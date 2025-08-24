@@ -1,0 +1,1052 @@
+{
+ "Resources": {
+  "VideosTable19B3D0C4": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "video_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "created_at",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "GSI_UserVideos",
+      "KeySchema": [
+       {
+        "AttributeName": "user_id",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "created_at",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "NonKeyAttributes": [
+        "title",
+        "status",
+        "thumbnail_url",
+        "duration_s"
+       ],
+       "ProjectionType": "INCLUDE"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "video_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "TableName": "Videos"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideosTable/Resource"
+   }
+  },
+  "GenerateVideoFunctionServiceRole463C7178": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GenerateVideoFunction/ServiceRole/Resource"
+   }
+  },
+  "GenerateVideoFunctionServiceRoleDefaultPolicy269DBB0D": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VideosTable19B3D0C4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VideosTable19B3D0C4",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "bedrock:InvokeModel",
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:bedrock:us-west-2::foundation-model/*",
+        "arn:aws:bedrock:us-east-1::foundation-model/*"
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "GenerateVideoFunctionServiceRoleDefaultPolicy269DBB0D",
+    "Roles": [
+     {
+      "Ref": "GenerateVideoFunctionServiceRole463C7178"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GenerateVideoFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "GenerateVideoFunction0F0FFB9D": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "VIDEOS_TABLE": {
+       "Ref": "VideosTable19B3D0C4"
+      },
+      "GSI_USER_VIDEOS": "GSI_UserVideos"
+     }
+    },
+    "FunctionName": "generate_video",
+    "Handler": "generate_video.index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GenerateVideoFunctionServiceRole463C7178",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "GenerateVideoFunctionServiceRoleDefaultPolicy269DBB0D",
+    "GenerateVideoFunctionServiceRole463C7178"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GenerateVideoFunction/Resource",
+    "aws:asset:path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ListVideosFunctionServiceRole530038A8": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ListVideosFunction/ServiceRole/Resource"
+   }
+  },
+  "ListVideosFunctionServiceRoleDefaultPolicy7CE06E7E": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VideosTable19B3D0C4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VideosTable19B3D0C4",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ListVideosFunctionServiceRoleDefaultPolicy7CE06E7E",
+    "Roles": [
+     {
+      "Ref": "ListVideosFunctionServiceRole530038A8"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ListVideosFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ListVideosFunctionF0C167BD": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "VIDEOS_TABLE": {
+       "Ref": "VideosTable19B3D0C4"
+      },
+      "GSI_USER_VIDEOS": "GSI_UserVideos"
+     }
+    },
+    "FunctionName": "list_videos",
+    "Handler": "list_videos.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "ListVideosFunctionServiceRole530038A8",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "ListVideosFunctionServiceRoleDefaultPolicy7CE06E7E",
+    "ListVideosFunctionServiceRole530038A8"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ListVideosFunction/Resource",
+    "aws:asset:path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "GenerateVideoWorkflowRole17056847": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "states.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GenerateVideoWorkflow/Role/Resource"
+   }
+  },
+  "GenerateVideoWorkflowRoleDefaultPolicy16A80A24": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "GenerateVideoFunction0F0FFB9D",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "GenerateVideoFunction0F0FFB9D",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "GenerateVideoWorkflowRoleDefaultPolicy16A80A24",
+    "Roles": [
+     {
+      "Ref": "GenerateVideoWorkflowRole17056847"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GenerateVideoWorkflow/Role/DefaultPolicy/Resource"
+   }
+  },
+  "GenerateVideoWorkflowE03EECEE": {
+   "Type": "AWS::StepFunctions::StateMachine",
+   "Properties": {
+    "DefinitionString": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"StartAt\":\"InvokeGenerateVideo\",\"States\":{\"InvokeGenerateVideo\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "GenerateVideoFunction0F0FFB9D",
+         "Arn"
+        ]
+       },
+       "\"}},\"TimeoutSeconds\":900}"
+      ]
+     ]
+    },
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "GenerateVideoWorkflowRole17056847",
+      "Arn"
+     ]
+    },
+    "StateMachineName": "generate_video_workflow"
+   },
+   "DependsOn": [
+    "GenerateVideoWorkflowRoleDefaultPolicy16A80A24",
+    "GenerateVideoWorkflowRole17056847"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GenerateVideoWorkflow/Resource"
+   }
+  },
+  "ApiCertificate1D5B2B3B": {
+   "Type": "AWS::CertificateManager::Certificate",
+   "Properties": {
+    "DomainName": "api.videomk.com",
+    "DomainValidationOptions": [
+     {
+      "DomainName": "api.videomk.com",
+      "HostedZoneId": "Z0974997WX5TY8WRHR6Z"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "BackendStack/ApiCertificate"
+     }
+    ],
+    "ValidationMethod": "DNS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiCertificate/Resource"
+   }
+  },
+  "VideoMkApiD5E014A1": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Name": "videomk-api"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Resource"
+   }
+  },
+  "VideoMkApiCloudWatchRole96F24915": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/CloudWatchRole/Resource"
+   }
+  },
+  "VideoMkApiAccountC265AA9F": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "VideoMkApiCloudWatchRole96F24915",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "VideoMkApiD5E014A1"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Account"
+   }
+  },
+  "VideoMkApiDeployment599DCF78a6c12754575453676ac52d18d42d6bbe": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "Automatically created by the RestApi construct",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "DependsOn": [
+    "VideoMkApiusersuseridC5D510FA",
+    "VideoMkApiusersuseridvideosgeneratePOST80DB3099",
+    "VideoMkApiusersuseridvideosgenerate2F79A75D",
+    "VideoMkApiusersuseridvideosGETDBF3FB86",
+    "VideoMkApiusersuseridvideosA22ABE0C",
+    "VideoMkApiusers1FC2DE34"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "VideoMkApiDeploymentStageprod51F9B922": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "VideoMkApiDeployment599DCF78a6c12754575453676ac52d18d42d6bbe"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    },
+    "StageName": "prod"
+   },
+   "DependsOn": [
+    "VideoMkApiAccountC265AA9F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "VideoMkApiusers1FC2DE34": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "VideoMkApiD5E014A1",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "users",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/Resource"
+   }
+  },
+  "VideoMkApiusersuseridC5D510FA": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "VideoMkApiusers1FC2DE34"
+    },
+    "PathPart": "{user_id}",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosA22ABE0C": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "VideoMkApiusersuseridC5D510FA"
+    },
+    "PathPart": "videos",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosgenerate2F79A75D": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "VideoMkApiusersuseridvideosA22ABE0C"
+    },
+    "PathPart": "generate",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosgeneratePOSTApiPermissionBackendStackVideoMkApi2D7E8557POSTusersuseridvideosgenerate2D839454": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "VideoGenerationSFLauncherF7BBCDEF",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:593549830025:",
+       {
+        "Ref": "VideoMkApiD5E014A1"
+       },
+       "/",
+       {
+        "Ref": "VideoMkApiDeploymentStageprod51F9B922"
+       },
+       "/POST/users/*/videos/generate"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/ApiPermission.BackendStackVideoMkApi2D7E8557.POST..users.{user_id}.videos.generate"
+   }
+  },
+  "VideoMkApiusersuseridvideosgeneratePOSTApiPermissionTestBackendStackVideoMkApi2D7E8557POSTusersuseridvideosgenerate25472D52": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "VideoGenerationSFLauncherF7BBCDEF",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:593549830025:",
+       {
+        "Ref": "VideoMkApiD5E014A1"
+       },
+       "/test-invoke-stage/POST/users/*/videos/generate"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/ApiPermission.Test.BackendStackVideoMkApi2D7E8557.POST..users.{user_id}.videos.generate"
+   }
+  },
+  "VideoMkApiusersuseridvideosgeneratePOST80DB3099": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:us-west-2:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "VideoGenerationSFLauncherF7BBCDEF",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridvideosgenerate2F79A75D"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosGETApiPermissionBackendStackVideoMkApi2D7E8557GETusersuseridvideos4642E229": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ListVideosFunctionF0C167BD",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:593549830025:",
+       {
+        "Ref": "VideoMkApiD5E014A1"
+       },
+       "/",
+       {
+        "Ref": "VideoMkApiDeploymentStageprod51F9B922"
+       },
+       "/GET/users/*/videos"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/ApiPermission.BackendStackVideoMkApi2D7E8557.GET..users.{user_id}.videos"
+   }
+  },
+  "VideoMkApiusersuseridvideosGETApiPermissionTestBackendStackVideoMkApi2D7E8557GETusersuseridvideos9A1BCD58": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ListVideosFunctionF0C167BD",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:593549830025:",
+       {
+        "Ref": "VideoMkApiD5E014A1"
+       },
+       "/test-invoke-stage/GET/users/*/videos"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/ApiPermission.Test.BackendStackVideoMkApi2D7E8557.GET..users.{user_id}.videos"
+   }
+  },
+  "VideoMkApiusersuseridvideosGETDBF3FB86": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:us-west-2:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ListVideosFunctionF0C167BD",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridvideosA22ABE0C"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/Resource"
+   }
+  },
+  "ApiDomain2D27DFFC": {
+   "Type": "AWS::ApiGateway::DomainName",
+   "Properties": {
+    "DomainName": "api.videomk.com",
+    "EndpointConfiguration": {
+     "Types": [
+      "REGIONAL"
+     ]
+    },
+    "RegionalCertificateArn": {
+     "Ref": "ApiCertificate1D5B2B3B"
+    },
+    "SecurityPolicy": "TLS_1_2"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiDomain/Resource"
+   }
+  },
+  "ApiBasePathMapping5CDC6C7F": {
+   "Type": "AWS::ApiGateway::BasePathMapping",
+   "Properties": {
+    "DomainName": {
+     "Ref": "ApiDomain2D27DFFC"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    },
+    "Stage": {
+     "Ref": "VideoMkApiDeploymentStageprod51F9B922"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiBasePathMapping/Resource"
+   }
+  },
+  "ApiAliasRecordBCE933A3": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "ApiDomain2D27DFFC",
+       "RegionalDomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::GetAtt": [
+       "ApiDomain2D27DFFC",
+       "RegionalHostedZoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z0974997WX5TY8WRHR6Z",
+    "Name": "api.videomk.com.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiAliasRecord/Resource"
+   }
+  },
+  "VideoGenerationSFLauncherServiceRole58085DBB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoGenerationSFLauncher/ServiceRole/Resource"
+   }
+  },
+  "VideoGenerationSFLauncherServiceRoleDefaultPolicy9B29863A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "states:StartExecution",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "GenerateVideoWorkflowE03EECEE"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "VideoGenerationSFLauncherServiceRoleDefaultPolicy9B29863A",
+    "Roles": [
+     {
+      "Ref": "VideoGenerationSFLauncherServiceRole58085DBB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoGenerationSFLauncher/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "VideoGenerationSFLauncherF7BBCDEF": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "STATE_MACHINE_ARN": {
+       "Ref": "GenerateVideoWorkflowE03EECEE"
+      }
+     }
+    },
+    "FunctionName": "VideoGenerationSFLauncher",
+    "Handler": "sf_launcher.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "VideoGenerationSFLauncherServiceRole58085DBB",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "VideoGenerationSFLauncherServiceRoleDefaultPolicy9B29863A",
+    "VideoGenerationSFLauncherServiceRole58085DBB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoGenerationSFLauncher/Resource",
+    "aws:asset:path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Q0W6DMAz8lr6n2VY07Zm2mjRp3RDde2WCCxkkQdisQij/PiWlKuqT787O+ZyN3Lxs5PMKLrRWZbNudSGnI4NqBFzoNJWjBePKQk4/ULQodmcbgRctmKIEOb0PVrF2NrSWOMPeaCLtrBcajJxyd30fa+ZarcY4F5EXlJyACJlkGoqgRG4H1SBvgVAQY3ee3enEQA3Jz5jgw/655mEgnsB4AFVrG5cuuRcKe9ZnrYDRgIUKeznt7lp4sKBeQKcrYLzAKKccidNOx0vuMFXKDZbFHrvWjQYtB3XBjgzVLUmFIkdyQ68wHncjs+cVH5BrVwZpRntnQNsvMHFuwYJHBlwfoOu0rUL3QfKidwPjayKnNEfl+vK6KqAjsvf3CPHzQ8bZ6XvgbmAvspFrZ58S+ZLIt9Uvab3uB8vaoMyv9R84kC2ESwIAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "VideoMkApiEndpointB800F052": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "VideoMkApiD5E014A1"
+      },
+      ".execute-api.us-west-2.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "VideoMkApiDeploymentStageprod51F9B922"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

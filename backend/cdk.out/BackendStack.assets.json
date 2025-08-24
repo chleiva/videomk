@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a": {
+      "displayName": "GenerateVideoFunction/Code",
+      "source": {
+        "path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "593549830025-us-west-2-786b6a2d": {
+          "bucketName": "cdk-hnb659fds-assets-593549830025-us-west-2",
+          "objectKey": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-file-publishing-role-593549830025-us-west-2"
+        }
+      }
+    },
+    "9429403a47b662753f38cad8f7c159552d8dd4b17d842bfe51fb83e9d12ea75b": {
+      "displayName": "BackendStack Template",
+      "source": {
+        "path": "BackendStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "593549830025-us-west-2-0b704785": {
+          "bucketName": "cdk-hnb659fds-assets-593549830025-us-west-2",
+          "objectKey": "9429403a47b662753f38cad8f7c159552d8dd4b17d842bfe51fb83e9d12ea75b.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-file-publishing-role-593549830025-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
