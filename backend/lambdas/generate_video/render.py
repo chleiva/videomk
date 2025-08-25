@@ -154,6 +154,29 @@ def _num(x, default=1.0):
         return default
 
 
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        from decimal import Decimal as _D
+        if isinstance(value, _D):
+            return int(value)
+        return int(value)
+    except Exception:
+        try:
+            return int(float(value))
+        except Exception:
+            return default
+
+
+def _as_float(value: Any, default: float = 0.0) -> float:
+    try:
+        from decimal import Decimal as _D
+        if isinstance(value, _D):
+            return float(value)
+        return float(value)
+    except Exception:
+        return default
+
+
 def parse_color(color_val):
     if isinstance(color_val, (list, tuple)):
         return tuple(map(int, color_val[:3]))
@@ -248,22 +271,27 @@ def _text_image(item: Dict[str, Any], canvas: Tuple[int, int]):
     from PIL import Image, ImageDraw
     W, H = canvas
     text = item.get("text", "")
-    font_size = int(item.get("fontsize", item.get("font_size", 48)))
+    font_size = _as_int(item.get("fontsize", item.get("font_size", 48)), 48)
     color = parse_color(item.get("color", "white"))
     font_path = item.get("font")
     align = (item.get("align") or "left").lower()
     font = _font(font_path, font_size)
 
     box_cfg = item.get("box", {})
-    pad = int(box_cfg.get("padding", 16))
-    radius = int(box_cfg.get("radius", 24))
-    fill = box_cfg.get("fill", (0, 0, 0, 120))
-    fill = tuple(fill) if isinstance(fill, (list, tuple)) else (0, 0, 0, 120)
+    pad = _as_int(box_cfg.get("padding", 16), 16)
+    radius = _as_int(box_cfg.get("radius", 24), 24)
+    fill_val = box_cfg.get("fill", (0, 0, 0, 120))
+    if isinstance(fill_val, (list, tuple)):
+        fill = tuple(_as_int(c, 0) for c in list(fill_val)[:4])
+        if len(fill) < 4:
+            fill = tuple(list(fill) + [120] * (4 - len(fill)))
+    else:
+        fill = (0, 0, 0, 120)
 
     max_w = None
     if "width" in box_cfg:
         try:
-            max_w = max(100, int(float(box_cfg["width"]) * W) - 2 * pad)
+            max_w = max(100, int(_as_float(box_cfg["width"], 0.8) * W) - 2 * pad)
         except Exception:
             max_w = None
 
@@ -296,8 +324,8 @@ def _text_image(item: Dict[str, Any], canvas: Tuple[int, int]):
     line_gap = max(4, int(font_size * 0.3))
     text_h = sum(heights) + line_gap * max(0, len(lines) - 1)
 
-    box_w = (max_w + 2 * pad) if max_w else (text_w + 2 * pad)
-    box_h = text_h + 2 * pad
+    box_w = _as_int((max_w + 2 * pad), text_w + 2 * pad) if max_w else (text_w + 2 * pad)
+    box_h = _as_int(text_h + 2 * pad, text_h + 2 * pad)
 
     img = Image.new("RGBA", (box_w, box_h), (0, 0, 0, 0))
     if len(fill) == 4 and fill[3] > 0:
@@ -329,14 +357,14 @@ def make_text_clip(item: Dict[str, Any], size: Tuple[int, int], duration: float)
     y = item.get("y", 0.5)
 
     if align == "center":
-        left = (W - img.width) // 2
+        left = _as_int((W - img.width) // 2, 0)
     elif align == "right":
-        x_px = pct(x, W) if isinstance(x, float) else int(x)
-        left = W - x_px - img.width
+        x_px = pct(x, W) if isinstance(x, float) else _as_int(x, 0)
+        left = _as_int(W - x_px - img.width, 0)
     else:
-        left = pct(x, W) if isinstance(x, float) else int(x)
+        left = pct(x, W) if isinstance(x, float) else _as_int(x, 0)
 
-    top = pct(y, H) - img.height // 2 if isinstance(y, float) and 0 <= y <= 1 else int(y)
+    top = (_as_int(pct(y, H) - img.height // 2) if isinstance(y, float) and 0 <= y <= 1 else _as_int(y, 0))
     clip = set_pos(clip, (left, top))
     return clip
 

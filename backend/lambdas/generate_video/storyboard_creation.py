@@ -188,7 +188,6 @@ def _call_openai_storyboard(api_key: str, context: Dict[str, Any]) -> Optional[D
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "temperature": 0.2,
         "max_completion_tokens": 12000,
     }
 

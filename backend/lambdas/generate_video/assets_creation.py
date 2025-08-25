@@ -73,7 +73,11 @@ def create_assets(video_id: str, plot: Dict[str, Any], table_name: Optional[str]
         try:
             # Derive a deterministic seed from video, scene, and narrative context for uniqueness
             seed_input = f"{video_id}:{scene_id}:{summary}:{storytelling}".encode("utf-8")
-            seed = int.from_bytes(hashlib.md5(seed_input).digest()[:4], byteorder="big", signed=False)
+            raw_seed = int.from_bytes(hashlib.md5(seed_input).digest()[:4], byteorder="big", signed=False)
+            # Bedrock Nova Canvas requires seed <= 2147483646. Ensure 1..2147483646
+            seed = raw_seed % 2147483646
+            if seed == 0:
+                seed = 1
             img_bytes = generate_image_bytes(
                 prompt=prompt,
                 width=2560,
