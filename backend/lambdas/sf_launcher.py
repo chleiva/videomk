@@ -2,6 +2,7 @@ import json
 import os
 import time
 import uuid
+import logging
 import boto3
 from typing import Any, Dict, Optional
 
@@ -11,10 +12,36 @@ _dynamodb = boto3.resource("dynamodb")
 
 
 def _get_table(table_name: Optional[str] = None):
-    name = table_name or os.environ.get("VIDEOS_TABLE", "")
+    name = table_name or "Videos"
     if not name:
         raise RuntimeError("VIDEOS_TABLE environment variable is not set")
     return _dynamodb.Table(name)
+
+
+def _extract_cognito_sub(event: Dict[str, Any]) -> Optional[str]:
+    """
+    Try to extract the Cognito user id (sub) from API Gateway authorizer context.
+    Supports REST API (authorizer.claims.sub) and HTTP API (authorizer.jwt.claims.sub).
+    """
+    try:
+        rc = (event or {}).get("requestContext") or {}
+        authz = rc.get("authorizer") or {}
+        # REST API with Cognito User Pool authorizer
+        claims = authz.get("claims") or {}
+        if isinstance(claims, dict):
+            sub = claims.get("sub") or claims.get("cognito:username")
+            if sub:
+                return str(sub)
+        # HTTP API with JWT authorizer
+        jwt = authz.get("jwt") or {}
+        jwt_claims = jwt.get("claims") or {}
+        if isinstance(jwt_claims, dict):
+            sub = jwt_claims.get("sub") or jwt_claims.get("cognito:username")
+            if sub:
+                return str(sub)
+    except Exception:
+        pass
+    return None
 
 
 def _register_intent(
@@ -56,15 +83,43 @@ def _pack_input(event: Dict[str, Any]) -> Dict[str, Any]:
         "headers": headers,
         "body": body,
     }
-    # convenience fan-out of common path param
-    if "user_id" in path_params and "user_id" not in packed:
-        packed["user_id"] = path_params["user_id"]
+    # Derive user_id from Cognito when available, else fall back to path param
+    auth_user_id = _extract_cognito_sub(event)
+    path_user_id = path_params.get("user_id")
+    effective_user_id = auth_user_id or path_user_id or ""
+    packed["user_id"] = effective_user_id
+
+    # Log user identity details and possible mismatch
+    logging.info(
+        "Launcher received user identity: auth_user_id=%s path_user_id=%s effective_user_id=%s",
+        auth_user_id,
+        path_user_id,
+        effective_user_id,
+    )
+    if auth_user_id and path_user_id and auth_user_id != path_user_id:
+        logging.warning(
+            "user_id mismatch: using Cognito auth_user_id=%s over path_user_id=%s",
+            auth_user_id,
+            path_user_id,
+        )
     return packed
 
 
 def handler(event: Dict[str, Any], context: Any):
-    sm_arn = os.environ["STATE_MACHINE_ARN"]
-    table_name = os.environ.get("VIDEOS_TABLE", "")
+    table_name = "Videos"
+    # Discover state machine by name to avoid env vars
+    sm_name = "generate_video_workflow"
+    sm_arn = None
+    paginator = _sfn.get_paginator("list_state_machines")
+    for page in paginator.paginate():
+        for sm in page.get("stateMachines", []) or []:
+            if sm.get("name") == sm_name:
+                sm_arn = sm.get("stateMachineArn")
+                break
+        if sm_arn:
+            break
+    if not sm_arn:
+        raise RuntimeError("State machine 'generate_video_workflow' not found")
     input_obj = _pack_input(event)
 
     # Extract needed fields

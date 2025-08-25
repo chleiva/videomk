@@ -5,5 +5,9 @@
   },
   "acknowledged-issue-numbers": [
     34892
-  ]
+  ],
+  "hosted-zone:account=593549830025:domainName=videomk.com:region=us-east-1": {
+    "Id": "/hostedzone/Z0974997WX5TY8WRHR6Z",
+    "Name": "videomk.com."
+  }
 }

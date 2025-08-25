@@ -1,0 +1,7 @@
+{
+  "cognitoUserPoolId": "",
+  "cognitoUserPoolArn": "arn:aws:cognito-idp:us-east-1:593549830025:userpool/us-east-1_BOclzICgy",
+  "awsAccount": "593549830025",
+  "awsRegion": "us-west-2"
+}
+

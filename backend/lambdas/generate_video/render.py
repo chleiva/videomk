@@ -17,7 +17,7 @@ os.environ.setdefault("TMP", "/tmp")
 
 
 def _get_table(table_name: Optional[str] = None):
-    name = table_name or os.environ.get("VIDEOS_TABLE", "")
+    name = table_name or "Videos"
     if not name:
         raise RuntimeError("VIDEOS_TABLE environment variable is not set")
     return boto3.resource("dynamodb").Table(name)
@@ -656,7 +656,7 @@ def render_video(
 ) -> Dict[str, Any]:
     update_status(video_id, "RENDERING", table_name)
 
-    item = _get_video_item(video_id, table_name)
+    item = _get_video_item(video_id, table_name or "Videos")
     user_id_fresh = item.get("user_id") or user_id
     storyboard_fresh = item.get("storyboard") or storyboard or {}
 
@@ -681,7 +681,7 @@ def render_video(
         raise
 
     # Upload to S3
-    bucket = os.environ.get("ASSETS_BUCKET", "videomk.com")
+    bucket = "videomk.com"
     ext = Path(local_file).suffix or ".mp4"
     key = f"videos/{user_id_fresh}/{video_id}{ext}"
     s3 = boto3.client("s3")
@@ -692,7 +692,7 @@ def render_video(
         "video_uri": s3_uri,
         "duration_s": int(total_dur or 0),
     }
-    update_status(video_id, "COMPLETE", table_name, extra_attributes=final)
+    update_status(video_id, "COMPLETE", table_name or "Videos", extra_attributes=final)
     return final
 
 

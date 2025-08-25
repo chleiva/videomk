@@ -1,61 +1,5 @@
 {
  "Resources": {
-  "VideosTable19B3D0C4": {
-   "Type": "AWS::DynamoDB::Table",
-   "Properties": {
-    "AttributeDefinitions": [
-     {
-      "AttributeName": "video_id",
-      "AttributeType": "S"
-     },
-     {
-      "AttributeName": "user_id",
-      "AttributeType": "S"
-     },
-     {
-      "AttributeName": "created_at",
-      "AttributeType": "S"
-     }
-    ],
-    "BillingMode": "PAY_PER_REQUEST",
-    "GlobalSecondaryIndexes": [
-     {
-      "IndexName": "GSI_UserVideos",
-      "KeySchema": [
-       {
-        "AttributeName": "user_id",
-        "KeyType": "HASH"
-       },
-       {
-        "AttributeName": "created_at",
-        "KeyType": "RANGE"
-       }
-      ],
-      "Projection": {
-       "NonKeyAttributes": [
-        "title",
-        "status",
-        "thumbnail_url",
-        "duration_s"
-       ],
-       "ProjectionType": "INCLUDE"
-      }
-     }
-    ],
-    "KeySchema": [
-     {
-      "AttributeName": "video_id",
-      "KeyType": "HASH"
-     }
-    ],
-    "TableName": "Videos"
-   },
-   "UpdateReplacePolicy": "Retain",
-   "DeletionPolicy": "Retain",
-   "Metadata": {
-    "aws:cdk:path": "BackendStack/VideosTable/Resource"
-   }
-  },
   "VideoDepsLayerA2FAB0A5": {
    "Type": "AWS::Lambda::LayerVersion",
    "Properties": {
@@ -132,24 +76,19 @@
        "Effect": "Allow",
        "Resource": [
         {
-         "Fn::GetAtt": [
-          "VideosTable19B3D0C4",
-          "Arn"
-         ]
-        },
-        {
          "Fn::Join": [
           "",
           [
+           "arn:",
            {
-            "Fn::GetAtt": [
-             "VideosTable19B3D0C4",
-             "Arn"
-            ]
+            "Ref": "AWS::Partition"
            },
-           "/index/*"
+           ":dynamodb:us-west-2:593549830025:table/Videos"
           ]
          ]
+        },
+        {
+         "Ref": "AWS::NoValue"
         }
        ]
       },
@@ -197,13 +136,11 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
     },
     "Environment": {
      "Variables": {
-      "VIDEOS_TABLE": {
-       "Ref": "VideosTable19B3D0C4"
-      },
+      "VIDEOS_TABLE": "Videos",
       "GSI_USER_VIDEOS": "GSI_UserVideos",
       "ASSETS_BUCKET": "videomk.com",
       "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
@@ -233,7 +170,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/GenerateVideoFunction/Resource",
-    "aws:asset:path": "asset.f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -295,22 +232,50 @@
        "Effect": "Allow",
        "Resource": [
         {
-         "Fn::GetAtt": [
-          "VideosTable19B3D0C4",
-          "Arn"
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-west-2:593549830025:table/Videos"
+          ]
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      },
+      {
+       "Action": [
+        "dynamodb:Query",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-west-2:593549830025:table/Videos"
+          ]
          ]
         },
         {
          "Fn::Join": [
           "",
           [
+           "arn:",
            {
-            "Fn::GetAtt": [
-             "VideosTable19B3D0C4",
-             "Arn"
-            ]
+            "Ref": "AWS::Partition"
            },
-           "/index/*"
+           ":dynamodb:us-west-2:593549830025:table/Videos/index/*"
           ]
          ]
         }
@@ -335,13 +300,11 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
     },
     "Environment": {
      "Variables": {
-      "VIDEOS_TABLE": {
-       "Ref": "VideosTable19B3D0C4"
-      },
+      "VIDEOS_TABLE": "Videos",
       "GSI_USER_VIDEOS": "GSI_UserVideos"
      }
     },
@@ -362,7 +325,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/ListVideosFunction/Resource",
-    "aws:asset:path": "asset.f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -420,24 +383,19 @@
        "Effect": "Allow",
        "Resource": [
         {
-         "Fn::GetAtt": [
-          "VideosTable19B3D0C4",
-          "Arn"
-         ]
-        },
-        {
          "Fn::Join": [
           "",
           [
+           "arn:",
            {
-            "Fn::GetAtt": [
-             "VideosTable19B3D0C4",
-             "Arn"
-            ]
+            "Ref": "AWS::Partition"
            },
-           "/index/*"
+           ":dynamodb:us-west-2:593549830025:table/Videos"
           ]
          ]
+        },
+        {
+         "Ref": "AWS::NoValue"
         }
        ]
       },
@@ -471,13 +429,11 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
     },
     "Environment": {
      "Variables": {
-      "VIDEOS_TABLE": {
-       "Ref": "VideosTable19B3D0C4"
-      }
+      "VIDEOS_TABLE": "Videos"
      }
     },
     "FunctionName": "get_video",
@@ -497,7 +453,669 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/GetVideoFunction/Resource",
-    "aws:asset:path": "asset.f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "IntentPlotFunctionServiceRoleAC29D670": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/IntentPlotFunction/ServiceRole/Resource"
+   }
+  },
+  "IntentPlotFunctionServiceRoleDefaultPolicyE557F7E7": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-west-2:593549830025:table/Videos"
+          ]
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      },
+      {
+       "Action": "bedrock:InvokeModel",
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:bedrock:us-west-2::foundation-model/*",
+        "arn:aws:bedrock:us-east-1::foundation-model/*"
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "IntentPlotFunctionServiceRoleDefaultPolicyE557F7E7",
+    "Roles": [
+     {
+      "Ref": "IntentPlotFunctionServiceRoleAC29D670"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/IntentPlotFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "IntentPlotFunctionA29B7850": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+    },
+    "FunctionName": "intent_plot_handler",
+    "Handler": "generate_video.handlers.intent_plot_handler.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "IntentPlotFunctionServiceRoleAC29D670",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 60
+   },
+   "DependsOn": [
+    "IntentPlotFunctionServiceRoleDefaultPolicyE557F7E7",
+    "IntentPlotFunctionServiceRoleAC29D670"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/IntentPlotFunction/Resource",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AssetsPlanFunctionServiceRoleC70A58FB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetsPlanFunction/ServiceRole/Resource"
+   }
+  },
+  "AssetsPlanFunctionB00700AF": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+    },
+    "FunctionName": "assets_plan_handler",
+    "Handler": "generate_video.handlers.assets_plan_handler.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "AssetsPlanFunctionServiceRoleC70A58FB",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "AssetsPlanFunctionServiceRoleC70A58FB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetsPlanFunction/Resource",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AssetSceneFunctionServiceRole02368BC7": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetSceneFunction/ServiceRole/Resource"
+   }
+  },
+  "AssetSceneFunctionServiceRoleDefaultPolicyE60DD760": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "bedrock:InvokeModel",
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:bedrock:us-west-2::foundation-model/*",
+        "arn:aws:bedrock:us-east-1::foundation-model/*"
+       ]
+      },
+      {
+       "Action": [
+        "s3:PutObject",
+        "s3:AbortMultipartUpload"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:s3:::videomk.com/generation/assets/*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AssetSceneFunctionServiceRoleDefaultPolicyE60DD760",
+    "Roles": [
+     {
+      "Ref": "AssetSceneFunctionServiceRole02368BC7"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetSceneFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "AssetSceneFunction32DD7898": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+    },
+    "FunctionName": "asset_scene_handler",
+    "Handler": "generate_video.handlers.asset_scene_handler.handler",
+    "MemorySize": 1024,
+    "Role": {
+     "Fn::GetAtt": [
+      "AssetSceneFunctionServiceRole02368BC7",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "AssetSceneFunctionServiceRoleDefaultPolicyE60DD760",
+    "AssetSceneFunctionServiceRole02368BC7"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetSceneFunction/Resource",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AssetsCollectFunctionServiceRoleAAF0805F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetsCollectFunction/ServiceRole/Resource"
+   }
+  },
+  "AssetsCollectFunctionServiceRoleDefaultPolicy281000F7": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-west-2:593549830025:table/Videos"
+          ]
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AssetsCollectFunctionServiceRoleDefaultPolicy281000F7",
+    "Roles": [
+     {
+      "Ref": "AssetsCollectFunctionServiceRoleAAF0805F"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetsCollectFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "AssetsCollectFunction035F7DAB": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+    },
+    "FunctionName": "assets_collect_handler",
+    "Handler": "generate_video.handlers.assets_collect_handler.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "AssetsCollectFunctionServiceRoleAAF0805F",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 60
+   },
+   "DependsOn": [
+    "AssetsCollectFunctionServiceRoleDefaultPolicy281000F7",
+    "AssetsCollectFunctionServiceRoleAAF0805F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AssetsCollectFunction/Resource",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "StoryboardRenderFunctionServiceRoleEE86789B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/StoryboardRenderFunction/ServiceRole/Resource"
+   }
+  },
+  "StoryboardRenderFunctionServiceRoleDefaultPolicy44B015DD": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-west-2:593549830025:table/Videos"
+          ]
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject",
+        "s3:GetBucketLocation",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:s3:::videomk.com",
+        "arn:aws:s3:::videomk.com/generation/assets/*",
+        "arn:aws:s3:::videomk.com/videos/*"
+       ]
+      },
+      {
+       "Action": "secretsmanager:GetSecretValue",
+       "Effect": "Allow",
+       "Resource": "arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "StoryboardRenderFunctionServiceRoleDefaultPolicy44B015DD",
+    "Roles": [
+     {
+      "Ref": "StoryboardRenderFunctionServiceRoleEE86789B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/StoryboardRenderFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "StoryboardRenderFunction4A3F332B": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+    },
+    "FunctionName": "storyboard_render_handler",
+    "Handler": "generate_video.handlers.storyboard_render_handler.handler",
+    "Layers": [
+     {
+      "Ref": "VideoDepsLayerA2FAB0A5"
+     }
+    ],
+    "MemorySize": 4096,
+    "Role": {
+     "Fn::GetAtt": [
+      "StoryboardRenderFunctionServiceRoleEE86789B",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "StoryboardRenderFunctionServiceRoleDefaultPolicy44B015DD",
+    "StoryboardRenderFunctionServiceRoleEE86789B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/StoryboardRenderFunction/Resource",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "MarkFailedFunctionServiceRoleA00CCC7A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/MarkFailedFunction/ServiceRole/Resource"
+   }
+  },
+  "MarkFailedFunctionServiceRoleDefaultPolicyC13C6257": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":dynamodb:us-west-2:593549830025:table/Videos"
+          ]
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "MarkFailedFunctionServiceRoleDefaultPolicyC13C6257",
+    "Roles": [
+     {
+      "Ref": "MarkFailedFunctionServiceRoleA00CCC7A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/MarkFailedFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "MarkFailedFunctionAB21145B": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+    },
+    "FunctionName": "mark_failed_handler",
+    "Handler": "generate_video.handlers.mark_failed_handler.handler",
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "MarkFailedFunctionServiceRoleA00CCC7A",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "MarkFailedFunctionServiceRoleDefaultPolicyC13C6257",
+    "MarkFailedFunctionServiceRoleA00CCC7A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/MarkFailedFunction/Resource",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -533,7 +1151,7 @@
        "Resource": [
         {
          "Fn::GetAtt": [
-          "GenerateVideoFunction0F0FFB9D",
+          "IntentPlotFunctionA29B7850",
           "Arn"
          ]
         },
@@ -543,7 +1161,137 @@
           [
            {
             "Fn::GetAtt": [
-             "GenerateVideoFunction0F0FFB9D",
+             "IntentPlotFunctionA29B7850",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "AssetsPlanFunctionB00700AF",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "AssetsPlanFunctionB00700AF",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "AssetsCollectFunction035F7DAB",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "AssetsCollectFunction035F7DAB",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "MarkFailedFunctionAB21145B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "MarkFailedFunctionAB21145B",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "StoryboardRenderFunction4A3F332B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "StoryboardRenderFunction4A3F332B",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "AssetSceneFunction32DD7898",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "AssetSceneFunction32DD7898",
              "Arn"
             ]
            },
@@ -574,14 +1322,49 @@
      "Fn::Join": [
       "",
       [
-       "{\"StartAt\":\"InvokeGenerateVideo\",\"States\":{\"InvokeGenerateVideo\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"Resource\":\"",
+       "{\"StartAt\":\"IntentAndPlot\",\"States\":{\"IntentAndPlot\":{\"Next\":\"PlanAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
        {
         "Fn::GetAtt": [
-         "GenerateVideoFunction0F0FFB9D",
+         "IntentPlotFunctionA29B7850",
          "Arn"
         ]
        },
-       "\"}},\"TimeoutSeconds\":900}"
+       "\"},\"PlanAssets\":{\"Next\":\"HasScenes?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "AssetsPlanFunctionB00700AF",
+         "Arn"
+        ]
+       },
+       "\"},\"HasScenes?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.scenes[0]\",\"IsPresent\":true,\"Next\":\"GenerateAssetsMap\"}],\"Default\":\"NoScenes\"},\"NoScenes\":{\"Type\":\"Pass\",\"Next\":\"CollectAssets\"},\"CollectAssets\":{\"Next\":\"StoryboardAndRender\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "AssetsCollectFunction035F7DAB",
+         "Arn"
+        ]
+       },
+       "\"},\"GenerateAssetsMap\":{\"Type\":\"Map\",\"ResultPath\":\"$.assetResults\",\"Next\":\"CollectAssets\",\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"ItemsPath\":\"$.scenes\",\"ItemSelector\":{\"video_id.$\":\"$.video_id\",\"plot.$\":\"$.plot\",\"scene.$\":\"$$.Map.Item.Value\"},\"ItemProcessor\":{\"ProcessorConfig\":{\"Mode\":\"INLINE\"},\"StartAt\":\"GenerateSceneAsset\",\"States\":{\"GenerateSceneAsset\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "AssetSceneFunction32DD7898",
+         "Arn"
+        ]
+       },
+       "\"}}},\"MaxConcurrency\":3},\"MarkFailed\":{\"Next\":\"WorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.error\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "MarkFailedFunctionAB21145B",
+         "Arn"
+        ]
+       },
+       "\"},\"StoryboardAndRender\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+       {
+        "Fn::GetAtt": [
+         "StoryboardRenderFunction4A3F332B",
+         "Arn"
+        ]
+       },
+       "\"},\"WorkflowFailed\":{\"Type\":\"Fail\"}},\"TimeoutSeconds\":1800}"
       ]
      ]
     },
@@ -689,7 +1472,7 @@
     "aws:cdk:path": "BackendStack/VideoMkApi/Account"
    }
   },
-  "VideoMkApiDeployment599DCF78320d62bca4e6d303fc48139eb9c602af": {
+  "VideoMkApiDeployment599DCF782dcd7537a65caa2983234eb0220cd378": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Automatically created by the RestApi construct",
@@ -710,7 +1493,9 @@
     "VideoMkApiusersuseridvideosOPTIONS6DB9C1A7",
     "VideoMkApiusersuseridvideosA22ABE0C",
     "VideoMkApiusersOPTIONSC5AE0C1E",
-    "VideoMkApiusers1FC2DE34"
+    "VideoMkApiusers1FC2DE34",
+    "VideoMkApiDefault4xxGatewayResponse46914539",
+    "VideoMkApiDefault5xxGatewayResponse67F59849"
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/VideoMkApi/Deployment/Resource"
@@ -720,7 +1505,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "VideoMkApiDeployment599DCF78320d62bca4e6d303fc48139eb9c602af"
+     "Ref": "VideoMkApiDeployment599DCF782dcd7537a65caa2983234eb0220cd378"
     },
     "RestApiId": {
      "Ref": "VideoMkApiD5E014A1"
@@ -807,7 +1592,7 @@
      "IntegrationResponses": [
       {
        "ResponseParameters": {
-        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
         "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
        },
@@ -911,7 +1696,10 @@
   "VideoMkApiusersuseridvideosgeneratePOST80DB3099": {
    "Type": "AWS::ApiGateway::Method",
    "Properties": {
-    "AuthorizationType": "NONE",
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "ApiAuthorizer68095F41"
+    },
     "HttpMethod": "POST",
     "Integration": {
      "IntegrationHttpMethod": "POST",
@@ -972,7 +1760,7 @@
      "IntegrationResponses": [
       {
        "ResponseParameters": {
-        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
         "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
        },
@@ -1076,7 +1864,10 @@
   "VideoMkApiusersuseridvideosvideoidGET11F92566": {
    "Type": "AWS::ApiGateway::Method",
    "Properties": {
-    "AuthorizationType": "NONE",
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "ApiAuthorizer68095F41"
+    },
     "HttpMethod": "GET",
     "Integration": {
      "IntegrationHttpMethod": "POST",
@@ -1122,7 +1913,7 @@
      "IntegrationResponses": [
       {
        "ResponseParameters": {
-        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
         "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
        },
@@ -1226,7 +2017,10 @@
   "VideoMkApiusersuseridvideosGETDBF3FB86": {
    "Type": "AWS::ApiGateway::Method",
    "Properties": {
-    "AuthorizationType": "NONE",
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "ApiAuthorizer68095F41"
+    },
     "HttpMethod": "GET",
     "Integration": {
      "IntegrationHttpMethod": "POST",
@@ -1272,7 +2066,7 @@
      "IntegrationResponses": [
       {
        "ResponseParameters": {
-        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
         "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
        },
@@ -1315,7 +2109,7 @@
      "IntegrationResponses": [
       {
        "ResponseParameters": {
-        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
         "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
        },
@@ -1346,6 +2140,40 @@
    },
    "Metadata": {
     "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/OPTIONS/Resource"
+   }
+  },
+  "VideoMkApiDefault4xxGatewayResponse46914539": {
+   "Type": "AWS::ApiGateway::GatewayResponse",
+   "Properties": {
+    "ResponseParameters": {
+     "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+     "gatewayresponse.header.Access-Control-Allow-Headers": "'*'",
+     "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+    },
+    "ResponseType": "DEFAULT_4XX",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default4xxGatewayResponse/Resource"
+   }
+  },
+  "VideoMkApiDefault5xxGatewayResponse67F59849": {
+   "Type": "AWS::ApiGateway::GatewayResponse",
+   "Properties": {
+    "ResponseParameters": {
+     "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+     "gatewayresponse.header.Access-Control-Allow-Headers": "'*'",
+     "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+    },
+    "ResponseType": "DEFAULT_5XX",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default5xxGatewayResponse/Resource"
    }
   },
   "ApiDomain2D27DFFC": {
@@ -1408,6 +2236,23 @@
     "aws:cdk:path": "BackendStack/ApiAliasRecord/Resource"
    }
   },
+  "ApiAuthorizer68095F41": {
+   "Type": "AWS::ApiGateway::Authorizer",
+   "Properties": {
+    "IdentitySource": "method.request.header.Authorization",
+    "Name": "BackendStackApiAuthorizer2893BA6E",
+    "ProviderARNs": [
+     "arn:aws:cognito-idp:us-east-1:593549830025:userpool/us-east-1_BOclzICgy"
+    ],
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    },
+    "Type": "COGNITO_USER_POOLS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiAuthorizer/Resource"
+   }
+  },
   "VideoGenerationSFLauncherServiceRole58085DBB": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -1448,11 +2293,12 @@
     "PolicyDocument": {
      "Statement": [
       {
-       "Action": "states:StartExecution",
+       "Action": [
+        "states:StartExecution",
+        "states:ListStateMachines"
+       ],
        "Effect": "Allow",
-       "Resource": {
-        "Ref": "GenerateVideoWorkflowE03EECEE"
-       }
+       "Resource": "*"
       },
       {
        "Action": [
@@ -1472,24 +2318,19 @@
        "Effect": "Allow",
        "Resource": [
         {
-         "Fn::GetAtt": [
-          "VideosTable19B3D0C4",
-          "Arn"
-         ]
-        },
-        {
          "Fn::Join": [
           "",
           [
+           "arn:",
            {
-            "Fn::GetAtt": [
-             "VideosTable19B3D0C4",
-             "Arn"
-            ]
+            "Ref": "AWS::Partition"
            },
-           "/index/*"
+           ":dynamodb:us-west-2:593549830025:table/Videos"
           ]
          ]
+        },
+        {
+         "Ref": "AWS::NoValue"
         }
        ]
       }
@@ -1512,17 +2353,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
-    },
-    "Environment": {
-     "Variables": {
-      "STATE_MACHINE_ARN": {
-       "Ref": "GenerateVideoWorkflowE03EECEE"
-      },
-      "VIDEOS_TABLE": {
-       "Ref": "VideosTable19B3D0C4"
-      }
-     }
+     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
     },
     "FunctionName": "VideoGenerationSFLauncher",
     "Handler": "sf_launcher.handler",
@@ -1541,7 +2372,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/VideoGenerationSFLauncher/Resource",
-    "aws:asset:path": "asset.f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3",
+    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -1549,7 +2380,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11RXW/CMAz8LbyHbKxCe+ZDkybBhsq0V2RSU7I2SRW7Q1WV/z4lFFH25Luzc74kL3I2z+TzBC40VUU1rfVR9nsGVQm40KEvOgvGFUfZf8GxRrE62QSCqMEcC5D9Bjr03+hJOxvbD/yttYqHxhjv0BtNcSQIyg5AhExyEYugTC5bVSEvgVBoMLLP3XV1qjtXa9Ull4SCIMbmNLjTgYEqkpsU793+ugofB9L9GLegztom2zEPQqFnfdIKGA1YKNHLfnXX4oERDQIaXQLjBTrZ50i8aHTKeocLpVxrWayxqV1n0HJUR2zPUN6SlChyJNd6hekBbmTwvOIt8tkVURrQ2hnQ9gNMmhux6LEDPm+habQtY/efFIR3LeM8k/0iR+V8cV0V0R45hHuE9EEx4+D02XLT8jhZELuOz84+ZXKWydfJD2k99a1lbVDm1/oH1VV3GHQCAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2VRXW/bMAz8LX1XtHVGsWc3RYcCzWY4214DRmZs1rZoiPQCz/B/H6Skq7s98e74edIne3uX2Y83cJaNq9pNR0c77xVca+Ash7maPPRcHe13OHZ4D4Kmg/5YgZ2fYcLwE4MQe7M9+Xf8cfROr4k1LjD0JLFkMZIdQARVbB6Dkczej65FTWsIejuX3GFsS7HgjtyUpiS0GFEcTtfpclCQVuxzOu/J/+IW3xfYeQeD2TZMDk0BIuYRqDN7BcUduIZ82rXmi3EYlE7kQLEHDzUGO2/ftNiwoouBgWpQPMNk5xJF84GSgTeYO8ejV/OAQ8dTj16jumJ7hfr1khpNicJjcJfHfyXXmRe8Q224itIVfblcUKIM7CUV/ys9cA/kv0KfsisW1xSgzQ6GgXwds/9JXHtS/iEYCuZO8lEbDvQbQ/L3ly0m8Kh4l9k5L9FxqC5nR7RHXRaTPj7ajGPX3r6NOoy6drmYYtKG/YfM3mb2882LEG3C6JV6tOUl/gHhUgBuzgIAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "BackendStack/CDKMetadata/Default"

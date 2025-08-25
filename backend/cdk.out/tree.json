@@ -11,77 +11,8 @@
           "VideosTable": {
             "id": "VideosTable",
             "path": "BackendStack/VideosTable",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "BackendStack/VideosTable/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
-                  "aws:cdk:cloudformation:props": {
-                    "attributeDefinitions": [
-                      {
-                        "attributeName": "video_id",
-                        "attributeType": "S"
-                      },
-                      {
-                        "attributeName": "user_id",
-                        "attributeType": "S"
-                      },
-                      {
-                        "attributeName": "created_at",
-                        "attributeType": "S"
-                      }
-                    ],
-                    "billingMode": "PAY_PER_REQUEST",
-                    "globalSecondaryIndexes": [
-                      {
-                        "indexName": "GSI_UserVideos",
-                        "keySchema": [
-                          {
-                            "attributeName": "user_id",
-                            "keyType": "HASH"
-                          },
-                          {
-                            "attributeName": "created_at",
-                            "keyType": "RANGE"
-                          }
-                        ],
-                        "projection": {
-                          "projectionType": "INCLUDE",
-                          "nonKeyAttributes": [
-                            "title",
-                            "status",
-                            "thumbnail_url",
-                            "duration_s"
-                          ]
-                        }
-                      }
-                    ],
-                    "keySchema": [
-                      {
-                        "attributeName": "video_id",
-                        "keyType": "HASH"
-                      }
-                    ],
-                    "tableName": "Videos"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
-                  "version": "2.153.0"
-                }
-              },
-              "ScalingRole": {
-                "id": "ScalingRole",
-                "path": "BackendStack/VideosTable/ScalingRole",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.Resource",
-                  "version": "2.153.0"
-                }
-              }
-            },
             "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "fqn": "aws-cdk-lib.aws_dynamodb.TableBase",
               "version": "2.153.0"
             }
           },
@@ -227,24 +158,19 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": [
-                                        "VideosTable19B3D0C4",
-                                        "Arn"
-                                      ]
-                                    },
-                                    {
                                       "Fn::Join": [
                                         "",
                                         [
+                                          "arn:",
                                           {
-                                            "Fn::GetAtt": [
-                                              "VideosTable19B3D0C4",
-                                              "Arn"
-                                            ]
+                                            "Ref": "AWS::Partition"
                                           },
-                                          "/index/*"
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
                                         ]
                                       ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
                                     }
                                   ]
                                 },
@@ -335,13 +261,11 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-                      "s3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
                     },
                     "environment": {
                       "variables": {
-                        "VIDEOS_TABLE": {
-                          "Ref": "VideosTable19B3D0C4"
-                        },
+                        "VIDEOS_TABLE": "Videos",
                         "GSI_USER_VIDEOS": "GSI_UserVideos",
                         "ASSETS_BUCKET": "videomk.com",
                         "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
@@ -462,22 +386,50 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": [
-                                        "VideosTable19B3D0C4",
-                                        "Arn"
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": [
+                                    "dynamodb:Query",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
+                                        ]
                                       ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
+                                          "arn:",
                                           {
-                                            "Fn::GetAtt": [
-                                              "VideosTable19B3D0C4",
-                                              "Arn"
-                                            ]
+                                            "Ref": "AWS::Partition"
                                           },
-                                          "/index/*"
+                                          ":dynamodb:us-west-2:593549830025:table/Videos/index/*"
                                         ]
                                       ]
                                     }
@@ -545,13 +497,11 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-                      "s3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
                     },
                     "environment": {
                       "variables": {
-                        "VIDEOS_TABLE": {
-                          "Ref": "VideosTable19B3D0C4"
-                        },
+                        "VIDEOS_TABLE": "Videos",
                         "GSI_USER_VIDEOS": "GSI_UserVideos"
                       }
                     },
@@ -659,24 +609,19 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": [
-                                        "VideosTable19B3D0C4",
-                                        "Arn"
-                                      ]
-                                    },
-                                    {
                                       "Fn::Join": [
                                         "",
                                         [
+                                          "arn:",
                                           {
-                                            "Fn::GetAtt": [
-                                              "VideosTable19B3D0C4",
-                                              "Arn"
-                                            ]
+                                            "Ref": "AWS::Partition"
                                           },
-                                          "/index/*"
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
                                         ]
                                       ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
                                     }
                                   ]
                                 },
@@ -753,13 +698,11 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-                      "s3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
                     },
                     "environment": {
                       "variables": {
-                        "VIDEOS_TABLE": {
-                          "Ref": "VideosTable19B3D0C4"
-                        }
+                        "VIDEOS_TABLE": "Videos"
                       }
                     },
                     "functionName": "get_video",
@@ -785,11 +728,1163 @@
               "version": "2.153.0"
             }
           },
-          "InvokeGenerateVideo": {
-            "id": "InvokeGenerateVideo",
-            "path": "BackendStack/InvokeGenerateVideo",
+          "IntentPlotFunction": {
+            "id": "IntentPlotFunction",
+            "path": "BackendStack/IntentPlotFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "BackendStack/IntentPlotFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "BackendStack/IntentPlotFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/IntentPlotFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "BackendStack/IntentPlotFunction/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "BackendStack/IntentPlotFunction/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:Query",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "bedrock:InvokeModel",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    "arn:aws:bedrock:us-west-2::foundation-model/*",
+                                    "arn:aws:bedrock:us-east-1::foundation-model/*"
+                                  ]
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "IntentPlotFunctionServiceRoleDefaultPolicyE557F7E7",
+                            "roles": [
+                              {
+                                "Ref": "IntentPlotFunctionServiceRoleAC29D670"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.153.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.153.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "BackendStack/IntentPlotFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "BackendStack/IntentPlotFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "BackendStack/IntentPlotFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.153.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/IntentPlotFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+                    },
+                    "functionName": "intent_plot_handler",
+                    "handler": "generate_video.handlers.intent_plot_handler.handler",
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "IntentPlotFunctionServiceRoleAC29D670",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.12",
+                    "timeout": 60
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.153.0"
+            }
+          },
+          "AssetsPlanFunction": {
+            "id": "AssetsPlanFunction",
+            "path": "BackendStack/AssetsPlanFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "BackendStack/AssetsPlanFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "BackendStack/AssetsPlanFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/AssetsPlanFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.153.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "BackendStack/AssetsPlanFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "BackendStack/AssetsPlanFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "BackendStack/AssetsPlanFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.153.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/AssetsPlanFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+                    },
+                    "functionName": "assets_plan_handler",
+                    "handler": "generate_video.handlers.assets_plan_handler.handler",
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "AssetsPlanFunctionServiceRoleC70A58FB",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.12",
+                    "timeout": 30
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.153.0"
+            }
+          },
+          "AssetSceneFunction": {
+            "id": "AssetSceneFunction",
+            "path": "BackendStack/AssetSceneFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "BackendStack/AssetSceneFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "BackendStack/AssetSceneFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/AssetSceneFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "BackendStack/AssetSceneFunction/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "BackendStack/AssetSceneFunction/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "bedrock:InvokeModel",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    "arn:aws:bedrock:us-west-2::foundation-model/*",
+                                    "arn:aws:bedrock:us-east-1::foundation-model/*"
+                                  ]
+                                },
+                                {
+                                  "Action": [
+                                    "s3:PutObject",
+                                    "s3:AbortMultipartUpload"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "arn:aws:s3:::videomk.com/generation/assets/*"
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "AssetSceneFunctionServiceRoleDefaultPolicyE60DD760",
+                            "roles": [
+                              {
+                                "Ref": "AssetSceneFunctionServiceRole02368BC7"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.153.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.153.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "BackendStack/AssetSceneFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "BackendStack/AssetSceneFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "BackendStack/AssetSceneFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.153.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/AssetSceneFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+                    },
+                    "functionName": "asset_scene_handler",
+                    "handler": "generate_video.handlers.asset_scene_handler.handler",
+                    "memorySize": 1024,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "AssetSceneFunctionServiceRole02368BC7",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.12",
+                    "timeout": 120
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.153.0"
+            }
+          },
+          "AssetsCollectFunction": {
+            "id": "AssetsCollectFunction",
+            "path": "BackendStack/AssetsCollectFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "BackendStack/AssetsCollectFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "BackendStack/AssetsCollectFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/AssetsCollectFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "BackendStack/AssetsCollectFunction/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "BackendStack/AssetsCollectFunction/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:Query",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "AssetsCollectFunctionServiceRoleDefaultPolicy281000F7",
+                            "roles": [
+                              {
+                                "Ref": "AssetsCollectFunctionServiceRoleAAF0805F"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.153.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.153.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "BackendStack/AssetsCollectFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "BackendStack/AssetsCollectFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "BackendStack/AssetsCollectFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.153.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/AssetsCollectFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+                    },
+                    "functionName": "assets_collect_handler",
+                    "handler": "generate_video.handlers.assets_collect_handler.handler",
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "AssetsCollectFunctionServiceRoleAAF0805F",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.12",
+                    "timeout": 60
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.153.0"
+            }
+          },
+          "StoryboardRenderFunction": {
+            "id": "StoryboardRenderFunction",
+            "path": "BackendStack/StoryboardRenderFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "BackendStack/StoryboardRenderFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "BackendStack/StoryboardRenderFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/StoryboardRenderFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "BackendStack/StoryboardRenderFunction/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "BackendStack/StoryboardRenderFunction/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:Query",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": [
+                                    "s3:GetObject",
+                                    "s3:GetBucketLocation",
+                                    "s3:PutObject",
+                                    "s3:AbortMultipartUpload"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    "arn:aws:s3:::videomk.com",
+                                    "arn:aws:s3:::videomk.com/generation/assets/*",
+                                    "arn:aws:s3:::videomk.com/videos/*"
+                                  ]
+                                },
+                                {
+                                  "Action": "secretsmanager:GetSecretValue",
+                                  "Effect": "Allow",
+                                  "Resource": "arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "StoryboardRenderFunctionServiceRoleDefaultPolicy44B015DD",
+                            "roles": [
+                              {
+                                "Ref": "StoryboardRenderFunctionServiceRoleEE86789B"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.153.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.153.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "BackendStack/StoryboardRenderFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "BackendStack/StoryboardRenderFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "BackendStack/StoryboardRenderFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.153.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/StoryboardRenderFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+                    },
+                    "functionName": "storyboard_render_handler",
+                    "handler": "generate_video.handlers.storyboard_render_handler.handler",
+                    "layers": [
+                      {
+                        "Ref": "VideoDepsLayerA2FAB0A5"
+                      }
+                    ],
+                    "memorySize": 4096,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "StoryboardRenderFunctionServiceRoleEE86789B",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.12",
+                    "timeout": 900
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.153.0"
+            }
+          },
+          "MarkFailedFunction": {
+            "id": "MarkFailedFunction",
+            "path": "BackendStack/MarkFailedFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "BackendStack/MarkFailedFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "BackendStack/MarkFailedFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/MarkFailedFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "BackendStack/MarkFailedFunction/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "BackendStack/MarkFailedFunction/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:Query",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
+                                        ]
+                                      ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "MarkFailedFunctionServiceRoleDefaultPolicyC13C6257",
+                            "roles": [
+                              {
+                                "Ref": "MarkFailedFunctionServiceRoleA00CCC7A"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.153.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.153.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "BackendStack/MarkFailedFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "BackendStack/MarkFailedFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.153.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "BackendStack/MarkFailedFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.153.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/MarkFailedFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+                    },
+                    "functionName": "mark_failed_handler",
+                    "handler": "generate_video.handlers.mark_failed_handler.handler",
+                    "memorySize": 256,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "MarkFailedFunctionServiceRoleA00CCC7A",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.12",
+                    "timeout": 10
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.153.0"
+            }
+          },
+          "IntentAndPlot": {
+            "id": "IntentAndPlot",
+            "path": "BackendStack/IntentAndPlot",
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.153.0"
+            }
+          },
+          "PlanAssets": {
+            "id": "PlanAssets",
+            "path": "BackendStack/PlanAssets",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.153.0"
+            }
+          },
+          "GenerateSceneAsset": {
+            "id": "GenerateSceneAsset",
+            "path": "BackendStack/GenerateSceneAsset",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.153.0"
+            }
+          },
+          "GenerateAssetsMap": {
+            "id": "GenerateAssetsMap",
+            "path": "BackendStack/GenerateAssetsMap",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.Map",
+              "version": "2.153.0"
+            }
+          },
+          "CollectAssets": {
+            "id": "CollectAssets",
+            "path": "BackendStack/CollectAssets",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.153.0"
+            }
+          },
+          "StoryboardAndRender": {
+            "id": "StoryboardAndRender",
+            "path": "BackendStack/StoryboardAndRender",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.153.0"
+            }
+          },
+          "HasScenes?": {
+            "id": "HasScenes?",
+            "path": "BackendStack/HasScenes?",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.Choice",
+              "version": "2.153.0"
+            }
+          },
+          "NoScenes": {
+            "id": "NoScenes",
+            "path": "BackendStack/NoScenes",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.Pass",
+              "version": "2.153.0"
+            }
+          },
+          "MarkFailed": {
+            "id": "MarkFailed",
+            "path": "BackendStack/MarkFailed",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.153.0"
+            }
+          },
+          "WorkflowFailed": {
+            "id": "WorkflowFailed",
+            "path": "BackendStack/WorkflowFailed",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.Fail",
               "version": "2.153.0"
             }
           },
@@ -852,7 +1947,7 @@
                                   "Resource": [
                                     {
                                       "Fn::GetAtt": [
-                                        "GenerateVideoFunction0F0FFB9D",
+                                        "IntentPlotFunctionA29B7850",
                                         "Arn"
                                       ]
                                     },
@@ -862,7 +1957,137 @@
                                         [
                                           {
                                             "Fn::GetAtt": [
-                                              "GenerateVideoFunction0F0FFB9D",
+                                              "IntentPlotFunctionA29B7850",
+                                              "Arn"
+                                            ]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "AssetsPlanFunctionB00700AF",
+                                        "Arn"
+                                      ]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": [
+                                              "AssetsPlanFunctionB00700AF",
+                                              "Arn"
+                                            ]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "AssetsCollectFunction035F7DAB",
+                                        "Arn"
+                                      ]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": [
+                                              "AssetsCollectFunction035F7DAB",
+                                              "Arn"
+                                            ]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "MarkFailedFunctionAB21145B",
+                                        "Arn"
+                                      ]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": [
+                                              "MarkFailedFunctionAB21145B",
+                                              "Arn"
+                                            ]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "StoryboardRenderFunction4A3F332B",
+                                        "Arn"
+                                      ]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": [
+                                              "StoryboardRenderFunction4A3F332B",
+                                              "Arn"
+                                            ]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "AssetSceneFunction32DD7898",
+                                        "Arn"
+                                      ]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": [
+                                              "AssetSceneFunction32DD7898",
                                               "Arn"
                                             ]
                                           },
@@ -910,14 +2135,49 @@
                       "Fn::Join": [
                         "",
                         [
-                          "{\"StartAt\":\"InvokeGenerateVideo\",\"States\":{\"InvokeGenerateVideo\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"Resource\":\"",
+                          "{\"StartAt\":\"IntentAndPlot\",\"States\":{\"IntentAndPlot\":{\"Next\":\"PlanAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": [
-                              "GenerateVideoFunction0F0FFB9D",
+                              "IntentPlotFunctionA29B7850",
                               "Arn"
                             ]
                           },
-                          "\"}},\"TimeoutSeconds\":900}"
+                          "\"},\"PlanAssets\":{\"Next\":\"HasScenes?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": [
+                              "AssetsPlanFunctionB00700AF",
+                              "Arn"
+                            ]
+                          },
+                          "\"},\"HasScenes?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.scenes[0]\",\"IsPresent\":true,\"Next\":\"GenerateAssetsMap\"}],\"Default\":\"NoScenes\"},\"NoScenes\":{\"Type\":\"Pass\",\"Next\":\"CollectAssets\"},\"CollectAssets\":{\"Next\":\"StoryboardAndRender\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": [
+                              "AssetsCollectFunction035F7DAB",
+                              "Arn"
+                            ]
+                          },
+                          "\"},\"GenerateAssetsMap\":{\"Type\":\"Map\",\"ResultPath\":\"$.assetResults\",\"Next\":\"CollectAssets\",\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"ItemsPath\":\"$.scenes\",\"ItemSelector\":{\"video_id.$\":\"$.video_id\",\"plot.$\":\"$.plot\",\"scene.$\":\"$$.Map.Item.Value\"},\"ItemProcessor\":{\"ProcessorConfig\":{\"Mode\":\"INLINE\"},\"StartAt\":\"GenerateSceneAsset\",\"States\":{\"GenerateSceneAsset\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": [
+                              "AssetSceneFunction32DD7898",
+                              "Arn"
+                            ]
+                          },
+                          "\"}}},\"MaxConcurrency\":3},\"MarkFailed\":{\"Next\":\"WorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.error\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": [
+                              "MarkFailedFunctionAB21145B",
+                              "Arn"
+                            ]
+                          },
+                          "\"},\"StoryboardAndRender\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"MarkFailed\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": [
+                              "StoryboardRenderFunction4A3F332B",
+                              "Arn"
+                            ]
+                          },
+                          "\"},\"WorkflowFailed\":{\"Type\":\"Fail\"}},\"TimeoutSeconds\":1800}"
                         ]
                       ]
                     },
@@ -1118,7 +2378,7 @@
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "VideoMkApiDeployment599DCF78320d62bca4e6d303fc48139eb9c602af"
+                          "Ref": "VideoMkApiDeployment599DCF782dcd7537a65caa2983234eb0220cd378"
                         },
                         "restApiId": {
                           "Ref": "VideoMkApiD5E014A1"
@@ -1270,7 +2530,7 @@
                                                 {
                                                   "statusCode": "204",
                                                   "responseParameters": {
-                                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+                                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
                                                     "method.response.header.Access-Control-Allow-Origin": "'*'",
                                                     "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                                                   }
@@ -1394,7 +2654,10 @@
                                         "attributes": {
                                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                           "aws:cdk:cloudformation:props": {
-                                            "authorizationType": "NONE",
+                                            "authorizationType": "COGNITO_USER_POOLS",
+                                            "authorizerId": {
+                                              "Ref": "ApiAuthorizer68095F41"
+                                            },
                                             "httpMethod": "POST",
                                             "integration": {
                                               "type": "AWS_PROXY",
@@ -1490,7 +2753,7 @@
                                                 {
                                                   "statusCode": "204",
                                                   "responseParameters": {
-                                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+                                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
                                                     "method.response.header.Access-Control-Allow-Origin": "'*'",
                                                     "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
                                                   }
@@ -1614,7 +2877,10 @@
                                         "attributes": {
                                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                           "aws:cdk:cloudformation:props": {
-                                            "authorizationType": "NONE",
+                                            "authorizationType": "COGNITO_USER_POOLS",
+                                            "authorizerId": {
+                                              "Ref": "ApiAuthorizer68095F41"
+                                            },
                                             "httpMethod": "GET",
                                             "integration": {
                                               "type": "AWS_PROXY",
@@ -1686,7 +2952,7 @@
                                             {
                                               "statusCode": "204",
                                               "responseParameters": {
-                                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+                                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
                                                 "method.response.header.Access-Control-Allow-Origin": "'*'",
                                                 "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                                               }
@@ -1810,7 +3076,10 @@
                                     "attributes": {
                                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                       "aws:cdk:cloudformation:props": {
-                                        "authorizationType": "NONE",
+                                        "authorizationType": "COGNITO_USER_POOLS",
+                                        "authorizerId": {
+                                          "Ref": "ApiAuthorizer68095F41"
+                                        },
                                         "httpMethod": "GET",
                                         "integration": {
                                           "type": "AWS_PROXY",
@@ -1882,7 +3151,7 @@
                                         {
                                           "statusCode": "204",
                                           "responseParameters": {
-                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
                                             "method.response.header.Access-Control-Allow-Origin": "'*'",
                                             "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                                           }
@@ -1946,7 +3215,7 @@
                                     {
                                       "statusCode": "204",
                                       "responseParameters": {
-                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
                                         "method.response.header.Access-Control-Allow-Origin": "'*'",
                                         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                                       }
@@ -1991,6 +3260,70 @@
                 },
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.aws_apigateway.ResourceBase",
+                  "version": "2.153.0"
+                }
+              },
+              "Default4xxGatewayResponse": {
+                "id": "Default4xxGatewayResponse",
+                "path": "BackendStack/VideoMkApi/Default4xxGatewayResponse",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/VideoMkApi/Default4xxGatewayResponse/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ApiGateway::GatewayResponse",
+                      "aws:cdk:cloudformation:props": {
+                        "responseParameters": {
+                          "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                          "gatewayresponse.header.Access-Control-Allow-Headers": "'*'",
+                          "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+                        },
+                        "responseType": "DEFAULT_4XX",
+                        "restApiId": {
+                          "Ref": "VideoMkApiD5E014A1"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.CfnGatewayResponse",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.GatewayResponse",
+                  "version": "2.153.0"
+                }
+              },
+              "Default5xxGatewayResponse": {
+                "id": "Default5xxGatewayResponse",
+                "path": "BackendStack/VideoMkApi/Default5xxGatewayResponse",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "BackendStack/VideoMkApi/Default5xxGatewayResponse/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ApiGateway::GatewayResponse",
+                      "aws:cdk:cloudformation:props": {
+                        "responseParameters": {
+                          "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                          "gatewayresponse.header.Access-Control-Allow-Headers": "'*'",
+                          "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+                        },
+                        "responseType": "DEFAULT_5XX",
+                        "restApiId": {
+                          "Ref": "VideoMkApiD5E014A1"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.CfnGatewayResponse",
+                      "version": "2.153.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.GatewayResponse",
                   "version": "2.153.0"
                 }
               }
@@ -2105,6 +3438,46 @@
               "version": "2.153.0"
             }
           },
+          "ImportedUserPool": {
+            "id": "ImportedUserPool",
+            "path": "BackendStack/ImportedUserPool",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.153.0"
+            }
+          },
+          "ApiAuthorizer": {
+            "id": "ApiAuthorizer",
+            "path": "BackendStack/ApiAuthorizer",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "BackendStack/ApiAuthorizer/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Authorizer",
+                  "aws:cdk:cloudformation:props": {
+                    "identitySource": "method.request.header.Authorization",
+                    "name": "BackendStackApiAuthorizer2893BA6E",
+                    "providerArns": [
+                      "arn:aws:cognito-idp:us-east-1:593549830025:userpool/us-east-1_BOclzICgy"
+                    ],
+                    "restApiId": {
+                      "Ref": "VideoMkApiD5E014A1"
+                    },
+                    "type": "COGNITO_USER_POOLS"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.CfnAuthorizer",
+                  "version": "2.153.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_apigateway.CognitoUserPoolsAuthorizer",
+              "version": "2.153.0"
+            }
+          },
           "VideoGenerationSFLauncher": {
             "id": "VideoGenerationSFLauncher",
             "path": "BackendStack/VideoGenerationSFLauncher",
@@ -2173,11 +3546,12 @@
                             "policyDocument": {
                               "Statement": [
                                 {
-                                  "Action": "states:StartExecution",
+                                  "Action": [
+                                    "states:StartExecution",
+                                    "states:ListStateMachines"
+                                  ],
                                   "Effect": "Allow",
-                                  "Resource": {
-                                    "Ref": "GenerateVideoWorkflowE03EECEE"
-                                  }
+                                  "Resource": "*"
                                 },
                                 {
                                   "Action": [
@@ -2197,24 +3571,19 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": [
-                                        "VideosTable19B3D0C4",
-                                        "Arn"
-                                      ]
-                                    },
-                                    {
                                       "Fn::Join": [
                                         "",
                                         [
+                                          "arn:",
                                           {
-                                            "Fn::GetAtt": [
-                                              "VideosTable19B3D0C4",
-                                              "Arn"
-                                            ]
+                                            "Ref": "AWS::Partition"
                                           },
-                                          "/index/*"
+                                          ":dynamodb:us-west-2:593549830025:table/Videos"
                                         ]
                                       ]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
                                     }
                                   ]
                                 }
@@ -2280,17 +3649,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-                      "s3Key": "f7b81b1a48346ca67d8dce4b61e976f9c663587db0c5c066871ebd277d2508a3.zip"
-                    },
-                    "environment": {
-                      "variables": {
-                        "STATE_MACHINE_ARN": {
-                          "Ref": "GenerateVideoWorkflowE03EECEE"
-                        },
-                        "VIDEOS_TABLE": {
-                          "Ref": "VideosTable19B3D0C4"
-                        }
-                      }
+                      "s3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
                     },
                     "functionName": "VideoGenerationSFLauncher",
                     "handler": "sf_launcher.handler",

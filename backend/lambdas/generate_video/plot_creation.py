@@ -82,12 +82,12 @@ def _parse_plot_json(text: str) -> Dict[str, Any]:
 
 def create_plot(video_id: str, prompt: str, table_name: Optional[str] = None) -> Dict[str, Any]:
     # Update to PLOT_CREATION
-    update_status(video_id, "PLOT_CREATION", table_name)
+    update_status(video_id, "PLOT_CREATION", table_name or "Videos")
 
     truncated = truncate_prompt(prompt)
     if not truncated or len(truncated.strip()) < 3:
         plot = {"legit": False, "reason": "Empty or too short prompt"}
-        update_status(video_id, "ASSETS_CREATION", table_name, extra_attributes={"plot": plot})
+        update_status(video_id, "ASSETS_CREATION", table_name or "Videos", extra_attributes={"plot": plot})
         return plot
 
     # Call Bedrock Anthropic to validate and draft a plot
@@ -107,7 +107,7 @@ def create_plot(video_id: str, prompt: str, table_name: Optional[str] = None) ->
     plot = _parse_plot_json(raw_text)
 
     # Record artifact fields. Next stage expects status to advance to ASSETS_CREATION.
-    update_status(video_id, "ASSETS_CREATION", table_name, extra_attributes={"plot": plot})
+    update_status(video_id, "ASSETS_CREATION", table_name or "Videos", extra_attributes={"plot": plot})
     return plot
 
 

@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 from typing import Any, Dict, Optional, Tuple
 
 import boto3
@@ -40,11 +41,37 @@ def _json_response(status: int, body: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    # Extract path params
+    # Extract path params and Cognito identity
     path_params = (event or {}).get("pathParameters") or {}
-    user_id = path_params.get("user_id")
+    path_user_id = path_params.get("user_id")
     video_id = path_params.get("video_id")
 
+    # Require auth and exact match with path user
+    auth_user_id: Optional[str] = None
+    try:
+        rc = (event or {}).get("requestContext") or {}
+        authz = rc.get("authorizer") or {}
+        claims = authz.get("claims") or {}
+        if isinstance(claims, dict):
+            auth_user_id = (claims.get("sub") or claims.get("cognito:username"))
+        if not auth_user_id:
+            jwt = authz.get("jwt") or {}
+            jwt_claims = jwt.get("claims") or {}
+            if isinstance(jwt_claims, dict):
+                auth_user_id = (jwt_claims.get("sub") or jwt_claims.get("cognito:username"))
+    except Exception:
+        auth_user_id = None
+
+    logging.info("get_video identity: auth_user_id=%s path_user_id=%s", auth_user_id, path_user_id)
+
+    if not path_user_id:
+        return _json_response(400, {"message": "Missing required path parameter 'user_id'"})
+    if not auth_user_id:
+        return _json_response(401, {"message": "Unauthorized"})
+    if auth_user_id != path_user_id:
+        return _json_response(403, {"message": "Forbidden"})
+
+    user_id = path_user_id
     try:
         validate_user_id(user_id)
     except Exception as e:

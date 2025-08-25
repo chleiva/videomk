@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 from typing import Any, Dict, Tuple
 
 from .auth import validate_user_id
@@ -22,7 +23,32 @@ def _extract_user_prompt_and_video_id(event: Dict[str, Any]) -> Tuple[str, str, 
             video_id = event.get("video_id") or (body.get("video_id") if isinstance(body, dict) else None)
         else:
             # Direct Lambda/APIGW invocation style
-            user_id = event.get("pathParameters", {}).get("user_id")
+            # Prefer Cognito sub from authorizer when available
+            auth_user_id = None
+            try:
+                rc = (event or {}).get("requestContext") or {}
+                authz = rc.get("authorizer") or {}
+                claims = authz.get("claims") or {}
+                if isinstance(claims, dict):
+                    auth_user_id = (claims.get("sub") or claims.get("cognito:username"))
+                if not auth_user_id:
+                    jwt = authz.get("jwt") or {}
+                    jwt_claims = jwt.get("claims") or {}
+                    if isinstance(jwt_claims, dict):
+                        auth_user_id = (jwt_claims.get("sub") or jwt_claims.get("cognito:username"))
+            except Exception:
+                auth_user_id = None
+
+            path_user_id = event.get("pathParameters", {}).get("user_id")
+            # Enforce presence of path user and authenticated match
+            if not path_user_id:
+                raise ValueError("Missing required path parameter 'user_id'")
+            if not auth_user_id:
+                raise PermissionError("Unauthorized")
+            if auth_user_id != path_user_id:
+                raise PermissionError("Forbidden")
+
+            user_id = path_user_id
             raw_body = event.get("body")
             if isinstance(raw_body, str):
                 try:
@@ -42,6 +68,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     table_name = os.environ.get("VIDEOS_TABLE", "")
 
     user_id, prompt, video_id = _extract_user_prompt_and_video_id(event)
+    logging.info("generate_video handler: user_id=%s video_id=%s", user_id, video_id)
     validate_user_id(user_id)
     if not video_id:
         raise ValueError("video_id not provided in event payload")

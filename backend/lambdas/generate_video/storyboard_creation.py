@@ -16,7 +16,7 @@ DEFAULT_MUSIC_S3 = os.environ.get(
 
 
 def _get_table(table_name: Optional[str] = None):
-    name = table_name or os.environ.get("VIDEOS_TABLE", "")
+    name = table_name or "Videos"
     if not name:
         raise RuntimeError("VIDEOS_TABLE environment variable is not set")
     return boto3.resource("dynamodb").Table(name)
@@ -388,10 +388,10 @@ def create_storyboard(
     video_id: str, plot: Dict[str, Any], assets: Dict[str, Any], table_name: Optional[str] = None
 ) -> Dict[str, Any]:
     # Update status to STORYBOARD_CREATION (idempotent)
-    update_status(video_id, "STORYBOARD_CREATION", table_name)
+    update_status(video_id, "STORYBOARD_CREATION", table_name or "Videos")
 
     # Fetch freshest video record (plot, assets) from DynamoDB
-    item = _get_video_item(video_id, table_name)
+    item = _get_video_item(video_id, table_name or "Videos")
     plot_fresh = item.get("plot") or plot or {}
     assets_fresh = item.get("assets") or assets or {}
 
@@ -416,7 +416,7 @@ def create_storyboard(
     storyboard_ddb = _to_dynamodb_compatible(storyboard)
 
     update_status(
-        video_id, "RENDERING", table_name, extra_attributes={"storyboard": storyboard_ddb}
+        video_id, "RENDERING", table_name or "Videos", extra_attributes={"storyboard": storyboard_ddb}
     )
     return storyboard
 

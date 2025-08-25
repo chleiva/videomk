@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-deploy-role-593549830025-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-cfn-exec-role-593549830025-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-593549830025-us-west-2/7b6e182046261900738d67715aae536dca9ef3c86d5c41389554f4f8a782e66c.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-593549830025-us-west-2/5d021a770fb1c1e5efbaac9915286757717a93addc5d1d02739cf3c67d94a0ed.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -34,20 +34,6 @@
         "BackendStack.assets"
       ],
       "metadata": {
-        "/BackendStack/VideosTable": [
-          {
-            "type": "aws:cdk:hasPhysicalName",
-            "data": {
-              "Ref": "VideosTable19B3D0C4"
-            }
-          }
-        ],
-        "/BackendStack/VideosTable/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "VideosTable19B3D0C4"
-          }
-        ],
         "/BackendStack/VideoDepsLayer/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -108,6 +94,108 @@
             "data": "GetVideoFunctionE844CD93"
           }
         ],
+        "/BackendStack/IntentPlotFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IntentPlotFunctionServiceRoleAC29D670"
+          }
+        ],
+        "/BackendStack/IntentPlotFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IntentPlotFunctionServiceRoleDefaultPolicyE557F7E7"
+          }
+        ],
+        "/BackendStack/IntentPlotFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IntentPlotFunctionA29B7850"
+          }
+        ],
+        "/BackendStack/AssetsPlanFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetsPlanFunctionServiceRoleC70A58FB"
+          }
+        ],
+        "/BackendStack/AssetsPlanFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetsPlanFunctionB00700AF"
+          }
+        ],
+        "/BackendStack/AssetSceneFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetSceneFunctionServiceRole02368BC7"
+          }
+        ],
+        "/BackendStack/AssetSceneFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetSceneFunctionServiceRoleDefaultPolicyE60DD760"
+          }
+        ],
+        "/BackendStack/AssetSceneFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetSceneFunction32DD7898"
+          }
+        ],
+        "/BackendStack/AssetsCollectFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetsCollectFunctionServiceRoleAAF0805F"
+          }
+        ],
+        "/BackendStack/AssetsCollectFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetsCollectFunctionServiceRoleDefaultPolicy281000F7"
+          }
+        ],
+        "/BackendStack/AssetsCollectFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetsCollectFunction035F7DAB"
+          }
+        ],
+        "/BackendStack/StoryboardRenderFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoryboardRenderFunctionServiceRoleEE86789B"
+          }
+        ],
+        "/BackendStack/StoryboardRenderFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoryboardRenderFunctionServiceRoleDefaultPolicy44B015DD"
+          }
+        ],
+        "/BackendStack/StoryboardRenderFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoryboardRenderFunction4A3F332B"
+          }
+        ],
+        "/BackendStack/MarkFailedFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MarkFailedFunctionServiceRoleA00CCC7A"
+          }
+        ],
+        "/BackendStack/MarkFailedFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MarkFailedFunctionServiceRoleDefaultPolicyC13C6257"
+          }
+        ],
+        "/BackendStack/MarkFailedFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MarkFailedFunctionAB21145B"
+          }
+        ],
         "/BackendStack/GenerateVideoWorkflow/Role/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -153,7 +241,7 @@
         "/BackendStack/VideoMkApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "VideoMkApiDeployment599DCF78320d62bca4e6d303fc48139eb9c602af"
+            "data": "VideoMkApiDeployment599DCF782dcd7537a65caa2983234eb0220cd378"
           }
         ],
         "/BackendStack/VideoMkApi/DeploymentStage.prod/Resource": [
@@ -282,6 +370,18 @@
             "data": "VideoMkApiusersOPTIONSC5AE0C1E"
           }
         ],
+        "/BackendStack/VideoMkApi/Default4xxGatewayResponse/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiDefault4xxGatewayResponse46914539"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default5xxGatewayResponse/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiDefault5xxGatewayResponse67F59849"
+          }
+        ],
         "/BackendStack/ApiDomain/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -298,6 +398,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiAliasRecordBCE933A3"
+          }
+        ],
+        "/BackendStack/ApiAuthorizer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiAuthorizer68095F41"
           }
         ],
         "/BackendStack/VideoGenerationSFLauncher/ServiceRole/Resource": [

@@ -38,7 +38,7 @@ def _scene_prompt(base_summary: str, storytelling: str, scene: Dict[str, Any]) -
 
 def create_assets(video_id: str, plot: Dict[str, Any], table_name: Optional[str] = None) -> Dict[str, Any]:
     # Update status to ASSETS_CREATION (idempotent)
-    update_status(video_id, "ASSETS_CREATION", table_name)
+    update_status(video_id, "ASSETS_CREATION", table_name or "Videos")
 
     # If plot is not legit, skip image generation and return minimal assets
     if not isinstance(plot, dict) or not plot.get("legit"):
@@ -46,7 +46,7 @@ def create_assets(video_id: str, plot: Dict[str, Any], table_name: Optional[str]
         update_status(
             video_id,
             "STORYBOARD_CREATION",
-            table_name,
+            table_name or "Videos",
             extra_attributes={"assets": assets},
         )
         return assets
@@ -114,7 +114,7 @@ def create_assets(video_id: str, plot: Dict[str, Any], table_name: Optional[str]
     update_status(
         video_id,
         "STORYBOARD_CREATION",
-        table_name,
+        table_name or "Videos",
         extra_attributes={"assets": assets},
     )
     return assets
