@@ -56,6 +56,15 @@ class BackendStack(Stack):
         # ============================
         # Lambda functions
         # ============================
+        # Lambda Layer for video rendering dependencies
+        video_layer = _lambda.LayerVersion(
+            self,
+            "VideoDepsLayer",
+            code=_lambda.Code.from_asset("layers/video_deps"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+            description="Video rendering Python dependencies (moviepy, pillow, numpy, etc)",
+        )
+
         generate_video_fn = _lambda.Function(
             self,
             "GenerateVideoFunction",
@@ -64,10 +73,15 @@ class BackendStack(Stack):
             handler="generate_video.index.handler",
             code=_lambda.Code.from_asset("lambdas"),
             timeout=Duration.minutes(15),
+            memory_size=2048,
             environment={
                 "VIDEOS_TABLE": videos_table.table_name,
                 "GSI_USER_VIDEOS": "GSI_UserVideos",
+                "ASSETS_BUCKET": "videomk.com",
+                "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
+                "OPENAI_MODEL": "gpt-5",
             },
+            layers=[video_layer],
         )
 
         list_videos_fn = _lambda.Function(
@@ -84,9 +98,23 @@ class BackendStack(Stack):
             },
         )
 
+        get_video_fn = _lambda.Function(
+            self,
+            "GetVideoFunction",
+            function_name="get_video",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="get_video.handler",
+            code=_lambda.Code.from_asset("lambdas"),
+            timeout=Duration.seconds(30),
+            environment={
+                "VIDEOS_TABLE": videos_table.table_name,
+            },
+        )
+
         # Full read/write access as requested
         videos_table.grant_read_write_data(generate_video_fn)
         videos_table.grant_read_write_data(list_videos_fn)
+        videos_table.grant_read_data(get_video_fn)
 
         # Allow Bedrock model invocation (all models in us-west-2 and us-east-1)
         generate_video_fn.add_to_role_policy(
@@ -96,6 +124,43 @@ class BackendStack(Stack):
                     "arn:aws:bedrock:us-west-2::foundation-model/*",
                     "arn:aws:bedrock:us-east-1::foundation-model/*",
                 ],
+            )
+        )
+
+        # Allow put/get to the assets bucket path
+        generate_video_fn.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:AbortMultipartUpload",
+                ],
+                resources=[
+                    "arn:aws:s3:::videomk.com/generation/assets/*",
+                    "arn:aws:s3:::videomk.com/videos/*",
+                ],
+            )
+        )
+
+        # Allow get to the video objects for presigning via get_video
+        get_video_fn.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "s3:GetObject",
+                    "s3:GetBucketLocation",
+                ],
+                resources=[
+                    "arn:aws:s3:::videomk.com",
+                    "arn:aws:s3:::videomk.com/videos/*",
+                ],
+            )
+        )
+
+        # Allow Secrets Manager get for OpenAI key
+        generate_video_fn.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["secretsmanager:GetSecretValue"],
+                resources=["arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"]
             )
         )
 
@@ -168,10 +233,42 @@ class BackendStack(Stack):
         user_id = users.add_resource("{user_id}")
         videos = user_id.add_resource("videos")
         generate = videos.add_resource("generate")
+        video_item = videos.add_resource("{video_id}")
+
+        # CORS preflight on resources (adds OPTIONS)
+        users.add_cors_preflight(
+            allow_origins=apigw.Cors.ALL_ORIGINS,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Content-Type"],
+        )
+        user_id.add_cors_preflight(
+            allow_origins=apigw.Cors.ALL_ORIGINS,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Content-Type"],
+        )
+        videos.add_cors_preflight(
+            allow_origins=apigw.Cors.ALL_ORIGINS,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Content-Type"],
+        )
+        generate.add_cors_preflight(
+            allow_origins=apigw.Cors.ALL_ORIGINS,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Content-Type"],
+        )
+        video_item.add_cors_preflight(
+            allow_origins=apigw.Cors.ALL_ORIGINS,
+            allow_methods=["GET", "OPTIONS"],
+            allow_headers=["Content-Type"],
+        )
 
         # GET /users/{user_id}/videos -> list_videos Lambda (proxy integration)
         list_integration = apigw.LambdaIntegration(list_videos_fn, proxy=True)
         videos.add_method("GET", list_integration)
+
+        # GET /users/{user_id}/videos/{video_id} -> get_video Lambda (proxy integration)
+        get_video_integration = apigw.LambdaIntegration(get_video_fn, proxy=True)
+        video_item.add_method("GET", get_video_integration)
 
         # Launcher Lambda to start Step Functions execution
         launcher_fn = _lambda.Function(
@@ -184,6 +281,7 @@ class BackendStack(Stack):
             timeout=Duration.seconds(10),
             environment={
                 "STATE_MACHINE_ARN": state_machine.state_machine_arn,
+                "VIDEOS_TABLE": videos_table.table_name,
             },
         )
 
@@ -194,6 +292,9 @@ class BackendStack(Stack):
                 resources=[state_machine.state_machine_arn],
             )
         )
+
+        # Allow the launcher to write to the Videos table
+        videos_table.grant_read_write_data(launcher_fn)
 
         # POST /users/{user_id}/videos/generate -> launcher Lambda (proxy integration)
         generate_integration = apigw.LambdaIntegration(launcher_fn, proxy=True)

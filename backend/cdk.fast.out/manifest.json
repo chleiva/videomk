@@ -1,0 +1,277 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "BackendStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "BackendStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "BackendStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://593549830025/us-west-2",
+      "properties": {
+        "templateFile": "BackendStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-deploy-role-593549830025-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-cfn-exec-role-593549830025-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-593549830025-us-west-2/902dd0c7b71099dc9c5361b65fcee69e036fd5387dfb330e248d03b19281474e.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "BackendStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::593549830025:role/cdk-hnb659fds-lookup-role-593549830025-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "BackendStack.assets"
+      ],
+      "metadata": {
+        "/BackendStack/VideosTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "VideosTable19B3D0C4"
+            }
+          }
+        ],
+        "/BackendStack/VideosTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideosTable19B3D0C4"
+          }
+        ],
+        "/BackendStack/VideoDepsLayer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoDepsLayerA2FAB0A5"
+          }
+        ],
+        "/BackendStack/GenerateVideoFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GenerateVideoFunctionServiceRole463C7178"
+          }
+        ],
+        "/BackendStack/GenerateVideoFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GenerateVideoFunctionServiceRoleDefaultPolicy269DBB0D"
+          }
+        ],
+        "/BackendStack/GenerateVideoFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GenerateVideoFunction0F0FFB9D"
+          }
+        ],
+        "/BackendStack/ListVideosFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListVideosFunctionServiceRole530038A8"
+          }
+        ],
+        "/BackendStack/ListVideosFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListVideosFunctionServiceRoleDefaultPolicy7CE06E7E"
+          }
+        ],
+        "/BackendStack/ListVideosFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListVideosFunctionF0C167BD"
+          }
+        ],
+        "/BackendStack/GenerateVideoWorkflow/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GenerateVideoWorkflowRole17056847"
+          }
+        ],
+        "/BackendStack/GenerateVideoWorkflow/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GenerateVideoWorkflowRoleDefaultPolicy16A80A24"
+          }
+        ],
+        "/BackendStack/GenerateVideoWorkflow/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GenerateVideoWorkflowE03EECEE"
+          }
+        ],
+        "/BackendStack/ApiCertificate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiCertificate1D5B2B3B"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiD5E014A1"
+          }
+        ],
+        "/BackendStack/VideoMkApi/CloudWatchRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiCloudWatchRole96F24915"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Account": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiAccountC265AA9F"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Deployment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiDeployment599DCF78a6c12754575453676ac52d18d42d6bbe"
+          }
+        ],
+        "/BackendStack/VideoMkApi/DeploymentStage.prod/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiDeploymentStageprod51F9B922"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Endpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiEndpointB800F052"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusers1FC2DE34"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridC5D510FA"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosA22ABE0C"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosgenerate2F79A75D"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/ApiPermission.BackendStackVideoMkApi2D7E8557.POST..users.{user_id}.videos.generate": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosgeneratePOSTApiPermissionBackendStackVideoMkApi2D7E8557POSTusersuseridvideosgenerate2D839454"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/ApiPermission.Test.BackendStackVideoMkApi2D7E8557.POST..users.{user_id}.videos.generate": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosgeneratePOSTApiPermissionTestBackendStackVideoMkApi2D7E8557POSTusersuseridvideosgenerate25472D52"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosgeneratePOST80DB3099"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/ApiPermission.BackendStackVideoMkApi2D7E8557.GET..users.{user_id}.videos": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosGETApiPermissionBackendStackVideoMkApi2D7E8557GETusersuseridvideos4642E229"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/ApiPermission.Test.BackendStackVideoMkApi2D7E8557.GET..users.{user_id}.videos": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosGETApiPermissionTestBackendStackVideoMkApi2D7E8557GETusersuseridvideos9A1BCD58"
+          }
+        ],
+        "/BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoMkApiusersuseridvideosGETDBF3FB86"
+          }
+        ],
+        "/BackendStack/ApiDomain/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiDomain2D27DFFC"
+          }
+        ],
+        "/BackendStack/ApiBasePathMapping/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiBasePathMapping5CDC6C7F"
+          }
+        ],
+        "/BackendStack/ApiAliasRecord/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiAliasRecordBCE933A3"
+          }
+        ],
+        "/BackendStack/VideoGenerationSFLauncher/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoGenerationSFLauncherServiceRole58085DBB"
+          }
+        ],
+        "/BackendStack/VideoGenerationSFLauncher/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoGenerationSFLauncherServiceRoleDefaultPolicy9B29863A"
+          }
+        ],
+        "/BackendStack/VideoGenerationSFLauncher/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VideoGenerationSFLauncherF7BBCDEF"
+          }
+        ],
+        "/BackendStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/BackendStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/BackendStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "BackendStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

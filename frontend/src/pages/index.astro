@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PromptForm from "../components/PromptForm";
+import ConsentToast from "../components/ConsentToast";
+---
+<BaseLayout title="videomk" description="Create AI-generated videos with a simple prompt.">
+	<section class="mx-auto flex min-h-[70vh] max-w-5xl flex-col items-center justify-center px-6 text-center">
+		<h1 class="text-balance text-3xl font-semibold tracking-tight text-neutral-900 md:text-5xl">
+			Turn ideas into <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">video</span><span class="font-black">mk</span>
+		</h1>
+		<div class="mt-8 w-full">
+			<PromptForm client:idle />
+		</div>
+	</section>
+	<ConsentToast client:idle />
+</BaseLayout>

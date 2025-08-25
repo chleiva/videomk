@@ -1,0 +1,23 @@
+---
+import "../styles/global.css";
+const { title = "videomk", description = "Create AI-generated videos with a simple prompt." } = Astro.props;
+---
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	</head>
+	<body class="min-h-screen bg-neutral-50 text-neutral-900 antialiased selection:bg-black selection:text-white">
+		<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded-md focus:shadow">Skip to content</a>
+		<main id="content" class="min-h-screen">
+			<slot />
+		</main>
+		<footer class="px-6 py-10 text-center text-sm text-neutral-500">
+			<a href="/privacy" class="underline underline-offset-4 hover:text-neutral-800">Privacy</a>
+		</footer>
+	</body>
+</html>

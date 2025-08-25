@@ -1,0 +1,12 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import QuestionsStepper from "../components/QuestionsStepper";
+---
+<BaseLayout title="Questions — videomk">
+	<section class="mx-auto max-w-5xl px-6 py-16">
+		<h1 class="text-2xl font-semibold text-neutral-900">Questions</h1>
+		<div class="mt-6">
+			<QuestionsStepper client:idle />
+		</div>
+	</section>
+</BaseLayout>

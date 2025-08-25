@@ -1,0 +1,76 @@
+import json
+import os
+from typing import Any, Dict
+
+import boto3
+from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError
+
+
+def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    user_id = None
+    if isinstance(event, dict):
+        path_params = event.get("pathParameters") or {}
+        user_id = path_params.get("user_id")
+
+    if not user_id:
+        return {
+            "statusCode": 400,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET,OPTIONS",
+            },
+            "body": json.dumps({"message": "Missing required path parameter 'user_id'"}),
+        }
+
+    table_name = os.environ.get("VIDEOS_TABLE")
+    index_name = os.environ.get("GSI_USER_VIDEOS", "GSI_UserVideos")
+
+    if not table_name:
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET,OPTIONS",
+            },
+            "body": json.dumps({"message": "Server configuration error: VIDEOS_TABLE not set"}),
+        }
+
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(table_name)
+
+    try:
+        response = table.query(
+            IndexName=index_name,
+            KeyConditionExpression=Key("user_id").eq(user_id),
+            ScanIndexForward=False,  # newest first by created_at
+        )
+        items = response.get("Items", [])
+        body = {"user_id": user_id, "items": items}
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET,OPTIONS",
+            },
+            "body": json.dumps(body),
+        }
+    except ClientError as e:
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET,OPTIONS",
+            },
+            "body": json.dumps({"message": "Failed to query videos", "error": str(e)}),
+        }
+
+

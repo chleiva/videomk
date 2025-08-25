@@ -2,5 +2,8 @@
   "hosted-zone:account=593549830025:domainName=videomk.com:region=us-west-2": {
     "Id": "/hostedzone/Z0974997WX5TY8WRHR6Z",
     "Name": "videomk.com."
-  }
+  },
+  "acknowledged-issue-numbers": [
+    34892
+  ]
 }

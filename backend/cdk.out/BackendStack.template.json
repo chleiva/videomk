@@ -56,6 +56,25 @@
     "aws:cdk:path": "BackendStack/VideosTable/Resource"
    }
   },
+  "VideoDepsLayerA2FAB0A5": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "CompatibleRuntimes": [
+     "python3.12"
+    ],
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "5e3438f55df61ad152aed1e06fefb1505c421ea68afc5118b348f485b72ed87d.zip"
+    },
+    "Description": "Video rendering Python dependencies (moviepy, pillow, numpy, etc)"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoDepsLayer/Resource",
+    "aws:asset:path": "asset.5e3438f55df61ad152aed1e06fefb1505c421ea68afc5118b348f485b72ed87d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
   "GenerateVideoFunctionServiceRole463C7178": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -141,6 +160,23 @@
         "arn:aws:bedrock:us-west-2::foundation-model/*",
         "arn:aws:bedrock:us-east-1::foundation-model/*"
        ]
+      },
+      {
+       "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:AbortMultipartUpload"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:s3:::videomk.com/generation/assets/*",
+        "arn:aws:s3:::videomk.com/videos/*"
+       ]
+      },
+      {
+       "Action": "secretsmanager:GetSecretValue",
+       "Effect": "Allow",
+       "Resource": "arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"
       }
      ],
      "Version": "2012-10-17"
@@ -161,18 +197,27 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip"
+     "S3Key": "b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb.zip"
     },
     "Environment": {
      "Variables": {
       "VIDEOS_TABLE": {
        "Ref": "VideosTable19B3D0C4"
       },
-      "GSI_USER_VIDEOS": "GSI_UserVideos"
+      "GSI_USER_VIDEOS": "GSI_UserVideos",
+      "ASSETS_BUCKET": "videomk.com",
+      "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
+      "OPENAI_MODEL": "gpt-5"
      }
     },
     "FunctionName": "generate_video",
     "Handler": "generate_video.index.handler",
+    "Layers": [
+     {
+      "Ref": "VideoDepsLayerA2FAB0A5"
+     }
+    ],
+    "MemorySize": 2048,
     "Role": {
      "Fn::GetAtt": [
       "GenerateVideoFunctionServiceRole463C7178",
@@ -188,7 +233,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/GenerateVideoFunction/Resource",
-    "aws:asset:path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+    "aws:asset:path": "asset.b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -290,7 +335,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip"
+     "S3Key": "b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb.zip"
     },
     "Environment": {
      "Variables": {
@@ -317,7 +362,142 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/ListVideosFunction/Resource",
-    "aws:asset:path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+    "aws:asset:path": "asset.b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "GetVideoFunctionServiceRole7E50B751": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GetVideoFunction/ServiceRole/Resource"
+   }
+  },
+  "GetVideoFunctionServiceRoleDefaultPolicy6A1D727C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VideosTable19B3D0C4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VideosTable19B3D0C4",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject",
+        "s3:GetBucketLocation"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:s3:::videomk.com",
+        "arn:aws:s3:::videomk.com/videos/*"
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "GetVideoFunctionServiceRoleDefaultPolicy6A1D727C",
+    "Roles": [
+     {
+      "Ref": "GetVideoFunctionServiceRole7E50B751"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GetVideoFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "GetVideoFunctionE844CD93": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
+     "S3Key": "b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "VIDEOS_TABLE": {
+       "Ref": "VideosTable19B3D0C4"
+      }
+     }
+    },
+    "FunctionName": "get_video",
+    "Handler": "get_video.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GetVideoFunctionServiceRole7E50B751",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.12",
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "GetVideoFunctionServiceRoleDefaultPolicy6A1D727C",
+    "GetVideoFunctionServiceRole7E50B751"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/GetVideoFunction/Resource",
+    "aws:asset:path": "asset.b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -509,7 +689,7 @@
     "aws:cdk:path": "BackendStack/VideoMkApi/Account"
    }
   },
-  "VideoMkApiDeployment599DCF78a6c12754575453676ac52d18d42d6bbe": {
+  "VideoMkApiDeployment599DCF78320d62bca4e6d303fc48139eb9c602af": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Automatically created by the RestApi construct",
@@ -518,23 +698,29 @@
     }
    },
    "DependsOn": [
+    "VideoMkApiusersuseridOPTIONSC86E3AD8",
     "VideoMkApiusersuseridC5D510FA",
+    "VideoMkApiusersuseridvideosvideoidGET11F92566",
+    "VideoMkApiusersuseridvideosvideoidOPTIONSFA32B021",
+    "VideoMkApiusersuseridvideosvideoid0BDBD6D4",
+    "VideoMkApiusersuseridvideosgenerateOPTIONSD265E091",
     "VideoMkApiusersuseridvideosgeneratePOST80DB3099",
     "VideoMkApiusersuseridvideosgenerate2F79A75D",
     "VideoMkApiusersuseridvideosGETDBF3FB86",
+    "VideoMkApiusersuseridvideosOPTIONS6DB9C1A7",
     "VideoMkApiusersuseridvideosA22ABE0C",
+    "VideoMkApiusersOPTIONSC5AE0C1E",
     "VideoMkApiusers1FC2DE34"
    ],
    "Metadata": {
-    "aws:cdk:path": "BackendStack/VideoMkApi/Deployment/Resource",
-    "aws:cdk:do-not-refactor": true
+    "aws:cdk:path": "BackendStack/VideoMkApi/Deployment/Resource"
    }
   },
   "VideoMkApiDeploymentStageprod51F9B922": {
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "VideoMkApiDeployment599DCF78a6c12754575453676ac52d18d42d6bbe"
+     "Ref": "VideoMkApiDeployment599DCF78320d62bca4e6d303fc48139eb9c602af"
     },
     "RestApiId": {
      "Ref": "VideoMkApiD5E014A1"
@@ -609,6 +795,49 @@
    },
    "Metadata": {
     "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosgenerateOPTIONSD265E091": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridvideosgenerate2F79A75D"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/OPTIONS/Resource"
    }
   },
   "VideoMkApiusersuseridvideosgeneratePOSTApiPermissionBackendStackVideoMkApi2D7E8557POSTusersuseridvideosgenerate2D839454": {
@@ -718,6 +947,214 @@
     "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/generate/POST/Resource"
    }
   },
+  "VideoMkApiusersuseridvideosvideoid0BDBD6D4": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "VideoMkApiusersuseridvideosA22ABE0C"
+    },
+    "PathPart": "{video_id}",
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/{video_id}/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosvideoidOPTIONSFA32B021": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridvideosvideoid0BDBD6D4"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/{video_id}/OPTIONS/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosvideoidGETApiPermissionBackendStackVideoMkApi2D7E8557GETusersuseridvideosvideoidB3CC9147": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetVideoFunctionE844CD93",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:593549830025:",
+       {
+        "Ref": "VideoMkApiD5E014A1"
+       },
+       "/",
+       {
+        "Ref": "VideoMkApiDeploymentStageprod51F9B922"
+       },
+       "/GET/users/*/videos/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/{video_id}/GET/ApiPermission.BackendStackVideoMkApi2D7E8557.GET..users.{user_id}.videos.{video_id}"
+   }
+  },
+  "VideoMkApiusersuseridvideosvideoidGETApiPermissionTestBackendStackVideoMkApi2D7E8557GETusersuseridvideosvideoidA06D77EE": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetVideoFunctionE844CD93",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:us-west-2:593549830025:",
+       {
+        "Ref": "VideoMkApiD5E014A1"
+       },
+       "/test-invoke-stage/GET/users/*/videos/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/{video_id}/GET/ApiPermission.Test.BackendStackVideoMkApi2D7E8557.GET..users.{user_id}.videos.{video_id}"
+   }
+  },
+  "VideoMkApiusersuseridvideosvideoidGET11F92566": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:us-west-2:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GetVideoFunctionE844CD93",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridvideosvideoid0BDBD6D4"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/{video_id}/GET/Resource"
+   }
+  },
+  "VideoMkApiusersuseridvideosOPTIONS6DB9C1A7": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridvideosA22ABE0C"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/OPTIONS/Resource"
+   }
+  },
   "VideoMkApiusersuseridvideosGETApiPermissionBackendStackVideoMkApi2D7E8557GETusersuseridvideos4642E229": {
    "Type": "AWS::Lambda::Permission",
    "Properties": {
@@ -825,6 +1262,92 @@
     "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/videos/GET/Resource"
    }
   },
+  "VideoMkApiusersuseridOPTIONSC86E3AD8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "VideoMkApiusersuseridC5D510FA"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/{user_id}/OPTIONS/Resource"
+   }
+  },
+  "VideoMkApiusersOPTIONSC5AE0C1E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "VideoMkApiusers1FC2DE34"
+    },
+    "RestApiId": {
+     "Ref": "VideoMkApiD5E014A1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VideoMkApi/Default/users/OPTIONS/Resource"
+   }
+  },
   "ApiDomain2D27DFFC": {
    "Type": "AWS::ApiGateway::DomainName",
    "Properties": {
@@ -930,6 +1453,45 @@
        "Resource": {
         "Ref": "GenerateVideoWorkflowE03EECEE"
        }
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "VideosTable19B3D0C4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "VideosTable19B3D0C4",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
       }
      ],
      "Version": "2012-10-17"
@@ -950,12 +1512,15 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a.zip"
+     "S3Key": "b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb.zip"
     },
     "Environment": {
      "Variables": {
       "STATE_MACHINE_ARN": {
        "Ref": "GenerateVideoWorkflowE03EECEE"
+      },
+      "VIDEOS_TABLE": {
+       "Ref": "VideosTable19B3D0C4"
       }
      }
     },
@@ -976,7 +1541,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/VideoGenerationSFLauncher/Resource",
-    "aws:asset:path": "asset.5dee9cfd0a974db8fbed7bd14ee76e949602c831a49f71019288345fb479880a",
+    "aws:asset:path": "asset.b5c46b7f702dd2837d809468ff6e88c85631cbe7bfd188efe2ca9790908f5bcb",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -984,7 +1549,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Q0W6DMAz8lr6n2VY07Zm2mjRp3RDde2WCCxkkQdisQij/PiWlKuqT787O+ZyN3Lxs5PMKLrRWZbNudSGnI4NqBFzoNJWjBePKQk4/ULQodmcbgRctmKIEOb0PVrF2NrSWOMPeaCLtrBcajJxyd30fa+ZarcY4F5EXlJyACJlkGoqgRG4H1SBvgVAQY3ee3enEQA3Jz5jgw/655mEgnsB4AFVrG5cuuRcKe9ZnrYDRgIUKeznt7lp4sKBeQKcrYLzAKKccidNOx0vuMFXKDZbFHrvWjQYtB3XBjgzVLUmFIkdyQ68wHncjs+cVH5BrVwZpRntnQNsvMHFuwYJHBlwfoOu0rUL3QfKidwPjayKnNEfl+vK6KqAjsvf3CPHzQ8bZ6XvgbmAvspFrZ58S+ZLIt9Uvab3uB8vaoMyv9R84kC2ESwIAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11RXW/CMAz8LbyHbKxCe+ZDkybBhsq0V2RSU7I2SRW7Q1WV/z4lFFH25Luzc74kL3I2z+TzBC40VUU1rfVR9nsGVQm40KEvOgvGFUfZf8GxRrE62QSCqMEcC5D9Bjr03+hJOxvbD/yttYqHxhjv0BtNcSQIyg5AhExyEYugTC5bVSEvgVBoMLLP3XV1qjtXa9Ull4SCIMbmNLjTgYEqkpsU793+ugofB9L9GLegztom2zEPQqFnfdIKGA1YKNHLfnXX4oERDQIaXQLjBTrZ50i8aHTKeocLpVxrWayxqV1n0HJUR2zPUN6SlChyJNd6hekBbmTwvOIt8tkVURrQ2hnQ9gNMmhux6LEDPm+habQtY/efFIR3LeM8k/0iR+V8cV0V0R45hHuE9EEx4+D02XLT8jhZELuOz84+ZXKWydfJD2k99a1lbVDm1/oH1VV3GHQCAAA="
    },
    "Metadata": {
     "aws:cdk:path": "BackendStack/CDKMetadata/Default"
