@@ -177,6 +177,39 @@ def _as_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
+def loop_audio_to_duration(audio, duration: float):
+    """Loop an audio clip to at least the given duration.
+
+    Tries built-in audio_loop if available; otherwise concatenates copies and
+    trims to exact duration.
+    """
+    try:
+        from moviepy import afx  # lazy import
+        if hasattr(afx, "audio_loop"):
+            return afx.audio_loop(audio, duration=float(duration))
+    except Exception:
+        pass
+    try:
+        from moviepy import concatenate_audioclips  # lazy import
+        total = float(duration)
+        src_dur = float(getattr(audio, "duration", 0) or 0)
+        if src_dur <= 0 or total <= 0:
+            return set_dur(audio, max(0.0, total))
+        clips = []
+        remaining = total
+        while remaining > 0:
+            if remaining < src_dur:
+                clips.append(subclip_from(audio, 0, remaining))
+                remaining = 0
+            else:
+                clips.append(audio)
+                remaining -= src_dur
+        out = concatenate_audioclips(clips)
+        return set_dur(out, total)
+    except Exception:
+        return set_dur(audio, float(duration))
+
+
 def parse_color(color_val):
     if isinstance(color_val, (list, tuple)):
         return tuple(map(int, color_val[:3]))
@@ -246,13 +279,47 @@ def make_bg_clip(bg: Dict[str, Any], duration: float, size: Tuple[int, int]):
 def _font(path: Optional[str], size: int):
     from PIL import ImageFont
     try:
-        if path and Path(path).exists():
-            return ImageFont.truetype(path, size)
-        for sys in (
+        # Resolve S3 or local path if provided
+        if path:
+            try:
+                resolved = _ensure_local_path(path)
+            except Exception:
+                resolved = path
+            if resolved and Path(resolved).exists():
+                return ImageFont.truetype(resolved, size)
+
+        # Allow overriding via environment (e.g., Lambda layer under /opt)
+        env_font = os.environ.get("FONT_PATH")
+        if env_font and Path(env_font).exists():
+            return ImageFont.truetype(env_font, size)
+
+        # Bundled font with the lambda package (preferred fallback)
+        try:
+            here = Path(__file__).resolve().parent
+            bundled = here / "assets" / "fonts" / "Inter-Regular.ttf"
+            if bundled.exists():
+                return ImageFont.truetype(str(bundled), size)
+        except Exception:
+            pass
+
+        # Common Lambda layer font locations
+        lambda_candidates = [
+            "/opt/fonts/DejaVuSans.ttf",
+            "/opt/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/opt/share/fonts/NotoSans-Regular.ttf",
+            "/opt/fonts/NotoSans-Regular.ttf",
+        ]
+        for cand in lambda_candidates:
+            if Path(cand).exists():
+                return ImageFont.truetype(cand, size)
+
+        # Try common system locations (useful for local dev)
+        system_candidates = [
             "/System/Library/Fonts/Helvetica.ttc",
             "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             "C:/Windows/Fonts/arial.ttf",
-        ):
+        ]
+        for sys in system_candidates:
             if Path(sys).exists():
                 return ImageFont.truetype(sys, size)
     except Exception:
@@ -268,7 +335,7 @@ def rounded_box(w, h, r, fill=(0, 0, 0, 128)):
 
 
 def _text_image(item: Dict[str, Any], canvas: Tuple[int, int]):
-    from PIL import Image, ImageDraw
+    from PIL import Image, ImageDraw, ImageFont as _IF
     W, H = canvas
     text = item.get("text", "")
     font_size = _as_int(item.get("fontsize", item.get("font_size", 48)), 48)
@@ -342,6 +409,18 @@ def _text_image(item: Dict[str, Any], canvas: Tuple[int, int]):
             x = pad
         draw_img.text((x, y), ln, fill=color, font=font)
         y += h + line_gap
+    # If we had to fall back to PIL's default bitmap font, upsample the image to approximate requested size
+    try:
+        if not isinstance(font, _IF.FreeTypeFont):
+            # Default bitmap font height is ~11px; scale to requested font_size
+            base_h = max(11, heights[0] if heights else 11)
+            scale = max(1, int(round(font_size / float(base_h))))
+            if scale > 1:
+                from PIL import Image as _PILImage
+                resample = getattr(_PILImage, "Resampling", _PILImage).__dict__.get("LANCZOS", 1)
+                img = img.resize((img.width * scale, img.height * scale), resample=resample)
+    except Exception:
+        pass
     return img
 
 
@@ -537,10 +616,17 @@ def _compose_and_render(storyboard: Dict[str, Any], workdir: Path) -> Tuple[str,
     music_vol = float(music_cfg.get("music_volume", 0.3))
     if music_path and Path(music_path).exists() and total_dur > 0:
         music = AudioFileClip(music_path)
-        # Trim slightly before the end to prevent out-of-range reads due to float rounding
-        safe_end = max(0.0, min(total_dur, float(getattr(music, "duration", total_dur) or total_dur)) - 0.05)
-        if safe_end > 0:
-            music = subclip_from(music, 0, safe_end)
+        src_dur = float(getattr(music, "duration", 0) or 0)
+        if src_dur <= 0:
+            pass
+        elif src_dur + 0.01 < total_dur:
+            # Loop music to fill the entire duration
+            music = loop_audio_to_duration(music, total_dur)
+        else:
+            # Trim slightly before the end to prevent out-of-range reads due to float rounding
+            safe_end = max(0.0, min(total_dur, src_dur) - 0.05)
+            if safe_end > 0:
+                music = subclip_from(music, 0, safe_end)
         music = volume_x(music, music_vol)
         tracks.append(music)
 
