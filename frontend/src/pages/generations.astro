@@ -1,13 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import GenerationsList from "../components/GenerationsList";
+import GenerationsPage from "../components/GenerationsPage";
 ---
 <BaseLayout title="Generations — videomk">
-	<section class="mx-auto max-w-6xl px-6 py-16">
-		<h1 class="text-2xl font-semibold text-neutral-900">Your Generations</h1>
-		<p class="mt-2 text-neutral-600">Live status for your recent tasks.</p>
-		<div class="mt-8">
-			<GenerationsList client:idle />
-		</div>
-	</section>
+	<script>
+		{`
+		  import('/src/lib/auth.ts').then(async (m) => {
+		    try { await m.handleAuthCodeIfPresent(); } catch {}
+		  });
+		`}
+	</script>
+	<GenerationsPage client:idle />
 </BaseLayout>

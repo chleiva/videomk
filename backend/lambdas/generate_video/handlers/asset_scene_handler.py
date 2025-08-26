@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 import boto3
 
-from ..bedrock import generate_image_bytes
+from ..openai_images import generate_image_bytes
 
 
 def _get_assets_bucket() -> str:
@@ -50,8 +50,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
     img_bytes = generate_image_bytes(
         prompt=prompt,
-        width=2560,
-        height=1440,
+        width=1024,
+        height=1024,
         cfg_scale=8.0,
         seed=seed,
     )
@@ -69,8 +69,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "scene_id": scene_id,
         "type": "image",
         "s3": f"s3://{bucket}/{key}",
-        "width": 2560,
-        "height": 1440,
+        "width": 1024,
+        "height": 1024,
     }
 
     return {

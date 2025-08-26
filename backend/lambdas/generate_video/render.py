@@ -3,6 +3,7 @@ import os
 import json
 import logging
 from pathlib import Path
+import time
 
 import boto3
 from botocore.exceptions import ClientError
@@ -251,17 +252,126 @@ def make_bg_clip(bg: Dict[str, Any], duration: float, size: Tuple[int, int]):
             return set_dur(ColorClip(size=(W, H), color=(0, 0, 0)), duration)
         img = set_dur(ImageClip(str(path)), duration)
         fit = (bg.get("fit") or "cover").lower()
+        effects = bg.get("effects") or []
+        if isinstance(effects, str):
+            effects = [effects]
+
+        def _parse_zoom(effs: List[str]) -> Tuple[Optional[str], float]:
+            mode: Optional[str] = None
+            strength = 0.06
+            for e in effs:
+                es = str(e).lower().strip()
+                if es.startswith("zoom_in"):
+                    mode = "in"
+                if es.startswith("zoom_out"):
+                    mode = "out"
+                if ":" in es:
+                    name, arg = es.split(":", 1)
+                    if name in ("zoom_in", "zoom_out"):
+                        try:
+                            strength = max(0.01, min(0.2, float(arg)))
+                        except Exception:
+                            pass
+            return mode, strength
+
+        def _parse_pan(effs: List[str]) -> Optional[str]:
+            for e in effs:
+                es = str(e).lower().strip()
+                if es.startswith("pan:"):
+                    return es.split(":", 1)[1]
+                if es == "pan":
+                    return "right"
+            return None
+
+        has_motion = bool(effects)
         if fit == "cover":
-            scale = max(W / img.w, H / img.h)
-            img = resize_clip(img, scale)
-            img = crop_clip(img, x_center=img.w // 2, y_center=img.h // 2, width=W, height=H)
+            base_scale = max(W / img.w, H / img.h)
+            # Add headroom for motion to avoid black borders
+            motion_headroom = 1.08 if has_motion else 1.0
+            img = resize_clip(img, base_scale * motion_headroom)
+
+            # Apply optional zoom
+            zoom_mode, zoom_strength = _parse_zoom(effects)
+            if zoom_mode == "in":
+                img = resize_clip(img, (lambda t: 1.0 + zoom_strength * max(0.0, min(1.0, t / max(0.001, duration)))))
+            elif zoom_mode == "out":
+                img = resize_clip(img, (lambda t: 1.0 + zoom_strength * max(0.0, 1.0 - min(1.0, t / max(0.001, duration)))))
+
+            # Apply optional pan via animated position
+            pan_dir = _parse_pan(effects)
+            if pan_dir:
+                cw, ch = getattr(img, "w", W), getattr(img, "h", H)
+                min_x, max_x = (W - cw, 0)
+                min_y, max_y = (H - ch, 0)
+                cx = (min_x + max_x) / 2.0
+                cy = (min_y + max_y) / 2.0
+                # Define start/end positions depending on available room
+                if pan_dir in ("right", "r") and cw > W:
+                    x0, x1 = min_x, max_x
+                    y0 = cy
+                    pos = (lambda t: (int(x0 + (x1 - x0) * (t / max(0.001, duration))), int(y0)))
+                    img = set_pos(img, pos)
+                elif pan_dir in ("left", "l") and cw > W:
+                    x0, x1 = max_x, min_x
+                    y0 = cy
+                    pos = (lambda t: (int(x0 + (x1 - x0) * (t / max(0.001, duration))), int(y0)))
+                    img = set_pos(img, pos)
+                elif pan_dir in ("down", "d") and ch > H:
+                    y0, y1 = min_y, max_y
+                    x0 = cx
+                    pos = (lambda t: (int(x0), int(y0 + (y1 - y0) * (t / max(0.001, duration)))))
+                    img = set_pos(img, pos)
+                elif pan_dir in ("up", "u") and ch > H:
+                    y0, y1 = max_y, min_y
+                    x0 = cx
+                    pos = (lambda t: (int(x0), int(y0 + (y1 - y0) * (t / max(0.001, duration)))))
+                    img = set_pos(img, pos)
+                else:
+                    # If no room to pan, keep centered
+                    img = set_pos(img, "center")
+            else:
+                # No pan requested: keep centered
+                img = set_pos(img, "center")
+
+            return img
         else:
             scale = min(W / img.w, H / img.h)
             img = resize_clip(img, scale)
             from moviepy import CompositeVideoClip
             bgc = set_dur(ColorClip((W, H), color=(0, 0, 0)), duration)
-            img = set_dur(CompositeVideoClip([bgc, set_pos(img, "center")], size=(W, H)), duration)
-        return img
+            if has_motion:
+                # Subtle pan inside the canvas
+                zoom_mode, zoom_strength = _parse_zoom(effects)
+                if zoom_mode == "in":
+                    img = resize_clip(img, (lambda t: 1.0 + zoom_strength * max(0.0, min(1.0, t / max(0.001, duration)))))
+                elif zoom_mode == "out":
+                    img = resize_clip(img, (lambda t: 1.0 + zoom_strength * max(0.0, 1.0 - min(1.0, t / max(0.001, duration)))))
+
+                pan_dir = _parse_pan(effects)
+                # Compute a small travel range (10% of remaining room)
+                cw, ch = getattr(img, "w", 0), getattr(img, "h", 0)
+                room_x = max(0, W - cw)
+                room_y = max(0, H - ch)
+                if pan_dir in ("right", "r") and room_x > 0:
+                    x0, x1 = 0, min(0, room_x)
+                    pos = (lambda t: (int((x0 + (x1 - x0) * (t / max(0.001, duration)))), int((H - ch) / 2)))
+                    return set_dur(CompositeVideoClip([bgc, set_pos(img, pos)], size=(W, H)), duration)
+                if pan_dir in ("left", "l") and room_x > 0:
+                    x0, x1 = min(0, room_x), 0
+                    pos = (lambda t: (int((x0 + (x1 - x0) * (t / max(0.001, duration)))), int((H - ch) / 2)))
+                    return set_dur(CompositeVideoClip([bgc, set_pos(img, pos)], size=(W, H)), duration)
+                if pan_dir in ("down", "d") and room_y > 0:
+                    y0, y1 = min(0, room_y), 0
+                    pos = (lambda t: (int((W - cw) / 2), int((y0 + (y1 - y0) * (t / max(0.001, duration))))))
+                    return set_dur(CompositeVideoClip([bgc, set_pos(img, pos)], size=(W, H)), duration)
+                if pan_dir in ("up", "u") and room_y > 0:
+                    y0, y1 = 0, min(0, room_y)
+                    pos = (lambda t: (int((W - cw) / 2), int((y0 + (y1 - y0) * (t / max(0.001, duration))))))
+                    return set_dur(CompositeVideoClip([bgc, set_pos(img, pos)], size=(W, H)), duration)
+                # Fallback: center if no room to pan
+                return set_dur(CompositeVideoClip([bgc, set_pos(img, "center")], size=(W, H)), duration)
+            else:
+                return set_dur(CompositeVideoClip([bgc, set_pos(img, "center")], size=(W, H)), duration)
 
     if t == "video":
         path = _ensure_local_path(bg.get("path", ""))
@@ -445,25 +555,153 @@ def make_text_clip(item: Dict[str, Any], size: Tuple[int, int], duration: float)
 
     top = (_as_int(pct(y, H) - img.height // 2) if isinstance(y, float) and 0 <= y <= 1 else _as_int(y, 0))
     clip = set_pos(clip, (left, top))
+    # Attach positioning metadata for later non-overlap arrangement
+    try:
+        pref = "bottom" if (isinstance(y, float) and 0 <= y <= 1 and y > 0.5) else "top"
+        clip._vmk_meta = {
+            "left": int(left),
+            "top": int(top),
+            "width": int(getattr(img, "width", 0) or clip.w),
+            "height": int(getattr(img, "height", 0) or clip.h),
+            "pref": pref,
+            "align": align,
+        }
+    except Exception:
+        pass
     return clip
 
 
 def make_caption_overlay(item: Dict[str, Any], size: Tuple[int, int], duration: float):
     # Provide strong defaults for captions near the bottom center
-    caption: Dict[str, Any] = {
-        "type": "text",
-        "text": str(item.get("text", "")),
-        "fontsize": int(item.get("fontsize", 40)),
-        "color": item.get("color", "white"),
-        "align": item.get("align", "center"),
-        "y": item.get("y", 0.85),
-        "effects": item.get("effects", ["fadein:0.3"]),
-        "box": item.get(
-            "box",
-            {"width": 0.9, "padding": 18, "radius": 10, "fill": [0, 0, 0, 220]},
-        ),
-    }
-    return make_text_clip(caption, size, duration)
+    W, H = size
+    full_text = str(item.get("text", ""))
+    fontsize = int(item.get("fontsize", 40))
+    color = item.get("color", "white")
+    align = (item.get("align") or "center").lower()
+    y_center = item.get("y", 0.88)
+    box_cfg = dict({"width": 0.9, "padding": 18, "radius": 10, "fill": [0, 0, 0, 220]}, **(item.get("box") or {}))
+    max_lines_per_page = int(item.get("max_lines", 2))
+
+    # Prepare font and wrapping measurement identical to _text_image
+    try:
+        from PIL import Image, ImageDraw
+    except Exception:
+        # Fallback: just render as one caption if PIL is not available for any reason
+        caption: Dict[str, Any] = {
+            "type": "text",
+            "text": full_text,
+            "fontsize": fontsize,
+            "color": color,
+            "align": align,
+            "y": y_center,
+            "box": box_cfg,
+        }
+        return make_text_clip(caption, size, duration)
+
+    font = _font(item.get("font"), fontsize)
+    pad = _as_int(box_cfg.get("padding", 18), 18)
+    try:
+        max_w = max(100, int(_as_float(box_cfg.get("width", 0.9), 0.9) * W) - 2 * pad)
+    except Exception:
+        max_w = None
+
+    # Wrap text into lines constrained by max_w
+    tmp = Image.new("RGBA", (1, 1))
+    draw = ImageDraw.Draw(tmp)
+    words = str(full_text).split()
+    lines: List[str] = []
+    if max_w:
+        cur = ""
+        for w in words:
+            candidate = (cur + " " + w).strip()
+            bbox = draw.textbbox((0, 0), candidate, font=font)
+            if bbox[2] - bbox[0] <= max_w or not cur:
+                cur = candidate
+            else:
+                lines.append(cur)
+                cur = w
+        if cur:
+            lines.append(cur)
+    else:
+        lines = str(full_text).split("\n")
+
+    # If it fits within the allowed lines, render as a single caption
+    if len(lines) <= max_lines_per_page or max_lines_per_page <= 0:
+        caption: Dict[str, Any] = {
+            "type": "text",
+            "text": "\n".join(lines),
+            "fontsize": fontsize,
+            "color": color,
+            "align": align,
+            "y": y_center,
+            "box": box_cfg,
+        }
+        return make_text_clip(caption, size, duration)
+
+    # Otherwise, split into sequential pages
+    pages: List[List[str]] = []
+    idx = 0
+    while idx < len(lines):
+        pages.append(lines[idx: idx + max_lines_per_page])
+        idx += max_lines_per_page
+
+    num_pages = max(1, len(pages))
+    # Distribute time evenly across pages
+    base = float(duration) / float(num_pages)
+    # Build each page as its own ImageClip positioned bottom-center
+    import numpy as np
+    from moviepy import ImageClip, CompositeVideoClip
+
+    page_clips: List[Any] = []
+    t_cursor = 0.0
+    max_page_w = 0
+    max_page_h = 0
+
+    for page in pages:
+        page_item = {
+            "type": "text",
+            "text": "\n".join(page),
+            "fontsize": fontsize,
+            "color": color,
+            "align": "center",
+            "box": box_cfg,
+        }
+        # Render image for the current page
+        img = _text_image(page_item, size)
+        max_page_w = max(max_page_w, getattr(img, "width", 0))
+        max_page_h = max(max_page_h, getattr(img, "height", 0))
+        clip = set_dur(ImageClip(np.array(img)), base)
+        # Bottom-center placement relative to the scene canvas
+        left = _as_int((W - img.width) // 2, 0)
+        top = _as_int(pct(y_center, H) - img.height // 2, 0) if isinstance(y_center, float) else _as_int(y_center, 0)
+        clip = set_pos(clip, (left, top))
+        # Optional gentle fades for readability
+        try:
+            fade_t = min(0.25, max(0.12, base * 0.15))
+            clip = fade_in(fade_out(clip, fade_t), fade_t)
+        except Exception:
+            pass
+        clip = set_start(clip, t_cursor)
+        t_cursor += base
+        page_clips.append(clip)
+
+    comp = CompositeVideoClip(page_clips, size=(W, H))
+    comp = set_dur(comp, duration)
+    # Provide positioning metadata so higher-level arrangement can avoid overlaps
+    try:
+        left_meta = _as_int((W - max_page_w) // 2, 0)
+        top_meta = _as_int(pct(y_center, H) - max_page_h // 2, 0) if isinstance(y_center, float) else _as_int(y_center, 0)
+        comp._vmk_meta = {
+            "left": int(left_meta),
+            "top": int(top_meta),
+            "width": int(max_page_w),
+            "height": int(max_page_h),
+            "pref": "bottom",
+            "align": "center",
+        }
+    except Exception:
+        pass
+    return comp
 
 
 def make_video_overlay(item: Dict[str, Any], size: Tuple[int, int], duration: float):
@@ -533,24 +771,113 @@ def build_scene(scene: Dict[str, Any], size: Tuple[int, int]):
     scene_audio_clips = []
 
     overlays = sorted(scene.get("overlays", []), key=lambda it: it.get("z", 0))
+    text_like_clips: List[Any] = []
+    non_text_layers: List[Any] = []
     for item in overlays:
         t = (item.get("type") or "").lower()
         try:
             if t in ("text", "textbox"):
-                layers.append(make_text_clip(item, size, dur))
+                text_like_clips.append(make_text_clip(item, size, dur))
             elif t == "caption":
-                layers.append(make_caption_overlay(item, size, dur))
+                text_like_clips.append(make_caption_overlay(item, size, dur))
             elif t == "video":
                 video_clip = make_video_overlay(item, size, dur)
-                layers.append(video_clip)
+                non_text_layers.append(video_clip)
                 if getattr(video_clip, "audio", None):
                     scene_audio_clips.append(video_clip.audio)
             elif t == "image":
                 img_clip = make_image_overlay(item, size, dur)
                 if img_clip:
-                    layers.append(img_clip)
+                    non_text_layers.append(img_clip)
         except Exception as e:
             logging.warning("overlay error (%s): %s", t, str(e))
+
+    # Smart arrangement to avoid overlapping text/caption overlays
+    def _arrange_non_overlapping_text(clips: List[Any], canvas: Tuple[int, int], margin: int = 10) -> List[Any]:
+        W, H = canvas
+        top_group: List[Any] = []
+        bottom_group: List[Any] = []
+        for c in clips:
+            meta = getattr(c, "_vmk_meta", None) or {}
+            pref = meta.get("pref", "top")
+            if pref == "bottom":
+                bottom_group.append(c)
+            else:
+                top_group.append(c)
+
+        # Place top-anchored items top-down
+        top_group.sort(key=lambda c: (getattr(c, "_vmk_meta", {}).get("top", 0)))
+        current_top = 0
+        arranged: List[Any] = []
+        for c in top_group:
+            meta = getattr(c, "_vmk_meta", {})
+            left = int(meta.get("left", 0))
+            top = int(meta.get("top", 0))
+            w = int(meta.get("width", getattr(c, "w", 0)))
+            h = int(meta.get("height", getattr(c, "h", 0)))
+            new_top = max(top, current_top + margin)
+            # Keep on screen
+            if new_top + h > H:
+                new_top = max(0, H - h)
+            arranged.append(set_pos(c, (left, new_top)))
+            try:
+                c._vmk_meta["top"] = new_top
+                c._vmk_meta["width"] = w
+                c._vmk_meta["height"] = h
+            except Exception:
+                pass
+            current_top = new_top + h
+
+        # Place bottom-anchored items bottom-up
+        bottom_group.sort(key=lambda c: (getattr(c, "_vmk_meta", {}).get("top", 0)), reverse=True)
+        current_bottom = H
+        for c in bottom_group:
+            meta = getattr(c, "_vmk_meta", {})
+            left = int(meta.get("left", 0))
+            top = int(meta.get("top", 0))
+            w = int(meta.get("width", getattr(c, "w", 0)))
+            h = int(meta.get("height", getattr(c, "h", 0)))
+            desired_bottom = top + h
+            new_bottom = min(desired_bottom, current_bottom - margin)
+            new_top = max(0, new_bottom - h)
+            if new_top < 0:
+                new_top = 0
+            arranged.append(set_pos(c, (left, new_top)))
+            try:
+                c._vmk_meta["top"] = new_top
+                c._vmk_meta["width"] = w
+                c._vmk_meta["height"] = h
+            except Exception:
+                pass
+            current_bottom = new_top
+
+        # Final pass to ensure no overlaps between groups
+        arranged.sort(key=lambda c: (getattr(c, "_vmk_meta", {}).get("top", 0)))
+        last_bottom = -margin
+        fixed: List[Any] = []
+        for c in arranged:
+            meta = getattr(c, "_vmk_meta", {})
+            left = int(meta.get("left", 0))
+            top = int(meta.get("top", 0))
+            h = int(meta.get("height", getattr(c, "h", 0)))
+            if top <= last_bottom + margin:
+                top = last_bottom + margin
+                if top + h > H:
+                    top = max(0, H - h)
+                c = set_pos(c, (left, top))
+                try:
+                    c._vmk_meta["top"] = top
+                except Exception:
+                    pass
+            last_bottom = top + h
+            fixed.append(c)
+        return fixed
+
+    if text_like_clips:
+        arranged_text = _arrange_non_overlapping_text(text_like_clips, size)
+        layers.extend(arranged_text)
+    if non_text_layers:
+        layers.extend(non_text_layers)
 
     scene_clip = set_dur(CompositeVideoClip(layers, size=size), dur)
     if scene_audio_clips:
@@ -572,7 +899,16 @@ def apply_transition(prev, nxt, spec: str):
     return prev, set_start(nxt, prev.end)
 
 
-def _compose_and_render(storyboard: Dict[str, Any], workdir: Path) -> Tuple[str, float]:
+# NOTE: This function enforces a soft max time budget for rendering.
+# If the time budget is exceeded while composing scenes, we truncate at the last
+# fully built scene and proceed to encode that partial video successfully.
+# Future improvement: move long renders to EC2 or split by scenes via AWS Step Functions
+# to guarantee strict time budgets and resumability.
+def _compose_and_render(
+    storyboard: Dict[str, Any],
+    workdir: Path,
+    max_time_seconds: float = 600.0,  # Default 10 minutes soft budget
+) -> Tuple[str, float]:
     from moviepy import CompositeVideoClip, AudioFileClip, CompositeAudioClip
 
     out = storyboard.get("output", {})
@@ -581,25 +917,48 @@ def _compose_and_render(storyboard: Dict[str, Any], workdir: Path) -> Tuple[str,
     crf = str(out.get("crf", 18))
     audio_bitrate = out.get("audio_bitrate", "192k")
 
+    start_ts = time.monotonic()
+    deadline_ts = (start_ts + float(max_time_seconds)) if max_time_seconds else None
+
     scenes = storyboard.get("scenes", [])
     comps: List[Any] = []
     for i, scene in enumerate(scenes, 1):
+        # If we already exhausted the budget before starting the next scene, stop.
+        if deadline_ts and time.monotonic() >= deadline_ts:
+            logging.info(
+                "Max render time reached before building scene %s; truncating output.",
+                i,
+            )
+            break
         try:
             comps.append(build_scene(scene, (W, H)))
         except Exception as e:
             logging.warning("scene %s failed: %s", i, str(e))
             from moviepy import ColorClip
             comps.append(set_dur(ColorClip(size=(W, H), color=(0, 0, 0)), float(scene.get("duration", 3))))
+        # If we crossed the budget after completing this scene, keep it and stop here.
+        if deadline_ts and time.monotonic() >= deadline_ts:
+            logging.info(
+                "Max render time reached after building scene %s; truncating output.",
+                i,
+            )
+            break
 
     default_tr = (storyboard.get("transitions", {}) or {}).get("default", "none")
     timeline: List[Any] = []
-    for i, clip in enumerate(comps):
-        if i == 0:
-            timeline.append(set_start(clip, 0.0))
-        else:
-            a, b = apply_transition(timeline[-1], clip, default_tr)
-            timeline[-1] = a
-            timeline.append(b)
+    if not comps:
+        # Nothing could be built within the budget; produce a minimal valid clip.
+        from moviepy import ColorClip
+        minimal = set_dur(ColorClip(size=(W, H), color=(0, 0, 0)), 1.0)
+        timeline = [set_start(minimal, 0.0)]
+    else:
+        for i, clip in enumerate(comps):
+            if i == 0:
+                timeline.append(set_start(clip, 0.0))
+            else:
+                a, b = apply_transition(timeline[-1], clip, default_tr)
+                timeline[-1] = a
+                timeline.append(b)
 
     video = CompositeVideoClip(timeline, size=(W, H))
     total_dur = float(getattr(video, "duration", 0) or 0)
@@ -639,6 +998,15 @@ def _compose_and_render(storyboard: Dict[str, Any], workdir: Path) -> Tuple[str,
 
     temp_audio = str((workdir / "temp_audio.m4a").resolve())
     os.makedirs(os.path.dirname(temp_audio), exist_ok=True)
+    # If the soft budget was exceeded, we still proceed to encode the partial
+    # composition we have. Encoding itself may run past the budget slightly, which is
+    # acceptable under the current soft-time policy.
+    if deadline_ts and time.monotonic() >= deadline_ts:
+        logging.info(
+            "Time budget exceeded prior to encoding; proceeding with partial video (%d scenes, %.2fs).",
+            len(comps),
+            total_dur,
+        )
     video.write_videofile(
         str(local_out),
         fps=fps,
@@ -649,6 +1017,88 @@ def _compose_and_render(storyboard: Dict[str, Any], workdir: Path) -> Tuple[str,
         ffmpeg_params=["-movflags", "+faststart", "-crf", crf, "-b:a", audio_bitrate],
     )
     return str(local_out), total_dur
+
+
+def _generate_preview_gif(video_path: str, workdir: Path, total_dur: float) -> Optional[str]:
+    """Generate a small 3-frame animated GIF preview for a rendered video.
+
+    The frames are sampled at ~20%, ~50%, and ~80% of the duration. The GIF is
+    sized down to a reasonable width to keep the payload small.
+    """
+    try:
+        from moviepy import VideoFileClip
+        from PIL import Image as _PILImage
+        import imageio
+        import numpy as np
+
+        if not Path(video_path).exists():
+            return None
+
+        # Open the video and get duration if needed
+        clip = VideoFileClip(video_path)
+        dur = float(total_dur or 0.0)
+        if dur <= 0:
+            dur = float(getattr(clip, "duration", 0) or 0.0)
+        if dur <= 0:
+            return None
+
+        # Sample three moments across the clip
+        sample_points = [0.2, 0.5, 0.8]
+        times = [max(0.0, min(dur - 0.01, dur * p)) for p in sample_points]
+
+        key_images = []
+        target_width = 320
+        resample = getattr(_PILImage, "Resampling", _PILImage).__dict__.get("LANCZOS", 1)
+        for t in times:
+            try:
+                frame = clip.get_frame(t)
+                img = _PILImage.fromarray(frame)
+                # Resize to target width while preserving aspect ratio
+                if img.width > target_width and img.width > 0 and img.height > 0:
+                    new_h = max(1, int(round(img.height * (target_width / float(img.width)))))
+                    img = img.resize((target_width, new_h), resample=resample)
+                key_images.append(img)
+            except Exception:
+                continue
+
+        if not key_images:
+            return None
+
+        # Build a sequence with short crossfades between key frames and a reasonable hold
+        frames_out: list[np.ndarray] = []
+        durations_out: list[float] = []
+
+        hold_seconds = 1.2   # pause at each key frame
+        tween_count = 6       # number of blended frames between key frames
+        tween_seconds = 0.12  # per tween frame duration (50% slower than 0.08)
+
+        for idx, img in enumerate(key_images):
+            # Hold on the key image
+            frames_out.append(np.array(img))
+            durations_out.append(hold_seconds)
+
+            # Crossfade to the next key image
+            if idx < len(key_images) - 1:
+                nxt = key_images[idx + 1]
+                # Ensure same size
+                if nxt.size != img.size:
+                    nxt = nxt.resize(img.size, resample=resample)
+                for k in range(1, tween_count + 1):
+                    alpha = k / float(tween_count + 1)
+                    blended = _PILImage.blend(img, nxt, alpha)
+                    frames_out.append(np.array(blended))
+                    durations_out.append(tween_seconds)
+
+        out_path = workdir / "preview.gif"
+        imageio.mimsave(str(out_path), frames_out, format="GIF", duration=durations_out, loop=0)
+        try:
+            clip.close()
+        except Exception:
+            pass
+        return str(out_path)
+    except Exception as e:
+        logging.exception("Failed to generate preview GIF: %s", str(e))
+        return None
 
 
 def render_video(
@@ -688,9 +1138,21 @@ def render_video(
     s3.upload_file(local_file, bucket, key, ExtraArgs={"ContentType": "video/mp4"})
     s3_uri = f"s3://{bucket}/{key}"
 
+    # Generate and upload preview GIF
+    preview_gif_local = _generate_preview_gif(local_file, workdir, total_dur)
+    preview_gif_uri = None
+    if preview_gif_local and Path(preview_gif_local).exists():
+        gif_key = f"videos/{user_id_fresh}/{video_id}.gif"
+        try:
+            s3.upload_file(preview_gif_local, bucket, gif_key, ExtraArgs={"ContentType": "image/gif"})
+            preview_gif_uri = f"s3://{bucket}/{gif_key}"
+        except Exception as e:
+            logging.warning("Failed to upload preview GIF for video_id=%s: %s", video_id, str(e))
+
     final = {
         "video_uri": s3_uri,
         "duration_s": int(total_dur or 0),
+        "preview_gif_uri": preview_gif_uri,
     }
     update_status(video_id, "COMPLETE", table_name or "Videos", extra_attributes=final)
     return final

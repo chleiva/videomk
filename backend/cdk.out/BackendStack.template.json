@@ -136,7 +136,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "Environment": {
      "Variables": {
@@ -170,7 +170,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/GenerateVideoFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -280,6 +280,18 @@
          ]
         }
        ]
+      },
+      {
+       "Action": [
+        "s3:GetObject",
+        "s3:GetBucketLocation",
+        "s3:HeadObject"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:s3:::videomk.com",
+        "arn:aws:s3:::videomk.com/videos/*"
+       ]
       }
      ],
      "Version": "2012-10-17"
@@ -300,7 +312,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "Environment": {
      "Variables": {
@@ -325,7 +337,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/ListVideosFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -429,7 +441,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "Environment": {
      "Variables": {
@@ -453,7 +465,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/GetVideoFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -558,7 +570,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "FunctionName": "intent_plot_handler",
     "Handler": "generate_video.handlers.intent_plot_handler.handler",
@@ -578,7 +590,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/IntentPlotFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -622,7 +634,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "FunctionName": "assets_plan_handler",
     "Handler": "generate_video.handlers.assets_plan_handler.handler",
@@ -641,7 +653,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/AssetsPlanFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -686,20 +698,17 @@
     "PolicyDocument": {
      "Statement": [
       {
-       "Action": "bedrock:InvokeModel",
-       "Effect": "Allow",
-       "Resource": [
-        "arn:aws:bedrock:us-west-2::foundation-model/*",
-        "arn:aws:bedrock:us-east-1::foundation-model/*"
-       ]
-      },
-      {
        "Action": [
         "s3:PutObject",
         "s3:AbortMultipartUpload"
        ],
        "Effect": "Allow",
        "Resource": "arn:aws:s3:::videomk.com/generation/assets/*"
+      },
+      {
+       "Action": "secretsmanager:GetSecretValue",
+       "Effect": "Allow",
+       "Resource": "arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"
       }
      ],
      "Version": "2012-10-17"
@@ -720,7 +729,12 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY"
+     }
     },
     "FunctionName": "asset_scene_handler",
     "Handler": "generate_video.handlers.asset_scene_handler.handler",
@@ -740,7 +754,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/AssetSceneFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -837,7 +851,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "FunctionName": "assets_collect_handler",
     "Handler": "generate_video.handlers.assets_collect_handler.handler",
@@ -857,7 +871,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/AssetsCollectFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -973,7 +987,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "FunctionName": "storyboard_render_handler",
     "Handler": "generate_video.handlers.storyboard_render_handler.handler",
@@ -998,7 +1012,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/StoryboardRenderFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -1095,7 +1109,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "FunctionName": "mark_failed_handler",
     "Handler": "generate_video.handlers.mark_failed_handler.handler",
@@ -1115,7 +1129,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/MarkFailedFunction/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -2353,7 +2367,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-593549830025-us-west-2",
-     "S3Key": "b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f.zip"
+     "S3Key": "1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965.zip"
     },
     "FunctionName": "VideoGenerationSFLauncher",
     "Handler": "sf_launcher.handler",
@@ -2372,7 +2386,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BackendStack/VideoGenerationSFLauncher/Resource",
-    "aws:asset:path": "asset.b3f3dd79ec55699d97a51278bbd880d1143be67394db58467e4b515880c57a8f",
+    "aws:asset:path": "asset.1c2ce5b08af3d9315d9a50d456e522c5aabb0647eea856332d5e44dd5dc19965",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

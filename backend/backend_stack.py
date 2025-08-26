@@ -131,6 +131,21 @@ class BackendStack(Stack):
             )
         )
 
+        # Allow list_videos to presign and validate GIF objects (private bucket)
+        list_videos_fn.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "s3:GetObject",
+                    "s3:GetBucketLocation",
+                    "s3:HeadObject",
+                ],
+                resources=[
+                    "arn:aws:s3:::videomk.com",
+                    "arn:aws:s3:::videomk.com/videos/*",
+                ],
+            )
+        )
+
         # Allow Bedrock model invocation (all models in us-west-2 and us-east-1)
         generate_video_fn.add_to_role_policy(
             iam.PolicyStatement(
@@ -213,6 +228,9 @@ class BackendStack(Stack):
             code=_lambda.Code.from_asset("lambdas"),
             timeout=Duration.seconds(120),
             memory_size=1024,
+            environment={
+                "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
+            },
         )
 
         assets_collect_fn = _lambda.Function(
@@ -267,21 +285,30 @@ class BackendStack(Stack):
         )
 
         # Bedrock permissions only for per-scene asset generation
-        asset_scene_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["bedrock:InvokeModel"],
-                resources=[
-                    "arn:aws:bedrock:us-west-2::foundation-model/*",
-                    "arn:aws:bedrock:us-east-1::foundation-model/*",
-                ],
-            )
-        )
+        # (No longer required after switching to OpenAI images)
+        # asset_scene_fn.add_to_role_policy(
+        #     iam.PolicyStatement(
+        #         actions=["bedrock:InvokeModel"],
+        #         resources=[
+        #             "arn:aws:bedrock:us-west-2::foundation-model/*",
+        #             "arn:aws:bedrock:us-east-1::foundation-model/*",
+        #         ],
+        #     )
+        # )
 
         # S3 permissions: scene generation (put assets), renderer (get assets, put videos)
         asset_scene_fn.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["s3:PutObject", "s3:AbortMultipartUpload"],
                 resources=["arn:aws:s3:::videomk.com/generation/assets/*"],
+            )
+        )
+
+        # Secrets Manager access for OpenAI Images in asset_scene_fn
+        asset_scene_fn.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["secretsmanager:GetSecretValue"],
+                resources=["arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"],
             )
         )
         storyboard_render_fn.add_to_role_policy(

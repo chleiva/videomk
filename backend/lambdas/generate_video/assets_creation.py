@@ -6,7 +6,7 @@ import logging
 import boto3
 
 from .db import update_status
-from .bedrock import generate_image_bytes
+from .openai_images import generate_image_bytes
 
 
 def _get_assets_bucket() -> str:
@@ -69,19 +69,19 @@ def create_assets(video_id: str, plot: Dict[str, Any], table_name: Optional[str]
 
         prompt = _scene_prompt(summary, storytelling, scene)
 
-        # Generate a 4K UHD image for each scene
+        # Generate an image for each scene
         try:
             # Derive a deterministic seed from video, scene, and narrative context for uniqueness
             seed_input = f"{video_id}:{scene_id}:{summary}:{storytelling}".encode("utf-8")
             raw_seed = int.from_bytes(hashlib.md5(seed_input).digest()[:4], byteorder="big", signed=False)
-            # Bedrock Nova Canvas requires seed <= 2147483646. Ensure 1..2147483646
+            # Keep seed within 32-bit signed range for portability (even if OpenAI ignores it)
             seed = raw_seed % 2147483646
             if seed == 0:
                 seed = 1
             img_bytes = generate_image_bytes(
                 prompt=prompt,
-                width=2560,
-                height=1440,
+                width=1024,
+                height=1024,
                 cfg_scale=8.0,
                 seed=seed,
             )
@@ -91,8 +91,8 @@ def create_assets(video_id: str, plot: Dict[str, Any], table_name: Optional[str]
                 "scene_id": scene_id,
                 "type": "image",
                 "s3": f"s3://{bucket}/{key}",
-                "width": 2560,
-                "height": 1440,
+                "width": 1024,
+                "height": 1024,
             })
         except Exception as e:
             logging.exception(

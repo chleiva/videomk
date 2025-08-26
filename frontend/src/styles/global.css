@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+/* Subtle moving sheen for modern CTA buttons */
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.25) 35%,
+    transparent 50%
+  );
+  transform: translateX(-100%);
+  transition: transform 500ms ease;
+}
+.btn-shimmer:hover::after {
+  transform: translateX(100%);
+}
+
+/* Simple 16:9 aspect ratio utility without JS */
+.ratio-16x9 {
+  position: relative;
+  width: 100%;
+}
+.ratio-16x9::before {
+  content: "";
+  display: block;
+  padding-top: 56.25%; /* 9/16 */
+}
+.ratio-media {
+  position: absolute;
+  inset: 0;
+}
+
+/* Visible focus for keyboard users when not using Tailwind ring utilities */
+.focus-visible:focus-visible {
+  outline: 2px solid #ec4899; /* pink-500 */
+  outline-offset: 2px;
+}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiGateway } from "../lib/config";
+import { getAuthorizationHeader } from "../lib/auth";
 
 const STORAGE_KEYS = {
   prompt: "videomk_prompt",
@@ -38,19 +39,25 @@ export default function PromptForm() {
     setIsSubmitting(true);
 
     try {
-      const url = apiGateway.generateVideo();
+      const { Authorization, userId } = await getAuthorizationHeader();
+      if (!userId) {
+        setIsSubmitting(false);
+        alert("You must be signed in to create a video.");
+        return;
+      }
+      const url = apiGateway.generateVideo(userId);
       const json = JSON.stringify({ prompt: trimmed });
       console.log("Submitting generation", { url, promptLength: trimmed.length });
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization },
         body: json,
         keepalive: true,
         mode: "cors",
         cache: "no-store",
       });
       console.log("Generation request response", res.status);
-      // Navigate regardless; explicitly target index.html for S3/CloudFront compatibility
+      // Navigate regardless
       window.location.href = "/generations/index.html";
     } catch (err) {
       console.error(err);
@@ -78,9 +85,24 @@ export default function PromptForm() {
     />
     <button
       type="submit"
-      className="ml-2 shrink-0 rounded-full bg-gradient-to-r from-blue-500 to-pink-500 px-6 py-3 text-white font-semibold shadow-md hover:scale-105 transition-transform"
+      disabled={isSubmitting}
+      aria-busy={isSubmitting}
+      aria-disabled={isSubmitting}
+      className="group btn-shimmer ml-2 shrink-0 relative overflow-hidden rounded-full bg-gradient-to-r from-blue-500 to-pink-500 px-6 py-3 text-white font-semibold shadow-md transition-all duration-200 ease-out hover:brightness-110 hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none disabled:pointer-events-none"
     >
-      Create
+      <span className="relative z-10 flex items-center gap-2">
+        {isSubmitting ? (
+          <>
+            <span
+              aria-hidden
+              className="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
+            />
+            <span>Creating…</span>
+          </>
+        ) : (
+          <span>Create</span>
+        )}
+      </span>
     </button>
   </div>
 

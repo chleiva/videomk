@@ -1,0 +1,84 @@
+---
+---
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Signing you in…</title>
+  </head>
+  <body>
+    <p>Signing you in…</p>
+    <script>
+      (function(){
+        function redirectAway(){
+          const target = localStorage.getItem('vmk_post_login_redirect');
+          if (target) {
+            localStorage.removeItem('vmk_post_login_redirect');
+            location.replace(target);
+          } else {
+            location.replace('/generations/index.html');
+          }
+        }
+        const fallback = setTimeout(redirectAway, 6000);
+        (async () => {
+          try {
+            const url = new URL(location.href);
+            const code = url.searchParams.get('code');
+            const incomingState = url.searchParams.get('state');
+            if (!code) { clearTimeout(fallback); redirectAway(); return; }
+
+            const storedState = localStorage.getItem('vmk_auth_state');
+            if (storedState && incomingState && storedState !== incomingState) {
+              url.searchParams.delete('code');
+              url.searchParams.delete('state');
+              history.replaceState({}, '', url.pathname + (url.search ? `?${url.searchParams.toString()}` : '') + url.hash);
+              clearTimeout(fallback);
+              redirectAway();
+              return;
+            }
+
+            const verifier = localStorage.getItem('vmk_pkce_verifier') || '';
+            const isLocalhost = location.hostname === 'localhost';
+            const redirectUri = isLocalhost ? 'http://localhost:4321/auth/callback' : `${location.origin}/auth/callback/index.html`;
+
+            const params = new URLSearchParams();
+            params.set('grant_type', 'authorization_code');
+            params.set('client_id', '6h06ggqnla3a7ej0i9716jnred');
+            params.set('code', code);
+            params.set('redirect_uri', redirectUri);
+            params.set('code_verifier', verifier);
+
+            console.debug('[auth] inline exchange start', { isLocalhost, redirectUri });
+            const res = await fetch('https://auth.videomk.com/oauth2/token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: params.toString()
+            });
+            if (!res.ok) throw new Error('token exchange failed: ' + res.status);
+            const json = await res.json();
+            const expiresIn = json.expires_in || 3600;
+            const tokens = {
+              access_token: json.access_token,
+              id_token: json.id_token,
+              refresh_token: json.refresh_token,
+              expires_at: Date.now() + expiresIn * 1000
+            };
+            localStorage.setItem('vmk_auth_tokens', JSON.stringify(tokens));
+            localStorage.removeItem('vmk_pkce_verifier');
+            localStorage.removeItem('vmk_auth_state');
+
+            url.searchParams.delete('code');
+            url.searchParams.delete('state');
+            history.replaceState({}, '', url.pathname + (url.searchParams.size ? `?${url.searchParams.toString()}` : '') + url.hash);
+          } catch (e) {
+            console.error('[auth] inline exchange error', e);
+          } finally {
+            clearTimeout(fallback);
+            redirectAway();
+          }
+        })();
+      })();
+    </script>
+  </body>
+  </html>
+
+

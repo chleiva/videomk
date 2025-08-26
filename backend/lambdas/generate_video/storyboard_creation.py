@@ -107,6 +107,8 @@ def _call_openai_storyboard(api_key: str, context: Dict[str, Any]) -> Optional[D
         "Use the provided storytelling text to guide the flow and insert succinct captions across scenes. "
         "Break the storytelling into short 6-15 word snippets mapped to scenes in order. "
         "Place captions as overlay.text near the bottom (y≈0.85) with a semi-transparent box for readability. "
+        "For each scene background, include subtle motion in background.effects such as 'zoom_in:0.05', 'zoom_out:0.05', or 'pan:right'. "
+        "Ensure every scene has at least one motion effect to keep the frame alive. "
         "No markdown, no explanations."
     )
 
@@ -166,11 +168,14 @@ def _call_openai_storyboard(api_key: str, context: Dict[str, Any]) -> Optional[D
             text_samples.append(f"- scene {t.get('scene_id')}: '{content[:100]}'")
 
     user = (
-        "Using this context, produce a 10–40 second storyboard. "
-        "Use available scene durations; if missing, keep 2–4 seconds per scene. "
+        
+        "Using this context, produce a storyboard of max. 60 seconds. "
+        "Use available scene durations; if missing, keep few seconds per scene. "
         "Reference provided S3 image URIs in scene backgrounds via path field. "
         "Distribute the storytelling text into concise captions across scenes in order; if longer than scenes, truncate; "
+        "The maximum duration of the entire story cannot exceed 60 seconds"
         "if shorter, leave some scenes without caption. Place captions as overlay.text near bottom with a readable box. "
+        "Add motion to every scene via background.effects (choose one or two): 'zoom_in:0.04', 'zoom_out:0.04', 'pan:right', 'pan:left', 'pan:up', 'pan:down'. Keep motion subtle. "
         "Return ONLY JSON.\n\n"
         f"Video ID: {context.get('video_id', '')}\n"
         f"Summary: {summary}\n"
@@ -284,7 +289,19 @@ def _fallback_storyboard(video_id: str, plot: Dict[str, Any], assets: Dict[str, 
         txt = text_by_scene.get(scene.get("id"))
         background: Dict[str, Any] = {"type": "color", "value": [20, 20, 30]}
         if img and img.get("s3"):
-            background = {"type": "image", "path": img.get("s3"), "fit": "cover"}
+            # Add subtle default motion so every frame has some movement
+            # Randomize between a few gentle options by hashing the scene id
+            sid = str(scene.get("id", idx))
+            seed = sum(ord(c) for c in sid) % 4
+            if seed == 0:
+                eff = ["zoom_in:0.05"]
+            elif seed == 1:
+                eff = ["zoom_out:0.05"]
+            elif seed == 2:
+                eff = ["pan:right"]
+            else:
+                eff = ["pan:up"]
+            background = {"type": "image", "path": img.get("s3"), "fit": "cover", "effects": eff}
         overlays: List[Dict[str, Any]] = []
         if txt and txt.get("content"):
             overlays.append(

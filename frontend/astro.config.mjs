@@ -12,14 +12,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     server: {
-      proxy: {
-        '/api': {
-          target: 'https://api.videomk.com',
-          changeOrigin: true,
-          secure: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        }
-      }
+      port: 4321
     }
   }
 });

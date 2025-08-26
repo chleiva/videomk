@@ -17,11 +17,12 @@ def _build_system_prompt() -> str:
         "First, decide if the user's request is legitimate and safe to fulfill. "
         "If it is not legitimate, respond with compact JSON with legit=false and a short reason. "
         "If it is legitimate, produce a detailed plot outline. "
+        "Also generate a very short, catchy title (max 5 words). "
         "Start with a concise storytelling paragraph that conveys the overall narrative and tone; this can serve as the full script. "
-        "Then split the story into 2-6 scenes. "
+        "Then split the story into 2-3 scenes, for a total max. duration of 60 seconds "
         "Each scene should include a one-line description and an estimated duration in seconds (integer). "
         "Do not include camera jargon or production details. "
-        "Expected JSON keys when legit=true: legit (bool), summary (string), storytelling (string), "
+        "Expected JSON keys when legit=true: legit (bool), title (string), summary (string), storytelling (string), "
         "scenes (array of {id, description, duration_s})."
     )
 
@@ -29,6 +30,7 @@ def _build_system_prompt() -> str:
 def _build_user_prompt(user_prompt: str) -> str:
     example = {
         "legit": True,
+        "title": "Beach Sunrise Energy",
         "summary": "Quick teaser showcasing a beach sunrise with a motivating caption.",
         "storytelling": (
             "Dawn breaks over the ocean. 'New day, new energy' sets the tone as the first rays "
@@ -41,7 +43,7 @@ def _build_user_prompt(user_prompt: str) -> str:
         ],
     }
     instructions = (
-        "Return ONLY compact JSON. Keys: legit (bool), summary (string), storytelling (string), "
+        "Return ONLY compact JSON. Keys: legit (bool), title (string, max 5 words), summary (string), storytelling (string), "
         "scenes (array of {id, description, duration_s}). "
         "durations must be small integers. If not legit, return {\"legit\": false, \"reason\": \"...\"}. "
         "No markdown, no code fences."
@@ -62,6 +64,13 @@ def _parse_plot_json(text: str) -> Dict[str, Any]:
         if "legit" not in data:
             raise ValueError("Missing 'legit' field")
         if data.get("legit") is True:
+            # Normalize title to max 5 words
+            raw_title = str(data.get("title", "")).strip()
+            if raw_title:
+                words = raw_title.split()
+                if len(words) > 5:
+                    raw_title = " ".join(words[:5])
+                data["title"] = raw_title
             scenes = data.get("scenes") or []
             if not isinstance(scenes, list) or len(scenes) == 0:
                 raise ValueError("Expected non-empty 'scenes' array when legit=true")
@@ -107,7 +116,22 @@ def create_plot(video_id: str, prompt: str, table_name: Optional[str] = None) ->
     plot = _parse_plot_json(raw_text)
 
     # Record artifact fields. Next stage expects status to advance to ASSETS_CREATION.
-    update_status(video_id, "ASSETS_CREATION", table_name or "Videos", extra_attributes={"plot": plot})
+    # Promote title to top-level attribute for quick listing
+    title = str(plot.get("title", "")).strip()
+    if not title:
+        # Fallback from summary or prompt, trimmed to 5 words
+        fallback = str(plot.get("summary") or truncated or "").strip()
+        if fallback:
+            words = fallback.split()
+            title = " ".join(words[:5])
+        else:
+            title = "Untitled"
+    update_status(
+        video_id,
+        "ASSETS_CREATION",
+        table_name or "Videos",
+        extra_attributes={"plot": plot, "title": title},
+    )
     return plot
 
 
