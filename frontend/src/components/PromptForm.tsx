@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { apiGateway } from "../lib/config";
-import { getAuthorizationHeader } from "../lib/auth";
+import { startGeneration, newRequestId } from "../lib/api";
 
 const STORAGE_KEYS = {
   prompt: "videomk_prompt",
@@ -13,6 +12,7 @@ export default function PromptForm() {
   const [firstAutofillDone, setFirstAutofillDone] = useState(false);
   const [hint, setHint] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const requestRef = useRef<{ text: string; id: string }>({ text: "", id: "" });
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEYS.prompt);
@@ -38,32 +38,23 @@ export default function PromptForm() {
     sessionStorage.setItem(STORAGE_KEYS.prompt, trimmed);
     setIsSubmitting(true);
 
+    // Same prompt => same request id, so a retry after a flaky network can't start (or bill) twice.
+    if (requestRef.current.text !== trimmed) requestRef.current = { text: trimmed, id: newRequestId() };
     try {
-      const { Authorization, userId } = await getAuthorizationHeader();
-      if (!userId) {
+      const result = await startGeneration(trimmed, requestRef.current.id);
+      if (!result.ok) {
         setIsSubmitting(false);
-        alert("You must be signed in to create a video.");
+        setHint(result.message);
+        inputRef.current?.focus();
         return;
       }
-      const url = apiGateway.generateVideo(userId);
-      const json = JSON.stringify({ prompt: trimmed });
-      console.log("Submitting generation", { url, promptLength: trimmed.length });
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization },
-        body: json,
-        keepalive: true,
-        mode: "cors",
-        cache: "no-store",
-      });
-      console.log("Generation request response", res.status);
-      // Navigate regardless
+      sessionStorage.removeItem(STORAGE_KEYS.prompt);
       window.location.href = "/generations/index.html";
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
+      setHint("There was a problem starting your generation. Please try again.");
       inputRef.current?.focus();
-      alert("There was a problem starting your generation. Please try again.");
     }
   }
 

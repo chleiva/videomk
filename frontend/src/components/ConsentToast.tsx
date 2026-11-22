@@ -46,7 +46,7 @@ export default function ConsentToast() {
             We use only necessary cookies by default.
           </p>
           <p className="mt-1 text-xs text-neutral-600">
-            Enable optional cookies to help us improve vidomk.{" "}
+            Enable optional cookies to help us improve videomk.{" "}
             <a href="/privacy" className="underline underline-offset-2">Privacy</a>
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">

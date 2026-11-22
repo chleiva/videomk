@@ -5,16 +5,8 @@ import ConsentToast from "../components/ConsentToast";
 ---
 <BaseLayout title="videomk" description="Create AI-generated videos with a simple prompt.">
 	<script>
-		{`
-		  import('/src/lib/auth.ts').then(async (m) => {
-		    try {
-		      const tokens = await m.getTokensIfAvailable();
-		      if (tokens) {
-		        location.replace('/generations/index.html');
-		      }
-		    } catch {}
-		  });
-		`}
+		import { getTokensIfAvailable } from "../lib/auth";
+		getTokensIfAvailable().then((t) => { if (t) location.replace("/generations/index.html"); }).catch(() => {});
 	</script>
 	<section class="mx-auto flex min-h-[70vh] max-w-5xl flex-col items-center justify-center px-6 text-center">
 		<h1 class="text-balance text-3xl font-semibold tracking-tight text-neutral-900 md:text-5xl">

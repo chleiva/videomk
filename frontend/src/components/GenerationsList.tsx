@@ -5,7 +5,8 @@ import { getAuthorizationHeader, handleAuthCodeIfPresent } from "../lib/auth";
 interface TaskItem {
   id: string;
   title?: string;
-  status: "queued" | "running" | "complete" | "error";
+  status: "queued" | "running" | "complete" | "error" | "rejected";
+  reject_reason?: string | null;
   eta_seconds?: number | null;
   created_at?: string | null;
   download_url?: string | null;
@@ -22,7 +23,8 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
   const hasTasks = useMemo(() => tasks.length > 0, [tasks]);
 
   const timerRef = useRef<number | undefined>(undefined);
-  const delayRef = useRef<number>(30000);
+  const delayRef = useRef<number>(15000);
+  const hasActiveRef = useRef<boolean>(true);
 
   function saveCache(items: TaskItem[]) {
     try {
@@ -93,19 +95,23 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
             COMPLETE: "complete",
             ERROR: "error",
             FAILED: "error",
+            REJECTED: "rejected",
           };
           const status = statusMap[statusStr] || "queued";
           const download_url: string | null = s3ToHttps(it?.video_uri) || it?.download_url || null;
           const preview_gif_url: string | null = (it?.preview_gif_url as string | null) || s3ToHttps(it?.preview_gif_uri) || null;
           const title: string | undefined = it?.title;
+          const reject_reason: string | null = typeof it?.reject_reason === "string" ? it.reject_reason : null;
           const created_at: string | null = typeof it?.created_at === "string" ? it.created_at : null;
           const eta_seconds = typeof it?.eta_seconds === "number" ? it.eta_seconds : null;
           const duration_s: number | null = typeof it?.duration_s === "number" ? it.duration_s : null;
           const video_url: string | null = typeof it?.video_url === "string" ? it.video_url : null;
-          return { id, status, title, download_url, eta_seconds, preview_gif_url, created_at, duration_s, video_url } as TaskItem;
+          return { id, status, title, reject_reason, download_url, eta_seconds, preview_gif_url, created_at, duration_s, video_url } as TaskItem;
         })
         .filter(Boolean) as TaskItem[];
 
+      // The list endpoint returns every video for the user, so this is the source of truth for polling.
+      hasActiveRef.current = normalized.some((t) => t.status === "running" || t.status === "queued");
       setTasks((prev) => {
         const merged = mergeTasks(prev, normalized);
         saveCache(merged);
@@ -115,11 +121,14 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
       console.error(e);
     } finally {
       setLoading(false);
-      const currentDelay = delayRef.current;
-      timerRef.current = window.setTimeout(() => {
-        delayRef.current = currentDelay + 30000;
-        fetchTasks();
-      }, currentDelay);
+      // Poll only while something is still processing; back off but never beyond 2 minutes.
+      if (hasActiveRef.current) {
+        const currentDelay = delayRef.current;
+        timerRef.current = window.setTimeout(() => {
+          delayRef.current = Math.min(currentDelay + 15000, 120000);
+          fetchTasks();
+        }, currentDelay);
+      }
     }
   }
 
@@ -148,7 +157,8 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
 
   function handleManualRefresh() {
     if (timerRef.current) window.clearTimeout(timerRef.current);
-    delayRef.current = 30000;
+    delayRef.current = 15000;
+    hasActiveRef.current = true;
     setLoading(true);
     fetchTasks();
   }
@@ -253,6 +263,9 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                     <div>
                       <h3 className="text-base font-medium text-neutral-900 line-clamp-2">{t.title || "Untitled"}</h3>
                       <p className="mt-0.5 text-xs text-neutral-500">{timeAgo(t.created_at)}</p>
+                      {t.status === "rejected" && t.reject_reason && (
+                        <p className="mt-1 text-xs text-neutral-600 line-clamp-2">{t.reject_reason}</p>
+                      )}
                     </div>
                     <StatusBadge status={t.status} />
                   </div>
@@ -315,7 +328,8 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                       )}
                       {t.status === "queued" && <span>Queued</span>}
                       {t.status === "complete" && <span>Complete</span>}
-                      {t.status === "error" && <span>Error</span>}
+                      {t.status === "error" && <span>Something went wrong. You haven't been charged for this one.</span>}
+                      {t.status === "rejected" && <span>{t.reject_reason || "This request can't be turned into a video."}</span>}
                     </div>
                   </div>
                 </a>
@@ -334,12 +348,14 @@ function StatusBadge({ status }: { status: TaskItem["status"] }) {
     running: "bg-amber-100 text-amber-800",
     complete: "bg-emerald-100 text-emerald-800",
     error: "bg-rose-100 text-rose-800",
+    rejected: "bg-neutral-200 text-neutral-700",
   }[status];
   const label = {
     queued: "Queued",
     running: "Running",
     complete: "Complete",
     error: "Error",
+    rejected: "Not allowed",
   }[status];
   return <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles}`}>{label}</span>;
 }

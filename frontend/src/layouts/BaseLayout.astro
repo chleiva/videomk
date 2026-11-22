@@ -11,17 +11,12 @@ const { title = "videomk", description = "Create AI-generated videos with a simp
 		<meta name="description" content={description} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<script>
-			{`
-			(function(){
-			  if (location.pathname === '/' || location.pathname.startsWith('/auth/callback')) return;
-			  try {
-			    // Defer import until after DOM initialized to avoid blocking
-			    import('/src/lib/auth.ts').then(m => m.bootstrapAuthForPage && m.bootstrapAuthForPage());
-			  } catch (e) {
-			    console.error('Auth bootstrap failed', e);
-			  }
-			})();
-			`}
+			// Real bundled module (the old inline template-string script never executed as code).
+			import { bootstrapAuthForPage } from "../lib/auth";
+			const p = location.pathname;
+			if (p !== "/" && !p.startsWith("/auth/callback") && !p.startsWith("/privacy")) {
+				bootstrapAuthForPage().catch((e) => console.error("Auth bootstrap failed", e));
+			}
 		</script>
 	</head>
 	<body class="min-h-screen bg-neutral-50 text-neutral-900 antialiased selection:bg-black selection:text-white">

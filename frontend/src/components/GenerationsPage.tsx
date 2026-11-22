@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import GenerationsList from "./GenerationsList";
-import { apiGateway } from "../lib/config";
-import { getAuthorizationHeader } from "../lib/auth";
+import { startGeneration, newRequestId } from "../lib/api";
 
 export default function GenerationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,6 +10,7 @@ export default function GenerationsPage() {
   const [hint, setHint] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
   const inputRef = useRef<HTMLInputElement>(null);
+  const requestRef = useRef<{ text: string; id: string }>({ text: "", id: "" });
 
   const canSubmit = useMemo(() => !submitting, [submitting]);
 
@@ -40,28 +40,22 @@ export default function GenerationsPage() {
     }
     setHint("");
     setSubmitting(true);
+    if (requestRef.current.text !== trimmed) requestRef.current = { text: trimmed, id: newRequestId() };
     try {
-      const { Authorization, userId } = await getAuthorizationHeader();
-      if (!userId) {
+      const result = await startGeneration(trimmed, requestRef.current.id);
+      if (!result.ok) {
         setSubmitting(false);
-        alert("You must be signed in to create a video.");
+        setHint(result.message);
+        inputRef.current?.focus();
         return;
       }
-      const url = apiGateway.generateVideo(userId);
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization },
-        body: JSON.stringify({ prompt: trimmed }),
-      });
-      if (!res.ok) {
-        throw new Error(`Request failed with ${res.status}`);
-      }
       closeModal();
+      setPrompt("");
       setRefreshNonce((n) => n + 1);
     } catch (err) {
       console.error(err);
       setSubmitting(false);
-      alert("There was a problem starting your generation. Please try again.");
+      setHint("There was a problem starting your generation. Please try again.");
     }
   }
 
