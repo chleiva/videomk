@@ -1,0 +1,83 @@
+# videomk native apps: design brief
+
+For the design agent. Read `SPEC.md` §3 for screen behaviour; this document says what to design, the constraints, and what to hand back.
+
+## 1. The product in one paragraph
+Type a topic; get a narrated, animated explainer video (diagrams, charts, timelines, big numbers, quotes, real photos, captions, music).
+Then review and change *anything*: the script, the visuals, the photos, the order. Creators publish to YouTube and social. The apps must feel like a
+**confident, calm creative tool**: fast to start, never overwhelming, with the editor as the place where people feel in control.
+
+## 2. Design principles
+1. **Start in one gesture.** A new user should be one text field away from their first video. Everything else is progressive.
+2. **Show the work.** Generation takes a while: make progress legible (stages, partial results) instead of a spinner.
+3. **Editing is direct.** Tap the thing you want to change. Prefer structured controls (rows, chips, steppers) over typed syntax.
+4. **Trust and attribution are visible.** Photo credits, sources and what "published" means are first-class, not fine print.
+5. **Platform-idiomatic, brand-consistent.** One identity (colour, type, motion, voice), but navigation and components feel native: iOS (HIG) and Android (Material 3).
+6. **Accessible by default.** Large text, screen readers, contrast, reduced motion: designed in, not audited in.
+
+## 3. Brand starting points (challenge them)
+The video engine already has three "looks" that the app's brand should be able to sit beside. Sampled from the product:
+
+| Look | Background | Text | Accent | Accent 2 |
+|---|---|---|---|---|
+| Midnight | `#0A0E20` → `#1E1B4B` | `#F8FAFC` | `#6366F1` | `#22D3EE` |
+| Paper | `#FBF8F3` → `#EEE6DA` | `#1F2937` | `#E11D48` | `#2563EB` |
+| Sunrise | `#1C1042` → `#7A1F5C` | `#FFF7ED` | `#FB923C` | `#FDE047` |
+
+The current web app uses neutral greys, rounded 2xl cards, Inter, and a blue `#3B82F6` → pink `#EC4899` gradient for the main action.
+Typography: Inter is licensed (OFL) and already bundled; native apps should default to **SF Pro (iOS) / system or Roboto Flex (Android)** unless the designer argues for Inter.
+Voice: plain, warm, specific; no hype, no "magic" language; errors say what happened and what to do.
+
+## 4. Deliverables
+
+### 4.1 Foundations (hand back first)
+- Brand: name treatment, **app icon** (iOS and Android adaptive + monochrome), launch screen, empty-state illustration style.
+- **Design tokens** in a machine-readable format (JSON): colour (light/dark, semantic: surface, onSurface, primary, danger, success, warning, scrim…), type scale, spacing, radii, elevation, motion durations/curves. Tokens must map cleanly to SwiftUI and Compose themes. Android may use Material You dynamic colour as an option; propose how the brand survives it.
+- **Component inventory with all states** (default, pressed, disabled, loading, error, focused, selected, dragging): buttons, text fields (with counters and errors), status chips, video card (grid/list), scene row, scene-type icon set (title, bullets, diagram, chart, timeline, big number, quote, photo), bottom sheet / side panel, tabs/segmented control (Preview | Published), toasts/snackbars, empty states, skeletons, banners (conflict, render failed, offline).
+- **Iconography:** SF Symbols on iOS and Material Symbols on Android where they exist; custom icons only for the 8 scene types and brand marks.
+- **Motion principles:** screen transitions, reorder lift/drop, stage-by-stage progress, success moment when a video finishes. Everything has a Reduce Motion alternative.
+
+### 4.2 Flows and screens (iPhone, iPad, Android phone, Android tablet/foldable)
+1. **Onboarding + sign-in** (system browser handoff for sign-in; what the user sees while it opens/returns; sign-in errors).
+2. **Library** (grid/list; statuses: running, complete, failed, rejected-with-reason, editing; empty; offline; first-run examples).
+3. **Create** (prompt, dictation, length, look, music mood; quota remaining and exhausted; validation errors; "prompt not allowed" explanation).
+4. **Progress** (6 stages; live status; what happens if the user leaves; push permission request at the moment of value; Live Activity design for iOS lock screen/Dynamic Island, ongoing notification for Android).
+5. **Player/detail** (player controls with chapters; share/save; copy title/description; revision info; report).
+6. **Editor** (the priority screen: see 4.3).
+7. **Settings** (account, delete account confirmation, notifications, appearance, legal, report, feedback).
+8. **System surfaces:** push notification content, widgets (recent videos), share-sheet presentation, App Shortcuts/Intents UI.
+
+### 4.3 The editor, in detail
+This is where design effort should concentrate. Design for one-handed phone use first, then expand to tablet.
+- **Scene list:** each row shows type icon, narration excerpt, duration, state (*edited*, *needs attention*, *will be re-made*). Reordering by long-press drag with a clear lift state and haptics; delete with undo; insert affordance between rows. Accessible alternative to dragging.
+- **Inspector:** bottom sheet on phones (peek / half / full detents, with a pinned mini-player or preview thumbnail so the user doesn't lose context), side panel on tablets.
+  Forms for each scene type; pay special attention to **diagram** (steps and arrows as rows/chips with a live mini-preview, no typed syntax), **chart** (label/value rows, bar/line toggle), **timeline** (date/label rows), and **photo** (search field, candidate grid with photographer + "Unsplash"/licence line as tappable links, selected state, "no good photo" state).
+- **Narration field:** word count, spoken-time estimate, limits and inline errors; "listen to this scene" affordance.
+- **Preview vs Publish:** make the difference obvious (draft quality, fast, doesn't change the published video vs full quality, new version). Show render progress in place; lock editing during render with a clear explanation.
+- **Revision/conflict states:** "this video changed on another device" with *Reload* and *Keep my changes*; revision list with restore.
+- **Undo/redo**, draft-saved indicator, discard changes confirmation.
+
+### 4.4 Content and states to design explicitly
+Loading skeletons, empty, offline, error, rate-limited ("5 of 5 videos used today"), rejected prompt, failed render ("no quota used"), long titles/narrations, very long lists, right-to-left readiness, largest Dynamic Type/font scale, dark mode, landscape on phones, split-screen/multi-window on tablets.
+
+### 4.5 Store and marketing assets
+App Store and Google Play screenshot sets (light/dark where useful), feature graphic, preview-video storyboard, store listing copy tone.
+
+## 5. Constraints from the product (not negotiable)
+- Videos are **16:9, 1080p**, with burned-in captions; the apps never render video.
+- Eight scene types only (listed above); the editor can't invent new ones.
+- Photos come from Unsplash and Openverse. **Attribution must be visible and linked** wherever a photo appears in the app (picker, editor row, player details), using the photographer name and "Unsplash"; Unsplash reviews screenshots of this.
+- Narration limits: 6–70 words per scene. A video has up to 90 scenes.
+- Daily generation quota (server-defined). Editing has its own limit and a "one render at a time per video" rule.
+- Safety: users must be able to **report** content in-app; rejected prompts show the server's reason.
+- Photos of identifiable private people are rejected by the photo reviewer; the UI should never promise a specific photo.
+
+## 6. Hand-off requirements
+1. Tokens as JSON (and the source Figma/file), with a README of semantic naming.
+2. Every screen in light and dark, at the sizes above, annotated with spacing, type styles and states; interactive prototypes for: create → progress → player, and the editor (reorder, inspector sheet, photo picker, preview/publish).
+3. Redlines for the editor's gestures and sheet detents; motion specs with durations and curves.
+4. An accessibility spec per screen: reading order, labels/hints, actions for non-gesture alternatives, minimum touch targets (44 pt / 48 dp), contrast ratios.
+5. Rationale for any place the iOS and Android designs diverge.
+
+## 7. How the design is checked against the build
+Native implementation uses the exported tokens directly (compiled to Swift/Kotlin), and each component has a screenshot test per state so drift from the design is caught automatically.
