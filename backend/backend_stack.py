@@ -111,7 +111,10 @@ class BackendStack(Stack):
         # ----------------------------
         list_videos_fn = make_fn("ListVideosFunction", "list_videos", "list_videos.handler", timeout=Duration.seconds(30), env={"GSI_USER_VIDEOS": "GSI_UserVideos"})
         get_video_fn = make_fn("GetVideoFunction", "get_video", "get_video.handler", timeout=Duration.seconds(30))
-        launcher_fn = make_fn("VideoGenerationSFLauncher", "VideoGenerationSFLauncher", "sf_launcher.handler", timeout=Duration.seconds(10))
+        launcher_fn = make_fn(
+            "VideoGenerationSFLauncher", "VideoGenerationSFLauncher", "sf_launcher.handler", timeout=Duration.seconds(10),
+            env={"DAILY_VIDEO_LIMIT": str(self.node.try_get_context("dailyVideoLimit") or 5)},
+        )
 
         videos_table.grant_read_write_data(list_videos_fn)
         videos_table.grant_read_data(get_video_fn)
