@@ -19,7 +19,7 @@ renders video.
 |---|---|---|
 | 1 | Sign in with **Apple** and **Google** (native), sign out, delete account | §11 |
 | 2 | Library | all videos with live status, pull to refresh, push when done |
-| 3 | Create (brief composer) | describe the video (text or voice), optionally attach photos/videos/own voice, length (or "let the Producer decide"), look, music; shows the estimated cost |
+| 3 | Create (brief composer) | describe the video (text or voice), optionally attach photos/short clips (limits shown inline), length (or "let the Producer decide"), look, music; shows the estimated cost |
 | 3b | Credits | free allowance, buy credit packs through the store, balance + history (§10) |
 | 4 | Progress | stages, not a spinner; cancel is out of scope |
 | 5 | Player | play, scrub, chapters, share/save, copy title + description (with photo credits) |
@@ -71,7 +71,7 @@ Settings (account, notifications, appearance, legal, report, delete account)
 
 ### 3.2 Create (brief composer)
 
-> **Update (see `docs/PRODUCER.md`):** Create is a *brief*, not a topic box. The user describes what they want ("a fun video of our week in Mallorca…"), may attach photos and videos (system photo picker, no permission prompt; up to dozens of items), and may record their voice (as the brief and/or as narration). The Producer chooses visuals automatically; the user is never asked to pick photos. Uploads run in the background with resumable transfer and clear progress, and before anything is processed the app states plainly what happens to the user's media (privacy copy).
+> **Update (see `docs/PRODUCER.md`):** Create is a *brief*, not a topic box. The user describes what they want ("a fun video of our week in Mallorca…"), may attach photos and videos (system photo picker, no permission prompt; up to dozens of items), and may dictate the brief by voice (narration is always the AI voice; the user's recording is not used as narration). The Producer chooses visuals automatically; the user is never asked to pick photos. Uploads run in the background with resumable transfer and clear progress, and before anything is processed the app states plainly what happens to the user's media (privacy copy).
 > The rest of this section describes the text-only parts, which still apply.
 
 - Prompt field (10–2000 chars, validated before sending, counter), dictation, 3–5 rotating example prompts.
