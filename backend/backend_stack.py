@@ -11,6 +11,8 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_apigateway as apigw,
     aws_cognito as cognito,
+    aws_s3 as s3,
+    CfnOutput,
     aws_stepfunctions as sfn,
     aws_stepfunctions_tasks as tasks,
     aws_iam as iam,
@@ -23,7 +25,6 @@ from constructs import Construct
 
 from engine_v2 import EngineV2
 
-ASSETS_BUCKET = "videomk.com"
 OPENAI_SSM_PARAM = "/videomk/openai_api_key"  # standard SSM parameter: free (Secrets Manager costs ~$0.40/mo idle)
 TRANSIENT_LAMBDA_ERRORS = [
     "Lambda.ServiceException",
@@ -34,14 +35,42 @@ TRANSIENT_LAMBDA_ERRORS = [
 
 
 class BackendStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, *, stage: str, stage_cfg: Dict[str, Any], **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+        is_prod = stage == "prod"
+        keep = RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY
+        domain = stage_cfg.get("domain")  # e.g. "videomk.com": enables api.<domain>; None => default execute-api URL
+        ASSETS_BUCKET = f"videomk-{stage}-{self.account}"
 
         # ============================
         # Data
         # ============================
-        # The Videos table (+ GSI_UserVideos) already exists and is imported, not managed here.
-        videos_table = dynamodb.Table.from_table_name(self, "VideosTable", "Videos")
+        # Everything is created per stage and account: no resource is shared with, or imported from, any other account.
+        videos_table = dynamodb.Table(
+            self, "VideosTable",
+            partition_key=dynamodb.Attribute(name="video_id", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            point_in_time_recovery_specification=dynamodb.PointInTimeRecoverySpecification(point_in_time_recovery_enabled=is_prod),
+            removal_policy=keep,
+        )
+        videos_table.add_global_secondary_index(
+            index_name="GSI_UserVideos",
+            partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="created_at", type=dynamodb.AttributeType.STRING),
+            projection_type=dynamodb.ProjectionType.ALL,
+        )
+
+        assets_bucket = s3.Bucket(
+            self, "AssetsBucket",
+            bucket_name=ASSETS_BUCKET,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            encryption=s3.BucketEncryption.S3_MANAGED,
+            enforce_ssl=True,
+            removal_policy=keep,
+            auto_delete_objects=not is_prod,
+            lifecycle_rules=[s3.LifecycleRule(abort_incomplete_multipart_upload_after=Duration.days(2))],
+            cors=[s3.CorsRule(allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD], allowed_origins=["*"], allowed_headers=["*"], max_age=3600)],
+        )
 
         # Per-user daily quota counters. On-demand + TTL => zero idle cost.
         usage_table = dynamodb.Table(
@@ -309,10 +338,6 @@ class BackendStack(Stack):
         # ============================
         # API Gateway + custom domain
         # ============================
-        hosted_zone = route53.HostedZone.from_lookup(self, "HostedZone", domain_name="videomk.com")
-        certificate = acm.Certificate(
-            self, "ApiCertificate", domain_name="api.videomk.com", validation=acm.CertificateValidation.from_dns(hosted_zone)
-        )
         api = apigw.RestApi(
             self,
             "VideoMkApi",
@@ -331,22 +356,20 @@ class BackendStack(Stack):
         api.add_gateway_response("Default4xxGatewayResponse", type=apigw.ResponseType.DEFAULT_4_XX, response_headers=cors_headers)
         api.add_gateway_response("Default5xxGatewayResponse", type=apigw.ResponseType.DEFAULT_5_XX, response_headers=cors_headers)
 
-        api_domain = apigw.DomainName(
-            self,
-            "ApiDomain",
-            domain_name="api.videomk.com",
-            certificate=certificate,
-            endpoint_type=apigw.EndpointType.REGIONAL,
-            security_policy=apigw.SecurityPolicy.TLS_1_2,
-        )
-        apigw.BasePathMapping(self, "ApiBasePathMapping", domain_name=api_domain, rest_api=api, stage=api.deployment_stage)
-        route53.ARecord(
-            self,
-            "ApiAliasRecord",
-            zone=hosted_zone,
-            record_name="api",
-            target=route53.RecordTarget.from_alias(targets.ApiGatewayDomain(api_domain)),
-        )
+        if domain:
+            hosted_zone = route53.HostedZone.from_lookup(self, "HostedZone", domain_name=domain)
+            certificate = acm.Certificate(
+                self, "ApiCertificate", domain_name=f"api.{domain}", validation=acm.CertificateValidation.from_dns(hosted_zone)
+            )
+            api_domain = apigw.DomainName(
+                self, "ApiDomain", domain_name=f"api.{domain}", certificate=certificate,
+                endpoint_type=apigw.EndpointType.REGIONAL, security_policy=apigw.SecurityPolicy.TLS_1_2,
+            )
+            apigw.BasePathMapping(self, "ApiBasePathMapping", domain_name=api_domain, rest_api=api, stage=api.deployment_stage)
+            route53.ARecord(
+                self, "ApiAliasRecord", zone=hosted_zone, record_name="api",
+                target=route53.RecordTarget.from_alias(targets.ApiGatewayDomain(api_domain)),
+            )
 
         users = api.root.add_resource("users")
         user_id = users.add_resource("{user_id}")
@@ -354,25 +377,34 @@ class BackendStack(Stack):
         generate = videos.add_resource("generate")
         video_item = videos.add_resource("{video_id}")
 
-        cfg: Dict[str, Any] = {}
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
-        if os.path.exists(config_path):
-            with open(config_path, "r") as f:
-                cfg = json.load(f)
-        user_pool_ref = (
-            cfg.get("cognitoUserPoolArn")
-            or os.environ.get("COGNITO_USER_POOL_ARN")
-            or self.node.try_get_context("cognitoUserPoolArn")
-            or cfg.get("cognitoUserPoolId")
-            or os.environ.get("COGNITO_USER_POOL_ID")
-            or self.node.try_get_context("cognitoUserPoolId")
+        user_pool = cognito.UserPool(
+            self, "UserPool",
+            user_pool_name=f"videomk-{stage}",
+            self_sign_up_enabled=True,
+            sign_in_aliases=cognito.SignInAliases(email=True),
+            auto_verify=cognito.AutoVerifiedAttrs(email=True),
+            password_policy=cognito.PasswordPolicy(min_length=10, require_digits=True, require_lowercase=True, require_uppercase=False, require_symbols=False),
+            account_recovery=cognito.AccountRecovery.EMAIL_ONLY,
+            removal_policy=keep,
         )
-        if not user_pool_ref:
-            raise ValueError("Provide Cognito pool via config.json, COGNITO_USER_POOL_ARN or COGNITO_USER_POOL_ID.")
-        if isinstance(user_pool_ref, str) and user_pool_ref.startswith("arn:") and ":userpool/" in user_pool_ref:
-            user_pool = cognito.UserPool.from_user_pool_arn(self, "ImportedUserPool", user_pool_ref)
-        else:
-            user_pool = cognito.UserPool.from_user_pool_id(self, "ImportedUserPool", str(user_pool_ref))
+        callback_urls = list(stage_cfg.get("callbackUrls") or ["http://localhost:4321/auth/callback"])
+        logout_urls = list(stage_cfg.get("logoutUrls") or ["http://localhost:4321/"])
+        user_pool_client = user_pool.add_client(
+            "WebClient",
+            generate_secret=False,
+            o_auth=cognito.OAuthSettings(
+                flows=cognito.OAuthFlows(authorization_code_grant=True),
+                scopes=[cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
+                callback_urls=callback_urls, logout_urls=logout_urls,
+            ),
+            prevent_user_existence_errors=True,
+        )
+        hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
+        CfnOutput(self, "ApiUrl", value=api.url)
+        CfnOutput(self, "UserPoolId", value=user_pool.user_pool_id)
+        CfnOutput(self, "UserPoolClientId", value=user_pool_client.user_pool_client_id)
+        CfnOutput(self, "AuthDomain", value=hosted_ui.base_url())
+        CfnOutput(self, "AssetsBucketName", value=assets_bucket.bucket_name)
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
         for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"])):
