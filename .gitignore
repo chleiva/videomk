@@ -71,8 +71,9 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# Anchored: an unanchored `lib/` also ignored frontend/src/lib
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -262,3 +263,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Lambda layer build output (built by backend/layers/build_layer.sh)
+backend/layers/video_deps/python/
+backend/layers/*/python/
+backend/layers/bin/
+
+# Local scratch / render output
+.scratch/
+*.mp4
+!**/tests/fixtures/*.mp4
