@@ -13,6 +13,8 @@ export const apiGateway = {
   generateVideo: (userId: string) => `${API_BASE}/users/${u(userId)}/videos/generate`,
   listVideos: (userId: string) => `${API_BASE}/users/${u(userId)}/videos`,
   getVideo: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}`,
+  plan: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/plan`,
+  edits: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/edits`,
 };
 
 // Legacy "questions" flow (src/pages/questions.astro). Not served by this repo's backend.

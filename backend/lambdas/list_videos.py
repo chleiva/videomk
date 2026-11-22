@@ -265,6 +265,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         sanitized: list[dict] = []
         for it in enriched:
             out = {k: v for k, v in it.items() if k in allowed_keys}
+            out["editable"] = bool(it.get("plan_key"))  # made by the v2 engine: has an editable plan
             if "preview_gif_url" in it:
                 out["preview_gif_url"] = it["preview_gif_url"]
             sanitized.append(out)
@@ -280,7 +281,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
             "body": json.dumps(body, default=_json_default),
         }
-    except ClientError as e:
+    except ClientError:
         return {
             "statusCode": 500,
             "headers": {

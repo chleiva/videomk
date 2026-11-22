@@ -5,7 +5,7 @@ sanitisers, ids must match the strict 8-hex shape, and a human can never choose 
 """
 import copy
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from . import plan as plan_mod
 from .scenes import SCENE_TYPES
@@ -14,13 +14,17 @@ from .theme import THEMES
 MAX_OPS = 40
 _CAND_RE = re.compile(r"^(unsplash|openverse):[A-Za-z0-9_\-]{1,40}$")
 _VOICE_RE = re.compile(r"^[A-Za-z0-9_\- ]{0,40}$")
+_REF_RE = re.compile(r"^ref:[A-Za-z0-9_]{1,20}$")
 
 
 class EditError(ValueError):
     pass
 
 
-def _find(beats: List[Dict[str, Any]], bid: Any) -> int:
+def _find(beats: List[Dict[str, Any]], bid: Any, refs: Optional[Dict[str, str]] = None) -> int:
+    """Index of a beat by id, or by "ref:<name>" for a beat inserted earlier in the same batch (clients can't know new ids)."""
+    if isinstance(bid, str) and _REF_RE.match(bid):
+        bid = (refs or {}).get(bid)
     for i, b in enumerate(beats):
         if b["id"] == bid:
             return i
@@ -55,26 +59,30 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
     new = copy.deepcopy(plan)
     beats: List[Dict[str, Any]] = new["beats"]
     touched: List[str] = []
+    refs: Dict[str, str] = {}
 
     def touch(bid: str) -> None:
         if bid not in touched:
             touched.append(bid)
+
+    def F(bid: Any) -> int:
+        return _find(beats, bid, refs)
 
     for op in ops:
         if not isinstance(op, dict):
             raise EditError("each op must be an object")
         kind = op.get("op")
         if kind == "set_narration":
-            i = _find(beats, op.get("id"))
+            i = F(op.get("id"))
             beats[i]["narration"] = _narration(op.get("text"))
             touch(beats[i]["id"])
         elif kind == "set_scene":
-            i = _find(beats, op.get("id"))
+            i = F(op.get("id"))
             beats[i]["scene"] = _scene(op.get("type"), op.get("props"))
             beats[i].pop("pick", None)  # a new scene invalidates a previously picked photo
             touch(beats[i]["id"])
         elif kind == "pick_image":
-            i = _find(beats, op.get("id"))
+            i = F(op.get("id"))
             if beats[i]["scene"]["type"] != "image":
                 raise EditError("pick_image applies to image scenes")
             cand = op.get("candidate")
@@ -86,25 +94,30 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
             if len(beats) >= max_beats:
                 raise EditError(f"a video can have at most {max_beats} beats")
             after = op.get("after")
-            at = 0 if after in (None, "") else _find(beats, after) + 1
+            at = 0 if after in (None, "") else F(after) + 1
             sc = op.get("scene") or {}
             beat = {"id": plan_mod.new_beat_id(None, {b["id"] for b in beats}), "narration": _narration(op.get("narration")), "scene": _scene(sc.get("type"), sc.get("props"))}
             if plan_mod._s(op.get("chapter"), 60):
                 beat["chapter"] = plan_mod._s(op.get("chapter"), 60)
             beats.insert(at, beat)
+            ref = op.get("ref")
+            if ref is not None:
+                if not isinstance(ref, str) or not _REF_RE.match("ref:" + ref) or "ref:" + ref in refs:
+                    raise EditError("bad or duplicate ref")
+                refs["ref:" + ref] = beat["id"]
             touch(beat["id"])
         elif kind == "delete":
             if len(beats) <= 1:
                 raise EditError("a video needs at least one beat")
-            beats.pop(_find(beats, op.get("id")))
+            beats.pop(F(op.get("id")))
         elif kind == "move":
-            i = _find(beats, op.get("id"))
+            i = F(op.get("id"))
             to = op.get("to")
             if isinstance(to, bool) or not isinstance(to, int) or not 0 <= to < len(beats):
                 raise EditError("'to' is out of range")
             beats.insert(to, beats.pop(i))
         elif kind == "set_chapter":
-            i = _find(beats, op.get("id"))
+            i = F(op.get("id"))
             title = plan_mod._s(op.get("title"), 60)
             beats[i].pop("chapter", None)
             if title:

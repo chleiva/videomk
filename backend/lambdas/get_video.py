@@ -101,7 +101,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         resp = table.get_item(Key={"video_id": video_id})
         item = resp.get("Item") or {}
-    except ClientError as e:
+    except ClientError:
         return _json_response(500, {"message": "Failed to get video"})
 
     if not item:
@@ -150,7 +150,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         url = s3.generate_presigned_url(
             "get_object", Params=params, ExpiresIn=3600
         )
-    except ClientError as e:
+    except ClientError:
         return _json_response(500, {"message": "Failed to sign url"})
 
     if redirect_flag:

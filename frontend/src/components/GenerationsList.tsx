@@ -6,6 +6,7 @@ interface TaskItem {
   id: string;
   title?: string;
   status: "queued" | "running" | "complete" | "error" | "rejected";
+  editable?: boolean;
   reject_reason?: string | null;
   eta_seconds?: number | null;
   created_at?: string | null;
@@ -106,7 +107,8 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
           const eta_seconds = typeof it?.eta_seconds === "number" ? it.eta_seconds : null;
           const duration_s: number | null = typeof it?.duration_s === "number" ? it.duration_s : null;
           const video_url: string | null = typeof it?.video_url === "string" ? it.video_url : null;
-          return { id, status, title, reject_reason, download_url, eta_seconds, preview_gif_url, created_at, duration_s, video_url } as TaskItem;
+          const editable = it?.editable === true;
+          return { id, status, title, editable, reject_reason, download_url, eta_seconds, preview_gif_url, created_at, duration_s, video_url } as TaskItem;
         })
         .filter(Boolean) as TaskItem[];
 
@@ -270,6 +272,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                     <StatusBadge status={t.status} />
                   </div>
                 </a>
+                <EditLink t={t} />
               </article>
             );
           })}
@@ -333,11 +336,26 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                     </div>
                   </div>
                 </a>
+                <EditLink t={t} />
               </article>
             );
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+function EditLink({ t }: { t: TaskItem }) {
+  if (t.status !== "complete" || !t.editable) return null;
+  return (
+    <div className="mt-3 border-t border-neutral-100 pt-3">
+      <a
+        href={`/edit/index.html?id=${encodeURIComponent(t.id)}`}
+        className="inline-flex items-center rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+      >
+        Edit video
+      </a>
     </div>
   );
 }

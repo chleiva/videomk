@@ -346,3 +346,55 @@ def test_asset_licence_filter_and_credits_block():
 def test_research_failure_never_fails_the_video():
     notes, src = research.gather_notes("x", fetch=lambda u: (_ for _ in ()).throw(ValueError("down")))
     assert notes == "" and src == []
+
+
+# ----------------------------------------------------------------------------- edit ops
+def _plan_with_beats():
+    plan, _ = plan_mod.validate_plan(GOOD_PLAN)
+    return plan
+
+
+def test_insert_refs_let_one_batch_edit_and_order_beats_it_just_created():
+    from engine import edits as E
+
+    plan = _plan_with_beats()
+    first = plan["beats"][0]["id"]
+    ops = [
+        {"op": "insert", "ref": "a", "after": first, "narration": "A brand new first beat about the wonder of light in water.", "scene": {"type": "title", "props": {"title": "New"}}},
+        {"op": "insert", "ref": "b", "after": "ref:a", "narration": "And a second new beat that follows the first new beat directly.", "scene": {"type": "stat", "props": {"value": "7", "label": "colors"}}},
+        {"op": "set_narration", "id": "ref:a", "text": "A rewritten first beat about the wonder of light in water droplets."},
+        {"op": "move", "id": "ref:b", "to": 0},
+    ]
+    new, touched = E.apply_ops(plan, ops)
+    assert new["beats"][0]["scene"]["type"] == "stat"                       # ref:b, moved to the front
+    assert new["beats"][1]["id"] == first                                     # the original first beat
+    assert new["beats"][2]["narration"].startswith("A rewritten first beat")  # ref:a, edited after it was inserted
+    assert len(touched) == 2 and len({b["id"] for b in new["beats"]}) == len(new["beats"])
+    for bad in ([{"op": "set_narration", "id": "ref:nope", "text": "one two three four five six seven"}],
+                [{"op": "insert", "ref": "x y", "narration": "word " * 8, "scene": {"type": "title", "props": {"title": "t"}}}],
+                [{"op": "insert", "ref": "d", "narration": "word " * 8, "scene": {"type": "title", "props": {"title": "t"}}}, {"op": "insert", "ref": "d", "narration": "word " * 8, "scene": {"type": "title", "props": {"title": "t"}}}]):
+        with pytest.raises(E.EditError):
+            E.apply_ops(plan, bad)
+
+
+def test_every_edit_op_is_validated_and_the_input_plan_is_never_mutated():
+    from engine import edits as E
+    import copy
+
+    plan = _plan_with_beats()
+    snapshot = copy.deepcopy(plan)
+    ids = [b["id"] for b in plan["beats"]]
+    good = [
+        {"op": "set_scene", "id": ids[1], "type": "bullets", "props": {"heading": "H", "items": ["a", "b"]}},
+        {"op": "set_chapter", "id": ids[2], "title": "Colors"}, {"op": "set_meta", "title": "New title", "theme": "paper", "mood": "bright"},
+        {"op": "set_voice", "voice": "Puck", "style": "Say it calmly"},
+    ]
+    new, _ = E.apply_ops(plan, good)
+    assert new["theme"] == "paper" and new["tts"]["voice"] == "Puck" and new["beats"][1]["scene"]["type"] == "bullets"
+    assert plan == snapshot
+    for bad in ([{"op": "set_meta", "theme": "neon"}], [{"op": "set_voice", "voice": "../x"}], [{"op": "move", "id": ids[0], "to": 99}], [{"op": "set_scene", "id": ids[0], "type": "bullets", "props": {"items": ["only one"]}}],
+                [{"op": "set_narration", "id": ids[0], "text": "too short"}], [{"op": "set_narration", "id": ids[0], "text": "word " * 90}], [{"op": "pick_image", "id": ids[0], "candidate": "unsplash:x"}], [], "nope", [{"op": "set_meta", "title": "  "}]):
+        with pytest.raises(E.EditError):
+            E.apply_ops(plan, bad)
+    with pytest.raises(E.EditError):
+        E.apply_ops(plan, [{"op": "set_chapter", "id": ids[0], "title": "x"}] * 41)

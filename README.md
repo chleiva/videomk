@@ -1,7 +1,8 @@
 # videomk
 
 Turn an idea into a narrated, animated explainer video: structured scenes (diagrams, charts, timelines, stats, quotes,
-licensed photos), captions, music, SFX. Serverless-only: Lambda + Step Functions + S3, zero cost at idle.
+licensed photos picked by a vision model), captions, music, SFX, and an editor to review and change any part of it.
+Serverless-only: Lambda + Step Functions + S3, zero cost at idle.
 
 ```
 frontend/   Astro + React + Tailwind (Cognito Hosted UI, PKCE)
@@ -18,14 +19,14 @@ docs/ENGINE.md                                        architecture, evidence, co
 ```
 
 ```bash
-# tests
+# tests (62 backend; `-m 'not slow'` skips the ~2 min of real-video end-to-end runs)
 cd backend && pip install -r requirements-dev.txt && pytest
 
 # render the demo timeline locally (chunked, parallel, with audio)
 python scripts/local_render.py tests/fixtures/demo_timeline.json /tmp/demo.mp4
 
 # frontend
-cd frontend && npm ci && npm run build
+cd frontend && npm ci && npm run build && npm test
 ```
 
 Read `docs/ENGINE.md` before deploying: it has the runbook, the breaking changes from the hardening pass, and an explicit
