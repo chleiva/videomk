@@ -162,7 +162,7 @@ Add `api/openapi.yaml` describing every endpoint, schema, error shape and the ed
 | # | Decision |
 |---|---|
 | 1 | **Platforms:** SwiftUI iOS 17+ (iPhone + iPad adaptive) and Compose Android 8+ (phones + tablets/foldables). Fully native, no cross-platform runtime. |
-| 2 | **Money:** free allowance + credits, bought **only through the stores**. Pricing, allowances and credit costs are **server-driven and changeable without an app update** (§10). |
+| 2 | **Money:** 3 free videos on day one, then 1 free video per day (length-capped, watermarked); credits in three packs bought **only through the stores**; AI edits metered from real cost. Pricing, allowances and credit costs are **server-driven and changeable without an app update** (§10, `PRICING.md`). |
 | 3 | **Sign-in:** native Sign in with **Apple** and **Google**; providers are server-configurable; email/password exists only as a hidden reviewer/test path (§11). |
 | 4 | **Analytics and crash reporting:** our own, minimal, logged to CloudWatch, plus the stores' own crash consoles. No analytics or crash vendors (§12). |
 | 5 | **Collaboration / reviewers:** not in v1. Revisit later. |
@@ -171,26 +171,24 @@ Add `api/openapi.yaml` describing every endpoint, schema, error shape and the ed
 | 8 | **Type:** system fonts for UI (SF Pro on iOS, Roboto Flex/system on Android) for best Dynamic Type/font-scaling, platform feel and no bundling. Brand expression comes from colour, motion, iconography and the wordmark. Inter remains the typeface *inside the generated videos*. |
 
 ### Still open
-- Credit pack contents (how many credits per pack) and the credit cost per video minute: needs numbers (§10.2).
-- Whether free videos are capped in length or carry a watermark.
-- Whether edits are free or consume credits (proposal in §10.3).
+- Confirm the credit formula/packs, price of "remove watermark" and whether to keep 3 free AI actions per video (`PRICING.md` §7).
 
 ## 10. Credits, free allowance and purchases
 
-### 10.1 Product rules (proposal, all values live in server config)
-- **Welcome allowance:** the first 24 hours after an account is created: **3 free videos**.
-- **Weekly free video:** afterwards **1 free video per 7 days** (rolling from the last free use; the UI shows when the next one unlocks).
-- **Credits:** consumable packs bought in-app. You specified three packs at about **$10, $20 and $200** (store price points are fixed tiers, e.g. $9.99, $19.99, $199.99). Credits don't expire (expiry rules vary by region).
-- **Spending order:** welcome/weekly free allowance first, then credits.
-- **Cost of a video:** server-defined function of requested length, e.g. `credits = ceil(minutes) × credits_per_minute`; the app always asks the server for a **quote** before create and shows it; the server charges exactly what it quoted.
-- **Failures are free:** rejected prompts and failed renders refund the charge (same mechanism as today's quota refund).
-- **Server-driven:** free allowance sizes/timing, credit cost per minute, which products are offered and how many credits each grants, and any free-tier limits come from `/config` and the wallet endpoint. Only the store product ids and prices are fixed by the stores; change them in App Store Connect / Play Console.
+### 10.1 Product rules (decided; every value lives in server config; numbers and derivation in `PRICING.md`)
+- **Welcome allowance:** first 24 hours after account creation: **3 free videos**, up to 3 minutes each, no watermark.
+- **Daily free video:** afterwards **1 free video per day**, up to 2 minutes, small watermark (bottom-right, below the caption band).
+- **Credits:** consumable packs bought only through the stores: **$9.99 → 100**, **$19.99 → 220**, **$199.99 → 2,400** credits. A video costs **5 credits per started minute** (max 12 minutes). Credits never expire.
+- **Spending order:** free allowance first, then credits. Paid videos are never watermarked; free videos can be re-rendered clean for 2 credits per minute.
+- **Quote, then charge:** the app asks the server for a quote before create and before an AI edit, shows it, and the server charges exactly the quote.
+- **Failures are free:** rejected prompts and failed renders/edits refund the charge.
+- **Server-driven:** allowances, caps, credit cost, packs, watermark rules and AI-action prices come from `/config` and the wallet endpoint. Only store product ids and prices are fixed by the stores.
 
-### 10.2 Unit economics (illustration only: your numbers decide)
-Estimated production cost is roughly **$0.03–0.05 per finished minute** (planning, voice, photo review, render; see `docs/ENGINE.md`: estimates, not measured on real traffic). If 1 credit = 1 minute and a $9.99 pack granted 50 credits, revenue would be about $0.20/min, about $0.17 after a 15% store commission (30% in some cases) against about $0.05 cost. This only shows the margin is wide enough to be generous; pack sizes are a business decision. **[DECIDE]**
+### 10.2 Unit economics
+Target: **7x store-net revenue ÷ our cost.** The chosen formula and packs hold at least 7.2x at every length (1–12 min) under the mid cost estimate and a 15% store fee, and fall to roughly 4–6x if real cost is 60% higher or the 30% commission applies. Costs are estimates until real `cost_usd` data exists: see `PRICING.md` for the tables, sensitivity and recalibration plan.
 
 ### 10.3 Edits
-Proposal: previews and edits are **included** (bounded by the per-revision cost cap and daily edit limit that already exist); re-evaluate with real usage. A fresh video from a new prompt is what costs credits.
+Everything that needs no AI is free (reorder, delete, text/data changes, look, music, picking an already-found photo, previews). **AI actions cost credits priced from their real cost** (re-voice a scene 1, new photo search 1, AI-rewrite a scene 2 when it exists), with **3 free AI actions per video**, cache hits free, failures refunded, and a quote shown before rendering starts.
 
 ### 10.4 Architecture
 - **Server owns the wallet.** A DynamoDB ledger (append-only transactions keyed by an idempotency id) + a balance item updated with conditional writes. Charge happens at `generate` (reservation), refund on reject/fail, so the existing REJECTED/failed paths keep working.
