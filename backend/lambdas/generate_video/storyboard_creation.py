@@ -8,6 +8,7 @@ from decimal import Decimal
 import re
 
 from .db import update_status
+from common.secrets import get_openai_api_key
 
 
 DEFAULT_MUSIC_S3 = os.environ.get(
@@ -30,32 +31,6 @@ def _get_video_item(video_id: str, table_name: Optional[str] = None) -> Dict[str
     except ClientError as e:
         logging.exception("Failed to get video item for video_id=%s: %s", video_id, str(e))
         return {}
-
-
-def _fetch_openai_api_key() -> str:
-    """Fetch OpenAI API key from AWS Secrets Manager in us-west-2.
-
-    Expects secret name OPENAI_API_KEY (overridable via OPENAI_API_SECRET_NAME),
-    with a JSON object containing {"API_KEY": "..."}. If the secret is a plain
-    string, that string is used as the key.
-    """
-    secret_name = os.environ.get("OPENAI_API_SECRET_NAME", "OPENAI_API_KEY")
-    try:
-        client = boto3.client("secretsmanager", region_name="us-west-2")
-        res = client.get_secret_value(SecretId=secret_name)
-        secret_str = res.get("SecretString") or ""
-        if not secret_str:
-            return ""
-        try:
-            payload = json.loads(secret_str)
-            key = payload.get("API_KEY") or payload.get("openai_api_key")
-            return str(key or "")
-        except json.JSONDecodeError:
-            # SecretString was a plain API key
-            return secret_str
-    except Exception as e:
-        logging.exception("Failed to fetch OpenAI API key from Secrets Manager: %s", str(e))
-        return ""
 
 
 def _json_safe(value: Any) -> Any:
@@ -199,24 +174,7 @@ def _call_openai_storyboard(api_key: str, context: Dict[str, Any]) -> Optional[D
     try:
         data = json.dumps(body).encode("utf-8")
 
-        # Debug: log request details (mask API key)
-        try:
-            auth = req.get_header("Authorization") or ""
-            masked = auth[:20] + "…" if auth else ""
-            logging.info(
-                "OpenAI request: url=%s model=%s temp=%s max_tokens=%s headers={Authorization:%s, Content-Type:%s} payload=%s",
-                req.full_url,
-                body.get("model"),
-                body.get("temperature"),
-                body.get("max_tokens"),
-                masked,
-                req.get_header("Content-Type"),
-                json.dumps(body, ensure_ascii=False, separators=(",", ":")),
-            )
-        except Exception:
-            pass
-
-        with urllib.request.urlopen(req, data=data, timeout=30) as resp:
+        with urllib.request.urlopen(req, data=data, timeout=int(os.environ.get('OPENAI_STORYBOARD_TIMEOUT_S', '90'))) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
         choices = payload.get("choices") or []
         text = ""
@@ -420,7 +378,7 @@ def create_storyboard(
     }
 
     # Try OpenAI first
-    api_key = _fetch_openai_api_key()
+    api_key = get_openai_api_key()
     storyboard = _call_openai_storyboard(api_key, context) or {}
 
     if not _validate_storyboard(storyboard):

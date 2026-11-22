@@ -261,7 +261,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             enriched.append(it)
 
         # Sanitize response: expose only fields needed by clients and a presigned GIF URL
-        allowed_keys = {"user_id", "video_id", "status", "title", "duration_s", "created_at", "video_url"}
+        allowed_keys = {"user_id", "video_id", "status", "title", "duration_s", "created_at", "video_url", "reject_reason"}
         sanitized: list[dict] = []
         for it in enriched:
             out = {k: v for k, v in it.items() if k in allowed_keys}
@@ -289,7 +289,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Methods": "GET,OPTIONS",
             },
-            "body": json.dumps({"message": "Failed to query videos", "error": str(e)}),
+            "body": json.dumps({"message": "Failed to query videos"}),
         }
 
 

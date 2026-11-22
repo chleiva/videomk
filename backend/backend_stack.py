@@ -1,3 +1,7 @@
+import json
+import os
+from typing import Any, Dict, List, Optional
+
 from aws_cdk import (
     Duration,
     Stack,
@@ -9,358 +13,212 @@ from aws_cdk import (
     aws_stepfunctions as sfn,
     aws_stepfunctions_tasks as tasks,
     aws_iam as iam,
+    aws_logs as logs,
     aws_certificatemanager as acm,
     aws_route53 as route53,
     aws_route53_targets as targets,
 )
 from constructs import Construct
-import os
-import json
+
+ASSETS_BUCKET = "videomk.com"
+OPENAI_SSM_PARAM = "/videomk/openai_api_key"  # standard SSM parameter: free (Secrets Manager costs ~$0.40/mo idle)
+TRANSIENT_LAMBDA_ERRORS = [
+    "Lambda.ServiceException",
+    "Lambda.AWSLambdaException",
+    "Lambda.SdkClientException",
+    "Lambda.TooManyRequestsException",
+]
+
 
 class BackendStack(Stack):
-
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # ============================
-        # DynamoDB: Videos table (import existing)
+        # Data
         # ============================
-        # NOTE: The table 'Videos' already exists. Leaving the original creation code here commented.
-        # videos_table = dynamodb.Table(
-        #     self,
-        #     "VideosTable",
-        #     table_name="Videos",
-        #     partition_key=dynamodb.Attribute(
-        #         name="video_id",
-        #         type=dynamodb.AttributeType.STRING,
-        #     ),
-        #     billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-        #     removal_policy=RemovalPolicy.RETAIN,
-        # )
-        # videos_table.add_global_secondary_index(
-        #     index_name="GSI_UserVideos",
-        #     partition_key=dynamodb.Attribute(
-        #         name="user_id",
-        #         type=dynamodb.AttributeType.STRING,
-        #     ),
-        #     sort_key=dynamodb.Attribute(
-        #         name="created_at",
-        #         type=dynamodb.AttributeType.STRING,
-        #     ),
-        #     projection_type=dynamodb.ProjectionType.INCLUDE,
-        #     non_key_attributes=[
-        #         "title",
-        #         "status",
-        #         "thumbnail_url",
-        #         "duration_s",
-        #     ],
-        # )
+        # The Videos table (+ GSI_UserVideos) already exists and is imported, not managed here.
         videos_table = dynamodb.Table.from_table_name(self, "VideosTable", "Videos")
 
+        # Per-user daily quota counters. On-demand + TTL => zero idle cost.
+        usage_table = dynamodb.Table(
+            self,
+            "UsageTable",
+            partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="day", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            time_to_live_attribute="ttl",
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
+        common_env = {
+            "VIDEOS_TABLE": videos_table.table_name,
+            "USAGE_TABLE": usage_table.table_name,
+            "ASSETS_BUCKET": ASSETS_BUCKET,
+            "OPENAI_SSM_PARAM": OPENAI_SSM_PARAM,
+        }
+
         # ============================
-        # Lambda functions
+        # Lambda layer (built by layers/build_layer.sh for linux/x86_64)
         # ============================
-        # Lambda Layer for video rendering dependencies
+        layer_dir = os.path.join(os.path.dirname(__file__), "layers", "video_deps")
+        if not os.path.isdir(os.path.join(layer_dir, "python")) and not os.environ.get("CDK_SKIP_LAYER_CHECK"):
+            raise ValueError(
+                "Lambda layer not built. Run `backend/layers/build_layer.sh` first "
+                "(or set CDK_SKIP_LAYER_CHECK=1 for a synth-only check)."
+            )
         video_layer = _lambda.LayerVersion(
             self,
             "VideoDepsLayer",
             code=_lambda.Code.from_asset("layers/video_deps"),
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+            compatible_architectures=[_lambda.Architecture.X86_64],
             description="Video rendering Python dependencies (moviepy, pillow, numpy, etc)",
         )
 
-        generate_video_fn = _lambda.Function(
-            self,
-            "GenerateVideoFunction",
-            function_name="generate_video",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.index.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.minutes(15),
-            memory_size=2048,
-            environment={
-                "VIDEOS_TABLE": videos_table.table_name,
-                "GSI_USER_VIDEOS": "GSI_UserVideos",
-                "ASSETS_BUCKET": "videomk.com",
-                "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
-                "OPENAI_MODEL": "gpt-5",
-            },
-            layers=[video_layer],
-        )
+        def make_fn(
+            construct_id: str,
+            name: str,
+            handler: str,
+            *,
+            timeout: Duration,
+            memory: int = 256,
+            env: Optional[Dict[str, str]] = None,
+            layers: Optional[List[_lambda.ILayerVersion]] = None,
+        ) -> _lambda.Function:
+            return _lambda.Function(
+                self,
+                construct_id,
+                function_name=name,
+                runtime=_lambda.Runtime.PYTHON_3_12,
+                architecture=_lambda.Architecture.X86_64,
+                handler=handler,
+                code=_lambda.Code.from_asset("lambdas"),
+                timeout=timeout,
+                memory_size=memory,
+                environment={**common_env, **(env or {})},
+                layers=layers or [],
+                log_retention=logs.RetentionDays.TWO_WEEKS,  # no unbounded log storage
+            )
 
-        list_videos_fn = _lambda.Function(
-            self,
-            "ListVideosFunction",
-            function_name="list_videos",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="list_videos.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(30),
-            environment={
-                "VIDEOS_TABLE": videos_table.table_name,
-                "GSI_USER_VIDEOS": "GSI_UserVideos",
-            },
-        )
+        # ----------------------------
+        # API-facing Lambdas
+        # ----------------------------
+        list_videos_fn = make_fn("ListVideosFunction", "list_videos", "list_videos.handler", timeout=Duration.seconds(30), env={"GSI_USER_VIDEOS": "GSI_UserVideos"})
+        get_video_fn = make_fn("GetVideoFunction", "get_video", "get_video.handler", timeout=Duration.seconds(30))
+        launcher_fn = make_fn("VideoGenerationSFLauncher", "VideoGenerationSFLauncher", "sf_launcher.handler", timeout=Duration.seconds(10))
 
-        get_video_fn = _lambda.Function(
-            self,
-            "GetVideoFunction",
-            function_name="get_video",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="get_video.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(30),
-            environment={
-                "VIDEOS_TABLE": videos_table.table_name,
-            },
-        )
-
-        # Full read/write access as requested
-        videos_table.grant_read_write_data(generate_video_fn)
         videos_table.grant_read_write_data(list_videos_fn)
         videos_table.grant_read_data(get_video_fn)
+        videos_table.grant_read_write_data(launcher_fn)
+        usage_table.grant_read_write_data(launcher_fn)
 
-        # Ensure list_videos can Query GSIs explicitly (some imports may miss index ARNs)
+        # Imported tables don't carry index ARNs: grant them explicitly for the GSI query.
         list_videos_fn.add_to_role_policy(
             iam.PolicyStatement(
-                actions=["dynamodb:Query", "dynamodb:DescribeTable"],
-                resources=[
-                    videos_table.table_arn,
-                    f"{videos_table.table_arn}/index/*",
-                ],
+                actions=["dynamodb:Query", "dynamodb:DescribeTable", "dynamodb:BatchGetItem"],
+                resources=[videos_table.table_arn, f"{videos_table.table_arn}/index/*"],
             )
         )
-
-        # Allow list_videos to presign and validate GIF objects (private bucket)
-        list_videos_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=[
-                    "s3:GetObject",
-                    "s3:GetBucketLocation",
-                    "s3:HeadObject",
-                ],
-                resources=[
-                    "arn:aws:s3:::videomk.com",
-                    "arn:aws:s3:::videomk.com/videos/*",
-                ],
+        for fn in (list_videos_fn, get_video_fn):
+            fn.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["s3:GetObject", "s3:GetBucketLocation"],
+                    resources=[f"arn:aws:s3:::{ASSETS_BUCKET}", f"arn:aws:s3:::{ASSETS_BUCKET}/videos/*"],
+                )
             )
-        )
-
-        # Allow Bedrock model invocation (all models in us-west-2 and us-east-1)
-        generate_video_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["bedrock:InvokeModel"],
-                resources=[
-                    "arn:aws:bedrock:us-west-2::foundation-model/*",
-                    "arn:aws:bedrock:us-east-1::foundation-model/*",
-                ],
-            )
-        )
-
-        # Allow put/get to the assets bucket path
-        generate_video_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=[
-                    "s3:PutObject",
-                    "s3:GetObject",
-                    "s3:AbortMultipartUpload",
-                ],
-                resources=[
-                    "arn:aws:s3:::videomk.com/generation/assets/*",
-                    "arn:aws:s3:::videomk.com/videos/*",
-                ],
-            )
-        )
-
-        # Allow get to the video objects for presigning via get_video
-        get_video_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=[
-                    "s3:GetObject",
-                    "s3:GetBucketLocation",
-                ],
-                resources=[
-                    "arn:aws:s3:::videomk.com",
-                    "arn:aws:s3:::videomk.com/videos/*",
-                ],
-            )
-        )
-
-        # Allow Secrets Manager get for OpenAI key
-        generate_video_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["secretsmanager:GetSecretValue"],
-                resources=["arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"]
-            )
-        )
 
         # ----------------------------
-        # New multi-step workflow Lambdas
+        # Workflow Lambdas
         # ----------------------------
-        intent_plot_fn = _lambda.Function(
-            self,
-            "IntentPlotFunction",
-            function_name="intent_plot_handler",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.handlers.intent_plot_handler.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(60),
-            memory_size=512,
+        bedrock_policy = iam.PolicyStatement(
+            actions=["bedrock:InvokeModel"],
+            resources=[
+                "arn:aws:bedrock:us-west-2::foundation-model/*",
+                "arn:aws:bedrock:us-east-1::foundation-model/*",
+                f"arn:aws:bedrock:*:{self.account}:inference-profile/*",
+            ],
+        )
+        openai_key_policy = iam.PolicyStatement(
+            actions=["ssm:GetParameter"],
+            resources=[f"arn:aws:ssm:{self.region}:{self.account}:parameter{OPENAI_SSM_PARAM}"],
+        )
+        # Legacy fallback until the key is migrated to SSM; remove after `aws secretsmanager delete-secret`.
+        legacy_secret_policy = iam.PolicyStatement(
+            actions=["secretsmanager:GetSecretValue"],
+            resources=[f"arn:aws:secretsmanager:us-west-2:{self.account}:secret:OPENAI_API_KEY*"],
         )
 
-        assets_plan_fn = _lambda.Function(
-            self,
-            "AssetsPlanFunction",
-            function_name="assets_plan_handler",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.handlers.assets_plan_handler.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(30),
-            memory_size=512,
-        )
-
-        asset_scene_fn = _lambda.Function(
-            self,
-            "AssetSceneFunction",
-            function_name="asset_scene_handler",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.handlers.asset_scene_handler.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(120),
-            memory_size=1024,
-            environment={
-                "OPENAI_API_SECRET_NAME": "OPENAI_API_KEY",
-            },
-        )
-
-        assets_collect_fn = _lambda.Function(
-            self,
-            "AssetsCollectFunction",
-            function_name="assets_collect_handler",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.handlers.assets_collect_handler.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(60),
-            memory_size=512,
-        )
-
-        storyboard_render_fn = _lambda.Function(
-            self,
+        intent_plot_fn = make_fn("IntentPlotFunction", "intent_plot_handler", "generate_video.handlers.intent_plot_handler.handler", timeout=Duration.seconds(60), memory=512)
+        assets_plan_fn = make_fn("AssetsPlanFunction", "assets_plan_handler", "generate_video.handlers.assets_plan_handler.handler", timeout=Duration.seconds(30), memory=512)
+        asset_scene_fn = make_fn("AssetSceneFunction", "asset_scene_handler", "generate_video.handlers.asset_scene_handler.handler", timeout=Duration.seconds(120), memory=1024)
+        assets_collect_fn = make_fn("AssetsCollectFunction", "assets_collect_handler", "generate_video.handlers.assets_collect_handler.handler", timeout=Duration.seconds(60), memory=512)
+        storyboard_render_fn = make_fn(
             "StoryboardRenderFunction",
-            function_name="storyboard_render_handler",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.handlers.storyboard_render_handler.handler",
-            code=_lambda.Code.from_asset("lambdas"),
+            "storyboard_render_handler",
+            "generate_video.handlers.storyboard_render_handler.handler",
             timeout=Duration.minutes(15),
-            memory_size=4096,
+            memory=4096,
+            env={"OPENAI_MODEL": "gpt-5"},
             layers=[video_layer],
         )
+        mark_failed_fn = make_fn("MarkFailedFunction", "mark_failed_handler", "generate_video.handlers.mark_failed_handler.handler", timeout=Duration.seconds(10))
+        mark_rejected_fn = make_fn("MarkRejectedFunction", "mark_rejected_handler", "generate_video.handlers.mark_rejected_handler.handler", timeout=Duration.seconds(10))
 
-        mark_failed_fn = _lambda.Function(
-            self,
-            "MarkFailedFunction",
-            function_name="mark_failed_handler",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="generate_video.handlers.mark_failed_handler.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(10),
-            memory_size=256,
-        )
+        for fn in (intent_plot_fn, assets_collect_fn, storyboard_render_fn, mark_failed_fn, mark_rejected_fn):
+            videos_table.grant_read_write_data(fn)
+        for fn in (mark_failed_fn, mark_rejected_fn):
+            usage_table.grant_read_write_data(fn)
 
-        # Grants for new lambdas
-        videos_table.grant_read_write_data(intent_plot_fn)
-        videos_table.grant_read_write_data(assets_collect_fn)
-        videos_table.grant_read_write_data(storyboard_render_fn)
-        videos_table.grant_read_write_data(mark_failed_fn)
-
-        # Bedrock permissions for intent/plot generation
-        intent_plot_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["bedrock:InvokeModel"],
-                resources=[
-                    "arn:aws:bedrock:us-west-2::foundation-model/*",
-                    "arn:aws:bedrock:us-east-1::foundation-model/*",
-                ],
-            )
-        )
-
-        # Bedrock permissions only for per-scene asset generation
-        # (No longer required after switching to OpenAI images)
-        # asset_scene_fn.add_to_role_policy(
-        #     iam.PolicyStatement(
-        #         actions=["bedrock:InvokeModel"],
-        #         resources=[
-        #             "arn:aws:bedrock:us-west-2::foundation-model/*",
-        #             "arn:aws:bedrock:us-east-1::foundation-model/*",
-        #         ],
-        #     )
-        # )
-
-        # S3 permissions: scene generation (put assets), renderer (get assets, put videos)
+        intent_plot_fn.add_to_role_policy(bedrock_policy)
+        for fn in (asset_scene_fn, storyboard_render_fn):
+            fn.add_to_role_policy(openai_key_policy)
+            fn.add_to_role_policy(legacy_secret_policy)
         asset_scene_fn.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["s3:PutObject", "s3:AbortMultipartUpload"],
-                resources=["arn:aws:s3:::videomk.com/generation/assets/*"],
-            )
-        )
-
-        # Secrets Manager access for OpenAI Images in asset_scene_fn
-        asset_scene_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["secretsmanager:GetSecretValue"],
-                resources=["arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"],
+                resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/assets/*"],
             )
         )
         storyboard_render_fn.add_to_role_policy(
             iam.PolicyStatement(
-                actions=[
-                    "s3:GetObject",
-                    "s3:GetBucketLocation",
-                    "s3:PutObject",
-                    "s3:AbortMultipartUpload",
-                ],
+                actions=["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload", "s3:GetBucketLocation"],
                 resources=[
-                    "arn:aws:s3:::videomk.com",
-                    "arn:aws:s3:::videomk.com/generation/assets/*",
-                    "arn:aws:s3:::videomk.com/videos/*",
+                    f"arn:aws:s3:::{ASSETS_BUCKET}",
+                    f"arn:aws:s3:::{ASSETS_BUCKET}/generation/assets/*",
+                    f"arn:aws:s3:::{ASSETS_BUCKET}/videos/*",
                 ],
             )
         )
 
-        # Secrets Manager for storyboard (OpenAI)
-        storyboard_render_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["secretsmanager:GetSecretValue"],
-                resources=["arn:aws:secretsmanager:us-west-2:*:secret:OPENAI_API_KEY*"],
-            )
-        )
-
         # ----------------------------
-        # Step Functions workflow definition
+        # Step Functions (legacy v1 pipeline, hardened)
         # ----------------------------
-        intent_plot_task = tasks.LambdaInvoke(
-            self,
-            "IntentAndPlot",
-            lambda_function=intent_plot_fn,
-            payload_response_only=True,
-            result_path="$",
-        )
+        def invoke(construct_id: str, fn: _lambda.IFunction) -> tasks.LambdaInvoke:
+            task = tasks.LambdaInvoke(self, construct_id, lambda_function=fn, payload_response_only=True, result_path="$")
+            task.add_retry(errors=TRANSIENT_LAMBDA_ERRORS, interval=Duration.seconds(2), max_attempts=3, backoff_rate=2.0)
+            return task
 
-        assets_plan_task = tasks.LambdaInvoke(
-            self,
-            "PlanAssets",
-            lambda_function=assets_plan_fn,
-            payload_response_only=True,
-            result_path="$",
-        )
+        intent_plot_task = invoke("IntentAndPlot", intent_plot_fn)
+        assets_plan_task = invoke("PlanAssets", assets_plan_fn)
+        assets_collect_task = invoke("CollectAssets", assets_collect_fn)
+        storyboard_render_task = invoke("StoryboardAndRender", storyboard_render_fn)
 
-        scene_task = tasks.LambdaInvoke(
+        scene_task = invoke("GenerateSceneAsset", asset_scene_fn)
+        # Image providers rate-limit/flake: retry any task failure twice, then degrade to a plain-colour scene.
+        scene_task.add_retry(errors=["States.TaskFailed"], interval=Duration.seconds(5), max_attempts=2, backoff_rate=2.0)
+        scene_degraded = sfn.Pass(
             self,
-            "GenerateSceneAsset",
-            lambda_function=asset_scene_fn,
-            payload_response_only=True,
-            result_path="$",
+            "SceneAssetDegraded",
+            parameters={
+                "video_id.$": "$.video_id",
+                "scene_id.$": "$.scene.id",
+                "image": None,
+                "text": {"scene_id.$": "$.scene.id", "type": "text", "content.$": "$.scene.description"},
+            },
         )
+        scene_task.add_catch(scene_degraded, errors=["States.ALL"], result_path="$.error")
+        scene_chain = sfn.Chain.start(scene_task)
 
         assets_map = sfn.Map(
             self,
@@ -374,53 +232,26 @@ class BackendStack(Stack):
             },
             result_path="$.assetResults",
         )
-        assets_map.item_processor(scene_task)
+        assets_map.item_processor(scene_chain)
 
-        assets_collect_task = tasks.LambdaInvoke(
-            self,
-            "CollectAssets",
-            lambda_function=assets_collect_fn,
-            payload_response_only=True,
-            result_path="$",
-        )
-
-        storyboard_render_task = tasks.LambdaInvoke(
-            self,
-            "StoryboardAndRender",
-            lambda_function=storyboard_render_fn,
-            payload_response_only=True,
-            result_path="$",
-        )
-
-        # Choice to skip map when there are no scenes
         has_scenes = sfn.Choice(self, "HasScenes?")
-        has_scenes.when(
-            sfn.Condition.is_present("$.scenes[0]"),
-            assets_map,
-        ).otherwise(sfn.Pass(self, "NoScenes"))
+        has_scenes.when(sfn.Condition.is_present("$.scenes[0]"), assets_map).otherwise(sfn.Pass(self, "NoScenes"))
 
-        # Failure handling: mark FAILED then end with Fail state
-        mark_failed_task = tasks.LambdaInvoke(
-            self,
-            "MarkFailed",
-            lambda_function=mark_failed_fn,
-            payload_response_only=True,
-            result_path="$.error",
-        )
-        fail_state = sfn.Fail(self, "WorkflowFailed")
-        failure_chain = sfn.Chain.start(mark_failed_task).next(fail_state)
+        mark_failed_task = tasks.LambdaInvoke(self, "MarkFailed", lambda_function=mark_failed_fn, payload_response_only=True, result_path="$.error_result")
+        failure_chain = sfn.Chain.start(mark_failed_task).next(sfn.Fail(self, "WorkflowFailed"))
+        for t in (intent_plot_task, assets_plan_task, assets_map, assets_collect_task, storyboard_render_task):
+            t.add_catch(failure_chain, errors=["States.ALL"], result_path="$.error")
 
-        for t in [intent_plot_task, assets_plan_task, assets_map, assets_collect_task, storyboard_render_task]:
-            t.add_catch(failure_chain, result_path="$.error")
+        # Prompt judged not legitimate: stop here (no images, no render, no cost), mark REJECTED, refund.
+        mark_rejected_task = tasks.LambdaInvoke(self, "MarkRejected", lambda_function=mark_rejected_fn, payload_response_only=True, result_path="$.rejected")
+        rejected_chain = sfn.Chain.start(mark_rejected_task).next(sfn.Succeed(self, "Rejected"))
+        mark_rejected_task.add_catch(failure_chain, errors=["States.ALL"], result_path="$.error")
 
-        definition = (
-            sfn.Chain.start(intent_plot_task)
-            .next(assets_plan_task)
-            .next(has_scenes.afterwards())
-            .next(assets_collect_task)
-            .next(storyboard_render_task)
-        )
+        legit_choice = sfn.Choice(self, "PromptLegit?")
+        legit_choice.when(sfn.Condition.boolean_equals("$.plot.legit", True), assets_plan_task).otherwise(rejected_chain)
+        assets_plan_task.next(has_scenes.afterwards()).next(assets_collect_task).next(storyboard_render_task)
 
+        definition = sfn.Chain.start(intent_plot_task).next(legit_choice)
         state_machine = sfn.StateMachine(
             self,
             "GenerateVideoWorkflow",
@@ -429,48 +260,34 @@ class BackendStack(Stack):
             timeout=Duration.minutes(30),
         )
 
-        # ============================
-        # API Gateway + Custom Domain
-        # ============================
-        hosted_zone = route53.HostedZone.from_lookup(
-            self, "HostedZone", domain_name="videomk.com"
-        )
+        state_machine.grant_start_execution(launcher_fn)
+        launcher_fn.add_environment("STATE_MACHINE_ARN", state_machine.state_machine_arn)
 
+        # ============================
+        # API Gateway + custom domain
+        # ============================
+        hosted_zone = route53.HostedZone.from_lookup(self, "HostedZone", domain_name="videomk.com")
         certificate = acm.Certificate(
-            self,
-            "ApiCertificate",
-            domain_name="api.videomk.com",
-            validation=acm.CertificateValidation.from_dns(hosted_zone),
+            self, "ApiCertificate", domain_name="api.videomk.com", validation=acm.CertificateValidation.from_dns(hosted_zone)
         )
-
         api = apigw.RestApi(
             self,
             "VideoMkApi",
             rest_api_name="videomk-api",
-            deploy_options=apigw.StageOptions(stage_name="prod"),
+            deploy_options=apigw.StageOptions(
+                stage_name="prod",
+                throttling_rate_limit=20,   # req/s across the stage (per-user limits are the daily quota)
+                throttling_burst_limit=40,
+            ),
         )
+        cors_headers = {
+            "Access-Control-Allow-Origin": "'*'",
+            "Access-Control-Allow-Headers": "'*'",
+            "Access-Control-Allow-Methods": "'GET,POST,OPTIONS'",
+        }
+        api.add_gateway_response("Default4xxGatewayResponse", type=apigw.ResponseType.DEFAULT_4_XX, response_headers=cors_headers)
+        api.add_gateway_response("Default5xxGatewayResponse", type=apigw.ResponseType.DEFAULT_5_XX, response_headers=cors_headers)
 
-        # Ensure CORS headers are returned even on 4XX/5XX (e.g., authorizer failures)
-        api.add_gateway_response(
-            "Default4xxGatewayResponse",
-            type=apigw.ResponseType.DEFAULT_4_XX,
-            response_headers={
-                "Access-Control-Allow-Origin": "'*'",
-                "Access-Control-Allow-Headers": "'*'",
-                "Access-Control-Allow-Methods": "'GET,POST,OPTIONS'",
-            },
-        )
-        api.add_gateway_response(
-            "Default5xxGatewayResponse",
-            type=apigw.ResponseType.DEFAULT_5_XX,
-            response_headers={
-                "Access-Control-Allow-Origin": "'*'",
-                "Access-Control-Allow-Headers": "'*'",
-                "Access-Control-Allow-Methods": "'GET,POST,OPTIONS'",
-            },
-        )
-
-        # Explicit API custom domain and base path mapping
         api_domain = apigw.DomainName(
             self,
             "ApiDomain",
@@ -479,16 +296,7 @@ class BackendStack(Stack):
             endpoint_type=apigw.EndpointType.REGIONAL,
             security_policy=apigw.SecurityPolicy.TLS_1_2,
         )
-
-        apigw.BasePathMapping(
-            self,
-            "ApiBasePathMapping",
-            domain_name=api_domain,
-            rest_api=api,
-            stage=api.deployment_stage,
-        )
-
-        # Route53 alias record for the custom domain
+        apigw.BasePathMapping(self, "ApiBasePathMapping", domain_name=api_domain, rest_api=api, stage=api.deployment_stage)
         route53.ARecord(
             self,
             "ApiAliasRecord",
@@ -497,123 +305,60 @@ class BackendStack(Stack):
             target=route53.RecordTarget.from_alias(targets.ApiGatewayDomain(api_domain)),
         )
 
-        # Resources: /users/{user_id}/videos and subresource /generate
         users = api.root.add_resource("users")
         user_id = users.add_resource("{user_id}")
         videos = user_id.add_resource("videos")
         generate = videos.add_resource("generate")
         video_item = videos.add_resource("{video_id}")
 
-        # Cognito Authorizer (required for all methods)
-        # Load from config.json first, then fall back to env/context. Accept ARN or ID.
-        config_user_pool_id = None
-        config_user_pool_arn = None
-        try:
-            config_path = os.path.join(os.path.dirname(__file__), "config.json")
-            if os.path.exists(config_path):
-                with open(config_path, "r") as config_file:
-                    cfg = json.load(config_file)
-                    config_user_pool_id = cfg.get("cognitoUserPoolId")
-                    config_user_pool_arn = cfg.get("cognitoUserPoolArn")
-        except Exception:
-            # Ignore config read errors and fall back to env/context
-            pass
-
+        cfg: Dict[str, Any] = {}
+        config_path = os.path.join(os.path.dirname(__file__), "config.json")
+        if os.path.exists(config_path):
+            with open(config_path, "r") as f:
+                cfg = json.load(f)
         user_pool_ref = (
-            config_user_pool_arn
+            cfg.get("cognitoUserPoolArn")
             or os.environ.get("COGNITO_USER_POOL_ARN")
             or self.node.try_get_context("cognitoUserPoolArn")
-            or config_user_pool_id
+            or cfg.get("cognitoUserPoolId")
             or os.environ.get("COGNITO_USER_POOL_ID")
             or self.node.try_get_context("cognitoUserPoolId")
         )
         if not user_pool_ref:
-            raise ValueError(
-                "Provide Cognito pool via COGNITO_USER_POOL_ARN (or context cognitoUserPoolArn) or ID (COGNITO_USER_POOL_ID)."
-            )
+            raise ValueError("Provide Cognito pool via config.json, COGNITO_USER_POOL_ARN or COGNITO_USER_POOL_ID.")
         if isinstance(user_pool_ref, str) and user_pool_ref.startswith("arn:") and ":userpool/" in user_pool_ref:
             user_pool = cognito.UserPool.from_user_pool_arn(self, "ImportedUserPool", user_pool_ref)
         else:
             user_pool = cognito.UserPool.from_user_pool_id(self, "ImportedUserPool", str(user_pool_ref))
-        authorizer = apigw.CognitoUserPoolsAuthorizer(
-            self,
-            "ApiAuthorizer",
-            cognito_user_pools=[user_pool],
-        )
+        authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
-        # CORS preflight on resources (adds OPTIONS)
-        users.add_cors_preflight(
-            allow_origins=apigw.Cors.ALL_ORIGINS,
-            allow_methods=["GET", "POST", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-        )
-        user_id.add_cors_preflight(
-            allow_origins=apigw.Cors.ALL_ORIGINS,
-            allow_methods=["GET", "POST", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-        )
-        videos.add_cors_preflight(
-            allow_origins=apigw.Cors.ALL_ORIGINS,
-            allow_methods=["GET", "POST", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-        )
-        generate.add_cors_preflight(
-            allow_origins=apigw.Cors.ALL_ORIGINS,
-            allow_methods=["GET", "POST", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-        )
-        video_item.add_cors_preflight(
-            allow_origins=apigw.Cors.ALL_ORIGINS,
-            allow_methods=["GET", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-        )
+        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"])):
+            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization"])
 
-        # GET /users/{user_id}/videos -> list_videos Lambda (proxy integration)
-        list_integration = apigw.LambdaIntegration(list_videos_fn, proxy=True)
-        videos.add_method(
-            "GET",
-            list_integration,
-            authorization_type=apigw.AuthorizationType.COGNITO,
-            authorizer=authorizer,
+        cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
+        videos.add_method("GET", apigw.LambdaIntegration(list_videos_fn, proxy=True), **cognito_auth)
+        video_item.add_method("GET", apigw.LambdaIntegration(get_video_fn, proxy=True), **cognito_auth)
+
+        # Reject malformed/oversized prompts at the edge, before any Lambda runs.
+        generate_model = api.add_model(
+            "GenerateRequestModel",
+            content_type="application/json",
+            model_name="GenerateRequest",
+            schema=apigw.JsonSchema(
+                schema=apigw.JsonSchemaVersion.DRAFT4,
+                type=apigw.JsonSchemaType.OBJECT,
+                required=["prompt"],
+                properties={
+                    "prompt": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=10, max_length=2000),
+                    "client_request_id": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=8, max_length=64),
+                },
+            ),
         )
-
-        # GET /users/{user_id}/videos/{video_id} -> get_video Lambda (proxy integration)
-        get_video_integration = apigw.LambdaIntegration(get_video_fn, proxy=True)
-        video_item.add_method(
-            "GET",
-            get_video_integration,
-            authorization_type=apigw.AuthorizationType.COGNITO,
-            authorizer=authorizer,
-        )
-
-        # Launcher Lambda to start Step Functions execution
-        launcher_fn = _lambda.Function(
-            self,
-            "VideoGenerationSFLauncher",
-            function_name="VideoGenerationSFLauncher",
-            runtime=_lambda.Runtime.PYTHON_3_12,
-            handler="sf_launcher.handler",
-            code=_lambda.Code.from_asset("lambdas"),
-            timeout=Duration.seconds(10),
-        )
-
-        # Allow the launcher to start executions and list state machines
-        launcher_fn.add_to_role_policy(
-            iam.PolicyStatement(
-                actions=["states:StartExecution", "states:ListStateMachines"],
-                resources=["*"],
-            )
-        )
-
-        # Allow the launcher to write to the Videos table
-        videos_table.grant_read_write_data(launcher_fn)
-
-        # POST /users/{user_id}/videos/generate -> launcher Lambda (proxy integration)
-        generate_integration = apigw.LambdaIntegration(launcher_fn, proxy=True)
+        validator = api.add_request_validator("GenerateBodyValidator", validate_request_body=True, validate_request_parameters=False)
         generate.add_method(
             "POST",
-            generate_integration,
-            authorization_type=apigw.AuthorizationType.COGNITO,
-            authorizer=authorizer,
+            apigw.LambdaIntegration(launcher_fn, proxy=True),
+            request_validator=validator,
+            request_models={"application/json": generate_model},
+            **cognito_auth,
         )
-

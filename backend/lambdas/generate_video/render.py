@@ -57,12 +57,28 @@ def _download_s3_uri_to_tmp(s3_uri: str) -> str:
         return s3_uri
 
 
-def _ensure_local_path(path: Optional[str]) -> Optional[str]:
+ASSETS_BUCKET = os.environ.get("ASSETS_BUCKET", "videomk.com")
+
+
+def _is_allowed_asset(path: str, video_id: str) -> bool:
+    """Storyboards come from an LLM: only allow this video's own generated assets
+    or the shared static pack (music etc.). Blocks prompt-injected paths to other users' files."""
+    prefix = f"s3://{ASSETS_BUCKET}/generation/assets/"
+    if not path.startswith(prefix) or ".." in path:
+        return False
+    rest = path[len(prefix):]
+    return rest.startswith(f"{video_id}/") or rest.startswith("static/")
+
+
+def _ensure_local_path(path: Optional[str], video_id: str = "") -> Optional[str]:
     if not path:
         return path
     if _is_s3_uri(path):
+        if not _is_allowed_asset(path, video_id):
+            logging.warning("Blocked storyboard asset outside allowed prefix: %s", path)
+            return None
         return _download_s3_uri_to_tmp(path)
-    return path
+    return None if path.startswith(("/", "..")) and not path.startswith("/tmp/") else path
 
 
 # --------------------------- compatibility shims --------------------------- #
@@ -1116,10 +1132,10 @@ def render_video(
         if isinstance(bg, dict) and bg.get("type") == "image":
             bg_path = bg.get("path")
             if bg_path:
-                bg["path"] = _ensure_local_path(bg_path)
+                bg["path"] = _ensure_local_path(bg_path, video_id)
         for ov in scene.get("overlays", []) or []:
             if isinstance(ov, dict) and "path" in ov:
-                ov["path"] = _ensure_local_path(ov.get("path"))
+                ov["path"] = _ensure_local_path(ov.get("path"), video_id)
 
     workdir = Path("/tmp/render")
     workdir.mkdir(parents=True, exist_ok=True)

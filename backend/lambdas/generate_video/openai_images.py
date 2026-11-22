@@ -4,32 +4,7 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-import boto3
-
-
-def _fetch_openai_api_key() -> str:
-    """Fetch OpenAI API key from AWS Secrets Manager in us-west-2.
-
-    Expects secret name OPENAI_API_KEY (overridable via OPENAI_API_SECRET_NAME),
-    with a JSON object containing {"API_KEY": "..."}. If the secret is a plain
-    string, that string is used as the key.
-    """
-    secret_name = os.environ.get("OPENAI_API_SECRET_NAME", "OPENAI_API_KEY")
-    try:
-        client = boto3.client("secretsmanager", region_name="us-west-2")
-        res = client.get_secret_value(SecretId=secret_name)
-        secret_str = res.get("SecretString") or ""
-        if not secret_str:
-            return ""
-        try:
-            payload = json.loads(secret_str)
-            key = payload.get("API_KEY") or payload.get("openai_api_key")
-            return str(key or "")
-        except json.JSONDecodeError:
-            return secret_str
-    except Exception as e:
-        logging.exception("Failed to fetch OpenAI API key from Secrets Manager: %s", str(e))
-        return ""
+from common.secrets import get_openai_api_key
 
 
 def _normalize_size(width: int, height: int) -> str:
@@ -59,7 +34,7 @@ def generate_image_bytes(
     is used by OpenAI. The "size" is derived from width/height and coerced to a
     supported square size.
     """
-    api_key = _fetch_openai_api_key()
+    api_key = get_openai_api_key()
     if not api_key:
         raise RuntimeError("Missing OpenAI API key")
 

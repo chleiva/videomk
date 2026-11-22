@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+from functools import lru_cache
 from typing import Any, Dict, Optional, Tuple
 
 import boto3
@@ -25,6 +26,16 @@ def _parse_s3_uri(s3_uri: str) -> Tuple[str, str]:
     if not bucket or not key:
         raise ValueError("video_uri missing bucket or key")
     return bucket, key
+
+
+@lru_cache(maxsize=8)
+def _bucket_region(bucket: str) -> str:
+    """Bucket region never changes: look it up once per container, not per request."""
+    try:
+        loc = boto3.client("s3", region_name="us-east-1").get_bucket_location(Bucket=bucket).get("LocationConstraint")
+        return loc or "us-east-1"
+    except Exception:
+        return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
 
 
 def _json_response(status: int, body: Dict[str, Any]) -> Dict[str, Any]:
@@ -91,7 +102,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         resp = table.get_item(Key={"video_id": video_id})
         item = resp.get("Item") or {}
     except ClientError as e:
-        return _json_response(500, {"message": "Failed to get video", "error": str(e)})
+        return _json_response(500, {"message": "Failed to get video"})
 
     if not item:
         return _json_response(404, {"message": "Video not found"})
@@ -117,13 +128,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     download_flag = (qs.get("download") or "").lower() in ("1", "true", "yes")
     redirect_flag = (qs.get("redirect") or "").lower() in ("1", "true", "yes")
 
-    # Determine bucket region to avoid S3 PermanentRedirects
-    try:
-        meta_s3 = boto3.client("s3", region_name="us-east-1")
-        loc = meta_s3.get_bucket_location(Bucket=bucket).get("LocationConstraint")
-        bucket_region = loc or "us-east-1"
-    except Exception:
-        bucket_region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+    bucket_region = _bucket_region(bucket)
 
     # Generate a presigned URL using the bucket's region and virtual-hosted-style addressing
     s3 = boto3.client(
@@ -146,7 +151,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "get_object", Params=params, ExpiresIn=3600
         )
     except ClientError as e:
-        return _json_response(500, {"message": "Failed to sign url", "error": str(e)})
+        return _json_response(500, {"message": "Failed to sign url"})
 
     if redirect_flag:
         return {
