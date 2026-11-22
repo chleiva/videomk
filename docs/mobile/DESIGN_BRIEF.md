@@ -25,7 +25,8 @@ The video engine already has three "looks" that the app's brand should be able t
 | Sunrise | `#1C1042` → `#7A1F5C` | `#FFF7ED` | `#FB923C` | `#FDE047` |
 
 The current web app uses neutral greys, rounded 2xl cards, Inter, and a blue `#3B82F6` → pink `#EC4899` gradient for the main action.
-Typography: Inter is licensed (OFL) and already bundled; native apps should default to **SF Pro (iOS) / system or Roboto Flex (Android)** unless the designer argues for Inter.
+**Decided:** UI type is **SF Pro (iOS) and Roboto Flex/system (Android)**, for the best Dynamic Type/font scaling and native feel; Inter stays inside the generated videos. Brand expression comes from colour, motion, iconography and the wordmark: design those to carry it.
+**Decided:** Android is **brand-first**, with *Use system colours* (Material You dynamic colour) as an opt-in setting on Android 12+. Show how each screen looks in both modes; status colours never follow the wallpaper.
 Voice: plain, warm, specific; no hype, no "magic" language; errors say what happened and what to do.
 
 ## 4. Deliverables
@@ -38,14 +39,15 @@ Voice: plain, warm, specific; no hype, no "magic" language; errors say what happ
 - **Motion principles:** screen transitions, reorder lift/drop, stage-by-stage progress, success moment when a video finishes. Everything has a Reduce Motion alternative.
 
 ### 4.2 Flows and screens (iPhone, iPad, Android phone, Android tablet/foldable)
-1. **Onboarding + sign-in** (system browser handoff for sign-in; what the user sees while it opens/returns; sign-in errors).
+1. **Onboarding + sign-in:** native **Sign in with Apple** and **Sign in with Google** (one-tap sheets, no browser handoff); Apple's button must follow Apple's identity guidelines and Google's the Google branding rules; first-run value moment before asking for notifications; sign-in errors; a hidden email/password reviewer path (not shown to normal users).
 2. **Library** (grid/list; statuses: running, complete, failed, rejected-with-reason, editing; empty; offline; first-run examples).
 3. **Create** (prompt, dictation, length, look, music mood; quota remaining and exhausted; validation errors; "prompt not allowed" explanation).
 4. **Progress** (6 stages; live status; what happens if the user leaves; push permission request at the moment of value; Live Activity design for iOS lock screen/Dynamic Island, ongoing notification for Android).
 5. **Player/detail** (player controls with chapters; share/save; copy title/description; revision info; report).
 6. **Editor** (the priority screen: see 4.3).
-7. **Settings** (account, delete account confirmation, notifications, appearance, legal, report, feedback).
-8. **System surfaces:** push notification content, widgets (recent videos), share-sheet presentation, App Shortcuts/Intents UI.
+7. **Credits and purchases:** balance chip (always visible in Library/Create), cost shown before create, **free allowance states** (welcome: 3 videos in the first day; then one free video per week with a clear "next free video in…" state), the **credit store** (three packs shown honestly with what each buys, store-native purchase sheets, pending/Ask-to-Buy, failed, success), transaction history, low-balance and out-of-credits states that route to purchase without pressure, refunded-render messaging ("no credits used").
+8. **Settings** (account, delete account confirmation, notifications, appearance, *Use system colours* on Android, legal, report, feedback).
+9. **System surfaces:** push notification content, widgets (recent videos), share-sheet presentation, App Shortcuts/Intents UI.
 
 ### 4.3 The editor, in detail
 This is where design effort should concentrate. Design for one-handed phone use first, then expand to tablet.
@@ -68,7 +70,8 @@ App Store and Google Play screenshot sets (light/dark where useful), feature gra
 - Eight scene types only (listed above); the editor can't invent new ones.
 - Photos come from Unsplash and Openverse. **Attribution must be visible and linked** wherever a photo appears in the app (picker, editor row, player details), using the photographer name and "Unsplash"; Unsplash reviews screenshots of this.
 - Narration limits: 6–70 words per scene. A video has up to 90 scenes.
-- Daily generation quota (server-defined). Editing has its own limit and a "one render at a time per video" rule.
+- Money is **credits plus a free allowance, bought only through the stores**; amounts, costs and offers are server-driven and may change, so no price or credit count is hard-coded in copy or layouts (layouts must survive different numbers and currencies). Editing has its own limit and a "one render at a time per video" rule.
+- No analytics/crash SDK UI (no consent walls from third parties); telemetry is first-party and anonymous.
 - Safety: users must be able to **report** content in-app; rejected prompts show the server's reason.
 - Photos of identifiable private people are rejected by the photo reviewer; the UI should never promise a specific photo.
 

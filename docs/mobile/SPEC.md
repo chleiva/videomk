@@ -1,8 +1,8 @@
-# videomk native apps: product and technical spec (draft 1)
+# videomk native apps: product and technical spec (draft 2)
 
 Fully native clients: **iOS in Swift/SwiftUI, Android in Kotlin/Jetpack Compose.** No cross-platform runtime, no web views for product UI.
 This document is the source of truth for what gets built; `DESIGN_BRIEF.md` is what the design agent works from.
-Items marked **[DECIDE]** need a product decision; everything else is a proposal to be challenged.
+Decisions made so far are in §9. Items marked **[DECIDE]** still need a product decision; everything else is a proposal to be challenged.
 
 ## 1. Product scope
 
@@ -17,9 +17,10 @@ renders video.
 ### 1.2 v1 feature set
 | # | Feature | Notes |
 |---|---|---|
-| 1 | Sign in / sign out / delete account | Cognito, system-browser PKCE |
+| 1 | Sign in with **Apple** and **Google** (native), sign out, delete account | §11 |
 | 2 | Library | all videos with live status, pull to refresh, push when done |
-| 3 | Create | prompt, length, look, music mood; shows today's remaining quota |
+| 3 | Create | prompt, length, look, music mood; shows what the video will cost (free allowance or credits) |
+| 3b | Credits | free allowance, buy credit packs through the store, balance + history (§10) |
 | 4 | Progress | stages, not a spinner; cancel is out of scope |
 | 5 | Player | play, scrub, chapters, share/save, copy title + description (with photo credits) |
 | 6 | Editor | every part of the video (see §4); preview vs publish; revisions |
@@ -71,9 +72,9 @@ Settings (account, notifications, appearance, legal, report, delete account)
 ### 3.2 Create
 - Prompt field (10–2000 chars, validated before sending, counter), dictation, 3–5 rotating example prompts.
 - Options: **length** (1–12 min, default 3), **look** (Midnight/Paper/Sunrise), **music mood**. *(Server gap: only `prompt` is accepted today.)*
-- Shows "N of 5 videos left today"; at 0 shows when it resets and offers nothing else (no dark patterns).
+- Shows the **cost before you commit** ("Free video" or "N credits") and the balance. When there is no free allowance and not enough credits, the primary button becomes "Get credits" (opens the store sheet, §10). When a free video returns, say when ("Your next free video is in 3 days"). No dark patterns, no countdown pressure.
 - Sends `client_request_id` (UUID per attempt) so a retry never double-bills.
-- Acceptance: airplane-mode submit fails cleanly with the draft preserved; double-tap creates one video; 429 shows the quota message from the server.
+- Acceptance: airplane-mode submit fails cleanly with the draft preserved; double-tap creates one video and charges once; insufficient credits routes to purchase and returns to Create with the draft intact.
 
 ### 3.3 Progress
 Stages the user can understand: *Researching → Writing the script → Recording the voice → Choosing photos → Rendering → Finishing*.
@@ -97,7 +98,7 @@ Mirrors the web editor's capabilities, redesigned for touch.
 - Acceptance: every op the server supports can be produced from the UI; the golden diff vectors (§5.3) pass; a stale device gets a clear conflict flow; killing the app mid-edit restores the draft.
 
 ### 3.6 Settings / account / safety
-Sign out; **delete account** (in-app, removes videos, files and the Cognito user: required by Apple for apps with account creation: verify wording); notification preferences; appearance (system/light/dark); legal (privacy, terms); send feedback; **Report** on any video and inside the editor (Google Play requires in-app reporting for apps that generate AI content: verify current policy text).
+Sign out; **delete account** (in-app: removes videos, files, wallet and the Cognito user, and **revokes the Sign in with Apple token**; Apple requires this for apps with account creation: verify current wording); notification preferences; appearance (system/light/dark); legal (privacy, terms); send feedback; **Report** on any video and inside the editor (Google Play requires in-app reporting for apps that generate AI content: verify current policy text).
 
 ## 4. Native quality bar
 - **Accessibility:** Dynamic Type / font scale to the maximum sizes without truncation of essential text; VoiceOver/TalkBack labels, actions for reorder (accessibility actions, not drag only), focus order; 4.5:1 contrast; Reduce Motion respected; captions are burned into videos already (no soft captions v1).
@@ -122,7 +123,9 @@ Add `api/openapi.yaml` describing every endpoint, schema, error shape and the ed
 | Need | Why |
 |---|---|
 | `POST /…/generate` accepts `target_minutes`, `theme`, `mood` | Create options |
-| `GET /users/{u}/quota` (remaining, resets_at); quota in 429 body | Show remaining videos |
+| Wallet & entitlements (§10): `GET /users/{u}/wallet`, cost quote on create, credit ledger, purchase verification, store server notifications | Free allowance + paid credits; **replaces the daily quota** |
+| `POST /auth/social` (Apple/Google ID-token exchange) + provider flags in `/config` (§11) | Native one-tap sign-in |
+| `POST /telemetry` (batched events + crash/hang reports) → structured CloudWatch logs and metrics (§12) | Our own analytics and crash reporting |
 | Progress: `progress {stage, done, total}` on the video item/list | Real progress UI, Live Activity |
 | Cursor pagination + `ETag`/`If-None-Match` on the list | Large libraries, cheap refresh |
 | `POST /devices` (register APNs/FCM token), `DELETE /devices/{id}`; send on COMPLETE/FAILED/EDIT_READY | Push (APNs direct for Live Activity updates; FCM for Android) |
@@ -132,14 +135,14 @@ Add `api/openapi.yaml` describing every endpoint, schema, error shape and the ed
 | Signed URL for a beat's narration audio | "Listen to this scene" in the editor |
 | `GET /config` (unauthenticated): min supported app version, feature flags, legal URLs | Forced upgrade, kill switches |
 | `X-App-Version`, `X-Platform` headers + `/v1` versioning | Safe evolution of an API that installed apps keep calling |
-| Cognito mobile app client with custom-scheme callback (S256 PKCE only) | Native sign-in |
+| Cognito mobile app client; federated Google/Apple for the web's Hosted UI (S256 PKCE only) | Web parity; native apps use `/auth/social` |
 
 ## 6. Build, test, release
 - **Repo layout:** `mobile/ios`, `mobile/android`, `api/`, `design/tokens.json` (design tokens exported by the design agent and compiled to Swift/Kotlin by a script).
 - **CI:** build + unit + UI/screenshot tests for both apps on every PR; contract tests against the OpenAPI spec; lint (SwiftLint/ktlint/detekt).
-- **Distribution:** TestFlight and Play internal/closed testing tracks; staged rollouts; crash reporting and non-identifying product analytics (**[DECIDE]** vendor).
-- **Store readiness:** privacy policy matching actual data handling, App Privacy "nutrition label" and Play Data safety form, age/content rating questionnaires (declare AI-generated content), account-deletion path, in-app reporting, review notes with a demo account and sample prompts, export-compliance answers (HTTPS only). Google Play: a new *personal* developer account must run a closed test with 12 testers for 14 days first; organisation accounts are exempt.
-- **Payments:** if anything is sold in-app (**[DECIDE]**), digital goods use Apple/Google billing; design the entitlement model on the server first.
+- **Distribution:** TestFlight and Play internal/closed testing tracks; staged rollouts. Crash reporting and analytics are our own (§12): no third-party SDKs.
+- **Store readiness:** privacy policy matching actual data handling (including telemetry and purchases), App Privacy "nutrition label" and Play Data safety form, age/content rating questionnaires (declare AI-generated content), account-deletion path, in-app reporting, review notes with a demo account and sample prompts, export-compliance answers (HTTPS only). Google Play: a new *personal* developer account must run a closed test with 12 testers for 14 days first; organisation accounts are exempt.
+- **Payments:** credits are consumable digital goods sold only through Apple/Google billing (§10); there is no web checkout.
 
 ## 7. Build constraints and how we handle them
 - **iOS cannot be compiled or run in the cloud sandbox this assistant works in** (Xcode needs macOS). Without a connected Mac, Swift UI code would be written blind. Plan: put everything that isn't UI (models, API client, auth state machine, diff/validation, formatting) in plain Swift packages that are unit-tested against the shared fixtures, and do UI work with a Mac connected (simulator builds, screenshots, XCUITests). Android has no such limit.
@@ -153,10 +156,79 @@ Add `api/openapi.yaml` describing every endpoint, schema, error shape and the ed
 4. **Native extras:** Live Activity / ongoing notification, widgets, share targets, App Intents/Shortcuts.
 5. **Hardening and store readiness:** accessibility audit, performance budgets, safety/reporting, account deletion, beta tracks, review submissions.
 
-## 9. Open decisions
-1. Minimum OS versions and tablet support (§2).
-2. Monetization: free, quota-only, or paid credits/subscription (decides entitlement design and store billing).
-3. Auth methods: email + password only, or social login (Apple requires an equivalent privacy-preserving option when third-party login is offered: verify current guideline 4.8 text).
-4. Analytics and crash-reporting vendors.
-5. Do reviewers/collaborators belong in v1?
-6. App name, bundle/application ids, store accounts (personal vs organisation on Google Play).
+## 9. Decisions
+
+### Made
+| # | Decision |
+|---|---|
+| 1 | **Platforms:** SwiftUI iOS 17+ (iPhone + iPad adaptive) and Compose Android 8+ (phones + tablets/foldables). Fully native, no cross-platform runtime. |
+| 2 | **Money:** free allowance + credits, bought **only through the stores**. Pricing, allowances and credit costs are **server-driven and changeable without an app update** (§10). |
+| 3 | **Sign-in:** native Sign in with **Apple** and **Google**; providers are server-configurable; email/password exists only as a hidden reviewer/test path (§11). |
+| 4 | **Analytics and crash reporting:** our own, minimal, logged to CloudWatch, plus the stores' own crash consoles. No analytics or crash vendors (§12). |
+| 5 | **Collaboration / reviewers:** not in v1. Revisit later. |
+| 6 | **Identity:** name **videomk** (domain videomk.com). Organisation accounts exist for Apple and Google Play. Proposed ids: iOS `com.videomk.app`, Android `com.videomk.app`; confirm before registering. |
+| 7 | **Android colour:** brand-first, with *Use system colours* (Material You dynamic colour) as an opt-in setting on Android 12+. Rationale: videomk's identity is tied to the video looks users see; dynamic colour stays available for people who expect it. Status colours (success/warning/danger) never follow the wallpaper. |
+| 8 | **Type:** system fonts for UI (SF Pro on iOS, Roboto Flex/system on Android) for best Dynamic Type/font-scaling, platform feel and no bundling. Brand expression comes from colour, motion, iconography and the wordmark. Inter remains the typeface *inside the generated videos*. |
+
+### Still open
+- Credit pack contents (how many credits per pack) and the credit cost per video minute: needs numbers (§10.2).
+- Whether free videos are capped in length or carry a watermark.
+- Whether edits are free or consume credits (proposal in §10.3).
+
+## 10. Credits, free allowance and purchases
+
+### 10.1 Product rules (proposal, all values live in server config)
+- **Welcome allowance:** the first 24 hours after an account is created: **3 free videos**.
+- **Weekly free video:** afterwards **1 free video per 7 days** (rolling from the last free use; the UI shows when the next one unlocks).
+- **Credits:** consumable packs bought in-app. You specified three packs at about **$10, $20 and $200** (store price points are fixed tiers, e.g. $9.99, $19.99, $199.99). Credits don't expire (expiry rules vary by region).
+- **Spending order:** welcome/weekly free allowance first, then credits.
+- **Cost of a video:** server-defined function of requested length, e.g. `credits = ceil(minutes) × credits_per_minute`; the app always asks the server for a **quote** before create and shows it; the server charges exactly what it quoted.
+- **Failures are free:** rejected prompts and failed renders refund the charge (same mechanism as today's quota refund).
+- **Server-driven:** free allowance sizes/timing, credit cost per minute, which products are offered and how many credits each grants, and any free-tier limits come from `/config` and the wallet endpoint. Only the store product ids and prices are fixed by the stores; change them in App Store Connect / Play Console.
+
+### 10.2 Unit economics (illustration only: your numbers decide)
+Estimated production cost is roughly **$0.03–0.05 per finished minute** (planning, voice, photo review, render; see `docs/ENGINE.md`: estimates, not measured on real traffic). If 1 credit = 1 minute and a $9.99 pack granted 50 credits, revenue would be about $0.20/min, about $0.17 after a 15% store commission (30% in some cases) against about $0.05 cost. This only shows the margin is wide enough to be generous; pack sizes are a business decision. **[DECIDE]**
+
+### 10.3 Edits
+Proposal: previews and edits are **included** (bounded by the per-revision cost cap and daily edit limit that already exist); re-evaluate with real usage. A fresh video from a new prompt is what costs credits.
+
+### 10.4 Architecture
+- **Server owns the wallet.** A DynamoDB ledger (append-only transactions keyed by an idempotency id) + a balance item updated with conditional writes. Charge happens at `generate` (reservation), refund on reject/fail, so the existing REJECTED/failed paths keep working.
+- **iOS purchase:** StoreKit 2 `Product.purchase(options: [.appAccountToken(userUUID)])` → send the signed transaction (JWS) to `POST /purchases/apple` → server verifies the Apple signature chain / queries the App Store Server API, credits the wallet **idempotently by transaction id**, then the app calls `transaction.finish()`. Server also subscribes to **App Store Server Notifications V2** (refunds/revocations → debit or flag).
+- **Android purchase:** Play Billing Library `launchBillingFlow` with `obfuscatedAccountId` → send the purchase token to `POST /purchases/google` → server verifies with the **Google Play Developer API**, grants credits idempotently, then **consumes** the purchase (consumables must be consumed/acknowledged within the allowed window). Server subscribes to **Real-time developer notifications** for voided purchases.
+- **Pending/deferred purchases** (Ask to Buy, slow payment methods) are handled as a visible "pending" state; credits arrive when the store confirms.
+- **Abuse:** free allowance is per account; consider device attestation (App Attest / Play Integrity) before granting free allowances at scale.
+- No purchases, prices or external payment links on the web app for now (store-policy risk).
+- Verify against current Apple/Google billing documentation before implementing; the store rules and APIs change.
+
+## 11. Sign-in
+
+- **Providers:** Sign in with Apple (`ASAuthorizationController`) and Sign in with Google (Credential Manager on Android; Google Sign-In on iOS). Apple requires an equivalent privacy-preserving option when third-party login is offered, and we offer Apple itself.
+- **Native one-tap, server-verified:** the app obtains the provider's ID token (with a nonce) and calls `POST /auth/social`. The server verifies signature (provider JWKS, cached), issuer, audience (our client ids), expiry and nonce, then maps to a **Cognito user** (link by provider subject; verified-email linking only when the provider asserts it) and returns normal Cognito tokens (custom-auth challenge flow). No passwords are stored. The web app keeps Cognito Hosted UI with the same federated providers.
+- **Apple specifics:** the user's name is only delivered on first authorisation (store it then); private-relay emails are valid identities; on account deletion the server calls Apple's token-revocation endpoint.
+- **Changeable:** enabled providers come from `/config`. An email/password path is kept behind a flag for App Review and QA (Apple reviewers need working credentials), and can be hidden in production builds.
+- Tokens live in Keychain / Keystore-encrypted storage; refresh is silent; sign-out revokes the refresh token server-side.
+
+## 12. Analytics and crash reporting (our own)
+
+- **Principle:** the smallest thing that answers real questions. Nothing is sent to third parties; the stores' own consoles cover crashes/ANRs too (App Store Connect/Xcode Organizer, Play Console Android vitals).
+- **Transport:** `POST /telemetry` (batched, gzip, size- and rate-limited) → a Lambda writes **one structured JSON log line per event** and emits **CloudWatch Embedded Metric Format** counters. Dashboards and ad-hoc questions use CloudWatch Logs Insights; alarms on a few metrics (e.g. crash-free sessions, sign-in failures, purchase-verification failures, render failures, API 5xx). Short log retention (e.g. 30 days). No idle cost.
+- **Events (allowlist, versioned schema):** app_open, sign_in_started/succeeded/failed (provider only), create_started/succeeded/failed (length, look; **never the prompt text**), render_completed (duration), editor_opened, edit_submitted (op counts by type), preview/publish, purchase_started/succeeded/failed/pending, paywall_viewed, share, report_submitted, notification_permission result, screen views.
+- **Crashes and hangs:** iOS via **MetricKit** diagnostics (crashes, hangs, CPU/disk exceptions) delivered on next launch; Android via an `UncaughtExceptionHandler` that writes a report to disk plus **`ApplicationExitInfo`** (ANRs, native crashes, OOM kills), uploaded on next launch. Each report carries app version/build, OS version, device model class, stack and a short breadcrumb trail (screen names, no content).
+- **Symbolication:** keep each release's **dSYMs** and Android **R8 mapping files** in S3; a small script symbolicates a report on demand.
+- **Privacy:** an install id (random, resettable, **not linked to the account**) instead of user ids; no prompts, narration, photo queries, emails or tokens; coarse OS/device class only. This lets the privacy label state diagnostics/analytics are not linked to identity: confirm against what actually ships.
+- **Abuse:** the endpoint accepts anonymous traffic (crashes can precede sign-in), so it has an API key, payload and rate caps, schema validation and is never trusted for decisions.
+
+## 13. What you will need to provide (never paste secrets into chat)
+
+| Item | Where it goes |
+|---|---|
+| Apple: Team ID; register `com.videomk.app` with capabilities **Sign in with Apple, Push Notifications, In-App Purchase, Associated Domains**; App Store Connect API key (Issuer ID, Key ID, `.p8`) for CI uploads; APNs auth key (`.p8`); Sign in with Apple key; IAP products created for the three packs; App Store Server Notifications V2 URL set to our endpoint | CI secrets / AWS SSM SecureString (I'll tell you the exact names) |
+| Google: Play Console app with application id `com.videomk.app`; Play App Signing SHA-256 fingerprint; service account JSON with Play Developer API access (for publishing and purchase verification); OAuth client ids (Android + Web) for Sign in with Google; a **Firebase project used only as the FCM push transport** (no Analytics SDK); Pub/Sub topic for real-time developer notifications; in-app products created for the packs | CI secrets / AWS SSM |
+| Domain: host the `apple-app-site-association` and `assetlinks.json` files on videomk.com (universal/app links) | videomk.com |
+| Legal: privacy policy and terms that match §10–12; support URL; data-safety/App Privacy answers; age/content ratings | store consoles |
+| Accounts: tax/banking agreements completed in both consoles (required to sell) | store consoles |
+| AWS: the target account/region for the backend (see the earlier question about the old account) | `backend` stage config |
+
+## 14. Backend work this adds, in order of dependency
+1. OpenAPI spec + golden fixtures. 2. Wallet/ledger, quote, free-allowance rules, config endpoint (replaces the daily quota). 3. `/auth/social`. 4. Purchase verification (Apple, Google) + store notifications. 5. Progress stages, pagination/ETag, devices + push, account deletion, reports, revisions, beat audio URLs. 6. Telemetry endpoint, dashboards and alarms.
