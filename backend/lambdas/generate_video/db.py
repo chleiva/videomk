@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import boto3
 from botocore.exceptions import ClientError
@@ -61,3 +61,20 @@ def update_status(
         if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
             return {}
         raise
+
+
+def set_attributes(video_id: str, attrs: Dict[str, Any], remove: Optional[List[str]] = None, table_name: Optional[str] = None) -> None:
+    """Set/remove plain attributes WITHOUT the terminal-status guard (used for edit bookkeeping on COMPLETE videos)."""
+    names, values, sets = {}, {}, []
+    for k, v in attrs.items():
+        names[f"#{k}"], values[f":{k}"] = k, v
+        sets.append(f"#{k} = :{k}")
+    expr = ("SET " + ", ".join(sets)) if sets else ""
+    if remove:
+        for k in remove:
+            names[f"#r_{k}"] = k
+        expr += (" " if expr else "") + "REMOVE " + ", ".join(f"#r_{k}" for k in remove)
+    kwargs: Dict[str, Any] = {"Key": {"video_id": video_id}, "UpdateExpression": expr, "ExpressionAttributeNames": names}
+    if values:
+        kwargs["ExpressionAttributeValues"] = values
+    _get_table(table_name).update_item(**kwargs)

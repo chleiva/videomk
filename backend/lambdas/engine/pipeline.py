@@ -25,16 +25,18 @@ def render_chunk(
     *,
     draft: bool = False,
 ) -> Dict[str, Any]:
+    """Render frames [f0, f1) of `timeline` into a TS segment whose timestamps start at 0.
+
+    Every segment starts on an IDR frame (fresh encoder), so segments of any length concatenate with `-c copy`.
+    """
     r = Renderer(timeline, image_loader, draft=draft)
     gop = r.fps * GOP_SECONDS
-    if f0 % gop:
-        raise ValueError(f"chunk start {f0} is not a multiple of the GOP ({gop})")
     n = media.encode_segment(
         r.frames(f0, f1), out_path,
-        width=r.out_w, height=r.out_h, fps=r.fps, start_time=f0 / r.fps, gop=gop,
+        width=r.out_w, height=r.out_h, fps=r.fps, start_time=0.0, gop=gop,
         crf=28 if draft else 20, preset="ultrafast" if draft else "veryfast",
     )
-    return {"frames": n, "f0": f0, "f1": f0 + n}
+    return {"frames": n}
 
 
 def sfx_events(timeline: Dict[str, Any]) -> List[Tuple[float, str, float]]:

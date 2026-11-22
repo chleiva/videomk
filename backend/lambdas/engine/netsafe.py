@@ -53,5 +53,5 @@ def fetch_bytes(url: str, *, max_bytes: int = 15_000_000, timeout: int = 20, hea
     return data
 
 
-def fetch_json(url: str, *, timeout: int = 15) -> Any:
-    return json.loads(fetch_bytes(url, max_bytes=2_000_000, timeout=timeout, headers={"Accept": "application/json"}))
+def fetch_json(url: str, *, timeout: int = 15, headers: Optional[Dict[str, str]] = None) -> Any:
+    return json.loads(fetch_bytes(url, max_bytes=2_000_000, timeout=timeout, headers={"Accept": "application/json", **(headers or {})}))

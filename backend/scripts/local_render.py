@@ -21,7 +21,7 @@ from PIL import Image  # noqa: E402
 
 from engine import media, pipeline  # noqa: E402
 from engine.tts import MockTTS, synth_beat  # noqa: E402
-from engine.timeline import chunk_ranges  # noqa: E402
+from engine.timeline import chunk_plan, chunk_timeline  # noqa: E402
 
 
 def _demo_photo():
@@ -37,10 +37,10 @@ def _loader(key):
 
 
 def _work(args):
-    tl, k, f0, f1, path, draft = args
+    tl, c, path, draft = args
     t = time.time()
-    pipeline.render_chunk(tl, f0, f1, path, _loader, draft=draft)
-    return k, path, time.time() - t, f1 - f0
+    pipeline.render_chunk(chunk_timeline(tl, c["lo"], c["hi"]), 0, c["frames"], path, _loader, draft=draft)
+    return c["k"], path, time.time() - t, c["frames"]
 
 
 def main():
@@ -53,10 +53,10 @@ def main():
     a = ap.parse_args()
 
     tl = json.load(open(a.timeline))
-    chunks = chunk_ranges(tl, a.chunk_seconds)
+    chunks = chunk_plan(tl, a.chunk_seconds, draft=a.draft)
     t0 = time.time()
     with tempfile.TemporaryDirectory() as tmp:
-        jobs = [(tl, c["k"], c["f0"], c["f1"], os.path.join(tmp, f"seg_{c['k']:03d}.ts"), a.draft) for c in chunks]
+        jobs = [(tl, c, os.path.join(tmp, f"seg_{c['k']:03d}.ts"), a.draft) for c in chunks]
         with ProcessPoolExecutor(max_workers=a.workers) as ex:
             results = sorted(ex.map(_work, jobs))
         t_render = time.time() - t0

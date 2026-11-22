@@ -17,20 +17,23 @@ class CostCapExceeded(RuntimeError):
     pass
 
 
-def add_cost(video_id: str, usd: float, table_name: str | None = None) -> float:
+def add_cost(video_id: str, usd: float, table_name: str | None = None, field: str = "cost_usd") -> float:
     """Atomically add `usd`; raises CostCapExceeded (job fails, quota refunded) if the cap would be passed."""
+    if not field.replace("_", "").isalnum():
+        raise ValueError("bad cost field")
     if usd <= 0:  # nothing to record (e.g. mock provider); also avoids a no-op write
         return 0.0
     table = boto3.resource("dynamodb").Table(table_name or os.environ.get("VIDEOS_TABLE", "Videos"))
     try:
         res = table.update_item(
             Key={"video_id": video_id},
-            UpdateExpression="ADD cost_usd :c",
-            ConditionExpression="attribute_not_exists(cost_usd) OR cost_usd <= :room",
+            UpdateExpression="ADD #f :c",
+            ConditionExpression="attribute_not_exists(#f) OR #f <= :room",
+            ExpressionAttributeNames={"#f": field},
             ExpressionAttributeValues={":c": Decimal(str(round(usd, 6))), ":room": Decimal(str(round(MAX_COST_USD - usd, 6)))},
             ReturnValues="UPDATED_NEW",
         )
-        return float(res.get("Attributes", {}).get("cost_usd", usd))
+        return float(res.get("Attributes", {}).get(field, usd))
     except ClientError as e:
         if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
             raise CostCapExceeded(f"video exceeded the ${MAX_COST_USD:.2f} cost cap") from e

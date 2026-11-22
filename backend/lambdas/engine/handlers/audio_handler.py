@@ -17,15 +17,18 @@ def _load_wav(key: str, tmp: str):
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    video_id = str(event["video_id"])
+    video_id, rev = str(event["video_id"]), int(event.get("rev", 1))
     pfx = awsio.prefix(video_id)
     tl = awsio.get_json(event["timeline_key"])
+    prefix_audio = pfx + "audio/"
+    keys = [sc["audio_key"] for sc in tl["scenes"]]
+    if not all(isinstance(k, str) and k.startswith(prefix_audio) and ".." not in k for k in keys):
+        raise ValueError("timeline references audio outside this video")
     with tempfile.TemporaryDirectory() as tmp:
-        keys = [f"{pfx}audio/beat_{i:03d}.wav" for i in range(len(tl["scenes"]))]
         with ThreadPoolExecutor(max_workers=8) as ex:
             beats = list(ex.map(lambda k: _load_wav(k, tmp), keys))
         out = os.path.join(tmp, "mix.m4a")
         pipeline.make_audio(tl, beats, out)
-        key = pfx + "audio/mix.m4a"
+        key = f"{pfx}audio/mix_r{rev}_{event.get('mode', 'final')}.m4a"
         awsio.upload(out, key, "audio/mp4")
     return {"key": key}

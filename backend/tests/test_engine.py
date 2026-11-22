@@ -12,7 +12,7 @@ from engine import align, assets, audio, media, pipeline, plan as plan_mod, rese
 from engine.renderer import Renderer
 from engine.scenes import SCENE_TYPES
 from engine.scenes.captions import paginate
-from engine.timeline import build_timeline, chunk_ranges
+from engine.timeline import build_timeline, chunk_plan, chunk_timeline
 
 FIX = os.path.join(os.path.dirname(__file__), "fixtures", "demo_timeline.json")
 
@@ -92,30 +92,76 @@ def test_captions_paginate_and_highlight_by_time():
 
 
 # ----------------------------------------------------------------------------- chunking / seams
-def test_chunked_render_stitches_with_exact_duration_and_gop_aligned_chunks():
-    tl = small_timeline(6.0, ["title", "bullets", "chart"])
-    chunks = chunk_ranges(tl, chunk_seconds=2)
-    assert [c["f0"] for c in chunks] == [0, 60, 120] and chunks[-1]["f1"] == 180
+def test_chunked_render_stitches_with_exact_duration_and_continuous_timestamps():
+    tl = small_timeline(9.0, ["title", "bullets", "chart"])
+    chunks = chunk_plan(tl, target_seconds=3)
+    assert len(chunks) == 3 and sum(c["frames"] for c in chunks) == 270
     with tempfile.TemporaryDirectory() as tmp:
         segs = []
         for c in chunks:
             p = os.path.join(tmp, f"{c['k']}.ts")
-            pipeline.render_chunk(tl, c["f0"], c["f1"], p, draft=True)
+            pipeline.render_chunk(chunk_timeline(tl, c["lo"], c["hi"]), 0, c["frames"], p, draft=True)
             segs.append(p)
         out = os.path.join(tmp, "o.mp4")
         media.mux_final(segs, None, out, fps=30)
-        assert abs(media.ffprobe_duration(out) - 6.0) < 0.1
+        assert abs(media.ffprobe_duration(out) - 9.0) < 0.1
         pts = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "frame=pts_time", "-of", "csv=p=0", out],
                              capture_output=True, text=True).stdout.split()
-        pts = [float(x.strip(",")) for x in pts]
-        assert len(pts) == 180
-        diffs = np.diff(sorted(pts))
-        assert np.allclose(diffs, 1 / 30, atol=1e-3), "timestamps must be continuous across chunk seams"
+        pts = sorted(float(x.strip(",")) for x in pts)
+        assert len(pts) == 270
+        assert np.allclose(np.diff(pts), 1 / 30, atol=1e-3), "timestamps must be continuous across chunk seams"
 
 
-def test_render_chunk_rejects_non_gop_start():
-    with pytest.raises(ValueError):
-        pipeline.render_chunk(small_timeline(), 7, 40, "/tmp/x.ts")
+def _six_scene_timeline():
+    tl = small_timeline(60.0, ["title", "bullets", "chart", "stat", "quote", "timeline"])
+    for i, sc in enumerate(tl["scenes"]):
+        sc["id"] = f"{i:08x}"
+    return tl
+
+
+def test_chunk_hash_is_position_independent_and_edit_local():
+    """The property the editor relies on: an edit re-renders its own chunk only; shifted-but-identical chunks stay cached."""
+    tl = _six_scene_timeline()
+    base = chunk_plan(tl, 20)
+    assert [(c["lo"], c["hi"]) for c in base] == [(0, 2), (2, 4), (4, 6)]
+
+    edited = json.loads(json.dumps(tl))
+    edited["scenes"][0]["props"]["title"] = "A different title"
+    edited["scenes"][0]["duration"] += 2.0          # longer scene => every later scene moves 2 s later
+    for sc in edited["scenes"][1:]:
+        sc["start"] += 2.0
+    new = chunk_plan(edited, 20)
+    assert new[0]["hash"] != base[0]["hash"]        # the edited chunk
+    assert new[1]["hash"] == base[1]["hash"]        # moved 2 s later in the video, same content => cache hit
+    assert new[2]["hash"] == base[2]["hash"]
+    # editing the LAST scene of a chunk also invalidates the next chunk (its opening crossfade shows that scene)
+    e2 = json.loads(json.dumps(tl))
+    e2["scenes"][1]["props"]["items"] = ["x", "y"]
+    n2 = chunk_plan(e2, 20)
+    assert n2[0]["hash"] != base[0]["hash"] and n2[1]["hash"] != base[1]["hash"] and n2[2]["hash"] == base[2]["hash"]
+    # draft and final never share a cache entry; a renderer version bump invalidates everything
+    assert chunk_plan(tl, 20, draft=True)[0]["hash"] != base[0]["hash"]
+
+
+def test_chunk_frame_counts_sum_exactly_to_the_total():
+    tl = small_timeline(61.7, ["title", "bullets", "chart", "stat", "quote", "timeline", "diagram"])
+    tl["scenes"] = [dict(sc, start=round(i * 61.7 / 7, 4), duration=round(61.7 / 7, 4)) for i, sc in enumerate(tl["scenes"])]
+    tl["duration"] = round(sum(s["duration"] for s in tl["scenes"]), 4)
+    for target in (5, 12, 20, 45):
+        assert sum(c["frames"] for c in chunk_plan(tl, target)) == round(tl["duration"] * 30)
+
+
+def test_chunk_render_is_identical_wherever_the_chunk_sits():
+    """Same scenes at a different absolute time => pixel-identical frames (what makes cached segments reusable)."""
+    tl = _six_scene_timeline()
+    shifted = json.loads(json.dumps(tl))
+    for sc in shifted["scenes"]:
+        sc["start"] += 7.3
+    c1, c2 = chunk_plan(tl, 20)[1], chunk_plan(shifted, 20)[1]
+    assert c1["hash"] == c2["hash"]
+    r1, r2 = Renderer(chunk_timeline(tl, c1["lo"], c1["hi"])), Renderer(chunk_timeline(shifted, c2["lo"], c2["hi"]))
+    for f in (0, 10, 200, 350):
+        assert np.array_equal(np.asarray(r1.frame_at(f / 30)), np.asarray(r2.frame_at(f / 30)))
 
 
 # ----------------------------------------------------------------------------- audio
@@ -250,13 +296,29 @@ def test_rejected_plan_passes_reason_through():
     assert p == {"legit": False, "reason": "Not suitable."}
 
 
-def test_timeline_durations_follow_audio_and_chunks_are_gop_aligned():
+def test_timeline_durations_follow_audio_and_scenes_use_beat_ids():
     plan, _ = plan_mod.validate_plan(GOOD_PLAN)
     tl = build_timeline(plan, [{"duration": 4.0}, {"duration": 9.0}, {"duration": 20.0}], video_id="v")
     assert [round(s["duration"], 2) for s in tl["scenes"][:2]] == [4.95, 9.95]
     assert tl["scenes"][1]["start"] == pytest.approx(tl["scenes"][0]["duration"])
+    assert [s["id"] for s in tl["scenes"]] == [b["id"] for b in plan["beats"]] and all(len(b["id"]) == 8 for b in plan["beats"])
     assert tl["chapters"][0]["title"] == "Intro" and tl["duration"] == pytest.approx(sum(s["duration"] for s in tl["scenes"]), abs=1e-3)
-    assert all(c["f0"] % 60 == 0 for c in chunk_ranges(tl, 30))
+    assert sum(c["frames"] for c in chunk_plan(tl, 30)) == round(tl["duration"] * 30)
+
+
+def test_beat_ids_are_strict_and_media_staleness_tracks_content():
+    plan, _ = plan_mod.validate_plan({**GOOD_PLAN, "beats": [dict(b, id="../../etc") for b in GOOD_PLAN["beats"]]})
+    assert all(plan_mod._ID_RE.match(b["id"]) for b in plan["beats"])  # an id from outside can never reach an S3 key
+    plan["tts"] = {"provider": "mock", "voice": "", "style": ""}
+    b = plan["beats"][0]
+    assert plan_mod.needs_media(plan, b)
+    b["media"] = {"tts_hash": plan_mod.tts_hash(plan, b), "audio_key": "k", "duration": 3.0}
+    assert not plan_mod.needs_media(plan, b)
+    b["narration"] += " And one more sentence."
+    assert plan_mod.needs_media(plan, b)
+    plan["tts"]["voice"] = "Puck"
+    b["media"]["tts_hash"] = "stale"
+    assert plan_mod.needs_media(plan, b)
 
 
 def test_image_scene_without_asset_degrades_to_title_card():

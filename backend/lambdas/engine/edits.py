@@ -1,0 +1,139 @@
+"""Human edits as small, validated operations on the plan. Pure functions: the editor API and the tests both use them.
+
+Anything a person can type is untrusted exactly like LLM output: every changed field goes back through the same
+sanitisers, ids must match the strict 8-hex shape, and a human can never choose a file path or an S3 key.
+"""
+import copy
+import re
+from typing import Any, Dict, List, Tuple
+
+from . import plan as plan_mod
+from .scenes import SCENE_TYPES
+from .theme import THEMES
+
+MAX_OPS = 40
+_CAND_RE = re.compile(r"^(unsplash|openverse):[A-Za-z0-9_\-]{1,40}$")
+_VOICE_RE = re.compile(r"^[A-Za-z0-9_\- ]{0,40}$")
+
+
+class EditError(ValueError):
+    pass
+
+
+def _find(beats: List[Dict[str, Any]], bid: Any) -> int:
+    for i, b in enumerate(beats):
+        if b["id"] == bid:
+            return i
+    raise EditError(f"unknown beat id {bid!r}")
+
+
+def _narration(text: Any) -> str:
+    t = plan_mod._s(text, 700)
+    n = len(t.split())
+    if n < plan_mod.MIN_BEAT_WORDS:
+        raise EditError(f"narration needs at least {plan_mod.MIN_BEAT_WORDS} words")
+    if n > plan_mod.MAX_BEAT_WORDS:
+        raise EditError(f"narration is limited to {plan_mod.MAX_BEAT_WORDS} words per beat; split it into two beats")
+    return t
+
+
+def _scene(stype: Any, props: Any) -> Dict[str, Any]:
+    if stype not in SCENE_TYPES:
+        raise EditError(f"unknown scene type {stype!r}")
+    try:
+        return {"type": stype, "props": plan_mod.sanitize_props(stype, props if isinstance(props, dict) else {})}
+    except (ValueError, TypeError, AttributeError) as e:
+        raise EditError(f"invalid {stype} scene: {e}") from e
+
+
+def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_BEATS) -> Tuple[Dict[str, Any], List[str]]:
+    """Returns (new_plan, touched_beat_ids). Raises EditError on the first invalid op: all-or-nothing."""
+    if not isinstance(ops, list) or not ops:
+        raise EditError("ops must be a non-empty list")
+    if len(ops) > MAX_OPS:
+        raise EditError(f"at most {MAX_OPS} operations per edit")
+    new = copy.deepcopy(plan)
+    beats: List[Dict[str, Any]] = new["beats"]
+    touched: List[str] = []
+
+    def touch(bid: str) -> None:
+        if bid not in touched:
+            touched.append(bid)
+
+    for op in ops:
+        if not isinstance(op, dict):
+            raise EditError("each op must be an object")
+        kind = op.get("op")
+        if kind == "set_narration":
+            i = _find(beats, op.get("id"))
+            beats[i]["narration"] = _narration(op.get("text"))
+            touch(beats[i]["id"])
+        elif kind == "set_scene":
+            i = _find(beats, op.get("id"))
+            beats[i]["scene"] = _scene(op.get("type"), op.get("props"))
+            beats[i].pop("pick", None)  # a new scene invalidates a previously picked photo
+            touch(beats[i]["id"])
+        elif kind == "pick_image":
+            i = _find(beats, op.get("id"))
+            if beats[i]["scene"]["type"] != "image":
+                raise EditError("pick_image applies to image scenes")
+            cand = op.get("candidate")
+            if not isinstance(cand, str) or not _CAND_RE.match(cand):
+                raise EditError("bad candidate id")
+            beats[i]["pick"] = cand
+            touch(beats[i]["id"])
+        elif kind == "insert":
+            if len(beats) >= max_beats:
+                raise EditError(f"a video can have at most {max_beats} beats")
+            after = op.get("after")
+            at = 0 if after in (None, "") else _find(beats, after) + 1
+            sc = op.get("scene") or {}
+            beat = {"id": plan_mod.new_beat_id(None, {b["id"] for b in beats}), "narration": _narration(op.get("narration")), "scene": _scene(sc.get("type"), sc.get("props"))}
+            if plan_mod._s(op.get("chapter"), 60):
+                beat["chapter"] = plan_mod._s(op.get("chapter"), 60)
+            beats.insert(at, beat)
+            touch(beat["id"])
+        elif kind == "delete":
+            if len(beats) <= 1:
+                raise EditError("a video needs at least one beat")
+            beats.pop(_find(beats, op.get("id")))
+        elif kind == "move":
+            i = _find(beats, op.get("id"))
+            to = op.get("to")
+            if isinstance(to, bool) or not isinstance(to, int) or not 0 <= to < len(beats):
+                raise EditError("'to' is out of range")
+            beats.insert(to, beats.pop(i))
+        elif kind == "set_chapter":
+            i = _find(beats, op.get("id"))
+            title = plan_mod._s(op.get("title"), 60)
+            beats[i].pop("chapter", None)
+            if title:
+                beats[i]["chapter"] = title
+        elif kind == "set_meta":
+            if "title" in op:
+                t = plan_mod._s(op["title"], 60)
+                if not t:
+                    raise EditError("title cannot be empty")
+                new["title"] = t
+            if "description" in op:
+                new["description"] = plan_mod._s(op["description"], 400)
+            if "theme" in op:
+                if op["theme"] not in THEMES:
+                    raise EditError("unknown theme")
+                new["theme"] = op["theme"]
+            if "mood" in op:
+                if op["mood"] not in ("calm", "bright", "tense"):
+                    raise EditError("unknown mood")
+                new["mood"] = op["mood"]
+        elif kind == "set_voice":
+            voice = str(op.get("voice", ""))
+            if not _VOICE_RE.match(voice):
+                raise EditError("bad voice name")
+            new.setdefault("tts", {})["voice"] = voice
+            if "style" in op:
+                new["tts"]["style"] = plan_mod._s(op["style"], 160)
+        else:
+            raise EditError(f"unknown op {kind!r}")
+    if not beats:
+        raise EditError("a video needs at least one beat")
+    return new, touched

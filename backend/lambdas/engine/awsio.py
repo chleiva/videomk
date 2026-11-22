@@ -1,8 +1,11 @@
 import json
 import os
-from typing import Any, Optional
+from functools import lru_cache
+from typing import Any, Dict, Optional
 
 import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
 
 _s3 = None
 
@@ -47,3 +50,33 @@ def download(key: str, path: str) -> None:
 
 def upload(path: str, key: str, content_type: str, bkt: Optional[str] = None) -> None:
     s3().upload_file(path, bkt or bucket(), key, ExtraArgs={"ContentType": content_type})
+
+
+def head(key: str) -> Optional[Dict[str, Any]]:
+    """Object metadata, or None when it doesn't exist (used for content-addressed cache hits)."""
+    try:
+        return s3().head_object(Bucket=bucket(), Key=key)
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+            return None
+        raise
+
+
+def put_bytes_meta(key: str, data: bytes, content_type: str, metadata: Dict[str, str]) -> None:
+    s3().put_object(Bucket=bucket(), Key=key, Body=data, ContentType=content_type, Metadata=metadata)
+
+
+@lru_cache(maxsize=4)
+def _region_of(bkt: str) -> str:
+    try:
+        loc = boto3.client("s3", region_name="us-east-1").get_bucket_location(Bucket=bkt).get("LocationConstraint")
+        return loc or "us-east-1"
+    except Exception:
+        return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+
+
+def presign(key: str, bkt: Optional[str] = None, expires: int = 3600) -> str:
+    """Time-limited GET URL signed for the bucket's own region (avoids S3 PermanentRedirects)."""
+    b = bkt or bucket()
+    client = boto3.client("s3", region_name=_region_of(b), config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}))
+    return client.generate_presigned_url("get_object", Params={"Bucket": b, "Key": key}, ExpiresIn=expires)

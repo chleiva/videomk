@@ -1,6 +1,7 @@
 """Timeline -> frames. Pure function of (timeline, t): any frame range can be rendered independently,
 which is what makes chunk-parallel rendering on Lambda possible."""
 import bisect
+import zlib
 from typing import Any, Callable, Dict, Iterator, List, Optional
 
 from PIL import Image
@@ -27,6 +28,8 @@ class Renderer:
         self.out_w, self.out_h = (self.W // 2, self.H // 2) if draft else (self.W, self.H)
         self.theme = get_theme(timeline.get("theme", "midnight"))
         self.scenes: List[Dict[str, Any]] = timeline["scenes"]
+        self.lead: Optional[Dict[str, Any]] = timeline.get("lead")
+        self.outro: bool = bool(timeline.get("outro", True))
         self.starts = [float(s["start"]) for s in self.scenes]
         last = self.scenes[-1]
         self.total = float(timeline.get("duration") or (float(last["start"]) + float(last["duration"])))
@@ -55,11 +58,18 @@ class Renderer:
         return img
 
     # ----- frames
-    def _draw_scene(self, idx: int, lt: float, t_global: float) -> Image.Image:
-        sc = self.scenes[idx]
+    @staticmethod
+    def _ambient_phase(scene: Dict[str, Any]) -> float:
+        """Background drift depends on the scene (not on absolute time), so a rendered chunk is identical wherever it sits."""
+        return (zlib.crc32(str(scene.get("id", "")).encode()) % 97) * 3.7
+
+    def _draw_scene(self, idx: int, lt: float, t_global: float = 0.0) -> Image.Image:
+        return self._draw_spec(self.scenes[idx], lt)
+
+    def _draw_spec(self, sc: Dict[str, Any], lt: float) -> Image.Image:
         draw = SCENES.get(sc["type"])
         cv = Canvas(self.W, self.H, ss=self.ss)
-        cv.background(self.theme, t_global, ambience=sc["type"] != "image")
+        cv.background(self.theme, max(0.0, lt) + self._ambient_phase(sc), ambience=sc["type"] != "image")
         if draw is None:
             cv.text(self.W / 2, self.H / 2, f"unknown scene type: {sc['type']}", "semibold", 48, (255, 255, 255, 255), anchor="mm")
         else:
@@ -81,20 +91,20 @@ class Renderer:
         idx = self.scene_index(t)
         sc = self.scenes[idx]
         lt = t - self.starts[idx]
-        img = self._draw_scene(idx, lt, t)
+        img = self._draw_spec(sc, lt)
         tr = min(TRANSITION_S, float(sc["duration"]) * 0.4)
-        if idx > 0 and lt < tr and sc.get("transition", "fade") != "none":
-            prev_lt = float(self.scenes[idx - 1]["duration"]) + lt  # outgoing scene holds its final state
-            prev = self._draw_scene(idx - 1, prev_lt, t)
-            a = lt / tr
-            a = a * a * (3 - 2 * a)
-            img = Image.blend(prev, img, a)
-        if t > self.total - OUTRO_FADE_S:
+        if lt < tr and sc.get("transition", "fade") != "none":
+            prev = self.scenes[idx - 1] if idx > 0 else self.lead  # a chunk starts mid-crossfade using its lead scene
+            if prev is not None:
+                held = self._draw_spec(prev, float(prev["duration"]) + lt)  # outgoing scene holds its final state
+                a = lt / tr
+                img = Image.blend(held, img, a * a * (3 - 2 * a))
+        if self.outro and t > self.total - OUTRO_FADE_S:
             k = max(0.0, min(1.0, (t - (self.total - OUTRO_FADE_S)) / OUTRO_FADE_S))
             img = Image.blend(img, Image.new("RGB", img.size, BLACK), k)
         return img
 
     def frames(self, f0: int, f1: int) -> Iterator[bytes]:
         """Raw rgb24 bytes for frames [f0, f1)."""
-        for f in range(f0, min(f1, self.total_frames)):
+        for f in range(f0, f1):  # exact count: past the last scene a frame simply holds its final state
             yield self.frame_at(f / self.fps).tobytes()

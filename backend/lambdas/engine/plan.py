@@ -1,7 +1,9 @@
 """The Director's plan: LLM output is untrusted input. Everything is whitelisted, clamped and
 normalised here before it can reach the renderer, S3 paths or the database."""
+import hashlib
 import json
 import re
+import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .scenes import SCENE_TYPES
@@ -70,6 +72,40 @@ def parse_plan_json(text: str) -> Dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("plan is not a JSON object")
     return data
+
+
+# ----------------------------------------------------------------------------- ids / hashes
+_ID_RE = re.compile(r"^[0-9a-f]{8}$")
+
+
+def new_beat_id(existing: Any = None, taken: Optional[set] = None) -> str:
+    """Stable 8-hex beat id. Used in S3 keys, so only this exact shape is ever accepted from outside."""
+    if isinstance(existing, str) and _ID_RE.match(existing) and not (taken and existing in taken):
+        return existing
+    while True:
+        cand = uuid.uuid4().hex[:8]
+        if not (taken and cand in taken):
+            return cand
+
+
+def tts_hash(plan: Dict[str, Any], beat: Dict[str, Any]) -> str:
+    """Content address of a beat's narration audio: same text+voice => same wav, never re-synthesised."""
+    cfg = plan.get("tts", {})
+    raw = json.dumps([cfg.get("provider", ""), cfg.get("voice", ""), cfg.get("style", ""), beat["narration"]], ensure_ascii=False)
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def needs_media(plan: Dict[str, Any], beat: Dict[str, Any]) -> bool:
+    """True when the beat's audio/photo must be (re)made: new beat, edited text/voice, new image query or picked photo."""
+    m = beat.get("media") or {}
+    if m.get("tts_hash") != tts_hash(plan, beat) or not m.get("audio_key") or not m.get("duration"):
+        return True
+    if beat["scene"]["type"] == "image":
+        if m.get("query") != beat["scene"]["props"].get("image_query") or m.get("pick") != beat.get("pick"):
+            return True
+        if not m.get("asset") and not m.get("no_photo"):
+            return True
+    return False
 
 
 # ----------------------------------------------------------------------------- sanitising
@@ -194,7 +230,7 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS) -> Tuple[
         except (ValueError, TypeError, AttributeError) as e:
             warnings.append(f"beat {i}: scene replaced ({e})")
             scene = _fallback_scene(narration)
-        beat = {"narration": narration, "scene": scene}
+        beat = {"id": new_beat_id(b.get("id")), "narration": narration, "scene": scene}
         if _s(b.get("chapter"), 60):
             beat["chapter"] = _s(b.get("chapter"), 60)
         beats.append(beat)

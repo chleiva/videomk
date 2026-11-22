@@ -273,6 +273,7 @@ class BackendStack(Stack):
         # ----------------------------
         engine = str(self.node.try_get_context("engine") or "v1")
         active_machine = state_machine
+        v2 = None
         if engine == "v2":
             engine_dir = os.path.join(os.path.dirname(__file__), "layers", "engine_deps")
             if not os.path.isdir(os.path.join(engine_dir, "python")) and not os.environ.get("CDK_SKIP_LAYER_CHECK"):
@@ -290,13 +291,13 @@ class BackendStack(Stack):
                 "DEFAULT_TARGET_MINUTES": str(self.node.try_get_context("defaultMinutes") or "3"),
                 "CHUNK_SECONDS": "30",
             }
-            for ctx_key, env_key in (("planModelId", "PLAN_MODEL_ID"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE")):
+            for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
             v2 = EngineV2(
                 self, "EngineV2",
                 make_fn=make_fn, engine_layer=engine_layer, videos_table=videos_table, assets_bucket=ASSETS_BUCKET,
-                mark_failed_fn=mark_failed_fn, mark_rejected_fn=mark_rejected_fn, env=engine_env,
+                mark_failed_fn=mark_failed_fn, mark_rejected_fn=mark_rejected_fn, usage_table=usage_table, env=engine_env,
                 account=self.account, region=self.region,
                 render_concurrency=int(self.node.try_get_context("renderConcurrency") or 8),
             )
@@ -404,3 +405,29 @@ class BackendStack(Stack):
             request_models={"application/json": generate_model},
             **cognito_auth,
         )
+
+        # ----------------------------
+        # Editor API (engine v2 only): read the plan, submit validated edits.
+        # ----------------------------
+        if v2 is not None:
+            plan_res = video_item.add_resource("plan")
+            edits_res = video_item.add_resource("edits")
+            plan_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["GET", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+            edits_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+            plan_res.add_method("GET", apigw.LambdaIntegration(v2.editor_get_fn, proxy=True), **cognito_auth)
+            edits_model = api.add_model(
+                "EditRequestModel", content_type="application/json", model_name="EditRequest",
+                schema=apigw.JsonSchema(
+                    schema=apigw.JsonSchemaVersion.DRAFT4, type=apigw.JsonSchemaType.OBJECT, required=["base_rev"],
+                    properties={
+                        "base_rev": apigw.JsonSchema(type=apigw.JsonSchemaType.INTEGER, minimum=1),
+                        "mode": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["preview", "final"]),
+                        "ops": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, max_items=40, items=apigw.JsonSchema(type=apigw.JsonSchemaType.OBJECT)),
+                    },
+                ),
+            )
+            edits_validator = api.add_request_validator("EditBodyValidator", validate_request_body=True, validate_request_parameters=False)
+            edits_res.add_method(
+                "POST", apigw.LambdaIntegration(v2.editor_apply_fn, proxy=True),
+                request_validator=edits_validator, request_models={"application/json": edits_model}, **cognito_auth,
+            )

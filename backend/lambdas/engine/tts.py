@@ -59,11 +59,14 @@ class MockTTS:
 
     name = "mock"
 
+    def __init__(self) -> None:
+        self.speed = max(0.5, float(os.environ.get("MOCK_TTS_SPEED", "1")))  # >1 = faster speech (shorter test videos)
+
     def synth(self, text: str, voice: str = "", style: str = "") -> np.ndarray:
         words = text.split()
         out: List[np.ndarray] = []
         for i, w in enumerate(words):
-            dur = 0.16 + 0.045 * len(w) + (0.22 if w[-1:] in ",;:" else 0.4 if w[-1:] in ".!?" else 0.0)
+            dur = (0.16 + 0.045 * len(w) + (0.22 if w[-1:] in ",;:" else 0.4 if w[-1:] in ".!?" else 0.0)) / self.speed
             n = int(dur * SR)
             t = np.arange(n, dtype=np.float32) / SR
             f0 = 110 + (sum(map(ord, w)) % 70)
