@@ -3,8 +3,8 @@
 For the design agent. Read `SPEC.md` §3 for screen behaviour; this document says what to design, the constraints, and what to hand back.
 
 ## 1. The product in one paragraph
-Type a topic; get a narrated, animated explainer video (diagrams, charts, timelines, big numbers, quotes, real photos, captions, music).
-Then review and change *anything*: the script, the visuals, the photos, the order. Creators publish to YouTube and social. The apps must feel like a
+Describe the video you want, optionally with your own photos, clips and voice. An AI **Producer** makes it: it writes the story and chooses, every few seconds, the right visual (library photos, *your* photos and clips, draw-on sketches, charts, maps, diagrams), with narration, captions and music. The user supervises: see what the Producer chose and why, change anything by tapping or by telling the Producer.
+(Earlier drafts assumed "topic in, photos picked by the user". That was wrong: see `docs/PRODUCER.md`. The user should almost never have to choose a photo.) Creators publish to YouTube and social. The apps must feel like a
 **confident, calm creative tool**: fast to start, never overwhelming, with the editor as the place where people feel in control.
 
 ## 2. Design principles
@@ -41,16 +41,18 @@ Voice: plain, warm, specific; no hype, no "magic" language; errors say what happ
 ### 4.2 Flows and screens (iPhone, iPad, Android phone, Android tablet/foldable)
 1. **Onboarding + sign-in:** native **Sign in with Apple** and **Sign in with Google** (one-tap sheets, no browser handoff); Apple's button must follow Apple's identity guidelines and Google's the Google branding rules; first-run value moment before asking for notifications; sign-in errors; a hidden email/password reviewer path (not shown to normal users).
 2. **Library** (grid/list; statuses: running, complete, failed, rejected-with-reason, editing; empty; offline; first-run examples).
-3. **Create** (prompt, dictation, length, look, music mood; quota remaining and exhausted; validation errors; "prompt not allowed" explanation).
+3. **Create = brief composer:** free-text/voice brief; attached photos and videos (grid of selected media, remove/reorder, "+42 more"), optional own-voice recording; length ("Producer decides" or fixed), look, music; cost estimate; upload progress and privacy copy; validation errors; "not allowed" explanation. Show three example briefs: a topic, a holiday story from photos, "narrate my clip".
 4. **Progress** (6 stages; live status; what happens if the user leaves; push permission request at the moment of value; Live Activity design for iOS lock screen/Dynamic Island, ongoing notification for Android).
 5. **Player/detail** (player controls with chapters; share/save; copy title/description; revision info; report).
-6. **Editor** (the priority screen: see 4.3).
+6. **Producer's plan and editor** (the priority screens: see 4.3). The plan view is the *main* editing view; the scene inspector is secondary.
 7. **Credits and purchases:** balance chip (always visible in Library/Create), **a quote shown before every spend** (create and AI edits), **free allowance states** (welcome: 3 clean videos up to 3 min in the first day; then one free video per day, up to 2 min, watermarked, with a clear "next free video in…" state; the paid-only options are visible but explained, not hidden), **the watermark** (small bottom-right wordmark: design it and show it on the real caption/photo-credit layouts) and the **remove-watermark** action on free videos, the **credit store** (three packs shown honestly with what each buys, store-native purchase sheets, pending/Ask-to-Buy, failed, success), transaction history, low-balance and out-of-credits states that route to purchase without pressure, refunded-render messaging ("no credits used").
 8. **Settings** (account, delete account confirmation, notifications, appearance, *Use system colours* on Android, legal, report, feedback).
 9. **System surfaces:** push notification content, widgets (recent videos), share-sheet presentation, App Shortcuts/Intents UI.
 
 ### 4.3 The editor, in detail
 This is where design effort should concentrate. Design for one-handed phone use first, then expand to tablet.
+- **Producer's plan (main view):** a vertical storyboard: each narration chapter with its text, then a horizontally scrolling strip of visual items (thumbnail, duration, a small badge for the kind: *Your photo*, *Library photo*, *Your clip*, *Sketch*, *Chart*, *Map*, *Scene*). Tap an item: a sheet with *why this was chosen*, *Ask the Producer for another*, *Use one of my photos*, *Draw it instead*, *Remove*. A **chat bar** ("Ask the Producer to change something…") with suggestion chips ("Shorter beach part", "More drawings", "Add a map") is the primary way to make bigger changes.
+- **Replace media sheet** (replaces the old photo picker): suggestions / my media / draw tabs; library candidates always show photographer + source as tappable credit.
 - **Scene list:** each row shows type icon, narration excerpt, duration, state (*edited*, *needs attention*, *will be re-made*). Reordering by long-press drag with a clear lift state and haptics; delete with undo; insert affordance between rows. Accessible alternative to dragging.
 - **Inspector:** bottom sheet on phones (peek / half / full detents, with a pinned mini-player or preview thumbnail so the user doesn't lose context), side panel on tablets.
   Forms for each scene type; pay special attention to **diagram** (steps and arrows as rows/chips with a live mini-preview, no typed syntax), **chart** (label/value rows, bar/line toggle), **timeline** (date/label rows), and **photo** (search field, candidate grid with photographer + "Unsplash"/licence line as tappable links, selected state, "no good photo" state).

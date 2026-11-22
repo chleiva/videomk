@@ -6,7 +6,7 @@ Decisions made so far are in §9. Items marked **[DECIDE]** still need a product
 
 ## 1. Product scope
 
-videomk turns a topic into a narrated, animated explainer video and lets the creator review and change any part of it. The apps are
+videomk turns a **brief** (a topic, or the user's own photos, clips and voice plus a description) into a narrated video made by an AI **Producer** that decides the story and which media appears when (see `docs/PRODUCER.md`), and lets the creator review and change any part of it. The apps are
 **thin clients**: all generation, rendering and editing validation happens on the server (Lambda + Step Functions + S3). A phone never
 renders video.
 
@@ -19,11 +19,11 @@ renders video.
 |---|---|---|
 | 1 | Sign in with **Apple** and **Google** (native), sign out, delete account | §11 |
 | 2 | Library | all videos with live status, pull to refresh, push when done |
-| 3 | Create | prompt, length, look, music mood; shows what the video will cost (free allowance or credits) |
+| 3 | Create (brief composer) | describe the video (text or voice), optionally attach photos/videos/own voice, length (or "let the Producer decide"), look, music; shows the estimated cost |
 | 3b | Credits | free allowance, buy credit packs through the store, balance + history (§10) |
 | 4 | Progress | stages, not a spinner; cancel is out of scope |
 | 5 | Player | play, scrub, chapters, share/save, copy title + description (with photo credits) |
-| 6 | Editor | every part of the video (see §4); preview vs publish; revisions |
+| 6 | Producer's plan + editor | see what the Producer chose for each stretch of narration; override any item; ask the Producer for changes in plain language; preview vs publish; revisions |
 | 7 | Notifications | render finished / failed (APNs, FCM) |
 | 8 | Safety | report content in-app (store requirement), clear rejection messages |
 | 9 | Settings | account, appearance, notifications, legal, feedback |
@@ -69,7 +69,11 @@ Settings (account, notifications, appearance, legal, report, delete account)
 - Empty state teaches by example (3 tappable sample prompts).
 - Acceptance: a video created on one device appears on the other after refresh; a rejected prompt shows its reason; rotating or resizing never loses scroll position.
 
-### 3.2 Create
+### 3.2 Create (brief composer)
+
+> **Update (see `docs/PRODUCER.md`):** Create is a *brief*, not a topic box. The user describes what they want ("a fun video of our week in Mallorca…"), may attach photos and videos (system photo picker, no permission prompt; up to dozens of items), and may record their voice (as the brief and/or as narration). The Producer chooses visuals automatically; the user is never asked to pick photos. Uploads run in the background with resumable transfer and clear progress, and before anything is processed the app states plainly what happens to the user's media (privacy copy).
+> The rest of this section describes the text-only parts, which still apply.
+
 - Prompt field (10–2000 chars, validated before sending, counter), dictation, 3–5 rotating example prompts.
 - Options: **length** (1–12 min, default 3), **look** (Midnight/Paper/Sunrise), **music mood**. *(Server gap: only `prompt` is accepted today.)*
 - Shows the **cost before you commit** ("Free video" or "N credits") and the balance. When there is no free allowance and not enough credits, the primary button becomes "Get credits" (opens the store sheet, §10). When a free video returns, say when ("Your next free video is in 3 days"). No dark patterns, no countdown pressure.
@@ -77,7 +81,7 @@ Settings (account, notifications, appearance, legal, report, delete account)
 - Acceptance: airplane-mode submit fails cleanly with the draft preserved; double-tap creates one video and charges once; insufficient credits routes to purchase and returns to Create with the draft intact.
 
 ### 3.3 Progress
-Stages the user can understand: *Researching → Writing the script → Recording the voice → Choosing photos → Rendering → Finishing*.
+Stages the user can understand: *Looking at your media (when attached) → Researching → Writing the story → Recording the voice → Finding and drawing visuals → Rendering → Finishing*.
 *(Server gap: today only coarse statuses; add `progress {stage, done, total}`.)* Push notification on finish/fail; on iOS a Live Activity, on Android an ongoing notification.
 Failure shows what happened in plain words and that no quota was consumed.
 
@@ -87,6 +91,9 @@ Failure shows what happened in plain words and that no quota was consumed.
 - Shows which revision is published and whether a newer preview exists.
 
 ### 3.5 Editor (the core of the app)
+
+> **Update (see `docs/PRODUCER.md`):** the main editing view is the **Producer's plan**: narration chapters, each with the strip of visual items the Producer chose (library photo, your photo, your clip, sketch, chart, map, scene card) with duration and a one-line *why*. Tapping an item offers *Ask the Producer for another*, *Use one of my photos*, *Draw it instead*, *Remove*. A chat bar lets the user say "make the beach part shorter" or "add a map". The photo picker is only a **replace** override. The scene-by-scene inspector below remains for fine control of script and structured scenes.
+
 Mirrors the web editor's capabilities, redesigned for touch.
 - **Scene list:** long-press-drag reorder with haptics, swipe to delete (with undo), "+" to insert after, each row shows type, narration excerpt, duration, and an *edited* / *needs attention* marker.
 - **Inspector** (bottom sheet on phones, side panel on tablets): narration with live word count and spoken-time estimate; scene type; a form per type:
