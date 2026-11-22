@@ -29,7 +29,7 @@ Planning has a fixed part (the prompt and grounding notes), so very short videos
 
 You asked for a **7x margin**. I define it as **store-net revenue ÷ our cost**, i.e. after the store's commission (15% for small-business programmes, 30% otherwise), so it is the number that reaches your bank versus what we spend.
 
-## Packs and margin (store-net revenue ÷ our cost; target ≥ 7x)
+### Packs and margin (store-net revenue ÷ our cost; target ≥ 7x)
 
 | Pack | Credits | Price/credit | 3-min video, mid cost, 15% fee | 5-min | 1-min | 3-min, 30% fee | 3-min, HIGH cost, 15% fee | worst (1-min, high cost, 30% fee) |
 |---|---|---|---|---|---|---|---|---|
