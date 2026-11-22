@@ -1,0 +1,31 @@
+"""Step 4b (parallel to rendering): narration + generated music + sfx -> one AAC track."""
+import os
+import tempfile
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict
+
+import numpy as np
+
+from .. import audio, awsio, pipeline
+
+
+def _load_wav(key: str, tmp: str):
+    path = os.path.join(tmp, os.path.basename(key))
+    awsio.download(key, path)
+    samples, sr = audio.read_wav(path)
+    return samples if sr == audio.SR else np.interp(np.linspace(0, samples.size - 1, int(samples.size * audio.SR / sr)), np.arange(samples.size), samples).astype(np.float32)
+
+
+def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    video_id = str(event["video_id"])
+    pfx = awsio.prefix(video_id)
+    tl = awsio.get_json(event["timeline_key"])
+    with tempfile.TemporaryDirectory() as tmp:
+        keys = [f"{pfx}audio/beat_{i:03d}.wav" for i in range(len(tl["scenes"]))]
+        with ThreadPoolExecutor(max_workers=8) as ex:
+            beats = list(ex.map(lambda k: _load_wav(k, tmp), keys))
+        out = os.path.join(tmp, "mix.m4a")
+        pipeline.make_audio(tl, beats, out)
+        key = pfx + "audio/mix.m4a"
+        awsio.upload(out, key, "audio/mp4")
+    return {"key": key}

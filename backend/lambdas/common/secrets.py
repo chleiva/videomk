@@ -49,3 +49,18 @@ def get_openai_api_key() -> str:
     if key:
         _cache["openai"] = key
     return key
+
+
+def get_secret_param(name: str) -> str:
+    """Generic SSM SecureString lookup (cached per container), e.g. '/videomk/gemini_api_key'."""
+    if name in _cache:
+        return _cache[name]
+    try:
+        val = boto3.client("ssm").get_parameter(Name=name, WithDecryption=True)["Parameter"]["Value"]
+    except Exception as e:
+        logging.error("could not read %s (%s)", name, type(e).__name__)
+        return ""
+    val = _from_secret_string(val)
+    if val:
+        _cache[name] = val
+    return val

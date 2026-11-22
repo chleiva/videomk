@@ -10,7 +10,7 @@ import logging
 import os
 import time
 import uuid
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import boto3
 from botocore.exceptions import ClientError

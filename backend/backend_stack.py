@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from aws_cdk import (
     Duration,
+    Size,
     Stack,
     RemovalPolicy,
     aws_dynamodb as dynamodb,
@@ -19,6 +20,8 @@ from aws_cdk import (
     aws_route53_targets as targets,
 )
 from constructs import Construct
+
+from engine_v2 import EngineV2
 
 ASSETS_BUCKET = "videomk.com"
 OPENAI_SSM_PARAM = "/videomk/openai_api_key"  # standard SSM parameter: free (Secrets Manager costs ~$0.40/mo idle)
@@ -85,6 +88,7 @@ class BackendStack(Stack):
             memory: int = 256,
             env: Optional[Dict[str, str]] = None,
             layers: Optional[List[_lambda.ILayerVersion]] = None,
+            ephemeral_mb: Optional[int] = None,
         ) -> _lambda.Function:
             return _lambda.Function(
                 self,
@@ -98,6 +102,7 @@ class BackendStack(Stack):
                 memory_size=memory,
                 environment={**common_env, **(env or {})},
                 layers=layers or [],
+                **({"ephemeral_storage_size": Size.mebibytes(ephemeral_mb)} if ephemeral_mb else {}),
                 log_retention=logs.RetentionDays.TWO_WEEKS,  # no unbounded log storage
             )
 
@@ -260,8 +265,42 @@ class BackendStack(Stack):
             timeout=Duration.minutes(30),
         )
 
-        state_machine.grant_start_execution(launcher_fn)
-        launcher_fn.add_environment("STATE_MACHINE_ARN", state_machine.state_machine_arn)
+        # ----------------------------
+        # Engine v2 (opt-in: `cdk deploy -c engine=v2`). v1 stays the default until v2 is proven on real Lambda.
+        # ----------------------------
+        engine = str(self.node.try_get_context("engine") or "v1")
+        active_machine = state_machine
+        if engine == "v2":
+            engine_dir = os.path.join(os.path.dirname(__file__), "layers", "engine_deps")
+            if not os.path.isdir(os.path.join(engine_dir, "python")) and not os.environ.get("CDK_SKIP_LAYER_CHECK"):
+                raise ValueError("Engine layer not built. Run `backend/layers/build_layer.sh engine_deps` first.")
+            engine_layer = _lambda.LayerVersion(
+                self, "EngineDepsLayer",
+                code=_lambda.Code.from_asset("layers/engine_deps"),
+                compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+                compatible_architectures=[_lambda.Architecture.X86_64],
+                description="Engine v2: numpy, Pillow, static ffmpeg (all manylinux wheels)",
+            )
+            engine_env = {
+                "TTS_PROVIDER": str(self.node.try_get_context("ttsProvider") or "gemini"),
+                "MAX_VIDEO_COST_USD": str(self.node.try_get_context("maxVideoCostUsd") or "1.50"),
+                "DEFAULT_TARGET_MINUTES": str(self.node.try_get_context("defaultMinutes") or "3"),
+                "CHUNK_SECONDS": "30",
+            }
+            for ctx_key, env_key in (("planModelId", "PLAN_MODEL_ID"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE")):
+                if self.node.try_get_context(ctx_key):
+                    engine_env[env_key] = str(self.node.try_get_context(ctx_key))
+            v2 = EngineV2(
+                self, "EngineV2",
+                make_fn=make_fn, engine_layer=engine_layer, videos_table=videos_table, assets_bucket=ASSETS_BUCKET,
+                mark_failed_fn=mark_failed_fn, mark_rejected_fn=mark_rejected_fn, env=engine_env,
+                account=self.account, region=self.region,
+                render_concurrency=int(self.node.try_get_context("renderConcurrency") or 8),
+            )
+            active_machine = v2.state_machine
+
+        active_machine.grant_start_execution(launcher_fn)
+        launcher_fn.add_environment("STATE_MACHINE_ARN", active_machine.state_machine_arn)
 
         # ============================
         # API Gateway + custom domain

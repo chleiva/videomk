@@ -1,0 +1,6 @@
+# Engine v2 layer: every package is a manylinux wheel (no compiled system deps to bundle).
+numpy==1.26.4
+Pillow==10.4.0
+# Bundles a static ffmpeg (libx264, aac, sidechaincompress, ...). >=0.5 ships a modern ffmpeg (amix normalize needs >=4.4);
+# the engine_selftest Lambda reports the exact version and filters on the real runtime.
+imageio-ffmpeg==0.6.0

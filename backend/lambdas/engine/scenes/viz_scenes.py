@@ -1,0 +1,332 @@
+import math
+from typing import Any, Dict, List, Optional, Tuple
+
+from PIL import Image
+
+from ..canvas import Canvas, partial_polyline, with_alpha
+from ..easing import ease_in_out_cubic, ease_out_back, ease_out_cubic, lerp, progress, reveal_times
+from ..theme import Theme
+from .base import CENTER_X, CONTENT_TOP, SceneCtx, format_number, heading
+
+MAX_NODES = 10
+
+
+# ------------------------------------------------------------------ diagram
+def layout_diagram(nodes: List[Dict[str, Any]], edges: List[List[Any]]) -> Dict[str, int]:
+    """Longest-path layering (cycle-safe). Returns node id -> layer index."""
+    ids = [str(n["id"]) for n in nodes]
+    layer = {i: 0 for i in ids}
+    clean = [(str(e[0]), str(e[1])) for e in edges if len(e) >= 2 and str(e[0]) in layer and str(e[1]) in layer and str(e[0]) != str(e[1])]
+    for _ in range(len(ids)):
+        changed = False
+        for a, b in clean:
+            if layer[b] < layer[a] + 1 and layer[a] + 1 < len(ids):
+                layer[b] = layer[a] + 1
+                changed = True
+        if not changed:
+            break
+    return layer
+
+
+def _diagram_geometry(cv: Canvas, props: Dict[str, Any], top: float, bottom: float):
+    nodes = [n for n in (props.get("nodes") or []) if isinstance(n, dict) and "id" in n][:MAX_NODES]
+    edges = [e for e in (props.get("edges") or []) if isinstance(e, (list, tuple)) and len(e) >= 2]
+    layer = layout_diagram(nodes, edges)
+    n_layers = (max(layer.values()) + 1) if layer else 1
+    area_x0, area_x1 = 140, 1780
+    gap = 130 if n_layers <= 4 else 90
+    # Edge labels wrap to <=2 lines of <=190px, so a modest gap is enough and nodes stay big.
+    label_w = max((max((cv.measure(l, "regular", 24) for l in cv.wrap(str(e[2]), "regular", 24, 190)), default=0.0)
+                   for e in edges if len(e) >= 3 and e[2]), default=0.0)
+    if label_w:
+        gap = max(gap, min(label_w + 70, 250))
+    big = 1.25 if n_layers <= 3 else 1.0
+    node_w = min(340.0 * big, (area_x1 - area_x0 - gap * (n_layers - 1)) / n_layers)
+    node_h = (104.0 if node_w > 230 else 92.0) * (big if node_w > 280 else 1.0)
+    cols: Dict[int, List[Dict[str, Any]]] = {}
+    for n in nodes:
+        cols.setdefault(layer[str(n["id"])], []).append(n)
+    max_col = max((len(v) for v in cols.values()), default=1)
+    vgap = 36
+    total_h_max = max_col * node_h + (max_col - 1) * vgap
+    if total_h_max > bottom - top:  # compress
+        node_h = max(70.0, ((bottom - top) - (max_col - 1) * vgap) / max_col)
+    used_w = n_layers * node_w + (n_layers - 1) * gap
+    x_start = (area_x0 + area_x1) / 2 - used_w / 2
+    cy_mid = (top + bottom) / 2
+    pos: Dict[str, Tuple[float, float]] = {}
+    order: List[str] = []
+    for li in range(n_layers):
+        col = cols.get(li, [])
+        col_h = len(col) * node_h + (len(col) - 1) * vgap
+        for k, n in enumerate(col):
+            x = x_start + li * (node_w + gap)
+            y = cy_mid - col_h / 2 + k * (node_h + vgap)
+            pos[str(n["id"])] = (x, y)
+            order.append(str(n["id"]))
+    return nodes, edges, pos, order, node_w, node_h, layer
+
+
+def diagram_cues(props: Dict[str, Any], dur: float) -> List[float]:
+    n = min(len(props.get("nodes") or []), MAX_NODES)
+    return reveal_times(n, dur, props.get("cues"), first=0.12, last=0.78)
+
+
+def _arrowhead(cv: Canvas, pts, color) -> None:
+    ex, ey = pts[-1]
+    px, py = pts[-2]
+    ang = math.atan2(ey - py, ex - px)
+    s = 18
+    tip = (ex + math.cos(ang) * 12, ey + math.sin(ang) * 12)
+    cv.polygon(
+        [tip, (tip[0] - s * math.cos(ang - 0.45), tip[1] - s * math.sin(ang - 0.45)),
+         (tip[0] - s * math.cos(ang + 0.45), tip[1] - s * math.sin(ang + 0.45))],
+        fill=color,
+    )
+
+
+def _edge_label(cv: Canvas, th: Theme, text: str, run_a: float, run_b: float, y_line: float, alpha: float) -> None:
+    lines = cv.wrap(text, "regular", 24, 190)[:2]
+    tw = max(cv.measure(l, "regular", 24) for l in lines)
+    lh = 28
+    h = len(lines) * lh + 10
+    lx = (run_a + run_b) / 2
+    bottom = y_line - 14  # sits just above the arrow's final run
+    cv.rrect(lx - tw / 2 - 10, bottom - h, tw + 20, h, 12, fill=with_alpha(th.bg_top, 0.8 * alpha))
+    for i, l in enumerate(lines):
+        cv.text(lx, bottom - h + 5 + i * lh + lh / 2, l, "regular", 24, with_alpha(th.text, alpha), anchor="mm")
+
+
+def draw_diagram(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    top = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20) if props.get("title") else CONTENT_TOP + 40
+    nodes, edges, pos, order, nw, nh, layer = _diagram_geometry(cv, props, top + 10, ctx.bottom - 10)
+    if not nodes:
+        return
+    times = reveal_times(len(order), dur, props.get("cues"), first=0.12, last=0.78)
+    node_t = {nid: times[i] for i, nid in enumerate(order)}
+    font_px = 42 if nw > 380 else 36 if nw > 260 else 30 if nw > 200 else 26
+    arrow_col = with_alpha(th.accent2, 0.95)
+
+    for e in edges:  # edges first so nodes sit on top
+        a, b = str(e[0]), str(e[1])
+        if a not in pos or b not in pos or a == b:
+            continue
+        ax, ay = pos[a]
+        bx, by = pos[b]
+        start = max(node_t[a], node_t[b] - 0.15) + 0.25
+        p = ease_in_out_cubic(progress(lt, start, 0.55))
+        if p <= 0:
+            continue
+        x1, y1 = ax + nw, ay + nh / 2
+        x2, y2 = bx, by + nh / 2
+        if bx < ax:  # backward edge: route underneath
+            ymax = max(ay, by) + nh + 26
+            pts = [(ax + nw / 2, ay + nh), (ax + nw / 2, ymax), (bx + nw / 2, ymax), (bx + nw / 2, by + nh)]
+        elif abs(y1 - y2) < 2:
+            pts = [(x1 + 6, y1), (x2 - 14, y2)]
+        else:  # branch: leave the source immediately, then a long straight run into the target
+            bend = x1 + 34
+            pts = [(x1 + 6, y1), (bend, y1), (bend, y2), (x2 - 14, y2)]
+        cv.line(partial_polyline(pts, p), arrow_col, 6)
+        if p > 0.96:
+            _arrowhead(cv, pts, arrow_col)
+        if len(e) >= 3 and e[2] and p > 0.8:
+            run_a, run_b = (pts[-2][0], pts[-1][0]) if len(pts) >= 3 else (pts[0][0], pts[-1][0])
+            _edge_label(cv, th, str(e[2]), run_a, run_b, pts[-1][1], progress(lt, start + 0.45, 0.3))
+
+    for n in nodes:
+        nid = str(n["id"])
+        x, y = pos[nid]
+        p = progress(lt, node_t[nid], 0.5)
+        if p <= 0:
+            continue
+        s = max(0.01, ease_out_back(p, 1.5))
+        a = ease_out_cubic(progress(lt, node_t[nid], 0.25))
+        w, h = nw * s, nh * s
+        x0, y0 = x + (nw - w) / 2, y + (nh - h) / 2
+        primary = layer[nid] == 0
+        cv.shadow(x0, y0, w, h, 24, alpha=th.shadow_alpha * a)
+        fill = with_alpha(th.accent, a) if primary else (255, 255, 255, int(255 * a)) if th.name == "paper" else with_alpha(th.card, a)
+        cv.rrect(x0, y0, w, h, 24, fill=fill, outline=with_alpha(th.accent2 if primary else th.accent, a), width=3)
+        lines = cv.wrap(str(n.get("label", nid)), "semibold", font_px * s, w - 36)[:2]
+        lh = font_px * s * 1.2
+        col = with_alpha((255, 255, 255) if primary else th.text, a)
+        for i, line in enumerate(lines):
+            cv.text(x + nw / 2, y + nh / 2 - (len(lines) - 1) * lh / 2 + i * lh, line, "semibold", font_px * s, col, anchor="mm")
+
+
+
+# ------------------------------------------------------------------ chart
+def _fmt(v: float, unit: str) -> str:
+    dec = 0 if abs(v) >= 100 or float(v).is_integer() else 1 if abs(v) >= 10 else 2
+    s = format_number(v, dec, abs(v) >= 1000)
+    if "." in s:
+        s = s.rstrip("0").rstrip(".")
+    if unit in ("$", "€", "£"):
+        return unit + s
+    return s + (unit if unit in ("%", "x") else (" " + unit if unit else ""))
+
+
+def chart_cues(props: Dict[str, Any], dur: float) -> List[float]:
+    return reveal_times(len(props.get("values") or []), dur, props.get("cues"), first=0.15, last=0.7)
+
+
+def draw_chart(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    labels = [str(x) for x in (props.get("labels") or [])][:12]
+    try:
+        values = [float(v) for v in (props.get("values") or [])][: len(labels)]
+    except (TypeError, ValueError):
+        values = []
+    n = min(len(labels), len(values))
+    top = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20) if props.get("title") else CONTENT_TOP + 50
+    if n == 0:
+        return
+    unit = str(props.get("unit", ""))
+    kind = str(props.get("kind", "bar"))
+    x0, x1 = 200, 1760
+    y_top, y_base = top + 60, ctx.bottom - 70
+    vmax = max(max(values[:n]), 0.0) or 1.0
+    vmin = min(min(values[:n]), 0.0) if kind == "bar" else min(values[:n])
+    if kind == "line":
+        pad = (vmax - vmin) * 0.12 or 1
+        vmin, vmax = vmin - pad, vmax + pad
+    rng = (vmax - vmin) or 1.0
+
+    def ypos(v: float) -> float:
+        return y_base - (v - vmin) / rng * (y_base - y_top)
+
+    # grid
+    gp = ease_out_cubic(progress(lt, 0.0, 0.6))
+    for k in range(5):
+        gy = y_base - (y_base - y_top) * k / 4
+        cv.line([(x0, gy), (x1, gy)], with_alpha(th.card_outline if th.name != "paper" else (31, 41, 55, 30), gp * (1.0 if k else 1.6)), 2, round_caps=False)
+        if k:
+            cv.text(x0 - 16, gy, _fmt(vmin + rng * k / 4, unit if unit != "%" else "%"), "regular", 24, with_alpha(th.muted, gp), anchor="rm")
+    times = reveal_times(n, dur, props.get("cues"), first=0.15, last=0.7)
+    slot = (x1 - x0) / n
+    highlight = props.get("highlight")
+    if kind == "line":
+        pts = [(x0 + slot * (i + 0.5), ypos(values[i])) for i in range(n)]
+        total_p = ease_in_out_cubic(progress(lt, times[0], max(0.8, times[-1] - times[0] + 0.5)))
+        part = partial_polyline(pts, total_p)
+        if len(part) >= 2:
+            cv.polygon(part + [(part[-1][0], y_base), (part[0][0], y_base)], with_alpha(th.accent, 0.16))
+            cv.line(part, th.accent + (255,), 8)
+        for i, (px, py) in enumerate(pts):
+            dp = ease_out_back(progress(lt, times[i] + 0.1, 0.4), 2)
+            if dp > 0:
+                cv.ellipse(px, py, 13 * dp, 13 * dp, fill=th.accent2 + (255,), outline=(255, 255, 255, 255), width=3)
+                cv.text(px, py - 34, _fmt(values[i], unit), "semibold", 30, with_alpha(th.text, min(1, dp)), anchor="mb")
+            cv.text(px, y_base + 18, labels[i], "regular", 28, with_alpha(th.muted, gp), anchor="ma")
+        return
+    bw = min(150.0, slot * 0.56)
+    for i in range(n):
+        p = ease_out_cubic(progress(lt, times[i], 0.9))
+        cx = x0 + slot * (i + 0.5)
+        zero_y = ypos(0.0 if vmin < 0 else vmin)
+        top_y = zero_y + (ypos(values[i]) - zero_y) * p
+        col = th.accent2 if (highlight is not None and int(highlight) == i) else th.accent
+        a, b = sorted((zero_y, top_y))
+        if b - a > 1:
+            cv.shadow(cx - bw / 2, a, bw, b - a, 14, blur=14, dy=8, alpha=th.shadow_alpha * 0.8 * p)
+            cv.rrect(cx - bw / 2, a, bw, b - a, 14, fill=col + (255,))
+        shown = _fmt(values[i] * p, unit)
+        cv.text(cx, a - 14, shown, "bold", 34, with_alpha(th.text, min(1.0, p * 1.6)), anchor="mb")
+        cv.text(cx, y_base + 18, labels[i], "regular", 28, with_alpha(th.muted, gp), anchor="ma")
+
+
+# ------------------------------------------------------------------ timeline
+def timeline_cues(props: Dict[str, Any], dur: float) -> List[float]:
+    return reveal_times(len(props.get("events") or []), dur, props.get("cues"), first=0.15, last=0.75)
+
+
+def draw_timeline(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    events = [e for e in (props.get("events") or []) if isinstance(e, dict)][:7]
+    top = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20) if props.get("title") else CONTENT_TOP + 40
+    if not events:
+        return
+    n = len(events)
+    ly = (top + ctx.bottom) / 2 + 20
+    x0, x1 = 180, 1740
+    times = reveal_times(n, dur, props.get("cues"), first=0.15, last=0.75)
+    drawn = ease_in_out_cubic(progress(lt, 0.05, max(0.8, times[-1] + 0.3)))
+    cv.line([(x0, ly), (x1, ly)], with_alpha(th.card_outline if th.name != "paper" else (31, 41, 55, 50), 1.0), 8)
+    cv.line(partial_polyline([(x0, ly), (x1, ly)], drawn), th.accent + (255,), 8)
+    slot = (x1 - x0) / max(1, n - 1) if n > 1 else 0
+    box_w = min(340.0, (x1 - x0) / n * 1.25)
+    for i, ev in enumerate(events):
+        cx = x0 + slot * i if n > 1 else (x0 + x1) / 2
+        p = progress(lt, times[i], 0.5)
+        if p <= 0:
+            continue
+        a = ease_out_cubic(p * 1.5)
+        s = ease_out_back(p, 2)
+        above = i % 2 == 0
+        cv.ellipse(cx, ly, 20 * s, 20 * s, fill=th.accent2 + (255,), outline=(255, 255, 255, 255), width=4)
+        stem = 70 + (1 - ease_out_cubic(p)) * 20
+        y_edge = ly - 28 - stem if above else ly + 28 + stem
+        cv.line([(cx, ly - 24) if above else (cx, ly + 24), (cx, y_edge)], with_alpha(th.muted, a * 0.7), 3)
+        date = str(ev.get("date", ""))
+        label = str(ev.get("label", ""))
+        lines = cv.wrap(label, "regular", 31, box_w - 28)[:3]
+        h = (78 + len(lines) * 40) if date else (34 + len(lines) * 40)
+        by = y_edge - h if above else y_edge
+        bx = min(max(cx - box_w / 2, 60), 1920 - 60 - box_w)
+        cv.card(bx, by, box_w, h, th, r=20, alpha=a)
+        ty = by + 16
+        if date:
+            cv.text(bx + 20, ty, date, "bold", 34, with_alpha(th.accent, a))
+            ty += 48
+        for k, line in enumerate(lines):
+            cv.text(bx + 20, ty + k * 40, line, "regular", 31, with_alpha(th.text, a))
+
+
+# ------------------------------------------------------------------ image (Ken Burns)
+def image_cues(props: Dict[str, Any], dur: float) -> List[float]:
+    return [0.0]
+
+
+def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    src: Optional[Image.Image] = ctx.resolve_image(str(props.get("asset", ""))) if props.get("asset") else None
+    tw, tht = cv.W * cv.ss, cv.H * cv.ss
+    if src is None:  # asset missing: elegant placeholder instead of a crash
+        cv.card(260, 180, 1400, 560, th, r=36)
+        cv.text(CENTER_X, 460, str(props.get("alt") or props.get("title") or "Image unavailable"), "semibold", 54, with_alpha(th.muted, 1), anchor="mm")
+        return
+    motion = str(props.get("ken_burns", "in"))
+    p = ease_in_out_cubic(progress(lt, 0.0, max(dur, 0.5)))
+    z = lerp(1.0, 1.14, p) if motion != "out" else lerp(1.14, 1.0, p)
+    sw, sh = src.size
+    base = max(tw / sw, tht / sh)
+    vw, vh = tw / (base * z), tht / (base * z)
+    cx, cy = sw / 2, sh / 2
+    pan = (sw - vw) / 2 * 0.8
+    if motion == "left":
+        cx += lerp(pan, -pan, p)
+    elif motion == "right":
+        cx += lerp(-pan, pan, p)
+    cx = min(max(cx, vw / 2), sw - vw / 2)
+    cy = min(max(cy, vh / 2), sh - vh / 2)
+    img = src.resize((tw, tht), Image.BILINEAR, box=(cx - vw / 2, cy - vh / 2, cx + vw / 2, cy + vh / 2))
+    cv.im.paste(img)
+    # bottom scrim so captions stay legible over any photo
+    scrim = _scrim(tw, tht)
+    cv.im.paste(Image.new("RGB", scrim.size, (0, 0, 0)), (0, tht - scrim.height), scrim)
+    credit = str(props.get("credit", "")).strip()
+    if credit:
+        a = ease_out_cubic(progress(lt, 0.4, 0.6))
+        cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+
+
+_SCRIM: Dict[Tuple[int, int], Image.Image] = {}
+
+
+def _scrim(w: int, h: int) -> Image.Image:
+    key = (w, h)
+    if key not in _SCRIM:
+        import numpy as np
+
+        sh = int(h * 0.42)
+        ramp = (np.linspace(0, 1, sh, dtype=np.float32) ** 1.6 * 215).astype("uint8")
+        _SCRIM[key] = Image.fromarray(np.repeat(ramp[:, None], w, axis=1), "L")
+    return _SCRIM[key]

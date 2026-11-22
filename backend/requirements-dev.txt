@@ -1,0 +1,8 @@
+# Tests + local rendering. Also needs `ffmpeg` and `ffprobe` on PATH (apt install ffmpeg / brew install ffmpeg).
+pytest>=8
+moto[dynamodb,s3,ssm,secretsmanager]>=5
+boto3
+numpy
+Pillow
+aws-cdk-lib>=2.150
+constructs>=10

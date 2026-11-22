@@ -1,0 +1,523 @@
+{
+ "version": 1,
+ "video_id": "demo",
+ "fps": 30,
+ "width": 1920,
+ "height": 1080,
+ "theme": "midnight",
+ "captions": true,
+ "scenes": [
+  {
+   "id": "s1",
+   "type": "title",
+   "start": 0.0,
+   "duration": 5.0,
+   "props": {
+    "title": "How Black Holes Form",
+    "subtitle": "From dying stars to the edge of spacetime"
+   },
+   "words": [
+    [
+     "Every",
+     0.4,
+     0.7
+    ],
+    [
+     "black",
+     0.7,
+     1.0
+    ],
+    [
+     "hole",
+     1.0,
+     1.4
+    ],
+    [
+     "begins",
+     1.4,
+     1.9
+    ],
+    [
+     "with",
+     1.9,
+     2.1
+    ],
+    [
+     "a",
+     2.1,
+     2.2
+    ],
+    [
+     "dying",
+     2.2,
+     2.7
+    ],
+    [
+     "star.",
+     2.7,
+     3.3
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s2",
+   "type": "bullets",
+   "start": 5.0,
+   "duration": 8.0,
+   "props": {
+    "heading": "The life of a massive star",
+    "items": [
+     "Fusion balances gravity for millions of years",
+     "Iron builds up in the core and fusion stops",
+     "The core collapses in under a second",
+     "A supernova blasts the outer layers away"
+    ]
+   },
+   "words": [
+    [
+     "Massive",
+     0.3,
+     0.8
+    ],
+    [
+     "stars",
+     0.8,
+     1.2
+    ],
+    [
+     "fight",
+     1.2,
+     1.6
+    ],
+    [
+     "gravity",
+     1.6,
+     2.1
+    ],
+    [
+     "with",
+     2.1,
+     2.3
+    ],
+    [
+     "fusion,",
+     2.3,
+     2.9
+    ],
+    [
+     "until",
+     3.1,
+     3.5
+    ],
+    [
+     "the",
+     3.5,
+     3.6
+    ],
+    [
+     "fuel",
+     3.6,
+     4.0
+    ],
+    [
+     "runs",
+     4.0,
+     4.3
+    ],
+    [
+     "out.",
+     4.3,
+     4.8
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s3",
+   "type": "diagram",
+   "start": 13.0,
+   "duration": 9.0,
+   "props": {
+    "title": "From star to black hole",
+    "nodes": [
+     {
+      "id": "a",
+      "label": "Massive star"
+     },
+     {
+      "id": "b",
+      "label": "Core collapse"
+     },
+     {
+      "id": "c",
+      "label": "Supernova"
+     },
+     {
+      "id": "d",
+      "label": "Neutron star"
+     },
+     {
+      "id": "e",
+      "label": "Black hole"
+     }
+    ],
+    "edges": [
+     [
+      "a",
+      "b"
+     ],
+     [
+      "b",
+      "c"
+     ],
+     [
+      "c",
+      "d",
+      "< 3 solar masses"
+     ],
+     [
+      "c",
+      "e",
+      "> 3 solar masses"
+     ]
+    ]
+   },
+   "words": [
+    [
+     "Once",
+     0.3,
+     0.6
+    ],
+    [
+     "the",
+     0.6,
+     0.7
+    ],
+    [
+     "core",
+     0.7,
+     1.0
+    ],
+    [
+     "collapses,",
+     1.0,
+     1.7
+    ],
+    [
+     "the",
+     1.9,
+     2.0
+    ],
+    [
+     "leftover",
+     2.0,
+     2.5
+    ],
+    [
+     "mass",
+     2.5,
+     2.9
+    ],
+    [
+     "decides",
+     2.9,
+     3.4
+    ],
+    [
+     "its",
+     3.4,
+     3.6
+    ],
+    [
+     "fate.",
+     3.6,
+     4.2
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s4",
+   "type": "chart",
+   "start": 22.0,
+   "duration": 7.0,
+   "props": {
+    "kind": "bar",
+    "title": "Typical mass at death (solar masses)",
+    "labels": [
+     "White dwarf",
+     "Neutron star",
+     "Stellar BH",
+     "Supermassive BH"
+    ],
+    "values": [
+     1.4,
+     2.1,
+     10,
+     4000000
+    ],
+    "unit": "",
+    "highlight": 2
+   },
+   "words": [
+    [
+     "Stellar",
+     0.3,
+     0.8
+    ],
+    [
+     "black",
+     0.8,
+     1.1
+    ],
+    [
+     "holes",
+     1.1,
+     1.5
+    ],
+    [
+     "are",
+     1.5,
+     1.7
+    ],
+    [
+     "ten",
+     1.7,
+     2.0
+    ],
+    [
+     "times",
+     2.0,
+     2.3
+    ],
+    [
+     "the",
+     2.3,
+     2.4
+    ],
+    [
+     "sun.",
+     2.4,
+     2.9
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s5",
+   "type": "timeline",
+   "start": 29.0,
+   "duration": 9.0,
+   "props": {
+    "title": "How we learned about them",
+    "events": [
+     {
+      "date": "1915",
+      "label": "Einstein publishes general relativity"
+     },
+     {
+      "date": "1916",
+      "label": "Schwarzschild finds the first solution"
+     },
+     {
+      "date": "1971",
+      "label": "Cygnus X-1 identified"
+     },
+     {
+      "date": "2019",
+      "label": "First image of a black hole"
+     }
+    ]
+   },
+   "words": [
+    [
+     "Einstein's",
+     0.3,
+     1.0
+    ],
+    [
+     "equations",
+     1.0,
+     1.6
+    ],
+    [
+     "predicted",
+     1.6,
+     2.2
+    ],
+    [
+     "them",
+     2.2,
+     2.5
+    ],
+    [
+     "a",
+     2.5,
+     2.6
+    ],
+    [
+     "century",
+     2.6,
+     3.1
+    ],
+    [
+     "ago.",
+     3.1,
+     3.5
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s6",
+   "type": "stat",
+   "start": 38.0,
+   "duration": 6.0,
+   "props": {
+    "value": "6.5 billion",
+    "label": "solar masses in the M87 black hole"
+   },
+   "words": [
+    [
+     "The",
+     0.3,
+     0.45
+    ],
+    [
+     "M87",
+     0.45,
+     1.0
+    ],
+    [
+     "black",
+     1.0,
+     1.3
+    ],
+    [
+     "hole",
+     1.3,
+     1.6
+    ],
+    [
+     "is",
+     1.6,
+     1.7
+    ],
+    [
+     "enormous.",
+     1.7,
+     2.4
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s7",
+   "type": "stat",
+   "start": 44.0,
+   "duration": 6.0,
+   "props": {
+    "value": "73%",
+    "label": "of surveyed adults can't explain an event horizon"
+   },
+   "words": [
+    [
+     "Most",
+     0.3,
+     0.6
+    ],
+    [
+     "people",
+     0.6,
+     1.0
+    ],
+    [
+     "can't",
+     1.0,
+     1.3
+    ],
+    [
+     "explain",
+     1.3,
+     1.7
+    ],
+    [
+     "one.",
+     1.7,
+     2.1
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s8",
+   "type": "quote",
+   "start": 50.0,
+   "duration": 7.0,
+   "props": {
+    "text": "Black holes ain't as black as they are painted.",
+    "attribution": "Stephen Hawking"
+   },
+   "words": [
+    [
+     "Hawking",
+     0.3,
+     0.8
+    ],
+    [
+     "showed",
+     0.8,
+     1.2
+    ],
+    [
+     "they",
+     1.2,
+     1.4
+    ],
+    [
+     "slowly",
+     1.4,
+     1.9
+    ],
+    [
+     "glow.",
+     1.9,
+     2.4
+    ]
+   ],
+   "narration_offset": 0.0
+  },
+  {
+   "id": "s9",
+   "type": "image",
+   "start": 57.0,
+   "duration": 6.0,
+   "props": {
+    "asset": "demo-photo",
+    "ken_burns": "in",
+    "credit": "Photo: generated test image (CC0)"
+   },
+   "words": [
+    [
+     "Thanks",
+     0.3,
+     0.7
+    ],
+    [
+     "for",
+     0.7,
+     0.9
+    ],
+    [
+     "watching.",
+     0.9,
+     1.6
+    ]
+   ],
+   "narration_offset": 0.0
+  }
+ ],
+ "duration": 63.0,
+ "mood": "calm"
+}
