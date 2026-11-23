@@ -1,4 +1,8 @@
 name: VideoMK
+configs:
+  Debug: debug
+  Beta: release     # TestFlight: Release-compiled (no debug code), pointed at the QA backend
+  Release: release  # App Store: production backend (not deployed yet)
 options:
   bundleIdPrefix: com.videomk
   deploymentTarget:
@@ -48,6 +52,10 @@ targets:
           VMK_API_BASE: https://rj1uhfqld0.execute-api.eu-west-1.amazonaws.com/prod
           VMK_AUTH_DOMAIN: https://videomk-qa-225438.auth.eu-west-1.amazoncognito.com
           VMK_CLIENT_ID: 5j3hia3hdqa5g3gob8np0t5421
+        Beta:  # same QA backend as Debug
+          VMK_API_BASE: https://rj1uhfqld0.execute-api.eu-west-1.amazonaws.com/prod
+          VMK_AUTH_DOMAIN: https://videomk-qa-225438.auth.eu-west-1.amazoncognito.com
+          VMK_CLIENT_ID: 5j3hia3hdqa5g3gob8np0t5421
         Release:  # production is not deployed yet: the app shows "not configured" until these are filled in
           VMK_API_BASE: ""
           VMK_AUTH_DOMAIN: ""
@@ -64,6 +72,12 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: VideoMK
 schemes:
+  VideoMK-TestFlight:
+    build:
+      targets:
+        VideoMK: all
+    archive:
+      config: Beta
   VideoMK:
     build:
       targets:
