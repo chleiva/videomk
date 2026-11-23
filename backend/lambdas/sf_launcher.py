@@ -70,6 +70,10 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(m, bool) or not isinstance(m, (int, float)) or not (MIN_MINUTES <= m <= MAX_MINUTES):
             raise BadRequest(f"'target_minutes' must be a number from {MIN_MINUTES:g} to {MAX_MINUTES:g}")
         out["target_minutes"] = float(m)
+    if "language" in body and body["language"] is not None:
+        if body["language"] not in ("en", "es"):
+            raise BadRequest("'language' must be 'en' or 'es'")
+        out["language"] = body["language"]
     if "theme" in body and body["theme"] is not None:
         if body["theme"] not in THEMES:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))

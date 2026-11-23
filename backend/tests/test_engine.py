@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import tempfile
+import urllib.parse
 
 import numpy as np
 import pytest
@@ -522,13 +523,81 @@ def _plan_with(voices, speakers):
     return {"legit": True, "title": "T", "voices": voices, "beats": beats}
 
 
-def test_voice_catalogue_is_every_english_generative_voice_and_names_are_canonical():
+def test_voice_catalogue_is_small_balanced_and_canonical():
     from engine import voices
 
     assert voices.canonical("matthew") == "Matthew" and voices.canonical(" RUTH ") == "Ruth" and voices.canonical("Zhiyu") is None
-    assert len(voices.CATALOG) == 21 and voices.DEFAULT_VOICE in voices.CATALOG
-    assert "Ruth (US, female)" in voices.prompt_list()
-    assert "Matthew" in plan_mod.SYSTEM_PROMPT and "DIFFERENT voices" in plan_mod.SYSTEM_PROMPT  # the director sees the cast list and the dialogue rule
+    en, es = voices.names("en"), voices.names("es")
+    assert len(en) == 10 and len(es) == 6
+    for lang, accents in (("en", {"American", "British", "Australian", "Indian"}), ("es", {"Latin American (US)", "Mexican", "Spanish (Spain)"})):
+        names = voices.names(lang)
+        assert {voices.CATALOG[n][1] for n in names} == accents  # every accent is there...
+        for accent in accents:
+            genders = {voices.CATALOG[n][2] for n in names if voices.CATALOG[n][1] == accent}
+            assert genders == {"female", "male"}  # ...with a woman and a man each
+    assert voices.DEFAULT_VOICES == {"en": "Ruth", "es": "Lupe"}
+    assert voices.canonical("Lupe", "en") is None and voices.canonical("Lupe", "es") == "Lupe"  # a voice only works in its own language
+    assert voices.canonical("Joanna") is None  # trimmed from the catalogue
+    p = plan_mod.system_prompt("en")
+    assert "Ruth (American, female)" in p and "house voice" in p and "Lupe" not in p and "DIFFERENT voices" in p
+    ps = plan_mod.system_prompt("es")
+    assert "in Spanish" in ps and "Lupe (Latin American (US), female)" in ps and "Ruth" not in ps
+
+
+def test_spanish_plans_get_spanish_voices_only():
+    from engine import voices
+
+    plan, warns = plan_mod.validate_plan(_plan_with({"ana": "Lupe", "luis": "Matthew", "eva": "Mia"}, ["ana", "luis", "eva"]), language="es")
+    assert plan["language"] == "es" and plan["voices"]["ana"] == "Lupe" and plan["voices"]["eva"] == "Mia"
+    assert voices.language_of(plan["voices"]["luis"]) == "es" and plan["voices"]["luis"] not in ("Lupe", "Mia")  # Luis keeps his lines, with a Spanish voice
+    assert voices.CATALOG[plan["voices"]["luis"]][2] == "male"  # and, being the one that had to be replaced, a different gender from the speaker before
+    assert any("voices adjusted" in w for w in warns)
+    assert plan_mod.validate_plan(_plan_with(None, [None]), language="es")[0]["voices"] == {"narrator": "Lupe"}
+    assert plan_mod.validate_plan(_plan_with(None, [None]))[0]["voices"] == {"narrator": "Ruth"} and plan_mod.validate_plan(_plan_with(None, [None]))[0]["language"] == "en"
+
+
+def test_language_detection_is_free_when_clear_and_declines_unsupported_languages():
+    from engine import language
+
+    asked = []
+
+    def ask(system, user):
+        asked.append(user)
+        return {"Quelle est l'histoire de Paris et de sa tour ?": "fr", "???": "xx"}.get(user, "es")
+
+    assert language.detect("Explica cómo funciona un volcán, para niños", ask) == "es"
+    assert language.detect("A visual tour of the most famous landmarks of Paris", ask) == "en"
+    assert language.detect("¿Por qué el cielo es azul?", ask) == "es"
+    assert asked == []  # clear briefs never cost a model call
+    assert language.detect("Historia de Roma", ask) == "es" and asked == ["Historia de Roma"]  # shared words ("de") never decide alone: ask
+    assert language.detect("Napoleon Bonaparte", ask) == "es" and asked[-1] == "Napoleon Bonaparte"  # a name alone: the small model decides
+    asked.clear()
+    assert language.heuristic("Quelle est l'histoire de Paris et de sa tour ?") is None  # French is not mistaken for Spanish
+    assert language.heuristic("Explique-moi pourquoi le ciel est bleu, dans le détail") is None
+    assert language.heuristic("Cómo funciona la fotosíntesis") is None and language.heuristic("Explica cómo funciona la fotosíntesis, ¿por qué?") == "es"
+    assert language.detect("Quelle est l'histoire de Paris et de sa tour ?", ask) == "other" and asked == ["Quelle est l'histoire de Paris et de sa tour ?"]
+    assert language.detect("???", ask) == "en"  # cannot tell: English
+    assert language.detect("Napoleon Bonaparte", lambda s, u: (_ for _ in ()).throw(RuntimeError("down"))) == "en"  # a failing model never fails the video
+    assert "English and Spanish" in language.unsupported_message()
+
+
+def test_research_reads_the_wikipedia_of_the_videos_language():
+    from engine import research
+
+    urls = []
+
+    def fake(url, **kw):
+        urls.append(url)
+        if "list=search" in url:
+            return {"query": {"search": [{"title": "Volcán"}]}}
+        return {"query": {"pages": [{"title": "Volcán", "fullurl": "https://es.wikipedia.org/wiki/Volc%C3%A1n", "extract": "Un volcán es una estructura geológica. " * 12}]}}
+
+    notes, sources = research.gather_notes("volcanes", fetch=fake, language="es")
+    assert all(u.startswith("https://es.wikipedia.org/") for u in urls) and "volcán" in notes.lower()
+    assert sources[0]["publisher"] == "Wikipedia (es)"
+    urls.clear()
+    research.gather_notes("volcanoes", fetch=fake)
+    assert all(u.startswith("https://en.wikipedia.org/") for u in urls)
 
 
 def test_a_dialogue_keeps_up_to_three_characters_and_a_narrator_with_distinct_real_voices():
@@ -539,7 +608,7 @@ def test_a_dialogue_keeps_up_to_three_characters_and_a_narrator_with_distinct_re
     assert voices.clean_cast({"narrator": "Nonexistent"}) == {"narrator": voices.DEFAULT_VOICE}
     assert voices.clean_cast(None) == {"narrator": voices.DEFAULT_VOICE}
     dup = voices.clean_cast({"a": "Ruth", "b": "Ruth"})  # two speakers on one voice would be unintelligible
-    assert dup["a"] == "Ruth" and dup["b"] != "Ruth" and voices.CATALOG[dup["b"]][1] != voices.CATALOG["Ruth"][1]
+    assert dup["a"] == "Ruth" and dup["b"] != "Ruth" and voices.CATALOG[dup["b"]][2] != voices.CATALOG["Ruth"][2]
 
 
 def test_validate_plan_casts_speakers_and_defaults_the_rest_to_the_narrator():
@@ -588,3 +657,45 @@ def test_edits_can_recast_voices_and_reassign_speakers():
                 {"op": "set_voice", "speaker": "sam", "voice": "NotAVoice"}, {"op": "set_voice", "speaker": "ghost", "voice": "Amy"}):
         with pytest.raises(edits.EditError):
             edits.apply_ops(plan, [bad])
+
+
+def test_narrator_gives_way_when_characters_run_out_of_voices_of_their_gender():
+    from engine import voices
+
+    # three women in Spanish (only 3 women's voices exist) and a narrator who also asked for a woman's voice
+    c = voices.clean_cast({"narrator": "Lupe", "ana": "Mia", "lucia": "Lucia", "marta": "Lupe"}, "es")
+    assert (c["ana"], c["lucia"], c["marta"]) == ("Mia", "Lucia", "Lupe")  # every character is a woman, as asked
+    assert voices.CATALOG[c["narrator"]][2] == "male" and list(c) == ["narrator", "ana", "lucia", "marta"]
+    assert "3 women's voices and 3 men's voices" in plan_mod.system_prompt("es") and "skip the narrator" in plan_mod.system_prompt("en")
+
+
+def test_research_uses_short_queries_written_by_a_small_model_and_never_cites_unrelated_pages():
+    from engine import research
+
+    searched = []
+    pages = {"Volcán": "Un volcán es una estructura geológica por la que emerge el magma. " * 6,
+             "Magma": "El magma es roca fundida bajo la superficie de la Tierra. " * 6}
+
+    def fake(url, **kw):
+        if "list=search" in url:
+            q = urllib.parse.unquote_plus(url.split("srsearch=")[1].split("&")[0])
+            searched.append(q)
+            return {"query": {"search": [{"title": {"volcán": "Volcán", "magma": "Magma"}.get(q.lower(), "Buscando a Nemo")}]}}
+        title = urllib.parse.unquote_plus(url.split("titles=")[1].split("&")[0])
+        return {"query": {"pages": [{"title": title, "fullurl": f"https://es.wikipedia.org/wiki/{title}", "extract": pages.get(title, "x" * 400)}]}}
+
+    ask = lambda system, user: "1. Volcán\n- magma\n\n" + "z" * 200   # numbered, bulleted and an overlong line: all cleaned up
+    notes, sources = research.gather_notes("Explica cómo se forman los volcanes, para niños curiosos.", fetch=fake, language="es", ask=ask)
+    assert searched == ["Volcán", "magma"]  # never the whole sentence
+    assert [s["title"] for s in sources] == ["Volcán", "Magma"]
+    # a failing model falls back to the brief itself and never fails the video
+    searched.clear()
+    research.gather_notes("volcanes", fetch=fake, language="es", ask=lambda s, u: (_ for _ in ()).throw(RuntimeError("down")))
+    assert searched == ["volcanes"]
+
+
+def test_plan_keeps_the_sources_the_director_says_it_used():
+    plan, _ = plan_mod.validate_plan({**_plan_with(None, [None]), "sources_used": ["Volcán", "  Magma ", 7, None]})
+    assert plan["sources_used"] == ["Volcán", "Magma"]
+    assert "sources_used" not in plan_mod.validate_plan(_plan_with(None, [None]))[0]  # absent stays absent: cite everything researched
+    assert plan_mod.validate_plan({**_plan_with(None, [None]), "sources_used": []})[0]["sources_used"] == []  # used nothing: cite nothing

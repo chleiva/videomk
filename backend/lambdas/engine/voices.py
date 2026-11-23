@@ -1,57 +1,85 @@
-"""Polly generative voices the director may cast, and how a beat's voice is resolved.
+"""Polly generative voices the director may cast, per language, and how a beat's voice is resolved.
 
-The list is every English generative voice Polly offers (checked with `aws polly describe-voices --engine generative`).
+A small, balanced set on purpose (accents x genders), not Polly's whole catalogue: easier for the director to choose well and for
+people to tell speakers apart. Every voice below was checked with `aws polly describe-voices --engine generative`.
 They are the voices of the `polly` TTS provider; other providers ignore the cast.
 """
 import re
 from typing import Dict, List, Optional
 
-# name -> (accent, gender)
+# name -> (language, accent, gender)
 CATALOG: Dict[str, tuple] = {
-    "Ruth": ("US", "female"), "Danielle": ("US", "female"), "Joanna": ("US", "female"), "Salli": ("US", "female"), "Tiffany": ("US", "female"),
-    "Matthew": ("US", "male"), "Stephen": ("US", "male"), "Kenneth": ("US", "male"), "Nate": ("US", "male"),
-    "Amy": ("British", "female"), "Brian": ("British", "male"),
-    "Olivia": ("Australian", "female"), "Russell": ("Australian", "male"), "Curtis": ("Australian", "male"),
-    "Niamh": ("Irish", "female"), "Aria": ("New Zealand", "female"), "Ayanda": ("South African", "female"),
-    "Kajal": ("Indian", "female"), "Kiara": ("Indian", "female"), "Arjun": ("Indian", "male"), "Jasmine": ("Singaporean", "female"),
+    # English: American, British, Australian, Indian; one woman and one man each, two more Americans (the biggest audience)
+    "Ruth": ("en", "American", "female"), "Danielle": ("en", "American", "female"),
+    "Matthew": ("en", "American", "male"), "Stephen": ("en", "American", "male"),
+    "Amy": ("en", "British", "female"), "Brian": ("en", "British", "male"),
+    "Olivia": ("en", "Australian", "female"), "Russell": ("en", "Australian", "male"),
+    "Kajal": ("en", "Indian", "female"), "Arjun": ("en", "Indian", "male"),
+    # Spanish: Latin American (US Spanish and Mexican) and European (Spain); one woman and one man each
+    "Lupe": ("es", "Latin American (US)", "female"), "Pedro": ("es", "Latin American (US)", "male"),
+    "Mia": ("es", "Mexican", "female"), "Andres": ("es", "Mexican", "male"),
+    "Lucia": ("es", "Spanish (Spain)", "female"), "Sergio": ("es", "Spanish (Spain)", "male"),
 }
-DEFAULT_VOICE = "Ruth"
+LANGUAGES = {"en": "English", "es": "Spanish"}
+DEFAULT_VOICES = {"en": "Ruth", "es": "Lupe"}   # the house voices: the director leans on them unless another clearly suits better
+DEFAULT_VOICE = DEFAULT_VOICES["en"]
 MAX_SPEAKERS = 4  # up to 3 speaking characters plus an optional narrator
 _BY_LOWER = {n.lower(): n for n in CATALOG}
 _ID_RE = re.compile(r"[^a-z0-9_]")
 
 
-def canonical(name: object) -> Optional[str]:
-    """The catalogue spelling of a voice name, or None if Polly's generative engine doesn't offer it."""
-    return _BY_LOWER.get(str(name or "").strip().lower())
+def language_of(voice: str) -> Optional[str]:
+    return CATALOG[voice][0] if voice in CATALOG else None
 
 
-def prompt_list() -> str:
-    return "; ".join(f"{n} ({a}, {g})" for n, (a, g) in CATALOG.items())
+def canonical(name: object, language: Optional[str] = None) -> Optional[str]:
+    """The catalogue spelling of a voice name; None if unknown, or (when `language` is given) a voice of another language."""
+    v = _BY_LOWER.get(str(name or "").strip().lower())
+    return v if v and (language is None or CATALOG[v][0] == language) else None
+
+
+def names(language: str) -> List[str]:
+    return [n for n, (lang, _, _) in CATALOG.items() if lang == language]
+
+
+def prompt_list(language: str = "en") -> str:
+    return "; ".join(f"{n} ({CATALOG[n][1]}, {CATALOG[n][2]})" for n in names(language))
+
+
+def gender_counts(language: str) -> str:
+    f = sum(CATALOG[n][2] == "female" for n in names(language))
+    return f"{f} women's voices and {len(names(language)) - f} men's voices"
 
 
 def speaker_id(raw: object) -> str:
     return _ID_RE.sub("", str(raw or "").strip().lower())[:20]
 
 
-def clean_cast(raw: object) -> Dict[str, str]:
-    """{speaker id: catalogue voice}, at most MAX_SPEAKERS, every voice real and no two speakers sharing one."""
-    out: Dict[str, str] = {}
+def clean_cast(raw: object, language: str = "en") -> Dict[str, str]:
+    """{speaker id: voice}, at most MAX_SPEAKERS. Every voice is real, in the video's language, and no two speakers share one.
+    A speaker whose voice is unknown, in the wrong language or already taken keeps their id and gets a free voice instead
+    (preferring a different gender from the speaker before), so a dialogue never loses a character."""
+    wanted: Dict[str, Optional[str]] = {}
     if isinstance(raw, dict):
         for k, v in raw.items():
-            sid, voice = speaker_id(k), canonical(v)
-            if sid and voice and sid not in out and len(out) < MAX_SPEAKERS:
-                out[sid] = voice
-    if not out:
-        return {"narrator": DEFAULT_VOICE}
-    used: List[str] = []
-    for sid in list(out):  # two speakers on one voice would be unintelligible: move the later one to an unused voice
-        if out[sid] in used:
-            gender = CATALOG[out[sid]][1]
-            pool = [n for n, (_, g) in CATALOG.items() if n not in used and n not in out.values()]
-            out[sid] = next((n for n in pool if CATALOG[n][1] != gender), pool[0] if pool else out[sid])
-        used.append(out[sid])
-    return out
+            sid = speaker_id(k)
+            if sid and sid not in wanted and len(wanted) < MAX_SPEAKERS:
+                wanted[sid] = canonical(v, language)
+    if not wanted:
+        return {"narrator": DEFAULT_VOICES.get(language, DEFAULT_VOICE)}
+    out: Dict[str, str] = {}
+    taken: List[str] = []
+    # Characters choose first, the narrator last: if voices of one gender run out, it is the narrator who changes, not a character.
+    order = [s for s in wanted if s != "narrator"] + [s for s in wanted if s == "narrator"]
+    for sid in order:
+        voice = wanted[sid]
+        if voice is None or voice in taken:
+            pool = [n for n in names(language) if n not in taken and n not in wanted.values()] or [n for n in names(language) if n not in taken]
+            last_gender = CATALOG[taken[-1]][2] if taken else None
+            voice = next((n for n in pool if CATALOG[n][2] != last_gender), pool[0] if pool else DEFAULT_VOICES.get(language, DEFAULT_VOICE))
+        out[sid] = voice
+        taken.append(voice)
+    return {sid: out[sid] for sid in wanted}  # the director's own order
 
 
 def beat_voice(plan: Dict, beat: Dict) -> str:

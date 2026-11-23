@@ -153,9 +153,10 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
             if not _VOICE_RE.match(voice):
                 raise EditError("bad voice name")
             if (new.get("tts") or {}).get("provider", "polly") == "polly":
-                voice = voice_mod.canonical(voice) or ""
+                lang = new.get("language") or "en"
+                voice = voice_mod.canonical(voice, lang) or ""
                 if not voice:
-                    raise EditError("unknown voice: choose one of " + ", ".join(voice_mod.CATALOG))
+                    raise EditError(f"unknown voice for this {voice_mod.LANGUAGES.get(lang, lang)} video: choose one of " + ", ".join(voice_mod.names(lang)))
             cast = new.setdefault("voices", {})
             speaker = voice_mod.speaker_id(op.get("speaker")) if op.get("speaker") else ("narrator" if "narrator" in cast or not cast else next(iter(cast)))
             if cast and speaker not in cast:

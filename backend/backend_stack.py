@@ -443,6 +443,7 @@ class BackendStack(Stack):
                     "client_request_id": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=8, max_length=64),
                     "target_minutes": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=1, maximum=12),
                     "theme": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["midnight", "paper", "sunrise"]),
+                    "language": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["en", "es"]),
                 },
             ),
         )
