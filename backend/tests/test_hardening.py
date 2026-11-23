@@ -195,7 +195,7 @@ def test_wallet_endpoint_requires_the_owner(aws):
     ev = {"pathParameters": {"user_id": "u1"}, "headers": {"X-Timezone": "Europe/Madrid"}, "requestContext": {"authorizer": {"claims": {"sub": "u1"}}}}
     out = wallet_api.handler(ev, None)
     body = json.loads(out["body"])
-    assert out["statusCode"] == 200 and body["balance"] == 5 and body["rules"]["daily"] == 2 and body["buckets"][0]["kind"] == "signup"
+    assert out["statusCode"] == 200 and body["balance"] == 5 and body["rules"]["daily"] == 1 and body["buckets"][0]["kind"] == "signup"
     assert wallet_api.handler({**ev, "requestContext": {}}, None)["statusCode"] == 401
     assert wallet_api.handler({**ev, "pathParameters": {"user_id": "u2"}}, None)["statusCode"] == 403
 

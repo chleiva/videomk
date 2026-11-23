@@ -1,4 +1,4 @@
-# Credits (decided 2026-11-23)
+# Credits (decided 2026-11-23; daily free credit lowered from 2 to 1 the same day)
 
 **1 credit = 1 started minute of video**, at least 1 and at most 12 per video: a 10 s video costs 1, 60 s costs 1, 61 s costs 2. The length
 the user picks is the length that is billed and made (the launcher passes it to the workflow). Failed or declined videos refund exactly the
@@ -8,7 +8,7 @@ buckets they were charged to, once.
 | Credits | Amount | Expiry |
 |---|---|---|
 | Welcome | 5, on first sight of the account | 30 days |
-| Daily free | 2 per local day (the day starts at the user's timezone midnight, sent as `X-Timezone`; first day has none, the welcome credits cover it) | the same night |
+| Daily free | 1 per local day (the day starts at the user's timezone midnight, sent as `X-Timezone`; first day has none, the welcome credits cover it) | the same night |
 | Purchased | packs below | never |
 | Returned | a 24 h make-good when a refund finds its bucket expired | 24 h |
 
@@ -22,8 +22,8 @@ credits per minute: same economics.
 ## Cost basis (estimates, +-30%; measure again with real data)
 About $0.02 fixed plus $0.04 per minute (voice $0.027/min with Polly generative, render about $0.015/min, planning the rest):
 1 min is about $0.06, 3 min $0.14, 12 min $0.50. Worst cost per credit is a 1-minute video, about $0.06, so a $0.50 credit is about 8x
-before store fees (about 5-7x after). Free exposure per active free user: about $0.12 a day if both daily credits are used, $0.30 for the
-welcome credits.
+before store fees (about 5-7x after). Free exposure per active free user (daily credit set to 1 on 2026-11-23): first month 5 + 29 = 34 credits, about $1.70-2.05 if every one is used
+(realistically a fraction of that), then about 30 credits a month, $1.50-1.80. The daily amount is a server setting (`WALLET_DAILY_CREDITS`).
 
 ## Abuse controls
 Built: spend is conditional per bucket (no overspend under concurrency), refunds are idempotent, daily claim limited per UTC day,

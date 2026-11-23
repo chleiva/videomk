@@ -153,9 +153,9 @@ public struct WalletInfo: Sendable, Equatable, Decodable {
         buckets = (try? c.decode([WalletBucket].self, forKey: .buckets)) ?? []
         nextFreeAt = (try? c.decode(Double.self, forKey: .nextDailyAt)).map(Date.init(timeIntervalSince1970:))
         let r = try? c.decode(Rules.self, forKey: .rules)
-        dailyCredits = r?.daily ?? 2; signupCredits = r?.signup ?? 5
+        dailyCredits = r?.daily ?? 1; signupCredits = r?.signup ?? 5
     }
-    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, dailyCredits: Int = 2, signupCredits: Int = 5) {
+    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, dailyCredits: Int = 1, signupCredits: Int = 5) {
         self.balance = balance; self.buckets = buckets; self.nextFreeAt = nextFreeAt; self.dailyCredits = dailyCredits; self.signupCredits = signupCredits
     }
 

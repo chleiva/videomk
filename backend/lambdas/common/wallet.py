@@ -1,7 +1,7 @@
 """Credits wallet. 1 credit = 1 started minute of video (a 10-second video costs 1, 61 seconds costs 2).
 
 Credits live in *buckets* so each kind can expire on its own and the soonest-expiring is spent first:
-  daily   2 free credits a day, expire at the end of the user's local day (no hoarding)
+  daily   1 free credit a day, expire at the end of the user's local day (no hoarding)
   signup  5 welcome credits, expire after 30 days
   paid    bought through the stores, never expire (one bucket per user, increased per purchase)
   refund  a make-good when a refund finds its original bucket already expired (valid 24 h)
@@ -41,7 +41,7 @@ def _int(name: str, default: int) -> int:
 
 
 def rules() -> Dict[str, int]:
-    return {"credit_unit_seconds": 60, "max_minutes": MAX_MINUTES, "signup": _int("WALLET_SIGNUP_CREDITS", 5), "daily": _int("WALLET_DAILY_CREDITS", 2),
+    return {"credit_unit_seconds": 60, "max_minutes": MAX_MINUTES, "signup": _int("WALLET_SIGNUP_CREDITS", 5), "daily": _int("WALLET_DAILY_CREDITS", 1),
             "signup_valid_days": _int("WALLET_SIGNUP_VALID_DAYS", 30)}
 
 

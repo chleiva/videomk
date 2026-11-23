@@ -34,7 +34,7 @@ struct WalletView: View {
                         if let next = w.nextFreeAt {
                             Label("Next free credits: \(next.formatted(.relative(presentation: .named)))", systemImage: "clock")
                         }
-                        Label("\(w.dailyCredits) free credits every day. They expire that night.", systemImage: "gift")
+                        Label(w.dailyCredits == 1 ? "1 free credit every day. It expires that night." : "\(w.dailyCredits) free credits every day. They expire that night.", systemImage: "gift")
                     } footer: {
                         Text("1 credit makes up to 1 minute of video, rounded up: a 10-second video and a 60-second video cost 1 credit, a 61-second video costs 2. Free credits expire; credits you buy never do.")
                     }

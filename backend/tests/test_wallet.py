@@ -6,6 +6,12 @@ import pytest
 from common import wallet
 
 DAY = 86400
+
+
+@pytest.fixture(autouse=True)
+def two_daily_credits(monkeypatch):
+    """The scenarios below are written for 2 daily credits so spending across buckets is visible; the product default is locked separately."""
+    monkeypatch.setenv("WALLET_DAILY_CREDITS", "2")
 T0 = 1_800_000_000.0  # a fixed instant: 2027-01-15 08:00:00 UTC
 
 
@@ -133,6 +139,14 @@ def test_store_purchases_are_granted_once_per_transaction(aws):
     assert wallet.grant_paid("u", 45, "apple-txn-101", now=T0) is True
     assert kinds("u", T0)["paid"] == 65
     assert wallet.balance("u", now=T0 + 400 * DAY)["balance"] >= 65     # paid credits never expire
+
+
+def test_product_defaults_are_5_welcome_credits_and_1_free_credit_a_day(aws, monkeypatch):
+    monkeypatch.delenv("WALLET_DAILY_CREDITS", raising=False)
+    monkeypatch.delenv("WALLET_SIGNUP_CREDITS", raising=False)
+    r = wallet.rules()
+    assert (r["signup"], r["daily"], r["signup_valid_days"], r["credit_unit_seconds"], r["max_minutes"]) == (5, 1, 30, 60, 12)
+    assert kinds("fresh", T0) == {"signup": 5} and kinds("fresh", T0 + DAY) == {"daily": 1, "signup": 5}
 
 
 def test_rules_come_from_server_config(aws, monkeypatch):
