@@ -24,13 +24,15 @@ The script prompt also gets today's date and a rule that time-sensitive facts mu
 Took: the cheap intent gate before searching; separate query preparation with provider options (topic, time range); budgeted ReAct loop; citation ids; fallback when search is unavailable.
 Changed: native tool use instead of the XML-tag protocol (no parse retries); evidence-as-notes with a usefulness verdict; id-only page reads; SSRF-safe fetching (Plorer's `web_fetch` accepts any http/https URL including internal addresses and follows redirects: worth fixing there); no Exa yet (the provider is behind one `search` signature, add it beside `TavilyProvider`).
 
-## Images from the internet
-Not enabled, on purpose. Images found by web search are almost never licensed for reuse, and a rendered video can be published by the user (YouTube, social).
-Showing a hotlinked image in a page (Plorer) is not the same as embedding it in a published video. What is safe and worth adding next: Wikimedia Commons
-images with their machine-readable license (Commons API `extmetadata`: LicenseShortName, Artist), public-domain sources (NASA, Library of Congress,
-Smithsonian, US government works) found by the agent through `include_domains`, all attributed like the Unsplash and Openverse photos already are. Product decision needed before
-anything beyond that.
+## Images from the internet: policy (decided 2026-11-23)
+**Only images that are fully licensed for reuse, never anything copyrighted.** Web search is for text research only: the search request asks the provider for no images
+(`include_images: false`, covered by a test) and nothing the agent finds on the web ever becomes a picture in a video. Pictures come only from sources with a clear open licence:
+Unsplash (Unsplash License) and Openverse (CC0, public domain, CC BY), each credited on screen and in the description, and the user's own photos. Candidates to add later, each
+with machine-readable licence data: Wikimedia Commons (Commons API `extmetadata`), and public-domain collections (NASA, Library of Congress, Smithsonian, US government works).
+A new source needs a documented licence check in code before it is used.
 
 ## Setup
+The key is the same Tavily key Plorer uses (read from its Secrets Manager entry `tavily`, us-west-2, and copied to `/videomk/tavily_api_key` in SSM; never printed or committed). It is shared, so
+usage and quota are shared with Plorer, and a rotation there must be repeated here. Create a separate key for videomk before launch if you want separate quotas and billing. To set or replace it:
 `aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/tavily_api_key --value '<key>'` (never in chat or git). `WEB_RESEARCH=off`
 on the plan function disables the web path without a deploy of code.
