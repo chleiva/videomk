@@ -9,10 +9,9 @@ final class Dictation {
     enum State: Equatable { case idle, starting, listening, unavailable(String) }
 
     private(set) var state: State = .idle
-    /// Language being spoken. Remembered; defaults from the phone's preferred languages.
-    var language: DictationLanguage = DictationLanguage.initial(saved: UserDefaults.standard.string(forKey: "dictationLanguage"), preferred: Locale.preferredLanguages) {
-        didSet { UserDefaults.standard.set(language.rawValue, forKey: "dictationLanguage") }
-    }
+    /// No language menu: dictation follows the phone's first preferred language we support (English or Spanish).
+    /// A multilingual model can replace this later; the server detects the brief's language from the text either way.
+    private var language: DictationLanguage { DictationLanguage.initial(saved: nil, preferred: Locale.preferredLanguages) }
     /// Called with the full text (what was already typed plus what was said) every time the recognizer updates.
     var onText: ((String) -> Void)?
 

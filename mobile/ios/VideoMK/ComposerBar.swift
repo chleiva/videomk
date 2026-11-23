@@ -88,11 +88,6 @@ struct ComposerBar: View {
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
-        .contextMenu {  // touch and hold: choose the language you will speak
-            Picker("Dictation language", selection: $dictation.language) {
-                ForEach(DictationLanguage.allCases) { Text($0.title).tag($0) }
-            }
-        }
         .accessibilityLabel(dictation.isListening ? "Stop dictation" : "Dictate")
         .accessibilityHint("Say what video you want instead of typing")
         .accessibilityIdentifier("micButton")
