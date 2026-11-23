@@ -71,12 +71,14 @@ Rules:
 SYSTEM_PROMPT = system_prompt("en")
 
 
-def build_user_prompt(topic: str, notes: str, target_minutes: float) -> str:
+def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None) -> str:
     words = int(target_minutes * WORDS_PER_MIN)
     beats = max(4, round(target_minutes * 60 / 14))
     return (
         f"Topic: {topic}\n\n"
         f"Target length: about {target_minutes:g} minute(s): roughly {words} narration words in about {beats} beats.\n\n"
+        + (f"Today's date: {today}. Anything time-sensitive must come from the grounding notes (with the date it refers to), never from memory.\n\n" if today else "")
+        +
         f"Grounding notes (may be empty):\n{notes or '(none)'}\n\n"
         "Return the JSON plan now."
     )
@@ -295,9 +297,9 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
     )
 
 
-def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
+def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
-    user = build_user_prompt(topic, notes, target_minutes)
+    user = build_user_prompt(topic, notes, target_minutes, today)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
         text = llm(system_prompt(language, region), user)
@@ -309,5 +311,5 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
             return plan, warns
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e
-            user = build_user_prompt(topic, notes, target_minutes) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
+            user = build_user_prompt(topic, notes, target_minutes, today) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
     raise ValueError(f"could not obtain a valid plan: {last_err}")

@@ -49,6 +49,33 @@ def _bedrock():
 REVIEW_MODEL = os.environ.get("REVIEW_MODEL_ID", f"{GEO}.anthropic.claude-haiku-5-5")
 
 
+def complete_tools(
+    system: str,
+    messages: List[Dict[str, Any]],
+    tools: List[Dict[str, Any]],
+    *,
+    max_tokens: int = 900,
+    model: Optional[str] = None,
+    effort: str = "low",
+    tool_choice: Optional[Dict[str, Any]] = None,
+) -> Tuple[List[Dict[str, Any]], str, Dict[str, Any]]:
+    """One turn of a tool-using conversation (Bedrock native tool use). Returns (content blocks, stop_reason, meta{model, tokens, cost_usd}).
+    No fallback model: an agent loop that silently changes model half-way is harder to reason about than one that fails and falls back at a higher level."""
+    model_id = model or REVIEW_MODEL
+    body: Dict[str, Any] = {"anthropic_version": "bedrock-2023-05-31", "max_tokens": max_tokens, "system": system, "messages": messages, "tools": tools}
+    if tool_choice:
+        body["tool_choice"] = tool_choice  # {"type": "none"} makes the model answer in text, used for the last turn of a loop
+    if is_claude5(model_id):
+        body["output_config"] = {"effort": effort}
+    else:
+        body["temperature"] = 0.2
+    res = json.loads(_bedrock().invoke_model(modelId=model_id, body=json.dumps(body))["body"].read())
+    usage = res.get("usage") or {}
+    tin, tout = int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0))
+    blocks = [b for b in res.get("content", []) if isinstance(b, dict) and b.get("type") in ("text", "tool_use")]
+    return blocks, str(res.get("stop_reason") or ""), {"model": model_id, "tokens_in": tin, "tokens_out": tout, "cost_usd": estimate_cost(model_id, tin, tout)}
+
+
 def complete(
     system: str,
     user: str,

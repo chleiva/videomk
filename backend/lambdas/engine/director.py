@@ -5,22 +5,41 @@ Pure of storage and billing so the production handler and the evaluation script 
 """
 from typing import Any, Callable, Dict, List, Optional
 
-from . import language as lang_mod, plan as plan_mod, research, voices
+from datetime import date
+
+from . import language as lang_mod, plan as plan_mod, research, researcher, voices
 
 Ask = Callable[..., str]  # (system, user, max_tokens=...) -> text
 
 
 def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[str, str], str],
-           language: Optional[str] = None, region: Optional[str] = None, theme: Optional[str] = None) -> Dict[str, Any]:
-    """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles]}."""
+           language: Optional[str] = None, region: Optional[str] = None, theme: Optional[str] = None,
+           web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
+           budget: Optional[researcher.Budget] = None) -> Dict[str, Any]:
+    """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
+    With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
     if language not in voices.LANGUAGES:  # not chosen by the caller: work it out from the brief (free for clear briefs)
         language = lang_mod.detect(prompt, lambda s, u: ask_small(s, u, 20))
         if language not in voices.LANGUAGES:
             return {"legit": False, "reason": lang_mod.unsupported_message()}
 
-    notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
-    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region)
+    today = today or date.today().isoformat()
+    info: Dict[str, Any] = {"mode": "encyclopedia"}
+    notes, sources = "", []
+    if web_provider is not None and ask_tools is not None:
+        decision = researcher.decide(prompt, language=language, region=region, today=today, ask=lambda s, u, n=260: ask_small(s, u, n))
+        info.update({"decided": decision.mode, "reason": decision.reason, "queries": decision.queries})
+        if decision.mode == "web":
+            r = researcher.research_web(prompt, decision=decision, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools, budget=budget)
+            info.update({"searches": r.searches, "reads": r.reads, "iterations": r.iterations, "seconds": round(r.seconds, 1), "cost_usd": r.cost_usd, "error": r.error})
+            if r.sources:
+                notes, sources, info["mode"] = r.notes, r.sources, "web"
+            else:
+                info["fallback"] = True  # nothing usable came back: fall through to the encyclopedia path
+    if info["mode"] != "web":
+        notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
+    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
 
@@ -33,4 +52,4 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if region:
         plan["region"] = region
     plan["sources"] = sources
-    return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched}
+    return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

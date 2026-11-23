@@ -5,10 +5,29 @@ from typing import Any, Dict
 
 from generate_video.db import set_attributes, update_status
 
-from .. import awsio, costs, director, llm, voices
+from common.secrets import get_secret_param
+
+from .. import awsio, costs, director, llm, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
+
+
+WEB_SEARCH_COST_USD = float(os.environ.get("WEB_SEARCH_COST_USD", "0.008"))  # Tavily basic search, one credit; verify against your plan
+
+
+def _web_tools(spent: Dict[str, float]):
+    """The web research tools, or (None, None) when no search key is configured (the encyclopedia path is used)."""
+    key = get_secret_param("/videomk/tavily_api_key", quiet=True)
+    if not key or os.environ.get("WEB_RESEARCH", "on") == "off":
+        return None, None
+
+    def ask_tools(system, messages, tools, **kw):
+        blocks, stop, meta = llm.complete_tools(system, messages, tools, model=llm.REVIEW_MODEL, **kw)
+        spent["cost"] += meta["cost_usd"]
+        return blocks, stop, meta
+
+    return websearch.TavilyProvider(key), ask_tools
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -31,9 +50,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         spent["cost"] += meta["cost_usd"]
         return text
 
+    provider, ask_tools = _web_tools(spent)
     result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
-                             region=event.get("region"), theme=event.get("theme"))
+                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools)
+    r = result.get("research") or {}
+    spent["cost"] += float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     costs.add_cost(video_id, spent["cost"])
+    if r.get("mode") == "web" or r.get("fallback"):
+        logging.warning("research: %s", {k: r.get(k) for k in ("mode", "decided", "searches", "reads", "iterations", "seconds", "error", "fallback")})
     if result.get("warnings"):
         logging.warning("plan warnings: %s", result["warnings"][:10])  # WARNING level: Lambda drops INFO by default
     if not result["legit"]:
