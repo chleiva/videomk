@@ -83,6 +83,20 @@ struct FixedAuth: AuthorizationProviding {
         #expect(seen?.value(forHTTPHeaderField: "X-Platform") == "ios" && seen?.value(forHTTPHeaderField: "X-App-Version") == "1.2")
     }
 
+    @Test func requestsCarryTheDeviceRegionForVoiceDefaults() async throws {
+        nonisolated(unsafe) var seen: URLRequest?
+        StubProtocol.handler = { req in seen = req; return (200, Data(#"{"items":[]}"#.utf8)) }
+        let gb = APIClient(config: config, auth: FixedAuth(), session: stubSession(), region: { "gb" })
+        _ = try await gb.listVideos()
+        #expect(seen?.value(forHTTPHeaderField: "X-Region") == "GB")
+        let none = APIClient(config: config, auth: FixedAuth(), session: stubSession(), region: { nil })
+        _ = try await none.listVideos()
+        #expect(seen?.value(forHTTPHeaderField: "X-Region") == nil)
+        let bad = APIClient(config: config, auth: FixedAuth(), session: stubSession(), region: { "419" })  // not a country code: never sent
+        _ = try await bad.listVideos()
+        #expect(seen?.value(forHTTPHeaderField: "X-Region") == nil)
+    }
+
     @Test func startGenerationSendsNormalizedPromptAndRequestID() async throws {
         nonisolated(unsafe) var body: [String: Any] = [:]
         StubProtocol.handler = { req in

@@ -10,7 +10,7 @@ import logging
 import os
 import time
 import uuid
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import boto3
 from botocore.exceptions import ClientError
@@ -56,6 +56,17 @@ def validate_prompt(body: Dict[str, Any]) -> str:
     if len(prompt) > MAX_PROMPT_CHARS:
         raise BadRequest(f"'prompt' must be at most {MAX_PROMPT_CHARS} characters")
     return prompt
+
+
+def request_region(event: Dict[str, Any]) -> Optional[str]:
+    """Where the viewer is, as an ISO country code, for default voice accents only. The app sends its device region (the user's own setting);
+    CloudFront's viewer country is used if the API is ever served through CloudFront. Never trusted for anything but voice choice."""
+    headers = {str(k).lower(): v for k, v in ((event or {}).get("headers") or {}).items()}
+    for name in ("x-region", "cloudfront-viewer-country"):
+        value = str(headers.get(name) or "").strip().upper()
+        if len(value) == 2 and value.isalpha():
+            return value
+    return None
 
 
 THEMES = ("midnight", "paper", "sunrise")
@@ -126,6 +137,9 @@ def handler(event: Dict[str, Any], context: Any):
         logger.error("STATE_MACHINE_ARN is not configured")
         return json_response(500, {"message": "Server configuration error"})
 
+    region = request_region(event)
+    if region:
+        options["region"] = region
     video_id, idempotent = video_id_for(user_id, body)
     usage_day = time.strftime("%Y-%m-%d", time.gmtime())
 

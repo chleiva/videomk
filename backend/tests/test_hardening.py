@@ -177,3 +177,19 @@ def test_render_blocks_foreign_assets():
     assert not render._is_allowed_asset("s3://videomk.com/videos/user/secret.mp4", "vid-1")
     assert not render._is_allowed_asset("s3://other-bucket/generation/assets/vid-1/x.png", "vid-1")
     assert not render._is_allowed_asset("s3://videomk.com/generation/assets/vid-1/../x.png", "vid-1")
+
+
+def test_launcher_passes_the_viewers_region_but_only_as_a_two_letter_code(launcher, monkeypatch):
+    monkeypatch.setenv("DAILY_VIDEO_LIMIT", "10")
+    ev = _event()
+    ev["headers"] = {"X-Region": "gb", "Authorization": "Bearer SECRET"}
+    assert launcher.handler(ev, None)["statusCode"] == 202
+    sent = json.loads(launcher.fake.calls[0]["input"])
+    assert sent["region"] == "GB" and "SECRET" not in launcher.fake.calls[0]["input"]
+    ev2 = _event(body={"prompt": "A short explainer about how black holes form", "client_request_id": "region-test-02"})
+    ev2["headers"] = {"X-Region": "../etc"}
+    assert launcher.handler(ev2, None)["statusCode"] == 202 and "region" not in json.loads(launcher.fake.calls[1]["input"])
+    ev3 = _event(body={"prompt": "A short explainer about how black holes form", "client_request_id": "region-test-03"})
+    ev3["headers"] = {"CloudFront-Viewer-Country": "IN"}
+    launcher.handler(ev3, None)
+    assert json.loads(launcher.fake.calls[2]["input"])["region"] == "IN"

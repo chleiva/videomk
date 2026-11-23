@@ -423,7 +423,7 @@ class BackendStack(Stack):
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
         for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"])):
-            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization"])
+            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region"])
 
         cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
         videos.add_method("GET", apigw.LambdaIntegration(list_videos_fn, proxy=True), **cognito_auth)

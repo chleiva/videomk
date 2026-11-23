@@ -523,25 +523,30 @@ def _plan_with(voices, speakers):
     return {"legit": True, "title": "T", "voices": voices, "beats": beats}
 
 
-def test_voice_catalogue_is_small_balanced_and_canonical():
+def test_voice_catalogue_covers_every_english_and_spanish_generative_voice():
     from engine import voices
 
     assert voices.canonical("matthew") == "Matthew" and voices.canonical(" RUTH ") == "Ruth" and voices.canonical("Zhiyu") is None
-    en, es = voices.names("en"), voices.names("es")
-    assert len(en) == 10 and len(es) == 6
-    for lang, accents in (("en", {"American", "British", "Australian", "Indian"}), ("es", {"Latin American (US)", "Mexican", "Spanish (Spain)"})):
-        names = voices.names(lang)
-        assert {voices.CATALOG[n][1] for n in names} == accents  # every accent is there...
-        for accent in accents:
-            genders = {voices.CATALOG[n][2] for n in names if voices.CATALOG[n][1] == accent}
-            assert genders == {"female", "male"}  # ...with a woman and a man each
-    assert voices.DEFAULT_VOICES == {"en": "Ruth", "es": "Lupe"}
+    assert len(voices.names("en")) == 21 and len(voices.names("es")) == 7
     assert voices.canonical("Lupe", "en") is None and voices.canonical("Lupe", "es") == "Lupe"  # a voice only works in its own language
-    assert voices.canonical("Joanna") is None  # trimmed from the catalogue
-    p = plan_mod.system_prompt("en")
-    assert "Ruth (American, female)" in p and "house voice" in p and "Lupe" not in p and "DIFFERENT voices" in p
-    ps = plan_mod.system_prompt("es")
-    assert "in Spanish" in ps and "Lupe (Latin American (US), female)" in ps and "Ruth" not in ps
+    for lang in ("en", "es"):  # a woman and a man are always available for a dialogue
+        assert {voices.CATALOG[n][2] for n in voices.names(lang)} == {"female", "male"}
+
+
+def test_default_voice_follows_the_viewers_region_and_the_brief_can_override():
+    from engine import voices
+
+    d = voices.default_voice
+    assert [d("en", r) for r in (None, "US", "us", "CA", "FR", "GB", "IN", "AU", "IE", "NZ", "ZA", "SG")] == \
+        ["Ruth", "Ruth", "Ruth", "Ruth", "Ruth", "Amy", "Kajal", "Olivia", "Niamh", "Aria", "Ayanda", "Jasmine"]  # Canada: no Canadian voice, so American
+    assert [d("es", r) for r in (None, "ES", "MX", "AR", "CO", "CL", "PE", "US", "FR")] == ["Lucia", "Lucia", "Mia", "Mia", "Mia", "Mia", "Mia", "Lupe", "Lucia"]
+    assert voices.clean_region(" gb ") == "GB" and voices.clean_region("GBR") is None and voices.clean_region("1A") is None and voices.clean_region(None) is None
+    assert voices.clean_cast(None, "en", "IN") == {"narrator": "Kajal"} and voices.clean_cast({"narrator": "Brian"}, "en", "IN") == {"narrator": "Brian"}
+    p_in = plan_mod.system_prompt("en", "IN")
+    assert "The viewer is in IN" in p_in and "default voice is Kajal (Indian)" in p_in and "The brief always wins" in p_in
+    assert "The viewer is in" not in plan_mod.system_prompt("en") and "default voice is Ruth (American)" in plan_mod.system_prompt("en")
+    assert "default voice is Lucia (Spanish (Spain))" in plan_mod.system_prompt("es") and "default voice is Mia (Mexican)" in plan_mod.system_prompt("es", "MX")
+    assert "Ruth (American, female)" in plan_mod.system_prompt("en") and "Lupe" not in plan_mod.system_prompt("en") and "DIFFERENT voices" in plan_mod.system_prompt("en")
 
 
 def test_spanish_plans_get_spanish_voices_only():
@@ -552,7 +557,8 @@ def test_spanish_plans_get_spanish_voices_only():
     assert voices.language_of(plan["voices"]["luis"]) == "es" and plan["voices"]["luis"] not in ("Lupe", "Mia")  # Luis keeps his lines, with a Spanish voice
     assert voices.CATALOG[plan["voices"]["luis"]][2] == "male"  # and, being the one that had to be replaced, a different gender from the speaker before
     assert any("voices adjusted" in w for w in warns)
-    assert plan_mod.validate_plan(_plan_with(None, [None]), language="es")[0]["voices"] == {"narrator": "Lupe"}
+    assert plan_mod.validate_plan(_plan_with(None, [None]), language="es")[0]["voices"] == {"narrator": "Lucia"}
+    assert plan_mod.validate_plan(_plan_with(None, [None]), language="es", region="MX")[0]["voices"] == {"narrator": "Mia"}
     assert plan_mod.validate_plan(_plan_with(None, [None]))[0]["voices"] == {"narrator": "Ruth"} and plan_mod.validate_plan(_plan_with(None, [None]))[0]["language"] == "en"
 
 
@@ -605,8 +611,8 @@ def test_a_dialogue_keeps_up_to_three_characters_and_a_narrator_with_distinct_re
 
     c = voices.clean_cast({"narrator": "Olivia", "Maya": "ruth", "Sam": "Matthew", "Lee": "Amy", "Extra": "Brian", "bad id!": "Nate"})
     assert list(c) == ["narrator", "maya", "sam", "lee"] and list(c.values()) == ["Olivia", "Ruth", "Matthew", "Amy"]  # 3 characters + narrator; the rest is dropped
-    assert voices.clean_cast({"narrator": "Nonexistent"}) == {"narrator": voices.DEFAULT_VOICE}
-    assert voices.clean_cast(None) == {"narrator": voices.DEFAULT_VOICE}
+    assert voices.clean_cast({"narrator": "Nonexistent"}) == {"narrator": voices.default_voice("en")}
+    assert voices.clean_cast(None) == {"narrator": voices.default_voice("en")}
     dup = voices.clean_cast({"a": "Ruth", "b": "Ruth"})  # two speakers on one voice would be unintelligible
     assert dup["a"] == "Ruth" and dup["b"] != "Ruth" and voices.CATALOG[dup["b"]][2] != voices.CATALOG["Ruth"][2]
 
@@ -666,7 +672,7 @@ def test_narrator_gives_way_when_characters_run_out_of_voices_of_their_gender():
     c = voices.clean_cast({"narrator": "Lupe", "ana": "Mia", "lucia": "Lucia", "marta": "Lupe"}, "es")
     assert (c["ana"], c["lucia"], c["marta"]) == ("Mia", "Lucia", "Lupe")  # every character is a woman, as asked
     assert voices.CATALOG[c["narrator"]][2] == "male" and list(c) == ["narrator", "ana", "lucia", "marta"]
-    assert "3 women's voices and 3 men's voices" in plan_mod.system_prompt("es") and "skip the narrator" in plan_mod.system_prompt("en")
+    assert "3 women's voices and 4 men's voices" in plan_mod.system_prompt("es") and "skip the narrator" in plan_mod.system_prompt("en")
 
 
 def test_research_uses_short_queries_written_by_a_small_model_and_never_cites_unrelated_pages():
@@ -699,3 +705,4 @@ def test_plan_keeps_the_sources_the_director_says_it_used():
     assert plan["sources_used"] == ["Volcán", "Magma"]
     assert "sources_used" not in plan_mod.validate_plan(_plan_with(None, [None]))[0]  # absent stays absent: cite everything researched
     assert plan_mod.validate_plan({**_plan_with(None, [None]), "sources_used": []})[0]["sources_used"] == []  # used nothing: cite nothing
+

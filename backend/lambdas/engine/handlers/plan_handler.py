@@ -38,7 +38,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         meta_acc["cost"] += meta["cost_usd"]
         return text
 
-    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask, language=language)
+    region = voices.clean_region(event.get("region"))
+    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask, language=language, region=region)
     costs.add_cost(video_id, meta_acc["cost"])
     if warnings:
         logging.warning("plan warnings: %s", warnings[:10])  # WARNING level: Lambda drops INFO by default
@@ -51,11 +52,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     used = plan.pop("sources_used", None)
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
+    if region:
+        plan["region"] = region
     plan["sources"] = sources
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     forced = os.environ.get("TTS_VOICE", "")
     if forced:  # an operator-forced voice overrides the director's casting: one voice, no dialogue
-        plan["voices"] = {"narrator": voices.canonical(forced, language) or voices.DEFAULT_VOICES[language]}
+        plan["voices"] = {"narrator": voices.canonical(forced, language) or voices.default_voice(language, region)}
         for b in plan["beats"]:
             b.pop("speaker", None)
     if plan["tts"]["provider"] == "polly":  # recorded in the plan so edits months later still use the same voice

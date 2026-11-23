@@ -32,9 +32,12 @@ public struct APIClient: Sendable {
     private let auth: any AuthorizationProviding
     private let session: URLSession
     private let appVersion: String
+    private let region: @Sendable () -> String?
 
-    public init(config: AppConfig, auth: any AuthorizationProviding, session: URLSession = .shared, appVersion: String = "0") {
-        self.config = config; self.auth = auth; self.session = session; self.appVersion = appVersion
+    /// `region`: the device's region setting (ISO country code). The server uses it only to pick a default voice accent.
+    public init(config: AppConfig, auth: any AuthorizationProviding, session: URLSession = .shared, appVersion: String = "0",
+                region: @escaping @Sendable () -> String? = { Locale.current.region?.identifier }) {
+        self.config = config; self.auth = auth; self.session = session; self.appVersion = appVersion; self.region = region
     }
 
     public func listVideos() async throws -> [VideoItem] {
@@ -87,6 +90,7 @@ public struct APIClient: Sendable {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         req.setValue("ios", forHTTPHeaderField: "X-Platform")
         req.setValue(appVersion, forHTTPHeaderField: "X-App-Version")
+        if let region = region(), region.count == 2 { req.setValue(region.uppercased(), forHTTPHeaderField: "X-Region") }
         if let body { req.httpBody = body; req.setValue("application/json", forHTTPHeaderField: "Content-Type") }
 
         let data: Data, resp: URLResponse

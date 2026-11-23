@@ -24,8 +24,10 @@ SCENE_DOCS = """Scene types (props):
 - quote: {text (<=180), attribution (<=50)}. Only real, well-known quotes from the grounding notes.
 - image: {image_query (2-6 words describing a real photograph), alt (<=70)}. A real-world photo (place, object, person-type, scene). When the topic is about places, landmarks, nature, objects or anything people want to see, use a photo for at least 1 beat in 3, one per named place or object. For abstract topics (processes, ideas, numbers) use at most 1 beat in 5."""
 
-def system_prompt(language: str = "en") -> str:
-    default_voice = voice_mod.DEFAULT_VOICES.get(language, voice_mod.DEFAULT_VOICE)
+def system_prompt(language: str = "en", region: Optional[str] = None) -> str:
+    default_voice = voice_mod.default_voice(language, region)
+    default_accent = voice_mod.CATALOG[default_voice][1]
+    where = f"The viewer is in {region.upper()}. " if region else ""
     return f"""You are the director of a short animated explainer video. You turn a topic into a plan of "beats".
 Each beat has ONE idea, a narration to be spoken aloud, and ONE visual scene that illustrates it.
 
@@ -46,8 +48,9 @@ Otherwise return ONLY JSON (no markdown, no code fences):
 
 Language: write EVERYTHING viewers read or hear (title, description, narration, scene text) in {voice_mod.LANGUAGES.get(language, "English")}, and cast only voices from the list below.
 Voices you may cast (name, accent, gender): {voice_mod.prompt_list(language)}.
-- {default_voice} is our house voice and our best one: use her/him for most narration. Choose another only when the topic clearly calls for it
-  (an accent that fits the subject, a child-friendly tone) or when casting several speakers.
+- {where}Their default voice is {default_voice} ({default_accent}): use it for most narration. The brief always wins: if it asks for an accent, a
+  gender or a named voice ("with a British voice", "una voz mexicana"), cast that instead, whatever the viewer's region. Otherwise choose another
+  voice only when the topic clearly calls for it (an accent that fits the subject, a child-friendly tone) or when casting several speakers.
 - Use ONE voice unless the user asks for a conversation, interview, debate or dialogue between people.
 - Each voice can be used only once. The cast is small (there are {voice_mod.gender_counts(language)} to choose from), so for a dialogue between
   several people of the same gender skip the narrator rather than run out of voices.
@@ -223,7 +226,7 @@ def _fallback_scene(narration: str) -> Dict[str, Any]:
     return {"type": "title", "props": {"title": " ".join(words[:9]).rstrip(",;:"), "subtitle": ""}}
 
 
-def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en") -> Tuple[Dict[str, Any], List[str]]:
+def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
     """Returns (clean_plan, warnings). Raises ValueError when nothing usable remains."""
     warnings: List[str] = []
     if plan.get("legit") is not True:
@@ -267,7 +270,7 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
     if not beats:
         raise ValueError("no usable beats in plan")
 
-    cast = voice_mod.clean_cast(plan.get("voices"), language)
+    cast = voice_mod.clean_cast(plan.get("voices"), language, region)
     asked = plan.get("voices") if isinstance(plan.get("voices"), dict) else {}
     if asked and cast != {voice_mod.speaker_id(k): voice_mod.canonical(v, language) for k, v in asked.items() if voice_mod.speaker_id(k)}:
         warnings.append("voices adjusted (unknown or duplicate voice, or more than 3 speakers)")
@@ -292,14 +295,14 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
     )
 
 
-def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en") -> Tuple[Dict[str, Any], List[str]]:
+def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     user = build_user_prompt(topic, notes, target_minutes)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
-        text = llm(system_prompt(language), user)
+        text = llm(system_prompt(language, region), user)
         try:
-            plan, warns = validate_plan(parse_plan_json(text), language=language)
+            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region)
             replaced = [w for w in warns if "scene replaced" in w]
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
                 raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")
