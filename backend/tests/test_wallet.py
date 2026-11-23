@@ -180,3 +180,53 @@ def test_the_unlimited_flag_only_applies_to_the_flagged_account_and_credits_can_
     wallet.balance("p", now=T0)
     assert wallet.give_credits("p", 20) is True and kinds("p", T0)["paid"] == 20
     assert wallet.give_credits("p", 20) is True and kinds("p", T0)["paid"] == 40   # each hand-given grant is its own transaction
+
+
+# ---------------------------------------------------------------- the unlimited flag must not be forgeable
+def test_the_flag_is_ignored_in_production_even_if_someone_writes_it(aws, monkeypatch):
+    wallet.set_unlimited("t")
+    assert wallet.is_unlimited("t")
+    monkeypatch.setenv("ALLOW_UNLIMITED_ACCOUNTS", "0")                  # what the stack sets for the production stage
+    assert not wallet.is_unlimited("t") and wallet.balance("t", now=T0)["unlimited"] is False
+    wallet.balance("t", now=T0)
+    with pytest.raises(wallet.InsufficientCredits):
+        wallet.charge("t", 6, now=T0)                                    # production charges everyone
+    monkeypatch.delenv("ALLOW_UNLIMITED_ACCOUNTS")
+    assert not wallet.is_unlimited("t")                                  # and the default, if the setting is ever missing, is off
+    monkeypatch.setenv("ALLOW_UNLIMITED_ACCOUNTS", "1")
+    monkeypatch.delenv("FLAGS_TABLE")
+    assert not wallet.is_unlimited("t")                                  # no flags table configured: nobody is unlimited
+
+
+def test_only_an_exact_true_in_the_flags_table_counts(aws):
+    flags = aws.Table("Flags")
+    for value in ("true", 1, "yes", False, None, {"x": 1}):
+        flags.put_item(Item={"user_id": "weird", "unlimited": value})
+        assert not wallet.is_unlimited("weird"), value
+    flags.put_item(Item={"user_id": "weird", "unlimited": True})
+    assert wallet.is_unlimited("weird")
+
+
+def test_nothing_in_the_wallet_table_or_the_api_surface_can_turn_the_flag_on(aws):
+    """The flag is read from FLAGS_TABLE only. An `unlimited` attribute planted in the wallet table (the table runtime code can write) is ignored,
+    and no API handler calls set_unlimited."""
+    import glob
+    import re
+
+    wallet.balance("p", now=T0)
+    aws.Table("Wallet").update_item(Key={"user_id": "p", "sk": "META"}, UpdateExpression="SET unlimited = :t", ExpressionAttributeValues={":t": True})
+    assert not wallet.is_unlimited("p") and wallet.balance("p", now=T0)["unlimited"] is False
+    with pytest.raises(wallet.InsufficientCredits):
+        wallet.charge("p", 6, now=T0)
+    root = __import__("os").path.join(__import__("os").path.dirname(__file__), "..", "lambdas")
+    callers = [f for f in glob.glob(root + "/**/*.py", recursive=True) if re.search(r"set_unlimited\(", open(f).read()) and not f.endswith("common/wallet.py")]
+    assert callers == []                                                 # only scripts/wallet_admin.py (outside lambdas/) may call it
+
+
+def test_another_user_cannot_borrow_a_flagged_account(aws):
+    wallet.set_unlimited("flagged")
+    wallet.balance("other", now=T0)
+    wallet.charge("other", 5, now=T0)
+    with pytest.raises(wallet.InsufficientCredits):
+        wallet.charge("other", 1, now=T0)                                # the flag belongs to one user id
+    assert not wallet.is_unlimited("other") and not wallet.is_unlimited("") and not wallet.is_unlimited("flagged ")

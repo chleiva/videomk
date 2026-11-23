@@ -5,6 +5,7 @@
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py limited you@example.com          # back to normal
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py give you@example.com 20          # add 20 paid credits
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py show you@example.com
+The unlimited flag is only honoured outside production (ALLOW_UNLIMITED_ACCOUNTS is 0 there) and lives in a table the Lambdas cannot write.
 Accounts are found by email in the stage's Cognito pool, or pass a user id (the token `sub`). Defaults to stage qa; prod asks you to type prod.
 """
 import argparse
@@ -37,6 +38,11 @@ def main() -> None:
     if len(mine) != 1:
         sys.exit(f"expected one wallet table for stage {a.stage}, found {mine}")
     os.environ["WALLET_TABLE"] = mine[0]
+    flags = [t for t in tables if t.startswith(f"videomk-{a.stage}-AccountFlagsTable")]
+    if len(flags) != 1:
+        sys.exit(f"expected one account-flags table for stage {a.stage}, found {flags}")
+    os.environ["FLAGS_TABLE"] = flags[0]
+    os.environ["ALLOW_UNLIMITED_ACCOUNTS"] = "0" if a.stage == "prod" else "1"  # `show` reports what the running system would do
     uid = a.who
     if "@" in a.who:
         users = session.client("cognito-idp").list_users(UserPoolId=out["UserPoolId"], Filter=f'email = "{a.who}"')["Users"]

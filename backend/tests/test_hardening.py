@@ -142,6 +142,14 @@ def test_an_unlimited_account_can_always_create_videos(launcher):
     assert len(launcher.fake.calls) == 3 and wallet.balance("u1")["unlimited"] is True
 
 
+def test_unlimited_accounts_have_a_daily_ceiling_in_case_their_token_is_stolen(launcher, monkeypatch):
+    wallet.set_unlimited("u1")
+    monkeypatch.setenv("UNLIMITED_DAILY_VIDEOS", "2")
+    codes = [launcher.handler(_event(body={"prompt": "A twelve minute documentary about black holes", "target_minutes": 12, "client_request_id": f"ceiling-test-{i:02d}"}), None)["statusCode"] for i in range(3)]
+    assert codes == [202, 202, 429] and len(launcher.fake.calls) == 2
+    assert wallet.balance("u1")["unlimited"] is True
+
+
 def test_launcher_defaults_to_the_servers_default_length_and_bills_it(launcher):
     assert launcher.handler(_event(), None)["statusCode"] == 202
     assert json.loads(launcher.fake.calls[0]["input"])["target_minutes"] == 3.0 and wallet.balance("u1")["balance"] == 2

@@ -101,10 +101,23 @@ class BackendStack(Stack):
             removal_policy=RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY,
         )
 
+        # Admin-only account flags (for example unlimited test accounts). Runtime Lambdas get READ access only; the only writer is a person with
+        # AWS admin credentials running scripts/wallet_admin.py. Kept separate from the wallet table, which four runtime functions can write.
+        flags_table = dynamodb.Table(
+            self,
+            "AccountFlagsTable",
+            partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            point_in_time_recovery=is_prod,
+            removal_policy=RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY,
+        )
+
         common_env = {
             "VIDEOS_TABLE": videos_table.table_name,
             "USAGE_TABLE": usage_table.table_name,
             "WALLET_TABLE": wallet_table.table_name,
+            "FLAGS_TABLE": flags_table.table_name,
+            "ALLOW_UNLIMITED_ACCOUNTS": "0" if is_prod else "1",  # production ignores the unlimited flag entirely
             "ASSETS_BUCKET": ASSETS_BUCKET,
             "OPENAI_SSM_PARAM": OPENAI_SSM_PARAM,
         }
@@ -171,6 +184,7 @@ class BackendStack(Stack):
         usage_table.grant_read_write_data(launcher_fn)
         for fn in (launcher_fn, wallet_fn):
             wallet_table.grant_read_write_data(fn)
+            flags_table.grant_read_data(fn)  # read only: nothing at runtime can grant itself unlimited credits
 
         # Imported tables don't carry index ARNs: grant them explicitly for the GSI query.
         list_videos_fn.add_to_role_policy(

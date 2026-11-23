@@ -14,6 +14,8 @@ os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "test")
 os.environ["VIDEOS_TABLE"] = "Videos"
 os.environ["USAGE_TABLE"] = "Usage"
 os.environ["WALLET_TABLE"] = "Wallet"
+os.environ["FLAGS_TABLE"] = "Flags"
+os.environ["ALLOW_UNLIMITED_ACCOUNTS"] = "1"
 os.environ["STATE_MACHINE_ARN"] = "arn:aws:states:us-west-2:123456789012:stateMachine:generate_video_workflow"
 
 
@@ -37,6 +39,12 @@ def aws():
             TableName="Wallet",
             KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}, {"AttributeName": "sk", "KeyType": "RANGE"}],
             AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}, {"AttributeName": "sk", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        ddb.create_table(
+            TableName="Flags",
+            KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}],
             BillingMode="PAY_PER_REQUEST",
         )
         yield ddb

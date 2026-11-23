@@ -31,3 +31,14 @@ welcome credits only once per account.
 To build (needs keys or store setup): Apple DeviceCheck / App Attest (one welcome grant per device, genuine app only; Play Integrity on
 Android), free credits only for Apple/Google sign-in, a global daily budget for free videos that pauses free generation when spent, limits per
 IP and device on sign-ups, alarms on hourly spend, store-verified purchases (one transaction id grants once: `grant_paid` is ready).
+
+## Unlimited test accounts: how the exception is protected (2026-11-23)
+Purpose: staff and test accounts that are never charged. Threats considered and the controls:
+| Threat | Control |
+|---|---|
+| A user (or a bug in code that handles user input) grants itself the flag | The flag is in its own table (`AccountFlagsTable`) that **no Lambda role can write** (only the launcher and wallet function can read it); the only writer is a person with AWS admin credentials running `scripts/wallet_admin.py`. No API route sets it, and a test fails if any handler calls `set_unlimited`. Verified with the IAM policy simulator. |
+| The flag leaks into production | The stack sets `ALLOW_UNLIMITED_ACCOUNTS=0` for prod (all functions, checked on the synthesized template) and the code treats anything but `"1"` as off, so even a flag written in prod is ignored. |
+| Flag keyed by something a user can change | Keyed by the immutable Cognito `sub`, never by email; only an exact boolean `true` counts. |
+| An unlimited account's token is stolen and used to burn money | Unlimited accounts still have a daily ceiling (`UNLIMITED_DAILY_VIDEOS`, default 50), every use is logged as `UNLIMITED_ACCOUNT_USE` (alarm on it), and the per-video cost cap still applies. |
+| Unlimited use hides failures | Nothing is charged, so nothing is refunded; refunds only ever return what was actually taken. |
+Keep the flag to a handful of staff accounts; review with `wallet_admin.py show`. Before launch also add a CloudWatch alarm on `UNLIMITED_ACCOUNT_USE`.

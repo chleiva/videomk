@@ -17,7 +17,7 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import wallet
+from common import usage, wallet
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -164,6 +164,11 @@ def handler(event: Dict[str, Any], context: Any):
     credits = wallet.credits_for_minutes(minutes)
     try:
         charged = wallet.charge(user_id, credits, tz=request_timezone(event))
+        if credits and not charged:  # nothing was taken: an unlimited (test/staff) account. Keep a ceiling and a trail in case its token is ever stolen.
+            logger.warning("UNLIMITED_ACCOUNT_USE user=%s credits=%s minutes=%s", user_id, credits, minutes)
+            usage.consume(f"unlimited:{user_id}", limit=int(os.environ.get("UNLIMITED_DAILY_VIDEOS", "50")))
+    except usage.QuotaExceeded:
+        return json_response(429, {"message": "Daily limit for this test account reached."}, {"Retry-After": "3600"})
     except wallet.InsufficientCredits as e:
         return json_response(402, {"message": f"This video needs {e.needed} credit{'s' if e.needed != 1 else ''} and you have {e.balance}.",
                                    "code": "insufficient_credits", "balance": e.balance, "needed": e.needed})

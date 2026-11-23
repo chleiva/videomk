@@ -114,15 +114,31 @@ def ensure_grants(user_id: str, *, now: Optional[float] = None, tz: Optional[str
                 raise
 
 
+def _flags():
+    return boto3.resource("dynamodb").Table(os.environ["FLAGS_TABLE"])
+
+
+def unlimited_allowed() -> bool:
+    """Off by default and set to 1 by the stack only for non-production stages: in production the flag is ignored even if someone writes it."""
+    return os.environ.get("ALLOW_UNLIMITED_ACCOUNTS") == "1"
+
+
 def is_unlimited(user_id: str) -> bool:
-    """Test and staff accounts: `unlimited` on the account's META item, set only with AWS access (`scripts/wallet_admin.py`), never through the API."""
-    meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}, ConsistentRead=True).get("Item") or {}
-    return bool(meta.get("unlimited"))
+    """Test and staff accounts. The flag lives in its own table (FLAGS_TABLE) that the runtime Lambdas can only READ: it is written only
+    with AWS admin credentials (`scripts/wallet_admin.py`), never through the API and never by a function that handles user input.
+    Keyed by the immutable Cognito `sub`, never by email (users can change their email)."""
+    if not unlimited_allowed() or not user_id or not os.environ.get("FLAGS_TABLE"):
+        return False
+    item = _flags().get_item(Key={"user_id": user_id}).get("Item") or {}
+    return item.get("unlimited") is True
 
 
 def set_unlimited(user_id: str, on: bool = True) -> None:
-    ensure_grants(user_id)  # makes sure the account has its META item
-    _table().update_item(Key={"user_id": user_id, "sk": "META"}, UpdateExpression="SET #u = :v", ExpressionAttributeNames={"#u": "unlimited"}, ExpressionAttributeValues={":v": on})
+    """Admin only (needs write access to FLAGS_TABLE, which no Lambda role has)."""
+    if on:
+        _flags().put_item(Item={"user_id": user_id, "unlimited": True, "set_at": int(time.time())})
+    else:
+        _flags().delete_item(Key={"user_id": user_id})
 
 
 def give_credits(user_id: str, credits: int, note: str = "admin") -> bool:
@@ -140,7 +156,7 @@ def balance(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = No
     ensure_grants(user_id, now=now, tz=tz)
     live = _live_buckets(user_id, now)
     meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}).get("Item") or {}
-    unlimited = bool(meta.get("unlimited"))
+    unlimited = is_unlimited(user_id)
     r = rules()
     _, midnight = local_day(now, tz)
     next_daily = max(midnight, (int(meta.get("last_daily_utc_day", 0)) + 1) * 86400.0) if r["daily"] else None
