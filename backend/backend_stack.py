@@ -68,7 +68,13 @@ class BackendStack(Stack):
             enforce_ssl=True,
             removal_policy=keep,
             auto_delete_objects=not is_prod,
-            lifecycle_rules=[s3.LifecycleRule(abort_incomplete_multipart_upload_after=Duration.days(2))],
+            lifecycle_rules=[
+                s3.LifecycleRule(abort_incomplete_multipart_upload_after=Duration.days(2)),
+                # Re-creatable intermediates (video segments, audio mixes; tagged by the engine) go after a week: an edit later just re-renders them.
+                s3.LifecycleRule(id="expire-working-files", tag_filters={"retention": "working"}, expiration=Duration.days(7)),
+                # Finished videos: Intelligent-Tiering moves a video to cheaper tiers by itself when it isn't watched (no retrieval fees, still instant).
+                s3.LifecycleRule(id="tier-finished-videos", prefix="videos/", transitions=[s3.Transition(storage_class=s3.StorageClass.INTELLIGENT_TIERING, transition_after=Duration.days(0))]),
+            ],
             cors=[s3.CorsRule(allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD], allowed_origins=["*"], allowed_headers=["*"], max_age=3600)],
         )
 

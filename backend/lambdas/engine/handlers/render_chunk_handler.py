@@ -41,5 +41,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "seg.ts")
         info = pipeline.render_chunk(ct, 0, int(event["frames"]), out, make_image_loader(video_id), draft=draft)
-        awsio.upload(out, key, "video/mp2t")
+        awsio.upload(out, key, "video/mp2t", working=True)
     return {"k": k, "key": key, "cached": False, **info}

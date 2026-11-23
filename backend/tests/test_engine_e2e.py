@@ -2,6 +2,7 @@
 LLM, Wikipedia and stock APIs are stubbed; TTS is the mock provider; rendering/ffmpeg are real."""
 import io
 import json
+import os
 
 import boto3
 import pytest
@@ -257,3 +258,15 @@ def test_inserting_deleting_and_reordering_beats_keeps_everything_consistent(gen
     _, tl2, segs, fin = run_tail(prep)
     assert [s["type"] for s in tl2["chunks"] and json.loads(boto3.client("s3", region_name="us-west-2").get_object(Bucket="videomk.com", Key=tl2["timeline_key"])["Body"].read())["scenes"]] == ["image", "title", "stat", "diagram"]
     assert fin["status"] == "PREVIEW_READY"
+
+
+def test_only_re_creatable_intermediates_are_tagged_for_expiry(generated):
+    """Segments and audio mixes expire after a week (an edit rebuilds them). Anything an edit cannot rebuild must never carry the tag."""
+    s3 = boto3.client("s3")
+    bucket = os.environ["ASSETS_BUCKET"]
+    keys = [o["Key"] for o in s3.list_objects_v2(Bucket=bucket).get("Contents", [])]
+    tagged = {k for k in keys if {"Key": "retention", "Value": "working"} in s3.get_object_tagging(Bucket=bucket, Key=k)["TagSet"]}
+    expected = {k for k in keys if "/segments/" in k or "/audio/mix_" in k}
+    assert expected and tagged == expected
+    never = [k for k in keys if k.endswith(".wav") or "/assets/" in k or k.endswith(".json") or k.endswith(".mp4")]
+    assert never and not (set(never) & tagged)

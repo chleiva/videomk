@@ -48,8 +48,14 @@ def download(key: str, path: str) -> None:
     s3().download_file(bucket(), key, path)
 
 
-def upload(path: str, key: str, content_type: str, bkt: Optional[str] = None) -> None:
-    s3().upload_file(path, bkt or bucket(), key, ExtraArgs={"ContentType": content_type})
+WORKING_TAG = "retention=working"  # the bucket's lifecycle rule deletes objects with this tag after 7 days (see backend_stack.py)
+
+
+def upload(path: str, key: str, content_type: str, bkt: Optional[str] = None, *, working: bool = False) -> None:
+    """`working=True` marks a re-creatable intermediate (video segments, audio mixes): the bucket expires it after 7 days.
+    Never tag anything an edit cannot rebuild by itself (narration audio, photos, plans, finished videos)."""
+    extra = {"ContentType": content_type, **({"Tagging": WORKING_TAG} if working else {})}
+    s3().upload_file(path, bkt or bucket(), key, ExtraArgs=extra)
 
 
 def head(key: str) -> Optional[Dict[str, Any]]:

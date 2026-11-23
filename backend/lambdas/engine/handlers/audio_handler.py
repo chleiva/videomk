@@ -30,5 +30,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         out = os.path.join(tmp, "mix.m4a")
         pipeline.make_audio(tl, beats, out)
         key = f"{pfx}audio/mix_r{rev}_{event.get('mode', 'final')}.m4a"
-        awsio.upload(out, key, "audio/mp4")
+        awsio.upload(out, key, "audio/mp4", working=True)
     return {"key": key}
