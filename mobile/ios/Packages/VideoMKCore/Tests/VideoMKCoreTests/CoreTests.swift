@@ -84,15 +84,28 @@ struct FixedAuth: AuthorizationProviding {
     }
 
     @Test func startGenerationSendsNormalizedPromptAndRequestID() async throws {
-        nonisolated(unsafe) var body: [String: String] = [:]
+        nonisolated(unsafe) var body: [String: Any] = [:]
         StubProtocol.handler = { req in
-            body = (try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: String]) ?? [:]
+            body = (try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: Any]) ?? [:]
             return (202, Data(#"{"message":"workflow started","video_id":"abc"}"#.utf8))
         }
         let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
         let id = try await api.startGeneration(prompt: "  A tour   of Paris ", clientRequestID: "req-12345678")
         #expect(id == "abc")
-        #expect(body["prompt"] == "A tour of Paris" && body["client_request_id"] == "req-12345678")
+        #expect(body["prompt"] as? String == "A tour of Paris" && body["client_request_id"] as? String == "req-12345678")
+    }
+
+    @Test func startGenerationSendsLengthAndLook() async throws {
+        nonisolated(unsafe) var body: [String: Any] = [:]
+        StubProtocol.handler = { req in
+            body = (try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: Any]) ?? [:]
+            return (202, Data(#"{"video_id":"abc"}"#.utf8))
+        }
+        let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
+        _ = try await api.startGeneration(prompt: "A tour of Paris", clientRequestID: "r", options: CreateOptions(minutes: 5, look: .paper))
+        #expect(body["target_minutes"] as? Double == 5 && body["theme"] as? String == "paper")
+        _ = try await api.startGeneration(prompt: "A tour of Paris", clientRequestID: "r")  // defaults: 3 minutes, no look
+        #expect(body["target_minutes"] as? Double == 3 && body["theme"] == nil)
     }
 
     @Test(arguments: [(400, "invalid"), (429, "quota"), (401, "unauthorized"), (403, "unauthorized"), (500, "server")])

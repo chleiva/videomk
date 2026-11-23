@@ -105,6 +105,21 @@ def test_launcher_never_forwards_headers_or_jwt(launcher):
     assert launcher.fake.calls[0]["stateMachineArn"].endswith("generate_video_workflow")
 
 
+def test_launcher_forwards_valid_create_options(launcher):
+    body = {"prompt": "A short explainer about how black holes form", "target_minutes": 2, "theme": "paper"}
+    assert launcher.handler(_event(body=body), None)["statusCode"] == 202
+    sent = json.loads(launcher.fake.calls[0]["input"])
+    assert sent["target_minutes"] == 2.0 and sent["theme"] == "paper"
+
+
+@pytest.mark.parametrize("extra", [{"target_minutes": 0}, {"target_minutes": 13}, {"target_minutes": "3"}, {"target_minutes": True}, {"theme": "neon"}])
+def test_launcher_rejects_invalid_options_without_charging(launcher, extra):
+    body = {"prompt": "A short explainer about how black holes form", **extra}
+    assert launcher.handler(_event(body=body), None)["statusCode"] == 400
+    assert launcher.fake.calls == []
+    assert usage.consume("u1", limit=2) == 1  # nothing was consumed by the rejected request
+
+
 def test_launcher_quota_429_and_no_extra_execution(launcher):
     for _ in range(2):
         assert launcher.handler(_event(), None)["statusCode"] == 202

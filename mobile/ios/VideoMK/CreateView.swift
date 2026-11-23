@@ -6,6 +6,7 @@ struct CreateView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var brief: String
     @State private var requestID = UUID().uuidString
+    @State private var options = CreateOptions()
     @State private var sending = false
     @State private var error: String?
     @FocusState private var focused: Bool
@@ -38,6 +39,7 @@ struct CreateView: View {
                         Text(counterText).font(.footnote).foregroundStyle(counterColor)
                         Spacer()
                     }
+                    optionsSection
                     if let error { Text(error).font(.callout).foregroundStyle(Theme.danger).accessibilityIdentifier("createError") }
                     if brief.isEmpty {
                         Text("Try one of these").font(.footnote.weight(.semibold)).foregroundStyle(Theme.textSecondary)
@@ -66,6 +68,27 @@ struct CreateView: View {
         .onAppear { focused = true }
     }
 
+    private var optionsSection: some View {
+        Card {
+            VStack(alignment: .leading, spacing: 14) {
+                Picker("Length", selection: $options.minutes) {
+                    ForEach(CreateOptions.lengths, id: \.self) { Text("\(Int($0)) min").tag($0) }
+                }
+                .pickerStyle(.menu)
+                .accessibilityIdentifier("lengthPicker")
+                Divider()
+                Picker("Look", selection: $options.look) {
+                    Text("Producer decides").tag(VideoLook?.none)
+                    ForEach(VideoLook.allCases) { Text($0.title).tag(VideoLook?.some($0)) }
+                }
+                .pickerStyle(.menu)
+                .accessibilityIdentifier("lookPicker")
+                Text("A \(Int(options.minutes)) minute video takes a few minutes to make.").font(.footnote).foregroundStyle(Theme.textSecondary)
+            }
+        }
+        .onChange(of: options) { requestID = UUID().uuidString }  // different options = a different request
+    }
+
     private var counterText: String {
         if count == 0 { return "At least \(Brief.minLength) characters" }
         if count < Brief.minLength { return "\(Brief.minLength - count) more characters needed" }
@@ -78,7 +101,7 @@ struct CreateView: View {
         sending = true; error = nil
         defer { sending = false }
         do {
-            let id = try await model.create(brief: brief, requestID: requestID)
+            let id = try await model.create(brief: brief, requestID: requestID, options: options)
             onCreated(id)
         } catch let e as APIError {
             error = e.message  // the draft stays in place so nothing is lost

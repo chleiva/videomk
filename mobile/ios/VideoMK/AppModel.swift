@@ -90,9 +90,9 @@ final class AppModel {
 
     // MARK: create / play
 
-    func create(brief: String, requestID: String) async throws -> String {
+    func create(brief: String, requestID: String, options: CreateOptions) async throws -> String {
         guard let api else { throw APIError.server }
-        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID) }
+        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options) }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 

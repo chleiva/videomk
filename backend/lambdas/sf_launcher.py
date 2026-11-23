@@ -58,6 +58,25 @@ def validate_prompt(body: Dict[str, Any]) -> str:
     return prompt
 
 
+THEMES = ("midnight", "paper", "sunrise")
+MIN_MINUTES, MAX_MINUTES = 1.0, 12.0
+
+
+def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
+    """Optional create options. Absent means the server default; present but invalid is a 400, never silently ignored."""
+    out: Dict[str, Any] = {}
+    if "target_minutes" in body and body["target_minutes"] is not None:
+        m = body["target_minutes"]
+        if isinstance(m, bool) or not isinstance(m, (int, float)) or not (MIN_MINUTES <= m <= MAX_MINUTES):
+            raise BadRequest(f"'target_minutes' must be a number from {MIN_MINUTES:g} to {MAX_MINUTES:g}")
+        out["target_minutes"] = float(m)
+    if "theme" in body and body["theme"] is not None:
+        if body["theme"] not in THEMES:
+            raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
+        out["theme"] = body["theme"]
+    return out
+
+
 def video_id_for(user_id: str, body: Dict[str, Any]) -> Tuple[str, bool]:
     """Deterministic id when the client sends `client_request_id` (double-click safe)."""
     crid = body.get("client_request_id")
@@ -94,6 +113,7 @@ def handler(event: Dict[str, Any], context: Any):
     try:
         body = parse_body(event)
         prompt = validate_prompt(body)
+        options = validate_options(body)
     except BadRequest as e:
         return json_response(400, {"message": str(e)})
 
@@ -121,7 +141,7 @@ def handler(event: Dict[str, Any], context: Any):
         resp = _sfn.start_execution(
             stateMachineArn=sm_arn,
             name=video_id,  # one execution per video; duplicate starts fail fast
-            input=json.dumps({"user_id": user_id, "video_id": video_id, "prompt": prompt, "usage_day": usage_day}),
+            input=json.dumps({"user_id": user_id, "video_id": video_id, "prompt": prompt, "usage_day": usage_day, **options}),
         )
     except ClientError as e:
         code = e.response.get("Error", {}).get("Code")

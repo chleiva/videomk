@@ -36,6 +36,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if not plan.get("legit"):
         return {**base, "plot": {"legit": False, "reason": plan.get("reason", "")}}
 
+    if event.get("theme") in ("midnight", "paper", "sunrise"):  # the user's choice beats the model's
+        plan["theme"] = event["theme"]
     plan["sources"] = sources
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     key = awsio.prefix(video_id) + "plan_r1.json"

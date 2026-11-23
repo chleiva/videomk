@@ -84,6 +84,22 @@ struct StartResponse: Decodable { let videoID: String; enum CodingKeys: String, 
 struct PlaybackResponse: Decodable { let url: String }
 struct MessageResponse: Decodable { let message: String? ; let status: String? }
 
+/// The three looks the video engine offers (docs/mobile/DESIGN_BRIEF.md).
+public enum VideoLook: String, CaseIterable, Sendable, Identifiable {
+    case midnight, paper, sunrise
+    public var id: String { rawValue }
+    public var title: String { rawValue.capitalized }
+}
+
+public struct CreateOptions: Sendable, Equatable {
+    public static let lengths: [Double] = [1, 2, 3, 5, 8, 12]
+    public static let defaultMinutes: Double = 3
+    public var minutes: Double
+    public var look: VideoLook?  // nil = let the Producer choose
+
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil) { self.minutes = minutes; self.look = look }
+}
+
 public enum Brief {
     public static let minLength = 10
     public static let maxLength = 2000
