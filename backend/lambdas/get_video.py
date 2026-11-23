@@ -171,6 +171,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "user_id": user_id,
             "video_id": video_id,
             "status": status,
+            "title": item.get("title"),
+            "description": item.get("youtube_description"),  # chapters + image credits (linked) + sources, ready to paste
             "url": url,
             "download": download_flag,
         },

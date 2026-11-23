@@ -9,8 +9,11 @@ struct VideoDetailView: View {
     let videoID: String
     @State private var player: AVPlayer?
     @State private var playbackURL: URL?
+    @State private var videoDescription: String?
+    @State private var copiedDescription = false
     @State private var playbackError: String?
     @State private var copied = false
+    @State private var editing = false
 
     var body: some View {
         ScrollView {
@@ -34,6 +37,17 @@ struct VideoDetailView: View {
         .task(id: model.video(videoID)?.status) { await loadPlayerIfReady() }
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
         .onDisappear { player?.pause() }
+        .toolbar {
+            if let v = model.video(videoID), v.editable, v.status == .complete {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Edit") { player?.pause(); editing = true }.accessibilityIdentifier("editButton")
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $editing, onDismiss: {
+            player = nil; playbackURL = nil  // the edit may have published a new version
+            Task { await model.refresh(); await loadPlayerIfReady() }
+        }) { EditorView(videoID: videoID) }
     }
 
     @ViewBuilder private func playerSection(_ video: VideoItem) -> some View {
@@ -52,19 +66,37 @@ struct VideoDetailView: View {
         .accessibilityIdentifier("player")
 
         Text(video.displayTitle).font(.title3.bold()).foregroundStyle(Theme.text)
-        HStack(spacing: 12) {
-            if let playbackURL {
-                ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle), preview: SharePreview(video.displayTitle)) {
-                    Label("Share", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
+        if let d = videoDescription {
+            DisclosureGroup("Description and photo credits") {
+                Text(Linkified.attributed(d)).font(.footnote).foregroundStyle(Theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled).padding(.top, 6)
+            }
+            .tint(Theme.primary).accessibilityIdentifier("descriptionGroup")
+        }
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                if let playbackURL {
+                    ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle), preview: SharePreview(video.displayTitle)) {
+                        Label("Share", systemImage: "square.and.arrow.up").lineLimit(1).frame(maxWidth: .infinity)
+                    }.buttonStyle(.bordered)
+                }
+                Button {
+                    UIPasteboard.general.string = video.displayTitle
+                    copied = true
+                    Task { try? await Task.sleep(for: .seconds(2)); copied = false }
+                } label: {
+                    Label(copied ? "Copied" : "Copy title", systemImage: copied ? "checkmark" : "doc.on.doc").lineLimit(1).frame(maxWidth: .infinity)
                 }.buttonStyle(.bordered)
             }
-            Button {
-                UIPasteboard.general.string = video.displayTitle
-                copied = true
-                Task { try? await Task.sleep(for: .seconds(2)); copied = false }
-            } label: {
-                Label(copied ? "Copied" : "Copy title", systemImage: copied ? "checkmark" : "doc.on.doc").frame(maxWidth: .infinity)
-            }.buttonStyle(.bordered)
+            if let d = videoDescription {
+                Button {
+                    UIPasteboard.general.string = d
+                    copiedDescription = true
+                    Task { try? await Task.sleep(for: .seconds(2)); copiedDescription = false }
+                } label: {
+                    Label(copiedDescription ? "Copied" : "Copy description with credits", systemImage: copiedDescription ? "checkmark" : "text.alignleft").lineLimit(1).frame(maxWidth: .infinity)
+                }.buttonStyle(.bordered).accessibilityIdentifier("copyDescription")
+            }
         }
     }
 
@@ -81,11 +113,27 @@ struct VideoDetailView: View {
         guard model.video(videoID)?.status == .complete, player == nil else { return }
         playbackError = nil
         do {
-            let url = try await model.playbackURL(for: videoID)
+            let info = try await model.playback(for: videoID)
+            let url = info.url
             playbackURL = url
+            videoDescription = info.description
             let p = AVPlayer(url: url)
             player = p
         } catch let e as APIError { playbackError = e.message } catch { playbackError = APIError.server.message }
+    }
+}
+
+/// Makes every URL in the text tappable (photographer and Unsplash links in the credits, Wikipedia sources).
+enum Linkified {
+    static func attributed(_ text: String) -> AttributedString {
+        var out = AttributedString(text)
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return out }
+        for m in detector.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
+            if let r = Range(m.range, in: text), let url = m.url, let lower = AttributedString.Index(r.lowerBound, within: out), let upper = AttributedString.Index(r.upperBound, within: out) {
+                out[lower..<upper].link = url
+            }
+        }
+        return out
     }
 }
 

@@ -65,6 +65,8 @@ final class VideoMKUITests: XCTestCase {
         app.cells.firstMatch.tap()
         XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 20))
         sleep(3); shot(app, "3-player")
+        let credits = app.buttons["Description and photo credits"]
+        if credits.waitForExistence(timeout: 10) { credits.tap(); sleep(1); shot(app, "3b-credits") }
         app.navigationBars.buttons.firstMatch.tap()
         app.buttons["newVideoButton"].tap()
         XCTAssertTrue(app.textViews["briefField"].waitForExistence(timeout: 5))
@@ -75,5 +77,46 @@ final class VideoMKUITests: XCTestCase {
         app.buttons["settingsButton"].tap()
         XCTAssertTrue(app.buttons["signOutButton"].waitForExistence(timeout: 5))
         shot(app, "6-settings")
+    }
+
+    /// Edit a scene's narration, render a draft preview, then publish. Uses a real, editable video on QA (about 3 minutes).
+    func testEditNarrationPreviewThenPublish() throws {
+        let dir = ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"]
+        func shot(_ app: XCUIApplication, _ name: String) {
+            guard let dir else { return }
+            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+        }
+        let app = try launch(signedIn: true)
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 20))
+        app.cells.firstMatch.tap()
+        XCTAssertTrue(app.buttons["editButton"].waitForExistence(timeout: 20), "an editable, completed video should offer Edit")
+        app.buttons["editButton"].tap()
+
+        XCTAssertTrue(app.buttons["beatRow"].firstMatch.waitForExistence(timeout: 20), "the scene list did not load")
+        XCTAssertFalse(app.buttons["previewButton"].isEnabled, "nothing changed yet")
+        shot(app, "7-editor")
+
+        app.buttons["beatRow"].firstMatch.tap()
+        let field = app.textViews["narrationField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.97)).tap()
+        field.typeText(" And that is the idea.")
+        shot(app, "8-scene")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.staticTexts["Edited"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["previewButton"].isEnabled)
+
+        app.buttons["previewButton"].tap()
+        XCTAssertTrue(app.otherElements["renderingView"].waitForExistence(timeout: 20) || app.staticTexts["Making your preview"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["doneTitle"].waitForExistence(timeout: 400), "the preview did not finish")
+        XCTAssertEqual(app.staticTexts["doneTitle"].label, "Preview ready")
+        shot(app, "9-preview-ready")
+        app.buttons["doneButton"].tap()   // back to editing
+
+        XCTAssertTrue(app.buttons["publishButton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["publishButton"].isEnabled, "an approved preview can be published without further changes")
+        app.buttons["publishButton"].tap()
+        XCTAssertTrue(app.staticTexts["doneTitle"].waitForExistence(timeout: 600), "publishing did not finish")
+        XCTAssertEqual(app.staticTexts["doneTitle"].label, "Published")
     }
 }

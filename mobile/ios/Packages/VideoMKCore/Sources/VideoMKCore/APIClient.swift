@@ -5,6 +5,8 @@ public enum APIError: Error, Equatable, Sendable {
     case invalid(String)
     case quota(String)
     case notReady(VideoStatus)
+    /// The video changed since it was loaded, or a render is already running (editor only).
+    case conflict(String)
     case network
     case server
 
@@ -13,6 +15,7 @@ public enum APIError: Error, Equatable, Sendable {
         case .unauthorized: "Your session expired. Please sign in again."
         case .invalid(let m), .quota(let m): m
         case .notReady: "This video isn't ready yet."
+        case .conflict(let m): m
         case .network: "Network problem. Check your connection and try again."
         case .server: "Something went wrong on our side. Please try again."
         }
@@ -40,10 +43,13 @@ public struct APIClient: Sendable {
     }
 
     /// A presigned MP4 URL. Throws `.notReady` (with the current status) while the video is still being made.
-    public func playbackURL(videoID: String) async throws -> URL {
+    public func playbackURL(videoID: String) async throws -> URL { try await playback(videoID: videoID).url }
+
+    public func playback(videoID: String) async throws -> PlaybackInfo {
         let (data, _) = try await send("GET", ["videos", videoID])
-        guard let url = URL(string: try decode(PlaybackResponse.self, data).url) else { throw APIError.server }
-        return url
+        let r = try decode(PlaybackResponse.self, data)
+        guard let url = URL(string: r.url) else { throw APIError.server }
+        return PlaybackInfo(url: url, description: r.description)
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
@@ -55,9 +61,24 @@ public struct APIClient: Sendable {
         return try decode(StartResponse.self, data).videoID
     }
 
+    // MARK: editor
+
+    public func editorSnapshot(videoID: String) async throws -> EditorSnapshot {
+        let (data, _) = try await send("GET", ["videos", videoID, "plan"], conflictIsEdit: true)
+        return try decode(EditorSnapshot.self, data)
+    }
+
+    /// Returns the new revision. Throws `.conflict` when the base revision is stale or a render is running.
+    public func applyEdits(videoID: String, baseRev: Int, ops: [EditOp], mode: RenderMode) async throws -> Int {
+        let body = try JSONSerialization.data(withJSONObject: ["base_rev": baseRev, "ops": ops.map(\.json), "mode": mode.rawValue] as [String: Any])
+        let (data, _) = try await send("POST", ["videos", videoID, "edits"], body: body, conflictIsEdit: true)
+        struct R: Decodable { let rev: Int }
+        return try decode(R.self, data).rev
+    }
+
     // MARK: - plumbing
 
-    private func send(_ method: String, _ path: [String], body: Data? = nil) async throws -> (Data, HTTPURLResponse) {
+    private func send(_ method: String, _ path: [String], body: Data? = nil, conflictIsEdit: Bool = false) async throws -> (Data, HTTPURLResponse) {
         let (token, userID) = try await auth.authorization()
         var url = config.apiBase.appendingPathComponent("users").appendingPathComponent(userID)
         for p in path { url.appendPathComponent(p) }
@@ -78,6 +99,7 @@ public struct APIClient: Sendable {
         case 200..<300: return (data, http)
         case 401, 403: throw APIError.unauthorized
         case 400: throw APIError.invalid(Self.message(data) ?? "That brief can't be used.")
+        case 409 where conflictIsEdit: throw APIError.conflict(Self.message(data) ?? "This video changed. Reload to continue.")
         case 409: throw APIError.notReady(VideoStatus(serverStatus: (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status ?? ""))
         case 429: throw APIError.quota(Self.message(data) ?? "You've reached today's limit. Try again tomorrow.")
         default: throw APIError.server

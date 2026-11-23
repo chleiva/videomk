@@ -96,9 +96,21 @@ final class AppModel {
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 
-    func playbackURL(for id: String) async throws -> URL {
+    func editorSnapshot(_ id: String) async throws -> EditorSnapshot {
         guard let api else { throw APIError.server }
-        return try await api.playbackURL(videoID: id)
+        do { return try await api.editorSnapshot(videoID: id) }
+        catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
+    }
+
+    func applyEdits(_ id: String, baseRev: Int, ops: [EditOp], mode: RenderMode) async throws -> Int {
+        guard let api else { throw APIError.server }
+        do { return try await api.applyEdits(videoID: id, baseRev: baseRev, ops: ops, mode: mode) }
+        catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
+    }
+
+    func playback(for id: String) async throws -> PlaybackInfo {
+        guard let api else { throw APIError.server }
+        return try await api.playback(videoID: id)
     }
 
     #if DEBUG

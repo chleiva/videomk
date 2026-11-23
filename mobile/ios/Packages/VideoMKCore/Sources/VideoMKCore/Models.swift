@@ -81,7 +81,13 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
 
 struct VideoListResponse: Decodable { let items: [VideoItem] }
 struct StartResponse: Decodable { let videoID: String; enum CodingKeys: String, CodingKey { case videoID = "video_id" } }
-struct PlaybackResponse: Decodable { let url: String }
+struct PlaybackResponse: Decodable { let url: String; let description: String? }
+
+public struct PlaybackInfo: Sendable, Equatable {
+    public let url: URL
+    /// Title-less description with chapters, linked image credits and sources.
+    public let description: String?
+}
 struct MessageResponse: Decodable { let message: String? ; let status: String? }
 
 /// The three looks the video engine offers (docs/mobile/DESIGN_BRIEF.md).

@@ -478,3 +478,21 @@ def test_polly_provider_requests_neural_pcm_and_resamples():
     with pytest.raises(tts.TTSError):
         p.synth("x")
     assert tts.DEFAULT_PROVIDER == "polly" or os.environ.get("TTS_PROVIDER")
+
+
+def test_photo_review_budget_leaves_room_for_the_whole_json():
+    """A truncated review ('no JSON') silently degrades photo choice to the first search result: keep the cap generous."""
+    from engine import stock
+
+    seen = {}
+
+    def fake_complete(system, user, **kw):
+        seen.update(kw)
+        return '{"choice": 2, "scores": [1, 9], "reason": "Clear view of the tower."}', {"cost_usd": 0.0}
+
+    c = [{"thumb_url": "https://x/a", "provider": "unsplash", "id": str(i)} for i in range(2)]
+    jpg = io.BytesIO()
+    Image.new("RGB", (64, 36), (10, 20, 30)).save(jpg, "JPEG")
+    idx, reason, _, _ = stock.llm_review(c, "n", "alt", "q", fetch_bytes_fn=lambda *a, **k: jpg.getvalue(), complete=fake_complete)
+    assert idx == 1 and seen["max_tokens"] >= 800
+    assert "at most 15 words" in stock.REVIEW_SYSTEM
