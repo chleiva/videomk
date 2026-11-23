@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from .scenes import SCENE_TYPES
 from .theme import THEMES
 from . import voices as voice_mod
+from .usermedia import PHOTO_ID_RE
 
 MAX_BEATS = 90
 MIN_BEAT_WORDS, MAX_BEAT_WORDS = 6, 70
@@ -71,15 +72,26 @@ Rules:
 SYSTEM_PROMPT = system_prompt("en")
 
 
-def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None) -> str:
+def photos_prompt(photos: List[Dict[str, Any]]) -> str:
+    lines = [f'{p["id"]}: {p.get("caption") or "a photo"} ({p.get("orientation", "landscape")}' + (f', taken {p["taken"]}' if p.get("taken") else "") + ")" for p in photos]
+    return (
+        f"The user attached {len(photos)} of their own photos. The video is built around them:\n" + "\n".join(lines) + "\n"
+        "- Use EVERY photo, as an image scene with props {\"photo\": \"P1\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}. These scenes are the "
+        "visuals: do NOT add stock-photo scenes.\n"
+        "- Order them by the date taken when given, otherwise as listed, unless the story the user asked for needs another order.\n"
+        "- Narrate what is visible and what the user told you in the brief. Never invent names, places, dates or events the captions and the brief do not state.\n"
+        "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n")
+
+
+def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None) -> str:
     words = int(target_minutes * WORDS_PER_MIN)
-    beats = max(4, round(target_minutes * 60 / 14))
+    beats = max(4, round(target_minutes * 60 / 14), len(photos or []))
     return (
         f"Topic: {topic}\n\n"
         f"Target length: about {target_minutes:g} minute(s): roughly {words} narration words in about {beats} beats.\n\n"
         + (f"Today's date: {today}. Anything time-sensitive must come from the grounding notes (with the date it refers to), never from memory.\n\n" if today else "")
-        +
-        f"Grounding notes (may be empty):\n{notes or '(none)'}\n\n"
+        + (photos_prompt(photos) if photos else "")
+        + f"Grounding notes (may be empty):\n{notes or '(none)'}\n\n"
         "Return the JSON plan now."
     )
 
@@ -130,7 +142,7 @@ def needs_media(plan: Dict[str, Any], beat: Dict[str, Any]) -> bool:
     if m.get("tts_hash") != tts_hash(plan, beat) or not m.get("audio_key") or not m.get("duration"):
         return True
     if beat["scene"]["type"] == "image":
-        if m.get("query") != beat["scene"]["props"].get("image_query") or m.get("pick") != beat.get("pick"):
+        if m.get("query") != beat["scene"]["props"].get("image_query") or m.get("pick") != beat.get("pick") or m.get("photo") != beat["scene"]["props"].get("photo"):
             return True
         if not m.get("asset") and not m.get("no_photo"):
             return True
@@ -216,10 +228,14 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
             raise ValueError("quote is empty")
         return out
     if stype == "image":
-        q = _s(p.get("image_query"), 80)
+        q = _s(p.get("image_query"), 80) or (_s(p.get("alt"), 80) if PHOTO_ID_RE.match(str(p.get("photo") or "").strip().upper()) else "")
         if not q:
             raise ValueError("image_query is empty")
-        return {"image_query": q, "alt": _s(p.get("alt") or q, 70), "ken_burns": "in"}
+        out = {"image_query": q, "alt": _s(p.get("alt") or q, 70), "ken_burns": "in"}
+        photo = str(p.get("photo") or "").strip().upper()
+        if PHOTO_ID_RE.match(photo):
+            out["photo"] = photo  # one of the user's own photos; validate_plan checks it exists
+        return out
     raise ValueError(f"unknown scene type {stype!r}")
 
 
@@ -228,7 +244,7 @@ def _fallback_scene(narration: str) -> Dict[str, Any]:
     return {"type": "title", "props": {"title": " ".join(words[:9]).rstrip(",;:"), "subtitle": ""}}
 
 
-def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
+def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None) -> Tuple[Dict[str, Any], List[str]]:
     """Returns (clean_plan, warnings). Raises ValueError when nothing usable remains."""
     warnings: List[str] = []
     if plan.get("legit") is not True:
@@ -262,6 +278,8 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
         except (ValueError, TypeError, AttributeError) as e:
             warnings.append(f"beat {i}: scene replaced ({e})")
             scene = _fallback_scene(narration)
+        if scene["type"] == "image" and scene["props"].get("photo") and scene["props"]["photo"] not in (photo_ids or []):
+            scene["props"].pop("photo")  # the model named a photo that doesn't exist: it becomes an ordinary stock-photo scene
         beat = {"id": new_beat_id(b.get("id")), "narration": narration, "scene": scene}
         sp = voice_mod.speaker_id(b.get("speaker"))
         if sp:
@@ -297,19 +315,34 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
     )
 
 
-def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
+def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
+                  photos: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
-    user = build_user_prompt(topic, notes, target_minutes, today)
+    user = build_user_prompt(topic, notes, target_minutes, today, photos)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
         text = llm(system_prompt(language, region), user)
         try:
-            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region)
+            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []])
             replaced = [w for w in warns if "scene replaced" in w]
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
                 raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")
+            if photos and plan.get("legit"):
+                used = {b["scene"]["props"].get("photo") for b in plan["beats"] if b["scene"]["type"] == "image"}
+                unused = [p for p in photos if p["id"] not in used]
+                if unused and attempt < retries:
+                    raise ValueError("these photos are not used in any scene: " + ", ".join(p["id"] for p in unused) + ". The video must use every photo")
+                if unused:  # still missing after the retry: never drop the user's photo, add a plain scene for it
+                    taken = {b["id"] for b in plan["beats"]}
+                    for p in unused:
+                        cap = (p.get("caption") or "a photo").rstrip(". ")
+                        text = f"{cap[:1].upper()}{cap[1:]}. A moment from the story." if len(cap.split()) >= 3 else f"{cap}. A moment from the story, shown here as it was."
+                        bid = new_beat_id(None, taken)
+                        taken.add(bid)
+                        plan["beats"].append({"id": bid, "narration": text, "scene": {"type": "image", "props": {"image_query": cap[:80], "alt": cap[:70], "ken_burns": "in", "photo": p["id"]}}})
+                    warns.append("added scenes for unused photos: " + ", ".join(p["id"] for p in unused))
             return plan, warns
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e
-            user = build_user_prompt(topic, notes, target_minutes, today) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
+            user = build_user_prompt(topic, notes, target_minutes, today, photos) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
     raise ValueError(f"could not obtain a valid plan: {last_err}")

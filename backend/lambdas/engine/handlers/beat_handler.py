@@ -55,6 +55,11 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     props = beat["scene"]["props"]
     query, pick = props["image_query"], beat.get("pick")
     out: Dict[str, Any] = {"query": query, "pick": pick}
+    if props.get("photo"):  # the user's own photo: no search, no credit line, nothing to review
+        item = next((m for m in plan.get("media_items") or [] if m.get("id") == props["photo"]), None)
+        if item and str(item.get("key", "")).startswith(pfx + "assets/"):
+            out.update({"asset": item["key"], "photo": props["photo"]})
+            return out
     unsplash_key = get_secret_param("/videomk/unsplash_access_key", quiet=True)
     cands_key = f"{pfx}assets/cands_{beat['id']}.json"
 

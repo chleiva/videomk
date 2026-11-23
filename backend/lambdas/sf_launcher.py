@@ -18,6 +18,7 @@ from botocore.exceptions import ClientError
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from common import usage, wallet
+from common.photo_ids import PhotoError, upload_key, valid_media_ids
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -27,6 +28,7 @@ MAX_PROMPT_CHARS = 2000
 _NAMESPACE = uuid.UUID("6f1d2f0e-6c1b-4a53-9a57-5c1b8d7c2a11")
 
 _sfn = boto3.client("stepfunctions")
+_s3 = boto3.client("s3")
 _dynamodb = boto3.resource("dynamodb")
 
 
@@ -81,6 +83,11 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(m, bool) or not isinstance(m, (int, float)) or not (MIN_MINUTES <= m <= MAX_MINUTES):
             raise BadRequest(f"'target_minutes' must be a number from {MIN_MINUTES:g} to {MAX_MINUTES:g}")
         out["target_minutes"] = float(m)
+    if body.get("media") is not None:
+        try:
+            out["media"] = valid_media_ids(body["media"])
+        except PhotoError as e:
+            raise BadRequest(str(e)) from e
     if "language" in body and body["language"] is not None:
         if body["language"] not in ("en", "es"):
             raise BadRequest("'language' must be 'en' or 'es'")
@@ -157,6 +164,12 @@ def handler(event: Dict[str, Any], context: Any):
         existing = _dynamodb.Table(os.environ.get("VIDEOS_TABLE", "Videos")).get_item(Key={"video_id": video_id}).get("Item")
         if existing:
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
+
+    for mid in options.get("media", []):  # every photo must really be uploaded, into this user's own folder
+        try:
+            _s3.head_object(Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid))
+        except ClientError:
+            return json_response(400, {"message": "One of your photos didn't finish uploading. Please try again."})
 
     # Quote, then charge exactly the quote: the length that is billed is the length that is made.
     minutes = options.get("target_minutes") or float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))

@@ -58,6 +58,10 @@ def upload(path: str, key: str, content_type: str, bkt: Optional[str] = None, *,
     s3().upload_file(path, bkt or bucket(), key, ExtraArgs=extra)
 
 
+def delete(key: str) -> None:
+    s3().delete_object(Bucket=bucket(), Key=key)
+
+
 def head(key: str) -> Optional[Dict[str, Any]]:
     """Object metadata, or None when it doesn't exist (used for content-addressed cache hits)."""
     try:

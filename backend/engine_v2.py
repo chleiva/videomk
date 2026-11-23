@@ -57,6 +57,8 @@ class EngineV2(Construct):
         for fn in (plan_fn, beat_fn):  # the beat Lambda runs the vision photo review
             fn.add_to_role_policy(iam.PolicyStatement(actions=["bedrock:InvokeModel"], resources=["arn:aws:bedrock:*::foundation-model/*", f"arn:aws:bedrock:*:{account}:inference-profile/*"]))
         plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{region}:{account}:parameter/videomk/tavily_api_key"]))
+        # the user's uploaded photos: read, then delete once the clean copy exists (the clean copy goes under generation/v2/, already allowed above)
+        plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:DeleteObject"], resources=[f"arn:aws:s3:::{assets_bucket}/uploads/*"]))
         beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["polly:SynthesizeSpeech"], resources=["*"]))
         beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{region}:{account}:parameter/videomk/*_api_key", f"arn:aws:ssm:{region}:{account}:parameter/videomk/unsplash_access_key"]))
         for fn in (plan_fn, beat_fn, timeline_fn):

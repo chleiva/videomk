@@ -297,6 +297,10 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
     p = ease_in_out_cubic(progress(lt, 0.0, max(dur, 0.5)))
     z = lerp(1.0, 1.14, p) if motion != "out" else lerp(1.14, 1.0, p)
     sw, sh = src.size
+    if sw / sh < 1.3 and props.get("photo"):  # a portrait or square phone photo of the user's: show all of it, never crop a face off
+        _draw_contained(cv, src, tw, tht, z)
+        cv.im.paste(Image.new("RGB", _scrim(tw, tht).size, (0, 0, 0)), (0, tht - _scrim(tw, tht).height), _scrim(tw, tht))
+        return
     base = max(tw / sw, tht / sh)
     vw, vh = tw / (base * z), tht / (base * z)
     cx, cy = sw / 2, sh / 2
@@ -316,6 +320,34 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
     if credit:
         a = ease_out_cubic(progress(lt, 0.4, 0.6))
         cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+
+
+_BACKDROP: Dict[Tuple[int, int, int], Image.Image] = {}
+
+
+def _draw_contained(cv: Canvas, src: Image.Image, tw: int, tht: int, z: float) -> None:
+    """The photo whole, centred and gently zooming, over a blurred, darkened copy of itself that fills the frame."""
+    from PIL import ImageFilter
+
+    key = (id(src), tw, tht)
+    if key not in _BACKDROP:
+        if len(_BACKDROP) > 8:
+            _BACKDROP.clear()
+        small = src.copy()
+        small.thumbnail((480, 480))
+        bg = small.resize((tw, tht), Image.BILINEAR, box=_cover_box(small.size, tw, tht)).filter(ImageFilter.GaussianBlur(28 * tw / 1920))
+        _BACKDROP[key] = Image.eval(bg, lambda v: int(v * 0.45))
+    cv.im.paste(_BACKDROP[key])
+    s = min(tw * 0.9 / src.width, tht * 0.94 / src.height) * z
+    fg = src.resize((max(1, round(src.width * s)), max(1, round(src.height * s))), Image.BILINEAR)
+    cv.im.paste(fg, ((tw - fg.width) // 2, (tht - fg.height) // 2))
+
+
+def _cover_box(size: Tuple[int, int], tw: int, tht: int) -> Tuple[float, float, float, float]:
+    sw, sh = size
+    scale = max(tw / sw, tht / sh)
+    vw, vh = tw / scale, tht / scale
+    return ((sw - vw) / 2, (sh - vh) / 2, (sw + vw) / 2, (sh + vh) / 2)
 
 
 _SCRIM: Dict[Tuple[int, int], Image.Image] = {}

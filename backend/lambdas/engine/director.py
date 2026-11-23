@@ -15,7 +15,7 @@ Ask = Callable[..., str]  # (system, user, max_tokens=...) -> text
 def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[str, str], str],
            language: Optional[str] = None, region: Optional[str] = None, theme: Optional[str] = None,
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
-           budget: Optional[researcher.Budget] = None) -> Dict[str, Any]:
+           budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -39,7 +39,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                 info["fallback"] = True  # nothing usable came back: fall through to the encyclopedia path
     if info["mode"] != "web":
         notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
-    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None)
+    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
 
@@ -51,5 +51,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         sources = [s for s in sources if s["title"] in set(used)]
     if region:
         plan["region"] = region
+    if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)
+        plan["media_items"] = [{k: p.get(k) for k in ("id", "key", "w", "h", "orientation", "caption")} for p in photos]
     plan["sources"] = sources
     return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

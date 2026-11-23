@@ -73,6 +73,8 @@ class BackendStack(Stack):
                 # Re-creatable intermediates (video segments, audio mixes; tagged by the engine) go after a week: an edit later just re-renders them.
                 s3.LifecycleRule(id="expire-working-files", tag_filters={"retention": "working"}, expiration=Duration.days(7)),
                 # Finished videos: Intelligent-Tiering moves a video to cheaper tiers by itself when it isn't watched (no retrieval fees, still instant).
+                # Originals the user uploaded are deleted as soon as the engine has made its clean copy; anything never used goes after two days.
+                s3.LifecycleRule(id="expire-orphan-uploads", prefix="uploads/", expiration=Duration.days(2)),
                 s3.LifecycleRule(id="tier-finished-videos", prefix="videos/", transitions=[s3.Transition(storage_class=s3.StorageClass.INTELLIGENT_TIERING, transition_after=Duration.days(0))]),
             ],
             cors=[s3.CorsRule(allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD], allowed_origins=["*"], allowed_headers=["*"], max_age=3600)],
@@ -173,6 +175,10 @@ class BackendStack(Stack):
         list_videos_fn = make_fn("ListVideosFunction", "list_videos", "list_videos.handler", timeout=Duration.seconds(30), env={"GSI_USER_VIDEOS": "GSI_UserVideos"})
         get_video_fn = make_fn("GetVideoFunction", "get_video", "get_video.handler", timeout=Duration.seconds(30))
         wallet_fn = make_fn("WalletFunction", "wallet_api", "wallet_api.handler", timeout=Duration.seconds(10))
+        uploads_fn = make_fn("UploadsFunction", "uploads_api", "uploads_api.handler", timeout=Duration.seconds(10))
+        uploads_objects = f"arn:aws:s3:::{ASSETS_BUCKET}/uploads/*"
+        uploads_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[uploads_objects]))  # presigned POSTs are signed with this role
+        usage_table.grant_read_write_data(uploads_fn)
         launcher_fn = make_fn(
             "VideoGenerationSFLauncher", "VideoGenerationSFLauncher", "sf_launcher.handler", timeout=Duration.seconds(10),
             env={"DAILY_VIDEO_LIMIT": str(self.node.try_get_context("dailyVideoLimit") or 5)},
@@ -182,6 +188,8 @@ class BackendStack(Stack):
         videos_table.grant_read_data(get_video_fn)
         videos_table.grant_read_write_data(launcher_fn)
         usage_table.grant_read_write_data(launcher_fn)
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[uploads_objects]))  # HeadObject: are the photos really there?
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["uploads/*"]}}))
         for fn in (launcher_fn, wallet_fn):
             wallet_table.grant_read_write_data(fn)
             flags_table.grant_read_data(fn)  # read only: nothing at runtime can grant itself unlimited credits
@@ -414,6 +422,7 @@ class BackendStack(Stack):
         generate = videos.add_resource("generate")
         video_item = videos.add_resource("{video_id}")
         wallet_res = user_id.add_resource("wallet")
+        uploads_res = user_id.add_resource("uploads")
 
         user_pool = cognito.UserPool(
             self, "UserPool",
@@ -460,13 +469,14 @@ class BackendStack(Stack):
         CfnOutput(self, "AssetsBucketName", value=assets_bucket.bucket_name)
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
-        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"])):
+        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"]), (uploads_res, ["POST", "OPTIONS"])):
             resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone"])
 
         cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
         videos.add_method("GET", apigw.LambdaIntegration(list_videos_fn, proxy=True), **cognito_auth)
         video_item.add_method("GET", apigw.LambdaIntegration(get_video_fn, proxy=True), **cognito_auth)
         wallet_res.add_method("GET", apigw.LambdaIntegration(wallet_fn, proxy=True), **cognito_auth)
+        uploads_res.add_method("POST", apigw.LambdaIntegration(uploads_fn, proxy=True), **cognito_auth)
 
         # Reject malformed/oversized prompts at the edge, before any Lambda runs.
         generate_model = api.add_model(
@@ -483,6 +493,8 @@ class BackendStack(Stack):
                     "target_minutes": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=1, maximum=12),
                     "theme": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["midnight", "paper", "sunrise"]),
                     "language": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["en", "es"]),
+                    "media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=10,
+                                              items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),
                 },
             ),
         )

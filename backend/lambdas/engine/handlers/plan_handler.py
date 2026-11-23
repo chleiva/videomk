@@ -7,7 +7,7 @@ from generate_video.db import set_attributes, update_status
 
 from common.secrets import get_secret_param
 
-from .. import awsio, costs, director, llm, voices, websearch
+from .. import awsio, costs, director, llm, usermedia, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -30,6 +30,23 @@ def _web_tools(spent: Dict[str, float]):
     return websearch.TavilyProvider(key), ask_tools
 
 
+def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, float]):
+    """Clean copies of the user's uploads plus a caption and safety verdict for each. Returns (usable photos, skipped [{id, reason}])."""
+    ids = usermedia.valid_media_ids(media_ids)
+    photos, thumbs, skipped = usermedia.prepare(video_id, user_id, ids, get=lambda k: awsio.get_bytes(k), put=lambda k, b: awsio.put_bytes(k, b, "image/jpeg"),
+                                                delete=awsio.delete, asset_prefix=awsio.prefix(video_id) + "assets/")
+
+    def ask_vision(system: str, user: str, images: Any) -> str:
+        text, meta = llm.complete(system, user, images=images, max_tokens=1800, model=llm.REVIEW_MODEL, effort="low")
+        spent["cost"] += meta["cost_usd"]
+        return text
+
+    flagged = usermedia.analyze(photos, thumbs, ask_vision)
+    if flagged:
+        logging.warning("photo review flagged %s of %s photos: %s", len(flagged), len(ids), [f["reason"] for f in flagged])
+    return photos, skipped + flagged
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     user_id = str(event.get("user_id", ""))
@@ -50,9 +67,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         spent["cost"] += meta["cost_usd"]
         return text
 
+    photos, skipped = [], []
+    if event.get("media"):
+        photos, skipped = _user_photos(video_id, user_id, event["media"], spent)
+        if not photos:
+            return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
     result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
-                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools)
+                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos)
     r = result.get("research") or {}
     spent["cost"] += float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     costs.add_cost(video_id, spent["cost"])
@@ -75,5 +97,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     key = awsio.prefix(video_id) + "plan_r1.json"
     awsio.put_json(key, plan)
     update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"])})
-    set_attributes(video_id, {"plan_key": key, "rev": 1})
+    set_attributes(video_id, {"plan_key": key, "rev": 1, **({"photos_skipped": len(skipped)} if skipped else {})})
     return {**base, "plot": {"legit": True}, "plan_key": key, "rev": 1, "mode": "final", "cost_field": "cost_usd", "beat_ids": [b["id"] for b in plan["beats"]]}
