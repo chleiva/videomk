@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from generate_video.db import set_attributes, update_status
 
-from .. import awsio, costs, language as lang_mod, llm, plan as plan_mod, research, voices
+from .. import awsio, costs, director, llm, voices
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -19,42 +19,27 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     base = {"video_id": video_id, "user_id": user_id, "usage_day": event.get("usage_day")}
 
     update_status(video_id, "PLOT_CREATION")
-    language = str(event.get("language") or "")
-    if language not in voices.LANGUAGES:  # not chosen by the caller: work it out from the brief (free for clear briefs)
-        language = lang_mod.detect(prompt, lambda s, u: llm.complete(s, u, max_tokens=20, model=llm.REVIEW_MODEL, effort="low")[0])
-        if language not in voices.LANGUAGES:
-            return {**base, "plot": {"legit": False, "reason": lang_mod.unsupported_message()}}
-    def ask_small(system: str, user: str) -> str:
-        text, meta = llm.complete(system, user, max_tokens=120, model=llm.REVIEW_MODEL, effort="low")
-        costs.add_cost(video_id, meta["cost_usd"])
+    spent = {"cost": 0.0}
+
+    def ask_small(system: str, user: str, max_tokens: int = 120) -> str:
+        text, meta = llm.complete(system, user, max_tokens=max_tokens, model=llm.REVIEW_MODEL, effort="low")
+        spent["cost"] += meta["cost_usd"]
         return text
 
-    notes, sources = research.gather_notes(prompt, language=language, ask=ask_small)
-
-    meta_acc = {"cost": 0.0}
-
-    def ask(system: str, user: str) -> str:
+    def ask_big(system: str, user: str) -> str:
         text, meta = llm.complete(system, user)
-        meta_acc["cost"] += meta["cost_usd"]
+        spent["cost"] += meta["cost_usd"]
         return text
 
-    region = voices.clean_region(event.get("region"))
-    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask, language=language, region=region)
-    costs.add_cost(video_id, meta_acc["cost"])
-    if warnings:
-        logging.warning("plan warnings: %s", warnings[:10])  # WARNING level: Lambda drops INFO by default
+    result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
+                             region=event.get("region"), theme=event.get("theme"))
+    costs.add_cost(video_id, spent["cost"])
+    if result.get("warnings"):
+        logging.warning("plan warnings: %s", result["warnings"][:10])  # WARNING level: Lambda drops INFO by default
+    if not result["legit"]:
+        return {**base, "plot": {"legit": False, "reason": result.get("reason", "")}}
+    plan, language, region = result["plan"], result["plan"]["language"], result["plan"].get("region")
 
-    if not plan.get("legit"):
-        return {**base, "plot": {"legit": False, "reason": plan.get("reason", "")}}
-
-    if event.get("theme") in ("midnight", "paper", "sunrise"):  # the user's choice beats the model's
-        plan["theme"] = event["theme"]
-    used = plan.pop("sources_used", None)
-    if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
-        sources = [s for s in sources if s["title"] in set(used)]
-    if region:
-        plan["region"] = region
-    plan["sources"] = sources
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     forced = os.environ.get("TTS_VOICE", "")
     if forced:  # an operator-forced voice overrides the director's casting: one voice, no dialogue
