@@ -399,10 +399,25 @@ class BackendStack(Stack):
             ),
             prevent_user_existence_errors=True,
         )
+        # Native iOS/Android apps: public client, authorization code + PKCE through the hosted UI, custom-scheme redirect.
+        mobile_client = user_pool.add_client(
+            "MobileClient",
+            generate_secret=False,
+            o_auth=cognito.OAuthSettings(
+                flows=cognito.OAuthFlows(authorization_code_grant=True),
+                scopes=[cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
+                callback_urls=["com.videomk.app://auth/callback"], logout_urls=["com.videomk.app://auth/signout"],
+            ),
+            # Admin password auth needs IAM credentials, so it is not reachable by app users; QA scripts use it to get test tokens.
+            auth_flows=cognito.AuthFlow(admin_user_password=(stage != "prod")),
+            access_token_validity=Duration.hours(1), id_token_validity=Duration.hours(1), refresh_token_validity=Duration.days(60),
+            prevent_user_existence_errors=True,
+        )
         hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
         CfnOutput(self, "ApiUrl", value=api.url)
         CfnOutput(self, "UserPoolId", value=user_pool.user_pool_id)
         CfnOutput(self, "UserPoolClientId", value=user_pool_client.user_pool_client_id)
+        CfnOutput(self, "MobileClientId", value=mobile_client.user_pool_client_id)
         CfnOutput(self, "AuthDomain", value=hosted_ui.base_url())
         CfnOutput(self, "AssetsBucketName", value=assets_bucket.bucket_name)
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
