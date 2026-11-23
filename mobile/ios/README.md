@@ -22,7 +22,7 @@ Sign in on the simulator with any account created through the sign-in page (emai
 `aws cognito-idp admin-create-user`.
 
 ## Install on your own iPhone
-1. In Xcode: the VideoMK target, Signing & Capabilities, choose your Team (a free Apple ID works for 7-day installs; TestFlight needs the paid program).
+1. The team is set in `project.yml` (`DEVELOPMENT_TEAM: 39ANXJNUTL`, Agilegency Ltd). Xcode must have that Apple ID: Xcode, Settings, Accounts, `+`, Apple ID. Without it the build fails with "No Accounts" (a free Apple ID works for 7-day installs; TestFlight needs the paid program).
 2. If `com.videomk.app` is taken for your team, change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` **and** the redirect `com.videomk.app://auth/callback` in `backend/backend_stack.py` (the `MobileClient`), redeploy, then regenerate.
 3. Connect the phone, select it as the destination, Run. Trust the developer profile on the phone (Settings, General, VPN & Device Management) the first time.
 
