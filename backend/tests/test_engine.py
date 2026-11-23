@@ -706,3 +706,17 @@ def test_plan_keeps_the_sources_the_director_says_it_used():
     assert "sources_used" not in plan_mod.validate_plan(_plan_with(None, [None]))[0]  # absent stays absent: cite everything researched
     assert plan_mod.validate_plan({**_plan_with(None, [None]), "sources_used": []})[0]["sources_used"] == []  # used nothing: cite nothing
 
+
+
+def test_description_labels_follow_the_videos_language_but_unsplash_attribution_keeps_its_wording():
+    from engine import assets
+    from engine.handlers import finalize_handler
+
+    ledger = [{"attribution": "Photo by Ana (https://unsplash.com/@ana?utm_source=videomk&utm_medium=referral) on Unsplash", "landing_url": "https://unsplash.com/photos/x"}]
+    sources = [{"title": "Volcán", "publisher": "Wikipedia (es)", "url": "https://es.wikipedia.org/wiki/Volc%C3%A1n"}]
+    es, en = assets.credits_block(ledger, sources, "es"), assets.credits_block(ledger, sources)
+    assert es.startswith("Créditos de las imágenes:") and "Fuentes:" in es and "Photo by Ana" in es  # attribution wording is Unsplash's
+    assert en.startswith("Image credits:") and "Sources:" in en
+    chapters = [{"start": 5.0, "title": "Uno"}, {"start": 30.0, "title": "Dos"}, {"start": 60.0, "title": "Tres"}]
+    assert finalize_handler._chapters_text(chapters, "es").splitlines()[0] == "0:00 Introducción"
+    assert finalize_handler._chapters_text(chapters).splitlines()[0] == "0:00 Intro"

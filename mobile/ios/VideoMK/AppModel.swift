@@ -11,6 +11,7 @@ final class AppModel {
     private(set) var videos: [VideoItem] = []
     private(set) var loadState: LoadState = .idle
     private(set) var pending: [PendingVideo] = []
+    private(set) var wallet: WalletInfo?
     private(set) var completions = 0                       // bumps when a video finishes: drives the success haptic
     private var stageSince: [String: (stage: VideoStatus.Stage, since: Date)] = [:]
     private var briefs: [String: String] = [:]             // what the user asked for, shown while the server has no title yet
@@ -33,6 +34,11 @@ final class AppModel {
 
     var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } || pending.contains { $0.state == .sending } }
     var entries: [LibraryEntry] { LibraryMerge.entries(pending: pending, server: videos) }
+
+    func refreshWallet() async {
+        guard let api else { return }
+        if let w = try? await api.wallet() { wallet = w }
+    }
 
     func brief(for id: String) -> String? { briefs[id] }
     func stage(for id: String) -> (stage: VideoStatus.Stage, since: Date)? { stageSince[id] }
@@ -66,7 +72,7 @@ final class AppModel {
 
     func signOut() async {
         await auth?.signOut()
-        videos = []; pending = []; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
+        wallet = nil; videos = []; pending = []; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
         phase = .signedOut
     }
 
@@ -76,6 +82,7 @@ final class AppModel {
         guard let api else { return }
         if videos.isEmpty { loadState = .loading }
         do {
+            Task { await refreshWallet() }  // credits load alongside the list
             let fresh = try await api.listVideos()
             track(old: videos, new: fresh)
             videos = fresh
@@ -128,8 +135,9 @@ final class AppModel {
             let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options)
             briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .accepted(videoID: videoID) }
-            await refresh()
+            await refresh()  // also re-reads the credits the video just used
         } catch let e as APIError {
+            if case .insufficientCredits = e { await refreshWallet() }
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
         } catch {
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(APIError.server.message) }

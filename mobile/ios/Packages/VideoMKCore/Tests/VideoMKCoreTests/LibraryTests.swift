@@ -67,4 +67,38 @@ import Testing
         let fast = ProgressEstimator.fraction(stage: .rendering, secondsInStage: 60, minutes: 1)
         #expect(slow < fast)
     }
+
+    @Test func dictationLanguageDefaultsFromThePhoneAndRespectsASavedChoice() {
+        #expect(DictationLanguage.initial(saved: nil, preferred: ["en-US", "es-ES"]) == .english)
+        #expect(DictationLanguage.initial(saved: nil, preferred: ["fr-FR", "es-MX"]) == .spanish)  // first supported one wins
+        #expect(DictationLanguage.initial(saved: nil, preferred: ["fr-FR"]) == .english)
+        #expect(DictationLanguage.initial(saved: "es", preferred: ["en-US"]) == .spanish)
+        #expect(DictationLanguage.initial(saved: "xx", preferred: ["es-ES"]) == .spanish)
+    }
+
+    @Test func dictationPicksAnInstalledLocaleOfTheRightLanguageNearThePhonesRegion() {
+        let supported = ["en-US", "en-GB", "es-ES", "es-MX", "es-US", "fr-FR"]
+        #expect(DictationLanguage.spanish.locale(region: "ES", supported: supported) == "es-ES")
+        #expect(DictationLanguage.spanish.locale(region: "US", supported: supported) == "es-US")
+        #expect(DictationLanguage.spanish.locale(region: "AR", supported: supported) == "es-MX")  // no es-AR: the biggest Latin American one
+        #expect(DictationLanguage.english.locale(region: "GB", supported: supported) == "en-GB")
+        #expect(DictationLanguage.english.locale(region: "IN", supported: supported) == "en-US")
+        #expect(DictationLanguage.spanish.locale(region: nil, supported: []) == "es-MX")
+    }
+
+    @Test func creditsAreStartedMinutes() {
+        #expect([0.2, 1, 1.01, 2.5, 3, 12, 40].map { CreateOptions(minutes: $0).credits } == [1, 1, 2, 3, 3, 12, 12])
+        #expect(CreateOptions().credits == 3)
+        #expect(WalletInfo(balance: 2).canAfford(2) && !WalletInfo(balance: 2).canAfford(3))
+    }
+
+    @Test func decodesTheServersWalletShape() throws {
+        let json = """
+        {"balance":9,"buckets":[{"kind":"daily","remaining":2,"expires_at":1800000000},{"kind":"signup","remaining":5,"expires_at":1802000000},{"kind":"paid","remaining":2,"expires_at":null}],
+         "next_daily_at":1800003600,"rules":{"credit_unit_seconds":60,"max_minutes":12,"signup":5,"daily":2,"signup_valid_days":30}}
+        """
+        let w = try JSONDecoder().decode(WalletInfo.self, from: Data(json.utf8))
+        #expect(w.balance == 9 && w.buckets.map(\.kind) == [.daily, .signup, .paid] && w.buckets[2].expiresAt == nil && w.buckets[0].expiresAt != nil)
+        #expect(w.nextFreeAt != nil && w.dailyCredits == 2 && w.signupCredits == 5)
+    }
 }

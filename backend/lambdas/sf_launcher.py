@@ -17,7 +17,7 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import usage
+from common import wallet
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -100,13 +100,22 @@ def video_id_for(user_id: str, body: Dict[str, Any]) -> Tuple[str, bool]:
     return str(uuid.uuid4()), False
 
 
-def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool) -> None:
+def request_timezone(event: Dict[str, Any]) -> Optional[str]:
+    """The user's IANA timezone (X-Timezone), only to decide where their local day ends for the daily free credits."""
+    headers = {str(k).lower(): v for k, v in ((event or {}).get("headers") or {}).items()}
+    tz = str(headers.get("x-timezone") or "").strip()
+    return tz if 1 <= len(tz) <= 40 and all(ch.isalnum() or ch in "/_+-" for ch in tz) else None
+
+
+def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool, credits: int = 0, charge: Any = None) -> None:
     item = {
         "video_id": video_id,
         "user_id": user_id,
         "prompt": prompt,
         "status": "STARTED_PROCESSING",
         "usage_day": usage_day,
+        "credits_charged": credits,
+        "charge": json.dumps(charge or []),  # exactly which buckets were charged, so a failure refunds exactly those
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     kwargs: Dict[str, Any] = {"Item": item}
@@ -149,13 +158,18 @@ def handler(event: Dict[str, Any], context: Any):
         if existing:
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
 
+    # Quote, then charge exactly the quote: the length that is billed is the length that is made.
+    minutes = options.get("target_minutes") or float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
+    options["target_minutes"] = minutes
+    credits = wallet.credits_for_minutes(minutes)
     try:
-        usage.consume(user_id)
-    except usage.QuotaExceeded as e:
-        return json_response(429, {"message": str(e)}, {"Retry-After": "3600"})
+        charged = wallet.charge(user_id, credits, tz=request_timezone(event))
+    except wallet.InsufficientCredits as e:
+        return json_response(402, {"message": f"This video needs {e.needed} credit{'s' if e.needed != 1 else ''} and you have {e.balance}.",
+                                   "code": "insufficient_credits", "balance": e.balance, "needed": e.needed})
 
     try:
-        _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent)
+        _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged)
         resp = _sfn.start_execution(
             stateMachineArn=sm_arn,
             name=video_id,  # one execution per video; duplicate starts fail fast
@@ -164,14 +178,14 @@ def handler(event: Dict[str, Any], context: Any):
     except ClientError as e:
         code = e.response.get("Error", {}).get("Code")
         if code in ("ConditionalCheckFailedException", "ExecutionAlreadyExists"):
-            usage.refund(user_id, day=usage_day)
+            wallet.refund(user_id, charged)
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
         logger.exception("Failed to start workflow")
-        usage.refund(user_id, day=usage_day)
+        wallet.refund(user_id, charged)
         return json_response(500, {"message": "Failed to start workflow"})
     except Exception:
         logger.exception("Failed to start workflow")
-        usage.refund(user_id, day=usage_day)
+        wallet.refund(user_id, charged)
         return json_response(500, {"message": "Failed to start workflow"})
 
     start_date = resp.get("startDate")

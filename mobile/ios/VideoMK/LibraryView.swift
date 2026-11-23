@@ -5,6 +5,7 @@ struct LibraryView: View {
     @Environment(AppModel.self) private var model
     @State private var path: [String] = []
     @State private var showingSettings = false
+    @State private var showingWallet = false
     @State private var text = ""
     @State private var options = LibraryView.defaultOptions()
     @State private var dictation = Dictation()
@@ -24,18 +25,29 @@ struct LibraryView: View {
             .navigationTitle("Videos")
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if let wallet = model.wallet {
+                        Button { showingWallet = true } label: {
+                            Label("\(wallet.balance)", systemImage: "bolt.circle.fill").font(.subheadline.weight(.semibold).monospacedDigit())
+                        }
+                        .accessibilityLabel("\(wallet.balance) credits")
+                        .accessibilityHint("Shows your credits")
+                        .accessibilityIdentifier("balanceChip")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingSettings = true } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel("Settings").accessibilityIdentifier("settingsButton")
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                ComposerBar(text: $text, options: $options, dictation: dictation, focus: $composerFocused, onSend: send)
+                ComposerBar(text: $text, options: $options, dictation: dictation, focus: $composerFocused, credits: options.credits, balance: model.wallet?.balance, onSend: send)
             }
         }
         .task { await model.refresh() }
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
         .sheet(isPresented: $showingSettings) { SettingsView() }
+        .sheet(isPresented: $showingWallet) { WalletView() }
         .sensoryFeedback(.success, trigger: model.completions)
         .onAppear { dictation.onText = { text = $0 } }
         .onDisappear { dictation.stop() }

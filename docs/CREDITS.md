@@ -1,0 +1,33 @@
+# Credits (decided 2026-11-23)
+
+**1 credit = 1 started minute of video**, at least 1 and at most 12 per video: a 10 s video costs 1, 60 s costs 1, 61 s costs 2. The length
+the user picks is the length that is billed and made (the launcher passes it to the workflow). Failed or declined videos refund exactly the
+buckets they were charged to, once.
+
+## What users get (server config, no app update: `WALLET_*` env, see `common/wallet.py`)
+| Credits | Amount | Expiry |
+|---|---|---|
+| Welcome | 5, on first sight of the account | 30 days |
+| Daily free | 2 per local day (the day starts at the user's timezone midnight, sent as `X-Timezone`; first day has none, the welcome credits cover it) | the same night |
+| Purchased | packs below | never |
+| Returned | a 24 h make-good when a refund finds its bucket expired | 24 h |
+
+Spending order: soonest-expiring first (daily, welcome, returned, purchased). Daily credits can be claimed once per UTC day **and** local day, so
+sending different timezones earns nothing extra.
+
+## Proposed packs (not yet in the stores)
+20 / 45 / 500 credits for $9.99 / $19.99 / $199.99 (about $0.50 / $0.44 / $0.40 per credit), relabelled from the earlier 100 / 220 / 2400 at 5
+credits per minute: same economics.
+
+## Cost basis (estimates, +-30%; measure again with real data)
+About $0.02 fixed plus $0.04 per minute (voice $0.027/min with Polly generative, render about $0.015/min, planning the rest):
+1 min is about $0.06, 3 min $0.14, 12 min $0.50. Worst cost per credit is a 1-minute video, about $0.06, so a $0.50 credit is about 8x
+before store fees (about 5-7x after). Free exposure per active free user: about $0.12 a day if both daily credits are used, $0.30 for the
+welcome credits.
+
+## Abuse controls
+Built: spend is conditional per bucket (no overspend under concurrency), refunds are idempotent, daily claim limited per UTC day,
+welcome credits only once per account.
+To build (needs keys or store setup): Apple DeviceCheck / App Attest (one welcome grant per device, genuine app only; Play Integrity on
+Android), free credits only for Apple/Google sign-in, a global daily budget for free videos that pauses free generation when spent, limits per
+IP and device on sign-ups, alarms on hourly spend, store-verified purchases (one transaction id grants once: `grant_paid` is ready).

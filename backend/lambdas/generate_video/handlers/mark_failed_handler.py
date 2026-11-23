@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from common import usage
+from common import wallet
 from ..db import get_video_item, update_status
 
 
@@ -21,7 +21,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if updated:  # only refund when we actually moved the video to FAILED
         item = get_video_item(video_id)
         try:
-            usage.refund(str(item.get("user_id") or event.get("user_id") or ""), day=item.get("usage_day"))
+            wallet.refund_video(item)
         except Exception:
-            logging.exception("quota refund failed")
+            logging.exception("credit refund failed")
     return {"status": "FAILED", "video_id": video_id}

@@ -7,7 +7,7 @@ import boto3
 import pytest
 from PIL import Image
 
-from common import usage
+from common import usage, wallet
 from engine import costs, llm, research, stock
 from engine.handlers import (audio_handler, beat_handler, edit_failed_handler, edit_prep_handler, editor_apply, editor_get, finalize_handler,
                              plan_handler, render_chunk_handler, timeline_handler)
@@ -72,8 +72,10 @@ def run_tail(state):
 
 
 def start_video(aws, video_id="vid1"):
-    usage.consume(USER, limit=5)
-    aws.Table("Videos").put_item(Item={"video_id": video_id, "user_id": USER, "usage_day": usage._today(), "status": "STARTED_PROCESSING"})
+    wallet.balance(USER)  # welcome credits
+    taken = wallet.charge(USER, 1)
+    aws.Table("Videos").put_item(Item={"video_id": video_id, "user_id": USER, "usage_day": usage._today(), "status": "STARTED_PROCESSING",
+                                       "credits_charged": 1, "charge": json.dumps(taken)})
     return {"user_id": USER, "video_id": video_id, "prompt": "How do rainbows form?", "usage_day": usage._today()}
 
 
@@ -114,7 +116,7 @@ def test_rejected_prompt_stops_before_any_spend(env, monkeypatch):
 
     mark_rejected_handler.handler(out, None)
     assert env.Table("Videos").get_item(Key={"video_id": "vid2"})["Item"]["status"] == "REJECTED"
-    assert usage.consume(USER, limit=1) == 1  # refunded
+    assert wallet.balance(USER)["balance"] == 5  # refunded: no credits used
 
 
 def test_cost_cap_fails_the_job_instead_of_overspending(env, monkeypatch):

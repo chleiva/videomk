@@ -8,10 +8,13 @@ struct ComposerBar: View {
     @Binding var options: CreateOptions
     @Bindable var dictation: Dictation
     var focus: FocusState<Bool>.Binding
+    let credits: Int            // what this video would cost
+    let balance: Int?           // nil until the wallet has loaded
     let onSend: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var canSend: Bool { Brief.isValid(text) }
+    private var affordable: Bool { balance.map { credits <= $0 } ?? true }
+    private var canSend: Bool { Brief.isValid(text) && affordable }
     private var count: Int { Brief.normalized(text).count }
 
     var body: some View {
@@ -26,9 +29,19 @@ struct ComposerBar: View {
                 Label("Listening… tap the microphone when you're done", systemImage: "waveform").font(.footnote).foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
                     .accessibilityIdentifier("listeningHint")
-            } else if !text.isEmpty && !canSend {
+            } else if Brief.isValid(text) && !affordable {
+                Label("This video needs \(credits) credit\(credits == 1 ? "" : "s") and you have \(balance ?? 0). Choose a shorter length.", systemImage: "exclamationmark.circle")
+                    .font(.footnote).foregroundStyle(Theme.warning)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
+                    .accessibilityIdentifier("notEnoughCredits")
+            } else if !text.isEmpty && !Brief.isValid(text) {
                 Text("A few more words, please (\(Brief.minLength - count) to go).").font(.footnote).foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
+            } else if Brief.isValid(text) {
+                Text("\(credits) credit\(credits == 1 ? "" : "s")\(balance.map { " · you have \($0)" } ?? "")")
+                    .font(.footnote).foregroundStyle(Theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
+                    .accessibilityIdentifier("costLine")
             } else if count > Brief.maxLength - 200 {
                 Text("\(count) / \(Brief.maxLength)").font(.footnote).foregroundStyle(count > Brief.maxLength ? Theme.danger : Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 20)
@@ -75,6 +88,11 @@ struct ComposerBar: View {
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
+        .contextMenu {  // touch and hold: choose the language you will speak
+            Picker("Dictation language", selection: $dictation.language) {
+                ForEach(DictationLanguage.allCases) { Text($0.title).tag($0) }
+            }
+        }
         .accessibilityLabel(dictation.isListening ? "Stop dictation" : "Dictate")
         .accessibilityHint("Say what video you want instead of typing")
         .accessibilityIdentifier("micButton")
@@ -99,7 +117,7 @@ struct ComposerBar: View {
             .background(Theme.surface, in: Circle())
         }
         .accessibilityLabel("Video options")
-        .accessibilityValue("\(Int(options.minutes)) minutes, \(options.look?.title ?? "Producer decides the look")")
+        .accessibilityValue("\(Int(options.minutes)) minutes, \(options.credits) credits, \(options.look?.title ?? "Producer decides the look")")
         .accessibilityIdentifier("optionsMenu")
     }
 }

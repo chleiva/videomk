@@ -86,12 +86,18 @@ def credit_line(entry: Dict[str, str]) -> str:
     return f"Photo: {who} ({entry.get('license', '')})".strip()
 
 
-def credits_block(ledger: List[Dict[str, str]], sources: List[Dict[str, str]]) -> str:
+LABELS = {"en": {"credits": "Image credits:", "sources": "Sources:", "intro": "Intro"},
+          "es": {"credits": "Créditos de las imágenes:", "sources": "Fuentes:", "intro": "Introducción"}}
+
+
+def credits_block(ledger: List[Dict[str, str]], sources: List[Dict[str, str]], language: str = "en") -> str:
+    """The Unsplash attribution lines themselves keep Unsplash's recommended wording ("Photo by ... on Unsplash") in every language."""
+    labels = LABELS.get(language, LABELS["en"])
     lines: List[str] = []
     if ledger:
-        lines.append("Image credits:")
+        lines.append(labels["credits"])
         lines += [f"- {e.get('attribution') or (e.get('title') + ' - ' + e.get('creator') + ' (' + e.get('license') + ')')}  {e.get('landing_url', '')}".rstrip() for e in ledger]
     if sources:
-        lines.append("Sources:")
+        lines.append(labels["sources"])
         lines += [f"- {s['title']} ({s.get('publisher', '')}) {s.get('url', '')}".rstrip() for s in sources]
     return "\n".join(lines)

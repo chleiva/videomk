@@ -9,6 +9,7 @@ public enum APIError: Error, Equatable, Sendable {
     case conflict(String)
     case network
     case server
+    case insufficientCredits(balance: Int, needed: Int)
 
     public var message: String {
         switch self {
@@ -16,6 +17,7 @@ public enum APIError: Error, Equatable, Sendable {
         case .invalid(let m), .quota(let m): m
         case .notReady: "This video isn't ready yet."
         case .conflict(let m): m
+        case .insufficientCredits(let have, let need): "This video needs \(need) credit\(need == 1 ? "" : "s") and you have \(have)."
         case .network: "Network problem. Check your connection and try again."
         case .server: "Something went wrong on our side. Please try again."
         }
@@ -38,6 +40,11 @@ public struct APIClient: Sendable {
     public init(config: AppConfig, auth: any AuthorizationProviding, session: URLSession = .shared, appVersion: String = "0",
                 region: @escaping @Sendable () -> String? = { Locale.current.region?.identifier }) {
         self.config = config; self.auth = auth; self.session = session; self.appVersion = appVersion; self.region = region
+    }
+
+    public func wallet() async throws -> WalletInfo {
+        let (data, _) = try await send("GET", ["wallet"])
+        return try decode(WalletInfo.self, data)
     }
 
     public func listVideos() async throws -> [VideoItem] {
@@ -90,6 +97,7 @@ public struct APIClient: Sendable {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         req.setValue("ios", forHTTPHeaderField: "X-Platform")
         req.setValue(appVersion, forHTTPHeaderField: "X-App-Version")
+        req.setValue(TimeZone.current.identifier, forHTTPHeaderField: "X-Timezone")  // where the user's day ends, for the daily free credits
         if let region = region(), region.count == 2 { req.setValue(region.uppercased(), forHTTPHeaderField: "X-Region") }
         if let body { req.httpBody = body; req.setValue("application/json", forHTTPHeaderField: "Content-Type") }
 
@@ -105,6 +113,10 @@ public struct APIClient: Sendable {
         case 400: throw APIError.invalid(Self.message(data) ?? "That brief can't be used.")
         case 409 where conflictIsEdit: throw APIError.conflict(Self.message(data) ?? "This video changed. Reload to continue.")
         case 409: throw APIError.notReady(VideoStatus(serverStatus: (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status ?? ""))
+        case 402:
+            struct Short: Decodable { let balance: Int?; let needed: Int? }
+            let s = try? JSONDecoder().decode(Short.self, from: data)
+            throw APIError.insufficientCredits(balance: s?.balance ?? 0, needed: s?.needed ?? 1)
         case 429: throw APIError.quota(Self.message(data) ?? "You've reached today's limit. Try again tomorrow.")
         default: throw APIError.server
         }

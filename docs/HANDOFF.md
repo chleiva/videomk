@@ -9,7 +9,7 @@ videomk: AI explainer-video generator. A **Producer** agent turns a brief (+ opt
 - No generated images in the base product (premium-only later). No own-voice narration; narration is always AI. Dictating the brief is fine. Clips: highlight reel only, deferred; photos first.
 - Uploaded photos: cheap small-vision-model risk review in batches (also captions), flag `/videomk/flags/photo_review` = on|log_only|off. Not a legal safeguard.
 - Sketches: LLM writes a compact drawing program (icon composition + simple stroke paths + labels), renderer animates it. Spike not started.
-- Pricing: 5 credits per started minute so far; packs 100/220/2400 credits for $9.99/$19.99/$199.99; free = 3 videos on day one then 1 per day. Target 7x margin: worst-pack margin with Producer density and uploads says 7 credits/min (current bonuses) or 6 with smaller bonuses. **User has not chosen yet.** `backend/scripts/pricing_model.py` and `docs/mobile/PRICING.md` still need updating.
+- Pricing (superseded by `docs/CREDITS.md`: 1 credit per started minute, 5 welcome + 2 daily expiring free credits): earlier 5 credits per started minute; packs 100/220/2400 credits for $9.99/$19.99/$199.99; free = 3 videos on day one then 1 per day. Target 7x margin: worst-pack margin with Producer density and uploads says 7 credits/min (current bonuses) or 6 with smaller bonuses. **User has not chosen yet.** `backend/scripts/pricing_model.py` and `docs/mobile/PRICING.md` still need updating.
 - Upload limits proposed: free 5 photos per video; paid 4 photos per minute, max 60 per video.
 
 ## AWS

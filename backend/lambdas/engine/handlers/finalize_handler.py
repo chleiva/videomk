@@ -11,11 +11,11 @@ from .. import assets, awsio, media, pipeline
 OUTPUT_BUCKET = os.environ.get("ASSETS_BUCKET", "videomk.com")
 
 
-def _chapters_text(chapters: List[Dict[str, Any]]) -> str:
+def _chapters_text(chapters: List[Dict[str, Any]], language: str = "en") -> str:
     """YouTube needs the first chapter at 0:00, 3+ chapters, each >= 10 s."""
     ch = list(chapters)
     if ch and ch[0]["start"] > 0.5:
-        ch.insert(0, {"start": 0.0, "title": "Intro"})
+        ch.insert(0, {"start": 0.0, "title": assets.LABELS.get(language, assets.LABELS["en"])["intro"]})
     ch = [c for i, c in enumerate(ch) if i == 0 or c["start"] - ch[i - 1]["start"] >= 10]
     if len(ch) < 3:
         return ""
@@ -56,7 +56,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if have_gif:
             awsio.upload(gif, gkey, "image/gif", bkt=OUTPUT_BUCKET)
 
-    description = "\n\n".join(x for x in (tl.get("description", ""), _chapters_text(tl.get("chapters", [])), assets.credits_block(tl.get("ledger", []), tl.get("sources", []))) if x)
+    description = "\n\n".join(x for x in (tl.get("description", ""), _chapters_text(tl.get("chapters", []), tl.get("language", "en")), assets.credits_block(tl.get("ledger", []), tl.get("sources", []), tl.get("language", "en"))) if x)
     attrs = {
         "video_uri": f"s3://{OUTPUT_BUCKET}/{vkey}", "duration_s": int(got), "final_rev": rev, "edit_state": "READY",
         "youtube_description": description[:4800], "title": tl.get("title") or "Untitled", "last_rendered_at": int(time.time()),

@@ -13,6 +13,7 @@ os.environ.setdefault("AWS_ACCESS_KEY_ID", "test")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "test")
 os.environ["VIDEOS_TABLE"] = "Videos"
 os.environ["USAGE_TABLE"] = "Usage"
+os.environ["WALLET_TABLE"] = "Wallet"
 os.environ["STATE_MACHINE_ARN"] = "arn:aws:states:us-west-2:123456789012:stateMachine:generate_video_workflow"
 
 
@@ -30,6 +31,12 @@ def aws():
             TableName="Usage",
             KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}, {"AttributeName": "day", "KeyType": "RANGE"}],
             AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}, {"AttributeName": "day", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        ddb.create_table(
+            TableName="Wallet",
+            KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}, {"AttributeName": "sk", "KeyType": "RANGE"}],
+            AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}, {"AttributeName": "sk", "AttributeType": "S"}],
             BillingMode="PAY_PER_REQUEST",
         )
         yield ddb

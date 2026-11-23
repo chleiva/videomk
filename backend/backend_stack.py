@@ -83,9 +83,22 @@ class BackendStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,
         )
 
+        # Credits wallet: buckets with their own expiry (see common/wallet.py). On-demand + TTL => zero idle cost. Never destroyed in prod.
+        wallet_table = dynamodb.Table(
+            self,
+            "WalletTable",
+            partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="sk", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            time_to_live_attribute="ttl",
+            point_in_time_recovery=is_prod,
+            removal_policy=RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY,
+        )
+
         common_env = {
             "VIDEOS_TABLE": videos_table.table_name,
             "USAGE_TABLE": usage_table.table_name,
+            "WALLET_TABLE": wallet_table.table_name,
             "ASSETS_BUCKET": ASSETS_BUCKET,
             "OPENAI_SSM_PARAM": OPENAI_SSM_PARAM,
         }
@@ -140,6 +153,7 @@ class BackendStack(Stack):
         # ----------------------------
         list_videos_fn = make_fn("ListVideosFunction", "list_videos", "list_videos.handler", timeout=Duration.seconds(30), env={"GSI_USER_VIDEOS": "GSI_UserVideos"})
         get_video_fn = make_fn("GetVideoFunction", "get_video", "get_video.handler", timeout=Duration.seconds(30))
+        wallet_fn = make_fn("WalletFunction", "wallet_api", "wallet_api.handler", timeout=Duration.seconds(10))
         launcher_fn = make_fn(
             "VideoGenerationSFLauncher", "VideoGenerationSFLauncher", "sf_launcher.handler", timeout=Duration.seconds(10),
             env={"DAILY_VIDEO_LIMIT": str(self.node.try_get_context("dailyVideoLimit") or 5)},
@@ -149,6 +163,8 @@ class BackendStack(Stack):
         videos_table.grant_read_data(get_video_fn)
         videos_table.grant_read_write_data(launcher_fn)
         usage_table.grant_read_write_data(launcher_fn)
+        for fn in (launcher_fn, wallet_fn):
+            wallet_table.grant_read_write_data(fn)
 
         # Imported tables don't carry index ARNs: grant them explicitly for the GSI query.
         list_videos_fn.add_to_role_policy(
@@ -206,6 +222,7 @@ class BackendStack(Stack):
             videos_table.grant_read_write_data(fn)
         for fn in (mark_failed_fn, mark_rejected_fn):
             usage_table.grant_read_write_data(fn)
+            wallet_table.grant_read_write_data(fn)
 
         intent_plot_fn.add_to_role_policy(bedrock_policy)
         for fn in (asset_scene_fn, storyboard_render_fn):
@@ -376,6 +393,7 @@ class BackendStack(Stack):
         videos = user_id.add_resource("videos")
         generate = videos.add_resource("generate")
         video_item = videos.add_resource("{video_id}")
+        wallet_res = user_id.add_resource("wallet")
 
         user_pool = cognito.UserPool(
             self, "UserPool",
@@ -422,12 +440,13 @@ class BackendStack(Stack):
         CfnOutput(self, "AssetsBucketName", value=assets_bucket.bucket_name)
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
-        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"])):
-            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region"])
+        for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"])):
+            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone"])
 
         cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
         videos.add_method("GET", apigw.LambdaIntegration(list_videos_fn, proxy=True), **cognito_auth)
         video_item.add_method("GET", apigw.LambdaIntegration(get_video_fn, proxy=True), **cognito_auth)
+        wallet_res.add_method("GET", apigw.LambdaIntegration(wallet_fn, proxy=True), **cognito_auth)
 
         # Reject malformed/oversized prompts at the edge, before any Lambda runs.
         generate_model = api.add_model(

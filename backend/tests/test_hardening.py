@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from common import usage
+from common import usage, wallet
 from generate_video import db
 
 
@@ -70,7 +70,6 @@ def launcher(aws, monkeypatch):
     fake = _FakeSfn()
     monkeypatch.setattr(sf_launcher, "_sfn", fake)
     monkeypatch.setattr(sf_launcher, "_dynamodb", aws)
-    monkeypatch.setenv("DAILY_VIDEO_LIMIT", "2")
     sf_launcher.fake = fake
     return sf_launcher
 
@@ -100,7 +99,7 @@ def test_launcher_never_forwards_headers_or_jwt(launcher):
     r = launcher.handler(_event(), None)
     assert r["statusCode"] == 202
     sent = json.loads(launcher.fake.calls[0]["input"])
-    assert set(sent) == {"user_id", "video_id", "prompt", "usage_day"}
+    assert set(sent) == {"user_id", "video_id", "prompt", "usage_day", "target_minutes"}  # no headers; the billed length rides along
     assert "SECRET" not in launcher.fake.calls[0]["input"]
     assert launcher.fake.calls[0]["stateMachineArn"].endswith("generate_video_workflow")
 
@@ -117,15 +116,27 @@ def test_launcher_rejects_invalid_options_without_charging(launcher, extra):
     body = {"prompt": "A short explainer about how black holes form", **extra}
     assert launcher.handler(_event(body=body), None)["statusCode"] == 400
     assert launcher.fake.calls == []
-    assert usage.consume("u1", limit=2) == 1  # nothing was consumed by the rejected request
+    assert wallet.balance("u1")["balance"] == 5  # nothing was charged for the rejected request
 
 
-def test_launcher_quota_429_and_no_extra_execution(launcher):
-    for _ in range(2):
-        assert launcher.handler(_event(), None)["statusCode"] == 202
-    r = launcher.handler(_event(), None)
-    assert r["statusCode"] == 429 and r["headers"]["Retry-After"]
-    assert len(launcher.fake.calls) == 2
+def test_launcher_charges_one_credit_per_started_minute_and_refuses_when_short(launcher):
+    assert wallet.balance("u1")["balance"] == 5                         # welcome credits
+    ok = launcher.handler(_event(body={"prompt": "A short explainer about how black holes form", "target_minutes": 2.5}), None)
+    assert ok["statusCode"] == 202 and wallet.balance("u1")["balance"] == 2   # 2.5 minutes = 3 started minutes = 3 credits
+    sent = json.loads(launcher.fake.calls[0]["input"])
+    assert sent["target_minutes"] == 2.5                                 # what is billed is what is made
+    item = launcher._dynamodb.Table("Videos").get_item(Key={"video_id": json.loads(ok["body"])["video_id"]})["Item"]
+    assert item["credits_charged"] == 3 and sum(x["n"] for x in json.loads(item["charge"])) == 3
+    r = launcher.handler(_event(body={"prompt": "Another explainer about how black holes form", "target_minutes": 3}), None)
+    body = json.loads(r["body"])
+    assert r["statusCode"] == 402 and body["code"] == "insufficient_credits" and (body["balance"], body["needed"]) == (2, 3)
+    assert len(launcher.fake.calls) == 1 and wallet.balance("u1")["balance"] == 2   # refused: nothing started, nothing taken
+    assert launcher.handler(_event(body={"prompt": "A one minute explainer about black holes", "target_minutes": 1}), None)["statusCode"] == 202
+
+
+def test_launcher_defaults_to_the_servers_default_length_and_bills_it(launcher):
+    assert launcher.handler(_event(), None)["statusCode"] == 202
+    assert json.loads(launcher.fake.calls[0]["input"])["target_minutes"] == 3.0 and wallet.balance("u1")["balance"] == 2
 
 
 def test_launcher_idempotent_with_client_request_id(launcher):
@@ -134,7 +145,7 @@ def test_launcher_idempotent_with_client_request_id(launcher):
     b = json.loads(launcher.handler(_event(body=body), None)["body"])
     assert a["video_id"] == b["video_id"]
     assert len(launcher.fake.calls) == 1  # double-click did not start (or bill) a second job
-    assert usage.consume("u1", limit=2) == 2  # only one unit was consumed before this call
+    assert wallet.balance("u1")["balance"] == 2  # one default (3 minute) video was charged once, not twice
 
 
 def test_launcher_refunds_when_start_fails(launcher):
@@ -142,29 +153,51 @@ def test_launcher_refunds_when_start_fails(launcher):
         raise RuntimeError("sfn down")
     launcher.fake.start_execution = boom
     assert launcher.handler(_event(), None)["statusCode"] == 500
-    assert usage.consume("u1", limit=1) == 1  # refunded
+    assert wallet.balance("u1")["balance"] == 5  # refunded in full
 
 
 # ---------- reject/failed handlers ----------
+def _charged_video(aws, status, credits=3):
+    wallet.balance("u1")
+    taken = wallet.charge("u1", credits)
+    aws.Table("Videos").put_item(Item={"video_id": "v", "user_id": "u1", "status": status, "charge": json.dumps(taken), "credits_charged": credits})
+    return taken
+
+
 def test_mark_rejected_sets_reason_and_refunds(aws):
     from generate_video.handlers import mark_rejected_handler
-    usage.consume("u1", limit=1)
-    day = usage._today()
-    aws.Table("Videos").put_item(Item={"video_id": "v", "user_id": "u1", "usage_day": day, "status": "PLOT_CREATION"})
+    _charged_video(aws, "PLOT_CREATION")
+    assert wallet.balance("u1")["balance"] == 2
     out = mark_rejected_handler.handler({"video_id": "v", "plot": {"legit": False, "reason": "unsafe"}}, None)
     assert out["status"] == "REJECTED"
     item = aws.Table("Videos").get_item(Key={"video_id": "v"})["Item"]
     assert item["status"] == "REJECTED" and item["reject_reason"] == "unsafe"
-    assert usage.consume("u1", limit=1) == 1
+    assert wallet.balance("u1")["balance"] == 5  # "no credits used" is true
+
+
+def test_mark_failed_refunds_a_failed_video_once(aws):
+    from generate_video.handlers import mark_failed_handler
+    _charged_video(aws, "RENDERING")
+    mark_failed_handler.handler({"video_id": "v", "error": {"Error": "X"}}, None)
+    mark_failed_handler.handler({"video_id": "v", "error": {"Error": "X"}}, None)  # a retry must not refund twice
+    assert wallet.balance("u1")["balance"] == 5
 
 
 def test_mark_failed_does_not_refund_completed(aws):
     from generate_video.handlers import mark_failed_handler
-    usage.consume("u1", limit=1)
-    aws.Table("Videos").put_item(Item={"video_id": "v", "user_id": "u1", "usage_day": usage._today(), "status": "COMPLETE"})
+    _charged_video(aws, "COMPLETE")
     mark_failed_handler.handler({"video_id": "v", "error": {"Error": "X"}}, None)
-    with pytest.raises(usage.QuotaExceeded):
-        usage.consume("u1", limit=1)
+    assert wallet.balance("u1")["balance"] == 2  # a finished video stays paid for
+
+
+def test_wallet_endpoint_requires_the_owner(aws):
+    import wallet_api
+    ev = {"pathParameters": {"user_id": "u1"}, "headers": {"X-Timezone": "Europe/Madrid"}, "requestContext": {"authorizer": {"claims": {"sub": "u1"}}}}
+    out = wallet_api.handler(ev, None)
+    body = json.loads(out["body"])
+    assert out["statusCode"] == 200 and body["balance"] == 5 and body["rules"]["daily"] == 2 and body["buckets"][0]["kind"] == "signup"
+    assert wallet_api.handler({**ev, "requestContext": {}}, None)["statusCode"] == 401
+    assert wallet_api.handler({**ev, "pathParameters": {"user_id": "u2"}}, None)["statusCode"] == 403
 
 
 # ---------- renderer asset allow-list ----------
@@ -181,15 +214,15 @@ def test_render_blocks_foreign_assets():
 
 def test_launcher_passes_the_viewers_region_but_only_as_a_two_letter_code(launcher, monkeypatch):
     monkeypatch.setenv("DAILY_VIDEO_LIMIT", "10")
-    ev = _event()
+    ev = _event(body={"prompt": "A short explainer about how black holes form", "target_minutes": 1})
     ev["headers"] = {"X-Region": "gb", "Authorization": "Bearer SECRET"}
     assert launcher.handler(ev, None)["statusCode"] == 202
     sent = json.loads(launcher.fake.calls[0]["input"])
     assert sent["region"] == "GB" and "SECRET" not in launcher.fake.calls[0]["input"]
-    ev2 = _event(body={"prompt": "A short explainer about how black holes form", "client_request_id": "region-test-02"})
+    ev2 = _event(body={"prompt": "A short explainer about how black holes form", "client_request_id": "region-test-02", "target_minutes": 1})
     ev2["headers"] = {"X-Region": "../etc"}
     assert launcher.handler(ev2, None)["statusCode"] == 202 and "region" not in json.loads(launcher.fake.calls[1]["input"])
-    ev3 = _event(body={"prompt": "A short explainer about how black holes form", "client_request_id": "region-test-03"})
+    ev3 = _event(body={"prompt": "A short explainer about how black holes form", "client_request_id": "region-test-03", "target_minutes": 1})
     ev3["headers"] = {"CloudFront-Viewer-Country": "IN"}
     launcher.handler(ev3, None)
     assert json.loads(launcher.fake.calls[2]["input"])["region"] == "IN"

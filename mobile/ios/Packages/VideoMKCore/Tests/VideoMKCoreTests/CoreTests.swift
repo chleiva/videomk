@@ -97,6 +97,18 @@ struct FixedAuth: AuthorizationProviding {
         #expect(seen?.value(forHTTPHeaderField: "X-Region") == nil)
     }
 
+    @Test func notEnoughCreditsIsATypedErrorAndRequestsCarryTheTimezone() async throws {
+        nonisolated(unsafe) var tz: String?
+        StubProtocol.handler = { req in
+            tz = req.value(forHTTPHeaderField: "X-Timezone")
+            return (402, Data(#"{"message":"This video needs 4 credits and you have 3.","code":"insufficient_credits","balance":3,"needed":4}"#.utf8))
+        }
+        let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
+        do { _ = try await api.startGeneration(prompt: "A tour of Paris", clientRequestID: "r"); Issue.record("expected an error") }
+        catch { #expect(error as? APIError == .insufficientCredits(balance: 3, needed: 4)); #expect((error as? APIError)?.message == "This video needs 4 credits and you have 3.") }
+        #expect(tz == TimeZone.current.identifier)
+    }
+
     @Test func startGenerationSendsNormalizedPromptAndRequestID() async throws {
         nonisolated(unsafe) var body: [String: Any] = [:]
         StubProtocol.handler = { req in

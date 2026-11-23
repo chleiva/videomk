@@ -116,6 +116,53 @@ public struct CreateOptions: Sendable, Equatable {
     public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil) { self.minutes = minutes; self.look = look }
 }
 
+public extension CreateOptions {
+    /// 1 credit per started minute, at least 1 (matches the server; the server's number is the one that is charged).
+    var credits: Int { max(1, min(12, Int(minutes.rounded(.up)))) }
+}
+
+public struct WalletBucket: Sendable, Equatable, Decodable {
+    public enum Kind: String, Sendable { case daily, signup, paid, refund, other }
+    public let kindName: String
+    public let remaining: Int
+    public let expiresAt: Date?
+    public var kind: Kind { Kind(rawValue: kindName) ?? .other }
+    enum CodingKeys: String, CodingKey { case kindName = "kind", remaining, expiresAt = "expires_at" }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        kindName = try c.decode(String.self, forKey: .kindName)
+        remaining = try c.decode(Int.self, forKey: .remaining)
+        expiresAt = (try? c.decode(Double.self, forKey: .expiresAt)).map(Date.init(timeIntervalSince1970:))
+    }
+    public init(kind: String, remaining: Int, expiresAt: Date? = nil) { kindName = kind; self.remaining = remaining; self.expiresAt = expiresAt }
+}
+
+public struct WalletInfo: Sendable, Equatable, Decodable {
+    public let balance: Int
+    public let buckets: [WalletBucket]
+    public let nextFreeAt: Date?
+    public let dailyCredits: Int
+    public let signupCredits: Int
+    enum CodingKeys: String, CodingKey { case balance, buckets, nextDailyAt = "next_daily_at", rules }
+    private struct Rules: Decodable { let daily: Int?; let signup: Int? }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        balance = try c.decode(Int.self, forKey: .balance)
+        buckets = (try? c.decode([WalletBucket].self, forKey: .buckets)) ?? []
+        nextFreeAt = (try? c.decode(Double.self, forKey: .nextDailyAt)).map(Date.init(timeIntervalSince1970:))
+        let r = try? c.decode(Rules.self, forKey: .rules)
+        dailyCredits = r?.daily ?? 2; signupCredits = r?.signup ?? 5
+    }
+    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, dailyCredits: Int = 2, signupCredits: Int = 5) {
+        self.balance = balance; self.buckets = buckets; self.nextFreeAt = nextFreeAt; self.dailyCredits = dailyCredits; self.signupCredits = signupCredits
+    }
+
+    /// Whether `credits` can be paid right now.
+    public func canAfford(_ credits: Int) -> Bool { balance >= credits }
+}
+
 public enum Brief {
     public static let minLength = 10
     public static let maxLength = 2000

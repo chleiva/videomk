@@ -30,6 +30,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     tl["ledger"] = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] == "image" and (b.get("media") or {}).get("ledger")]
     tl["sources"] = plan.get("sources", [])
     tl["description"] = plan.get("description", "")
+    tl["language"] = plan.get("language", "en")
     key = f"{pfx}timeline_r{rev}.json"
     awsio.put_json(key, tl)
     return {

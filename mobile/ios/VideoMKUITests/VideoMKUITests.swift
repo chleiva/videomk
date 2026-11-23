@@ -23,6 +23,11 @@ final class VideoMKUITests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: id).firstMatch
     }
 
+    /// A finished (Ready) video: the newest row may be a declined or failed one, which has no player.
+    private func readyRow(_ app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "identifier == 'videoRow' AND label CONTAINS 'Ready'")).firstMatch
+    }
+
     private func shot(_ app: XCUIApplication, _ name: String) {
         guard let dir = ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"] else { return }
         try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
@@ -90,9 +95,9 @@ final class VideoMKUITests: XCTestCase {
 
         let app = try launch(signedIn: true)
         XCTAssertTrue(app.textFields["composerField"].waitForExistence(timeout: 20))
-        XCTAssertTrue(element(app, "videoRow").waitForExistence(timeout: 20))
+        XCTAssertTrue(readyRow(app).waitForExistence(timeout: 20))
         shot(app, "2-library")
-        element(app, "videoRow").tap()
+        readyRow(app).tap()
         XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 20))
         sleep(3); shot(app, "3-player")
         let credits = app.buttons["Description and photo credits"]
@@ -101,20 +106,42 @@ final class VideoMKUITests: XCTestCase {
         let field = app.textFields["composerField"]
         field.tap()
         field.typeText("A visual tour of the landmarks of Rome")
+        XCTAssertTrue(app.staticTexts["costLine"].waitForExistence(timeout: 5), "the composer shows what the video will cost")
         shot(app, "5-composer-filled")
         app.buttons["optionsMenu"].tap()
         sleep(1); shot(app, "5b-options")
         app.tap()   // dismiss the menu
+        XCTAssertTrue(app.buttons["balanceChip"].exists, "the credit balance is always visible")
+        app.buttons["balanceChip"].tap()
+        XCTAssertTrue(app.navigationBars["Credits"].waitForExistence(timeout: 5))
+        sleep(1); shot(app, "5c-credits")
+        app.buttons["Done"].tap()
         app.buttons["settingsButton"].tap()
         XCTAssertTrue(app.buttons["signOutButton"].waitForExistence(timeout: 5))
         shot(app, "6-settings")
     }
 
+    /// A video that costs more credits than the user has can't be sent, and the screen says why and what to do.
+    func testNotEnoughCreditsBlocksSendingAndExplainsWhy() throws {
+        let app = try launch(signedIn: true)
+        let field = app.textFields["composerField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["balanceChip"].waitForExistence(timeout: 20))
+        field.tap()
+        field.typeText("A very long documentary about the history of Rome")
+        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5), "affordable at the default length")
+        app.buttons["optionsMenu"].tap()
+        app.buttons["12 minutes"].tap()
+        XCTAssertTrue(app.staticTexts["notEnoughCredits"].waitForExistence(timeout: 5), "12 credits is more than a test account has")
+        XCTAssertFalse(app.buttons["sendButton"].exists)
+        shot(app, "5d-not-enough-credits")
+    }
+
     /// Edit a scene's narration, render a draft preview, then publish. Uses a real, editable video on QA (about 3 minutes).
     func testEditNarrationPreviewThenPublish() throws {
         let app = try launch(signedIn: true)
-        XCTAssertTrue(element(app, "videoRow").waitForExistence(timeout: 20))
-        element(app, "videoRow").tap()
+        XCTAssertTrue(readyRow(app).waitForExistence(timeout: 20))
+        readyRow(app).tap()
         XCTAssertTrue(app.buttons["editButton"].waitForExistence(timeout: 20), "an editable, completed video should offer Edit")
         app.buttons["editButton"].tap()
 

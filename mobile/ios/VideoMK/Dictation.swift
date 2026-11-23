@@ -1,6 +1,7 @@
 import AVFoundation
 import Observation
 import Speech
+import VideoMKCore
 
 /// Speech to text for the brief. Uses on-device recognition when the iPhone supports it, so audio stays on the phone.
 @MainActor @Observable
@@ -8,6 +9,10 @@ final class Dictation {
     enum State: Equatable { case idle, starting, listening, unavailable(String) }
 
     private(set) var state: State = .idle
+    /// Language being spoken. Remembered; defaults from the phone's preferred languages.
+    var language: DictationLanguage = DictationLanguage.initial(saved: UserDefaults.standard.string(forKey: "dictationLanguage"), preferred: Locale.preferredLanguages) {
+        didSet { UserDefaults.standard.set(language.rawValue, forKey: "dictationLanguage") }
+    }
     /// Called with the full text (what was already typed plus what was said) every time the recognizer updates.
     var onText: ((String) -> Void)?
 
@@ -26,7 +31,9 @@ final class Dictation {
         guard state != .starting, state != .listening else { return }
         state = .starting
         guard await authorized() else { return }
-        guard let recognizer = SFSpeechRecognizer(locale: .current) ?? SFSpeechRecognizer(locale: Locale(identifier: "en-US")), recognizer.isAvailable else {
+        let supported = SFSpeechRecognizer.supportedLocales().map(\.identifier)
+        let id = language.locale(region: Locale.current.region?.identifier, supported: supported)
+        guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)) ?? SFSpeechRecognizer(locale: Locale(identifier: "en-US")), recognizer.isAvailable else {
             state = .unavailable("Dictation isn't available right now.")
             return
         }
