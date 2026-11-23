@@ -5,7 +5,7 @@ library, create, progress, player/share, settings). Not yet: editor, credits/pur
 (sign-in is the Cognito hosted page, which supports email + password), account deletion.
 
 ## What the app does
-Home is one screen: the list of videos and, pinned at the bottom, a composer where you type or dictate (microphone button, on-device speech recognition when the iPhone supports it) what you want. Sending adds a placeholder row at once; it becomes a live row with stage and an estimated progress bar, then a finished video, while you keep browsing or ask for more. Length and look are in the options button next to the composer.
+Home is one screen: the list of videos and, pinned at the bottom, a composer where you type or dictate (microphone button, on-device speech recognition when the iPhone supports it) what you want. Sending adds a placeholder row at once; it becomes a live row with stage and an estimated progress bar, then a finished video, while you keep browsing or ask for more. Length and look are in the options button next to the composer. The photo button next to the microphone attaches up to 10 of your photos (see `docs/PHOTOS.md`): they are cleaned on the phone, uploaded, and the video is built around them.
 
 ## Layout
 - `project.yml`: the Xcode project definition ([XcodeGen](https://github.com/yonaskolb/XcodeGen); `brew install xcodegen`). The `.xcodeproj` is generated and not committed.

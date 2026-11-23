@@ -5,8 +5,9 @@ import XCTest
 final class VideoMKUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
-    private func launch(signedIn: Bool, minutes: String? = nil) throws -> XCUIApplication {
+    private func launch(signedIn: Bool, minutes: String? = nil, photoFiles: String? = nil) throws -> XCUIApplication {
         let app = XCUIApplication()
+        if let photoFiles { app.launchEnvironment["VMK_DEBUG_PHOTO_FILES"] = photoFiles }
         app.launchEnvironment["VMK_DEBUG_RESET"] = "1"  // the simulator Keychain survives between launches
         if let minutes { app.launchEnvironment["VMK_DEBUG_DEFAULT_MINUTES"] = minutes }
         if signedIn {
@@ -84,6 +85,40 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertFalse(element(app, "runningRow").exists || element(app, "pendingRow").exists, "the video did not finish in time")
         XCTAssertTrue(element(app, "videoRow").exists)
         shot(app, "12-finished")
+    }
+
+    /// Attach photos, say what the video should be about, send: the photos upload, the video is made around them, and it plays.
+    /// Needs `TEST_RUNNER_VMK_DEBUG_PHOTO_FILES=/path/a.jpg:/path/b.jpg` (the system photo picker can't be driven from a test). Makes one real video on QA.
+    func testAVideoFromYourPhotos() throws {
+        guard let files = ProcessInfo.processInfo.environment["VMK_DEBUG_PHOTO_FILES"], !files.isEmpty else { throw XCTSkip("no photo files in the environment") }
+        let count = files.split(separator: ":").count
+        let app = try launch(signedIn: true, minutes: "1", photoFiles: files)
+        let field = app.textFields["composerField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["photoButton"].exists, "the composer offers photos")
+        let photos = app.descendants(matching: .any).matching(identifier: "attachedPhoto")
+        let deadline = Date().addingTimeInterval(30)
+        while photos.count < count && Date() < deadline { sleep(1) }
+        XCTAssertEqual(photos.count, count, "the attached photos are shown")
+        XCTAssertTrue(element(app, "photosNote").exists, "the privacy note is shown with the photos")
+        field.tap()
+        field.typeText("A relaxed day out with my family and our dog: the park, the beach, pizza and a hike.")
+        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5))
+        shot(app, "13-photos-attached")
+        app.buttons["sendButton"].tap()
+
+        XCTAssertTrue(element(app, "pendingRow").waitForExistence(timeout: 20) || element(app, "runningRow").waitForExistence(timeout: 60), "a row for the new video appears")
+        XCTAssertFalse(element(app, "failedRow").exists, "the upload and the request succeeded")
+        XCTAssertEqual(photos.count, 0, "the composer is cleared after sending")
+        shot(app, "14-uploading")
+        XCTAssertTrue(element(app, "runningRow").waitForExistence(timeout: 120), "the video is being made")
+        let finish = Date().addingTimeInterval(420)
+        while (element(app, "runningRow").exists || element(app, "pendingRow").exists) && Date() < finish { sleep(5) }
+        XCTAssertFalse(element(app, "failedRow").exists)
+        XCTAssertTrue(readyRow(app).waitForExistence(timeout: 20))
+        readyRow(app).tap()
+        XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 30), "the finished video plays")
+        sleep(3); shot(app, "15-photo-video")
     }
 
     /// Saves screenshots for visual review when `TEST_RUNNER_VMK_SHOTS_DIR` is set; always asserts the screens exist.

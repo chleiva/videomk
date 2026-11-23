@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import VideoMKCore
 
@@ -7,6 +8,7 @@ struct ComposerBar: View {
     @Binding var text: String
     @Binding var options: CreateOptions
     @Bindable var dictation: Dictation
+    @Bindable var photos: PhotoAttachments
     var focus: FocusState<Bool>.Binding
     let credits: Int            // what this video would cost
     let balance: Int?           // nil until the wallet has loaded
@@ -47,15 +49,17 @@ struct ComposerBar: View {
                     .frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 20)
             }
 
+            if !photos.isEmpty { AttachedPhotosStrip(photos: photos) }
             HStack(alignment: .bottom, spacing: 8) {
                 optionsMenu
                 HStack(alignment: .bottom, spacing: 4) {
-                    TextField("Describe a video…", text: $text, axis: .vertical)
+                    TextField(photos.isEmpty ? "Describe a video…" : "What should the video be about?", text: $text, axis: .vertical)
                         .focused(focus)
                         .lineLimit(1...5)
                         .textInputAutocapitalization(.sentences)
                         .padding(.leading, 14).padding(.vertical, 10)
                         .accessibilityIdentifier("composerField")
+                    photoButton
                     micButton
                 }
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -73,7 +77,22 @@ struct ComposerBar: View {
         .padding(.top, 8).padding(.bottom, 8)
         .background(.bar)
         .animation(.snappy, value: canSend)
+        .animation(.snappy, value: photos.items.count)
         .animation(.snappy, value: dictation.state)
+    }
+
+    private var photoButton: some View {
+        PhotosPicker(selection: $photos.picked, maxSelectionCount: max(1, photos.remaining), matching: .images) {
+            Image(systemName: "photo.on.rectangle.angled")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(photos.remaining == 0 ? Theme.textSecondary : Theme.primary)
+                .frame(width: 40, height: 44)
+                .contentShape(Rectangle())
+        }
+        .disabled(photos.remaining == 0)
+        .accessibilityLabel("Add photos")
+        .accessibilityHint("Choose up to \(PhotoLimits.maxPhotos) of your photos to use in the video")
+        .accessibilityIdentifier("photoButton")
     }
 
     private var micButton: some View {

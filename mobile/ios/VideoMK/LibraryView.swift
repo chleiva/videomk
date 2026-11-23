@@ -9,6 +9,7 @@ struct LibraryView: View {
     @State private var text = ""
     @State private var options = LibraryView.defaultOptions()
     @State private var dictation = Dictation()
+    @State private var photos = PhotoAttachments()
     @FocusState private var composerFocused: Bool
 
     var body: some View {
@@ -41,10 +42,13 @@ struct LibraryView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                ComposerBar(text: $text, options: $options, dictation: dictation, focus: $composerFocused, credits: options.credits, balance: model.wallet.flatMap { $0.unlimited ? nil : $0.balance }, onSend: send)
+                ComposerBar(text: $text, options: $options, dictation: dictation, photos: photos, focus: $composerFocused, credits: options.credits, balance: model.wallet.flatMap { $0.unlimited ? nil : $0.balance }, onSend: send)
             }
         }
         .task { await model.refresh() }
+        #if DEBUG
+        .task { await photos.loadDebugFiles() }
+        #endif
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingWallet) { WalletView() }
@@ -55,7 +59,8 @@ struct LibraryView: View {
 
     private func send() {
         dictation.stop()
-        model.submit(brief: text, options: options)
+        model.submit(brief: text, options: options, photos: photos.items.map(\.data))
+        photos.clear()
         text = ""
         composerFocused = false
     }
@@ -212,7 +217,7 @@ struct PendingRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ShimmerThumb(symbol: failed == nil ? "paperplane.fill" : "exclamationmark.triangle.fill", animate: failed == nil && !reduceMotion)
+            ShimmerThumb(symbol: failed != nil ? "exclamationmark.triangle.fill" : pending.photoCount > 0 ? "photo.stack.fill" : "paperplane.fill", animate: failed == nil && !reduceMotion)
                 .frame(width: 112, height: 63)
                 .clipShape(RoundRectangle(radius: 10))
             VStack(alignment: .leading, spacing: 6) {
@@ -223,6 +228,9 @@ struct PendingRow: View {
                         Button("Try again", action: onRetry).font(.caption.weight(.semibold))
                         Button("Remove", role: .destructive, action: onDismiss).font(.caption)
                     }.buttonStyle(.borderless)
+                } else if case .uploading(let done, let total) = pending.state {
+                    ProgressView(value: Double(done), total: Double(max(total, 1))).tint(Theme.primary).animation(.smooth, value: done)
+                    Text("Uploading photos \(min(done + 1, total)) of \(total)").font(.caption).foregroundStyle(Theme.textSecondary)
                 } else {
                     ProgressView().controlSize(.small)
                     Text("Sending your request…").font(.caption).foregroundStyle(Theme.textSecondary)

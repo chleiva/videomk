@@ -42,6 +42,12 @@ public struct APIClient: Sendable {
         self.config = config; self.auth = auth; self.session = session; self.appVersion = appVersion; self.region = region
     }
 
+    public func requestUploads(count: Int) async throws -> [UploadSlot] {
+        let body = try JSONSerialization.data(withJSONObject: ["count": count])
+        let (data, _) = try await send("POST", ["uploads"], body: body)
+        return try decode(UploadSlotsResponse.self, data).uploads
+    }
+
     public func wallet() async throws -> WalletInfo {
         let (data, _) = try await send("GET", ["wallet"])
         return try decode(WalletInfo.self, data)
@@ -63,8 +69,9 @@ public struct APIClient: Sendable {
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
-    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions()) async throws -> String {
+    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = []) async throws -> String {
         var fields: [String: Any] = ["prompt": Brief.normalized(prompt), "client_request_id": clientRequestID, "target_minutes": options.minutes]
+        if !media.isEmpty { fields["media"] = media }
         if let look = options.look { fields["theme"] = look.rawValue }
         let body = try JSONSerialization.data(withJSONObject: fields)
         let (data, _) = try await send("POST", ["videos", "generate"], body: body)

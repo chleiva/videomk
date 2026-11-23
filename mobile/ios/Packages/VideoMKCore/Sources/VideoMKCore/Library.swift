@@ -5,6 +5,7 @@ import Foundation
 public struct PendingVideo: Sendable, Equatable, Identifiable {
     public enum State: Sendable, Equatable {
         case sending
+        case uploading(done: Int, total: Int)   // photos going up before the video is requested
         case accepted(videoID: String)
         case failed(String)
     }
@@ -13,11 +14,12 @@ public struct PendingVideo: Sendable, Equatable, Identifiable {
     public let id: String
     public let brief: String
     public let options: CreateOptions
+    public let photoCount: Int
     public var state: State
     public let createdAt: Date
 
-    public init(id: String = UUID().uuidString, brief: String, options: CreateOptions, state: State = .sending, createdAt: Date = .now) {
-        self.id = id; self.brief = brief; self.options = options; self.state = state; self.createdAt = createdAt
+    public init(id: String = UUID().uuidString, brief: String, options: CreateOptions, photoCount: Int = 0, state: State = .sending, createdAt: Date = .now) {
+        self.id = id; self.brief = brief; self.options = options; self.photoCount = photoCount; self.state = state; self.createdAt = createdAt
     }
 
     public var acceptedVideoID: String? { if case .accepted(let v) = state { v } else { nil } }
