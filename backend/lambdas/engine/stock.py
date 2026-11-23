@@ -11,6 +11,7 @@ short-lived working copy in S3 so re-renders/edits don't re-download. Expire `ge
 """
 import io
 import json
+import logging
 import os
 import re
 import urllib.parse
@@ -66,7 +67,19 @@ def unsplash_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json
 
 def openverse_search(query: str, fetch: Callable[..., Any] = fetch_json) -> List[Candidate]:
     out: List[Candidate] = []
-    for r in assets.search(query, fetch=lambda u: fetch(u)):
+    # Openverse (anonymous) is slow and answers 504 now and then (8-30 s): a longer timeout and up to 3 attempts are cheaper
+    # than losing the beat's photo. Beats run in a 3-minute Lambda.
+    call = (lambda u: fetch_json(u, timeout=25)) if fetch is fetch_json else (lambda u: fetch(u))
+    results: List[Dict[str, Any]] = []
+    for attempt in range(3):
+        try:
+            results = assets.search(query, fetch=call)
+            break
+        except FetchError as e:
+            logging.warning("openverse attempt %d failed for %r: %s", attempt + 1, query, e)
+            if attempt == 2:
+                raise
+    for r in results:
         lic = str(r.get("license", "")).lower()
         w, h = int(r.get("width") or 0), int(r.get("height") or 0)
         url = str(r.get("url") or "")
@@ -87,7 +100,8 @@ def gather(query: str, *, unsplash_key: str = "", fetch: Callable[..., Any] = fe
     for fn in (lambda: unsplash_search(query, unsplash_key, fetch), lambda: openverse_search(query, fetch)):
         try:
             pools.append(fn())
-        except (FetchError, ValueError, KeyError, TypeError):
+        except (FetchError, ValueError, KeyError, TypeError) as e:
+            logging.warning("stock provider failed for %r: %s: %s", query, type(e).__name__, e)
             pools.append([])
     # interleave so the reviewer sees both sources, keeping each provider's own relevance order
     out: List[Candidate] = []
@@ -162,7 +176,7 @@ def llm_review(candidates: Sequence[Candidate], narration: str, alt: str, query:
     if not thumbs:
         raise FetchError("no thumbnails could be loaded")
     user = f"Narration for this moment: {narration[:400]}\nIntended subject: {alt or query}\nSearch query: {query}\n\nChoose the best of the {len(thumbs)} photos above."
-    text, meta = complete(REVIEW_SYSTEM, user, images=thumbs, max_tokens=300, temperature=0.0, model=llm.REVIEW_MODEL)
+    text, meta = complete(REVIEW_SYSTEM, user, images=thumbs, max_tokens=300, temperature=0.0, model=llm.REVIEW_MODEL, effort="low")
     idx, reason = parse_review(text, len(thumbs))
     return (shown[idx] if idx is not None else None), reason, float(meta.get("cost_usd", 0.0)), shown
 
@@ -213,8 +227,18 @@ def scout_reviewed(
     try:
         cands = gather(query, unsplash_key=unsplash_key, fetch=fetch_json_fn)
     except Exception:
+        logging.exception("photo gather crashed for %r", query)
         return None
+    words = query.split()
+    if not cands and len(words) > 3:  # long queries often match nothing: retry with the leading, most specific words
+        short = " ".join(words[:3])
+        try:
+            cands = gather(short, unsplash_key=unsplash_key, fetch=fetch_json_fn)
+        except Exception:
+            logging.exception("photo gather crashed for %r", short)
+            cands = []
     if not cands:
+        logging.warning("no photo candidates for %r", query)
         return None
     info: Dict[str, Any] = {"source": "first-result", "reason": "", "cost_usd": 0.0}
     order = list(range(len(cands)))
@@ -223,15 +247,18 @@ def scout_reviewed(
             idx, reason, cost, _ = review(cands, narration, alt, query, fetch_bytes_fn=fetch_bytes_fn)
             info = {"source": "llm", "reason": reason, "cost_usd": cost}
             if idx is None:
+                logging.warning("reviewer rejected all %d candidates for %r: %s", len(cands), query, reason)
                 return {"jpeg": None, "candidates": [public_meta(c) for c in cands], "review": info, "rejected_all": True}
             order = [idx] + [i for i in order if i != idx]
         except Exception as e:  # reviewer unavailable/garbled: degrade to provider relevance order, never block the video
+            logging.warning("photo review failed for %r: %s: %s", query, type(e).__name__, e)
             info = {"source": "fallback", "reason": f"review failed: {type(e).__name__}", "cost_usd": 0.0}
     for i in order:  # first downloadable candidate in preference order
         c = cands[i]
         try:
             jpeg, _ = assets.to_jpeg(fetch_full(c, fetch_bytes_fn))
-        except (FetchError, OSError, ValueError, Image.DecompressionBombError):
+        except (FetchError, OSError, ValueError, Image.DecompressionBombError) as e:
+            logging.warning("photo download failed (%s) for %r: %s", candidate_key(c), query, type(e).__name__)
             continue
         track_download(c, unsplash_key, fetch_json_fn)
         return {"jpeg": jpeg, "entry": ledger_entry(c), "credit": credit_line(c), "chosen": candidate_key(c),

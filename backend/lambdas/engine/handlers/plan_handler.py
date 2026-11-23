@@ -31,7 +31,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask)
     costs.add_cost(video_id, meta_acc["cost"])
     if warnings:
-        logging.info("plan warnings: %s", warnings[:10])
+        logging.warning("plan warnings: %s", warnings[:10])  # WARNING level: Lambda drops INFO by default
 
     if not plan.get("legit"):
         return {**base, "plot": {"legit": False, "reason": plan.get("reason", "")}}

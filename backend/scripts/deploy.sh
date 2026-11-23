@@ -9,5 +9,5 @@ actual="$(aws sts get-caller-identity --profile "$profile" --query Account --out
 if [ "$actual" != "$account" ]; then echo "Refusing: profile '$profile' is account $actual, stage '$stage' expects $account" >&2; exit 1; fi
 if [ "$stage" = "prod" ]; then read -r -p "Deploy to PRODUCTION ($account)? type 'prod': " ok; [ "$ok" = "prod" ] || exit 1; fi
 export AWS_PROFILE="$profile" AWS_REGION="$region" AWS_DEFAULT_REGION="$region"
-npx --yes aws-cdk@2 bootstrap "aws://$account/$region" -c stage="$stage"
-npx --yes aws-cdk@2 deploy "videomk-$stage" -c stage="$stage" -c engine=v2 --require-approval never "$@"
+npx --yes aws-cdk@latest bootstrap "aws://$account/$region" -c stage="$stage"
+npx --yes aws-cdk@latest deploy "videomk-$stage" -c stage="$stage" -c engine=v2 --require-approval never "$@"

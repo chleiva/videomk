@@ -21,7 +21,7 @@ SCENE_DOCS = """Scene types (props):
 - timeline: {title (<=50), events: [{date (<=12), label (<=55)}] (3-6)}. History, sequences over time.
 - stat: {value (<=12, e.g. "73%" or "$4.2B"), label (<=70)}. One striking number; only if it is in the grounding notes.
 - quote: {text (<=180), attribution (<=50)}. Only real, well-known quotes from the grounding notes.
-- image: {image_query (2-6 words describing a real photograph), alt (<=70)}. A real-world photo (place, object, person-type, scene). Use sparingly, 1 beat in 5 at most."""
+- image: {image_query (2-6 words describing a real photograph), alt (<=70)}. A real-world photo (place, object, person-type, scene). When the topic is about places, landmarks, nature, objects or anything people want to see, use a photo for at least 1 beat in 3, one per named place or object. For abstract topics (processes, ideas, numbers) use at most 1 beat in 5."""
 
 SYSTEM_PROMPT = f"""You are the director of a short animated explainer video. You turn a topic into a plan of "beats".
 Each beat has ONE idea, a narration to be spoken aloud, and ONE visual scene that illustrates it.
@@ -226,7 +226,10 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS) -> Tuple[
         try:
             if stype not in SCENE_TYPES:
                 raise ValueError(f"unknown scene type {stype!r}")
-            scene = {"type": stype, "props": sanitize_props(stype, scene_in.get("props") or {})}
+            props_in = scene_in.get("props")
+            if not isinstance(props_in, dict):  # the model sometimes flattens the props onto the scene itself
+                props_in = {k: v for k, v in scene_in.items() if k != "type"}
+            scene = {"type": stype, "props": sanitize_props(stype, props_in)}
         except (ValueError, TypeError, AttributeError) as e:
             warnings.append(f"beat {i}: scene replaced ({e})")
             scene = _fallback_scene(narration)
@@ -258,7 +261,11 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
     for attempt in range(retries + 1):
         text = llm(SYSTEM_PROMPT, user)
         try:
-            return validate_plan(parse_plan_json(text))
+            plan, warns = validate_plan(parse_plan_json(text))
+            replaced = [w for w in warns if "scene replaced" in w]
+            if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
+                raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")
+            return plan, warns
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e
             user = build_user_prompt(topic, notes, target_minutes) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."

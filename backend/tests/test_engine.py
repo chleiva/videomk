@@ -283,6 +283,39 @@ def test_plan_validation_blocks_injection_and_normalises():
     assert set(props) == {"image_query", "alt", "ken_burns"}  # LLM can never choose a file path
 
 
+def _flat_plan():
+    beats = [
+        {"narration": "The Eiffel Tower was finished in 1889 for the World's Fair and is the tallest structure in Paris today.",
+         "scene": {"type": "image", "image_query": "Eiffel Tower golden hour", "alt": "The Eiffel Tower"}},
+        {"narration": "Notre-Dame began in 1163 and the Louvre opened as a public museum during the French Revolution in 1793.",
+         "scene": {"type": "bullets", "heading": "Landmarks", "items": ["Notre-Dame, 1163", "The Louvre, 1793"]}},
+    ]
+    return {"legit": True, "title": "Paris", "description": "d", "mood": "calm", "theme": "midnight", "beats": beats}
+
+
+def test_validate_plan_accepts_props_flattened_onto_the_scene():
+    clean, warns = plan_mod.validate_plan(_flat_plan())
+    assert warns == []
+    assert [b["scene"]["type"] for b in clean["beats"]] == ["image", "bullets"]
+    assert clean["beats"][0]["scene"]["props"]["image_query"] == "Eiffel Tower golden hour"
+
+
+def test_generate_plan_repairs_when_most_scenes_are_replaced():
+    bad = _flat_plan()
+    for b in bad["beats"]:
+        b["scene"] = {"type": "bullets", "props": {"heading": "H", "items": "not a list"}}
+    answers = iter([json.dumps(bad), json.dumps(_flat_plan())])
+    seen = []
+
+    def ask(s, u):
+        seen.append(u)
+        return next(answers)
+
+    p, warns = plan_mod.generate_plan("paris", "", 1, ask)
+    assert len(seen) == 2 and "most scenes were invalid" in seen[1]
+    assert warns == [] and p["beats"][0]["scene"]["type"] == "image"
+
+
 def test_generate_plan_repairs_once_then_fails_closed():
     answers = iter(["not json at all", json.dumps(GOOD_PLAN)])
     p, _ = plan_mod.generate_plan("rainbows", "", 3, lambda s, u: next(answers))
@@ -398,3 +431,28 @@ def test_every_edit_op_is_validated_and_the_input_plan_is_never_mutated():
             E.apply_ops(plan, bad)
     with pytest.raises(E.EditError):
         E.apply_ops(plan, [{"op": "set_chapter", "id": ids[0], "title": "x"}] * 41)
+
+
+def test_llm_request_shape_per_model_generation(monkeypatch):
+    """Claude 5.x rejects `temperature` (400) and takes output_config.effort; older models still take temperature."""
+    from engine import llm
+
+    sent = []
+
+    class FakeBody:
+        def read(self):
+            return json.dumps({"content": [{"type": "text", "text": "ok"}], "usage": {"input_tokens": 10, "output_tokens": 5}}).encode()
+
+    class FakeClient:
+        def invoke_model(self, modelId, body):
+            sent.append((modelId, json.loads(body)))
+            return {"body": FakeBody()}
+
+    monkeypatch.setattr(llm, "_bedrock", lambda: FakeClient())
+    _, meta = llm.complete("s", "u", model="eu.anthropic.claude-sonnet-5-5", temperature=0.3, effort="low")
+    _, _ = llm.complete("s", "u", model="eu.anthropic.claude-sonnet-4-6", temperature=0.3)
+    new, old = sent[0][1], sent[1][1]
+    assert "temperature" not in new and new["output_config"] == {"effort": "low"}
+    assert old["temperature"] == 0.3 and "output_config" not in old
+    assert meta["cost_usd"] == pytest.approx((10 * 2.0 + 5 * 10.0) / 1_000_000)  # Sonnet 5.5: $2 / $10 per 1M
+    assert llm.estimate_cost("eu.anthropic.claude-haiku-5-5", 1_000_000, 1_000_000) == pytest.approx(0.60)
