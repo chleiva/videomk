@@ -17,7 +17,7 @@ def _provider(cfg: Dict[str, Any]):
     key = "" if keyless else get_secret_param(f"/videomk/{name}_api_key")
     if not keyless and not key:
         raise RuntimeError(f"missing API key for TTS provider {name}")
-    return tts.get_provider(name, key)
+    return tts.get_provider(name, key, cfg)
 
 
 def _wav_bytes(samples: np.ndarray) -> bytes:
@@ -40,7 +40,7 @@ def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     cfg = plan.get("tts", {})
     provider = _provider(cfg)
     text = beat["narration"]
-    costs.add_cost(video_id, len(text) * costs.TTS_PER_CHAR.get(provider.name, 0.00002), field=cost_field)
+    costs.add_cost(video_id, len(text) * (getattr(provider, "cost_per_char", None) or costs.TTS_PER_CHAR.get(provider.name, 0.00002)), field=cost_field)
     samples = tts.synth_beat(provider, text, voice=cfg.get("voice", ""), style=cfg.get("style", ""))
     if samples.size < audio.SR * 0.3:
         raise RuntimeError("TTS returned (almost) no audio")

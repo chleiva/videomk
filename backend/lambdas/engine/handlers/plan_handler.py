@@ -40,6 +40,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         plan["theme"] = event["theme"]
     plan["sources"] = sources
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
+    if plan["tts"]["provider"] == "polly":  # recorded in the plan so edits months later still use the same voice
+        plan["tts"].update({"engine": os.environ.get("POLLY_ENGINE", "generative"), "region": os.environ.get("POLLY_REGION", "us-east-1")})
     key = awsio.prefix(video_id) + "plan_r1.json"
     awsio.put_json(key, plan)
     update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"])})

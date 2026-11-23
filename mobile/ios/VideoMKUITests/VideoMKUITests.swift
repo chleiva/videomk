@@ -5,9 +5,10 @@ import XCTest
 final class VideoMKUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
-    private func launch(signedIn: Bool) throws -> XCUIApplication {
+    private func launch(signedIn: Bool, minutes: String? = nil) throws -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment["VMK_DEBUG_RESET"] = "1"  // the simulator Keychain survives between launches
+        if let minutes { app.launchEnvironment["VMK_DEBUG_DEFAULT_MINUTES"] = minutes }
         if signedIn {
             let env = ProcessInfo.processInfo.environment
             guard let id = env["VMK_DEBUG_ID_TOKEN"], !id.isEmpty else { throw XCTSkip("no QA token in the environment") }
@@ -18,62 +19,92 @@ final class VideoMKUITests: XCTestCase {
         return app
     }
 
+    private func element(_ app: XCUIApplication, _ id: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: id).firstMatch
+    }
+
+    private func shot(_ app: XCUIApplication, _ name: String) {
+        guard let dir = ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"] else { return }
+        try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+    }
+
     func testSignedOutUserSeesSignIn() throws {
         let app = try launch(signedIn: false)
         XCTAssertTrue(app.buttons["signInButton"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["videomk"].exists)
     }
 
-    func testCreateVideoShowsProgressThenPlays() throws {
-        let app = try launch(signedIn: true)
-        XCTAssertTrue(app.buttons["newVideoButton"].waitForExistence(timeout: 15), "library did not open")
+    /// The whole create flow happens on the home screen: a live row appears in the list, the composer is free again at once,
+    /// other videos stay reachable, and the row turns into a finished video. Makes one real 1-minute video on QA.
+    func testAskingForAVideoKeepsYouOnTheHomeScreen() throws {
+        let app = try launch(signedIn: true, minutes: "1")
+        let field = app.textFields["composerField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 20), "the composer should be on the home screen")
+        XCTAssertTrue(app.buttons["micButton"].exists, "dictation button")
+        XCTAssertTrue(app.buttons["optionsMenu"].exists)
+        XCTAssertFalse(app.buttons["sendButton"].exists, "nothing to send yet")
 
-        app.buttons["newVideoButton"].tap()
-        let field = app.textViews["briefField"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5))
-        let create = app.buttons["createButton"]
-        XCTAssertFalse(create.isEnabled, "an empty brief must not be submittable")
         field.tap()
         field.typeText("Explain how rainbows form, in simple terms.")
-        XCTAssertTrue(create.isEnabled)
-        create.tap()
+        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5))
+        shot(app, "10-composer-ready")
+        app.buttons["sendButton"].tap()
 
-        // After creating, the app opens the new video, which shows stages while it is made.
-        XCTAssertTrue(app.otherElements["progressCard"].waitForExistence(timeout: 30) || app.staticTexts["Making your video"].waitForExistence(timeout: 30),
-                      "progress screen did not appear")
-        // Real generation on QA takes about 1.5 minutes.
-        XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 300), "the finished video did not appear")
-        XCTAssertTrue(app.buttons["Share"].waitForExistence(timeout: 10))
+        // Instantly a placeholder or live row, and we never left the list.
+        let appeared = element(app, "pendingRow").waitForExistence(timeout: 10) || element(app, "runningRow").waitForExistence(timeout: 30)
+        XCTAssertFalse(element(app, "failedRow").exists, "the request failed (daily limit? connection?)")
+        XCTAssertTrue(appeared, "a row for the new video should appear")
+        XCTAssertTrue(app.navigationBars["Videos"].exists, "still on the home screen")
+        XCTAssertFalse(app.buttons["sendButton"].exists, "the composer is cleared and ready for another request")
+        XCTAssertTrue(element(app, "runningRow").waitForExistence(timeout: 60))
+        shot(app, "11-live-row")
+
+        // Ask for a second video while the first is still being made: both are live in the same list.
+        field.tap()
+        field.typeText("Why is the sky blue? A short explanation.")
+        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5))
+        app.buttons["sendButton"].tap()
+        func liveCount() -> Int {
+            app.descendants(matching: .any).matching(identifier: "runningRow").count + app.descendants(matching: .any).matching(identifier: "pendingRow").count
+        }
+        let both = Date().addingTimeInterval(60)
+        while liveCount() < 2 && Date() < both { sleep(1) }
+        XCTAssertGreaterThanOrEqual(liveCount(), 2, "two videos should be in progress at once")
+        XCTAssertTrue(app.navigationBars["Videos"].exists, "still on the home screen")
+        shot(app, "11b-two-live-rows")
+
+        // It finishes in place: no running or pending rows are left and the list still shows videos.
+        let deadline = Date().addingTimeInterval(480)
+        while (element(app, "runningRow").exists || element(app, "pendingRow").exists) && Date() < deadline { sleep(5) }
+        XCTAssertFalse(element(app, "runningRow").exists || element(app, "pendingRow").exists, "the video did not finish in time")
+        XCTAssertTrue(element(app, "videoRow").exists)
+        shot(app, "12-finished")
     }
 
     /// Saves screenshots for visual review when `TEST_RUNNER_VMK_SHOTS_DIR` is set; always asserts the screens exist.
     func testScreensRender() throws {
-        let dir = ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"]
-        func shot(_ app: XCUIApplication, _ name: String) {
-            guard let dir else { return }
-            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
-        }
         let out = try launch(signedIn: false)
         XCTAssertTrue(out.buttons["signInButton"].waitForExistence(timeout: 10))
         shot(out, "1-signin")
         out.terminate()
 
         let app = try launch(signedIn: true)
-        XCTAssertTrue(app.buttons["newVideoButton"].waitForExistence(timeout: 15))
-        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 15))
+        XCTAssertTrue(app.textFields["composerField"].waitForExistence(timeout: 20))
+        XCTAssertTrue(element(app, "videoRow").waitForExistence(timeout: 20))
         shot(app, "2-library")
-        app.cells.firstMatch.tap()
+        element(app, "videoRow").tap()
         XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 20))
         sleep(3); shot(app, "3-player")
         let credits = app.buttons["Description and photo credits"]
         if credits.waitForExistence(timeout: 10) { credits.tap(); sleep(1); shot(app, "3b-credits") }
         app.navigationBars.buttons.firstMatch.tap()
-        app.buttons["newVideoButton"].tap()
-        XCTAssertTrue(app.textViews["briefField"].waitForExistence(timeout: 5))
-        shot(app, "4-create-empty")
-        app.textViews["briefField"].typeText("A visual tour of the landmarks of Rome")
-        shot(app, "5-create-filled")
-        app.buttons["Cancel"].tap()
+        let field = app.textFields["composerField"]
+        field.tap()
+        field.typeText("A visual tour of the landmarks of Rome")
+        shot(app, "5-composer-filled")
+        app.buttons["optionsMenu"].tap()
+        sleep(1); shot(app, "5b-options")
+        app.tap()   // dismiss the menu
         app.buttons["settingsButton"].tap()
         XCTAssertTrue(app.buttons["signOutButton"].waitForExistence(timeout: 5))
         shot(app, "6-settings")
@@ -81,14 +112,9 @@ final class VideoMKUITests: XCTestCase {
 
     /// Edit a scene's narration, render a draft preview, then publish. Uses a real, editable video on QA (about 3 minutes).
     func testEditNarrationPreviewThenPublish() throws {
-        let dir = ProcessInfo.processInfo.environment["VMK_SHOTS_DIR"]
-        func shot(_ app: XCUIApplication, _ name: String) {
-            guard let dir else { return }
-            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
-        }
         let app = try launch(signedIn: true)
-        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 20))
-        app.cells.firstMatch.tap()
+        XCTAssertTrue(element(app, "videoRow").waitForExistence(timeout: 20))
+        element(app, "videoRow").tap()
         XCTAssertTrue(app.buttons["editButton"].waitForExistence(timeout: 20), "an editable, completed video should offer Edit")
         app.buttons["editButton"].tap()
 

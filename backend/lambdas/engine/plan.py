@@ -91,7 +91,10 @@ def new_beat_id(existing: Any = None, taken: Optional[set] = None) -> str:
 def tts_hash(plan: Dict[str, Any], beat: Dict[str, Any]) -> str:
     """Content address of a beat's narration audio: same text+voice => same wav, never re-synthesised."""
     cfg = plan.get("tts", {})
-    raw = json.dumps([cfg.get("provider", ""), cfg.get("voice", ""), cfg.get("style", ""), beat["narration"]], ensure_ascii=False)
+    parts = [cfg.get("provider", ""), cfg.get("voice", ""), cfg.get("style", ""), beat["narration"]]
+    if cfg.get("engine"):  # a different engine sounds different; plans made before engines were recorded keep their old hashes
+        parts += [cfg["engine"], cfg.get("region", "")]
+    raw = json.dumps(parts, ensure_ascii=False)
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
 
 

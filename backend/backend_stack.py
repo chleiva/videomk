@@ -320,7 +320,7 @@ class BackendStack(Stack):
                 "DEFAULT_TARGET_MINUTES": str(self.node.try_get_context("defaultMinutes") or "3"),
                 "CHUNK_SECONDS": "30",
             }
-            for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE")):
+            for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
             v2 = EngineV2(

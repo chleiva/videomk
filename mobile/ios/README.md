@@ -4,6 +4,9 @@ Thin native client for the videomk backend. Product spec: `docs/mobile/SPEC.md`.
 library, create, progress, player/share, settings). Not yet: editor, credits/purchases, push, Live Activity, Sign in with Apple/Google
 (sign-in is the Cognito hosted page, which supports email + password), account deletion.
 
+## What the app does
+Home is one screen: the list of videos and, pinned at the bottom, a composer where you type or dictate (microphone button, on-device speech recognition when the iPhone supports it) what you want. Sending adds a placeholder row at once; it becomes a live row with stage and an estimated progress bar, then a finished video, while you keep browsing or ask for more. Length and look are in the options button next to the composer.
+
 ## Layout
 - `project.yml`: the Xcode project definition ([XcodeGen](https://github.com/yonaskolb/XcodeGen); `brew install xcodegen`). The `.xcodeproj` is generated and not committed.
 - `Packages/VideoMKCore`: models, API client, PKCE auth, Keychain storage. No UI, unit-tested with `swift test`.

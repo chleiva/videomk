@@ -11,6 +11,16 @@ public enum VideoStatus: Sendable, Equatable {
         case starting, writing, voiceAndVisuals, rendering
         public static func < (a: Stage, b: Stage) -> Bool { a.rawValue < b.rawValue }
 
+        /// Fits on one line in a list row.
+        public var shortTitle: String {
+            switch self {
+            case .starting: "Starting"
+            case .writing: "Writing the story"
+            case .voiceAndVisuals: "Voice and visuals"
+            case .rendering: "Rendering"
+            }
+        }
+
         public var title: String {
             switch self {
             case .starting: "Getting started"

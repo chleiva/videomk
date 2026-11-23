@@ -496,3 +496,20 @@ def test_photo_review_budget_leaves_room_for_the_whole_json():
     idx, reason, _, _ = stock.llm_review(c, "n", "alt", "q", fetch_bytes_fn=lambda *a, **k: jpg.getvalue(), complete=fake_complete)
     assert idx == 1 and seen["max_tokens"] >= 800
     assert "at most 15 words" in stock.REVIEW_SYSTEM
+
+
+def test_polly_engine_region_cost_and_cache_key():
+    from engine import plan as plan_mod
+
+    p = tts.get_provider("polly", "", {"engine": "generative", "region": "us-east-1"})
+    assert p.engine == "generative" and p._region == "us-east-1" and p.cost_per_char == 0.00003
+    old = tts.get_provider("polly", "", {})  # plans made before the engine was recorded
+    assert old.engine == "neural" and old._region is None
+    assert tts.get_provider("polly", "", {"engine": "long-form", "region": "us-east-1"}).cost_per_char == 0.0001
+
+    beat = {"narration": "Same words."}
+    legacy = {"tts": {"provider": "polly", "voice": "Ruth", "style": "s"}}
+    gen = {"tts": {"provider": "polly", "voice": "Ruth", "style": "s", "engine": "generative", "region": "us-east-1"}}
+    neural = {"tts": {"provider": "polly", "voice": "Ruth", "style": "s", "engine": "neural", "region": "eu-west-1"}}
+    assert len({plan_mod.tts_hash(x, beat) for x in (legacy, gen, neural)}) == 3  # different engines never share cached audio
+    assert plan_mod.tts_hash(legacy, beat) == plan_mod.tts_hash({"tts": {"provider": "polly", "voice": "Ruth", "style": "s"}}, beat)

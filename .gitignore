@@ -273,3 +273,9 @@ backend/layers/bin/
 .scratch/
 *.mp4
 !**/tests/fixtures/*.mp4
+
+# Apple/App Store Connect private keys and signing material: never commit
+*.p8
+*.p12
+*.mobileprovision
+AuthKey_*

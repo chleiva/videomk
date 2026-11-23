@@ -85,9 +85,15 @@ class PollyTTS:
 
     name = "polly"
     PCM_RATE = 16000
+    # $/character, list prices (verify): standard $4/M, neural $16/M, generative $30/M, long-form $100/M
+    PER_CHAR = {"standard": 0.000004, "neural": 0.000016, "generative": 0.00003, "long-form": 0.0001}
 
     def __init__(self, client: Any = None, region: Optional[str] = None, engine: str = "neural"):
         self._client, self._region, self.engine = client, region, engine
+
+    @property
+    def cost_per_char(self) -> float:
+        return self.PER_CHAR.get(self.engine, 0.00003)
 
     @property
     def client(self) -> Any:
@@ -152,12 +158,13 @@ class GeminiTTS:
         return _pcm16_to_float(base64.b64decode(b64))
 
 
-def get_provider(name: Optional[str] = None, api_key: str = "") -> Any:
+def get_provider(name: Optional[str] = None, api_key: str = "", cfg: Optional[Dict[str, Any]] = None) -> Any:
     name = (name or DEFAULT_PROVIDER).lower()
     if name == "mock":
         return MockTTS()
-    if name == "polly":
-        return PollyTTS()
+    if name == "polly":  # plans made before the engine was recorded keep the neural engine in the stack's own region
+        cfg = cfg or {}
+        return PollyTTS(region=cfg.get("region") or None, engine=cfg.get("engine") or "neural")
     if name == "openai":
         return OpenAITTS(api_key)
     if name == "gemini":

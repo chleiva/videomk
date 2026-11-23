@@ -10,6 +10,11 @@ final class AppModel {
     private(set) var phase: Phase = .launching
     private(set) var videos: [VideoItem] = []
     private(set) var loadState: LoadState = .idle
+    private(set) var pending: [PendingVideo] = []
+    private(set) var completions = 0                       // bumps when a video finishes: drives the success haptic
+    private var stageSince: [String: (stage: VideoStatus.Stage, since: Date)] = [:]
+    private var briefs: [String: String] = [:]             // what the user asked for, shown while the server has no title yet
+    private var minutes: [String: Double] = [:]
     var signInError: String?
     var isSigningIn = false
 
@@ -26,7 +31,12 @@ final class AppModel {
         api = APIClient(config: config, auth: a, appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0")
     }
 
-    var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } }
+    var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } || pending.contains { $0.state == .sending } }
+    var entries: [LibraryEntry] { LibraryMerge.entries(pending: pending, server: videos) }
+
+    func brief(for id: String) -> String? { briefs[id] }
+    func stage(for id: String) -> (stage: VideoStatus.Stage, since: Date)? { stageSince[id] }
+    func requestedMinutes(for id: String) -> Double { minutes[id] ?? CreateOptions.defaultMinutes }
     func video(_ id: String) -> VideoItem? { videos.first { $0.id == id } }
 
     // MARK: session
@@ -56,7 +66,7 @@ final class AppModel {
 
     func signOut() async {
         await auth?.signOut()
-        videos = []; loadState = .idle
+        videos = []; pending = []; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
         phase = .signedOut
     }
 
@@ -66,7 +76,10 @@ final class AppModel {
         guard let api else { return }
         if videos.isEmpty { loadState = .loading }
         do {
-            videos = try await api.listVideos()
+            let fresh = try await api.listVideos()
+            track(old: videos, new: fresh)
+            videos = fresh
+            pending = LibraryMerge.stillPending(pending, server: fresh)
             loadState = .loaded
         } catch is CancellationError {
         } catch let e as APIError where e == .unauthorized {
@@ -76,6 +89,50 @@ final class AppModel {
         } catch {
             // keep what we have on screen; only a first load shows a full-screen error
             if videos.isEmpty { loadState = .failed((error as? APIError)?.message ?? "Couldn't load your videos.") } else { loadState = .loaded }
+        }
+    }
+
+    /// Remembers when each running video entered its current stage (for the progress estimate) and notices completions.
+    private func track(old: [VideoItem], new: [VideoItem]) {
+        let before = Dictionary(uniqueKeysWithValues: old.map { ($0.id, $0.status) })
+        for v in new {
+            if case .running(let s) = v.status {
+                if stageSince[v.id]?.stage != s { stageSince[v.id] = (s, .now) }
+            } else {
+                stageSince[v.id] = nil
+                if let b = before[v.id], b.isRunning, v.status == .complete { completions += 1 }
+            }
+        }
+    }
+
+    // MARK: ask for a video without leaving the home screen
+
+    /// Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more.
+    func submit(brief: String, options: CreateOptions) {
+        let p = PendingVideo(brief: Brief.normalized(brief), options: options)
+        pending.insert(p, at: 0)
+        Task { await send(p.id) }
+    }
+
+    func retry(_ id: String) {
+        guard let i = pending.firstIndex(where: { $0.id == id }) else { return }
+        pending[i].state = .sending
+        Task { await send(id) }
+    }
+
+    func dismissPending(_ id: String) { pending.removeAll { $0.id == id } }
+
+    private func send(_ id: String) async {
+        guard let p = pending.first(where: { $0.id == id }) else { return }
+        do {
+            let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options)
+            briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
+            if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .accepted(videoID: videoID) }
+            await refresh()
+        } catch let e as APIError {
+            if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
+        } catch {
+            if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(APIError.server.message) }
         }
     }
 

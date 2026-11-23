@@ -17,7 +17,12 @@ scripts/deploy.sh qa
 The script refuses unless the profile's account matches the stage. Outputs: `ApiUrl`, `UserPoolId`, `UserPoolClientId`, `AuthDomain`, `AssetsBucketName`.
 
 ## Voice (TTS)
-The default provider is **Amazon Polly** (neural engine, voice Ruth): no key, the Lambda's IAM role is the credential, nothing leaves AWS. Change the voice with `-c ttsVoice=Matthew` (Stephen, Joanna, Amy, Brian also work in eu-west-1). `-c ttsProvider=gemini|openai|mock` selects another provider; those need the keys below (mock needs none).
+The default provider is **Amazon Polly**, **generative** engine, voice Ruth, called in **us-east-1** (the generative engine is not offered in eu-west-1; it is in eu-central-1, eu-west-2, us-east-1 and us-west-2). No key: the Lambda's IAM role is the credential. Narration text therefore leaves the stack's region for us-east-1, still inside AWS: mention it in the privacy policy.
+- Voice: `-c ttsVoice=Matthew` (generative en-US: Ruth, Matthew, Danielle, Stephen, Joanna, Salli, Kenneth, Tiffany, Nate; en-GB: Amy, Brian).
+- Engine and region: `-c pollyEngine=generative|neural|long-form` and `-c pollyRegion=us-east-1`. Long-form is only in us-east-1 (Ruth, Danielle, Gregory, Patrick) and costs about 3x generative.
+- The engine and region are saved in each video's plan, so edits months later keep the same voice. Plans made before this keep the neural engine.
+- List prices (verify): neural $16, generative $30, long-form $100 per 1M characters (about 900 characters per spoken minute).
+- `-c ttsProvider=gemini|openai|mock` selects another provider; those need the keys below (mock needs none).
 
 ## Secrets (never in chat or git)
 Only for photos and optional providers:
