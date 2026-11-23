@@ -23,3 +23,8 @@ videomk: AI explainer-video generator. A **Producer** agent turns a brief (+ opt
 4. Producer engine: multiple visuals per beat, word-accurate alignment, photo upload + risk review, sketch spike, maps, conversational editing.
 5. Design gaps: iPad, Live Activity, widgets, empty/offline/error states, large text. The design board source lives in the cloud session scratchpad only; re-export from the published artifact if needed.
 6. Mobile apps (iOS needs Xcode, so it can only be built locally).
+
+## Waiting on the owner (remind them)
+- **Apple DeviceCheck key** (Apple developer account, team 39ANXJNUTL) for the abuse controls: one welcome grant per device, App Attest. To go in `.env`.
+- Separate **Tavily key** for videomk (it shares Plorer's key today), later.
+- Open decisions: in-app purchase products in App Store Connect, Exa as a second search provider, compressing narration audio.
