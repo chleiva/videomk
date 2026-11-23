@@ -16,11 +16,15 @@ scripts/deploy.sh qa
 ```
 The script refuses unless the profile's account matches the stage. Outputs: `ApiUrl`, `UserPoolId`, `UserPoolClientId`, `AuthDomain`, `AssetsBucketName`.
 
+## Voice (TTS)
+The default provider is **Amazon Polly** (neural engine, voice Ruth): no key, the Lambda's IAM role is the credential, nothing leaves AWS. Change the voice with `-c ttsVoice=Matthew` (Stephen, Joanna, Amy, Brian also work in eu-west-1). `-c ttsProvider=gemini|openai|mock` selects another provider; those need the keys below (mock needs none).
+
 ## Secrets (never in chat or git)
+Only for photos and optional providers:
 ```
-aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/openai_api_key --value '...'
-aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/gemini_api_key --value '...'
-aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/unsplash_access_key --value '...'
+aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/unsplash_access_key --value '...'   # photos (recommended)
+aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/gemini_api_key --value '...'       # only with ttsProvider=gemini
+aws ssm put-parameter --profile qa --region eu-west-1 --type SecureString --name /videomk/openai_api_key --value '...'       # only with ttsProvider=openai
 ```
 Also enable Bedrock model access for the Claude models in eu-west-1 (console, Bedrock, Model access).
 

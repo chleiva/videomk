@@ -10,6 +10,7 @@ MAX_COST_USD = float(os.environ.get("MAX_VIDEO_COST_USD", "1.50"))
 # $ per unit, estimates: override via env for your negotiated/current rates
 TTS_PER_CHAR = {"gemini": float(os.environ.get("TTS_GEMINI_PER_CHAR", "0.000016")),    # ~$10/M audio tokens at ~25 tok/s, ~15 chars/s
                 "openai": float(os.environ.get("TTS_OPENAI_PER_CHAR", "0.000018")),
+                "polly": float(os.environ.get("TTS_POLLY_PER_CHAR", "0.000016")),    # neural: ~$16 per 1M characters (list price; verify)
                 "mock": 0.0}
 
 

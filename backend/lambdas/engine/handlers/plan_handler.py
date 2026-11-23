@@ -37,7 +37,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {**base, "plot": {"legit": False, "reason": plan.get("reason", "")}}
 
     plan["sources"] = sources
-    plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "gemini"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
+    plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     key = awsio.prefix(video_id) + "plan_r1.json"
     awsio.put_json(key, plan)
     update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"])})

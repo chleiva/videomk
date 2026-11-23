@@ -56,6 +56,7 @@ class EngineV2(Construct):
             videos_table.grant_read_write_data(fn)
         for fn in (plan_fn, beat_fn):  # the beat Lambda runs the vision photo review
             fn.add_to_role_policy(iam.PolicyStatement(actions=["bedrock:InvokeModel"], resources=["arn:aws:bedrock:*::foundation-model/*", f"arn:aws:bedrock:*:{account}:inference-profile/*"]))
+        beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["polly:SynthesizeSpeech"], resources=["*"]))
         beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{region}:{account}:parameter/videomk/*_api_key"]))
         for fn in (plan_fn, beat_fn, timeline_fn):
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject"], resources=[v2_objects]))

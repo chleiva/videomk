@@ -64,7 +64,7 @@ independent renderers agree pixel for pixel). Segments are MPEG-TS with closed G
 boundary, exact duration, decoded frames ≈ 42-44 dB PSNR vs. the renderer.
 
 **TTS per beat, not per video.** Exact scene timing for free, parallel synthesis, and cheap re-synthesis of one edited beat.
-Providers (`gemini`, `openai`, `mock`) sit behind one interface; keys live in SSM (`/videomk/<provider>_api_key`).
+Providers (`polly` (default, IAM, no key), `gemini`, `openai`, `mock`) sit behind one interface; keys for the keyed ones live in SSM (`/videomk/<provider>_api_key`).
 The Gemini key is sent as a header, never in the URL.
 
 **Music and SFX are generated** (numpy), so no licence, no Content ID claims, nothing to store. A curated CC0 pack can replace

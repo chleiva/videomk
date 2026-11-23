@@ -16,7 +16,7 @@ import numpy as np
 
 from .audio import SR, trim_silence
 
-DEFAULT_PROVIDER = os.environ.get("TTS_PROVIDER", "gemini")
+DEFAULT_PROVIDER = os.environ.get("TTS_PROVIDER", "polly")
 
 
 class TTSError(RuntimeError):
@@ -76,6 +76,40 @@ class MockTTS:
         return np.concatenate(out) if out else np.zeros(int(0.2 * SR), np.float32)
 
 
+class PollyTTS:
+    """Amazon Polly (neural engine): no API key (the Lambda's IAM role is the credential), in-account, no data leaves AWS.
+
+    Polly has no style prompt, so `style` is ignored. Voice defaults to Ruth (en-US); Matthew, Stephen, Joanna, Amy and Brian also work.
+    Raw PCM comes back as s16le mono at 16 kHz and is resampled to SR.
+    """
+
+    name = "polly"
+    PCM_RATE = 16000
+
+    def __init__(self, client: Any = None, region: Optional[str] = None, engine: str = "neural"):
+        self._client, self._region, self.engine = client, region, engine
+
+    @property
+    def client(self) -> Any:
+        if self._client is None:
+            import boto3
+
+            self._client = boto3.client("polly", region_name=self._region or os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION"))
+        return self._client
+
+    def synth(self, text: str, voice: str = "", style: str = "") -> np.ndarray:
+        try:
+            resp = self.client.synthesize_speech(
+                Text=text[:2900], OutputFormat="pcm", SampleRate=str(self.PCM_RATE), VoiceId=voice or "Ruth", Engine=self.engine, TextType="text",
+            )
+            raw = resp["AudioStream"].read()
+        except Exception as e:  # botocore errors can echo request details: surface the type only
+            raise TTSError(f"Polly request failed: {type(e).__name__}") from e
+        if not raw:
+            raise TTSError("Polly returned no audio")
+        return _resample(_pcm16_to_float(raw), self.PCM_RATE, SR)
+
+
 class OpenAITTS:
     name = "openai"
 
@@ -122,6 +156,8 @@ def get_provider(name: Optional[str] = None, api_key: str = "") -> Any:
     name = (name or DEFAULT_PROVIDER).lower()
     if name == "mock":
         return MockTTS()
+    if name == "polly":
+        return PollyTTS()
     if name == "openai":
         return OpenAITTS(api_key)
     if name == "gemini":

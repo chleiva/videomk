@@ -315,7 +315,7 @@ class BackendStack(Stack):
                 description="Engine v2: numpy, Pillow, static ffmpeg (all manylinux wheels)",
             )
             engine_env = {
-                "TTS_PROVIDER": str(self.node.try_get_context("ttsProvider") or "gemini"),
+                "TTS_PROVIDER": str(self.node.try_get_context("ttsProvider") or "polly"),
                 "MAX_VIDEO_COST_USD": str(self.node.try_get_context("maxVideoCostUsd") or "1.50"),
                 "DEFAULT_TARGET_MINUTES": str(self.node.try_get_context("defaultMinutes") or "3"),
                 "CHUNK_SECONDS": "30",

@@ -456,3 +456,25 @@ def test_llm_request_shape_per_model_generation(monkeypatch):
     assert old["temperature"] == 0.3 and "output_config" not in old
     assert meta["cost_usd"] == pytest.approx((10 * 2.0 + 5 * 10.0) / 1_000_000)  # Sonnet 5.5: $2 / $10 per 1M
     assert llm.estimate_cost("eu.anthropic.claude-haiku-5-5", 1_000_000, 1_000_000) == pytest.approx(0.60)
+
+
+def test_polly_provider_requests_neural_pcm_and_resamples():
+    import io as _io
+
+    sent = {}
+    pcm = (np.sin(np.linspace(0, 440, 16000)) * 12000).astype("<i2").tobytes()  # 1 s at 16 kHz
+
+    class FakePolly:
+        def synthesize_speech(self, **kw):
+            sent.update(kw)
+            return {"AudioStream": _io.BytesIO(pcm)}
+
+    p = tts.get_provider("polly")
+    p._client = FakePolly()
+    a = p.synth("Hello there.", voice="Matthew", style="ignored")
+    assert sent["Engine"] == "neural" and sent["OutputFormat"] == "pcm" and sent["SampleRate"] == "16000" and sent["VoiceId"] == "Matthew"
+    assert abs(a.size - tts.SR) <= 2 and a.dtype == np.float32  # 1 s at 16 kHz -> 1 s at SR
+    p._client = type("Empty", (), {"synthesize_speech": lambda self, **kw: {"AudioStream": _io.BytesIO(b"")}})()
+    with pytest.raises(tts.TTSError):
+        p.synth("x")
+    assert tts.DEFAULT_PROVIDER == "polly" or os.environ.get("TTS_PROVIDER")

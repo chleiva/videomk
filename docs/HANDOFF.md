@@ -14,7 +14,7 @@ videomk: AI explainer-video generator. A **Producer** agent turns a brief (+ opt
 
 ## AWS
 - `qa` profile: account 552357225438, eu-west-1 (use for all testing). `default` profile: 464863885161, us-west-2 = production, go-live later. The old account 593549830025 is removed and must never be used.
-- Stages in `backend/stages.json`; deploy with `backend/scripts/deploy.sh qa`. Nothing has been deployed or bootstrapped yet. Never put keys in chat or git: SSM SecureString `/videomk/openai_api_key`, `/videomk/gemini_api_key`, `/videomk/unsplash_access_key`. Enable Bedrock Claude model access in eu-west-1.
+- Stages in `backend/stages.json`; deploy with `backend/scripts/deploy.sh qa`. Nothing has been deployed or bootstrapped yet. Never put keys in chat or git: SSM SecureString `/videomk/unsplash_access_key` (and `/videomk/gemini_api_key` / `/videomk/openai_api_key` only if those TTS providers are chosen; the default, Polly, needs none). Enable Bedrock Claude model access in eu-west-1.
 
 ## Next steps, in order
 1. Deploy QA (`docs/DEPLOY.md`), fix permission errors, run the selftest Lambda, then a real end-to-end video with the mock then real TTS.

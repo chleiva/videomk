@@ -12,9 +12,10 @@ from .. import assets, audio, awsio, costs, plan as plan_mod, stock, tts
 
 
 def _provider(cfg: Dict[str, Any]):
-    name = (cfg.get("provider") or "gemini").lower()
-    key = "" if name == "mock" else get_secret_param(f"/videomk/{name}_api_key")
-    if name != "mock" and not key:
+    name = (cfg.get("provider") or "polly").lower()
+    keyless = name in ("mock", "polly")  # polly authenticates with the Lambda's IAM role
+    key = "" if keyless else get_secret_param(f"/videomk/{name}_api_key")
+    if not keyless and not key:
         raise RuntimeError(f"missing API key for TTS provider {name}")
     return tts.get_provider(name, key)
 
