@@ -134,6 +134,14 @@ def test_launcher_charges_one_credit_per_started_minute_and_refuses_when_short(l
     assert launcher.handler(_event(body={"prompt": "A one minute explainer about black holes", "target_minutes": 1}), None)["statusCode"] == 202
 
 
+def test_an_unlimited_account_can_always_create_videos(launcher):
+    wallet.set_unlimited("u1")
+    for i in range(3):
+        body = {"prompt": "A twelve minute documentary about black holes", "target_minutes": 12, "client_request_id": f"unlimited-test-{i:02d}"}
+        assert launcher.handler(_event(body=body), None)["statusCode"] == 202
+    assert len(launcher.fake.calls) == 3 and wallet.balance("u1")["unlimited"] is True
+
+
 def test_launcher_defaults_to_the_servers_default_length_and_bills_it(launcher):
     assert launcher.handler(_event(), None)["statusCode"] == 202
     assert json.loads(launcher.fake.calls[0]["input"])["target_minutes"] == 3.0 and wallet.balance("u1")["balance"] == 2

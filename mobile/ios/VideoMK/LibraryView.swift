@@ -28,9 +28,9 @@ struct LibraryView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     if let wallet = model.wallet {
                         Button { showingWallet = true } label: {
-                            Label("\(wallet.balance)", systemImage: "bolt.circle.fill").font(.subheadline.weight(.semibold).monospacedDigit())
+                            Label(wallet.unlimited ? "∞" : "\(wallet.balance)", systemImage: "bolt.circle.fill").font(.subheadline.weight(.semibold).monospacedDigit())
                         }
-                        .accessibilityLabel("\(wallet.balance) credits")
+                        .accessibilityLabel(wallet.unlimited ? "Unlimited credits" : "\(wallet.balance) credits")
                         .accessibilityHint("Shows your credits")
                         .accessibilityIdentifier("balanceChip")
                     }
@@ -41,7 +41,7 @@ struct LibraryView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                ComposerBar(text: $text, options: $options, dictation: dictation, focus: $composerFocused, credits: options.credits, balance: model.wallet?.balance, onSend: send)
+                ComposerBar(text: $text, options: $options, dictation: dictation, focus: $composerFocused, credits: options.credits, balance: model.wallet.flatMap { $0.unlimited ? nil : $0.balance }, onSend: send)
             }
         }
         .task { await model.refresh() }

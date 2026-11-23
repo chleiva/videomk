@@ -11,8 +11,8 @@ struct WalletView: View {
                 if let w = model.wallet {
                     Section {
                         VStack(spacing: 4) {
-                            Text("\(w.balance)").font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Theme.text)
-                            Text(w.balance == 1 ? "credit" : "credits").foregroundStyle(Theme.textSecondary)
+                            Text(w.unlimited ? "∞" : "\(w.balance)").font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Theme.text)
+                            Text(w.unlimited ? "unlimited (test account)" : w.balance == 1 ? "credit" : "credits").foregroundStyle(Theme.textSecondary)
                         }
                         .frame(maxWidth: .infinity).padding(.vertical, 8)
                         .accessibilityElement(children: .combine)

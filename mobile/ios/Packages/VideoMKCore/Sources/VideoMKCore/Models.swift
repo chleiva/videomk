@@ -144,7 +144,9 @@ public struct WalletInfo: Sendable, Equatable, Decodable {
     public let nextFreeAt: Date?
     public let dailyCredits: Int
     public let signupCredits: Int
-    enum CodingKeys: String, CodingKey { case balance, buckets, nextDailyAt = "next_daily_at", rules }
+    /// Test and staff accounts the server never charges.
+    public let unlimited: Bool
+    enum CodingKeys: String, CodingKey { case balance, buckets, nextDailyAt = "next_daily_at", rules, unlimited }
     private struct Rules: Decodable { let daily: Int?; let signup: Int? }
 
     public init(from decoder: Decoder) throws {
@@ -154,13 +156,14 @@ public struct WalletInfo: Sendable, Equatable, Decodable {
         nextFreeAt = (try? c.decode(Double.self, forKey: .nextDailyAt)).map(Date.init(timeIntervalSince1970:))
         let r = try? c.decode(Rules.self, forKey: .rules)
         dailyCredits = r?.daily ?? 1; signupCredits = r?.signup ?? 5
+        unlimited = (try? c.decode(Bool.self, forKey: .unlimited)) ?? false
     }
-    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, dailyCredits: Int = 1, signupCredits: Int = 5) {
-        self.balance = balance; self.buckets = buckets; self.nextFreeAt = nextFreeAt; self.dailyCredits = dailyCredits; self.signupCredits = signupCredits
+    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, dailyCredits: Int = 1, signupCredits: Int = 5, unlimited: Bool = false) {
+        self.balance = balance; self.buckets = buckets; self.nextFreeAt = nextFreeAt; self.dailyCredits = dailyCredits; self.signupCredits = signupCredits; self.unlimited = unlimited
     }
 
     /// Whether `credits` can be paid right now.
-    public func canAfford(_ credits: Int) -> Bool { balance >= credits }
+    public func canAfford(_ credits: Int) -> Bool { unlimited || balance >= credits }
 }
 
 public enum Brief {

@@ -25,6 +25,7 @@ from botocore.exceptions import ClientError
 
 NEVER = 9_999_999_999
 MAX_MINUTES = 12
+UNLIMITED_DISPLAY = 999  # what an unlimited account's balance reads as, so older app builds still let it send
 
 
 class InsufficientCredits(Exception):
@@ -113,6 +114,22 @@ def ensure_grants(user_id: str, *, now: Optional[float] = None, tz: Optional[str
                 raise
 
 
+def is_unlimited(user_id: str) -> bool:
+    """Test and staff accounts: `unlimited` on the account's META item, set only with AWS access (`scripts/wallet_admin.py`), never through the API."""
+    meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}, ConsistentRead=True).get("Item") or {}
+    return bool(meta.get("unlimited"))
+
+
+def set_unlimited(user_id: str, on: bool = True) -> None:
+    ensure_grants(user_id)  # makes sure the account has its META item
+    _table().update_item(Key={"user_id": user_id, "sk": "META"}, UpdateExpression="SET #u = :v", ExpressionAttributeNames={"#u": "unlimited"}, ExpressionAttributeValues={":v": on})
+
+
+def give_credits(user_id: str, credits: int, note: str = "admin") -> bool:
+    """Add paid (never-expiring) credits by hand, once per call (a fresh reference each time)."""
+    return grant_paid(user_id, credits, f"{note}-{uuid.uuid4().hex[:10]}")
+
+
 def _live_buckets(user_id: str, now: float) -> List[Dict[str, Any]]:
     res = _table().query(KeyConditionExpression=Key("user_id").eq(user_id) & Key("sk").begins_with("B#"), ConsistentRead=True)
     return [b for b in sorted(res["Items"], key=lambda b: b["sk"]) if int(b["remaining"]) > 0 and int(b["expires_at"]) > now]
@@ -123,10 +140,11 @@ def balance(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = No
     ensure_grants(user_id, now=now, tz=tz)
     live = _live_buckets(user_id, now)
     meta = _table().get_item(Key={"user_id": user_id, "sk": "META"}).get("Item") or {}
+    unlimited = bool(meta.get("unlimited"))
     r = rules()
     _, midnight = local_day(now, tz)
     next_daily = max(midnight, (int(meta.get("last_daily_utc_day", 0)) + 1) * 86400.0) if r["daily"] else None
-    return {"balance": sum(int(b["remaining"]) for b in live),
+    return {"balance": UNLIMITED_DISPLAY if unlimited else sum(int(b["remaining"]) for b in live), "unlimited": unlimited,
             "buckets": [{"kind": b["kind"], "remaining": int(b["remaining"]), "expires_at": int(b["expires_at"]) if int(b["expires_at"]) < NEVER else None} for b in live],
             "next_daily_at": int(next_daily) if next_daily else None, "rules": r}
 
@@ -136,6 +154,8 @@ def charge(user_id: str, credits: int, *, now: Optional[float] = None, tz: Optio
     Raises InsufficientCredits. Concurrent requests can never overspend: every bucket update is conditional on what it still holds."""
     now = time.time() if now is None else now
     ensure_grants(user_id, now=now, tz=tz)
+    if is_unlimited(user_id):
+        return []  # nothing taken, so a failed video has nothing to refund
     for _ in range(5):
         live = _live_buckets(user_id, now)
         have = sum(int(b["remaining"]) for b in live)

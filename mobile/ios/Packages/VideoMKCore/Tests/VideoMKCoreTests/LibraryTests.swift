@@ -90,6 +90,7 @@ import Testing
         #expect([0.2, 1, 1.01, 2.5, 3, 12, 40].map { CreateOptions(minutes: $0).credits } == [1, 1, 2, 3, 3, 12, 12])
         #expect(CreateOptions().credits == 3)
         #expect(WalletInfo(balance: 2).canAfford(2) && !WalletInfo(balance: 2).canAfford(3))
+        #expect(WalletInfo(balance: 0, unlimited: true).canAfford(12))   // test accounts are never blocked
     }
 
     @Test func decodesTheServersWalletShape() throws {
@@ -99,6 +100,8 @@ import Testing
         """
         let w = try JSONDecoder().decode(WalletInfo.self, from: Data(json.utf8))
         #expect(w.balance == 9 && w.buckets.map(\.kind) == [.daily, .signup, .paid] && w.buckets[2].expiresAt == nil && w.buckets[0].expiresAt != nil)
-        #expect(w.nextFreeAt != nil && w.dailyCredits == 2 && w.signupCredits == 5)
+        #expect(w.nextFreeAt != nil && w.dailyCredits == 2 && w.signupCredits == 5 && !w.unlimited)
+        let u = try JSONDecoder().decode(WalletInfo.self, from: Data(#"{"balance":999,"unlimited":true,"buckets":[]}"#.utf8))
+        #expect(u.unlimited && u.canAfford(12))
     }
 }

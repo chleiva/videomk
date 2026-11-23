@@ -154,3 +154,29 @@ def test_rules_come_from_server_config(aws, monkeypatch):
     monkeypatch.setenv("WALLET_DAILY_CREDITS", "1")
     assert kinds("a", T0) == {"signup": 3}
     assert kinds("a", T0 + DAY) == {"daily": 1, "signup": 3}
+
+
+def test_an_unlimited_account_is_never_charged_and_its_failures_refund_nothing(aws):
+    wallet.balance("t", now=T0)
+    wallet.charge("t", 5, now=T0)                                       # a normal account runs dry
+    with pytest.raises(wallet.InsufficientCredits):
+        wallet.charge("t", 1, now=T0)
+    wallet.set_unlimited("t")
+    assert wallet.charge("t", 12, now=T0) == [] and wallet.charge("t", 12, now=T0) == []   # as many as it likes, nothing taken
+    b = wallet.balance("t", now=T0)
+    assert b["unlimited"] is True and b["balance"] == wallet.UNLIMITED_DISPLAY
+    aws.Table("Videos").put_item(Item={"video_id": "v9", "user_id": "t", "charge": json.dumps([])})
+    assert wallet.refund_video(aws.Table("Videos").get_item(Key={"video_id": "v9"})["Item"]) == 0   # nothing was taken, nothing comes back
+    assert "refund" not in {x["kind"] for x in wallet.balance("t", now=T0)["buckets"]}
+    wallet.set_unlimited("t", False)                                    # and it can be switched off again
+    with pytest.raises(wallet.InsufficientCredits):
+        wallet.charge("t", 1, now=T0)
+    assert wallet.balance("t", now=T0)["unlimited"] is False
+
+
+def test_the_unlimited_flag_only_applies_to_the_flagged_account_and_credits_can_be_given_by_hand(aws):
+    wallet.set_unlimited("flagged")
+    assert wallet.is_unlimited("flagged") and not wallet.is_unlimited("someone-else") and not wallet.is_unlimited("never-seen")
+    wallet.balance("p", now=T0)
+    assert wallet.give_credits("p", 20) is True and kinds("p", T0)["paid"] == 20
+    assert wallet.give_credits("p", 20) is True and kinds("p", T0)["paid"] == 40   # each hand-given grant is its own transaction
