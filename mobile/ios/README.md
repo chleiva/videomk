@@ -36,3 +36,11 @@ xcodebuild test -project VideoMK.xcodeproj -scheme VideoMK -destination 'platfor
 ```
 Debug builds also accept `VMK_DEBUG_ID_TOKEN` / `VMK_DEBUG_REFRESH_TOKEN` / `VMK_DEBUG_RESET=1` in the launch environment to start
 signed in or signed out. This code is compiled out of Release.
+
+## TestFlight
+One-time, in the browser: create the app record in App Store Connect (name videomk, bundle ID `com.videomk.app`, any SKU). Then:
+```
+mobile/ios/scripts/testflight.sh           # archive the Beta build (QA backend) and upload; uses the App Store Connect API key from .env
+mobile/ios/scripts/testflight.sh --local   # only build a signed .ipa, no upload
+```
+The build appears under TestFlight in App Store Connect 10-30 minutes later. Without the app record the upload stops with `missingApp`.
