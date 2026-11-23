@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .scenes import SCENE_TYPES
 from .theme import THEMES
+from . import voices as voice_mod
 
 MAX_BEATS = 90
 MIN_BEAT_WORDS, MAX_BEAT_WORDS = 6, 70
@@ -32,11 +33,21 @@ First decide if the request is legitimate and safe to make into an educational/e
 Otherwise return ONLY JSON (no markdown, no code fences):
 {{"legit": true, "title": "<<=60 chars>", "description": "<2 sentences for the video description>",
  "mood": "calm"|"bright"|"tense", "theme": "midnight"|"paper"|"sunrise",
+ "voices": {{"narrator": "<voice name from the list>"}},
  "beats": [{{"chapter": "<optional chapter title, only on the first beat of a chapter>",
+            "speaker": "<speaker id from \"voices\"; omit for the narrator>",
             "narration": "<{MIN_BEAT_WORDS}-{MAX_BEAT_WORDS} words, natural spoken language>",
             "scene": {{"type": "<type>", "props": {{...}}}}}}]}}
 
 {SCENE_DOCS}
+
+Voices you may cast (name, accent, gender): {voice_mod.prompt_list()}.
+- Choose the narrator's voice to suit the topic and audience, and vary your choices between videos; don't always pick the first.
+- Use ONE voice unless the user asks for a conversation, interview, debate or dialogue between people.
+- For a dialogue use 2 or 3 speaking characters, never more, plus an optional "narrator" (so at most 4 entries in "voices"). Give each an id (lowercase, short, like "maya") in "voices" with DIFFERENT voices (mix genders and
+  accents so listeners can tell them apart) and tag each beat's "speaker". Each beat is one speaker's spoken line in the first person: no
+  "Maya says", no stage directions; let the speakers answer each other and keep every line at least {MIN_BEAT_WORDS} words. A short "narrator"
+  introduction is fine.
 
 Rules:
 - Open with a hook in the first beat (a surprising fact or question), not "Welcome to...". End with a takeaway.
@@ -91,7 +102,7 @@ def new_beat_id(existing: Any = None, taken: Optional[set] = None) -> str:
 def tts_hash(plan: Dict[str, Any], beat: Dict[str, Any]) -> str:
     """Content address of a beat's narration audio: same text+voice => same wav, never re-synthesised."""
     cfg = plan.get("tts", {})
-    parts = [cfg.get("provider", ""), cfg.get("voice", ""), cfg.get("style", ""), beat["narration"]]
+    parts = [cfg.get("provider", ""), voice_mod.beat_voice(plan, beat), cfg.get("style", ""), beat["narration"]]
     if cfg.get("engine"):  # a different engine sounds different; plans made before engines were recorded keep their old hashes
         parts += [cfg["engine"], cfg.get("region", "")]
     raw = json.dumps(parts, ensure_ascii=False)
@@ -237,11 +248,22 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS) -> Tuple[
             warnings.append(f"beat {i}: scene replaced ({e})")
             scene = _fallback_scene(narration)
         beat = {"id": new_beat_id(b.get("id")), "narration": narration, "scene": scene}
+        sp = voice_mod.speaker_id(b.get("speaker"))
+        if sp:
+            beat["speaker"] = sp
         if _s(b.get("chapter"), 60):
             beat["chapter"] = _s(b.get("chapter"), 60)
         beats.append(beat)
     if not beats:
         raise ValueError("no usable beats in plan")
+
+    cast = voice_mod.clean_cast(plan.get("voices"))
+    asked = plan.get("voices") if isinstance(plan.get("voices"), dict) else {}
+    if asked and cast != {voice_mod.speaker_id(k): v for k, v in asked.items() if voice_mod.canonical(v) and voice_mod.speaker_id(k)}:
+        warnings.append("voices adjusted (unknown or duplicate voice, or more than 3 speakers)")
+    for b in beats:  # a speaker with no voice speaks as the narrator
+        if b.get("speaker") not in cast:
+            b.pop("speaker", None)
 
     title = _s(plan.get("title"), 60) or " ".join(beats[0]["narration"].split()[:5])
     return (
@@ -251,6 +273,7 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS) -> Tuple[
             "description": _s(plan.get("description"), 400),
             "mood": plan.get("mood") if plan.get("mood") in ("calm", "bright", "tense") else "calm",
             "theme": plan.get("theme") if plan.get("theme") in THEMES else "midnight",
+            "voices": cast,
             "beats": beats,
         },
         warnings,

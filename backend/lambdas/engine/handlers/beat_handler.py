@@ -8,7 +8,7 @@ import numpy as np
 
 from common.secrets import get_secret_param
 
-from .. import assets, audio, awsio, costs, plan as plan_mod, stock, tts
+from .. import assets, audio, awsio, costs, plan as plan_mod, stock, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -36,17 +36,18 @@ def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     key = f"{pfx}audio/{h}.wav"
     cached = awsio.head(key)
     if cached and (cached.get("Metadata") or {}).get("duration"):
-        return {"tts_hash": h, "audio_key": key, "duration": float(cached["Metadata"]["duration"])}
+        return {"tts_hash": h, "audio_key": key, "duration": float(cached["Metadata"]["duration"]), "voice": voices.beat_voice(plan, beat)}
     cfg = plan.get("tts", {})
     provider = _provider(cfg)
     text = beat["narration"]
     costs.add_cost(video_id, len(text) * (getattr(provider, "cost_per_char", None) or costs.TTS_PER_CHAR.get(provider.name, 0.00002)), field=cost_field)
-    samples = tts.synth_beat(provider, text, voice=cfg.get("voice", ""), style=cfg.get("style", ""))
+    voice = voices.beat_voice(plan, beat)
+    samples = tts.synth_beat(provider, text, voice=voice, style=cfg.get("style", ""))
     if samples.size < audio.SR * 0.3:
         raise RuntimeError("TTS returned (almost) no audio")
     dur = round(samples.size / audio.SR, 3)
     awsio.put_bytes_meta(key, _wav_bytes(samples), "audio/wav", {"duration": str(dur)})
-    return {"tts_hash": h, "audio_key": key, "duration": dur}
+    return {"tts_hash": h, "audio_key": key, "duration": dur, "voice": voice}
 
 
 def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:

@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from generate_video.db import set_attributes, update_status
 
-from .. import awsio, costs, llm, plan as plan_mod, research
+from .. import awsio, costs, llm, plan as plan_mod, research, voices
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -40,6 +40,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         plan["theme"] = event["theme"]
     plan["sources"] = sources
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
+    forced = os.environ.get("TTS_VOICE", "")
+    if forced:  # an operator-forced voice overrides the director's casting: one voice, no dialogue
+        plan["voices"] = {"narrator": voices.canonical(forced) or voices.DEFAULT_VOICE}
+        for b in plan["beats"]:
+            b.pop("speaker", None)
     if plan["tts"]["provider"] == "polly":  # recorded in the plan so edits months later still use the same voice
         plan["tts"].update({"engine": os.environ.get("POLLY_ENGINE", "generative"), "region": os.environ.get("POLLY_REGION", "us-east-1")})
     key = awsio.prefix(video_id) + "plan_r1.json"

@@ -8,6 +8,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import plan as plan_mod
+from . import voices as voice_mod
 from .scenes import SCENE_TYPES
 from .theme import THEMES
 
@@ -138,11 +139,32 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
                 if op["mood"] not in ("calm", "bright", "tense"):
                     raise EditError("unknown mood")
                 new["mood"] = op["mood"]
+        elif kind == "set_speaker":
+            i = F(op.get("id"))
+            sp = voice_mod.speaker_id(op.get("speaker"))
+            if sp and sp not in (new.get("voices") or {}):
+                raise EditError(f"unknown speaker {sp!r}")
+            beats[i].pop("speaker", None)
+            if sp:
+                beats[i]["speaker"] = sp
+            touch(beats[i]["id"])
         elif kind == "set_voice":
             voice = str(op.get("voice", ""))
             if not _VOICE_RE.match(voice):
                 raise EditError("bad voice name")
-            new.setdefault("tts", {})["voice"] = voice
+            if (new.get("tts") or {}).get("provider", "polly") == "polly":
+                voice = voice_mod.canonical(voice) or ""
+                if not voice:
+                    raise EditError("unknown voice: choose one of " + ", ".join(voice_mod.CATALOG))
+            cast = new.setdefault("voices", {})
+            speaker = voice_mod.speaker_id(op.get("speaker")) if op.get("speaker") else ("narrator" if "narrator" in cast or not cast else next(iter(cast)))
+            if cast and speaker not in cast:
+                raise EditError(f"unknown speaker {speaker!r}")
+            if speaker == "narrator" or not cast:
+                new.setdefault("tts", {})["voice"] = voice
+            cast[speaker] = voice
+            if len(set(cast.values())) < len(cast):
+                raise EditError("two speakers can't share a voice")
             if "style" in op:
                 new["tts"]["style"] = plan_mod._s(op["style"], 160)
         else:

@@ -420,10 +420,10 @@ def test_every_edit_op_is_validated_and_the_input_plan_is_never_mutated():
     good = [
         {"op": "set_scene", "id": ids[1], "type": "bullets", "props": {"heading": "H", "items": ["a", "b"]}},
         {"op": "set_chapter", "id": ids[2], "title": "Colors"}, {"op": "set_meta", "title": "New title", "theme": "paper", "mood": "bright"},
-        {"op": "set_voice", "voice": "Puck", "style": "Say it calmly"},
+        {"op": "set_voice", "voice": "Matthew", "style": "Say it calmly"},
     ]
     new, _ = E.apply_ops(plan, good)
-    assert new["theme"] == "paper" and new["tts"]["voice"] == "Puck" and new["beats"][1]["scene"]["type"] == "bullets"
+    assert new["theme"] == "paper" and new["tts"]["voice"] == "Matthew" and new["beats"][1]["scene"]["type"] == "bullets"
     assert plan == snapshot
     for bad in ([{"op": "set_meta", "theme": "neon"}], [{"op": "set_voice", "voice": "../x"}], [{"op": "move", "id": ids[0], "to": 99}], [{"op": "set_scene", "id": ids[0], "type": "bullets", "props": {"items": ["only one"]}}],
                 [{"op": "set_narration", "id": ids[0], "text": "too short"}], [{"op": "set_narration", "id": ids[0], "text": "word " * 90}], [{"op": "pick_image", "id": ids[0], "candidate": "unsplash:x"}], [], "nope", [{"op": "set_meta", "title": "  "}]):
@@ -513,3 +513,78 @@ def test_polly_engine_region_cost_and_cache_key():
     neural = {"tts": {"provider": "polly", "voice": "Ruth", "style": "s", "engine": "neural", "region": "eu-west-1"}}
     assert len({plan_mod.tts_hash(x, beat) for x in (legacy, gen, neural)}) == 3  # different engines never share cached audio
     assert plan_mod.tts_hash(legacy, beat) == plan_mod.tts_hash({"tts": {"provider": "polly", "voice": "Ruth", "style": "s"}}, beat)
+
+
+# ---------------------------------------------------------------- casting: one narrator or a dialogue of up to 3 voices
+def _plan_with(voices, speakers):
+    beats = [{"narration": f"This is spoken line number {i} of the conversation.", "speaker": s, "scene": {"type": "title", "props": {"title": f"T{i}"}}}
+             for i, s in enumerate(speakers)]
+    return {"legit": True, "title": "T", "voices": voices, "beats": beats}
+
+
+def test_voice_catalogue_is_every_english_generative_voice_and_names_are_canonical():
+    from engine import voices
+
+    assert voices.canonical("matthew") == "Matthew" and voices.canonical(" RUTH ") == "Ruth" and voices.canonical("Zhiyu") is None
+    assert len(voices.CATALOG) == 21 and voices.DEFAULT_VOICE in voices.CATALOG
+    assert "Ruth (US, female)" in voices.prompt_list()
+    assert "Matthew" in plan_mod.SYSTEM_PROMPT and "DIFFERENT voices" in plan_mod.SYSTEM_PROMPT  # the director sees the cast list and the dialogue rule
+
+
+def test_a_dialogue_keeps_up_to_three_characters_and_a_narrator_with_distinct_real_voices():
+    from engine import voices
+
+    c = voices.clean_cast({"narrator": "Olivia", "Maya": "ruth", "Sam": "Matthew", "Lee": "Amy", "Extra": "Brian", "bad id!": "Nate"})
+    assert list(c) == ["narrator", "maya", "sam", "lee"] and list(c.values()) == ["Olivia", "Ruth", "Matthew", "Amy"]  # 3 characters + narrator; the rest is dropped
+    assert voices.clean_cast({"narrator": "Nonexistent"}) == {"narrator": voices.DEFAULT_VOICE}
+    assert voices.clean_cast(None) == {"narrator": voices.DEFAULT_VOICE}
+    dup = voices.clean_cast({"a": "Ruth", "b": "Ruth"})  # two speakers on one voice would be unintelligible
+    assert dup["a"] == "Ruth" and dup["b"] != "Ruth" and voices.CATALOG[dup["b"]][1] != voices.CATALOG["Ruth"][1]
+
+
+def test_validate_plan_casts_speakers_and_defaults_the_rest_to_the_narrator():
+    plan, warns = plan_mod.validate_plan(_plan_with({"maya": "Ruth", "sam": "Matthew"}, ["maya", "sam", "ghost", None]))
+    assert plan["voices"] == {"maya": "Ruth", "sam": "Matthew"}
+    assert [b.get("speaker") for b in plan["beats"]] == ["maya", "sam", None, None]  # unknown or absent speaker -> narrator
+    solo, _ = plan_mod.validate_plan(_plan_with(None, [None, None]))
+    assert solo["voices"] == {"narrator": "Ruth"}
+
+
+def test_each_beat_gets_its_speakers_voice_and_a_voice_change_remakes_only_that_audio():
+    from engine import voices
+
+    plan, _ = plan_mod.validate_plan(_plan_with({"maya": "Ruth", "sam": "Matthew"}, ["maya", "sam", "maya"]))
+    plan["tts"] = {"provider": "polly", "style": "s", "engine": "generative", "region": "us-east-1"}
+    b = plan["beats"]
+    assert [voices.beat_voice(plan, x) for x in b] == ["Ruth", "Matthew", "Ruth"]
+    hashes = [plan_mod.tts_hash(plan, x) for x in b]
+    assert hashes[0] != hashes[1]  # same engine, different voice: different audio
+    plan["voices"]["sam"] = "Stephen"
+    assert plan_mod.tts_hash(plan, b[0]) == hashes[0] and plan_mod.tts_hash(plan, b[1]) != hashes[1]  # only Sam's lines are re-voiced
+    other = dict(plan, tts={"provider": "gemini", "voice": "Puck", "style": "s"})
+    assert voices.beat_voice(other, b[1]) == "Puck"  # the cast is Polly-only
+
+
+def test_legacy_plans_without_a_cast_keep_their_audio_cache_keys():
+    legacy = {"tts": {"provider": "polly", "voice": "Ruth", "style": "s"}, "beats": []}
+    beat = {"narration": "Same words."}
+    raw = json.dumps(["polly", "Ruth", "s", "Same words."], ensure_ascii=False)
+    import hashlib
+
+    assert plan_mod.tts_hash(legacy, beat) == hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def test_edits_can_recast_voices_and_reassign_speakers():
+    from engine import edits
+
+    plan, _ = plan_mod.validate_plan(_plan_with({"maya": "Ruth", "sam": "Matthew"}, ["maya", "sam"]))
+    plan["tts"] = {"provider": "polly"}
+    ids = [b["id"] for b in plan["beats"]]
+    new, touched = edits.apply_ops(plan, [{"op": "set_speaker", "id": ids[0], "speaker": "sam"}])
+    assert new["beats"][0]["speaker"] == "sam" and touched == [ids[0]]
+    new, _ = edits.apply_ops(plan, [{"op": "set_voice", "speaker": "sam", "voice": "stephen"}])
+    assert new["voices"]["sam"] == "Stephen"
+    for bad in ({"op": "set_speaker", "id": ids[0], "speaker": "nobody"}, {"op": "set_voice", "speaker": "sam", "voice": "Ruth"},
+                {"op": "set_voice", "speaker": "sam", "voice": "NotAVoice"}, {"op": "set_voice", "speaker": "ghost", "voice": "Amy"}):
+        with pytest.raises(edits.EditError):
+            edits.apply_ops(plan, [bad])

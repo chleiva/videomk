@@ -18,7 +18,8 @@ The script refuses unless the profile's account matches the stage. Outputs: `Api
 
 ## Voice (TTS)
 The default provider is **Amazon Polly**, **generative** engine, voice Ruth, called in **us-east-1** (the generative engine is not offered in eu-west-1; it is in eu-central-1, eu-west-2, us-east-1 and us-west-2). No key: the Lambda's IAM role is the credential. Narration text therefore leaves the stack's region for us-east-1, still inside AWS: mention it in the privacy policy.
-- Voice: `-c ttsVoice=Matthew` (generative en-US: Ruth, Matthew, Danielle, Stephen, Joanna, Salli, Kenneth, Tiffany, Nate; en-GB: Amy, Brian).
+- Voices: the director (planner LLM) casts the voices itself from every English generative voice (21: US, British, Australian, Irish, Indian, New Zealand, South African, Singaporean; list in `lambdas/engine/voices.py`). One narrator by default; when the user asks for a conversation, interview or debate it casts up to 3 speaking characters (plus an optional narrator), each with a different voice, and tags each beat with its `speaker`. Duplicate or unknown voices are corrected. The editor can reassign a beat's speaker (`set_speaker`) or a speaker's voice (`set_voice` with `speaker`).
+- To force one voice for everything (testing), set `-c ttsVoice=Matthew`: it overrides the casting and disables dialogue.
 - Engine and region: `-c pollyEngine=generative|neural|long-form` and `-c pollyRegion=us-east-1`. Long-form is only in us-east-1 (Ruth, Danielle, Gregory, Patrick) and costs about 3x generative.
 - The engine and region are saved in each video's plan, so edits months later keep the same voice. Plans made before this keep the neural engine.
 - List prices (verify): neural $16, generative $30, long-form $100 per 1M characters (about 900 characters per spoken minute).

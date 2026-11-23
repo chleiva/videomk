@@ -18,7 +18,7 @@ def _s3_uri_key(uri: str) -> str:
 def _beat_view(plan: Dict[str, Any], beat: Dict[str, Any], pfx: str) -> Dict[str, Any]:
     m = beat.get("media") or {}
     view: Dict[str, Any] = {
-        "id": beat["id"], "narration": beat["narration"], "scene": beat["scene"], "chapter": beat.get("chapter"), "pick": beat.get("pick"),
+        "id": beat["id"], "speaker": beat.get("speaker"), "narration": beat["narration"], "scene": beat["scene"], "chapter": beat.get("chapter"), "pick": beat.get("pick"),
         "duration": m.get("duration"), "stale": plan_mod.needs_media(plan, beat),  # true => will be re-synthesised/re-fetched on next render
     }
     asset = m.get("asset")
@@ -54,7 +54,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "video_id": video_id, "rev": int(item.get("rev", 1)), "status": item.get("status"), "edit_state": state or "READY",
         "edit_mode": item.get("edit_mode"), "edit_error": item.get("edit_error"),
         "title": plan.get("title"), "description": plan.get("description"), "theme": plan.get("theme"), "mood": plan.get("mood"),
-        "voice": (plan.get("tts") or {}).get("voice", ""), "beats": beats, "chapters": [b["chapter"] for b in plan["beats"] if b.get("chapter")],
+        "voice": (plan.get("tts") or {}).get("voice", ""), "voices": plan.get("voices") or {}, "beats": beats, "chapters": [b["chapter"] for b in plan["beats"] if b.get("chapter")],
         "final": {"url": signed("video_uri"), "rev": item.get("final_rev")},
         "preview": {"url": signed("preview_uri"), "rev": item.get("preview_rev")},
         "limits": {"max_beats": MAX_BEATS, "min_words": plan_mod.MIN_BEAT_WORDS, "max_words": plan_mod.MAX_BEAT_WORDS},
