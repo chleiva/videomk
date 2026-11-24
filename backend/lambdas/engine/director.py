@@ -41,6 +41,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if info["mode"] != "web":
         notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
     plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
+                                              allow_clips=info["mode"] != "web",
                                               **({"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}))
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}

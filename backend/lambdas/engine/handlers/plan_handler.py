@@ -24,7 +24,7 @@ def _web_tools(spent: Dict[str, float]):
 
     def ask_tools(system, messages, tools, **kw):
         blocks, stop, meta = llm.complete_tools(system, messages, tools, model=llm.REVIEW_MODEL, **kw)
-        spent["cost"] += meta["cost_usd"]
+        spent["research"] = spent.get("research", 0.0) + meta["cost_usd"]
         return blocks, stop, meta
 
     return websearch.TavilyProvider(key), ask_tools
@@ -38,7 +38,7 @@ def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, f
 
     def ask_vision(system: str, user: str, images: Any) -> str:
         text, meta = llm.complete(system, user, images=images, max_tokens=1800, model=llm.REVIEW_MODEL, effort="low")
-        spent["cost"] += meta["cost_usd"]
+        spent["photos"] = spent.get("photos", 0.0) + meta["cost_usd"]
         return text
 
     flagged = usermedia.analyze(photos, thumbs, ask_vision)
@@ -55,16 +55,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     base = {"video_id": video_id, "user_id": user_id, "usage_day": event.get("usage_day")}
 
     update_status(video_id, "PLOT_CREATION")
-    spent = {"cost": 0.0}
+    spent: Dict[str, float] = {}   # what was spent, by what it paid for (costs.PARTS)
 
     def ask_small(system: str, user: str, max_tokens: int = 120) -> str:
         text, meta = llm.complete(system, user, max_tokens=max_tokens, model=llm.REVIEW_MODEL, effort="low")
-        spent["cost"] += meta["cost_usd"]
+        spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
         return text
 
     def ask_big(system: str, user: str) -> str:
         text, meta = llm.complete(system, user)
-        spent["cost"] += meta["cost_usd"]
+        spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
         return text
 
     photos, skipped = [], []
@@ -77,8 +77,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                              region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos,
                              max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))))
     r = result.get("research") or {}
-    spent["cost"] += float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
-    costs.add_cost(video_id, spent["cost"])
+    spent["research"] = spent.get("research", 0.0) + float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
+    for part, usd in spent.items():
+        costs.add_cost(video_id, usd, part=part)
     if r.get("mode") == "web" or r.get("fallback"):
         logging.warning("research: %s", {k: r.get(k) for k in ("mode", "decided", "searches", "reads", "iterations", "seconds", "error", "fallback")})
     if result.get("warnings"):

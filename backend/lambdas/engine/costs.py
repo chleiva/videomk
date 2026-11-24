@@ -18,19 +18,25 @@ class CostCapExceeded(RuntimeError):
     pass
 
 
-def add_cost(video_id: str, usd: float, table_name: str | None = None, field: str = "cost_usd") -> float:
-    """Atomically add `usd`; raises CostCapExceeded (job fails, quota refunded) if the cap would be passed."""
+PARTS = ("speech", "script", "research", "photos", "stock")   # what a cost paid for: narration, the script's language models, web research, the user's photos, stock photo/clip reviews
+
+
+def add_cost(video_id: str, usd: float, table_name: str | None = None, field: str = "cost_usd", part: str | None = None) -> float:
+    """Atomically add `usd`; raises CostCapExceeded (job fails, quota refunded) if the cap would be passed.
+    With `part` the same amount is also added to the video's `c_<part>` attribute, so each video carries its own breakdown."""
     if not field.replace("_", "").isalnum():
         raise ValueError("bad cost field")
+    if part is not None and part not in PARTS:
+        raise ValueError("bad cost part")
     if usd <= 0:  # nothing to record (e.g. mock provider); also avoids a no-op write
         return 0.0
     table = boto3.resource("dynamodb").Table(table_name or os.environ.get("VIDEOS_TABLE", "Videos"))
     try:
         res = table.update_item(
             Key={"video_id": video_id},
-            UpdateExpression="ADD #f :c",
+            UpdateExpression="ADD #f :c" + (", #p :c" if part else ""),
             ConditionExpression="attribute_not_exists(#f) OR #f <= :room",
-            ExpressionAttributeNames={"#f": field},
+            ExpressionAttributeNames={"#f": field, **({"#p": f"c_{part}"} if part else {})},
             ExpressionAttributeValues={":c": Decimal(str(round(usd, 6))), ":room": Decimal(str(round(MAX_COST_USD - usd, 6)))},
             ReturnValues="UPDATED_NEW",
         )

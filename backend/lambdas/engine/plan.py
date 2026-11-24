@@ -34,11 +34,11 @@ IMAGE_DOC = """
 - gallery: {image_queries: 2-4 different photographs (2-6 words each), alt (<=70)}. The photographs follow each other during ONE beat, each shown for about 3-6 seconds. Use it when the narration names or compares several places, objects or moments, or for a montage that sets a mood. Every query must describe a different subject."""
 
 CLIP_DOC = """
-- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70)}. A 5-20 second stock video clip plays full screen behind the narration. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea."""
+- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70, a second, different wording of the same footage)}. A 5-20 second stock video clip plays full screen behind the narration. The narration of a clip beat must itself be general or atmospheric (a mood, a process, nature, everyday life): never about a specific event, news item, person, place or company, because stock footage cannot show it and the clip is rejected. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea. When the user's brief asks for video, footage or clips, use clip scenes freely (up to 1 beat in 3) for the generic atmosphere that stock footage does have (crowds, lights, food, weather, nature, streets, people at work), worded generically even when the topic is about named places ("festive market lights at night", not the name of the market)."""
 
 
-def scene_docs(images: bool = True) -> str:
-    return SCENE_DOCS_BASE + (IMAGE_DOC if images else "") + (CLIP_DOC if os.environ.get("CLIPS_ENABLED", "1") != "0" else "")
+def scene_docs(images: bool = True, clips: bool = True) -> str:
+    return SCENE_DOCS_BASE + (IMAGE_DOC if images else "") + (CLIP_DOC if clips and os.environ.get("CLIPS_ENABLED", "1") != "0" else "")
 
 
 DEFAULT_MAX_IMAGES_PER_MINUTE = 10.0
@@ -70,7 +70,7 @@ def music_rules() -> str:
 
 SCENE_DOCS = scene_docs()
 
-def system_prompt(language: str = "en", region: Optional[str] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE) -> str:
+def system_prompt(language: str = "en", region: Optional[str] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE, allow_clips: bool = True) -> str:
     default_voice = voice_mod.default_voice(language, region)
     default_accent = voice_mod.CATALOG[default_voice][1]
     where = f"The viewer is in {region.upper()}. " if region else ""
@@ -91,7 +91,7 @@ Otherwise return ONLY JSON (no markdown, no code fences):
             "scene": {{"type": "<type>", "props": {{...}}}}, "sfx": "<optional>"}}],
  "music": {{"style": "<id>", "energy": 3}}}}
 
-{scene_docs(images=max_images_per_minute > 0)}
+{scene_docs(images=max_images_per_minute > 0, clips=allow_clips)}
 
 Language: write EVERYTHING viewers read or hear (title, description, narration, scene text) in {voice_mod.LANGUAGES.get(language, "English")}, and cast only voices from the list below.
 Voices you may cast (name, accent, gender): {voice_mod.prompt_list(language)}.
@@ -354,7 +354,7 @@ def _fallback_scene(narration: str) -> Dict[str, Any]:
     return {"type": "title", "props": {"title": " ".join(words[:9]).rstrip(",;:"), "subtitle": ""}}
 
 
-def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, max_images: Optional[int] = None) -> Tuple[Dict[str, Any], List[str]]:
+def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, max_images: Optional[int] = None, allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
     """Returns (clean_plan, warnings). Raises ValueError when nothing usable remains. `max_images` caps stock photographs (galleries count each photo)."""
     warnings: List[str] = []
     if plan.get("legit") is not True:
@@ -388,6 +388,10 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
         except (ValueError, TypeError, AttributeError) as e:
             warnings.append(f"beat {i}: scene replaced ({e})")
             scene = _fallback_scene(narration)
+        if scene["type"] == "clip" and not allow_clips:  # current events: generic footage would mislead, so the beat becomes a photograph of the same subject
+            q = scene["props"]["clip_query"]
+            scene = {"type": "image", "props": {"image_query": q, "alt": scene["props"].get("alt") or q, "ken_burns": "in"}}
+            warnings.append(f"beat {i}: clip replaced by an image (no stock footage for current events)")
         if scene["type"] == "image" and scene["props"].get("photo") and scene["props"]["photo"] not in (photo_ids or []):
             scene["props"].pop("photo")  # the model named a photo that doesn't exist: it becomes an ordinary stock-photo scene
         beat = {"id": new_beat_id(b.get("id")), "narration": narration, "scene": scene}
@@ -468,16 +472,17 @@ def enforce_image_budget(beats: List[Dict[str, Any]], budget: int) -> List[str]:
 
 
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
-                  photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE) -> Tuple[Dict[str, Any], List[str]]:
+                  photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE,
+                  allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
     user = build_user_prompt(topic, notes, target_minutes, today, photos)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
-        text = llm(system_prompt(language, region, max_images_per_minute), user)
+        text = llm(system_prompt(language, region, max_images_per_minute, allow_clips), user)
         try:
             plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []],
-                                        max_images=image_budget(target_minutes, max_images_per_minute))
+                                        max_images=image_budget(target_minutes, max_images_per_minute), allow_clips=allow_clips)
             replaced = [w for w in warns if "scene replaced" in w]
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
                 raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")

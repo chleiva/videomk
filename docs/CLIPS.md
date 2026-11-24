@@ -36,3 +36,9 @@ motion stock footage really has (waves, traffic, clouds, hands typing, wildlife)
 - The selftest Lambda (`engine_selftest`) now proves the whole clip path on the Lambda runtime (decoders h264/vp8/vp9/theora present, normalise, decode, render).
 - Not built: choosing a clip in the editor (the editor lists clip beats and can change their narration; changing the clip needs a new `clip_query`), clips of the user's own phone videos,
   a second keyless provider (Internet Archive public-domain footage would be the next one), per-clip start offsets.
+
+
+## Why clips fell back to photos in real use, and what changed (2026-11-24)
+Measured since clips went live: 9 of 24 videos had a clip scene; of 10 clip scenes 6 got a real clip (all Pixabay), 4 fell back to a photo. Causes in the beat logs: Wikimedia downloads refused with HTTP 429 (8, no contact in the User-Agent), the reviewer rejecting every candidate (5), the verifier rejecting footage that did not fit a very specific narration (5), and the planner picking clips for news beats (an attack in Yemen) where generic footage can only mislead.
+Changes: Commons is skipped unless the User-Agent carries contact details (`CLIPS_COMMONS=1/0` overrides), so Pixabay gets all the review slots (now 8 candidates); the planner's second wording (`alt`) is searched when the first finds nothing; current-events videos (web research) get photographs instead of clip scenes; when the brief asks for video or footage the planner uses clips freely (up to 1 beat in 3, worded generically); and the reviewer and verifier now reject footage that contradicts the narration or misses the intended subject, but accept a fair generic fit (footage is atmosphere, not an illustration of every detail).
+Trade-off to know: a generic fit can be the wrong place (a canal at dusk under a Tiber video). Making the reviewers stricter brings back the fallbacks to photos; the prompts are `CLIP_REVIEW_SYSTEM` and `CLIP_VERIFY_SYSTEM`.

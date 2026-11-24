@@ -13,6 +13,7 @@ from tests.test_engine import small_timeline
 @pytest.fixture(autouse=True)
 def _no_real_llm_or_cache(monkeypatch):
     monkeypatch.setenv("CLIP_VERIFY", "0")   # tests that exercise verification turn it on and pass their own model stub
+    monkeypatch.setenv("CLIPS_COMMONS", "1")  # the interleaving tests include Commons; the test of its contact rule sets this itself
     clips._CACHE.clear()
 
 
@@ -352,3 +353,69 @@ def test_a_failing_clip_upload_falls_back_to_a_still_instead_of_failing_the_beat
     beat = {"id": "b7", "narration": "Waves roll in.", "scene": {"type": "clip", "props": {"clip_query": "waves", "alt": "waves"}}}
     out = beat_handler.make_clip({"beats": []}, beat, "vid", "cost_usd", 4.0)
     assert "clip_asset" not in out and out["asset"].endswith("img_x.jpg")
+
+
+# ================================================================= why clips fell back to photos in real use (found on the owner's morning videos)
+def test_commons_is_only_searched_when_the_client_identifies_itself(monkeypatch):
+    from engine import netsafe
+    monkeypatch.setattr(clips, "pexels_search", lambda q, k, f: [])
+    monkeypatch.setattr(clips, "pixabay_search", lambda q, k, f: [cand("pixabay", 1)])
+    monkeypatch.setattr(clips, "commons_search", lambda q, f: [cand("commons", 1), cand("commons", 2)])
+    monkeypatch.delenv("CLIPS_COMMONS", raising=False)
+    monkeypatch.setattr(netsafe, "USER_AGENT", "explainer-engine/2.0")                       # the default: Wikimedia would answer 429 to every download
+    assert [clips.candidate_key(c) for c in clips.gather("q", pixabay_key="k")] == ["pixabay:1"]
+    monkeypatch.setattr(netsafe, "USER_AGENT", "videomk/1.0 (contact: someone@example.org)")
+    assert [clips.candidate_key(c) for c in clips.gather("q", pixabay_key="k")] == ["pixabay:1", "commons:1", "commons:2"]
+    monkeypatch.setenv("CLIPS_COMMONS", "0")
+    assert [clips.candidate_key(c) for c in clips.gather("q", pixabay_key="k")] == ["pixabay:1"]
+    monkeypatch.setattr(netsafe, "USER_AGENT", "explainer-engine/2.0")
+    monkeypatch.setenv("CLIPS_COMMONS", "1")
+    assert len(clips.gather("q", pixabay_key="k")) == 3
+
+
+def test_a_second_wording_is_tried_when_the_first_finds_no_usable_clip(monkeypatch):
+    from engine.handlers import beat_handler
+
+    asked = []
+    def scout(q, n, a, **kw):
+        asked.append(q)
+        return None if q == "dark clouds over desert road" else {"mp4": b"MP4", "credit": "Video: Z / Pixabay", "entry": {}, "chosen": "pixabay:9", "review": {"cost_usd": 0.001}}
+    monkeypatch.setattr(beat_handler.clips, "scout_clip", scout)
+    monkeypatch.setattr(beat_handler.awsio, "put_bytes", lambda *a, **k: None)
+    monkeypatch.setattr(beat_handler, "get_secret_param", lambda *a, **k: "K")
+    monkeypatch.setattr(beat_handler.costs, "add_cost", lambda *a, **k: None)
+    beat = {"id": "b7", "narration": "Storm clouds gather over the empty road.", "scene": {"type": "clip", "props": {"clip_query": "dark clouds over desert road", "alt": "storm clouds gathering over empty highway"}}}
+    out = beat_handler.make_clip({"beats": []}, beat, "vid", "cost_usd", 4.0)
+    assert asked == ["dark clouds over desert road", "storm clouds gathering over empty highway"] and out["clip_asset"].endswith(".mp4")
+    asked.clear()
+    same = {**beat, "scene": {"type": "clip", "props": {"clip_query": "waves", "alt": "WAVES"}}}                     # the same wording again would be pointless
+    monkeypatch.setattr(beat_handler.clips, "scout_clip", lambda q, n, a, **kw: (asked.append(q), None)[1])
+    monkeypatch.setattr(beat_handler, "make_photo", lambda *a, **k: {"asset": "generation/v2/vid/assets/img.jpg"})
+    beat_handler.make_clip({"beats": []}, same, "vid", "cost_usd", 4.0)
+    assert asked == ["waves"]
+
+
+def test_current_events_get_photographs_not_stock_footage():
+    from engine import plan as plan_mod
+
+    def raw(stype, props):
+        return {"legit": True, "title": "T", "beats": [{"narration": "A line about the news that is long enough to count.", "scene": {"type": stype, "props": props}}]}
+    plan, warns = plan_mod.validate_plan(raw("clip", {"clip_query": "warship at sea", "alt": "navy ship"}), allow_clips=False)
+    assert plan["beats"][0]["scene"] == {"type": "image", "props": {"image_query": "warship at sea", "alt": "navy ship", "ken_burns": "in"}} and any("no stock footage" in w for w in warns)
+    assert plan_mod.validate_plan(raw("clip", {"clip_query": "waves", "alt": "waves"}))[0]["beats"][0]["scene"]["type"] == "clip"        # everything else keeps clips
+    assert "- clip:" in plan_mod.system_prompt("en") and "- clip:" not in plan_mod.system_prompt("en", None, 10, allow_clips=False)
+    assert "never about a specific event" in plan_mod.system_prompt("en")
+
+
+def test_a_brief_that_asks_for_footage_is_told_to_use_clips_freely_with_generic_wording():
+    from engine import plan as plan_mod
+    p = plan_mod.system_prompt("en")
+    assert "asks for video, footage or clips" in p and "up to 1 beat in 3" in p and "worded generically" in p
+
+
+def test_the_reviewers_reject_contradictions_and_misfits_but_accept_a_fair_generic_fit():
+    for prompt in (clips.CLIP_REVIEW_SYSTEM, clips.CLIP_VERIFY_SYSTEM):
+        low = " ".join(prompt.lower().split())   # the prompts wrap lines
+        assert "contradict" in low and "intended subject" in low and "another city" in low and ("fair, generic fit" in low)
+        assert "atmosphere" in low
+    assert clips.MAX_CANDIDATES == 8
