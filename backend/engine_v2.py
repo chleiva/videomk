@@ -30,8 +30,8 @@ class EngineV2(Construct):
         env: Dict[str, str],
         account: str,
         region: str,
-        render_concurrency: int = 8,
-        beat_concurrency: int = 5,
+        render_concurrency: int = 32,
+        beat_concurrency: int = 12,
     ) -> None:
         super().__init__(scope, construct_id)
         layers = [engine_layer]

@@ -30,6 +30,7 @@ final class Dictation {
     private var onDevice = false
     private var retriedOnServer = false
     private var recognizer: SFSpeechRecognizer?
+    private var discarding = false      // after sending: a transcript that arrives late must not write the sent text back into the field
 
     var isListening: Bool { state == .listening || state == .starting }
 
@@ -39,6 +40,7 @@ final class Dictation {
 
     func start(currentText: String) async {
         guard !isListening else { return }
+        discarding = false
         state = .starting
 
         // 1. What does the phone allow? Ask for what is still undecided; a denial is not an error, it switches to the fallback.
@@ -100,12 +102,18 @@ final class Dictation {
         state = .idle
     }
 
+    /// Stop and throw away anything still on its way: used when the text has been sent, so the final transcript cannot refill the field with the request just made.
+    func cancel() {
+        discarding = true
+        stop()
+    }
+
     func clearHint() {
         switch state { case .unavailable, .keyboardHint: state = .idle; default: break }
     }
 
     fileprivate func handle(text: String?, isFinal: Bool, error: NSError?) {
-        if let text, !text.isEmpty { gotText = true; onText?(base + text) }   // the final text of a phrase we just stopped still lands
+        if let text, !text.isEmpty, !discarding { gotText = true; onText?(base + text) }   // the final text of a phrase we just stopped still lands (unless it was cancelled)
         guard state != .idle else { return }
         if let error {
             switch DictationFailure.classify(domain: error.domain, code: error.code, gotText: gotText, onDevice: onDevice, dictationEnabled: Self.keyboardDictationEnabled) {

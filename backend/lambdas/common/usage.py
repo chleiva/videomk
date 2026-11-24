@@ -67,3 +67,30 @@ def refund(user_id: str, *, day: Optional[str] = None, table_name: Optional[str]
         )
     except ClientError:
         pass
+
+
+def claim_recent(user_id: str, fingerprint: str, video_id: str, *, window_s: int = 120, table_name: Optional[str] = None) -> Optional[str]:
+    """A short lock against the same request being made twice (a double tap, a text that reappears after sending): the first claim wins and returns None; an identical
+    request from the same user within `window_s` seconds returns the first request's video id instead. Stored in the usage table as {user_id: 'dup:<user>', day: <fingerprint>}."""
+    if window_s <= 0:  # switched off
+        return None
+    now = int(time.time())
+    table = _table(table_name)
+    key = {"user_id": f"dup:{user_id}", "day": fingerprint}
+    try:
+        table.put_item(Item={**key, "video_id": video_id, "until": now + window_s, "ttl": now + window_s + 3600},
+                       ConditionExpression="attribute_not_exists(user_id) OR #u < :now", ExpressionAttributeNames={"#u": "until"}, ExpressionAttributeValues={":now": now})
+        return None
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") != "ConditionalCheckFailedException":
+            raise
+    first = table.get_item(Key=key).get("Item") or {}
+    return str(first.get("video_id") or "") or None
+
+
+def release_recent(user_id: str, fingerprint: str, *, table_name: Optional[str] = None) -> None:
+    """The request did not start (no credits, a failure): let the same request be tried again at once. Best effort."""
+    try:
+        _table(table_name).delete_item(Key={"user_id": f"dup:{user_id}", "day": fingerprint})
+    except Exception:
+        pass

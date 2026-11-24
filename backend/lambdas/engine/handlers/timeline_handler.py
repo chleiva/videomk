@@ -8,7 +8,7 @@ from .. import sync as sync_mod
 from ..timeline import beat_info_from_plan, build_timeline, chunk_plan
 
 MAX_DURATION_S = float(os.environ.get("MAX_VIDEO_SECONDS", str(13 * 60)))
-CHUNK_SECONDS = int(os.environ.get("CHUNK_SECONDS", "30"))
+CHUNK_SECONDS = int(os.environ.get("CHUNK_SECONDS", "10"))
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:

@@ -5,6 +5,7 @@ starts the Step Functions workflow. Only the minimum (user_id, video_id, prompt)
 is passed to the state machine: never request headers (they carry the user's JWT
 and would be stored in execution history).
 """
+import hashlib
 import json
 import logging
 import os
@@ -181,6 +182,13 @@ def handler(event: Dict[str, Any], context: Any):
         except ClientError:
             return json_response(400, {"message": "One of your photos didn't finish uploading. Please try again."})
 
+    # The same request twice within two minutes (a double tap, text that reappeared after sending) is one video: the second returns the first, charges nothing.
+    fingerprint = hashlib.sha1(json.dumps([prompt.lower(), {k: options[k] for k in sorted(options) if k not in ("region",)}], sort_keys=True).encode("utf-8")).hexdigest()
+    first = usage.claim_recent(user_id, fingerprint, video_id, window_s=int(os.environ.get("DUPLICATE_WINDOW_S", "120")))
+    if first and first != video_id:
+        logger.warning("duplicate request from %s returned the video already started (%s)", user_id, first)
+        return json_response(202, {"message": "workflow already started", "video_id": first})
+
     # Quote, then charge exactly the quote: the length that is billed is the length that is made.
     minutes = options.get("target_minutes") or float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
     options["target_minutes"] = minutes
@@ -191,8 +199,10 @@ def handler(event: Dict[str, Any], context: Any):
             logger.warning("UNLIMITED_ACCOUNT_USE user=%s credits=%s minutes=%s", user_id, credits, minutes)
             usage.consume(f"unlimited:{user_id}", limit=int(os.environ.get("UNLIMITED_DAILY_VIDEOS", "50")))
     except usage.QuotaExceeded:
+        usage.release_recent(user_id, fingerprint)
         return json_response(429, {"message": "Daily limit for this test account reached."}, {"Retry-After": "3600"})
     except wallet.InsufficientCredits as e:
+        usage.release_recent(user_id, fingerprint)
         return json_response(402, {"message": f"This video needs {e.needed} credit{'s' if e.needed != 1 else ''} and you have {e.balance}.",
                                    "code": "insufficient_credits", "balance": e.balance, "needed": e.needed})
 
@@ -210,10 +220,12 @@ def handler(event: Dict[str, Any], context: Any):
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
         logger.exception("Failed to start workflow")
         wallet.refund(user_id, charged)
+        usage.release_recent(user_id, fingerprint)
         return json_response(500, {"message": "Failed to start workflow"})
     except Exception:
         logger.exception("Failed to start workflow")
         wallet.refund(user_id, charged)
+        usage.release_recent(user_id, fingerprint)
         return json_response(500, {"message": "Failed to start workflow"})
 
     start_date = resp.get("startDate")

@@ -134,7 +134,8 @@ def test_launcher_charges_one_credit_per_started_minute_and_refuses_when_short(l
     assert launcher.handler(_event(body={"prompt": "A one minute explainer about black holes", "target_minutes": 1}), None)["statusCode"] == 202
 
 
-def test_an_unlimited_account_can_always_create_videos(launcher):
+def test_an_unlimited_account_can_always_create_videos(launcher, monkeypatch):
+    monkeypatch.setenv("DUPLICATE_WINDOW_S", "0")   # these send the same text repeatedly on purpose
     wallet.set_unlimited("u1")
     for i in range(3):
         body = {"prompt": "A twelve minute documentary about black holes", "target_minutes": 12, "client_request_id": f"unlimited-test-{i:02d}"}
@@ -143,6 +144,7 @@ def test_an_unlimited_account_can_always_create_videos(launcher):
 
 
 def test_unlimited_accounts_have_a_daily_ceiling_in_case_their_token_is_stolen(launcher, monkeypatch):
+    monkeypatch.setenv("DUPLICATE_WINDOW_S", "0")   # these send the same text repeatedly on purpose
     wallet.set_unlimited("u1")
     monkeypatch.setenv("UNLIMITED_DAILY_VIDEOS", "2")
     codes = [launcher.handler(_event(body={"prompt": "A twelve minute documentary about black holes", "target_minutes": 12, "client_request_id": f"ceiling-test-{i:02d}"}), None)["statusCode"] for i in range(3)]
@@ -229,6 +231,7 @@ def test_render_blocks_foreign_assets():
 
 
 def test_launcher_passes_the_viewers_region_but_only_as_a_two_letter_code(launcher, monkeypatch):
+    monkeypatch.setenv("DUPLICATE_WINDOW_S", "0")   # these send the same text repeatedly on purpose
     monkeypatch.setenv("DAILY_VIDEO_LIMIT", "10")
     ev = _event(body={"prompt": "A short explainer about how black holes form", "target_minutes": 1})
     ev["headers"] = {"X-Region": "gb", "Authorization": "Bearer SECRET"}

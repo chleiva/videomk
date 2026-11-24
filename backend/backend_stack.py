@@ -363,7 +363,7 @@ class BackendStack(Stack):
                 "TTS_PROVIDER": str(self.node.try_get_context("ttsProvider") or "polly"),
                 "MAX_VIDEO_COST_USD": str(self.node.try_get_context("maxVideoCostUsd") or "1.50"),
                 "DEFAULT_TARGET_MINUTES": str(self.node.try_get_context("defaultMinutes") or "3"),
-                "CHUNK_SECONDS": "30",
+                "CHUNK_SECONDS": str(self.node.try_get_context("chunkSeconds") or 10),   # about one scene per chunk: the render takes as long as its slowest chunk, so small chunks run in parallel
             }
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
@@ -373,7 +373,7 @@ class BackendStack(Stack):
                 make_fn=make_fn, engine_layer=engine_layer, videos_table=videos_table, assets_bucket=ASSETS_BUCKET,
                 mark_failed_fn=mark_failed_fn, mark_rejected_fn=mark_rejected_fn, usage_table=usage_table, env=engine_env,
                 account=self.account, region=self.region,
-                render_concurrency=int(self.node.try_get_context("renderConcurrency") or 8),
+                render_concurrency=int(self.node.try_get_context("renderConcurrency") or 32),   # Step Functions inline Map allows at most 40; the account needs the Lambda concurrency
             )
             active_machine = v2.state_machine
 
