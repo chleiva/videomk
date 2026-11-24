@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- a play triangle inside the safe zone (the central 66dp circle) -->
+    <path android:fillColor="#FFFFFF" android:pathData="M44,36 L44,72 L74,54 Z" />
+</vector>
