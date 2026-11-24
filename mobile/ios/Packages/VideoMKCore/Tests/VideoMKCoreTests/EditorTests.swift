@@ -126,3 +126,27 @@ extension CoreTests {
         #expect(noAlt.summary == "city traffic")
     }
 }
+
+@Suite struct CaptionsOptionTests {
+    @Test func theSnapshotCarriesTheSubtitlesChoiceAndDefaultsToOn() throws {
+        func snap(_ extra: String) throws -> EditorSnapshot {
+            try JSONDecoder().decode(EditorSnapshot.self, from: Data(#"{"video_id":"v","rev":1,"edit_state":"READY","title":"T","beats":[]\#(extra)}"#.utf8))
+        }
+        #expect(try snap(#","captions":false"#).captions == false)
+        #expect(try snap(#","captions":true"#).captions == true)
+        #expect(try snap("").captions == true)                       // an older server that does not send it
+    }
+
+    @Test func togglingSubtitlesInTheEditorIsOneSetMetaOperation() {
+        let none = EditorDiff.ops(serverTitle: "T", server: [], localTitle: "T", local: [])
+        #expect(none.isEmpty)
+        let off = EditorDiff.ops(serverTitle: "T", server: [], localTitle: "T", local: [], serverCaptions: true, localCaptions: false)
+        #expect(off == [.setCaptions(false)] && off[0].json["op"] as? String == "set_meta" && off[0].json["captions"] as? Bool == false)
+        let back = EditorDiff.ops(serverTitle: "T", server: [], localTitle: "T", local: [], serverCaptions: false, localCaptions: true)
+        #expect(back == [.setCaptions(true)])
+    }
+
+    @Test func newVideosHaveSubtitlesOnUnlessTheCreatorTurnsThemOff() {
+        #expect(CreateOptions().captions == true && CreateOptions(captions: false).captions == false)
+    }
+}

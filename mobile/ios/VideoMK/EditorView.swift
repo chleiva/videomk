@@ -68,6 +68,7 @@ struct EditorView: View {
             }
             Section("Title") {
                 TextField("Title", text: $model.title).accessibilityIdentifier("titleField")
+                Toggle("Subtitles", isOn: $model.captions).accessibilityIdentifier("captionsToggle")
             }
             Section {
                 ForEach(model.beats) { beat in

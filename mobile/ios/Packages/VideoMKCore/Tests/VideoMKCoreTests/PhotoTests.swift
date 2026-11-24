@@ -109,6 +109,19 @@ extension CoreTests {
         _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r")
         #expect(body["media"] == nil)                                                              // no photos: the field is not sent at all
     }
+
+    @Test func subtitlesAreOnlySentWhenTheCreatorTurnsThemOff() async throws {
+        nonisolated(unsafe) var body: [String: Any] = [:]
+        StubProtocol.handler = { req in
+            body = (try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: Any]) ?? [:]
+            return (202, Data(#"{"video_id":"abc"}"#.utf8))
+        }
+        let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
+        _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r", options: CreateOptions(captions: false))
+        #expect(body["captions"] as? Bool == false)
+        _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r", options: CreateOptions())
+        #expect(body["captions"] == nil)                                                           // on is the server default
+    }
 }
 
 @Suite struct DictationPlanTests {

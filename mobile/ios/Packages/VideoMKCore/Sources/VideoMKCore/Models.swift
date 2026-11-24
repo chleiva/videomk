@@ -112,8 +112,9 @@ public struct CreateOptions: Sendable, Equatable {
     public static let defaultMinutes: Double = 3
     public var minutes: Double
     public var look: VideoLook?  // nil = let the Producer choose
+    public var captions: Bool    // subtitles on the video; the creator decides
 
-    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil) { self.minutes = minutes; self.look = look }
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true) { self.minutes = minutes; self.look = look; self.captions = captions }
 }
 
 public extension CreateOptions {

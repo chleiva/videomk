@@ -73,6 +73,7 @@ public struct APIClient: Sendable {
         var fields: [String: Any] = ["prompt": Brief.normalized(prompt), "client_request_id": clientRequestID, "target_minutes": options.minutes]
         if !media.isEmpty { fields["media"] = media }
         if let look = options.look { fields["theme"] = look.rawValue }
+        if !options.captions { fields["captions"] = false }   // on is the server default: only the choice to turn them off is sent
         let body = try JSONSerialization.data(withJSONObject: fields)
         let (data, _) = try await send("POST", ["videos", "generate"], body: body)
         return try decode(StartResponse.self, data).videoID

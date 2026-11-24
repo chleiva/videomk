@@ -11,6 +11,7 @@ final class EditorModel {
     private(set) var phase: Phase = .loading
     private(set) var snapshot: EditorSnapshot?
     var title = ""
+    var captions = true
     var beats: [EditorBeat] = []
     private(set) var picks: [String: String] = [:]
     var banner: String?          // conflict / validation / network message the user can act on
@@ -21,7 +22,7 @@ final class EditorModel {
     var limits: EditorLimits { snapshot?.limits ?? EditorLimits() }
     var ops: [EditOp] {
         guard let s = snapshot else { return [] }
-        return EditorDiff.ops(serverTitle: s.title, server: s.beats, localTitle: title, local: beats, picks: picks)
+        return EditorDiff.ops(serverTitle: s.title, server: s.beats, localTitle: title, local: beats, picks: picks, serverCaptions: s.captions, localCaptions: captions)
     }
     var isDirty: Bool { !ops.isEmpty }
     var canPublishWithoutChanges: Bool { snapshot?.previewRev == snapshot?.rev && snapshot?.previewRev != nil && snapshot?.finalRev != snapshot?.rev }
@@ -49,7 +50,7 @@ final class EditorModel {
     }
 
     private func adopt(_ s: EditorSnapshot) {
-        snapshot = s; title = s.title; beats = s.beats; picks = [:]
+        snapshot = s; title = s.title; captions = s.captions; beats = s.beats; picks = [:]
     }
 
     // MARK: edit

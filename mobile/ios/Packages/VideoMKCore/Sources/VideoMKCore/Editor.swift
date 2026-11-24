@@ -148,13 +148,14 @@ public struct EditorSnapshot: Sendable, Equatable, Decodable {
     public let editState: EditState
     public let editMode: String?
     public let title: String
+    public let captions: Bool        // subtitles on the video (the creator's choice)
     public let beats: [EditorBeat]
     public let limits: EditorLimits
     public let finalURL: URL?, finalRev: Int?
     public let previewURL: URL?, previewRev: Int?
 
     enum CodingKeys: String, CodingKey {
-        case videoID = "video_id", rev, editState = "edit_state", editMode = "edit_mode", title, beats, limits, final, preview
+        case videoID = "video_id", rev, editState = "edit_state", editMode = "edit_mode", title, captions, beats, limits, final, preview
     }
     private struct Rendered: Decodable { let url: String?; let rev: Int? }
     private struct Limits: Decodable { let max_beats: Int?; let min_words: Int?; let max_words: Int? }
@@ -166,6 +167,7 @@ public struct EditorSnapshot: Sendable, Equatable, Decodable {
         editState = EditState(try? c.decode(String.self, forKey: .editState))
         editMode = try? c.decode(String.self, forKey: .editMode)
         title = (try? c.decode(String.self, forKey: .title)) ?? ""
+        captions = (try? c.decode(Bool.self, forKey: .captions)) ?? true
         beats = try c.decode([EditorBeat].self, forKey: .beats)
         let l = try? c.decode(Limits.self, forKey: .limits)
         limits = EditorLimits(minWords: l?.min_words ?? 6, maxWords: l?.max_words ?? 70, maxBeats: l?.max_beats ?? 90)
@@ -185,6 +187,7 @@ public enum EditOp: Sendable, Equatable {
     case delete(id: String)
     case move(id: String, to: Int)
     case setTitle(String)
+    case setCaptions(Bool)
 
     var json: [String: Any] {
         switch self {
@@ -193,13 +196,15 @@ public enum EditOp: Sendable, Equatable {
         case .delete(let id): ["op": "delete", "id": id]
         case .move(let id, let to): ["op": "move", "id": id, "to": to]
         case .setTitle(let t): ["op": "set_meta", "title": t]
+        case .setCaptions(let on): ["op": "set_meta", "captions": on]
         }
     }
 }
 
 public enum EditorDiff {
     /// The operations that turn `server` into `local`. Order matters: content first, then deletions, then moves by target index.
-    public static func ops(serverTitle: String, server: [EditorBeat], localTitle: String, local: [EditorBeat], picks: [String: String] = [:]) -> [EditOp] {
+    public static func ops(serverTitle: String, server: [EditorBeat], localTitle: String, local: [EditorBeat], picks: [String: String] = [:],
+                           serverCaptions: Bool = true, localCaptions: Bool = true) -> [EditOp] {
         var ops: [EditOp] = []
         let serverByID = Dictionary(uniqueKeysWithValues: server.map { ($0.id, $0) })
         let localIDs = Set(local.map(\.id))
@@ -221,6 +226,7 @@ public enum EditorDiff {
         }
         let t = Self.normalize(localTitle)
         if !t.isEmpty, t != Self.normalize(serverTitle) { ops.append(.setTitle(t)) }
+        if localCaptions != serverCaptions { ops.append(.setCaptions(localCaptions)) }
         return ops
     }
 

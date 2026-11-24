@@ -137,6 +137,7 @@ struct ComposerBar: View {
                 Text("Producer decides").tag(VideoLook?.none)
                 ForEach(VideoLook.allCases) { Text($0.title).tag(VideoLook?.some($0)) }
             }
+            Toggle(isOn: $options.captions) { Label("Subtitles", systemImage: "captions.bubble") }
         } label: {
             VStack(spacing: 1) {
                 Image(systemName: "slider.horizontal.3").font(.system(size: 17, weight: .semibold))
@@ -147,7 +148,7 @@ struct ComposerBar: View {
             .background(Theme.surface, in: Circle())
         }
         .accessibilityLabel("Video options")
-        .accessibilityValue("\(Int(options.minutes)) minutes, \(options.credits) credits, \(options.look?.title ?? "Producer decides the look")")
+        .accessibilityValue("\(Int(options.minutes)) minutes, \(options.credits) credits, \(options.look?.title ?? "Producer decides the look"), subtitles \(options.captions ? "on" : "off")")
         .accessibilityIdentifier("optionsMenu")
     }
 }
