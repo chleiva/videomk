@@ -16,7 +16,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
            language: Optional[str] = None, region: Optional[str] = None, theme: Optional[str] = None,
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
            budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None,
-           max_images_per_minute: Optional[float] = None) -> Dict[str, Any]:
+           max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -41,7 +41,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if info["mode"] != "web":
         notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
     plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
-                                              allow_clips=info["mode"] != "web",
+                                              allow_clips=info["mode"] != "web", music_tracks=music_tracks,
                                               **({"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}))
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}

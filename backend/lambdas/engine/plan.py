@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .scenes import SCENE_TYPES
 from .theme import THEMES
+from . import library as library_mod
 from . import music as music_mod
 from . import sync as sync_mod
 from . import voices as voice_mod
@@ -63,18 +64,24 @@ def images_rule(per_minute: float) -> str:
             "A photograph illustrates what is named in the narration; never use one just to fill time.")
 
 
-def music_rules() -> str:
+def music_rules(tracks: Optional[List[Dict[str, Any]]] = None) -> str:
+    sfx = ("- Sound effects are optional and sparse (at most one beat in three): a beat may carry \"sfx\": one of "
+           + ", ".join(f"{k} ({v})" for k, v in PLANNER_SFX.items()) + ", or \"none\" to keep that beat's transition silent. Leave it out on most beats.")
+    if tracks:
+        return ("- Music: add a \"music\" object to the plan: {\"track\": \"<id>\", \"changes\": optional [{\"beat\": <1-based beat number>, \"track\": \"<id>\"}]}. "
+                "Choose from this curated library of recordings (id, length, energy 1-5, tempo, then what to expect):\n" + library_mod.prompt_list(tracks) + "\n"
+                "  Pick the recording whose description fits THIS subject and its mood, and vary your choices from video to video. A track shorter than the video loops smoothly. "
+                "Change track at most twice, only at a real shift of mood or chapter, never within the first 12 seconds; a pause (a silent beat) is a good place for a change.\n" + sfx)
     return ("- Music: add a \"music\" object to the plan: {\"style\": \"<id>\", \"energy\": 1-5, \"key\": optional like \"D minor\", \"tempo\": optional bpm 50-140, "
             "\"changes\": optional [{\"beat\": <1-based beat number>, \"style\": \"<id>\", \"energy\": 1-5}]}. Styles:\n" + music_mod.prompt_list() + "\n"
             "  Pick the style that fits THIS subject and its mood, and vary your choices from video to video (do not default to the same one). Energy 1 is barely there, 5 is driving. "
-            "Change style at most twice, only at a real shift of mood or chapter, never within the first 12 seconds.\n"
-            "- Sound effects are optional and sparse (at most one beat in three): a beat may carry \"sfx\": one of "
-            + ", ".join(f"{k} ({v})" for k, v in PLANNER_SFX.items()) + ", or \"none\" to keep that beat's transition silent. Leave it out on most beats.")
+            "Change style at most twice, only at a real shift of mood or chapter, never within the first 12 seconds.\n" + sfx)
 
 
 SCENE_DOCS = scene_docs()
 
-def system_prompt(language: str = "en", region: Optional[str] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE, allow_clips: bool = True) -> str:
+def system_prompt(language: str = "en", region: Optional[str] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE, allow_clips: bool = True,
+                  music_tracks: Optional[List[Dict[str, Any]]] = None) -> str:
     default_voice = voice_mod.default_voice(language, region)
     default_accent = voice_mod.CATALOG[default_voice][1]
     where = f"The viewer is in {region.upper()}. " if region else ""
@@ -115,7 +122,7 @@ Rules:
 - Narration is written for the ear: short sentences, concrete words, no markdown, no emoji, no stage directions.
 - Vary the visuals: never use the same scene type more than twice in a row; prefer diagrams, charts and timelines over bullets when the content is structured.
 {images_rule(max_images_per_minute)}
-{music_rules()}
+{music_rules(music_tracks)}
 - Be accurate. Use the grounding notes for facts and numbers. If something is uncertain, say so or leave it out.
 - Pauses: you do not have to speak all the time. For rhythm, include a few SILENT beats: "narration": "" with "hold": {MIN_HOLD_S:g}-{MAX_HOLD_S:g} (seconds, 3-6 is typical) on a beat whose scene is an image, gallery, clip, title, quote or stat; the music carries it. Use them to let a striking photograph or clip breathe, or to land one big word: add "word": "<one to three words, at most {MAX_WORD_CHARS} characters>" to an image, gallery or clip scene's props and it is shown large over the picture. Use at most one silent beat in four, never two in a row, never as the first or last beat, and not in a dialogue between speakers.
 - Narration and visuals must agree: every number or name on screen is also in (or clearly implied by) the narration.
@@ -358,6 +365,9 @@ def sanitize_music(raw: Any, n_beats: int) -> Optional[Dict[str, Any]]:
     style = str(raw.get("style") or "").strip().lower().replace(" ", "_").replace("-", "_")
     if style in music_mod.STYLES:
         out["style"] = style
+    track = str(raw.get("track") or "").strip().lower()
+    if library_mod.ID_RE.match(track):
+        out["track"] = track
     try:
         out["energy"] = min(5, max(1, int(raw.get("energy") or 3)))
     except (TypeError, ValueError):
@@ -376,11 +386,13 @@ def sanitize_music(raw: Any, n_beats: int) -> Optional[Dict[str, Any]]:
             beat, cs = int(ch["beat"]), str(ch.get("style") or "").strip().lower().replace(" ", "_")
         except (KeyError, TypeError, ValueError, AttributeError):
             continue
-        if cs in music_mod.STYLES and 2 <= beat <= n_beats:
-            changes.append({"beat": beat, "style": cs, "energy": min(5, max(1, int(ch.get("energy") or out["energy"])))})
+        ct = str(ch.get("track") or "").strip().lower()
+        ct = ct if library_mod.ID_RE.match(ct) else ""
+        if (cs in music_mod.STYLES or ct) and 2 <= beat <= n_beats:
+            changes.append({"beat": beat, "energy": min(5, max(1, int(ch.get("energy") or out["energy"]))), **({"style": cs} if cs in music_mod.STYLES else {}), **({"track": ct} if ct else {})})
     if changes:
         out["changes"] = sorted(changes, key=lambda c: c["beat"])[: music_mod.MAX_SEGMENTS - 1]
-    return out if "style" in out else None
+    return out if ("style" in out or "track" in out) else None
 
 
 def sanitize_sfx(raw: Any) -> Optional[str]:
@@ -523,13 +535,13 @@ def enforce_image_budget(beats: List[Dict[str, Any]], budget: int) -> List[str]:
 
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
                   photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE,
-                  allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
+                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
     user = build_user_prompt(topic, notes, target_minutes, today, photos)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
-        text = llm(system_prompt(language, region, max_images_per_minute, allow_clips), user)
+        text = llm(system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks), user)
         try:
             plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []],
                                         max_images=image_budget(target_minutes, max_images_per_minute), allow_clips=allow_clips)

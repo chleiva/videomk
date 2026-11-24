@@ -68,6 +68,7 @@ def make_audio(
     *,
     music_path: Optional[str] = None,
     music_volume: float = 0.2,
+    track_loader: Optional[Callable[[str], Any]] = None,
 ) -> None:
     """Narration (placed per scene) + music (generated unless provided) + sfx -> AAC."""
     duration = float(timeline["duration"])
@@ -83,7 +84,7 @@ def make_audio(
         if not music_path:
             music_path = os.path.join(tmp, "music.wav")
             spec = timeline.get("music")
-            samples = music_mod.render(spec, duration) if spec else generate_music(min(duration, 90.0), timeline.get("mood", "calm"))
+            samples = music_mod.render(spec, duration, track_loader) if spec else generate_music(min(duration, 90.0), timeline.get("mood", "calm"))
             write_wav(music_path, samples, MIX_SR, channels=2)
         sfx = os.path.join(tmp, "sfx.wav")
         write_wav(sfx, build_sfx_track(sfx_events(timeline), duration), MIX_SR, channels=2)

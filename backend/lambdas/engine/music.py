@@ -328,22 +328,29 @@ def resolve(plan_music: Optional[Dict[str, Any]], mood: str, scene_starts: Seque
     """Plan's music choice -> a concrete render spec with times: {key, tempo, seed, segments: [{start, style, energy}]}.
     Beat numbers (1-based) in `changes` become the start time of that beat's scene."""
     pm = plan_music if isinstance(plan_music, dict) else {}
-    style = pm.get("style") if pm.get("style") in STYLES else MOOD_STYLE.get(mood, DEFAULT_STYLE)
+    style = pm.get("style") if pm.get("style") in STYLES else MOOD_STYLE.get(mood, DEFAULT_STYLE)   # also the fallback when a library track is missing
     energy = int(pm.get("energy") or 3)
-    segs = [{"start": 0.0, "style": style, "energy": min(5, max(1, energy))}]
+    first = {"start": 0.0, "style": style, "energy": min(5, max(1, energy))}
+    if pm.get("track"):
+        first["track"] = str(pm["track"])
+    segs = [first]
     for ch in (pm.get("changes") or [])[: MAX_SEGMENTS - 1]:
         try:
             idx = int(ch["beat"]) - 1
             start = float(scene_starts[idx])
         except (KeyError, TypeError, ValueError, IndexError):
             continue
-        if ch.get("style") in STYLES and start > segs[-1]["start"] + 12.0 and start < duration - 12.0:  # a change needs room on both sides
-            segs.append({"start": round(start, 3), "style": ch["style"], "energy": min(5, max(1, int(ch.get("energy") or energy)))})
+        if (ch.get("style") in STYLES or ch.get("track")) and start > segs[-1]["start"] + 12.0 and start < duration - 12.0:  # a change needs room on both sides
+            seg = {"start": round(start, 3), "style": ch["style"] if ch.get("style") in STYLES else style, "energy": min(5, max(1, int(ch.get("energy") or energy)))}
+            if ch.get("track"):
+                seg["track"] = str(ch["track"])
+            segs.append(seg)
     return {"key": pm.get("key"), "tempo": pm.get("tempo"), "seed": zlib.crc32(str(video_id).encode()) & 0x7FFFFFFF, "segments": segs}
 
 
-def render(spec: Dict[str, Any], duration: float) -> np.ndarray:
-    """The full background track for `duration` seconds, stereo float32 (n, 2); style changes crossfade."""
+def render(spec: Dict[str, Any], duration: float, track_loader: Optional[Callable[[str], Optional[np.ndarray]]] = None) -> np.ndarray:
+    """The full background track for `duration` seconds, stereo float32 (n, 2); changes crossfade. A segment with a library `track` plays that recording
+    (`track_loader(id)` -> stereo 44.1 kHz samples, or None when it is unavailable, and then the procedural style stands in)."""
     segs = spec["segments"]
     n = int(duration * SR)
     out = np.zeros((n, 2), np.float32)
@@ -351,7 +358,18 @@ def render(spec: Dict[str, Any], duration: float) -> np.ndarray:
     for i, (s, end) in enumerate(zip(segs, ends)):
         lo = max(0.0, s["start"] - (XFADE_S / 2 if i > 0 else 0.0))
         hi = min(duration, end + (XFADE_S / 2 if i < len(segs) - 1 else 0.0))
-        seg = render_segment(s["style"], hi - lo, key=spec.get("key"), tempo=spec.get("tempo"), energy=s["energy"], seed=(spec["seed"] + 7919 * i) & 0x7FFFFFFF)
+        seg = None
+        if s.get("track") and track_loader is not None:
+            try:
+                recorded = track_loader(s["track"])
+                if recorded is not None and recorded.shape[0] > SR:
+                    from . import library
+
+                    seg = library.segment_audio(recorded, hi - lo)
+            except Exception:
+                seg = None
+        if seg is None:
+            seg = render_segment(s["style"], hi - lo, key=spec.get("key"), tempo=spec.get("tempo"), energy=s["energy"], seed=(spec["seed"] + 7919 * i) & 0x7FFFFFFF)
         m = seg.shape[0]
         env = np.ones(m, np.float32)
         x = int(XFADE_S * SR)

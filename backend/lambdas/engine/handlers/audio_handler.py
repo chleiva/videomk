@@ -1,4 +1,5 @@
 """Step 4b (parallel to rendering): narration + generated music + sfx -> one AAC track."""
+import logging
 import os
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
@@ -6,7 +7,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from .. import audio, awsio, pipeline
+from .. import audio, awsio, library, pipeline
 
 
 def _load_wav(key: str, tmp: str):
@@ -30,7 +31,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             loaded = dict(zip(spoken, ex.map(lambda k: _load_wav(k, tmp), spoken)))
         beats = [loaded[k] if k is not None else None for k in keys]
         out = os.path.join(tmp, "mix.m4a")
-        pipeline.make_audio(tl, beats, out)
+        wanted = {s["track"] for s in (tl.get("music") or {}).get("segments", []) if s.get("track")}
+        tracks: Dict[str, Any] = {}
+        for tid in wanted:  # the library tracks this video uses (a missing or unreadable one falls back to the synth)
+            try:
+                path = os.path.join(tmp, f"track_{tid}.mp3")
+                awsio.download(library.track_key(tid), path)
+                tracks[tid] = library.decode(path)
+            except Exception:
+                logging.warning("music track %s is unavailable; the synth stands in", tid)
+        pipeline.make_audio(tl, beats, out, track_loader=tracks.get)
         key = f"{pfx}audio/mix_r{rev}_{event.get('mode', 'final')}.m4a"
         awsio.upload(out, key, "audio/mp4", working=True)
     return {"key": key}
