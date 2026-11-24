@@ -59,3 +59,87 @@ def test_a_script_that_stays_short_is_accepted_with_a_logged_warning_not_looped_
 def test_the_planner_has_room_for_a_long_script():
     assert plan_handler.plan_max_tokens(1) == 8600 and plan_handler.plan_max_tokens(5) == 19000 and plan_handler.plan_max_tokens(12) == 32000
     assert plan_handler.plan_max_tokens(5) > 8000                                                  # the old cap that a 5-minute plan plus its thinking could hit
+
+
+# ---------------------------------------------------------------- a video is never shorter than the length asked
+from engine import timeline as tl_mod
+
+
+def _plan(n=10, silent_at=()):
+    beats = [{"id": f"b{i}", "narration": "" if i in silent_at else "word " * 20, "silent": i in silent_at, "hold": 4 if i in silent_at else None,
+              "scene": {"type": "image" if i in silent_at else "title", "props": {"image_query": "x", "title": "t"}}} for i in range(n)]
+    return {"beats": beats, "mood": "calm", "theme": "paper"}
+
+
+def _infos(plan, speech=8.0):
+    return [{"duration": (4.0 if b.get("silent") else speech)} for b in plan["beats"]]
+
+
+def test_a_short_video_is_stretched_to_the_length_asked_and_never_past_a_few_seconds_over():
+    plan = _plan(10)
+    base = tl_mod.build_timeline(plan, _infos(plan), video_id="v")["duration"]                    # 10 x (0.4 + 8 + 0.55) + 1.4 = 90.9
+    want = base + 14
+    t = tl_mod.build_timeline(plan, _infos(plan), video_id="v", min_seconds=want)
+    assert want <= t["duration"] <= want + tl_mod.MIN_VIDEO_MARGIN + 0.01
+    assert sum(s["duration"] for s in t["scenes"]) == pytest.approx(t["duration"], abs=0.01)
+    assert all(a["start"] < b["start"] for a, b in zip(t["scenes"], t["scenes"][1:]))              # scenes stay contiguous and in order
+    # nothing already tied to a word moves: only the tail of each scene grows
+    plain = tl_mod.build_timeline(plan, _infos(plan), video_id="v")
+    assert t["scenes"][0]["words"] == plain["scenes"][0]["words"]
+
+
+def test_a_video_already_long_enough_is_left_alone():
+    plan = _plan(10)
+    base = tl_mod.build_timeline(plan, _infos(plan), video_id="v")["duration"]
+    assert tl_mod.build_timeline(plan, _infos(plan), video_id="v", min_seconds=base - 5)["duration"] == base
+
+
+def test_stretching_spreads_first_over_speech_then_pauses_then_the_last_scene():
+    d = [10.0, 10.0, 4.0, 10.0]
+    s = [False, False, True, False]
+    small = tl_mod.stretch_to(d, s, sum(d) + 3 - tl_mod.MIN_VIDEO_MARGIN)
+    assert small == [11.0, 11.0, 4.0, 11.0]                                                         # 1 s on each spoken scene
+    big = tl_mod.stretch_to(d, s, sum(d) + 10)
+    assert big[0] == big[1] == 11.6 and big[2] > 4.0 and sum(big) >= sum(d) + 10                   # speech capped at +1.6, then the pause is held longer
+    huge = tl_mod.stretch_to(d, s, sum(d) + 60)
+    assert sum(huge) >= sum(d) + 60 and huge[2] == 8.0                                              # pauses stop at the hold limit; the rest goes to the end
+
+
+def test_the_plan_handler_records_the_length_asked_and_only_a_first_render_is_stretched():
+    import inspect
+    from engine.handlers import plan_handler, timeline_handler
+    assert 'plan["target_seconds"] = round(minutes * 60)' in inspect.getsource(plan_handler)
+    src = inspect.getsource(timeline_handler)
+    assert "min_seconds=" in src and "if rev == 1 and" in src                                  # an edit may legitimately make the video shorter
+
+
+# ---------------------------------------------------------------- the big word is about the subject, never the pause
+def test_a_big_word_that_names_the_pause_is_dropped_in_any_language():
+    for w in ("Silence", "SILENCE", "silence.", "Breathe", "Quiet", "Silencio", "Pausa", "Stille", "Silêncio", "Silenzio", "Take a breath"):
+        assert plan_mod._word_prop({"word": w}) == {}, w
+    assert plan_mod._word_prop({"word": "Paris"}) == {"word": "Paris"}
+    assert plan_mod._word_prop({"word": "1889"}) == {"word": "1889"}
+    assert plan_mod._word_prop({"word": "Seine"}) == {"word": "Seine"}
+
+
+def test_the_prompt_does_not_invite_a_title_about_silence():
+    s = plan_mod.system_prompt("en", None)
+    assert "SILENT" not in s and "FROM THE SUBJECT" in s and 'never "silence"' in s
+
+
+def test_a_silent_beat_with_a_meta_word_keeps_its_picture_but_loses_the_word():
+    raw = {"legit": True, "title": "T", "description": "d", "voices": {"narrator": "Ruth"}, "beats": [
+        {"narration": "A first idea about rivers and bridges.", "scene": {"type": "title", "props": {"title": "Rivers"}}},
+        {"narration": "", "hold": 4, "scene": {"type": "image", "props": {"image_query": "river at dawn", "word": "Silence"}}},
+        {"narration": "And a closing thought on the whole.", "scene": {"type": "title", "props": {"title": "End"}}}]}
+    plan, warns = plan_mod.validate_plan(raw)
+    silent = [b for b in plan["beats"] if b.get("silent")]
+    assert len(silent) == 1 and "word" not in silent[0]["scene"]["props"] and silent[0]["scene"]["type"] == "image"
+
+
+def test_a_reply_with_text_or_a_second_object_after_the_json_is_still_read():
+    good = '{"legit": true, "beats": [{"narration": "hello there"}]}'
+    for raw in (good + "\n\nNote: I kept it short.", good + '\n{"extra": 1}', "Here is the plan:\n" + good + "\nHope that helps {really}", "```json\n" + good + "\n```\nThanks"):
+        assert plan_mod.parse_plan_json(raw)["legit"] is True, raw
+    with pytest.raises(ValueError):
+        plan_mod.parse_plan_json("I cannot help with that {not json")

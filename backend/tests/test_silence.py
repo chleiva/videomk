@@ -20,7 +20,7 @@ def spoken(i, stype="title", **props):
 
 
 def silent(stype="image", hold=4, **props):
-    base = {"image": {"image_query": "sunrise over water", "alt": "sunrise"}, "title": {"title": "Breathe"}, "clip": {"clip_query": "waves", "alt": "waves"}}.get(stype, {})
+    base = {"image": {"image_query": "sunrise over water", "alt": "sunrise"}, "title": {"title": "Rivers"}, "clip": {"clip_query": "waves", "alt": "waves"}}.get(stype, {})
     return {"narration": "", "hold": hold, "scene": {"type": stype, "props": {**base, **props}}}
 
 
@@ -30,9 +30,9 @@ def plan_of(beats):
 
 # ================================================================= the plan
 def test_a_silent_beat_is_kept_with_a_clamped_hold_and_no_narration():
-    plan, warns = plan_mod.validate_plan(plan_of([spoken(1), silent("image", hold=4, word="Breathe"), spoken(2), spoken(3), spoken(4)]))
+    plan, warns = plan_mod.validate_plan(plan_of([spoken(1), silent("image", hold=4, word="Rivers"), spoken(2), spoken(3), spoken(4)]))
     b = plan["beats"][1]
-    assert b["silent"] is True and b["hold"] == 4.0 and b["narration"] == "" and b["scene"]["props"]["word"] == "Breathe" and not warns
+    assert b["silent"] is True and b["hold"] == 4.0 and b["narration"] == "" and b["scene"]["props"]["word"] == "Rivers" and not warns
     for given, want in ((0.5, 2.5), (99, 8.0), ("soon", plan_mod.DEFAULT_HOLD_S), (None, plan_mod.DEFAULT_HOLD_S), (6, 6.0)):
         p, _ = plan_mod.validate_plan(plan_of([spoken(1), silent("image", hold=given if given is not None else 4), spoken(2), spoken(3), spoken(4)]))
         if given is not None:
@@ -61,7 +61,7 @@ def test_a_silent_beat_must_show_a_picture_not_a_chart_or_a_list():
 def test_a_spoken_beat_that_is_too_short_is_still_dropped_and_the_big_word_is_cleaned():
     plan, warns = plan_mod.validate_plan(plan_of([spoken(1), {"narration": "Too short.", "scene": {"type": "title", "props": {"title": "x"}}}, spoken(2)]))
     assert len(plan["beats"]) == 2 and any("too short" in w for w in warns)
-    assert plan_mod.sanitize_props("image", {"image_query": "sea", "word": "  Stillness  and  peace  of the deep blue sea  "})["word"] == "Stillness and peace of the"[:24].rstrip() or True
+    assert plan_mod.sanitize_props("image", {"image_query": "sea", "word": "  Harbour  and  peace  of the deep blue sea  "})["word"] == "Harbour and peace of the"[:24].rstrip() or True
     w = plan_mod.sanitize_props("image", {"image_query": "sea", "word": "x" * 80})["word"]
     assert len(w) == plan_mod.MAX_WORD_CHARS
     assert "word" not in plan_mod.sanitize_props("image", {"image_query": "sea", "word": "   "})
@@ -107,10 +107,10 @@ def info_for(plan, durations):
 
 
 def test_a_silent_scene_is_exactly_as_long_as_it_is_held_with_no_captions_and_no_audio():
-    plan, _ = plan_mod.validate_plan(plan_of([spoken(1), silent("image", hold=5.5, word="Breathe"), spoken(2), spoken(3)]))
+    plan, _ = plan_mod.validate_plan(plan_of([spoken(1), silent("image", hold=5.5, word="Rivers"), spoken(2), spoken(3)]))
     tl = build_timeline(plan, info_for(plan, [4.0, 5.5, 4.0, 4.0]), video_id="v")
     s0, s1, s2 = tl["scenes"][:3]
-    assert s1["silent"] is True and s1["duration"] == 5.5 and s1["words"] == [] and s1["audio_key"] is None and s1["props"]["word"] == "Breathe"
+    assert s1["silent"] is True and s1["duration"] == 5.5 and s1["words"] == [] and s1["audio_key"] is None and s1["props"]["word"] == "Rivers"
     assert s0["duration"] == pytest.approx(LEAD + 4.0 + 0.55) and "silent" not in s0 and s2["start"] == pytest.approx(s1["start"] + 5.5)
     short, _ = plan_mod.validate_plan(plan_of([spoken(1), silent("title", hold=2.5), spoken(2), spoken(3)]))
     assert build_timeline(short, info_for(short, [4.0, 2.5, 4.0, 4.0]), video_id="v")["scenes"][1]["duration"] == max(MIN_SCENE, 2.5)
@@ -118,22 +118,22 @@ def test_a_silent_scene_is_exactly_as_long_as_it_is_held_with_no_captions_and_no
 
 
 def test_the_word_survives_the_gallery_and_clip_rebuilds():
-    plan, _ = plan_mod.validate_plan(plan_of([spoken(1), silent("clip", hold=5, word="Stillness"), spoken(2), spoken(3)]))
+    plan, _ = plan_mod.validate_plan(plan_of([spoken(1), silent("clip", hold=5, word="Harbour"), spoken(2), spoken(3)]))
     infos = info_for(plan, [4.0, 5.0, 4.0, 4.0])
     infos[1]["clip_asset"] = "c.mp4"
-    assert build_timeline(plan, infos, video_id="v")["scenes"][1]["props"]["word"] == "Stillness"
-    g = {"narration": "", "hold": 5, "scene": {"type": "gallery", "props": {"image_queries": ["sea", "sky"], "alt": "x", "word": "Quiet"}}}
+    assert build_timeline(plan, infos, video_id="v")["scenes"][1]["props"]["word"] == "Harbour"
+    g = {"narration": "", "hold": 5, "scene": {"type": "gallery", "props": {"image_queries": ["sea", "sky"], "alt": "x", "word": "Harbour"}}}
     plan2, _ = plan_mod.validate_plan(plan_of([spoken(1), g, spoken(2), spoken(3)]))
     infos2 = info_for(plan2, [4.0, 5.0, 4.0, 4.0])
     infos2[1]["gallery"] = [{"asset": "a.jpg", "query": "sea"}, {"asset": "b.jpg", "query": "sky"}]
-    assert build_timeline(plan2, infos2, video_id="v")["scenes"][1]["props"]["word"] == "Quiet"
+    assert build_timeline(plan2, infos2, video_id="v")["scenes"][1]["props"]["word"] == "Harbour"
 
 
 # ================================================================= the picture: one big word
 def test_the_big_word_fades_in_holds_and_fades_out_over_the_picture():
     photo = Image.new("RGB", (2400, 1400), (60, 90, 120))
     tl = small_timeline(6.0, ["image"])
-    tl["scenes"][0]["props"] = {"asset": "k", "word": "Breathe"}
+    tl["scenes"][0]["props"] = {"asset": "k", "word": "Rivers"}
     tl["scenes"][0]["words"] = []
     tl["captions"] = False
     plain = small_timeline(6.0, ["image"])
@@ -147,7 +147,7 @@ def test_the_big_word_fades_in_holds_and_fades_out_over_the_picture():
     assert white(r.frame_at(2.0)) > 2000 and white(rp.frame_at(2.0)) < 50                                    # shown, and only when asked for
     assert white(r.frame_at(5.95)) < 600                                                                     # gone by the end
     assert glow(r.frame_at(0.5)) < glow(r.frame_at(0.7)) < glow(r.frame_at(2.0)) and glow(r.frame_at(0.5)) < 160   # a fade, not a pop
-    for kind, props in (("gallery", {"assets": ["a", "b"], "credits": [], "alt": "x", "cuts": [0.0, 2.5], "word": "Quiet"}), ("clip", {"asset": "none.mp4", "alt": "x", "word": "Quiet"})):
+    for kind, props in (("gallery", {"assets": ["a", "b"], "credits": [], "alt": "x", "cuts": [0.0, 2.5], "word": "Harbour"}), ("clip", {"asset": "none.mp4", "alt": "x", "word": "Harbour"})):
         t2 = small_timeline(6.0, [kind])
         t2["scenes"][0]["props"], t2["scenes"][0]["words"], t2["captions"] = props, [], False
         assert Renderer(t2, lambda k: photo).frame_at(2.0).size == (1920, 1080)
@@ -195,9 +195,9 @@ def test_a_silent_beat_can_be_timed_given_a_voice_or_inserted():
             edits.apply_ops(plan, [bad])
     voiced, _ = edits.apply_ops(plan, [{"op": "set_narration", "id": sid, "text": "And now a few quiet words to give this moment a voice."}])
     assert "silent" not in voiced["beats"][1] and "hold" not in voiced["beats"][1] and voiced["beats"][1]["narration"].startswith("And now")
-    ins, _ = edits.apply_ops(plan, [{"op": "insert", "after": vid, "hold": 3, "scene": {"type": "image", "props": {"image_query": "calm sea", "word": "Pause"}}}])
+    ins, _ = edits.apply_ops(plan, [{"op": "insert", "after": vid, "hold": 3, "scene": {"type": "image", "props": {"image_query": "calm sea", "word": "Venice"}}}])
     b = ins["beats"][1]
-    assert b["silent"] is True and b["hold"] == 3.0 and b["narration"] == "" and b["scene"]["props"]["word"] == "Pause"
+    assert b["silent"] is True and b["hold"] == 3.0 and b["narration"] == "" and b["scene"]["props"]["word"] == "Venice"
     with pytest.raises(edits.EditError):
         edits.apply_ops(plan, [{"op": "insert", "after": vid, "hold": 3, "scene": {"type": "bullets", "props": {"heading": "h", "items": ["a", "b"]}}}])
     with pytest.raises(edits.EditError):

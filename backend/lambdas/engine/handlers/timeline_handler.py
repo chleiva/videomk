@@ -34,7 +34,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 info["words"] = awsio.get_json(key)["words"]
             except Exception:
                 pass
-    tl = build_timeline(plan, infos, video_id=video_id, fps=30)
+    tl = build_timeline(plan, infos, video_id=video_id, fps=30, min_seconds=float(plan.get("target_seconds") or 0) if rev == 1 and os.environ.get("STRETCH_TO_TARGET", "1") != "0" else 0.0)   # only a first render: an edit that removes scenes must be allowed to be shorter
     rep = sync_mod.report(tl)  # the free alignment check: is every reveal near the word that names it? (no model, a few ms)
     tl["sync"].update({k: rep[k] for k in ("anchored", "early", "late", "mean_abs_delta", "ok")})
     if not rep["ok"]:

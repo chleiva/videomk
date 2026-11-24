@@ -16,6 +16,35 @@ RENDER_VERSION = "2"  # bump when scene/renderer code changes: invalidates every
 MIN_TAIL_CHUNK_S = 8.0
 
 
+MAX_SPOKEN_STRETCH = 1.6   # most seconds a spoken scene may be held longer to reach the length asked
+MIN_VIDEO_MARGIN = 1.0     # aim this far past the asked length so rounding can never leave it short
+
+
+def stretch_to(durs: List[float], silent: List[bool], min_seconds: float, max_hold: float = 8.0) -> List[float]:
+    """A video must never be shorter than the length asked for (it may run over by a few seconds). Shortfall is spread as a longer hold at the END of scenes
+    (so nothing already anchored to a word moves): first a little on every spoken scene, then longer pauses, then whatever is left on the last scene."""
+    out = list(durs)
+    short = min_seconds + MIN_VIDEO_MARGIN - sum(out)
+    if short <= 0:
+        return out
+    spoken = [i for i, s in enumerate(silent) if not s]
+    if spoken:
+        each = min(MAX_SPOKEN_STRETCH, short / len(spoken))
+        for i in spoken:
+            out[i] += each
+        short -= each * len(spoken)
+    for i, s in enumerate(silent):
+        if short <= 0:
+            break
+        if s:
+            add = min(short, max(0.0, max_hold - out[i]))
+            out[i] += add
+            short -= add
+    if short > 0:
+        out[-1] += short
+    return out
+
+
 def build_timeline(
     plan: Dict[str, Any],
     beat_info: Sequence[Dict[str, Any]],
@@ -24,8 +53,15 @@ def build_timeline(
     fps: int = 30,
     width: int = 1920,
     height: int = 1080,
+    min_seconds: float = 0.0,
 ) -> Dict[str, Any]:
     """beat_info[i] = {'duration': speech seconds, 'asset': optional key for image scenes}."""
+    base = []
+    for i, beat in enumerate(plan["beats"]):
+        speech, silent = float(beat_info[i]["duration"]), bool(beat.get("silent"))
+        base.append(max(MIN_SCENE, speech) if silent else max(MIN_SCENE, LEAD + speech + TAIL))
+    base[-1] += END_HOLD
+    durs = stretch_to(base, [bool(b.get("silent")) for b in plan["beats"]], min_seconds) if min_seconds else base
     scenes: List[Dict[str, Any]] = []
     sync_items = sync_anchored = 0
     t = 0.0
@@ -34,9 +70,7 @@ def build_timeline(
         info = beat_info[i]
         speech = float(info["duration"])
         silent = bool(beat.get("silent"))
-        dur = max(MIN_SCENE, speech) if silent else max(MIN_SCENE, LEAD + speech + TAIL)   # a silent beat is exactly as long as it is held
-        if i == len(plan["beats"]) - 1:
-            dur += END_HOLD
+        dur = durs[i]   # the narration's length (+ lead and tail), a silent beat exactly as long as it is held, stretched at the end if the video would be shorter than asked
         stype = beat["scene"]["type"]
         props = dict(beat["scene"]["props"])
         if stype == "gallery":

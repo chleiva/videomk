@@ -38,6 +38,7 @@ def env(aws, monkeypatch):
     boto3.client("s3", region_name="us-west-2").create_bucket(Bucket="videomk.com", CreateBucketConfiguration={"LocationConstraint": "us-west-2"})
     monkeypatch.setenv("TTS_PROVIDER", "mock")
     monkeypatch.setenv("MOCK_TTS_SPEED", "3")  # short narration => short test videos
+    monkeypatch.setenv("STRETCH_TO_TARGET", "0")  # the toy script is far shorter than the length asked; stretching it would render minutes of video in a test
     monkeypatch.setenv("ASSETS_BUCKET", "videomk.com")
     monkeypatch.setenv("EDIT_STATE_MACHINE_ARN", "arn:aws:states:us-west-2:123456789012:stateMachine:edit")
     monkeypatch.setattr(finalize_handler, "OUTPUT_BUCKET", "videomk.com")

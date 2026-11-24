@@ -22,7 +22,7 @@ from . import voices as voice_mod
 STAGE_MIN_MINUTES = 4.0     # from this length on the script is built in stages
 SECTION_MINUTES = 1.5       # about this long each
 MIN_SECTIONS, MAX_SECTIONS = 3, 8
-SECTION_MIN_SHARE = 0.8     # a section under this share of its words is sent back once
+SECTION_MIN_SHARE = 0.9     # a section under this share of its words is sent back once
 MAX_WORKERS = 6
 
 Ask = Callable[[str, str], str]
