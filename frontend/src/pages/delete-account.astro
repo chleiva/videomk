@@ -1,0 +1,15 @@
+---
+import LegalDoc from "../components/LegalDoc.astro";
+import { CONTACT_EMAIL, EFFECTIVE } from "../data/legal";
+const glance = ["You can ask us to delete your videomk account and everything linked to it.", "Send the request from the email address on your account.", "We confirm, delete within 30 days, and tell you when it is done."];
+const sections = [
+	{ title: "How to delete your account", bullets: [
+		`Email ${CONTACT_EMAIL} from the address you use to sign in to videomk, with the subject “Delete my videomk account”.`,
+		"We may ask you to confirm it is you, for example by replying to a message we send to that address.",
+		"We delete your account and sign-in, your videos, narration and photos, your credit balance and history, and the plan behind each video. This cannot be undone.",
+		"We finish within 30 days and confirm by email."] },
+	{ title: "What we may keep", paras: ["Records we are legally required to keep, such as purchase records for accounting, are kept only for the period the law requires. Backups and provider caches are overwritten on their normal cycles. Purchases made through Apple or Google remain in their records; cancel any subscription with them."] },
+	{ title: "Delete only some videos", paras: [`If you want specific videos removed but want to keep your account, email ${CONTACT_EMAIL} with the video titles.`] },
+];
+---
+<LegalDoc title="Delete your account" intro="How to ask for your videomk account and data to be deleted." effective={EFFECTIVE} glance={glance} sections={sections} />

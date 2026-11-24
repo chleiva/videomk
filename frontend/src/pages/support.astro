@@ -1,0 +1,11 @@
+---
+import LegalDoc from "../components/LegalDoc.astro";
+import { CONTACT_EMAIL, EFFECTIVE } from "../data/legal";
+const glance = [`Email ${CONTACT_EMAIL} for help, privacy requests, account deletion or to report a video.`, "Please include the email address of your account and, for a video, its title."];
+const sections = [
+	{ title: "Get help", paras: [`Write to ${CONTACT_EMAIL}. We usually reply within two working days.`] },
+	{ title: "Report a video", paras: ["If a video made with videomk seems harmful, unlawful or infringing, tell us its title and what is wrong, and we will review it and remove it if it breaks our Terms."] },
+	{ title: "Your data", paras: ["See the Privacy Policy at /privacy, and /delete-account to have your account and data deleted."] },
+];
+---
+<LegalDoc title="Support" intro="How to contact videomk." effective={EFFECTIVE} glance={glance} sections={sections} />

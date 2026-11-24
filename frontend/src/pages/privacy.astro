@@ -1,147 +1,72 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import LegalDoc from "../components/LegalDoc.astro";
+import { COMPANY, CONTACT_EMAIL, EFFECTIVE } from "../data/legal";
+const glance = [
+	"videomk turns what you type or say (and photos you choose) into a narrated video.",
+	"Your prompts, photos and videos are private to your account. We do not use them to train AI models, and we do not sell personal data.",
+	"We show no ads and use no advertising or analytics trackers in the app.",
+	"To make a video we send your text (and photos you attach) to AI and media services that work for us. Section 4 lists them.",
+	"Location and camera data are removed from photos before anything else happens, and the originals are deleted.",
+	"You can ask us to delete your videos or your whole account at any time.",
+];
+const sections = [
+	{ title: "Who we are", paras: [
+		`This policy explains how ${COMPANY} (“videomk”, “we”, “us”) processes personal data when you use the videomk apps for iPhone and Android, and the videomk website. ${COMPANY} is the controller of that data.`,
+		"It covers what we collect, why, who receives it, how long we keep it and your rights, including under the UK GDPR and the EU GDPR where they apply."] },
+	{ title: "What we collect", paras: ["Depending on how you use videomk:"], bullets: [
+		"Account data: your email address and an account identifier. You sign in with email and a password, handled by Amazon Cognito. We never see your password in readable form.",
+		"What you ask for: the text of your requests (typed, or dictated and turned into text), the options you choose (length, look, subtitles, language), and any edits you make to a video.",
+		"Photos you attach: up to the limit shown in the app. Before upload, your phone removes all metadata (including location, camera and date) and resizes the photo.",
+		"What we make for you: the script, narration audio, the finished video and the list of sources and credits shown with it.",
+		"Credits and purchases: your credit balance and history. Payments are handled by Apple or Google; we receive confirmation of a purchase, never your card details.",
+		"Technical data: IP address, device type and app version, time of each request, and error logs. This is used for security, abuse prevention and fixing faults.",
+		"Messages you send us when you contact support."] },
+	{ title: "How we use it", paras: ["We use personal data to:"], bullets: [
+		"create the videos you ask for, keep them in your library, and let you edit, play and share them;",
+		"keep your account secure, limit abuse (for example repeated free sign-ups) and keep the service running and fast;",
+		"count and give you credits, process purchases and refunds;",
+		"answer your questions and tell you about important changes to the service;",
+		"meet legal obligations and defend legal claims."] },
+	{ title: "Who receives your data (our service providers)", paras: [
+		"We use these providers to run videomk. Each receives only what it needs for its part, and none may use it for its own advertising or to train its own models.",
+	], bullets: [
+		"Amazon Web Services: hosting, storage, sign-in (Cognito), and the AI models and voices we use through Amazon Bedrock and Amazon Polly. Your text and photos are processed inside our AWS account; Amazon states that Bedrock does not use your inputs to train models or share them with model providers. Servers are in Ireland and the United States.",
+		"Anthropic’s Claude models (through Amazon Bedrock): write the script and review photos and clips.",
+		"Tavily: for topics that need current information, short search queries about your topic (not your name, email or photos) are sent to a web search service, and the pages found are read to write an accurate script.",
+		"Stock photo and video libraries (Unsplash, Openverse, Pixabay, Pexels, Wikimedia Commons): our servers send search words for the pictures and clips a scene needs. They do not receive your account details or your own photos.",
+		"Apple and Google: sign-in is by email, but app distribution, in-app purchases and (optionally) speech recognition are provided by Apple’s and Google’s own services under their policies.",
+		"Professional advisers, and authorities where the law requires, or a buyer if our business is sold, under confidentiality.",
+		"We do not sell personal data and do not share it for advertising."] },
+	{ title: "Photos and AI processing", paras: [
+		"Photos you attach are checked by an AI model so the video can describe them and so unsafe images are refused. The location, camera and date data are removed on your phone, and again on our servers. We delete the original upload as soon as the cleaned copy is made (any leftover is removed automatically within 2 days).",
+		"The cleaned copy stays with the video it belongs to, because editing needs it, until that video is deleted.",
+		"Videos are made by AI and may contain mistakes. They are labelled as made with AI where the app or store requires it."] },
+	{ title: "Voice input", paras: [
+		"Dictation is optional. The microphone is used only while you press the microphone button. Your phone’s own speech recognition turns your voice into text: on iPhone this is done by Apple (on the device when possible, otherwise on Apple’s servers) and on Android by Google’s speech service. We receive only the text, never the audio. How Apple and Google treat audio is described in their policies."] },
+	{ title: "No training on your content", paras: [
+		"We do not use your prompts, photos, narration or videos to train or fine-tune AI models, and our providers listed above are not permitted to use them to train theirs."] },
+	{ title: "How long we keep data", bullets: [
+		"Videos, narration, photos you attached and the plan behind each video: until you delete them or your account.",
+		"Temporary working files used to build a video: automatically deleted after 7 days.",
+		"Upload leftovers: deleted within 2 days. Technical and error logs: deleted after 14 days.",
+		"Account, credit and purchase records: while your account exists, then only as long as the law requires (for example accounting records).",
+		"Backups and provider caches are overwritten on their normal cycles."] },
+	{ title: "Sharing a video", paras: [
+		"If you share a video link, anyone with the link can watch it without signing in, and we cannot control where the link travels or whether it is copied. Share only what you are happy to be public."] },
+	{ title: "Your rights and deleting your data", paras: [
+		"Depending on where you live, you may have the right to access, correct, delete, restrict or object to our use of your data, to receive a copy of it, and to withdraw consent. You may also complain to your data protection authority (in the UK, the Information Commissioner’s Office).",
+		`To use these rights, or to delete your videos or your whole account and everything linked to it, email ${CONTACT_EMAIL} from the address on your account. See also videomk.com/delete-account. We answer within 30 days, and we may need to confirm it is you.`] },
+	{ title: "Where data is processed", paras: [
+		"Data may be processed in the United Kingdom, the European Economic Area, the United States and other countries where our providers operate. Where required we rely on adequacy decisions, standard contractual clauses or equivalent safeguards."] },
+	{ title: "Security", paras: [
+		"Connections are encrypted, storage is private to our accounts, access to videos uses short-lived links, and we limit who can access production data. No system is perfectly secure, so we cannot guarantee absolute security."] },
+	{ title: "Children", paras: [
+		"videomk is for people aged 13 and over. It is not directed to children, and we do not knowingly collect data from them. If you think a child has given us data, contact us and we will delete it."] },
+	{ title: "Cookies on the website", paras: [
+		"The website uses only what is needed to keep you signed in. It sets no advertising or analytics cookies."] },
+	{ title: "Changes", paras: [
+		"We may update this policy. We will change the date at the top and, where the law requires, tell you in the app or by email."] },
+	{ title: "Contact", paras: [`Questions or requests: ${CONTACT_EMAIL}. ${COMPANY} is responsible for videomk for the purposes of this policy.`] },
+];
 ---
-<BaseLayout title="Privacy Policy — videomk">
-	<section class="mx-auto max-w-3xl px-6 py-16">
-		<h1 class="text-2xl font-semibold text-neutral-900">Privacy Policy</h1>
-		<p class="mt-2 text-sm text-neutral-500">Last updated: August 24, 2025</p>
-
-		<p class="mt-6 text-neutral-700">
-			This Privacy Policy describes how we collect, use, and disclose information about
-			individuals who use our websites, applications, and related services (collectively, the
-			“Services”). For the purposes of this Privacy Policy, “you” means the individual
-			using the Services, whether as a visitor, customer, account holder, applicant, or other
-			person interacting with us.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Changes to this Privacy Policy</h2>
-		<p class="mt-2 text-neutral-700">
-			We may update this Privacy Policy from time to time. If we make material changes, we
-			will update the “Last updated” date above and, where required by law, provide additional
-			notice (for example, on the Services or by email). If you do not agree to the updated
-			policy, please discontinue use of the Services.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Information We Collect</h2>
-		<p class="mt-2 text-neutral-700">We collect information about you from the following sources:</p>
-		<div class="mt-4 space-y-4 text-neutral-700">
-			<section>
-				<h3 class="font-medium text-neutral-900">Information You Provide</h3>
-				<ul class="mt-2 list-disc pl-5">
-					<li>Contact details (e.g., name, email, phone) for account and communication purposes.</li>
-					<li>Account credentials and profile information to create and secure your account.</li>
-					<li>Payment information processed by our payment provider for purchases.</li>
-					<li>Applicant information (e.g., CV, job history) if you apply for a role.</li>
-					<li>Prompts, questions, uploaded content, and generated outputs you create in the Services.</li>
-					<li>Any other information you choose to include in communications with us.</li>
-				</ul>
-			</section>
-			<section>
-				<h3 class="font-medium text-neutral-900">Information Collected Automatically</h3>
-				<p class="mt-2">We and certain third parties collect Usage Data using cookies and similar technologies, including:</p>
-				<ul class="mt-2 list-disc pl-5">
-					<li>Device and browser information (e.g., type, OS, IP address).</li>
-					<li>Approximate location (e.g., city, region).</li>
-					<li>Interaction data (e.g., pages viewed, clicks, date/time, referring URLs).</li>
-				</ul>
-			</section>
-			<section>
-				<h3 class="font-medium text-neutral-900">Information From Other Sources</h3>
-				<ul class="mt-2 list-disc pl-5">
-					<li>Analytics providers to understand and improve how the Services are used.</li>
-					<li>Business partners involved in offers or promotions.</li>
-					<li>Authentication providers you choose to link (e.g., sign-in with a third party).</li>
-					<li>Public sources, where allowed by law.</li>
-				</ul>
-				<p class="mt-2">We may deidentify or aggregate information and use it for any lawful purpose.</p>
-			</section>
-		</div>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">How We Use Information</h2>
-		<ul class="mt-2 list-disc pl-5 text-neutral-700">
-			<li>Provide, maintain, and improve the Services and related AI features.</li>
-			<li>Operate, protect, and secure the Services; detect, prevent, and respond to fraud and abuse.</li>
-			<li>Process transactions and fulfill requests.</li>
-			<li>Communicate with you, including service and support messages.</li>
-			<li>Conduct research, analytics, and product development.</li>
-			<li>Comply with legal obligations and enforce our terms.</li>
-		</ul>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Cookies and Similar Technologies</h2>
-		<p class="mt-2 text-neutral-700">
-			We use cookies and similar technologies to operate and measure the Services. Most browsers
-			allow you to control cookies via settings. Blocking some cookies may impact functionality.
-			Your browser may offer a Do Not Track signal; our Services are not configured to respond to
-			these signals.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">How We Disclose Information</h2>
-		<p class="mt-2 text-neutral-700">We disclose information as described below and as otherwise permitted by law:</p>
-		<ul class="mt-2 list-disc pl-5 text-neutral-700">
-			<li>Service providers that support operations (e.g., hosting, security, payments, analytics).</li>
-			<li>Business partners involved in promotions or providing access to the Services.</li>
-			<li>Other parties at your direction, including when you share content publicly or via integrations.</li>
-			<li>Professional advisors (e.g., auditors, legal counsel) and in connection with corporate transactions.</li>
-			<li>Authorities or others when required by law, to protect rights and safety, or to enforce terms.</li>
-		</ul>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Social Features and Third‑Party Links</h2>
-		<p class="mt-2 text-neutral-700">
-			If you use features that interact with third‑party platforms, those platforms may collect and
-			use information subject to their own policies. We are not responsible for third‑party practices.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Children’s Privacy</h2>
-		<p class="mt-2 text-neutral-700">
-			The Services are not intended for children under 13 (or the minimum age in your jurisdiction).
-			We do not knowingly collect personal information from children. If we learn that a child provided
-			personal information, we will take reasonable steps to delete it.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Data Security and Retention</h2>
-		<p class="mt-2 text-neutral-700">
-			We use reasonable safeguards to protect information. No system is perfectly secure. We retain
-			information as long as necessary for the purposes described above, including to provide the
-			Services, comply with legal obligations, resolve disputes, and enforce agreements.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">International Data Transfers</h2>
-		<p class="mt-2 text-neutral-700">
-			Information may be processed in countries other than your own. Where required, we use
-			appropriate safeguards for cross‑border transfers consistent with applicable law.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Your Rights and Choices</h2>
-		<p class="mt-2 text-neutral-700">
-			Depending on your location, you may have rights over your information, such as to request
-			access, deletion, correction, portability, restriction or objection to processing, and to
-			withdraw consent where processing is based on consent. We may take steps to verify your
-			identity before responding. To exercise these rights, contact us using the details below.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">U.S. State Privacy Disclosures</h2>
-		<p class="mt-2 text-neutral-700">
-			If you are a resident of California or certain other U.S. states with similar privacy laws, you
-			may have additional rights. In the last 12 months, we have collected the categories of personal
-			information described in “Information We Collect.” We do not sell or share personal information
-			as those terms are defined by applicable U.S. state laws. We will not discriminate against you for
-			exercising your rights. You may designate an authorized agent to make certain requests on your
-			behalf, subject to verification.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">How to Contact Us</h2>
-		<p class="mt-2 text-neutral-700">
-			Questions or requests? Email us at <a href="mailto:chris@chrisgenai.com" class="underline underline-offset-4">chris@chrisgenai.com</a>.
-		</p>
-
-		<h2 class="mt-10 text-lg font-medium text-neutral-900">Language</h2>
-		<p class="mt-2 text-neutral-700">
-			If there is any inconsistency between versions of this policy in different languages, the
-			English version will govern unless otherwise required by law.
-		</p>
-
-		<p class="mt-10">
-			<a href="/" class="underline underline-offset-4">Back to home</a>
-		</p>
-	</section>
-</BaseLayout>
+<LegalDoc title="Privacy Policy" intro="How videomk handles your data: what we collect, why, who helps us, how long we keep it and how to delete it." effective={EFFECTIVE} glance={glance} sections={sections} />

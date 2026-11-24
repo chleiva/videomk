@@ -8,6 +8,12 @@ import aws_cdk as cdk
 from backend_stack import BackendStack
 
 app = cdk.App()
+if app.node.try_get_context("site"):  # the public website (videomk.com): scripts/site.sh
+    from site_stack import SiteStack
+    SiteStack(app, "videomk-site", domain="videomk.com", phase=app.node.try_get_context("sitePhase") or "zone",
+              site_dir=os.path.join(os.path.dirname(__file__), "build", "site"), env=cdk.Environment(account="464863885161", region="us-east-1"))
+    app.synth()
+    raise SystemExit(0)
 stage = app.node.try_get_context("stage")
 with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
     stages = json.load(f)

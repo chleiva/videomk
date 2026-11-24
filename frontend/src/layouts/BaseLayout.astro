@@ -14,7 +14,7 @@ const { title = "videomk", description = "Create AI-generated videos with a simp
 			// Real bundled module (the old inline template-string script never executed as code).
 			import { bootstrapAuthForPage } from "../lib/auth";
 			const p = location.pathname;
-			if (p !== "/" && !p.startsWith("/auth/callback") && !p.startsWith("/privacy")) {
+			if (p !== "/" && !p.startsWith("/auth/callback") && !["/privacy", "/terms", "/support", "/delete-account"].some((x) => p.startsWith(x))) {
 				bootstrapAuthForPage().catch((e) => console.error("Auth bootstrap failed", e));
 			}
 		</script>
@@ -26,6 +26,8 @@ const { title = "videomk", description = "Create AI-generated videos with a simp
 		</main>
 		<footer class="px-6 py-10 text-center text-sm text-neutral-500">
 			<a href="/privacy" class="underline underline-offset-4 hover:text-neutral-800">Privacy</a>
+			<span aria-hidden="true"> · </span><a href="/terms" class="underline underline-offset-4 hover:text-neutral-800">Terms</a>
+			<span aria-hidden="true"> · </span><a href="/support" class="underline underline-offset-4 hover:text-neutral-800">Support</a>
 		</footer>
 	</body>
 </html>

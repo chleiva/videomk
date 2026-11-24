@@ -1,0 +1,57 @@
+---
+import LegalDoc from "../components/LegalDoc.astro";
+import { COMPANY, CONTACT_EMAIL, EFFECTIVE } from "../data/legal";
+const glance = [
+	`videomk is provided by ${COMPANY}. You must be 13 or older.`,
+	"Videos are made by AI from what you ask for. You are responsible for what you ask for, the photos you attach and how you use the result.",
+	"Credits pay for videos: the length you choose is the length that is billed, and a video that fails is refunded.",
+	"Pictures and clips come from third-party libraries under their own licences; credits are shown with the video.",
+	"No deceptive or harmful videos, and no videos that pretend to show real people saying things they did not say.",
+];
+const sections = [
+	{ title: "Acceptance", paras: [
+		`These Terms govern your use of the videomk apps and website provided by ${COMPANY} (“videomk”, “we”, “us”). By creating an account or using videomk you agree to them. If you do not agree, do not use videomk.`] },
+	{ title: "Who can use videomk", paras: [
+		"You must be at least 13 years old and able to enter into a binding agreement (if you are under 18, with the permission of a parent or guardian). Keep your sign-in details secret: you are responsible for what happens under your account. Give us accurate information, and one person should keep one account."] },
+	{ title: "What videomk does", paras: [
+		"You describe a video (by typing, speaking, and optionally attaching photos); videomk writes a script, finds pictures and clips, adds a narrated voice, music and subtitles, and produces a video you can watch, edit and share. Features, lengths and limits may change."] },
+	{ title: "Credits and payment", bullets: [
+		"Videos are paid for with credits. The app shows the cost before you make a video; the length you choose is the length that is billed and made.",
+		"Some credits are free (welcome and daily credits) and expire as the app states. Purchased credits do not expire.",
+		"If a video fails or is declined, the credits used are returned to your balance.",
+		"Purchases are made through Apple or Google under their terms and are charged and refunded by them. Except where the law gives you a right or the store’s rules say otherwise, purchased credits that have been used for a video are not refundable.",
+		"We may change prices and the credits offered. Changes do not affect credits you have already bought."] },
+	{ title: "Your content and your responsibilities", paras: [
+		"You keep your rights in the text and photos you provide. You give us the permission we need to process them to make and show your video, and to operate the service as the Privacy Policy describes.",
+		"You promise that you have the right to use what you submit, and that it does not infringe anyone’s rights, include other people’s private information without their permission, or break the law."] },
+	{ title: "Acceptable use", paras: ["You may not use videomk to:"], bullets: [
+		"create unlawful, hateful, harassing, sexually explicit, violent or deceptive material;",
+		"depict a real person saying or doing something they did not say or do, or impersonate a person or organisation;",
+		"create content that sexualises or endangers children, or promotes self-harm, terrorism or crime;",
+		"upload photos of people who have not agreed, or of children without a parent’s agreement;",
+		"attack, overload, scrape, probe or reverse engineer the service, or avoid its limits (for example by creating many accounts for free credits);",
+		"resell the service or use videos in a way that breaks a third party’s licence."] },
+	{ title: "AI-generated videos", paras: [
+		"Videos are produced by AI and may be inaccurate, incomplete, out of date or unsuitable for your purpose. Check facts before you rely on or publish a video. A video is not legal, medical, financial or other professional advice.",
+		"We may refuse or remove requests and videos that break these Terms. To report a video that you think is harmful or unlawful, email us at the address below with the video’s title."] },
+	{ title: "Who owns the video", paras: [
+		"As between you and us, you may use the videos you make, including for personal and business purposes, subject to these Terms and to the licences of the third-party material inside them (next section). We keep our rights in the app, software, designs, branding and technology."] },
+	{ title: "Third-party pictures, clips and music", paras: [
+		"Videos can include pictures and clips from libraries such as Unsplash, Openverse, Pixabay, Pexels and Wikimedia Commons, and music and voices from our providers. Each is used under its own licence, and some licences require credit, which the app shows with the video. If you reuse a video outside videomk, you are responsible for keeping those credits and respecting the licences."] },
+	{ title: "Sharing", paras: [
+		"A shared link lets anyone who has it watch the video. You are responsible for what you share and with whom."] },
+	{ title: "Availability and changes", paras: [
+		"We aim for videomk to be reliable but do not promise it will always be available or error free. We may change, suspend or stop all or part of it. We may suspend or end your account if you break these Terms or put others or the service at risk; you may stop using videomk and ask us to delete your account at any time."] },
+	{ title: "Disclaimers and liability", paras: [
+		"videomk is provided “as is” and “as available”, so far as the law allows. Nothing in these Terms limits rights you have as a consumer or any liability that cannot lawfully be limited, including for fraud, or for death or personal injury caused by negligence.",
+		`Subject to that, ${COMPANY} is not liable for indirect or consequential loss, or loss of profit, business, data or goodwill, and our total liability for any claim is limited to the greater of what you paid us in the 12 months before the claim and £100.`] },
+	{ title: "Your responsibility to us", paras: [
+		"So far as the law allows, you will cover our reasonable losses caused by your breach of these Terms, your unlawful use of videomk, or content you submit that infringes someone’s rights."] },
+	{ title: "Changes to these Terms", paras: [
+		"We may update these Terms. We will change the date above and, where the law requires, tell you. If you keep using videomk after a change takes effect you accept it."] },
+	{ title: "Law and disputes", paras: [
+		"These Terms are governed by the laws of England and Wales, and the courts of England and Wales have exclusive jurisdiction, except that if you are a consumer you keep any right to bring a claim in the courts of the country where you live."] },
+	{ title: "Contact", paras: [`Questions about these Terms: ${CONTACT_EMAIL}.`] },
+];
+---
+<LegalDoc title="Terms of Use" intro="The rules for using videomk, including credits, AI-made videos and your responsibilities." effective={EFFECTIVE} glance={glance} sections={sections} />
