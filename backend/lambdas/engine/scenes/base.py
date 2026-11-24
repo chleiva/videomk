@@ -1,7 +1,7 @@
 """Shared pieces for scene modules."""
 import re
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from PIL import Image
 
@@ -20,6 +20,7 @@ class SceneCtx:
     """Per-render context handed to scenes (asset access, geometry)."""
 
     resolve_image: Callable[[str], Optional[Image.Image]] = lambda key: None
+    resolve_clip: Callable[[str], Any] = lambda key: None   # key -> engine.clips.ClipFrames | None
     captions: bool = True
 
     @property

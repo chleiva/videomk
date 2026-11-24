@@ -2,6 +2,7 @@
 normalised here before it can reach the renderer, S3 paths or the database."""
 import hashlib
 import json
+import os
 import re
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -15,7 +16,7 @@ MAX_BEATS = 90
 MIN_BEAT_WORDS, MAX_BEAT_WORDS = 6, 70
 WORDS_PER_MIN = 150
 
-SCENE_DOCS = """Scene types (props):
+SCENE_DOCS_BASE = """Scene types (props):
 - title: {title (<=70 chars), subtitle (<=110)}. Use for the opening and for chapter openers.
 - bullets: {heading (<=50), items: 2-5 short strings (<=80 each)}. Lists, steps, key points.
 - diagram: {title (<=50), nodes: [{id, label (<=26)}] (3-7), edges: [[from_id, to_id, optional label (<=22, 1-3 words)]]}. Processes, causes and effects, architectures, flows. Keep it a left-to-right flow with at most 4 layers.
@@ -24,6 +25,16 @@ SCENE_DOCS = """Scene types (props):
 - stat: {value (<=12, e.g. "73%" or "$4.2B"), label (<=70)}. One striking number; only if it is in the grounding notes.
 - quote: {text (<=180), attribution (<=50)}. Only real, well-known quotes from the grounding notes.
 - image: {image_query (2-6 words describing a real photograph), alt (<=70)}. A real-world photo (place, object, person-type, scene). When the topic is about places, landmarks, nature, objects or anything people want to see, use a photo for at least 1 beat in 3, one per named place or object. For abstract topics (processes, ideas, numbers) use at most 1 beat in 5."""
+
+CLIP_DOC = """
+- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70)}. A 5-20 second stock video clip plays full screen behind the narration. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea."""
+
+
+def scene_docs() -> str:
+    return SCENE_DOCS_BASE + (CLIP_DOC if os.environ.get("CLIPS_ENABLED", "1") != "0" else "")
+
+
+SCENE_DOCS = scene_docs()
 
 def system_prompt(language: str = "en", region: Optional[str] = None) -> str:
     default_voice = voice_mod.default_voice(language, region)
@@ -45,7 +56,7 @@ Otherwise return ONLY JSON (no markdown, no code fences):
             "narration": "<{MIN_BEAT_WORDS}-{MAX_BEAT_WORDS} words, natural spoken language>",
             "scene": {{"type": "<type>", "props": {{...}}}}}}]}}
 
-{SCENE_DOCS}
+{scene_docs()}
 
 Language: write EVERYTHING viewers read or hear (title, description, narration, scene text) in {voice_mod.LANGUAGES.get(language, "English")}, and cast only voices from the list below.
 Voices you may cast (name, accent, gender): {voice_mod.prompt_list(language)}.
@@ -141,6 +152,9 @@ def needs_media(plan: Dict[str, Any], beat: Dict[str, Any]) -> bool:
     m = beat.get("media") or {}
     if m.get("tts_hash") != tts_hash(plan, beat) or not m.get("audio_key") or not m.get("duration"):
         return True
+    if beat["scene"]["type"] == "clip":
+        if m.get("query") != beat["scene"]["props"].get("clip_query") or (not m.get("clip_asset") and not m.get("asset") and not m.get("no_photo")):
+            return True
     if beat["scene"]["type"] == "image":
         if m.get("query") != beat["scene"]["props"].get("image_query") or m.get("pick") != beat.get("pick") or m.get("photo") != beat["scene"]["props"].get("photo"):
             return True
@@ -227,6 +241,11 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
         if not out["text"]:
             raise ValueError("quote is empty")
         return out
+    if stype == "clip":
+        q = _s(p.get("clip_query"), 80) or _s(p.get("alt"), 80)
+        if not q:
+            raise ValueError("clip_query is empty")
+        return {"clip_query": q, "alt": _s(p.get("alt") or q, 70)}
     if stype == "image":
         q = _s(p.get("image_query"), 80) or (_s(p.get("alt"), 80) if PHOTO_ID_RE.match(str(p.get("photo") or "").strip().upper()) else "")
         if not q:

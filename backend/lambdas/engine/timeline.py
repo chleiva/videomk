@@ -36,6 +36,13 @@ def build_timeline(
             dur += END_HOLD
         stype = beat["scene"]["type"]
         props = dict(beat["scene"]["props"])
+        if stype == "clip":
+            if info.get("clip_asset"):
+                props = {"asset": info["clip_asset"], "alt": props.get("alt", ""), **({"credit": info["credit"]} if info.get("credit") else {})}
+            elif info.get("asset"):  # no footage found: a still photo of the same subject keeps the beat visual
+                stype, props = "image", {"asset": info["asset"], "alt": props.get("alt", ""), "ken_burns": "in", **({"credit": info["credit"]} if info.get("credit") else {})}
+            else:
+                stype, props = "title", {"title": props.get("alt") or props.get("clip_query", ""), "subtitle": ""}
         if stype == "image":
             if info.get("asset"):
                 props["asset"] = info["asset"]
@@ -84,7 +91,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
     out = []
     for b in plan["beats"]:
         m = b.get("media") or {}
-        out.append({"duration": m["duration"], "asset": m.get("asset"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
+        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
     return out
 
 

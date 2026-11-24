@@ -18,7 +18,8 @@ BLACK = (0, 0, 0)
 
 
 class Renderer:
-    def __init__(self, timeline: Dict[str, Any], image_loader: Optional[Callable[[str], Optional[Image.Image]]] = None, draft: bool = False):
+    def __init__(self, timeline: Dict[str, Any], image_loader: Optional[Callable[[str], Optional[Image.Image]]] = None, draft: bool = False,
+                 clip_loader: Optional[Callable[[str], Any]] = None):
         self.tl = timeline
         self.draft = draft
         self.ss = 1 if draft else 2  # draft: no supersampling, half-size output (the downscale antialiases)
@@ -34,7 +35,9 @@ class Renderer:
         last = self.scenes[-1]
         self.total = float(timeline.get("duration") or (float(last["start"]) + float(last["duration"])))
         self.total_frames = int(round(self.total * self.fps))
-        self.ctx = SceneCtx(resolve_image=self._load_image, captions=bool(timeline.get("captions", True)))
+        self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)))
+        self._clip_loader = clip_loader
+        self._clips: Dict[str, Any] = {}
         self._image_loader = image_loader
         self._images: Dict[str, Optional[Image.Image]] = {}
 
@@ -56,6 +59,14 @@ class Renderer:
                 img = img.resize((int(img.width * scale), int(img.height * scale)), Image.LANCZOS)
         self._images[key] = img
         return img
+
+    def _load_clip(self, key: str):
+        if key not in self._clips:
+            try:
+                self._clips[key] = self._clip_loader(key) if self._clip_loader else None
+            except Exception:  # an unreadable clip degrades to the placeholder instead of failing the whole video
+                self._clips[key] = None
+        return self._clips[key]
 
     # ----- frames
     @staticmethod

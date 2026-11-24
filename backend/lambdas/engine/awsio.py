@@ -36,8 +36,9 @@ def get_json(key: str) -> Any:
     return json.loads(s3().get_object(Bucket=bucket(), Key=key)["Body"].read())
 
 
-def put_bytes(key: str, data: bytes, content_type: str = "application/octet-stream", bkt: Optional[str] = None) -> None:
-    s3().put_object(Bucket=bkt or bucket(), Key=key, Body=data, ContentType=content_type)
+def put_bytes(key: str, data: bytes, content_type: str = "application/octet-stream", bkt: Optional[str] = None, *, working: bool = False) -> None:
+    """`working=True`: a re-creatable intermediate (the bucket expires it after 7 days), e.g. a stock clip we only keep to render and edit."""
+    s3().put_object(Bucket=bkt or bucket(), Key=key, Body=data, ContentType=content_type, **({"Tagging": WORKING_TAG} if working else {}))
 
 
 def get_bytes(key: str) -> bytes:

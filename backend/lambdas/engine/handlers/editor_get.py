@@ -22,6 +22,9 @@ def _beat_view(plan: Dict[str, Any], beat: Dict[str, Any], pfx: str) -> Dict[str
         "duration": m.get("duration"), "stale": plan_mod.needs_media(plan, beat),  # true => will be re-synthesised/re-fetched on next render
     }
     asset = m.get("asset")
+    if beat["scene"]["type"] == "clip":
+        clip_key = m.get("clip_asset")
+        view["clip"] = {"credit": m.get("credit"), "chosen": m.get("chosen"), "has_clip": bool(clip_key), "fallback_photo": bool(not clip_key and asset), "no_media": bool(m.get("no_photo"))}
     if beat["scene"]["type"] == "image":
         view["photo"] = {"url": awsio.presign(asset) if isinstance(asset, str) and asset.startswith(pfx + "assets/") else None, "credit": m.get("credit"), "chosen": m.get("chosen"), "no_photo": bool(m.get("no_photo"))}
         try:

@@ -4,7 +4,7 @@ from .text_scenes import (
     bullets_cues, draw_bullets, draw_quote, draw_stat, draw_title, quote_cues, stat_cues, title_cues,
 )
 from .viz_scenes import (
-    chart_cues, diagram_cues, draw_chart, draw_diagram, draw_image, draw_timeline, image_cues, timeline_cues,
+    chart_cues, clip_cues, diagram_cues, draw_chart, draw_clip, draw_diagram, draw_image, draw_timeline, image_cues, timeline_cues,
 )
 
 # type -> (draw(cv, props, lt, dur, theme, ctx), cues(props, dur) -> reveal times for SFX)
@@ -17,6 +17,7 @@ SCENES: Dict[str, Tuple[Callable[..., None], Callable[[Dict[str, Any], float], L
     "stat": (draw_stat, stat_cues),
     "quote": (draw_quote, quote_cues),
     "image": (draw_image, image_cues),
+    "clip": (draw_clip, clip_cues),
 }
 
 SCENE_TYPES = tuple(SCENES)

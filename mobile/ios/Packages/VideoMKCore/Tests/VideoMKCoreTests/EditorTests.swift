@@ -116,3 +116,13 @@ extension CoreTests {
         catch { #expect(error as? APIError == .conflict("This video changed since you loaded it. Reload to continue.")) }
     }
 }
+
+@Suite struct ClipSceneTests {
+    @Test func aClipBeatDecodesAsAVideoClipWithItsDescription() throws {
+        let json = #"{"id":"b1","narration":"Waves roll in slowly over the sand.","scene":{"type":"clip","props":{"clip_query":"ocean waves","alt":"waves rolling in"}},"duration":4.2,"stale":false,"clip":{"has_clip":true,"credit":"Video: Z / Pexels"}}"#
+        let b = try JSONDecoder().decode(EditorBeat.self, from: Data(json.utf8))
+        #expect(b.kind == .clip && b.kind?.label == "Video clip" && b.kind?.symbol == "film" && b.summary == "waves rolling in")
+        let noAlt = try JSONDecoder().decode(EditorBeat.self, from: Data(#"{"id":"b2","narration":"Another line of narration here.","scene":{"type":"clip","props":{"clip_query":"city traffic"}}}"#.utf8))
+        #expect(noAlt.summary == "city traffic")
+    }
+}

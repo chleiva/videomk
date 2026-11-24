@@ -27,7 +27,7 @@ Changed: native tool use instead of the XML-tag protocol (no parse retries); evi
 ## Images from the internet: policy (decided 2026-11-23)
 **Only images that are fully licensed for reuse, never anything copyrighted.** Web search is for text research only: the search request asks the provider for no images
 (`include_images: false`, covered by a test) and nothing the agent finds on the web ever becomes a picture in a video. Pictures come only from sources with a clear open licence:
-Unsplash (Unsplash License) and Openverse (CC0, public domain, CC BY), each credited on screen and in the description, and the user's own photos. Candidates to add later, each
+Unsplash (Unsplash License) and Openverse (CC0, public domain, CC BY), each credited on screen and in the description, and the user's own photos. Video clips follow the same rule: Pexels (Pexels License) and Wikimedia Commons (per-file CC0, public domain, plain CC BY) only; see `docs/CLIPS.md`. Candidates to add later, each
 with machine-readable licence data: Wikimedia Commons (Commons API `extmetadata`), and public-domain collections (NASA, Library of Congress, Smithsonian, US government works).
 A new source needs a documented licence check in code before it is used.
 

@@ -24,12 +24,13 @@ def render_chunk(
     image_loader: Optional[Callable[[str], Optional[Image.Image]]] = None,
     *,
     draft: bool = False,
+    clip_loader: Optional[Callable[[str], Any]] = None,
 ) -> Dict[str, Any]:
     """Render frames [f0, f1) of `timeline` into a TS segment whose timestamps start at 0.
 
     Every segment starts on an IDR frame (fresh encoder), so segments of any length concatenate with `-c copy`.
     """
-    r = Renderer(timeline, image_loader, draft=draft)
+    r = Renderer(timeline, image_loader, draft=draft, clip_loader=clip_loader)
     gop = r.fps * GOP_SECONDS
     n = media.encode_segment(
         r.frames(f0, f1), out_path,

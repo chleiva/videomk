@@ -54,7 +54,7 @@ public struct BeatPhoto: Sendable, Equatable, Decodable {
 }
 
 public enum SceneKind: String, Sendable, CaseIterable {
-    case title, bullets, diagram, chart, timeline, stat, quote, image
+    case title, bullets, diagram, chart, timeline, stat, quote, image, clip
     public var symbol: String {
         switch self {
         case .title: "textformat"
@@ -65,6 +65,7 @@ public enum SceneKind: String, Sendable, CaseIterable {
         case .stat: "number"
         case .quote: "quote.opening"
         case .image: "photo"
+        case .clip: "film"
         }
     }
     public var label: String {
@@ -77,6 +78,7 @@ public enum SceneKind: String, Sendable, CaseIterable {
         case .stat: "Big number"
         case .quote: "Quote"
         case .image: "Photo"
+        case .clip: "Video clip"
         }
     }
 }
@@ -124,6 +126,7 @@ public struct EditorBeat: Sendable, Equatable, Identifiable, Decodable {
         case "stat": return [s("value"), s("label")].compactMap { $0 }.joined(separator: " ")
         case "quote": return s("text") ?? ""
         case "image": return s("alt") ?? s("image_query") ?? ""
+        case "clip": return s("alt") ?? s("clip_query") ?? ""
         default: return ""
         }
     }

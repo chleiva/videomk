@@ -322,6 +322,35 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
 
 
+# ------------------------------------------------------------------ clip (stock video behind the narration)
+def clip_cues(props: Dict[str, Any], dur: float) -> List[float]:
+    return [0.0]
+
+
+def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    frames = ctx.resolve_clip(str(props.get("asset", ""))) if props.get("asset") else None
+    tw, tht = cv.W * cv.ss, cv.H * cv.ss
+    if frames is None:  # the file is missing or undecodable: the same elegant placeholder as a missing photo
+        cv.card(260, 180, 1400, 560, th, r=36)
+        cv.text(CENTER_X, 460, str(props.get("alt") or props.get("title") or "Video unavailable"), "semibold", 54, with_alpha(th.muted, 1), anchor="mm")
+        return
+    t = max(0.0, min(lt, dur))  # an outgoing scene holds its final frame during the crossfade; footage shorter than the scene loops inside it
+    src = frames.frame(int(t * frames.fps))
+    p = ease_in_out_cubic(progress(t, 0.0, max(dur, 0.5)))
+    z = lerp(1.0, 1.06, p)  # a slow push-in hides the modest source resolution and keeps the frame alive
+    sw, sh = src.size
+    base = max(tw / sw, tht / sh)
+    vw, vh = tw / (base * z), tht / (base * z)
+    box = ((sw - vw) / 2, (sh - vh) / 2, (sw + vw) / 2, (sh + vh) / 2)
+    cv.im.paste(src.resize((tw, tht), Image.BILINEAR, box=box))
+    scrim = _scrim(tw, tht)
+    cv.im.paste(Image.new("RGB", scrim.size, (0, 0, 0)), (0, tht - scrim.height), scrim)
+    credit = str(props.get("credit", "")).strip()
+    if credit:
+        a = ease_out_cubic(progress(lt, 0.4, 0.6))
+        cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+
+
 _BACKDROP: Dict[Tuple[int, int, int], Image.Image] = {}
 
 

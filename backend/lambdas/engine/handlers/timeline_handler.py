@@ -27,7 +27,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     tl = build_timeline(plan, beat_info_from_plan(plan), video_id=video_id, fps=30)
     if tl["duration"] > MAX_DURATION_S:
         raise ValueError(f"video too long ({tl['duration']:.0f}s > {MAX_DURATION_S:.0f}s)")
-    tl["ledger"] = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] == "image" and (b.get("media") or {}).get("ledger")]
+    tl["ledger"] = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] in ("image", "clip") and (b.get("media") or {}).get("ledger")]
     tl["sources"] = plan.get("sources", [])
     tl["description"] = plan.get("description", "")
     tl["language"] = plan.get("language", "en")

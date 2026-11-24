@@ -8,7 +8,7 @@ import numpy as np
 
 from common.secrets import get_secret_param
 
-from .. import assets, audio, awsio, costs, plan as plan_mod, stock, tts, voices
+from .. import assets, audio, awsio, clips, costs, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -89,6 +89,26 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     return out
 
 
+def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str, speech: float) -> Dict[str, Any]:
+    """A short licensed stock clip for the beat. If none is found or usable, a still photo of the same subject, so the video never has a hole."""
+    pfx = awsio.prefix(video_id)
+    props = beat["scene"]["props"]
+    query = props["clip_query"]
+    out: Dict[str, Any] = {"query": query, "pick": None}
+    need = timeline_mod.LEAD + speech + timeline_mod.TAIL + 0.6  # the scene's length, with a little margin for the crossfade
+    result = clips.scout_clip(query, beat["narration"], props.get("alt", ""), need_seconds=need, pexels_key=get_secret_param("/videomk/pexels_api_key", quiet=True))
+    if result:
+        costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field)
+    if result and result.get("mp4"):
+        key = f"{pfx}assets/clip_{beat['id']}_{hashlib.sha1(result['mp4']).hexdigest()[:8]}.mp4"
+        awsio.put_bytes(key, result["mp4"], "video/mp4", working=True)
+        out.update({"clip_asset": key, "credit": result["credit"], "ledger": result["entry"], "chosen": result["chosen"]})
+        return out
+    still = {"id": beat["id"], "narration": beat["narration"], "scene": {"type": "image", "props": {"image_query": query, "alt": props.get("alt", query)}}}
+    out.update({k: v for k, v in make_photo(plan, still, video_id, cost_field).items() if k not in ("query", "pick")})
+    return out
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id, beat_id = str(event["video_id"]), str(event["beat_id"])
     cost_field = str(event.get("cost_field") or "cost_usd")
@@ -99,4 +119,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     media = make_audio(plan, beat, video_id, cost_field)
     if beat["scene"]["type"] == "image":
         media.update(make_photo(plan, beat, video_id, cost_field))
+    elif beat["scene"]["type"] == "clip":
+        media.update(make_clip(plan, beat, video_id, cost_field, float(media["duration"])))
     return {"id": beat_id, "media": media}

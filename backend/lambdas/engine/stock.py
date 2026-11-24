@@ -160,7 +160,8 @@ def _thumb_jpeg(raw: bytes) -> bytes:
 
 
 def llm_review(candidates: Sequence[Candidate], narration: str, alt: str, query: str, *, fetch_bytes_fn: Callable[..., bytes] = fetch_bytes,
-               complete: Optional[Callable[..., Tuple[str, Dict[str, Any]]]] = None) -> Tuple[Optional[int], str, float, List[int]]:
+               complete: Optional[Callable[..., Tuple[str, Dict[str, Any]]]] = None, system: str = REVIEW_SYSTEM,
+               noun: str = "photo") -> Tuple[Optional[int], str, float, List[int]]:
     """Ask a vision model to choose. Returns (index|None, reason, cost_usd, indexes_of_candidates_shown)."""
     from . import llm
 
@@ -175,8 +176,8 @@ def llm_review(candidates: Sequence[Candidate], narration: str, alt: str, query:
             continue
     if not thumbs:
         raise FetchError("no thumbnails could be loaded")
-    user = f"Narration for this moment: {narration[:400]}\nIntended subject: {alt or query}\nSearch query: {query}\n\nChoose the best of the {len(thumbs)} photos above."
-    text, meta = complete(REVIEW_SYSTEM, user, images=thumbs, max_tokens=800, temperature=0.0, model=llm.REVIEW_MODEL, effort="low")
+    user = f"Narration for this moment: {narration[:400]}\nIntended subject: {alt or query}\nSearch query: {query}\n\nChoose the best of the {len(thumbs)} {noun}s above."
+    text, meta = complete(system, user, images=thumbs, max_tokens=800, temperature=0.0, model=llm.REVIEW_MODEL, effort="low")
     idx, reason = parse_review(text, len(thumbs))
     return (shown[idx] if idx is not None else None), reason, float(meta.get("cost_usd", 0.0)), shown
 

@@ -24,6 +24,23 @@ def make_image_loader(video_id: str):
     return load
 
 
+def make_clip_loader(video_id: str, tmp: str):
+    """Stock clips: download the normalised MP4 once per chunk, decode it to frames once."""
+    allowed = awsio.prefix(video_id) + "assets/"
+
+    def load(key: str):
+        from .. import clips
+
+        if not key.startswith(allowed) or ".." in key or not key.endswith(".mp4"):
+            return None
+        path = os.path.join(tmp, "clip_" + re.sub(r"[^A-Za-z0-9]", "_", key[len(allowed):]))
+        with open(path, "wb") as fh:
+            fh.write(awsio.get_bytes(key))
+        return clips.ClipFrames(path)
+
+    return load
+
+
 def segment_key(video_id: str, h: str, draft: bool) -> str:
     if not _HASH.match(h):
         raise ValueError("bad chunk hash")
@@ -40,6 +57,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     ct = chunk_timeline(tl, int(event["lo"]), int(event["hi"]))
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "seg.ts")
-        info = pipeline.render_chunk(ct, 0, int(event["frames"]), out, make_image_loader(video_id), draft=draft)
+        info = pipeline.render_chunk(ct, 0, int(event["frames"]), out, make_image_loader(video_id), draft=draft, clip_loader=make_clip_loader(video_id, tmp))
         awsio.upload(out, key, "video/mp2t", working=True)
     return {"k": k, "key": key, "cached": False, **info}
