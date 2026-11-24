@@ -22,7 +22,7 @@ def test_no_element_module_failed_to_import():
 def test_the_element_meets_the_contract(name):
     el = ELEMENTS[name]
     assert name not in CORE and el.name == name and el.family in FAMILIES, (el.family, FAMILIES)
-    assert el.doc.lstrip().startswith(f"- {name}:") and len(el.doc) <= 700, "the doc is one to three lines starting with '- name:'"
+    assert el.doc.lstrip().startswith(f"- {name}:") and len(el.doc) <= 800, "the doc is one to three lines starting with '- name:'"
     assert len(el.samples) >= 2
     assert SCENES[name] == (el.draw, el.cues)
     for sample in el.samples:

@@ -280,7 +280,7 @@ DOC = (
     "- map: {mode: focus|regions|points|route|arcs, title (<=50), caption (<=60), focus: 1-4 names to frame, regions: <=12 countries/states, points: <=8 names or {name, label (<=28)}, "
     "stops: 2-8 names in order, arcs: <=8 [from, to, label?]}. Each mode takes its own list: {\"mode\":\"focus\",\"focus\":[\"Portugal\"]} {\"mode\":\"regions\",\"regions\":[\"France\",\"Spain\"]} "
     "{\"mode\":\"points\",\"points\":[\"Cairo\"]} {\"mode\":\"route\",\"stops\":[\"Paris\",\"Lyon\"]} {\"mode\":\"arcs\",\"arcs\":[[\"Shenzhen\",\"Rotterdam\"]]}. "
-    "Use when the narration names places, a journey, a spread or connections, listed in spoken order. Never when the place is vague; never give coordinates, only names."
+    "Use when the narration names places, a journey, a spread or connections, listed in spoken order. For a city or a tour use points or route with the landmarks, not focus (focus frames a country or region). Never when the place is vague; never give coordinates, only names."
 )
 
 SAMPLES = [

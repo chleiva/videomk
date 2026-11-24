@@ -43,7 +43,7 @@ CLIP_DOC = """
 
 
 ELEMENT_INTRO = """
-More scene types, by family. Use one only when the narration at that moment names what it shows, never the same one twice in a row, and prefer a plain type when in doubt:
+More scene types, by family. Use them SPARINGLY: most beats stay with the plain types above (title, bullets, image, gallery, clip, chart, timeline, stat, quote). Use one of these only where it makes the idea clearer than a plain scene, only when the narration at that moment names what it shows, never the same one twice in a row, and at most about one beat in four (a 3-minute video usually needs two or three of them, chosen for what the topic is: a map for a route, code for a tutorial, a comparison for a choice). When in doubt use a plain type:
 """
 
 

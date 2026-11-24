@@ -611,8 +611,9 @@ ELEMENTS = [
     Element(
         name="icons", family="Media",
         doc=("- icons: {title (<=50, optional), items: 2-6 [{icon (one plain English word, e.g. lock, cloud, heart, rocket, money), label (<=24), sub (<=40, optional)}]}. Large "
-             "icons with labels, revealed in order. Use when the narration names 2-6 features, categories or steps that each have a familiar symbol. Never for numbers "
-             "(use chart or stat), for long sentences, or for brand logos."),
+             "icons with labels, revealed in order. Use when the narration names 2-6 features, categories or steps that each have a familiar symbol, "
+             "and ONLY when every item has an obviously fitting everyday symbol (lock, cloud, clock, money, map pin, heart). Never for named artworks, people, places or abstract ideas (use bullets), "
+             "numbers, long sentences or logos."),
         sanitize=sanitize_icons, draw=draw_icons, cues=icons_cues, anchors=icons_anchors,
         samples=[
             {"title": "Why people love it", "items": [{"icon": "rocket", "label": "Fast", "sub": "Ready in seconds"}, {"icon": "lock", "label": "Private", "sub": "Your data stays yours"},
