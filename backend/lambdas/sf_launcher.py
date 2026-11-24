@@ -89,6 +89,10 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             out["media"] = valid_media_ids(body["media"])
         except PhotoError as e:
             raise BadRequest(str(e)) from e
+    if "captions" in body and body["captions"] is not None:
+        if not isinstance(body["captions"], bool):
+            raise BadRequest("'captions' must be true or false")
+        out["captions"] = body["captions"]
     if "max_images_per_minute" in body and body["max_images_per_minute"] is not None:
         m = body["max_images_per_minute"]
         if isinstance(m, bool) or not isinstance(m, (int, float)) or not (0 <= m <= MAX_IMAGES_PER_MINUTE):

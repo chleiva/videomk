@@ -176,7 +176,7 @@ Context flags: `engine`, `reviewModelId`, `unsplashAppName`, `editDailyLimit`, `
 `dailyVideoLimit`, `httpUserAgent` (Wikimedia/Openverse ask clients to identify themselves: set a contact string).
 
 **Quotas to check before a real run:** Lambda concurrent executions (new accounts can start very low; a 20-chunk render needs 20),
-Bedrock model access for `PLAN_MODEL_ID` (falls back to Haiku 4.5 then Haiku 3 if unavailable).
+Bedrock model access for `PLAN_MODEL_ID` (Claude Sonnet 5.5 by default) and `REVIEW_MODEL_ID` (Claude Haiku 5.5 by default). There is deliberately no automatic fallback model: a silent downgrade once hid a broken primary (set `PLAN_FALLBACK_MODEL_IDS` to opt in).
 
 **Housekeeping:** add an S3 lifecycle rule expiring `generation/v2/` after 7 days (the bucket is imported, so CDK doesn't manage it).
 Finalize already deletes segments and the mixed audio; plan/timeline/beat audio/photos are kept for cheap re-renders.

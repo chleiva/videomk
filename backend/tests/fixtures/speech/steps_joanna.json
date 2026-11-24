@@ -1,0 +1,82 @@
+{
+ "text": "Step one: gather your materials. Step two: measure twice. Step three: cut once, and then sand the edges smooth.",
+ "voice": "Joanna",
+ "marks": [
+  {
+   "word": "Step",
+   "start": 0.006
+  },
+  {
+   "word": "one",
+   "start": 0.332
+  },
+  {
+   "word": "gather",
+   "start": 0.872
+  },
+  {
+   "word": "your",
+   "start": 1.169
+  },
+  {
+   "word": "materials",
+   "start": 1.32
+  },
+  {
+   "word": "Step",
+   "start": 2.536
+  },
+  {
+   "word": "two",
+   "start": 2.877
+  },
+  {
+   "word": "measure",
+   "start": 3.516
+  },
+  {
+   "word": "twice",
+   "start": 3.828
+  },
+  {
+   "word": "Step",
+   "start": 4.728
+  },
+  {
+   "word": "three",
+   "start": 5.044
+  },
+  {
+   "word": "cut",
+   "start": 5.702
+  },
+  {
+   "word": "once",
+   "start": 5.855
+  },
+  {
+   "word": "and",
+   "start": 6.497
+  },
+  {
+   "word": "then",
+   "start": 6.66
+  },
+  {
+   "word": "sand",
+   "start": 6.823
+  },
+  {
+   "word": "the",
+   "start": 7.126
+  },
+  {
+   "word": "edges",
+   "start": 7.265
+  },
+  {
+   "word": "smooth",
+   "start": 7.622
+  }
+ ]
+}

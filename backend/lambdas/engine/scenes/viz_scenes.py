@@ -354,23 +354,28 @@ def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
         cv.text(CENTER_X, 460, str(props.get("alt") or "Images unavailable"), "semibold", 54, with_alpha(th.muted, 1), anchor="mm")
         return
     n = len(assets)
-    seg = max(dur, 0.5) / n
+    total = max(dur, 0.5)
+    # each photograph starts at its cut: when the narration names it (props.cuts, see engine/sync.py), else the beat is shared evenly
+    cuts = [float(c) for c in props.get("cuts") or []]
+    if len(cuts) != n or cuts[0] != 0.0 or any(b <= a for a, b in zip(cuts, cuts[1:])) or cuts[-1] >= total:
+        cuts = [total * k / n for k in range(n)]
+    bounds = cuts + [total]
     t = max(0.0, min(lt, dur - 1e-3))
-    i = min(n - 1, int(t / seg))
+    i = max(k for k in range(n) if cuts[k] <= t)
     motions = ("in", "left", "in", "right")
 
     def frame(k: int) -> Optional[Image.Image]:
         if srcs[k] is None:
             return None
-        local = (t - k * seg) / seg
+        local = (t - bounds[k]) / max(0.2, bounds[k + 1] - bounds[k])
         p = ease_in_out_cubic(min(1.0, max(0.0, local)))
         return _cover(srcs[k], tw, tht, lerp(1.0, 1.12, p), motions[k % 4], p)
 
     cur = frame(i) or next((f for f in (frame(k) for k in range(n)) if f is not None), None)
     if cur is None:
         return
-    # the next photograph fades in over the last moments of this one
-    into_next = t - (i + 1) * seg + GALLERY_FADE_S
+    # the next photograph fades in so that it is fully there at its cut
+    into_next = t - bounds[i + 1] + GALLERY_FADE_S
     if i < n - 1 and into_next > 0:
         nxt = frame(i + 1)
         if nxt is not None:
@@ -379,9 +384,10 @@ def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
     scrim = _scrim(tw, tht)
     cv.im.paste(Image.new("RGB", scrim.size, (0, 0, 0)), (0, tht - scrim.height), scrim)
     credits = [str(c) for c in props.get("credits") or []]
-    shown = credits[min(n - 1, int(min(lt, dur - 1e-3) / seg + 0.35))] if credits else ""   # switches with the picture, a little early like the fade
+    cur_k = i + 1 if (i < n - 1 and into_next > GALLERY_FADE_S * 0.5) else i                 # the credit switches with the picture
+    shown = credits[cur_k] if credits and cur_k < len(credits) else ""
     if shown.strip():
-        a = ease_out_cubic(progress((min(lt, dur - 1e-3) % seg), 0.15, 0.5))
+        a = ease_out_cubic(progress(t - bounds[cur_k], 0.15, 0.5))
         cv.text(1880, 40, shown[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
 
 

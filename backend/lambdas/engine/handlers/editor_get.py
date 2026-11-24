@@ -60,7 +60,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     return json_response(200, {
         "video_id": video_id, "rev": int(item.get("rev", 1)), "status": item.get("status"), "edit_state": state or "READY",
         "edit_mode": item.get("edit_mode"), "edit_error": item.get("edit_error"),
-        "title": plan.get("title"), "description": plan.get("description"), "theme": plan.get("theme"), "mood": plan.get("mood"),
+        "title": plan.get("title"), "description": plan.get("description"), "theme": plan.get("theme"), "mood": plan.get("mood"), "captions": plan.get("captions", True),
         "voice": (plan.get("tts") or {}).get("voice", ""), "voices": plan.get("voices") or {}, "beats": beats, "chapters": [b["chapter"] for b in plan["beats"] if b.get("chapter")],
         "final": {"url": signed("video_uri"), "rev": item.get("final_rev")},
         "preview": {"url": signed("preview_uri"), "rev": item.get("preview_rev")},

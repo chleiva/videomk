@@ -9,7 +9,7 @@ import numpy as np
 
 from common.secrets import get_secret_param
 
-from .. import assets, audio, awsio, clips, costs, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from .. import align, assets, audio, awsio, clips, costs, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -31,13 +31,38 @@ def _wav_bytes(samples: np.ndarray) -> bytes:
     return buf.getvalue()
 
 
+MIN_ALIGN_CONFIDENCE = 0.6
+
+
+def _store_words(key: str, samples: np.ndarray, text: str) -> bool:
+    """Word timings measured from the audio itself (free, a few ms). Not stored when the audio's pauses and the text's punctuation disagree: the timeline then
+    keeps the proportional estimate rather than a wrong measurement."""
+    try:
+        words, conf = align.align_words(samples, audio.SR, text)
+        if words and conf >= MIN_ALIGN_CONFIDENCE:
+            awsio.put_json(key, {"words": [list(w) for w in words], "conf": conf})
+            return True
+    except Exception:
+        logging.exception("word alignment failed")
+    return False
+
+
+def _wav_samples(data: bytes) -> np.ndarray:
+    with wave.open(io.BytesIO(data), "rb") as w:
+        return np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float32) / 32768.0
+
+
 def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:
     pfx = awsio.prefix(video_id)
     h = plan_mod.tts_hash(plan, beat)
     key = f"{pfx}audio/{h}.wav"
+    wkey = f"{pfx}audio/{h}.words.json"
     cached = awsio.head(key)
     if cached and (cached.get("Metadata") or {}).get("duration"):
-        return {"tts_hash": h, "audio_key": key, "duration": float(cached["Metadata"]["duration"]), "voice": voices.beat_voice(plan, beat)}
+        out = {"tts_hash": h, "audio_key": key, "duration": float(cached["Metadata"]["duration"]), "voice": voices.beat_voice(plan, beat)}
+        if awsio.head(wkey) or _store_words(wkey, _wav_samples(awsio.get_bytes(key)), beat["narration"]):   # audio made before alignment existed: measure it now
+            out["words_key"] = wkey
+        return out
     cfg = plan.get("tts", {})
     provider = _provider(cfg)
     text = beat["narration"]
@@ -48,7 +73,10 @@ def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
         raise RuntimeError("TTS returned (almost) no audio")
     dur = round(samples.size / audio.SR, 3)
     awsio.put_bytes_meta(key, _wav_bytes(samples), "audio/wav", {"duration": str(dur)})
-    return {"tts_hash": h, "audio_key": key, "duration": dur, "voice": voice}
+    out = {"tts_hash": h, "audio_key": key, "duration": dur, "voice": voice}
+    if _store_words(wkey, samples, text):
+        out["words_key"] = wkey
+    return out
 
 
 def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:
@@ -106,7 +134,7 @@ def make_gallery(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost
 
     with ThreadPoolExecutor(max_workers=min(4, len(queries))) as ex:
         results = list(ex.map(one, range(len(queries))))
-    shots = [{"asset": r["asset"], "credit": r.get("credit", ""), "ledger": r.get("ledger"), "chosen": r.get("chosen")} for r in results if r.get("asset")]
+    shots = [{"asset": r["asset"], "credit": r.get("credit", ""), "ledger": r.get("ledger"), "chosen": r.get("chosen"), "query": queries[i]} for i, r in enumerate(results) if r.get("asset")]
     out: Dict[str, Any] = {"query": "|".join(queries), "pick": None, "gallery": shots}
     if not shots:
         out["no_photo"] = True

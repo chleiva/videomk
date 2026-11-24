@@ -1,3 +1,4 @@
+import math
 from typing import Any, Dict, List
 
 from ..canvas import Canvas, with_alpha
@@ -76,11 +77,28 @@ def draw_bullets(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
 
 
 # ------------------------------------------------------------------ stat
+RING_R, RING_STROKE, RING_CLEAR = 300, 26, 30
+
+
+def ring_text_size(cv: Canvas, text: str) -> float:
+    """The largest font size at which `text` sits wholly inside the ring: its bounding-box corners stay within the ring's inner circle, with clear space.
+    Sized for the FINAL text, so the number does not change size while it counts up."""
+    inner = RING_R - RING_STROKE / 2 - RING_CLEAR
+    size = 200.0
+    while size > 40:
+        if math.hypot(cv.measure(text, "bold", size) / 2, size * 0.78 / 2) <= inner:
+            return size
+        size -= 4
+    return 40.0
+
+
 def stat_cues(props: Dict[str, Any], dur: float) -> List[float]:
     return [0.2, 0.2 + 1.3]
 
 
 def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    cue = (props.get("cues") or [0.2])[0]   # the moment the narration names the number (engine/sync.py): the count-up starts then
+    lt = lt - max(0.0, float(cue) - 0.2)
     value = str(props.get("value", "")).strip()
     label = str(props.get("label", "")).strip()
     cy = (ctx.bottom + CONTENT_TOP) / 2 - 40
@@ -95,12 +113,15 @@ def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
         count_p = ease_out_cubic(progress(lt, 0.2, 0.7))
 
     if is_pct:
-        r = 300
-        cv.arc(CENTER_X, cy, r, 0, 360, with_alpha(th.card_outline, 1.0) if th.name != "paper" else (31, 41, 55, 40), 26)
+        r = RING_R
+        cv.arc(CENTER_X, cy, r, 0, 360, with_alpha(th.card_outline, 1.0) if th.name != "paper" else (31, 41, 55, 40), RING_STROKE)
         sweep = 360 * (val / 100.0) * count_p
         if sweep > 1:
-            cv.arc(CENTER_X, cy, r, -90, -90 + sweep, th.accent + (255,), 26)
-    size, _ = cv.fit_text(shown, "bold", 1200, 300, 250 if not is_pct else 200, 80)
+            cv.arc(CENTER_X, cy, r, -90, -90 + sweep, th.accent + (255,), RING_STROKE)
+        final = f"{pre}{format_number(val, dec, comma)}{suf}"
+        size = ring_text_size(cv, final)
+    else:
+        size, _ = cv.fit_text(shown, "bold", 1200, 300, 250, 80)
     cv.text(CENTER_X, cy + (1 - ease_out_cubic(progress(lt, 0.1, 0.6))) * 30, shown, "bold", size, with_alpha(th.text, ease_out_cubic(progress(lt, 0.05, 0.4))), anchor="mm")
     if label:
         p = ease_out_cubic(progress(lt, 0.7, 0.6))

@@ -155,7 +155,23 @@ class Canvas:
         return self.font(weight, size).getlength(s) / self.ss
 
     def text(self, x, y, s: str, weight="regular", size=40, fill=(255, 255, 255, 255), anchor="la"):
-        self.d.text((self._s(x), self._s(y)), s, font=self.font(weight, size), fill=fill, anchor=anchor)
+        """Draws text honouring the fill's alpha. (PIL's RGBA draw ignores the alpha of text on an RGB canvas: every fade-in used to appear at full
+        strength from its first frame, and text with alpha 0 was fully visible. Shapes blend correctly; text is blended here through a mask.)"""
+        a = int(fill[3]) if len(fill) == 4 else 255
+        if a <= 0 or not s:
+            return
+        font = self.font(weight, size)
+        X, Y = self._s(x), self._s(y)
+        if a >= 255:
+            self.d.text((X, Y), s, font=font, fill=tuple(fill[:3]) + (255,), anchor=anchor)
+            return
+        l, t, r, b = self.d.textbbox((X, Y), s, font=font, anchor=anchor)
+        box = (max(0, int(l) - 3), max(0, int(t) - 3), min(self.im.width, int(r) + 3), min(self.im.height, int(b) + 3))
+        if box[2] <= box[0] or box[3] <= box[1]:
+            return
+        mask = Image.new("L", (box[2] - box[0], box[3] - box[1]), 0)
+        ImageDraw.Draw(mask).text((X - box[0], Y - box[1]), s, font=font, fill=255, anchor=anchor)
+        self.im.paste(tuple(fill[:3]), box, mask.point(lambda v: v * a // 255))
 
     def wrap(self, s: str, weight: str, size: float, max_w: float) -> List[str]:
         font = self.font(weight, size)

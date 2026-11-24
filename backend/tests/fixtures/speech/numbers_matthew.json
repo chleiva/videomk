@@ -1,0 +1,78 @@
+{
+ "text": "Inflation rose by 3.4 percent last year; wages grew by only 2 percent, so most households felt poorer.",
+ "voice": "Matthew",
+ "marks": [
+  {
+   "word": "Inflation",
+   "start": 0.006
+  },
+  {
+   "word": "rose",
+   "start": 0.586
+  },
+  {
+   "word": "by",
+   "start": 0.85
+  },
+  {
+   "word": "3.4",
+   "start": 0.997
+  },
+  {
+   "word": "percent",
+   "start": 1.774
+  },
+  {
+   "word": "last",
+   "start": 2.187
+  },
+  {
+   "word": "year",
+   "start": 2.497
+  },
+  {
+   "word": "wages",
+   "start": 3.039
+  },
+  {
+   "word": "grew",
+   "start": 3.44
+  },
+  {
+   "word": "by",
+   "start": 3.673
+  },
+  {
+   "word": "only",
+   "start": 3.878
+  },
+  {
+   "word": "2",
+   "start": 4.103
+  },
+  {
+   "word": "percent",
+   "start": 4.321
+  },
+  {
+   "word": "so",
+   "start": 5.096
+  },
+  {
+   "word": "most",
+   "start": 5.278
+  },
+  {
+   "word": "households",
+   "start": 5.562
+  },
+  {
+   "word": "felt",
+   "start": 6.123
+  },
+  {
+   "word": "poorer",
+   "start": 6.382
+  }
+ ]
+}

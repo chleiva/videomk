@@ -87,6 +87,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {**base, "plot": {"legit": False, "reason": result.get("reason", "")}}
     plan, language, region = result["plan"], result["plan"]["language"], result["plan"].get("region")
 
+    plan["captions"] = bool(event.get("captions", True))   # the creator's choice: subtitles on (default) or off
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     forced = os.environ.get("TTS_VOICE", "")
     if forced:  # an operator-forced voice overrides the director's casting: one voice, no dialogue

@@ -141,6 +141,10 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
                 if op["mood"] not in ("calm", "bright", "tense"):
                     raise EditError("unknown mood")
                 new["mood"] = op["mood"]
+            if "captions" in op:
+                if not isinstance(op["captions"], bool):
+                    raise EditError("captions must be true or false")
+                new["captions"] = op["captions"]
         elif kind == "set_music":
             music = plan_mod.sanitize_music(op.get("music"), len(beats))
             if music is None and op.get("music") not in (None, {}):

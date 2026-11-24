@@ -3,6 +3,7 @@ import hashlib
 import json
 from typing import Any, Dict, List, Sequence
 
+from . import sync as sync_mod
 from .align import estimate_words
 from .scenes import SCENES
 
@@ -26,6 +27,7 @@ def build_timeline(
 ) -> Dict[str, Any]:
     """beat_info[i] = {'duration': speech seconds, 'asset': optional key for image scenes}."""
     scenes: List[Dict[str, Any]] = []
+    sync_items = sync_anchored = 0
     t = 0.0
     chapters: List[Dict[str, Any]] = []
     for i, beat in enumerate(plan["beats"]):
@@ -39,7 +41,10 @@ def build_timeline(
         if stype == "gallery":
             shots = [g for g in (info.get("gallery") or []) if g.get("asset")]
             if len(shots) >= 2:
-                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", "")}
+                queries = [g.get("query") for g in shots]
+                if not all(queries):
+                    queries = list(props.get("image_queries") or [])[: len(shots)]
+                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", ""), "image_queries": queries}
             elif len(shots) == 1:  # only one photograph could be found: a plain image scene (the image branch below attaches the asset and credit)
                 info = {**info, "asset": shots[0]["asset"], "credit": shots[0].get("credit") or None}
                 stype, props = "image", {"alt": props.get("alt", ""), "ken_burns": "in"}
@@ -59,6 +64,15 @@ def build_timeline(
                     props["credit"] = info["credit"]
             else:  # scout found nothing usable: degrade to a clean title card instead of a hole
                 stype, props = "title", {"title": props.get("alt") or props.get("image_query", ""), "subtitle": ""}
+        # words: measured from the audio when we have them (engine/align.py), else the proportional estimate; both in scene time (after the lead-in)
+        if info.get("words"):
+            words = [[w, round(LEAD + float(s), 3), round(LEAD + float(e), 3)] for w, s, e in info["words"]]
+        else:
+            words = [list(w) for w in estimate_words(beat["narration"], speech, lead=LEAD)]
+        found = sync_mod.apply(stype, props, words, dur)   # anchor reveals to the words that name them (props.cues / props.cuts)
+        if found:
+            sync_items += found["items"]
+            sync_anchored += found["anchored"]
         # reveal cues, as seconds from scene start, for sfx; scenes without cues get none
         cues = SCENES[stype][1](props, dur)
         scenes.append(
@@ -68,7 +82,7 @@ def build_timeline(
                 "start": round(t, 4),
                 "duration": round(dur, 4),
                 "props": props,
-                "words": [list(w) for w in estimate_words(beat["narration"], speech, lead=LEAD)],
+                "words": words,
                 "audio_key": info.get("audio_key"),
                 "narration_offset": LEAD,
                 "cues": [round(c, 3) for c in cues[:8]],
@@ -91,7 +105,8 @@ def build_timeline(
         "height": height,
         "theme": plan.get("theme", "midnight"),
         "mood": plan.get("mood", "calm"),
-        "captions": True,
+        "captions": bool(plan.get("captions", True)),
+        "sync": {"items": sync_items, "anchored": sync_anchored, "aligned_beats": sum(1 for b in beat_info if b.get("words"))},
         "duration": round(t, 4),
         "scenes": scenes,
         "chapters": chapters,
@@ -104,7 +119,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
     out = []
     for b in plan["beats"]:
         m = b.get("media") or {}
-        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
+        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
     return out
 
 

@@ -125,7 +125,8 @@ def test_the_timeline_makes_a_gallery_a_single_image_or_a_card_when_photos_are_m
     def sc(info):
         return build_timeline(plan, [{"duration": 6.0, **info}], video_id="v")["scenes"][0]
     full = sc({"gallery": [{"asset": "a.jpg", "credit": "Photo: A"}, {"asset": "b.jpg", "credit": ""}, {"asset": "c.jpg", "credit": "Photo: C"}]})
-    assert full["type"] == "gallery" and full["props"] == {"assets": ["a.jpg", "b.jpg", "c.jpg"], "credits": ["Photo: A", "", "Photo: C"], "alt": "a"}
+    assert full["type"] == "gallery" and {k: full["props"][k] for k in ("assets", "credits", "alt", "image_queries")} == {"assets": ["a.jpg", "b.jpg", "c.jpg"], "credits": ["Photo: A", "", "Photo: C"], "alt": "a", "image_queries": ["g1a", "g1b", "g1c"]}
+    assert full["props"]["cuts"][0] == 0.0 and len(full["props"]["cuts"]) == 3
     one = sc({"gallery": [{"asset": "a.jpg", "credit": "Photo: A"}]})
     assert one["type"] == "image" and one["props"]["asset"] == "a.jpg" and one["props"]["credit"] == "Photo: A"
     assert sc({"gallery": []})["type"] == "title" and sc({})["type"] == "title"
