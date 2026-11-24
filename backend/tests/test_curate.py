@@ -276,3 +276,12 @@ def test_a_changed_user_gallery_is_remade_and_an_unchanged_one_is_not():
     beat["scene"]["props"]["photos"] = ["P1", "P3"]                  # same captions in the query, different photos: must still be remade
     beat["scene"]["props"]["image_queries"] = ["photo 1", "photo 2", "photo 3"]
     assert plan_mod.needs_media(plan, beat) is True
+
+
+def test_the_api_schema_allows_exactly_as_many_media_ids_as_the_server_limit():
+    """API Gateway validates the request body before any code runs: its limit must follow common.photo_ids.MAX_PHOTOS (it was left at 10 once, and 100-photo requests were refused)."""
+    import re
+    from common import photo_ids
+    src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "backend_stack.py"), encoding="utf-8").read()
+    m = re.search(r'"media": apigw\.JsonSchema\(type=apigw\.JsonSchemaType\.ARRAY, min_items=1, max_items=(\d+)', src)
+    assert m and int(m.group(1)) == photo_ids.MAX_PHOTOS
