@@ -30,7 +30,6 @@ final class Dictation {
     private var onDevice = false
     private var retriedOnServer = false
     private var recognizer: SFSpeechRecognizer?
-    private var generation = 0          // bumped by every stop: a start that was cancelled while a permission prompt was up must not begin listening afterwards
 
     var isListening: Bool { state == .listening || state == .starting }
 
@@ -41,15 +40,12 @@ final class Dictation {
     func start(currentText: String) async {
         guard !isListening else { return }
         state = .starting
-        generation += 1
-        let mine = generation
 
         // 1. What does the phone allow? Ask for what is still undecided; a denial is not an error, it switches to the fallback.
         var speech = Self.speechPermission()
         var mic = Self.microphonePermission()
         if speech == .undetermined { speech = await Self.requestSpeech() }
         if mic == .undetermined, speech != .denied { mic = await Self.requestMicrophone() }
-        guard mine == generation else { if state == .starting { state = .idle }; return }   // stopped while the prompt was up
 
         // 2. Is there a recognizer for this language?
         let supported = SFSpeechRecognizer.supportedLocales().map(\.identifier)
@@ -98,7 +94,6 @@ final class Dictation {
     }
 
     func stop() {
-        generation += 1
         guard state != .idle else { return }
         request?.endAudio()   // lets the recognizer deliver its final result
         teardown(keepTask: true)
