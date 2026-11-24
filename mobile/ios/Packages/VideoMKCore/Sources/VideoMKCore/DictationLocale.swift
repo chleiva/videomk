@@ -25,3 +25,26 @@ public enum DictationLanguage: String, CaseIterable, Sendable, Identifiable {
         return mine.first(where: { $0 == preferred }) ?? mine.first ?? preferred
     }
 }
+
+/// What the mic button should do, decided from what the phone allows. Pure, so every combination is tested.
+/// Order of preference: our own recognizer (live text, on device when possible) → the keyboard's built-in dictation → a clear way to turn one on.
+public enum DictationPlan: Equatable, Sendable {
+    public enum Permission: Sendable, Equatable { case undetermined, granted, denied }
+    case useApp                       // our recognizer (the system asks for any missing permission first)
+    case useKeyboard(String)          // focus the text field and point at the keyboard's own mic key
+    case blocked(String)              // nothing usable: say how to fix it
+
+    public static func decide(speech: Permission, microphone: Permission, recognizerAvailable: Bool, keyboardDictationEnabled: Bool) -> DictationPlan {
+        let appCanWork = speech != .denied && microphone != .denied && recognizerAvailable
+        if appCanWork { return .useApp }
+        if keyboardDictationEnabled {
+            let why = microphone == .denied ? "Microphone access is off for videomk, so use the microphone key on your keyboard instead."
+                : speech == .denied ? "Speech recognition is off for videomk, so use the microphone key on your keyboard instead."
+                : "Tap the microphone key on your keyboard to dictate."
+            return .useKeyboard(why)
+        }
+        if microphone == .denied { return .blocked("Allow microphone access for videomk in Settings, or turn on Dictation in Settings › General › Keyboard.") }
+        if speech == .denied { return .blocked("Allow speech recognition for videomk in Settings, or turn on Dictation in Settings › General › Keyboard.") }
+        return .blocked("Dictation isn't available right now. You can turn it on in Settings › General › Keyboard, or type your idea.")
+    }
+}

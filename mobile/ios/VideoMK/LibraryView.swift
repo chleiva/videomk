@@ -53,7 +53,7 @@ struct LibraryView: View {
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingWallet) { WalletView() }
         .sensoryFeedback(.success, trigger: model.completions)
-        .onAppear { dictation.onText = { text = $0 } }
+        .onAppear { dictation.onText = { text = $0 }; dictation.onKeyboardFallback = { composerFocused = true } }
         .onDisappear { dictation.stop() }
     }
 

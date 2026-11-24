@@ -48,8 +48,14 @@ final class AppModel {
 
     // MARK: session
 
+    private var started = false
+
+    /// Once per launch. The root view's `.task` can run again (a rotation or a full-screen presentation can rebuild it); a second start must
+    /// never re-run the session setup (in debug builds that includes the test sign-out).
     func start() async {
         guard let auth else { phase = .notConfigured; return }
+        guard !started else { return }
+        started = true
         #if DEBUG
         await seedDebugSession(auth)
         #endif

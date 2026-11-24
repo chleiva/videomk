@@ -87,6 +87,53 @@ final class VideoMKUITests: XCTestCase {
         shot(app, "12-finished")
     }
 
+    /// A finished video opens, goes full screen (landscape), keeps its place, and comes back. Uses an existing Ready video on QA.
+    @MainActor func testPlayerGoesFullScreenAndBack() throws {
+        let app = try launch(signedIn: true)
+        XCTAssertTrue(readyRow(app).waitForExistence(timeout: 30), "needs a finished video in the library")
+        readyRow(app).tap()
+        let full = app.buttons["Full screen"]
+        if !full.waitForExistence(timeout: 30) { print("TREE:", app.debugDescription) }
+        XCTAssertTrue(full.exists, "the player offers full screen")
+        shot(app, "17-inline-player")
+        full.tap()
+        XCTAssertTrue(app.buttons["closeFullScreenButton"].waitForExistence(timeout: 10), "full screen opened")
+        let window = app.windows.firstMatch
+        let turned = Date().addingTimeInterval(10)
+        while window.frame.width <= window.frame.height && Date() < turned { usleep(300_000) }
+        sleep(4)   // let the layout settle after the rotation
+        shot(app, "18-full-screen")
+        if let hold = ProcessInfo.processInfo.environment["VMK_HOLD_FULLSCREEN"], let secs = UInt32(hold) { sleep(secs) }   // lets the host take a real framebuffer screenshot
+        XCTAssertGreaterThan(window.frame.width, window.frame.height, "full screen is landscape")
+        app.buttons["closeFullScreenButton"].tap()
+        if !full.waitForExistence(timeout: 15) { print("TREE2:", app.debugDescription) }
+        XCTAssertTrue(full.exists, "back on the video page")
+        XCTAssertGreaterThan(window.frame.height, window.frame.width, "back to portrait")
+        XCTAssertEqual(app.state, .runningForeground)
+    }
+
+    /// Dictation must never take the app down, whatever the permission or recognizer state. The mic is pressed with both permissions granted
+    /// (`xcrun simctl privacy booted grant microphone|speech com.videomk.app`), the app must stay alive while "listening", and stop cleanly.
+    @MainActor func testDictationDoesNotCrash() throws {
+        addUIInterruptionMonitor(withDescription: "permissions") { alert in   // microphone and speech recognition ask on first use
+            for name in ["Allow", "OK", "Allow While Using App"] where alert.buttons[name].exists { alert.buttons[name].tap(); return true }
+            return false
+        }
+        let app = try launch(signedIn: true)
+        let mic = app.buttons["micButton"]
+        XCTAssertTrue(mic.waitForExistence(timeout: 20))
+        for round in 1...3 {
+            mic.tap()
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.05)).tap()   // empty status-bar area: lets the interruption monitor answer a permission alert
+            sleep(3)   // long enough for the audio tap to deliver buffers on its real-time thread
+            XCTAssertEqual(app.state, .runningForeground, "the app is still running after starting dictation (round \(round))")
+            shot(app, "16-dictation-\(round)")
+            if mic.label == "Stop dictation" { mic.tap(); sleep(1) }
+            XCTAssertEqual(app.state, .runningForeground, "the app is still running after stopping dictation (round \(round))")
+        }
+        XCTAssertTrue(app.textFields["composerField"].exists)
+    }
+
     /// Attach photos, say what the video should be about, send: the photos upload, the video is made around them, and it plays.
     /// Needs `TEST_RUNNER_VMK_DEBUG_PHOTO_FILES=/path/a.jpg:/path/b.jpg` (the system photo picker can't be driven from a test). Makes one real video on QA.
     func testAVideoFromYourPhotos() throws {

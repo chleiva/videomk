@@ -52,7 +52,7 @@ struct VideoDetailView: View {
 
     @ViewBuilder private func playerSection(_ video: VideoItem) -> some View {
         Group {
-            if let player { VideoPlayer(player: player) }
+            if let player { InlinePlayer(player: player) }
             else if let playbackError {
                 VStack(spacing: 12) {
                     Text(playbackError).foregroundStyle(Theme.textSecondary)

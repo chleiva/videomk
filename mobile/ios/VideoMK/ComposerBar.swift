@@ -25,7 +25,15 @@ struct ComposerBar: View {
                 Label(message, systemImage: "mic.slash").font(.footnote).foregroundStyle(Theme.warning)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
                     .transition(.opacity)
-                    .task { try? await Task.sleep(for: .seconds(4)); dictation.clearUnavailable() }
+                    .accessibilityIdentifier("dictationUnavailable")
+                    .task { try? await Task.sleep(for: .seconds(8)); dictation.clearHint() }
+            }
+            if case .keyboardHint(let message) = dictation.state {
+                Label(message, systemImage: "keyboard").font(.footnote).foregroundStyle(Theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
+                    .transition(.opacity)
+                    .accessibilityIdentifier("dictationKeyboardHint")
+                    .task { try? await Task.sleep(for: .seconds(8)); dictation.clearHint() }
             }
             if dictation.isListening {
                 Label("Listening… tap the microphone when you're done", systemImage: "waveform").font(.footnote).foregroundStyle(Theme.textSecondary)
@@ -82,14 +90,15 @@ struct ComposerBar: View {
     }
 
     private var photoButton: some View {
-        PhotosPicker(selection: $photos.picked, maxSelectionCount: max(1, photos.remaining), matching: .images) {
+        let full = photos.remaining == 0
+        return PhotosPicker(selection: $photos.picked, maxSelectionCount: max(1, photos.remaining), matching: .images) {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(photos.remaining == 0 ? Theme.textSecondary : Theme.primary)
+                .foregroundStyle(full ? Theme.textSecondary : Theme.primary)
                 .frame(width: 40, height: 44)
                 .contentShape(Rectangle())
         }
-        .disabled(photos.remaining == 0)
+        .disabled(full)
         .accessibilityLabel("Add photos")
         .accessibilityHint("Choose up to \(PhotoLimits.maxPhotos) of your photos to use in the video")
         .accessibilityIdentifier("photoButton")

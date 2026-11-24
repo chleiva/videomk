@@ -1,19 +1,26 @@
 import AVFoundation
 import Observation
 import Speech
+import UIKit
 import VideoMKCore
 
-/// Speech to text for the brief. Uses on-device recognition when the iPhone supports it, so audio stays on the phone.
+/// Speech to text for the brief. Our own recognizer gives live text (on the device when the iPhone supports it). If it can't be used
+/// (permission off, no recognizer, no usable microphone) we fall back to the keyboard's built-in dictation, or say how to turn one on.
+///
+/// IMPORTANT (Swift 6): every callback the system invokes on its own thread (permission replies, the audio tap, the recognizer) is created
+/// in a `nonisolated` helper below. A closure written inside this `@MainActor` class is main-actor-isolated, and iOS aborts the app
+/// the moment it is called from another thread: that was the crash on the first tap of the microphone.
 @MainActor @Observable
 final class Dictation {
-    enum State: Equatable { case idle, starting, listening, unavailable(String) }
+    enum State: Equatable { case idle, starting, listening, unavailable(String), keyboardHint(String) }
 
     private(set) var state: State = .idle
     /// No language menu: dictation follows the phone's first preferred language we support (English or Spanish).
-    /// A multilingual model can replace this later; the server detects the brief's language from the text either way.
     private var language: DictationLanguage { DictationLanguage.initial(saved: nil, preferred: Locale.preferredLanguages) }
     /// Called with the full text (what was already typed plus what was said) every time the recognizer updates.
     var onText: ((String) -> Void)?
+    /// Called when we hand over to the keyboard's own dictation: the screen focuses the text field.
+    var onKeyboardFallback: (() -> Void)?
 
     private let engine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
@@ -27,42 +34,50 @@ final class Dictation {
     }
 
     func start(currentText: String) async {
-        guard state != .starting, state != .listening else { return }
+        guard !isListening else { return }
         state = .starting
-        guard await authorized() else { return }
+
+        // 1. What does the phone allow? Ask for what is still undecided; a denial is not an error, it switches to the fallback.
+        var speech = Self.speechPermission()
+        var mic = Self.microphonePermission()
+        if speech == .undetermined { speech = await Self.requestSpeech() }
+        if mic == .undetermined, speech != .denied { mic = await Self.requestMicrophone() }
+
+        // 2. Is there a recognizer for this language?
         let supported = SFSpeechRecognizer.supportedLocales().map(\.identifier)
         let id = language.locale(region: Locale.current.region?.identifier, supported: supported)
-        guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)) ?? SFSpeechRecognizer(locale: Locale(identifier: "en-US")), recognizer.isAvailable else {
-            state = .unavailable("Dictation isn't available right now.")
-            return
+        let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)) ?? SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+        let plan = DictationPlan.decide(speech: speech, microphone: mic, recognizerAvailable: recognizer?.isAvailable ?? false, keyboardDictationEnabled: Self.keyboardDictationEnabled)
+        switch plan {
+        case .blocked(let message): state = .unavailable(message); return
+        case .useKeyboard(let message): fallBackToKeyboard(message); return
+        case .useApp: break
         }
+        guard let recognizer else { return }
+
+        // 3. Listen. Anything that goes wrong here also ends in the fallback, never in a crash.
         base = currentText.isEmpty || currentText.hasSuffix(" ") ? currentText : currentText + " "
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
         request.requiresOnDeviceRecognition = recognizer.supportsOnDeviceRecognition
         self.request = request
-
         do {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.record, mode: .measurement, options: .duckOthers)
             try session.setActive(true, options: .notifyOthersOnDeactivation)
             let input = engine.inputNode
-            let box = RequestBox(request)
-            input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) { buffer, _ in box.request.append(buffer) }
+            let format = input.outputFormat(forBus: 0)
+            guard format.sampleRate > 0, format.channelCount > 0 else { throw DictationError.noMicrophone }   // installTap would trap on an empty format (a call in progress, no input route)
+            input.removeTap(onBus: 0)
+            input.installTap(onBus: 0, bufferSize: 1024, format: format, block: Self.makeTap(for: request))
             engine.prepare()
             try engine.start()
         } catch {
             teardown()
-            state = .unavailable("Couldn't start the microphone.")
+            Self.keyboardDictationEnabled ? fallBackToKeyboard("The microphone isn't available for dictation right now, so use the microphone key on your keyboard.") : (state = .unavailable("Couldn't start the microphone. Is another app or a call using it?"))
             return
         }
-
-        task = recognizer.recognitionTask(with: request) { [weak self] result, error in
-            let text = result?.bestTranscription.formattedString
-            let isFinal = result?.isFinal ?? false
-            let failed = error != nil
-            Task { @MainActor in self?.handle(text: text, isFinal: isFinal, failed: failed) }
-        }
+        task = recognizer.recognitionTask(with: request, resultHandler: Self.makeResultHandler(for: self))
         state = .listening
     }
 
@@ -73,11 +88,18 @@ final class Dictation {
         state = .idle
     }
 
-    func clearUnavailable() { if case .unavailable = state { state = .idle } }
+    func clearHint() {
+        switch state { case .unavailable, .keyboardHint: state = .idle; default: break }
+    }
 
-    private func handle(text: String?, isFinal: Bool, failed: Bool) {
+    fileprivate func handle(text: String?, isFinal: Bool, failed: Bool) {
         if let text { onText?(base + text) }
         if (isFinal || failed) && state != .idle { teardown(); state = .idle }
+    }
+
+    private func fallBackToKeyboard(_ message: String) {
+        state = .keyboardHint(message)
+        onKeyboardFallback?()
     }
 
     private func teardown(keepTask: Bool = false) {
@@ -87,19 +109,48 @@ final class Dictation {
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
-    private func authorized() async -> Bool {
-        let speech = await withCheckedContinuation { (c: CheckedContinuation<SFSpeechRecognizerAuthorizationStatus, Never>) in
-            SFSpeechRecognizer.requestAuthorization { c.resume(returning: $0) }
+    private enum DictationError: Error { case noMicrophone }
+
+    // MARK: system state (nonisolated: safe to call from anywhere)
+
+    /// True when the keyboard's own dictation key is available (Settings › General › Keyboard › Enable Dictation).
+    static var keyboardDictationEnabled: Bool { UITextInputMode.activeInputModes.contains { $0.primaryLanguage == "dictation" } }
+
+    nonisolated static func speechPermission() -> DictationPlan.Permission {
+        switch SFSpeechRecognizer.authorizationStatus() { case .authorized: .granted; case .notDetermined: .undetermined; default: .denied }
+    }
+
+    nonisolated static func microphonePermission() -> DictationPlan.Permission {
+        switch AVAudioApplication.shared.recordPermission { case .granted: .granted; case .undetermined: .undetermined; default: .denied }
+    }
+
+    nonisolated static func requestSpeech() async -> DictationPlan.Permission {
+        await withCheckedContinuation { (c: CheckedContinuation<DictationPlan.Permission, Never>) in
+            SFSpeechRecognizer.requestAuthorization { c.resume(returning: $0 == .authorized ? .granted : .denied) }
         }
-        guard speech == .authorized else {
-            state = .unavailable("Allow speech recognition in Settings to dictate your brief.")
-            return false
+    }
+
+    nonisolated static func requestMicrophone() async -> DictationPlan.Permission {
+        await withCheckedContinuation { (c: CheckedContinuation<DictationPlan.Permission, Never>) in
+            AVAudioApplication.requestRecordPermission { c.resume(returning: $0 ? .granted : .denied) }
         }
-        guard await AVAudioApplication.requestRecordPermission() else {
-            state = .unavailable("Allow microphone access in Settings to dictate your brief.")
-            return false
+    }
+
+    // MARK: callbacks the system runs on its own threads (must be built outside the main actor)
+
+    nonisolated private static func makeTap(for request: SFSpeechAudioBufferRecognitionRequest) -> AVAudioNodeTapBlock {
+        let box = RequestBox(request)
+        return { buffer, _ in box.request.append(buffer) }
+    }
+
+    nonisolated private static func makeResultHandler(for dictation: Dictation) -> @Sendable (SFSpeechRecognitionResult?, Error?) -> Void {
+        let weakBox = WeakDictation(dictation)
+        return { result, error in
+            let text = result?.bestTranscription.formattedString
+            let isFinal = result?.isFinal ?? false
+            let failed = error != nil
+            Task { @MainActor in weakBox.value?.handle(text: text, isFinal: isFinal, failed: failed) }
         }
-        return true
     }
 }
 
@@ -107,4 +158,9 @@ final class Dictation {
 private final class RequestBox: @unchecked Sendable {
     let request: SFSpeechAudioBufferRecognitionRequest
     init(_ r: SFSpeechAudioBufferRecognitionRequest) { request = r }
+}
+
+private final class WeakDictation: @unchecked Sendable {
+    weak var value: Dictation?
+    init(_ d: Dictation) { value = d }
 }

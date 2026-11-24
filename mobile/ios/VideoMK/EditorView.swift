@@ -164,7 +164,7 @@ struct DoneView: View {
             VStack(spacing: 16) {
                 Text(mode == .final ? "Published" : "Preview ready").font(.title2.bold()).foregroundStyle(Theme.text).accessibilityIdentifier("doneTitle")
                 if let player {
-                    VideoPlayer(player: player).aspectRatio(16 / 9, contentMode: .fit)
+                    InlinePlayer(player: player).aspectRatio(16 / 9, contentMode: .fit)
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
                 }
                 if mode == .preview { Text("This is a draft. Publish from the editor to make the full-quality video.").font(.callout).foregroundStyle(Theme.textSecondary) }

@@ -110,3 +110,28 @@ extension CoreTests {
         #expect(body["media"] == nil)                                                              // no photos: the field is not sent at all
     }
 }
+
+@Suite struct DictationPlanTests {
+    typealias P = DictationPlan.Permission
+    @Test func ourRecognizerIsUsedWheneverItCanWork_evenBeforePermissionsAreAsked() {
+        #expect(DictationPlan.decide(speech: .undetermined, microphone: .undetermined, recognizerAvailable: true, keyboardDictationEnabled: false) == .useApp)
+        #expect(DictationPlan.decide(speech: .granted, microphone: .granted, recognizerAvailable: true, keyboardDictationEnabled: true) == .useApp)
+    }
+
+    @Test func aDeniedPermissionOrAMissingRecognizerFallsBackToTheKeyboardWhenItsDictationIsOn() {
+        for (s, m, r) in [(P.denied, P.granted, true), (.granted, .denied, true), (.granted, .granted, false), (.undetermined, .undetermined, false)] {
+            guard case .useKeyboard(let why) = DictationPlan.decide(speech: s, microphone: m, recognizerAvailable: r, keyboardDictationEnabled: true) else { Issue.record("expected keyboard fallback for \(s) \(m) \(r)"); continue }
+            #expect(why.contains("keyboard"))
+        }
+    }
+
+    @Test func withNothingUsableTheMessageSaysHowToFixIt() {
+        guard case .blocked(let mic) = DictationPlan.decide(speech: .granted, microphone: .denied, recognizerAvailable: true, keyboardDictationEnabled: false),
+              case .blocked(let speech) = DictationPlan.decide(speech: .denied, microphone: .granted, recognizerAvailable: true, keyboardDictationEnabled: false),
+              case .blocked(let none) = DictationPlan.decide(speech: .granted, microphone: .granted, recognizerAvailable: false, keyboardDictationEnabled: false)
+        else { Issue.record("expected blocked"); return }
+        #expect(mic.contains("microphone") && mic.contains("Keyboard"))
+        #expect(speech.contains("speech recognition") && speech.contains("Keyboard"))
+        #expect(none.contains("Settings") && none.contains("type"))
+    }
+}
