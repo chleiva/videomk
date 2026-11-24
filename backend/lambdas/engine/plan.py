@@ -70,7 +70,7 @@ def music_rules(tracks: Optional[List[Dict[str, Any]]] = None) -> str:
     if tracks:
         return ("- Music: add a \"music\" object to the plan: {\"track\": \"<id>\", \"changes\": optional [{\"beat\": <1-based beat number>, \"track\": \"<id>\"}]}. "
                 "Choose from this curated library of recordings (id, length, energy 1-5, tempo, then what to expect):\n" + library_mod.prompt_list(tracks) + "\n"
-                "  Pick the recording whose description fits THIS subject and its mood, and vary your choices from video to video. A track shorter than the video loops smoothly. "
+                "  How to choose: first decide the video's dominant feeling and purpose (inform calmly, excite, warn, amuse, reflect, inspire, reassure), then pick the recording whose description names that feeling and kind of topic. The topic's words alone mislead: a news item about a tragedy wants a solemn bed, not an upbeat newsroom one; a coding tutorial wants steady and unobtrusive, not dramatic. Match energy to the pace of the script (calm explanation 1-2, everyday topics 3, announcements, sport or launches 4-5). Vary your choices from video to video. A track shorter than the video loops smoothly. "
                 "Change track at most twice, only at a real shift of mood or chapter, never within the first 12 seconds; a pause (a silent beat) is a good place for a change.\n" + sfx)
     return ("- Music: add a \"music\" object to the plan: {\"style\": \"<id>\", \"energy\": 1-5, \"key\": optional like \"D minor\", \"tempo\": optional bpm 50-140, "
             "\"changes\": optional [{\"beat\": <1-based beat number>, \"style\": \"<id>\", \"energy\": 1-5}]}. Styles:\n" + music_mod.prompt_list() + "\n"

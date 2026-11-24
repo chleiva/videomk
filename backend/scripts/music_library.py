@@ -74,6 +74,44 @@ BRIEFS = [
      "Grand but restrained orchestra: strings, horns, soft timpani. Big achievements, exploration, history of great things."),
     ("meditative-drone", "Meditative drone", ["calm", "still"], 1, 50, "C major", "Meditative evolving drone with singing bowls and very soft pads, no rhythm, no melody, slow and still.",
      "Almost still: evolving drone, singing bowls, very soft pads, no rhythm. Silent beats, breathing and mindfulness, minimal narration."),
+    # ---- round 2 (2026-11-24): more dynamic and more varied, after the first round turned out calm-heavy (nothing above 118 bpm, no groove- or percussion-led tracks)
+    ("driving-electro-pop", "Driving electro pop", ["energetic", "modern"], 5, 124, "F# minor", "Driving modern electro-pop instrumental: four-on-the-floor kick, bright plucked synth arpeggios, side-chained pads and a rolling bass, 124 bpm, f sharp minor, energetic and propulsive but clean and steady, no drops.",
+     "Driving four-on-the-floor electro pop with bright synth plucks and rolling bass: propulsive and modern, steady energy. Product launches, innovation, fast-moving tech, countdowns and top-10 lists."),
+    ("indie-pop-sunshine", "Indie pop sunshine", ["upbeat", "fresh"], 4, 116, "A major", "Bright indie-pop instrumental: clean jangly electric guitar, handclaps, bouncy bass, glockenspiel accents and live drums, 116 bpm, A major, sunny and fresh.",
+     "Bright indie pop: jangly guitar, handclaps, bouncy bass, glockenspiel. Lifestyle, tips and hacks, creators, youth culture, feel-good explainers."),
+    ("funk-groove", "Funk groove", ["groovy", "fun"], 4, 108, "E minor", "Tight instrumental funk groove: slap bass, clean wah-wah rhythm guitar, crisp drums and short muted horn stabs, 108 bpm, e minor, groovy but light.",
+     "Groovy funk: slap bass, wah guitar, tight drums, light horn stabs. Fun facts, music and culture, design, quirky history, lighter business topics."),
+    ("boom-bap-beat", "Boom-bap beat", ["urban", "confident"], 4, 92, "G minor", "Instrumental boom-bap hip hop beat: punchy dusty drums, warm Rhodes chords, deep bass and vinyl crackle, 92 bpm, g minor, confident head-nod groove.",
+     "Confident head-nod hip-hop beat: punchy dusty drums, Rhodes, deep bass. Urban culture, money and markets, street history, sneaker and fashion stories."),
+    ("synthwave-drive", "Synthwave drive", ["retro", "driving"], 4, 104, "A minor", "Retro synthwave instrumental: gated snare, pulsing analog bass, shimmering arpeggiated synths and warm pads, 104 bpm, a minor, nostalgic and driving.",
+     "Retro 80s synthwave: pulsing bass, shimmering arpeggios, gated drums. Tech and gaming history, cars, the 80s and 90s, sci-fi, the future."),
+    ("cinematic-percussive-drive", "Cinematic percussive drive", ["epic", "intense"], 5, 128, "C minor", "Intense cinematic hybrid-orchestral instrumental: driving taiko-style percussion, repeating low string ostinato and rising brass textures, 128 bpm, c minor, relentless forward motion, steady level, no huge crescendo.",
+     "Driving percussion and a relentless string ostinato: intense, high stakes, steady level. Sports, space race, wars and rivalries, disasters, big battles of ideas."),
+    ("rock-guitar-light", "Rock guitar, light", ["energetic", "bold"], 4, 120, "E major", "Light energetic instrumental rock: overdriven but clean-ish electric guitar riff, live drums with a steady backbeat and a driving bass, 120 bpm, E major, bold but not loud.",
+     "Light, energetic rock: a clean riff, steady backbeat, driving bass. Sports, startups and challengers, cars, courage and competition."),
+    ("bossa-nova-sunny", "Bossa nova, sunny", ["relaxed", "warm"], 3, 100, "D major", "Sunny bossa nova instrumental: nylon-string guitar with the classic syncopated rhythm, soft brushed percussion, upright bass and a little flute, 100 bpm, D major.",
+     "Sunny bossa nova: syncopated nylon guitar, brushes, upright bass. Food and drink, Brazil and Latin culture, beaches, easy lifestyle topics."),
+    ("afrobeat-sunny", "Afrobeat, sunny", ["rhythmic", "joyful"], 4, 112, "G major", "Joyful instrumental Afrobeat-inspired groove: interlocking clean guitar plucks, layered hand percussion, a rolling bass and bright mallet accents, 112 bpm, G major, steady and warm.",
+     "Joyful interlocking guitars and layered percussion with a rolling bass. World cultures, music and dance, markets and cities, celebration, growth."),
+    ("swing-jazz-upbeat", "Swing jazz, upbeat", ["jaunty", "nostalgic"], 4, 138, "F major", "Upbeat instrumental swing: walking upright bass, swing drums with brushes, bright piano and a light clarinet, 138 bpm, F major, jaunty and good-humoured.",
+     "Jaunty swing with walking bass, clarinet and bright piano. The 1920s to 40s, history with a smile, trivia, cities like New York and Paris, quirky stories."),
+    ("baroque-strings-light", "Baroque strings, light", ["elegant", "clever"], 3, 100, "G major", "Elegant light baroque-style instrumental: harpsichord and pizzicato strings with a flowing violin line, 100 bpm, G major, orderly and clever, not heavy.",
+     "Elegant harpsichord and strings in a baroque style: orderly and clever. European history, science and mathematics, art, architecture, royalty."),
+    ("newsroom-pulse", "Newsroom pulse", ["urgent", "informative"], 4, 120, "D minor", "Modern newsroom instrumental: a steady ticking pulse, low synth bass, punchy staccato strings and crisp percussion, 120 bpm, d minor, urgent but not alarming, consistent level.",
+     "A steady ticking pulse, staccato strings and crisp percussion: urgent but not alarming. News roundups, current affairs, politics and economy, explainers about what just happened."),
+    ("space-synth-wonder", "Space synth wonder", ["awe", "futuristic"], 3, 84, "B minor", "Futuristic space-themed instrumental: slowly evolving analog synth pads, soft pulsing arpeggios, deep sub bass and a few airy lead notes, 84 bpm, b minor, awe-inspiring and wide.",
+     "Evolving synth pads, soft pulsing arpeggios, deep bass: vast and futuristic. Space, physics, artificial intelligence, the far future, science fiction."),
+    ("east-asian-serene", "East Asian, serene", ["serene", "elegant"], 2, 80, "D minor", "Serene instrumental with East Asian-inspired colours: plucked zither-style strings, soft bamboo flute, gentle taiko-like low drum touches and warm pads, 80 bpm, pentatonic, d minor, calm and refined.",
+     "Plucked zither strings, bamboo flute and warm pads, calm and refined. East Asia, tea, gardens and philosophy, travel in Japan and China, mindful topics."),
+    # ---- round 2b: topics the first 37 briefs did not serve (coding and deep focus, comedy, noir mystery, retro gaming)
+    ("deep-focus-electronic", "Deep focus electronic", ["focused", "steady"], 2, 90, "A minor", "Minimal deep-focus electronic instrumental: a soft steady pulse, muted warm bass, sparse airy synth textures and a very quiet hi-hat, 90 bpm, a minor, almost no melody, constant and unobtrusive so it never competes with speech.",
+     "Steady minimal electronic with almost no melody: it stays out of the way. Coding and programming, software and data tutorials, study, long technical explanations."),
+    ("sitcom-quirky", "Sitcom quirky", ["funny", "light"], 4, 112, "F major", "Light comic sitcom-style instrumental: pizzicato strings, clarinet, bouncy upright bass, finger snaps and a muted trombone, 112 bpm, F major, cheeky and good-humoured, steady level.",
+     "Cheeky and light: pizzicato, clarinet, bouncy bass, finger snaps. Funny explainers, myths and mistakes, awkward situations, parodies, everyday absurdities."),
+    ("noir-slow-jazz", "Noir slow jazz", ["mysterious", "smoky"], 2, 70, "E minor", "Slow smoky noir jazz instrumental: muted trumpet, brushed drums, upright bass and a lonely piano, 70 bpm, e minor, late night and mysterious.",
+     "Smoky noir: muted trumpet, brushes, lonely piano. True crime and unsolved cases, detective stories, scandals, dark history of cities."),
+    ("chiptune-adventure", "Chiptune adventure", ["playful", "retro"], 4, 126, "C major", "Upbeat chiptune video-game instrumental: 8-bit square and triangle wave melodies, a bouncy bass, light noise drums, 126 bpm, C major, adventurous and nostalgic, no harsh sounds.",
+     "8-bit game music: bouncy, nostalgic and adventurous. Video games and their history, retro tech, programming for fun, quests and challenges, playful tech topics."),
 ]
 SPEC = {b[0]: dict(zip(("id", "title", "mood", "energy", "bpm", "key", "brief", "description"), b)) for b in BRIEFS}
 DRAFT = os.path.join(os.getcwd(), "music-draft")
@@ -124,7 +162,7 @@ def cmd_generate(a) -> int:
     except ImportError:
         print("pip install google-genai", file=sys.stderr)
         return 2
-    client = genai.Client(api_key=key)
+    client = genai.Client(api_key=key, http_options={"api_version": "v1beta"})   # Lyria 3.5 is served on v1beta
     ids = [i for i in (a.only.split(",") if a.only else SPEC) if i]
     unknown = [i for i in ids if i not in SPEC]
     if unknown:
