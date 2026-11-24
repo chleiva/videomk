@@ -124,7 +124,7 @@ def test_a_big_word_that_names_the_pause_is_dropped_in_any_language():
 
 def test_the_prompt_does_not_invite_a_title_about_silence():
     s = plan_mod.system_prompt("en", None)
-    assert "SILENT" not in s and "FROM THE SUBJECT" in s and 'never "silence"' in s
+    assert "SILENT" not in s and "Never a word about the pause or sound" in s and '"silence"' in s
 
 
 def test_a_silent_beat_with_a_meta_word_keeps_its_picture_but_loses_the_word():
@@ -143,3 +143,30 @@ def test_a_reply_with_text_or_a_second_object_after_the_json_is_still_read():
         assert plan_mod.parse_plan_json(raw)["legit"] is True, raw
     with pytest.raises(ValueError):
         plan_mod.parse_plan_json("I cannot help with that {not json")
+
+
+# ---------------------------------------------------------------- the director decides pauses and has a reason for each
+def test_the_director_prompt_has_the_craft_rules_and_makes_pauses_and_big_words_optional():
+    s = plan_mod.system_prompt("en", None)
+    for needle in ("hook in the first beat", "Never greet", "One idea per beat", "not decoration", "name its reason", "usually zero in videos under 2 minutes", "optional and rare", "never the narrated sentence"):
+        assert needle in s, needle
+    assert "include a few" not in s and "SILENT" not in s                                             # nothing tells the model to add pauses to be seasoned
+
+
+def test_a_pause_keeps_the_directors_reason_and_a_missing_reason_is_fine():
+    raw = {"legit": True, "title": "T", "description": "d", "voices": {"narrator": "Ruth"}, "beats": [
+        {"narration": "A first idea about rivers and bridges in the city.", "scene": {"type": "title", "props": {"title": "Rivers"}}},
+        {"narration": "", "hold": 4, "why": "lets the aerial shot of the old town land", "scene": {"type": "image", "props": {"image_query": "old town from above"}}},
+        {"narration": "And a second idea about the markets and the food.", "scene": {"type": "title", "props": {"title": "Markets"}}},
+        {"narration": "", "hold": 3, "scene": {"type": "image", "props": {"image_query": "market at dawn"}}},
+        {"narration": "A closing thought on the whole city and its people.", "scene": {"type": "title", "props": {"title": "End"}}}]}
+    plan, _ = plan_mod.validate_plan(raw)
+    pauses = [b for b in plan["beats"] if b.get("silent")]
+    assert pauses and pauses[0].get("why") == "lets the aerial shot of the old town land"
+    assert all("word" not in b["scene"]["props"] for b in pauses)                                      # no word unless the director chose one
+
+
+def test_the_staged_prompts_carry_the_arc_hook_and_pause_rules():
+    from engine import staged
+    assert "never a greeting or an agenda" in staged.outline_system("en", None) and "arc" in staged.outline_system("en", None)
+    assert "at most one pause in it" in staged.SECTION_ADDENDUM

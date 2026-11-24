@@ -69,7 +69,7 @@ def test_a_spoken_beat_that_is_too_short_is_still_dropped_and_the_big_word_is_cl
 
 def test_the_planner_is_told_about_pauses():
     p = plan_mod.system_prompt("en")
-    assert "SILENT beats" in p and '"hold"' in p and "never two in a row" in p and "never as the first or last beat" in p and "one big word" in p.lower() or "shown large" in p
+    assert "pause" in p and '"hold"' in p and "Never two in a row" in p and "never first or last" in p and "optional and rare" in p
 
 
 def test_silent_beats_are_media_that_needs_no_audio_file():
