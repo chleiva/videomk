@@ -98,19 +98,24 @@ def stat_cues(props: Dict[str, Any], dur: float) -> List[float]:
 
 def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     cue = (props.get("cues") or [0.2])[0]   # the moment the narration names the number (engine/sync.py): the count-up starts then
-    lt = lt - max(0.0, float(cue) - 0.2)
+    wait = max(0.0, float(cue) - 0.2)
+    waiting = lt < wait    # before the number is spoken the card is not empty: the label and a dim zero wait for it (it once sat blank for 9 seconds)
+    dim = 0.4 * ease_out_cubic(progress(lt, 0.1, 0.5)) if waiting else 1.0
+    lt = 0.9 if waiting else lt - wait
     value = str(props.get("value", "")).strip()
     label = str(props.get("label", "")).strip()
     cy = (ctx.bottom + CONTENT_TOP) / 2 - 40
     parsed = parse_number(value)
-    count_p = ease_out_expo(progress(lt, 0.2, 1.3))
+    count_p = 0.0 if waiting else ease_out_expo(progress(lt, 0.2, 1.3))
     if parsed:
         pre, val, dec, suf, comma = parsed
         shown = f"{pre}{format_number(val * count_p, dec, comma)}{suf}"
         is_pct = suf.strip().startswith("%") and 0 <= val <= 100
     else:
         shown, is_pct, val = value, False, 0.0
-        count_p = ease_out_cubic(progress(lt, 0.2, 0.7))
+        count_p = 0.0 if waiting else ease_out_cubic(progress(lt, 0.2, 0.7))
+        if waiting:
+            shown = ""   # a word-like value waits as the label alone
 
     if is_pct:
         r = RING_R
@@ -122,13 +127,13 @@ def draw_stat(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
         size = ring_text_size(cv, final)
     else:
         size, _ = cv.fit_text(shown, "bold", 1200, 300, 250, 80)
-    cv.text(CENTER_X, cy + (1 - ease_out_cubic(progress(lt, 0.1, 0.6))) * 30, shown, "bold", size, with_alpha(th.text, ease_out_cubic(progress(lt, 0.05, 0.4))), anchor="mm")
+    cv.text(CENTER_X, cy + (1 - ease_out_cubic(progress(lt, 0.1, 0.6))) * 30, shown, "bold", size, with_alpha(th.text, ease_out_cubic(progress(lt, 0.05, 0.4)) * dim), anchor="mm")
     if label:
-        p = ease_out_cubic(progress(lt, 0.7, 0.6))
+        p = ease_out_cubic(progress(lt, 0.7, 0.6)) * (dim / 0.4 * 0.55 if waiting else 1.0)
         lab_size, lines = cv.fit_text(label, "semibold", 1300, 150, 54, 32)
         base = cy + (330 if is_pct else 190)
         for i, line in enumerate(lines):
-            cv.text(CENTER_X, base + i * lab_size * 1.25 + (1 - p) * 18, line, "semibold", lab_size, with_alpha(th.muted, p), anchor="ma")
+            cv.text(CENTER_X, base + i * lab_size * 1.25 + (1 - p) * 18, line, "semibold", lab_size, with_alpha(th.muted, min(1.0, p)), anchor="ma")
 
 
 # ------------------------------------------------------------------ quote
