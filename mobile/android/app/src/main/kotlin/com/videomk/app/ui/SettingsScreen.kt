@@ -19,6 +19,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -63,6 +66,21 @@ fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
                     TextButton(onClick = { confirm = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("signOutButton")) { Text("Sign out", color = Vmk.colors.danger) }
                 }
             }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val photoSettings = remember { com.videomk.app.data.PhotoSettings(context) }
+            var dates by remember { mutableStateOf(photoSettings.useDates) }
+            var places by remember { mutableStateOf(photoSettings.useLocations) }
+            Card {
+                Column {
+                    Text("Photos", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
+                    SwitchRow("Use photo dates", "Puts your photos in the order they were taken and groups them by day", dates, "photoDatesSwitch") { dates = it; photoSettings.useDates = it }
+                    SwitchRow(
+                        "Use photo locations",
+                        "Names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves.",
+                        places, "photoLocationsSwitch",
+                    ) { places = it; photoSettings.useLocations = it }
+                }
+            }
             Card {
                 Column {
                     Text("About", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
@@ -84,5 +102,20 @@ fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
             confirmButton = { TextButton(onClick = { confirm = false; onSignOut() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmSignOut")) { Text("Sign out", color = Vmk.colors.danger) } },
             dismissButton = { TextButton(onClick = { confirm = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Cancel") } },
         )
+    }
+}
+
+@Composable
+private fun SwitchRow(title: String, explanation: String, checked: Boolean, tag: String, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 6.dp)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange).testTag(tag),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, color = Vmk.colors.text)
+            Text(explanation, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+        }
+        Switch(checked = checked, onCheckedChange = null)
     }
 }

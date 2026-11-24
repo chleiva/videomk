@@ -11,6 +11,12 @@ photos, length and look, credit cost), video page with Media3 ExoPlayer inline p
 picks, reorder/delete, Preview and Publish), credits screen, settings. Unknown scene types from the server (it recently added `clip` and `gallery`) show as a
 generic "Scene" and never crash the editor.
 
+## Photo dates and approximate places
+Before a photo is stripped, `PhotoExif` reads its capture time (`DateTimeOriginal`, else `DateTime`) and GPS from the **original** (the private cache copy made right after the pick). Latitude and
+longitude are rounded to 2 decimals (about 1 km) on the phone and sent only in the generate request's optional `media_meta` (`{mediaId: {taken, lat, lon}}`, only photos and fields that exist). The uploaded
+JPEG still has all metadata removed. Two switches in Settings > Photos (`PhotoSettings`, plain preferences, both default on) turn dates and locations off; when off they are not read at all. No
+`ACCESS_MEDIA_LOCATION` and no prompt: the system photo picker / MediaStore redact GPS, so photos reached through it send no location, while gallery apps reached through the chooser often hand over the original.
+
 ## Layout
 - `app/src/main/kotlin/com/videomk/app/core`: no Android classes, so it runs in plain JVM unit tests. Models, `ApiClient` (every endpoint and header), `AuthService`
   (PKCE, refresh with one request in flight), `LibraryMerge`/`ProgressEstimator`, `Editor` (snapshot, ops, diff), `Photos` (limits, geometry, multipart, presigned-POST

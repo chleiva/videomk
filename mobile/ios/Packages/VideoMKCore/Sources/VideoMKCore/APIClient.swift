@@ -69,9 +69,11 @@ public struct APIClient: Sendable {
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
-    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = []) async throws -> String {
+    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:]) async throws -> String {
         var fields: [String: Any] = ["prompt": Brief.normalized(prompt), "client_request_id": clientRequestID, "target_minutes": options.minutes]
         if !media.isEmpty { fields["media"] = media }
+        let meta = mediaMeta.filter { media.contains($0.key) && !$0.value.isEmpty }.mapValues(\.json).filter { !$0.value.isEmpty }
+        if !meta.isEmpty { fields["media_meta"] = meta }
         if let look = options.look { fields["theme"] = look.rawValue }
         if !options.captions { fields["captions"] = false }   // on is the server default: only the choice to turn them off is sent
         let body = try JSONSerialization.data(withJSONObject: fields)

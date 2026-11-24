@@ -134,6 +134,14 @@ class AppViewModelTest {
         assertEquals(1, backend.uploadCalls); assertEquals(listOf("media0", "media1", "media2"), backend.startCalls.single().third)
     }
 
+    @Test fun `what was read from each photo goes into the request keyed by the uploaded ids`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        a.submit("Tell the story of my trip", CreateOptions(), listOf(byteArrayOf(1), byteArrayOf(2)), listOf(com.videomk.app.core.PhotoMeta("2025-01-02T03:04:05", 48.86, 2.29), null))
+        assertEquals(setOf("media0"), backend.startMeta.single()!!.keys)
+        a.submit("A brief about photos with nothing", CreateOptions(), listOf(byteArrayOf(1)))
+        assertEquals(null, backend.startMeta.last())
+    }
+
     @Test fun `a failed request stays as a row with the reason, and retry sends the same request id (no second video)`() = runBlocking {
         val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
         backend.startError = ApiError.Quota("Daily limit reached")

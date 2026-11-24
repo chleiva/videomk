@@ -19,7 +19,7 @@ from botocore.exceptions import ClientError
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from common import usage, wallet
-from common.photo_ids import PhotoError, upload_key, valid_media_ids
+from common.photo_ids import PhotoError, upload_key, valid_media_ids, valid_media_meta
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -88,6 +88,9 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
     if body.get("media") is not None:
         try:
             out["media"] = valid_media_ids(body["media"])
+            meta = valid_media_meta(body.get("media_meta"), out["media"])
+            if meta:
+                out["media_meta"] = meta   # capture time and approximate place of the photos, only when the person allowed it in Settings
         except PhotoError as e:
             raise BadRequest(str(e)) from e
     if "captions" in body and body["captions"] is not None:

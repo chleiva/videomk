@@ -3,7 +3,7 @@ import copy
 
 import pytest
 
-from tests.element_utils import changed, render, themes
+from tests.element_utils import blank, changed, render, themes
 from engine import plan as plan_mod, sync, timeline as tl_mod
 from engine.scenes import ELEMENTS, SCENES, register_runtime
 from engine.scenes import registry
@@ -153,3 +153,28 @@ def test_the_credits_ledger_includes_photos_shown_by_elements():
         {"scene": {"type": "annotated_image"}, "media": {"element": {"ledger": {"id": "gone"}}, "element_failed": True}},
         {"scene": {"type": "title"}, "media": {}}]}
     assert [e["id"] for e in credits_ledger(plan)] == ["img", "g1", "g2", "annot"]
+
+
+@pytest.mark.parametrize("name", sorted(ELEMENTS))
+def test_no_element_ever_leaves_the_screen_empty_even_when_its_words_are_spoken_late(name):
+    """A scene whose parts are tied to the words that name them must still show something from the start: if the narrator says the key words at the end of a long beat
+    (it happened: a 14-second scene was blank for 11 seconds), the viewer must not stare at an empty background. Goes through the real sync step."""
+    el = ELEMENTS[name]
+    if el.anchors is None:
+        return
+    for sample in el.samples:
+        props = el.sanitize(copy.deepcopy(sample))
+        dur = max(10.0, el.min_seconds + 4)
+        texts = el.anchors(props)
+        words, t = [], 0.3
+        while t < dur * 0.72:                                     # filler narration about something else for the first three quarters of the beat
+            words.append(["well", t, t + 0.3]); t += 0.42
+        for tx in texts:                                          # then the parts are named, one after another
+            for tok in str(tx).split():
+                words.append([tok, t, t + 0.3]); t += 0.32
+        sync.apply(name, props, words, dur)
+        if "cues" in props:   # (a sample with nothing to anchor keeps the element's own default schedule)
+            assert props["cues"][0] <= sync.FIRST_REVEAL_S + 1e-6 and all(b >= a for a, b in zip(props["cues"], props["cues"][1:]))
+        for lt in (1.5, 3.0, dur * 0.4):
+            shown = changed(blank("midnight", lt, dur), render(name, props, lt, dur, "midnight"))
+            assert shown > 0.003, f"{name} shows nothing at {lt:.1f}s of {dur:.0f}s when its parts are spoken late"

@@ -68,12 +68,13 @@ class ApiClient(
     }
 
     /** [clientRequestId] makes a retry of the same attempt idempotent (no double charge, no second video). */
-    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList()): String {
+    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null): String {
         val body = buildJsonObject {
             put("prompt", Brief.normalized(prompt))
             put("client_request_id", clientRequestId)
             put("target_minutes", options.minutes)
             if (media.isNotEmpty()) put("media", JsonArray(media.map { JsonPrimitive(it) }))
+            if (media.isNotEmpty() && mediaMeta != null) put("media_meta", mediaMeta)
             options.look?.let { put("theme", it.wire) }
             if (!options.captions) put("captions", false)   // on is the server default: only the choice to turn them off is sent
         }

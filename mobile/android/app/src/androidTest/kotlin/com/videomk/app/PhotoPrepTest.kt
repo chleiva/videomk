@@ -36,6 +36,7 @@ class PhotoPrepTest {
             exif.setAttribute(ExifInterface.TAG_MAKE, "SecretCam")
             exif.setAttribute(ExifInterface.TAG_MODEL, "X100")
             exif.setAttribute(ExifInterface.TAG_DATETIME, "2025:01:02 03:04:05")
+            exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, "2024:12:31 23:59:58")
             exif.saveAttributes()
         }
         return file.readBytes().also { file.delete() }
@@ -65,6 +66,19 @@ class PhotoPrepTest {
         val bmp = decode(out)
         assertEquals(2048, maxOf(bmp.width, bmp.height)); assertEquals(2048 to 1536, bmp.width to bmp.height)
         assertTrue(out.size <= PhotoLimits.MAX_UPLOAD_BYTES)
+    }
+
+    @Test fun dateAndApproximatePlaceAreReadFromTheOriginalAndAreGoneFromTheOutput() {
+        val src = sourceJpeg(1200, 800, ExifInterface.ORIENTATION_NORMAL)   // Eiffel tower 48.8584, 2.2945 and a known capture time
+        val meta = com.videomk.app.data.PhotoExif.read(ByteArrayInputStream(src), com.videomk.app.core.PhotoMetaPolicy())!!
+        assertEquals("2024-12-31T23:59:58", meta.taken)
+        assertEquals(48.86, meta.lat!!, 0.0); assertEquals(2.29, meta.lon!!, 0.0)
+        val noPlace = com.videomk.app.data.PhotoExif.read(ByteArrayInputStream(src), com.videomk.app.core.PhotoMetaPolicy(useLocations = false))!!
+        assertEquals("2024-12-31T23:59:58", noPlace.taken); assertNull(noPlace.lat)
+        assertNull(com.videomk.app.data.PhotoExif.read(ByteArrayInputStream(src), com.videomk.app.core.PhotoMetaPolicy(false, false)))
+        assertNoMetadata(PhotoPrep.jpeg(src)!!)
+        assertNull(com.videomk.app.data.PhotoExif.read(ByteArrayInputStream(PhotoPrep.jpeg(src)!!), com.videomk.app.core.PhotoMetaPolicy()))
+        assertNull(com.videomk.app.data.PhotoExif.read(ByteArrayInputStream(sourceJpeg(300, 300, 1, withExif = false)), com.videomk.app.core.PhotoMetaPolicy()))
     }
 
     @Test fun theStripPreviewIsSmall() {

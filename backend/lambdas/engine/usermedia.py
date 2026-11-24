@@ -64,10 +64,16 @@ def normalize(raw: bytes) -> Tuple[bytes, bytes, Dict[str, Any]]:
 
 
 def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[[str], bytes], put: Callable[[str, bytes], None],
-            delete: Callable[[str], None], asset_prefix: str, workers: int = 8) -> Tuple[List[Dict[str, Any]], List[bytes], List[Dict[str, str]]]:
+            delete: Callable[[str], None], asset_prefix: str, workers: int = 8, meta: Optional[Dict[str, Dict[str, Any]]] = None) -> Tuple[List[Dict[str, Any]], List[bytes], List[Dict[str, str]]]:
     """Returns (photos P1..Pn in upload order, their thumbnails, skipped [{id, reason}]). Originals are deleted whether or not they were usable.
     The photos are read, cleaned and stored in parallel (up to 100 of them), but numbered in the order the person gave them."""
     from concurrent.futures import ThreadPoolExecutor
+
+    meta = meta or {}
+    stamped = [m for m in media_ids if (meta.get(m) or {}).get("taken")]
+    if media_ids and len(stamped) * 2 >= len(media_ids):   # most photos carry a capture time: number them in the order they were taken (the rest keep their relative place, last)
+        order = {m: i for i, m in enumerate(media_ids)}
+        media_ids = sorted(media_ids, key=lambda m: ((meta.get(m) or {}).get("taken") is None, (meta.get(m) or {}).get("taken") or "", order[m]))
 
     def one(mid: str):
         key = upload_key(user_id, mid)
@@ -90,7 +96,8 @@ def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[
         key, full, thumb, facts = ok
         pid = f"P{len(photos) + 1}"
         akey = f"{asset_prefix}user_{pid}.jpg"
-        photos.append({"id": pid, "key": akey, **facts})
+        extra = {k: v for k, v in (meta.get(mid) or {}).items() if k in ("taken", "lat", "lon")}
+        photos.append({"id": pid, "key": akey, **facts, **({"taken": extra["taken"]} if extra.get("taken") else {}), **({k: extra[k] for k in ("lat", "lon") if k in extra})})
         thumbs.append(thumb)
         pending.append((key, akey, full))
 
@@ -137,3 +144,23 @@ def analyze(photos: List[Dict[str, Any]], thumbs: List[bytes], ask_vision: Calla
         drop = {f["id"] for f in flagged}
         photos[:] = [p for p in photos if p["id"] not in drop]
     return flagged
+
+
+def attach_places(photos: List[Dict[str, Any]]) -> int:
+    """Names the place of every photo that has approximate coordinates ("where": "Paris, France") from the bundled data, then FORGETS the coordinates: only the
+    place name and the capture time stay with the video. Returns how many photos got a place."""
+    from . import geoname
+
+    named = 0
+    for p in photos:
+        lat, lon = p.pop("lat", None), p.pop("lon", None)
+        if lat is None or lon is None:
+            continue
+        try:
+            where = geoname.place_for(float(lat), float(lon))
+        except Exception:
+            where = None
+        if where:
+            p["where"] = where
+            named += 1
+    return named

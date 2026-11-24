@@ -56,7 +56,7 @@ def test_an_exact_fit_is_untouched_and_the_first_photographs_win():
 
 def test_gallery_props_are_sanitised():
     ok = plan_mod.sanitize_props("gallery", {"image_queries": ["Rome forum", "rome FORUM", " Colosseum ", "", 5, "Pantheon", "Trevi", "Spanish steps"], "alt": ""})
-    assert ok == {"image_queries": ["Rome forum", "Colosseum", "Pantheon", "Trevi"], "alt": "Rome forum"}
+    assert ok == {"image_queries": ["Rome forum", "Colosseum", "Pantheon", "Trevi", "Spanish steps"], "alt": "Rome forum"}   # up to six, duplicates and junk dropped
     for bad in ({"image_queries": ["one"]}, {"image_queries": "a,b"}, {"image_queries": ["a", "A"]}, {}):
         with pytest.raises(ValueError):
             plan_mod.sanitize_props("gallery", bad)
@@ -64,7 +64,7 @@ def test_gallery_props_are_sanitised():
 
 def test_the_prompt_states_the_ceiling_and_documents_galleries(monkeypatch):
     p = plan_mod.system_prompt("en", "US", 10)
-    assert "at most 10 per minute" in p and "ceiling, not a target and not a minimum" in p and "- gallery:" in p and "- image:" in p and "Zero is fine" in p
+    assert "at most 10 per minute" in p and "use most of it" in p and "VISUAL topics" in p and "- gallery:" in p and "- image:" in p and "use few or none" in p and "2-6 different photographs" in p
     assert "at most 2.5 per minute" in plan_mod.system_prompt("en", None, 2.5)
     none = plan_mod.system_prompt("en", None, 0)
     assert "Do NOT use image or gallery scenes" in none and "- gallery:" not in none and "- image:" not in none and "- chart:" in none

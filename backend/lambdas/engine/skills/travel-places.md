@@ -9,4 +9,4 @@ pick: Cities, countries, landmarks, destinations, guides, 'best places to', itin
 - Mix the famous with one lesser-known thing, and say why a visitor would care about each.
 - Include a few practical tips (how to get there, what to avoid, what it costs) only if the notes support them.
 - Respect the place and its people; avoid cliches ("hidden gem", "bucket list").
-- Visuals: many photographs and galleries for places, a map for routes and locations, a ranking for top-N, a counter for a striking number. Music: warm, adventurous, sunny.
+- Visuals: photographs are the main visual. Almost every beat carries a gallery of 3-6 photographs of the places it names (in the order it names them) or a clip of the atmosphere (a street, the sea, a market); a map for a route or where things are. A counter, icons or a timeline only for a number or fact that truly matters, never instead of showing the place. Music: warm, adventurous, sunny.

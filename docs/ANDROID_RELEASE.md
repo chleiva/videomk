@@ -83,7 +83,9 @@ deleted; the microphone/speech is used only for dictation; what account data is 
 | User-generated content: the text brief | Yes | No | App functionality | Sent to make the video. |
 | Videos the user makes | Yes | No | App functionality | Stored until the user deletes them. |
 | Voice or audio recordings / audio files | **No** | - | - | Dictation uses Android's speech recognizer on the device/Google's recognition service as chosen by the OS; the app does not receive, record or upload audio, only the recognised text. (Say so in the form: speech recognition is performed by the OS service, outside the app.) |
-| Precise/approximate location | No | | | Photo location is removed. |
+| Approximate location | **Yes** (optional) | No | App functionality | Read from the metadata of the photos the user picks (when the photo's source provides it: no location permission is requested) and rounded to 2 decimals (about 1 km) on the phone before it is sent with the video request, to name places in the story. User-controlled: Settings > Photos > "Use photo locations" (default on). Not shared, not stored after the video is planned. Location is always removed from the uploaded photo files. |
+| Precise location | No | | | Never collected: only the rounded approximate location above. |
+| Photo capture time (part of "Photos" / app activity) | Yes (optional) | No | App functionality | The photo's EXIF capture time is sent with the video request to order and group photos by day. Settings > Photos > "Use photo dates" (default on). The timestamp is removed from the uploaded files. |
 | Device or other IDs, analytics, crash logs, diagnostics | No | | | No analytics or crash SDK. (If you add Play Integrity later, declare device integrity data.) |
 | Financial info | No | | | Update when Play Billing is added. |
 - Data is encrypted in transit (HTTPS): **Yes**.

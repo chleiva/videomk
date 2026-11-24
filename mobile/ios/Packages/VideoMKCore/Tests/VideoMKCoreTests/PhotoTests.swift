@@ -271,3 +271,93 @@ private actor Counter {
     func enter() { current += 1; peak = max(peak, current) }
     func leave() { current -= 1 }
 }
+
+private func taggedJPEG(exifDate: String? = nil, tiffDate: String? = nil, gps: (Double, String, Double, String)? = nil) -> Data {
+    let ctx = CGContext(data: nil, width: 40, height: 30, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
+    ctx.setFillColor(CGColor(red: 0.2, green: 0.5, blue: 0.8, alpha: 1)); ctx.fill(CGRect(x: 0, y: 0, width: 40, height: 30))
+    let out = NSMutableData()
+    let dest = CGImageDestinationCreateWithData(out, UTType.jpeg.identifier as CFString, 1, nil)!
+    var props: [CFString: Any] = [:]
+    if let exifDate { props[kCGImagePropertyExifDictionary] = [kCGImagePropertyExifDateTimeOriginal: exifDate] }
+    if let tiffDate { props[kCGImagePropertyTIFFDictionary] = [kCGImagePropertyTIFFDateTime: tiffDate, kCGImagePropertyTIFFMake: "X"] }   // ImageIO drops a TIFF dictionary that holds only a date
+    if let g = gps { props[kCGImagePropertyGPSDictionary] = [kCGImagePropertyGPSLatitude: g.0, kCGImagePropertyGPSLatitudeRef: g.1, kCGImagePropertyGPSLongitude: g.2, kCGImagePropertyGPSLongitudeRef: g.3] }
+    CGImageDestinationAddImage(dest, ctx.makeImage()!, props as CFDictionary)
+    precondition(CGImageDestinationFinalize(dest))
+    return out as Data
+}
+
+@Suite struct PhotoMetaTests {
+    @Test func readsTheExifDateAndRoundsTheGpsToTwoDecimals() throws {
+        let jpeg = taggedJPEG(exifDate: "2026:07:12 18:30:05", gps: (39.57649, "N", 2.65481, "E"))
+        let m = try #require(PhotoMetaReader.read(from: jpeg, dates: true, locations: true))
+        #expect(m == PhotoMeta(taken: "2026-07-12T18:30:05", lat: 39.58, lon: 2.65))
+    }
+
+    @Test func southAndWestAreNegative() throws {
+        let m = try #require(PhotoMetaReader.read(from: taggedJPEG(gps: (33.8688, "S", 151.2093, "W")), dates: true, locations: true))
+        #expect(m.lat == -33.87 && m.lon == -151.21 && m.taken == nil)
+        let tiny = try #require(PhotoMetaReader.read(from: taggedJPEG(gps: (0.001, "S", 0.002, "W")), dates: true, locations: true))
+        #expect(tiny.lat == 0 && tiny.lon == 0 && tiny.lat!.sign == .plus)   // never -0.0
+    }
+
+    @Test func fallsBackToTheTiffDateAndRefusesNonsense() throws {
+        let m = try #require(PhotoMetaReader.read(from: taggedJPEG(tiffDate: "2025:12:31 23:59:59"), dates: true, locations: true))
+        #expect(m.taken == "2025-12-31T23:59:59")
+        #expect(PhotoMetaReader.read(from: taggedJPEG(exifDate: "0000:00:00 00:00:00"), dates: true, locations: true) == nil)
+        #expect(PhotoMetaReader.read(from: taggedJPEG(exifDate: "yesterday"), dates: true, locations: true) == nil)
+        #expect(PhotoMetaReader.read(from: taggedJPEG(gps: (95, "N", 10, "E")), dates: true, locations: true) == nil)      // latitude out of range
+        #expect(PhotoMetaReader.coordinate(190.0, "E", negative: "W", limit: 180) == nil)   // ImageIO clamps 190 on write, so check the guard directly
+        #expect(PhotoMetaReader.coordinate(-5.0, "E", negative: "W", limit: 180) == nil)
+    }
+
+    @Test func switchesOffReadNothing() throws {
+        let jpeg = taggedJPEG(exifDate: "2026:07:12 18:30:05", gps: (39.5, "N", 2.6, "E"))
+        #expect(PhotoMetaReader.read(from: jpeg, dates: false, locations: false) == nil)
+        #expect(PhotoMetaReader.read(from: jpeg, dates: true, locations: false) == PhotoMeta(taken: "2026-07-12T18:30:05"))
+        #expect(PhotoMetaReader.read(from: jpeg, dates: false, locations: true) == PhotoMeta(lat: 39.5, lon: 2.6))
+    }
+
+    @Test func photosWithoutMetadataGiveNothing() {
+        #expect(PhotoMetaReader.read(from: taggedJPEG(), dates: true, locations: true) == nil)
+        #expect(PhotoMetaReader.read(from: Data("nope".utf8), dates: true, locations: true) == nil)
+    }
+
+    @Test func theUploadedJpegStillCarriesNoMetadata() throws {
+        let original = taggedJPEG(exifDate: "2026:07:12 18:30:05", gps: (39.5, "N", 2.6, "E"))
+        #expect(PhotoMetaReader.read(from: original, dates: true, locations: true) != nil)
+        let prepared = try #require(PhotoPrep.jpeg(from: original))
+        #expect(PhotoMetaReader.read(from: prepared, dates: true, locations: true) == nil)
+    }
+
+    @Test func settingsDefaultToOn() {
+        let d = UserDefaults(suiteName: "photometa-test-\(UUID().uuidString)")!
+        #expect(PhotoMetaSettings.dates(d) && PhotoMetaSettings.locations(d))
+        d.set(false, forKey: PhotoMetaSettings.datesKey); d.set(false, forKey: PhotoMetaSettings.locationsKey)
+        #expect(!PhotoMetaSettings.dates(d) && !PhotoMetaSettings.locations(d))
+    }
+
+    @Test func mediaMetaIsKeyedByIdWithOnlyPhotosThatHaveSomething() {
+        let m = PhotoMetaReader.mediaMeta(ids: ["a", "b", "c"], metas: [PhotoMeta(taken: "2026-07-12T18:30:05"), nil, PhotoMeta(lat: 1.5, lon: 2.5)])
+        #expect(Set(m.keys) == ["a", "c"] && m["a"]?.lat == nil)
+        #expect(PhotoMetaReader.mediaMeta(ids: ["a"], metas: [PhotoMeta()]).isEmpty)
+    }
+}
+
+extension CoreTests {
+    @Test func theGenerateRequestCarriesMediaMetaOnlyWhereThereIsSome() async throws {
+        nonisolated(unsafe) var body: [String: Any] = [:]
+        StubProtocol.handler = { req in
+            body = (try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: Any]) ?? [:]
+            return (202, Data(#"{"video_id":"abc"}"#.utf8))
+        }
+        let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
+        _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r", media: ["a", "b", "c"],
+                                          mediaMeta: ["a": PhotoMeta(taken: "2026-07-12T18:30:05", lat: -33.87, lon: 151.21), "c": PhotoMeta(taken: "2026-07-13T09:00:00"), "zzz": PhotoMeta(lat: 1, lon: 2), "b": PhotoMeta()])
+        let meta = try #require(body["media_meta"] as? [String: [String: Any]])
+        #expect(Set(meta.keys) == ["a", "c"])                                       // empty entries and ids not in media are left out
+        #expect(meta["a"]?["taken"] as? String == "2026-07-12T18:30:05" && meta["a"]?["lat"] as? Double == -33.87 && meta["a"]?["lon"] as? Double == 151.21)
+        #expect(Set(meta["c"]!.keys) == ["taken"])                                  // no lat/lon key when there is no location
+        _ = try await api.startGeneration(prompt: "A day out with the family", clientRequestID: "r", media: ["a"])
+        #expect(body["media_meta"] == nil)
+    }
+}

@@ -23,11 +23,13 @@ class FakeBackend : Backend {
     var editCalls = mutableListOf<Triple<Int, List<EditOp>, RenderMode>>()
     var editError: Exception? = null
     var newVideoId = "new-video"
+    val startMeta = mutableListOf<kotlinx.serialization.json.JsonObject?>()
 
     override suspend fun listVideos(): List<VideoItem> { listCalls++; listError?.let { throw it }; return videos }
     override suspend fun wallet(): WalletInfo = wallet
-    override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>): String {
+    override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?): String {
         startCalls += Triple(prompt, clientRequestId, media)
+        startMeta += mediaMeta
         startError?.let { throw it }
         return newVideoId
     }

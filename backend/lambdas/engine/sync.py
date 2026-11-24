@@ -141,6 +141,9 @@ def diagram_order(props: Dict[str, Any]) -> List[str]:
     return [str(n.get("label", n["id"])) for li in range(n_layers) for n in nodes if layer[str(n["id"])] == li]
 
 
+FIRST_REVEAL_S = 1.0   # the latest an element\'s first part may appear (an element draws nothing before its first reveal; a viewer must not stare at a bare background)
+
+
 def _element(stype: str):
     from .scenes.registry import ELEMENTS
 
@@ -200,6 +203,8 @@ def apply(stype: str, props: Dict[str, Any], words: Sequence[Word], scene_dur: f
         if not texts:
             return {}
         cues, idx = anchor_times(texts, words, scene_dur)
+        if cues and cues[0] > FIRST_REVEAL_S:   # a scene must never sit empty: if the narrator names the first part late in a long beat, it still appears at the start
+            cues = [FIRST_REVEAL_S] + list(cues[1:])
         props["cues"] = cues
         return {"items": len(texts), "anchored": sum(i is not None for i in idx)}
     if stype == "stat":

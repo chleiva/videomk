@@ -59,7 +59,7 @@ struct LibraryView: View {
 
     private func send() {
         dictation.cancel()   // not stop(): a final transcript arriving after this would put the sent text back in the field, and a second tap would send it again
-        model.submit(brief: text, options: options, photos: photos.items.map(\.data))
+        model.submit(brief: text, options: options, photos: photos.items.map(\.data), meta: photos.items.map(\.meta))
         photos.clear()
         text = ""
         composerFocused = false

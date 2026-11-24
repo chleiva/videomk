@@ -140,7 +140,7 @@ def test_the_director_records_the_users_photos_in_the_plan():
     ph = [{"id": "P1", "key": "generation/v2/v/assets/user_P1.jpg", "w": 100, "h": 200, "orientation": "portrait", "caption": "A dog", "taken": "2026-01-01"}]
     ask_small = lambda s, u, n=120: '{"mode":"encyclopedia"}'
     r = director.direct("My dog's day out", minutes=1, language="en", today="2026-11-23", ask_small=ask_small, ask_big=lambda s, u: _plan_json(["P1", "P1", "P1", "P1"]), photos=ph)
-    assert r["plan"]["media_items"] == [{"id": "P1", "key": "generation/v2/v/assets/user_P1.jpg", "w": 100, "h": 200, "orientation": "portrait", "caption": "A dog"}]
+    assert r["plan"]["media_items"] == [{"id": "P1", "key": "generation/v2/v/assets/user_P1.jpg", "w": 100, "h": 200, "orientation": "portrait", "caption": "A dog", "taken": "2026-01-01"}]
 
 
 # ---------------------------------------------------------------- beats use the photo instead of searching

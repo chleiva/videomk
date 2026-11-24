@@ -6,7 +6,7 @@ const glance = [
 	"Your prompts, photos and videos are private to your account. We do not use them to train AI models, and we do not sell personal data.",
 	"We show no ads and use no advertising or analytics trackers in the app.",
 	"To make a video we send your text (and photos you attach) to AI and media services that work for us. Section 4 lists them.",
-	"Location and camera data are removed from photos before anything else happens, and the originals are deleted.",
+	"Your photos are cleaned of all hidden data (location, camera, date) before they are stored, and the originals are deleted. If you allow it in Settings, the time each photo was taken and an approximate place (about 1 km) are used once to tell your story; the place is turned into a city name on our servers and the coordinates are not kept.",
 	"You can ask us to delete your videos or your whole account at any time.",
 ];
 const sections = [
@@ -16,7 +16,8 @@ const sections = [
 	{ title: "What we collect", paras: ["Depending on how you use videomk:"], bullets: [
 		"Account data: your email address and an account identifier. You sign in with email and a password, handled by Amazon Cognito. We never see your password in readable form.",
 		"What you ask for: the text of your requests (typed, or dictated and turned into text), the options you choose (length, look, subtitles, language), and any edits you make to a video.",
-		"Photos you attach: up to the limit shown in the app. Before upload, your phone removes all metadata (including location, camera and date) and resizes the photo.",
+		"Photos you attach: up to 100 per video. Before upload, your phone removes all metadata from the photo file (location, camera and date) and resizes it.",
+		"Photo date and approximate location (optional): if the two switches in Settings are on (they are on by default), the phone also reads when each photo was taken and where, from the photo's own data, and sends the date and time and a location rounded to about 1 km with your request, never inside the photo. We use them to put your photos in order, group them by day and name the places in your story. The location is turned into a place name from public map data on our own servers (no other company receives it); the coordinates are discarded as soon as the story is planned, while the place name and the time stay with your video. Turn the switches off and none of this is read or sent.",
 		"What we make for you: the script, narration audio, the finished video and the list of sources and credits shown with it.",
 		"Credits and purchases: your credit balance and history. Payments are handled by Apple or Google; we receive confirmation of a purchase, never your card details.",
 		"Technical data: IP address, device type and app version, time of each request, and error logs. This is used for security, abuse prevention and fixing faults.",
@@ -38,7 +39,7 @@ const sections = [
 		"Professional advisers, and authorities where the law requires, or a buyer if our business is sold, under confidentiality.",
 		"We do not sell personal data and do not share it for advertising."] },
 	{ title: "Photos and AI processing", paras: [
-		"Photos you attach are checked by an AI model so the video can describe them and so unsafe images are refused. The location, camera and date data are removed on your phone, and again on our servers. We delete the original upload as soon as the cleaned copy is made (any leftover is removed automatically within 2 days).",
+		"Photos you attach are checked by an AI model so the video can describe them and so unsafe images are refused. To keep this cheap and private, the photos are shown to the model as small numbered thumbnails, ten to a sheet, and the story is then worked out from the descriptions alone. The location, camera and date data are removed from the photo file on your phone, and again on our servers. We delete the original upload as soon as the cleaned copy is made (any leftover is removed automatically within 2 days).",
 		"The cleaned copy stays with the video it belongs to, because editing needs it, until that video is deleted.",
 		"Videos are made by AI and may contain mistakes. They are labelled as made with AI where the app or store requires it."] },
 	{ title: "Voice input", paras: [

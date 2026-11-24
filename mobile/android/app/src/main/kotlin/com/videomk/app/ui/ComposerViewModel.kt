@@ -21,14 +21,20 @@ import com.videomk.app.core.PickedSource
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.prepareInOrder
 import com.videomk.app.data.DictationController
+import com.videomk.app.core.PhotoMeta
+import com.videomk.app.data.PhotoExif
 import com.videomk.app.data.PhotoPrep
+import com.videomk.app.data.PhotoSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-class AttachedPhoto(val id: String = UUID.randomUUID().toString(), val data: ByteArray, val thumbnail: Bitmap?)
+class AttachedPhoto(val id: String = UUID.randomUUID().toString(), val data: ByteArray, val thumbnail: Bitmap?, val meta: PhotoMeta? = null)
+
+/** What the composer hands over when the user sends: the text, the prepared photos and (parallel to them) what was read from each original. */
+class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>)
 
 /**
  * Everything about the video being composed: the text, the length and look, the attached photos (up to 100) and dictation.
@@ -60,6 +66,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         private set
     private val cacheRoot = java.io.File(app.cacheDir, "picked")
     private val cache = PickedCache(java.io.File(cacheRoot, "session")).also { PickedCache.cleanLeftovers(cacheRoot) }   // an app start removes what a crashed session left
+    private val settings = PhotoSettings(app)
     private val copyLock = kotlinx.coroutines.sync.Mutex()
     private var unreadable = 0
     private val prepLock = kotlinx.coroutines.sync.Mutex()   // batches queue up, so at most PREP_PARALLELISM photos are ever in flight
@@ -102,7 +109,8 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
                 prepare = { f ->
                     withContext(Dispatchers.Default) {
                         if (f == null) null else try {
-                            PhotoPrep.jpeg(f.readBytes())?.let { AttachedPhoto(data = it, thumbnail = PhotoPrep.thumbnail(it)) }
+                            val meta = PhotoExif.read(f, settings.policy)   // from the original, before the pixels are re-encoded without any metadata
+                            PhotoPrep.jpeg(f.readBytes())?.let { AttachedPhoto(data = it, thumbnail = PhotoPrep.thumbnail(it), meta = meta) }
                         } catch (e: Exception) { null } finally { f.delete() }
                     }
                 },
@@ -127,9 +135,10 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     val canSend: Boolean get() = Brief.isValid(text)
 
     /** Hands back what to send and clears the composer, ready for the next request. */
-    fun takeForSend(): Pair<String, List<ByteArray>> {
+    fun takeForSend(): Outgoing {
         dictation.stop()
-        val out = text to photos.map { it.data }
+        val policy = settings.policy   // a switch turned off after the photos were prepared still wins
+        val out = Outgoing(text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } })
         photos.clear()
         cleanupIfIdle()
         notice = null

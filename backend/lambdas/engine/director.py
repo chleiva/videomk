@@ -82,7 +82,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if region:
         plan["region"] = region
     if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)
-        plan["media_items"] = [{k: p.get(k) for k in ("id", "key", "w", "h", "orientation", "caption")} for p in photos]
+        plan["media_items"] = [{**{k: p.get(k) for k in ("id", "key", "w", "h", "orientation", "caption")}, **{k: p[k] for k in ("taken", "where") if p.get(k)}} for p in photos]   # time and place only when the photo has them
         if story and story.get("chapters"):   # what the photos were understood to be about (kept for review and the editor, never shown in the video)
             plan["photo_story"] = {"story": story.get("story", ""), "voice": story.get("voice"), "tone": story.get("tone", ""), "chapters": [{"title": c.get("title", ""), "summary": c.get("summary", "")} for c in story["chapters"]],
                                    "unused": story.get("unused", [])}

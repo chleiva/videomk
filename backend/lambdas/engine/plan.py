@@ -36,10 +36,10 @@ SCENE_DOCS_BASE = """Scene types (props):
 
 IMAGE_DOC = """
 - image: {image_query (2-6 words describing a real photograph), alt (<=70)}. One real-world photograph (place, object, person-type, scene) held for the whole beat.
-- gallery: {image_queries: 2-4 different photographs (2-6 words each), alt (<=70)}. The photographs follow each other during ONE beat, each shown for about 3-6 seconds. Use it when the narration names or compares several places, objects or moments, or for a montage that sets a mood. Every query must describe a different subject."""
+- gallery: {image_queries: 2-6 different photographs (2-6 words each), alt (<=70)}. The photographs follow each other during ONE beat, each shown for about 2.5-5 seconds (all of them are fetched together, so a bigger gallery costs no extra time). Use it whenever the narration names or compares several places, objects or moments, or for a montage that sets a mood: name each one in the order shown. Every query must describe a different, specific subject (a named landmark, not 'beautiful building')."""
 
 CLIP_DOC = """
-- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70, a second, different wording of the same footage)}. A 5-20 second stock video clip plays full screen behind the narration. The narration of a clip beat must itself be general or atmospheric (a mood, a process, nature, everyday life): never about a specific event, news item, person, place or company, because stock footage cannot show it and the clip is rejected. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea. When the user's brief asks for video, footage or clips, use clip scenes freely (up to 1 beat in 3) for the generic atmosphere that stock footage does have (crowds, lights, food, weather, nature, streets, people at work), worded generically even when the topic is about named places ("festive market lights at night", not the name of the market)."""
+- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70, a second, different wording of the same footage)}. A 5-20 second stock video clip plays full screen behind the narration. The narration of a clip beat must itself be general or atmospheric (a mood, a process, nature, everyday life): never about a specific event, news item, person, place or company, because stock footage cannot show it and the clip is rejected. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea. When the user's brief asks for video, footage or clips, use clip scenes freely (up to 1 beat in 3) for the generic atmosphere that stock footage does have (crowds, lights, food, weather, nature, streets, people at work), worded generically even when the topic is about named places ("festive market lights at night", not the name of the market). For videos about places, food, nature or everyday life, a clip of the generic atmosphere (a street, the sea, a market, a kitchen, a crowd) is usually better than a still: prefer clips for atmosphere between the photograph beats."""
 
 
 ELEMENT_INTRO = """
@@ -66,8 +66,9 @@ def images_rule(per_minute: float) -> str:
     if per_minute <= 0:
         return "- Do NOT use image or gallery scenes: the viewer wants no stock photographs. (The user's own photos, if any, are used as instructed.)"
     return (f"- Stock photographs: at most {per_minute:g} per minute of video in total (every photograph in a gallery counts; the user's own photos never count). "
-            "That is a ceiling, not a target and not a minimum: choose the density this topic and pacing deserve. Places, landmarks, nature, food, culture and travel "
-            "topics usually benefit from many (galleries make a high density possible); numbers, processes and abstract ideas from few or none. Zero is fine. "
+            "That is a ceiling, but for VISUAL topics (places, cities, landmarks, nature, food, culture, travel, history of places, people, animals, products) use most of it: real pictures are what "
+            "hold the viewer, so nearly every beat of such a video carries a photograph or a gallery of the things the narration names (a gallery of 3-6 photographs for several places, one photograph for one), "
+            "and charts, counters, icons and cards are only for the few moments that are really about a number or an idea. For numbers, processes and abstract ideas use few or none. "
             "A photograph illustrates what is named in the narration; never use one just to fill time.")
 
 
@@ -162,7 +163,8 @@ def photo_slots(photos: Optional[List[Dict[str, Any]]], story: Optional[Dict[str
 def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] = None) -> str:
     def line(p: Dict[str, Any]) -> str:
         extra = (f' [{p["place"]}]' if p.get("place") and p["place"].lower() not in (p.get("caption") or "").lower() else "")
-        return f'{p["id"]}: {p.get("caption") or "a photo"}{extra} ({p.get("orientation", "landscape")}' + (f', taken {p["taken"]}' if p.get("taken") else "") + ")"
+        gps = (f' GPS place: {p["where"]}' if p.get("where") else "")
+        return f'{p["id"]}: {p.get("caption") or "a photo"}{extra} ({p.get("orientation", "landscape")}' + (f', taken {p["taken"]}' if p.get("taken") else "") + (f',{gps}' if gps else "") + ")"
     if not story or not story.get("chapters"):
         return (
             f"The user attached {len(photos)} of their own photos. The video is built around them:\n" + "\n".join(line(p) for p in photos) + "\n"
@@ -408,7 +410,7 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
                 clean.append(q)
         if len(clean) < 2:
             raise ValueError("a gallery needs at least 2 different image queries")
-        return {"image_queries": clean[:4], "alt": _s(p.get("alt") or clean[0], 70), **_word_prop(p)}
+        return {"image_queries": clean[:6], "alt": _s(p.get("alt") or clean[0], 70), **_word_prop(p)}
     if stype == "clip":
         q = _s(p.get("clip_query"), 80) or _s(p.get("alt"), 80)
         if not q:

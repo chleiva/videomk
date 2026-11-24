@@ -8,6 +8,7 @@ struct AttachedPhoto: Identifiable, @unchecked Sendable {   // immutable after c
     let id = UUID()
     let data: Data          // upright, at most 2048 px, no metadata
     let thumbnail: UIImage
+    var meta: PhotoMeta? = nil   // capture time / approximate place from the original; travels only in the generate request
 }
 
 /// The photos attached to the video being composed (up to `PhotoLimits.maxPhotos`). The system photo picker needs no permission prompt:
@@ -54,10 +55,11 @@ final class PhotoAttachments {
         batchTotal = 0
     }
 
-    nonisolated static func prepare(_ raw: Data) async -> AttachedPhoto? {
+    nonisolated static func prepare(_ raw: Data, dates: Bool = PhotoMetaSettings.dates(), locations: Bool = PhotoMetaSettings.locations()) async -> AttachedPhoto? {
         await Task.detached(priority: .userInitiated) {
+            let meta = PhotoMetaReader.read(from: raw, dates: dates, locations: locations)   // before the metadata is stripped
             guard let jpeg = PhotoPrep.jpeg(from: raw), let thumb = thumbnail(of: jpeg) else { return nil }
-            return AttachedPhoto(data: jpeg, thumbnail: thumb)
+            return AttachedPhoto(data: jpeg, thumbnail: thumb, meta: meta)
         }.value
     }
 

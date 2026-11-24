@@ -141,6 +141,34 @@ def describe(sheets: List[Tuple[List[str], bytes]], request: str, ask_vision: Ca
 
 
 # ----------------------------------------------------------------------------- 2. the story
+def when(taken: str) -> str:
+    """'2026-04-12T14:32:00' -> 'Sun 12 Apr 14:32'."""
+    import datetime
+    try:
+        return datetime.datetime.strptime(taken[:19], "%Y-%m-%dT%H:%M:%S").strftime("%a %d %b %H:%M")
+    except ValueError:
+        return taken
+
+
+def trip_summary(photos: List[Dict[str, Any]]) -> str:
+    """One line about when and where the photos were taken (from the photos' own data), or ''."""
+    import datetime
+    days: List[datetime.date] = []
+    for p in photos:
+        try:
+            days.append(datetime.datetime.strptime(p["taken"][:10], "%Y-%m-%d").date())
+        except (KeyError, ValueError, TypeError):
+            pass
+    places = list(dict.fromkeys(p["where"].replace("near ", "") for p in photos if p.get("where")))
+    bits = []
+    if days and len(days) * 2 >= len(photos):
+        a, b = min(days), max(days)
+        bits.append(f"taken {a.strftime('%d %b %Y')}" + (f" to {b.strftime('%d %b %Y')} ({(b - a).days + 1} days, {len(set(days))} with photos)" if b != a else ""))
+    if places:
+        bits.append("places from the photos' GPS: " + ", ".join(places[:8]))
+    return "; ".join(bits)
+
+
 def _catalogue_text(photos: List[Dict[str, Any]]) -> str:
     lines = []
     for p in photos:
@@ -148,6 +176,10 @@ def _catalogue_text(photos: List[Dict[str, Any]]) -> str:
         if p.get("place") and p["place"].lower() not in bits[0].lower():
             bits.append(f"place: {p['place']}")
         bits.append(p.get("subject", "other") + (", people" if p.get("people") else ""))
+        if p.get("taken"):
+            bits.append("taken " + when(p["taken"]))
+        if p.get("where"):
+            bits.append("GPS place: " + p["where"])
         if p.get("quality") == "poor":
             bits.append("POOR quality")
         if p.get("similar"):
@@ -170,6 +202,8 @@ def story_system(minutes: float, cap: int) -> str:
         "Open with a strong, establishing photo and end with a fitting one.\n"
         f"- Group into chapters by place, subject or time: 2 to 8 chapters, fewer for short videos. This video is {minutes:g} minutes, so use at most {cap} photos in total: keep the best of near duplicates, "
         "drop POOR quality photos first, prefer variety and what the request is about; put the rest in unused.\n"
+        "- Lines may say when ('taken Sun 12 Apr 14:32') and where ('GPS place: Paris, France') each photo was taken, from the photo's own data. Trust them over visual guesses for ORDER and for PLACE NAMES: order moments by time, "
+        "start a new chapter when the day changes, and name places as given. A photo without them is placed by what it shows.\n"
         "- The request decides the emphasis. Never invent names, places, dates or events that the captions and the request do not support; say less rather than guess."
     )
 
@@ -249,7 +283,9 @@ def reconcile(story: Dict[str, Any], photos: List[Dict[str, Any]], cap: int) -> 
 
 def make_story(request: str, minutes: float, photos: List[Dict[str, Any]], ask_text: Callable[[str, str], str]) -> Dict[str, Any]:
     cap = max_used(minutes)
-    user = f"The person's request: {request[:500]}\nVideo length: {minutes:g} minutes (use at most {cap} photos).\n\nPhotos:\n{_catalogue_text(photos)}\n\nReturn the JSON now."
+    summary = trip_summary(photos)
+    user = (f"The person's request: {request[:500]}\nVideo length: {minutes:g} minutes (use at most {cap} photos)." + (f"\nAbout the photos: {summary}." if summary else "")
+            + f"\n\nPhotos:\n{_catalogue_text(photos)}\n\nReturn the JSON now.")
     try:
         raw = _json_obj(ask_text(story_system(minutes, cap), user)) or {}
     except Exception:

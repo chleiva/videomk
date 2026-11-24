@@ -160,3 +160,72 @@ public struct PhotoUploader: Sendable {
         catch { throw APIError.network }
     }
 }
+
+/// What the phone tells the server about one photo, read from the ORIGINAL bytes before they are stripped. It travels only in the
+/// generate request (`media_meta`), never in the uploaded file. Coordinates are rounded to 2 decimals (about 1 km).
+public struct PhotoMeta: Sendable, Equatable {
+    public var taken: String?       // "YYYY-MM-DDTHH:MM:SS", local wall-clock time, no timezone
+    public var lat: Double?
+    public var lon: Double?
+    public init(taken: String? = nil, lat: Double? = nil, lon: Double? = nil) { self.taken = taken; self.lat = lat; self.lon = lon }
+    public var isEmpty: Bool { taken == nil && lat == nil && lon == nil }
+
+    var json: [String: Any] {
+        var out: [String: Any] = [:]
+        if let taken { out["taken"] = taken }
+        if let lat, let lon { out["lat"] = lat; out["lon"] = lon }
+        return out
+    }
+}
+
+/// The two Settings switches (default on).
+public enum PhotoMetaSettings {
+    public static let datesKey = "usePhotoDates"
+    public static let locationsKey = "usePhotoLocations"
+    public static func dates(_ d: UserDefaults = .standard) -> Bool { d.object(forKey: datesKey) as? Bool ?? true }
+    public static func locations(_ d: UserDefaults = .standard) -> Bool { d.object(forKey: locationsKey) as? Bool ?? true }
+}
+
+public enum PhotoMetaReader {
+    /// Reads capture time and approximate place from the original photo. A part whose switch is off is not read at all.
+    public static func read(from data: Data, dates: Bool, locations: Bool) -> PhotoMeta? {
+        guard dates || locations, let src = CGImageSourceCreateWithData(data as CFData, nil),
+              let props = CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any] else { return nil }
+        var meta = PhotoMeta()
+        if dates {
+            let exif = props[kCGImagePropertyExifDictionary] as? [CFString: Any]
+            let tiff = props[kCGImagePropertyTIFFDictionary] as? [CFString: Any]
+            let raw = (exif?[kCGImagePropertyExifDateTimeOriginal] as? String) ?? (tiff?[kCGImagePropertyTIFFDateTime] as? String)
+            meta.taken = raw.flatMap(isoDate)
+        }
+        if locations, let gps = props[kCGImagePropertyGPSDictionary] as? [CFString: Any] {
+            if let lat = coordinate(gps[kCGImagePropertyGPSLatitude], gps[kCGImagePropertyGPSLatitudeRef], negative: "S", limit: 90),
+               let lon = coordinate(gps[kCGImagePropertyGPSLongitude], gps[kCGImagePropertyGPSLongitudeRef], negative: "W", limit: 180) {
+                meta.lat = lat; meta.lon = lon
+            }
+        }
+        return meta.isEmpty ? nil : meta
+    }
+
+    /// "2026:07:12 18:30:00" to "2026-07-12T18:30:00"; anything else (including a zeroed date) is dropped.
+    static func isoDate(_ exif: String) -> String? {
+        let p = exif.trimmingCharacters(in: .whitespaces).split(whereSeparator: { ":- T".contains($0) }).map(String.init)
+        guard p.count >= 6, p[0].count == 4, p[1...5].allSatisfy({ $0.count == 2 }), let y = Int(p[0]), let mo = Int(p[1]), let d = Int(p[2]),
+              let h = Int(p[3]), let mi = Int(p[4]), let s = Int(p[5]), y >= 1900, (1...12).contains(mo), (1...31).contains(d), h < 24, mi < 60, s < 61 else { return nil }
+        return "\(p[0])-\(p[1])-\(p[2])T\(p[3]):\(p[4]):\(p[5])"
+    }
+
+    static func coordinate(_ value: Any?, _ ref: Any?, negative: String, limit: Double) -> Double? {
+        guard let v = (value as? NSNumber)?.doubleValue, v.isFinite, v >= 0 else { return nil }
+        let signed = (ref as? String)?.uppercased() == negative ? -v : v
+        let rounded = ((signed * 100).rounded() / 100) + 0   // + 0 turns -0.0 into 0.0
+        return abs(rounded) <= limit ? rounded : nil
+    }
+
+    /// The `media_meta` object: keyed by media id, only photos that have something to say.
+    public static func mediaMeta(ids: [String], metas: [PhotoMeta?]) -> [String: PhotoMeta] {
+        var out: [String: PhotoMeta] = [:]
+        for (id, meta) in zip(ids, metas) { if let meta, !meta.isEmpty { out[id] = meta } }
+        return out
+    }
+}

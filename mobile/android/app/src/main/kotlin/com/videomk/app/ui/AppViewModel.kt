@@ -8,6 +8,7 @@ import com.videomk.app.core.AuthException
 import com.videomk.app.core.AuthService
 import com.videomk.app.core.Backend
 import com.videomk.app.core.Brief
+import com.videomk.app.core.PhotoMeta
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.LibraryEntry
 import com.videomk.app.core.LibraryMerge
@@ -85,6 +86,7 @@ class AppViewModel(
     val editRevision: StateFlow<Int> = _editRevision.asStateFlow()
 
     private val photoData = HashMap<String, List<ByteArray>>()   // photos waiting to be uploaded, kept until the video is accepted (a retry needs no new selection)
+    private val photoMeta = HashMap<String, List<PhotoMeta?>>()   // what was read from each photo, same order as photoData
     private val refreshLock = Mutex()
     private var started = false
     /** True while the sign-in browser tab is open (so the screen can tell "came back without finishing" from "redirect arriving"). Survives rotation. */
@@ -219,12 +221,12 @@ class AppViewModel(
     // ask for a video without leaving the home screen
 
     /** Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more. */
-    fun submit(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList()) {
+    fun submit(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList()) {
         val p = PendingVideo(
             brief = Brief.normalized(brief), options = options, photoCount = photos.size, createdAtMillis = clock(),
             state = if (photos.isEmpty()) PendingVideo.State.Sending else PendingVideo.State.Uploading(0, photos.size),
         )
-        if (photos.isNotEmpty()) photoData[p.id] = photos
+        if (photos.isNotEmpty()) { photoData[p.id] = photos; photoMeta[p.id] = meta }
         update { it.copy(pending = listOf(p) + it.pending) }
         viewModelScope.launch { send(p.id) }
     }
@@ -236,7 +238,7 @@ class AppViewModel(
     }
 
     fun dismissPending(id: String) {
-        photoData.remove(id)
+        photoData.remove(id); photoMeta.remove(id)
         update { s -> s.copy(pending = s.pending.filterNot { it.id == id }) }
     }
 
@@ -255,8 +257,8 @@ class AppViewModel(
                 media = b.uploadPhotos(photos) { done, total -> setProgress(id, done, total) }
                 if (_state.value.pending.any { it.id == id }) setPendingState(id, PendingVideo.State.Sending)
             }
-            val videoId = b.startGeneration(p.brief, p.id, p.options, media)
-            photoData.remove(id)
+            val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()))
+            photoData.remove(id); photoMeta.remove(id)
             update { s ->
                 s.copy(
                     briefs = s.briefs + (videoId to p.brief), minutes = s.minutes + (videoId to p.options.minutes),

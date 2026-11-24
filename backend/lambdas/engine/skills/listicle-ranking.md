@@ -9,4 +9,4 @@ pick: Top 5, top 10, 'best of', 'N things', rankings, lists, countdowns.
 - Each item must be real and supported by the notes; ties and uncertain rankings are said out loud.
 - Vary the delivery so the list does not feel mechanical: a surprise, a comparison or a one-line story for a few items.
 - Keep to the number promised; end with a short wrap-up or a nod to what was left out.
-- Visuals: a ranking scene for the countdown, a photograph per item, a counter or stat for each key number. Music: upbeat and light, steady.
+- Visuals: when the items are places, things or people, give each item its own beat with a gallery of 3-5 photographs of it (the picture is the proof), and use a ranking scene only for the overview; a counter or stat only for a key number. Music: upbeat and light, steady.

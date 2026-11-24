@@ -28,3 +28,13 @@ def changed(a: Image.Image, b: Image.Image, threshold: int = 24) -> float:
 
 def themes() -> List[str]:
     return list(THEMES)
+
+
+def blank(theme: str = "midnight", lt: float = 1.0, dur: float = 8.0) -> Image.Image:
+    """The background alone (what a scene shows when it has drawn nothing yet)."""
+    from engine import scenes
+    scenes.SCENES["__blank__"] = (lambda *a, **k: None, lambda p, d: [])
+    try:
+        return render("__blank__", {}, lt, dur, theme)
+    finally:
+        scenes.SCENES.pop("__blank__", None)
