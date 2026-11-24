@@ -321,10 +321,10 @@ def test_generate_plan_repairs_when_most_scenes_are_replaced():
 
 def test_generate_plan_repairs_once_then_fails_closed():
     answers = iter(["not json at all", json.dumps(GOOD_PLAN)])
-    p, _ = plan_mod.generate_plan("rainbows", "", 3, lambda s, u: next(answers))
+    p, _ = plan_mod.generate_plan("rainbows", "", 1, lambda s, u: next(answers))
     assert p["legit"] and len(p["beats"]) == 3
     with pytest.raises(ValueError):
-        plan_mod.generate_plan("rainbows", "", 3, lambda s, u: "still not json")
+        plan_mod.generate_plan("rainbows", "", 1, lambda s, u: "still not json")
 
 
 def test_rejected_plan_passes_reason_through():

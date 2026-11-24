@@ -109,8 +109,8 @@ def _plan_json(photos_used):
 def test_the_prompt_lists_every_photo_with_caption_orientation_and_date():
     ph = [{"id": "P1", "caption": "Two kids on a beach", "orientation": "portrait", "taken": "2026-07-12"}, {"id": "P2", "caption": "", "orientation": "landscape"}]
     p = plan_mod.build_user_prompt("Our holiday", "", 1, photos=ph)
-    assert "P1: Two kids on a beach (portrait, taken 2026-07-12)" in p and "P2: a photo (landscape)" in p and "Use EVERY photo" in p and "about 4 beats" in p
-    assert "about 12 beats" in plan_mod.build_user_prompt("x", "", 1, photos=[{"id": f"P{i}"} for i in range(12)])   # at least one beat per photo
+    assert "P1: Two kids on a beach (portrait, taken 2026-07-12)" in p and "P2: a photo (landscape)" in p and "Use EVERY photo" in p and "at least 4 beats" in p
+    assert "at least 12 beats" in plan_mod.build_user_prompt("x", "", 1, photos=[{"id": f"P{i}"} for i in range(12)])   # at least one beat per photo
     assert "attached" not in plan_mod.build_user_prompt("x", "", 1)
 
 

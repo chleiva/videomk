@@ -144,12 +144,43 @@ def photos_prompt(photos: List[Dict[str, Any]]) -> str:
         "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n")
 
 
+SPOKEN_WORDS_PER_S = 2.4      # measured on real videos (326 words took 136 s of speech)
+BEAT_OVERHEAD_S = 0.95        # lead-in and tail of every spoken beat
+MIN_LENGTH_SHARE = 0.85       # a script under this share of the words the length needs is sent back once, then accepted
+
+
+def expected_beats(target_minutes: float, n_photos: int = 0) -> int:
+    return max(4, round(target_minutes * 60 / 14), n_photos)
+
+
+def expected_words(target_minutes: float, n_photos: int = 0) -> int:
+    """The narration words that make a video `target_minutes` long: the speaking time left after every beat's lead-in and tail, at the measured speaking rate."""
+    return max(60, int((target_minutes * 60 - expected_beats(target_minutes, n_photos) * BEAT_OVERHEAD_S) * SPOKEN_WORDS_PER_S))
+
+
+def spoken_words(beats: List[Dict[str, Any]]) -> int:
+    return sum(len(b.get("narration", "").split()) for b in beats if not b.get("silent"))
+
+
+def length_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0) -> Optional[str]:
+    """A message when the script is too short for the length that was asked for (and paid for); None when it is fine or the video is short anyway."""
+    target = expected_words(target_minutes, n_photos)
+    if target < 250:  # about a minute and a half or less: the plan lands close enough, and short test plans are common
+        return None
+    have = spoken_words(plan.get("beats") or [])
+    if have >= MIN_LENGTH_SHARE * target:
+        return None
+    return (f"the narration totals {have} words but a {target_minutes:g}-minute video needs about {target} words in at least {expected_beats(target_minutes, n_photos)} beats. "
+            f"Lengthen the beats (about {target // expected_beats(target_minutes, n_photos)} words each) and add beats with new, concrete material until the total is about {target} words; keep what already works")
+
+
 def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None) -> str:
-    words = int(target_minutes * WORDS_PER_MIN)
-    beats = max(4, round(target_minutes * 60 / 14), len(photos or []))
+    beats = expected_beats(target_minutes, len(photos or []))
+    words = expected_words(target_minutes, len(photos or []))
     return (
         f"Topic: {topic}\n\n"
-        f"Target length: about {target_minutes:g} minute(s): roughly {words} narration words in about {beats} beats.\n\n"
+        f"Target length: {target_minutes:g} minute(s). This is a hard requirement: the narration must total between {int(words * 0.9)} and {int(words * 1.1)} words "
+        f"(about {words}) across at least {beats} beats of roughly {max(20, words // beats)} words each. The viewer pays per minute, and a shorter script makes a shorter video.\n\n"
         + (f"Today's date: {today}. Anything time-sensitive must come from the grounding notes (with the date it refers to), never from memory.\n\n" if today else "")
         + (photos_prompt(photos) if photos else "")
         + f"Grounding notes (may be empty):\n{notes or '(none)'}\n\n"
@@ -538,6 +569,8 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
                   allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
+    if expected_words(target_minutes, len(photos or [])) >= 250:
+        retries = max(retries, 2)   # a long video may need a length repair on top of the other checks
     user = build_user_prompt(topic, notes, target_minutes, today, photos)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
@@ -548,6 +581,10 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
             replaced = [w for w in warns if "scene replaced" in w]
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
                 raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")
+            if plan.get("legit") and attempt < retries:
+                short = length_problem(plan, target_minutes, len(photos or []))
+                if short:  # the script would make a shorter video than the one asked for and paid for
+                    raise ValueError(short)
             if plan.get("legit") and attempt < retries:
                 gaps = sync_mod.coverage_problems(plan["beats"])
                 if gaps:  # the screen would show items the narrator never says: one repair attempt, like any invalid plan
@@ -567,6 +604,10 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
                         taken.add(bid)
                         plan["beats"].append({"id": bid, "narration": text, "scene": {"type": "image", "props": {"image_query": cap[:80], "alt": cap[:70], "ken_burns": "in", "photo": p["id"]}}})
                     warns.append("added scenes for unused photos: " + ", ".join(p["id"] for p in unused))
+            if plan.get("legit"):
+                short = length_problem(plan, target_minutes, len(photos or []))
+                if short:  # still short after the repairs: the video is made, and the warning is logged
+                    warns.append("length: " + short)
             return plan, warns
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e

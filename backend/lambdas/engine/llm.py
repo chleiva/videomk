@@ -115,7 +115,7 @@ def complete(
             text = "".join(p.get("text", "") for p in res.get("content", []) if isinstance(p, dict))
             usage = res.get("usage") or {}
             tin, tout = int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0))
-            return text, {"model": model_id, "tokens_in": tin, "tokens_out": tout, "cost_usd": estimate_cost(model, tin, tout)}
+            return text, {"model": model_id, "tokens_in": tin, "tokens_out": tout, "cost_usd": estimate_cost(model, tin, tout), "stop_reason": res.get("stop_reason")}
         except ClientError as e:
             code = e.response.get("Error", {}).get("Code", "")
             if code in ("AccessDeniedException", "ValidationException", "ResourceNotFoundException", "ModelNotReadyException"):

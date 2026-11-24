@@ -16,6 +16,10 @@ MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call p
 WEB_SEARCH_COST_USD = float(os.environ.get("WEB_SEARCH_COST_USD", "0.008"))  # Tavily basic search, one credit; verify against your plan
 
 
+def plan_max_tokens(minutes: float) -> int:
+    return int(min(32000, 6000 + 2600 * float(minutes)))
+
+
 def _web_tools(spent: Dict[str, float]):
     """The web research tools, or (None, None) when no search key is configured (the encyclopedia path is used)."""
     key = get_secret_param("/videomk/tavily_api_key", quiet=True)
@@ -63,7 +67,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return text
 
     def ask_big(system: str, user: str) -> str:
-        text, meta = llm.complete(system, user)
+        # room for the whole script: a long video is about 100 tokens per spoken beat plus its scene, and the model's own thinking counts against the limit too
+        text, meta = llm.complete(system, user, max_tokens=plan_max_tokens(minutes))
+        if meta.get("stop_reason") == "max_tokens":
+            logging.warning("the plan was cut off at the output limit (%s tokens) for a %s-minute video", meta.get("tokens_out"), minutes)
         spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
         return text
 

@@ -3,11 +3,12 @@
 Pure of storage and billing so the production handler and the evaluation script run exactly the same code:
   detect language -> research (queries written by a small model) -> director LLM -> validate, cast voices, keep only sources used.
 """
-from typing import Any, Callable, Dict, List, Optional
+import threading
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from datetime import date
 
-from . import language as lang_mod, plan as plan_mod, research, researcher, voices
+from . import language as lang_mod, plan as plan_mod, research, researcher, staged as staged_mod, voices
 
 Ask = Callable[..., str]  # (system, user, max_tokens=...) -> text
 
@@ -40,9 +41,31 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                 info["fallback"] = True  # nothing usable came back: fall through to the encyclopedia path
     if info["mode"] != "web":
         notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
-    plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
-                                              allow_clips=info["mode"] != "web", music_tracks=music_tracks,
-                                              **({"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}))
+    rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
+    if staged_mod.is_staged(minutes, len(photos or [])):
+        # a long video is written in stages (outline, then each section on its own, each with its own research): see engine/staged.py
+        lock = threading.Lock()
+
+        def research_section(sec: Dict[str, Any]) -> Tuple[str, List[Dict[str, str]]]:
+            brief = f"{prompt}: {sec['title']}. {sec['goal']}"
+            if web_provider is not None and ask_tools is not None:
+                dec = researcher.Decision(mode="web", queries=sec["queries"], topic="general", reason="research for one section of a long video")
+                r = researcher.research_web(brief, decision=dec, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools, budget=budget)
+                with lock:
+                    info["searches"] = info.get("searches", 0) + r.searches
+                    info["section_searches"] = info.get("section_searches", 0) + r.searches
+                if r.sources:
+                    return r.notes, r.sources
+            return research.gather_notes(f"{sec['title']} {prompt}", language=language, ask=lambda s, u: ask_small(s, u, 120))
+
+        plan, warnings, sinfo = staged_mod.generate(prompt, notes, minutes, ask_big, research=research_section, language=language, region=region,
+                                                    today=today if web_provider is not None else None, allow_clips=info["mode"] != "web", music_tracks=music_tracks, **rate)
+        seen = {s["title"] for s in sources}
+        sources = sources + [s for s in sinfo["sources"] if s["title"] not in seen and not seen.add(s["title"])]
+        info["staged"] = {"sections": sinfo["sections"], "titles": sinfo["titles"]}
+    else:
+        plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
+                                                  allow_clips=info["mode"] != "web", music_tracks=music_tracks, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
 
