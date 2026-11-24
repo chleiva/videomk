@@ -142,3 +142,14 @@ def test_register_rejects_bad_names():
     for bad in ("", "Has-Dash", "UPPER", "sp ace"):
         with pytest.raises(ValueError):
             registry.register(_demo(name=bad))
+
+
+def test_the_credits_ledger_includes_photos_shown_by_elements():
+    from engine.handlers.timeline_handler import credits_ledger
+    plan = {"beats": [
+        {"scene": {"type": "image"}, "media": {"ledger": {"id": "img"}}},
+        {"scene": {"type": "gallery"}, "media": {"gallery": [{"ledger": {"id": "g1"}}, {}, {"ledger": {"id": "g2"}}]}},
+        {"scene": {"type": "annotated_image"}, "media": {"element": {"ledger": {"id": "annot"}, "pins": []}}},
+        {"scene": {"type": "annotated_image"}, "media": {"element": {"ledger": {"id": "gone"}}, "element_failed": True}},
+        {"scene": {"type": "title"}, "media": {}}]}
+    assert [e["id"] for e in credits_ledger(plan)] == ["img", "g1", "g2", "annot"]

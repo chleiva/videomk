@@ -11,6 +11,16 @@ MAX_DURATION_S = float(os.environ.get("MAX_VIDEO_SECONDS", str(13 * 60)))
 CHUNK_SECONDS = int(os.environ.get("CHUNK_SECONDS", "10"))
 
 
+def credits_ledger(plan: Dict[str, Any]) -> list:
+    """Every licensed photograph or clip the video shows, for the credits in its description: image and clip scenes, each photo of a gallery, and the photo
+    of any element that fetches one (its `prepare` patch carries a `ledger`, e.g. annotated_image)."""
+    out = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] in ("image", "clip") and (b.get("media") or {}).get("ledger")]
+    out += [g["ledger"] for b in plan["beats"] if b["scene"]["type"] == "gallery" for g in (b.get("media") or {}).get("gallery") or [] if g.get("ledger")]
+    out += [b["media"]["element"]["ledger"] for b in plan["beats"]
+            if isinstance((b.get("media") or {}).get("element"), dict) and b["media"]["element"].get("ledger") and not (b.get("media") or {}).get("element_failed")]
+    return out
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     rev = int(event.get("rev", 1))
@@ -41,8 +51,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         logging.warning("sync check: %s", {k: rep[k] for k in ("items", "anchored", "early", "late", "mean_abs_delta")} | {"worst": sorted((r for r in rep["rows"] if r["delta"] is not None), key=lambda r: -abs(r["delta"]))[:3]})
     if tl["duration"] > MAX_DURATION_S:
         raise ValueError(f"video too long ({tl['duration']:.0f}s > {MAX_DURATION_S:.0f}s)")
-    tl["ledger"] = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] in ("image", "clip") and (b.get("media") or {}).get("ledger")]
-    tl["ledger"] += [g["ledger"] for b in plan["beats"] if b["scene"]["type"] == "gallery" for g in (b.get("media") or {}).get("gallery") or [] if g.get("ledger")]
+    tl["ledger"] = credits_ledger(plan)
     tl["sources"] = plan.get("sources", [])
     tl["description"] = plan.get("description", "")
     tl["language"] = plan.get("language", "en")
