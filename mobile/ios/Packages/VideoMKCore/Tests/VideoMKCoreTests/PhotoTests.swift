@@ -135,3 +135,40 @@ extension CoreTests {
         #expect(none.contains("Settings") && none.contains("type"))
     }
 }
+
+@Suite struct DictationFailureTests {
+    typealias F = DictationFailure
+    private func c(_ domain: String = "kAFAssistantErrorDomain", code: Int, text: Bool = false, device: Bool = false, on: Bool = true) -> F {
+        F.classify(domain: domain, code: code, gotText: text, onDevice: device, dictationEnabled: on)
+    }
+
+    @Test func anErrorAfterSpeechIsJustTheEndOfThePhrase() {
+        #expect(c(code: 1110, text: true) == .finishQuietly && c("kLSRErrorDomain", code: 201, text: true) == .finishQuietly)
+    }
+
+    @Test func cancellationsAreQuiet() { #expect(c(code: 216) == .finishQuietly && c(code: 301) == .finishQuietly) }
+
+    @Test func silenceGetsAFriendlyMessage() {
+        guard case .message(let m) = c(code: 1110) else { Issue.record("expected message"); return }
+        #expect(m.contains("didn't hear"))
+    }
+
+    @Test func dictationSwitchedOffIsSaidPlainlyOnceTheServerRecognizerFailedToo() {
+        #expect(c("kLSRErrorDomain", code: 201, device: true, on: false) == .retryOnServer)          // never block on our own reading of the setting
+        guard case .message(let m) = c("kLSRErrorDomain", code: 201, device: false, on: false) else { Issue.record("expected message"); return }
+        #expect(m.contains("Dictation is turned off") && m.contains("Settings"))
+    }
+
+    @Test func aFailedOnDeviceModelRetriesOnTheServerOnce() {
+        #expect(c("kLSRErrorDomain", code: 201, device: true) == .retryOnServer && c(code: 1101, device: true) == .retryOnServer)
+        guard case .message(let m) = c(code: 1101, device: false) else { Issue.record("expected message"); return }   // already on the server: no more retries
+        #expect(m.contains("1101"))
+    }
+
+    @Test func noNetworkSaysSo() {
+        guard case .message(let m) = c("NSURLErrorDomain", code: -1009) else { Issue.record("expected message"); return }
+        #expect(m.contains("internet"))
+        guard case .message(let m2) = c(code: 203) else { Issue.record("expected message"); return }
+        #expect(m2.contains("internet"))
+    }
+}

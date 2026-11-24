@@ -48,3 +48,21 @@ public enum DictationPlan: Equatable, Sendable {
         return .blocked("Dictation isn't available right now. You can turn it on in Settings › General › Keyboard, or type your idea.")
     }
 }
+
+/// What to do when Apple's recognizer reports an error. Silent failure was the bug: a phone with Dictation switched off, or without the on-device model,
+/// made the microphone button look dead. Every outcome is now either quiet (the normal end of a phrase) or a message that says what to do.
+public enum DictationFailure: Equatable, Sendable {
+    case finishQuietly                 // normal end: text arrived, or we cancelled it ourselves
+    case retryOnServer                 // on-device recognition failed before any text: try Apple's server recognizer
+    case message(String)
+
+    public static func classify(domain: String, code: Int, gotText: Bool, onDevice: Bool, dictationEnabled: Bool) -> DictationFailure {
+        if gotText { return .finishQuietly }                                   // errors after speech are how a session normally ends
+        if code == 216 || code == 301 { return .finishQuietly }                // cancelled
+        if code == 1110 || code == 1107 && domain.contains("Assistant") { return .message("I didn't hear anything. Tap the microphone and start speaking.") }
+        if onDevice { return .retryOnServer }                                  // always try the server recognizer first: our reading of the Dictation setting must never block a working microphone
+        if !dictationEnabled { return .message("Dictation is turned off on this iPhone. Turn it on in Settings › General › Keyboard › Enable Dictation, then tap the microphone again.") }
+        if domain == "NSURLErrorDomain" || code == 1100 || code == 203 { return .message("Dictation needs an internet connection right now. Check your connection and try again, or use the microphone key on your keyboard.") }
+        return .message("Dictation stopped unexpectedly (\(domain) \(code)). You can use the microphone key on your keyboard instead.")
+    }
+}

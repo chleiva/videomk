@@ -134,6 +134,33 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.textFields["composerField"].exists)
     }
 
+    /// Speak a sentence at the simulator (the host Mac's microphone is its microphone: `say` from the host while this runs) and see what dictation does:
+    /// the words land in the field, or a message says why not. Silence is the one result that is never acceptable.
+    @MainActor func testDictationEitherHearsOrExplains() throws {
+        addUIInterruptionMonitor(withDescription: "permissions") { alert in
+            for name in ["Allow", "OK", "Allow While Using App"] where alert.buttons[name].exists { alert.buttons[name].tap(); return true }
+            return false
+        }
+        let app = try launch(signedIn: true)
+        let mic = app.buttons["micButton"]
+        XCTAssertTrue(mic.waitForExistence(timeout: 20))
+        mic.tap()
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.05)).tap()
+        let field = app.textFields["composerField"]
+        let deadline = Date().addingTimeInterval(Double(ProcessInfo.processInfo.environment["VMK_LISTEN_SECONDS"] ?? "20") ?? 20)
+        var heard = ""
+        while Date() < deadline {
+            heard = (field.value as? String) ?? ""
+            if !heard.isEmpty && heard != "Describe a video…" { break }
+            if element(app, "dictationUnavailable").exists || element(app, "dictationKeyboardHint").exists { break }
+            usleep(500_000)
+        }
+        shot(app, "19-dictation-result")
+        let message = element(app, "dictationUnavailable").exists ? element(app, "dictationUnavailable").label : (element(app, "dictationKeyboardHint").exists ? element(app, "dictationKeyboardHint").label : "")
+        print("DICTATION RESULT text=[\(heard)] message=[\(message)] listening=\(element(app, "listeningHint").exists)")
+        XCTAssertTrue((!heard.isEmpty && heard != "Describe a video…") || !message.isEmpty || element(app, "listeningHint").exists, "dictation must hear, explain, or visibly be listening")
+    }
+
     /// Attach photos, say what the video should be about, send: the photos upload, the video is made around them, and it plays.
     /// Needs `TEST_RUNNER_VMK_DEBUG_PHOTO_FILES=/path/a.jpg:/path/b.jpg` (the system photo picker can't be driven from a test). Makes one real video on QA.
     func testAVideoFromYourPhotos() throws {

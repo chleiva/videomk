@@ -26,6 +26,10 @@ final class Dictation {
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
     private var base = ""
+    private var gotText = false
+    private var onDevice = false
+    private var retriedOnServer = false
+    private var recognizer: SFSpeechRecognizer?
 
     var isListening: Bool { state == .listening || state == .starting }
 
@@ -54,12 +58,20 @@ final class Dictation {
         case .useApp: break
         }
         guard let recognizer else { return }
-
-        // 3. Listen. Anything that goes wrong here also ends in the fallback, never in a crash.
+        self.recognizer = recognizer
         base = currentText.isEmpty || currentText.hasSuffix(" ") ? currentText : currentText + " "
+        gotText = false
+        retriedOnServer = false
+        listen(onDevice: recognizer.supportsOnDeviceRecognition)
+    }
+
+    /// Anything that goes wrong here ends in a message or the keyboard fallback, never in a crash or in silence.
+    private func listen(onDevice wantOnDevice: Bool) {
+        guard let recognizer else { return }
+        onDevice = wantOnDevice
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
-        request.requiresOnDeviceRecognition = recognizer.supportsOnDeviceRecognition
+        request.requiresOnDeviceRecognition = wantOnDevice
         self.request = request
         do {
             let session = AVAudioSession.sharedInstance()
@@ -92,9 +104,22 @@ final class Dictation {
         switch state { case .unavailable, .keyboardHint: state = .idle; default: break }
     }
 
-    fileprivate func handle(text: String?, isFinal: Bool, failed: Bool) {
-        if let text { onText?(base + text) }
-        if (isFinal || failed) && state != .idle { teardown(); state = .idle }
+    fileprivate func handle(text: String?, isFinal: Bool, error: NSError?) {
+        if let text, !text.isEmpty { gotText = true; onText?(base + text) }   // the final text of a phrase we just stopped still lands
+        guard state != .idle else { return }
+        if let error {
+            switch DictationFailure.classify(domain: error.domain, code: error.code, gotText: gotText, onDevice: onDevice, dictationEnabled: Self.keyboardDictationEnabled) {
+            case .finishQuietly: teardown(); state = .idle
+            case .retryOnServer where !retriedOnServer:
+                retriedOnServer = true
+                teardown()
+                listen(onDevice: false)
+            case .retryOnServer: teardown(); state = .unavailable("Dictation stopped unexpectedly (\(error.domain) \(error.code)). You can use the microphone key on your keyboard instead.")
+            case .message(let m): teardown(); state = .unavailable(m)
+            }
+        } else if isFinal {
+            teardown(); state = .idle
+        }
     }
 
     private func fallBackToKeyboard(_ message: String) {
@@ -148,8 +173,8 @@ final class Dictation {
         return { result, error in
             let text = result?.bestTranscription.formattedString
             let isFinal = result?.isFinal ?? false
-            let failed = error != nil
-            Task { @MainActor in weakBox.value?.handle(text: text, isFinal: isFinal, failed: failed) }
+            let failure = error.map { $0 as NSError }
+            Task { @MainActor in weakBox.value?.handle(text: text, isFinal: isFinal, error: failure) }
         }
     }
 }

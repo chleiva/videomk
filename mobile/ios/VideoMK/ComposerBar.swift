@@ -22,11 +22,18 @@ struct ComposerBar: View {
     var body: some View {
         VStack(spacing: 6) {
             if case .unavailable(let message) = dictation.state {
-                Label(message, systemImage: "mic.slash").font(.footnote).foregroundStyle(Theme.warning)
-                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20)
-                    .transition(.opacity)
-                    .accessibilityIdentifier("dictationUnavailable")
-                    .task { try? await Task.sleep(for: .seconds(8)); dictation.clearHint() }
+                HStack(alignment: .top, spacing: 8) {
+                    Label(message, systemImage: "mic.slash").font(.footnote).foregroundStyle(Theme.warning)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("dictationUnavailable")
+                    if message.contains("Settings") {
+                        Button("Open Settings") { if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) } }
+                            .font(.footnote.weight(.semibold)).accessibilityIdentifier("openSettingsButton")
+                    }
+                }
+                .padding(.horizontal, 20)
+                .transition(.opacity)
+                .task(id: message) { try? await Task.sleep(for: .seconds(12)); dictation.clearHint() }
             }
             if case .keyboardHint(let message) = dictation.state {
                 Label(message, systemImage: "keyboard").font(.footnote).foregroundStyle(Theme.textSecondary)
