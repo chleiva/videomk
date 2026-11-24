@@ -392,3 +392,21 @@ def test_a_gallery_photo_is_cut_in_when_its_subject_is_named_even_if_the_query_d
     assert props["cuts"][3] == pytest.approx(by["pasta"] + sync.GALLERY_AFTER_S, abs=0.01)
     # lists keep the stricter rule: half of an item's words must be said
     assert sync.find_mentions(["Colosseum interior arena"], words) == [None] and sync.find_mentions(["Colosseum interior arena"], words, 0.0) == [5]
+
+
+# ================================================================= a photo of exactly the frame's shape must not crash the render (found live)
+@pytest.mark.parametrize("size", [(1920, 1080), (3840, 2160), (1408, 792), (1401, 788), (1409, 792), (2000, 1125)])   # 1408x792 and its neighbours put the crop box at -1e-13
+def test_photos_of_exactly_16_by_9_render_in_images_and_galleries(size):
+    from PIL import Image
+    photo = Image.new("RGB", size, (90, 140, 200))
+    tl = small_timeline(9.0, ["image", "gallery"])
+    tl["scenes"][0]["props"] = {"asset": "k", "ken_burns": "in"}
+    tl["scenes"][1]["props"] = {"assets": ["a", "b", "c"], "credits": [], "alt": "x", "cuts": [0.0, 1.5, 3.0]}
+    tl["captions"] = False
+    r = Renderer(tl, lambda key: photo)
+    for t in np.linspace(0.0, 8.95, 60):                         # every phase of both scenes, including the crossfades and the end
+        assert r.frame_at(float(t)).size == (1920, 1080)
+    for k in ("in", "left", "right", "out"):
+        tl["scenes"][0]["props"]["ken_burns"] = k
+        for t in (0.0, 2.0, 4.4):
+            Renderer(tl, lambda key: photo).frame_at(t)

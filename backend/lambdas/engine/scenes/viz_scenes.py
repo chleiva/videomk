@@ -311,7 +311,7 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cx += lerp(-pan, pan, p)
     cx = min(max(cx, vw / 2), sw - vw / 2)
     cy = min(max(cy, vh / 2), sh - vh / 2)
-    img = src.resize((tw, tht), Image.BILINEAR, box=(cx - vw / 2, cy - vh / 2, cx + vw / 2, cy + vh / 2))
+    img = src.resize((tw, tht), Image.BILINEAR, box=_box(cx, cy, vw, vh, sw, sh))
     cv.im.paste(img)
     # bottom scrim so captions stay legible over any photo
     scrim = _scrim(tw, tht)
@@ -330,6 +330,12 @@ def gallery_cues(props: Dict[str, Any], dur: float) -> List[float]:
     return []
 
 
+def _box(cx: float, cy: float, vw: float, vh: float, sw: int, sh: int) -> Tuple[float, float, float, float]:
+    """The crop box centred on (cx, cy), kept inside the source: when the photo has exactly the frame's shape the box equals the image and float rounding
+    used to put its edge at -1e-13, which PIL rejects ("box offset can't be negative") and which failed the whole render."""
+    return (max(0.0, cx - vw / 2), max(0.0, cy - vh / 2), min(float(sw), cx + vw / 2), min(float(sh), cy + vh / 2))
+
+
 def _cover(src: Image.Image, tw: int, tht: int, z: float, motion: str, p: float) -> Image.Image:
     sw, sh = src.size
     base = max(tw / sw, tht / sh)
@@ -342,7 +348,7 @@ def _cover(src: Image.Image, tw: int, tht: int, z: float, motion: str, p: float)
         cx += lerp(-pan, pan, p)
     cx = min(max(cx, vw / 2), sw - vw / 2)
     cy = min(max(cy, vh / 2), sh - vh / 2)
-    return src.resize((tw, tht), Image.BILINEAR, box=(cx - vw / 2, cy - vh / 2, cx + vw / 2, cy + vh / 2))
+    return src.resize((tw, tht), Image.BILINEAR, box=_box(cx, cy, vw, vh, sw, sh))
 
 
 def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
