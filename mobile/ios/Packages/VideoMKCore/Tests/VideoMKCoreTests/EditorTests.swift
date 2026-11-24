@@ -150,3 +150,29 @@ extension CoreTests {
         #expect(CreateOptions().captions == true && CreateOptions(captions: false).captions == false)
     }
 }
+
+@Suite struct SilentBeatTests {
+    @Test func aSilentBeatDecodesWithItsHoldAndIsNotAnError() throws {
+        let json = #"{"id":"b1","narration":"","silent":true,"hold":4.0,"scene":{"type":"image","props":{"image_query":"sunrise","word":"Breathe"}},"duration":4.0}"#
+        let b = try JSONDecoder().decode(EditorBeat.self, from: Data(json.utf8))
+        #expect(b.silent && b.hold == 4.0 && b.narration.isEmpty)
+        let limits = EditorLimits()
+        #expect(EditorDiff.narrationError("", limits: limits, silent: true) == nil)                          // a pause needs no words
+        #expect(EditorDiff.narrationError("", limits: limits, silent: false) != nil)                         // a spoken beat still does
+        #expect(EditorDiff.narrationError("only three words", limits: limits, silent: true) != nil)          // typing a little into a pause is still checked
+        #expect(EditorDiff.narrationError("A few quiet words that give this pause a voice now.", limits: limits, silent: true) == nil)
+    }
+
+    @Test func olderServersWithoutTheFieldsStillDecode() throws {
+        let b = try JSONDecoder().decode(EditorBeat.self, from: Data(#"{"id":"b2","narration":"A normal spoken beat with enough words in it.","scene":{"type":"title","props":{}}}"#.utf8))
+        #expect(!b.silent && b.hold == nil)
+    }
+
+    @Test func leavingAPauseAloneProducesNoEdit() {
+        let pause = EditorBeat(id: "p", narration: "", silent: true, hold: 4)
+        let spoken = EditorBeat(id: "s", narration: "A line of narration with enough words in it.")
+        #expect(EditorDiff.ops(serverTitle: "T", server: [spoken, pause], localTitle: "T", local: [spoken, pause]).isEmpty)
+        var voiced = pause; voiced.narration = "Now it has a few words to say."
+        #expect(EditorDiff.ops(serverTitle: "T", server: [spoken, pause], localTitle: "T", local: [spoken, voiced]) == [.setNarration(id: "p", text: "Now it has a few words to say.")])
+    }
+}

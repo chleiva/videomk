@@ -130,7 +130,12 @@ struct BeatRow: View {
                     if edited { Text("Edited").font(.caption.weight(.semibold)).foregroundStyle(Theme.warning) }
                     else if beat.stale { Text("Will be re-made").font(.caption).foregroundStyle(Theme.textSecondary) }
                 }
-                Text(beat.narration).font(.callout).foregroundStyle(Theme.text).lineLimit(2)
+                if beat.silent && beat.narration.isEmpty {
+                    Label("Silent pause" + (beat.hold.map { ", \(Int($0.rounded())) s" } ?? ""), systemImage: "speaker.slash").font(.callout).foregroundStyle(Theme.textSecondary)
+                        .accessibilityIdentifier("silentBeatLabel")
+                } else {
+                    Text(beat.narration).font(.callout).foregroundStyle(Theme.text).lineLimit(2)
+                }
                 if let error { Text(error).font(.caption).foregroundStyle(Theme.danger) }
             }
         }

@@ -91,10 +91,12 @@ public struct EditorBeat: Sendable, Equatable, Identifiable, Decodable {
     public let chapter: String?
     public let duration: Double?
     public let stale: Bool
+    public let silent: Bool          // a pause: nothing is spoken, the picture is held for `hold` seconds while the music carries it
+    public let hold: Double?
     public let photo: BeatPhoto?
     public let candidates: [PhotoCandidate]
 
-    enum CodingKeys: String, CodingKey { case id, narration, scene, chapter, duration, stale, photo, candidates }
+    enum CodingKeys: String, CodingKey { case id, narration, scene, chapter, duration, stale, silent, hold, photo, candidates }
     private struct Scene: Decodable { let type: String; let props: [String: JSONValue]? }
 
     public init(from decoder: Decoder) throws {
@@ -107,14 +109,16 @@ public struct EditorBeat: Sendable, Equatable, Identifiable, Decodable {
         chapter = (try? c.decode(String.self, forKey: .chapter)).flatMap { $0.isEmpty ? nil : $0 }
         duration = try? c.decode(Double.self, forKey: .duration)
         stale = (try? c.decode(Bool.self, forKey: .stale)) ?? false
+        silent = (try? c.decode(Bool.self, forKey: .silent)) ?? false
+        hold = try? c.decode(Double.self, forKey: .hold)
         photo = try? c.decode(BeatPhoto.self, forKey: .photo)
         candidates = (try? c.decode([PhotoCandidate].self, forKey: .candidates)) ?? []
     }
 
     public init(id: String, narration: String, kind: SceneKind? = .title, summary: String = "", chapter: String? = nil, duration: Double? = nil,
-                stale: Bool = false, photo: BeatPhoto? = nil, candidates: [PhotoCandidate] = []) {
+                stale: Bool = false, silent: Bool = false, hold: Double? = nil, photo: BeatPhoto? = nil, candidates: [PhotoCandidate] = []) {
         self.id = id; self.narration = narration; self.kind = kind; self.summary = summary; self.chapter = chapter; self.duration = duration
-        self.stale = stale; self.photo = photo; self.candidates = candidates
+        self.stale = stale; self.silent = silent; self.hold = hold; self.photo = photo; self.candidates = candidates
     }
 
     /// One line describing what the scene shows, for the list.
@@ -233,8 +237,9 @@ public enum EditorDiff {
     public static func normalize(_ s: String) -> String { s.split(whereSeparator: \.isWhitespace).joined(separator: " ") }
 
     /// Mirrors the server's narration limits so errors show beside the field before anything is sent.
-    public static func narrationError(_ text: String, limits: EditorLimits) -> String? {
+    public static func narrationError(_ text: String, limits: EditorLimits, silent: Bool = false) -> String? {
         let n = normalize(text).split(separator: " ").count
+        if silent && n == 0 { return nil }          // a pause has no narration; typing words into it gives it a voice, and then the usual limits apply
         if n < limits.minWords { return "Needs at least \(limits.minWords) words (now \(n))." }
         if n > limits.maxWords { return "Limited to \(limits.maxWords) words per scene (now \(n)). Split it into two scenes." }
         return nil

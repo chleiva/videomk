@@ -21,12 +21,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     pfx = awsio.prefix(video_id)
     tl = awsio.get_json(event["timeline_key"])
     prefix_audio = pfx + "audio/"
-    keys = [sc["audio_key"] for sc in tl["scenes"]]
-    if not all(isinstance(k, str) and k.startswith(prefix_audio) and ".." not in k for k in keys):
+    keys = [sc.get("audio_key") for sc in tl["scenes"]]
+    spoken = [k for k in keys if k is not None]   # silent beats have none
+    if len(spoken) != sum(1 for sc in tl["scenes"] if not sc.get("silent")) or not all(isinstance(k, str) and k.startswith(prefix_audio) and ".." not in k for k in spoken):
         raise ValueError("timeline references audio outside this video")
     with tempfile.TemporaryDirectory() as tmp:
         with ThreadPoolExecutor(max_workers=8) as ex:
-            beats = list(ex.map(lambda k: _load_wav(k, tmp), keys))
+            loaded = dict(zip(spoken, ex.map(lambda k: _load_wav(k, tmp), spoken)))
+        beats = [loaded[k] if k is not None else None for k in keys]
         out = os.path.join(tmp, "mix.m4a")
         pipeline.make_audio(tl, beats, out)
         key = f"{pfx}audio/mix_r{rev}_{event.get('mode', 'final')}.m4a"

@@ -125,6 +125,49 @@ class EditorSnapshotTest {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+class SilentBeatTest {
+    private fun beatOf(json: String) = EditorBeat.fromJson(parseObject(json))
+
+    @Test fun `a silent beat decodes with its hold and is not an error`() {
+        val b = beatOf("""{"id":"b1","narration":"","silent":true,"hold":4.0,"scene":{"type":"image","props":{"image_query":"sunrise","word":"Breathe"}},"duration":4.0}""")
+        assertTrue(b.silent); assertEquals(4.0, b.hold!!, 0.0); assertTrue(b.narration.isEmpty())
+        val limits = EditorLimits()
+        assertNull(EditorDiff.narrationError("", limits, silent = true))                                   // a pause needs no words
+        assertNotNull(EditorDiff.narrationError("", limits, silent = false))                               // a spoken beat still does
+        assertNotNull(EditorDiff.narrationError("only three words", limits, silent = true))                // typing a little into a pause is still checked
+        assertNull(EditorDiff.narrationError("A few quiet words that give this pause a voice now.", limits, silent = true))
+    }
+
+    @Test fun `a silent beat may leave the narration out entirely, a spoken one may not`() {
+        assertTrue(beatOf("""{"id":"b","silent":true,"hold":3}""").narration.isEmpty())
+        try { beatOf("""{"id":"b"}"""); org.junit.Assert.fail() } catch (e: ApiError) { assertEquals(ApiError.Server, e) }
+    }
+
+    @Test fun `older servers without the fields still decode`() {
+        val b = beatOf("""{"id":"b2","narration":"A normal spoken beat with enough words in it.","scene":{"type":"title","props":{}}}""")
+        assertFalse(b.silent); assertNull(b.hold)
+    }
+
+    @Test fun `leaving a pause alone produces no edit, giving it words produces the normal set_narration`() {
+        val pause = EditorBeat("p", "", SceneKind.Image, silent = true, hold = 4.0)
+        val spoken = EditorBeat("s", "A line of narration with enough words in it.", SceneKind.Title)
+        assertTrue(EditorDiff.ops("T", listOf(spoken, pause), "T", listOf(spoken, pause)).isEmpty())
+        val voiced = pause.copy(narration = "Now it has a few words to say.")
+        assertEquals(listOf<EditOp>(EditOp.SetNarration("p", "Now it has a few words to say.")), EditorDiff.ops("T", listOf(spoken, pause), "T", listOf(spoken, voiced)))
+    }
+
+    @Test fun `the editor does not block Preview on an untouched pause`() {
+        val pause = EditorBeat("p", "", SceneKind.Image, silent = true, hold = 4.0)
+        val state = com.videomk.app.ui.EditorState(snapshot = EditorSnapshot("v", 1, EditState.Ready, null, "T", true, listOf(pause), EditorLimits()), beats = listOf(pause))
+        assertNull(state.narrationError("p")); assertFalse(state.isDirty)
+    }
+
+    @Test fun `the label reads Silent pause with the hold in seconds`() {
+        assertEquals("Silent pause, 4 s", com.videomk.app.ui.silentLabel(4.0)); assertEquals("Silent pause, 4 s", com.videomk.app.ui.silentLabel(3.6))
+        assertEquals("Silent pause", com.videomk.app.ui.silentLabel(null))
+    }
+}
+
 class CaptionsOptionTest {
     private fun snap(extra: String) = EditorSnapshot.fromJson(parseObject("""{"video_id":"v","rev":1,"edit_state":"READY","title":"T","beats":[]$extra}"""))
 

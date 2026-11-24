@@ -33,7 +33,8 @@ def build_timeline(
     for i, beat in enumerate(plan["beats"]):
         info = beat_info[i]
         speech = float(info["duration"])
-        dur = max(MIN_SCENE, LEAD + speech + TAIL)
+        silent = bool(beat.get("silent"))
+        dur = max(MIN_SCENE, speech) if silent else max(MIN_SCENE, LEAD + speech + TAIL)   # a silent beat is exactly as long as it is held
         if i == len(plan["beats"]) - 1:
             dur += END_HOLD
         stype = beat["scene"]["type"]
@@ -44,7 +45,7 @@ def build_timeline(
                 queries = [g.get("query") for g in shots]
                 if not all(queries):
                     queries = list(props.get("image_queries") or [])[: len(shots)]
-                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", ""), "image_queries": queries}
+                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", ""), "image_queries": queries, **({"word": props["word"]} if props.get("word") else {})}
             elif len(shots) == 1:  # only one photograph could be found: a plain image scene (the image branch below attaches the asset and credit)
                 info = {**info, "asset": shots[0]["asset"], "credit": shots[0].get("credit") or None}
                 stype, props = "image", {"alt": props.get("alt", ""), "ken_burns": "in"}
@@ -52,7 +53,7 @@ def build_timeline(
                 stype, props = "title", {"title": props.get("alt") or (props.get("image_queries") or [""])[0], "subtitle": ""}
         if stype == "clip":
             if info.get("clip_asset"):
-                props = {"asset": info["clip_asset"], "alt": props.get("alt", ""), **({"credit": info["credit"]} if info.get("credit") else {})}
+                props = {"asset": info["clip_asset"], "alt": props.get("alt", ""), **({"word": props["word"]} if props.get("word") else {}), **({"credit": info["credit"]} if info.get("credit") else {})}
             elif info.get("asset"):  # no footage found: a still photo of the same subject keeps the beat visual
                 stype, props = "image", {"asset": info["asset"], "alt": props.get("alt", ""), "ken_burns": "in", **({"credit": info["credit"]} if info.get("credit") else {})}
             else:
@@ -65,7 +66,9 @@ def build_timeline(
             else:  # scout found nothing usable: degrade to a clean title card instead of a hole
                 stype, props = "title", {"title": props.get("alt") or props.get("image_query", ""), "subtitle": ""}
         # words: measured from the audio when we have them (engine/align.py), else the proportional estimate; both in scene time (after the lead-in)
-        if info.get("words"):
+        if silent:
+            words = []
+        elif info.get("words"):
             words = [[w, round(LEAD + float(s), 3), round(LEAD + float(e), 3)] for w, s, e in info["words"]]
         else:
             words = [list(w) for w in estimate_words(beat["narration"], speech, lead=LEAD)]
@@ -84,6 +87,7 @@ def build_timeline(
                 "props": props,
                 "words": words,
                 "audio_key": info.get("audio_key"),
+                **({"silent": True} if silent else {}),
                 "narration_offset": LEAD,
                 "cues": [round(c, 3) for c in cues[:8]],
                 "transition": "fade",
@@ -119,7 +123,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
     out = []
     for b in plan["beats"]:
         m = b.get("media") or {}
-        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
+        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key"), "silent": bool(m.get("silent"))})
     return out
 
 

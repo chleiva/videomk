@@ -53,7 +53,7 @@ data class EditorState(
         return EditorDiff.normalize(server.narration) != EditorDiff.normalize(local.narration) || picks[id] != null
     }
 
-    fun narrationError(id: String): String? = beats.firstOrNull { it.id == id }?.let { EditorDiff.narrationError(it.narration, limits) }
+    fun narrationError(id: String): String? = beats.firstOrNull { it.id == id }?.let { EditorDiff.narrationError(it.narration, limits, it.silent) }
 }
 
 class EditorViewModel(private val videoId: String, private val backend: Backend?, private val onChanged: () -> Unit = {}, private val pollMillis: Long = 4000) : ViewModel() {

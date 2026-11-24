@@ -34,7 +34,7 @@ final class EditorModel {
     }
 
     func narrationError(for id: String) -> String? {
-        beats.first { $0.id == id }.flatMap { EditorDiff.narrationError($0.narration, limits: limits) }
+        beats.first { $0.id == id }.flatMap { EditorDiff.narrationError($0.narration, limits: limits, silent: $0.silent) }
     }
 
     // MARK: load

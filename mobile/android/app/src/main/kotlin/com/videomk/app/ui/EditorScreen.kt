@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
@@ -88,6 +89,9 @@ import com.videomk.app.core.EditorDiff
 import com.videomk.app.core.PhotoCandidate
 import com.videomk.app.core.RenderMode
 import com.videomk.app.core.SceneKind
+
+/** The row text of a pause, e.g. Silent pause, 4 s. */
+internal fun silentLabel(hold: Double?): String = "Silent pause" + (hold?.let { ", ${Math.round(it)} s" } ?: "")
 
 fun SceneKind?.icon(): ImageVector = when (this) {
     SceneKind.Title -> Icons.Filled.TextFields
@@ -231,7 +235,7 @@ private fun ActionBar(vm: EditorViewModel, state: EditorState) {
 }
 
 @Composable
-private fun BeatRow(
+internal fun BeatRow(
     beat: EditorBeat, edited: Boolean, error: String?, reorder: Boolean, picked: Boolean, canUp: Boolean, canDown: Boolean,
     onClick: () -> Unit, onUp: () -> Unit, onDown: () -> Unit, onDelete: () -> Unit,
 ) {
@@ -254,7 +258,12 @@ private fun BeatRow(
                         if (edited) Text("Edited", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.warning)
                         else if (beat.stale) Text("Will be re-made", style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary)
                     }
-                    Text(beat.narration, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    if (beat.silent && beat.narration.isEmpty()) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("silentBeatLabel")) {
+                            Icon(Icons.AutoMirrored.Filled.VolumeOff, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
+                            Text(silentLabel(beat.hold), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+                        }
+                    } else Text(beat.narration, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger) }
                 }
             }
@@ -332,12 +341,7 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
                 OutlinedTextField(
                     value = beat.narration, onValueChange = { vm.setNarration(beatId, it) }, label = { Text("Narration") },
                     isError = error != null, minLines = 5, modifier = Modifier.fillMaxWidth().testTag("narrationField"),
-                    supportingText = {
-                        Column {
-                            Text("$words words, about ${Math.round(EditorDiff.spokenSeconds(beat.narration))} seconds spoken. ${state.limits.minWords}–${state.limits.maxWords} words per scene.")
-                            if (error != null) Text(error, color = Vmk.colors.danger)
-                        }
-                    },
+                    supportingText = { NarrationSupport(beat, words, state.limits.minWords, state.limits.maxWords, error) },
                 )
             }
             Card {
@@ -360,6 +364,19 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
             }
             if (beat.kind == SceneKind.Image) PhotoSection(vm, state, beat)
         }
+    }
+}
+
+/** The text under the narration field. A silent pause with no words explains itself instead of counting words. */
+@Composable
+internal fun NarrationSupport(beat: EditorBeat, words: Int, minWords: Int, maxWords: Int, error: String?) {
+    Column(Modifier.testTag("narrationSupport")) {
+        if (beat.silent && words == 0) {
+            Text("A silent pause: nothing is spoken for ${Math.round(beat.hold ?: 0.0)} seconds and the music carries it. Type words here to give it a voice.")
+        } else {
+            Text("$words words, about ${Math.round(EditorDiff.spokenSeconds(beat.narration))} seconds spoken. $minWords–$maxWords words per scene.")
+        }
+        if (error != null) Text(error, color = Vmk.colors.danger)
     }
 }
 

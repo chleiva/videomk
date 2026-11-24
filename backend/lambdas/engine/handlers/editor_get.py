@@ -19,7 +19,7 @@ def _s3_uri_key(uri: str) -> str:
 def _beat_view(plan: Dict[str, Any], beat: Dict[str, Any], pfx: str) -> Dict[str, Any]:
     m = beat.get("media") or {}
     view: Dict[str, Any] = {
-        "id": beat["id"], "speaker": beat.get("speaker"), "narration": beat["narration"], "scene": beat["scene"], "chapter": beat.get("chapter"), "pick": beat.get("pick"),
+        "id": beat["id"], "speaker": beat.get("speaker"), "narration": beat["narration"], "silent": bool(beat.get("silent")), "hold": beat.get("hold"), "scene": beat["scene"], "chapter": beat.get("chapter"), "pick": beat.get("pick"),
         "duration": m.get("duration"), "stale": plan_mod.needs_media(plan, beat),  # true => will be re-synthesised/re-fetched on next render
     }
     asset = m.get("asset")

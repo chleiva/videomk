@@ -54,6 +54,9 @@ data class EditorBeat(
     val chapter: String? = null,
     val duration: Double? = null,
     val stale: Boolean = false,
+    /** A pause: nothing is spoken, the picture is held for [hold] seconds while the music carries it. */
+    val silent: Boolean = false,
+    val hold: Double? = null,
     val photo: BeatPhoto? = null,
     val candidates: List<PhotoCandidate> = emptyList(),
 ) {
@@ -63,10 +66,12 @@ data class EditorBeat(
         fun fromJson(o: JsonObject): EditorBeat {
             val scene = o.obj("scene")
             val type = scene?.str("type") ?: ""
+            val silent = o.bool("silent") ?: false
             return EditorBeat(
-                id = o.requireString("id"), narration = o.requireString("narration"), kind = SceneKind.fromWire(type), sceneType = type,
+                id = o.requireString("id"), narration = o.str("narration") ?: if (silent) "" else throw ApiError.Server, kind = SceneKind.fromWire(type), sceneType = type,
                 summary = summary(type, scene?.obj("props") ?: JsonObject(emptyMap())),
                 chapter = o.str("chapter")?.takeIf { it.isNotEmpty() }, duration = o.num("duration"), stale = o.bool("stale") ?: false,
+                silent = silent, hold = o.num("hold"),
                 photo = o.obj("photo")?.let { BeatPhoto.fromJson(it) },
                 candidates = o.arr("candidates")?.mapNotNull { e -> e.asObject()?.let { runCatching { PhotoCandidate.fromJson(it) }.getOrNull() } } ?: emptyList(),
             )
@@ -185,8 +190,9 @@ object EditorDiff {
     fun normalize(s: String): String = s.split(Regex("\\s+")).filter { it.isNotEmpty() }.joinToString(" ")
 
     /** Mirrors the server's narration limits so errors show beside the field before anything is sent. */
-    fun narrationError(text: String, limits: EditorLimits): String? {
+    fun narrationError(text: String, limits: EditorLimits, silent: Boolean = false): String? {
         val n = wordCount(text)
+        if (silent && n == 0) return null   // a pause has no narration; typing words into it gives it a voice, and then the usual limits apply
         if (n < limits.minWords) return "Needs at least ${limits.minWords} words (now $n)."
         if (n > limits.maxWords) return "Limited to ${limits.maxWords} words per scene (now $n). Split it into two scenes."
         return null

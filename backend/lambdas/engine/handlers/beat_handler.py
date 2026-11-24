@@ -52,7 +52,17 @@ def _wav_samples(data: bytes) -> np.ndarray:
         return np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float32) / 32768.0
 
 
+def _context(beat: Dict[str, Any]) -> str:
+    """What the stock reviewers are told the picture is for: the narration, or for a silent beat the scene's own description."""
+    if beat.get("narration"):
+        return beat["narration"]
+    p = beat["scene"]["props"]
+    return str(p.get("alt") or p.get("image_query") or p.get("clip_query") or " ".join(p.get("image_queries") or []))
+
+
 def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:
+    if beat.get("silent"):  # a pause: no synthesis, no cost; the duration is how long the picture is held
+        return {"tts_hash": plan_mod.tts_hash(plan, beat), "audio_key": None, "duration": round(float(beat.get("hold") or plan_mod.DEFAULT_HOLD_S), 3), "silent": True}
     pfx = awsio.prefix(video_id)
     h = plan_mod.tts_hash(plan, beat)
     key = f"{pfx}audio/{h}.wav"
@@ -104,7 +114,7 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
         except Exception:
             result = None
     if result is None:
-        result = stock.scout_reviewed(query, beat["narration"], props.get("alt", ""), unsplash_key=unsplash_key)
+        result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key)
         if result:
             costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
             if result.get("candidates"):
@@ -126,7 +136,7 @@ def make_gallery(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost
     queries = list(props["image_queries"])
 
     def one(i: int) -> Dict[str, Any]:
-        still = {"id": f"{beat['id']}g{i}", "narration": beat["narration"], "scene": {"type": "image", "props": {"image_query": queries[i], "alt": queries[i]}}}
+        still = {"id": f"{beat['id']}g{i}", "narration": _context(beat), "scene": {"type": "image", "props": {"image_query": queries[i], "alt": queries[i]}}}
         try:
             return make_photo(plan, still, video_id, cost_field)
         except Exception:
@@ -149,12 +159,12 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     out: Dict[str, Any] = {"query": query, "pick": None}
     need = timeline_mod.LEAD + speech + timeline_mod.TAIL + 0.6  # the scene's length, with a little margin for the crossfade
     keys = {"pexels_key": get_secret_param("/videomk/pexels_api_key", quiet=True), "pixabay_key": get_secret_param("/videomk/pixabay_api_key", quiet=True)}
-    result = clips.scout_clip(query, beat["narration"], props.get("alt", ""), need_seconds=need, **keys)
+    result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
     alt = str(props.get("alt") or "").strip()
     if (not result or not result.get("mp4")) and alt and alt.lower() != query.lower():  # the planner's second wording often finds what the first did not
-        second = clips.scout_clip(alt, beat["narration"], alt, need_seconds=need, **keys)
+        second = clips.scout_clip(alt, _context(beat), alt, need_seconds=need, **keys)
         if second:
             costs.add_cost(video_id, float(second.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
         if second and second.get("mp4"):
@@ -167,7 +177,7 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
             return out
         except Exception:  # storing the clip failed: a still photo keeps the beat visual, the video is not lost
             logging.exception("could not store clip %s", key)
-    still = {"id": beat["id"], "narration": beat["narration"], "scene": {"type": "image", "props": {"image_query": query, "alt": props.get("alt", query)}}}
+    still = {"id": beat["id"], "narration": _context(beat), "scene": {"type": "image", "props": {"image_query": query, "alt": props.get("alt", query), **({"word": props["word"]} if props.get("word") else {})}}}
     out.update({k: v for k, v in make_photo(plan, still, video_id, cost_field).items() if k not in ("query", "pick")})
     return out
 

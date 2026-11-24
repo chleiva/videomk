@@ -75,7 +75,9 @@ def make_audio(
         beats = [
             {"offset": float(sc["start"]) + float(sc.get("narration_offset", 0.0)), "samples": s}
             for sc, s in zip(timeline["scenes"], beat_samples)
+            if s is not None   # a silent beat has no narration
         ]
+        swells = [(float(sc["start"]) + 0.3, float(sc["start"]) + float(sc["duration"]) - 0.2) for sc in timeline["scenes"] if sc.get("silent")]
         nar = os.path.join(tmp, "nar.wav")
         write_wav(nar, build_narration(beats, duration, SR), SR)
         if not music_path:
@@ -85,7 +87,7 @@ def make_audio(
             write_wav(music_path, samples, MIX_SR, channels=2)
         sfx = os.path.join(tmp, "sfx.wav")
         write_wav(sfx, build_sfx_track(sfx_events(timeline), duration), MIX_SR, channels=2)
-        media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume)
+        media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume, swells=swells)
 
 
 def preview_gif(video_path: str, out_gif: str, duration: float, width: int = 320) -> bool:

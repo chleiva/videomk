@@ -300,6 +300,7 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
     if sw / sh < 1.3 and props.get("photo"):  # a portrait or square phone photo of the user's: show all of it, never crop a face off
         _draw_contained(cv, src, tw, tht, z)
         cv.im.paste(Image.new("RGB", _scrim(tw, tht).size, (0, 0, 0)), (0, tht - _scrim(tw, tht).height), _scrim(tw, tht))
+        _draw_word(cv, props, lt, dur)
         return
     base = max(tw / sw, tht / sh)
     vw, vh = tw / (base * z), tht / (base * z)
@@ -320,6 +321,22 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
     if credit:
         a = ease_out_cubic(progress(lt, 0.4, 0.6))
         cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+    _draw_word(cv, props, lt, dur)
+
+
+def _draw_word(cv: Canvas, props: Dict[str, Any], lt: float, dur: float) -> None:
+    """One big word over a picture (a silent beat's punchline): fades in, holds, fades out, with a soft shadow so it reads on any photograph."""
+    word = str(props.get("word") or "").strip()
+    if not word:
+        return
+    a_in = ease_out_cubic(progress(lt, 0.45, 0.55))
+    a = min(a_in, 1.0 - ease_out_cubic(progress(lt, max(0.8, dur - 0.55), 0.45)))
+    if a <= 0.01:
+        return
+    size, _ = cv.fit_text(word, "bold", 1500, 260, 210, 70)
+    y = 500 + (1 - a_in) * 26
+    cv.text(CENTER_X + 4, y + 7, word, "bold", size, (0, 0, 0, int(140 * a)), anchor="mm")
+    cv.text(CENTER_X, y, word, "bold", size, (255, 255, 255, int(255 * a)), anchor="mm")
 
 
 # ------------------------------------------------------------------ gallery (several photographs during one beat)
@@ -395,6 +412,7 @@ def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
     if shown.strip():
         a = ease_out_cubic(progress(t - bounds[cur_k], 0.15, 0.5))
         cv.text(1880, 40, shown[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+    _draw_word(cv, props, lt, dur)
 
 
 # ------------------------------------------------------------------ clip (stock video behind the narration)
@@ -424,6 +442,7 @@ def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     if credit:
         a = ease_out_cubic(progress(lt, 0.4, 0.6))
         cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+    _draw_word(cv, props, lt, dur)
 
 
 _BACKDROP: Dict[Tuple[int, int, int], Image.Image] = {}

@@ -21,7 +21,11 @@ struct BeatEditorView: View {
                     } header: { Text("Narration") } footer: {
                         VStack(alignment: .leading, spacing: 4) {
                             let words = EditorDiff.wordCount(beat.narration)
-                            Text("\(words) words, about \(Int(EditorDiff.spokenSeconds(beat.narration).rounded())) seconds spoken. \(model.limits.minWords)–\(model.limits.maxWords) words per scene.")
+                            if beat.silent && words == 0 {
+                                Text("A silent pause: nothing is spoken for \(Int((beat.hold ?? 0).rounded())) seconds and the music carries it. Type words here to give it a voice.")
+                            } else {
+                                Text("\(words) words, about \(Int(EditorDiff.spokenSeconds(beat.narration).rounded())) seconds spoken. \(model.limits.minWords)–\(model.limits.maxWords) words per scene.")
+                            }
                             if let error = model.narrationError(for: beatID) { Text(error).foregroundStyle(Theme.danger) }
                         }
                     }

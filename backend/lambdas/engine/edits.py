@@ -78,6 +78,17 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
         if kind == "set_narration":
             i = F(op.get("id"))
             beats[i]["narration"] = _narration(op.get("text"))
+            beats[i].pop("silent", None)   # words given to a silent beat make it a spoken one
+            beats[i].pop("hold", None)
+            touch(beats[i]["id"])
+        elif kind == "set_hold":
+            i = F(op.get("id"))
+            if not beats[i].get("silent"):
+                raise EditError("only a silent beat has a hold time; give a spoken beat its narration instead")
+            hold = op.get("seconds")
+            if isinstance(hold, bool) or not isinstance(hold, (int, float)) or not plan_mod.MIN_HOLD_S <= hold <= plan_mod.MAX_HOLD_S:
+                raise EditError(f"a silent beat is held {plan_mod.MIN_HOLD_S:g} to {plan_mod.MAX_HOLD_S:g} seconds")
+            beats[i]["hold"] = float(hold)
             touch(beats[i]["id"])
         elif kind == "set_scene":
             i = F(op.get("id"))
@@ -99,7 +110,12 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
             after = op.get("after")
             at = 0 if after in (None, "") else F(after) + 1
             sc = op.get("scene") or {}
-            beat = {"id": plan_mod.new_beat_id(None, {b["id"] for b in beats}), "narration": _narration(op.get("narration")), "scene": _scene(sc.get("type"), sc.get("props"))}
+            silent = op.get("hold") is not None and not plan_mod._s(op.get("narration"), 700)
+            if silent and sc.get("type") not in plan_mod.SILENT_SCENES:
+                raise EditError("a silent beat shows an image, gallery, clip, title, quote or stat")
+            beat = {"id": plan_mod.new_beat_id(None, {b["id"] for b in beats}), "narration": "" if silent else _narration(op.get("narration")), "scene": _scene(sc.get("type"), sc.get("props"))}
+            if silent:
+                beat["silent"], beat["hold"] = True, plan_mod.clamp_hold(op.get("hold"))
             if plan_mod._s(op.get("chapter"), 60):
                 beat["chapter"] = plan_mod._s(op.get("chapter"), 60)
             beats.insert(at, beat)

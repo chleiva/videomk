@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-from typing import Iterable, List, Optional, Sequence
+from typing import Iterable, List, Optional, Sequence, Tuple
 
 
 def ffmpeg_bin() -> str:
@@ -104,6 +104,8 @@ def mix_audio(
     duration: float,
     music_volume: float = 0.22,
     duck: bool = True,
+    swells: Sequence[Tuple[float, float]] = (),
+    swell_gain: float = 2.2,
 ) -> None:
     """Narration + (ducked) music + sfx -> AAC. Music is faded in/out and ducked under speech."""
     inputs = ["-i", narration_wav]
@@ -114,8 +116,10 @@ def mix_audio(
     if music_wav:
         inputs += ["-stream_loop", "-1", "-i", music_wav]
         fade_out_at = max(0.0, duration - 2.5)
+        # while nobody is speaking (a silent beat) the music comes up, with 0.8 s ramps so it breathes in and out
+        lift = "".join(f",volume='1+({swell_gain}-1)*clip(min((t-{a:.3f})/0.8,({b:.3f}-t)/0.8),0,1)':eval=frame" for a, b in swells if b - a > 1.0)
         graph.append(
-            f"[{idx}:a]aresample=44100,aformat=channel_layouts=stereo,volume={music_volume},atrim=0:{duration:.3f},"
+            f"[{idx}:a]aresample=44100,aformat=channel_layouts=stereo,volume={music_volume}{lift},atrim=0:{duration:.3f},"
             f"afade=t=in:d=1.5,afade=t=out:st={fade_out_at:.3f}:d=2.5[mus]"
         )
         if duck:
