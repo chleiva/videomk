@@ -39,12 +39,12 @@ class EngineV2(Construct):
         v2_objects = f"arn:aws:s3:::{assets_bucket}/generation/v2/*"
         videos_objects = f"arn:aws:s3:::{assets_bucket}/videos/*"
 
-        plan_fn = make_fn("V2PlanFn", "v2_plan", f"{base}.plan_handler.handler", timeout=Duration.minutes(10), memory=1024, env=env, layers=layers)   # long videos: an outline, then sections with their own research, in parallel
-        beat_fn = make_fn("V2BeatFn", "v2_beat", f"{base}.beat_handler.handler", timeout=Duration.minutes(3), memory=1536, env=env, layers=layers)
+        plan_fn = make_fn("V2PlanFn", "v2_plan", f"{base}.plan_handler.handler", timeout=Duration.minutes(10), memory=4096, env=env, layers=layers)   # long videos: an outline, then sections with their own research, in parallel
+        beat_fn = make_fn("V2BeatFn", "v2_beat", f"{base}.beat_handler.handler", timeout=Duration.minutes(3), memory=4096, env=env, layers=layers)
         timeline_fn = make_fn("V2TimelineFn", "v2_timeline", f"{base}.timeline_handler.handler", timeout=Duration.seconds(60), memory=512, env=env, layers=layers)
-        chunk_fn = make_fn("V2RenderChunkFn", "v2_render_chunk", f"{base}.render_chunk_handler.handler", timeout=Duration.minutes(10), memory=3008, env=env, layers=layers, ephemeral_mb=1024)
-        audio_fn = make_fn("V2AudioFn", "v2_audio", f"{base}.audio_handler.handler", timeout=Duration.minutes(5), memory=3008, env=env, layers=layers, ephemeral_mb=2048)
-        finalize_fn = make_fn("V2FinalizeFn", "v2_finalize", f"{base}.finalize_handler.handler", timeout=Duration.minutes(10), memory=3008, env=env, layers=layers, ephemeral_mb=4096)
+        chunk_fn = make_fn("V2RenderChunkFn", "v2_render_chunk", f"{base}.render_chunk_handler.handler", timeout=Duration.minutes(10), memory=10240, env=env, layers=layers, ephemeral_mb=1024)
+        audio_fn = make_fn("V2AudioFn", "v2_audio", f"{base}.audio_handler.handler", timeout=Duration.minutes(5), memory=10240, env=env, layers=layers, ephemeral_mb=2048)
+        finalize_fn = make_fn("V2FinalizeFn", "v2_finalize", f"{base}.finalize_handler.handler", timeout=Duration.minutes(10), memory=10240, env=env, layers=layers, ephemeral_mb=4096)
         edit_prep_fn = make_fn("V2EditPrepFn", "v2_edit_prep", f"{base}.edit_prep_handler.handler", timeout=Duration.seconds(30), memory=512, env=env, layers=layers)
         edit_failed_fn = make_fn("V2EditFailedFn", "v2_edit_failed", f"{base}.edit_failed_handler.handler", timeout=Duration.seconds(10), memory=256, env=env, layers=layers)
         self.editor_get_fn = make_fn("V2EditorGetFn", "v2_editor_get", f"{base}.editor_get.handler", timeout=Duration.seconds(20), memory=512, env=env, layers=layers)

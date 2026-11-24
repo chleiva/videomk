@@ -142,6 +142,9 @@ class BackendStack(Stack):
             description="Video rendering Python dependencies (moviepy, pillow, numpy, etc)",
         )
 
+        MEM_CAP = int(self.node.try_get_context("lambdaMemoryCap") or (3008 if stage == "prod" else 10240))
+        MEM_FLOOR = int(self.node.try_get_context("lambdaMemoryFloor") or 3008)
+
         def make_fn(
             construct_id: str,
             name: str,
@@ -153,6 +156,9 @@ class BackendStack(Stack):
             layers: Optional[List[_lambda.ILayerVersion]] = None,
             ephemeral_mb: Optional[int] = None,
         ) -> _lambda.Function:
+            # Lambda memory is generous on purpose (the AI is the cost, not the compute): every function gets at least MEM_FLOOR MB, which also buys CPU,
+            # and the heavy ones ask for more. The account's own cap wins: 10240 MB normally, 3008 MB in the prod account until its Lambda quota is raised.
+            memory = min(MEM_CAP, max(memory, MEM_FLOOR))
             return _lambda.Function(
                 self,
                 construct_id,
