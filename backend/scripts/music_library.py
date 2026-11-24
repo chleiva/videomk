@@ -70,8 +70,6 @@ BRIEFS = [
      "Smooth chilled electronic: warm synth chords, soft pads, light beat. Technology, startups, modern culture."),
     ("hopeful-ambient-piano", "Hopeful ambient piano", ["hopeful", "calm"], 2, 74, "Eb major", "Ambient piano with a slowly evolving string pad and soft reverb tails, 74 bpm, Eb major, hopeful and open.",
      "Hopeful ambient piano over a slow string pad. Health, wellbeing, the future, positive closing moments."),
-    ("epic-orchestral-lite", "Orchestral, light", ["epic", "grand"], 4, 90, "D major", "Light cinematic orchestral instrumental with strings, french horns and soft timpani, 90 bpm, D major, grand but restrained under narration.",
-     "Grand but restrained orchestra: strings, horns, soft timpani. Big achievements, exploration, history of great things."),
     ("meditative-drone", "Meditative drone", ["calm", "still"], 1, 50, "C major", "Meditative evolving drone with singing bowls and very soft pads, no rhythm, no melody, slow and still.",
      "Almost still: evolving drone, singing bowls, very soft pads, no rhythm. Silent beats, breathing and mindfulness, minimal narration."),
     # ---- round 2 (2026-11-24): more dynamic and more varied, after the first round turned out calm-heavy (nothing above 118 bpm, no groove- or percussion-led tracks)

@@ -9,12 +9,12 @@ Rule used for every row: **instrumental, steady, mid-tempo for explanations (abo
 | 1 | Marketing, product or app explainer | confident, positive | `uplifting-business` | `driving-electro-pop`, `indie-pop-sunshine`, `bright-pluck-morning` |
 | 2 | Educational explainer (how X works) | curious, clear | `documentary-wonder` | `bright-pluck-morning`, `lofi-evening`, `hopeful-ambient-piano` |
 | 3 | News and current affairs | informed, serious | `newsroom-pulse` | `tense-pulse`, `history-solemn` (for sad or grave news) |
-| 4 | History | reflective, dignified | `history-solemn` | `epic-orchestral-lite`, `baroque-strings-light`, `swing-jazz-upbeat` (1920s to 40s), `soft-piano-memory` |
+| 4 | History | reflective, dignified | `history-solemn` | `cinematic-rise`, `baroque-strings-light`, `swing-jazz-upbeat` (1920s to 40s), `soft-piano-memory` |
 | 5 | Science and space | awe, wonder | `space-synth-wonder` | `cinematic-rise`, `documentary-wonder`, `dreamy-bells` |
 | 6 | Technology, AI and software | modern, clean | `minimal-tech` | `electro-chill`, `synthwave-drive`, `driving-electro-pop` |
 | 7 | Coding and programming tutorials | focused, unobtrusive | `deep-focus-electronic` | `lofi-evening`, `minimal-tech` |
 | 8 | Finance, economy and business | steady, credible | `uplifting-business` | `minimal-tech`, `boom-bap-beat`, `tense-pulse` (risk and crisis) |
-| 9 | Inspiration and motivation | hopeful, rising | `inspire-build` | `hopeful-ambient-piano`, `epic-orchestral-lite`, `uplifting-business` |
+| 9 | Inspiration and motivation | hopeful, rising | `inspire-build` | `hopeful-ambient-piano`, `cinematic-percussive-drive`, `uplifting-business` |
 | 10 | Funny, myths and light-hearted | cheeky, playful | `sitcom-quirky` | `funk-groove`, `playful-kids`, `swing-jazz-upbeat` |
 | 11 | Travel and places | adventurous, warm | `travel-folk` | `acoustic-warm`, `mediterranean-sun`, `afrobeat-sunny`, `nature-strings` |
 | 12 | Food, drink and cooking | warm, relaxed | `bossa-nova-sunny` | `mediterranean-sun`, `jazz-cafe`, `acoustic-warm` |
