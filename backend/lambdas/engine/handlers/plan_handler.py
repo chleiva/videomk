@@ -7,7 +7,7 @@ from generate_video.db import set_attributes, update_status
 
 from common.secrets import get_secret_param
 
-from .. import library, awsio, costs, director, llm, usermedia, voices, websearch
+from .. import library, awsio, costs, director, llm, plan as plan_mod, usermedia, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -80,10 +80,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if not photos:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
+    catalog = library.load_catalog(awsio.get_json)
     result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
                              region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos,
                              max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
-                             music_tracks=library.load_catalog(awsio.get_json))
+                             music_tracks=catalog)
     r = result.get("research") or {}
     spent["research"] = spent.get("research", 0.0) + float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     for part, usd in spent.items():
@@ -96,6 +97,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {**base, "plot": {"legit": False, "reason": result.get("reason", "")}}
     plan, language, region = result["plan"], result["plan"]["language"], result["plan"].get("region")
 
+    known = {t["id"] for t in catalog}
+    chosen = plan_mod.sanitize_music(plan.get("music"), len(plan["beats"]), known)   # only recordings that really exist; no catalogue, no music
+    plan.pop("music", None)
+    if chosen:
+        plan["music"] = chosen
     plan["target_seconds"] = round(minutes * 60)   # the length asked and billed: the timeline never comes out shorter
     plan["captions"] = bool(event.get("captions", True))   # the creator's choice: subtitles on (default) or off
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}

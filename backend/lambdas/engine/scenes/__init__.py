@@ -21,4 +21,18 @@ SCENES: Dict[str, Tuple[Callable[..., None], Callable[[Dict[str, Any], float], L
     "gallery": (draw_gallery, gallery_cues),
 }
 
+from .registry import ELEMENTS, load_all  # noqa: E402
+
+load_all()   # every module in scenes/elements/
+for _el in ELEMENTS.values():
+    SCENES[_el.name] = (_el.draw, _el.cues)
+
 SCENE_TYPES = tuple(SCENES)
+
+
+def register_runtime(el) -> None:
+    """Add an element after import (tests). Production elements are found by scenes/elements/ discovery."""
+    global SCENE_TYPES
+    ELEMENTS[el.name] = el
+    SCENES[el.name] = (el.draw, el.cues)
+    SCENE_TYPES = tuple(SCENES)

@@ -1,6 +1,6 @@
 """The curated background-music library: tracks made once with Lyria (see scripts/music_library.py), checked by a person, stored in S3, and chosen by the planner
 from their descriptions. The planner says which track plays and where it changes; this module finds, decodes and fits the audio. If the catalogue or a track is
-missing the engine falls back to the procedural synth (engine/music.py), so a video is never silent because of the library.
+missing the video has no background music: there is no synthesised fallback (removed on 2026-11-24).
 
 S3 layout (in the assets bucket): music/catalog.json and music/<id>.mp3
 catalog.json: {"version": 1, "tracks": [{"id", "title", "description", "mood": [..], "energy": 1-5, "bpm", "key", "seconds", "file"}]}
@@ -20,7 +20,7 @@ SR = 44100
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,39}$")
 CATALOG_KEY = "music/catalog.json"
 CATALOG_TTL_S = 300
-TARGET_RMS = 0.09        # the loudness the synth tracks have: library tracks are levelled to it so the mix does not jump between sources
+TARGET_RMS = 0.09        # library tracks are levelled to this loudness so the mix does not jump from one track to another
 LOOP_XFADE_S = 3.0
 
 _cache: Dict[str, Any] = {"at": 0.0, "tracks": []}

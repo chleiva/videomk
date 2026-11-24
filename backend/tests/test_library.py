@@ -71,24 +71,26 @@ def test_decode_reads_real_audio_files(tmp_path):
         library.decode(str(tmp_path / "bad.mp3"))
 
 
-def test_the_prompt_offers_the_library_when_there_is_one_and_the_synth_when_not():
+def test_the_prompt_offers_the_library_when_there_is_one_and_no_music_when_not():
     tracks = library.clean_catalog(CATALOG)
     p = plan_mod.system_prompt("en", None, 10, True, tracks)
     assert "curated library" in p and "calm-pad-dawn (120 s, energy 1, 62 bpm): Slow weightless pads. No drums." in p and '"track"' in p and "ambient_pad" not in p
-    assert "sfx" in p.lower() and "silent beat" in p
-    synth = plan_mod.system_prompt("en")
-    assert "ambient_pad" in synth and "curated library" not in synth
+    assert "sfx" in p.lower() and "pause" in p
+    none = plan_mod.system_prompt("en")
+    assert "curated library" not in none and "ambient_pad" not in none and '"track"' not in none and "sfx" in none.lower()   # no library, no music instruction: nothing is synthesised
 
 
 def test_the_planner_can_name_tracks_and_changes_and_nonsense_ids_are_ignored():
     m = plan_mod.sanitize_music({"track": "Calm-Pad-Dawn", "changes": [{"beat": 4, "track": "ok-track-2"}, {"beat": 5, "track": "../etc"}, {"beat": 6, "style": "polka"}]}, 8)
-    assert m["track"] == "calm-pad-dawn" and m["changes"] == [{"beat": 4, "energy": 3, "track": "ok-track-2"}]
+    assert m == {"track": "calm-pad-dawn", "changes": [{"beat": 4, "track": "ok-track-2"}]}
+    assert plan_mod.sanitize_music({"track": "calm-pad-dawn", "changes": [{"beat": 4, "track": "ok-track-2"}]}, 8, known={"calm-pad-dawn"}) == {"track": "calm-pad-dawn"}   # a track that is not in the catalogue is dropped
+    assert plan_mod.sanitize_music({"track": "made-up-track"}, 8, known={"calm-pad-dawn"}) is None
     assert plan_mod.sanitize_music({"track": "bad id!"}, 8) is None and plan_mod.sanitize_music({"track": "x"}, 8) is None
 
 
-def test_resolve_and_render_play_the_recording_change_with_a_crossfade_and_fall_back_to_the_synth():
+def test_resolve_and_render_play_the_recording_change_with_a_crossfade_and_never_synthesise():
     starts = [0, 10, 25, 40, 55]
-    spec = music.resolve({"track": "calm-pad-dawn", "changes": [{"beat": 3, "track": "ok-track-2"}]}, "calm", starts, 70.0, "vid")
+    spec = music.resolve({"track": "calm-pad-dawn", "changes": [{"beat": 3, "track": "ok-track-2"}]}, starts, 70.0)
     assert [(s["start"], s.get("track")) for s in spec["segments"]] == [(0.0, "calm-pad-dawn"), (25.0, "ok-track-2")]
     marks = {"calm-pad-dawn": tone(60, 220.0), "ok-track-2": tone(60, 880.0)}
     out = music.render(spec, 40.0, marks.get)
@@ -97,8 +99,10 @@ def test_resolve_and_render_play_the_recording_change_with_a_crossfade_and_fall_
     assert freq(5, 15) == pytest.approx(220, abs=3) and freq(33, 39) == pytest.approx(880, abs=3)            # each segment plays its own recording
     jump = float(np.max(np.abs(np.diff(out[25 * SR - 300: 25 * SR + 300, 0]))))
     assert jump < 0.12
-    fallback = music.render(spec, 40.0, lambda tid: None)                                                     # tracks unavailable: the synth stands in, still a full track
-    assert fallback.shape == (40 * SR, 2) and float(np.abs(fallback).max()) > 0.3
-    assert music.render(spec, 40.0).shape == (40 * SR, 2)                                                     # and with no loader at all
-    boom = music.render(spec, 40.0, lambda tid: (_ for _ in ()).throw(RuntimeError("s3 down")))
-    assert boom.shape == (40 * SR, 2)
+    assert music.render(spec, 40.0, lambda tid: None) is None                                                 # no recording could be loaded: no music at all, never a synthesised one
+    assert music.render(spec, 40.0) is None and music.render(None, 40.0, marks.get) is None                   # no loader, or no music chosen
+    assert music.render(spec, 40.0, lambda tid: (_ for _ in ()).throw(RuntimeError("s3 down"))) is None
+    one = music.render(spec, 40.0, {"calm-pad-dawn": tone(60, 220.0)}.get)                                    # the second track is missing: the first stands in
+    assert one.shape == (40 * SR, 2) and freq.__call__(33, 39) is not None
+    out = one
+    assert float(np.abs(out[int(33 * SR): int(39 * SR)]).max()) > 0.05 and abs(freq(33, 39) - 220) < 3

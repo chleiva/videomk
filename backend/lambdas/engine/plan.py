@@ -7,10 +7,10 @@ import re
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from .scenes import SCENE_TYPES
+from .scenes import ELEMENTS, SCENE_TYPES
+from .scenes.registry import docs_by_family
 from .theme import THEMES
 from . import library as library_mod
-from . import music as music_mod
 from . import sync as sync_mod
 from . import voices as voice_mod
 from .audio import PLANNER_SFX
@@ -42,8 +42,15 @@ CLIP_DOC = """
 - clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70, a second, different wording of the same footage)}. A 5-20 second stock video clip plays full screen behind the narration. The narration of a clip beat must itself be general or atmospheric (a mood, a process, nature, everyday life): never about a specific event, news item, person, place or company, because stock footage cannot show it and the clip is rejected. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea. When the user's brief asks for video, footage or clips, use clip scenes freely (up to 1 beat in 3) for the generic atmosphere that stock footage does have (crowds, lights, food, weather, nature, streets, people at work), worded generically even when the topic is about named places ("festive market lights at night", not the name of the market)."""
 
 
+ELEMENT_INTRO = """
+More scene types, by family. Use one only when the narration at that moment names what it shows, never the same one twice in a row, and prefer a plain type when in doubt:
+"""
+
+
 def scene_docs(images: bool = True, clips: bool = True) -> str:
-    return SCENE_DOCS_BASE + (IMAGE_DOC if images else "") + (CLIP_DOC if clips and os.environ.get("CLIPS_ENABLED", "1") != "0" else "")
+    extra = docs_by_family()
+    return (SCENE_DOCS_BASE + (IMAGE_DOC if images else "") + (CLIP_DOC if clips and os.environ.get("CLIPS_ENABLED", "1") != "0" else "")
+            + (ELEMENT_INTRO + extra + "\n" if extra else ""))
 
 
 DEFAULT_MAX_IMAGES_PER_MINUTE = 10.0
@@ -64,20 +71,24 @@ def images_rule(per_minute: float) -> str:
             "A photograph illustrates what is named in the narration; never use one just to fill time.")
 
 
+MUSIC_CHOICE_RULE = ("  How to choose: first decide the video's dominant feeling and purpose (inform calmly, excite, warn, amuse, reflect, inspire, reassure), then pick the recording whose "
+                     "description names that feeling and kind of topic. The topic's words alone mislead: a news item about a tragedy wants a solemn bed, not an upbeat newsroom one; a coding "
+                     "tutorial wants steady and unobtrusive, not dramatic. Match energy to the pace of the script (calm explanation 1-2, everyday topics 3, announcements, sport or launches 4-5). "
+                     "Vary your choices from video to video. A track shorter than the video loops smoothly. Change track at most twice, only at a real shift of mood or chapter, never within "
+                     "the first 12 seconds; a pause (a silent beat) is a good place for a change.")
+
+
 def music_rules(tracks: Optional[List[Dict[str, Any]]] = None) -> str:
     sfx = ("- Sound effects are optional and sparse (at most one beat in three): a beat may carry \"sfx\": one of "
            + ", ".join(f"{k} ({v})" for k, v in PLANNER_SFX.items()) + ", or \"none\" to keep that beat's transition silent. Leave it out on most beats.")
-    if tracks:
-        return ("- Music: add a \"music\" object to the plan: {\"track\": \"<id>\", \"changes\": optional [{\"beat\": <1-based beat number>, \"track\": \"<id>\"}]}. "
-                "Choose from this curated library of recordings (id, length, energy 1-5, tempo, then what to expect):\n" + library_mod.prompt_list(tracks) + "\n"
-                "  How to choose: first decide the video's dominant feeling and purpose (inform calmly, excite, warn, amuse, reflect, inspire, reassure), then pick the recording whose description names that feeling and kind of topic. The topic's words alone mislead: a news item about a tragedy wants a solemn bed, not an upbeat newsroom one; a coding tutorial wants steady and unobtrusive, not dramatic. Match energy to the pace of the script (calm explanation 1-2, everyday topics 3, announcements, sport or launches 4-5). Vary your choices from video to video. A track shorter than the video loops smoothly. "
-                "Change track at most twice, only at a real shift of mood or chapter, never within the first 12 seconds; a pause (a silent beat) is a good place for a change.\n" + sfx)
-    return ("- Music: add a \"music\" object to the plan: {\"style\": \"<id>\", \"energy\": 1-5, \"key\": optional like \"D minor\", \"tempo\": optional bpm 50-140, "
-            "\"changes\": optional [{\"beat\": <1-based beat number>, \"style\": \"<id>\", \"energy\": 1-5}]}. Styles:\n" + music_mod.prompt_list() + "\n"
-            "  Pick the style that fits THIS subject and its mood, and vary your choices from video to video (do not default to the same one). Energy 1 is barely there, 5 is driving. "
-            "Change style at most twice, only at a real shift of mood or chapter, never within the first 12 seconds.\n" + sfx)
+    if not tracks:   # no library, no music: there is no synthesised fallback
+        return sfx
+    return ("- Music: add a \"music\" object to the plan: {\"track\": \"<id>\", \"changes\": optional [{\"beat\": <1-based beat number>, \"track\": \"<id>\"}]}. "
+            "Choose from this curated library of recordings (id, length, energy 1-5, tempo, then what to expect):\n" + library_mod.prompt_list(tracks) + "\n"
+            + MUSIC_CHOICE_RULE + "\n" + sfx)
 
 
+MAX_MUSIC_SEGMENTS = 3   # the first track plus at most two changes
 SCENE_DOCS = scene_docs()
 
 def system_prompt(language: str = "en", region: Optional[str] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE, allow_clips: bool = True,
@@ -371,6 +382,8 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
         if PHOTO_ID_RE.match(photo):
             out["photo"] = photo  # one of the user's own photos; validate_plan checks it exists
         return out
+    if stype in ELEMENTS:   # an element module (scenes/elements/) owns its props
+        return ELEMENTS[stype].sanitize(p)
     raise ValueError(f"unknown scene type {stype!r}")
 
 
@@ -399,6 +412,26 @@ def clamp_hold(raw: Any) -> float:
         return DEFAULT_HOLD_S
 
 
+def enforce_elements(beats: List[Dict[str, Any]]) -> List[str]:
+    """Heavy elements have a budget per video (`max_per_video`): the extra ones become title cards. The same element twice in a row only earns a warning."""
+    warns: List[str] = []
+    used: Dict[str, int] = {}
+    prev = ""
+    for i, b in enumerate(beats):
+        t = b["scene"]["type"]
+        el = ELEMENTS.get(t)
+        if el is not None:
+            used[t] = used.get(t, 0) + 1
+            if el.max_per_video is not None and used[t] > el.max_per_video:
+                b["scene"] = _fallback_scene(b["narration"])
+                warns.append(f"beat {i}: {t} replaced by a title card (at most {el.max_per_video} per video)")
+                t = "title"
+            elif t == prev:
+                warns.append(f"beat {i}: {t} twice in a row")
+        prev = t
+    return warns
+
+
 def enforce_silence(beats: List[Dict[str, Any]]) -> List[str]:
     """Silent beats are seasoning: never first or last, never two in a row, at most one in four. A beat that breaks a rule is dropped (it is only a picture)."""
     warns: List[str] = []
@@ -418,42 +451,27 @@ def enforce_silence(beats: List[Dict[str, Any]]) -> List[str]:
     return warns
 
 
-def sanitize_music(raw: Any, n_beats: int) -> Optional[Dict[str, Any]]:
-    """The planner's (or an editor's) music choice -> a clean dict, or None when there is nothing usable."""
+def sanitize_music(raw: Any, n_beats: int, known: Optional[set] = None) -> Optional[Dict[str, Any]]:
+    """The planner's (or an editor's) music choice -> {"track", "changes"}, or None when there is nothing usable. `known` (the catalogue's ids) drops unknown tracks."""
     if not isinstance(raw, dict):
         return None
-    out: Dict[str, Any] = {}
-    style = str(raw.get("style") or "").strip().lower().replace(" ", "_").replace("-", "_")
-    if style in music_mod.STYLES:
-        out["style"] = style
+    def ok(t: str) -> bool:
+        return bool(library_mod.ID_RE.match(t)) and (known is None or t in known)
     track = str(raw.get("track") or "").strip().lower()
-    if library_mod.ID_RE.match(track):
-        out["track"] = track
-    try:
-        out["energy"] = min(5, max(1, int(raw.get("energy") or 3)))
-    except (TypeError, ValueError):
-        out["energy"] = 3
-    if music_mod.parse_key(raw.get("key")) is not None:
-        out["key"] = _s(raw.get("key"), 12)
-    try:
-        t = int(raw.get("tempo"))
-        if music_mod.MIN_BPM <= t <= music_mod.MAX_BPM:
-            out["tempo"] = t
-    except (TypeError, ValueError):
-        pass
+    if not ok(track):
+        return None
+    out: Dict[str, Any] = {"track": track}
     changes: List[Dict[str, Any]] = []
     for ch in raw.get("changes") if isinstance(raw.get("changes"), list) else []:
         try:
-            beat, cs = int(ch["beat"]), str(ch.get("style") or "").strip().lower().replace(" ", "_")
+            beat, ct = int(ch["beat"]), str(ch.get("track") or "").strip().lower()
         except (KeyError, TypeError, ValueError, AttributeError):
             continue
-        ct = str(ch.get("track") or "").strip().lower()
-        ct = ct if library_mod.ID_RE.match(ct) else ""
-        if (cs in music_mod.STYLES or ct) and 2 <= beat <= n_beats:
-            changes.append({"beat": beat, "energy": min(5, max(1, int(ch.get("energy") or out["energy"]))), **({"style": cs} if cs in music_mod.STYLES else {}), **({"track": ct} if ct else {})})
+        if ok(ct) and 2 <= beat <= n_beats:
+            changes.append({"beat": beat, "track": ct})
     if changes:
-        out["changes"] = sorted(changes, key=lambda c: c["beat"])[: music_mod.MAX_SEGMENTS - 1]
-    return out if ("style" in out or "track" in out) else None
+        out["changes"] = sorted(changes, key=lambda c: c["beat"])[: MAX_MUSIC_SEGMENTS - 1]
+    return out
 
 
 def sanitize_sfx(raw: Any) -> Optional[str]:
@@ -528,6 +546,7 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
     if not beats:
         raise ValueError("no usable beats in plan")
     warnings += enforce_silence(beats)
+    warnings += enforce_elements(beats)
     if not beats:
         raise ValueError("no usable beats in plan")
     if max_images is not None:
@@ -598,7 +617,7 @@ def enforce_image_budget(beats: List[Dict[str, Any]], budget: int) -> List[str]:
 
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
                   photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE,
-                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:
+                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None, craft: str = "") -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
     if expected_words(target_minutes, len(photos or [])) >= 250:
@@ -606,7 +625,7 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
     user = build_user_prompt(topic, notes, target_minutes, today, photos)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
-        text = llm(system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks), user)
+        text = llm(system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft, user)
         try:
             plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []],
                                         max_images=image_budget(target_minutes, max_images_per_minute), allow_clips=allow_clips)

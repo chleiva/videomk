@@ -4,7 +4,8 @@ from typing import Any, Dict, List
 
 from common.http import json_response
 
-from .. import awsio, library as library_mod, music as music_mod, plan as plan_mod
+from ..scenes import SCENE_TYPES
+from .. import awsio, library as library_mod, plan as plan_mod
 from ..audio import PLANNER_SFX
 from ..plan import MAX_BEATS
 from .editor_common import load_owned_video
@@ -65,6 +66,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "final": {"url": signed("video_uri"), "rev": item.get("final_rev")},
         "preview": {"url": signed("preview_uri"), "rev": item.get("preview_rev")},
         "limits": {"max_beats": MAX_BEATS, "min_words": plan_mod.MIN_BEAT_WORDS, "max_words": plan_mod.MAX_BEAT_WORDS},
-        "scene_types": ["title", "bullets", "diagram", "chart", "timeline", "stat", "quote", "image", "gallery", "clip"],
-        "music": plan.get("music") or {}, "music_styles": music_mod.style_catalog(), "music_tracks": [{k: t[k] for k in ("id", "title", "description", "energy", "seconds")} for t in library_mod.load_catalog(awsio.get_json)], "sfx": sorted(PLANNER_SFX),
+        "scene_types": list(SCENE_TYPES),
+        "music": plan.get("music") or {}, "music_tracks": [{k: t[k] for k in ("id", "title", "description", "energy", "seconds")} for t in library_mod.load_catalog(awsio.get_json)], "sfx": sorted(PLANNER_SFX),
     })

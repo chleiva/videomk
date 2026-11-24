@@ -26,7 +26,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     out["ffmpeg_version"] = ver
     filters = subprocess.run([ff, "-hide_banner", "-filters"], capture_output=True, text=True).stdout
     encoders = subprocess.run([ff, "-hide_banner", "-encoders"], capture_output=True, text=True).stdout
-    out["has"] = {n: (n in filters) for n in ("sidechaincompress", "alimiter", "amix", "afade")}
+    out["has"] = {n: (n in filters) for n in ("sidechaincompress", "alimiter", "amix", "afade", "loudnorm")}
     out["has"].update({"libx264": "libx264" in encoders, "aac": " aac " in encoders})
     amix_help = subprocess.run([ff, "-hide_banner", "-h", "filter=amix"], capture_output=True, text=True).stdout
     out["has"]["amix_normalize_option"] = "normalize" in amix_help

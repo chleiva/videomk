@@ -171,74 +171,43 @@ def test_the_launcher_accepts_a_density_from_0_to_10_and_forwards_it(launcher):
     assert launcher.handler(event({}), None)["statusCode"] == 202 and "max_images_per_minute" not in json.loads(launcher.fake.calls[-1]["input"])
 
 
-# ================================================================= music
-def test_every_style_renders_a_clean_stereo_track_of_the_right_length():
-    for sid in music.STYLES:
-        a = music.render_segment(sid, 12.0, key=None, tempo=None, energy=3, seed=5)
-        assert a.shape == (12 * music.SR, 2) and a.dtype == np.float32 and not np.isnan(a).any()
-        assert 0.55 <= float(np.abs(a).max()) <= 0.61 and float(np.sqrt((a ** 2).mean())) > 0.02, sid          # audible, not clipping
-        assert not np.allclose(a[:, 0], a[:, 1])                                                                # a real stereo image
-        mono = a.mean(axis=1)
-        spec = np.abs(np.fft.rfft(mono)) ** 2
-        f = np.fft.rfftfreq(mono.size, 1 / music.SR)
-        assert spec[f > 4000].sum() / spec.sum() < 0.1 and spec[f < 250].sum() / spec.sum() < 0.8, sid        # no harsh top end, not all rumble (phones cannot play it)
+# ================================================================= music (library recordings only: nothing is synthesised)
+def _tone(seconds, f):
+    t = np.arange(int(seconds * music.SR)) / music.SR
+    x = (0.3 * np.sin(2 * np.pi * f * t)).astype(np.float32)
+    return np.stack([x, x], axis=1)
 
 
-def test_the_same_style_sounds_different_for_different_videos_and_identical_when_repeated():
-    a = music.render_segment("soft_piano", 10, key=None, tempo=None, energy=3, seed=1)
-    assert np.array_equal(a, music.render_segment("soft_piano", 10, key=None, tempo=None, energy=3, seed=1))
-    b = music.render_segment("soft_piano", 10, key=None, tempo=None, energy=3, seed=2)
-    assert abs(float(np.corrcoef(a[:, 0], b[:, 0])[0, 1])) < 0.2
-    assert abs(float(np.corrcoef(music.render_segment("soft_piano", 10, key="D minor", tempo=None, energy=3, seed=1)[:, 0], a[:, 0])[0, 1])) < 0.2    # another key is another piece
+def test_music_choices_are_sanitised_to_well_formed_library_tracks_and_styles_are_gone():
+    ok = plan_mod.sanitize_music({"track": "Soft-Piano-Memory", "style": "soft_piano", "energy": 9, "key": "e minor", "tempo": 90, "changes": [
+        {"beat": 5, "track": "tense-pulse"}, {"beat": 1, "track": "lofi-evening"}, {"beat": 7, "style": "polka"}, {"beat": 20, "track": "lofi-evening"}, {"beat": 3, "track": "bad id!"}, {"beat": "x", "track": "a-b-c"}]}, 8)
+    assert ok == {"track": "soft-piano-memory", "changes": [{"beat": 5, "track": "tense-pulse"}]}        # no style, energy, key or tempo; no change at beat 1, beyond the end or with a bad id
+    assert plan_mod.sanitize_music({"style": "soft_piano", "energy": 3}, 8) is None and plan_mod.sanitize_music("loud", 8) is None and plan_mod.sanitize_music(None, 8) is None
 
 
-def test_energy_changes_how_busy_the_music_is(monkeypatch):
-    kicks = {"n": 0}
-    real = music.drum_kick
-    monkeypatch.setattr(music, "drum_kick", lambda: (kicks.__setitem__("n", kicks["n"] + 1), real())[1])
-    music.render_segment("lofi_chill", 12, key="C major", tempo=80, energy=1, seed=3)
-    assert kicks["n"] == 0                                                    # the drums only join from energy 2
-    music.render_segment("lofi_chill", 12, key="C major", tempo=80, energy=5, seed=3)
-    assert kicks["n"] > 8
-
-
-def test_keys_parse_and_bad_ones_are_ignored():
-    assert music.parse_key("D minor") == (2, "minor") and music.parse_key("F# major") == (6, "major") and music.parse_key("Bb") == (10, None) and music.parse_key("a m") == (9, "minor")
-    assert music.parse_key("H sharp") is None and music.parse_key("") is None and music.parse_key(None) is None
-
-
-def test_music_choices_are_sanitised_and_never_invent_styles():
-    ok = plan_mod.sanitize_music({"style": "Soft Piano", "energy": 9, "key": "e minor", "tempo": 400, "changes": [
-        {"beat": 5, "style": "tense_pulse", "energy": 4}, {"beat": 1, "style": "lofi_chill"}, {"beat": 7, "style": "polka"}, {"beat": 20, "style": "lofi_chill"}, {"beat": 3, "style": "dreamy-bells"}, {"beat": "x"}]}, 8)
-    assert ok == {"style": "soft_piano", "energy": 5, "key": "e minor", "changes": [{"beat": 5, "style": "tense_pulse", "energy": 4}]}   # no tempo (400 bpm), no unknown style, no change at beat 1 or beyond the end
-    assert plan_mod.sanitize_music({"style": "polka"}, 8) is None and plan_mod.sanitize_music("loud", 8) is None and plan_mod.sanitize_music(None, 8) is None
-
-
-def test_validate_plan_keeps_music_and_sfx_and_drops_nonsense():
-    raw = {"legit": True, "title": "T", "music": {"style": "cinematic_rise", "energy": 2}, "beats": [
+def test_validate_plan_keeps_a_track_and_sfx_and_drops_nonsense():
+    raw = {"legit": True, "title": "T", "music": {"track": "cinematic-rise"}, "beats": [
         {"narration": "A line of narration that is long enough to count.", "scene": {"type": "title", "props": {"title": "x"}}, "sfx": "RISER"},
         {"narration": "Another line of narration that is long enough.", "scene": {"type": "title", "props": {"title": "y"}}, "sfx": "airhorn"},
         {"narration": "A third line of narration that is long enough.", "scene": {"type": "title", "props": {"title": "z"}}, "sfx": "none"}]}
     plan, _ = plan_mod.validate_plan(raw)
-    assert plan["music"] == {"style": "cinematic_rise", "energy": 2} and [b.get("sfx") for b in plan["beats"]] == ["riser", None, "none"]
+    assert plan["music"] == {"track": "cinematic-rise"} and [b.get("sfx") for b in plan["beats"]] == ["riser", None, "none"]
     raw["music"] = {"style": "kazoo"}
     assert "music" not in plan_mod.validate_plan(raw)[0]
 
 
 def test_music_changes_become_times_and_need_room_on_both_sides():
     starts = [0, 10, 25, 40, 55, 70]
-    spec = music.resolve({"style": "soft_piano", "energy": 2, "changes": [{"beat": 3, "style": "tense_pulse", "energy": 4}, {"beat": 5, "style": "dreamy_bells"}, {"beat": 6, "style": "lofi_chill"}]}, "calm", starts, 85.0, "vid1")
-    assert [(s["start"], s["style"], s["energy"]) for s in spec["segments"]] == [(0.0, "soft_piano", 2), (25.0, "tense_pulse", 4), (55.0, "dreamy_bells", 2)]   # a third change is dropped
-    early = music.resolve({"style": "soft_piano", "changes": [{"beat": 2, "style": "tense_pulse"}]}, "calm", starts, 85.0, "v")
-    assert len(early["segments"]) == 1                                     # a change 10 s in leaves no room for the first style
-    assert music.resolve(None, "tense", starts, 85.0, "v")["segments"][0]["style"] == "tense_pulse"      # no choice: the mood decides
-    assert music.resolve({"style": "nope"}, "bright", starts, 85.0, "v")["segments"][0]["style"] == "bright_pluck"
-    assert music.resolve(None, "calm", starts, 85.0, "a")["seed"] != music.resolve(None, "calm", starts, 85.0, "b")["seed"]
+    spec = music.resolve({"track": "soft-piano-memory", "changes": [{"beat": 3, "track": "tense-pulse"}, {"beat": 5, "track": "dreamy-bells"}, {"beat": 6, "track": "lofi-evening"}]}, starts, 85.0)
+    assert [(s["start"], s["track"]) for s in spec["segments"]] == [(0.0, "soft-piano-memory"), (25.0, "tense-pulse"), (55.0, "dreamy-bells")]   # a third change is dropped
+    early = music.resolve({"track": "soft-piano-memory", "changes": [{"beat": 2, "track": "tense-pulse"}]}, starts, 85.0)
+    assert len(early["segments"]) == 1                                     # a change 10 s in leaves no room for the first track
+    assert music.resolve(None, starts, 85.0) is None and music.resolve({"style": "soft_piano"}, starts, 85.0) is None and music.resolve({"track": "bad id!"}, starts, 85.0) is None   # no track, no music
 
 
-def test_a_style_change_crossfades_without_a_click():
-    spec = {"key": "A minor", "tempo": None, "seed": 9, "segments": [{"start": 0.0, "style": "ambient_pad", "energy": 3}, {"start": 20.0, "style": "tense_pulse", "energy": 3}]}
-    out = music.render(spec, 40.0)
+def test_a_track_change_crossfades_without_a_click():
+    spec = {"segments": [{"start": 0.0, "track": "a-low"}, {"start": 20.0, "track": "b-high"}]}
+    out = music.render(spec, 40.0, {"a-low": _tone(60, 220.0), "b-high": _tone(60, 330.0)}.get)
     assert out.shape == (40 * music.SR, 2) and float(np.abs(out).max()) <= 1.0 and not np.isnan(out).any()
     b = 20 * music.SR
     jump = float(np.max(np.abs(np.diff(out[b - 200: b + 200, 0]))))
@@ -246,6 +215,11 @@ def test_a_style_change_crossfades_without_a_click():
     assert jump < typical * 2.5                                            # no discontinuity at the boundary
     rms = lambda a, b_: float(np.sqrt((out[int(a * music.SR): int(b_ * music.SR)] ** 2).mean()))
     assert rms(19, 21) > 0.5 * min(rms(5, 15), rms(25, 35))                # no hole in the middle of the fade
+
+
+def test_the_synthesiser_is_gone_for_good():
+    assert not any(hasattr(music, n) for n in ("render_segment", "STYLES", "MOOD_STYLE", "inst_piano", "drum_kick", "style_catalog"))
+    assert not hasattr(audio, "generate_music")
 
 
 # ================================================================= sound effects
@@ -270,23 +244,31 @@ def test_every_effect_is_short_audible_and_quiet_enough_to_mix():
 
 def test_the_whole_audio_mix_uses_the_chosen_music_and_effects(tmp_path):
     tl = small_timeline(12.0, ["title", "bullets"])
-    tl["music"] = music.resolve({"style": "dreamy_bells", "energy": 2}, "calm", [0, 6], 12.0, "vid")
+    tl["music"] = music.resolve({"track": "dreamy-bells"}, [0, 6], 12.0)
     tl["scenes"][1]["sfx"] = "ding"
     out = tmp_path / "mix.m4a"
-    pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(out))
+    pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(out), track_loader={"dreamy-bells": _tone(30, 261.6)}.get)
     assert out.exists() and out.stat().st_size > 20_000
     from engine import media
     assert media.ffprobe_duration(str(out)) == pytest.approx(12.0, abs=0.3)
+    quiet = tmp_path / "nomusic.m4a"                                          # no track chosen (or none loadable): narration and effects only, still a valid file
+    tl["music"] = None
+    pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(quiet))
+    assert quiet.exists() and media.ffprobe_duration(str(quiet)) == pytest.approx(12.0, abs=0.3)
+    tl["music"] = music.resolve({"track": "dreamy-bells"}, [0, 6], 12.0)
+    none_loaded = tmp_path / "missing.m4a"
+    pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(none_loaded), track_loader=lambda tid: None)
+    assert none_loaded.exists()
 
 
 # ================================================================= editing
 def test_a_person_can_change_the_music_and_an_effect_and_cannot_choose_nonsense():
     plan = {"title": "T", "mood": "calm", "beats": [{"id": "aaaaaaa1", "narration": "x " * 10, "scene": {"type": "title", "props": {"title": "t"}}}, {"id": "aaaaaaa2", "narration": "y " * 10, "scene": {"type": "title", "props": {"title": "u"}}}]}
-    new, touched = edits.apply_ops(plan, [{"op": "set_music", "music": {"style": "lofi_chill", "energy": 4}}, {"op": "set_sfx", "id": "aaaaaaa2", "sfx": "typing"}])
-    assert new["music"] == {"style": "lofi_chill", "energy": 4} and new["beats"][1]["sfx"] == "typing" and touched == []
+    new, touched = edits.apply_ops(plan, [{"op": "set_music", "music": {"track": "lofi-evening"}}, {"op": "set_sfx", "id": "aaaaaaa2", "sfx": "typing"}])
+    assert new["music"] == {"track": "lofi-evening"} and new["beats"][1]["sfx"] == "typing" and touched == []
     new2, _ = edits.apply_ops(new, [{"op": "set_music", "music": None}, {"op": "set_sfx", "id": "aaaaaaa2", "sfx": ""}])
     assert "music" not in new2 and "sfx" not in new2["beats"][1]
-    for bad in ({"op": "set_music", "music": {"style": "polka"}}, {"op": "set_sfx", "id": "aaaaaaa1", "sfx": "airhorn"}, {"op": "set_sfx", "id": "zzzzzzzz", "sfx": "ding"}):
+    for bad in ({"op": "set_music", "music": {"style": "polka"}}, {"op": "set_music", "music": {"track": "x"}}, {"op": "set_sfx", "id": "aaaaaaa1", "sfx": "airhorn"}, {"op": "set_sfx", "id": "zzzzzzzz", "sfx": "ding"}):
         with pytest.raises(edits.EditError):
             edits.apply_ops(plan, [bad])
     g, _ = edits.apply_ops(plan, [{"op": "set_scene", "id": "aaaaaaa1", "type": "gallery", "props": {"image_queries": ["a b", "c d"]}}])

@@ -163,7 +163,7 @@ def write_section(topic: str, outline: Dict[str, Any], idx: int, notes: str, ask
 # ----------------------------------------------------------------------------- the whole
 def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: Optional[Research] = None, language: str = "en", region: Optional[str] = None,
              today: Optional[str] = None, max_images_per_minute: float = plan_mod.DEFAULT_MAX_IMAGES_PER_MINUTE, allow_clips: bool = True,
-             music_tracks: Optional[List[Dict[str, Any]]] = None, workers: int = MAX_WORKERS) -> Tuple[Dict[str, Any], List[str], Dict[str, Any]]:
+             music_tracks: Optional[List[Dict[str, Any]]] = None, workers: int = MAX_WORKERS, craft: str = "") -> Tuple[Dict[str, Any], List[str], Dict[str, Any]]:
     """-> (clean plan, warnings, info) where info = {sections, sources: [{title,url,...}], research_calls}."""
     rate = min(plan_mod.MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
     n = section_count(minutes)
@@ -171,7 +171,7 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
     outline: Dict[str, Any] = {}
     err = ""
     for attempt in range(2):
-        text = ask_big(outline_system(language, region, music_tracks), outline_user(topic, notes, minutes, n, today) + (f"\n\nYour previous answer was invalid: {err}. Return corrected JSON only." if err else ""))
+        text = ask_big(outline_system(language, region, music_tracks) + craft, outline_user(topic, notes, minutes, n, today) + (f"\n\nYour previous answer was invalid: {err}. Return corrected JSON only." if err else ""))
         try:
             raw = plan_mod.parse_plan_json(text)
             if raw.get("legit") is not True:
@@ -185,7 +185,7 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
     sections = outline["sections"]
 
     # 2. each section: its own research, then its own call (in parallel; results are kept in order)
-    system = plan_mod.system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + SECTION_ADDENDUM
+    system = plan_mod.system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft + SECTION_ADDENDUM
     sources: List[Dict[str, str]] = []
 
     def work(idx: int) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
@@ -229,10 +229,10 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
     for sec in sections[1:]:
         m = plan_mod.sanitize_music(sec.get("music"), len(plan["beats"])) if sec.get("music") else None
         at = chapter_at.get(sec["title"])
-        if m and at is not None and at >= 1 and (m.get("track") or m.get("style")) != (prev.get("track") or prev.get("style")):
-            changes.append({"beat": at + 1, **{k: m[k] for k in ("track", "style", "energy") if k in m}})
+        if m and at is not None and at >= 1 and m.get("track") != prev.get("track"):
+            changes.append({"beat": at + 1, **{"track": m["track"]}})
             prev = m
-    if changes and (music.get("style") or music.get("track")):
+    if changes and music.get("track"):
         fixed = plan_mod.sanitize_music({**music, "changes": changes}, len(plan["beats"]))
         if fixed:
             plan["music"] = fixed

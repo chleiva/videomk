@@ -41,7 +41,10 @@ def small_timeline(seconds=4.0, kinds=None):
 
 
 # ----------------------------------------------------------------------------- renderer
-@pytest.mark.parametrize("kind", SCENE_TYPES)
+BUILTIN_SCENES = ("title", "bullets", "diagram", "chart", "timeline", "stat", "quote", "image", "clip", "gallery")   # elements in scenes/elements/ are tested by tests/test_elements_framework.py
+
+
+@pytest.mark.parametrize("kind", BUILTIN_SCENES)
 def test_every_scene_type_renders_at_every_phase(kind):
     """No scene may crash at t=0 (degenerate geometry), mid-animation or after its end (held state)."""
     photo = Image.new("RGB", (2400, 1400), (80, 120, 200))
@@ -168,11 +171,15 @@ def test_chunk_render_is_identical_wherever_the_chunk_sits():
 
 
 # ----------------------------------------------------------------------------- audio
-def test_music_and_sfx_are_finite_bounded_and_deterministic():
-    m1, m2 = audio.generate_music(8, "calm"), audio.generate_music(8, "calm")
-    assert np.array_equal(m1, m2) and np.isfinite(m1).all() and np.abs(m1).max() <= 0.61 and m1.shape[1] == 2
-    for mood in ("calm", "bright", "tense"):
-        assert audio.generate_music(3, mood).shape[0] == 3 * audio.MIX_SR
+def _tone_music(seconds: float) -> np.ndarray:
+    """A steady two-tone stereo bed standing in for a library recording (the synthesised music was removed)."""
+    t = np.arange(int(seconds * audio.MIX_SR)) / audio.MIX_SR
+    x = (0.2 * np.sin(2 * np.pi * 261.6 * t) + 0.15 * np.sin(2 * np.pi * 392.0 * t)).astype(np.float32)
+    return np.stack([x, x], axis=1)
+
+
+def test_sfx_are_finite_and_bounded_and_no_music_is_synthesised():
+    assert not hasattr(audio, "generate_music") and not hasattr(audio, "MOODS")
     s = audio.build_sfx_track([(0.5, "whoosh", 0.3), (1.0, "pop", 0.2), (99, "pop", 1.0)], 3)
     assert np.isfinite(s).all() and s.shape == (3 * audio.MIX_SR, 2) and np.abs(s).max() < 1
 
@@ -192,7 +199,7 @@ def test_mix_audio_ducks_music_under_speech():
         speech = (0.5 * np.sin(2 * np.pi * 220 * np.arange(2 * sr) / sr)).astype(np.float32)
         nar = np.concatenate([speech, np.zeros(2 * sr, np.float32)])  # speech first 2 s, then silence
         audio.write_wav(os.path.join(tmp, "n.wav"), nar, sr)
-        audio.write_wav(os.path.join(tmp, "m.wav"), audio.generate_music(4, "calm"), audio.MIX_SR, 2)
+        audio.write_wav(os.path.join(tmp, "m.wav"), _tone_music(4), audio.MIX_SR, 2)
         for duck, name in ((True, "d.m4a"), (False, "nd.m4a")):
             media.mix_audio(os.path.join(tmp, "n.wav"), os.path.join(tmp, "m.wav"), None, os.path.join(tmp, name), duration=4.0, duck=duck)
 
@@ -722,3 +729,25 @@ def test_description_labels_follow_the_videos_language_but_unsplash_attribution_
     chapters = [{"start": 5.0, "title": "Uno"}, {"start": 30.0, "title": "Dos"}, {"start": 60.0, "title": "Tres"}]
     assert finalize_handler._chapters_text(chapters, "es").splitlines()[0] == "0:00 Introducción"
     assert finalize_handler._chapters_text(chapters).splitlines()[0] == "0:00 Intro"
+
+
+def _integrated_lufs(path):
+    out = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", path, "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
+    import re as _re
+    return float(_re.findall(r"I:\s+(-?\d+\.\d+) LUFS", out)[-1])
+
+
+def test_the_final_mix_is_levelled_to_the_publishing_loudness_whatever_the_input_level(tmp_path):
+    sr = audio.SR
+    t = np.arange(8 * sr) / sr
+    voice_like = (np.sin(2 * np.pi * 180 * t) * (0.5 + 0.5 * np.sin(2 * np.pi * 3 * t)) * 0.6).astype(np.float32)
+    for gain, name in ((1.0, "loud.m4a"), (0.08, "quiet.m4a")):
+        audio.write_wav(str(tmp_path / f"n{name}.wav"), voice_like * gain, sr)
+        media.mix_audio(str(tmp_path / f"n{name}.wav"), None, None, str(tmp_path / name), duration=8.0, loudness_lufs=-14.0)
+    loud, quiet = _integrated_lufs(str(tmp_path / "loud.m4a")), _integrated_lufs(str(tmp_path / "quiet.m4a"))
+    assert -16.0 < loud < -12.0 and -16.0 < quiet < -12.0, (loud, quiet)        # both land near -14 LUFS
+    audio.write_wav(str(tmp_path / "nraw.wav"), voice_like * 0.08, sr)
+    media.mix_audio(str(tmp_path / "nraw.wav"), None, None, str(tmp_path / "raw.m4a"), duration=8.0)
+    assert _integrated_lufs(str(tmp_path / "raw.m4a")) < -24.0                   # without levelling a quiet narration stays quiet
+    from engine import pipeline
+    assert pipeline.TARGET_LUFS == -14.0

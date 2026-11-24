@@ -9,6 +9,8 @@ import numpy as np
 
 from common.secrets import get_secret_param
 
+from ..scenes import ELEMENTS
+from ..scenes.registry import PrepareCtx
 from .. import align, assets, audio, awsio, clips, costs, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
@@ -196,4 +198,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         media.update(make_gallery(plan, beat, video_id, cost_field))
     elif beat["scene"]["type"] == "clip":
         media.update(make_clip(plan, beat, video_id, cost_field, float(media["duration"])))
+    else:
+        el = ELEMENTS.get(beat["scene"]["type"])
+        if el is not None and el.prepare is not None:   # an element that needs outside data (a map's places, ...): a failure falls back, it never fails the video
+            try:
+                patch = el.prepare(dict(beat["scene"]["props"]), PrepareCtx(video_id=video_id, beat_id=beat_id, narration=beat.get("narration", ""), duration=float(media["duration"]),
+                                                                            sources=plan.get("sources") or [], language=plan.get("language", "en"), region=plan.get("region")))
+                media["element"] = patch if isinstance(patch, dict) else {}
+            except Exception:
+                logging.exception("element %s could not prepare beat %s", el.name, beat_id)
+                media["element_failed"] = True
     return {"id": beat_id, "media": media}

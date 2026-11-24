@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Sequence
 
 from . import sync as sync_mod
 from .align import estimate_words
-from .scenes import SCENES
+from .scenes import ELEMENTS, SCENES
 
 LEAD = 0.40     # silence before the first word of a beat
 TAIL = 0.55     # breathing room after the last word
@@ -73,6 +73,12 @@ def build_timeline(
         dur = durs[i]   # the narration's length (+ lead and tail), a silent beat exactly as long as it is held, stretched at the end if the video would be shorter than asked
         stype = beat["scene"]["type"]
         props = dict(beat["scene"]["props"])
+        el = ELEMENTS.get(stype)
+        if el is not None:   # an element: merge what its prepare step fetched, or show its fallback when that failed
+            if info.get("element_failed"):
+                stype, props = el.fallback(props) if el.fallback else ("title", {"title": str(props.get("title") or props.get("heading") or props.get("label") or beat.get("narration", ""))[:60], "subtitle": ""})
+            elif isinstance(info.get("element"), dict):
+                props = {**props, **info["element"]}
         if stype == "gallery":
             shots = [g for g in (info.get("gallery") or []) if g.get("asset")]
             if len(shots) >= 2:
@@ -135,7 +141,7 @@ def build_timeline(
     from . import music as music_mod
 
     return {
-        "music": music_mod.resolve(plan.get("music"), plan.get("mood", "calm"), [s["start"] for s in scenes], t, video_id),
+        "music": music_mod.resolve(plan.get("music"), [s["start"] for s in scenes], t),
         "version": 2,
         "video_id": video_id,
         "fps": fps,
@@ -157,7 +163,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
     out = []
     for b in plan["beats"]:
         m = b.get("media") or {}
-        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key"), "silent": bool(m.get("silent"))})
+        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "words_key": m.get("words_key"), "credit": m.get("credit"), "audio_key": m.get("audio_key"), "silent": bool(m.get("silent")), "element": m.get("element"), "element_failed": bool(m.get("element_failed"))})
     return out
 
 

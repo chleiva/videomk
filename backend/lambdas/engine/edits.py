@@ -7,7 +7,6 @@ import copy
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from . import music as music_mod
 from . import plan as plan_mod
 from . import voices as voice_mod
 from .audio import PLANNER_SFX
@@ -164,7 +163,7 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
         elif kind == "set_music":
             music = plan_mod.sanitize_music(op.get("music"), len(beats))
             if music is None and op.get("music") not in (None, {}):
-                raise EditError("music needs a style from the list: " + ", ".join(music_mod.STYLES))
+                raise EditError("music needs a track from the library")
             new.pop("music", None)
             if music:
                 new["music"] = music

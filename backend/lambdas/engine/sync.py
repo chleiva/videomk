@@ -141,6 +141,12 @@ def diagram_order(props: Dict[str, Any]) -> List[str]:
     return [str(n.get("label", n["id"])) for li in range(n_layers) for n in nodes if layer[str(n["id"])] == li]
 
 
+def _element(stype: str):
+    from .scenes.registry import ELEMENTS
+
+    return ELEMENTS.get(stype)
+
+
 def item_texts(stype: str, props: Dict[str, Any]) -> List[str]:
     if stype == "bullets":
         return [str(i) for i in (props.get("items") or [])][:6]
@@ -154,6 +160,9 @@ def item_texts(stype: str, props: Dict[str, Any]) -> List[str]:
         return [f"{e.get('date', '')} {e.get('label', '')}" for e in (props.get("events") or []) if isinstance(e, dict)]
     if stype == "gallery":
         return [str(q) for q in (props.get("image_queries") or [])]
+    el = _element(stype)
+    if el is not None and el.anchors is not None:
+        return [str(t) for t in el.anchors(props) if str(t).strip()]
     return []
 
 
@@ -185,6 +194,14 @@ def apply(stype: str, props: Dict[str, Any], words: Sequence[Word], scene_dur: f
             cuts = [round(scene_dur * k / n, 3) for k in range(n)]
         props["cuts"] = cuts
         return {"items": n, "anchored": sum(i is not None for i in idx) + 1}
+    el = _element(stype)
+    if el is not None and el.anchors is not None:   # an element's own reveal list, anchored like bullets
+        texts = item_texts(stype, props)
+        if not texts:
+            return {}
+        cues, idx = anchor_times(texts, words, scene_dur)
+        props["cues"] = cues
+        return {"items": len(texts), "anchored": sum(i is not None for i in idx)}
     if stype == "stat":
         value = str(props.get("value", ""))
         toks = [t for t in content_tokens(value) if t not in ("%", "$")] or content_tokens(str(props.get("label", "")))

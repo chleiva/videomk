@@ -106,8 +106,10 @@ def mix_audio(
     duck: bool = True,
     swells: Sequence[Tuple[float, float]] = (),
     swell_gain: float = 2.2,
+    loudness_lufs: Optional[float] = None,
 ) -> None:
-    """Narration + (ducked) music + sfx -> AAC. Music is faded in/out and ducked under speech."""
+    """Narration + (ducked) music + sfx -> AAC. Music is faded in/out and ducked under speech. With `loudness_lufs` the whole mix is levelled to that integrated
+    loudness (EBU R128, true peak -1.5 dB): -14 is what YouTube plays at, so a video neither jumps nor gets turned down when it is published."""
     inputs = ["-i", narration_wav]
     graph: List[str] = []
     labels = ["[nar]"]
@@ -133,7 +135,8 @@ def mix_audio(
         graph.append(f"[{idx}:a]aresample=44100,aformat=channel_layouts=stereo[sfx]")
         labels.append("[sfx]")
         idx += 1
-    graph.append(f"{''.join(labels)}amix=inputs={len(labels)}:duration=first:normalize=0,alimiter=limit=0.95,atrim=0:{duration:.3f}[out]")
+    level = f",loudnorm=I={loudness_lufs:g}:TP=-1.5:LRA=11,aresample=44100" if loudness_lufs is not None else ""
+    graph.append(f"{''.join(labels)}amix=inputs={len(labels)}:duration=first:normalize=0{level},alimiter=limit=0.95,atrim=0:{duration:.3f}[out]")
     cmd = [ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error", *inputs, "-filter_complex", ";".join(graph), "-map", "[out]",
            "-c:a", "aac", "-b:a", "192k", out_path]
     proc = subprocess.run(cmd, capture_output=True, text=True)

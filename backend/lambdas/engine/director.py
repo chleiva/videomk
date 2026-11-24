@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from datetime import date
 
-from . import language as lang_mod, plan as plan_mod, research, researcher, staged as staged_mod, voices
+from . import language as lang_mod, plan as plan_mod, research, researcher, skills as skills_mod, staged as staged_mod, voices
 
 Ask = Callable[..., str]  # (system, user, max_tokens=...) -> text
 
@@ -28,6 +28,9 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
 
     today = today or date.today().isoformat()
     info: Dict[str, Any] = {"mode": "encyclopedia"}
+    skill_ids = skills_mod.select(prompt, lambda s, u: ask_small(s, u, 120), minutes)   # the producer: which kind of video is this, and so which craft guides apply
+    craft = skills_mod.render(skill_ids)
+    info["skills"] = skill_ids
     notes, sources = "", []
     if web_provider is not None and ask_tools is not None:
         decision = researcher.decide(prompt, language=language, region=region, today=today, ask=lambda s, u, n=260: ask_small(s, u, n))
@@ -59,13 +62,13 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             return research.gather_notes(f"{sec['title']} {prompt}", language=language, ask=lambda s, u: ask_small(s, u, 120))
 
         plan, warnings, sinfo = staged_mod.generate(prompt, notes, minutes, ask_big, research=research_section, language=language, region=region,
-                                                    today=today if web_provider is not None else None, allow_clips=info["mode"] != "web", music_tracks=music_tracks, **rate)
+                                                    today=today if web_provider is not None else None, allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, **rate)
         seen = {s["title"] for s in sources}
         sources = sources + [s for s in sinfo["sources"] if s["title"] not in seen and not seen.add(s["title"])]
         info["staged"] = {"sections": sinfo["sections"], "titles": sinfo["titles"]}
     else:
         plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
-                                                  allow_clips=info["mode"] != "web", music_tracks=music_tracks, **rate)
+                                                  allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
 
@@ -75,6 +78,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     used = plan.pop("sources_used", None)
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
+    plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
     if region:
         plan["region"] = region
     if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)

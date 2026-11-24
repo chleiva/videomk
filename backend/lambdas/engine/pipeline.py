@@ -9,7 +9,7 @@ from PIL import Image
 
 from . import media
 from . import music as music_mod
-from .audio import MIX_SR, SR, build_narration, build_sfx_track, generate_music, write_wav
+from .audio import MIX_SR, SR, build_narration, build_sfx_track, write_wav
 from .renderer import Renderer
 from .timeline import GOP_SECONDS
 
@@ -61,6 +61,9 @@ def sfx_events(timeline: Dict[str, Any]) -> List[Tuple[float, str, float]]:
     return ev
 
 
+TARGET_LUFS = float(os.environ.get("TARGET_LUFS", "-14"))   # what YouTube plays at; set TARGET_LUFS=-16 for quieter platforms
+
+
 def make_audio(
     timeline: Dict[str, Any],
     beat_samples: Sequence[np.ndarray],
@@ -70,7 +73,7 @@ def make_audio(
     music_volume: float = 0.2,
     track_loader: Optional[Callable[[str], Any]] = None,
 ) -> None:
-    """Narration (placed per scene) + music (generated unless provided) + sfx -> AAC."""
+    """Narration (placed per scene) + music (a library recording, if any) + sfx -> AAC."""
     duration = float(timeline["duration"])
     with tempfile.TemporaryDirectory() as tmp:
         beats = [
@@ -82,13 +85,13 @@ def make_audio(
         nar = os.path.join(tmp, "nar.wav")
         write_wav(nar, build_narration(beats, duration, SR), SR)
         if not music_path:
-            music_path = os.path.join(tmp, "music.wav")
-            spec = timeline.get("music")
-            samples = music_mod.render(spec, duration, track_loader) if spec else generate_music(min(duration, 90.0), timeline.get("mood", "calm"))
-            write_wav(music_path, samples, MIX_SR, channels=2)
+            samples = music_mod.render(timeline.get("music"), duration, track_loader)   # a library recording, or None: then there is no background music
+            if samples is not None:
+                music_path = os.path.join(tmp, "music.wav")
+                write_wav(music_path, samples, MIX_SR, channels=2)
         sfx = os.path.join(tmp, "sfx.wav")
         write_wav(sfx, build_sfx_track(sfx_events(timeline), duration), MIX_SR, channels=2)
-        media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume, swells=swells)
+        media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume, swells=swells, loudness_lufs=TARGET_LUFS)
 
 
 def preview_gif(video_path: str, out_gif: str, duration: float, width: int = 320) -> bool:
