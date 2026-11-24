@@ -223,6 +223,8 @@ def coverage_problems(plan_beats: Sequence[Dict[str, Any]], min_items: int = 3, 
         stype, props = sc.get("type"), sc.get("props") or {}
         if stype not in ("bullets", "diagram", "timeline", "chart", "gallery"):
             continue
+        if stype == "gallery" and props.get("photos"):   # the user's own photos: their captions only time the cuts, the narrator need not say them
+            continue
         texts = item_texts(stype, props)
         if len(texts) < min_items:
             continue

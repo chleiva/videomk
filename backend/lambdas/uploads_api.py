@@ -17,7 +17,7 @@ from common.identity import extract_cognito_sub
 from common.photo_ids import MAX_PHOTOS, MAX_UPLOAD_BYTES, upload_key
 
 logger = logging.getLogger()
-DAILY_PHOTOS = int(os.environ.get("UPLOAD_PHOTOS_PER_DAY", "150"))
+DAILY_PHOTOS = int(os.environ.get("UPLOAD_PHOTOS_PER_DAY", "600"))
 EXPIRES = 900
 
 

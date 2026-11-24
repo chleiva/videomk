@@ -19,7 +19,7 @@ from common.photo_ids import ID_RE, MAX_PHOTOS, MAX_UPLOAD_BYTES, PhotoError, up
 MAX_PIXELS = 80_000_000      # a decompression-bomb guard well above any phone camera
 MAX_SIDE = 2048
 THUMB_SIDE = 768
-PHOTO_ID_RE = re.compile(r"^P\d{1,2}$")
+PHOTO_ID_RE = re.compile(r"^P\d{1,3}$")
 
 
 def _taken(im: Image.Image) -> Optional[str]:
@@ -64,26 +64,43 @@ def normalize(raw: bytes) -> Tuple[bytes, bytes, Dict[str, Any]]:
 
 
 def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[[str], bytes], put: Callable[[str, bytes], None],
-            delete: Callable[[str], None], asset_prefix: str) -> Tuple[List[Dict[str, Any]], List[bytes], List[Dict[str, str]]]:
-    """Returns (photos P1..Pn in upload order, their thumbnails, skipped [{id, reason}]). Originals are deleted whether or not they were usable."""
-    photos, thumbs, skipped = [], [], []
-    for mid in media_ids:
+            delete: Callable[[str], None], asset_prefix: str, workers: int = 8) -> Tuple[List[Dict[str, Any]], List[bytes], List[Dict[str, str]]]:
+    """Returns (photos P1..Pn in upload order, their thumbnails, skipped [{id, reason}]). Originals are deleted whether or not they were usable.
+    The photos are read, cleaned and stored in parallel (up to 100 of them), but numbered in the order the person gave them."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(mid: str):
         key = upload_key(user_id, mid)
         try:
             full, thumb, facts = normalize(get(key))
         except PhotoError as e:
-            skipped.append({"id": mid, "reason": str(e)})
             delete(key)
-            continue
+            return mid, None, str(e)
         except Exception:  # missing object or storage trouble
-            skipped.append({"id": mid, "reason": "photo not found"})
+            return mid, None, "photo not found"
+        return mid, (key, full, thumb, facts), ""
+
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, len(media_ids) or 1))) as ex:
+        results = list(ex.map(one, media_ids))
+    photos, thumbs, skipped, pending = [], [], [], []
+    for mid, ok, reason in results:
+        if ok is None:
+            skipped.append({"id": mid, "reason": reason})
             continue
+        key, full, thumb, facts = ok
         pid = f"P{len(photos) + 1}"
         akey = f"{asset_prefix}user_{pid}.jpg"
-        put(akey, full)
-        delete(key)
         photos.append({"id": pid, "key": akey, **facts})
         thumbs.append(thumb)
+        pending.append((key, akey, full))
+
+    def store(item) -> None:
+        key, akey, full = item
+        put(akey, full)
+        delete(key)
+
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, len(pending) or 1))) as ex:
+        list(ex.map(store, pending))
     return photos, thumbs, skipped
 
 

@@ -17,7 +17,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
            language: Optional[str] = None, region: Optional[str] = None, theme: Optional[str] = None,
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
            budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None,
-           max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+           max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -68,7 +68,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         info["staged"] = {"sections": sinfo["sections"], "titles": sinfo["titles"]}
     else:
         plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
-                                                  allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, **rate)
+                                                  allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
 
@@ -83,5 +83,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         plan["region"] = region
     if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)
         plan["media_items"] = [{k: p.get(k) for k in ("id", "key", "w", "h", "orientation", "caption")} for p in photos]
+        if story and story.get("chapters"):   # what the photos were understood to be about (kept for review and the editor, never shown in the video)
+            plan["photo_story"] = {"story": story.get("story", ""), "voice": story.get("voice"), "tone": story.get("tone", ""), "chapters": [{"title": c.get("title", ""), "summary": c.get("summary", "")} for c in story["chapters"]],
+                                   "unused": story.get("unused", [])}
     plan["sources"] = sources
     return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

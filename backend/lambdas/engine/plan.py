@@ -151,15 +151,52 @@ Rules:
 SYSTEM_PROMPT = system_prompt("en")
 
 
-def photos_prompt(photos: List[Dict[str, Any]]) -> str:
-    lines = [f'{p["id"]}: {p.get("caption") or "a photo"} ({p.get("orientation", "landscape")}' + (f', taken {p["taken"]}' if p.get("taken") else "") + ")" for p in photos]
-    return (
-        f"The user attached {len(photos)} of their own photos. The video is built around them:\n" + "\n".join(lines) + "\n"
-        "- Use EVERY photo, as an image scene with props {\"photo\": \"P1\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}. These scenes are the "
-        "visuals: do NOT add stock-photo scenes.\n"
-        "- Order them by the date taken when given, otherwise as listed, unless the story the user asked for needs another order.\n"
-        "- Narrate what is visible and what the user told you in the brief. Never invent names, places, dates or events the captions and the brief do not state.\n"
-        "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n")
+def photo_slots(photos: Optional[List[Dict[str, Any]]], story: Optional[Dict[str, Any]] = None) -> int:
+    """How many beats the photos call for: one per moment of the story, else one per photo."""
+    if story and story.get("chapters"):
+        from . import curate
+        return len(curate.moments(story))
+    return len(photos or [])
+
+
+def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] = None) -> str:
+    def line(p: Dict[str, Any]) -> str:
+        extra = (f' [{p["place"]}]' if p.get("place") and p["place"].lower() not in (p.get("caption") or "").lower() else "")
+        return f'{p["id"]}: {p.get("caption") or "a photo"}{extra} ({p.get("orientation", "landscape")}' + (f', taken {p["taken"]}' if p.get("taken") else "") + ")"
+    if not story or not story.get("chapters"):
+        return (
+            f"The user attached {len(photos)} of their own photos. The video is built around them:\n" + "\n".join(line(p) for p in photos) + "\n"
+            "- Use EVERY photo, as an image scene with props {\"photo\": \"P1\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}. These scenes are the "
+            "visuals: do NOT add stock-photo scenes.\n"
+            "- Order them by the date taken when given, otherwise as listed, unless the story the user asked for needs another order.\n"
+            "- Narrate what is visible and what the user told you in the brief. Never invent names, places, dates or events the captions and the brief do not state.\n"
+            "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n")
+    from . import curate
+    by_id = {p["id"]: p for p in photos}
+    out = [f"The user attached {len(photos)} of their own photos. They have been studied and a story worked out (below). The video tells THIS story.\n"
+           f"THE STORY: {story.get('story') or '(not stated: follow the request)'}\n"
+           f"VOICE: {'first person: the person tells their own trip or event (we, I, our); never claim feelings or facts the request does not give' if story.get('voice') == 'first_person' else 'a narrator presents it'}"
+           + (f". TONE: {story['tone']}" if story.get("tone") else "") + "\n"
+           "MOMENTS, in order. Write ONE beat per moment (you may add beats without photos where the story needs context, facts or a link):"]
+    for ch in story["chapters"]:
+        out.append(f'Chapter "{ch.get("title") or "-"}"' + (f": {ch['summary']}" if ch.get("summary") else ""))
+        for m in ch["moments"]:
+            ids = m["photos"]
+            out.append("  - " + (f'photo {ids[0]}: ' if len(ids) == 1 else f'photos {", ".join(ids)} (a gallery): ') + (m.get("note") or "") + f" [{m.get('role', 'detail')}]")
+            for i in ids:
+                if i in by_id:
+                    out.append("      " + line(by_id[i]))
+    if story.get("unused"):
+        out.append("LEFT OUT (do not use): " + ", ".join(u["id"] for u in story["unused"]))
+    out.append(
+        "RULES for photo scenes:\n"
+        "- A moment with one photo is an image scene {\"photo\": \"P7\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}. A moment with 2-5 photos is a gallery scene "
+        "{\"photos\": [\"P7\", \"P8\"], \"alt\": \"<<=70 chars>\"} whose photographs follow each other in the order given while the narration of that beat names or describes them in that order.\n"
+        "- Use every photo of every moment, exactly as grouped; use no photo that is not in a moment; do NOT add stock-photo scenes for the user's own story (a map, a counter or another non-photo scene is fine where it helps, "
+        "for example a map of the route or a fact about a landmark from the grounding notes).\n"
+        "- Narrate what is visible and what the story and the request say, in the voice above. Add real facts about a named place or landmark only from the grounding notes. Never invent names, dates, people or events.\n"
+        "- Open the video on the first moment's photograph or a strong title, and let the chapters give the video its chapter titles (set \"chapter\" on the first beat of each chapter).\n\n")
+    return "\n".join(out)
 
 
 SPOKEN_WORDS_PER_S = 2.4      # measured on real videos (326 words took 136 s of speech)
@@ -192,15 +229,15 @@ def length_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 
             f"Lengthen the beats (about {target // expected_beats(target_minutes, n_photos)} words each) and add beats with new, concrete material until the total is about {target} words; keep what already works")
 
 
-def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None) -> str:
-    beats = expected_beats(target_minutes, len(photos or []))
-    words = expected_words(target_minutes, len(photos or []))
+def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None) -> str:
+    beats = expected_beats(target_minutes, photo_slots(photos, story))
+    words = expected_words(target_minutes, photo_slots(photos, story))
     return (
         f"Topic: {topic}\n\n"
         f"Target length: {target_minutes:g} minute(s). This is a hard requirement: the narration must total between {int(words * 0.9)} and {int(words * 1.1)} words "
         f"(about {words}) across at least {beats} beats of roughly {max(20, words // beats)} words each. The viewer pays per minute, and a shorter script makes a shorter video.\n\n"
         + (f"Today's date: {today}. Anything time-sensitive must come from the grounding notes (with the date it refers to), never from memory.\n\n" if today else "")
-        + (photos_prompt(photos) if photos else "")
+        + (photos_prompt(photos, story) if photos else "")
         + f"Grounding notes (may be empty):\n{notes or '(none)'}\n\n"
         "Return the JSON plan now."
     )
@@ -265,7 +302,7 @@ def needs_media(plan: Dict[str, Any], beat: Dict[str, Any]) -> bool:
     if m.get("tts_hash") != tts_hash(plan, beat) or (not m.get("audio_key") and not beat.get("silent")) or not m.get("duration"):
         return True
     if beat["scene"]["type"] == "gallery":
-        if m.get("query") != "|".join(beat["scene"]["props"]["image_queries"]) or (not m.get("gallery") and not m.get("no_photo")):
+        if m.get("query") != "|".join(beat["scene"]["props"]["image_queries"]) or m.get("photos") != beat["scene"]["props"].get("photos") or (not m.get("gallery") and not m.get("no_photo")):
             return True
     if beat["scene"]["type"] == "clip":
         if m.get("query") != beat["scene"]["props"].get("clip_query") or (not m.get("clip_asset") and not m.get("asset") and not m.get("no_photo")):
@@ -357,6 +394,10 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
             raise ValueError("quote is empty")
         return out
     if stype == "gallery":
+        own = [str(i).strip().upper() for i in (p.get("photos") if isinstance(p.get("photos"), list) else [])]
+        own = [i for i in dict.fromkeys(own) if PHOTO_ID_RE.match(i)]
+        if len(own) >= 2:   # a gallery of the user's own photos (validate_plan checks they exist and fills in the captions)
+            return {"photos": own[:6], "alt": _s(p.get("alt") or "", 70), **_word_prop(p)}
         qs = p.get("image_queries")
         if not isinstance(qs, list):
             raise ValueError("image_queries must be a list")
@@ -484,7 +525,7 @@ def _fallback_scene(narration: str) -> Dict[str, Any]:
     return {"type": "title", "props": {"title": " ".join(words[:9]).rstrip(",;:"), "subtitle": ""}}
 
 
-def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, max_images: Optional[int] = None, allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
+def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, photo_captions: Optional[Dict[str, str]] = None, max_images: Optional[int] = None, allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
     """Returns (clean_plan, warnings). Raises ValueError when nothing usable remains. `max_images` caps stock photographs (galleries count each photo)."""
     warnings: List[str] = []
     if plan.get("legit") is not True:
@@ -527,6 +568,16 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
             warnings.append(f"beat {i}: clip replaced by an image (no stock footage for current events)")
         if scene["type"] == "image" and scene["props"].get("photo") and scene["props"]["photo"] not in (photo_ids or []):
             scene["props"].pop("photo")  # the model named a photo that doesn't exist: it becomes an ordinary stock-photo scene
+        if scene["type"] == "gallery" and scene["props"].get("photos"):
+            ids = [x for x in scene["props"]["photos"] if x in (photo_ids or [])]
+            caps = [((photo_captions or {}).get(x) or x)[:80] for x in ids]
+            if len(ids) >= 2:   # captions double as the words each photo is tied to in the narration
+                scene["props"].update({"photos": ids, "image_queries": caps, "alt": scene["props"].get("alt") or caps[0][:70]})
+            elif ids:
+                scene = {"type": "image", "props": {"image_query": caps[0], "alt": caps[0][:70], "ken_burns": "in", "photo": ids[0]}}
+            else:
+                scene = _fallback_scene(narration)
+                warnings.append(f"beat {i}: gallery named photos that do not exist, replaced")
         if silent and scene["type"] not in SILENT_SCENES:
             warnings.append(f"beat {i}: silent beat dropped (a {scene['type']} scene needs narration)")
             continue
@@ -583,7 +634,7 @@ def count_images(beat: Dict[str, Any]) -> int:
     if sc["type"] == "image" and not sc["props"].get("photo"):
         return 1
     if sc["type"] == "gallery":
-        return len(sc["props"]["image_queries"])
+        return 0 if sc["props"].get("photos") else len(sc["props"]["image_queries"])   # the user's own photos never count
     return 0
 
 
@@ -617,23 +668,24 @@ def enforce_image_budget(beats: List[Dict[str, Any]], budget: int) -> List[str]:
 
 def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[str, str], str], *, retries: int = 1, language: str = "en", region: Optional[str] = None, today: Optional[str] = None,
                   photos: Optional[List[Dict[str, Any]]] = None, max_images_per_minute: float = DEFAULT_MAX_IMAGES_PER_MINUTE,
-                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None, craft: str = "") -> Tuple[Dict[str, Any], List[str]]:
+                  allow_clips: bool = True, music_tracks: Optional[List[Dict[str, Any]]] = None, craft: str = "", story: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], List[str]]:
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
-    if expected_words(target_minutes, len(photos or [])) >= 250:
+    slots = photo_slots(photos, story)
+    if expected_words(target_minutes, slots) >= 250:
         retries = max(retries, 2)   # a long video may need a length repair on top of the other checks
-    user = build_user_prompt(topic, notes, target_minutes, today, photos)
+    user = build_user_prompt(topic, notes, target_minutes, today, photos, story)
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
         text = llm(system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft, user)
         try:
-            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []],
+            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []], photo_captions={p["id"]: p.get("caption") or "" for p in photos or []},
                                         max_images=image_budget(target_minutes, max_images_per_minute), allow_clips=allow_clips)
             replaced = [w for w in warns if "scene replaced" in w]
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
                 raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")
             if plan.get("legit") and attempt < retries:
-                short = length_problem(plan, target_minutes, len(photos or []))
+                short = length_problem(plan, target_minutes, slots)
                 if short:  # the script would make a shorter video than the one asked for and paid for
                     raise ValueError(short)
             if plan.get("legit") and attempt < retries:
@@ -642,25 +694,39 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
                     raise ValueError("some scenes list items their narration never mentions: " + "; ".join(gaps[:4])
                                      + ". Rewrite those beats so the narration says each item's key words in the order shown (keep everything else as it is).")
             if photos and plan.get("legit"):
-                used = {b["scene"]["props"].get("photo") for b in plan["beats"] if b["scene"]["type"] == "image"}
-                unused = [p for p in photos if p["id"] not in used]
+                from . import curate
+                used: set = set()
+                for b in plan["beats"]:
+                    if b["scene"]["type"] == "image":
+                        used.add(b["scene"]["props"].get("photo"))
+                    elif b["scene"]["type"] == "gallery":
+                        used.update(b["scene"]["props"].get("photos") or [])
+                needed = set(curate.used_ids(story)) if story and story.get("chapters") else {p["id"] for p in photos}
+                unused = [p for p in photos if p["id"] in needed and p["id"] not in used]
                 if unused and attempt < retries:
-                    raise ValueError("these photos are not used in any scene: " + ", ".join(p["id"] for p in unused) + ". The video must use every photo")
-                if unused:  # still missing after the retry: never drop the user's photo, add a plain scene for it
+                    raise ValueError("these photos are not used in any scene: " + ", ".join(p["id"] for p in unused) + ". The video must use every photo of every moment")
+                if unused:  # still missing after the retry: never drop the user's photo, add scenes for them (galleries of up to four)
                     taken = {b["id"] for b in plan["beats"]}
-                    for p in unused:
-                        cap = (p.get("caption") or "a photo").rstrip(". ")
-                        text = f"{cap[:1].upper()}{cap[1:]}. A moment from the story." if len(cap.split()) >= 3 else f"{cap}. A moment from the story, shown here as it was."
+                    step = 1 if len(unused) <= 6 else 4   # a few missing photos get a scene each; many are grouped into galleries of four
+                    for k in range(0, len(unused), step):
+                        grp = unused[k:k + step]
+                        caps = [(p.get("caption") or "a photo").rstrip(". ")[:80] for p in grp]
                         bid = new_beat_id(None, taken)
                         taken.add(bid)
-                        plan["beats"].append({"id": bid, "narration": text, "scene": {"type": "image", "props": {"image_query": cap[:80], "alt": cap[:70], "ken_burns": "in", "photo": p["id"]}}})
+                        if len(grp) == 1:
+                            text = f"{caps[0][:1].upper()}{caps[0][1:]}. A moment from the story." if len(caps[0].split()) >= 3 else f"{caps[0]}. A moment from the story, shown here as it was."
+                            scene = {"type": "image", "props": {"image_query": caps[0], "alt": caps[0][:70], "ken_burns": "in", "photo": grp[0]["id"]}}
+                        else:
+                            text = "More moments from the story. " + " ".join(f"{c[:1].upper()}{c[1:]}." for c in caps)
+                            scene = {"type": "gallery", "props": {"photos": [p["id"] for p in grp], "image_queries": caps, "alt": caps[0][:70]}}
+                        plan["beats"].append({"id": bid, "narration": text, "scene": scene})
                     warns.append("added scenes for unused photos: " + ", ".join(p["id"] for p in unused))
             if plan.get("legit"):
-                short = length_problem(plan, target_minutes, len(photos or []))
+                short = length_problem(plan, target_minutes, slots)
                 if short:  # still short after the repairs: the video is made, and the warning is logged
                     warns.append("length: " + short)
             return plan, warns
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e
-            user = build_user_prompt(topic, notes, target_minutes, today, photos) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
+            user = build_user_prompt(topic, notes, target_minutes, today, photos, story) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
     raise ValueError(f"could not obtain a valid plan: {last_err}")

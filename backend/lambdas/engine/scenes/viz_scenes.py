@@ -392,6 +392,8 @@ def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
             return None
         local = (t - bounds[k]) / max(0.2, bounds[k + 1] - bounds[k])
         p = ease_in_out_cubic(min(1.0, max(0.0, local)))
+        if props.get("user") and srcs[k].width / srcs[k].height < 1.3:   # a portrait or square photo of the user's: all of it, never a face cropped off
+            return _contained_image(srcs[k], tw, tht, lerp(1.0, 1.06, p))
         return _cover(srcs[k], tw, tht, lerp(1.0, 1.12, p), motions[k % 4], p)
 
     cur = frame(i) or next((f for f in (frame(k) for k in range(n)) if f is not None), None)
@@ -448,8 +450,8 @@ def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
 _BACKDROP: Dict[Tuple[int, int, int], Image.Image] = {}
 
 
-def _draw_contained(cv: Canvas, src: Image.Image, tw: int, tht: int, z: float) -> None:
-    """The photo whole, centred and gently zooming, over a blurred, darkened copy of itself that fills the frame."""
+def _contained_image(src: Image.Image, tw: int, tht: int, z: float) -> Image.Image:
+    """The photo whole, centred and gently zooming, over a blurred, darkened copy of itself that fills the frame (an image of the full frame size)."""
     from PIL import ImageFilter
 
     key = (id(src), tw, tht)
@@ -460,10 +462,16 @@ def _draw_contained(cv: Canvas, src: Image.Image, tw: int, tht: int, z: float) -
         small.thumbnail((480, 480))
         bg = small.resize((tw, tht), Image.BILINEAR, box=_cover_box(small.size, tw, tht)).filter(ImageFilter.GaussianBlur(28 * tw / 1920))
         _BACKDROP[key] = Image.eval(bg, lambda v: int(v * 0.45))
-    cv.im.paste(_BACKDROP[key])
+    frame = _BACKDROP[key].copy()
     s = min(tw * 0.9 / src.width, tht * 0.94 / src.height) * z
     fg = src.resize((max(1, round(src.width * s)), max(1, round(src.height * s))), Image.BILINEAR)
-    cv.im.paste(fg, ((tw - fg.width) // 2, (tht - fg.height) // 2))
+    frame.paste(fg, ((tw - fg.width) // 2, (tht - fg.height) // 2))
+    return frame
+
+
+def _draw_contained(cv: Canvas, src: Image.Image, tw: int, tht: int, z: float) -> None:
+    cv.im.paste(_contained_image(src, tw, tht, z))
+
 
 
 def _cover_box(size: Tuple[int, int], tw: int, tht: int) -> Tuple[float, float, float, float]:

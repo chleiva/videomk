@@ -2,7 +2,7 @@
 import re
 from typing import Any, List
 
-MAX_PHOTOS = 10
+MAX_PHOTOS = 100   # per video: the engine catalogues them on contact sheets (engine/curate.py), so the cost grows slowly with the count
 MAX_UPLOAD_BYTES = 10_000_000
 ID_RE = re.compile(r"^[0-9a-f]{16}$")
 

@@ -136,6 +136,13 @@ def make_gallery(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost
 
     props = beat["scene"]["props"]
     queries = list(props["image_queries"])
+    if props.get("photos"):   # the user's own photos: their clean copies are already stored; no search, no credit line, nothing to review, no cost
+        items = {m["id"]: m for m in plan.get("media_items") or []}
+        shots = [{"asset": items[i]["key"], "credit": "", "query": queries[k] if k < len(queries) else i, "photo": i} for k, i in enumerate(props["photos"]) if i in items]
+        out = {"query": "|".join(queries), "photos": list(props["photos"]), "pick": None, "gallery": shots}
+        if not shots:
+            out["no_photo"] = True
+        return out
 
     def one(i: int) -> Dict[str, Any]:
         still = {"id": f"{beat['id']}g{i}", "narration": _context(beat), "scene": {"type": "image", "props": {"image_query": queries[i], "alt": queries[i]}}}

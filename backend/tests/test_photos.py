@@ -209,7 +209,7 @@ def test_upload_slots_pin_the_key_type_and_size(bucket):
     assert {"key": f"uploads/{UID}/{ids[0]}.jpg"} in conds and {"bucket": "photo-test-bucket"} in conds   # one key, in the caller's own folder
 
 
-@pytest.mark.parametrize("count", [0, 11, "3", True, None, 2.5])
+@pytest.mark.parametrize("count", [0, 101, "3", True, None, 2.5])
 def test_upload_counts_are_validated(bucket, count):
     import uploads_api
 
@@ -242,6 +242,6 @@ def test_the_launcher_accepts_only_photos_that_were_uploaded_by_this_user(bucket
     ok = go([mine], "photo-test-001")
     assert ok["statusCode"] == 202 and json.loads(launcher.fake.calls[0]["input"])["media"] == [mine]
     for bad, rid in (([theirs], "photo-test-002"), (["c" * 16], "photo-test-003"), (["nothex"], "photo-test-004"), ([mine, mine], "photo-test-005"),
-                     (["d" * 16] * 11, "photo-test-006"), ([], "photo-test-007")):
+                     (["d" * 16] * 101, "photo-test-006"), ([], "photo-test-007")):
         assert go(bad, rid)["statusCode"] == 400, bad
     assert len(launcher.fake.calls) == 1 and wallet.balance(UID)["balance"] == 4        # refused requests started nothing and charged nothing

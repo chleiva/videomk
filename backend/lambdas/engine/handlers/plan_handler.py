@@ -7,7 +7,7 @@ from generate_video.db import set_attributes, update_status
 
 from common.secrets import get_secret_param
 
-from .. import library, awsio, costs, director, llm, plan as plan_mod, usermedia, voices, websearch
+from .. import curate, library, awsio, costs, director, llm, plan as plan_mod, usermedia, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -34,21 +34,28 @@ def _web_tools(spent: Dict[str, float]):
     return websearch.TavilyProvider(key), ask_tools
 
 
-def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, float]):
-    """Clean copies of the user's uploads plus a caption and safety verdict for each. Returns (usable photos, skipped [{id, reason}])."""
+def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, float], prompt: str, minutes: float):
+    """The user's uploads made safe and understood. Returns (usable photos, skipped [{id, reason}], story).
+    Cheap by design (engine/curate.py): the photos are shown to a small model on contact sheets of 10, then one text-only call works out the story."""
     ids = usermedia.valid_media_ids(media_ids)
     photos, thumbs, skipped = usermedia.prepare(video_id, user_id, ids, get=lambda k: awsio.get_bytes(k), put=lambda k, b: awsio.put_bytes(k, b, "image/jpeg"),
                                                 delete=awsio.delete, asset_prefix=awsio.prefix(video_id) + "assets/")
 
     def ask_vision(system: str, user: str, images: Any) -> str:
         text, meta = llm.complete(system, user, images=images, max_tokens=1800, model=llm.REVIEW_MODEL, effort="low")
+        spent["photos"] = spent.get("photos", 0.0) + meta["cost_usd"]   # (a dict update from several threads: add-and-store of floats, a lost update is a rounding error)
+        return text
+
+    def ask_text(system: str, user: str) -> str:
+        text, meta = llm.complete(system, user, max_tokens=4500)
         spent["photos"] = spent.get("photos", 0.0) + meta["cost_usd"]
         return text
 
-    flagged = usermedia.analyze(photos, thumbs, ask_vision)
+    flagged, story = curate.curate(photos, thumbs, prompt, minutes, ask_vision=ask_vision, ask_text=ask_text)
     if flagged:
         logging.warning("photo review flagged %s of %s photos: %s", len(flagged), len(ids), [f["reason"] for f in flagged])
-    return photos, skipped + flagged
+    logging.warning("photos: %s uploaded, %s usable, story of %s moments (%s photos used), cost so far $%.4f", len(ids), len(photos), len(curate.moments(story)), len(curate.used_ids(story)), spent.get("photos", 0.0))
+    return photos, skipped + flagged, story
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -74,15 +81,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         spent["script"] = spent.get("script", 0.0) + meta["cost_usd"]
         return text
 
-    photos, skipped = [], []
+    photos, skipped, story = [], [], None
     if event.get("media"):
-        photos, skipped = _user_photos(video_id, user_id, event["media"], spent)
+        photos, skipped, story = _user_photos(video_id, user_id, event["media"], spent, prompt, minutes)
         if not photos:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
     catalog = library.load_catalog(awsio.get_json)
     result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
-                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos,
+                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
                              max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
                              music_tracks=catalog)
     r = result.get("research") or {}

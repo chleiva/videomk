@@ -85,10 +85,10 @@ def build_timeline(
                 queries = [g.get("query") for g in shots]
                 if not all(queries):
                     queries = list(props.get("image_queries") or [])[: len(shots)]
-                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", ""), "image_queries": queries, **({"word": props["word"]} if props.get("word") else {})}
+                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", ""), "image_queries": queries, **({"word": props["word"]} if props.get("word") else {}), **({"user": True} if props.get("photos") else {})}
             elif len(shots) == 1:  # only one photograph could be found: a plain image scene (the image branch below attaches the asset and credit)
                 info = {**info, "asset": shots[0]["asset"], "credit": shots[0].get("credit") or None}
-                stype, props = "image", {"alt": props.get("alt", ""), "ken_burns": "in"}
+                stype, props = "image", {"alt": props.get("alt", ""), "ken_burns": "in", **({"photo": shots[0]["photo"]} if shots[0].get("photo") else {})}
             else:
                 stype, props = "title", {"title": props.get("alt") or (props.get("image_queries") or [""])[0], "subtitle": ""}
         if stype == "clip":
