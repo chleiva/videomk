@@ -9,9 +9,9 @@ from engine import director, plan as plan_mod, staged
 
 def outline_json(n, minutes, **extra):
     return json.dumps({"legit": True, "title": "All About Paris", "description": "A tour.", "mood": "bright", "theme": "sunrise", "voices": {"narrator": "Ruth"},
-                       "music": {"style": "acoustic_warm", "energy": 3},
+                       "music": {"track": "acoustic-warm"},
                        "sections": [{"title": f"Part {i + 1}", "goal": f"goal {i + 1}", "key_points": [f"point {i + 1}a", f"point {i + 1}b"], "queries": [f"paris part {i + 1}"], "minutes": minutes / n,
-                                     **({"music": {"style": "soft_piano"}} if i == 2 else {})} for i in range(n)], **extra})
+                                     **({"music": {"track": "soft-piano"}} if i == 2 else {})} for i in range(n)], **extra})
 
 
 def section_json(idx, words_total, n_beats, *, silent=False):
@@ -138,7 +138,7 @@ def test_the_whole_video_goes_through_the_usual_rules_silence_images_and_music_c
     model, plan, warns, info = run(5.0)
     kinds = [b.get("silent", False) for b in plan["beats"]]
     assert kinds[0] is False and kinds[-1] is False and not any(a and b for a, b in zip(kinds, kinds[1:]))
-    assert plan["music"]["style"] == "acoustic_warm" and plan["music"].get("changes") and plan["music"]["changes"][0]["style"] == "soft_piano"
+    assert plan["music"]["track"] == "acoustic-warm" and plan["music"].get("changes") and plan["music"]["changes"][0]["track"] == "soft-piano"
     chapter_index = next(i for i, b in enumerate(plan["beats"]) if b.get("chapter") == "Part 3")
     assert plan["music"]["changes"][0]["beat"] == chapter_index + 1                                      # the change is at the first beat of the section that chose it
 
