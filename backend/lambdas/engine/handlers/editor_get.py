@@ -4,7 +4,8 @@ from typing import Any, Dict, List
 
 from common.http import json_response
 
-from .. import awsio, plan as plan_mod
+from .. import awsio, music as music_mod, plan as plan_mod
+from ..audio import PLANNER_SFX
 from ..plan import MAX_BEATS
 from .editor_common import load_owned_video
 
@@ -22,6 +23,9 @@ def _beat_view(plan: Dict[str, Any], beat: Dict[str, Any], pfx: str) -> Dict[str
         "duration": m.get("duration"), "stale": plan_mod.needs_media(plan, beat),  # true => will be re-synthesised/re-fetched on next render
     }
     asset = m.get("asset")
+    if beat["scene"]["type"] == "gallery":
+        view["gallery"] = {"photos": [{"credit": g.get("credit"), "chosen": g.get("chosen"), "url": awsio.presign(g["asset"]) if isinstance(g.get("asset"), str) and g["asset"].startswith(pfx + "assets/") else None}
+                                      for g in m.get("gallery") or []], "no_photo": bool(m.get("no_photo"))}
     if beat["scene"]["type"] == "clip":
         clip_key = m.get("clip_asset")
         view["clip"] = {"credit": m.get("credit"), "chosen": m.get("chosen"), "has_clip": bool(clip_key), "fallback_photo": bool(not clip_key and asset), "no_media": bool(m.get("no_photo"))}
@@ -61,5 +65,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "final": {"url": signed("video_uri"), "rev": item.get("final_rev")},
         "preview": {"url": signed("preview_uri"), "rev": item.get("preview_rev")},
         "limits": {"max_beats": MAX_BEATS, "min_words": plan_mod.MIN_BEAT_WORDS, "max_words": plan_mod.MAX_BEAT_WORDS},
-        "scene_types": ["title", "bullets", "diagram", "chart", "timeline", "stat", "quote", "image"],
+        "scene_types": ["title", "bullets", "diagram", "chart", "timeline", "stat", "quote", "image", "gallery", "clip"],
+        "music": plan.get("music") or {}, "music_styles": music_mod.style_catalog(), "sfx": sorted(PLANNER_SFX),
     })

@@ -7,8 +7,10 @@ import copy
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+from . import music as music_mod
 from . import plan as plan_mod
 from . import voices as voice_mod
+from .audio import PLANNER_SFX
 from .scenes import SCENE_TYPES
 from .theme import THEMES
 
@@ -139,6 +141,21 @@ def apply_ops(plan: Dict[str, Any], ops: Any, *, max_beats: int = plan_mod.MAX_B
                 if op["mood"] not in ("calm", "bright", "tense"):
                     raise EditError("unknown mood")
                 new["mood"] = op["mood"]
+        elif kind == "set_music":
+            music = plan_mod.sanitize_music(op.get("music"), len(beats))
+            if music is None and op.get("music") not in (None, {}):
+                raise EditError("music needs a style from the list: " + ", ".join(music_mod.STYLES))
+            new.pop("music", None)
+            if music:
+                new["music"] = music
+        elif kind == "set_sfx":
+            i = F(op.get("id"))
+            sfx = plan_mod.sanitize_sfx(op.get("sfx"))
+            if op.get("sfx") not in (None, "") and sfx is None:
+                raise EditError("unknown sound effect: choose one of " + ", ".join(sorted(PLANNER_SFX)) + ", or none")
+            beats[i].pop("sfx", None)
+            if sfx:
+                beats[i]["sfx"] = sfx
         elif kind == "set_speaker":
             i = F(op.get("id"))
             sp = voice_mod.speaker_id(op.get("speaker"))

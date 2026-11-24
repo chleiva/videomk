@@ -73,6 +73,7 @@ def request_region(event: Dict[str, Any]) -> Optional[str]:
 
 THEMES = ("midnight", "paper", "sunrise")
 MIN_MINUTES, MAX_MINUTES = 1.0, 12.0
+MAX_IMAGES_PER_MINUTE = 10.0   # the ceiling a request can ask for; the planner treats it as a maximum, never a target
 
 
 def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
@@ -88,6 +89,11 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             out["media"] = valid_media_ids(body["media"])
         except PhotoError as e:
             raise BadRequest(str(e)) from e
+    if "max_images_per_minute" in body and body["max_images_per_minute"] is not None:
+        m = body["max_images_per_minute"]
+        if isinstance(m, bool) or not isinstance(m, (int, float)) or not (0 <= m <= MAX_IMAGES_PER_MINUTE):
+            raise BadRequest(f"'max_images_per_minute' must be a number from 0 to {MAX_IMAGES_PER_MINUTE:g}")
+        out["max_images_per_minute"] = float(m)
     if "language" in body and body["language"] is not None:
         if body["language"] not in ("en", "es"):
             raise BadRequest("'language' must be 'en' or 'es'")

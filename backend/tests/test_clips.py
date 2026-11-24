@@ -10,6 +10,12 @@ from engine.timeline import build_timeline
 from tests.test_engine import small_timeline
 
 
+@pytest.fixture(autouse=True)
+def _no_real_llm_or_cache(monkeypatch):
+    monkeypatch.setenv("CLIP_VERIFY", "0")   # tests that exercise verification turn it on and pass their own model stub
+    clips._CACHE.clear()
+
+
 def make_source(seconds=4, size="640x360", fmt="mp4", tmp_path=None):
     """A real, moving test video made by ffmpeg itself."""
     out = tmp_path / f"src.{fmt}"
@@ -234,3 +240,115 @@ def test_the_beat_step_stores_the_clip_as_a_working_file_and_falls_back_to_a_sti
     monkeypatch.setattr(beat_handler, "make_photo", lambda plan, b, v, c: {"query": b["scene"]["props"]["image_query"], "pick": None, "asset": "generation/v2/vid/assets/img_b7_x.jpg", "credit": "Photo: Q / Unsplash"})
     out = beat_handler.make_clip(plan, beat, "vid", "cost_usd", 4.0)
     assert "clip_asset" not in out and out["asset"].endswith("img_b7_x.jpg") and out["query"] == "waves"
+
+
+# ---------------------------------------------------------------- Pixabay
+PIXABAY = {"total": 3, "totalHits": 3, "hits": [
+    {"id": 283533, "pageURL": "https://pixabay.com/videos/id-283533/", "tags": "ocean, waves, sea", "duration": 40, "user": "BlenderTimer", "user_id": 9538909,
+     "videos": {"large": {"url": "https://cdn.pixabay.com/video/l.mp4", "width": 1920, "height": 1080, "size": 38_000_000, "thumbnail": "https://cdn.pixabay.com/video/l.jpg"},
+                "medium": {"url": "https://cdn.pixabay.com/video/m.mp4", "width": 1280, "height": 720, "size": 15_000_000, "thumbnail": "https://cdn.pixabay.com/video/m.jpg"},
+                "small": {"url": "https://cdn.pixabay.com/video/s.mp4", "width": 960, "height": 540, "size": 10_000_000, "thumbnail": "https://cdn.pixabay.com/video/s.jpg"},
+                "tiny": {"url": "", "width": 0, "height": 0, "size": 0, "thumbnail": ""}}},
+    {"id": 2, "pageURL": "https://pixabay.com/videos/id-2/", "tags": "x", "duration": 9, "user": "A", "user_id": 1,
+     "videos": {"medium": {"url": "https://cdn.pixabay.com/video/p.mp4", "width": 720, "height": 1280, "size": 4_000_000, "thumbnail": "https://cdn.pixabay.com/video/p.jpg"}}},   # portrait
+    {"id": 3, "pageURL": "https://pixabay.com/videos/id-3/", "tags": "y", "duration": 9, "user": "B", "user_id": 2,
+     "videos": {"medium": {"url": "https://cdn.pixabay.com/video/h.mp4", "width": 1280, "height": 720, "size": 400_000_000, "thumbnail": "https://cdn.pixabay.com/video/h.jpg"}}},    # too big
+]}
+
+
+def test_pixabay_candidates_use_the_smallest_720p_file_and_carry_the_credit():
+    clips._CACHE.clear()
+    seen = {}
+    got = clips.pixabay_search("ocean waves", "PIX-KEY", fetch=lambda url, **kw: (seen.update(url=url), PIXABAY)[1])
+    assert seen["url"].startswith("https://pixabay.com/api/videos/?") and "safesearch=true" in seen["url"] and "video_type=film" in seen["url"] and "key=PIX-KEY" in seen["url"]
+    assert [c["id"] for c in got] == ["283533"]                                  # portrait and enormous files are skipped
+    c = got[0]
+    assert c["video_url"] == "https://cdn.pixabay.com/video/m.mp4" and c["thumb_url"].endswith("m.jpg") and c["duration"] == 40.0     # medium (1280x720), not the 1080p file
+    assert c["creator"] == "BlenderTimer" and c["creator_url"] == "https://pixabay.com/users/BlenderTimer-9538909/" and c["license"] == "Pixabay Content License"
+    assert c["attribution"] == "Video by BlenderTimer on Pixabay (https://pixabay.com/videos/id-283533/)" and clips.credit_line(c) == "Video: BlenderTimer / Pixabay"
+    assert clips.pixabay_search("x", "", fetch=lambda *a, **k: pytest.fail("no key, no request")) == []
+
+
+def test_pixabay_results_are_cached_for_24_hours_and_failures_are_not():
+    clips._CACHE.clear()
+    calls = []
+    fetch = lambda url, **kw: (calls.append(url), PIXABAY)[1]
+    clips.pixabay_search("Ocean Waves", "K", fetch=fetch)
+    clips.pixabay_search("ocean waves ", "K", fetch=fetch)                       # same query: no second request
+    assert len(calls) == 1
+    clips.pixabay_search("mountain lake", "K", fetch=fetch)
+    assert len(calls) == 2
+    clock = {"t": 1000.0}
+    assert clips._cached("k", lambda: "a", now=lambda: clock["t"]) == "a"
+    clock["t"] += clips.CACHE_TTL_S - 5
+    assert clips._cached("k", lambda: "b", now=lambda: clock["t"]) == "a"
+    clock["t"] += 10
+    assert clips._cached("k", lambda: "b", now=lambda: clock["t"]) == "b"       # expired after 24 h
+    with pytest.raises(FetchError):
+        clips._cached("bad", lambda: (_ for _ in ()).throw(FetchError("x")))
+    assert "bad" not in clips._CACHE
+
+
+def test_gather_asks_three_providers_and_interleaves_them(monkeypatch):
+    monkeypatch.setattr(clips, "pexels_search", lambda q, k, f: [cand("pexels", 1)])
+    monkeypatch.setattr(clips, "pixabay_search", lambda q, k, f: [cand("pixabay", 1), cand("pixabay", 2)])
+    monkeypatch.setattr(clips, "commons_search", lambda q, f: [cand("commons", 1)])
+    assert [clips.candidate_key(c) for c in clips.gather("q", pexels_key="a", pixabay_key="b")] == ["pexels:1", "pixabay:1", "commons:1", "pixabay:2"]
+
+
+# ---------------------------------------------------------------- one frame per 30 seconds of the footage we use
+@pytest.mark.parametrize("seconds,times", [(5, [2.5]), (20, [10.0]), (30, [15.0]), (31, [7.75, 23.25]), (61, [10.17, 30.5, 50.83]), (200, [33.33, 100.0, 166.67])])
+def test_verification_samples_one_frame_per_30_seconds_between_one_and_three(seconds, times):
+    assert clips.verify_frame_times(seconds) == pytest.approx(times, abs=0.02)
+
+
+def test_verification_sends_only_a_few_small_frames_in_a_single_call(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLIP_VERIFY", "1")
+    mp4, _ = clips.normalise(make_source(4, tmp_path=tmp_path), need_seconds=3.0, source_seconds=4.0, suffix=".mp4")
+    seen = {"calls": 0}
+    def complete(system, user, images=None, **kw):
+        seen.update(calls=seen["calls"] + 1, n=len(images), sizes=[Image.open(__import__("io").BytesIO(i)).size for i in images], model=kw.get("model"), max_tokens=kw.get("max_tokens"))
+        return '{"ok": true, "reason": "calm waves"}', {"cost_usd": 0.0007}
+    ok, why, cost = clips.verify(mp4, "Waves roll in.", "waves", "waves", 3.0, complete=complete)
+    assert (ok, why, cost) == (True, "calm waves", 0.0007) and seen["calls"] == 1 and seen["n"] == 1      # a 3 s clip: one frame, one call
+    assert seen["sizes"][0][0] == 512 and seen["max_tokens"] == 300
+    bad = lambda *a, **k: ('{"ok": false, "reason": "a logo is visible"}', {"cost_usd": 0.0007})
+    assert clips.verify(mp4, "n", "a", "q", 3.0, complete=bad)[:2] == (False, "a logo is visible")
+
+
+def test_verification_fails_open_and_can_be_switched_off(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLIP_VERIFY", "1")
+    mp4, _ = clips.normalise(make_source(3, tmp_path=tmp_path), need_seconds=2.0, source_seconds=3.0, suffix=".mp4")
+    boom = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("bedrock down"))
+    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=boom)[0] is True                         # a broken check never blocks the video
+    junk = lambda *a, **k: ("no json here", {"cost_usd": 0.0})
+    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=junk)[0] is True
+    assert clips.verify(b"not a video", "n", "a", "q", 2.0, complete=boom)[0] is True              # nothing to check
+    monkeypatch.setenv("CLIP_VERIFY", "0")
+    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=lambda *a, **k: pytest.fail("off means off"))[0] is True
+
+
+def test_a_clip_that_fails_verification_is_skipped_for_the_next_candidate(monkeypatch):
+    get, norm = fake_world(monkeypatch, [cand("pixabay", 1), cand("pixabay", 2)])
+    verdicts = iter([(False, "watermark in frame", 0.0007), (True, "fine", 0.0007)])
+    seen = []
+    def verify_fn(mp4, narration, alt, query, seconds):
+        seen.append(mp4)
+        return next(verdicts)
+    out = clips.scout_clip("q", "n", review=None, fetch_bytes_fn=get, normalise_fn=norm, verify_fn=verify_fn)
+    assert out["chosen"] == "pixabay:2" and len(seen) == 2 and out["review"]["verified"] == "fine" and out["review"]["cost_usd"] == pytest.approx(0.0014)
+    none = clips.scout_clip("q", "n", review=None, fetch_bytes_fn=get, normalise_fn=norm, verify_fn=lambda *a: (False, "no", 0.0))
+    assert none is None                                                                            # every candidate failed: the beat falls back to a still
+
+
+def test_a_failing_clip_upload_falls_back_to_a_still_instead_of_failing_the_beat(monkeypatch):
+    from engine.handlers import beat_handler
+
+    monkeypatch.setattr(beat_handler.awsio, "put_bytes", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("AccessDenied")))
+    monkeypatch.setattr(beat_handler, "get_secret_param", lambda *a, **k: "")
+    monkeypatch.setattr(beat_handler.clips, "scout_clip", lambda *a, **k: {"mp4": b"MP4", "credit": "Video: Z / Pixabay", "entry": {}, "chosen": "pixabay:1", "review": {"cost_usd": 0.0}})
+    monkeypatch.setattr(beat_handler.costs, "add_cost", lambda *a, **k: None)
+    monkeypatch.setattr(beat_handler, "make_photo", lambda plan, b, v, c: {"query": "waves", "pick": None, "asset": "generation/v2/vid/assets/img_x.jpg", "credit": "Photo: Q / Unsplash"})
+    beat = {"id": "b7", "narration": "Waves roll in.", "scene": {"type": "clip", "props": {"clip_query": "waves", "alt": "waves"}}}
+    out = beat_handler.make_clip({"beats": []}, beat, "vid", "cost_usd", 4.0)
+    assert "clip_asset" not in out and out["asset"].endswith("img_x.jpg")

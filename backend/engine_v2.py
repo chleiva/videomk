@@ -63,7 +63,7 @@ class EngineV2(Construct):
         beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{region}:{account}:parameter/videomk/*_api_key", f"arn:aws:ssm:{region}:{account}:parameter/videomk/unsplash_access_key"]))
         for fn in (plan_fn, beat_fn, timeline_fn):
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject"], resources=[v2_objects]))
-        for fn in (chunk_fn, audio_fn):  # they write segments and mixes, which carry the "working" tag
+        for fn in (chunk_fn, audio_fn, beat_fn):  # they write segments, mixes and stock clips, which carry the "working" tag
             fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject", "s3:PutObjectTagging"], resources=[v2_objects]))
         finalize_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject", "s3:DeleteObject"], resources=[v2_objects]))
         finalize_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[videos_objects]))

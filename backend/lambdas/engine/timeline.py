@@ -36,6 +36,15 @@ def build_timeline(
             dur += END_HOLD
         stype = beat["scene"]["type"]
         props = dict(beat["scene"]["props"])
+        if stype == "gallery":
+            shots = [g for g in (info.get("gallery") or []) if g.get("asset")]
+            if len(shots) >= 2:
+                props = {"assets": [g["asset"] for g in shots], "credits": [g.get("credit") or "" for g in shots], "alt": props.get("alt", "")}
+            elif len(shots) == 1:  # only one photograph could be found: a plain image scene (the image branch below attaches the asset and credit)
+                info = {**info, "asset": shots[0]["asset"], "credit": shots[0].get("credit") or None}
+                stype, props = "image", {"alt": props.get("alt", ""), "ken_burns": "in"}
+            else:
+                stype, props = "title", {"title": props.get("alt") or (props.get("image_queries") or [""])[0], "subtitle": ""}
         if stype == "clip":
             if info.get("clip_asset"):
                 props = {"asset": info["clip_asset"], "alt": props.get("alt", ""), **({"credit": info["credit"]} if info.get("credit") else {})}
@@ -64,13 +73,17 @@ def build_timeline(
                 "narration_offset": LEAD,
                 "cues": [round(c, 3) for c in cues[:8]],
                 "transition": "fade",
+                **({"sfx": beat["sfx"]} if beat.get("sfx") else {}),
             }
         )
         if beat.get("chapter"):
             chapters.append({"start": round(t, 3), "title": beat["chapter"]})
         t += dur
     # segment boundaries must be a multiple of the GOP so chunks start on an IDR frame
+    from . import music as music_mod
+
     return {
+        "music": music_mod.resolve(plan.get("music"), plan.get("mood", "calm"), [s["start"] for s in scenes], t, video_id),
         "version": 2,
         "video_id": video_id,
         "fps": fps,
@@ -91,7 +104,7 @@ def beat_info_from_plan(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
     out = []
     for b in plan["beats"]:
         m = b.get("media") or {}
-        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
+        out.append({"duration": m["duration"], "asset": m.get("asset"), "clip_asset": m.get("clip_asset"), "gallery": m.get("gallery"), "credit": m.get("credit"), "audio_key": m.get("audio_key")})
     return out
 
 

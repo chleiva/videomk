@@ -322,6 +322,69 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cv.text(1880, 40, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
 
 
+# ------------------------------------------------------------------ gallery (several photographs during one beat)
+GALLERY_FADE_S = 0.6
+
+
+def gallery_cues(props: Dict[str, Any], dur: float) -> List[float]:
+    return []
+
+
+def _cover(src: Image.Image, tw: int, tht: int, z: float, motion: str, p: float) -> Image.Image:
+    sw, sh = src.size
+    base = max(tw / sw, tht / sh)
+    vw, vh = tw / (base * z), tht / (base * z)
+    cx, cy = sw / 2, sh / 2
+    pan = (sw - vw) / 2 * 0.8
+    if motion == "left":
+        cx += lerp(pan, -pan, p)
+    elif motion == "right":
+        cx += lerp(-pan, pan, p)
+    cx = min(max(cx, vw / 2), sw - vw / 2)
+    cy = min(max(cy, vh / 2), sh - vh / 2)
+    return src.resize((tw, tht), Image.BILINEAR, box=(cx - vw / 2, cy - vh / 2, cx + vw / 2, cy + vh / 2))
+
+
+def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    assets = [str(a) for a in props.get("assets") or []]
+    srcs = [ctx.resolve_image(a) for a in assets]
+    tw, tht = cv.W * cv.ss, cv.H * cv.ss
+    if not assets or all(s is None for s in srcs):
+        cv.card(260, 180, 1400, 560, th, r=36)
+        cv.text(CENTER_X, 460, str(props.get("alt") or "Images unavailable"), "semibold", 54, with_alpha(th.muted, 1), anchor="mm")
+        return
+    n = len(assets)
+    seg = max(dur, 0.5) / n
+    t = max(0.0, min(lt, dur - 1e-3))
+    i = min(n - 1, int(t / seg))
+    motions = ("in", "left", "in", "right")
+
+    def frame(k: int) -> Optional[Image.Image]:
+        if srcs[k] is None:
+            return None
+        local = (t - k * seg) / seg
+        p = ease_in_out_cubic(min(1.0, max(0.0, local)))
+        return _cover(srcs[k], tw, tht, lerp(1.0, 1.12, p), motions[k % 4], p)
+
+    cur = frame(i) or next((f for f in (frame(k) for k in range(n)) if f is not None), None)
+    if cur is None:
+        return
+    # the next photograph fades in over the last moments of this one
+    into_next = t - (i + 1) * seg + GALLERY_FADE_S
+    if i < n - 1 and into_next > 0:
+        nxt = frame(i + 1)
+        if nxt is not None:
+            cur = Image.blend(cur, nxt, min(1.0, into_next / GALLERY_FADE_S))
+    cv.im.paste(cur)
+    scrim = _scrim(tw, tht)
+    cv.im.paste(Image.new("RGB", scrim.size, (0, 0, 0)), (0, tht - scrim.height), scrim)
+    credits = [str(c) for c in props.get("credits") or []]
+    shown = credits[min(n - 1, int(min(lt, dur - 1e-3) / seg + 0.35))] if credits else ""   # switches with the picture, a little early like the fade
+    if shown.strip():
+        a = ease_out_cubic(progress((min(lt, dur - 1e-3) % seg), 0.15, 0.5))
+        cv.text(1880, 40, shown[:90], "regular", 22, with_alpha((255, 255, 255), 0.7 * a), anchor="ra")
+
+
 # ------------------------------------------------------------------ clip (stock video behind the narration)
 def clip_cues(props: Dict[str, Any], dur: float) -> List[float]:
     return [0.0]

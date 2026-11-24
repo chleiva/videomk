@@ -161,11 +161,105 @@ def sfx_tick(sr: int = MIX_SR) -> np.ndarray:
     return (np.sin(2 * np.pi * 1800 * tt) * np.exp(-tt * 120.0) * 0.3).astype(np.float32)
 
 
+def _tt(n: int, sr: int) -> np.ndarray:
+    return np.arange(n, dtype=np.float32) / sr
+
+
+def sfx_ding(sr: int = MIX_SR) -> np.ndarray:
+    t = _tt(int(0.9 * sr), sr)
+    out = np.sin(2 * np.pi * 1318.5 * t) * np.exp(-t * 6.5) + 0.4 * np.sin(2 * np.pi * 2637 * t) * np.exp(-t * 11) + 0.15 * np.sin(2 * np.pi * 3951 * t) * np.exp(-t * 18)
+    return (out * np.minimum(1.0, t / 0.002) * 0.4).astype(np.float32)
+
+
+def sfx_click(sr: int = MIX_SR) -> np.ndarray:
+    rng = np.random.default_rng(3)
+    t = _tt(int(0.05 * sr), sr)
+    noise = _box(rng.standard_normal(t.size).astype(np.float32), 3)
+    return ((noise * 0.6 + np.sin(2 * np.pi * 2300 * t) * 0.5) * np.exp(-t * 110) * 0.45).astype(np.float32)
+
+
+def sfx_riser(sr: int = MIX_SR, dur: float = 1.3) -> np.ndarray:
+    rng = np.random.default_rng(4)
+    n = int(dur * sr)
+    t = _tt(n, sr)
+    noise = _box(rng.standard_normal(n).astype(np.float32), 5) - _box(rng.standard_normal(n).astype(np.float32), 70) * 0.3
+    sweep = np.sin(2 * np.pi * np.cumsum(260 + 1500 * (t / dur) ** 2) / sr)
+    env = (t / dur) ** 2.2 * np.minimum(1.0, (dur - t) / 0.03)
+    return ((noise * 0.5 + sweep * 0.35) * env * 0.7).astype(np.float32)
+
+
+def sfx_impact(sr: int = MIX_SR) -> np.ndarray:
+    rng = np.random.default_rng(5)
+    n = int(1.0 * sr)
+    t = _tt(n, sr)
+    thud = np.sin(2 * np.pi * np.cumsum(38 + 110 * np.exp(-t * 14)) / sr) * np.exp(-t * 4.5)
+    body = np.sin(2 * np.pi * 120 * t) * np.exp(-t * 9) * 0.5
+    burst = _box(rng.standard_normal(n).astype(np.float32), 9) * np.exp(-t * 18) * 0.5
+    return ((thud + body + burst) * 0.42).astype(np.float32)
+
+
+def sfx_shutter(sr: int = MIX_SR) -> np.ndarray:
+    out = np.zeros(int(0.32 * sr), np.float32)
+    for at, g in ((0.0, 1.0), (0.085, 0.75)):
+        c = sfx_click(sr) * g
+        i = int(at * sr)
+        out[i:i + c.size] += c[: out.size - i]
+    return (out * 1.1).astype(np.float32)
+
+
+def sfx_sparkle(sr: int = MIX_SR) -> np.ndarray:
+    rng = np.random.default_rng(6)
+    out = np.zeros(int(1.2 * sr), np.float32)
+    for k in range(7):
+        f = float(rng.choice([2093, 2349, 2637, 3136, 3520, 3951]))
+        t = _tt(int(0.5 * sr), sr)
+        note = np.sin(2 * np.pi * f * t) * np.exp(-t * 9) * 0.22
+        i = int((k * 0.11 + rng.random() * 0.04) * sr)
+        out[i:i + note.size] += note[: out.size - i]
+    return out
+
+
+def sfx_typing(sr: int = MIX_SR) -> np.ndarray:
+    rng = np.random.default_rng(7)
+    out = np.zeros(int(1.4 * sr), np.float32)
+    t_at = 0.0
+    while t_at < 1.25:
+        c = sfx_click(sr) * float(0.5 + 0.5 * rng.random())
+        i = int(t_at * sr)
+        out[i:i + c.size] += c[: out.size - i]
+        t_at += float(0.07 + 0.08 * rng.random())
+    return out
+
+
+def sfx_swipe(sr: int = MIX_SR) -> np.ndarray:
+    return (sfx_whoosh(sr, dur=0.28, seed=2) * 0.9).astype(np.float32)
+
+
+def sfx_chime(sr: int = MIX_SR) -> np.ndarray:
+    out = np.zeros(int(1.1 * sr), np.float32)
+    for at, f in ((0.0, 880.0), (0.14, 1318.5)):
+        t = _tt(int(0.9 * sr), sr)
+        note = (np.sin(2 * np.pi * f * t) + 0.35 * np.sin(2 * np.pi * 2 * f * t)) * np.exp(-t * 5.5) * 0.3
+        i = int(at * sr)
+        out[i:i + note.size] += note[: out.size - i]
+    return out
+
+
+# What the planner may put on a beat ("sfx"), with the effect's meaning for the prompt. `tick` stays internal.
+PLANNER_SFX = {
+    "whoosh": "a transition", "pop": "a small reveal", "ding": "a fact lands", "click": "a step or a choice", "riser": "tension building into this beat",
+    "impact": "a big moment", "shutter": "a photo is shown", "sparkle": "wonder or delight", "typing": "writing or computing", "swipe": "a quick change", "chime": "success or resolution",
+}
+_BANK_BUILDERS = {"whoosh": sfx_whoosh, "pop": sfx_pop, "tick": sfx_tick, "ding": sfx_ding, "click": sfx_click, "riser": sfx_riser, "impact": sfx_impact,
+                  "shutter": sfx_shutter, "sparkle": sfx_sparkle, "typing": sfx_typing, "swipe": sfx_swipe, "chime": sfx_chime}
+SFX_KINDS = tuple(_BANK_BUILDERS)
+
+
 def build_sfx_track(events: Sequence[Tuple[float, str, float]], duration: float, sr: int = MIX_SR) -> np.ndarray:
     """events: (time_s, kind, gain). Returns stereo (n,2)."""
     n = int(duration * sr)
     out = np.zeros(n, np.float32)
-    bank = {"whoosh": sfx_whoosh(sr), "pop": sfx_pop(sr), "tick": sfx_tick(sr)}
+    bank = {k: _BANK_BUILDERS[k](sr) for k in {e[1] for e in events if e[1] in _BANK_BUILDERS}}
     for t, kind, gain in events:
         s = bank.get(kind)
         i = int(t * sr)

@@ -28,6 +28,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if tl["duration"] > MAX_DURATION_S:
         raise ValueError(f"video too long ({tl['duration']:.0f}s > {MAX_DURATION_S:.0f}s)")
     tl["ledger"] = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] in ("image", "clip") and (b.get("media") or {}).get("ledger")]
+    tl["ledger"] += [g["ledger"] for b in plan["beats"] if b["scene"]["type"] == "gallery" for g in (b.get("media") or {}).get("gallery") or [] if g.get("ledger")]
     tl["sources"] = plan.get("sources", [])
     tl["description"] = plan.get("description", "")
     tl["language"] = plan.get("language", "en")

@@ -492,6 +492,7 @@ class BackendStack(Stack):
                     "client_request_id": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=8, max_length=64),
                     "target_minutes": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=1, maximum=12),
                     "theme": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["midnight", "paper", "sunrise"]),
+                    "max_images_per_minute": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=0, maximum=10),
                     "language": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["en", "es"]),
                     "media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=10,
                                               items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),

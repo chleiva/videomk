@@ -6,11 +6,12 @@ motion stock footage really has (waves, traffic, clouds, hands typing, wildlife)
 
 ## Flow
 1. **Plan**: the director writes `clip` scenes like any other scene (sanitised; an empty one becomes a plain card).
-2. **Beat step** (`engine/clips.py`, `beat_handler.make_clip`): search **Pexels** (only when `/videomk/pexels_api_key` exists in SSM) and **Wikimedia Commons**
-   (keyless), keep landscape footage of 3 s or more with an allowed licence, show the poster frames to the small vision model (same reviewer as photos, with a
+2. **Beat step** (`engine/clips.py`, `beat_handler.make_clip`): search **Pexels** (only when `/videomk/pexels_api_key` exists in SSM), **Pixabay** (only when
+   `/videomk/pixabay_api_key` exists; videos are cached 24 h as its terms require, 100 requests/60 s per key) and **Wikimedia Commons** (keyless), keep landscape footage of 3 s or more with an allowed licence, show the poster frames to the small vision model (same reviewer as photos, with a
    footage-editor prompt: no logos, no private people, must match), download the winner (≤ 70 MB, SSRF-safe fetch), and **normalise** it with ffmpeg: trimmed to the
    length the scene needs (a short clip loops inside its scene), cropped to 16:9, 1280x720, 30 fps, no audio, H.264 (about 1 MB per 10 s). Stored as
    `generation/v2/<video>/assets/clip_<beat>_<hash>.mp4` with the `retention=working` tag (expires after 7 days; the editor re-renders from it until then).
+2b. **Verification**: the clip is then checked on one frame per 30 s of the footage actually used (one call, at most 3 frames; `CLIP_VERIFY=0` disables it); a failing clip is skipped for the next candidate.
 3. **Fallbacks, so there is never a hole**: reviewer rejects everything / nothing found / download or decode fails (3 tries) → a still photo of the same subject
    (Unsplash/Openverse path) → a title card.
 4. **Render** (chunk Lambda): the clip is decoded once per chunk to JPEG frames in memory and drawn like a photo scene (slow push-in, bottom scrim for captions,
@@ -24,6 +25,7 @@ motion stock footage really has (waves, traffic, clouds, hands typing, wildlife)
   using content for machine-learning training, copying Pexels' core functionality. Our use (clips combined with narration and captions into a new video) is the intended
   pattern; we never serve the clips as a library. Default limit 200 requests/hour and 20,000/month: ask Pexels for a lift with a demo showing attribution before launch.
   **New API keys were reported paused when this was written.**
+- **Pixabay** (Pixabay Content License: free for commercial use, attribution not required; the API asks to show where videos come from, done on screen and in the description; permanent hotlinking is not allowed, so videos are downloaded as working copies).
 - **Wikimedia Commons**: only per-file CC0, public domain and plain CC BY (no -SA/-ND/-NC), the same bar as Openverse photos. Author and licence come from the file's own metadata.
 - Not a licence matter but worth knowing: Pexels content showing logos or trademarks cannot be used commercially for goods and services; the reviewer rejects visible logos.
 

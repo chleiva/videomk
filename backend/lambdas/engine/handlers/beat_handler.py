@@ -1,6 +1,7 @@
 """Step 2 (fan-out per beat): narration audio + licensed photo, both content-addressed so edits only redo what changed."""
 import io
 import hashlib
+import logging
 import wave
 from typing import Any, Dict, Optional
 
@@ -89,6 +90,29 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     return out
 
 
+def make_gallery(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:
+    """One licensed photograph per query, fetched in parallel (each is searched and reviewed like a single image scene). Queries that find nothing are dropped."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    props = beat["scene"]["props"]
+    queries = list(props["image_queries"])
+
+    def one(i: int) -> Dict[str, Any]:
+        still = {"id": f"{beat['id']}g{i}", "narration": beat["narration"], "scene": {"type": "image", "props": {"image_query": queries[i], "alt": queries[i]}}}
+        try:
+            return make_photo(plan, still, video_id, cost_field)
+        except Exception:
+            return {}
+
+    with ThreadPoolExecutor(max_workers=min(4, len(queries))) as ex:
+        results = list(ex.map(one, range(len(queries))))
+    shots = [{"asset": r["asset"], "credit": r.get("credit", ""), "ledger": r.get("ledger"), "chosen": r.get("chosen")} for r in results if r.get("asset")]
+    out: Dict[str, Any] = {"query": "|".join(queries), "pick": None, "gallery": shots}
+    if not shots:
+        out["no_photo"] = True
+    return out
+
+
 def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str, speech: float) -> Dict[str, Any]:
     """A short licensed stock clip for the beat. If none is found or usable, a still photo of the same subject, so the video never has a hole."""
     pfx = awsio.prefix(video_id)
@@ -96,14 +120,18 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     query = props["clip_query"]
     out: Dict[str, Any] = {"query": query, "pick": None}
     need = timeline_mod.LEAD + speech + timeline_mod.TAIL + 0.6  # the scene's length, with a little margin for the crossfade
-    result = clips.scout_clip(query, beat["narration"], props.get("alt", ""), need_seconds=need, pexels_key=get_secret_param("/videomk/pexels_api_key", quiet=True))
+    result = clips.scout_clip(query, beat["narration"], props.get("alt", ""), need_seconds=need, pexels_key=get_secret_param("/videomk/pexels_api_key", quiet=True),
+                              pixabay_key=get_secret_param("/videomk/pixabay_api_key", quiet=True))
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field)
     if result and result.get("mp4"):
         key = f"{pfx}assets/clip_{beat['id']}_{hashlib.sha1(result['mp4']).hexdigest()[:8]}.mp4"
-        awsio.put_bytes(key, result["mp4"], "video/mp4", working=True)
-        out.update({"clip_asset": key, "credit": result["credit"], "ledger": result["entry"], "chosen": result["chosen"]})
-        return out
+        try:
+            awsio.put_bytes(key, result["mp4"], "video/mp4", working=True)
+            out.update({"clip_asset": key, "credit": result["credit"], "ledger": result["entry"], "chosen": result["chosen"]})
+            return out
+        except Exception:  # storing the clip failed: a still photo keeps the beat visual, the video is not lost
+            logging.exception("could not store clip %s", key)
     still = {"id": beat["id"], "narration": beat["narration"], "scene": {"type": "image", "props": {"image_query": query, "alt": props.get("alt", query)}}}
     out.update({k: v for k, v in make_photo(plan, still, video_id, cost_field).items() if k not in ("query", "pick")})
     return out
@@ -119,6 +147,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     media = make_audio(plan, beat, video_id, cost_field)
     if beat["scene"]["type"] == "image":
         media.update(make_photo(plan, beat, video_id, cost_field))
+    elif beat["scene"]["type"] == "gallery":
+        media.update(make_gallery(plan, beat, video_id, cost_field))
     elif beat["scene"]["type"] == "clip":
         media.update(make_clip(plan, beat, video_id, cost_field, float(media["duration"])))
     return {"id": beat_id, "media": media}

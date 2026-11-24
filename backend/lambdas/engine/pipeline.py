@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 
 from . import media
+from . import music as music_mod
 from .audio import MIX_SR, SR, build_narration, build_sfx_track, generate_music, write_wav
 from .renderer import Renderer
 from .timeline import GOP_SECONDS
@@ -44,7 +45,15 @@ def sfx_events(timeline: Dict[str, Any]) -> List[Tuple[float, str, float]]:
     ev: List[Tuple[float, str, float]] = []
     for i, sc in enumerate(timeline["scenes"]):
         start = float(sc["start"])
-        if i > 0:
+        chosen = sc.get("sfx")
+        if chosen and chosen != "none":  # the director's own effect replaces the default transition whoosh
+            if chosen == "riser":
+                ev.append((max(0.0, start - 1.1), "riser", 0.32))   # builds up to the cut
+            else:
+                ev.append((start + (0.0 if chosen in ("impact", "shutter") else 0.12), chosen, 0.34))
+        elif chosen == "none":
+            pass
+        elif i > 0:
             ev.append((max(0.0, start - 0.12), "whoosh", 0.28))
         if sc["type"] in POP_SCENES:
             for c in sc.get("cues") or []:
@@ -71,7 +80,9 @@ def make_audio(
         write_wav(nar, build_narration(beats, duration, SR), SR)
         if not music_path:
             music_path = os.path.join(tmp, "music.wav")
-            write_wav(music_path, generate_music(min(duration, 90.0), timeline.get("mood", "calm")), MIX_SR, channels=2)
+            spec = timeline.get("music")
+            samples = music_mod.render(spec, duration) if spec else generate_music(min(duration, 90.0), timeline.get("mood", "calm"))
+            write_wav(music_path, samples, MIX_SR, channels=2)
         sfx = os.path.join(tmp, "sfx.wav")
         write_wav(sfx, build_sfx_track(sfx_events(timeline), duration), MIX_SR, channels=2)
         media.mix_audio(nar, music_path, sfx, out_path, duration=duration, music_volume=music_volume)

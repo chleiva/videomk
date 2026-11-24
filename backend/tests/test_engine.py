@@ -31,6 +31,7 @@ def small_timeline(seconds=4.0, kinds=None):
         "quote": {"text": "To be or not to be", "attribution": "W"},
         "image": {"asset": "k", "ken_burns": "left"},
         "clip": {"asset": "k", "alt": "waves"},
+        "gallery": {"assets": ["a", "b", "c"], "credits": ["Photo: A / Unsplash", "", "Photo: C / Unsplash"], "alt": "three places"},
     }
     per = seconds / len(kinds)
     for i, k in enumerate(kinds):

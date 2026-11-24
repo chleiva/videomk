@@ -74,7 +74,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
     result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
-                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos)
+                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos,
+                             max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))))
     r = result.get("research") or {}
     spent["cost"] += float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     costs.add_cost(video_id, spent["cost"])
