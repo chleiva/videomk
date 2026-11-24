@@ -1,45 +1,72 @@
+import ImageIO
 import Observation
 import PhotosUI
 import SwiftUI
 import VideoMKCore
 
-struct AttachedPhoto: Identifiable {
+struct AttachedPhoto: Identifiable, @unchecked Sendable {   // immutable after creation
     let id = UUID()
     let data: Data          // upright, at most 2048 px, no metadata
     let thumbnail: UIImage
 }
 
-/// The photos attached to the video being composed (up to 10). The system photo picker needs no permission prompt: the app only
-/// ever receives the photos the user taps.
+/// The photos attached to the video being composed (up to `PhotoLimits.maxPhotos`). The system photo picker needs no permission prompt:
+/// the app only ever receives the photos the user taps. Originals are loaded and prepared a few at a time (never all at once); only the
+/// prepared JPEG (at most 2048 px) and a small thumbnail stay in memory.
 @MainActor @Observable
 final class PhotoAttachments {
     private(set) var items: [AttachedPhoto] = []
-    private(set) var loading = 0
+    private(set) var loading = 0            // selected photos not prepared yet
+    private(set) var batchTotal = 0         // size of the batch being prepared, for "Preparing 37 of 100"
+    private(set) var notice: String?        // left out / unreadable photos, shown under the strip
     var picked: [PhotosPickerItem] = [] {
         didSet { if !picked.isEmpty { Task { await ingest() } } }
     }
 
     var remaining: Int { max(0, PhotoLimits.maxPhotos - items.count - loading) }
     var isEmpty: Bool { items.isEmpty && loading == 0 }
+    var preparingText: String? { loading > 0 ? "Preparing \(batchTotal - loading + 1) of \(batchTotal)" : nil }
 
     func remove(_ id: UUID) { items.removeAll { $0.id == id } }
-    func clear() { items = [] }
+    func clear() { items = []; notice = nil }
 
     private func ingest() async {
-        let batch = Array(picked.prefix(max(0, PhotoLimits.maxPhotos - items.count - loading)))
+        guard loading == 0 else { picked = []; return }       // the picker is disabled while preparing; ignore a late selection
+        let fit = PhotoLimits.fit(selected: picked.count, attached: items.count)
+        let batch = Array(picked.prefix(fit.keep))
         picked = []
-        loading += batch.count
-        for item in batch {
-            if let raw = try? await item.loadTransferable(type: Data.self), let photo = await Self.prepare(raw), items.count < PhotoLimits.maxPhotos { items.append(photo) }
+        notice = PhotoLimits.leftOutMessage(fit.leftOut)
+        guard !batch.isEmpty else { return }
+        batchTotal = batch.count; loading = batch.count
+        var unreadable = 0
+        let prepared: [AttachedPhoto?] = await boundedMap(batch, concurrency: PhotoLimits.prepareParallelism, onEach: { [self] _, photo in
             loading -= 1
+            if let photo, items.count < PhotoLimits.maxPhotos { items.append(photo) }   // appended as each finishes: the strip fills while preparing
+        }) { (_, item) async -> AttachedPhoto? in
+            guard let raw = try? await item.loadTransferable(type: Data.self) else { return nil }
+            return await Self.prepare(raw)
         }
+        unreadable = prepared.count - prepared.filter { $0 != nil }.count
+        if unreadable > 0 {
+            let msg = "\(unreadable) \(unreadable == 1 ? "photo" : "photos") couldn't be read."
+            notice = [notice, msg].compactMap { $0 }.joined(separator: " ")
+        }
+        batchTotal = 0
     }
 
     nonisolated static func prepare(_ raw: Data) async -> AttachedPhoto? {
         await Task.detached(priority: .userInitiated) {
-            guard let jpeg = PhotoPrep.jpeg(from: raw), let image = UIImage(data: jpeg), let thumb = image.preparingThumbnail(of: CGSize(width: 240, height: 240)) else { return nil }
+            guard let jpeg = PhotoPrep.jpeg(from: raw), let thumb = thumbnail(of: jpeg) else { return nil }
             return AttachedPhoto(data: jpeg, thumbnail: thumb)
         }.value
+    }
+
+    /// A small preview (112 px, enough for a 56 pt tile at 2x) decoded straight from the JPEG without inflating the full image.
+    nonisolated static func thumbnail(of jpeg: Data, maxPixel: Int = 112) -> UIImage? {
+        guard let src = CGImageSourceCreateWithData(jpeg as CFData, nil) else { return nil }
+        let opts: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceCreateThumbnailWithTransform: true,
+                                     kCGImageSourceShouldCacheImmediately: true, kCGImageSourceThumbnailMaxPixelSize: maxPixel]
+        return CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary).map { UIImage(cgImage: $0) }
     }
 
     #if DEBUG
@@ -60,7 +87,7 @@ struct AttachedPhotosStrip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+                LazyHStack(spacing: 8) {
                     ForEach(Array(photos.items.enumerated()), id: \.element.id) { index, photo in
                         Image(uiImage: photo.thumbnail)
                             .resizable().scaledToFill()
@@ -77,11 +104,19 @@ struct AttachedPhotosStrip: View {
                             .accessibilityLabel("Photo \(index + 1) of \(photos.items.count)")
                             .accessibilityIdentifier("attachedPhoto")
                     }
-                    ForEach(0..<photos.loading, id: \.self) { _ in
+                    if photos.loading > 0 {   // one spinner tile, however many are still being prepared
                         ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
                 }
                 .padding(.horizontal, 20)
+            }
+            if let preparing = photos.preparingText {
+                Text(preparing).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 20)
+                    .accessibilityIdentifier("photosPreparing")
+            }
+            if let notice = photos.notice {
+                Text(notice).font(.caption).foregroundStyle(Theme.danger).padding(.horizontal, 20)
+                    .accessibilityIdentifier("photosNotice")
             }
             Text("\(photos.items.count) of \(PhotoLimits.maxPhotos) photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.")
                 .font(.caption).foregroundStyle(Theme.textSecondary).padding(.horizontal, 20)

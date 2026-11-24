@@ -1,7 +1,10 @@
 package com.videomk.app.ui
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +27,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -78,6 +83,7 @@ import androidx.core.content.ContextCompat
 import com.videomk.app.core.Brief
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.DictationPlan
+import com.videomk.app.core.PhotoIntake
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.VideoLook
 import com.videomk.app.data.DictationController
@@ -116,8 +122,41 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
     val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         composer.dictation.start(composer.text, if (granted) DictationPlan.Permission.Granted else DictationPlan.Permission.Denied)
     }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(PhotoLimits.MAX_PHOTOS)) { uris ->
+    // the system picker has its own maximum per pick (MediaStore.getPickImagesMaxLimit()): choose in several rounds up to PhotoLimits.MAX_PHOTOS in total
+    val platformMax = remember {
+        if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) {
+            runCatching { MediaStore.getPickImagesMaxLimit() }.getOrDefault(PhotoLimits.MAX_PHOTOS)
+        } else PhotoLimits.MAX_PHOTOS
+    }
+    val pickMax = PhotoIntake.pickerMax(platformMax, composer.remaining)
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(pickMax)) { uris ->
         if (uris.isNotEmpty()) composer.addPhotos(context.contentResolver, uris)
+    }
+
+    // the user's own gallery app, Google Photos and Files side by side (a chooser around ACTION_GET_CONTENT); the system photo picker is only the fallback
+    fun getContentIntent() = Intent(Intent.ACTION_GET_CONTENT).apply {
+        type = "image/*"
+        addCategory(Intent.CATEGORY_OPENABLE)
+        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    val chooser = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == Activity.RESULT_OK && data != null) {
+            val clip = data.clipData?.let { c -> (0 until c.itemCount).mapNotNull { c.getItemAt(it).uri } } ?: emptyList()
+            val uris = PhotoIntake.extract(data.data, clip)
+            // keep access past this screen where the provider allows it (a rotation destroys the temporary grant)
+            uris.forEach { runCatching { context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) } }
+            if (uris.isNotEmpty()) composer.addPhotos(context.contentResolver, uris)
+        }
+    }
+    fun launchPhotoSource() {
+        val intent = getContentIntent()
+        val handled = try { context.packageManager.queryIntentActivities(intent, 0).isNotEmpty() } catch (e: Exception) { false }
+        try {
+            if (handled) chooser.launch(Intent.createChooser(intent, "Choose photos"))
+            else picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        } catch (e: Exception) { /* no way to pick photos on this device */ }
     }
 
     fun onMic() {
@@ -186,11 +225,11 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
                     val full = composer.remaining == 0
                     IconButton(
                         onClick = {
-                            try { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } catch (e: Exception) { /* no photo picker on this device */ }
+                            launchPhotoSource()
                         },
                         enabled = !full, modifier = Modifier.size(48.dp).testTag("photoButton"),
                     ) {
-                        Icon(Icons.Filled.PhotoLibrary, contentDescription = "Add photos. Choose up to ${PhotoLimits.MAX_PHOTOS} of your photos to use in the video",
+                        Icon(Icons.Filled.PhotoLibrary, contentDescription = if (full) "Photo limit reached: ${PhotoLimits.MAX_PHOTOS} photos" else "Add photos. Choose up to ${composer.remaining} more of your photos to use in the video (${PhotoLimits.MAX_PHOTOS} at most)",
                             tint = if (full) Vmk.colors.textSecondary else MaterialTheme.colorScheme.primary)
                     }
                     IconButton(onClick = ::onMic, modifier = Modifier.size(48.dp).testTag("micButton")) {
@@ -271,12 +310,12 @@ private fun MenuChoice(label: String, detail: String?, selected: Boolean, tag: S
     )
 }
 
-/** The strip of attached photos above the text field. */
+/** The strip of attached photos above the text field: a lazy row of small previews (only the visible ones are composed), so 100 photos stay smooth. */
 @Composable
 private fun AttachedPhotosStrip(composer: ComposerViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            composer.photos.forEachIndexed { index, photo ->
+        LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
                 Box(Modifier.size(64.dp).semantics { contentDescription = "Photo ${index + 1} of ${composer.photos.size}" }.testTag("attachedPhoto")) {
                     photo.thumbnail?.let {
                         Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp).align(Alignment.BottomStart).clip(RoundedCornerShape(10.dp)))
@@ -292,11 +331,20 @@ private fun AttachedPhotosStrip(composer: ComposerViewModel) {
                     }
                 }
             }
-            repeat(composer.loading) {
+            if (composer.loading > 0) item(key = "preparing") {   // one placeholder, however many are still being prepared
                 Box(Modifier.size(64.dp).padding(4.dp).clip(RoundedCornerShape(10.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
                 }
             }
+        }
+        if (composer.loading > 0) {
+            Text(
+                composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
+                modifier = Modifier.padding(horizontal = 20.dp).testTag("photosPreparing"),
+            )
+        }
+        composer.notice?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = 20.dp).testTag("photosNotice"))
         }
         Text(
             "${composer.photos.size} of ${PhotoLimits.MAX_PHOTOS} photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.",

@@ -313,7 +313,7 @@ private fun PendingRow(pending: PendingVideo, onRetry: () -> Unit, onDismiss: ()
                     }
                     st is PendingVideo.State.Uploading -> {
                         LinearProgressIndicator(progress = { st.done.toFloat() / maxOf(st.total, 1) }, modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primary, trackColor = Vmk.colors.surfaceRaised)
-                        Text("Uploading photos ${minOf(st.done + 1, st.total)} of ${st.total}", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                        Text("Uploading ${minOf(st.done + 1, st.total)} of ${st.total}", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                     }
                     else -> {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primary, trackColor = Vmk.colors.surfaceRaised)

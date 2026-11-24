@@ -77,13 +77,16 @@ object PhotoPrep {
         }
     }
 
-    /** A small bitmap for the strip of attached photos, decoded from the prepared JPEG. */
-    fun thumbnail(jpeg: ByteArray, target: Int = 240): Bitmap? {
+    /** A small preview for the strip of attached photos (longest side at most [target] px, 16-bit colour: about 70 KB), decoded from the prepared JPEG. */
+    fun thumbnail(jpeg: ByteArray, target: Int = 192): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size, bounds)
-        if (bounds.outWidth <= 0) return null
-        var sample = 1
-        while (minOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= target) sample *= 2
-        return BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size, BitmapFactory.Options().apply { inSampleSize = sample })
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val sample = PhotoGeometry.sampleSize(bounds.outWidth, bounds.outHeight, target)
+        val opts = BitmapFactory.Options().apply { inSampleSize = sample; inPreferredConfig = Bitmap.Config.RGB_565 }
+        val small = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size, opts) ?: return null
+        val (w, h) = PhotoGeometry.fit(small.width, small.height, target)
+        if (w == small.width && h == small.height) return small
+        return Bitmap.createScaledBitmap(small, w, h, true).also { if (it !== small) small.recycle() }
     }
 }

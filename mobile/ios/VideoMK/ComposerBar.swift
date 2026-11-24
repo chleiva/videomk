@@ -98,6 +98,7 @@ struct ComposerBar: View {
 
     private var photoButton: some View {
         let full = photos.remaining == 0
+        let busy = photos.loading > 0
         return PhotosPicker(selection: $photos.picked, maxSelectionCount: max(1, photos.remaining), matching: .images) {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 18, weight: .semibold))
@@ -105,7 +106,7 @@ struct ComposerBar: View {
                 .frame(width: 40, height: 44)
                 .contentShape(Rectangle())
         }
-        .disabled(full)
+        .disabled(full || busy)
         .accessibilityLabel("Add photos")
         .accessibilityHint("Choose up to \(PhotoLimits.maxPhotos) of your photos to use in the video")
         .accessibilityIdentifier("photoButton")

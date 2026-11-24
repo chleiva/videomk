@@ -230,7 +230,7 @@ struct PendingRow: View {
                     }.buttonStyle(.borderless)
                 } else if case .uploading(let done, let total) = pending.state {
                     ProgressView(value: Double(done), total: Double(max(total, 1))).tint(Theme.primary).animation(.smooth, value: done)
-                    Text("Uploading photos \(min(done + 1, total)) of \(total)").font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text("Uploading \(done) of \(total)").font(.caption).foregroundStyle(Theme.textSecondary)
                 } else {
                     ProgressView().controlSize(.small)
                     Text("Sending your request…").font(.caption).foregroundStyle(Theme.textSecondary)

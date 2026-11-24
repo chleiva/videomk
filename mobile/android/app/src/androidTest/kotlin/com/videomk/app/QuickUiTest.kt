@@ -156,7 +156,7 @@ class QuickUiTest {
         tiles.take(4).forEach { it.click() }
         device.wait(Until.findObject(By.res("$picker:id/button_add")), 5_000)!!.click()
         Ui.require("photosNote", 30_000)
-        assertTrue("all four picked photos get attached", device.wait(Until.hasObject(By.res("photosNote").textStartsWith("4 of 10 photos")), 30_000))
+        assertTrue("all four picked photos get attached", device.wait(Until.hasObject(By.res("photosNote").textStartsWith("4 of 100 photos")), 30_000))
         assertEquals(4, device.findObjects(Ui.res("attachedPhoto")).size)
         Ui.shot("13-picker-attached")
         device.findObjects(By.desc("Remove photo 1")).first().click()
@@ -170,7 +170,7 @@ class QuickUiTest {
         assertEquals(3, device.findObjects(Ui.res("attachedPhoto")).size)
         Ui.require("composerField").apply { click(); text = "Tell the story of these three photos." }
         Ui.shot("10-photos-attached")
-        assertTrue(Ui.require("photosNote").text.startsWith("3 of 10 photos"))
+        assertTrue(Ui.require("photosNote").text.startsWith("3 of 100 photos"))
         ActivityScenario.launch(MainActivity::class.java).close()   // a second launch must not duplicate anything
     }
 }

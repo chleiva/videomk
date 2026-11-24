@@ -1,6 +1,12 @@
 package com.videomk.app.core
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.JsonObject
@@ -13,14 +19,110 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
-/** Photos the user attaches to a video (up to 10). */
+/** Photos the user attaches to a video (up to 100). */
 object PhotoLimits {
-    const val MAX_PHOTOS = 10
+    const val MAX_PHOTOS = 100
+    /** Photos prepared (decoded, scaled, re-encoded) at the same time: each one briefly holds a decoded bitmap, so this stays small. */
+    const val PREP_PARALLELISM = 2
+    /** Photos uploaded at the same time. */
+    const val UPLOAD_PARALLELISM = 4
+    /** Tries per photo (the first plus two retries). */
+    const val UPLOAD_TRIES = 3
     const val MAX_UPLOAD_BYTES = 10_000_000
     const val MAX_PIXEL = 2048
     /** JPEG qualities tried in order until the file fits [MAX_UPLOAD_BYTES]. */
     val QUALITIES = listOf(85, 70, 55)
+}
+
+/** What a selection does to the room left: the first photos that fit are kept, the rest are left out (and the user is told how many). */
+data class PhotoIntake(val accepted: Int, val leftOut: Int) {
+    companion object {
+        fun plan(selected: Int, remaining: Int): PhotoIntake {
+            val take = minOf(maxOf(selected, 0), maxOf(remaining, 0))
+            return PhotoIntake(take, maxOf(selected, 0) - take)
+        }
+
+        /** Items for one system-picker round: the platform's per-pick maximum, never more than the room left, and at least 2 (the contract refuses fewer). */
+        fun pickerMax(platformMax: Int, remaining: Int): Int = maxOf(2, minOf(maxOf(platformMax, 2), remaining))
+
+        /** The picked items from a chooser result: the several (clipData) if present, else the single one (data). No duplicates, order kept. */
+        fun <T> extract(single: T?, clip: List<T>): List<T> = (if (clip.isNotEmpty()) clip else listOfNotNull(single)).distinct()
+
+        fun leftOutMessage(leftOut: Int): String =
+            "$leftOut photo${if (leftOut == 1) " was" else "s were"} left out: a video can use up to ${PhotoLimits.MAX_PHOTOS}."
+
+        fun unreadableMessage(n: Int): String = "$n photo${if (n == 1) " couldn't" else "s couldn't"} be read and ${if (n == 1) "was" else "were"} skipped."
+
+        fun preparingText(done: Int, total: Int): String = "Preparing ${minOf(done + 1, total)} of $total"
+    }
+}
+
+/** Runs [work] over [items] at most [parallelism] at a time (not more), returning results in the order of [items]. */
+suspend fun <T, R> boundedMap(items: List<T>, parallelism: Int, work: suspend (index: Int, item: T) -> R): List<R> = coroutineScope {
+    val gate = Semaphore(maxOf(1, parallelism))
+    items.mapIndexed { i, item -> async { gate.withPermit { work(i, item) } } }.awaitAll()
+}
+
+/**
+ * Prepares [items] with [parallelism] in flight and hands each result to [onResult] **in order**, as soon as it and all before it are ready.
+ * Only a few results are ever waiting, because the next window of items starts only when the previous window has been delivered.
+ */
+suspend fun <T, R> prepareInOrder(items: List<T>, parallelism: Int, prepare: suspend (T) -> R, onResult: suspend (index: Int, result: R) -> Unit) {
+    var next = 0
+    for (window in items.chunked(maxOf(1, parallelism))) {
+        val results = coroutineScope { window.map { async { prepare(it) } }.awaitAll() }
+        for (r in results) onResult(next++, r)
+    }
+}
+
+/** Where a picked photo's bytes come from (a content uri on the phone, a file in tests). Null when it can't be opened. */
+fun interface PickedSource<T> { fun open(item: T): java.io.InputStream? }
+
+/**
+ * Private copies of the picked originals, made right after the pick while the gallery app's read grant is valid, so preparing never touches the provider
+ * again (it survives a rotation and the gallery app going away). Files live in `<root>/<session>/<n>.src`; the prepared JPEG is what stays in memory.
+ */
+class PickedCache(private val root: java.io.File, private val maxBytes: Long = 120_000_000L) {
+    private val session = java.io.File(root, UUID.randomUUID().toString())
+    private val counter = AtomicInteger(0)
+
+    /** Streams the item into a new file with a small buffer (never the whole original in memory). Null when it can't be read or is too big. */
+    fun <T> copy(item: T, source: PickedSource<T>): java.io.File? {
+        val input = try { source.open(item) } catch (e: Exception) { null } ?: return null
+        session.mkdirs()
+        val file = java.io.File(session, "${counter.incrementAndGet()}.src")
+        try {
+            input.use { ins -> file.outputStream().use { out ->
+                val buf = ByteArray(64 * 1024)
+                var total = 0L
+                while (true) {
+                    val n = ins.read(buf)
+                    if (n < 0) break
+                    total += n
+                    if (total > maxBytes) throw IOException("too big")
+                    out.write(buf, 0, n)
+                }
+                if (total == 0L) throw IOException("empty")
+            } }
+            return file
+        } catch (e: Exception) {
+            file.delete()
+            return null
+        }
+    }
+
+    /** Files currently held for this session. */
+    fun files(): List<java.io.File> = session.listFiles()?.toList() ?: emptyList()
+
+    /** Removes this session's folder and everything in it. */
+    fun endSession() { session.deleteRecursively() }
+
+    companion object {
+        /** At app start: remove the folders a crashed session left behind. */
+        fun cleanLeftovers(root: java.io.File) { root.deleteRecursively() }
+    }
 }
 
 /** The pure part of photo preparation (the pixels are handled by the platform code in `data/PhotoPrep`). */
@@ -83,21 +185,48 @@ object MultipartForm {
     }
 }
 
-/** Uploads the prepared photos and returns their ids in the same order. Throws on the first failure (the caller keeps the photos and can retry). */
-class PhotoUploader(private val api: ApiClient, private val http: OkHttpClient = defaultHttpClient()) {
+/**
+ * Uploads the prepared photos and returns their ids in the same order: one presign call for all of them, then [parallelism] posts at a time, each photo
+ * tried up to [tries] times with a short backoff. If any photo still fails, the others finish and this throws one clear error (the caller keeps the photos
+ * and the user can retry without choosing them again).
+ */
+class PhotoUploader(
+    private val api: ApiClient,
+    private val http: OkHttpClient = defaultHttpClient(),
+    private val parallelism: Int = PhotoLimits.UPLOAD_PARALLELISM,
+    private val tries: Int = PhotoLimits.UPLOAD_TRIES,
+    private val backoffMillis: (failedAttempts: Int) -> Long = { 500L * it },
+) {
     suspend fun upload(photos: List<ByteArray>, progress: (done: Int, total: Int) -> Unit = { _, _ -> }): List<String> {
         if (photos.isEmpty() || photos.size > PhotoLimits.MAX_PHOTOS) throw ApiError.Invalid("Choose between 1 and ${PhotoLimits.MAX_PHOTOS} photos.")
         val slots = api.requestUploads(photos.size)
         if (slots.size != photos.size) throw ApiError.Server
-        val ids = ArrayList<String>()
+        val done = AtomicInteger(0)
         progress(0, photos.size)
-        for ((photo, slot) in photos.zip(slots)) {
-            currentCoroutineContext().ensureActive()
-            post(photo, slot)
-            ids += slot.id
-            progress(ids.size, photos.size)
+        val failures = boundedMap(photos.zip(slots), parallelism) { _, (photo, slot) ->
+            val ok = postWithRetry(photo, slot)
+            if (ok == null) synchronized(done) { progress(done.incrementAndGet(), photos.size) }   // counts reach the caller in order
+            ok
+        }.filterNotNull()
+        if (failures.isNotEmpty()) {
+            if (failures.all { it is ApiError.Network }) throw ApiError.Network   // offline: say so
+            throw ApiError.Invalid(
+                if (photos.size == 1) "A photo couldn't be uploaded. Please try again."
+                else "${failures.size} of ${photos.size} photos couldn't be uploaded. Tap Try again: your photos are still here.",
+            )
         }
-        return ids
+        return slots.map { it.id }
+    }
+
+    /** Null when the photo went up, otherwise the last error. */
+    private suspend fun postWithRetry(photo: ByteArray, slot: UploadSlot): ApiError? {
+        var last: ApiError = ApiError.Server
+        for (attempt in 1..tries) {
+            currentCoroutineContext().ensureActive()
+            try { post(photo, slot); return null } catch (e: ApiError) { last = e }
+            if (attempt < tries) delay(backoffMillis(attempt))
+        }
+        return last
     }
 
     private suspend fun post(photo: ByteArray, slot: UploadSlot) {

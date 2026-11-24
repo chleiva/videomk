@@ -17,6 +17,7 @@ final class AppModel {
     private var briefs: [String: String] = [:]             // what the user asked for, shown while the server has no title yet
     private var minutes: [String: Double] = [:]
     private var photoData: [String: [Data]] = [:]          // photos waiting to be uploaded, kept until the video is accepted (so a retry needs no new selection)
+    private var uploadedMedia: [String: [Int: String]] = [:]   // photos already uploaded per pending request, so a retry sends only the rest
     var signInError: String?
     var isSigningIn = false
 
@@ -131,11 +132,11 @@ final class AppModel {
 
     func retry(_ id: String) {
         guard let i = pending.firstIndex(where: { $0.id == id }) else { return }
-        pending[i].state = pending[i].photoCount > 0 ? .uploading(done: 0, total: pending[i].photoCount) : .sending
+        pending[i].state = pending[i].photoCount > 0 ? .uploading(done: uploadedMedia[id]?.count ?? 0, total: pending[i].photoCount) : .sending
         Task { await send(id) }
     }
 
-    func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; photoData[id] = nil }
+    func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; photoData[id] = nil; uploadedMedia[id] = nil }
 
     private func setProgress(_ id: String, done: Int, total: Int) {
         if let i = pending.firstIndex(where: { $0.id == id }), case .uploading = pending[i].state { pending[i].state = .uploading(done: done, total: total) }
@@ -147,16 +148,19 @@ final class AppModel {
             var media: [String] = []
             if let photos = photoData[id] {
                 guard let api else { throw APIError.server }
-                media = try await PhotoUploader(api: api).upload(photos) { [weak self] done, total in
+                media = try await PhotoUploader(api: api).upload(photos, already: uploadedMedia[id] ?? [:]) { [weak self] done, total in
                     Task { @MainActor in self?.setProgress(id, done: done, total: total) }
                 }
                 if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .sending }
             }
             let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options, media: media)
-            photoData[id] = nil
+            photoData[id] = nil; uploadedMedia[id] = nil
             briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .accepted(videoID: videoID) }
             await refresh()  // also re-reads the credits the video just used
+        } catch let e as PhotoUploadFailure {
+            uploadedMedia[id] = e.uploaded
+            if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
         } catch let e as APIError {
             if case .insufficientCredits = e { await refreshWallet() }
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }

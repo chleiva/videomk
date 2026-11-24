@@ -6,7 +6,7 @@ manual DI (`AppContainer`). Release-ready (R8, signing from outside the reposito
 
 ## What the app does
 Same as iOS: sign in with the Cognito hosted page (Authorization Code + PKCE in a Chrome Custom Tab, redirect `com.videomk.app://auth/callback`), one home screen
-with the list of videos (pending rows, live rows with an honest progress estimate, finished videos) and a composer pinned at the bottom (text, dictation, up to 10
+with the list of videos (pending rows, live rows with an honest progress estimate, finished videos) and a composer pinned at the bottom (text, dictation, up to 100
 photos, length and look, credit cost), video page with Media3 ExoPlayer inline plus a landscape full screen, share/copy, editor (title, scenes, narration, photo
 picks, reorder/delete, Preview and Publish), credits screen, settings. Unknown scene types from the server (it recently added `clip` and `gallery`) show as a
 generic "Scene" and never crash the editor.
@@ -38,12 +38,12 @@ Sign in on the emulator through the real hosted page (email + password / verific
 
 ## Tests
 ```
-./gradlew testDebugUnitTest              # 94 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
+./gradlew testDebugUnitTest              # 102 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
                                          # library merge + progress estimator, photo geometry + multipart + uploader, editor diff/snapshot/view model, app view model
 ./scripts/run-ui-tests.sh                # instrumented tests on the running emulator, against QA (see below)
 ./scripts/run-ui-tests.sh com.videomk.app.E2ETest   # makes ONE real 1-minute video from 4 photos on QA (a few cents), plays it, full screen, edits it
 ```
-The instrumented tests (8 + 11 + 3 Compose fixtures + 2, plus 3 end-to-end steps) are UiAutomator black-box tests (`QuickUiTest`, `DictationUiTest`, `E2ETest`) plus `PhotoPrepTest` (real decoder: GPS/EXIF really stripped,
+The instrumented tests (8 + 11 + 3 Compose fixtures + 2, plus 3 end-to-end steps) are UiAutomator black-box tests (`QuickUiTest`, `DictationUiTest`, `E2ETest`) plus `PhotoPrepTest` (9 tests, real decoder: GPS/EXIF really stripped,
 orientation applied to the pixels, at most 2048 px, under 10 MB). They need an emulator or device, and for the signed-in ones a QA session:
 1. Create a QA user once: `aws cognito-idp admin-create-user` / `admin-set-user-password --permanent` in the `videomk-qa` pool (profile `qa`); give it unlimited credits with
    `backend/scripts/wallet_admin.py unlimited <email>`.

@@ -2,10 +2,45 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-/// Photos the user attaches to a video (up to 10).
+/// Photos the user attaches to a video (up to 100).
 public enum PhotoLimits {
-    public static let maxPhotos = 10
+    public static let maxPhotos = 100
     public static let maxUploadBytes = 10_000_000
+    public static let prepareParallelism = 3     // originals are big: only a few are decoded at a time
+    public static let uploadParallelism = 4
+    public static let uploadAttempts = 3         // per photo
+    public static let slotChunk = 25             // presigned posts requested per call
+
+    /// Splits a selection into what fits and what is left out, keeping the first ones.
+    public static func fit(selected: Int, attached: Int, loading: Int = 0) -> (keep: Int, leftOut: Int) {
+        let room = max(0, maxPhotos - attached - loading)
+        let keep = min(max(0, selected), room)
+        return (keep, max(0, selected) - keep)
+    }
+
+    public static func leftOutMessage(_ n: Int) -> String? {
+        n > 0 ? "\(n) \(n == 1 ? "photo was" : "photos were") left out: you can attach up to \(maxPhotos)." : nil
+    }
+}
+
+/// Runs `op` over `items` with at most `concurrency` in flight. Results come back in input order; `onEach` is called on the caller's
+/// isolation as each one finishes (for progress).
+public func boundedMap<T: Sendable, R: Sendable>(_ items: [T], concurrency: Int, onEach: (Int, R) -> Void = { _, _ in }, isolation: isolated (any Actor)? = #isolation, _ op: @escaping @Sendable (Int, T) async -> R) async -> [R] {
+    var results = [R?](repeating: nil, count: items.count)
+    await withTaskGroup(of: (Int, R).self) { group in
+        var next = 0
+        func launch() {
+            guard next < items.count else { return }
+            let i = next, item = items[i]; next += 1
+            group.addTask { (i, await op(i, item)) }
+        }
+        for _ in 0..<max(1, concurrency) { launch() }
+        while let (i, r) = await group.next() {
+            results[i] = r; onEach(i, r)
+            if !Task.isCancelled { launch() }
+        }
+    }
+    return results.compactMap { $0 }
 }
 
 /// Prepares a photo on the phone before it is uploaded: upright, at most 2048 px on its longest side, and with **no metadata at all**
@@ -53,26 +88,62 @@ public enum MultipartForm {
     }
 }
 
-/// Uploads the prepared photos and returns their ids in the same order. Throws on the first failure (the caller keeps the photos and can retry).
+/// Some photos could not be uploaded even after retries. `uploaded` (index to media id) is kept by the caller so a retry only sends the rest.
+public struct PhotoUploadFailure: Error, Sendable {
+    public let uploaded: [Int: String]
+    public let total: Int
+    public var failed: Int { total - uploaded.count }
+    public var message: String {
+        "\(failed) of \(total) photos couldn't be uploaded. Check your connection and tap Try again: the \(uploaded.count) already uploaded won't be sent again."
+    }
+}
+
+/// Uploads the prepared photos and returns their ids in the same order. Up to `uploadParallelism` at a time, each photo tried up to
+/// `uploadAttempts` times, presigned posts requested `slotChunk` at a time. If some still fail it throws `PhotoUploadFailure`
+/// (carrying what was uploaded) and the caller keeps the photos; passing that back as `already` resumes with only the missing ones.
 public struct PhotoUploader: Sendable {
     let api: APIClient
     let session: URLSession
+    let backoff: [Duration]     // wait before attempt 2, 3, ...
 
-    public init(api: APIClient, session: URLSession = .shared) { self.api = api; self.session = session }
+    public init(api: APIClient, session: URLSession = .shared, backoff: [Duration] = [.milliseconds(600), .seconds(2)]) {
+        self.api = api; self.session = session; self.backoff = backoff
+    }
 
-    public func upload(_ photos: [Data], progress: @Sendable (Int, Int) -> Void = { _, _ in }) async throws -> [String] {
+    public func upload(_ photos: [Data], already: [Int: String] = [:], progress: @Sendable (Int, Int) -> Void = { _, _ in }) async throws -> [String] {
         guard !photos.isEmpty, photos.count <= PhotoLimits.maxPhotos else { throw APIError.invalid("Choose between 1 and \(PhotoLimits.maxPhotos) photos.") }
-        let slots = try await api.requestUploads(count: photos.count)
-        guard slots.count == photos.count else { throw APIError.server }
-        var ids: [String] = []
-        progress(0, photos.count)
-        for (photo, slot) in zip(photos, slots) {
+        let total = photos.count
+        var done = already.filter { $0.key >= 0 && $0.key < total }
+        progress(done.count, total)
+        let todo = (0..<total).filter { done[$0] == nil }
+        var start = 0
+        while start < todo.count {
             try Task.checkCancellation()
-            try await post(photo, to: slot)
-            ids.append(slot.id)
-            progress(ids.count, photos.count)
+            let chunk = Array(todo[start..<min(start + PhotoLimits.slotChunk, todo.count)]); start += chunk.count
+            let slots = try await api.requestUploads(count: chunk.count)
+            guard slots.count == chunk.count else { throw APIError.server }
+            let work = zip(chunk, slots).map { (index: $0, slot: $1) }
+            var completed = done.count
+            let outcomes = await boundedMap(work, concurrency: PhotoLimits.uploadParallelism, onEach: { _, ok in
+                if ok { completed += 1; progress(completed, total) }
+            }) { _, w in await self.postWithRetry(photos[w.index], to: w.slot) }
+            for (w, ok) in zip(work, outcomes) where ok { done[w.index] = w.slot.id }
+            try Task.checkCancellation()
+            if outcomes.contains(false) { throw PhotoUploadFailure(uploaded: done, total: total) }
         }
-        return ids
+        return (0..<total).compactMap { done[$0] }
+    }
+
+    private func postWithRetry(_ photo: Data, to slot: UploadSlot) async -> Bool {
+        for attempt in 0..<PhotoLimits.uploadAttempts {
+            if attempt > 0 {
+                let wait = backoff.isEmpty ? Duration.zero : backoff[min(attempt - 1, backoff.count - 1)]
+                try? await Task.sleep(for: wait)
+            }
+            if Task.isCancelled { return false }
+            if (try? await post(photo, to: slot)) != nil { return true }
+        }
+        return false
     }
 
     private func post(_ photo: Data, to slot: UploadSlot) async throws {

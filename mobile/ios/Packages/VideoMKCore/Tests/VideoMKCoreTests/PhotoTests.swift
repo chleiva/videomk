@@ -67,7 +67,9 @@ extension CoreTests {
     @Test func photosUploadInOrderWithProgressAndWithoutTheLoginToken() async throws {
         nonisolated(unsafe) var seen: [(url: String, auth: String?, type: String?, bytes: Int)] = []
         nonisolated(unsafe) var count = 0
+        let lock = NSLock()
         StubProtocol.handler = { req in
+            lock.lock(); defer { lock.unlock() }
             let body = req.bodyData ?? Data()
             seen.append((req.url!.absoluteString, req.value(forHTTPHeaderField: "Authorization"), req.value(forHTTPHeaderField: "Content-Type"), body.count))
             if req.url!.host == "bucket.s3.test" { count += 1; return (204, Data()) }
@@ -83,18 +85,66 @@ extension CoreTests {
         #expect(s3Calls.count == 3 && s3Calls.allSatisfy { $0.auth == nil && ($0.type ?? "").hasPrefix("multipart/form-data") })   // storage never sees it
     }
 
-    @Test func aFailedPhotoStopsTheSequenceAndSaysSo() async throws {
-        nonisolated(unsafe) var posts = 0
+    @Test func aPhotoThatKeepsFailingIsRetriedThenReportedWithoutLosingTheOthers() async throws {
+        nonisolated(unsafe) var posts: [String: Int] = [:]
+        let lock = NSLock()
         StubProtocol.handler = { req in
-            if req.url!.host == "bucket.s3.test" { posts += 1; return posts == 2 ? (403, Data("denied".utf8)) : (204, Data()) }
+            if req.url!.host == "bucket.s3.test" {
+                let key = String(decoding: req.bodyData ?? Data(), as: UTF8.self).contains("uploads/u/1.jpg") ? "second" : "other"
+                lock.lock(); posts[key, default: 0] += 1; lock.unlock()
+                return key == "second" ? (403, Data("denied".utf8)) : (204, Data())
+            }
             return (200, self.slotsJSON(3))
         }
         let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
-        do { _ = try await PhotoUploader(api: api, session: stubSession()).upload([Data([1]), Data([2]), Data([3])]); Issue.record("expected a failure") }
-        catch { #expect((error as? APIError)?.message == "A photo couldn't be uploaded. Please try again.") }
-        #expect(posts == 2)                                                                        // the third photo was never attempted
-        await #expect(throws: APIError.self) { _ = try await PhotoUploader(api: api, session: stubSession()).upload([]) }
-        await #expect(throws: APIError.self) { _ = try await PhotoUploader(api: api, session: stubSession()).upload(Array(repeating: Data([1]), count: 11)) }
+        let uploader = PhotoUploader(api: api, session: stubSession(), backoff: [.milliseconds(1)])
+        do { _ = try await uploader.upload([Data([1]), Data([2]), Data([3])]); Issue.record("expected a failure") }
+        catch let e as PhotoUploadFailure {
+            #expect(e.uploaded.keys.sorted() == [0, 2] && e.failed == 1 && e.message.contains("1 of 3 photos"))
+        }
+        #expect(posts["second"] == PhotoLimits.uploadAttempts && posts["other"] == 2)           // three tries for the bad one, the rest went up once
+        await #expect(throws: APIError.self) { _ = try await uploader.upload([]) }
+        await #expect(throws: APIError.self) { _ = try await uploader.upload(Array(repeating: Data([1]), count: PhotoLimits.maxPhotos + 1)) }
+    }
+
+    @Test func aPhotoThatFailsOnceSucceedsOnRetry() async throws {
+        nonisolated(unsafe) var posts = 0
+        let lock = NSLock()
+        StubProtocol.handler = { req in
+            if req.url!.host == "bucket.s3.test" { lock.lock(); posts += 1; let n = posts; lock.unlock(); return n == 1 ? (500, Data()) : (204, Data()) }
+            return (200, self.slotsJSON(1))
+        }
+        let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
+        let ids = try await PhotoUploader(api: api, session: stubSession(), backoff: [.milliseconds(1)]).upload([Data([1])])
+        #expect(ids == ["0000000000000001"] && posts == 2)
+    }
+
+    @Test func aHundredPhotosGoUpFourAtATimeInChunksOf25AndResumeSkipsWhatIsDone() async throws {
+        nonisolated(unsafe) var inFlight = 0, peak = 0, slotCalls: [Int] = [], posts = 0
+        let lock = NSLock()
+        StubProtocol.handler = { req in
+            if req.url!.host == "bucket.s3.test" {
+                lock.lock(); inFlight += 1; peak = max(peak, inFlight); posts += 1; lock.unlock()
+                Thread.sleep(forTimeInterval: 0.01)
+                lock.lock(); inFlight -= 1; lock.unlock()
+                return (204, Data())
+            }
+            let n = ((try? JSONSerialization.jsonObject(with: req.bodyData ?? Data()) as? [String: Int]) ?? [:])["count"] ?? 0
+            lock.lock(); slotCalls.append(n); lock.unlock()
+            return (200, self.slotsJSON(n))
+        }
+        let api = APIClient(config: config, auth: FixedAuth(), session: stubSession())
+        let photos = (0..<100).map { Data([UInt8($0)]) }
+        nonisolated(unsafe) var last = (0, 0)
+        let ids = try await PhotoUploader(api: api, session: stubSession()).upload(photos) { last = ($0, $1) }
+        #expect(ids.count == 100 && last == (100, 100) && posts == 100)
+        #expect(slotCalls == [25, 25, 25, 25])
+        #expect(peak <= PhotoLimits.uploadParallelism)
+        // resume: 90 already uploaded, only 10 are sent, in one slot request
+        slotCalls = []; posts = 0
+        let already = Dictionary(uniqueKeysWithValues: (0..<90).map { ($0, "old\($0)") })
+        let resumed = try await PhotoUploader(api: api, session: stubSession()).upload(photos, already: already)
+        #expect(resumed.count == 100 && resumed[0] == "old0" && posts == 10 && slotCalls == [10])
     }
 
     @Test func theVideoRequestCarriesThePhotoIds() async throws {
@@ -184,4 +234,40 @@ extension CoreTests {
         guard case .message(let m2) = c(code: 203) else { Issue.record("expected message"); return }
         #expect(m2.contains("internet"))
     }
+}
+
+@Suite struct PhotoLimitTests {
+    @Test func theCapIsOneHundred() {
+        #expect(PhotoLimits.maxPhotos == 100)
+        #expect(PhotoLimits.leftOutMessage(0) == nil)
+        #expect(PhotoLimits.leftOutMessage(1)!.contains("1 photo was left out") && PhotoLimits.leftOutMessage(5)!.contains("5 photos were left out") && PhotoLimits.leftOutMessage(5)!.contains("100"))
+    }
+
+    @Test func aSelectionKeepsTheFirstOnesThatFit() {
+        #expect(PhotoLimits.fit(selected: 30, attached: 0) == (30, 0))
+        #expect(PhotoLimits.fit(selected: 30, attached: 90) == (10, 20))
+        #expect(PhotoLimits.fit(selected: 30, attached: 80, loading: 15) == (5, 25))
+        #expect(PhotoLimits.fit(selected: 5, attached: 100) == (0, 5))
+        #expect(PhotoLimits.fit(selected: 0, attached: 3) == (0, 0))
+    }
+
+    @Test func boundedMapKeepsOrderAndNeverExceedsTheLimit() async {
+        let state = Counter()
+        nonisolated(unsafe) var seen: [Int] = []
+        let out = await boundedMap(Array(0..<40), concurrency: 3, onEach: { i, _ in seen.append(i) }) { i, v in
+            await state.enter(); try? await Task.sleep(for: .milliseconds(Int.random(in: 1...5))); await state.leave()
+            return v * 2
+        }
+        #expect(out == (0..<40).map { $0 * 2 } && seen.count == 40)
+        let peak = await state.peak
+        #expect(peak <= 3 && peak > 0)
+        let empty = await boundedMap([Int](), concurrency: 3) { _, v in v }
+        #expect(empty.isEmpty)
+    }
+}
+
+private actor Counter {
+    var current = 0, peak = 0
+    func enter() { current += 1; peak = max(peak, current) }
+    func leave() { current -= 1 }
 }

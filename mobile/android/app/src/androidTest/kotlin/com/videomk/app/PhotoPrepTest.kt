@@ -67,6 +67,13 @@ class PhotoPrepTest {
         assertTrue(out.size <= PhotoLimits.MAX_UPLOAD_BYTES)
     }
 
+    @Test fun theStripPreviewIsSmall() {
+        val out = PhotoPrep.jpeg(sourceJpeg(4000, 3000, ExifInterface.ORIENTATION_NORMAL))!!
+        val t = PhotoPrep.thumbnail(out)!!
+        assertTrue("preview is at most 192 px, was ${t.width}x${t.height}", maxOf(t.width, t.height) <= 192 && maxOf(t.width, t.height) >= 96)
+        assertTrue("about 70 KB, not megabytes", t.byteCount < 200_000)
+    }
+
     @Test fun orientationSixIsAppliedToThePixels() {
         // A 4000x3000 file tagged "rotate 90 clockwise to view": the upright picture is 3000x4000 (portrait), scaled to 1536x2048.
         val out = PhotoPrep.jpeg(sourceJpeg(4000, 3000, ExifInterface.ORIENTATION_ROTATE_90))!!
