@@ -180,12 +180,12 @@ def sfx_chime(sr: int = MIX_SR) -> np.ndarray:
 
 
 # What the planner may put on a beat ("sfx"), with the effect's meaning for the prompt. `tick` stays internal.
+# Only NON-TONAL effects remain (owner decision 2026-11-25: bells, dings, chimes and sparkles were annoying and made no sense). The tonal builders above (ding, chime, sparkle, pop,
+# tick, riser) are kept as functions but are not registered: a plan that still names one gets no sound.
 PLANNER_SFX = {
-    "whoosh": "a transition", "pop": "a small reveal", "ding": "a fact lands", "click": "a step or a choice", "riser": "tension building into this beat",
-    "impact": "a big moment", "shutter": "a photo is shown", "sparkle": "wonder or delight", "typing": "writing or computing", "swipe": "a quick change", "chime": "success or resolution",
+    "whoosh": "a transition", "click": "a step or a choice", "impact": "a big moment", "shutter": "a photo is shown", "typing": "writing or computing", "swipe": "a quick change",
 }
-_BANK_BUILDERS = {"whoosh": sfx_whoosh, "pop": sfx_pop, "tick": sfx_tick, "ding": sfx_ding, "click": sfx_click, "riser": sfx_riser, "impact": sfx_impact,
-                  "shutter": sfx_shutter, "sparkle": sfx_sparkle, "typing": sfx_typing, "swipe": sfx_swipe, "chime": sfx_chime}
+_BANK_BUILDERS = {"whoosh": sfx_whoosh, "click": sfx_click, "impact": sfx_impact, "shutter": sfx_shutter, "typing": sfx_typing, "swipe": sfx_swipe}
 SFX_KINDS = tuple(_BANK_BUILDERS)
 
 

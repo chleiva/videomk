@@ -191,7 +191,7 @@ def test_validate_plan_keeps_a_track_and_sfx_and_drops_nonsense():
         {"narration": "Another line of narration that is long enough.", "scene": {"type": "title", "props": {"title": "y"}}, "sfx": "airhorn"},
         {"narration": "A third line of narration that is long enough.", "scene": {"type": "title", "props": {"title": "z"}}, "sfx": "none"}]}
     plan, _ = plan_mod.validate_plan(raw)
-    assert plan["music"] == {"track": "cinematic-rise"} and [b.get("sfx") for b in plan["beats"]] == ["riser", None, "none"]
+    assert plan["music"] == {"track": "cinematic-rise"} and [b.get("sfx") for b in plan["beats"]] == [None, None, "none"]      # "riser" is a removed tonal effect: dropped like an unknown one
     raw["music"] = {"style": "kazoo"}
     assert "music" not in plan_mod.validate_plan(raw)[0]
 
@@ -224,28 +224,31 @@ def test_the_synthesiser_is_gone_for_good():
 
 # ================================================================= sound effects
 def test_the_director_chooses_effects_and_the_default_transition_whoosh_steps_aside():
-    tl = {"scenes": [{"type": "title", "start": 0.0, "sfx": "chime"}, {"type": "title", "start": 10.0, "sfx": "riser"}, {"type": "title", "start": 20.0, "sfx": "none"},
+    tl = {"scenes": [{"type": "title", "start": 0.0, "sfx": "swipe"}, {"type": "title", "start": 10.0, "sfx": "chime"}, {"type": "title", "start": 20.0, "sfx": "none"},
                      {"type": "title", "start": 30.0}, {"type": "title", "start": 40.0, "sfx": "impact"}, {"type": "bullets", "start": 50.0, "cues": [1.0, 2.0]}]}
     ev = pipeline.sfx_events(tl)
-    assert (0.12, "chime", 0.34) in ev and (8.9, "riser", 0.32) in ev and (40.0, "impact", 0.34) in ev
+    assert (0.12, "swipe", 0.34) in ev and (40.0, "impact", 0.34) in ev
+    assert not any(k in ("chime", "ding", "sparkle", "pop", "riser", "tick") for _, k, _ in ev)       # no bells or musical sounds, even when an old plan still names one
     assert (29.88, "whoosh", 0.28) in ev                                    # an unremarkable beat keeps the transition whoosh
     assert not any(abs(t - 19.88) < 1e-6 for t, _, _ in ev) and not any(k == "whoosh" and abs(t - 9.88) < 1e-6 for t, k, _ in ev)   # "none" is silent, and a chosen effect replaces the whoosh
-    assert sum(1 for _, k, _ in ev if k == "pop") == 2
+    assert not any(abs(t - 9.88) < 1e-6 or abs(t - 10.12) < 1e-6 for t, _, _ in ev)                      # an old plan's removed effect is silence, not a whoosh and not a bell
 
 
 def test_every_effect_is_short_audible_and_quiet_enough_to_mix():
     for kind in audio.SFX_KINDS:
         s = audio._BANK_BUILDERS[kind](audio.MIX_SR)
         assert 0.03 < s.size / audio.MIX_SR < 1.6 and not np.isnan(s).any() and 0.1 < float(np.abs(s).max()) <= 1.0, kind
-    assert set(audio.PLANNER_SFX) <= set(audio.SFX_KINDS) and "tick" not in audio.PLANNER_SFX
-    track = audio.build_sfx_track([(1.0, "ding", 0.3), (2.0, "nonsense", 0.3), (99.0, "pop", 0.3)], 4.0)
+    assert set(audio.PLANNER_SFX) <= set(audio.SFX_KINDS) and set(audio.SFX_KINDS) == {"whoosh", "click", "impact", "shutter", "typing", "swipe"}
+    for gone in ("ding", "chime", "sparkle", "pop", "riser", "tick"):
+        assert gone not in audio.SFX_KINDS and gone not in audio.PLANNER_SFX and not audio.build_sfx_track([(1.0, gone, 0.3)], 4.0).any()
+    track = audio.build_sfx_track([(1.0, "click", 0.3), (2.0, "nonsense", 0.3), (99.0, "ding", 0.3)], 4.0)
     assert track.shape == (4 * audio.MIX_SR, 2) and float(np.abs(track[int(1.0 * audio.MIX_SR): int(2.0 * audio.MIX_SR)]).max()) > 0.05 and float(np.abs(track[int(2.5 * audio.MIX_SR):]).max()) == 0.0
 
 
 def test_the_whole_audio_mix_uses_the_chosen_music_and_effects(tmp_path):
     tl = small_timeline(12.0, ["title", "bullets"])
     tl["music"] = music.resolve({"track": "dreamy-bells"}, [0, 6], 12.0)
-    tl["scenes"][1]["sfx"] = "ding"
+    tl["scenes"][1]["sfx"] = "impact"
     out = tmp_path / "mix.m4a"
     pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(out), track_loader={"dreamy-bells": _tone(30, 261.6)}.get)
     assert out.exists() and out.stat().st_size > 20_000

@@ -9,7 +9,7 @@ from PIL import Image
 
 from . import media
 from . import music as music_mod
-from .audio import MIX_SR, SR, build_narration, build_sfx_track, write_wav
+from .audio import MIX_SR, SFX_KINDS, SR, build_narration, build_sfx_track, write_wav
 from .renderer import Renderer
 from .timeline import GOP_SECONDS
 
@@ -46,18 +46,13 @@ def sfx_events(timeline: Dict[str, Any]) -> List[Tuple[float, str, float]]:
     for i, sc in enumerate(timeline["scenes"]):
         start = float(sc["start"])
         chosen = sc.get("sfx")
-        if chosen and chosen != "none":  # the director's own effect replaces the default transition whoosh
-            if chosen == "riser":
-                ev.append((max(0.0, start - 1.1), "riser", 0.32))   # builds up to the cut
-            else:
+        if chosen and chosen != "none":  # the director's own effect replaces the default transition whoosh; a removed tonal effect (bell, ding, chime...) in an old plan is silence
+            if chosen in SFX_KINDS:
                 ev.append((start + (0.0 if chosen in ("impact", "shutter") else 0.12), chosen, 0.34))
         elif chosen == "none":
             pass
         elif i > 0:
             ev.append((max(0.0, start - 0.12), "whoosh", 0.28))
-        if sc["type"] in POP_SCENES:
-            for c in sc.get("cues") or []:
-                ev.append((start + float(c), "pop", 0.16))
     return ev
 
 

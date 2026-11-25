@@ -83,7 +83,7 @@ MUSIC_CHOICE_RULE = ("  How to choose: first decide the video's dominant feeling
 
 def music_rules(tracks: Optional[List[Dict[str, Any]]] = None) -> str:
     sfx = ("- Sound effects are optional and sparse (at most one beat in three): a beat may carry \"sfx\": one of "
-           + ", ".join(f"{k} ({v})" for k, v in PLANNER_SFX.items()) + ", or \"none\" to keep that beat's transition silent. Leave it out on most beats.")
+           + ", ".join(f"{k} ({v})" for k, v in PLANNER_SFX.items()) + ", or \"none\" to keep that beat's transition silent. Leave it out on most beats. Never use bells, dings, chimes or musical sounds: the music carries the feeling.")
     if not tracks:   # no library, no music: there is no synthesised fallback
         return sfx
     return ("- Music: add a \"music\" object to the plan: {\"track\": \"<id>\", \"changes\": optional [{\"beat\": <1-based beat number>, \"track\": \"<id>\"}]}. "

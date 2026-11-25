@@ -13,7 +13,7 @@ The planner (the LLM that writes the script) now also picks the background music
 - Cost and speed: numpy synthesis, about 0.3 s per 30 s of music on a laptop, free, licence-free, no Content ID risk.
 
 ## Sound effects
-Eleven effects, all synthesised: whoosh (transition), pop (small reveal), ding (a fact lands), click (a step), riser (tension into this beat, placed to peak at the cut), impact (a big moment), shutter (a photo), sparkle (wonder), typing (writing or computing), swipe (quick change), chime (success). A beat may carry `"sfx": "<name>"` (or `"none"` for a silent transition); the planner is told to use them sparingly (at most one beat in three). Beats without one keep the default transition whoosh.
+Six NON-TONAL effects remain, all synthesised: whoosh (transition), click (a step), impact (a big moment), shutter (a photo), typing (writing or computing), swipe (a quick change). **Removed 2026-11-25 on the owner's order**: ding, chime, sparkle, pop, riser and tick. They were tonal, played over the music and the voice like a bell, and the directors chose them often (across 134 QA plans: chime 42, sparkle 31, ding 28), and a pop sounded on every list reveal. The builders still exist in `audio.py` but are not registered, so a plan that still names one (an old video, an edit) gets silence for that effect (never a whoosh, never a bell), the director is told never to use bells or musical sounds, and the per-reveal pops are gone. The default transition whoosh stays.
 
 ## What about AI music models? (the decision for later)
 | Option | Fit | Cost / risk |
