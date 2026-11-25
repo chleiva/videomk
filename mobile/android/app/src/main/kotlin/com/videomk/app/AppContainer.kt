@@ -40,7 +40,7 @@ class AppContainer(
         if (config != null && a != null) DebugHooks.fakeMedia(appContext) ?: com.videomk.app.core.ApiMediaApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
     }
     private val appScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
-    val mediaUploads: com.videomk.app.data.MediaUploadController? by lazy { mediaApi?.let { com.videomk.app.data.MediaUploadController(appContext, it, http, appScope) } }
+    val mediaUploads: com.videomk.app.data.MediaUploadController? by lazy { mediaApi?.let { com.videomk.app.data.MediaUploadController(appContext, it, http, appScope, DebugHooks.fakePoster(appContext)) } }
 
     fun warmUp() { Thread { runCatching { auth } }.start() }
 }

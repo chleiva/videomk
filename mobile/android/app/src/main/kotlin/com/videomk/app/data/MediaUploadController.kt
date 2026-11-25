@@ -30,7 +30,7 @@ import java.util.UUID
  * (only if the Settings switches are on), prepared (upright, at most 2048 px, no metadata: the same [PhotoPrep] as video photos), hashed, kept as a file in the
  * app's private folder and queued. The queue lives in the app scope, so the banner survives leaving the tab; it is saved to disk and resumed on next launch.
  */
-class MediaUploadController(context: Context, api: MediaApi, http: OkHttpClient, private val scope: CoroutineScope) {
+class MediaUploadController(context: Context, api: MediaApi, http: OkHttpClient, private val scope: CoroutineScope, poster: com.videomk.app.core.SlotPoster? = null) {
     private val app = context.applicationContext
     private val dir = File(app.filesDir, "media-queue").also { it.mkdirs() }
     private val settings = PhotoSettings(app)
@@ -46,7 +46,7 @@ class MediaUploadController(context: Context, api: MediaApi, http: OkHttpClient,
             override fun read(path: String) = runCatching { File(path).readBytes() }.getOrNull()
             override fun delete(path: String) { runCatching { File(path).delete() } }
         },
-        HttpSlotPoster(http),
+        poster ?: HttpSlotPoster(http),
     )
 
     /** Shared by the Media tab and the composer picker: how many photos should be listed once the server has prepared the uploads. */

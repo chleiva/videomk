@@ -17,6 +17,14 @@ longitude are rounded to 2 decimals (about 1 km) on the phone and sent only in t
 JPEG still has all metadata removed. Two switches in Settings > Photos (`PhotoSettings`, plain preferences, both default on) turn dates and locations off; when off they are not read at all. No
 `ACCESS_MEDIA_LOCATION` and no prompt: the system photo picker / MediaStore redact GPS, so photos reached through it send no location, while gallery apps reached through the chooser often hand over the original.
 
+## The interface (docs/UI_DESIGN.md)
+Tokens (colours, radii, shadows) live in `ui/Theme.kt` and shared pieces in `ui/UiKit.kt`. Main screen: docked **composer card** (`ComposerBar.kt`: photo strip, two-line field, ONE
+status line for price / reason / fix with a one-tap fix chip, toolbar with attach + count badge, options pill "3 min · ⚡3", mic, and a send button that is always drawn, tonal until
+it can act) over a feed of **cards** (`LibraryScreen.kt`: Ready, Making with four named steps, Didn't finish with "Try again"). Options are a bottom sheet (`OptionsSheet.kt`). **Add photos**
+is one sheet (`AddPhotosSheet.kt`): This phone | My media over one selection bar. No storage permission: "This phone" opens the system Photo Picker from inside the sheet and what it
+returns lands in the strip at once. The Media tab shows the **upload journey** (`UploadJourney.kt`): local tiles with states, one collapsible upload bar, one completion toast.
+Pure logic with tests: `core/ComposerLogic.kt` (status line state machine, cost fix, selection wording, tile states, upload summary).
+
 ## Layout
 - `app/src/main/kotlin/com/videomk/app/core`: no Android classes, so it runs in plain JVM unit tests. Models, `ApiClient` (every endpoint and header), `AuthService`
   (PKCE, refresh with one request in flight), `LibraryMerge`/`ProgressEstimator`, `Editor` (snapshot, ops, diff), `Photos` (limits, geometry, multipart, presigned-POST

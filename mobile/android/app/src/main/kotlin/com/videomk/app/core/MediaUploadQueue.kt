@@ -151,7 +151,22 @@ class MediaUploadQueue(
     fun retryFailed() = mutate { l -> l.map { if (it.state == UploadState.Failed) it.copy(state = UploadState.Queued, error = null, slotUrl = null, slotFields = null, mediaId = null) else it } }
 
     /** Removes finished items from the list (the banner message was read). */
-    fun dismissFinished() = mutate { l -> l.filter { !it.state.finished } }
+    fun dismissFinished() {
+        _items.value.filter { it.state.finished }.forEach { blobs.delete(it.path) }
+        mutate { l -> l.filter { !it.state.finished } }
+    }
+
+    /** Photos that did not fit are queued again (storage was freed or the plan changed). */
+    fun requeueNoSpace() = mutate { l -> l.map { if (it.state == UploadState.NoSpace) it.copy(state = UploadState.Queued, error = null, slotUrl = null, slotFields = null) else it } }
+
+    /** Retries one failed photo (the tile's "Tap to retry"). */
+    fun retry(id: String) = mutate { l -> l.map { if (it.id == id && it.state == UploadState.Failed) it.copy(state = UploadState.Queued, error = null, slotUrl = null, slotFields = null, mediaId = null) else it } }
+
+    /** Removes one waiting photo ("Remove from queue"). */
+    fun remove(id: String) {
+        _items.value.firstOrNull { it.id == id }?.let { blobs.delete(it.path) }
+        mutate { l -> l.filter { it.id != id } }
+    }
 
     fun hasWork(): Boolean = _items.value.any { it.state == UploadState.Queued || it.state == UploadState.Uploading }
 
@@ -181,7 +196,6 @@ class MediaUploadQueue(
             } catch (e: ApiError.StorageFull) {
                 _usage.value = e.usedBytes to e.limitBytes
                 setStates(needSlots.map { it.id }) { it.copy(state = UploadState.NoSpace, error = "Not enough storage") }
-                needSlots.forEach { blobs.delete(it.path) }
                 return true
             } catch (e: ApiError.Network) { offline = true; return false
             } catch (e: ApiError.Unauthorized) { return false
@@ -205,7 +219,6 @@ class MediaUploadQueue(
                     }
                 }
             }
-            needSlots.forEach { n -> _items.value.firstOrNull { it.id == n.id }?.takeIf { it.state == UploadState.Duplicate || it.state == UploadState.NoSpace }?.let { blobs.delete(it.path) } }
         }
         val ready = _items.value.filter { it.state == UploadState.Queued && it.slotUrl != null && it.id in batch.map { b -> b.id } }
         boundedMap(ready, concurrency) { _, item -> if (!paused && !cancelled) uploadOne(item) }
@@ -220,8 +233,8 @@ class MediaUploadQueue(
         for (attempt in 1..tries) {
             try {
                 poster.post(item.slotUrl!!, item.slotFields.orEmpty(), bytes)
+                // the prepared file stays until the batch is dismissed: the grid shows it as the photo's own local picture while the server prepares the thumbnail
                 setStates(listOf(item.id)) { it.copy(state = UploadState.Done, error = null, slotUrl = null, slotFields = null) }
-                blobs.delete(item.path)
                 return
             } catch (e: CancellationException) { setStates(listOf(item.id)) { it.copy(state = UploadState.Queued) }; throw e
             } catch (e: ApiError) { last = e }

@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 
 /** Debug only: made-up My media data with gradient thumbnails (data: URIs), to look at the screens without a server. Never in a release build. */
-class FakeMediaApi : MediaApi {
+class FakeMediaApi(private val full: Boolean = false) : MediaApi {
     private val places = listOf("Phuket, Thailand", "Lisbon, Portugal", "Kyoto, Japan", null, "Cape Town, South Africa", null)
     private val photos = MutableList(150) { i ->
         val t = LocalDateTime.of(2025, 9, 28, 14, 0).minusDays(i * 2L).minusHours(i % 5L)
@@ -29,9 +29,16 @@ class FakeMediaApi : MediaApi {
         return "data:image/png;base64," + Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
     }
 
-    override suspend fun summary() = MediaSummary("free", 2_000_000_000, 1_790_000_000, photos.size, false, listOf(YearCount(2025, 110), YearCount(2024, 40)),
+    override suspend fun summary() = MediaSummary("free", 2_000_000_000, if (full) 2_000_000_000 else 1_790_000_000, photos.size, false, listOf(YearCount(2025, 110), YearCount(2024, 40)),
         listOf(PlaceCount("Phuket", "Thailand", 25)), cols.toList())
-    override suspend fun requestUploads(items: List<UploadRequestItem>) = UploadsResponse(items.mapIndexed { i, _ -> UploadSlotResult(i, SlotStatus.NoSpace, null, null, emptyMap(), null, null) }, 1_790_000_000, 2_000_000_000)
+    override suspend fun requestUploads(items: List<UploadRequestItem>) = UploadsResponse(items.mapIndexed { i, _ ->
+        if (full) return@mapIndexed UploadSlotResult(i, if (i < 3) SlotStatus.Upload else SlotStatus.NoSpace, if (i < 3) "new$i" else null, "https://fake.invalid/up", mapOf("key" to "ok$i"), null, null)
+        when (i % 6) {
+            2 -> UploadSlotResult(i, SlotStatus.Duplicate, null, null, emptyMap(), "p0", null)
+            4 -> UploadSlotResult(i, SlotStatus.Upload, "new$i", "https://fake.invalid/up", mapOf("key" to "fail"), null, null)
+            else -> UploadSlotResult(i, SlotStatus.Upload, "new$i", "https://fake.invalid/up", mapOf("key" to "ok$i"), null, null)
+        }
+    }, 1_790_000_000, 2_000_000_000)
     override suspend fun items(limit: Int, cursor: String?, filter: MediaFilter): MediaPage {
         val all = photos.filter { filter.collection == null || filter.collection in it.collections }
         val start = cursor?.toIntOrNull() ?: 0

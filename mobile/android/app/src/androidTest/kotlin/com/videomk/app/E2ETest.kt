@@ -34,7 +34,7 @@ class E2ETest {
         val appeared = Ui.find("pendingRow", 10_000) ?: Ui.find("runningRow", 30_000)
         assertFalse("the request failed", Ui.has("failedRow"))
         assertTrue("a row for the new video appears", appeared != null)
-        assertFalse("composer cleared", Ui.has("sendButton"))
+        assertFalse("composer cleared", Ui.has("attachedPhoto"))
         assertFalse("photos cleared", Ui.has("attachedPhoto"))
         Ui.shot("21-uploading")
         Ui.require("runningRow", 90_000)

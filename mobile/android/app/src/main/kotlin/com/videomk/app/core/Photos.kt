@@ -42,7 +42,14 @@ object PhotoCapacity {
 
     fun minimumMinutes(photos: Int): Double = photos * 1.0 / 0.85 / 60
 
-    private fun minutesText(m: Double): String {
+    /** The smallest length option that shows all [photos]; null when they already fit or no option is long enough. */
+    fun suggestion(photos: Int, minutes: Double, options: List<Int>): Int? {
+        if (photos <= capacity(minutes)) return null
+        val need = minimumMinutes(photos)
+        return options.sorted().firstOrNull { it >= need - 1e-9 }
+    }
+
+    fun minutesText(m: Double): String {
         val n = if (m == Math.floor(m)) m.toInt().toString() else m.toString()
         return "$n minute${if (m == 1.0) "" else "s"}"
     }

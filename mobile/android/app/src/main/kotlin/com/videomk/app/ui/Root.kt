@@ -71,8 +71,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         containerColor = Vmk.colors.background, contentWindowInsets = WindowInsets(0),
         bottomBar = {
             if (showTabs && container.mediaApi != null) NavigationBar(containerColor = Vmk.colors.surface) {
-                NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text("Videos") }, modifier = Modifier.testTag("tabVideos"))
-                NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text("Media") }, modifier = Modifier.testTag("tabMedia"))
+                NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text("Videos") }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
+                NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text("Media") }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
             }
         },
     ) { inner ->
@@ -83,6 +83,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
                 onOpenVideo = { nav.navigate("video/$it") },
                 onOpenWallet = { nav.navigate("wallet") },
                 onOpenSettings = { nav.navigate("settings") },
+                onOpenMedia = { navigateTab(nav, "media") },
             )
         }
         composable("media") { entry ->
@@ -110,6 +111,12 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     }
     androidx.compose.runtime.LaunchedEffect(Unit) { container.mediaUploads?.resumeIfAny() }   // an interrupted upload queue continues on the next launch
 }
+
+@Composable
+private fun tabColors() = androidx.compose.material3.NavigationBarItemDefaults.colors(
+    selectedIconColor = Vmk.colors.primary, selectedTextColor = Vmk.colors.primary, indicatorColor = Vmk.colors.primaryContainer,
+    unselectedIconColor = Vmk.colors.textSecondary, unselectedTextColor = Vmk.colors.textSecondary,
+)
 
 private fun navigateTab(nav: androidx.navigation.NavHostController, route: String) {
     nav.navigate(route) { popUpTo("library") { saveState = true }; launchSingleTop = true; restoreState = true }

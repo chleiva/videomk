@@ -11,4 +11,8 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun photoFiles(intent: Intent?): List<String> = emptyList()
 
     @Suppress("UNUSED_PARAMETER") fun fakeMedia(context: android.content.Context): com.videomk.app.core.MediaApi? = null
+    @Suppress("UNUSED_PARAMETER") fun balanceOverride(context: android.content.Context): Int? = null
+    @Suppress("UNUSED_PARAMETER") fun mediaFiles(intent: Intent?): List<String> = emptyList()
+    @Suppress("UNUSED_PARAMETER") fun fakePoster(context: android.content.Context): com.videomk.app.core.SlotPoster? = null
+    @Suppress("UNUSED_PARAMETER") fun prompt(intent: Intent?): String? = null
 }

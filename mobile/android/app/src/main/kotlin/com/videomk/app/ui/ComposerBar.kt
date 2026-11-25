@@ -1,18 +1,21 @@
 package com.videomk.app.ui
 
 import android.Manifest
-import android.app.Activity
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.provider.MediaStore
+import android.os.Build
+import android.view.HapticFeedbackConstants
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,98 +23,110 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.PhotoAlbum
-import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.videomk.app.core.Brief
+import com.videomk.app.core.AddPhotosLogic
+import com.videomk.app.core.ComposerLogic
+import com.videomk.app.core.ComposerStatus
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.DictationPlan
 import com.videomk.app.core.MediaLabels
-import com.videomk.app.core.PhotoCapacity
-import com.videomk.app.core.PhotoIntake
 import com.videomk.app.core.PhotoLimits
-import com.videomk.app.core.VideoLook
+import com.videomk.app.core.StatusKind
 import com.videomk.app.data.DictationController
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private fun plural(n: Int) = if (n == 1) "" else "s"
 
 /**
- * The "ask for a video" bar pinned to the bottom of the home screen: type or dictate, optionally set length and look, send.
- * Sending never leaves the screen; the new video appears as a row in the list above.
+ * The docked composer card (docs/UI_DESIGN.md section e): photo strip, a two-line field, ONE status line (price, reason and fix), and a toolbar with
+ * attach, the options pill, the microphone and a send button that is always drawn (tonal until it can act).
  */
 @Composable
-fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, modifier: Modifier = Modifier) {
+fun ComposerBar(
+    composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, modifier: Modifier = Modifier,
+    onAddCredits: () -> Unit = {},
+) {
     val context = LocalContext.current
+    val view = LocalView.current
+    val scope = rememberCoroutineScope()
     val dictationState by composer.dictation.state.collectAsState()
     val listening = dictationState is DictationController.State.Listening || dictationState is DictationController.State.Starting
-    val text = composer.text
     val options = composer.options
-    val credits = options.credits
-    val affordable = balance == null || credits <= balance
-    val valid = Brief.isValid(text)
-    val canSend = valid && affordable
-    val count = Brief.normalized(text).length
+    val status = ComposerLogic.status(composer.text, options, balance, composer.totalPhotos, listening, sending = false)
     val focus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    val container = LocalContainerOrNull.current
+    var optionsOpen by remember { mutableStateOf(false) }
+    var pulse by remember { mutableIntStateOf(0) }
+    val shake = remember { Animatable(0f) }
+    val flash = remember { Animatable(0f) }
+    val still = reduceMotion(context)
 
     LaunchedEffect(composer.focusRequests) {
         if (composer.focusRequests > 0) { runCatching { focus.requestFocus() }; keyboard?.show() }
@@ -121,50 +136,17 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
             delay(8000); composer.dictation.clearHint()
         }
     }
+    LaunchedEffect(pulse) {
+        if (pulse > 0 && !still) {
+            flash.snapTo(1f)
+            launch { flash.animateTo(0f, tween(450)) }
+            for (x in listOf(4f, -4f, 3f, -3f, 0f)) shake.animateTo(x, tween(55))
+        }
+    }
 
     val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         composer.dictation.start(composer.text, if (granted) DictationPlan.Permission.Granted else DictationPlan.Permission.Denied)
     }
-    // the system picker has its own maximum per pick (MediaStore.getPickImagesMaxLimit()): choose in several rounds up to PhotoLimits.MAX_PHOTOS in total
-    val platformMax = remember {
-        if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) {
-            runCatching { MediaStore.getPickImagesMaxLimit() }.getOrDefault(PhotoLimits.MAX_PHOTOS)
-        } else PhotoLimits.MAX_PHOTOS
-    }
-    val pickMax = PhotoIntake.pickerMax(platformMax, composer.remaining)
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(pickMax)) { uris ->
-        if (uris.isNotEmpty()) composer.addPhotos(context.contentResolver, uris)
-    }
-
-    // the user's own gallery app, Google Photos and Files side by side (a chooser around ACTION_GET_CONTENT); the system photo picker is only the fallback
-    fun getContentIntent() = Intent(Intent.ACTION_GET_CONTENT).apply {
-        type = "image/*"
-        addCategory(Intent.CATEGORY_OPENABLE)
-        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-    val chooser = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val data = result.data
-        if (result.resultCode == Activity.RESULT_OK && data != null) {
-            val clip = data.clipData?.let { c -> (0 until c.itemCount).mapNotNull { c.getItemAt(it).uri } } ?: emptyList()
-            val uris = PhotoIntake.extract(data.data, clip)
-            // keep access past this screen where the provider allows it (a rotation destroys the temporary grant)
-            uris.forEach { runCatching { context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) } }
-            if (uris.isNotEmpty()) composer.addPhotos(context.contentResolver, uris)
-        }
-    }
-    fun launchPhotoSource() {
-        val intent = getContentIntent()
-        val handled = try { context.packageManager.queryIntentActivities(intent, 0).isNotEmpty() } catch (e: Exception) { false }
-        try {
-            if (handled) chooser.launch(Intent.createChooser(intent, "Choose photos"))
-            else picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        } catch (e: Exception) { /* no way to pick photos on this device */ }
-    }
-
-    val container = LocalContainerOrNull.current
-    var myMedia by remember { mutableStateOf(false) }
-    if (myMedia && container?.mediaApi != null) MyMediaPicker(composer, container.mediaApi!!, onDone = { myMedia = false }, tracker = container.mediaUploads?.arrivals)
 
     fun onMic() {
         try {
@@ -179,206 +161,257 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
         }
     }
 
+    fun haptic(ok: Boolean) {
+        if (Build.VERSION.SDK_INT >= 30) view.performHapticFeedback(if (ok) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.REJECT)
+        else view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+    }
+
+    fun tapSend() {
+        if (status.sendReady) { haptic(true); onSend() }
+        else {
+            // a tonal send is never dead: it pulses the reason and says it out loud
+            haptic(false); pulse++
+            view.announceForAccessibility(status.text + (status.fix?.let { ". " + it.description() } ?: ""))
+        }
+    }
+
+    fun applyFix() {
+        val fix = status.fix ?: return
+        if (fix.addCredits) onAddCredits() else composer.options = options.copy(minutes = fix.minutes!!.toDouble())
+    }
+
+    val shape = RoundedCornerShape(28.dp)
+    val dark = Vmk.colors.dark
+    val big = LocalDensity.current.fontScale >= 1.5f
     Surface(
-        modifier = modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime)),
-        color = Vmk.colors.surface, shadowElevation = 6.dp,
+        modifier = modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+            .padding(horizontal = 12.dp).padding(bottom = 8.dp, top = 4.dp)
+            .widthIn(max = 640.dp)
+            .vmkShadow(3, shape, dark).hairline(shape, Vmk.colors.outline),
+        shape = shape, color = Vmk.colors.surface,
     ) {
-        Column(Modifier.padding(top = 8.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            val hintMod = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
-            when (val s = dictationState) {
-                is DictationController.State.Unavailable ->
-                    HintLine(s.message, Icons.Filled.MicOff, Vmk.colors.warning, hintMod.testTag("dictationUnavailable"))
-                is DictationController.State.KeyboardHint ->
-                    HintLine(s.message, Icons.Filled.Keyboard, Vmk.colors.textSecondary, hintMod.testTag("dictationKeyboardHint"))
-                else -> Unit
+        Column(Modifier.padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 10.dp)) {
+            if (composer.totalPhotos > 0) {
+                PhotoStrip(composer)
+                Box(Modifier.size(6.dp))
             }
-            when {
-                listening -> HintLine("Listening… tap the microphone when you're done", Icons.Filled.GraphicEq, Vmk.colors.textSecondary, hintMod.testTag("listeningHint"))
-                valid && !affordable -> HintLine(
-                    "This video needs $credits credit${plural(credits)} and you have $balance. Choose a shorter length.",
-                    null, Vmk.colors.warning, hintMod.testTag("notEnoughCredits"),
-                )
-                text.isNotEmpty() && !valid -> Text(
-                    if (count > Brief.MAX_LENGTH) "$count / ${Brief.MAX_LENGTH}: please shorten it." else "A few more words, please (${Brief.MIN_LENGTH - count} to go).",
-                    style = MaterialTheme.typography.bodySmall, color = if (count > Brief.MAX_LENGTH) Vmk.colors.danger else Vmk.colors.textSecondary, modifier = hintMod,
-                )
-                valid -> Text(
-                    "$credits credit${plural(credits)}${balance?.let { " · you have $it" } ?: ""}",
-                    style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = hintMod.testTag("costLine"),
-                )
-            }
-
-            if (composer.photos.isNotEmpty() || composer.loading > 0 || composer.library.isNotEmpty()) AttachedPhotosStrip(composer, options.minutes)
-
-            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OptionsMenu(options, onChange = { composer.options = it })
-                Row(
-                    Modifier.weight(1f)
-                        .clip(RoundedCornerShape(24.dp)).background(Vmk.colors.background)
-                        .border(1.dp, if (listening) Vmk.colors.danger.copy(alpha = 0.6f) else Vmk.colors.textSecondary.copy(alpha = 0.25f), RoundedCornerShape(24.dp)),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    TextField(
-                        value = text, onValueChange = { composer.text = it },
-                        modifier = Modifier.weight(1f).focusRequester(focus).testTag("composerField"),
-                        placeholder = { Text(if (composer.photos.isEmpty()) "Describe a video…" else "What should the video be about?") },
-                        maxLines = 5,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, disabledIndicatorColor = Color.Transparent,
-                        ),
-                    )
-                    val full = composer.remaining == 0
-                    IconButton(
-                        onClick = {
-                            launchPhotoSource()
-                        },
-                        enabled = !full, modifier = Modifier.size(48.dp).testTag("photoButton"),
-                    ) {
-                        Icon(Icons.Filled.PhotoLibrary, contentDescription = if (full) "Photo limit reached: ${PhotoLimits.MAX_PHOTOS} photos" else "Add photos. Choose up to ${composer.remaining} more of your photos to use in the video (${PhotoLimits.MAX_PHOTOS} at most)",
-                            tint = if (full) Vmk.colors.textSecondary else MaterialTheme.colorScheme.primary)
-                    }
-                    if (container?.mediaApi != null) IconButton(onClick = { myMedia = true }, enabled = composer.libraryRoom > 0, modifier = Modifier.size(48.dp).testTag("myMediaButton")) {
-                        Icon(Icons.Filled.PhotoAlbum, contentDescription = "My media. Choose photos from your private library for this video", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(onClick = ::onMic, modifier = Modifier.size(48.dp).testTag("micButton")) {
-                        Icon(
-                            if (listening) Icons.Filled.GraphicEq else Icons.Filled.Mic,
-                            contentDescription = if (listening) "Stop dictation" else "Dictate. Say what video you want instead of typing",
-                            tint = if (listening) Vmk.colors.danger else MaterialTheme.colorScheme.primary,
-                        )
-                    }
+            TextField(
+                value = composer.text, onValueChange = { composer.text = it },
+                modifier = Modifier.fillMaxWidth().focusRequester(focus).offset(x = (-16).dp).testTag("composerField"),
+                placeholder = { Text(if (composer.totalPhotos == 0) "Describe your video…" else "What should the video be about?", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textTertiary) },
+                textStyle = MaterialTheme.typography.bodyLarge,
+                minLines = 2, maxLines = 6,
+                readOnly = listening,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, disabledIndicatorColor = Color.Transparent,
+                    focusedTextColor = if (listening) Vmk.colors.textSecondary else Vmk.colors.text, unfocusedTextColor = if (listening) Vmk.colors.textSecondary else Vmk.colors.text,
+                ),
+            )
+            dictationHint(dictationState)
+            StatusLine(status, flash.value, shake.value, ::applyFix)
+            Box(Modifier.size(6.dp))
+            val attach: @Composable () -> Unit = { AttachButton(composer, enabled = !listening) { composer.openAddPhotos(null) } }
+            val pill: @Composable (Modifier) -> Unit = { m -> OptionsPill(composer, status, enabled = !listening, m) { optionsOpen = true } }
+            val mic: @Composable () -> Unit = { MicButton(listening, ::onMic) }
+            val send: @Composable () -> Unit = { SendButton(status, balance, options, ::tapSend) }
+            if (big) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { attach(); pill(Modifier.weight(1f)) }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) { mic(); send() }
                 }
-                if (canSend) {
-                    IconButton(
-                        onClick = onSend,
-                        modifier = Modifier.size(48.dp).clip(CircleShape).background(Vmk.gradient).testTag("sendButton"),
-                    ) { Icon(Icons.Filled.ArrowUpward, contentDescription = "Make video", tint = Color.White) }
-                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { attach(); pill(Modifier.weight(1f)); mic(); send() }
             }
         }
+    }
+
+    if (optionsOpen) OptionsSheet(composer, balance, onDismiss = { optionsOpen = false })
+    val request = composer.addPhotosRequest
+    if (request != null) {
+        AddPhotosSheet(composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = request.tab == 1, onDismiss = { composer.closeAddPhotos() })
     }
 }
 
 @Composable
-private fun HintLine(message: String, icon: androidx.compose.ui.graphics.vector.ImageVector?, color: Color, modifier: Modifier) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (icon != null) Icon(icon, null, tint = color, modifier = Modifier.size(16.dp))
+private fun dictationHint(state: DictationController.State) {
+    when (state) {
+        is DictationController.State.Unavailable -> HintRow(state.message, Vmk.colors.warning, "dictationUnavailable")
+        is DictationController.State.KeyboardHint -> HintRow(state.message, Vmk.colors.textSecondary, "dictationKeyboardHint")
+        else -> Unit
+    }
+}
+
+@Composable
+private fun HintRow(message: String, color: Color, tag: String) {
+    Row(Modifier.padding(top = 4.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Icon(Icons.Filled.Warning, null, tint = color, modifier = Modifier.size(16.dp))
         Text(message, style = MaterialTheme.typography.bodySmall, color = color)
     }
 }
 
+/** The single place for price, reason and fix: exactly one message at a time. */
 @Composable
-private fun OptionsMenu(options: CreateOptions, onChange: (CreateOptions) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        Column(
-            Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).clip(RoundedCornerShape(24.dp)).background(Vmk.colors.background).border(1.dp, Vmk.colors.textSecondary.copy(alpha = 0.25f), RoundedCornerShape(24.dp))
-                .clickable(onClickLabel = "Choose length and look") { open = true }.padding(horizontal = 4.dp)
-                .semantics {
-                    contentDescription = "Video options"
-                    stateDescription = "${options.minutes.toInt()} minutes, ${options.credits} credits, ${options.look?.title ?: "Producer decides the look"}, subtitles ${if (options.captions) "on" else "off"}"
-                }
-                .testTag("optionsMenu"),
-            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
-        ) {
-            Icon(Icons.Filled.Tune, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-            Text("${options.minutes.toInt()} min", fontSize = 10.sp, color = MaterialTheme.colorScheme.primary)
+private fun StatusLine(status: ComposerStatus, flash: Float, shake: Float, onFix: () -> Unit) {
+    val color = when (status.kind) {
+        StatusKind.TooLong -> Vmk.colors.danger
+        StatusKind.NotAffordable, StatusKind.NoCredits -> Vmk.colors.warning
+        StatusKind.Listening -> Vmk.colors.danger
+        StatusKind.PhotoHint -> Vmk.colors.text
+        else -> Vmk.colors.textSecondary
+    }
+    val icon = when (status.kind) {
+        StatusKind.NotAffordable, StatusKind.NoCredits, StatusKind.TooLong -> Icons.Filled.Warning
+        StatusKind.Listening -> Icons.Filled.GraphicEq
+        else -> Icons.Filled.Bolt
+    }
+    val iconTint = when (status.kind) { StatusKind.Ready, StatusKind.Idle, StatusKind.PhotoHint, StatusKind.TooShort -> Vmk.colors.primary; else -> color }
+    val tag = when (status.kind) {
+        StatusKind.NotAffordable, StatusKind.NoCredits -> "notEnoughCredits"
+        StatusKind.PhotoHint -> "photoCapacityHint"
+        StatusKind.Ready, StatusKind.Idle -> "costLine"
+        else -> "hintLine"
+    }
+    val bg = Vmk.colors.warningContainer.copy(alpha = flash)
+    Column(
+        Modifier.fillMaxWidth().offset(x = shake.dp).clip(RoundedCornerShape(10.dp)).background(bg).testTag("statusLine")
+            .semantics { liveRegion = LiveRegionMode.Polite },
+    ) {
+        Row(Modifier.heightIn(min = 28.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(icon, null, tint = iconTint, modifier = Modifier.size(15.dp))
+            Text(status.text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = color, modifier = Modifier.weight(1f).testTag(tag))
+            if (status.fix != null && status.kind != StatusKind.PhotoHint) FixChip(status.fix.label(), status.fix.description(), Modifier.testTag("fixChip"), onFix)
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            Text("Length", style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-            for (m in CreateOptions.LENGTHS) {
-                MenuChoice("${m.toInt()} minute${plural(m.toInt())}", "${CreateOptions(m).credits} credit${plural(CreateOptions(m).credits)}", options.minutes == m, "length-${m.toInt()}") {
-                    onChange(options.copy(minutes = m)); open = false
-                }
-            }
-            Text("Look", style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-            MenuChoice("Producer decides", null, options.look == null, "look-auto") { onChange(options.copy(look = null)); open = false }
-            for (l in VideoLook.entries) MenuChoice(l.title, null, options.look == l, "look-${l.wire}") { onChange(options.copy(look = l)); open = false }
-            DropdownMenuItem(
-                text = { Text("Subtitles") },
-                trailingIcon = { Switch(checked = options.captions, onCheckedChange = null) },
-                onClick = { onChange(options.copy(captions = !options.captions)) },   // the menu stays open so the switch can be seen changing
-                modifier = Modifier.heightIn(min = 48.dp).semantics { stateDescription = if (options.captions) "on" else "off" },
-            )
+        if (status.fix != null && status.kind == StatusKind.PhotoHint) FixChip(status.fix.label(), status.fix.description(), Modifier.padding(start = 23.dp).testTag("fixChip"), onFix)
+    }
+}
+
+@Composable
+private fun AttachButton(composer: ComposerViewModel, enabled: Boolean, onClick: () -> Unit) {
+    val n = composer.totalPhotos
+    val full = composer.remaining == 0
+    Box(Modifier.size(48.dp).alpha(if (enabled) 1f else 0.4f), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.size(44.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised)
+                .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Add photos", onClick = onClick)
+                .semantics { contentDescription = if (n > 0) "Add photos. $n selected" else "Add photos" }.testTag("photoButton"),
+            contentAlignment = Alignment.Center,
+        ) { Icon(Icons.Filled.AddPhotoAlternate, null, tint = if (full) Vmk.colors.textTertiary else Vmk.colors.text, modifier = Modifier.size(24.dp)) }
+        AddPhotosLogic.badge(n)?.let { b ->
+            Box(
+                Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-2).dp).heightIn(min = 20.dp).clip(CircleShape).background(Vmk.colors.primary).padding(horizontal = 6.dp)
+                    .testTag("photoBadge"),
+                contentAlignment = Alignment.Center,
+            ) { Text(b, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.onPrimary, maxLines = 1) }
         }
     }
 }
 
 @Composable
-private fun MenuChoice(label: String, detail: String?, selected: Boolean, tag: String, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(label)
-                if (detail != null) Text(detail, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-            }
-        },
-        leadingIcon = { if (selected) Icon(Icons.Filled.Check, "Selected") else Box(Modifier.size(24.dp)) },
-        onClick = onClick, modifier = Modifier.heightIn(min = 48.dp).testTag(tag),
-    )
+private fun OptionsPill(composer: ComposerViewModel, status: ComposerStatus, enabled: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val options = composer.options
+    val warn = status.kind == StatusKind.NotAffordable || status.kind == StatusKind.NoCredits
+    val shape = RoundedCornerShape(24.dp)
+    val bg by animateColorAsState(if (warn) Vmk.colors.warningContainer else Vmk.colors.surfaceRaised, label = "pill")
+    val look = options.look?.title ?: "Producer decides the look"
+    val narrow = LocalContext.current.resources.configuration.screenWidthDp < 340
+    Row(
+        modifier.heightIn(min = 44.dp).clip(shape).background(bg).then(if (warn) Modifier.border(1.5.dp, Vmk.colors.warning, shape) else Modifier)
+            .alpha(if (enabled) 1f else 0.4f)
+            .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Open video options", onClick = onClick)
+            .padding(horizontal = 14.dp)
+            .semantics {
+                contentDescription = "Video options"
+                stateDescription = "${options.minutes.toInt()} minute${plural(options.minutes.toInt())}, ${options.credits} credit${plural(options.credits)}, $look, subtitles ${if (options.captions) "on" else "off"}"
+            }.testTag("optionsMenu"),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+    ) {
+        Icon(Icons.Filled.Tune, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(20.dp))
+        if (narrow) Text("${options.minutes.toInt()} min · ${options.credits}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1)
+        else CreditsText(options.minutes.toInt(), options.credits, if (warn) Vmk.colors.warning else Vmk.colors.primary)
+    }
 }
 
-/** The strip of attached photos above the text field: a lazy row of small previews (only the visible ones are composed), so 100 photos stay smooth. */
 @Composable
-private fun AttachedPhotosStrip(composer: ComposerViewModel, minutes: Double) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun MicButton(listening: Boolean, onClick: () -> Unit) {
+    val still = reduceMotion(LocalContext.current)
+    Box(Modifier.size(48.dp).clickable(role = Role.Button, onClickLabel = if (listening) "Stop dictation" else "Dictate", onClick = onClick)
+        .semantics { contentDescription = if (listening) "Stop dictation" else "Dictate. Say what video you want instead of typing" }.testTag("micButton"), contentAlignment = Alignment.Center) {
+        if (listening) {
+            val ring = if (still) 1f else rememberInfiniteTransition(label = "ring").animateFloat(1f, 1.5f, infiniteRepeatable(tween(1000), RepeatMode.Restart), label = "r").value
+            Box(Modifier.size(44.dp).scale(ring).clip(CircleShape).background(Vmk.colors.danger.copy(alpha = 0.18f)))
+            Box(Modifier.size(44.dp).clip(CircleShape).background(Vmk.colors.danger), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Stop, null, tint = Color.White, modifier = Modifier.size(22.dp)) }
+        } else Icon(Icons.Filled.Mic, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(24.dp))
+    }
+}
+
+/** 52 dp, always drawn: filled with the brand gradient when it can act, tonal when it cannot. Never disabled for screen readers. */
+@Composable
+private fun SendButton(status: ComposerStatus, balance: Int?, options: CreateOptions, onClick: () -> Unit) {
+    val ready = status.sendReady
+    val desc = if (ready) "Ready, costs ${options.credits} credit${plural(options.credits)}" else "Not ready. ${status.text}${if (status.fix != null) ". Double tap for the fix." else ""}"
+    Box(
+        Modifier.size(52.dp).clip(CircleShape)
+            .then(if (ready) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))
+            .clickable(role = Role.Button, onClickLabel = if (ready) "Make video" else "Explain why this can't be sent yet", onClick = onClick)
+            .semantics { contentDescription = "Make video"; stateDescription = desc }.testTag("sendButton"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(Icons.Filled.ArrowUpward, null, tint = if (ready) Color.White else Vmk.colors.textTertiary, modifier = Modifier.size(26.dp))
+    }
+}
+
+/** The attached photos: a count row and a horizontally scrolling strip of small previews, each removable (phone and My media in one strip). */
+@Composable
+private fun PhotoStrip(composer: ComposerViewModel) {
+    val phone = composer.photos.size + composer.loading
+    val library = composer.library.size
+    val source = when { phone > 0 && library > 0 -> "From this phone and My media"; library > 0 -> "From My media"; else -> "From this phone" }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "${composer.photos.size + composer.library.size} of ${PhotoLimits.MAX_PHOTOS} photos", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
+                color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f).testTag("photosNote"),
+            )
+            Text(source, style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary)
+        }
+        if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
+        composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 4.dp)) {
             itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
-                Box(Modifier.size(64.dp).semantics { contentDescription = "Photo ${index + 1} of ${composer.photos.size}" }.testTag("attachedPhoto")) {
-                    photo.thumbnail?.let {
-                        Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp).align(Alignment.BottomStart).clip(RoundedCornerShape(10.dp)))
-                    }
-                    Box(
-                        Modifier.align(Alignment.TopEnd).size(48.dp)
-                            .clickable(onClickLabel = "Remove photo ${index + 1}") { composer.removePhoto(photo.id) },
-                        contentAlignment = Alignment.TopEnd,
-                    ) {
-                        Box(Modifier.padding(top = 2.dp, end = 2.dp).size(24.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Close, "Remove photo ${index + 1}", tint = Color.White, modifier = Modifier.size(16.dp))
-                        }
-                    }
+                StripTile(Modifier.semantics { contentDescription = "Photo ${index + 1} of ${composer.photos.size + composer.library.size}" }.testTag("attachedPhoto"), "Remove photo ${index + 1}", { composer.removePhoto(photo.id) }) {
+                    photo.thumbnail?.let { Image(it, it.hashCode()) }
                 }
             }
-            itemsIndexed(composer.library, key = { _, p -> "lib-${p.id}" }) { index, photo ->
-                Box(Modifier.size(64.dp).semantics { contentDescription = "From My media: ${MediaLabels.photo(photo)}" }.testTag("attachedLibraryPhoto")) {
-                    PhotoThumb(photo, Modifier.size(56.dp).align(Alignment.BottomStart).clip(RoundedCornerShape(10.dp)))
-                    Box(
-                        Modifier.align(Alignment.TopEnd).size(48.dp).clickable(onClickLabel = "Remove from the video") { composer.removeLibrary(photo.id) },
-                        contentAlignment = Alignment.TopEnd,
-                    ) {
-                        Box(Modifier.padding(top = 2.dp, end = 2.dp).size(24.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Close, "Remove from the video", tint = Color.White, modifier = Modifier.size(16.dp))
-                        }
-                    }
+            itemsIndexed(composer.library, key = { _, p -> "lib-${p.id}" }) { _, photo ->
+                StripTile(Modifier.semantics { contentDescription = "From My media: ${MediaLabels.photo(photo)}" }.testTag("attachedLibraryPhoto"), "Remove from the video", { composer.removeLibrary(photo.id) }) {
+                    PhotoThumb(photo, Modifier.size(56.dp))
                 }
             }
-            if (composer.loading > 0) item(key = "preparing") {   // one placeholder, however many are still being prepared
-                Box(Modifier.size(64.dp).padding(4.dp).clip(RoundedCornerShape(10.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+            if (composer.loading > 0) item(key = "preparing") {
+                Box(Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
+                    androidx.compose.material3.CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
                 }
             }
         }
-        if (composer.loading > 0) {
-            Text(
-                composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
-                modifier = Modifier.padding(horizontal = 20.dp).testTag("photosPreparing"),
-            )
-        }
-        composer.notice?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = 20.dp).testTag("photosNotice"))
-        }
-        Text(
-            "${composer.photos.size + composer.library.size} of ${PhotoLimits.MAX_PHOTOS} photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.",
-            style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 20.dp).testTag("photosNote"),
-        )
-        // not blocking: sending is still allowed; recomputed on every length change and every removal
-        PhotoCapacity.hint(composer.totalPhotos, minutes, CreateOptions.LENGTHS.map { it.toInt() })?.let { hint ->
-            Text(
-                hint, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning,
-                modifier = Modifier.padding(horizontal = 20.dp).semantics { contentDescription = "Video length tip. $hint" }.testTag("photoCapacityHint"),
-            )
+    }
+}
+
+@Composable
+private fun Image(bitmap: android.graphics.Bitmap, key: Int) {
+    androidx.compose.foundation.Image(bitmap.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp))
+}
+
+@Composable
+private fun StripTile(modifier: Modifier, removeLabel: String, onRemove: () -> Unit, content: @Composable () -> Unit) {
+    Box(modifier.size(56.dp)) {
+        Box(Modifier.size(56.dp).clip(RoundedCornerShape(12.dp))) { content() }
+        // 18 dp to look at, 44 dp to hit
+        Box(Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-12).dp).size(44.dp).clickable(onClickLabel = removeLabel, role = Role.Button, onClick = onRemove), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(18.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Close, removeLabel, tint = Color.White, modifier = Modifier.size(12.dp))
+            }
         }
     }
 }

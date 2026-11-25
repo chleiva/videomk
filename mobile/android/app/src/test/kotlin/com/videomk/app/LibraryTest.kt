@@ -4,6 +4,7 @@ import com.videomk.app.core.Brief
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.LibraryEntry
 import com.videomk.app.core.LibraryMerge
+import com.videomk.app.core.MakingSteps
 import com.videomk.app.core.PendingVideo
 import com.videomk.app.core.ProgressEstimator
 import com.videomk.app.core.VideoItem
@@ -83,5 +84,15 @@ class LibraryTest {
         assertEquals(VideoStatus.Running(Stage.VoiceAndVisuals), VideoStatus.fromServer("STORYBOARD_CREATION"))
         assertEquals(VideoStatus.Running(Stage.Starting), VideoStatus.fromServer(""))
         assertTrue(VideoStatus.fromServer("RENDERING").isRunning); assertFalse(VideoStatus.Complete.isRunning)
+    }
+
+    @Test fun `making steps fill from the overall estimate and the card says what is left`() {
+        assertEquals(listOf(0f, 0f, 0f, 0f), MakingSteps.fills(0.0)); assertEquals(listOf(1f, 1f, 1f, 1f), MakingSteps.fills(1.0))
+        assertEquals(listOf(1f, 0.5f, 0f, 0f), MakingSteps.fills(0.32).map { Math.round(it * 100) / 100f })
+        assertEquals(2, MakingSteps.current(0.5)); assertEquals(3, MakingSteps.current(1.0)); assertEquals(0, MakingSteps.current(0.0))
+        assertEquals("Writing the story.", MakingSteps.sentence(VideoStatus.Stage.Writing))
+        assertEquals("Less than a minute left.", ProgressEstimator.leftText(VideoStatus.Stage.Rendering, 500.0, 1.0))
+        assertTrue(ProgressEstimator.leftText(VideoStatus.Stage.Starting, 0.0, 3.0).startsWith("About "))
+        assertTrue(ProgressEstimator.secondsLeft(VideoStatus.Stage.Starting, 0.0) > ProgressEstimator.secondsLeft(VideoStatus.Stage.Rendering, 0.0))
     }
 }

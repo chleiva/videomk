@@ -19,6 +19,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -73,6 +80,7 @@ import com.videomk.app.core.MediaCollection
 import com.videomk.app.core.MediaPhoto
 import com.videomk.app.core.MediaSummary
 import com.videomk.app.core.StorageMeter
+import com.videomk.app.core.UploadTiles
 import com.videomk.app.data.MediaUploadController
 import com.videomk.app.data.PhotoSettings
 
@@ -99,7 +107,7 @@ fun rememberPhotoChooser(onPicked: (List<Uri>) -> Unit): () -> Unit {
     }
 }
 
-/** The Media tab. */
+/** The Media tab: title, storage, search, collections and the timeline, with the upload journey (local tiles, one bar, one toast) on top. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaScreen(
@@ -107,53 +115,122 @@ fun MediaScreen(
     onMakeVideo: (List<MediaPhoto>) -> Unit,
 ) {
     val context = LocalContext.current
+    val view = androidx.compose.ui.platform.LocalView.current
     LaunchedEffect(Unit) { vm.start(); vm.refreshLinksIfStale() }
     var storageOpen by rememberSaveable { mutableStateOf(false) }
+    var barExpanded by rememberSaveable { mutableStateOf(false) }
+    var toast by remember { mutableStateOf<String?>(null) }
     val choose = rememberPhotoChooser { uris -> uploads?.add(context.contentResolver, uris) }
 
     val progress = uploads?.queue?.progress?.collectAsState()?.value
+    val items = uploads?.queue?.items?.collectAsState()?.value ?: emptyList()
     val preparing = uploads?.preparing?.collectAsState()?.value
     val skipped = uploads?.skipped?.collectAsState()?.value ?: 0
     LaunchedEffect(progress?.uploaded) { vm.onUploaded(progress?.uploaded ?: 0) }
     // back on this tab or back in the app: look again now; leaving stops the waiting
     androidx.lifecycle.compose.LifecycleResumeEffect(vm) { vm.onVisible(); onPauseOrDispose { vm.stopWaiting() } }
     val used = uploads?.queue?.usage?.collectAsState()?.value
+    val listedIds = remember(vm.photos) { vm.photos.map { it.id }.toSet() }
+    val stopped = progress != null && (progress.paused || progress.offline || progress.noSpace > 0)
 
-    Scaffold(
-        containerColor = Vmk.colors.background,
-        topBar = {
-            TopAppBar(
-                title = { Text("My media", fontWeight = FontWeight.Bold) },
-                actions = {
-                    if (vm.summary?.readOnly != true) IconButton(onClick = choose, modifier = Modifier.size(48.dp).testTag("addMedia")) { Icon(Icons.Filled.Add, "Add photos to My media") }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
-            )
-        },
-        bottomBar = { SelectionBar(vm, onMakeVideo) },
-    ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            val s = vm.summary
-            if (s != null) StorageMeterRow(used?.first ?: s.usedBytes, used?.second ?: s.limitBytes, { storageOpen = true }, Modifier.padding(horizontal = 16.dp))
-            if (vm.summary?.readOnly == true) Text("Read only until you are under your storage limit. You can still view and delete photos.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("readOnlyNote"))
-            MediaSearchBar(vm, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-            NoticeLine(vm)
-            MediaBody(
-                vm, onAdd = if (vm.summary?.readOnly == true) null else choose, onOpenCollection = onOpenCollection, onMakeVideo = onMakeVideo,
-                header = {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 8.dp)) {
-                        PrivacyNote()
-                        if (uploads != null && progress != null) UploadBanner(
-                            progress, preparing, skipped, vm.gettingReady, onPause = { uploads.pause() }, onResume = { uploads.resume() }, onCancel = { uploads.cancel() },
-                            onRetry = { uploads.retryFailed() }, onDismiss = { uploads.queue.dismissFinished(); uploads.clearSkipped() }, onOpenStorage = { storageOpen = true },
-                        )
-                        if (!vm.search.active) CollectionsStrip(vm, onOpenCollection)
+    // the batch settles when every photo is finished and the server lists the added ones (or it stopped waiting): one summary, then the local tiles hand over to the grid
+    val allFinished = items.isNotEmpty() && items.all { it.state.finished }
+    val noProblems = items.none { it.state == com.videomk.app.core.UploadState.Failed || it.state == com.videomk.app.core.UploadState.NoSpace }
+    val allListed = items.filter { it.state == com.videomk.app.core.UploadState.Done }.all { it.mediaId in listedIds }
+    val settled = allFinished && noProblems && allListed
+    val settledGaveUp = allFinished && noProblems && !allListed && vm.gettingReady == 0
+    LaunchedEffect(settled, settledGaveUp) {
+        if (!settled && !settledGaveUp) return@LaunchedEffect
+        if (settledGaveUp) kotlinx.coroutines.delay(2500)
+        val msg = UploadTiles.summary(items.count { it.state == com.videomk.app.core.UploadState.Done }, items.count { it.state == com.videomk.app.core.UploadState.Duplicate }, 0)
+        toast = msg; view.announceForAccessibility(msg)
+        kotlinx.coroutines.delay(1500)
+        uploads?.queue?.dismissFinished(); uploads?.clearSkipped()
+    }
+    LaunchedEffect(toast) { if (toast != null) { kotlinx.coroutines.delay(8000); toast = null } }
+    // polite, aggregated progress for screen readers: at most every 10 percent or 15 seconds, never per photo
+    UploadAnnouncements(progress)
+
+    // how long the finished photos have waited for the server ("Getting it ready" becomes "Still getting it ready")
+    var finishedAt by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    var tickNow by remember { androidx.compose.runtime.mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(allFinished) { if (allFinished) { finishedAt = System.currentTimeMillis(); while (true) { kotlinx.coroutines.delay(5000); tickNow = System.currentTimeMillis() } } else finishedAt = 0L }
+    val processingSeconds = if (finishedAt > 0) (tickNow - finishedAt) / 1000 else 0L
+    val started = remember(progress?.active) { System.currentTimeMillis() }
+    val elapsed = System.currentTimeMillis() - started
+
+    Box(Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Vmk.colors.background,
+            contentWindowInsets = WindowInsets(0),
+            topBar = {
+                Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Media", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
+                    val shape = CircleShape
+                    Row(Modifier.heightIn(min = 44.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape), verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = 44.dp).testTag("selectMode")) { Text("Select", fontWeight = FontWeight.SemiBold) }
+                        if (vm.summary?.readOnly != true) IconButton(onClick = choose, modifier = Modifier.size(44.dp).testTag("addMedia")) { Icon(Icons.Filled.Add, "Add photos to My media", tint = Vmk.colors.primary) }
                     }
-                },
+                }
+            },
+            bottomBar = { SelectionBar(vm, onMakeVideo) },
+        ) { padding ->
+            Column(Modifier.fillMaxSize().padding(padding)) {
+                val s = vm.summary
+                if (s != null) StorageMeterRow(used?.first ?: s.usedBytes, used?.second ?: s.limitBytes, { storageOpen = true }, Modifier.padding(horizontal = 16.dp))
+                if (vm.summary?.readOnly == true) Text("Read only until you are under your storage limit. You can still view and delete photos.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("readOnlyNote"))
+                MediaSearchBar(vm, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                NoticeLine(vm)
+                val columns = rememberColumns()
+                val batchIds = remember(items) { items.mapNotNull { it.mediaId }.toSet() }
+                MediaBody(
+                    vm, onAdd = if (vm.summary?.readOnly == true) null else choose, onOpenCollection = onOpenCollection, onMakeVideo = onMakeVideo,
+                    header = {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 8.dp)) {
+                            PrivacyNote()
+                            if (!vm.search.active) CollectionsStrip(vm, onOpenCollection)
+                        }
+                    },
+                    localTiles = if (items.isNotEmpty() && !vm.search.active) ({
+                        UploadBatchSection(items, vm.photos, columns, stopped, processingSeconds = processingSeconds, onRetry = { uploads?.queue?.retry(it.id); uploads?.start() })
+                    }) else null,
+                    hiddenIds = if (items.isNotEmpty()) batchIds else emptySet(),
+                )
+            }
+        }
+        if (barExpanded) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f)).clickable(onClickLabel = "Close upload details") { barExpanded = false })
+        Column(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            toast?.let { MediaToast(it, "Got it", { toast = null }) }
+            if (uploads != null && progress != null && !vm.selecting) UploadBar(
+                progress, items, listedIds, preparing, elapsed, barExpanded, { barExpanded = it },
+                onPause = { uploads.pause() }, onResume = { uploads.resume() }, onCancel = { uploads.cancel(); barExpanded = false },
+                onRetry = { uploads.queue.retry(it.id); uploads.start() }, onRetryAll = { uploads.retryFailed() },
+                onManageStorage = { storageOpen = true }, onNotNow = { uploads.queue.dismissFinished() },
             )
         }
     }
     if (storageOpen) vm.summary?.let { StorageSheet(it, used, onDismiss = { storageOpen = false }) }
+}
+
+/** Rate-limited, aggregated TalkBack announcements while uploading (docs/UI_DESIGN.md section m.5). */
+@Composable
+private fun UploadAnnouncements(progress: com.videomk.app.core.QueueProgress?) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    var lastBucket by remember { mutableStateOf(-1) }
+    var lastTime by remember { mutableStateOf(0L) }
+    var lastState by remember { mutableStateOf("") }
+    if (progress == null) return
+    val state = when { progress.noSpace > 0 -> "Storage is full"; progress.offline -> "Waiting for connection"; progress.paused -> "Upload paused"; else -> "" }
+    LaunchedEffect(state) { if (state.isNotEmpty() && state != lastState) view.announceForAccessibility(state); lastState = state }
+    LaunchedEffect(progress.finished) {
+        if (!progress.active || progress.total == 0) return@LaunchedEffect
+        val bucket = progress.finished * 10 / progress.total
+        val now = System.currentTimeMillis()
+        if (bucket > lastBucket && (bucket != lastBucket || now - lastTime > 15_000) && progress.finished > 0) {
+            lastBucket = bucket; lastTime = now
+            view.announceForAccessibility("Uploaded ${progress.finished} of ${progress.total} photos.")
+        }
+    }
 }
 
 /** A collection's own screen: its photos in the same grid, with search and selection. */
@@ -204,11 +281,16 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
 fun MediaBody(
     vm: MediaViewModel, onAdd: (() -> Unit)?, onOpenCollection: (String) -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit,
     header: (@Composable () -> Unit)?, modifier: Modifier = Modifier, selectionHint: String? = null,
+    order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(),
 ) {
     val columns = rememberColumns()
     androidx.compose.material3.pulltorefresh.PullToRefreshBox(isRefreshing = vm.refreshing, onRefresh = { vm.pullRefresh() }, modifier = modifier.fillMaxSize()) {
     Box(Modifier.fillMaxSize()) {
         when {
+            vm.photos.isEmpty() && localTiles != null -> PhotoGrid(
+                photos = emptyList(), selected = emptySet(), selecting = false, columns = columns, onOpen = {}, onToggle = {}, onLongPress = {}, onDragSelect = {}, onNearEnd = {},
+                header = header, localTiles = localTiles,
+            )
             vm.loading && vm.photos.isEmpty() -> SkeletonGrid(columns, Modifier.padding(top = 4.dp))
             vm.error != null && vm.photos.isEmpty() -> StateMessage("Couldn't load your photos", vm.error!!, "Try again") { vm.refresh() }
             vm.photos.isEmpty() && vm.search.active && !vm.searching -> StateMessage("No photos match", "Try fewer words, or remove a filter above.", "Clear search") { vm.clearSearch() }
@@ -224,6 +306,7 @@ fun MediaBody(
                 photos = vm.photos, selected = vm.selection.toSet(), selecting = vm.selecting, columns = columns,
                 onOpen = { vm.viewerIndex = it }, onToggle = { vm.toggle(it) }, onLongPress = { vm.startSelecting(it) },
                 onDragSelect = { id -> if (id !in vm.selection) vm.toggle(id) }, onNearEnd = { vm.loadMore() }, header = header, flat = vm.flatOrder,
+                order = order, dimUnselected = dimUnselected, localTiles = localTiles, hiddenIds = hiddenIds,
                 footer = { if (vm.offline) Text("Offline. Showing the photos saved on this phone.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(16.dp)) },
             )
         }

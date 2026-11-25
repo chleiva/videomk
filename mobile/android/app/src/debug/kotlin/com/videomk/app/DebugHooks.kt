@@ -32,5 +32,23 @@ object DebugHooks {
 
     /** `vmk_debug_fake_media`: fake My media data (no server) for screenshots. Read from a file flag so it works without an intent at container time. */
     fun fakeMedia(context: android.content.Context): com.videomk.app.core.MediaApi? =
-        if (java.io.File(context.filesDir, "fake_media").exists()) FakeMediaApi() else null
+        if (java.io.File(context.filesDir, "fake_media").exists()) FakeMediaApi(full = java.io.File(context.filesDir, "fake_full").exists()) else null
+
+    /** `files/fake_balance` holds a number: the credits the app pretends to have (to look at the "not enough credits" composer). */
+    fun balanceOverride(context: android.content.Context): Int? =
+        runCatching { java.io.File(context.filesDir, "fake_balance").readText().trim().toInt() }.getOrNull()
+
+    /** `vmk_debug_media_files=/a.png:/b.png` adds those files to the My media upload queue at launch. */
+    fun mediaFiles(intent: Intent?): List<String> =
+        intent?.getStringExtra("vmk_debug_media_files")?.split(":")?.filter { it.isNotBlank() } ?: emptyList()
+
+    /** With fake media on, uploads take a few seconds and one photo in six is refused, so every tile state can be looked at. */
+    fun fakePoster(context: android.content.Context): com.videomk.app.core.SlotPoster? =
+        if (java.io.File(context.filesDir, "fake_media").exists()) com.videomk.app.core.SlotPoster { _, fields, _ ->
+            kotlinx.coroutines.delay(7000)
+            if (fields["key"] == "fail") throw com.videomk.app.core.ApiError.Invalid("Too large. Photos can be up to 25 MB.")
+        } else null
+
+    /** `vmk_debug_prompt` fills the composer at launch (and focuses it): typing through adb is slow. */
+    fun prompt(intent: Intent?): String? = intent?.getStringExtra("vmk_debug_prompt")?.takeIf { it.isNotBlank() }
 }

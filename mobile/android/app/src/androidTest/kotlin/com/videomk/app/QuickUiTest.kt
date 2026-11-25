@@ -30,7 +30,8 @@ class QuickUiTest {
         Ui.require("composerField", 30_000)
         Ui.require("micButton"); Ui.require("photoButton"); Ui.require("optionsMenu")
         Ui.require("balanceChip", 20_000)
-        assertFalse("nothing to send yet", Ui.has("sendButton"))
+        Ui.require("sendButton")   // the send button is always drawn (tonal until there is something to send)
+        assertTrue(Ui.require("costLine").text.startsWith("A 3 minute video"))
         assertFalse(Ui.has("signInButton"))
         Ui.shot("02-library")
     }
@@ -42,10 +43,12 @@ class QuickUiTest {
         Ui.require("sendButton")
         assertTrue(Ui.require("costLine").text.startsWith("3 credits"))   // default length is 3 minutes
         Ui.require("optionsMenu").click()
-        Ui.clickText("1 minute")
+        Ui.require("length-1").click()
+        Ui.require("optionsDone").click()
         assertTrue(Ui.require("costLine").text.startsWith("1 credit"))
         Ui.require("optionsMenu").click(); Ui.shot("03-options")
-        Ui.clickText("Paper")
+        Ui.require("look-paper").click()
+        Ui.require("optionsDone").click()
         Ui.shot("04-composer-filled")
     }
 
@@ -150,11 +153,13 @@ class QuickUiTest {
     @Test fun systemPhotoPickerAttachesPhotos() {
         Ui.launch(signedIn = true)
         Ui.require("photoButton", 30_000).click()
+        Ui.require("pickFromPhone", 10_000).click()   // the Add photos sheet opens the system picker from its This phone tab
         val picker = "com.google.android.providers.media.module"
         val tiles = device.wait(Until.findObjects(By.res("$picker:id/icon_thumbnail")), 15_000)
         org.junit.Assume.assumeTrue("no photos on the device (push p1..p4.jpg to /sdcard/Pictures)", !tiles.isNullOrEmpty())
         tiles.take(4).forEach { it.click() }
         device.wait(Until.findObject(By.res("$picker:id/button_add")), 5_000)!!.click()
+        Ui.require("addPhotosDone", 30_000).click()   // the photos are in the strip already; Add closes the sheet
         Ui.require("photosNote", 30_000)
         assertTrue("all four picked photos get attached", device.wait(Until.hasObject(By.res("photosNote").textStartsWith("4 of 100 photos")), 30_000))
         assertEquals(4, device.findObjects(Ui.res("attachedPhoto")).size)

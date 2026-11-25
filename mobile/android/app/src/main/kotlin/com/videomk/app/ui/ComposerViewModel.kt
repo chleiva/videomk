@@ -90,6 +90,20 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
 
     fun requestFocus() { focusRequests++ }
 
+    /** The Add photos sheet is open (null: closed). [tab] 0 is This phone, 1 is My media. */
+    class AddPhotosRequest(val tab: Int)
+    var addPhotosRequest by mutableStateOf<AddPhotosRequest?>(null); private set
+    fun openAddPhotos(tab: Int?) { addPhotosRequest = AddPhotosRequest(tab ?: 0) }
+    fun closeAddPhotos() { addPhotosRequest = null }
+    fun flagLimit() { notice = com.videomk.app.core.AddPhotosLogic.LIMIT_MESSAGE }
+
+    /** A tapped example prompt: fills the field and the length, keeps the cursor in the field, never sends. */
+    fun useExample(text: String, minutes: Double?) {
+        this.text = text
+        if (minutes != null) options = options.copy(minutes = minutes)
+        requestFocus()
+    }
+
     fun applyDebugDefaults(minutes: Double?) { if (minutes != null) options = options.copy(minutes = minutes) }
 
     fun addPhotos(resolver: ContentResolver, uris: List<Uri>) =

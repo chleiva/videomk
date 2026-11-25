@@ -29,9 +29,18 @@ import kotlinx.coroutines.launch
  */
 class MediaViewModel(
     private val api: MediaApi?, private val collectionId: String? = null, private val cache: MediaCache? = null,
-    private val limit: Int = Int.MAX_VALUE, private val tracker: ArrivalTracker = ArrivalTracker(),
+    private var limit: Int = Int.MAX_VALUE, private val tracker: ArrivalTracker = ArrivalTracker(),
 ) : ViewModel() {
     private val listing = MediaListing()
+    /** The album chip chosen in the picker (null: all photos). A collection screen has its own fixed [collectionId]. */
+    var activeCollection by mutableStateOf<String?>(null); private set
+    private val col: String? get() = activeCollection ?: collectionId
+    private val picked = HashMap<String, MediaPhoto>()   // the photos behind the selected ids (a search result may no longer be on screen)
+
+    fun setLimit(n: Int) { limit = n }
+
+    fun setCollectionFilter(id: String?) { activeCollection = id; clearSearchOnly(); refresh() }
+    private fun clearSearchOnly() { debouncer.cancel(); search = SearchState(); searchResult = null; understoodChips = emptyList(); fromPrompt = false }
     var summary by mutableStateOf<MediaSummary?>(null); private set
     var collections by mutableStateOf<List<MediaCollection>>(emptyList()); private set
     var photos by mutableStateOf<List<MediaPhoto>>(emptyList()); private set      // what the grid shows right now (timeline or search result)
@@ -60,7 +69,7 @@ class MediaViewModel(
     private suspend fun refreshHead(): Int? {
         val a = api ?: return null
         return try {
-            val page = a.items(60, null, MediaFilter(collection = collectionId))
+            val page = a.items(60, null, MediaFilter(collection = col))
             listing.mergeHead(page); offline = false
             if (searchResult == null) photos = listing.items
             val s = a.summary(); summary = s
@@ -107,7 +116,7 @@ class MediaViewModel(
         viewModelScope.launch {
             loading = photos.isEmpty(); error = null
             try {
-                val page = a.items(60, null, MediaFilter(collection = collectionId))
+                val page = a.items(60, null, MediaFilter(collection = col))
                 listing.replace(page); offline = false
                 if (collectionId == null) cache?.savePage("first", page)
                 if (searchResult == null) photos = listing.items
@@ -139,7 +148,7 @@ class MediaViewModel(
         }
         viewModelScope.launch {
             loadingMore = true
-            try { listing.append(a.items(60, listing.cursor, MediaFilter(collection = collectionId))); photos = listing.items } catch (e: CancellationException) { throw e } catch (e: Exception) { /* the next scroll tries again */ }
+            try { listing.append(a.items(60, listing.cursor, MediaFilter(collection = col))); photos = listing.items } catch (e: CancellationException) { throw e } catch (e: Exception) { /* the next scroll tries again */ }
             loadingMore = false
         }
     }
@@ -148,7 +157,7 @@ class MediaViewModel(
     fun refreshLinksIfStale() {
         val a = api ?: return
         if (!listing.linksStale()) return
-        viewModelScope.launch { runCatching { listing.refreshLinks(a.items(60, null, MediaFilter(collection = collectionId)).items); if (searchResult == null) photos = listing.items } }
+        viewModelScope.launch { runCatching { listing.refreshLinks(a.items(60, null, MediaFilter(collection = col)).items); if (searchResult == null) photos = listing.items } }
     }
 
     // search
@@ -182,22 +191,25 @@ class MediaViewModel(
 
     // selection
 
-    fun startSelecting(id: String) { selecting = true; if (id !in selection && selection.size < limit) selection.add(id) }
+    /** The toolbar's "Select": selection mode with nothing chosen yet. */
+    fun beginSelecting() { selecting = true }
+
+    fun startSelecting(id: String) { selecting = true; if (id !in selection && selection.size < limit) { selection.add(id); photos.firstOrNull { it.id == id }?.let { picked[id] = it } } }
     fun toggle(id: String) {
-        if (id in selection) selection.remove(id) else if (selection.size < limit) selection.add(id) else notice = "You can choose up to $limit photos."
+        if (id in selection) selection.remove(id) else if (selection.size < limit) { selection.add(id); photos.firstOrNull { it.id == id }?.let { picked[id] = it } } else notice = com.videomk.app.core.AddPhotosLogic.LIMIT_MESSAGE
         if (selection.isEmpty() && limit == Int.MAX_VALUE) selecting = false
     }
     fun selectAllInView() {
         selecting = true
-        for (p in photos) if (p.id !in selection && selection.size < limit) selection.add(p.id)
+        for (p in photos) if (p.id !in selection && selection.size < limit) { selection.add(p.id); picked[p.id] = p }
         if (selection.size >= limit && photos.size > selection.size) notice = "Selected the first $limit."
     }
-    fun preselect(ids: List<String>) { selection.clear(); selection.addAll(ids.take(limit)); selecting = true }
-    fun clearSelection() { selection.clear(); selecting = false }
+    fun preselect(ids: List<String>) { selection.clear(); selection.addAll(ids.take(limit)); ids.take(limit).forEach { id -> photos.firstOrNull { it.id == id }?.let { picked[id] = it } }; selecting = true }
+    fun clearSelection() { selection.clear(); picked.clear(); selecting = false }
 
     /** The picker sheet starts in selection mode with what is already chosen. */
-    fun startPicker(existing: List<String>) { selection.clear(); selection.addAll(existing.take(limit)); selecting = true }
-    fun selectedPhotos(): List<MediaPhoto> = selection.mapNotNull { id -> photos.firstOrNull { it.id == id } ?: listing.get(id) }
+    fun startPicker(existing: List<MediaPhoto>) { selection.clear(); picked.clear(); existing.take(limit).forEach { selection.add(it.id); picked[it.id] = it }; selecting = true }
+    fun selectedPhotos(): List<MediaPhoto> = selection.mapNotNull { id -> picked[id] ?: photos.firstOrNull { it.id == id } ?: listing.get(id) }
 
     // actions
 

@@ -243,7 +243,8 @@ class MediaTest {
         val p = q.progress.value
         assertEquals(250, p.total); assertEquals(250, p.finished); assertEquals(250, p.uploaded); assertFalse(p.active)
         assertEquals(list.sumOf { it.size }, p.bytesDone)
-        assertTrue("prepared files are deleted once uploaded", blobs.files.isEmpty())
+        assertEquals("the prepared files stay as local pictures until the batch is dismissed", 250, blobs.files.size)
+        q.dismissFinished(); assertTrue(blobs.files.isEmpty()); assertEquals(0, q.items.value.size)
         assertEquals(10L to 100L, q.usage.value)
     }
 
@@ -274,9 +275,9 @@ class MediaTest {
         val p = q.progress.value
         assertEquals(1, p.uploaded); assertEquals(1, p.duplicates); assertEquals(1, p.noSpace); assertEquals(1, p.failed); assertTrue(p.storageFullMessageNeeded)
         assertEquals("not a photo", q.items.value[3].error); assertEquals("old", q.items.value[1].mediaId)
-        // the uploaded and duplicate photos' files are gone; the failed one keeps its file for a retry
-        assertEquals(setOf("/f/i3"), blobs.files.keys)
-        q.dismissFinished(); assertEquals(0, q.items.value.size)
+        // every file is kept (as the tile's local picture and for a retry) until the batch is dismissed
+        assertEquals(4, blobs.files.size)
+        q.dismissFinished(); assertEquals(0, q.items.value.size); assertTrue(blobs.files.isEmpty())
     }
 
     @Test fun `when nothing fits the whole batch is marked no_space and usage is known`() = runBlocking {
@@ -326,7 +327,7 @@ class MediaTest {
         assertEquals(2, q.progress.value.uploaded); assertTrue(q.progress.value.paused); assertTrue(q.hasWork())
         q.cancel()
         assertEquals(2, q.items.value.size); assertEquals(2, q.progress.value.total)   // only the finished ones stay
-        assertTrue("cancelled photos' files are deleted", blobs.files.isEmpty())
+        assertEquals("cancelled photos' files are deleted, finished ones are kept until dismissed", 2, blobs.files.size)
     }
 
     @Test fun `a missing prepared file fails that photo without stopping the others`() = runBlocking {

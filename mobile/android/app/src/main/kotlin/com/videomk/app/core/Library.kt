@@ -78,4 +78,38 @@ object ProgressEstimator {
         val eased = 1 - exp(-1.6 * t)   // fast at first, slows down, never completes the slice
         return lo + (hi - lo) * minOf(eased, 0.96)
     }
+
+    /** Seconds still expected, from the typical time of each remaining stage (honest and rough). */
+    fun secondsLeft(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double = CreateOptions.DEFAULT_MINUTES): Double {
+        val order = VideoStatus.Stage.entries
+        val here = order.indexOf(stage)
+        val rest = order.drop(here + 1).sumOf { expectedSeconds(it, minutes) }
+        return maxOf(0.0, expectedSeconds(stage, minutes) - secondsInStage) + rest
+    }
+
+    /** "About 2 min left." / "Less than a minute left." */
+    fun leftText(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double = CreateOptions.DEFAULT_MINUTES): String {
+        val s = secondsLeft(stage, secondsInStage, minutes)
+        return if (s < 60) "Less than a minute left." else "About ${Math.ceil(s / 60).toInt()} min left."
+    }
+}
+
+/** The four named steps of the in-progress card: Script, Voice, Pictures, Final cut, each filled by the overall estimate. */
+object MakingSteps {
+    val names = listOf("Script", "Voice", "Pictures", "Final cut")
+    private val edges = listOf(0.0, 0.22, 0.42, 0.62, 1.0)
+
+    /** Fill (0..1) of each step for an overall progress [fraction]. */
+    fun fills(fraction: Double): List<Float> = (0 until 4).map { i -> (((fraction - edges[i]) / (edges[i + 1] - edges[i])).coerceIn(0.0, 1.0)).toFloat() }
+
+    /** The step being worked on (the first one not full). */
+    fun current(fraction: Double): Int = fills(fraction).indexOfFirst { it < 1f }.let { if (it < 0) 3 else it }
+
+    /** What is happening, in words (no invented scene numbers: the server does not report them). */
+    fun sentence(stage: VideoStatus.Stage): String = when (stage) {
+        VideoStatus.Stage.Starting -> "Getting started."
+        VideoStatus.Stage.Writing -> "Writing the story."
+        VideoStatus.Stage.VoiceAndVisuals -> "Voice and pictures."
+        VideoStatus.Stage.Rendering -> "Putting it all together."
+    }
 }

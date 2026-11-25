@@ -43,6 +43,8 @@ class MainActivity : ComponentActivity() {
         if (fresh) {
             composer.applyDebugDefaults(DebugHooks.defaultMinutes(intent))
             composer.addPhotoFiles(DebugHooks.photoFiles(intent))
+            DebugHooks.prompt(intent)?.let { composer.text = it; composer.requestFocus() }
+            DebugHooks.mediaFiles(intent).takeIf { it.isNotEmpty() }?.let { files -> container.mediaUploads?.add(contentResolver, files.map { android.net.Uri.fromFile(java.io.File(it)) }) }
             handleAuthIntent(intent)
         }
         setContent {
