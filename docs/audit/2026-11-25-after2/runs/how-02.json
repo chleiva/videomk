@@ -1,0 +1,583 @@
+{
+ "id": "how-02",
+ "category": "how-to / tutorial",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo empezar a correr si nunca he hecho ejercicio",
+ "great": "Plan realista para principiante (caminar/correr alternado, 3 veces por semana, 20-30 min), calzado, ritmo conversacional, progresión gradual, descanso, lesiones comunes, consulta médica si hay condiciones; motivador y práctico.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:12:31",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Cómo empezar a correr desde cero es una explicación atemporal basada en principios de fisiología y entrenamiento que no cambian con frecuencia, así que no requiere búsqueda web.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto",
+   "health-wellbeing"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 1552,
+  "n_sources": 0,
+  "n_fetched": 2,
+  "fetched": [
+   "Wave Race: Blue Storm",
+   "Gran Premio de Alemania de Motociclismo de 1970"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Wave Race: Blue Storm\nWave Race: Blue Storm es un videojuego de carreras de motos de agua desarrollado por Nintendo Software Technology en 2001 para la consola GameCube. Este juego acompañó el lanzamiento de la consola en los tres mercados. Es la secuela de Wave Race 64 para Nintendo 64.\n\n## Gran Premio de Alemania de Motociclismo de 1970\nEl Gran Premio de Alemania de Motociclismo de 1970 fue la primera prueba de la temporada 1970 del Campeonato Mundial de Motociclismo. El Gran Premio se disputó los días 2 y 3 de mayo de 1970 en el Circuito de Nurburgring.\nLa organización en Nürburgring centró la ira de los conductores. Esta carrera fue conducida en los (entonces) 21 km de largo Nordschleife en el contexto de la Eifelrennen. Durante toda la jornada, se realizaron carreras tanto de automóviles como de motocicletas. A los corredores de motos, solo se les dio hora y media para explorar la pista y luego 45 minutos para calificar. Hacía frío, niebla y humedad, y debido a los entrenamientos de los coches de Fórmula 2), la pista se volvió aún más resbaladiza.\nAdemás, la organización entregó permisos iniciales aleatorios. Los pilotos principiantes apenas tuvieron la oportunidad de comenzar (y por lo tanto ganar dinero inicial), mientras que los conductores alemanes apenas pudieron comenzar. El neerlandés Theo Louwes se fue a casa antes de las carreras porque solo se le permitía comenzar en la categoría de 500 cc. Las barreras de choque, que eran necesarias para los automóviles, eran extremadamente peligrosas para los motociclistas…",
+ "plan": {
+  "title": "Cómo empezar a correr si nunca has hecho ejercicio",
+  "description": "Una guía sencilla para empezar a correr desde cero, sin lesiones y sin frustrarte. Aprende a preparar tu cuerpo, a alternar caminar y correr y a mantener el hábito.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "132be30f",
+    "narration": "¿Y si te dijera que no necesitas ser atleta para correr? Todo corredor empezó un día sin saber nada. Con un plan sencillo, tú también puedes pasar de sofá a trote en pocas semanas.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Empieza a correr desde cero",
+      "subtitle": "Un plan sencillo para quien nunca ha hecho ejercicio"
+     }
+    },
+    "chapter": "Antes de salir"
+   },
+   {
+    "id": "e6b1afba",
+    "narration": "El error más común es salir con demasiada prisa. Corres fuerte, terminas agotado, te duelen las piernas y abandonas. Empezar despacio no es de débiles: es la forma de que el hábito dure.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person jogging park morning",
+      "alt": "runner on a path at sunrise"
+     }
+    }
+   },
+   {
+    "id": "b39eea1f",
+    "narration": "Antes de empezar, prepara tres cosas: unas zapatillas cómodas, ropa ligera y un horario realista. Si tienes dudas de salud, o una condición médica, consulta antes con un profesional sanitario.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Lo que necesitas",
+      "items": [
+       "Zapatillas cómodas",
+       "Ropa ligera",
+       "Un horario realista",
+       "Consulta médica si dudas"
+      ]
+     }
+    }
+   },
+   {
+    "id": "34eb7e35",
+    "narration": "Elige un lugar agradable y llano, como un parque o un camino tranquilo. Un entorno bonito ayuda mucho a que tengas ganas de volver al día siguiente.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "park running path trees",
+      "alt": "camino de parque para correr",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "1a84fc39",
+    "narration": "El secreto es alternar caminar y correr. Calienta caminando cinco minutos. Después trota suave un minuto, camina dos, y repite. Debes poder hablar mientras te mueves; si no puedes, baja el ritmo.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Una sesión de principiante",
+      "steps": [
+       {
+        "label": "Camina 5 minutos",
+        "detail": "Calentamiento suave"
+       },
+       {
+        "label": "Trota 1 minuto",
+        "detail": "A ritmo en el que puedas hablar"
+       },
+       {
+        "label": "Camina 2 minutos",
+        "detail": "Recupera el aliento"
+       },
+       {
+        "label": "Repite varias veces",
+        "detail": "Y termina caminando"
+       }
+      ]
+     }
+    },
+    "sfx": "click",
+    "chapter": "El método"
+   },
+   {
+    "id": "8fd20eb8",
+    "narration": "No hace falta salir cada día. Tu cuerpo mejora durante el descanso. Prueba así: día uno, sesión. Día dos, descanso. Día tres, sesión. Día cuatro, descanso. Día cinco, sesión.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Una semana de ejemplo",
+      "nodes": [
+       {
+        "id": "d1",
+        "label": "Día 1: sesión"
+       },
+       {
+        "id": "d2",
+        "label": "Día 2: descanso"
+       },
+       {
+        "id": "d3",
+        "label": "Día 3: sesión"
+       },
+       {
+        "id": "d4",
+        "label": "Día 4: descanso"
+       },
+       {
+        "id": "d5",
+        "label": "Día 5: sesión"
+       }
+      ],
+      "edges": [
+       [
+        "d1",
+        "d2"
+       ],
+       [
+        "d2",
+        "d3"
+       ],
+       [
+        "d3",
+        "d4"
+       ],
+       [
+        "d4",
+        "d5"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "f2aca25d",
+    "narration": "Cada semana, aumenta un poco el tiempo de trote y reduce el de caminata. Poco a poco, tu corazón, tus pulmones y tus piernas se adaptan. Sin prisa, el progreso llega solo.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Progreso gradual",
+      "items": [
+       "Más trote",
+       "Menos caminata",
+       "Sin prisa"
+      ],
+      "style": "spotlight",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "61a3f82f",
+    "narration": "Escucha a tu cuerpo. Un cansancio normal es esperable, pero un dolor agudo en una articulación es una señal para parar. Si el dolor persiste, consulta a un profesional.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "runner tying shoes",
+      "alt": "corredor atándose las zapatillas",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Cuidarte y seguir"
+   },
+   {
+    "id": "6bfde678",
+    "narration": "Estira suavemente al terminar, bebe agua y duerme bien. Son gestos pequeños que reducen las molestias y te ayudan a recuperarte para la siguiente salida.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "heart",
+        "label": "Estira suave"
+       },
+       {
+        "icon": "water",
+        "label": "Bebe agua"
+       },
+       {
+        "icon": "moon",
+        "label": "Duerme bien"
+       }
+      ],
+      "title": "Después de correr"
+     }
+    }
+   },
+   {
+    "id": "551410a6",
+    "narration": "Hay días en que no tendrás ganas. Es normal. Ponte las zapatillas igualmente y promete solo diez minutos. Casi siempre, empezar es lo más difícil, y después ya estás en marcha.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lo difícil no es correr: es salir por la puerta.",
+      "emphasis": "salir por la puerta"
+     }
+    }
+   },
+   {
+    "id": "e0f2c1a1",
+    "narration": "Apunta cada sesión en una libreta o en el móvil. Ver tus avances, aunque sean pequeños, motiva mucho. Un minuto más de trote que la semana pasada ya es una victoria.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands writing notebook",
+      "alt": "person writing in a journal"
+     }
+    }
+   },
+   {
+    "id": "d0123039",
+    "narration": "Si puedes, corre con un amigo o únete a un grupo. Compartir el esfuerzo hace más ligeros los kilómetros y es más difícil faltar a la cita cuando alguien te espera.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "friends running together",
+       "running group sunrise",
+       "two runners trail"
+      ],
+      "alt": "personas corriendo juntas"
+     }
+    }
+   },
+   {
+    "id": "c5486dac",
+    "narration": "Recuerda: empieza despacio, alterna caminar y correr, descansa entre sesiones y escucha a tu cuerpo. No compites con nadie, solo con el sofá de ayer.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lo esencial",
+      "items": [
+       "Empieza despacio",
+       "Alterna caminar y correr",
+       "Descansa entre sesiones",
+       "Escucha a tu cuerpo"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "clock",
+       "footprints",
+       "moon",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "328bef75",
+    "narration": "Tu primera salida no tiene que ser perfecta, solo tiene que ocurrir. Mañana, ponte las zapatillas, sal diez minutos y da el primer paso. Tu yo del futuro te lo agradecerá.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "runner sunrise road",
+      "alt": "corredor al amanecer",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "tutorial-howto",
+   "health-wellbeing"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 59.8,
+  "before_first_script_call_s": 6.2,
+  "script_s": 53.5
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.14836,
+  "search_api": 0.0,
+  "total": 0.14863
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 36637,
+  "out": 8048
+ },
+ "rules": {
+  "length": {
+   "words": 420,
+   "expected_words": 402,
+   "ratio": 1.045,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 188.3,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 34,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si te dijera que no necesitas ser atleta para correr? Todo corredor empezó un día sin saber nada. Con un plan sencillo, tú también puedes pasar de sofá a trote en pocas semanas.",
+   "close_text": "Tu primera salida no tiene que ser perfecta, solo tiene que ocurrir. Mañana, ponte las zapatillas, sal diez minutos y da el primer paso. Tu yo del futuro te lo agradecerá."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 1,
+    "clip": 2,
+    "checklist": 1,
+    "image": 3,
+    "steps": 1,
+    "diagram": 1,
+    "bullets": 2,
+    "icons": 1,
+    "kinetic_text": 1,
+    "gallery": 1
+   },
+   "max_run": 1,
+   "entropy": 3.18,
+   "top_type": "image",
+   "top_share": 0.21,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "escucha a tu cuerpo",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 2,
+   "notes_len": 1552,
+   "flag_thin_notes": false,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "no_sources_cited",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 6 (diagram): its narration never says ['Día 2: descanso', 'Día 3: sesión', 'Día 4: descanso', 'Día 5: sesión']",
+   "beat 12 (gallery): its narration never says ['running group sunrise', 'two runners trail']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The advice is standard and correct (run/walk intervals, talk test, rest days, see a doctor if in doubt). The notes were irrelevant, so it rests on common knowledge, and the plan has no specific total duration or weekly count."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers shoes, run/walk intervals, talk test, rest days, progression, pain and a medical check. It leaves out session length (20-30 min), common injuries by name, shoe specifics and a concrete week-by-week progression."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chapters run in a clear order: prepare, method, care. Beat 13 recaps and beat 14 closes, so there is slight redundancy, but the pacing is fine."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question 'no necesitas ser atleta' creates curiosity. The ending 'Tu yo del futuro te lo agradecerá' is a little clichéd but still lands."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, motivating and informal in the tú register, suited to beginners."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary and match the narration (steps, diagram, checklist). The 'hands writing notebook' clip is generic, and the diagram of a week with five nodes is somewhat thin."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Mostly generic advice. The 'solo diez minutos' trick and 'el sofá de ayer' are nice touches, but little is surprising or specific."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, aimed at a beginner, and close to the target length. It is probably a little over the ~402 words, and it omits the session duration and weekly frequency, though it implies three sessions."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural Spanish with correct punctuation. 'de sofá a trote' is a bit of a calque, and 'Un cansancio normal es esperable' is a little stiff."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Repite varias veces",
+    "issue": "It gives no total session duration (20-30 min) or number of repetitions, so the plan is vague.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Estira suavemente al terminar",
+    "issue": "Common beginner injuries (shin splints, knees) are not named, and shoe advice is only 'cómodas'.",
+    "beat": 9
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Recuerda: empieza despacio, alterna caminar y correr",
+    "issue": "The summary repeats points already made, and it also repeats 'ponte las zapatillas' from beat 10.",
+    "beat": 13
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "hands writing notebook",
+    "issue": "A generic clip that adds little.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "Total session length of 20-30 minutes",
+   "Three sessions per week stated explicitly",
+   "Names of common injuries (shin splints, knee pain)",
+   "Specific advice on choosing shoes, such as going to a specialist shop",
+   "Concrete week-by-week progression"
+  ],
+  "wrong_facts": [],
+  "would_publish": true,
+  "summary": "A clear, warm and practical beginner plan with a sensible structure and no factual errors. It is somewhat generic and lacks concrete durations, a weekly progression and injury detail.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "pasar de sofá a trote",
+     "problem": "Slightly calqued from the English 'couch to jog'.",
+     "better": "pasar del sofá a trotar"
+    },
+    {
+     "quote": "Un cansancio normal es esperable",
+     "problem": "Stiff register for narration.",
+     "better": "Es normal sentirse cansado"
+    },
+    {
+     "quote": "Sin prisa, el progreso llega solo.",
+     "problem": "Slightly vague.",
+     "better": "Sin prisa, el progreso llega solo con la constancia."
+    }
+   ]
+  },
+  "mean": 3.78,
+  "cost_usd": 0.023138,
+  "tokens": [
+   4889,
+   1336
+  ]
+ }
+}

@@ -1,0 +1,90 @@
+{
+ "legit": true,
+ "title": "How Vaccines Work: Training Your Immune System",
+ "description": "A vaccine shows your immune system a harmless copy of a germ. Learn how this training lets your body fight the real thing fast.",
+ "mood": "bright",
+ "theme": "sunrise",
+ "language": "en",
+ "voices": {
+  "narrator": "Ruth"
+ },
+ "beats": [
+  {
+   "id": "ce8afc1c",
+   "narration": "What if your body could practice fighting a disease before ever catching it? That is exactly what a vaccine does.",
+   "scene": {
+    "type": "kinetic_text",
+    "props": {
+     "text": "Practice fighting a disease before catching it",
+     "emphasis": "Practice"
+    }
+   },
+   "media": {
+    "duration": 7.083916666666667
+   }
+  },
+  {
+   "id": "ab490fa1",
+   "narration": "A vaccine contains a weakened or killed germ, or just a piece of it. It looks like a threat, but it cannot make you seriously ill.",
+   "scene": {
+    "type": "bullets",
+    "props": {
+     "heading": "Inside a vaccine",
+     "items": [
+      "Weakened germ",
+      "Killed germ",
+      "A piece of it"
+     ],
+     "style": "icons",
+     "accent": "coral",
+     "icons": [
+      "shield",
+      "germ",
+      "puzzle"
+     ]
+    }
+   },
+   "sfx": "pop",
+   "media": {
+    "duration": 8.731041666666666
+   }
+  },
+  {
+   "id": "c60a1056",
+   "narration": "Your immune system learns to recognize it and destroy it. Next time the real germ shows up, your body is ready.",
+   "scene": {
+    "type": "kinetic_text",
+    "props": {
+     "text": "Next time, your body is ready.",
+     "emphasis": "ready"
+    }
+   },
+   "sfx": "chime",
+   "media": {
+    "duration": 7.295041666666667
+   }
+  }
+ ],
+ "skills": [
+  "explainer-education",
+  "health-wellbeing"
+ ],
+ "region": "US",
+ "sources": [
+  {
+   "title": "Vaccine",
+   "url": "https://en.wikipedia.org/wiki/Vaccine",
+   "publisher": "Wikipedia",
+   "license": "CC BY-SA 4.0"
+  }
+ ],
+ "frame": {
+  "aspect": "9:16",
+  "resolution": "1080p",
+  "width": 1080,
+  "height": 1920,
+  "orientation": "portrait",
+  "platform": "tiktok"
+ },
+ "target_seconds": 30
+}

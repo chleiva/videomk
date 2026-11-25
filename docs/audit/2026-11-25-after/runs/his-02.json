@@ -1,0 +1,877 @@
+{
+ "id": "his-02",
+ "category": "history",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "Historia de la Revolución Mexicana",
+ "great": "Porfiriato, Madero y el Plan de San Luis (1910), Zapata, Villa, Huerta, Carranza, Constitución de 1917, fin del conflicto y legado; periodización clara, fechas correctas, personajes, consecuencias.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:55:33",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La Revolución Mexicana es un tema histórico estable y bien documentado; una enciclopedia ofrece una explicación precisa sin necesidad de información reciente.",
+  "queries": [
+   "Revolución Mexicana historia resumen",
+   "Revolución Mexicana 1910 1920 causas"
+  ],
+  "searches": 7,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": 7,
+  "skills": [
+   "history-story"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Un país contra la eterna reelección",
+    "La caída de Díaz y la presidencia de Madero",
+    "Decena Trágica y el legado que sigue vivo"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 24.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 20.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 16.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 16.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 11.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 7.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 7.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 3.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 8,
+  "grounding": {
+   "beats": 21,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 24284,
+  "n_sources": 8,
+  "n_fetched": 25,
+  "fetched": [
+   "Francisco I. Madero",
+   "Avenida Francisco I. Madero (Ciudad de México)",
+   "Plan de San Luis - Wikipedia, la enciclopedia libre",
+   "Nace Francisco I. Madero, antirreeleccionista y precursor de la ...",
+   "Congreso del Estado de San Luis Potosí on Facebook: \"🇲🇽 La #RevoluciónMexicana inició con un Plan... el #PlanDeSanLuis. ▪️Francisco I. #Madero estuvo pre…\"",
+   "Porfiriato e Inicio de la Revolución Mexicana - Gob MX",
+   "Porfiriato - Qué fue, historia, causas, ideología y final",
+   "Porfirio Diaz | UTRGV",
+   "México bajo Porfirio Díaz, 1876-1911 - La Revolución Mexicana y los Estados Unidos en las colecciones de la Biblioteca del Congreso | Exposiciones - La Bibliote",
+   "Francisco I. Madero - Wikipedia",
+   "Francisco I. Madero - Wikipedia, la enciclopedia libre",
+   "Francisco Madero | Mexican Revolution, Death, & President | Britannica",
+   "6 de noviembre de 1911, Francisco I. Madero asume la Presidencia de la República. | Secretaría de la Defensa Nacional | Gobierno | gob.mx",
+   "Francisco I. Madero; Biografa; Banco de Mxico",
+   "La presidencia de Madero y su asesinato - La Revolución Mexicana y los Estados Unidos en las colecciones de la Biblioteca del Congreso | Exposiciones - La Bibli",
+   "Elaboración del Plan de San Luis",
+   "¿Qué fue La Decena Trágica? - Causas y consecuencias",
+   "Ten Tragic Days - Wikipedia",
+   "Decena Trágica - Wikipedia, la enciclopedia libre",
+   "Decena Trágica: Línea del Tiempo | Preceden",
+   "9 de febrero de 1913, inicio de la Decena Trágica. | Secretaría de la Defensa Nacional | Gobierno | gob.mx",
+   "LA NO REELECCIÓN DEL PRESIDENTE DE LA ... - UNAM",
+   "Constitución Política de los Estados Unidos Mexicanos, que reforma ...",
+   "Reelección en México: breviario histórico",
+   "RESUMEN DE LA REFORMA POLÍTICO-ELECTORAL | Sitio para el Sistema de Consulta de la Reforma Electoral"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 20: kinetic_text replaced by a title card (at most 3 per video)",
+  "section 1: the section narration totals 206 words but a 1.3-minute section needs about 173 (at most 181). Trim it: shorter sentences, fewer words per beat, drop the least important details; keep the beats, the key points and do not go under 159 words",
+  "section 2: some scenes list items their narration never mentions: beat 5 (bullets): its narration never says ['Alianza ya desintegrada', 'Democráticos y otros líderes']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Francisco I. Madero\nFrancisco Ignacio Madero González (Parras de la Fuente, Coahuila; 30 de octubre de 1873 - Ciudad de México, 22 de febrero de 1913), conocido como Francisco I. Madero y apodado como «el Apóstol de la Democracia», fue un empresario, político y escritor mexicano que se desempeñó como presidente de México del 6 de noviembre de 1911 hasta el 19 de febrero de 1913 cuando fue derrocado y asesinado en un golpe de Estado militar conocido como la Decena Trágica.​\nFue uno de los más prominentes ideólogos y líderes de la Revolución mexicana, y logró derrocar a Porfirio Díaz y unificar de modo temporal varias fuerzas democráticas y antiporfiristas. Madero es considerado un personaje fundamental en la historia de México y símbolo de democracia, no reelección, libertad política y justicia social. Su legado se basa en la defensa del sufragio universal y la prohibición de la reelección de gobernantes para evitar las dictaduras.​\n\n## Avenida Francisco I. Madero (Ciudad de México)\nLa avenida Francisco I. Madero es una de las principales vías de acceso al centro histórico de la Ciudad de México. La avenida comienza a partir del Eje Central Lázaro Cárdenas, como continuación de la Avenida Juárez y corre en sentido de Poniente a Oriente desembocando en la plaza de la Constitución o Zócalo capitalino.\nDebe su nombre en honor de Francisco I. Madero, político antirreeleccionista y más tarde presidente de la República, uno de los personajes más importantes de la Revolución mexicana.\n\n## Plan de San Luis - Wikipedia, la enciclopedia libre\nEl Plan de San Luis fue un manifiesto fechado el 5 de octubre de 1910[\\[1\\]](#cite_note-1) por Francisco I. Madero, líder del movimiento revolucionario Mexicano y candidato presidencial por el Partido Nacional Antirreeleccionista, bajo el lema \"sufragio efectivo, no reelección\". Se llamó pitó bélico al pueblo mexicano a tomar las armas para el 20 de noviembre siguiente. El documento convocaba a levantarse en armas para la culminación de la dictadura de Porfirio Díaz y establecer elecciones [...] En 1910 el Partido Nacional Antirreeleccionista eligió como candidatos a la presidencia y vicepresidencia de México a Francisco I. Madero y a Francisco Vázquez Gómez, respectivamente. Ratificando la alianza con el Partido Nacionalista Democrático.[\\[6\\]](#cite_note-may46-6) Se consideraba a la fórmula adecuada ya que Madero era popular y Vázquez tenía un reconocido prestigio político.[\\[7\\]](#cit\n\n## Nace Francisco I. Madero, antirreeleccionista y precursor de la ...\na Porfirio Díaz, mientras que Madero fue trasladado a San Luis Potosí, donde posteriormente logró su libertad y huyó a San Antonio, Texas. Ahí publicó el 5 de octubre de 1910 el Plan de San Luis, mediante el cual desconocía la reelección de Porfirio Díaz y convocaba a establecer elecciones libres junto con el levantamiento en armas, establecido para el 20 de noviembre. Si bien ese día Madero entró al país al mando de un grupo armado, el contingente era reducido, y decidió regresar a Nueva [...] viable para contender en las elecciones presidenciales por el Partido Antirreeleccionista, en contra del candidato eterno: Porfirio Díaz. En enero de 1909, Madero fundó el Club Democrático Antirreeleccionista de San Pedro. Un mes después viajó a la Ciudad de México con Roque Estrada, José Vasconcelos y otros personajes para crear el Centro Antirreeleccionista de México.3 Su lema representativo fue\n\n## Congreso del Estado de San Luis Potosí on Facebook: \"🇲🇽 La #RevoluciónMexicana inició con un Plan... el #PlanDeSanLuis. ▪️Francisco I. #Madero estuvo pre…\"\n🚂Escapó el 6 de octubre de 1910, disfrazado en uniforme de mecánico de trenes hacia Texas, allá difundió el Plan de San Luis, fechado el 5 de octubre de 1910, esta fecha es tomada debido a que es el último día que Madero estuvo en suelo mexicano y así evitaría cualquier problema con las autoridades estadounidenses. 📜 El Plan llamó a levantarse en armas el #20DeNoviembre de 1910, dando así el inicio de la Revolución Mexicana. [Image: May be an image of text] [...] # Congreso del Estado de San Luis Potosí on Facebook: \"🇲🇽 La #RevoluciónMexicana inició con un Plan... el #PlanDeSanLuis. ▪️Francisco I. #Madero estuvo pre…\" 🇲🇽 La #RevoluciónMexicana inició con un Plan... el #PlanDeSanLuis. ▪️Francisco I. #Madero estuvo preso en #SanLuisPotosí en 1910, por su oposición al régimen porfirista, en el edificio que hoy ocupa el Centro de las Artes. [...] - Author: Congreso del Estado de San Luis Pot\n\n## Porfiriato e Inicio de la Revolución Mexicana - Gob MX\nlibres para los poderes federales ni estatales, los gobernan­ tes eran impuestos por el Presidente Díaz y su grupo, y el pueblo mexicano no tenía voz ni voto. Por otra parte, en el ámbito social, la riqueza se concentró en pocas manos, de tal manera, que la mayor parte de la sociedad mexicana vivía en condiciones de pobreza. El porfiriato se distinguió por ser un régimen represivo y recurrir a la fuerza para imponerse, cuando no funcionaban las prácticas de conciliación. [...] grandes inversiones de capital extranjero e incremento de la in­ dustria nacional. Asimismo, se logró sanear las finanzas públicas y mejorar el crédito nacional, alcanzando gran confianza en el exterior, y se organizó el sistema bancario.8 A pesar de los logros alcanzados en materia económica y administrativa, el porfiriato se caracterizó por ser un régimen que retrocedió en los ámbitos político y social. La libert\n\n## Porfiriato - Qué fue, historia, causas, ideología y final\n## Causas del Porfiriato El régimen de Porfirio Díaz tuvo como principal causa la Revolución de Tuxtepec de 1876, en la que el caudillo se opuso a la reelección de Sebastián Lerdo de Tejada y encabezó un golpe de Estado que forzó su renuncia. [...] El Porfiriato fue un período de la historia mexicana que tuvo lugar entre 1876 y 1911, en el que México estuvo gobernado por Porfirio Díaz. Fue una etapa de estabilidad política basada tanto en el establecimiento de acuerdos como en el autoritarismo, la represión política y la censura de prensa. Porfirio Díaz promovió la modernización, la educación laica y las inversiones extranjeras, especialmente en la industria y los ferrocarriles. [...] La censura de prensa violentaba la libertad de imprenta consagrada en la Constitución de 1857 y se amparaba en la llamada Ley Mordaza de 1882, que permitía al régimen de Porfirio Díaz ejercer una censura se\n\n## Porfirio Diaz | UTRGV\nDiaz then proceeded to south Texas, where he raised several hundred thousand dollars from private supporters to train a small army. With this army, Diaz crossed the river and took Matamoros with little resistance on April 1, 1876. From then until 1910, a period known as the Porfiriato, Diaz ruled México with an iron fist. Although he took pride in the massive construction of railroads and development of mines, that growth was achieved at fearsome cost. Diaz suppressed the civil liberties [...] se alcanzó a un coste terrible, pues se suprimieron las libertades civiles garantizadas por la Constitución de 1857 y millones de mexicanos fueron desahuciados de sus viviendas y tierras, expropiadas para abrir paso a las explotaciones comercial. Para el final de su régimen, la mayor parte los mexicanos era más pobre de lo que habían sido sus predecesores cuarenta años antes, lo que allanó el camin\n\n## México bajo Porfirio Díaz, 1876-1911 - La Revolución Mexicana y los Estados Unidos en las colecciones de la Biblioteca del Congreso | Exposiciones - La Bibliote\nHabía muchas razones por las que los porfiristas y sus administradores científicos, que creían en gobernar de acuerdo a principios “científicos”, preferían concentrarse en los avances económicos. La historia del México independiente había consistido de numerosas revoluciones entre facciones políticas hambrientas de riquezas y poder. Personalizando el régimen en una figura central, que ejercería por muchos años, los científicos esperaban evitar la clase de conflictos que habían plagado y [...] invertir en minas y factorías. Sin embargo, su gobierno hizo todo esto a expensas de derechos políticos básicos y control económico. Muchos críticos del régimen fueron encarcelados o asesinados. A medida que las décadas pasaban, Díaz se apoyaba cada vez más en el fraude político y en el ejército para mantenerse en el poder. [...] invertir en minas y factorías. Sin embargo, su gobierno hizo todo esto\n\n## Francisco I. Madero - Wikipedia\n| Madero, c. 1910–13 | | 37th President of Mexico | | In office 6 November 1911 – 19 February 1913 | | Vice President | José María Pino Suárez | | Preceded by | Francisco León de la Barra | | Succeeded by | Pedro Lascuráin | | | | Personal details | | Born | Francisco Ignacio Madero González (1873-10-30)30 October 1873 Parras de la Fuente, Coahuila, Mexico | | Died | 22 February 1913(1913-02-22) (aged 39) Mexico City, Mexico | | Cause of death | Assassination (gunshot wounds) | [...] Francisco Ignacio Madero González (Spanish pronunciation: ( \"Help:IPA/Spanish\"); 30 October 1873 – 22 February 1913) was a Mexican businessman, revolutionary, writer, politician, and statesman who served as the 37th president of Mexico from 1911 until he was deposed and assassinated in a coup d'état in February 1913. He came to prominence as an advocate for democracy and as an opponent of President and dicta\n\n## Francisco I. Madero - Wikipedia, la enciclopedia libre\nFrancisco Ignacio Madero González (Parras de la Fuente, Coahuila; 30 de octubre de 1873 - Ciudad de México, 22 de febrero de 1913), conocido como Francisco I. Madero y apodado como «el Apóstol de la Democracia», fue un empresario, político y escritor mexicano que se desempeñó como presidente de México del 6 de noviembre de 1911 hasta el 19 de febrero de 1913 cuando fue derrocado y asesinado en un golpe de Estado militar conocido como la Decena Trágica. [...] Apariencia De Wikipedia, la enciclopedia libre Para otros usos de este término, véase Francisco Madero. | Francisco I. Madero | | Madero como presidente, c. 1912 | | Presidente de los Estados Unidos Mexicanos | | 6 de noviembre de 1911-19 de febrero de 1913 | | Gabinete \"Gabinete (política)\") | Gabinete de Francisco I. Madero | | Vicepresidente | José María Pino Suárez | | Predecesor | Francisco León de la Barra | | Sucesor | Pedro L\n\n## Francisco Madero | Mexican Revolution, Death, & President | Britannica\nAfter being arrested and escaping to San Antonio, Texas, Madero declared himself the legitimate president of Mexico and called for an armed insurrection in October 1910. After assuming office in November 1911, Madero's administration was met with resistance from both conservatives and revolutionaries, leading to political instability. In February 1913, a military revolt broke out in Mexico City, and Madero was arrested and assassinated. [...] Francisco Madero (born Oct. 30, 1873, Parras, Mex.—died Feb. 22, 1913, Mexico City) was a Mexican revolutionary and president of Mexico (1911–13), who successfully ousted the dictator Porfirio Díaz by temporarily unifying various democratic and anti-Díaz forces. He proved incapable of controlling the reactions from both conservatives and revolutionaries that his moderate reforms provoked, however. [...] 1 Britannica SourceCreated from Britannica art\n\n## 6 de noviembre de 1911, Francisco I. Madero asume la Presidencia de la República. | Secretaría de la Defensa Nacional | Gobierno | gob.mx\nAsí, el 6 de noviembre de 1911, Francisco I. Madero asumió la presidencia de la República, cargo que ocupó poco más de 15 meses, y que fue uno de los símbolos más notables de la vida nacional. [...] Ante este panorama, el 7 de junio de 1911, Madero entró a la Ciudad de México, como Jefe de la Revolución triunfante, se ocupó de reorganizar su campaña política para participar junto con José María Pino Suarez, como candidato a la presidencia y vicepresidencia respectivamente, en las elecciones presidenciales del 15 de octubre de 1911, de las que resultaron vencedores. [...] Para 1911, Francisco I. Madero, se había convertido en una de las principales figuras de la política nacional, fue testigo del avance de la revolución en el norte del país y en algunas otras regiones, asimismo, participó en la firma de los Tratados de Ciudad Juárez, el 21 de mayo de ese año, en los que se estableció el f\n\n## Francisco I. Madero; Biografa; Banco de Mxico\ntheir resignation, while Huerta assumed the presidency. On February 22, 1913, Madero and Pino Suárez were taken to the Lecumberri penitentiary, and both were assassinated behind that building. The death of Madero, considered the apostle of democracy, led to a second stage of the Mexican Revolution, the goal of which was to bring back his ideals and to finish the work started by him. [...] Porfirio Díaz resigned to the presidency on May 25 and, the following day, León de la Barra took office. Madero returned to Mexico City on June 7, 1911, amid great celebrations. In August, the Constitutionalist Progressive Party was founded, on the basis of which he ran for presidency. Although he obtained a landslide victory in the elections of October, and his government was an example of democracy and political liberties that attempted to solve domestic problems using the law and [...] As the Ten Tra\n\n## La presidencia de Madero y su asesinato - La Revolución Mexicana y los Estados Unidos en las colecciones de la Biblioteca del Congreso | Exposiciones - La Bibli\nCuando el presidente Madero fue derrocado y asesinado en febrero de 1913, Carranza criticó a Huerta, lo acusó de asumir la presidencia ilegalmente y declaró a Coahuila en estado de rebelión contra su gobierno. El gobernador de Coahuila, Venustiano Carranza. Prints and Photographs Division, Biblioteca del Congreso Marcar como favorito: //www.loc.gov/exhibits/mexican-revolution-and-the-united-states/madero-presidency-sp.html#obj015 [...] El presidente Porfirio Díaz y su vice-presidente Ramón Corral dimitieron de sus cargos el 25 de mayo de 1911 y poco después abandonaron el país rumbo a París. De acuerdo con los relatos de testigos presenciales, México estaba rebosante de alegría. Sin embargo, cuando Madero llegó a tomar posesión de la silla presidencial (6 de noviembre de 1911), gran parte de su coalición ya se había desintegrado. Él había menospreciado al general Pascual Orozco, Jr., al \n\n## Elaboración del Plan de San Luis\nEl Plan de San Luis ha sido considerado como el detonante de la Revolución mexicana, pues no sólo fue un llamado a derrocar al gobierno de Porfirio Díaz, sino que también se expresaron en él los deseos de edificar un país democrático y de llevar a cabo una reforma en el campo. Este documento, elaborado por Francisco I. Madero el 5 de octubre de 1910, comenzó a planearse en San Luis Potosí, de allí su nombre, pero fue redactado en San Antonio, Texas, con la ayuda de su secretario particular, [...] Sin embargo, se le puso la fecha del último día que Madero pasó en suelo mexicano antes de trasladarse a los Estados Unidos, hacia donde huyó debido a la persecución por parte del régimen porfirista. Mediante este plan, Madero declaró ilegítimas laselecciones del 10 de julio e hizo un llamado a tomar las armas el día 20 de noviembre de ese año. La idea era, además de terminar con el mandato del \n\n## ¿Qué fue La Decena Trágica? - Causas y consecuencias\n## ¿Qué fue? Se llama Decena Trágica a un golpe militar contra el gobierno del presidente reformista Francisco Madero. Se inició el 9 de febrero de 1913 y finalizó el 19 de febrero con el derrocamiento del primer mandatario, que el día 22 fue asesinado junto a su vicepresidente, José María Pino Suárez. El propósito del golpe de Estado era ponerle fin al gobierno de Madero, al que se acusaba de haber provocado una gran inestabilidad política, e instaurar una dictadura militar. [...] - Félix Díaz Prieto (1868-1945): militar porfirista que firmó con Huerta el Pacto de la Embajada, que aseguró el éxito del golpe militar. - Gustavo Adolfo Madero (1875-1913): diputado mexicano, hermano de Francisco Madero, que descubrió la traición de Huerta, lo detuvo y pistola en mano lo llevó ante el presidente, que decidió dejarlo en libertad. Fue asesinado por soldados leales a Mondragón, durante los fest\n\n## Ten Tragic Days - Wikipedia\nThe Ten Tragic Days (Spanish: La Decena Trágica) is the name given to the multi-day coup d'état during the Mexican Revolution in Mexico City. It was staged by opponents of Francisco I. Madero, the democratically elected president of Mexico, between 9–19 February 1913. The coup instigated a second phase of the Mexican Revolution, after dictator Porfirio Díaz had been ousted and replaced in elections by Francisco I. Madero. The coup was carried out by general Victoriano Huerta and supporters of [...] ## External links [edit] - Album, Mexican Revolution This is an album of the Mexican Revolution by Manuel Ramos (1874–1945), which contains forty-three photographic prints illustrating damage in Mexico City during the February 1913 uprising against President Francisco I. Madero (1873–1913) also called La Decena Tragica. - Fotografos de la Decena Trágica [...] But the political drama continued.\n\n## Decena Trágica - Wikipedia, la enciclopedia libre\n5500 Se conoce como Decena Trágica al golpe de Estado militar que tuvo lugar del 9 al 19 de febrero\\ de 1913 para derrocar al presidente de México Francisco I. Madero. La sublevación se inició en la Ciudad de México, donde un grupo de disidentes comandado por el general Manuel Mondragón se levantó en armas y puso en libertad a los generales Bernardo Reyes y Félix Díaz, quienes estaban presos. Posteriormente, asaltaron algunas dependencias del gobierno y decretaron el estado de sitio.\\ [...] # Decena Trágica Decena Trágica Parte de Revolución mexicana Soldados sublevados en acción durante la Decena Trágica Fecha 9 de febrero de 1913-19 de febrero de 1913 (10 días) LugarCiudad de México Resultado Victoria Rebelde Traición de Victoriano Huerta Asesinato de: Francisco I. Madero y José María Pino Suárez Beligerantes Figuras políticas Comandantes Bajas México (Gobierno de Madero) Militares sub\n\n## Decena Trágica: Línea del Tiempo | Preceden\n1. La Decena Trágica comenzó el 9 de febrero de 1913 con el levantamiento de Félix Díaz y Bernardo Reyes contra el gobierno de Francisco I. Madero. 2. Los combates se concentraron en la Ciudad de México y provocaron graves daños, numerosas muertes y una profunda crisis política. 3. El general Victoriano Huerta, encargado de defender al gobierno, pactó con Félix Díaz mediante el Pacto de la Embajada. [...] 4. Francisco I. Madero y el vicepresidente José María Pino Suárez renunciaron el 19 de febrero de 1913 bajo presión militar. 5. Madero y Pino Suárez fueron asesinados el 22 de febrero de 1913, tras lo cual Victoriano Huerta consolidó su dictadura. [...] - Use Cases - Resources - Pricing La Decena Trágica fue un periodo de diez días de rebelión y violencia en la Ciudad de México que culminó con el derrocamiento y asesinato del presidente Francisco I. Madero. Más Menos Crea una línea de t\n\n## 9 de febrero de 1913, inicio de la Decena Trágica. | Secretaría de la Defensa Nacional | Gobierno | gob.mx\nSe conoce como Decena Trágica a los diez días de continuos combates, desarrollados del 9 al 18 de febrero de 1913, en la Ciudad de México; por la sublevación de los Generales Retirados Manuel Mondragón, Bernardo Reyes, Félix Díaz y una fracción del Ejército Federal en contra del Gobierno de Francisco I. Madero. [...] Durante este hecho, el General Victoriano Huerta, con ayuda del embajador estadounidense Henry Lane Wilsonfue nombrado Comandante Militar de la plaza, por lo que tomó prisionero al Presidente Madero a quien lo obligó a renunciar a su cargo y con ello usurpar el Poder Ejecutivo.\n\n## Francisco I. Madero - Wikipedia, la enciclopedia libre\nFue uno de los más prominentes ideólogos y líderes de la Revolución mexicana, y logró derrocar a Porfirio Díaz y unificar de modo temporal varias fuerzas democráticas y antiporfiristas. Madero es considerado un personaje fundamental en la historia de México y símbolo de democracia, no reelección, libertad política y justicia social. Su legado se basa en la defensa del sufragio universal y la prohibición de la reelección de gobernantes para evitar las dictaduras. ## Biografía [editar] [...] No Reelección, por fin causaría la renuncia del presidente Porfirio Díaz en 1911, seguida de una guerra civil de diez años en la que morirían más de un millón de mexicanos. [...] Francisco I. Madero asumió como Presidente de los Estados Unidos Mexicanos el 6 de noviembre de 1911 tras ganar los primeros comicios relativamente libres desde la Reforma. Hombre de gran idealismo pero con escasa experiencia \n\n## Nace Francisco I. Madero, antirreeleccionista y precursor de la ...\nviable para contender en las elecciones presidenciales por el Partido Antirreeleccionista, en contra del candidato eterno: Porfirio Díaz. En enero de 1909, Madero fundó el Club Democrático Antirreeleccionista de San Pedro. Un mes después viajó a la Ciudad de México con Roque Estrada, José Vasconcelos y otros personajes para crear el Centro Antirreeleccionista de México.3 Su lema representativo fue “Sufragio efectivo. No reelección.” En junio de 1910 Madero emprendió un viaje con Félix F. [...] a Porfirio Díaz, mientras que Madero fue trasladado a San Luis Potosí, donde posteriormente logró su libertad y huyó a San Antonio, Texas. Ahí publicó el 5 de octubre de 1910 el Plan de San Luis, mediante el cual desconocía la reelección de Porfirio Díaz y convocaba a establecer elecciones libres junto con el levantamiento en armas, establecido para el 20 de noviembre. Si bien ese día Madero entró \n\n## LA NO REELECCIÓN DEL PRESIDENTE DE LA ... - UNAM\n[El artículo 83 de la Constitución Política de los Estados Unidos Mexi­ canos sería reformado en dos ocasiones más, a través de sendos decretos de reforma: el núm. 203 y el núm. 216, publicados en el Diario Oficial de la Fede­ ración del 9 de agosto de 2012 y del 10 de febrero de 2014, respectivamente. La primera, para modificar los términos del carácter “provisional”, para quedar como sigue: El Presidente entrará a ejercer su encargo el 1o. de diciembre y durará en él seis años. El ciudadano [...] No conozco con cuántos votos se aprobó el artículo 83, debido a que el dato no se encuentra asentado en el Diario de los Debates, pero ese artículo no suscitó mayor discusión. El Congreso Constituyente fue antirreeleccionista: se nutría de la experiencia de los últimos decenios y del movimiento made­ rista. Se sabía, de antemano, que uno de los principios más importantes de la nueva Constituci\n\n## Constitución Política de los Estados Unidos Mexicanos, que reforma ...\nese puesto. Texto Vigente D.O.F. 10 de febrero de 2014 N. DE E. EN RELACIÓN CON LA ENTRADA EN VIGOR DEL PRESENTE ARTÍCULO, VÉASE DÉCIMO QUINTO TRANSITORIO DEL DECRETO QUE MODIFICA LA CONSTITUCIÓN. (REFORMADO, D.O.F. 10 DE FEBRERO DE 2014) Art. 83.- El Presidente entrará a ejercer su encargo el 1o. de octubre y durará en él seis años. El ciudadano que haya desempeñado el cargo de Presidente de la República, electo popularmente, o con el carácter de interino o sustituto, o asuma provisionalmente [...] ese puesto. Texto derivado de la reforma publicada en el D.O.F. 9 de agosto de 2012 (REFORMADO, D.O.F. 9 DE AGOSTO DE 2012) Art. 83.- El Presidente entrará a ejercer su encargo el 1o. de diciembre y durará en él seis años. El ciudadano que haya desempeñado el cargo de Presidente de la República, electo popularmente, o con el carácter de interino o substituto, o asuma provisionalmente la titul\n\n## Reelección en México: breviario histórico\nde 1927 en la matanza de Huitzilac). El general Obregón victimado ya en su condición de presidente electo el 17 julio de 1928 (Gaceta Parlamentaria, 2009, pp. 42-46). Meses después, se funda el Partido Nacional Revolucionario (PNR), y fue esa formación política la que en 1932 propone directamente a la Cámara de Diputados la reforma al 83 constitucional, para impedir de manera definitiva la reelección presidencial. Sin embargo, aprovechando esa iniciativa, sin mediar ningún argumento [...] en torno a este concepto y su previsión histórica nacional, surge a la luz la reforma política",
+ "plan": {
+  "title": "Revolución Mexicana: de Madero a un nuevo país",
+  "description": "La Revolución Mexicana nació de una pregunta sencilla: ¿puede un país vivir décadas bajo un mismo gobernante? Este video recorre cómo Francisco I. Madero desafió a Porfirio Díaz, cómo se rompió la unidad revolucionaria y qué huella dejó.",
+  "language": "es",
+  "mood": "tense",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "c9317cbf",
+    "narration": "¿Qué pasa cuando un empresario de provincia se atreve a decirle no al hombre que lleva décadas mandando en todo un país? Esa es la historia de Francisco I. Madero.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Francisco I. Madero retrato",
+      "alt": "Retrato de Francisco I. Madero",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "Un país contra la eterna reelección"
+   },
+   {
+    "id": "5c2fb763",
+    "narration": "Madero nació el 30 de octubre de 1873 en Parras de la Fuente, Coahuila. Fue empresario, político y escritor. Nada en su vida parecía anunciar a un enemigo del poder.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Francisco I. Madero",
+      "items": [
+       "Nació el 30 de octubre de 1873",
+       "Parras de la Fuente, Coahuila",
+       "Empresario, político y escritor"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "calendar",
+       "map",
+       "book"
+      ]
+     }
+    }
+   },
+   {
+    "id": "386a600b",
+    "narration": "Para entenderlo, hay que mirar el Porfiriato. En 1876, Díaz toma el poder tras Tuxtepec. Después, Díaz gobierna México por décadas. En 1911, llega el fin del régimen.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "El Porfiriato",
+      "events": [
+       {
+        "date": "1876",
+        "label": "Díaz toma el poder tras Tuxtepec"
+       },
+       {
+        "date": "1876-1911",
+        "label": "Díaz gobierna México"
+       },
+       {
+        "date": "1911",
+        "label": "Fin del régimen"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "35547947",
+    "narration": "Hubo trenes, minas e inversión extranjera. Pero también censura de prensa, represión y fraude. Los gobernantes eran impuestos, el pueblo no tenía voz ni voto y la riqueza estaba en pocas manos.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Porfirio Díaz retrato",
+       "ferrocarril México siglo XIX",
+       "hacienda mexicana porfiriato"
+      ],
+      "alt": "Imágenes del Porfiriato"
+     }
+    }
+   },
+   {
+    "id": "d6650b6f",
+    "narration": "Madero respondió con una idea simple, que cabía en cuatro palabras: sufragio efectivo, no reelección. En 1909 fundó clubes antirreeleccionistas y ayudó a crear el Centro Antirreeleccionista de México.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Sufragio efectivo, no reelección.",
+      "emphasis": "no reelección"
+     }
+    }
+   },
+   {
+    "id": "9b12bf3f",
+    "narration": "Su fuerza fue unir, de modo temporal, a varias fuerzas democráticas y antiporfiristas. Por defender el voto y la no reelección, lo llamaron «el Apóstol de la Democracia».",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Una causa común",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Fuerzas democráticas",
+        "icon": "users"
+       },
+       {
+        "id": "b",
+        "label": "Antiporfiristas",
+        "icon": "flag"
+       },
+       {
+        "id": "c",
+        "label": "Madero",
+        "icon": "star"
+       },
+       {
+        "id": "d",
+        "label": "Sufragio y no reelección",
+        "icon": "vote"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "c"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "15a05c95",
+    "narration": "Ya no era solo un hombre contra un presidente. Era un país entero preguntándose si el poder puede quedarse para siempre. Y Madero estaba por llamarlo a las armas.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "multitud México 1910 revolución",
+      "alt": "Multitud en México en 1910",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "c3556b76",
+    "narration": "Madero llamó a las armas con el Plan de San Luis. Pronto surgieron levantamientos: Orozco y Villa en el norte, Zapata en Morelos.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Francisco I. Madero retrato",
+       "Pancho Villa revolucionario",
+       "Emiliano Zapata retrato"
+      ],
+      "alt": "Madero, Villa y Zapata"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "La caída de Díaz y la presidencia de Madero"
+   },
+   {
+    "id": "4dd8fdbf",
+    "narration": "Con esa coalición de fuerzas antiporfiristas, Madero logró lo impensable. El 25 de mayo de 1911, Porfirio Díaz renunció y salió del país rumbo a París.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Porfirio Díaz exilio París",
+      "alt": "Porfirio Díaz en 1911",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "8e2fed03",
+    "narration": "Primero, el Plan de San Luis. Después, el 7 de junio de 1911, Madero entra a la capital como jefe de la revolución triunfante. Por fin, asume la presidencia el 6 de noviembre.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Del llamado a las armas al poder",
+      "events": [
+       {
+        "date": "1910",
+        "label": "Plan de San Luis"
+       },
+       {
+        "date": "7 jun 1911",
+        "label": "Madero entra a la capital"
+       },
+       {
+        "date": "6 nov 1911",
+        "label": "Madero asume la presidencia"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "8760505c",
+    "narration": "Su gobierno duró del 6 de noviembre de 1911 al 19 de febrero de 1913. Apenas unos quince meses.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "15",
+      "unit": "meses",
+      "label": "Duración de la presidencia de Madero",
+      "delta": "1911-1913"
+     }
+    }
+   },
+   {
+    "id": "1091530b",
+    "narration": "Pero la unidad era frágil. Cuando Madero tomó posesión, buena parte de su coalición ya se había desintegrado. Los democráticos y otros líderes habían coincidido solo contra Díaz.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Una unidad temporal",
+      "items": [
+       "Coalición contra Díaz",
+       "Alianza ya desintegrada",
+       "Democráticos y otros líderes"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "4b4046c0",
+    "narration": "Además, distintos grupos esperaban cambios más profundos, como la reforma del campo. Conservadores y revolucionarios resistieron sus reformas moderadas, y el país vivió inestabilidad política.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "campesinos trabajando campo",
+      "alt": "agricultores en el campo"
+     }
+    }
+   },
+   {
+    "id": "52350470",
+    "narration": "Entonces surge la gran pregunta: ¿bastaba la democracia política para resolver las demandas del país?",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "¿Bastaba la democracia política para resolver las demandas del país?",
+      "emphasis": "democracia política"
+     }
+    }
+   },
+   {
+    "id": "f8cc0251",
+    "narration": "Diez días bastaron para destruir una democracia joven. El 9 de febrero de 1913 estalla la sublevación en la capital. El 19, Madero es derrocado. El 22, Madero es asesinado.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Diez días que cambiaron México",
+      "events": [
+       {
+        "date": "9 feb 1913",
+        "label": "Estalla la sublevación en la capital"
+       },
+       {
+        "date": "19 feb 1913",
+        "label": "Madero es derrocado"
+       },
+       {
+        "date": "22 feb 1913",
+        "label": "Madero es asesinado"
+       }
+      ]
+     }
+    },
+    "sfx": "riser",
+    "chapter": "Decena Trágica y el legado que sigue vivo"
+   },
+   {
+    "id": "1dbfbfa4",
+    "narration": "Todo empieza con una sublevación militar en la Ciudad de México. El general Huerta, que debía defender al gobierno, pacta con Félix Díaz en el Pacto de la Embajada. Así queda el golpe consumado.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo cayó Madero",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Sublevación militar"
+       },
+       {
+        "id": "b",
+        "label": "Pacto de la Embajada"
+       },
+       {
+        "id": "c",
+        "label": "Golpe consumado"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "rose",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "d3616d83",
+    "narration": "Madero y su vicepresidente, José María Pino Suárez, renunciaron bajo presión militar. Días después fueron asesinados, y Huerta consolidó una dictadura. Justo lo que Madero había combatido.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Decena Trágica 1913 Ciudad de México ruinas",
+      "alt": "Daños en la Ciudad de México en 1913",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "1787539d",
+    "narration": "Pero su muerte lo transformó. Madero, llamado el Apóstol de la Democracia, se volvió símbolo de democracia, libertad política y justicia social.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Madero murió, pero se volvió símbolo de democracia y justicia social.",
+      "emphasis": "símbolo"
+     }
+    }
+   },
+   {
+    "id": "c9353ee1",
+    "narration": "Su legado es claro: defender el sufragio universal y prohibir la reelección de gobernantes, para evitar dictaduras. Esa idea sigue en la Constitución, en el artículo 83.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "El legado de Madero",
+      "items": [
+       "Sufragio universal",
+       "Prohibición de la reelección",
+       "Evitar dictaduras"
+      ],
+      "style": "spotlight",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "cf9a3f6b",
+    "narration": "Hoy su nombre sigue vivo en la avenida Francisco I. Madero, una de las principales vías del centro histórico de la Ciudad de México, que desemboca en el Zócalo.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Avenida Francisco I. Madero Ciudad de México",
+       "Zócalo Ciudad de México plaza",
+       "Centro Histórico Ciudad de México calle peatonal"
+      ],
+      "alt": "Avenida Madero y el Zócalo"
+     }
+    }
+   },
+   {
+    "id": "6004e5a2",
+    "narration": "La Revolución Mexicana dejó una pregunta que sigue abierta: ¿cómo limitar el poder? Madero respondió con votos libres y sin reelección. Cuidar esa respuesta sigue siendo tarea de todos.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "La Revolución Mexicana dejó una pregunta que sigue abierta",
+      "subtitle": ""
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Francisco I. Madero",
+    "url": "https://es.wikipedia.org/wiki/Francisco_I._Madero",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Avenida Francisco I. Madero (Ciudad de México)",
+    "url": "https://es.wikipedia.org/wiki/Avenida_Francisco_I._Madero_(Ciudad_de_M%C3%A9xico)",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Plan de San Luis - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Plan_de_San_Luis",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Porfiriato e Inicio de la Revolución Mexicana - Gob MX",
+    "url": "https://www.gob.mx/cms/uploads/attachment/file/3174/fasciculo_4_momentos_estelares.pdf",
+    "publisher": "gob.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Porfiriato - Qué fue, historia, causas, ideología y final",
+    "url": "https://concepto.de/porfiriato",
+    "publisher": "concepto.de",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Francisco I. Madero - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Francisco_I._Madero",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Francisco Madero | Mexican Revolution, Death, & President | Britannica",
+    "url": "https://www.britannica.com/biography/Francisco-Madero",
+    "publisher": "britannica.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Decena Trágica: Línea del Tiempo | Preceden",
+    "url": "https://www.preceden.com/timeline/decena-tragica",
+    "publisher": "preceden.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "history-story"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 65.2,
+  "before_first_script_call_s": 28.7,
+  "script_s": 36.5
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.27862,
+  "research": 0.00353,
+  "search_api": 0.056,
+  "total": 0.33841
+ },
+ "calls": {
+  "small": 4,
+  "big": 7,
+  "tools": 7
+ },
+ "tokens": {
+  "in": 121833,
+  "out": 11079
+ },
+ "rules": {
+  "length": {
+   "words": 573,
+   "expected_words": 537,
+   "ratio": 1.067,
+   "beats": 21,
+   "expected_beats": 17,
+   "est_speech_s": 258.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Qué pasa cuando un empresario de provincia se atreve a decirle no al hombre que lleva décadas mandando en todo un país? Esa es la historia de Francisco I. Madero.",
+   "close_text": "La Revolución Mexicana dejó una pregunta que sigue abierta: ¿cómo limitar el poder? Madero respondió con votos libres y sin reelección. Cuidar esa respuesta sigue siendo tarea de todos."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "image": 4,
+    "bullets": 3,
+    "timeline": 3,
+    "gallery": 3,
+    "kinetic_text": 3,
+    "diagram": 2,
+    "counter": 1,
+    "clip": 1,
+    "title": 1
+   },
+   "max_run": 1,
+   "entropy": 3.01,
+   "top_type": "image",
+   "top_share": 0.19,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 10,
+   "ungrounded_numbers": [],
+   "entities": 27,
+   "ungrounded_entities": [
+    "Morelos",
+    "Villa",
+    "Zapata"
+   ],
+   "ungrounded_share": 0.081,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "apostol de la democracia",
+    "count": 2
+   },
+   {
+    "phrase": "el plan de san",
+    "count": 2
+   },
+   {
+    "phrase": "plan de san luis",
+    "count": 2
+   },
+   {
+    "phrase": "la ciudad de mexico",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1,
+   "section": 1,
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 8,
+   "fetched": 25,
+   "notes_len": 24284,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.05,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 4 (gallery): its narration never says ['ferrocarril México siglo XIX', 'hacienda mexicana porfiriato']",
+   "beat 12 (bullets): its narration never says ['Alianza ya desintegrada', 'Democráticos y otros líderes']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most dates match the notes, but the script misdates Díaz's resignation (it was 25 May, which is correct, though it is not in the notes). It omits that Madero did not enter the capital until 7 June, and it is vague about 'Orozco y Villa'. The notes also describe Madero's plan as a call to arms on 20 November 1910, which the script never states."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The brief was the history of the whole Revolution, but the script is really a Madero biography. It has almost nothing on Zapata's Plan de Ayala, Villa, Carranza, the 1917 Constitution, the Huerta war, or how the conflict ended."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The sequence is clear and the three chapters flow, but it stops in 1913 and the narration is lopsided. The ending jumps to the legacy and a street name, with no periodization of the Revolution."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about a provincial businessman defying a ruler is engaging, and the close poses a thoughtful question about limiting power, though the 'tarea de todos' line is a little moralizing."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The register is suitably narrative and accessible for an explainer, with a few flat spots in the timeline-reading beats."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, but several are filler: the 15-month counter, the diagram of 'Fuerzas democráticas' pointing at Madero, and a generic clip of peasants working. The timeline in beat 3 is trivial, and the image queries for the three key figures are generic."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The framing around Madero is distinctive, and the mention of article 83 and Avenida Madero is concrete. Much of the rest is paraphrase of the notes, with robotic lines like 'Díaz toma el poder tras Tuxtepec'."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "The script does not deliver the history of the Mexican Revolution that was requested. It ignores most of the required points (Zapata, Villa, Carranza, the 1917 Constitution, the end of the conflict) and covers only the 1910-1913 phase, although it is roughly on length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is generally fluent and correct, with a few stiff or repetitive constructions."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "critical",
+    "quote": "Huerta consolidó una dictadura. Justo lo que Madero había combatido.",
+    "issue": "The story stops at 1913. Carranza, the Constitutionalists, Villa and Zapata's war, the Constitución de 1917 and the end of the fighting are all missing.",
+    "beat": 17
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "Esa es la historia de Francisco I. Madero.",
+    "issue": "The request was the history of the Revolution, but the script is framed as a biography of Madero.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Pronto surgieron levantamientos: Orozco y Villa en el norte, Zapata en Morelos.",
+    "issue": "Zapata rose up later, after Madero took power, and it was against Madero that he issued the Plan de Ayala. The phrasing implies they were part of the 1910-11 coalition without any nuance.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Esa idea sigue en la Constitución, en el artículo 83.",
+    "issue": "Article 83 is correct, but it is not in the notes and is stated without context. It was reinstated in the 1917 Constitution, which the script never mentions.",
+    "beat": 19
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Después, Díaz gobierna México por décadas. En 1911, llega el fin del régimen.",
+    "issue": "The narration only reads out the timeline and adds nothing. The present tense is also awkward for past events.",
+    "beat": 3
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Duración de la presidencia de Madero",
+    "issue": "A counter used for a trivial number, and 'unos quince meses' is imprecise.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Conservadores y revolucionarios resistieron sus reformas moderadas",
+    "issue": "The script never explains the agrarian question or the Plan de Ayala, so Zapata's motive stays vague. It names Villa and Zapata but gives them no content.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "Zapata and the Plan de Ayala (Tierra y Libertad)",
+   "Pancho Villa and the División del Norte",
+   "Venustiano Carranza and the Constitutionalists against Huerta",
+   "The Constitución de 1917",
+   "The end of the armed phase (1920) and the legacy",
+   "The call to arms of 20 November 1910",
+   "An estimate of the human cost of the Revolution"
+  ],
+  "wrong_facts": [
+   "Orozco and Villa as northern uprisings is imprecise but acceptable; Zapata's uprising was not part of the 1910 phase. (Unverified, but true: Díaz resigned on 25 May 1911.)"
+  ],
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Por fin, asume la presidencia el 6 de noviembre.",
+     "problem": "Slightly stiff present tense in a narrative, and a calque of 'finally'",
+     "better": "Y el 6 de noviembre asumió la presidencia."
+    },
+    {
+     "quote": "Díaz toma el poder tras Tuxtepec.",
+     "problem": "Telegraphic style that is unclear without context",
+     "better": "En 1876 Díaz se hizo con el poder tras la rebelión de Tuxtepec."
+    },
+    {
+     "quote": "Los democráticos y otros líderes habían coincidido solo contra Díaz.",
+     "problem": "Vague, repeated wording",
+     "better": "Solo los unía su oposición a Díaz."
+    }
+   ]
+  },
+  "would_publish": false,
+  "summary": "The script is fluent and has a good hook, but it is a Madero biography that stops in 1913 rather than the history of the Mexican Revolution. Zapata, Villa, Carranza, the 1917 Constitution and the end of the conflict are absent.",
+  "mean": 3.11,
+  "cost_usd": 0.040018,
+  "tokens": [
+   9549,
+   2092
+  ]
+ }
+}

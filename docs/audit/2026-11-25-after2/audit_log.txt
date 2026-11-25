@@ -1,0 +1,25 @@
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=23
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=23
+already spent in saved results: $0.000 (cap $1.6)
+[1/8] cmp-01   ok         run $0.066   running total $0.236   41s
+[2/8] hea-01   ok         run $0.137   running total $0.445   61s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=25
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+[3/8] how-02   ok         run $0.149   running total $0.575   79s
+[4/8] bio-03   ok         run $0.124   running total $0.647   88s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=4
+WARNING:root:GROUNDING flagged=1 repaired=1 candidates=5 checked=5
+[5/8] mkt-01   ok         run $0.051   running total $0.851   106s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=1 checked=1
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=38
+[6/8] rec-01   ok         run $0.155   running total $0.935   116s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=1 checked=1
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=3 sources=6
+[7/8] kid-01   ok         run $0.085   running total $0.958   124s
+[8/8] opi-02   ok         run $0.159   running total $1.170   178s
+
+DONE. total spent $1.170 of $1.6

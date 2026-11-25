@@ -1,0 +1,656 @@
+{
+ "id": "cmp-01",
+ "category": "comparison (A vs B)",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "React vs Vue: which should I learn first?",
+ "great": "Fair comparison: learning curve, ecosystem, jobs, performance, tooling, philosophy; a recommendation by situation; no tribalism; accurate.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:12:31",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "Framework popularity, job demand, and ecosystem status shift over time, so an accurate comparison for a video made in late 2026 needs recent sources rather than training-data impressions.",
+  "queries": [
+   "React vs Vue 2026 beginners",
+   "best frontend framework to learn 2026"
+  ],
+  "searches": 2,
+  "reads": 0,
+  "iterations": 2,
+  "seconds": 9.2,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5833,
+  "n_sources": 5,
+  "n_fetched": 6,
+  "fetched": [
+   "React vs Vue in 2026: Which Frontend Framework Should You Choose?",
+   "Vue vs React: Latest Comparison in 2026 | Epicmax",
+   "React vs Vue vs Angular Which is Best For Beginners (2026)",
+   "React, Vue, or Svelte in 2026: A Practical Framework Comparison for Modern Apps | SVAR Blog",
+   "12 Best Frontend Frameworks for Web Applications in 2026",
+   "Best Frontend Frameworks 2026: Every Major JavaScript Framework You Need to Know"
+  ],
+  "research_agent_cost_usd": 0.0008193
+ },
+ "warnings": [
+  "beat 11: checklist twice in a row"
+ ],
+ "notes": "## React vs Vue in 2026: Which Frontend Framework Should You Choose?\nReact dominates in job market share (65%) while Vue excels in developer satisfaction and learning curve Vue 3 Composition API and React Hooks offer similar patterns — the gap has narrowed significantly React's ecosystem is larger; Vue's is more cohesive with official routing and state management For new projects, choose React for enterprise/hiring ease, Vue for rapid development and simplicity [...] Vue: Single-file components (`.vue` files) with template, script, and style in one file feel natural. The official docs are exceptional. A developer with HTML/CSS/JS knowledge can be productive in days. React: JSX requires a mental shift (mixing HTML in JavaScript). State management has more options (and thus more decisions). The ecosystem's breadth can overwhelm newcomers. Try both frameworks in CoderFile's JavaScript editor to feel the difference firsthand. ## Performance Comparison [...] I\n\n## Vue vs React: Latest Comparison in 2026 | Epicmax\nVue is generally easier to start with. Its template syntax looks like the HTML you already know, the official docs walk you through one recommended path, and you can adopt it incrementally in an existing project. React is approachable too, but JSX, hooks rules, and the number of ecosystem decisions (routing, state, data fetching) put more on a beginner's plate in the first weeks. ### Is Vue faster than React? [...] The syntax reflects the same split. React embeds markup in JavaScript through JSX; Vue keeps HTML-like templates, JavaScript logic, and scoped styles together in Single-File Components. Neither approach is objectively better — but they attract different tastes, and they shape how quickly new developers get productive. ## React vs Vue Learning Curve: Which Is Easier to Learn? [...] That said, the curves converge. Once a team is past the first month, productivity in both framewo\n\n## React vs Vue vs Angular Which is Best For Beginners (2026)\nWhy it’s risky: Beginners often build a React app, realize they need to change pages, and then freeze because React doesn’t include a router by default. They end up patching together random tools that eventually break. What to do instead: If you choose React, use a meta-framework like Next.js that bundles the necessary tools for you, or stick to Vue which handles this out of the box. ## Technology Comparison Table [...] To make your decision incredibly simple, here is how the big three stack up against each other for a typical small business or startup. | | | | | | --- --- | Technology | Best For | Difficulty | Cost | Business Rating | | Vue.js | Small apps, Prototypes & Portals | Easy | Low | ⭐⭐⭐⭐⭐ | | React.js | Startups, SaaS, Scalable apps | Medium | Medium | ⭐⭐⭐⭐ | | Angular | Complex enterprise apps, Banks | Hard | High | ⭐⭐⭐ | [...] Remember the core takeaways: Angular is an absol\n\n## React, Vue, or Svelte in 2026: A Practical Framework Comparison for Modern Apps | SVAR Blog\n| Dimension | React | Vue.js | Svelte | --- --- | | Learning Curve | Moderate-High: JSX, hook rules, state boilerplate | Low-Moderate: Intuitive HTML/CSS templates, v-model | Lowest: Close to vanilla JS/HTML, intuitive Runes | | Performance & Bundles | High Performance. Virtual DOM; ~148 KB avg bundle; auto-memoized in v19 | Balanced & Hybrid. Virtual DOM/Vapor Mode; ~94 KB avg bundle | Peak Performance: Direct DOM, no VDOM; ~31 KB avg bundle | [...] Vue uses Single File Components (`.vue` files), combining HTML templates, JavaScript logic, and scoped CSS into a single document. Developers transitioning from standard web development usually find this structure intuitive. Two-way data binding via v-model eliminates repetitive state handling code, making form-heavy applications fast to build. [...] Analyzing discussions across developer communities (such as Reddit’s r/reactjs, r/vuejs, and\n\n## 12 Best Frontend Frameworks for Web Applications in 2026\n| Framework | Best for | Main strength | Think again if | --- --- | | React | Complex product interfaces | Large ecosystem | You need built-in full-stack tools | | Angular | Large enterprise systems | Strong structure | Your team needs a fast, simple start | | Vue.js | Small to mid-sized products | Easy to learn | You need the largest possible ecosystem | | Next.js | SEO-focused React apps | Server and static rendering | Your app is fully private and simple | [...] React is a safe choice for many business apps because it has a large ecosystem. Angular is strong for large and structured enterprise systems. Vue is easy to learn and works well for many small and mid-sized products. Next.js is useful when a React project also needs public pages, search visibility, and fast first loads. [...] ### Which frontend framework is easiest to learn? Vue and Alpine.js are often easier for people who k\n\n## Best Frontend Frameworks 2026: Every Major JavaScript Framework You Need to Know\nBest for Newbies? Popularity (Usage % from 2025 Surveys) : React (most jobs & resources) Beginner Difficulty : Alpine.js or Vue.js (easiest start) Best For : Vue.js (versatile & simple) Performance Focus : Astro or Qwik (speed wins) Bundle Size (Typical Minified) : Preact or Astro (smallest) Ecosystem & Community : React (biggest support) Job Market Demand : React (most opportunities) Backed By : Tie (depends on trust) [...] Why Choose It: 80-95% less JS than equivalent sites, better mobile performance, and incremental adoption. ## Choosing the Best Frontend Framework for Your 2026 Project Your decision hinges on priorities: React for jobs and ecosystem depth, Angular for enterprise structure, Vue for enjoyment and balance, Svelte/Solid for raw performance, Astro/Qwik for content/SEO dominance, or lighter tools like Alpine/Preact for minimalism. [...] ### React: The Undisputed Leader for",
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "React and Vue are two of the most popular frontend frameworks, and this video compares them on learning curve, jobs, and ecosystem. You will leave with a clear recommendation based on your situation.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "d27f941c",
+    "narration": "You want to build websites, and everyone tells you something different. Learn React. No, learn Vue. Pick wrong, and you might waste weeks. So how do you actually choose?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "React vs Vue: Which First?",
+      "subtitle": "Choosing your first frontend framework"
+     }
+    },
+    "sfx": "whoosh",
+    "chapter": "The decision"
+   },
+   {
+    "id": "24aa05d5",
+    "narration": "Here is the decision. We will compare them on three things: how easy they are to learn, how many jobs they offer, and how big their ecosystems are.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "book",
+        "label": "Learning curve"
+       },
+       {
+        "icon": "money",
+        "label": "Jobs"
+       },
+       {
+        "icon": "cloud",
+        "label": "Ecosystem"
+       }
+      ],
+      "title": "Three criteria"
+     }
+    }
+   },
+   {
+    "id": "38d25b58",
+    "narration": "Start with learning. Vue is generally easier to begin with. Its templates look like the HTML you already know, and the official docs walk you down one recommended path.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why Vue feels gentle",
+      "items": [
+       "Templates look like HTML",
+       "Official docs, one clear path",
+       "Adopt it bit by bit"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "code",
+       "book",
+       "puzzle"
+      ]
+     }
+    },
+    "chapter": "Learning curve"
+   },
+   {
+    "id": "ff6e1d9b",
+    "narration": "Vue also uses single-file components. Template, script, and style live together in one dot vue file. Someone who knows HTML, CSS, and JavaScript can be productive in days.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "A Vue single-file component",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Template",
+        "icon": "code"
+       },
+       {
+        "id": "s",
+        "label": "Script",
+        "icon": "cog"
+       },
+       {
+        "id": "c",
+        "label": "Style",
+        "icon": "palette"
+       },
+       {
+        "id": "f",
+        "label": "One .vue file",
+        "icon": "file"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "f"
+       ],
+       [
+        "s",
+        "f"
+       ],
+       [
+        "c",
+        "f"
+       ]
+      ],
+      "style": "pills",
+      "accent": "emerald",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "182532a3",
+    "narration": "React asks a bit more. JSX mixes markup into JavaScript, which needs a mental shift. Hooks have rules. And you face more choices for routing, state, and data fetching.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What React asks of beginners",
+      "items": [
+       "JSX: markup inside JavaScript",
+       "Hooks have rules",
+       "Many ecosystem decisions"
+      ],
+      "style": "rail",
+      "accent": "sky",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "5fcef13b",
+    "narration": "One warning. Beginners often build a React app, then need a second page and freeze, because React has no router built in. Vue handles that out of the box.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Bring your own tools"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Official tools included"
+      },
+      "rows": [
+       {
+        "label": "Routing",
+        "a": "Add a library",
+        "b": "Official router"
+       },
+       {
+        "label": "State management",
+        "a": "Many options",
+        "b": "Official option"
+       }
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "d24508d3",
+    "narration": "The good news is that the curves converge. Past the first month, productivity in both frameworks looks similar, and Vue's Composition API and React Hooks now follow similar patterns.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "After the first month, the learning curves converge.",
+      "emphasis": "converge"
+     }
+    }
+   },
+   {
+    "id": "9c9db6c1",
+    "narration": "Now the other side: work. React dominates the job market, with about sixty-five percent share in one 2026 comparison. More jobs, more tutorials, more answers online.",
+    "scene": {
+     "type": "pie",
+     "props": {
+      "labels": [
+       "React",
+       "Other"
+      ],
+      "values": [
+       65.0,
+       35.0
+      ],
+      "unit": "%",
+      "donut": true,
+      "title": "Job market share"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "Jobs and ecosystem"
+   },
+   {
+    "id": "cd80d8aa",
+    "narration": "React's ecosystem is also larger. That makes it a safe choice for many business apps. Vue's ecosystem is smaller, but more cohesive, with official routing and state management.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "",
+       "React",
+       "Vue"
+      ],
+      "rows": [
+       [
+        "Size",
+        "Largest",
+        "Smaller"
+       ],
+       [
+        "Feel",
+        "Many choices",
+        "Cohesive"
+       ],
+       [
+        "Best for",
+        "Complex interfaces",
+        "Small to mid products"
+       ]
+      ],
+      "title": "Ecosystem at a glance",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "1c0cb0b2",
+    "narration": "Vue wins on enjoyment. Developers rate its satisfaction highly, and one guide scores it five stars for small apps and prototypes. React gets four, strong for startups and scalable products.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "developer coding laptop desk",
+       "startup team working office",
+       "programmer writing code screen"
+      ],
+      "alt": "Developers building web apps"
+     }
+    }
+   },
+   {
+    "id": "8881c314",
+    "narration": "So here is the verdict. If your goal is a job soon, learn React. Its demand and resources are the biggest, and a meta-framework like Next.js bundles the missing pieces.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Pick React if...",
+      "items": [
+       "You want the most job openings",
+       "You want the biggest ecosystem",
+       "You will use Next.js"
+      ]
+     }
+    },
+    "chapter": "Your choice"
+   },
+   {
+    "id": "7633224a",
+    "narration": "If you are new, want fast progress, or just want to enjoy building, pick Vue. You get a clear path, great docs, and working projects sooner.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Pick Vue if...",
+      "items": [
+       "You are brand new to frameworks",
+       "You want simplicity and speed",
+       "You value great documentation"
+      ]
+     }
+    }
+   },
+   {
+    "id": "1072fdac",
+    "narration": "Still unsure? Build the same small app in both. An afternoon each will show you which one fits your brain. Neither choice is wrong, because the skills transfer.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Settle it yourself",
+      "steps": [
+       {
+        "label": "Build a small app in Vue"
+       },
+       {
+        "label": "Build the same app in React"
+       },
+       {
+        "label": "Keep the one that feels natural"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "888e9355",
+    "narration": "The takeaway: choose React for hiring odds, Vue for an easier start. Pick one today, build something real, and you can always learn the other later.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "React for jobs. Vue for an easy start. Just start building.",
+      "emphasis": "Just start building"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "React vs Vue in 2026: Which Frontend Framework Should You Choose?",
+    "url": "https://coderfile.io/blog/react-vs-vue-2026",
+    "publisher": "coderfile.io",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Vue vs React: Latest Comparison in 2026 | Epicmax",
+    "url": "https://epicmax.co/blog/react-vue",
+    "publisher": "epicmax.co",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "React vs Vue vs Angular Which is Best For Beginners (2026)",
+    "url": "https://www.dataenriche.com/react-vs-vue-vs-angular-best-for-beginners",
+    "publisher": "dataenriche.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "React, Vue, or Svelte in 2026: A Practical Framework Comparison for Modern Apps | SVAR Blog",
+    "url": "https://svar.dev/blog/react-vs-vue-vs-svelte-for-modern-web-apps",
+    "publisher": "svar.dev",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Best Frontend Frameworks 2026: Every Major JavaScript Framework You Need to Know",
+    "url": "https://quartzdevs.com/resources/best-frontend-frameworks-2026-every-major-javascript-framework",
+    "publisher": "quartzdevs.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 27.7,
+  "before_first_script_call_s": 11.5,
+  "script_s": 16.2
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "research": 0.00082,
+  "script_big": 0.04918,
+  "search_api": 0.016,
+  "total": 0.06623
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 1
+ },
+ "tokens": {
+  "in": 20733,
+  "out": 2885
+ },
+ "rules": {
+  "length": {
+   "words": 399,
+   "expected_words": 402,
+   "ratio": 0.993,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 179.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You want to build websites, and everyone tells you something different. Learn React. No, learn Vue. Pick wrong, and you might waste weeks. So how do you actually choose?",
+   "close_text": "The takeaway: choose React for hiring odds, Vue for an easier start. Pick one today, build something real, and you can always learn the other later."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "icons": 1,
+    "bullets": 2,
+    "diagram": 1,
+    "versus": 1,
+    "kinetic_text": 2,
+    "pie": 1,
+    "table": 1,
+    "gallery": 1,
+    "checklist": 2,
+    "steps": 1
+   },
+   "max_run": 2,
+   "entropy": 3.38,
+   "top_type": "bullets",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 8,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 5,
+   "fetched": 6,
+   "notes_len": 5833,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The 65% job share is from a single source and presented as a hard pie chart. \"Developers rate its satisfaction highly\" and the five-star versus four-star ratings come from a small-business blog and are used as evidence of enjoyment. The claim that beginners \"freeze\" because React has no router is exaggerated."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers learning curve, jobs and ecosystem and gives a recommendation by situation. Performance, tooling (Vite, devtools) and philosophy are missing, and there is no mention of React Native, Nuxt or regional job reality."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear arc: criteria, learning, jobs, verdict, and a self-test. A small flaw is that beat 10 on enjoyment sits awkwardly in the jobs and ecosystem section."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook of \"Learn React. No, learn Vue.\" creates mild tension. The ending takeaway is fine but is mostly a summary line."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, beginner-appropriate and non-tribal, with a fair \"neither choice is wrong\" stance."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well: pie, table, versus, diagram and checklists. The pie is a trivial two-slice chart. Beat 10's gallery of generic coder images does not match the star-rating narration."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Largely follows the sources. The \"freeze at a second page\" router point is concrete, but most of the rest is generic comparison."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, about the right length, with a recommendation by situation. Fewer criteria than the note suggests."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clear. \"Here is the decision\" is a slightly odd opener for beat 2, and \"dot vue file\" is spoken naturally."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "React dominates the job market, with about sixty-five percent share in one 2026 comparison.",
+    "issue": "A single unverified secondary-source figure is turned into a precise pie chart, and the metric (job postings versus usage) is unclear.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Developers rate its satisfaction highly, and one guide scores it five stars for small apps and prototypes.",
+    "issue": "The star ratings are a business-oriented blog's opinion, not evidence of developer enjoyment. The claim is weak.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "then need a second page and freeze, because React has no router built in.",
+    "issue": "This overstates a blog's warning. The same notes say a meta-framework like Next.js solves it.",
+    "beat": 6
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "We will compare them on three things: how easy they are to learn, how many jobs they offer, and how big their ecosystems are.",
+    "issue": "Performance, tooling and philosophy are skipped, and the notes had bundle-size data to use.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Vue wins on enjoyment.",
+    "issue": "A fourth criterion appears after the three announced, and it breaks the promised structure.",
+    "beat": 10
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "developer coding laptop desk",
+    "issue": "Generic stock images do not illustrate the claim about ratings and satisfaction.",
+    "beat": 10
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Pick wrong, and you might waste weeks.",
+    "issue": "The stakes are small and the framing is generic. This weakens the curiosity of the hook.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "If you are new, want fast progress, or just want to enjoy building, pick Vue.",
+    "issue": "The advice never tells the US viewer that React dominates local hiring, or that Vue jobs are fewer. It also omits the fact that Vue-first learners can still face React-heavy job listings.",
+    "beat": 12
+   }
+  ],
+  "missing": [
+   "Performance and bundle-size comparison",
+   "Tooling (Vite, devtools, Nuxt vs Next)",
+   "Philosophy: library vs framework, JSX vs templates",
+   "React Native and mobile reach",
+   "Caveat that job-share stats vary by region and source"
+  ],
+  "wrong_facts": [
+   "The 65% React job share comes from a single secondary source and is not verified.",
+   "The star ratings are a small-business blog's opinion, not a developer-satisfaction measure."
+  ],
+  "would_publish": false,
+  "summary": "A clean, fair, well-structured beginner comparison that leans on a few thin blog statistics and omits performance, tooling and philosophy. The hook and ending are serviceable but not memorable.",
+  "mean": 3.56,
+  "cost_usd": 0.028864,
+  "tokens": [
+   6207,
+   1645
+  ]
+ }
+}

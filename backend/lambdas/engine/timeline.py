@@ -18,13 +18,14 @@ MIN_TAIL_CHUNK_S = 8.0
 
 MAX_SPOKEN_STRETCH = 1.6   # most seconds a spoken scene may be held longer to reach the length asked
 MIN_VIDEO_MARGIN = 1.0     # aim this far past the asked length so rounding can never leave it short
+SHORT_VIDEO_MARGIN = 0.4   # under a minute (15, 30, 45 s) a whole second would be 7 percent of the video
 
 
 def stretch_to(durs: List[float], silent: List[bool], min_seconds: float, max_hold: float = 8.0) -> List[float]:
     """A video must never be shorter than the length asked for (it may run over by a few seconds). Shortfall is spread as a longer hold at the END of scenes
     (so nothing already anchored to a word moves): first a little on every spoken scene, then longer pauses, then whatever is left on the last scene."""
     out = list(durs)
-    short = min_seconds + MIN_VIDEO_MARGIN - sum(out)
+    short = min_seconds + (SHORT_VIDEO_MARGIN if min_seconds < 60 else MIN_VIDEO_MARGIN) - sum(out)
     if short <= 0:
         return out
     spoken = [i for i, s in enumerate(silent) if not s]

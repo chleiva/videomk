@@ -1,0 +1,656 @@
+{
+ "id": "hea-01",
+ "category": "health and wellbeing",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how does sleep affect memory and what can I do to sleep better",
+ "great": "Sleep stages and consolidation (slow-wave and REM), hippocampus to cortex transfer, effects of sleep deprivation, practical hygiene tips (consistent schedule, light, caffeine, screens), 7-9 hours for adults; avoids medical overclaiming; suggests a doctor for persistent insomnia.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:56:43",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Sleep's role in memory consolidation and general sleep hygiene advice are well-established, timeless science that an encyclopedia covers accurately; no recent news or changing data is needed.",
+  "queries": [
+   "how sleep affects memory consolidation",
+   "tips for better sleep quality"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 3683,
+  "n_sources": 3,
+  "n_fetched": 4,
+  "fetched": [
+   "Effects of sleep deprivation on cognitive performance",
+   "Sleep deprivation",
+   "Sleep hygiene",
+   "Hygiene"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 456 words but a 3-minute video needs about 402 (at most 422). Trim it: shorter sentences, fewer words per beat, drop the least important details; keep the hook, the key points and the ending, keep at least 13 beats, and do not go under 369 words"
+ ],
+ "notes": "## Effects of sleep deprivation on cognitive performance\nThe effects of sleep deprivation on cognitive performance are a broad range of impairments resulting from inadequate sleep, impacting attention, executive function and memory. Recent 2025 research specifies these include reduced cognitive flexibility (task-switching accuracy after total sleep deprivation) and prolonged auditory P300 latency with slower reaction time in healthy adults. An estimated 20% of adults or more have some form of sleep deprivation. It may come with insomnia or major depressive disorder, or indicate other mental disorders. The consequences can negatively affect the health, cognition, energy level and mood of a person and anyone around. It increases the risk of human error, especially with technology.\n\n## Sleep deprivation\nSleep deprivation, also known as sleep insufficiency or sleeplessness, is the health condition of not having adequate duration or quality of sleep to support proper alertness, performance, and health. It can be either chronic or acute and may vary widely in severity. This means it can occur over both short and long periods. Sleep is important because adequate sleep, or restful sleep, is essential for maintaining overall health, brain performance, emotional regulation, and metabolic balance. Persistent sleep insufficiency can contribute to cognitive decline, emotional instability, and biological wear that has effects similar to accelerated aging. Scientific research demonstrates that inadequate sleep produces chronic consequences for overall health, ranging from attentional lapses to long-term neurodegenerative changes.\nThe human body and most living organisms depend on sleep for neural recovery. All known animals sleep or exhibit some form of sleep behavior, and the importance of sleep is self-evident for humans, as nearly a third of a person's life is spent sleeping. Sleep deprivation is common, affecting about one-third of the population.\nThe US National Sleep Foundation recommends...\n\n## Sleep hygiene\nSleep hygiene is a behavioral and environmental practice developed in the late 1970s as a method to help people with mild to moderate insomnia. Clinicians assess the sleep hygiene of people with insomnia and other conditions, such as depression, and offer recommendations based on the assessment.\nSleep hygiene recommendations include establishing a regular sleep schedule, taking no or short naps, not exercising physically (or mentally) too close to bedtime, limiting worry, limiting exposure to light in the hours before sleep, and getting out of bed if sleep does not come. Additionally, use of the bed for anything but sleep and sex, avoiding alcohol (as well as nicotine, caffeine, and other stimulants) in the hours before bedtime, and having a peaceful, comfortable and dark sleep environment, are other hygiene recommendations.\n\n## Hygiene\nHygiene is a set of practices performed to preserve health.\nAccording to the World Health Organization (WHO), \"Hygiene refers to conditions and practices that help to maintain health and prevent the spread of diseases.\" Personal hygiene refers to maintaining the body's cleanliness. Hygiene activities can be grouped into the following: home and everyday hygiene, personal hygiene, medical hygiene, sleep hygiene, and food hygiene. Home and every day hygiene includes hand washing, respiratory hygiene, food hygiene at home, hygiene in the kitchen, hygiene in the bathroom, laundry hygiene, and medical hygiene at home.\nWhile often equated with cleanliness in common usage, hygiene is a term encompassing the personal practices and environmental conditions that maintain health and prevent disease.",
+ "plan": {
+  "title": "How Sleep Shapes Memory, and How to Sleep Better",
+  "description": "Sleep deprivation harms attention, executive function and memory, and it affects about one-third of people. This video explains what a lack of sleep does to thinking and which sleep hygiene habits can help.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "8f25d832",
+    "narration": "You studied hard all evening, then stayed up late to keep going. The next morning, the facts feel slippery. What happened to them? The answer may be in the hours you skipped.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Sleep and Memory",
+      "subtitle": "What a lack of sleep does to your mind, and how to fix it"
+     }
+    },
+    "chapter": "Why sleep matters"
+   },
+   {
+    "id": "f0ef75b9",
+    "narration": "Nearly a third of your life is spent asleep. That is a huge investment. Every known animal sleeps or shows some form of sleep behavior, which hints that it does something essential.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "1/3",
+      "label": "of a person's life is spent sleeping"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "c96732ad",
+    "narration": "Adequate, restful sleep supports four things: overall health, brain performance, emotional regulation, and metabolic balance. Your body and brain use that time for neural recovery, like a nightly repair shift.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "heart",
+        "label": "Health"
+       },
+       {
+        "icon": "brain",
+        "label": "Brain performance"
+       },
+       {
+        "icon": "smile",
+        "label": "Emotions"
+       },
+       {
+        "icon": "battery",
+        "label": "Metabolic balance"
+       }
+      ],
+      "title": "What good sleep supports"
+     }
+    }
+   },
+   {
+    "id": "2814cc10",
+    "narration": "So what happens when sleep falls short? Sleep deprivation means not having enough duration or quality of sleep to support proper alertness, performance and health. It can be short-term or chronic, and mild or severe.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Sleep deprivation",
+      "definition": "Not having adequate duration or quality of sleep to support proper alertness, performance, and health."
+     }
+    }
+   },
+   {
+    "id": "2cb81759",
+    "narration": "It is far more common than you might think. About one-third of the population is affected, and one estimate says twenty percent of adults or more have some form of sleep deprivation.",
+    "scene": {
+     "type": "pictogram",
+     "props": {
+      "total": 100,
+      "filled": 33,
+      "icon": "person",
+      "label": "About one-third of people are affected",
+      "title": "Sleep deprivation is common"
+     }
+    },
+    "chapter": "What lack of sleep does to thinking"
+   },
+   {
+    "id": "f665b1dc",
+    "narration": "The effects are broad. Poor sleep impairs three big areas of thinking: attention, executive function, which is your ability to plan and manage tasks, and memory. That is why yesterday's study session can vanish.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Too little sleep hits thinking",
+      "nodes": [
+       {
+        "id": "s",
+        "label": "Too little sleep",
+        "icon": "moon"
+       },
+       {
+        "id": "a",
+        "label": "Attention",
+        "icon": "eye"
+       },
+       {
+        "id": "e",
+        "label": "Executive function",
+        "icon": "brain"
+       },
+       {
+        "id": "m",
+        "label": "Memory",
+        "icon": "book"
+       }
+      ],
+      "edges": [
+       [
+        "s",
+        "a"
+       ],
+       [
+        "s",
+        "e"
+       ],
+       [
+        "s",
+        "m"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "c400e749",
+    "narration": "Recent research adds detail. After total sleep deprivation, healthy adults showed reduced cognitive flexibility, meaning less accurate task-switching. Their brain responses were also slower, with longer auditory P300 latency and slower reaction times.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Findings in healthy adults",
+      "items": [
+       "Flexibility: task-switching accuracy drops",
+       "P300 latency: brain response is prolonged",
+       "Reaction time: slower"
+      ],
+      "style": "keywords",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "1935610b",
+    "narration": "The damage goes beyond a bad day. Persistent sleep loss can contribute to cognitive decline, emotional instability, and biological wear similar to accelerated aging. It also raises the risk of human error, especially with technology.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "tired person typing night",
+      "alt": "exhausted worker at a laptop"
+     }
+    }
+   },
+   {
+    "id": "5dbb9358",
+    "narration": "The good news is that sleep habits can be trained. Since the late 1970s, clinicians have used a set of practices called sleep hygiene to help people with mild to moderate insomnia.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Sleep hygiene",
+      "definition": "Behavioral and environmental practices developed in the late 1970s to help people with mild to moderate insomnia."
+     }
+    }
+   },
+   {
+    "id": "48f967f6",
+    "narration": "Start with timing. Keep a regular sleep schedule. Take no naps, or only short ones. And do not exercise physically, or mentally, too close to bedtime, because your body needs time to wind down.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Get the timing right",
+      "steps": [
+       {
+        "label": "Keep a regular schedule"
+       },
+       {
+        "label": "No naps, or short ones"
+       },
+       {
+        "label": "No hard exercise near bedtime"
+       }
+      ]
+     }
+    },
+    "chapter": "How to sleep better"
+   },
+   {
+    "id": "64b1622d",
+    "narration": "Next, calm your evening. Limit worry. Limit exposure to light in the hours before sleep. And avoid alcohol, nicotine, caffeine and other stimulants in the hours before bed, since they work against rest.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Evening dos and don'ts",
+      "items": [
+       "Limit worry",
+       "Dim the light before sleep",
+       "Avoid alcohol and nicotine",
+       "Avoid caffeine and stimulants"
+      ],
+      "checked": [
+       true,
+       true,
+       false,
+       false
+      ]
+     }
+    }
+   },
+   {
+    "id": "1d1441fc",
+    "narration": "Then shape the room. A peaceful, comfortable and dark sleep environment helps. Use your bed for sleep, and sex, only. That teaches your brain that bed means rest, not scrolling or working.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "dark quiet bedroom bed",
+      "alt": "calm dark bedroom",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "1ca3dc4a",
+    "narration": "And if sleep does not come, get out of bed. Lying there frustrated links your bed with wakefulness. Do something quiet elsewhere, then return when you feel sleepy.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "a",
+        "label": "In bed, awake",
+        "kind": "start"
+       },
+       {
+        "id": "b",
+        "label": "Sleep comes?",
+        "kind": "decision"
+       },
+       {
+        "id": "c",
+        "label": "Get out of bed, stay calm",
+        "kind": "step"
+       },
+       {
+        "id": "d",
+        "label": "Sleep",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "d",
+        "yes"
+       ],
+       [
+        "b",
+        "c",
+        "no"
+       ],
+       [
+        "c",
+        "a"
+       ]
+      ],
+      "title": "Can't sleep?"
+     }
+    }
+   },
+   {
+    "id": "107b1ef1",
+    "narration": "So here is the one idea to keep. Sleep is when your brain recovers, and your memory depends on it. Protect your nights with regular, dark, calm habits, and tomorrow's mind will thank you.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Protect your sleep, and you protect your memory.",
+      "emphasis": "memory"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Effects of sleep deprivation on cognitive performance",
+    "url": "https://en.wikipedia.org/wiki/Effects_of_sleep_deprivation_on_cognitive_performance",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Sleep deprivation",
+    "url": "https://en.wikipedia.org/wiki/Sleep_deprivation",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Sleep hygiene",
+    "url": "https://en.wikipedia.org/wiki/Sleep_hygiene",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 63.5,
+  "before_first_script_call_s": 19.8,
+  "script_s": 43.7
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "script_big": 0.13845,
+  "search_api": 0.0,
+  "total": 0.13876
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 37380,
+  "out": 6981
+ },
+ "rules": {
+  "length": {
+   "words": 459,
+   "expected_words": 402,
+   "ratio": 1.142,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 204.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 34,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You studied hard all evening, then stayed up late to keep going. The next morning, the facts feel slippery. What happened to them? The answer may be in the hours you skipped.",
+   "close_text": "So here is the one idea to keep. Sleep is when your brain recovers, and your memory depends on it. Protect your nights with regular, dark, calm habits, and tomorrow's mind will thank you."
+  },
+  "variety": {
+   "distinct": 13,
+   "counts": {
+    "title": 1,
+    "stat": 1,
+    "icons": 1,
+    "definition": 2,
+    "pictogram": 1,
+    "diagram": 1,
+    "bullets": 1,
+    "clip": 1,
+    "steps": 1,
+    "checklist": 1,
+    "image": 1,
+    "flowchart": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.66,
+   "top_type": "definition",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "some form of sleep",
+    "count": 2
+   },
+   {
+    "phrase": "in the hours before",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 3,
+   "fetched": 4,
+   "notes_len": 3683,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly faithful to the notes, but it presents 'Nearly a third of your life asleep' and 'about one-third affected' correctly while the 'sleep hygiene' use is oversimplified. 'Four things' is fine. The 'nightly repair shift' framing is loose. Nothing is wildly wrong, but the memory mechanism is never stated, so the central claim rests on assertion."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The question is how sleep affects memory, yet there is no mention of sleep stages, slow-wave or REM, consolidation, or the hippocampus-to-cortex transfer. The video also omits the 7-9 hour recommendation and advice to see a doctor. It spends beats on prevalence statistics and P300 latency instead."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear (why, effects, tips), but beats 2-5 are padding with generic stats, and memory gets only a single beat. The tips section is fine and the ending ties back to memory."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook, about studying and slippery facts, is decent. The ending is a tidy takeaway but is a fairly generic summary line."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear and suited to a general US audience, with minor cliché ('tomorrow's mind will thank you')."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well and match the narration (stat, diagram, flowchart, checklist). The checklist's checked/unchecked marks are confusing, and the pictogram is a weak fit for a rough estimate."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Content is generic and lifted from encyclopedia notes. Details like P300 latency are jargon with no payoff for the viewer, and there are no concrete memory examples or surprising facts."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "It answers the sleep-improvement half, but the memory half is thin, with no mechanism. It also omits the recommended hours and a doctor referral for persistent insomnia."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural. A few staccato lists and the odd phrase 'Use your bed for sleep, and sex, only' are slightly awkward."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "critical",
+    "quote": "Poor sleep impairs three big areas of thinking: attention, executive function, which is your ability to plan and manage tasks, and memory.",
+    "issue": "Never explains how sleep affects memory: no consolidation, slow-wave or REM sleep, or hippocampus-to-cortex transfer. This is the core of the request.",
+    "beat": 6
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Keep a regular sleep schedule.",
+    "issue": "No recommended duration (7-9 hours for adults) is given anywhere, and no advice to see a doctor for persistent insomnia.",
+    "beat": 10
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "with longer auditory P300 latency and slower reaction times.",
+    "issue": "Jargon-heavy detail from the notes with no explanation and no link to memory. It wastes limited time.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "It is far more common than you might think.",
+    "issue": "Prevalence stats repeat the earlier one-third point and pad the runtime, while memory gets one beat.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "The answer may be in the hours you skipped.",
+    "issue": "The hook promises an explanation of lost memory that the script never delivers; it just says 'sleep deprivation hurts memory'.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Persistent sleep loss can contribute to cognitive decline, emotional instability, and biological wear similar to accelerated aging.",
+    "issue": "Somewhat alarmist, with no hedging that this is correlational or evidence-limited, and it could invite medical overclaiming.",
+    "beat": 8
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"checked\": [true, true, false, false]",
+    "issue": "The mixed checkmarks are unexplained and imply that alcohol and caffeine are not 'done', which is confusing.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "Sleep stages: slow-wave and REM roles in memory consolidation",
+   "Hippocampus-to-cortex transfer",
+   "Sleep needed before learning, too (encoding)",
+   "7-9 hours for adults",
+   "See a doctor for persistent insomnia",
+   "Screens and blue light specifically"
+  ],
+  "wrong_facts": [
+   "Nothing clearly wrong, but 'sleep hygiene' is described only as an insomnia aid, and 'no naps' is a simplification."
+  ],
+  "would_publish": false,
+  "summary": "A clean, readable script that sticks to the notes but fails the core question: it never explains how sleep consolidates memory, and it pads with prevalence statistics and jargon. Tips are decent, but the script omits sleep duration and a doctor referral.",
+  "mean": 3.0,
+  "cost_usd": 0.027576,
+  "tokens": [
+   5313,
+   1695
+  ]
+ }
+}

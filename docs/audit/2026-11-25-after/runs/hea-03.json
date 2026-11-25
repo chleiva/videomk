@@ -1,0 +1,910 @@
+{
+ "id": "hea-03",
+ "category": "health and wellbeing",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "I get anxious before presentations. Give me a practical guide to handle performance anxiety: why it happens in the body, breathing techniques that work, how to prepare, and when to seek professional help.",
+ "great": "Fight-or-flight explanation, physiological sigh or box breathing, preparation and rehearsal, reframing arousal as excitement, exposure, when to seek help (persistent/impairing anxiety); compassionate, non-diagnostic, evidence-based.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:56:53",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Performance anxiety explainer covers timeless content: how the stress response works in the body, established breathing techniques, preparation strategies, and criteria for professional help. This is ",
+  "queries": [],
+  "searches": 8,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": 8,
+  "skills": [
+   "health-wellbeing",
+   "tutorial-howto"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Why your body panics before you speak",
+    "Breathing and preparation that actually help",
+    "When nerves need more support"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 57.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 53.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 49.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 48.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 44.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 40.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 40.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 36.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 5.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 18,
+  "grounding": {
+   "beats": 21,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 24407,
+  "n_sources": 7,
+  "n_fetched": 26,
+  "fetched": [
+   "10.1 Managing Public Speaking Anxiety | Communication in the Real World: An Introduction to Communication Studies",
+   "Embodied strategies for public speaking anxiety: evaluation of the Corp-Oral program",
+   "The Science of Speaking: What Actually Happens When You’re Nervous - Miranda Toastmasters Club",
+   "PUBLIC SPEAKING ANXIETY - National Social Anxiety Center",
+   "Fear Public Speaking | Stage Fright Symptoms | Maple Grove MN",
+   "Physiological Sigh: What the Stanford Breathing Trial Found",
+   "'Cyclic sighing' can help breathe away anxiety",
+   "The effect of slow breathing in regulating anxiety",
+   "Breathwork for Anxiety: Evidence-Based Techniques That Actually Work | Simply Psychology",
+   "Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature",
+   "How To Prepare For A Presentation | Reduce Anxiety With Fia's Best 5-Minute Pre-Presentation Routine",
+   "Fear of public speaking: How can I overcome it? - Mayo Clinic",
+   "30 Ways to Manage Speaking Anxiety | University Counseling Service - Division of Student Life | The University of Iowa",
+   "Ideagraph Anxiety FINAL",
+   "How to overcome presentation anxiety: 15 mindful techniques — Calm Blog",
+   "Social Anxiety Disorder Treatments: Evidence-Based Approaches - meadowbrookcounseling.com",
+   "Social Anxiety Disorder Treatments: Evidence-Based Approaches - feeds.meadowbrookcounseling.com",
+   "Performance Anxiety: Symptoms, Causes & Treatment",
+   "How to help athletes overcome sudden performance anxiety",
+   "Overcoming Performance Anxiety in Music, Acting, Sports, and More",
+   "Social Anxiety Disorder | Fact Sheets | Yale Medicine",
+   "Social Anxiety Disorder (Social Phobia): Symptoms & Treatment",
+   "Overcoming Fear of Public Speaking with Cognitive Behavioral Therapy (CBT) — Julie Kolzet, PhD",
+   "CBT for Fear of Public Speaking | Dr. Alan Jacobson",
+   "Slow breathing for reducing stress: The effect of extending exhale☆",
+   "Brief structured respiration practices enhance mood and reduce physiological arousal"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "section 1: some scenes list items their narration never mentions: beat 7 (gallery): its narration never says ['person presenting to colleagues', 'student giving classroom presentation']. Say each item's key words in the order shown"
+ ],
+ "notes": "## 10.1 Managing Public Speaking Anxiety | Communication in the Real World: An Introduction to Communication Studies\nPublic speaking anxiety is a type of CA that produces physiological, cognitive, and behavioral reactions in people when faced with a real or imagined presentation (Bodie, 2010). Physiological responses to public speaking anxiety include increased heart rate, flushing of the skin or face, and sweaty palms, among other things. These reactions are the result of natural chemical processes in the human body. The fight or flight instinct helped early humans survive threatening situations. When faced [...] Cognitive reactions to public speaking anxiety often include intrusive thoughts that can increase anxiety: “People are judging me,” “I’m not going to do well,” and “I’m going to forget what to say.” These thoughts are reactions to the physiological changes in the body but also bring in the social/public aspect of public speaking in which speakers fear being negatively judged or evaluated beca\n\n## Embodied strategies for public speaking anxiety: evaluation of the Corp-Oral program\nmodulation of the sympathetic autonomic system. This prepares the body for an impending stressful event, such as a public speaking engagement, causing a condition known as anticipatory anxiety (Beltrán-Velasco et al., 2019). Furthermore, this reaction releases chemical messengers that influence various brain areas responsible for memory and learning. This chain of events can interfere with normal neuronal operations in the prefrontal cortex, leading to disruptions in critical cognitive [...] as an indicator of anxiety (Heller et al., 1997), induced distress states and social anxiety traits are linked to an increase in heart rate and greater right hemisphere activity (decrease in FAA) in public speaking situations. Similarly, the study by Wang et al. (2015) shows a decrease in FAA in response to anxiety induced by public speaking. Based on the findings of these studies, it can be inferred\n\n## The Science of Speaking: What Actually Happens When You’re Nervous - Miranda Toastmasters Club\nYour brain is wired to protect you. When it senses danger—physical or emotional—it activates the sympathetic nervous system. That’s the bit responsible for the “fight, flight, or freeze” response. In public speaking situations, it gets activated the same way it would if you were under threat. The issue? Your brain can’t always tell the difference between: - Real threat - Wild animal charging at you - Perceived threat - A room full of people watching you speak. [...] Whether it's a real or perceived threat, your body floods with adrenaline, cortisol, and other stress hormones. This causes: - Racing heart - preparing to run or fight - Dry mouth - digestion pauses to prioritise survival - Sweaty palms - cooling you down for action - Shaky voice - muscle tension from stress - Blank mind - brain redirecting focus to survival, not memory recall This reaction is really helpful in the jungle, bu\n\n## PUBLIC SPEAKING ANXIETY - National Social Anxiety Center\nThe pre-frontal lobes of our brain sort our memories and is sensitive to anxiety. Dr. Michael DeGeorgia of Case Western University Hospitals, says: “If your brain starts to freeze up, you get more stressed and the stress hormones go even higher. That shuts down the frontal lobe and disconnects it from the rest of the brain. It makes it even harder to retrieve those memories.” [...] The fight or flight response activates complex bodily changes to protect us. A threat to our safety requires immediate action. We need to respond without debating whether to jump out of the way of on oncoming car while in an intersection. Speaking to a crowd isn’t life threatening. The threat area of the brain can’t distinguish between these threats. ## Help for public speaking anxiety [...] A common fear in public speaking is the brain freeze. The prospect of having an audience’s attention while standing in s\n\n## Fear Public Speaking | Stage Fright Symptoms | Maple Grove MN\n- Symptoms of stage fright are triggered by the autonomic nervous system’s fight-or-flight response. Reactions vary, including a racing heart, dry mouth, shaking, and the mind going blank. Overcoming this anxiety requires mastering the material through practice and preparing for all potential questions. [...] ### What are the Symptoms of Stage Fright? In most cases, the fear and anxiety of stage fright activate and arouses the autonomic nervous system which triggers the fight or flight reaction. People can experience a wide range of symptoms with varying degrees of intensity. Symptoms could be any of the following: racing heart, tightness or pain in the chest, nausea, dry mouth, stammering or stuttering, shakes, sweats, chills, muscle tension, lightheadedness, or your mind going blank.\n\n## Physiological Sigh: What the Stanford Breathing Trial Found\nAbout 110 adults were randomized to five minutes a day of cyclic sighing, box breathing, cyclic hyperventilation or mindfulness meditation for 28 days. All groups reported better mood and less anxiety. Cyclic sighing produced the largest rise in daily positive mood, significantly more than meditation, and the biggest drop in resting breathing rate. Heart rate variability and sleep did not differ between groups. It was a small, single, unreplicated trial. [...] Quick Answer The physiological sigh is a two-part breath: a full inhale through the nose, a second short sniff on top to fully inflate the lungs, then one long, slow exhale through the mouth. In a Stanford randomized trial, five minutes a day of this pattern for one month improved mood and lowered resting breathing rate slightly more than meditation. It is a stress-management tool, not a treatment for anxiety disorders. [...] A sho\n\n## 'Cyclic sighing' can help breathe away anxiety\nBut, according to a new study from Stanford Medicine, there's an easy, at-home way to help lower your stress level: It's called cyclic sighing, a controlled breathing exercise that emphasizes long exhalations. What's more, it can take as little as five minutes to experience less anxiety, a better mood and even decreased rates of breathing at rest, a sign of overall body calmness. [...] \"What's interesting about the breath is that it's right on the edge of conscious control,\" said David Spiegel, MD, the Jack, Lulu, and Sam Willson Professor in Medicine and associate chair of psychiatry and behavioral sciences, who co-led the study with Stanford Medicine neurobiologist Andrew Huberman, PhD, and Melis Yilmaz Balban, PhD, former Stanford Medicine senior research scientist. \"Most of the time breathing is automatic, like digestion, heartbeat and other bodily functions, but you can [...] For ma\n\n## The effect of slow breathing in regulating anxiety\nIn the self-reported results, slow breathing was found to be more effective in reducing anxiety compared to fast breathing. We found higher levels of valence and arousal in the uncertain condition compared to the certain condition. Through slow breathing exercises, participants’ responses to the emotional stimuli of an impending uncertain threat were diminished. It may be that slow breathing prepares the individual physically and psychologically for future anxious events. Across disorders, [...] breathing, slow breathing) × 2 (certainty: certain, uncertain) within-subjects design. The results of showed that: (1) Slow breathing effectively reduced anxiety, the valence and arousal are lower under the slow breathing. (2) The EEG of fast and slow breathing showed different characteristics. There is an overall increase in power during slow breathing in the delta, theta, alpha and beta bands.(\n\n## Breathwork for Anxiety: Evidence-Based Techniques That Actually Work | Simply Psychology\nThe mechanism involves the vagus nerve, which runs from the brainstem to the abdomen and regulates parasympathetic (rest-and-digest) activity. Slow, diaphragmatic breathing activates vagal afferent fibers that send \"safety\" signals to the brain, downregulating the sympathetic response. Specifically, slow exhales activate the parasympathetic nervous system more strongly than inhales. This is why techniques that extend the exhale are particularly effective for acute anxiety reduction. [...] Research from Stanford (Huberman, Yackle) demonstrated that the \"physiological sigh\" — two short inhales through the nose followed by a long exhale through the mouth — is the fastest way to offload excess CO2 and reduce acute anxiety. How to do it: - Take a normal inhale through the nose - At the top, take a second, smaller inhale to fully expand the lungs - Slowly exhale through the mouth until lungs a\n\n## Breathing Practices for Stress and Anxiety Reduction: Conceptual Framework of Implementation Guidelines Based on a Systematic Review of the Published Literature\nIntervention effectiveness was less likely during fast-only breathing versus any other pace, consistent with other reviews finding benefits associated with slow-paced breathing practices [23,35]. Polyvagal and neurovisceral integration theories favor slow over fast breathing due to its activation of the parasympathetic nervous system and accompanying effects on the mind and brain . Our analysis further suggests that, provided fast-only practices are avoided, specific breath pace may not [...] Interestingly, fast breathing can successfully reduce stress when paired with slower paces or holds, as seen in the 12 fast + slow interventions, all of which were effective. Such practices may provide benefits by teaching practitioners to slow their breathing patterns and self-soothe during stressful situations; or by building CO2 tolerance, which is inversely related to symptoms of stress and anxi\n\n## 'Cyclic sighing' can help breathe away anxiety\nRespiratory rate was also inversely correlated with a change in positive affect, suggesting that the participants whose breathing slowed down the most were also the ones who experienced the greatest improvement in mood. \"We know that people who are breathing very rapidly feel more anxious, such as during a panic attack,\" Spiegel said. \"Controlled breathwork seems to be a straightforward way to do the opposite: lower physiologic arousal and regulate your mood.\" #### Simple, quick and free [...] Indeed, while all three controlled breathing interventions decreased anxiety and negative mood, participants in the cyclic sighing group had the greatest daily improvement in positive feelings on the Positive and Negative Affect Schedule questionnaire. The effect increased as the study went on, suggesting that the more consecutive days they practiced cyclic sighing, the more it helped their mood. #\n\n## How To Prepare For A Presentation | Reduce Anxiety With Fia's Best 5-Minute Pre-Presentation Routine\nFocus: Condense to 30 seconds of box breathing, with emphasis on the exhale to quickly activate the parasympathetic response. Intention: Create an abbreviated purpose statement focusing on authentic connection rather than comprehensive content: \"I'm here to share my honest perspective and add value to this conversation.\" Activation: Focus primarily on establishing a grounded stance and releasing physical tension rather than extensive vocal warm-ups. [...] 3. Moderate Stimulants and Hydrate - Use moderation with stimulants, reduce caffeine after noon, avoid excessive alcohol, and drink extra water for clear thinking and vocal quality. 4. Review—Don't Rehearse—Before Sleep - Lightly read through your main points before going to sleep; refrain from vigorous rehearsing, which might bring on anxiety. Research on memory consolidation reveals that sleep does a better job of processing learning \n\n## Fear of public speaking: How can I overcome it? - Mayo Clinic\nGet organized. Ahead of time, carefully plan out the information you want to present. This includes any props and audio or visual aids. The more organized you are, the less nervous you'll be. Use an outline on a small card to stay on track. If possible, visit the place where you'll speak, review the equipment and practice the talk before your actual presentation. [...] Challenge specific worries. When you're afraid of something, the fear may be larger than the actual threat. List what you're worried about. Then list what else could happen and any evidence that supports whether or not what you fear will happen. Ask yourself how past presentations have gone. See yourself as a success. Imagine that your presentation will go well. Positive thoughts can ease concerns about how you perform socially and make you feel less anxious. [...] Breathe deeply. This can be very calming. Take two or more\n\n## 30 Ways to Manage Speaking Anxiety | University Counseling Service - Division of Student Life | The University of Iowa\n### The Day of the Presentation 11. Eat several hours before the talk–not immediately before 12. Dress for success–your success! Dress comfortably and appropriately for the situation. Look your best 13. Challenge negative thinking–Continue positive thinking 14. If you need to, express your fears to a friend 15. Review 3 x 5 cards of inspirational thoughts 16. Practice your talk one last time 17. Go to the room early to ready equipment and your podium. [...] 1. Select a topic of interest to you 2. Prepare carefully–know your material 3. Practice–rehearse your talk with a friend 4. Know your audience 5. Challenge negative thinking–make 3 x 5 cards of positive thoughts or have friends write out inspirational thoughts for you. 6. Expect positive reactions–expect success! 7. Know the room–if unfamiliar, visit your speaking space before you talk. 8. Employ aerobic exercise strategies–daily aer\n\n## Ideagraph Anxiety FINAL\n# Top 10 Tips for Managing Presentation Anxiety Techniques are from Speaking Up without Freaking Out: 50 techniques for confident, calm, and competent presenting<sup>©</sup> by Matt Abrahams available on Amazon Think about positive Greet your anxiety: outcomes and say “This is me positive affirmations feeling nervous” 2 1 Connect with your Say tongue twisters audience by to warm up your looking at them voice and become 3 present oriented 4 Breathe deeply from\n\n## How to overcome presentation anxiety: 15 mindful techniques — Calm Blog\nProgressive muscle relaxation, or PMR, is a mindfulness technique that involves tensing and then relaxing each muscle group in the body. This practice is particularly useful for managing physical symptoms of presentation anxiety, such as shaking hands or a tense jaw. 💙 Practice PMR in order to Create Rest and Relaxation before a presentation with this 3-minute session. ### 3. Practice mindful speaking [...] When practicing your presentation, remain fully present and focused on the content of your message rather than on the audience's potential reaction. Speaking slowly and deliberately, paying attention to each word, can help you overcome fears of judgment. 💙 Let go of the expectation that practice makes perfect. Putting in the work means Practice Makes Better. Next ## 9 hand positions for meditation to add to your practice [...] The good news is, your nervous system can be regulated, an\n\n## Social Anxiety Disorder Treatments: Evidence-Based Approaches - meadowbrookcounseling.com\nIndividual CBT is the most well-researched and guideline-recommended treatment for SAD. SSRIs or SNRIs are often added when symptoms are more severe or when therapy alone provides partial relief. The best approach depends on symptom severity, individual response, and how the person prefers to engage with treatment. ### Is social anxiety a mental illness? [...] CBT is the most well-researched therapy for SAD, with lasting gains that continue improving after treatment en\n\n## Performance Anxiety: Symptoms, Causes & Treatment\nIt may be time to seek help when performance anxiety causes avoidance, panic symptoms, sleep problems, declining school or work performance, relationship stress, substance use, or loss of confidence. Therapy can help when anxiety begins affecting daily life. ### How is performance anxiety treated? [...] These strategies can help, but if anxiety keeps returning or intensifying, professional support can make a difference. ## When to Seek Anxiety Treatment You do not need to wait until performance anxiety becomes unbearable before asking for help. Support can be helpful when anxiety is limiting your life, affecting your confidence, or making everyday responsibilities harder. Consider anxiety treatment if you: [...] Support can help when performance pressure starts affecting sleep, grades, self-esteem, friendships, family communication, or a teen’s willingness to try new things. Lifeline Beh\n\n## How to help athletes overcome sudden performance anxiety\n## The bottom line Athletes of all ages, including teens, could develop performance anxiety. Mental training skills can help them return to the court or the field. “Some performance anxiety is normal and helpful in boosting attention and effort,” Dr. Valle said. “But if it is persistent and distressing, then seek out help from a licensed professional who is an expert in mental health and mental performance.” [...] Frustration: They may feel like they’re not good enough or that they’re letting themselves or their teammates down. Discouragement: It can be hard for them to stay motivated and positive when they are struggling to perform skills that they have been able to do easily for years. Embarrassment: They may be afraid of what their teammates, coaches or fans think of them. [...] It’s also important for your teen to try to have a positive attitude. You can encourage them to: Focus on t\n\n## Overcoming Performance Anxiety in Music, Acting, Sports, and More\nThese tips should help reduce performance anxiety. But if they don't, talk to a counselor or therapist trained in treating anxiety issues. You may benefit from more intensive therapy, such as cognitive behavioral therapy, to help overcome performance anxiety. In addition, beta-blockers such as propranolol that lower the heart rate and block the effects of adrenaline are sometimes used by people with performance anxiety. [...] Simply put, stress and anxiety about performing in front of people causes performance anxiety. Confronting your fears and vulnerabilities, accepting yourself for who you are, and not feeling like you have to prove yourself to others, is the first step toward overcoming performance anxiety. Keep in mind that nobody is perfect, nobody expects you to be perfect, and it is OK to make mistakes.\n\n## Social Anxiety Disorder | Fact Sheets | Yale Medicine\nIf the patient acknowledges a fear of social situations, the doctor will ask about their symptoms, including what situations cause fear and anxiety, how they feel when they’re in those situations, and whether their fear or anxiety prevents them from living their life fully. Answers to these questions will help the doctor decide if they should refer the patient to a mental health professional. [...] Beta-blockers, which help to reduce symptoms, like sweating or trembling, among people with performance-related social anxiety disorder, especially when taken an hour before the patient is in a social situation. [...] ## What is the outlook for people with social anxiety disorder? People who do not seek help for social anxiety disorder may continue to avoid social situations indefinitely, limiting their ability to thrive at work, school, or in interpersonal relationships. They may have a decre\n\n## Social Anxiety Disorder (Social Phobia): Symptoms & Treatment\nSocial anxiety disorder is highly treatable with cognitive behavioral therapy (CBT) and/or medication. Together, you and your healthcare provider will find the best treatment plan for you. You may find a support group helpful, as well. Cognitive behavioral therapy (CBT) is a form of talk therapy. It’s the go-to treatment for social anxiety disorder. A psychologist or therapist works with you to change thinking and behavior patterns that are unhelpful. [...] Antidepressants can take weeks to start working. It might be hard to wait until you start feeling better. But it’s important to begin treatment and stick with it. Ask your provider about when you can expect to feel better after starting an antidepressant. Social anxiety disorder generally doesn’t go away on its own. Evidence shows that cognitive behavioral therapy (CBT) and medications like antidepressants are very successful in manag\n\n## Overcoming Fear of Public Speaking with Cognitive Behavioral Therapy (CBT) — Julie Kolzet, PhD\nAvoiding public speaking reinforces fear. CBT incorporates gradual exposure to speaking situations, starting with low-stakes scenarios and progressing to more challenging ones. Examples include: Practicing in front of a mirror. Speaking to a supportive friend or family member. Joining a small group or class to practice presentations. Each step builds confidence and reduces anxiety over time. 4. Developing Coping Strategies [...] How CBT Helps with Public Speaking Anxiety CBT is a structured, evidence-based approach that focuses on identifying and changing negative thought patterns and behaviors. Here's how it works: 1. Identifying Negative Thoughts CBT begins by helping you recognize thoughts that fuel your anxiety, such as: \"I'm going to embarrass myself.\" \"Everyone will think I’m incompetent.\" \"I’ll forget what to say and look foolish.\" [...] CBT equips you with tools to manage anxiety\n\n## CBT for Fear of Public Speaking | Dr. Alan Jacobson\n### CBT for Fear of Public Speaking Reduces Anxiety Levels CBT for public speaking anxiety aims to identify and challenge negative thought patterns associated with public speaking fears. By changing these thought patterns, you can experience a reduction in anxiety levels related to public speaking. This is often the first thing people notice as treatment progresses. ### Improved Coping Strategies Through CBT for Speech Anxiety [...] Cognitive-behavioral therapy for public speaking anxiety equips you with practical coping strategies to manage anxiety and stress associated with public speaking. This might include relaxation techniques, positive self-talk, and exposure exercises to desensitize fear gradually. You will get to challenge yourself at a comfortable pace, and as things get better, you’ll likely feel quite proud. ### Increased Self-Confidence Through Cognitive Techniques [...] Ide\n\n## Slow breathing for reducing stress: The effect of extending exhale☆\nRegular slow breathing practice for 12 weeks significantly reduced psychological stress as measured by PROMIS Anxiety (−4.85 S.D. ± 5.53, confidence interval [−5.60, −3.00], but not physiological stress as measured by heart rate variability. Group comparisons showed small effect size differences (d = 0.2) with further reductions in psychological stress and physiological stress from baseline to 12 weeks for exhale greater than inhale versus exhale equals inhale, however these differences were [...] differ by treatment group as measured by a Wilcoxon test. Both groups had significant changes from baseline and 12 weeks in PROMIS Anxiety based on Wilcoxon signed-rank test. The between group differences for Exhale=Inhale and Exhale>Inhale treatment groups was 1.07 ± 5.53 [CI − 1.19, 3.32]. This represented a non- significant (p = 0.350) further reduction in psychological stress in the Exhale>\n\n## Brief structured respiration practices enhance mood and reduce physiological arousal\nSecondarily, we wanted to investigate if breathing practices with different inhale-exhale ratios have differential effects on physiology and psychological measures. We hypothesized that breathing practices that place emphasis on the exhale versus the inhale portion of each breath would be more effective in reducing anxiety and improving well-being. Accordingly, we hypothesized that cyclic sighing would have more beneficial psychological and physiological effects than cyclic hyperventilation or [...] Inhales increase heart rate and exhales decrease heart rate via respiratory sinus arrhythmia36—a normal phenomenon that relates to the effects of breathing on intrathoracic pressure, diaphragmatic movement, heart volume/blood flow rates, and compensatory shifts in vagal activation.37 We sought to explore how inhale-emphasized (longer inhales) versus exhale-emphasized (longer exhales) versus b",
+ "plan": {
+  "title": "Calm Before You Speak: Handling Presentation Anxiety",
+  "description": "A practical guide to performance anxiety before presentations: why your body reacts the way it does, breathing and preparation techniques that help, and when to talk to a professional. This is general information, not medical advice.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "201191fd",
+    "narration": "Your heart pounds. Your hands shake. Your mind goes blank. And yet nothing is attacking you. It is just a room full of people, waiting for you to talk.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "audience seated in conference room",
+      "alt": "people waiting in a presentation room"
+     }
+    },
+    "chapter": "Why your body panics before you speak"
+   },
+   {
+    "id": "5c91686a",
+    "narration": "Here is what happens. Your brain sounds an alarm. That releases adrenaline. And adrenaline leaves your body ready to act, as if you had to fight or run.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The stress response",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Brain alarm",
+        "icon": "brain"
+       },
+       {
+        "id": "b",
+        "label": "Adrenaline",
+        "icon": "bolt"
+       },
+       {
+        "id": "c",
+        "label": "Body ready to act",
+        "icon": "play"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "releases"
+       ],
+       [
+        "b",
+        "c",
+        "prepares"
+       ]
+      ],
+      "style": "cards",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "f2c35587",
+    "narration": "This fight or flight response helped early humans survive real danger. The problem is that your brain can't always tell a wild animal from an audience watching you.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Real threat",
+       "tagline": "A wild animal charging"
+      },
+      "b": {
+       "name": "Perceived threat",
+       "tagline": "A room watching you speak"
+      },
+      "rows": [
+       {
+        "label": "Brain's reaction",
+        "a": "Alarm fires",
+        "b": "Alarm fires"
+       },
+       {
+        "label": "Body's reaction",
+        "a": "Adrenaline floods in",
+        "b": "Adrenaline floods in"
+       }
+      ]
+     }
+    },
+    "sfx": "pop"
+   },
+   {
+    "id": "5825f4ca",
+    "narration": "Adrenaline explains the symptoms. A faster heartbeat. Quick, shallow breathing. Sweating. Shaky hands. A dry mouth. Each one is your body preparing for action.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What adrenaline does",
+      "items": [
+       "Faster heartbeat",
+       "Quick, shallow breathing",
+       "Sweating",
+       "Shaky hands",
+       "Dry mouth"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "heart",
+       "wind",
+       "bubbles",
+       "hand",
+       "droplet"
+      ]
+     }
+    }
+   },
+   {
+    "id": "812762c9",
+    "narration": "Feeling judged is an especially strong trigger. We are social animals, so being negatively evaluated by others registers in the brain as a threat. That is why presentations feel so dangerous.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Feeling judged makes the brain sound the alarm.",
+      "emphasis": "judged"
+     }
+    }
+   },
+   {
+    "id": "7d388036",
+    "narration": "Here is a useful twist. Nerves and excitement feel physically almost the same: racing heart, buzzing energy. So you can try reading that feeling as energy, not fear.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Nerves",
+       "tagline": "Feels like fear"
+      },
+      "b": {
+       "name": "Excitement",
+       "tagline": "Feels like energy"
+      },
+      "rows": [
+       {
+        "label": "Heart",
+        "a": "Racing",
+        "b": "Racing"
+       },
+       {
+        "label": "Body",
+        "a": "Buzzing",
+        "b": "Buzzing"
+       }
+      ],
+      "verdict": "Same feeling, different label"
+     }
+    }
+   },
+   {
+    "id": "e78f9488",
+    "narration": "So some nervousness is normal. It can even sharpen your focus. Most speakers feel it, which means you are not alone, and nothing is wrong with you.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "speaker on stage with microphone",
+       "person presenting to colleagues",
+       "student giving classroom presentation"
+      ],
+      "alt": "people speaking in front of audiences"
+     }
+    }
+   },
+   {
+    "id": "be3dc974",
+    "narration": "Now for the good part: you can send your body a calmer signal. The simplest way is your breath. Slow breathing, with a longer exhale, helps settle the alarm.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Make the exhale longer than the inhale.",
+      "emphasis": "longer"
+     }
+    },
+    "chapter": "Breathing and preparation that actually help"
+   },
+   {
+    "id": "b48d8ee9",
+    "narration": "Here is how. Breathe in through your nose for a comfortable count. Then breathe out slowly through your mouth for a longer count. Repeat for a few rounds.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Slow breathing",
+      "steps": [
+       {
+        "label": "Breathe in through the nose",
+        "detail": "A comfortable count"
+       },
+       {
+        "label": "Breathe out through the mouth",
+        "detail": "A longer, slower count"
+       },
+       {
+        "label": "Repeat a few rounds"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "88dc4813",
+    "narration": "Try it gently, without forcing. If you feel dizzy or strained, ease off. Slow exhales nudge the body toward rest and digest, which is the opposite of panic.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person breathing calmly outdoors",
+      "alt": "relaxed woman taking a deep breath"
+     }
+    }
+   },
+   {
+    "id": "ec5b02b4",
+    "narration": "To check you are breathing low, try belly breathing. Rest a hand on your stomach. When you inhale, that hand should rise. Your chest stays quieter.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "hand on stomach breathing",
+      "alt": "person with hand on belly breathing",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "7b526a88",
+    "narration": "Breathing calms the moment. Preparation shrinks the fear. Practise aloud, ideally in the real room or in front of a friend, so the situation already feels familiar.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "empty conference room presentation",
+       "practicing presentation in front of friend",
+       "small meeting room podium"
+      ],
+      "alt": "rehearsing a presentation in a real room"
+     }
+    }
+   },
+   {
+    "id": "cca1ef1e",
+    "narration": "Know your opening lines especially well, because the first moments are the hardest. Once you are past them, the words tend to flow.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Nail the start",
+      "items": [
+       "Know your opening lines",
+       "First moments are hardest",
+       "Then the flow takes over"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "b56d6814",
+    "narration": "On the day, arrive early. Drink some water. And reframe the feeling: that racing heart is not only fear, it can be excitement. Tell yourself, I am excited.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Day-of habits",
+      "items": [
+       "Arrive early",
+       "Drink water",
+       "Call it excitement"
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "29a9f9f4",
+    "narration": "Most nerves fade once you start speaking, or once the event is over. But what if the fear doesn't fade? What if it follows you for weeks?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "When nerves need more support",
+      "subtitle": "Normal nerves fade. Constant fear deserves attention."
+     }
+    },
+    "chapter": "When nerves need more support"
+   },
+   {
+    "id": "4a32b9ef",
+    "narration": "Some anxiety is normal and even helpful. It sharpens attention and effort. It is worth seeking help when anxiety is intense, constant, or keeps coming back.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Normal nerves"
+      },
+      "b": {
+       "name": "Worth support"
+      },
+      "rows": [
+       {
+        "label": "Timing",
+        "a": "Fades after the start",
+        "b": "Dread for weeks"
+       },
+       {
+        "label": "Intensity",
+        "a": "Helpful energy",
+        "b": "Intense, constant"
+       },
+       {
+        "label": "Effect",
+        "a": "You still show up",
+        "b": "Fear runs your life"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "c930ff01",
+    "narration": "Signs it may be time to talk to someone: avoiding presentations, work or school because of fear. Dread for weeks. Panic attacks. Poor sleep. Or losing confidence.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Signs to talk to someone",
+      "items": [
+       "Avoiding presentations, work or school",
+       "Dread lasting weeks",
+       "Panic attacks",
+       "Sleep problems",
+       "Loss of confidence"
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "13f71b0f",
+    "narration": "Some signs are urgent. Chest pain, trouble breathing that does not ease, or thoughts of harming yourself. Contact emergency services or a crisis line right away. Support exists, and you deserve it.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Get urgent care for",
+      "items": [
+       "Chest pain",
+       "Trouble breathing that does not ease",
+       "Thoughts of harming yourself"
+      ],
+      "style": "cards",
+      "accent": "rose",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "7e5dee87",
+    "narration": "A doctor or therapist can help. Cognitive behavioural therapy is commonly used for anxiety. It helps you spot fearful thoughts, then practise speaking in small, gradual steps.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How CBT can help",
+      "steps": [
+       {
+        "label": "Spot fearful thoughts"
+       },
+       {
+        "label": "Challenge them"
+       },
+       {
+        "label": "Practise in small steps",
+        "detail": "Mirror, friend, small group"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "6a5fbe28",
+    "narration": "This is general information, not medical advice. For your own situation, speak to a doctor or mental health professional. You do not have to wait until it feels unbearable.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person talking with therapist",
+      "alt": "A person talking with a therapist",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "2491b23f",
+    "narration": "So remember: your body is trying to help. Slow your exhale. Practise out loud. And if fear is running your life, ask for support. That is your next step.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Slow your exhale. Practise out loud. Ask for support.",
+      "emphasis": "Ask for support"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "The effect of slow breathing in regulating anxiety",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11897343",
+    "publisher": "pmc.ncbi.nlm.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Breathwork for Anxiety: Evidence-Based Techniques That Actually Work | Simply Psychology",
+    "url": "https://www.simplypsychology.com/articles/breathwork-for-anxiety-guide",
+    "publisher": "simplypsychology.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Fear of public speaking: How can I overcome it? - Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/specific-phobias/expert-answers/fear-of-public-speaking/faq-20058416",
+    "publisher": "mayoclinic.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "30 Ways to Manage Speaking Anxiety | University Counseling Service - Division of Student Life | The University of Iowa",
+    "url": "https://counseling.uiowa.edu/news/2015/09/30-ways-manage-speaking-anxiety",
+    "publisher": "counseling.uiowa.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Performance Anxiety: Symptoms, Causes & Treatment",
+    "url": "https://lifelinepcs.com/performance-anxiety",
+    "publisher": "lifelinepcs.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Social Anxiety Disorder (Social Phobia): Symptoms & Treatment",
+    "url": "https://my.clevelandclinic.org/health/diseases/22709-social-anxiety",
+    "publisher": "my.clevelandclinic.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Overcoming Fear of Public Speaking with Cognitive Behavioral Therapy (CBT) — Julie Kolzet, PhD",
+    "url": "https://www.doctorkolzet.com/blog/overcoming-fear-of-public-speaking-with-cbt",
+    "publisher": "doctorkolzet.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "health-wellbeing",
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 93.7,
+  "before_first_script_call_s": 62.2,
+  "script_s": 31.5
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "script_big": 0.1784,
+  "research": 0.00391,
+  "search_api": 0.064,
+  "total": 0.2466
+ },
+ "calls": {
+  "small": 3,
+  "big": 5,
+  "tools": 7
+ },
+ "tokens": {
+  "in": 90152,
+  "out": 8209
+ },
+ "rules": {
+  "length": {
+   "words": 581,
+   "expected_words": 537,
+   "ratio": 1.082,
+   "beats": 21,
+   "expected_beats": 17,
+   "est_speech_s": 262.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Your heart pounds. Your hands shake. Your mind goes blank. And yet nothing is attacking you. It is just a room full of people, waiting for you to talk.",
+   "close_text": "So remember: your body is trying to help. Slow your exhale. Practise out loud. And if fear is running your life, ask for support. That is your next step."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "clip": 2,
+    "diagram": 1,
+    "versus": 3,
+    "bullets": 3,
+    "kinetic_text": 3,
+    "gallery": 2,
+    "steps": 2,
+    "image": 2,
+    "checklist": 2,
+    "title": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "versus",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 7,
+   "fetched": 26,
+   "notes_len": 24407,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.05,
+  "flags": [
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 7 (gallery): its narration never says ['person presenting to colleagues', 'student giving classroom presentation']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The physiology, slow-exhale breathing, CBT and help-seeking points all match the notes and common knowledge. Small overreaches include 'once you are past them, the words tend to flow' and 'Nerves and excitement feel physically almost the same', both stated confidently without sourcing."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers fight-or-flight, slow breathing, rehearsal, reframing and when to seek help. It never names the physiological sigh or box breathing even though the notes have them, and it gives no exposure practice, no concrete counts such as 4-in/6-out, and little on cognitive symptoms or the brain-freeze mechanism."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order runs clearly from why it happens to breathing, preparation, then when to get help, and ends on a three-part takeaway. It is slightly repetitive: the excitement reframe appears in both beat 6 and beat 14, and beats 7 and 16 both say some anxiety is normal."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening, 'Your heart pounds... And yet nothing is attacking you', creates tension. The closing 'Slow your exhale. Practise out loud. Ask for support.' lands as a takeaway, though it is somewhat a plain summary."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Compassionate, non-diagnostic and reassuring ('nothing is wrong with you', 'You do not have to wait until it feels unbearable'). The disclaimer is stiff and the register is a little generic."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well: diagram, versus, steps, checklist, clips and galleries, and each matches its narration. Some versus tables are thin (Heart: Racing vs Racing) and stock-photo galleries are generic."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Content is solid but standard advice. The wild-animal-versus-audience contrast and the nerves/excitement table are familiar, with no surprising fact, study or example such as the Stanford sighing trial or the freeze-up mechanism."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It covers all four requested parts in English at about the target length. The breathing section is thin, with only one generic technique and no named methods."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clear, natural spoken English. It mixes British spellings ('Practise', 'behavioural') into a US-targeted script."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Slow breathing, with a longer exhale, helps settle the alarm.",
+    "issue": "The request asked for breathing techniques that work, but only one generic pattern is given. It omits the physiological sigh and box breathing, and gives no concrete counts, though the notes include the Stanford sigh details.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Practise aloud, ideally in the real room or in front of a friend",
+    "issue": "Preparation advice is thin: no gradual exposure, no recording yourself, no structuring content, and no mention of the brain-freeze fear or how to recover from it.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Once you are past them, the words tend to flow.",
+    "issue": "This is an unsourced generalization that is not in the notes.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Nerves and excitement feel physically almost the same: racing heart, buzzing energy.",
+    "issue": "The reframing claim is not supported by the notes and is presented without evidence or attribution.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Some anxiety is normal and even helpful. It sharpens attention and effort.",
+    "issue": "This repeats beat 7 ('some nervousness is normal. It can even sharpen your focus').",
+    "beat": 16
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Cognitive behavioural therapy is commonly used for anxiety.",
+    "issue": "British spelling in a script for a US viewer.",
+    "beat": 19
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "{\"label\": \"Heart\", \"a\": \"Racing\", \"b\": \"Racing\"}",
+    "issue": "The comparison table rows carry little information, with identical entries on both sides.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "Named techniques: physiological sigh, box breathing, with specific counts",
+   "Exposure practice and gradual speaking opportunities",
+   "Evidence, such as the Stanford study, to add a surprising fact",
+   "Handling a blank mind or brain freeze during a talk",
+   "Cognitive reframing of catastrophic thoughts"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, kind and well-organized guide that is sound but generic. The breathing section is thin (no named techniques or counts) and there is little non-obvious content. It needs the physiological sigh or box breathing and more concrete detail to be publishable.",
+  "mean": 3.78,
+  "cost_usd": 0.033576,
+  "tokens": [
+   8353,
+   1687
+  ]
+ }
+}

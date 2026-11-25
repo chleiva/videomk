@@ -41,6 +41,10 @@ def max_used(minutes: float) -> int:
     return max(3, int(float(minutes) * 60 * SHARE_FOR_PHOTOS / SECONDS_PER_PHOTO))
 
 
+def _len_text(minutes: float) -> str:
+    return f"{int(round(float(minutes) * 60))} seconds" if float(minutes) < 1 - 1e-9 else f"{float(minutes):g} minutes"
+
+
 def minutes_for(n_photos: int) -> float:
     """The shortest video that can show all `n_photos` (the apps tell the person when the length they chose is shorter)."""
     return n_photos * SECONDS_PER_PHOTO / SHARE_FOR_PHOTOS / 60.0
@@ -301,7 +305,7 @@ def story_system(minutes: float, cap: int, grouped: bool = False, n: Optional[in
         "The video's script will be written from your story and the person's request; never write notes that describe what a photo shows.\n"
         "- Every photo appears in exactly one moment or in unused. A moment has 1 to 9 photos and a layout: single (1 standout photo), sequence (2 to 5 photos shown one after another), collage (3 to 9 photos of the same "
         "subject, place and day shown TOGETHER on one screen, in a styled layout: use collages to fit many photos into a short video).\n"
-        f"- This video is {minutes:g} minutes and can show about {cap} photos. If there are more photos than that, keep the best of near duplicates, drop POOR quality photos first and put the rest in unused; if there "
+        f"- This video is {_len_text(minutes)} and can show about {cap} photos. If there are more photos than that, keep the best of near duplicates, drop POOR quality photos first and put the rest in unused; if there "
         "are fewer, use single and sequence moments for the best photos and collages for the rest. Prefer variety and what the request is about.\n"
         + (pace_rules(cap, n) + "\n" if n else "")
         + "- Order the moments to tell a story: usually the order things happened, or by theme when there is no sequence. Open with a strong, establishing photo and end with a fitting one.\n"
@@ -495,7 +499,7 @@ def make_story(request: str, minutes: float, photos: List[Dict[str, Any]], ask_t
     cap = max_used(minutes)
     summary = trip_summary(photos)
     groups = group_photos(photos)
-    user = (f"The person's request: {request[:500]}\nVideo length: {minutes:g} minutes (about {cap} photos fit)." + (f"\nAbout the photos: {summary}." if summary else "")
+    user = (f"The person's request: {request[:500]}\nVideo length: {_len_text(minutes)} (about {cap} photos fit)." + (f"\nAbout the photos: {summary}." if summary else "")
             + (f"\n\nGroups by day and session (from the photos' own dates):\n{groups_text(groups)}" if groups else "")
             + f"\n\nPhotos:\n{_catalogue_text(photos)}\n\nReturn the JSON now.")
     try:

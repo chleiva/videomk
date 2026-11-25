@@ -1,0 +1,971 @@
+{
+ "id": "fin-03",
+ "category": "personal finance",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "Explain how a mortgage works for a first-time buyer in the US: down payment, fixed vs adjustable rate, how amortization shifts interest vs principal over time, PMI, closing costs, and what the current 30-year rate environment looks like.",
+ "great": "Components of the payment, amortization example with correct maths, fixed vs ARM, PMI under 20% down, closing costs 2-5%, current rates from research with date; honest caveats.",
+ "minutes": 5.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 5.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:58:38",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The core mechanics of mortgages (down payment, fixed vs adjustable, amortization, PMI, closing costs) are timeless and could come from an encyclopedia, but the request explicitly asks for the current ",
+  "queries": [
+   "30-year mortgage rates this week",
+   "current 30-year fixed mortgage rate US",
+   "mortgage rates November 2026"
+  ],
+  "searches": 14,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 15.7,
+  "error": "",
+  "fallback": null,
+  "section_searches": 10,
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "What you really borrow, and the rate you lock",
+    "Amortization: where each payment actually goes",
+    "PMI, closing costs and the full cash you need"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 22,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 1,
+   "repaired": 1,
+   "unsupported": 1,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 7,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": {
+   "rejected": 1,
+   "repaired": 1,
+   "calls": 1
+  },
+  "notes_len": 29912,
+  "n_sources": 8,
+  "n_fetched": 42,
+  "fetched": [
+   "Today's mortgage rates | Mortgage rates today | Compare today's mortgage rates | HSH.com",
+   "Mortgage Rates Average 7.28% | Freddie Mac",
+   "FHA borrowers may be released from monthly insurance premiums",
+   "How to remove mortgage insurance on an FHA loan",
+   "Complete costs of buying a house, from down payment to maintenance (and more)",
+   "How do I get the lowest mortgage rate? 10 tips you can use.",
+   "Mortgage Rates Average 7.28%",
+   "Mortgage Rates Decline for Third Consecutive Week to 7.18% | Freddie Mac",
+   "2026 PROFILE OF HOME BUYERS AND SELLERS",
+   "First-Time Home Buyer Statistics 2026: 75+ Facts, Data & Trends",
+   "Highlights From the Profile of Home Buyers and Sellers",
+   "Average Age of First-Time Home Buyers Is 40: 2026 Stats",
+   "Top 10 Takeaways from NAR’s 2026 Profile of Home Buyers and Sellers",
+   "Compare Current 5/1 ARM Rates",
+   "Current ARM Loan Rates",
+   "Mortgage Rates",
+   "Understanding Your Mortgage Amortization Schedule: Principal vs. Interest | WealthTrack",
+   "What Is an Amortization Schedule? Guide + Free Calculator",
+   "Loan amortization and extra payments – Wells Fargo",
+   "Average US 30-year mortgage rate rises to 7.28% this week, ending a four-week slide - ABC News",
+   "Mortgage Rates Today: 30-Year and 15-Year Fixed (Freddie Mac) | MLQ.ai",
+   "What to Know About PMI | Fannie Mae",
+   "How to Avoid PMI Without a 20% Down Payment | 2026",
+   "What is private mortgage insurance? | Consumer Financial Protection Bureau",
+   "PMI in 2026: When Private Mortgage Insurance Makes Sense - CUSO Home Lending",
+   "How much would my payment be on a $300,000 mortgage? (2026)",
+   "What is the monthly mortgage payment on a $300,000 house?",
+   "How Much a $300,000 Mortgage Will Cost You Each Month",
+   "How to Remove PMI at 20% Equity | Pike Creek Mortgages | Pike Creek Mortgage",
+   "How To Get Rid of PMI: A Homeowner’s Guide",
+   "When You Can Cancel PMI (and What It Costs) | Bankrate",
+   "How To Get Rid Of PMI (Private Mortgage Insurance) - ALCOVA Mortgage",
+   "Homeowners Protection Act (PMI Cancellation Act) | NCUA",
+   "FHA Mortgage Insurance in 2026: MIP Costs & Removal Rules - valleywestmortgage.com",
+   "FHA MIP Chart (2026): Upfront and Annual MIP Rates",
+   "FHA Mortgage Insurance and 2026 MIP Rates",
+   "FHA Mortgage Insurance (MIP) Explained for 2026 | Wise Capital Mortgage",
+   "FHA mortgage insurance premium (MIP): Costs and rules | Rocket Mortgage",
+   "The 30-Year Fell to 7.18%. Third Consecutive Weekly Decline.",
+   "Mortgage Rates Climb in Freddie Mac's Weekly Average | Today, November 23, 2026 | Mortgage Rates, Home Loan Guides & Expert Insights | The Mortgage Reports",
+   "Mortgage Rates Fall a Fourth Week: 30-Year Drops to 7.11% | Ready Front Real Estate",
+   "Clio Carroll Team | REALTOR on Instagram: \"Freddie Mac reported an average 30-year fixed mortgage rate of 7.32% on October 22, 2026, compared w…\""
+  ],
+  "research_agent_cost_usd": 0.0020568
+ },
+ "warnings": [
+  "beat 18: scene replaced (unsupported character '$')",
+  "section 1: some scenes list items their narration never mentions: beat 6 (chart): its narration never says ['Nov 12', 'Nov 19']. Say each item's key words in the order shown",
+  "section 3: some scenes list items their narration never mentions: beat 2 (diagram): its narration never says ['Pay PMI monthly', '20%: you can request', '78%: automatic end']. Say each item's key words in the order shown",
+  "scenes corrected: 1 of 1",
+  "grounding: 1 beats had unsupported specifics, 1 rewritten"
+ ],
+ "notes": "## Today's mortgage rates | Mortgage rates today | Compare today's mortgage rates | HSH.com\nPublished: Thu, 19 Nov 2026 15:00:00 GMT\nAs reported by Freddie Mac today, the average offered interest rate for a conforming 30-year fixed-rate mortgage (FRM) increased by seventeen basis points (0.17%), rebounding to 7.28%. Before the bounce higher, this rate had slid to about a six-week low. [...] | Week | 30-year-Fixed | 15-year-Fixed | --- | 11/19 | 7.280% | 6.660% | | 11/12 | 7.110% | 6.450% | | 11/05 | 7.180% | 6.570% | | 10/29 | 7.240% | 6.600% | | 10/22 | 7.320% | 6.680% | | 10/15 | 7.400% | 6.710% | | 10/08 | 7.400% | 6.730% | | 10/01 | 7.280% | 6.600% | | 09/24 | 7.030% | 6.420% | | 09/17 | 6.950% | 6.260% | | 09/10 | 6.760% | 6.090% | | 09/03 | 6.710% | 6.040% | ## Mortgage Choices at a Glance Loan type/termsFixed 30 yearsFixed 15 years/ 20 Years [...] With different-sized declines this week, the interest rate gap between 30-year fixed loans and 5-year ARMs widened a little, landing at 90 basis points, a fair-sized \n\n## Mortgage Rates Average 7.28% | Freddie Mac\nPublished: Thu, 19 Nov 2026 15:00:00 GMT\nNews Facts - The 30-year FRM averaged 7.28% as of November 19, 2026, up from last week when it averaged 7.11%. A year ago at this time, the 30-year FRM averaged 6.26%. - The 15-year FRM averaged 6.66%, up from last week when it averaged 6.45%. A year ago at this time, the 15-year FRM averaged 5.54%. [...] MCLEAN, Va., Nov. 19, 2026 (GLOBE NEWSWIRE) -- Freddie Mac (OTCQB: FMCC) today released the results of its Primary Mortgage Market Survey® (PMMS®), showing the 30-year fixed-rate mortgage (FRM) averaged 7.28%. “While prospective borrowers often shop around for a home, they may not always think to do the same for their mortgage, as comparing multiple rate quotes can potentially save them thousands over a loan’s lifetime,” said Sam Khater, Freddie Mac's Chief Economist. News Facts [...] The PMMS® is focused on conventional, conforming, fully amortizing home purchase loans for borrowers wh\n\n## FHA borrowers may be released from monthly insurance premiums\n(NewsNation) — Could you qualify for lower monthly mortgage payments under proposed changes to Federal Housing Administration policy? While the FHA has not yet adopted any changes, mortgage industry groups are lobbying for lower mortgage insurance costs in response to Department of Housing and Urban Development reports on housing affordability that were released to Congress on Monday. One proposal would reduce the annual FHA mortgage insurance premium rate, lowering monthly costs for homeowners. Currently, FHA borrowers who make down payments of less than 10% must pay mortgage insurance premiums for the life of the loan. The proposed changes would allow the first group of borrowers to be treated more like homeowners with conventional mortgages, who can generally request cancellation of private mortgage insurance once they reach 20% equity. The second proposal would allow FHA mortgage ins\n\n## How to remove mortgage insurance on an FHA loan\n- Your annual premium either cancels on its own — at 78% of the home's original value, or after 11 years — or it runs for the life of the loan. - If your premium isn't eligible to be cancelled, refinancing into a conventional loan is the only exit — and it pays off only if the new rate and closing costs work in your favor. If you have an FHA loan, part of your monthly payment goes to a mortgage insurance premium, or MIP. Depending on when your loan closed and how much you put down, the annual premium either falls off on its own or stays for the life of the loan — in which case, refinancing is the only way out. How long you have to pay FHA mortgage insurance premiums come down to two dates and one number: when your loan closed, when FHA assigned your case number and the size of your down payment.\n\n## Complete costs of buying a house, from down payment to maintenance (and more)\n# Complete costs of buying a house, from down payment to maintenance (and more). - Closing costs alone run 2% to 5% of your loan amount, and the lender fees inside that range are the part you can negotiate. Buying a $300,000 home with 3% down means showing up at closing with somewhere between $14,000 and $24,000. Here's what every stage of a home purchase actually costs, from the cash you need upfront to the expenses that follow you for as long as you own the place. ## Home prices in the U.S. The home price is the biggest single number in the deal. Your required cash to close is your down payment plus your closing costs. - **If you're using a conventional loan with 3% down** and your credit score is at least 620, you'd put down $9,000 and borrow $291,000. - **If you're using an FHA loan** and your credit score is 580 or higher, the minimum down payment is 3.5% ($10,500) on a $289,500 loa\n\n## How do I get the lowest mortgage rate? 10 tips you can use.\nThe median down payment was 18% for all buyers and 9% for first-time home buyers in 2026, according to the National Association of REALTORS®.\n\n## How to Remove PMI at 20% Equity | Pike Creek Mortgages | Pike Creek Mortgage\nIf your FHA down payment was 10% or more, MIP cancels after 11 years of on-time payments. Conventional loan PMI, by contrast, follows the HPA rules described throughout this post and is cancellable at 20% equity. Knowing which loan type you have is the essential first question before you take any action. This guide was prepared by Pike Creek Mortgages, NMLS Licensed Lender, serving Newark, DE and communities throughout Delaware. [...] No — FHA loans have a different, stricter rule set for mortgage insurance, and this is one of the most important distinctions for Delaware borrowers to understand. On an FHA loan originated after June 3, 2013 with a down payment of less than 10%, mortgage insurance premium (MIP) is required for the entire life of the loan. It does not automatically cancel at 20% equity. The only way to eliminate MIP on those loans is to refinance into a conventional loan — \n\n## How to Avoid PMI Without a 20% Down Payment | 2026\nTo get rid of PMI on a conventional loan, you need to build at least 20% equity through loan payments or home appreciation, then request cancellation from your lender or wait for automatic removal. According to the Homeowners Protection Act of 1998, you can remove PMI by: [...] ## What is PMI? PMI stands for private mortgage insurance, a type of insurance that protects the lender if a borrower stops making mortgage payments. Lenders usually require PMI when a borrower puts down less than 20% on a conventional home loan. Borrowers pay PMI alongside their monthly mortgage payment until they build 20% equity in the home. Once the loan reaches that threshold, the lender cancels PMI. ## How to avoid PMI [...] Requesting PMI cancellation after reaching 80% loan-to-value by contacting the lender in writing. Waiting for automatic PMI cancellation at 78% loan-to-value under federal law. Reaching \n\n## How To Get Rid of PMI: A Homeowner’s Guide\nAt least 20% equity: Most lenders allow you to request PMI cancellation once you reach 20% equity in their home, meaning the loan-to-value (LTV) ratio falls to 80%. Under federal law, PMI is generally removed automatically when the loan balance reaches 78% of the home’s original value if the borrower is current on payments. [...] ### Key Takeaways Homeowners can usually request PMI removal once they reach 20% equity in their home. PMI automatically ends on many conventional loans when the balance reaches 78% of the home’s original value (22% equity). Lenders typically require a good payment history and no additional liens before removing PMI. Refinancing or increasing your home’s value may help you eliminate PMI sooner. start portlet menu bar Web Content Viewer end portlet menu bar [...] ### Request Early PMI Cancellation Once your home’s equity reaches 20%, you may be able to request PM\n\n## When You Can Cancel PMI (and What It Costs) | Bankrate\nPrivate mortgage insurance (PMI): Charged on conventional loans with less than 20% down, as part of your monthly payment. Cancels once you hit the LTV thresholds above. FHA mortgage insurance premium (MIP): Required on all FHA loans, this is an upfront charge plus a monthly premium. Unlike PMI, MIP usually lasts the life of the loan unless you refinance out of it. [...] PMI (private mortgage insurance) may have helped you become a homeowner sooner, but once you’ve built enough equity, don’t keep paying for something that benefits your lender, not you. Lenders will require PMI when you buy a home with less than 20% down, which protects them if you default on the loan. The cost is rolled into your monthly mortgage payment, but it doesn’t last forever, and you have more control over when it ends than you may realize. [...] Get a new appraisal: If your home has appreciated or you’ve made imp\n\n## How To Get Rid Of PMI (Private Mortgage Insurance) - ALCOVA Mortgage\nThe most straightforward path is reaching 20% equity in your home based on the original purchase price or current appraised value, then formally requesting that your lender cancel PMI. Here’s what to do: Review your loan balance to determine if you’ve hit 80% loan-to-value (LTV). Contact your loan servicer to initiate the cancellation process. Be prepared to pay for a new appraisal to confirm your home’s value. [...] If you have an FHA loan, you’re paying Mortgage Insurance Premium (MIP), which works differently than PMI. Here’s the breakdown: For loans after June 3, 2013, MIP typically lasts for the life of the loan unless you refinance into a conventional loan. Refinancing into a conventional loan once you’ve reached 20% equity is often the best route. [...] ## What Is PMI? Private Mortgage Insurance (PMI) is a type of insurance that protects your lender in case you stop making payment\n\n## Homeowners Protection Act (PMI Cancellation Act) | NCUA\nExcessive PMI coverage provides little extra protection for a lender and does not benefit the borrower. In some instances, homeowners have experienced problems in canceling PMI. At other times, lenders may have agreed to terminate coverage when the borrower’s equity reached 20%, but the policies and procedures for canceling or terminating PMI coverage varied widely among lenders. Before HPA, homeowners had limited options when lenders refused to cancel their PMI coverage. Even homeowners in the\n\n## FHA Mortgage Insurance in 2026: MIP Costs & Removal Rules - valleywestmortgage.com\nUpfront MIP (UFMIP): 1.75% of the base loan amount, charged once at closing. Most borrowers finance it into the loan rather than paying cash. Annual MIP: 0.55% of the loan amount per year for most 30-year loans with the minimum 3.5% down, or 0.50% with at least 5% down. It's divided by 12 and added to each monthly payment. 1.75%Upfront premium, one time — usually financed into the loan 0.55%Annual MIP on most 30-year loans with 3.5% down [...] FHA charges two premiums: a 1.75% upfront MIP (usually financed into the loan, per HUD) and an annual MIP of 0.55% for most 30-year loans with the minimum down payment — 0.50% if you put at least 5% down. HUD cut the annual premium by 30 basis points in March 2023 (most borrowers previously paid 0.85%), and the lower pricing is still in effect in 2026. [...] 11 yrsWhen annual MIP ends automatically with 10%+ down $541,2872026 FHA limit, one-unit ho\n\n## FHA Mortgage Insurance in 2026: MIP Costs & Removal Rules - valleywestmortgage.com\n- Upfront MIP (UFMIP): 1.75% of the base loan amount, charged once at closing. Most borrowers finance it into the loan rather than paying cash. - Annual MIP: 0.55% of the loan amount per year for most 30-year loans with the minimum 3.5% down, or 0.50% with at least 5% down. It's divided by 12 and added to each monthly payment. Sources: HUD Mortgagee Letter 2023-05; HUD FHA mortgage limits, 2026. [...] - FHA charges two premiums: a 1.75% upfront MIP (usually financed into the loan, per HUD) and an annual MIP of 0.55% for most 30-year loans with the minimum down payment — 0.50% if you put at least 5% down. - HUD cut the annual premium by 30 basis points in March 2023 (most borrowers previously paid 0.85%), and the lower pricing is still in effect in 2026. [...] What is the FHA MIP rate for 2026? On most 30-year FHA loans the annual MIP is 0.55% of the loan balance with under 5% down, or 0.\n\n## FHA MIP Chart (2026): Upfront and Annual MIP Rates\n| Premium | Rate | When you pay | How long | ------| | Upfront MIP (UFMIP) | 1.75% of the base loan amount | At closing, usually added to the loan | One time | | Annual MIP, terms over 15 years, base loan of $726,200 or less | 0.50% or 0.55% | Monthly, in your mortgage payment | 11 years or the loan term | | Annual MIP, terms over 15 years, base loan over $726,200 | 0.70% or 0.75% | Monthly | 11 years or the loan term | [...] | Base loan amount | LTV | Annual MIP | Duration | ------| | $726,200 or less | 90% or less | 0.15% | 11 years | | $726,200 or less | Over 90% | 0.40% | Loan term | | Over $726,200 | 78% or less | 0.15% | 11 years | | Over $726,200 | Over 78% to 90% | 0.40% | 11 years | | Over $726,200 | Over 90% | 0.65% | Loan term | Overall, a 15-year term saves on MIP and interest. However, the higher principal payment makes it harder to qualify on income. ## How long the annual \n\n## FHA Mortgage Insurance and 2026 MIP Rates\n- The upfront mortgage insurance premium is 1.75% of the base loan amount. - Annual MIP rates range from 0.15% to 0.75%. - Many buyers using the minimum 3.5% down payment on a 30-year FHA loan pay an annual rate of 0.55%. - The annual premium is divided into monthly amounts and included in your mortgage payment. - Unlike conventional loan mortgage insurance, MIP typically lasts for the life of the loan unless you put a 10% down payment at closing or refinance to a different loan type. [...] | Base Loan Amount | Original LTV | Approximate Down Payment | Annual MIP Rate | Payment Period | ------ | $726,200 or less | 90% or less | 10% or \n\n## Mortgage Rates Average 7.28%\nPublished: Thu, 19 Nov 2026 17:00:00 GMT\nMCLEAN, Va., Nov. 19, 2026 (GLOBE NEWSWIRE) -- Freddie Mac (OTCQB: FMCC) today released the results of its Primary Mortgage Market Survey® (PMMS®), showing the 30-year fixed-rate mortgage (FRM) averaged 7.28%. “While prospective borrowers often shop around for a home, they may not always think to do the same for their mortgage, as comparing multiple rate quotes can potentially save them thousands over a loan’s lifetime,” said Sam Khater, Freddie Mac's Chief Economist. News Facts [...] News Facts - The 30-year FRM averaged 7.28% as of November 19, 2026, up from last week when it averaged 7.11%. A year ago at this time, the 30-year FRM averaged 6.26%. - The 15-year FRM averaged 6.66%, up from last week when it averaged 6.45%. A year ago at this time, the 15-year FRM averaged 5.54%. [...] The PMMS® is focused on conventional, conforming, fully amortizing home purchase loans for borrowers wh\n\n## Mortgage Rates Decline for Third Consecutive Week to 7.18% | Freddie Mac\nPublished: Thu, 05 Nov 2026 00:00:00 GMT\nMCLEAN, Va., Nov. 05, 2026 (GLOBE NEWSWIRE) -- Freddie Mac (OTCQB: FMCC) today released the results of its Primary Mortgage Market Survey® (PMMS®), showing the 30-year fixed-rate mortgage (FRM) averaged 7.18%. “Mortgage rates continued their downward trajectory this week, improving the environment for prospective homebuyers against a backdrop of strong economic growth,” said Sam Khater, Freddie Mac's Chief Economist. News Facts [...] News Facts - The 30-year FRM averaged 7.18% as of November 5, 2026, down from last week when it averaged 7.24%. A year ago at this time, the 30-year FRM averaged 6.22%. - The 15-year FRM averaged 6.57%, down from last week when it averaged 6.60%. A year ago at this time, the 15-year FRM averaged 5.50%. [...] The PMMS® is focused on conventional, conforming, fully amortizing home purchase loans for borrowers who put 20% down and have excellent credit. For mor\n\n## 2026 PROFILE OF HOME BUYERS AND SELLERS\nIn 2026, the median down payment among all buyers was 18 percent, nine percent for first-time home buyers, and 19 percent for repeat buyers. Thus, if a repeat buyer is not making an all-cash purchase, they are making a comparably large down payment on their home compared with past years. In recent years, as interest rates have climbed, buyers may be placing larger downpayments to offset the monthly mortgage payment if they have the availability to do so. [...] - In 2026, the median down payment among all buyers was 18 percent, nine percent for first-time home buyers, and 19 percent for repeat buyers. Thus, if a repeat buyer is not making an all-cash purchase, they are making a comparably large down payment on their home compared with past years. ##### Sources of Down Payment [...] This year, 10 percent of buyers financed 100 percent of their entire purchase price with a mortgage, up slig\n\n## First-Time Home Buyer Statistics 2026: 75+ Facts, Data & Trends\nDown payment requirements continue to rise, making it harder for first-time buyers to enter the market. The median down payment for first-time buyers hit 10% in 2025, the highest level since 1989. ### Down Payment Percentages | Buyer Type | 2025 | 2024 | 2023 | Source | --- --- | First-time buyers (median) | 10% | 9% | 8% | NAR | | Repeat buyers (median) | 23% | 23% | 19% | NAR | | All buyers (median) | 19% | 18% | 14% | NAR | | All-cash buyers | 26% | 26% | 28% | NAR | [...] 21% of all home buyers are first-time buyers, the lowest share ever recorded 40 years old is the median age of first-time buyers, an all-time high 10% median down payment for first-time buyers, the highest since 1989 $97,000 median household income for first-time buyers 88% of all home buyers used a real estate agent [...] ### Dollar Amounts | Home Price | 10% Down (First-Time) | 23% Down (Repeat) | --- | $300,000 |\n\n## Highlights From the Profile of Home Buyers and Sellers\nInfographic of 2026 Profile of Home Buyers and Sellers highlights: 18% median down payment, 22% first-time buyers, 92% of sellers used an agent. Download the full report (free for members) Read the news release\n\n## Average Age of First-Time Home Buyers Is 40: 2026 Stats\nThe median first-time buyer down payment was 10%, matching the highest level recorded since 1989. Repeat buyers put down 23%. (NAR 2025 Profile) 22% of first-time buyers used a gift or loan from family or friends for their down payment; 26% tapped financial assets such as a 401(k), stocks or cryptocurrency. (NAR 2025 Profile) First-time buyers had a median household income of $94,400. (NAR 2025 Profile, via Builder) [...] The median first-time buyer down payment was 10% in NAR's 2025 Profile, matching the highest level recorded since 1989. Repeat buyers put down a median of 23%, and all buyers 19%. First-time down payments have risen four years in a row: 6% in 2022, 8% in 2023, 9% in 2024 and 10% in 2025. NAR links the rise to competition from all-cash buyers. A bigger down payment makes an offer more competitive and lowers the monthly payment at higher mortgage rates. [...] Repeat buyer\n\n## Top 10 Takeaways from NAR’s 2026 Profile of Home Buyers and Sellers\n1\\. First-time buyers: First-time home buyers increased slightly from the lowest historical share of 21% to 22% as housing affordability improved momentarily due to a short-lived drop in mortgage interest rates. First-time buyers continue to face limited affordable inventory and difficulty saving for a down payment. Before the Great Recession, 40% of primary residence buyers were 40% first-time buyers. Even among successful first-time buyers, the hardest step was finding the right property. [...] who financed versus those who made all-cash purchases. First-time buyers who financed had a median age of 38, while first-time buyers who made an all-cash purchase had a median age of 54. [...] 2\\. Age of first-time buyers: The overall median age of first-time buyers remained at the all-time high seen in last year’s report of 40 years old. Since 2010, the age of first-time buyers has been increm\n\n## Compare Current 5/1 ARM Rates\n| National Average Mortgage Rates, Purchase | | | | ------| | Mortgage | Rate | APR | Monthly Payment | | 30-year fixed, conventional | 7.43% | 7.68% | $1,944 | | 15-year fixed, conventional | 6.60% | 7.00% | $2,455 | | 5-year/6-month ARM | 6.74% | 6.98% | $1,814 | Source: Curinos LLC, November 2026; assumes a 720 FICO® ScoreΘ, $350,000 mortgage Notes: Monthly payment calculation assumes a $350,000 mortgage and 20% down; ARM payments can change after five years [...] For 30-year fixed-rate mortgages, the average mortgage rate is 7.43% in November 2026. Mortgage rates are set by lenders and can be affected by many factors, including Federal Reserve monetary policy. The overall condition of the economy also plays a major role in where lenders will set their mortgage rates. [...] - Mortgage rates drift down. The average 30-year fixed mortgage rate fell for a third straight week to 7.18% in \n\n## Current ARM Loan Rates\n### Compare current ARM rates versus other loan types Purchase Refinance | Product | Interest Rate | APR | --- | 3/1 ARM Rate | 6.17% | 7.06% | | 5/1 ARM Rate | 6.34% | 6.97% | | 7/1 ARM Rate | 6.43% | 6.83% | | 10/1 ARM Rate | 6.33% | 6.59% | | 30-Year Fixed Rate | 7.40% | 7.48% | | 15-Year Fixed Rate | 6.72% | 6.85% | | 30-Year Fixed Rate FHA | 7.11% | 7.16% | Rates as of Thursday, November 19, 2026 at 6:30 AM [...] | Product | Interest Rate | APR | --- | 3/1 ARM Rate | 6.26% | 7.11% | | 5/1 ARM Rate | 6.33% | 6.90% | | 7/1 ARM Rate | 6.46% | 6.83% | | 10/1 ARM Rate | 6.43% | 6.35% | | 30-Year Fixed Rate | 7.51% | 7.61% | | 15-Year Fixed Rate | 6.82% | 6.96% | | 30-Year Fixed Rate FHA | 7.34% | 7.40% | Rates as of Thursday, November 19, 2026 at 6:30 AM ###### How Bankrate collects mortgage rates Caret Down Icon [...] Close X Icon Weekly national mortgage interest rate trends Today's AR\n\n## Mortgage Rates\nThe 30-year fixed-rate mortgageaveraged 7.11% as of November 12, 2026, down from last week when it averaged 7.18%. A year ago at this time, the 30-year FRM averaged 6.24%. The 15-year fixed-rate mortgageaveraged 6.45%, down from last week when it averaged 6.57%. A year ago at this time, the 15-year FRM averaged 5.49%. _PMMS results are released weekly on Thursdays at 12 p.m. ET. and are an average of loan rates offered the prior Thursday through Wednesday._ [...] Search 1. Home 2. Research & Perspectives 3. Research # Mortgage Rates Primary Mortgage Market Survey® (PMMS®) results are based on the mortgage rate collected from thousands of loan applications submitted to Freddie Mac through Loan Product Advisor® (LPA®) from lenders across the country when a borrower applies for a mortgage. Learn more in our FAQs. ## Primary Mortgage Market Survey® U.S. weekly mortgage rate averages as of 11\n\n## Understanding Your Mortgage Amortization Schedule: Principal vs. Interest | WealthTrack\nIn the early years of a mortgage, a larger portion of each payment goes toward interest, while the principal portion is smaller. Over time, as the outstanding loan balance decreases, the interest portion decreases and the principal portion increases. This schedule allows you to see the gradual shift from interest-heavy payments to principal-heavy payments and track the decline of your mortgage balance. ## How a Mortgage Amortization Schedule Works [...] The principal portion reduces your outstanding loan balance. Over time, as the interest portion decreases, the principal portion increases, accelerating your equity in the home. ### 5. Remaining Balance After each payment, the remaining balance shows how much of the original loan is still owed. This helps homeowners track progress and plan for future financial decisions. ## Factors That Influence Your Amortization Schedule Several factors\n\n## What Is an Amortization Schedule? Guide + Free Calculator\nInterest on the remaining balance, calculated from the current balance × monthly rate. Principal, which is the rest of the payment after interest is deducted. Principal reduces the balance for next month. Because the balance falls every month, the interest portion of each payment also falls, and the principal portion grows. The total payment stays the same — but the split changes month by month. ## The columns in a typical schedule A standard amortization schedule has six columns: [...] The balance is lower than the original schedule would show. Interest on subsequent payments is calculated on the lower balance, so each future interest charge is smaller. More of each future monthly payment goes to principal (since less is needed for interest). The loan reaches zero earlier — saving the months that would otherwise have been at the end of the schedule. See our extra payment guide for worke\n\n## Loan amortization and extra payments – Wells Fargo\nTypically, the majority of each payment at the beginning of the loan term pays for interest and a smaller amount pays down the principal balance. Assuming regular payments, more of each following payment pays down your principal. This reduction of debt over time is amortization. ## How can making extra payments help? [...] Mortgage amortization is the reduction of debt by regular payments of principal and interest over a period of time. For example, if you make a monthly mortgage payment, a portion of that payment covers interest and a portion pays down your principal. [...] When you make an extra payment or a payment that's larger than the required payment, you can designate that the extra funds be applied to principal. Because interest is calculated against the principal balance, paying down the principal in less time on your mortgage reduces the interest you’ll pay. Even small additio\n\n## Average US 30-year mortgage rate rises to 7.28% this week, ending a four-week slide - ABC News\nPublished: Thu, 19 Nov 2026 17:00:46 GMT\nThe average 30-year fixed-rate mortgage in the U.S. rose to 7.28% from 7.11% last week, mortgage buyer Freddie Mac said Thursday. One year ago, the average rate was 6.26%. The average rate eased in the four weeks heading into this week and hadn't increased since Oct. 8, when it hit 7.40%, its highest level in nearly three years. [...] “The debate has shifted from whether the Fed hikes in December to how aggressively it moves,” said Anthony Smith, a senior economist at Realtor.com. “That is a tough backdrop for mortgage rates heading into what is already a seasonally slow stretch for the housing market.” Mortgage rates have been marching higher overall since late February, when the U.S. war with Iran began, pushing up the price of oil and driving inflation higher. [...] That yield had been mostly trending lower since early October, after climbing to its highest level since 2002, but it ha\n\n## Mortgage Rates Today: 30-Year and 15-Year Fixed (Freddie Mac) | MLQ.ai\nPublished: Thu, 19 Nov 2026 02:00:00 GMT\nThe 30-year fixed rate averaged 7.28% in the Freddie Mac Primary Mortgage Market Survey® for the week of Nov 19, 2026, up 1.04 percentage points from a year earlier. ### How often are mortgage rates updated? Freddie Mac publishes the survey every Thursday. This page updates after each release. ### Why is my mortgage quote different from the average? [...] | Week of | 30-year fixed | 15-year fixed | 10-year Treasury | Spread | ------ | Nov 19, 2026 | 7.28 | 6.66 | 5.04 | 2.24 | | Nov 12, 2026 | 7.11 | 6.45 | 5.10 | 2.01 | | Nov 5, 2026 | 7.18 | 6.57 | 4.84 | 2.34 | | Oct 29, 2026 | 7.24 | 6.60 | 4.98 | 2.26 | | Oct 22, 2026 | 7.32 | 6.68 | 4.96 | 2.36 | | Oct 15, 2026 | 7.40 | 6.71 | 5.10 | 2.30 | | Oct 8, 2026 | 7.40 | 6.73 | 5.22 | 2.18 | | Oct 1, 2026 | 7.28 | 6.60 | 5.24 | 2.04 | | Sep 24, 2026 | 7.03 | 6.42 | 5.18 | 1.85 | [...] # Mortgage rates Average rates on 30-year and 15-year f\n\n## What to Know About PMI | Fannie Mae\n### What is PMI? PMI is a type of mortgage insurance that’s usually required with a conventional loan when the buyer makes a down payment of less than 20% of the home’s value. PMI protects the lender if the buyer stops making loan payments since it’s riskier for a lender to give a mortgage with less than a 20% down payment from the buyer. [...] ### Pros - You may be able to make as little as a 3% down payment. - You can request cancellation of PMI. - PMI is potentially more affordable for those with high credit scores. - There is no upfront premium. - You can buy a home more quickly. ### Cons - PMI increases the cost of your loan over time. - If you have a low credit score, PMI can be expensive. - Putting less than 20% down may cause you to receive a higher interest rate [...] # What to Know About Private Mortgage Insurance Private Mortgage Insurance (PMI) can help you buy a home with a \n\n## How to Avoid PMI Without a 20% Down Payment | 2026\n## Key Takeaways Private mortgage insurance (PMI) applies to most conventional loans with less than 20% down. PMI usually costs between 0.30% and 1.15% of the loan amount per year. You can avoid PMI without 20% down through options like piggyback loans, lender-paid PMI, VA loans, or special lender programs. You can request PMI removal at 80% loan-to-value or wait for automatic cancellation at 78%. Check your no-PMI options. Start here [...] Many home buyers want to understand how to avoid private mortgage insurance because it adds a recurring cost to their monthly mortgage payments. While PMI allows borrowers to buy a home with less than 20% down, it can increase the total cost of the loan over time. Fortunately, there are ways to make a down payment of less than 20% without paying monthly PMI premiums. Here’s how. In this article (Skip to…) Ways to avoid PMI How much is PMI? PMI vs. FHA\n\n## What is private mortgage insurance? | Consumer Financial Protection Bureau\nConsumer Financial Protection B",
+ "plan": {
+  "title": "How a Mortgage Works: A First-Time Buyer's Guide",
+  "description": "A plain-English walkthrough of how a US mortgage works, from the down payment and fixed versus adjustable rates to amortization, PMI and closing costs. It also looks at where 30-year mortgage rates stand in November 2026, as general information and not advice.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "69145047",
+    "narration": "Two buyers purchase the exact same $300,000 home. Yet their monthly payments can differ by hundreds of dollars. The reason is not the house. It is the loan, and the rate attached to it.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Same House, Different Payment",
+      "subtitle": "The loan and the rate make the difference"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "What you really borrow, and the rate you lock"
+   },
+   {
+    "id": "8d8437b6",
+    "narration": "Start with the loan itself. It is the price minus your down payment. Put 3% down on $300,000, and you pay $9,000 up front and borrow $291,000.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "loan = price - down payment",
+        "note": "The down payment shrinks the loan"
+       },
+       {
+        "formula": "300000 - 9000 = 291000",
+        "note": "3% down on $300,000"
+       }
+      ],
+      "title": "What you actually borrow"
+     }
+    }
+   },
+   {
+    "id": "332d8747",
+    "narration": "Minimums depend on the loan type. A conventional loan can start at 3% down with a credit score of 620. An FHA loan needs 3.5% down, with a score of 580 or higher.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Conventional",
+       "tagline": "Minimum 3% down"
+      },
+      "b": {
+       "name": "FHA",
+       "tagline": "Minimum 3.5% down"
+      },
+      "rows": [
+       {
+        "label": "Down payment",
+        "a": "3%",
+        "b": "3.5%"
+       },
+       {
+        "label": "Credit score",
+        "a": "620 or higher",
+        "b": "580 or higher"
+       },
+       {
+        "label": "On $300,000",
+        "a": "$9,000 down",
+        "b": "$10,500 down"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "144fdfc3",
+    "narration": "What do buyers really put down? In 2026, the median was 18% for all buyers, but only 9% for first-time buyers. Most newcomers borrow more, so the rate matters even more.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Median down payment, 2026",
+      "labels": [
+       "All buyers",
+       "First-time"
+      ],
+      "values": [
+       18.0,
+       9.0
+      ],
+      "unit": "%",
+      "highlight": 1
+     }
+    }
+   },
+   {
+    "id": "1a465414",
+    "narration": "Now the rate. A fixed rate stays the same for the whole loan, so your principal and interest payment never moves. An adjustable rate, or ARM, starts lower, then resets, so your payment can change.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Fixed rate",
+       "tagline": "Same rate for life"
+      },
+      "b": {
+       "name": "Adjustable (ARM)",
+       "tagline": "Lower first, then resets"
+      },
+      "rows": [
+       {
+        "label": "Starting rate",
+        "a": "Higher",
+        "b": "Usually lower"
+       },
+       {
+        "label": "Over time",
+        "a": "Stays the same",
+        "b": "Can change"
+       },
+       {
+        "label": "Payment",
+        "a": "Predictable",
+        "b": "Can move after reset"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "98709696",
+    "narration": "So where are rates today? On November 19, Freddie Mac reported the 30-year fixed averaged 7.28%. A week earlier it was 7.11%, and a year ago, 6.26%.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "30-year fixed, Freddie Mac average",
+      "labels": [
+       "A year ago",
+       "Nov 12",
+       "Nov 19"
+      ],
+      "values": [
+       6.26,
+       7.11,
+       7.28
+      ],
+      "unit": "%",
+      "highlight": 2
+     }
+    }
+   },
+   {
+    "id": "1d7c5482",
+    "narration": "Since early September, weekly rates have ranged from 6.71% to 7.40%. That is a wide swing. Freddie Mac's chief economist says comparing several lenders can save thousands over the life of a loan.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "6.71%-7.40%",
+      "label": "Range of weekly 30-year rates since early September"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "910189b1",
+    "narration": "You might picture each payment chipping away at the loan evenly. It doesn't. Your payment stays level, but what's inside it changes every single month. That shift is called amortization.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The payment stays level. What's inside it changes.",
+      "emphasis": "What's inside it changes"
+     }
+    },
+    "chapter": "Amortization: where each payment actually goes"
+   },
+   {
+    "id": "00fbf528",
+    "narration": "Interest is charged on what you still owe. Take a $291,000 loan at 7.28% for 30 years. Divide the rate by twelve, and the monthly rate is about 0.607%.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "r = 0.0728 / 12",
+        "note": "monthly rate, about 0.607%"
+       },
+       {
+        "formula": "interest = 291000 * r",
+        "note": "first month, on the full balance"
+       }
+      ],
+      "title": "Interest on the remaining balance"
+     }
+    }
+   },
+   {
+    "id": "11895ee4",
+    "narration": "Month one, interest is about $1,765. The standard payment formula gives a principal-and-interest payment near $1,991. Subtract, and only about $226 reduces the loan. Most of your first payment is interest.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Your first payment",
+      "steps": [
+       {
+        "label": "Interest: about $1,765",
+        "detail": "$291,000 times the monthly rate"
+       },
+       {
+        "label": "Payment: about $1,991",
+        "detail": "principal and interest, fixed for 30 years"
+       },
+       {
+        "label": "Principal: about $226",
+        "detail": "payment minus interest"
+       }
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "eeed5171",
+    "narration": "That small bite lowers the balance. Next month's interest is slightly smaller, so slightly more goes to principal. The payment stays the same, the split slides, and late in the loan it flips.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The split shifts",
+      "nodes": [
+       {
+        "id": "b",
+        "label": "Balance"
+       },
+       {
+        "id": "i",
+        "label": "Less interest"
+       },
+       {
+        "id": "p",
+        "label": "More principal"
+       },
+       {
+        "id": "n",
+        "label": "Lower balance"
+       }
+      ],
+      "edges": [
+       [
+        "b",
+        "i"
+       ],
+       [
+        "i",
+        "p"
+       ],
+       [
+        "p",
+        "n"
+       ],
+       [
+        "n",
+        "b",
+        "repeat"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "6d265d9a",
+    "narration": "A 15-year loan at 6.66% raises the payment to roughly $2,560. But you'd pay about $170,000 in interest, versus roughly $426,000 on the 30-year. A higher payment buys far less interest.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "30-year fixed",
+       "tagline": "7.28% rate"
+      },
+      "b": {
+       "name": "15-year fixed",
+       "tagline": "6.66% rate"
+      },
+      "rows": [
+       {
+        "label": "Monthly P&I",
+        "a": "about $1,991",
+        "b": "about $2,560"
+       },
+       {
+        "label": "Total interest",
+        "a": "about $426,000",
+        "b": "about $170,000"
+       }
+      ],
+      "verdict": "Higher payment, far less interest"
+     }
+    }
+   },
+   {
+    "id": "cc31cfa8",
+    "narration": "Extra payments help too. Tell your lender to apply them to principal. The balance drops faster, future interest shrinks, and the loan ends sooner.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Extra principal payments",
+      "items": [
+       "Apply extra to principal",
+       "Balance falls faster",
+       "Future interest shrinks",
+       "Loan ends sooner"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "target",
+       "chart-column",
+       "banknote",
+       "clock"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cc8f10ca",
+    "narration": "So time is the real lever. The sooner principal falls, the less interest is ever charged. Next, the extra costs that sit on top of this payment.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The sooner principal falls, the less interest you ever pay.",
+      "emphasis": "less interest"
+     }
+    }
+   },
+   {
+    "id": "27c187b9",
+    "narration": "Your loan payment is not the whole bill. Put less than 20% down on a conventional loan, and the lender adds private mortgage insurance, called PMI. It protects the lender, not you.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "PMI",
+      "definition": "Private mortgage insurance. It protects the lender if a borrower stops paying, and is usually required with under 20% down on a conventional loan."
+     }
+    },
+    "chapter": "PMI, closing costs and the full cash you need"
+   },
+   {
+    "id": "6d9c52e4",
+    "narration": "The good news: PMI can be cancelled. You can generally request it once you reach 20% equity, and federal law removes it automatically at 78% of the home's original value, if you're current on payments.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How PMI ends",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Under 20% down",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Pay PMI monthly",
+        "icon": "banknote"
+       },
+       {
+        "id": "c",
+        "label": "20%: you can request",
+        "icon": "clock"
+       },
+       {
+        "id": "d",
+        "label": "78%: automatic end",
+        "icon": "check"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "ladder",
+      "accent": "teal",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "f529bf2d",
+    "narration": "FHA loans work differently. They charge an upfront premium of 1.75% of the loan, usually financed, plus a monthly premium. With under 10% down, it lasts the life of the loan. Refinancing is the only exit.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Conventional PMI",
+       "tagline": "Under 20% down"
+      },
+      "b": {
+       "name": "FHA MIP",
+       "tagline": "Government-insured loan"
+      },
+      "rows": [
+       {
+        "label": "Upfront cost",
+        "a": "None",
+        "b": "1.75% of loan"
+       },
+       {
+        "label": "Under 10% down",
+        "a": "Cancels at 20% equity",
+        "b": "Life of the loan"
+       },
+       {
+        "label": "Way out",
+        "a": "Request or automatic",
+        "b": "Refinance"
+       }
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "809ec14c",
+    "narration": "Now closing costs. They run 2% to 5% of the loan amount, covering lender and other fees. The lender fees inside that range are the part you can negotiate, so ask.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "2% to 5%",
+      "label": "Closing costs as a share of the loan amount"
+     }
+    }
+   },
+   {
+    "id": "f3ca59fd",
+    "narration": "Here's an example. A $300,000 home with 3% down means a $9,000 down payment. Add closing costs, and you need about $14,000 to $24,000 in cash at closing.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Cash to close",
+      "items": [
+       "Home price: $300,000 with 3% down",
+       "Down payment: $9,000",
+       "Add closing costs",
+       "Cash needed at closing: about $14,000 to $24,000"
+      ],
+      "style": "keywords",
+      "accent": "amber",
+      "emphasis": 3,
+      "icons": [
+       "home",
+       "banknote",
+       "plus",
+       "banknote"
+      ]
+     }
+    }
+   },
+   {
+    "id": "a64675e9",
+    "narration": "And monthly cost goes beyond principal and interest. Property taxes, homeowners insurance and maintenance all follow you for as long as you own the place. Budget for them before you fall in love with a house.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "money",
+        "label": "Taxes"
+       },
+       {
+        "icon": "shield",
+        "label": "Insurance"
+       },
+       {
+        "icon": "tools",
+        "label": "Maintenance"
+       }
+      ],
+      "title": "Beyond the loan payment"
+     }
+    }
+   },
+   {
+    "id": "7e664f5a",
+    "narration": "So a mortgage is four things. The price. The rate. The time. And the extras. Keep those four in view, and the loan stops being a mystery.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What a mortgage really is",
+      "items": [
+       "The price",
+       "The rate",
+       "The time",
+       "The extras"
+      ],
+      "style": "spotlight",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "8235daf6",
+    "narration": "With the 30-year rate near 7.28% today, compare quotes from several lenders. A small difference in rate or fees can save thousands over the life of the loan.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Compare lender quotes: the rate is about 7.28% now, and small gaps cost thousands.",
+      "emphasis": "Compare lender quotes"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Mortgage Rates Average 7.28% | Freddie Mac",
+    "url": "https://freddiemac.gcs-web.com/news-releases/news-release-details/mortgage-rates-average-728-0",
+    "publisher": "freddiemac.gcs-web.com",
+    "license": "",
+    "date": "Thu, 19 Nov 2026 15:00:00 GMT"
+   },
+   {
+    "title": "Complete costs of buying a house, from down payment to maintenance (and more)",
+    "url": "https://finance.yahoo.com/real-estate/articles/complete-costs-buying-house-down-211911257.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How do I get the lowest mortgage rate? 10 tips you can use.",
+    "url": "https://finance.yahoo.com/personal-finance/mortgages/article/how-do-i-get-the-lowest-mortgage-rate-224601102.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Compare Current 5/1 ARM Rates",
+    "url": "https://www.experian.com/blogs/ask-experian/5-1-arm-rates",
+    "publisher": "experian.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What Is an Amortization Schedule? Guide + Free Calculator",
+    "url": "https://getloancalc.com/amortization-schedule-explained",
+    "publisher": "getloancalc.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Loan amortization and extra payments – Wells Fargo",
+    "url": "https://www.wellsfargo.com/financial-education/homeownership/loan-amortization-extra-payments",
+    "publisher": "wellsfargo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "When You Can Cancel PMI (and What It Costs) | Bankrate",
+    "url": "https://www.bankrate.com/mortgages/basics-of-private-mortgage-insurance-pmi",
+    "publisher": "bankrate.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "FHA Mortgage Insurance in 2026: MIP Costs & Removal Rules - valleywestmortgage.com",
+    "url": "https://valleywestmortgage.com/fha-mortgage-insurance-2026-mip-costs",
+    "publisher": "valleywestmortgage.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 66.8,
+  "before_first_script_call_s": 17.3,
+  "script_s": 49.6
+ },
+ "cost": {
+  "script_small": 0.0018,
+  "research": 0.00629,
+  "script_big": 0.27522,
+  "search_api": 0.112,
+  "total": 0.3953
+ },
+ "calls": {
+  "small": 4,
+  "tools": 9,
+  "big": 6
+ },
+ "tokens": {
+  "in": 144253,
+  "out": 14845
+ },
+ "rules": {
+  "length": {
+   "words": 710,
+   "expected_words": 672,
+   "ratio": 1.057,
+   "beats": 22,
+   "expected_beats": 21,
+   "est_speech_s": 316.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 35,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Two buyers purchase the exact same $300,000 home. Yet their monthly payments can differ by hundreds of dollars. The reason is not the house. It is the loan, and the rate attached to it.",
+   "close_text": "With the 30-year rate near 7.28% today, compare quotes from several lenders. A small difference in rate or fees can save thousands over the life of the loan."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "equation": 2,
+    "versus": 4,
+    "chart": 2,
+    "stat": 2,
+    "kinetic_text": 3,
+    "steps": 1,
+    "diagram": 2,
+    "bullets": 3,
+    "definition": 1,
+    "icons": 1
+   },
+   "max_run": 1,
+   "entropy": 3.3,
+   "top_type": "versus",
+   "top_share": 0.18,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 34,
+   "ungrounded_numbers": [
+    "0607",
+    "170000",
+    "1765",
+    "1991",
+    "226",
+    "2560",
+    "426000"
+   ],
+   "entities": 5,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.179,
+   "ungrounded_number_share": 0.206,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "principal and interest payment",
+    "count": 2
+   },
+   {
+    "phrase": "can save thousands over",
+    "count": 2
+   },
+   {
+    "phrase": "save thousands over the",
+    "count": 2
+   },
+   {
+    "phrase": "thousands over the life",
+    "count": 2
+   },
+   {
+    "phrase": "life of the loan",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1,
+   "coverage": 2,
+   "other": 2
+  },
+  "sources": {
+   "cited": 8,
+   "fetched": 42,
+   "notes_len": 29912,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": false,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch",
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": [
+   "beat 6 (chart): its narration never says ['Nov 12', 'Nov 19']",
+   "beat 16 (diagram): its narration never says ['Pay PMI monthly', '20%: you can request', '78%: automatic end']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The main figures match the notes (7.28%, 7.11%, 6.26%, 2-5%, 9% and 18% medians). However, the $14k-$24k cash-to-close range is inconsistent with 2-5% of a $291k loan, and the 15-year example mixes a $291k loan with a rate from a different week's national average."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "Covers down payment, fixed vs ARM, amortization with worked math, 15 vs 30 year, PMI, FHA MIP, closing costs and current rates. ARM mechanics are thin, and taxes and insurance are only mentioned."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear arc from loan to rate to amortization to extras to a four-part recap. Beats 21 and 22 both close, and the rate comment repeats beat 7."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The 'two buyers, same house, payments differ by hundreds' hook is good, but it is never paid off with a concrete comparison. The ending is a practical call to action rather than a strong image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Plain, friendly and suited to beginners, with short sentences."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety: equations, charts of real numbers, versus tables and steps. The stat 'Range of weekly 30-year rates' is fine, and the ARM versus fixed table is qualitative only."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The worked amortization example and the FHA MIP detail are concrete, but much of the rest is standard explainer material, and the closing line is generic."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "All requested topics are addressed, in English, close to the target length. ARM rates are not given, and the current-rate discussion is brief."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural, with small oddities such as 'the rate is about 7.28% now'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "you need about $14,000 to $24,000 in cash at closing",
+    "issue": "The range is copied from the notes, but the 2-5% closing costs on a $291k loan are about $5.8k-$14.6k, so cash to close would be about $14.8k-$23.6k. The range roughly works, but the script never shows the arithmetic and presents the range as a unit that isn't traceable.",
+    "beat": 19
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "A 15-year loan at 6.66% raises the payment to roughly $2,560.",
+    "issue": "The 15-year rate is the national average for a different product, applied to the example loan. The payment and interest figures are not in the notes and are computed by the writer, though they are approximately right ($2,544 and about $167k).",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "They charge an upfront premium of 1.75% of the loan, usually financed",
+    "issue": "The 1.75% upfront MIP is true but is not in the visible notes. 'Refinancing is the only exit' omits the 11-year cancellation for 10%+ down, though the script does qualify it with 'under 10% down'.",
+    "beat": 17
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "An adjustable rate, or ARM, starts lower, then resets, so your payment can change.",
+    "issue": "ARM treatment is minimal: no 5/1 structure, no caps, no current ARM rate despite the notes mentioning a 90 bp gap.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "With the 30-year rate near 7.28% today, compare quotes from several lenders.",
+    "issue": "This repeats the advice already given in beat 7, so the ending is redundant.",
+    "beat": 22
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Yet their monthly payments can differ by hundreds of dollars.",
+    "issue": "The hook promises a comparison between two buyers that is never delivered.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Property taxes, homeowners insurance and maintenance all follow you",
+    "issue": "Taxes and insurance (escrow) are not quantified or tied into the monthly payment, and PMI cost is never given.",
+    "beat": 20
+   }
+  ],
+  "missing": [
+   "ARM details (5/1 structure, caps, current ARM rate)",
+   "typical PMI cost range",
+   "escrow for taxes and insurance in the monthly payment",
+   "a concrete example of how the principal share grows over years",
+   "a caveat that rates change weekly and the shown rate is an average"
+  ],
+  "wrong_facts": [
+   "The $14,000-$24,000 cash-to-close range is not derived from the stated 2-5% of a $291k loan in the script.",
+   "The 15-year payment and interest figures are not in the notes (unverified, but approximately true)."
+  ],
+  "would_publish": false,
+  "summary": "A clear, well-paced beginner script with correct core numbers and a worked amortization example. It is weakened by thin ARM coverage, an undelivered hook, and some figures that are unsourced or not derived in the script.",
+  "mean": 3.78,
+  "cost_usd": 0.035798,
+  "tokens": [
+   9389,
+   1702
+  ]
+ }
+}

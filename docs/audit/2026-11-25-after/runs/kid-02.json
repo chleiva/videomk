@@ -1,0 +1,790 @@
+{
+ "id": "kid-02",
+ "category": "education / lesson for kids",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "Una lección de fracciones para niños de 10 años: qué son, numerador y denominador, comparar fracciones, sumar con el mismo denominador y un par de ejemplos con pizza y chocolate. Con un repaso al final.",
+ "great": "Objetivos claros, ejemplos concretos con pizza/chocolate, numerador/denominador, comparar, suma con mismo denominador, repaso y pregunta final; lenguaje para 10 años; matemáticamente correcto.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:07:29",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Las fracciones, el numerador y denominador, la comparación y la suma con igual denominador son conocimientos matemáticos atemporales que no cambian, así que no hace falta buscar información reciente e",
+  "queries": [],
+  "searches": 6,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": 6,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "¿Qué es una fracción? Numerador y denominador",
+    "Comparar fracciones con pizza y chocolate",
+    "Sumar fracciones y repaso final"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 20,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 20228,
+  "n_sources": 6,
+  "n_fetched": 21,
+  "fetched": [
+   "Fracción (desambiguación)",
+   "Fracción",
+   "Fracción irreducible",
+   "Fracción molar",
+   "Numerador y denominador: Entiende las partes de una fracción",
+   "Calcula el numerador y denominador de una fracción fácilmente",
+   "PRIMARIA: RESOLVEMOS PROBLEMAS DE REPARTO CON FRACCIONES",
+   "Cómo enseñar Fracciones en Primaria: Guía educativa para docentes | Estudyando",
+   "FRACCIONES para PRIMARIA. EXPLICACIÓN SENCILLA con ACTIVIDADES",
+   "Fracciones para segundo ciclo de primaria. | PDF",
+   "🥇▷【 Fracciones - Matemáticas Sexto Primaria (11 años) 】",
+   "Cómo comparar fracciones: los 4 casos explicados | EasyMaths",
+   "Resumen de Comparación de Fracciones: Entendiendo y Aplicando Conceptos Fundamentales",
+   "https://educacionbasica.sep.gob.mx/wp-content/uploads/2024/09/Fichero_3%C2%B0_%C2%BFQue-es-una-fraccion_.pdf",
+   "Descubriendo las Fracciones con Chocolate: Una Aventura Matemática para Sexto C - Plan de clase · EdutekaLab · Eduteka",
+   "Libro digital interactivo",
+   "Suma de fracciones con el mismo denominador: Guía y Ejemplos",
+   "Suma de fracciones con el mismo denominador: GUÍA y EJEMPLOS FÁCILES",
+   "Cómo sumar y restar fracciones Guía con ejercicios resueltos",
+   "Ejercicios de Suma de Fracciones con Soluciones Paso a Paso | Tutorela",
+   "Cómo se Hace la Suma de Fracciones | Colegio Del Valle"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 16: equation twice in a row",
+  "section 1: some scenes list items their narration never mentions: beat 2 (bullets): its narration never says ['Un todo', 'Tomamos algunas partes']; beat 4 (diagram): its narration never says ['Todo: la pizza', 'Numerador: 1 parte']; beat 5 (bullets): its narration never says ['Abajo: denominador, partes en total', '3/4: tomas 3 de 4 partes']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Fracción (desambiguación)\nEl término fracción  hace  una referencia:\na una cantidad dividida por otra cantidad, fracción;\nal cociente entre dos expresiones algebraicas, fracción algebraica;\nFracción del pan, en religión (concretamente en algunas confesiones cristianas), al acto ceremonial de dividir el pan durante la Comunión;\na una fracción geográfica,\nen política a un grupo parlamentario, y\nen derecho, a un fragmento específico de la ley, generalmente numerado.\n\n## Fracción\nUna fracción es una forma de representar una división entre dos cantidades enteras, donde una parte (numerador) indica cuántas partes se toman y la otra (denominador) indica cuántas partes iguales se divide el todo. Las fracciones forman parte de los Número racional y se utilizan ampliamente en la vida cotidiana y en distintos contextos matemáticos.\nAdemás, una fracción puede interpretarse como una operación de división (matemática) o como una forma de expresar relaciones proporcionales, como sucede en el cálculo de porcentaje.\nFracciones para estudiantes de nivel básico\nUna fracción es una manera de representar partes de un todo.\nPor ejemplo: si una pizza se divide en 4 partes iguales y tomas 1, se forma la expresión 1/4 (un cuarto).\nEl número de abajo (denominador) indica en cuántas partes se divide el total, y el número de arriba (numerador) indica cuántas partes se tomaron del total ya dividido. \nUso de fracciones en la vida cotidiana\nLas fracciones se utilizan en diversas situaciones cotidianas, como:\nRepartir alimentos en partes iguales\nMedir ingredientes en recetas\nCalcular descuentos y proporciones.\n​\nEn el ámbito de la aritmética, las fracciones también pueden expresarse en…\n\n## Fracción irreducible\nEn matemáticas, una fracción irreducible es una fracción que no se puede simplificar (reducir), es decir, que el numerador y el denominador no comparten factores en común (otro que la unidad). Una fracción está escrita en su mínima expresión (es una fracción irreducible) cuando no existe otra fracción equivalente que se pueda escribir en términos más sencillos. Una fracción que no es irreducible se dice que es reducible, o que no está escrita en su mínima expresión\nEjemplos de fracciones irreducibles son las siguientes:\n  \n    \n      \n        \n          \n            \n              \n                \n              \n              \n                \n                  2\n                \n              \n            \n            \n              \n                \n              \n              \n                \n                  3\n                \n              \n            \n          \n        \n        \n        ,\n        \n        \n          \n            \n              \n                \n              \n              \n                \n                  3…\n\n## Fracción molar\nEn química, la fracción molar (xi o χi) se define como la unidad de la cantidad de un constituyente (expresada en moles), ni, dividida por la cantidad total de todos los constituyentes en una mezcla (también expresada en moles), ntot. Esta expresión se da a continuación:\nxi=nintot\nLa suma de todas las fracciones molares es igual a 1:\n∑i=1Nni=ntot; ∑i=1Nxi=1.\nEl mismo concepto expresado con un denominador de 100 es el porcentaje molar, porcentaje molar o proporción molar (%mol).\nLa fracción molar también se llama fracción de cantidad.​ Es idéntica a la fracción numérica, que se define como el número de moléculas de un componente Ni dividido por el número total de todas las moléculas N tot. La fracción molar a veces se denota con la letra griega minúscula χ (chi) en lugar de una x romana.​​ Para mezclas de gases, la IUPAC recomienda la letra y.​\nEl Instituto Nacional de Estándares y Tecnología de los Estados Unidos usa el término fracción de cantidad de sustancia sobre fracción molar porque no contiene el nombre de mol.​\nLa fracción molar es una relación de moles a moles y la concentración molar es un cociente de moles a volumen.\nLa fracción molar expresa la composición de una mezcla…\n\n## 🥇▷【 Fracciones - Matemáticas Sexto Primaria (11 años) 】\nComparar fracciones con el mismo denominador Comparar fracciones con distinto denominador a) Comparar fracciones con el mismo denominador Es mayor la fracción que tenga mayor el numerador. Podemos comprobar que 2 / 4 = 0,5 mientras que 1 / 4 = 0,25, luego la primera fracción es mayor. También podemos comprobar que 5 / 9 = 0,55 mientras que 3 / 9 = 0,33, luego la primera fracción es mayor. b) Comparar fracciones con distinto denominador [...] En este caso puede ocurrir que tengan el mismo numerador o no. b.1.- Si tienen el mismo numerador es mayor la que tenga menor denominador. En este caso comprobamos que 8 / 3 = 2,66 mientras que 8 / 5 = 1,60, luego la primera fracción es mayor. También podemos ver que 6 / 2 = 3,00 mientras que 6 / 4 = 1,50, luego la primera fracción es mayor. b.2.- Si tienen distinto numerador entonces para poder compararlas hay que expresarlas con el mismo denominado\n\n## Cómo comparar fracciones: los 4 casos explicados | EasyMaths\nmás pequeño. En los demás casos → se buscan fracciones equivalentes con el mismo denominador. ## Caso 1: las fracciones tienen el mismo denominador Es el caso más fácil. 38 y 58 son octavos: los trozos son del mismo tamaño, así que es mayor la que tiene más trozos. Por tanto, 38 < 58, porque 3 < 5. ## Caso 2: las fracciones tienen el mismo numerador Aquí es donde más se equivocan los niños. Comparemos 13 y 15. Muchos dicen «15 es mayor porque 5 es mayor que 3». ¡Error! [...] Comparemos 23 y 34. Los trozos no son del mismo tamaño, así que no basta con contar. Hay que cortar las dos fracciones en trozos iguales, es decir, reducirlas a común denominador. 1. Busca un denominador común: un número que esté en la tabla del 3 y en la del 4. Aquí, 12 (3 × 4 = 12). 2. Transforma cada fracción multiplicando el numerador y el denominador por el mismo número: - 23 = 812 (por 4), - 34 = 912 (por 3). 3\n\n## Resumen de Comparación de Fracciones: Entendiendo y Aplicando Conceptos Fundamentales\nComparar fracciones con el mismo denominador es un proceso simple, ya que el denominador (el número de partes iguales) es el mismo para ambas fracciones. En este caso, la comparación se realiza únicamente entre los numeradores. Por ejemplo, al comparar 3/8 y 5/8, observamos solo los numeradores 3 y 5. Como 3 es menor que 5, concluimos que 3/8 es menor que 5/8. [...] Este método es directo y no requiere cálculos adicionales, convirtiéndose en una manera eficiente de comparar fracciones. Es importante recordar que el denominador indica en cuántas partes se ha dividido el todo, mientras que el numerador indica cuántas de esas partes estamos considerando. Por lo tanto, al tener el mismo denominador, estamos comparando cantidades iguales del mismo todo. [...] ## Comparación de Fracciones con Denominadores Diferentes Para comparar fracciones con denominadores diferentes, es necesario encontrar\n\n## https://educacionbasica.sep.gob.mx/wp-content/uploads/2024/09/Fichero_3%C2%B0_%C2%BFQue-es-una-fraccion_.pdf\nPlantar problemas que impliquen comparar fracciones con igual numerador o igual denominador. Por ejemplo: -La maestra de Vanesa reparte dos barras iguales de chocolate, en la primera barra de chocolate, Vanesa recibe , ,mientras que, de la segunda barra de chocolate, Diego recibe de la barra. ¿A quién le tocó mayor cantidad de chocolate?7-¿Qué tira será más larga, la que mide metros o la que mide metros?-La maestra de Vanesa reparte dos barras iguales de chocolate, en la primera barra de [...] la primera barra de chocolate, Vanesa recibe , ,mientras que, de la segunda barra de chocolate, Diego recibe de la barra. ¿A quién le tocó mayor cantidad de chocolate? [...] o de un conjunto de ellos usando material concreto o doblando y recortando figuras, en los que, primero, los resultados sean menores que la unidad y luego, mayores que la unidad. Po r ejemplo, un chocolate entre 4 personas y 3 \n\n## Descubriendo las Fracciones con Chocolate: Una Aventura Matemática para Sexto C - Plan de clase · EdutekaLab · Eduteka\nNombre: “Partiendo y nombrando fracciones con chocolate” Objetivo: Identificar y representar fracciones con material concreto. Instrucciones: + El docente entrega a cada grupo barras de chocolate divididas en 12 piezas. + Los estudiantes parten la barra en diferentes fracciones indicadas (por ejemplo, 1/2, 1/3, 1/4, 3/12). + Nombran oralmente cada fracción y la escriben en sus hojas de trabajo.Organización: Grupos de 3-4 estudiantes. [...] Docente: Muestra una barra de chocolate y dice: “Hoy vamos a convertirnos en detectives de fracciones para descubrir cómo dividir este chocolate en partes iguales y compartirlo justamente.” Estudiantes: Se muestran interesados y atentos. #### Contextualización: Docente: Relaciona las fracciones con la vida diaria: “Cuando compartimos un pastel, un chocolate o una pizza, usamos fracciones para saber cuánto le toca a cada quien.” [...] + Los estudiantes \n\n## Libro digital interactivo\n¿Quién comió más chocolate? Explique.¡Tener presente! En la comparación de fracciones se debe tener la misma unidad como referencia para poder comparar cada par de fracciones. ## Momento 2. 2. Desarrollo Parte I: Fracciones Equivalentes (35 minutos) Objetivo: Identificar fracciones equivalentes utilizando representaciones visuales y procedimientos matemáticos. Procedimiento: [...] Representación de fracciones: Dividir la barra en diferentes partes para representar una fracción, una cantidad específica de esas partes representa una fracción. Comparación de fracciones: Coloca dos barras de fracciones con denominadores iguales o diferentes, y compara cuál es mayor o menor. [...] Modelar problemas de fracciones: Usa la barra para visualizar problemas de fracciones. Por ejemplo, si un problema involucra encontrar 1/2 de 10, puedes dividir una barra en dos partes y representar 1/2 coloreando u\n\n## Numerador y denominador: Entiende las partes de una fracción\nTitle: Numerador y denominador: Entiende las partes de una fracción # Numerador y denominador: Entiende las partes de una fracción. Las fracciones son una parte esencial de las matemáticas que nos permiten expresar cantidades que no son enteras. Una fracción se compone de dos elementos fundamentales, los cuales son el **numerador** y el **denominador**. ## ¿Qué es una fracción? Una **fracción** es una forma de representar parte de un todo. Las fracciones se utilizan para mostrar una cantidad que es menor que 1, y se componen de dos partes: el **numerador** y el **denominador**. El numerador, que se coloca en la parte superior, indica cuántas partes del todo estamos considerando. El denominador, que se coloca en la parte inferior, indica en cuántas partes se ha dividido el todo. Por ejemplo, si tenemos una pizza y la cortamos en 8 porciones iguales y tomamos 3 de esas porciones, la fracci\n\n## Calcula el numerador y denominador de una fracción fácilmente\nTitle: Calcula el numerador y denominador de una fracción fácilmente # Calcula el numerador y denominador de una fracción fácilmente. Las fracciones son una parte fundamental de las matemáticas, y entender cómo calcular su numerador y denominador es esencial para resolver problemas y realizar operaciones con ellas. En este artículo, te explicaremos de manera clara y sencilla qué es una fracción, las partes que la componen y cómo calcular tanto su numerador como su denominador. Consiste en dos números separados por una línea horizontal, donde el número de arriba se llama numerador y el de abajo denominador. Esta cantidad se divide en partes iguales y se expresa como una relación entre una parte y el todo. El numerador indica la cantidad de partes que se toman, mientras que el denominador indica cuántas partes tiene el todo. Por ejemplo, si tenemos una pizza y la dividimos en 8 trozos, si \n\n## PRIMARIA: RESOLVEMOS PROBLEMAS DE REPARTO CON FRACCIONES\nLas fracciones son partes de un todo. Se utilizan para representar la división de un objeto o una cantidad en partes iguales. Por ejemplo, si tenemos una pizza y la cortamos en 4 partes iguales, cada parte será 1/4 de la pizza. De esta forma, podemos expresar fracciones como un número que indica cuántas partes tenemos (numerador) sobre un número que representa cuántas partes hay en total (denominador). [...] El denominador, que se encuentra en la parte inferior, es el número que indica cuántas partes iguales hay en el todo. Siguiendo el mismo ejemplo de 2/3, el 3 es el denominador y significa que la unidad se ha dividido en 3 partes iguales.\n\n## Cómo enseñar Fracciones en Primaria: Guía educativa para docentes | Estudyando\n“Si tenemos una pizza cortada en 8 porciones y comemos 3, hemos comido tres octavos de la pizza.” “Si una botella tiene 4 partes iguales y usamos 1, hemos usado un cuarto de la botella.” Este tipo de situaciones ayuda a que los niños relacionen las fracciones con su vida diaria, fortaleciendo la comprensión conceptual y el vocabulario matemático. ## Sección 2: Comparación y equivalencia de fracciones ### 2.1 Comparación de fracciones con el mismo denominador [...] Uso de material concreto: cortando pizzas o pasteles en diferentes números de partes pero coloreando la misma proporción. Representación gráfica y en recta numérica: los estudiantes pueden ver cómo distintas fracciones ocupan el mismo punto en la recta numérica. Actividades de juego: tarjetas con fracciones equivalentes para emparejar. ### 2.4 Orden de fracciones [...] Utilizar rectas numéricas o diagramas de barras para que lo\n\n## FRACCIONES para PRIMARIA. EXPLICACIÓN SENCILLA con ACTIVIDADES\n[3:27] trozos iguales y me como cinco trozos el denominador sigue siendo tres las partes iguales en las que he partido cada Pizza [3:35] en este caso me he comido 5co tercios porque me he comido una pizza entera y dos trocitos de otra Inténtalo tú si [3:42] parto las pizzas en seis trozos iguales y me como ocho trozos Con qué fracción se [3:48] representa muy bien 8 sexos Y si parto las pizas en seis trozos y me como dos [...] [0:50] el número de arriba es que empieza por la misma sílaba que la palabra nube si numerador es una palabra nueva para ti [0:57] te recomiendo que juegues con sus sílabas ahora que ya sabemos cómo es una fracción veamos un ejemplo si parto una [1:04] pizza en seis trozos iguales 1 dos 3 4 c y se y me como dos de esos trozos uno y [1:11] dos podemos decir que me he comido esta fracción de pizza pero Cómo se leen las fracciones el número de arriba el [...] [4:30] t\n\n## Fracciones para segundo ciclo de primaria. | PDF\n- 4 12 = 5 4 + 3 4 = 3 12 + 2 12 = 6 24 + 12 24 = 5 4 - 3 4 = ![13 Pensamos 1. Laura y su hermana cocinaron una pizza, la dividieron en 8 porciones iguales. Laura comió 3/8 y su hermana 2/8. ¿Qué fracción de la pizza comieron entre las dos? ¿Qué fracción de la pizza sobró? 2. Leo dividió una tortilla en 15 partes iguales. Él repartió 6 partes entre sus amigos. ¿Qué fracción [...] Una fracción es la expresión matemática que se utiliza para representar las partes de un todo. Es decir, es un número entero que ha sido dividido en partes iguales y cada parte es la fracción del entero. Toda fracción es una división y toda división es una fracción. El diseño curricular nos explicita que el estudio de los números racionales ocupa un lugar central en los aprendizajes de Segundo Ciclo. Es un trabajo exigente para los alumnos que deberá desembocar en un cambio\n\n## Suma de fracciones con el mismo denominador: Guía y Ejemplos\nA continuación, vamos a ver varios ejemplos de fracciones de suma que ilustran la suma de fracciones con el mismo denominador. ### Ejemplo 1: Suma de 1/6 y 2/6 Identificamos que ambas fracciones tienen el mismo denominador (6): 1. Sumamos los numeradores: 1 + 2 = 3. 2. Conservamos el denominador: obtenemos 3/6. 3. Podemos simplificar a 1/2 dividiendo por el MCD que es 3. ### Ejemplo 2: Suma de 3/8 y 2/8 En este caso, el denominador es 8: [...] 1. Sumamos los numeradores: 2 + (-1) = 1. 2. Conservamos el denominador: obtenemos 1/3. ## Práctica: Ejercicios para afianzar el aprendizaje Para dominar la suma de fracciones con el mismo denominador, la práctica es fundamental. A continuación, te presentamos algunos ejercicios que puedes resolver: Ejercicio 1: Suma 3/4 + 1/4 = ? Ejercicio 2: Suma 5/10 + 2/10 = ? Ejercicio 3: Suma 2/7 + 3/7 = ? Ejercicio 4: Suma 8/15 + 2/15 = ? Ejercicio 5: Suma 1\n\n## Suma de fracciones con el mismo denominador: GUÍA y EJEMPLOS FÁCILES\nAhora observemos otro ejemplo: 4/7 + 2/7. Nuevamente, como ambas fracciones poseen el mismo denominador, sumamos los numeradores: 4 + 2 = 6. Por lo tanto, 4/7 + 2/7 se convierte en 6/7, una suma con mismo denominador. En este caso, no es necesario simplificar, ya que 6/7 es una fracción propia. [...] Ver ejemplos de suma de fracciones con el mismo denominador es una excelente manera de asimilar el concepto. Consideremos las siguientes fracciones: 1/6 + 2/6. Dado que ambas tienen un denominador de 6, procedemos a sumar los numeradores: 1 + 2, lo que nos da 3. Por lo tanto, la suma de fracciones con igual denominador resulta en 3/6. Esto también se puede simplificar a 1/2, lo que es una parte crucial a considerar al entender el final de la operación. [...] Un tercer ejemplo podría ser 5/10 + 3/10. Al tener el mismo denominador 10, sumamos: 5 + 3, que resulta en 8. Así que la suma de fracci\n\n## Cómo sumar y restar fracciones Guía con ejercicios resueltos\nVamos a realizar un ejemplo de suma de fracciones. Supongamos que queremos sumar 3/5 + 1/5. Siguiendo nuestro método anterior: 1. Identificamos que el denominador es 5 en ambas fracciones. 2. Sumamos los numeradores: 3 + 1 = 4. 3. Mantenemos el denominador igual: 4/5. El resultado de 3/5 + 1/5 es 4/5. Como puedes ver, las sumas son directas cuando los denominadores coinciden. ## Restar Fracciones con el Mismo Denominador [...] Por ejemplo, si queremos sumar 1/4 + 2/4, simplemente sumamos los numeradores: 1 + 2 = 3. El resultado se coloca sobre el mismo denominador, 4, lo que da como resultado 3/4. Este método es fácil y directo, permitiendo realizar sumas sin dificultad. [...] La suma de fracciones es un proceso bastante sencillo cuando ambas fracciones tienen el mismo denominador. Para sumar fracciones con el mismo denominador, simplemente sumamos los numeradores y mantenemos el denomin\n\n## Ejercicios de Suma de Fracciones con Soluciones Paso a Paso | Tutorela\n+ Los errores más frecuentes son: sumar denominadores (solo se suman numeradores), no amplificar correctamente las fracciones, olvidar simplificar el resultado final, y no verificar que ambas fracciones tengan el mismo denominador antes de sumar los numeradores. ### ¿Puedo sumar fracciones con denominadores negativos? + [...] + 1. Convierte ambas fracciones originales a decimales y súmalas 2. Convierte tu resultado a decimal 3. Compara ambos decimales - deben ser iguales 4. Verifica que usaste el mismo denominador común en ambas fracciones ### ¿Qué errores comunes debo evitar al sumar fracciones? + [...] Explicación completa con ejemplos Para sumar fracciones deberemos hallar el común denominador simplificando, ampliando o multiplicando los denominadores. A continuación, hay que sumar sólo los numeradores para llegar al resultado. Explicación completa ## Practicar Suma de fracciones Pon \n\n## Cómo se Hace la Suma de Fracciones | Colegio Del Valle\nEste es quizás el error más frecuente y con mayores consecuencias. Sumar fracciones con denominadores diferentes sin primero encontrar un denominador común es un error conceptual grave, ya que se estarían sumando cantidades que no son comparables directamente. Para evitar esto, siempre identifica los denominadores de las fracciones que deseas sumar y calcula su MCM, este será el nuevo denominador común. [...] 1. Encontrar el mínimo común múltiplo (MCM) de los denominadores. 2. Convertir las fracciones al mismo denominador utilizando el MCM. 3. Sumar los numeradores y mantener el nuevo denominador. 4. Simplificar la fracción si es necesario. ### Método de la mariposa Este truco visual facilita la suma de fracciones: 1. Multiplica en cruz los numeradores y denominadores. 2. Suma los resultados. 3. Multiplica los denominadores. 4. Forma la nueva fracción y simplifica si es necesario. [...] ",
+ "plan": {
+  "title": "Fracciones fáciles: pizza, chocolate y sumas",
+  "description": "Una lección de fracciones para niños de 10 años: qué es una fracción, qué hacen el numerador y el denominador, cómo comparar fracciones y cómo sumar fracciones con el mismo denominador. Con ejemplos de pizza y chocolate y un repaso final.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "2bf04081",
+    "narration": "Dos amigos comparten una pizza. Uno come un trozo. El otro también come un trozo. ¿Comieron lo mismo? Depende de una cosa: si los trozos son iguales.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "pizza shared between friends",
+      "alt": "Amigos compartiendo una pizza",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "¿Qué es una fracción? Numerador y denominador"
+   },
+   {
+    "id": "4bb4e86f",
+    "narration": "Ahí entran las fracciones. Una fracción representa partes de un todo que se ha dividido en partes iguales. Puede ser una pizza, una tableta de chocolate o una botella.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Una fracción",
+      "items": [
+       "Un todo",
+       "Partes iguales",
+       "Tomamos algunas partes"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "pizza",
+       "scale",
+       "hand"
+      ]
+     }
+    }
+   },
+   {
+    "id": "040edbb5",
+    "narration": "Veamos un ejemplo. Cortamos una pizza en cuatro partes iguales. Si tomas una, escribimos uno sobre cuatro. Se lee: un cuarto.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "1/4",
+      "definition": "Una pizza dividida en 4 partes iguales, de las que tomas 1, es un cuarto.",
+      "example": "1/4 = un cuarto de pizza"
+     }
+    }
+   },
+   {
+    "id": "b8db639a",
+    "narration": "Fíjate en los dos números. El de abajo se llama denominador. Dice en cuántas partes iguales dividimos el todo. Aquí, cuatro.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Partes de una fracción",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Todo: la pizza",
+        "icon": "pizza"
+       },
+       {
+        "id": "d",
+        "label": "Denominador: 4 partes",
+        "icon": "scale"
+       },
+       {
+        "id": "n",
+        "label": "Numerador: 1 parte",
+        "icon": "hand"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "d",
+        "se divide"
+       ],
+       [
+        "d",
+        "n",
+        "tomamos"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "d3f5b539",
+    "narration": "El número de arriba es el numerador. Dice cuántas partes tomamos. Aquí, una. Y si tomas tres trozos de esa pizza, será tres cuartos.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Numerador y denominador",
+      "items": [
+       "Arriba: numerador, partes que tomas",
+       "Abajo: denominador, partes en total",
+       "3/4: tomas 3 de 4 partes"
+      ],
+      "style": "keywords",
+      "accent": "teal",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "c022e6ab",
+    "narration": "Recuerda la regla de oro: las partes deben ser iguales. Si un trozo es enorme y otro diminuto, ya no podemos hablar de cuartos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Las partes de una fracción siempre deben ser iguales.",
+      "emphasis": "iguales"
+     }
+    }
+   },
+   {
+    "id": "4266f644",
+    "narration": "Usamos fracciones a diario: para repartir comida, medir ingredientes en una receta o calcular descuentos en una tienda.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "food",
+        "label": "Repartir comida"
+       },
+       {
+        "icon": "spoon",
+        "label": "Medir ingredientes"
+       },
+       {
+        "icon": "money",
+        "label": "Calcular descuentos"
+       }
+      ],
+      "title": "Fracciones en la vida diaria"
+     }
+    }
+   },
+   {
+    "id": "b4a3e62c",
+    "narration": "¿Qué es más grande, un octavo o un medio? Muchos piensan que el 8 es mayor que el 2, así que un octavo gana. ¡Pues no! Vamos a descubrirlo con pizza.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "¿Qué es más grande: 1/8 o 1/2?",
+      "emphasis": "1/8 o 1/2"
+     }
+    },
+    "chapter": "Comparar fracciones con pizza y chocolate"
+   },
+   {
+    "id": "35428dd5",
+    "narration": "Primer caso: mismo denominador. Si una pizza tiene 8 trozos iguales, los trozos miden lo mismo. Entonces gana la fracción con más trozos, es decir, el numerador mayor.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "pizza cut into eight slices",
+      "alt": "Pizza cortada en ocho trozos iguales",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "8479d98e",
+    "narration": "Ahora el chocolate. Una tableta tiene 8 onzas. Si comes 3 onzas, comes 3/8. Si tu amigo come 5 onzas, come 5/8. Como 5 es mayor que 3, tu amigo comió más.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Tú",
+       "tagline": "3/8 de chocolate"
+      },
+      "b": {
+       "name": "Tu amigo",
+       "tagline": "5/8 de chocolate"
+      },
+      "rows": [
+       {
+        "label": "Onzas comidas",
+        "a": "3 onzas",
+        "b": "5 onzas"
+       },
+       {
+        "label": "Fracción",
+        "a": "3/8",
+        "b": "5/8"
+       }
+      ],
+      "verdict": "5/8 es mayor que 3/8",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "80208ace",
+    "narration": "Segundo caso: mismo numerador. Piensa en una pizza que se corta en 2, en 4 o en 8 partes. Tomas solo un trozo de cada una. ¿Cuál trozo es más grande?",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "pizza cut in half",
+       "pizza cut in four slices",
+       "pizza cut in eight slices"
+      ],
+      "alt": "Pizzas cortadas en 2, 4 y 8 partes"
+     }
+    }
+   },
+   {
+    "id": "e3cdb8be",
+    "narration": "Cuantas más partes haces, más pequeños son los trozos. Por eso 1/2 es mayor que 1/4, y 1/4 es mayor que 1/8. El número de abajo grande significa trozos pequeños.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Mismo numerador: trozos más pequeños",
+      "items": [
+       "1/2: trozo grande",
+       "1/4: trozo mediano",
+       "1/8: trozo pequeño"
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "a350704f",
+    "narration": "Un truco para no equivocarte: dibuja barras del mismo tamaño, divídelas en las partes que indica cada denominador, píntalas y compara. Lo que ves, ¡no te engaña!",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Truco de las barras",
+      "steps": [
+       {
+        "label": "Dibuja barras iguales"
+       },
+       {
+        "label": "Divídelas en partes iguales"
+       },
+       {
+        "label": "Pinta el numerador"
+       },
+       {
+        "label": "Compara lo pintado"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "3b478436",
+    "narration": "Tienes una pizza cortada en ocho trozos. Te comes dos y tu amigo se come tres. ¿Qué parte de la pizza se han comido entre los dos?",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "pizza cut into slices",
+      "alt": "Una pizza cortada en trozos iguales",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Sumar fracciones y repaso final"
+   },
+   {
+    "id": "356a1607",
+    "narration": "Es fácil. Cuando el denominador es el mismo, sumas los numeradores y el denominador se queda igual. Los trozos son del mismo tamaño, así que solo contamos cuántos hay.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Mismo denominador",
+      "items": [
+       "Suma los numeradores",
+       "El denominador se queda igual"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "fd07e254",
+    "narration": "Vamos con la pizza. Dos octavos más tres octavos. Primero, dos más tres son cinco. Después, mantenemos el ocho. Son cinco octavos, porque los trozos siguen siendo octavos.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "2/8 + 3/8",
+        "note": "Mismo denominador: 8"
+       },
+       {
+        "formula": "(2 + 3)/8 = 5/8",
+        "note": "Sumamos arriba, el 8 no cambia"
+       }
+      ],
+      "title": "Pizza: sumar octavos"
+     }
+    }
+   },
+   {
+    "id": "ca8d1c75",
+    "narration": "Ahora el chocolate. Una tableta tiene cuatro onzas iguales. Comes un cuarto y luego dos cuartos más. Uno más dos son tres. Has comido tres cuartos de la tableta.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "1/4 + 2/4",
+        "note": "Mismo denominador: 4"
+       },
+       {
+        "formula": "(1 + 2)/4 = 3/4",
+        "note": "Tres cuartos de la tableta"
+       }
+      ],
+      "title": "Chocolate: sumar cuartos"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "d3f83c41",
+    "narration": "Cuidado con un error muy común. No se suman también los denominadores. Dos octavos más tres octavos no son cinco dieciseisavos. Los trozos no cambian de tamaño, así que el ocho se queda.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Error",
+       "tagline": "Sumar también abajo"
+      },
+      "b": {
+       "name": "Correcto",
+       "tagline": "El denominador se queda"
+      },
+      "rows": [
+       {
+        "label": "2/8 + 3/8",
+        "a": "5/16",
+        "b": "5/8"
+       },
+       {
+        "label": "Denominador",
+        "a": "8 + 8 = 16",
+        "b": "Sigue siendo 8"
+       }
+      ],
+      "verdict": "Los trozos siguen siendo octavos",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "4e39c25c",
+    "narration": "Repasemos. Una fracción son partes iguales de un todo. El denominador dice en cuántas partes se divide. El numerador dice cuántas tomas. Además, ya sabes comparar fracciones y sumarlas.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Repaso",
+      "items": [
+       "Fracción: partes iguales de un todo",
+       "Denominador: en cuántas se divide",
+       "Numerador: cuántas tomas",
+       "Comparar y sumar"
+      ],
+      "style": "keywords",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "52fe1964",
+    "narration": "Ahora, cuando mires una pizza o un chocolate, podrás decir qué fracción queda. Y ya sabes: las fracciones están en todas partes, listas para que las repartas y las sumes.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Mira una pizza o un chocolate y di qué fracción queda.",
+      "emphasis": "qué fracción queda"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Fracción",
+    "url": "https://es.wikipedia.org/wiki/Fracci%C3%B3n",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Numerador y denominador: Entiende las partes de una fracción",
+    "url": "https://matematrix.net/numerador-denominador",
+    "publisher": "matematrix.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Cómo comparar fracciones: los 4 casos explicados | EasyMaths",
+    "url": "https://easymaths.app/es/blog/como-comparar-fracciones",
+    "publisher": "easymaths.app",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Resumen de Comparación de Fracciones: Entendiendo y Aplicando Conceptos Fundamentales",
+    "url": "https://teachy.ai/es/resumenes/educacion-primaria/primaria-6-grado/matematicas-a-espanol/comparacion-de-fracciones-entendiendo-y-aplicando-conceptos-fundamentales-4976c",
+    "publisher": "teachy.ai",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Suma de fracciones con el mismo denominador: Guía y Ejemplos",
+    "url": "https://matematix.org?p=7114",
+    "publisher": "matematix.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Cómo sumar y restar fracciones Guía con ejercicios resueltos",
+    "url": "https://matematrix.net/operaciones-combinadas-con-numeros-naturales-pdf",
+    "publisher": "matematrix.net",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 35.0,
+  "before_first_script_call_s": 4.8,
+  "script_s": 30.2
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "script_big": 0.18939,
+  "research": 0.00273,
+  "search_api": 0.048,
+  "total": 0.24044
+ },
+ "calls": {
+  "small": 3,
+  "big": 5,
+  "tools": 6
+ },
+ "tokens": {
+  "in": 87001,
+  "out": 7631
+ },
+ "rules": {
+  "length": {
+   "words": 554,
+   "expected_words": 537,
+   "ratio": 1.032,
+   "beats": 20,
+   "expected_beats": 17,
+   "est_speech_s": 249.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 27,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Dos amigos comparten una pizza. Uno come un trozo. El otro también come un trozo. ¿Comieron lo mismo? Depende de una cosa: si los trozos son iguales.",
+   "close_text": "Ahora, cuando mires una pizza o un chocolate, podrás decir qué fracción queda. Y ya sabes: las fracciones están en todas partes, listas para que las repartas y las sumes."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "image": 3,
+    "bullets": 5,
+    "definition": 1,
+    "diagram": 1,
+    "kinetic_text": 3,
+    "icons": 1,
+    "versus": 2,
+    "gallery": 1,
+    "steps": 1,
+    "equation": 2
+   },
+   "max_run": 2,
+   "entropy": 3.07,
+   "top_type": "bullets",
+   "top_share": 0.25,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "denominador dice en cuantas",
+    "count": 2
+   },
+   {
+    "phrase": "dice en cuantas partes",
+    "count": 2
+   },
+   {
+    "phrase": "el numerador dice cuantas",
+    "count": 2
+   },
+   {
+    "phrase": "ahora el chocolate una",
+    "count": 2
+   },
+   {
+    "phrase": "el chocolate una tableta",
+    "count": 2
+   },
+   {
+    "phrase": "chocolate una tableta tiene",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1,
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 6,
+   "fetched": 21,
+   "notes_len": 20228,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 2 (bullets): its narration never says ['Un todo', 'Tomamos algunas partes']",
+   "beat 4 (diagram): its narration never says ['Todo: la pizza', 'Numerador: 1 parte']",
+   "beat 5 (bullets): its narration never says ['Abajo: denominador, partes en total', '3/4: tomas 3 de 4 partes']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The maths is correct (1/4, 3/8<5/8, 2/8+3/8=5/8, 5/16 as the common error). Small slips: a chocolate bar of '8 onzas' is an odd, American framing, and the 'regla de oro' is slightly overstated."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers every requested point, but comparing with different numerators and denominators is skipped. The opening question 1/8 vs 1/2 is only answered indirectly, and there are no stated objectives or closing quiz."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: what a fraction is, then parts, comparing, adding, and review. The chapters are sensible. The review is short, and the 1/8 vs 1/2 hook is never explicitly resolved."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The hook is a puzzle about two friends and one slice each, with real tension. The ending is a practical challenge, but it is a little soft and has no concrete final question."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is friendly and direct with 'tú', and suits 10-year-olds. A few phrases are a bit adult, such as 'Fíjate' and 'regla de oro'."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well: image, diagram, versus, equation and steps, and they match the narration. The images are generic pizza stock photos, not drawn fractions. The diagram's 'scale' and 'hand' icons are odd."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The common-error contrast (5/16) and the bars trick are useful, but most of the script is a standard textbook sequence."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It includes all requested elements: definition, numerator/denominator, comparing, adding with the same denominator, pizza and chocolate examples, and a review. The length is about right."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is clear and correct. 'Onzas' for chocolate sounds un-Spanish for ES (it would be 'onzas' only as a chocolate-bar piece, or 'porciones'), and 'dieciseisavos' is hard for 10-year-olds."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Una tableta tiene 8 onzas. Si comes 3 onzas, comes 3/8.",
+    "issue": "Ounces are an unusual unit for Spain, and a chocolate bar is normally counted in pieces (onzas de chocolate do exist in Spain, but they are the pieces/squares of a bar). It would be clearer to say 'porciones' or 'cuadritos'.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "¿Qué es más grande, un octavo o un medio? Muchos piensan que el 8 es mayor que el 2, así que un octavo gana. ¡Pues no!",
+    "issue": "The hook question is never explicitly answered. The case of different numerators and denominators (equivalent fractions) is absent.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Además, ya sabes comparar fracciones y sumarlas.",
+    "issue": "The review is thin for comparing and adding. The rules are not restated, and there is no final question for practice.",
+    "beat": 19
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "no son cinco dieciseisavos",
+    "issue": "The word is hard to say and understand for 10-year-olds. A simpler framing would be '5/16', read aloud with an example.",
+    "beat": 18
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "pizza cut into slices",
+    "issue": "The generic stock image does not show 2/8 and 3/8 shaded, so it adds little to the addition lesson.",
+    "beat": 14
+   }
+  ],
+  "missing": [
+   "Explicit answer to why 1/2 > 1/8",
+   "Brief mention of comparing different denominators or equivalent fractions",
+   "A practice question for the viewer at the end",
+   "Learning objectives at the start"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, correct and friendly lesson that covers the requested points with good pizza and chocolate examples and a useful common-error scene. It leaves the opening 1/8 vs 1/2 question hanging, has a thin review and no final question, and uses odd chocolate 'onzas'.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Una tableta tiene 8 onzas.",
+     "problem": "'Onzas' as a unit is an anglicism-like choice and confusing in ES.",
+     "better": "Una tableta tiene 8 porciones."
+    },
+    {
+     "quote": "Ahí entran las fracciones.",
+     "problem": "Slightly calqued from 'that's where fractions come in'.",
+     "better": "Ahí es donde aparecen las fracciones."
+    },
+    {
+     "quote": "Lo que ves, ¡no te engaña!",
+     "problem": "Stiff and unnatural.",
+     "better": "Lo que ves con tus ojos no falla."
+    }
+   ]
+  },
+  "mean": 3.78,
+  "cost_usd": 0.035626,
+  "tokens": [
+   9378,
+   1687
+  ]
+ }
+}

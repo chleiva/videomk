@@ -1,0 +1,622 @@
+{
+ "id": "opi-01",
+ "category": "opinion / essay",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Is remote work better than working in an office? Give me a balanced essay with a clear conclusion.",
+ "great": "Clear thesis, both sides with evidence (productivity studies, collaboration, commute, inequality), nuance, a committed conclusion; not mushy; avoids invented studies.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:07:39",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The request asks for a balanced essay on remote versus office work, a debate built on research findings and reasoning that is largely timeless. An encyclopedia source covers the established arguments ",
+  "queries": [
+   "remote work vs office work benefits drawbacks"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 5.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 7,
+  "grounding": {
+   "beats": 13,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2347,
+  "n_sources": 2,
+  "n_fetched": 2,
+  "fetched": [
+   "Remote work",
+   "Electronics and IT industry in Odisha"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 329 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## Remote work\nRemote work is the practice of working at or from one's home or another space rather than from an office or workplace.\nThe practice of working at home has been documented for centuries, but remote work for large employers began on a small scale in the 1970s when technology was developed that could link satellite offices to downtown mainframes through dumb terminals using telephone lines as a network bridge. It became more common in the 1990s and 2000s, facilitated by internet technologies such as collaborative software on cloud computing and conference calling via videotelephony. In 2020, workplace hazard controls during the COVID-19 pandemic catalyzed a rapid transition to remote work for white-collar workers around the world. This shift largely persisted even after restrictions were lifted.\nProponents of a geographically distributed workforce argue that it reduces costs associated with maintaining an office, grants employees greater autonomy and flexibility—which improves their motivation and job satisfaction—eliminates environmental harms from commuting, allows employers to access a more geographically diverse pool of applicants, and enables employees to live where they prefer.\nOpponents...\n\n## Electronics and IT industry in Odisha\nElectronics and IT industry in Odisha refers to the information technology (IT), information technology-enabled services (ITeS), software services, electronics manufacturing and related technology industries operating in the Indian state of Odisha. The industry is primarily concentrated in Bhubaneswar, the state capital, with technology activities also present in cities such as Rourkela, Cuttack, Berhampur, Sambalpur and Balasore.\nThe development of Odisha's IT sector has been supported by the establishment of Software Technology Parks of India (STPI) infrastructure, development of IT parks, government policies, availability of technical education institutions and investments by domestic and multinational technology companies.\nAccording to the Odisha Economic Survey (2024–25), Odisha crossed the US$1 billion software exports benchmark. The information technology sector in the state employs around 60,000 software professionals, either directly or through hybrid work arrangements, and has more than 500 IT companies, including national and global technology firms.",
+ "plan": {
+  "title": "Remote Work vs Office: Which Is Actually Better?",
+  "description": "A balanced look at remote work and office work, covering costs, flexibility, environment and collaboration. It ends with a clear conclusion about which approach fits which situation.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "046878a7",
+    "narration": "In 2020, millions of office workers were sent home almost overnight. Years later, many never went back. So was that a lucky accident, or a better way to work?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Remote Work vs Office",
+      "subtitle": "Which way of working is actually better?"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "The big question"
+   },
+   {
+    "id": "f3a8a73d",
+    "narration": "Working from home is not new. It has been documented for centuries, and large employers began trying it on a small scale in the 1970s.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "How remote work grew",
+      "events": [
+       {
+        "date": "1970s",
+        "label": "Terminals link satellite offices"
+       },
+       {
+        "date": "1990s-2000s",
+        "label": "Internet and video calls"
+       },
+       {
+        "date": "2020",
+        "label": "Pandemic shift"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "8b550a3f",
+    "narration": "Technology did the heavy lifting. Phone lines and terminals came first, then the internet, cloud software and video calls made working from anywhere realistic.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing laptop home",
+      "alt": "working on a laptop at home"
+     }
+    }
+   },
+   {
+    "id": "65fa6c4a",
+    "narration": "Then 2020 arrived. Health rules pushed white-collar workers around the world to work from home, and the shift largely persisted even after restrictions were lifted.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "2020",
+      "label": "The year remote work went global"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "f7914f03",
+    "narration": "Supporters make a strong case. Without an office, employers cut costs. Employees gain autonomy and flexibility, which can lift motivation and job satisfaction.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Remote work: the benefits",
+      "items": [
+       "Lower office costs",
+       "Autonomy and flexibility",
+       "Higher motivation",
+       "Better job satisfaction"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "banknote",
+       "clock",
+       "rocket",
+       "heart"
+      ]
+     }
+    },
+    "chapter": "The case for remote work"
+   },
+   {
+    "id": "45e016a7",
+    "narration": "There is more. No commute means less pollution. Employers can hire from a wider pool of applicants. And people can live where they prefer.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Why distributed teams appeal",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "No commute",
+        "icon": "leaf"
+       },
+       {
+        "id": "b",
+        "label": "Wider hiring pool",
+        "icon": "globe"
+       },
+       {
+        "id": "c",
+        "label": "Live where you prefer",
+        "icon": "house"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "and"
+       ],
+       [
+        "b",
+        "c",
+        "and"
+       ]
+      ],
+      "style": "pills",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "2697876c",
+    "narration": "A real example is Odisha, India. Its tech sector employs around 60,000 software professionals, either directly or through hybrid work arrangements.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "60,000",
+      "label": "Software professionals in Odisha, directly or hybrid"
+     }
+    }
+   },
+   {
+    "id": "261cd6ac",
+    "narration": "But opponents have a point. Offices put people in the same room, which makes quick questions, mentoring and spontaneous ideas easier than a video call.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "team meeting in modern office",
+      "alt": "colleagues collaborating in an office",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "The case for the office"
+   },
+   {
+    "id": "53f144f6",
+    "narration": "Home can also blur the line between work and life. Some people feel isolated, and others simply lack a quiet space or a good connection.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "empty desk lonely home office",
+      "alt": "person alone working at home desk"
+     }
+    }
+   },
+   {
+    "id": "e69181a9",
+    "narration": "So the real question is not which place wins. It is which one fits the task, the person and the team. Think of it as a trade-off.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Remote",
+       "tagline": "Freedom and flexibility"
+      },
+      "b": {
+       "name": "Office",
+       "tagline": "Presence and connection"
+      },
+      "rows": [
+       {
+        "label": "Flexibility",
+        "a": "High",
+        "b": "Lower"
+       },
+       {
+        "label": "Commute",
+        "a": "None",
+        "b": "Daily"
+       },
+       {
+        "label": "Collaboration",
+        "a": "Needs effort",
+        "b": "Natural"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "19801f70",
+    "narration": "Many companies now sit in the middle. Hybrid work blends both. Some days people focus at home, and on office days they meet and build trust.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The hybrid middle",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Home days"
+       },
+       {
+        "id": "o",
+        "label": "Office days"
+       },
+       {
+        "id": "y",
+        "label": "Hybrid"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "y"
+       ],
+       [
+        "o",
+        "y"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    },
+    "chapter": "The verdict"
+   },
+   {
+    "id": "b19481b6",
+    "narration": "Here is my conclusion. Remote work is better for focused tasks, flexibility and access to talent. The office is better for teamwork, training and building culture.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Which fits best",
+      "items": [
+       "Focused solo work: remote",
+       "Flexibility and talent: remote",
+       "Teamwork and culture: office",
+       "Mentoring new people: office"
+      ]
+     }
+    }
+   },
+   {
+    "id": "603ec2d1",
+    "narration": "So neither wins outright. For most knowledge work, a flexible mix beats a strict rule. Choose the setting that fits the task, and you get the best of both.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The best workplace is the one that fits the work.",
+      "emphasis": "fits the work"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Remote work",
+    "url": "https://en.wikipedia.org/wiki/Remote_work",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Electronics and IT industry in Odisha",
+    "url": "https://en.wikipedia.org/wiki/Electronics_and_IT_industry_in_Odisha",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 66.1,
+  "before_first_script_call_s": 22.7,
+  "script_s": 43.4
+ },
+ "cost": {
+  "script_small": 0.00028,
+  "script_big": 0.1321,
+  "search_api": 0.0,
+  "total": 0.13238
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 36822,
+  "out": 6403
+ },
+ "rules": {
+  "length": {
+   "words": 332,
+   "expected_words": 402,
+   "ratio": 0.826,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 150.7,
+   "flag_short": true,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In 2020, millions of office workers were sent home almost overnight. Years later, many never went back. So was that a lucky accident, or a better way to work?",
+   "close_text": "So neither wins outright. For most knowledge work, a flexible mix beats a strict rule. Choose the setting that fits the task, and you get the best of both."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "timeline": 1,
+    "clip": 2,
+    "stat": 1,
+    "bullets": 1,
+    "diagram": 2,
+    "counter": 1,
+    "image": 1,
+    "versus": 1,
+    "checklist": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.39,
+   "top_type": "clip",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 3,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 2,
+   "fetched": 2,
+   "notes_len": 2347,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.08,
+  "flags": [
+   "too_short"
+  ],
+  "mismatch_scenes": [
+   "beat 2 (timeline): its narration never says ['Terminals link satellite offices', 'Internet and video calls', 'Pandemic shift']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Claims track the notes and nothing is invented, but the Odisha stat is misapplied as evidence for remote work and 'which fits' claims are asserted without evidence."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "No productivity studies, data on hybrid or attrition, or inequality; the reviewer note asks for evidence, yet the script offers only Wikipedia-level generalities and an irrelevant Odisha figure."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The chapters are clear, but about a quarter of the script is spent on history, and the 'case for' beats repeat each other; the verdict arrives only after the history and both cases."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening about workers sent home overnight is decent, but the ending 'best of both' is a generic summary."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational, balanced and suited to a general audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, but the 'stat' for the year 2020 and the Odisha counter are weak uses, and the versus table is thin."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly generic pros and cons; the only specific, Odisha, is off-point."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It gives a balanced essay with a conclusion, but the conclusion is the hedge 'neither wins outright', not the clear commitment requested; length is fine."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clean and natural English."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "A real example is Odisha, India. Its tech sector employs around 60,000 software professionals, either directly or through hybrid work arrangements.",
+    "issue": "This stat is irrelevant to whether remote work is better; it shows a headcount, not a benefit, and mixes in hybrid work. It is also off-region for a US viewer.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Supporters make a strong case.",
+    "issue": "There is no actual evidence such as productivity studies, retention or pay data. Claims are bare assertions.",
+    "beat": 5
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "So neither wins outright.",
+    "issue": "The viewer asked for a clear conclusion, and this is a hedge. 'A flexible mix' is generic and not committed.",
+    "beat": 13
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Working from home is not new. It has been documented for centuries",
+    "issue": "Three beats of history use up time that should go to the arguments, in a 3-minute video.",
+    "beat": 2
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "The year remote work went global",
+    "issue": "A stat scene showing just '2020' is not a real number and merely repeats the narration.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Some people feel isolated, and others simply lack a quiet space or a good connection.",
+    "issue": "This is a missed chance to discuss inequality, such as housing and career effects for remote workers.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Productivity and performance evidence",
+   "Effects on career advancement and proximity bias",
+   "Inequality in home setups and access to remote jobs",
+   "Commute time and cost figures",
+   "US-specific data on hybrid or return-to-office mandates",
+   "A committed thesis"
+  ],
+  "wrong_facts": [
+   "The Odisha figure is accurate to the notes but does not support the point it is placed under."
+  ],
+  "would_publish": false,
+  "summary": "A tidy, balanced but generic script that mostly paraphrases a thin encyclopedia entry. It lacks evidence, uses an irrelevant Odisha stat, and ends in a hedge instead of a clear verdict.",
+  "mean": 3.0,
+  "cost_usd": 0.02099,
+  "tokens": [
+   4215,
+   1256
+  ]
+ }
+}

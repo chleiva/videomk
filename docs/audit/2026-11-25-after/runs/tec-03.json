@@ -1,0 +1,884 @@
+{
+ "id": "tec-03",
+ "category": "technology / AI",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "what are the most important AI model releases and trends of the past few months",
+ "great": "Recent releases and trends with dates from research, who released what, capabilities, agents/reasoning/cost trends, caveats; must be fresh and sourced, not stale 2023 content.",
+ "minutes": 4.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:59:43",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The request asks about recent AI model releases and trends over the past few months, which changes quickly and is likely newer than my training data, so current web sources are needed for an accurate ",
+  "queries": [
+   "AI model releases this month",
+   "latest AI model launches 2026",
+   "AI industry trends recent months"
+  ],
+  "searches": 13,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 21.4,
+  "error": "",
+  "fallback": null,
+  "section_searches": 9,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "A leaderboard that flipped in one day",
+    "Model families: big, fast and cheap tiers",
+    "Open weights, choice and what to watch"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 19,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 1,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 36006,
+  "n_sources": 11,
+  "n_fetched": 55,
+  "fetched": [
+   "AI Model Releases November 2026: Day-by-Day List (Nov 24) — BeevR",
+   "New AI Models (Nov 2026) Release Guide",
+   "AI Model Releases in November 2026",
+   "New AI Models 2026: Month-by-Month Release Timeline | Versus Models",
+   "Best AI Models of 2026: 4 Powerful Picks Ranked by Task",
+   "Introducing GPT-6 Sol and Luna | OpenAI",
+   "AI winners to shift as monetization becomes the benchmark: UBS GWM - CNBC",
+   "The AI economy will depend on better matches - Business Insider",
+   "Gemini 4 Carbon Availability [2026]: $2 Intro Price, Limited Regions",
+   "Introducing Gemini 4 Neon",
+   "Introducing Gemini 4 Hydrogen",
+   "Google’s Gemini 4 Carbon tops AI rankings, but only cyber defenders get it - The Next Web",
+   "The Biggest Benchmark in AI Just Updated, Dealing a Major Blow to a Chinese Contender - Gizmodo",
+   "Anthropic vs. OpenAI: Who’s Winning the AI Race? - Visual Capitalist",
+   "Google launches Gemini 4 Neon, claims it's three times faster than Carbon - Neowin",
+   "Google launches Gemini 4 Neon with Opus 5.5-level coding performance at 25% lower API token prices - VentureBeat",
+   "Google rolls out Gemini 4 Hydrogen, finally replacing 3.8 Flash - Ars Technica",
+   "Gemini 4 Carbon is now available",
+   "Gemini 4 Carbon: Developer Guide",
+   "Gemini 4 Carbon: our next frontier model",
+   "Gemini 4 Carbon Benchmarks, Pricing & Context Window",
+   "Gemini 4 Carbon - Model Card — Google DeepMind",
+   "The Gemini Carbon Release Explained (How do we get them to see this?) : r/Bard",
+   "The AI models of November 2026 compared side by side",
+   "Latest Claude Model and Every Release: Timeline 2026 |… — Patchoutech Intel",
+   "AI Model Releases: November 2026 Roundup | MJ INSIGHTS",
+   "The AI models and agents shutting down in November 2026, and what replaces them — Enjoy Agentic Industries",
+   "Best AI Models in November 2026: Current Leaderboard + Release Timeline | ZNIX.ai",
+   "AI News This Week: 10 Updates for November 6–12, 2026 | QuestStudio",
+   "Gemini 4 Neon: Pricing, Benchmarks, and Where It Fits",
+   "Gemini 4 Neon vs Hydrogen and Carbon: Which Tier Fits",
+   "GPT-6.2 Astra and Sol: Features, Benchmarks, Tests & Pricing | DataCamp",
+   "Artificial Analysis on X: \"OpenAI’s release of GPT-6.2 Astra and GPT-6.2 Sol delivers the #2 model in the Artificial Analysis I…\"",
+   "GPT-6.2 Astra and Sol are now available - Announcements - OpenAI Developer Community",
+   "GPT-6.2 Astra and GPT-6.2 Sol API Pricing and Day 0 Support on LiteLLM | liteLLM",
+   "Gemini 4 Hydrogen Released: Price, Benchmarks and Access | CellCog",
+   "Gemini 4 Hydrogen and Orchestrator | Google Antigravity Blog",
+   "Inkling 2 Mini: 26.4B Open-Weight Model, Apache 2.0",
+   "Inkling 2 Mini: Run Thinking Machines' Open Model Locally | MindStudio",
+   "Thinking Machines has released Inkling 2 Mini, an open weights looped transformer",
+   "Open-Weight Efficiency: Inkling 2 Mini",
+   "Inkling 2 Mini Benchmarks, Cost and Capabilities | Vals AI",
+   "Inkling 2 Mini: Benchmarks, Pricing and Local Setup",
+   "Microsoft Ignite 2026 Recap: MAI Models, Agents, Foundry",
+   "Microsoft Copilot Beats OpenAI, Anthropic on Price",
+   "Microsoft launches in-house coding and security models at Ignite, recasts Copilot as an operating system for work",
+   "Microsoft Ignite 2026: Why the Copilot Harness Beats the Models | MindStudio",
+   "Microsoft challenges OpenAI, Anthropic with specialized AI models | LinkedIn",
+   "Go Gadget News on Facebook: \"Microsoft takes on OpenAI and Anthropic with seven new AI models at Ignite 2026. https://gogadget.ne…\"",
+   "Kimi K3.1 Pro: 2.8T Open Weights, 1M Context [2026]",
+   "Kimi K3.1 Pro: Specs, Price, Open Weights, and Benchmarks | Yotta Labs",
+   "Kimi K3.1 Pro Release Date and Models | FlexAI Blog",
+   "Kimi K3.1 Pro: Moonshot AI's Open-Weight Model Challenges Opus and Astra",
+   "Kimi K3.1 Pro is live on Featherless - Featherless",
+   "Kimi-K3.1-Pro is now open-weights : r/LocalLLaMA"
+  ],
+  "research_agent_cost_usd": 0.0024317
+ },
+ "warnings": [
+  "section 1: the section narration totals 215 words but a 1.3-minute section needs about 173 (at most 181). Trim it: shorter sentences, fewer words per beat, drop the least important details; keep the beats, the key points and do not go under 159 words",
+  "section 3: the section narration totals 157 words but a 1.4-minute section needs about 187 words in at least 6 beats. Lengthen the beats and add beats with new, concrete material until it is about 187 words"
+ ],
+ "notes": "## AI Model Releases November 2026: Day-by-Day List (Nov 24) — BeevR\nPublished: Thu, 12 Nov 2026 18:50:07 GMT\n← Blog Field note # AI Model Releases November 2026: Day-by-Day List (Nov 24) Thien Nguyen· Nov 12, 2026 From 13 to 24 November 2026, the biggest model releases were OpenAI's GPT-6.2 Astra and GPT-6.2 Sol (17 Nov, $8/$40 and $2/$10 per million tokens), Google's Gemini 4 Neon (18 Nov, $3/$15), Alibaba's Qwen4-Max (16 Nov) and Microsoft's MAI Code 2 (17 Nov). The main open-weight releases were Inkling 2 Mini (20 Nov) and Sarvam-105B-1711 (22 Nov). [...] ## Which new AI models were released in November 2026? Between 1 and 24 November 2026 we confirmed 27 model releases from 13 vendors: frontier LLMs (Claude Fable 5.2, GPT-6.2 Astra and Sol, Gemini 4 Carbon, Hydrogen and Neon, Qwen4-Max), coding models (MAI Code 2), open-weight models (Inkling 2 Mini, SenseNova Loop-9B, Sarvam-105B-1711) and image, video, world and voice models. [...] | 18 Nov | Reson8 | Rumble-2-Flash (0.5B) | Speech-to-tex\n\n## New AI Models (Nov 2026) Release Guide\nPublished: Mon, 02 Nov 2026 00:00:00 GMT\nThe major AI models released or announced in late October and November 2026 are GPT-6.1 Terra from OpenAI (released October 26), Gemini 4 Carbon from Google (announced October 28), and Kimi K3.1 Pro from Moonshot (with full open weights promised by November 4), alongside DeepSeek V4.1 Flash 1017 (October 17) and Claude Haiku 5.5 from Anthropic (October 7, just before the window). Every model in this guide was confirmed on the lab's own announcement page, and independent scores come from the [...] - Gemini 4 Carbon general availability. Google is phasing Carbon to more trusted partners through the Fairwind Program before making it available to developers, businesses and consumers. - GPT-6 Rosalind expansion. The research preview has a `rosalind` endpoint today; OpenAI has not stated a GA date or a full product surface. - Kimi K3.1 Pro weights. Full model weights release by November 4, 202\n\n## AI Model Releases in November 2026\nPublished: Wed, 18 Nov 2026 12:00:00 GMT\n10 releases from 6 labs 10 AI models were released in November 2026, from OpenAI, Anthropic, Google, Meta, Qwen and Z.ai. OpenAI shipped the most that month with 3. Every entry links to its full model page with specs and benchmark scores at launch.\n\n## New AI Models 2026: Month-by-Month Release Timeline | Versus Models\nPublished: Sun, 22 Nov 2026 00:00:00 GMT\n## November - Nov 9 – Anthropic: Claude Fable 5.2. - Nov 10 – Google: Gemini 4 Carbon – Google’s most capable model, in the app only on AI Ultra. - Nov 12 – Google: Gemini 4 Hydrogen, available to free users too. - Nov 17 – OpenAI: GPT-6.2 Astra and Sol – in ChatGPT Work, Codex and the API. - Nov 17 – Microsoft (Ignite): business Copilot lets you choose OpenAI or Anthropic models. - Nov 18 – Google: Gemini 4 Neon on the AI Pro and Ultra plans. ## Announced but not confirmed [...] - Sep 1 – Anthropic: Claude Fable 5.1. - Sep 2 – Google: Gemini 3.8 Flash. - Sep 3 – OpenAI: GPT-6 Astra, OpenAI’s most capable model, on paid plans. - Sep 14 – Apple: Siri AI beta in English. Apple says the models were built “in collaboration with Google and its Gemini models”. Not yet available on iPhones in the EU. - Sep 14 – Microsoft: the `=COPILOT()` function in Excel retired. - Sep 21 – xAI: Grok 4.7. [..\n\n## Best AI Models of 2026: 4 Powerful Picks Ranked by Task\nPublished: Tue, 03 Nov 2026 13:22:32 GMT\nThe boards also change constantly. When Artificial Analysis launched Intelligence Index v5 on October 27, 2026, Claude Opus 5.5 ranked first. One day later, Google announced Gemini 4 Carbon, and it took first place at 59, with Opus 5.5 at 58 and GPT-6 Astra at 57. That’s why any list of the best AI models of 2026 needs a date and a source next to every claim. [...] Very often. The top spot on Artificial Analysis changed from Claude Opus 5.5 to Gemini 4 Carbon within a day in late October 2026. ### Conclusion The best AI models of 2026 aren’t a single winner but a set of tools for different jobs. Claude Opus 5.5 leads coding, Opus 5.5 and Gemini 4 Argon lead writing, Argon leads professional research, and Claude Haiku 5.5 and GPT-6 Luna lead on budget. Gemini 4 Carbon leads the overall index but isn’t widely available yet. [...] Best coding picks: - Top pick: Claude Opus 5.5 for complex a\n\n## Introducing GPT-6 Sol and Luna | OpenAI\nPublished: Tue, 10 Nov 2026 06:00:00 GMT\nImproving caching for agents and long conversations Continuing to improve alignment Availability _Update on September 29, 2026:_ _Learn about OpenAI's latest model:__GPT‑6 .1 Sol⁠_⁠_._ Earlier this month, we introduced GPT‑6 Astra, the most intelligent and aligned model in the world. While the most demanding and important projects still call for Astra’s full depth, work happens at different scales, rhythms, and budgets.\n\n## AI winners to shift as monetization becomes the benchmark: UBS GWM - CNBC\nPublished: Thu, 29 Oct 2026 04:42:31 GMT\nAI winners to shift as monetization becomes the benchmark: UBS GWM. James Cheo, CIO of South Asia and Australia at UBS Global Wealth Management, says AI is a multi-decade cycle, with investors now favoring quality names with long order backlogs and strong pricing power. He adds that the focus is shifting to capital efficiency, with investors increasingly looking beyond cloud revenue to ad revenue and productivity gains over time.\n\n## The AI economy will depend on better matches - Business Insider\nPublished: Tue, 24 Nov 2026 22:30:42 GMT\nAI is expanding across the labor market, but its effects remain uneven and are likely to be weakest in sectors expected to face the greatest worker shortages over the next decade-plus. As the workforce tightens, the question is not only how AI will change jobs, but whether workers can move into the roles the economy will need most. Over the past several months, Indeed Hiring Lab has examined that shift from multiple angles: How AI is changing job titles, where hiring demand is growing, what job seekers are searching for, and who is accessing new AI-related work. US \"AI-touched\" job titles — standardized titles with at least five postings mentioning AI — increased from 264 in early 2022 to 822 in early 2026. In the US, almost two-thirds (63%) of AI-touched job titles are outside traditional tech occupations, the highest among the six nations analyzed by Indeed Hiring Lab. Even so, in five\n\n## Gemini 4 Carbon Availability [2026]: $2 Intro Price, Limited Regions\nPublished: Tue, 10 Nov 2026 16:29:06 GMT\n| Wider access for developers, businesses and consumers | Paying developers and enterprises since November 10, 2026; consumers rolling out to Google AI Ultra, with Google AI Pro added in AI Mode on November 16, 2026 | Google’s announcement | | Gemini 4 Carbon is widely available around the world | Unconfirmed | No country-by-country availability list; consumer access is a phased rollout to Google AI Ultra and, in AI Mode, Google AI Pro | [...] One more detail from Google’s materials sets the tone. The company contrasts Carbon with its sibling model, Argon, and says Carbon is built for tasks that test the limits of a model’s intelligence. Since then, Gemini 4 Neon launched on November 18, 2026 and replaced Argon in the Gemini app. That framing tells you who the intended customer is. It is the team with a problem the lighter models cannot solve, not the team that wants a faster autocomplet\n\n## Introducing Gemini 4 Neon\nPublished: Wed, 18 Nov 2026 00:00:00 GMT\nBreadcrumb 1. Home 2. Innovation & AI 3. Models & research 4. Gemini Models # Introducing Gemini 4 Neon Nov 18, 2026 | x.com Facebook LinkedIn Mail Bringing frontier-level intelligence with fast end-to-end task completion across complex software engineering, knowledge work, and science workflows. Koray Kavukcuoglu SVP, Google DeepMind and Chief AI Architect, Google Share x.com Facebook LinkedIn Mail Listen to article minutes [...] The model is priced at $3 per million input tokens ($0.15 per million cached input tokens, a 95% discount) and $15 per million output tokens, with a 1 million-token context window. Gemini 4 Neon is rolling out today in the Gemini API in Google AI Studio, Gemini for business (via API and model dropdown), for paid Google AI Pro and Ultra subscribers in Google Antigravity, and for Pro and Ultra subscribers in the Gemini app. ## Delivers across enterprise, analytic\n\n## Introducing Gemini 4 Hydrogen\nPublished: Thu, 12 Nov 2026 18:00:00 GMT\nGemini 4 Hydrogen is available Unlocking efficiencies in multi-model workloads Scaling developer and enterprise workflows Adaptable speed and intelligence across thinking levels Fast, everyday help in the Gemini app and Search Designed for safe, dependable execution for scale Available to everyone today _Last updated November 13, 2026_ [...] Feed Introducing Gemini 4 Hydrogen Share x.comFacebookLinkedInMail Copy link [] Preferences Links Images RSS feed x.com Facebook LinkedIn Mail Copy link Newsletter Breadcrumb 1. Hom\n\n## Inkling 2 Mini: 26.4B Open-Weight Model, Apache 2.0\nThe release is a model, not a product bundle. Thinking Machines Lab put Inkling 2 Mini out as an open-weight model, which means anyone can download the trained parameters and run them without asking permission. The company also made it available on Tinker, where developers can run inference and customize the model. Those two routes cover the main ways a team would want to use it: self-host from the weights, or work through the company’s own platform. [...] Thinking Machines Lab released Inkling 2 Mini on November 20, 2026, and it shipped with open weights. The company describes the model as its smallest, a looped transformer that runs on a laptop and excels at agentic coding. TestingCatalog AI News and Quartz both covered the release, and the weights sit on Hugging Face under an Apache 2.0 license. [...] | Attribute | Confirmed detail | ---| | Developer | Thinking Machines Lab | | Model \n\n## Inkling 2 Mini: Run Thinking Machines' Open Model Locally | MindStudio\nInkling 2 Mini is an open-weight multimodal model from Thinking Machines Lab, released under Apache 2.0 on November 20, 2026. It takes text and image input and produces text output, and it’s built specifically to be small enough to run on local hardware rather than requiring a data center GPU cluster. The full checkpoint is about 20GB, distributed in mixed NVFP4 and MXFP8 precision, which is why it fits on a 32GB Mac or a single DGX Spark unit. ## TL;DR [...] This breadth of support matters more than it might seem. A lot of open-weight releases land with only one or two inference paths working cleanly at launch, leaving GGUF conversions and quantization support to community effort over the following weeks. Inkling 2 Mini shipping with Ollama, vLLM, and llama.cpp support (including GGUF) from day one lowers the barrier for anyone who wants to try it on a laptop the same day it’s released.\n\n## Thinking Machines has released Inkling 2 Mini, an open weights looped transformer\nIt is released under an Apache 2.0 license, with text and image input and a 1M token context window. Image 1 Inkling 2 Mini matches Qwen3.8 27B (xhigh) and Nanbeige4.3-33B on the Intelligence Index with ~5x and ~6x fewer active parameters, respectively. It is on the Pareto frontier for Intelligence vs. size on both total and active parameters. Image 2 Inkling 2 Mini uses ~38% more output tokens than Qwen3.8 27B for the same Intelligence Index score, but ~2.8x less compute. [...] Twelve of its 24 layers run three times per token, adding compute without adding output tokens. It averages ~152K output tokens per Intelligence Index task vs. ~110K for Qwen3.8 27B and ~158K for Nanbeige4.3-33B. On our compute proxy measure (active parameters × tokens), it sits on the Pareto frontier, using ~2.8x less compute than Qwen3.8 27B and ~5x less than Nanbeige4.3-33B. Image 3 Inkling 2 Mini is ~6x cheap\n\n## Open-Weight Efficiency: Inkling 2 Mini\nThinking Machines released Inkling 2 Mini on November 20, 2026, a looped-transformer open-weights model that leads every sub-100B rival on agentic coding benchmarks while fitting in a ~20 GB footprint runnable on a consumer laptop \\. The model's architecture directly addresses the 55.4% of enterprise AI decision makers who cite agent reliability and hallucination management as a top adoption challenge \\, while its dual release on Hugging Face and the managed Tinker platform positions THINK to [...] The News: Thinking Machines launched Inkling 2 Mini on November 20, 2026 \\, an open-weights model built on a looped-transformer architecture that runs the middle layers three times per token \\. The model is a Mixture-of-Experts design with 26.4B total parameters and 3.4B active, carrying a ~20 GB memory footprint that allows it to run on consumer laptops \\. Thinking Machines researchers demons\n\n## Inkling 2 Mini Benchmarks, Cost and Capabilities | Vals AI\n# Inkling 2 Mini Inkling 2 Mini is an open-weight model from Thinking Machines, released November 20, 2026. It ranks #38 of 43 models on the Vals Index with 46.46%. Its best result is #10 of 49 on CyberBench v1.1. Release Date: Nov 20, 2026 Developer Thinking Machines 🇺🇸 Context Window 1M Max Output Tokens 1M Token Costs (in/out) $0.15/0.50 Weights Open Input Modalities Text input supported Image input supported Video input not supported File input not supported [...] Accuracy 46.46 % ± 1.11 Cost / Test (Vals Index) $ 3.197 Latency 47 min 15 s Image 33: Vals Index Accuracy Cost Latency Show rankings only among open weight models Benchmarks Accuracy Rankings on CyberBench Thinking Machines’ new open-weight Inkling 2 Mini ties Claude Opus 5.5 (CVP) on CyberBench at 74.58% (#10 of 49), at $0.93 per test versus $4.17. It’s small enough to run on a Mac laptop or DGX Spark. [...] Thinking Mach\n\n## Inkling 2 Mini: Benchmarks, Pricing and Local Setup\nThinking Machines Lab released Inkling 2 Mini, an open-weights model that takes text and images, responds in text and fits in a laptop’s memory: the weights take up about 20GB. It is built for agentic work – coding, tool-assisted search and document tasks, including on your own machine. On SWE-bench Verified, according to the developer, Inkling 2 Mini solves 79.2% of tasks, against 77.8% for Qwen3.8-27B and 46.1% for Gemma 4 31B. On DeepSWE v1.1 the gap is wider: 48.2% versus 42.2% for [...] Inkling 2 Mini’s weights are open under the Apache 2.0 license. Via API, the model is available on Tinker, Thinking Machines’ platform for inference and fine-tuning, and on OpenRouter at $0.10 per 1M input tokens, $0.40 per 1M output tokens and $0.02 for cache reads. There it is served by a single provider so far, Prime Intellect, at 73 tokens per second, while Qwen3.8-27B has 24 providers, the faste\n\n## Microsoft Ignite 2026 Recap: MAI Models, Agents, Foundry\nOn model choice, the Copilot blog says employees can let Auto routing pick a model and effort level per task, or manually choose OpenAI or Anthropic models subject to organizational policy. Some reports before and during the event spoke of 20 or more frontier models available in the Copilot harness. We could not confirm a specific model count in the Book of News, the Copilot blog or the keynote recap, so treat any number as unverified. ### Microsoft Foundry: evaluation and routing grow up [...] Microsoft’s Copilot blog says Auto routing picks a model and effort level per task, and employees can also manually choose OpenAI or Anthropic models subject to organizational policy. GitHub Copilot adds MAI Code 2 and MAI Code 2 Flash to its model picker. Microsoft also said GPT 6.2 and Meta’s latest models are coming to Foundry, without dates. We could not verify a specific total model count in \n\n## Microsoft Copilot Beats OpenAI, Anthropic on Price\nMicrosoft is positioning its Copilot AI assistant as the cost-effective choice for enterprises, claiming it outperforms both OpenAI's ChatGPT and Anthropic's Claude on price. The announcement came during the company's annual Ignite user conference on November 18, 2026, where Microsoft executives touted Copilot's ability to deliver comparable or superior functionality at lower operating costs. With runaway AI expenses becoming a major concern for businesses this year, Microsoft's value [...] Judson Althoff, CEO of Microsoft's commercial business, made the bold claim during his Ignite keynote: \"Anything you can do in Claude or ChatGPT, you can do better with Copilot, and for less.\" The statement reflects Microsoft's aggressive positioning as AI labs increasingly compete for enterprise customers. Officially launched on November 18, 2026, this pricing message represents Microsoft's direct ch\n\n## Microsoft launches in-house coding and security models at Ignite, recasts Copilot as an operating system for work\nSubscribe Now Microsoft is using its Ignite 2026 conference to show it can compete with its own AI partners on price: the company unveiled in-house coding and cybersecurity models that it says come close to rival models from OpenAI and Anthropic at a fraction of the cost,... The article requires paid subscription.\n\n## Microsoft Ignite 2026: Why the Copilot Harness Beats the Models | MindStudio\nMicrosoft used Ignite 2026 to launch seven new AI models and a set of claims about beating Claude Opus 5.5 at a fraction of the cost. But the best coding result of the week didn’t come from any of those seven models. It came from Copilot Fusion, a routing system that picks and coordinates multiple models rather than being a model itself. Fusion Max scored 71.2% on Terminal Bench 4.1, ahead of both Opus 5.5 and Gemini 5.2, largely by calling out to Anthropic and other third-party models when the [...] Mostly in the cheap, high-volume slots. Microsoft was fairly upfront on stage that the new models are not yet tuned for harder problems or long-horizon agentic work, which is exactly where the expensive tokens get spent. That shows up directly in Fusion’s own tier structure: G\n\n## Introducing Gemini 4 Neon\nPublished: Wed, 18 Nov 2026 00:00:00 GMT\nThe model is priced at $3 per million input tokens ($0.15 per million cached input tokens, a 95% discount) and $15 per million output tokens, with a 1 million-token context window. Gemini 4 Neon is rolling out today in the Gemini API in Google AI Studio, Gemini for business (via API and model dropdown), for paid Google AI Pro and Ultra subscribers in Google Antigravity, and for Pro and Ultra subscribers in the Gemini app. ## Delivers across enterprise, analytical, and scientific work\n\n## Gemini 4 Neon: Pricing, Benchmarks, and Where It Fits\nPublished: Thu, 19 Nov 2026 00:00:00 GMT\n| Detail | Gemini 4 Neon | ---| | Released | November 18, 2026 | | Model ID | gemini-4-neon (stable) | | Where it sits | Between Hydrogen (everyday) and Carbon (hardest work) | | Price per 1M tokens | $3 input / $0.15 cached input / $15 output | | Context window | 1,048,576 tokens (shared input, thinking, output) | | Max output | 65,536 synchronous, up to 1M with long decode | | Inputs / outputs | Text, image, video, audio, PDF in; text out | [...] Gemini 4 Neon costs $3 per million input tokens, $0.15 per million cached input tokens, and $15 per million output tokens, flat across its full context window. It's available on the paid tier only, and thinking tokens bill at the output rate. ### What is Gemini 4 Neon's context window? [...] | 💲 Model | 📥 Input / 📤 output per 1M | 📝 Note | --- | Hydrogen | $1.50 / $7.50 | Neon costs about 2x Hydrogen | | Neon | $3 / $15 | Flat across the 1M wi\n\n## Gemini 4 Neon vs Hydrogen and Carbon: Which Tier Fits\nPublished: Thu, 19 Nov 2026 00:00:00 GMT\nA developer pricing a million output tokens on November 19 would pay $10 for Gemini 4 Carbon and $15 for Gemini 4 Neon. A developer pricing the same work for December 1 gets $20 for Carbon and $15 for Neon. Google positions Neon between Hydrogen and Carbon on capability. The price order only starts to resemble that description in December.Gemini Developer API rates [...] Hydrogen launched on November 12 with a free API tier and paid rates of $1.50 input and $7.50 output per million tokens. Neon joined the paid tier on November 18 at $3 and $15. Those releases gave developers two additional choices while Carbon and Argon were still at their introductory prices. On November 19, Google’s standard price table lists a December change for Carbon and Argon. It lists single rates for Hydrogen and Neon. [...] 1. 01 November and December have different price orders.Carbon and Argon are $2 input an\n\n## GPT-6.2 Astra and Sol: Features, Benchmarks, Tests & Pricing | DataCamp\nPublished: Tue, 17 Nov 2026 21:45:45 GMT\n| Model | Input | Cached input | Output | ------| | GPT-6.2 Astra | $8.00 | $0.40 | $40.00 | | GPT-6.2 Sol | $2.00 | $0.10 | $10.00 | The lower prices are only part of the saving. Because both models use fewer output tokens, the cost per task falls further, which is why Astra's Agents' Last Exam run costs less than a third of GPT-6 Astra's. OpenAI also recommends keeping prompt prefixes unchanged and appending new instructions, to get more cache hits and preserve reasoning across turns. [...] GPT-6.2 Astra costs $8 per million input tokens, $0.40 per million cached input tokens, and $40 per million output tokens. That is 20% below GPT-6 Astra on input and output and 60% below on cached input. GPT-6.2 Sol costs $2, $0.10, and $10, the same as GPT-6.1 Sol. ### Is GPT-6.2 Astra better than GPT-6 Astra? [...] - All 3 matched the template closely enough that I couldn't tell them apart by eye.\n\n## Artificial Analysis on X: \"OpenAI’s release of GPT-6.2 Astra and GPT-6.2 Sol delivers the #2 model in the Artificial Analysis I…\"\nPublished: Tue, 17 Nov 2026 17:56:04 GMT\n@OpenAI's GPT-6.2 Astra is priced at $8/$40, 20% below GPT-6 Astra, and cached input drops to $0.40 from $1.00 per million tokens. GPT-6.2 Sol pricing is unchanged from GPT-6.1 Sol, at $2/$10 per million input/output tokens. [...] Key takeaways: ➤ Second in Intelligence Index: OpenAI now trails only Anthropic’s Claude Fable 5.2 in the Artificial Analysis Intelligence Index. GPT-6.2 Astra jumps 5 points from GPT-6 Astra, overtaking Gemini 4 Carbon (60) and Claude Opus 5.5 (59) at their top effort settings. GPT-6.2 Sol gains 2 points at 57, placing it on par with GPT-6 Astra at ~15% of the Cost per Task. [...] ➤ No improvement in Coding Agent Index: GPT-6.2 Astra is flat with GPT-6 Astra, and GPT-6.2 Sol loses 3 points relative to GPT-6.1 Sol in the Artificial Analysis Coding Agent Index (Codex harness at max effort). For Sol, the drop is driven by a 14-point drop in SWE-Atlas-QnA-AA, wher\n\n## GPT-6.2 Astra and Sol are now available - Announcements - OpenAI Developer Community\nPublished: Tue, 17 Nov 2026 18:00:37 GMT\nPro 500 subscribers can use Ultrafast with either model. For the first time, we’re also bringing Ultrafast to Pro 200 subscribers, starting with GPT-6.2 Sol. Developers can access gpt-6.2-astra and gpt-6.2-sol in the OpenAI API, with Ultrafast available. ### | Output (MTok) | --- | GPT-6.2 Astra | $8.00 | $40.00 | | GPT-6.2 Sol | $2.00 | $10.00 | Read the full announcement: OpenAI Image 9 ### Introducing GPT-6.2 Astra and Sol\n\n## GPT-6.2 Astra and GPT-6.2 Sol API Pricing and Day 0 Support on LiteLLM | liteLLM\nPublished: Tue, 17 Nov 2026 10:00:00 GMT\nOpenAI serves tool calling for these models through the Responses API. LiteLLM sends a `/chat/completions` request with tools to `/v1/responses` for you. `/chat/completions` `/v1/responses` ## FAQ​ ### How much does GPT-6.2 Astra cost?​ $8.00 per 1M input tokens and $40.00 per 1M output tokens. Cache reads cost $0.40 per 1M tokens. Above 272K input tokens, the prices are $16.00, $60.00 and $0.80. ### How much does GPT-6.2 Sol cost?​ [...] $2.00 per 1M input tokens and $10.00 per 1M output tokens, the same as GPT-6.1 Sol. Cache reads cost $0.10 per 1M tokens. ### Is GPT-6.2 Astra cheaper than GPT-6 Astra?​ Yes. GPT-6 Astra costs $10 / $50 per 1M tokens and GPT-6.2 Astra costs $8 / $40. Cached input drops by 60%. ### Should I use GPT-6.2 Astra or GPT-6.2 Sol?​ [...] Prices per 1M tokens for GPT-6.2 Sol: On both models, Batch is 50% off and Fast mode costs 2x. GPT-6.2 Astra input and output\n\n## Gemini 4 Hydrogen Released: Price, Benchmarks and Access | CellCog\nPublished: Sun, 08 Nov 2026 14:00:00 GMT\nGoogle released Gemini 4 Hydrogen on November 12, 2026. Its announcement, stamped 18:00 UTC, puts the model on all tiers of Google AI Studio and the Gemini API, in the Gemini app and in Google Search. The paid API price is $1.50 per million input tokens and $7.50 per million output tokens. [...] - Where it is. The announcement lists Google AI Studio and the Gemini API on all tiers, Gemini for business, the Gemini app, Google Search, and Google Antigravity for paid Google AI Pro and Ultra subscribers. It also names Gemini in Google Sheets. - Search. Robby Stein, Google’s VP of Product for Search, wrote that Hydrogen is available globally in Google Search for all users, and called it “the biggest model upgrade to Search yet”. [...] OfficeChai traced the name to an October 27 post by Pankaj Kumar: “Gemini 4 Flash is in internal testing under the codename Hydrogen.” On November 4, two more a\n\n## Introducing Gemini 4 Hydrogen\nPublished: Thu, 12 Nov 2026 18:00:00 GMT\nWhile our frontier models, Gemini 4 Carbon and Gemini 4 Argon, excel at deep, long-horizon reasoning on your hardest problems, Hydrogen is built for rapid execution across diverse agentic workflows. With Hydrogen, we’re also bringing Gemini 4 to everyone — for all tiers of Google AI Studio, the Gemini API, Gemini for business, the Gemini app, Google Search, and paid Google AI Pro and Ultra subscribers in Google Antigravity. [...] Gemini 4 Hydrogen is available Unlocking efficiencies in multi-model workloads Scaling developer and enterprise workflows Adaptable speed and intelligence across thinking levels Fast, everyday help in the Gemini app and Search Designed for safe, dependable execution for scale Available to everyone today _Last updated November 13, 2026_ [...] We built Gemini 4 Hydrogen for real-world usability. Hydrogen’s four thinking levels — low, medium, high (default), and a \n\n## Gemini 4 Hydrogen and Orchestrator | Google Antigravity Blog\nPublished: Thu, 12 Nov 2026 18:07:36 GMT\nGemini 4 Hydrogen brings cutting-edge intelligence for everyday coding and agentic workflows. When you want frontier planning paired with speed without managing model switches, Orchestrator puts both Gemini 4 Carbon and Gemini 4 Hydrogen behind one prompt. Starting today, Gemini 4 Hydrogen is rolling out across paid Google AI Pro and Ultra subscribers. Orchestrator is rolling out as Orchestrator (Carbon) and Orchestrator (Argon) for Google AI Ultra subscribers, and as Orchestrator (Argon) for [...] Today, we’re rolling out Gemini 4 Hydrogen inside Google Antigravity alongside a new model dropdown option called Orchestrator, which pairs Hydrogen with our str\n\n## Google’s Gemini 4 Carbon tops AI rankings, but only cyber defenders get it - The Next Web\nPublished: Thu, 29 Oct 2026 16:05:18 GMT\nGoogle has released Gemini 4 Carbon, its newest frontier AI model, to a small group of cyber defenders. Koray Kavukcuoglu, senior vice president at Google DeepMind and Google’s chief AI architect, announced it in a Google blog post on Wednesday. Carbon ranks first on the Artificial Analysis Intelligence Index v5.0 with a score of 59. The Artificial Analysis index puts Anthropic’s Claude Opus 5.5 second with 58, and OpenAI’s GPT-6 Astra third with 57. > “Carbon illustrates the pace at which we’re pushing the frontier forward,” Kavukcuoglu wrote. On CWE-bench, which measures patching, it scored 71.0%. On Google’s internal tests, Carbon was more than twice as successful as Argon at writing secure code. On Terminal-Bench 4.0, Carbon’s rate of successful cheating was 0.0%. GPT-6 Astra leads on FrontierSWE 2, a software engineering test, with 65.5% against Carbon’s 61.2%. > “With Gemini 4 Argo\n\n## The Biggest Benchmark in AI Just Updated, Dealing a Major Blow to a Chinese Contender - Gizmodo\nPublished: Thu, 29 Oct 2026 09:00:02 GMT\nKimi K3.1 Pro is no longer the fourth best AI model in the world. Last week, Kimi K3.1 Pro, an LLM from the Beijing, China-based company Moonshot AI, debuted to a surprising amount of fanfare, particularly if you care about benchmarks, which are meant to be standardized measurements for models’ capabilities. Kimi K3.1 Pro’s success was a minor earthquake in the AI world. But that never technically happened, and then on Tuesday, Artificial Analysis announced a new version of its Intelligence Index called Intelligence Index v5. Artificial Analysis itself pointed out in the announcement of the new Index that “The open weights gap widens from 3 points to 12.” Again, Moonshot still hasn’t released the model’s weights, and won’t until November 4. > Google’s Gemini 4 Carbon is the new #1 on the Artificial Analysis Intelligence Index v5, and second only to Claude Opus 5.5 on the Artificial Analy\n\n## Anthropic vs. OpenAI: Who’s Winning the AI Race? - Visual Capitalist\nPublished: Thu, 19 Nov 2026 12:10:48 GMT\nOpenAI: Who’s Winning the AI Race? ## Who’s Ahead in the Race Between Anthropic and OpenAI? * Anthropic’s Fable 5.2 leads the Artificial Analysis Intelligence Index with a score of 64.6 as of Nov. 17, 2026, ahead of OpenAI’s GPT-6.2 Astra at 62.1. * Anthropic has held the lead for seven consecutive months since April 2026, its longest stretch in front, after leadership changed hands eight times between September 2024 and April 2026. * The two companies released 13 frontier models in 2026 through mid-November, more than the 11 released in 2024 and 2025 combined. The rivalry between Anthropic and OpenAI has become one of the defining competitions in artificial intelligence. It includes Anthropic’s Opus and Fable models and OpenAI’s leading GPT and o-series models, showing only releases that set a new high for their company. Anthropic’s Opus 4.5 held the lead for just 17 days before OpenAI’\n\n## Google launches Gemini 4 Neon, claims it's three times faster than Carbon - Neowin\nPublished: Thu, 19 Nov 2026 01:02:01 GMT\n# Google launches Gemini 4 Neon, claims it's three times faster than Carbon. Google's new Gemini 4 Neon model is here, promises faster performance and lower cost per task than Carbon, despite currently costing more per token. And now, Google is covering the middle ground with the release of its latest model, Gemini 4 Neon. Interestingly, even though Carbon is still supposed to be Google's strongest model to date, the company has shared some benchmarks in which Neon exceeded Carbon's performance on certain tasks. Google also claims that Neon completes tasks three times faster at 60% of the cost of Carbon. Neon scores 61 on the Artificial Analysis Intelligence Index and 65.4% on CursorBench 4.1, with Google reporting that it's \"competitive with the leading models in its class.\" Neon is multimodal, as it supports text, images, audio, and video. Here are Google's official benchmarks of Gemin\n\n## Google launches Gemini 4 Neon with Opus 5.5-level coding performance at 25% lower API token prices - VentureBeat\nPublished: Wed, 18 Nov 2026 23:33:31 GMT\n# Google launches Gemini 4 Neon with Opus 5.5-level coding performance at 25% lower API token prices. Google's new mid-ranged AI large language model is here: Gemini 4 Neon launched earlier today on the paid Gemini API in Google AI Studio and Android Studio, as well as in the Gemini app and AI-assisted development platform Google Antigravity for Google AI Pro and Ultra subscribers. “In our early evaluations, it matched or exceeded Gemini 4 Carbon on overall quality at 3x the speed and 60% of the cost,” said Thai Tran, Glean’s AI product lead, in Google’s announcement. That puts its headline rates 50% higher those of Anthropic’s mid-range Claude Sonnet 5.5 and OpenAI’s mid-range GPT-6.2 Sol, but Google reports that Neon beats both on the Artificial Analysis Intelligence Index at its highest reasoning setting. More impressively, Neon costs 25% below Anthropic's larger, flagship Opus 5.5’s \n\n## Google rolls out Gemini 4 Hydrogen, finally replacing 3.8 Flash - Ars Technica\nPublished: Thu, 12 Nov 2026 19:23:03 GMT\n# Google rolls out Gemini 4 Hydrogen, finally replacing 3.8 Flash. Google is continuing its elemental AI naming scheme with the new Gemini 4 Hydrogen. These names are less descriptive than the Pro/Flash monikers of earlier releases, but Hydrogen’s purpose is clear: It replaces the faster, more economical Flash models most people in Google’s ecosystem use. It runs in one of four thinking levels (low, medium, high, and the new xhigh), and even in high mode, it’s 2.5 times faster than Flash 3.8. Users will also see gains in code generation, with Hydrogen more than tripling 3.8 Flash’s score in Terminal-Bench. It managed a score of 54 in the popular Artificial Analysis Intelligence Index with xhigh mode versus 50 for Argon. Everyone will reportedly get access to Hydrogen in search, but it’s a bit more restricted in the Gemini app and AI Studio. The new model is live for AI Pro and Ultra subs\n\n## Gemini 4 Carbon is now available\nPublished: Tue, 10 Nov 2026 00:00:00 GMT\nGemini 4 Carbon is available via the API in Google AI Studio and Gemini for business for all paying developers and enterprises, at the same introductory price 1 as Gemini 4 Argon ($2 per million input tokens and $10 per million output tokens). It is also rolling out to all Google AI Ultra subscribers in Google Antigravity, the Gemini app, and AI Mode in Search. ## Higher-precision knowledge work, artifact generation, and data analysis [...] For developers: Build with the Gemini API paid tier in AI Studio and Android Studio, and if you’re a Google AI Ultra subscriber, you can try it in Google Antigravity and AI Studio. For enterprises: Try it in Gemini for business via the API or model drop down, Google Antigravity, or CodeMender. For everyday users: Try Carbon starting today in the Gemini app and AI Mode in Search if you’re a Google AI Ultra subscriber. [...] Two weeks ago, we released C\n\n## Gemini 4 Carbon: Developer Guide\nPublished: Tue, 10 Nov 2026 00:00:00 GMT\nToday, we are making Gemini 4 Carbon available to developers, enterprises, scientists, and consumers. First announced two weeks ago and released to cybersecurity defenders via our Fairwind Program, you can now start building using the paid tier of the Gemini API in Google AI Studio and for Google AI Ultra subscribers in AI Studio and Google Antigravity. [...] | Model | Model ID | Default thinking | Pricing (per 1M tokens) | --- --- | | Gemini 4 Carbon | `gemini-4-carbon` | `medium` | Intro (through Nov 30): $2 input · $10 output _(95% off cached)_ From Dec 1: $4 input · $20 output · Pricing details | Carbon supports a unified 1M token context window via the Gemini API for input and output tokens, tunable thinking levels (`low`, `medium`, `high`), and the full suite of built-in Gemini API tools. [...] Gemini 4 Carbon joins Gemini 4 Argon in our family of frontier models, at the same intro\n\n## Gemini 4 Carbon: our next frontier model\nPublished: Wed, 28 Oct 2026 17:00:00 GMT\nWe're taking a deliberate approach to rollout and are actively engaged in the U.S. government’s voluntary process for pre-release model testing. Starting this week, we will make Carbon available to a subset of cyber defenders and will gradually phase access to additional trusted partners through our Fairwind Program. We’re continuing to gather feedback and iterate on guardrails before making Carbon available to developers, businesses, and consumers via our product surfaces as soon as possible. [...] Gemini 4 Carbon will launch at the same introductory price 1 as Argon at $2 per million input tokens and $10 per million output tokens, with cached input tokens priced at 95% off input token price. ## Improving coding and reasoning for challengin",
+ "plan": {
+  "title": "AI Model Releases of Late 2026: What Actually Mattered",
+  "description": "A look at the biggest AI model releases from October and November 2026, including GPT-6.2, Gemini 4 and Claude Fable 5.2. It explains the trends behind them: tiered model families, fast-changing leaderboards, and the push toward open weights and model choice.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "e4051b43",
+    "narration": "Which AI model is the best in the world? On October 27, the answer was Claude Opus 5.5. Just one day later, that answer was wrong. Here is how fast the frontier really moves.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "The leaderboard that flipped in one day",
+      "subtitle": "AI frontier models, late October to mid-November 2026"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "A leaderboard that flipped in one day"
+   },
+   {
+    "id": "76ba1d0f",
+    "narration": "On October 27, Artificial Analysis launched Intelligence Index version 5, a benchmark that scores AI models. Anthropic's Claude Opus 5.5 took first place on the very first day.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Intelligence Index v5",
+      "definition": "A benchmark from Artificial Analysis that scores AI models. Launched October 27, 2026, with Claude Opus 5.5 in first place."
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "0271cb79",
+    "narration": "One day later, Google announced Gemini 4 Carbon. It took first place with a score of 59. Claude Opus 5.5 slipped to second at 58, and OpenAI's GPT-6 Astra sat third at 57.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Intelligence Index v5, Oct 28",
+      "labels": [
+       "Gemini 4 Carbon",
+       "Claude Opus 5.5",
+       "GPT-6 Astra"
+      ],
+      "values": [
+       59.0,
+       58.0,
+       57.0
+      ],
+      "unit": "pts",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "3a7334e7",
+    "narration": "But Carbon began with a tiny audience. Google first gave it only to a small group of cyber defenders, and then widened access slowly through its Fairwind Program.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Carbon starts small",
+      "items": [
+       "Announced October 28",
+       "Cyber defenders first",
+       "Trusted partners through Fairwind"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "calendar",
+       "lock",
+       "users"
+      ]
+     }
+    }
+   },
+   {
+    "id": "532beac6",
+    "narration": "Then the releases came fast. On November 9, Anthropic shipped Claude Fable 5.2. On November 10, Gemini 4 Carbon reached paying developers and enterprises, at an introductory price of two dollars per million input tokens.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Flagships, November 2026",
+      "events": [
+       {
+        "date": "Oct 27",
+        "label": "Index v5 launches, Opus 5.5 first"
+       },
+       {
+        "date": "Oct 28",
+        "label": "Gemini 4 Carbon takes first"
+       },
+       {
+        "date": "Nov 9",
+        "label": "Claude Fable 5.2 arrives"
+       },
+       {
+        "date": "Nov 10",
+        "label": "Carbon opens to paying developers"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "ddd1a973",
+    "narration": "Consumers get Carbon in phases. Google AI Ultra subscribers came first. Then on November 16, Google AI Pro subscribers got it in AI Mode. Not everyone has it yet.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Carbon's phased rollout",
+      "steps": [
+       {
+        "label": "Cyber defenders",
+        "detail": "Late October, via Fairwind"
+       },
+       {
+        "label": "Developers and enterprises",
+        "detail": "November 10"
+       },
+       {
+        "label": "Google AI Ultra",
+        "detail": "Gemini app and AI Mode"
+       },
+       {
+        "label": "Google AI Pro in AI Mode",
+        "detail": "November 16"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "64747f31",
+    "narration": "So here is the lesson. Any claim that a model is the best needs a date and a source, because the top spot can change within a day.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Every best-model claim needs a date and a source.",
+      "emphasis": "a date and a source"
+     }
+    }
+   },
+   {
+    "id": "2db57095",
+    "narration": "Labs no longer ship one model. They ship a family. Google's Gemini 4 has Hydrogen for everyday speed, Neon in the middle, and Carbon for the hardest work.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Gemini 4 tiers",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Hydrogen: everyday",
+        "icon": "bolt"
+       },
+       {
+        "id": "n",
+        "label": "Neon: the middle",
+        "icon": "star"
+       },
+       {
+        "id": "c",
+        "label": "Carbon: hardest work",
+        "icon": "brain"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "n"
+       ],
+       [
+        "n",
+        "c"
+       ]
+      ],
+      "style": "cards",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    },
+    "chapter": "Model families: big, fast and cheap tiers"
+   },
+   {
+    "id": "a02bb6a5",
+    "narration": "Hydrogen arrived on November 12, and free users get it too. Pricing is counted in tokens, which are small chunks of text, roughly a word or part of one.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Token",
+      "definition": "A small chunk of text, roughly a word or part of one. AI models read and bill in tokens.",
+      "example": "Prices are quoted per million tokens."
+     }
+    }
+   },
+   {
+    "id": "e317894b",
+    "narration": "Then came Neon on November 18. It costs $3 per million input tokens and $15 per million output tokens. It has a one million token context window, and it replaced Argon.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Gemini 4 Neon, Nov 18",
+      "items": [
+       "$3 per million input tokens",
+       "$15 per million output tokens",
+       "1 million-token context window",
+       "Replaced Argon"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "banknote",
+       "banknote",
+       "book",
+       "replace"
+      ]
+     }
+    }
+   },
+   {
+    "id": "655c5907",
+    "narration": "The context window is how much text a model can hold in mind at once. And cached input on Neon costs just fifteen cents per million, a 95 percent discount.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "95",
+      "unit": "%",
+      "label": "Discount on cached input: $0.15 per million tokens",
+      "delta": "vs $3 regular input"
+     }
+    }
+   },
+   {
+    "id": "cfffbea4",
+    "narration": "OpenAI did the same on November 17, in ChatGPT Work, Codex and the API. GPT-6.2 Astra costs $8 input and $40 output. Sol costs $2 input and $10 output.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Model",
+       "Input",
+       "Output"
+      ],
+      "rows": [
+       [
+        "Astra",
+        "$8",
+        "$40"
+       ],
+       [
+        "Sol",
+        "$2",
+        "$10"
+       ]
+      ],
+      "title": "GPT-6.2 prices per million tokens",
+      "highlight": {
+       "row": 0
+      }
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "d9dd7782",
+    "narration": "Here's the math. Astra output is $40 per million tokens. Sol output is $10. That is a four times gap, so picking the right tier decides your bill.",
+    "scene": {
+     "type": "scale_compare",
+     "props": {
+      "items": [
+       {
+        "label": "GPT-6.2 Sol",
+        "value": 10.0,
+        "note": "Cheap tier"
+       },
+       {
+        "label": "GPT-6.2 Astra",
+        "value": 40.0,
+        "note": "4x more"
+       }
+      ],
+      "unit": "$",
+      "title": "Output price per million tokens"
+     }
+    }
+   },
+   {
+    "id": "1e511323",
+    "narration": "Not every strong model sits behind an API. Open weights let anyone download the model and run it. Moonshot promised full weights for Kimi K3.1 Pro by November 4.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Open weights: download it, run it, no permission needed.",
+      "emphasis": "Open weights"
+     }
+    },
+    "chapter": "Open weights, choice and what to watch"
+   },
+   {
+    "id": "a5b3ab9e",
+    "narration": "Then came Inkling 2 Mini, Apache 2.0, on November 20. It runs on a laptop. Two days later, on November 22, Sarvam-105B-1711 joined the open-weight list.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Open-weight releases",
+      "events": [
+       {
+        "date": "Nov 4",
+        "label": "Kimi K3.1 Pro full weights"
+       },
+       {
+        "date": "Nov 20",
+        "label": "Inkling 2 Mini, Apache 2.0"
+       },
+       {
+        "date": "Nov 22",
+        "label": "Sarvam-105B-1711"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "0c305ba3",
+    "narration": "The frontier is not only American. Alibaba's Qwen4-Max arrived on November 16. Microsoft's MAI Code 2 followed on November 17, a coding specialist built in-house.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Alibaba headquarters Hangzhou",
+       "Microsoft Ignite conference stage",
+       "programmer writing code monitor"
+      ],
+      "alt": "Labs competing at the frontier"
+     }
+    }
+   },
+   {
+    "id": "8edcade5",
+    "narration": "Also at Ignite on November 17, business Copilot let users choose OpenAI or Anthropic models. The buyer now picks the engine, not just the vendor.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Choice inside Copilot",
+      "nodes": [
+       {
+        "id": "u",
+        "label": "Business user",
+        "icon": "user"
+       },
+       {
+        "id": "c",
+        "label": "Copilot",
+        "icon": "cloud"
+       },
+       {
+        "id": "o",
+        "label": "OpenAI models"
+       },
+       {
+        "id": "a",
+        "label": "Anthropic models"
+       }
+      ],
+      "edges": [
+       [
+        "u",
+        "c"
+       ],
+       [
+        "c",
+        "o",
+        "choose"
+       ],
+       [
+        "c",
+        "a",
+        "choose"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "f06551a3",
+    "narration": "The pace is hard to overstate. According to BeevR, 27 model releases from 13 vendors were confirmed between November 1 and 24.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "27 releases",
+      "label": "from 13 vendors, Nov 1-24, per BeevR"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "a71964a2",
+    "narration": "So the takeaway is simple. No single model wins. Match the model to the job, whether that is coding, writing or budget work. And check the date on any ranking.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What to remember",
+      "items": [
+       "No single model wins",
+       "Match the model to the job",
+       "Check the date on any ranking"
+      ],
+      "style": "spotlight",
+      "accent": "teal",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "AI Model Releases November 2026: Day-by-Day List (Nov 24) — BeevR",
+    "url": "https://beevr.ai/blog/ai-model-releases-november-2026",
+    "publisher": "beevr.ai",
+    "license": "",
+    "date": "Thu, 12 Nov 2026 18:50:07 GMT"
+   },
+   {
+    "title": "New AI Models (Nov 2026) Release Guide",
+    "url": "https://www.clone-systems.com/blog/new-ai-models-november-2026-release-guide-and-security",
+    "publisher": "clone-systems.com",
+    "license": "",
+    "date": "Mon, 02 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "New AI Models 2026: Month-by-Month Release Timeline | Versus Models",
+    "url": "https://versusmodels.com/en/ai-releases-2026-timeline",
+    "publisher": "versusmodels.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Best AI Models of 2026: 4 Powerful Picks Ranked by Task",
+    "url": "https://lorphic.com/best-ai-models-of-2026",
+    "publisher": "lorphic.com",
+    "license": "",
+    "date": "Tue, 03 Nov 2026 13:22:32 GMT"
+   },
+   {
+    "title": "Gemini 4 Carbon Availability [2026]: $2 Intro Price, Limited Regions",
+    "url": "https://shattered.io/gemini-4-carbon-availability-2-dollar-intro-price-not-worldwide-2026",
+    "publisher": "shattered.io",
+    "license": "",
+    "date": "Tue, 10 Nov 2026 16:29:06 GMT"
+   },
+   {
+    "title": "Introducing Gemini 4 Neon",
+    "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon",
+    "publisher": "blog.google",
+    "license": "",
+    "date": "Wed, 18 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Google’s Gemini 4 Carbon tops AI rankings, but only cyber defenders get it - The Next Web",
+    "url": "https://thenextweb.com/news/gemini-4-carbon-google-cybersecurity-model",
+    "publisher": "thenextweb.com",
+    "license": "",
+    "date": "Thu, 29 Oct 2026 16:05:18 GMT"
+   },
+   {
+    "title": "Gemini 4 Carbon is now available",
+    "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available",
+    "publisher": "blog.google",
+    "license": "",
+    "date": "Tue, 10 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Gemini 4 Neon vs Hydrogen and Carbon: Which Tier Fits",
+    "url": "https://www.digitalapplied.com/blog/gemini-4-neon-vs-hydrogen-vs-carbon",
+    "publisher": "digitalapplied.com",
+    "license": "",
+    "date": "Thu, 19 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "GPT-6.2 Astra and Sol: Features, Benchmarks, Tests & Pricing | DataCamp",
+    "url": "https://www.datacamp.com/blog/gpt-6-2-astra-and-sol",
+    "publisher": "datacamp.com",
+    "license": "",
+    "date": "Tue, 17 Nov 2026 21:45:45 GMT"
+   },
+   {
+    "title": "Inkling 2 Mini: 26.4B Open-Weight Model, Apache 2.0",
+    "url": "https://shattered.io/thinking-machines-inkling-2-mini-open-weights-26-4b-3-4b-active",
+    "publisher": "shattered.io",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 66.1,
+  "before_first_script_call_s": 23.4,
+  "script_s": 42.7
+ },
+ "cost": {
+  "script_small": 0.0007,
+  "research": 0.00577,
+  "script_big": 0.31961,
+  "search_api": 0.104,
+  "total": 0.43008
+ },
+ "calls": {
+  "small": 3,
+  "tools": 8,
+  "big": 7
+ },
+ "tokens": {
+  "in": 160005,
+  "out": 12910
+ },
+ "rules": {
+  "length": {
+   "words": 561,
+   "expected_words": 537,
+   "ratio": 1.045,
+   "beats": 19,
+   "expected_beats": 17,
+   "est_speech_s": 251.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 35,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Which AI model is the best in the world? On October 27, the answer was Claude Opus 5.5. Just one day later, that answer was wrong. Here is how fast the frontier really moves.",
+   "close_text": "So the takeaway is simple. No single model wins. Match the model to the job, whether that is coding, writing or budget work. And check the date on any ranking."
+  },
+  "variety": {
+   "distinct": 13,
+   "counts": {
+    "title": 1,
+    "definition": 2,
+    "chart": 1,
+    "bullets": 3,
+    "timeline": 2,
+    "steps": 1,
+    "kinetic_text": 2,
+    "diagram": 2,
+    "counter": 1,
+    "table": 1,
+    "scale_compare": 1,
+    "gallery": 1,
+    "stat": 1
+   },
+   "max_run": 1,
+   "entropy": 3.58,
+   "top_type": "bullets",
+   "top_share": 0.16,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 21,
+   "ungrounded_numbers": [],
+   "entities": 33,
+   "ungrounded_entities": [
+    "American"
+   ],
+   "ungrounded_share": 0.019,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "claude opus 5 5",
+    "count": 3
+   },
+   {
+    "phrase": "model is the best",
+    "count": 2
+   },
+   {
+    "phrase": "per million input tokens",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "section": 2
+  },
+  "sources": {
+   "cited": 11,
+   "fetched": 55,
+   "notes_len": 36006,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": false,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 4 (bullets): its narration never says ['Announced October 28', 'Trusted partners through Fairwind']",
+   "beat 5 (timeline): its narration never says ['Index v5 launches, Opus 5.5 first', 'Claude Fable 5.2 arrives']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most figures match the notes, but several claims are shaky or contradictory. Carbon's Oct 28 announcement is described as 'tiny audience... cyber defenders', and Kimi K3.1 Pro weights are stated as released on Nov 4 though the notes only say 'promised'. The Neon cached-price math is also loosely framed."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers Google, OpenAI and Anthropic releases, pricing, open weights and Qwen/Microsoft. It says almost nothing about capabilities, agents, reasoning trends or caveats. Claude Fable 5.2 gets one line and nothing on what it does."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The three chapters are clear, but the first runs long on one leaderboard story. The timeline in beat 5 is titled 'November' yet starts in October. Beats 9-11 mix tokens, Hydrogen, Neon and the context window awkwardly."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The hook 'On October 27, the answer was Claude Opus 5.5. Just one day later, that answer was wrong' creates tension. The ending is a plain three-bullet recap, which is serviceable but not memorable."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Plain, clear, beginner-friendly explainer voice appropriate for a US general audience."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well, and the chart and table use real numbers. The gallery uses generic queries like 'programmer writing code monitor', and the Nov 4 open-weights timeline entry is shaky."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The one-day leaderboard flip is a concrete, memorable detail. The rest is a list of dates and prices, and the 'date and source' lesson is repeated."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is in English and roughly on length. It addresses 'releases and trends' but is thin on trends (agents, reasoning, cost) and leans on a list of releases."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clean sentences. A few clipped lines and the 'Here's the math' phrasing are minor."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Moonshot promised full weights for Kimi K3.1 Pro by November 4.",
+    "issue": "The narration says 'promised', but the timeline scene lists 'Nov 4 Kimi K3.1 Pro full weights' as a release. The notes only say the weights were promised by that date, so the release is unconfirmed.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Google first gave it only to a small group of cyber defenders",
+    "issue": "The notes show Carbon was announced on Oct 28 and topped the index, with a phased rollout. The script's framing that it started with 'a tiny audience' is thinly sourced, and the cyber-defender detail comes only from a headline.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "at an introductory price of two dollars per million input tokens",
+    "issue": "The $2 introductory price comes from a third-party page title only, and there is no output price. Calling it 'intro' without a date or end is shaky.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "On November 9, Anthropic shipped Claude Fable 5.2.",
+    "issue": "There is no description of what Fable 5.2 does. The script gives no capability, agentic or reasoning trend information, which a 'trends' video needs.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Flagships, November 2026",
+    "issue": "The timeline title says November but includes Oct 27 and 28 events. It also repeats the content of beats 2-3.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "The context window is how much text a model can hold in mind at once.",
+    "issue": "The definition comes a beat after the term was used in beat 10, and it sits awkwardly beside the cached-price point.",
+    "beat": 11
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Any claim that a model is the best needs a date and a source",
+    "issue": "The lesson is repeated in beats 7 and 19, and it is a generic takeaway.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "It runs on a laptop.",
+    "issue": "An unsupported claim. The notes describe Inkling 2 Mini as a 26.4B open-weight model with 3.4B active parameters, and nothing says it runs on a laptop.",
+    "beat": 15
+   }
+  ],
+  "missing": [
+   "What the new models can actually do (agents, coding, reasoning)",
+   "Trend analysis: falling prices, tiered families, open-weight catch-up, agentic tools such as Codex and Antigravity",
+   "Caveats about benchmarks and vendor claims",
+   "Anthropic's and Apple's developments (Siri with Gemini)",
+   "Impact on ordinary users"
+  ],
+  "wrong_facts": [
+   "Kimi K3.1 Pro weights are listed as released on Nov 4, but the notes say only that they were promised by Nov 4",
+   "'It runs on a laptop' for Inkling 2 Mini is unsupported by the notes"
+  ],
+  "would_publish": false,
+  "summary": "A clean, well-visualized rundown of dates and prices that opens with a strong hook, but it is mostly a list of releases with little on capabilities or trends. A few claims overreach the notes, including the Kimi weights release and the laptop claim.",
+  "mean": 3.44,
+  "cost_usd": 0.037276,
+  "tokens": [
+   9353,
+   1857
+  ]
+ }
+}

@@ -1,0 +1,746 @@
+{
+ "id": "bio-02",
+ "category": "biography",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "La vida de Frida Kahlo: infancia con polio, el accidente de 1925, su relación con Diego Rivera, su pintura y por qué es un icono hoy.",
+ "great": "Coyoacán 1907, polio, accidente de autobús 1925, empieza a pintar, matrimonio con Rivera, autorretratos y surrealismo (Las dos Fridas), salud, muerte 1954, Casa Azul, icono cultural; fechas correctas.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:02:23",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "recency cue in the brief",
+  "queries": [],
+  "searches": 13,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 19.5,
+  "error": "",
+  "fallback": null,
+  "section_searches": 9,
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "De la polio al accidente que lo cambió todo",
+    "Diego Rivera: amor, dolor y colores",
+    "Por qué Frida es un icono hoy"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 20,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 1,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 30485,
+  "n_sources": 8,
+  "n_fetched": 32,
+  "fetched": [
+   "Anicarlomagno Painting on Facebook: \"🌸Frida Kahlo hizo de su propia vida una obra de arte. Del dolor, los colores. De las heridas, flores…\"",
+   "Frida Kahlo | Biography, Paintings, Self-Portrait, Accident, Husband, & Facts | Britannica",
+   "Frida Kahlo Biography: Life, Paintings, Pain and Legacy | TryHerCare",
+   "Who Was Frida Kahlo? Her Life, in Facts",
+   "The 10 Most Expensive Artworks by Women | Paintings, Artist, List, & Facts | Britannica",
+   "México frena subasta de cuadro de Frida Kahlo en Nueva York - Los Angeles Times",
+   "Biografía de Frida Kahlo para Niños: Historia, Datos y Actividades | Storypie",
+   "Frida Kahlo biography",
+   "Frida Kahlo, su vida a través de la discapacidad. | Consejo Nacional para el Desarrollo y la Inclusión de las Personas con Discapacidad | Gobierno | gob.mx",
+   "Frida Kahlo - Phoenix Art Museum",
+   "Frida | Museo Frida Kahlo",
+   "El accidente de Frida Kahlo y su recuperación | TheHistoryOfArt.org",
+   "How a Devastating Accident Changed Frida Kahlo's Life and Inspired Her Art | HISTORY",
+   "How a Horrific Bus Accident Changed Frida Kahlo’s Life",
+   "Frida Kahlo: Así fue el accidente de autobús que la hirió gravemente",
+   "FRIDA KAHLO, RAÍZ DE VIDA — El Mirador",
+   "Bounty of Frida Kahlo Art Emerges in Mexico’s Restored Museum - The New York Times",
+   "Museo | Museo Frida Kahlo",
+   "Frida Kahlo, Frieda and Diego Rivera, 1931 · SFMOMA",
+   "Frida Kahlo - Wikipedia, la enciclopedia libre",
+   "¿Cuándo se casó Frida Kahlo con Diego Rivera?",
+   "La atormentada vida de Diego Rivera: maltratos y traiciones a Frida Kahlo y la confesión de haber sido caníbal - Infobae",
+   "Frida Kahlo y Diego Rivera cuál es la historia de amor en su matrimonio e infidelidades narración de la relación sentimental pareja de artistas México | ESPECTA",
+   "La vida amorosa de Frida Kahlo y Diego Rivera",
+   "4 autorretratos de Frida Kahlo que debes conocer - Cultura Genial",
+   "Frida Kahlo: autorretratos de dualidad y desamparo - Blog de AntiguoRincon.com Historia, cultura y curiosidades.",
+   "\"El sueño (la cama)\", la pintura de Frida Kahlo que se convirtió en la obra de arte más cara de una mujer jamás subastada - BBC News Mundo",
+   "“El sueño (La cama)” de Frida Kahlo se subasta por US$ 54,7 millones y se convierte en la obra más cara creada por una mujer | CNN",
+   "Sotheby's on Instagram: \"Marking a new record for the most valuable work by a woman artist ever sold at auction, Frida Kahlo’…\"",
+   "Autorretrato de Frida Kahlo subastado por 54,7 mdd rompe récord para artistas femeninas | AP News",
+   "Un cuadro de Frida Kahlo fue retirado de una subasta en EE.UU. y desató un escándalo internacional",
+   "Christie’s retira de subasta una obra de Frida Kahlo valuada en US$3,5 millones - Forbes Colombia"
+  ],
+  "research_agent_cost_usd": 0.0016663
+ },
+ "warnings": [
+  "section 1: some scenes list items their narration never mentions: beat 5 (timeline): its narration never says ['Nace en la Casa Azul', 'Contrae polio', 'Entra a la Preparatoria']. Say each item's key words in the order shown",
+  "section 2: some scenes list items their narration never mentions: beat 2 (timeline): its narration never says ['Primera boda', 'Separación', 'Segunda boda']; beat 4 (gallery): its narration never says ['Frida Kahlo Thorn Necklace Hummingbird', 'Frida Kahlo The Two Fridas painting']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Anicarlomagno Painting on Facebook: \"🌸Frida Kahlo hizo de su propia vida una obra de arte. Del dolor, los colores. De las heridas, flores…\"\nPublished: Fri, 06 Nov 2026 18:12:47 GMT\nTambién tuvo una relación compleja con Diego Rivera, marcada por el amor, las infidelidades, las separaciones y los reencuentros. Y aun atravesando dolores físicos durante gran parte de su vida, Frida nunca dejó de crear. En mi obra quise imaginarla desde otro lugar: más lúdica, más pop, rodeada de flores y colores, inflando un chicle como quien se permite jugar por un instante. [...] 🌸Frida Kahlo hizo de su propia vida una obra de arte. Del dolor, los colores. De las heridas, flores. De su identidad, una bandera. ❤️Nació en Coyoacán en 1907 y, a los 18 años, sufrió un accidente que cambió para siempre su vida. Pasó largos períodos inmovilizada y fue durante esa etapa cuando comenzó a pintar con mayor intensidad. Un espejo colocado sobre su cama le permitió convertir su propio rostro en uno de sus grandes temas. [...] Porque Frida no fue solamente la mujer que sufrió. Fue también la muje\n\n## Frida Kahlo | Biography, Paintings, Self-Portrait, Accident, Husband, & Facts | Britannica\nPublished: Mon, 20 Jul 1998 00:00:00 GMT\n- 1907: Born in Coyoacán, Mexico, on July 6. - 1913: Contracts polio, which leaves Kahlo with a slight limp. - 1925: Seriously injured while riding a bus home from school when it collides with a trolley. During her slow recovery Kahlo teaches herself to paint. - 1929: Marries fellow Mexican artist Diego Rivera. [...] In 1925 Kahlo was riding a bus home from school when it collided with a trolley. She was seriously injured in the accident, with multiple fractures in her spine, right leg, collarbone, ribs, and pelvis. Her shoulder was dislocated, her right foot crushed, and her abdomen and uterus punctured by an iron handrail. She later joked that this was the moment she lost her virginity. The injuries plagued Kahlo for the rest of her life, and she underwent more than 30 medical procedures in subsequent [...] Kahlo was born to a German father of Hungarian descent and a Mexican mother of \n\n## Frida Kahlo Biography: Life, Paintings, Pain and Legacy | TryHerCare\nPublished: Tue, 24 Nov 2026 15:00:00 GMT\n01. 1907 Born in La Casa Azul (the Blue House) in Coyoacán. She later gave 1910 as her birth year, linking herself to the Mexican Revolution. 02. 1913 Contracts polio, which leaves her right leg thinner and weaker. 03. 1922 Enters the National Preparatory School in Mexico City, one of only a few dozen girls among some 2,000 students. 04. 1925 Severely injured on 17 September when the bus she is riding collides with a streetcar. 05. 1926 [...] On 17 September 1925 her life changed. The wooden bus she was riding home collided with an electric streetcar. A metal handrail impaled her through the pelvis, and she suffered fractures to her spine, collarbone, ribs, pelvis and right leg and foot. Doctors doubted she would survive. She spent months in a full-body plaster cast and endured many operations, often reported as around thirty, over the rest of her life. [...] On 17 September 1925 the woo\n\n## Who Was Frida Kahlo? Her Life, in Facts\nPublished: Thu, 19 Nov 2026 16:00:00 GMT\nChildhood polio in 1913, a near fatal bus accident at 18, a three month bed confinement that led her to painting, and a marriage to muralist Diego Rivera in\n\n## The 10 Most Expensive Artworks by Women | Paintings, Artist, List, & Facts | Britannica\nPublished: Thu, 23 Oct 2025 00:00:00 GMT\n## Frida Kahlo, El sueño (La cama) (1940): $54.7 million The sale at Sotheby’s in New York City in 2025 of Frida Kahlo’s El sueño (La cama) (1940; The Dream \\[The Bed]) was a highly anticipated event, and it did not disappoint. The painting secured $54.7 million with fees, making the amount the highest paid for an artwork by a woman at auction. ## Georgia O’Keeffe, Jimson Weed/White Flower No. 1 (1932): $44.4 million Jimson Weed/White Flower No. 1 [...] In November 2025, when Frida Kahlo’s El sueño (La cama) (1940; The Dream \\[The Bed]) went to auction the same week Gustav Klimt’s Portrait of Elisabeth Lederer (1914–16) also went under the hammer, it illustrated the need for a list focusing on art by women at auction. El sueño (La cama) fetched $54.7 million with fees, making it the highest paid for an artwork by a woman at auction (prices have not been adjusted for inflation). The sum w\n\n## México frena subasta de cuadro de Frida Kahlo en Nueva York - Los Angeles Times\nPublished: Sat, 21 Nov 2026 02:53:28 GMT\nEl año pasado, el autorretrato de 1940 “El sueño (La cama)” de Kahlo se vendió por 54,7 millones de dólares, convirtiéndose en la obra de una artista femenina de mayor precio vendida en subasta. [...] La misma pintura fue subastada en 2020 por Sotheby’s sin que hubiese impedimentos. Toda la obra de Frida Kahlo en territorio mexicano es considerada monumento artístico y está protegida por la Ley Federal sobre Monumentos y Zonas Arqueológicos, Artísticos e Históricos de México. ‘Caminos de memoria, caminos de sanación’ es el nombre de la exhibición amazónica que se presentará en Los Ángeles [...] La solicitud se fundamenta en la declaratoria que reconoce la obra de Frida Kahlo como monumento artístico de México. “En colaboración con el vendedor, hemos decidido retirar el lote en este momento para llevar a cabo una investigación más exhaustiva”, señalaron el jueves portavoces de Christie’s\n\n## Biografía de Frida Kahlo para Niños: Historia, Datos y Actividades | Storypie\nmundo con atención, a encontrar la belleza en los detalles más pequeños. Mi madre, Matilde Calderón, era fuerte y devota. Crecí rodeada del zumbido de la vida mexicana, con sus mercados, sus fiestas y sus tradiciones. Sin embargo, mi infancia no fue del todo fácil. A los seis años, en 1913, contraje polio. La enfermedad dejó mi pierna derecha más delgada y débil que la izquierda, y algunos niños se burlaban de mí. Pero esa experiencia, aunque dolorosa, me enseñó a ser fuerte y a no rendirme. [...] mundo con atención, a encontrar la belleza en los detalles más pequeños. Mi madre, Matilde Calderón, era fuerte y devota. Crecí rodeada del zumbido de la vida mexicana, con sus mercados, sus fiestas y sus tradiciones. Sin embargo, mi infancia no fue del todo fácil. A los seis años, en 1913, contraje polio. La enfermedad dejó mi pierna derecha más delgada y débil que la izquierda, y algunos niño\n\n## Frida Kahlo biography\nFrida Kahlo has poor health in her childhood. She contracted polio at the age of 6 and had to be bedridden for nine months. This disease caused her right leg and foot to grow much thinner than her left one. She limped after she recovered from polio. She has been wearing long skirts to cover that for the rest of her life. Her father encouraged her to do lots of sports to help her recover. She played soccer, went swimming, and even did wrestle, which is very unusual at that time for a girl. She [...] Frida Kahlo Logo # Frida Kahlo biography Frida Kahlo Photo Considered one of Mexico's greatest artists, Frida Kahlo was born on July 6, 1907 in Coyocoan, Mexico City, Mexico. She grew up in the family's home where was later referred to as the Blue House or Casa Azul. Her father is a German descendant and photographer. He immigrated to Mexico where he met and married her mother Matilde. Her mot\n\n## Frida Kahlo, su vida a través de la discapacidad. | Consejo Nacional para el Desarrollo y la Inclusión de las Personas con Discapacidad | Gobierno | gob.mx\nSu nombre completo fue, Magdalena del Carmen Frida Kahlo Calderón nació en la Ciudad de México, el 6 de julio del 1907. Su vida estuvo marcada por el dolor físico, en 1913 enfermó de poliomielitis, esta enfermedad le dejó una secuela permanente: la pierna derecha era mucho más delgada que la izquierda. [...] Fue exactamente en esa época de convalecencia cuando Frida comenzó su andar artístico, junto al muralista mexicano Diego Rivera, a quien conoció en la preparatoria y de quien Frida quedó encantada. El aburrimiento y el estar inmóvil en cama la llevaron a pensar en algo que pudiera hacer, así inició su carrera de pintora adaptando un espejo para que ella pudiera ser su propia modelo y mandó a hacer un caballete especial, ya que no se podía sentar, fue así que comenzó a pintar y plasmó en su obra\n\n## Frida Kahlo - Phoenix Art Museum\nFrida Kahlo nació en Coyoacán, Mexico en 1907. Su padre era de descendencia alemán-húngaro, mientras que su madre, de México, era de descendencia indígena y española. Contrajo polio de niña, que la dejó con una leve cojera. Fue la primera de muchas enfermedades que sufrió en toda su vida. [...] En 1922, Kahlo inició sus estudios de medicina en la Escuela Nacional Preparatoria en la Ciudad de México, donde conoció a Diego Rivera. En 1925, sobrevivió un accidente de autobús que a raíz del cual tuvo que someterse a más de 30 cirugías durante su vida. Se enseñó a pintar durante su recuperación y al unirse al Partido Comunista Mexicano, se encontró de nuevo con Rivera. En 1929 se casaron y, de 1930 a 1933, viajaron por los Estados Unidos; Rivera pintando murales y Kahlo pintando retratos [...] Los artistas volvieron a México en 1933 y para 1939 se divorciaron, después de años de infidelidad m\n\n## Frida | Museo Frida Kahlo\nNace Cristina, hermana menor de Frida. ### Estalla la Revolución mexicana. Estalla la Revolución mexicana. ### Frida contrae poliomielitis. Frida contrae poliomielitis. ### Frida ingresa a la Escuela Nacional Preparatoria. Frida ingresa a la Escuela Nacional Preparatoria. ### Frida se une a “Los Cachuchas”. Frida se une a “Los Cachuchas”. ### Frida deja la escuela por un tiempo. Frida deja la escuela por un tiempo. ### Frida sufre el grave accidente que marcará su vida. [...] Retrato de mi padre, Guillermo Kahlo, tomando como referencia una fotografía de su padre en la juventud. La relación entre ambos fue siempre muy cercana. Fotógrafo de profesión, Guillermo también era muy afecto a los autorretratos. Fue él quien acostumbró a su hija a mirar con determinación hacia la cámara. ### Por su delicada salud, Frida requiere enfermeras de tiempo completo. [...] ### Nace Wilhelm (Guillermo) Ka\n\n## El accidente de Frida Kahlo y su recuperación | TheHistoryOfArt.org\nFrida Kahlo tenía dieciocho años cuando un autobús y un tranvía chocaron en Ciudad de México el 17 de septiembre de 1925. Las lesiones interrumpieron su educación y transformaron las condiciones de su vida cotidiana, pero no crearon de la nada su interés por el trabajo visual: la fotografía, el dibujo, la impresión y la actividad literaria ya formaban parte de su experiencia. Durante una recuperación irregular, la pintura se convirtió en una práctica más sostenida, apoyada por un entorno de [...] ## El choque del 17 de septiembre de 1925 Los hechos centrales coinciden en la cronología del museo de la artista y en las tres noticias de prensa reproducidas en el estudio de Rodríguez Blanco: la fecha fue el 17 de septiembre de 1925 y los vehículos eran un autobús y un tranvía. El autobús cubría la ruta de Coyoacán, mientras que el tranvía se identificaba con Tlalpan. No fue un choque entre u\n\n## How a Devastating Accident Changed Frida Kahlo's Life and Inspired Her Art | HISTORY\nOn September 17, 1925, that all changed. After a day of classes, Kahlo and her friend Alejandro Gomez Arias boarded a bus heading toward Coyoacan. Minutes after they sat down on a wooden bench, the bus turned a corner and slammed into an electric trolley car traveling at full speed. “The streetcar crushed the bus against the street corner,” Kahlo told author Raquel Tibol in Frida Kahlo: An Open Life. “It was a strange crash, not violent but dull and slow, and it injured everyone, me much more [...] When the bus Kahlo was riding hit a trolley car, she suffered serious internal injuries as a long metal rod tore through her midsection. On the scene of the accident, an onlooker tried to remove the metal rod from Kahlo’s body. “When he pulled it,” Arias recalled, “Frida screamed so loud that no one heard the siren of the Red Cross ambulance.” [...] By: Elizabeth Svoboda # How a Devastating Ac\n\n## How a Horrific Bus Accident Changed Frida Kahlo’s Life\nAs Arias and Kahlo would later recall, the couple was returning home from school on September 17, 1925, a gray, rainy, overcast day. They boarded one bus, but got off to look for an umbrella Kahlo realized she had lost. They boarded a second, more crowded bus, and took seats towards the back. Minutes later, the bus driver tried to pass in front of an oncoming electric streetcar, which crashed into the side of the bus, dragging it for a number of feet. Several passengers were killed instantly, [...] Kahlo’s pelvic bone had been fractured and the rail had punctured her abdomen and uterus. Her spine had been broken in three places, her right leg in 11 places, her shoulder was dislocated, her collarbone was broken, and doctors later discovered that three additional vertebrae had been broken as well. ## She took up painting during her long recovery [...] READ MORE: Frida Kahlo and Diego River\n\n## Frida Kahlo: Así fue el accidente de autobús que la hirió gravemente\nEra 1925 cuando Frida Kahlo , con tan sólo 19 años, sufrió múltiples heridas en su cuerpo causadas por un accidente, cuando el camión en el que viajaba fue arrollado por un tranvía. Como resultado del choque, Kahlo sufrió fracturas en dos costillas, su columna vertebral quedó fracturada en tres partes, más daños en su pelvis, su pierna y pie derecho, clavícula y hombro izquierdo. Se creía que los daños eran tan graves que incluso le causarían la muerte. La pintora pasó semanas postrada en cama y [...] Las personas que resultaron con lesiones en este accidente son las siguientes: Señorita Frida Kahlo , que pertenece a una distinguida familia de la municipalidad de Coyoacán, que presenta contusión profunda de las vísceras abdominales; probable fractura de la pelvis, y fractura del pie derecho. [...] Como se recordará, la señorita Kahlo presenta una contusión profunda en las vísceras abdomi\n\n## FRIDA KAHLO, RAÍZ DE VIDA — El Mirador\nCon un futuro que se abría ante sus ojos, Frida Kahlo sufrió un accidente que dio un vuelco definitivo a su vida, pues la tarde lluviosa del 17 de septiembre de 1925, el camión donde viajaba con destino a Coyoacán fue embestido por un tranvía procedente del pueblo de Xochimilco.5 Frida dio testimonio de los hec\n\n## \"El sueño (la cama)\", la pintura de Frida Kahlo que se convirtió en la obra de arte más cara de una mujer jamás subastada - BBC News Mundo\nUna pintura surrealista de la famosa artista mexicana Frida Kahlo se vendió por US$54,7 millones, rompiendo el récord de subasta para una obra de una mujer. La pintura, de la década de 1940, alcanzó un precio más de mil veces superior a su valor original cuando fue subastada en 1980, tras una tensa puja entre dos coleccionistas, según la casa de subastas Sotheby's. [...] Fin de Anuncio app \"Pocos podrían haber imaginado que 'El sueño (la cama)' se vendería finalmente por US$55 millones cuando fue subastada por primera vez en Sotheby's en 1980 por US$51.000\", comentó Anna Di Stasi, directora del departamento de arte latinoamericano de la casa de subastas. [...] La obra, titulada \"El sueño (la cama)\", representa a Kahlo dormida en una cama con dosel bajo un esqueleto envuelto con dinamita. La subasta superó el récord anterior para la obra de una pintora, de US$44 millones, así como el prec\n\n## “El sueño (La cama)” de Frida Kahlo se subasta por US$ 54,7 millones y se convierte en la obra más cara creada por una mujer | CNN\nUna de las pinturas más enigmáticas de Frida Kahlo alcanzó un récord histórico al venderse por US$ 54,7 millones en la subasta de arte surrealista de Sotheby’s en Manhattan, Nueva York. La obra, que retrata a la artista dormida bajo el dosel de una cama mientras un esqueleto flota sobre la estructura, fue adjudicada en minutos durante la puja. [...] Titulado “El sueño (La cama)”, el autorretrato fue pintado en 1940, un año tumultuoso en la vida de Kahlo marcado por el dolor físico, la inestabilidad de su matrimonio con Diego Rivera y su constante reflexión sobre la vida y la muerte. La pintura refleja su fascinación por el mundo de los sueños y la fragilidad de la existencia, un tema recurrente en su obra, según la nota de catálogo de Sotheby’s. [...] Personas observan el último autorretrato de busto de Frida Kahlo, <em>“Diego y yo”</em>, en Sotheby's el 5 de noviembre de 2021 en la ciud\n\n## Sotheby's on Instagram: \"Marking a new record for the most valuable work by a woman artist ever sold at auction, Frida Kahlo’…\"\n# Sotheby's on Instagram: \"Marking a new record for the most valuable work by a woman artist ever sold at auction, Frida Kahlo’…\" Marking a new record for the most valuable work by a woman artist ever sold at auction, Frida Kahlo’s ‘El sueño (La cama)’ sold to applause at #SothebysNewYork tonight at $54.7 million. [...] Painted in 1940, a pivotal year in Kahlo’s life marked by her turbulent relationship with Diego Rivera and ongoing health challenges, the work has remained in the same private collection for 45 years. The bed became a crucial symbol of challenge and resilience, providing the deeply personal setting for many of her self-portraits, while the skeleton which she kept above it served as a reminder of mortality and tradition. [...] The New York Sales continue on Friday 21 November with the Modern Day Auctions. Tap the link in bio to discover more. [Image: Video by Sotheby's on \n\n## Autorretrato de Frida Kahlo subastado por 54,7 mdd rompe récord para artistas femeninas | AP News\nLa pintura en la que Kahlo aparece durmiendo en una cama, titulada “El sueño (La cama)”, superó el récord que tenía “Jimson Weed/White Flower No. 1″ de Georgia O’Keeffe, que se vendió por 44,4 millones de dólares en 2014. [...] La pintura fue la estrella de una venta de más de 100 obras surrealistas de artistas como Salvador Dalí, René Magritte, Max Ernst y Dorothea Tanning. Kahlo resistió ser etiquetada como surrealista, un estilo de arte que es onírico y se centra en una fascinación por la mente inconsciente. “Nunca pinté sueños”, dijo una vez. “Pinté mi propia realidad”. En su nota de catálogo, Sotheby’s dijo que la pintura “ofrece una meditación espectral sobre la porosa frontera entre el sueño y la muerte”. [...] La identidad del comprador no fue revelada. ## El cuadro La pieza representa a Kahlo durmiendo en una cama de madera de estilo colonial que flota entre las nubes. Está cubi\n\n## México frena subasta de cuadro de Frida Kahlo en Nueva York - Los Angeles Times\nLa pintura salió de México más de tres décadas antes de la publicación del decreto de 1984 que declaró monumento artístico a la obra de Kahlo. El decreto prohíbe la exportación definitiva y se aplica a las obras de la artista que se encontraban en territorio mexicano al momento de publicarse. [...] La solicitud se fundamenta en la declaratoria que reconoce la obra de Frida Kahlo como monumento artístico de México. “En colaboración con el vendedor, hemos decidido retirar el lote en este momento para llevar a cabo una investigación más exhaustiva”, señalaron el jueves portavoces de Christie’s en un correo electrónico enviado a The Associated Press. “Esperamos poder vender esta obra en una fecha posterior”. [...] La misma pintura fue subastada en 2020 por Sotheby’s sin que hubiese impedimentos. Toda la obra de Frida Kahlo en territorio mexicano es considerada monumento artístico y está prot\n\n## Un cuadro de Frida Kahlo fue retirado de una subasta en EE.UU. y desató un escándalo internacional\nSegún una nota del Instituto Nacional de Bellas Artes y Literatura (Inbal) de México, la solicitud se fundamentó en el artículo 26 de la Ley Federal sobre Monumentos y Zonas Arqueológicos, Artísticos e Históricos. En dicha declaratoria se reconoce la obra de Frida Kahlo como \"monumento artístico\". \"México declaró la obra de Kahlo como monumento artístico desde 1984 y prohíbe su exportación\", explica el escrito sobre la obra que iba a ser subastada en Estados Unidos. [...] La venta de las piezas de Kahlo (1907-1954) no está prohibida. Pero, lo que está prohibida es su exportación definitiva al ser considerada monumento artístico, especificaron en el escrito. Por lo expuesto, el gobierno mexicano afirmó que da seguimiento al caso en coordinación con el Fideicomiso de Museos Diego Rivera y Frida Kahlo, cuyo fiduciario es el Banco de México, y actúa conforme a las obligaciones marcadas por l\n\n## Christie’s retira de subasta una obra de Frida Kahlo valuada en US$3,5 millones - Forbes Colombia\nFrida Kahlo (1907-1954) pintó ‘Congreso de los pueblos por la paz’ en octubre de 1952 y posteriormente la donó al Congreso de la Paz. La obra salió de México aproximadamente tres décadas antes de que, en 1984, se publicara el decreto que declaró monumento artístico la producción de la pintora. Ese antecedente forma parte de la discusión sobre la situación jurídica de la pintura y las condiciones bajo las cuales podría comercializarse y salir del país. [...] La casa de subastas suspendió la venta de ‘Congreso de los pueblos por la paz’ luego de que las autoridades mexicanas solicitaran información sobre su procedencia. La casa de subastas Christie’s retiró de una de sus ventas programadas para este martes la pintura ‘Congreso de los pueblos por la paz’, de Frida Kahlo, luego de recibir una solicitud del Gobierno de México para verificar la procedencia de la obra, estimada entre US$2,5 mil\n\n## Frida Kahlo - Phoenix Art Museum\nEn 1922, Kahlo inició sus estudios de medicina en la Escuela Nacional Preparatoria en la Ciudad de México, donde conoció a Diego Rivera. En 1925, sobrevivió un accidente de autobús que a raíz del cual tuvo que someterse a más de 30 cirugías durante su vida. Se enseñó a pintar durante su recuperación y al unirse al Partido Comunista Mexicano, se encontró de nuevo con Rivera. En 1929 se casaron y, de 1930 a 1933, viajaron por los Estados Unidos; Rivera pintando murales y Kahlo pintando retratos [...] Frida Kahlo nació en Coyoacán, Mexico en 1907. Su padre era de descendencia alemán-húngaro, mientras que su madre, de México, era de descendencia indígena y española. Contrajo polio de niña, que la dejó con una leve cojera. Fue la primera de muchas enfermedades que sufrió en toda su vida. [...] Los artistas volvieron a México en 1933 y para 1939 se divorciaron, después de años de infidelidad m\n\n## Frida Kahlo - Wikipedia, la enciclopedia libre\nLa artista contrajo matrimonio con Diego Rivera el 21 de agosto de 1929. En 1930, Kahlo se embarazó por primera vez. Sin embargo, debido a la posición anómala del feto y a las secuelas del accidente de 1925, el embarazo de tres meses debió ser interrumpido, según decidió el médico Jesús Marín. Por aquel entonces otros médicos opinaron que probablemente Kahlo nunca podría tener hijos. y Rita Dar (izquierda), en 1947. [...] El 17 de septiembre de 1925, Kahlo sufrió un grave accidente cuando el autobús en el que ella viajaba fue arrollado por un tranvía, quedando aplastado contra un muro y completamente destruido. Regresaba de la escuela a casa junto a Alejandro Gómez Arias, su novio de entonces. Su columna vertebral quedó fracturada en tres partes, sufriendo además fracturas en dos costillas, en la clavícula y tres en el hueso pélvico. Su pierna derecha se fracturó en once partes, su pie d\n\n##\n\n## Frida Kahlo, su vida a través de la discapacidad. | Consejo Nacional para el Desarrollo y la Inclusión de las Personas con Discapacidad | Gobierno | gob.mx\nMás tarde en 1925 tuvo un accidente cuando viajaba en un autobús, este fue envestido por un tranvía lo que le ocasionó la perforación de la pelvis con el pasamanos del tranvía, además de una fractura en la columna vertebral, la clavícula, varias costillas, y se fracturó una pierna en once lugares distintos. Este accidente tuvo como consecuencia que Frida quedara incapacitada para realizar muchos movimientos. [...] Su nombre completo fue, Magdalena del Carmen Frida Kahlo Calderón nació en la Ciudad de México, el 6 de julio del 1907. Su vida estuvo marcada por el dolor físico, en 1913 enfermó de poliomielitis, esta enfermedad le dejó una secuela permanente: la pierna derecha era mucho más delgada que la izquierda. [...] En 1929, pintó “El camión” algunos elementos en esta pintura que se podían referir al accidente de autobús de 1925 en el cual Frida sufrió graves heridas: el autobús es de \n\n## ¿Cuándo se casó Frida Kahlo con Diego Rivera?\nIniciaron una relación extramarital, hasta que en 1929 se casaron, él tenía 43 años y Frida 22: su matrimonio estuvo marcado por infidelidades, pues Rivera era un hombre que amaba a las mujeres se decía “muy enamorado” por lo que no tenía reparo en ser infiel, una, otra y otra vez. ## ¿Cómo fue el matrimonio entre Frida Kahlo y Diego Rivera? 26 preguntas relacionadas encontradas ### ¿Cuál era la sexualidad de Frida Kahlo? [...] Lo interesante –decía– es que durante «diez años trabajaron juntos y se amaron». Una reflexión que bien podría aplicarse al tumultuoso matrimonio de la pintora Frida Kahlo –hoy se cumplen 65 años de su fallecimiento– y el muralista Diego Rivera, quienes llegaron a pasar por la vicaría dos veces en 1929 y 1940. ## ¿Qué relacion tenía Frida Kahlo y Diego Rivera? [...] Frida Kahlo y Diego Rivera se casaron dos veces, los protagonistas de una relación amorosa empañada\n\n## La atormentada vida de Diego Rivera: maltratos y traiciones a Frida Kahlo y la confesión de haber sido caníbal - Infobae\nLa pareja prosperó y el 21 de agosto de 1929, Frida Kahlo y Diego Rivera, “la paloma” y “el elefante” como los llamaban, se casaron. Él tenía 43 años, ella 22. La boda se realizó en la terraza de la ex amante de Diego, Tina Modotti, y la encargada de la comida mexicana fue su ex mujer Lupe Marín. Otra vez Diego mezclando amores. Sopa de ostión, arroz con plátano, chiles rellenos, mole negro, pozole rojos… delicias mexicanas en un ambiente con mucho color y con la presencia de un puñado de [...] PUBLICIDAD Su matrimonio con Lupe terminó en 1928. Y, en 1929, terminó también su romance con el partido comunista mexicano: fue expulsado. ¿El motivo? Rivera estaba trabajando con el gobierno de México y sus camaradas sostenían que eso era tener relación con el imperialismo. Diego se había acostumbrado a superponer amores, como las capas que tiene la cebolla uno envolvía al anterior y terminaban \n\n## Frida Kahlo y Diego Rivera cuál es la historia de amor en su matrimonio e infidelidades narración de la relación sentimental pareja de artistas México | ESPECTA\nFrida Kahlo y su historia con Diego Rivera es presentado en ópera ## ¿Cómo inició el amor entre Frida Kahlo y Diego Rivera? A tres años de su accidente, Frida Kahlo conoce a Diego Rivera y le hace llevar algunos de sus cuadros, los cuales dejarían en él una grata impresión por el talento que tenía ella. La química fue desarrollándose entre ambos y fue así que ambos se casan por primera vez en 1929. Él, con 43 años, y ella, con 22. [...] Uno de sus proyectos fue tener hijos, aunque el estado de salud de Frida Kahlo impidió que todas las oportunidades en las que intentó tuviesen éxito. En total, serían cuatro abortos que tuvo y tras los cuales decidió no tener hijos, lo cual sumó una nueva desazón a su vida y que sería el punto eje para la creación de ‘Aborto en Detroit’, una de sus obras maestras. Ella soportaba los engaños de Diego, pero esto terminó enfermándola aún más. ## Las infideli\n\n## La vida amorosa de Frida Kahlo y Diego Rivera\nSeparación y Reconciliación: En 1939, Frida y Diego se separaron debido a las infidelidades y tensiones en su matrimonio. Sin embargo, se reconciliaron y volvieron a casarse en 1940. A pesar de los desafíos, su conexión era innegable, y compartían una profunda admiración por el talento artístico del otro. [...] Infidelidades y Conflictos: La vida amorosa de Kahlo y Rivera estuvo plagada de altibajos. Ambos eran personalidades intensas y apasionadas, y su matrimonio fue testigo de numerosos desafíos. Diego Rivera era conocido por sus múltiples infidelidades, incluida una relación con la hermanastra de Frida. A su vez, Frida también tuvo sus propias experiencias extramatrimoniales, incluida una breve relación con el político exiliado León Trotsky. [...] Encuentro y Matrimonio: Frida Kahlo y Diego Rivera se conocieron por primera vez en 1928, cuando él estaba pintando un mural en la Escuela\n\n## 4 autorretratos de Frida Kahlo que debes conocer - Cultura Genial\nLa artista se muestra con una mirada firme y desafiante, rodeada de varios elementos alegóricos. En primera instancia, el collar que se clava en su cuello y la hace sangrar evoca la iconografía cristiana, en especial la corona de espinas de Cristo. Esto refleja el dolor y el sacrificio de la separación. [...] Por su parte, los clavos hacen referencia al dolor físico constante. La imagen recuerda el martirio de San Sebastián, un tema recurrente en el arte religioso. Otro de los elementos cruciales es el corsé de fierro. La artista usó estos aparatos ortopédicos para sostener su columna, pero aquí también simboliza una prisión que la mantiene atada a su dolor. [...] Por su parte, el gato negro que está detrás de su hombro izquierdo se puede asociar con la mala suerte, mientras que el mono es una referencia directa a su vida en pareja. Con Rivera tenían varios monos como mascotas. Aunque en\n\n## Frida Kahlo: autorretratos de dualidad y desamparo - Blog de AntiguoRincon.com Historia, cultura y curiosidades.\nQue Frida Kahlo toma su propio dolor como inspiración y se sirve de su cuerpo como modelo se hace evidente en su proclividad al autorretrato. Son muchos los testimonios y ensayos que aseguran que el dolor es musa y estímulo, particularmente el anímico. En el caso de Frida se puede hacer de ello una afirmación completa, así como encontrar en su obra pictórica una conjunción entre el dolor físico y psíquico. [...] ## II- Consideraciones sobre sus autorretratos y simbología Si hablamos de la obra de Frida nos viene a la mente de forma automática el autorretrato. Frida realizó más de setenta pinturas de sí misma, una forma que usó para combatir el desamparo y la desorganización psíquica, pero también para fijar su propia identidad ante los demás y ante sí misma, para reconstruirse y valorarse. [...] Se ha escrito sobre Frida Kahlo una copiosa literatura con el propósito de inmortalizar y rep",
+ "plan": {
+  "title": "Frida Kahlo: del dolor al icono mundial",
+  "description": "Un recorrido por la vida de Frida Kahlo: la polio de su infancia, el accidente de 1925 que cambió su destino, su relación con Diego Rivera y la pintura que la convirtió en icono. Descubre por qué su obra sigue marcando el arte y la cultura de hoy.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "fdc0b0e1",
+    "narration": "¿Qué pasa cuando una joven que sueña con ser médica queda clavada a una cama? Frida Kahlo respondió con pinceles. Todo empezó con una niña enferma y un autobús en Ciudad de México.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Casa Azul Coyoacán Frida Kahlo",
+      "alt": "La Casa Azul en Coyoacán",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "De la polio al accidente que lo cambió todo"
+   },
+   {
+    "id": "368be16e",
+    "narration": "Frida nació el 6 de julio de 1907 en la Casa Azul, en Coyoacán. Más tarde dijo que fue en 1910, para ligarse a la Revolución Mexicana.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Casa Azul Coyoacán fachada azul",
+       "Revolución Mexicana fotografía histórica 1910"
+      ],
+      "alt": "Casa Azul y Revolución Mexicana"
+     }
+    }
+   },
+   {
+    "id": "8e87ea34",
+    "narration": "En 1913, con seis años, contrajo polio. Su pierna derecha quedó más delgada y débil, y le dejó una leve cojera. Era una niña fuerte, decidida a no rendirse.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Una infancia con polio",
+      "items": [
+       "1913: contrae polio",
+       "Pierna derecha más delgada y débil",
+       "Una leve cojera"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "calendar",
+       "heart",
+       "park"
+      ]
+     }
+    }
+   },
+   {
+    "id": "9709f1d3",
+    "narration": "En 1922 entró a la Escuela Nacional Preparatoria. Era una de pocas decenas de chicas entre unos 2.000 estudiantes. Soñaba con estudiar medicina.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Escuela Nacional Preparatoria Ciudad de México",
+      "alt": "Escuela Nacional Preparatoria",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "7ae64de5",
+    "narration": "El 17 de septiembre de 1925, con 18 años, el autobús en que viajaba chocó con un tranvía. Una barra de metal le atravesó la pelvis. Los médicos dudaban que sobreviviera.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "El día que cambió su vida",
+      "events": [
+       {
+        "date": "1907",
+        "label": "Nace en la Casa Azul"
+       },
+       {
+        "date": "1913",
+        "label": "Contrae polio"
+       },
+       {
+        "date": "1922",
+        "label": "Entra a la Preparatoria"
+       },
+       {
+        "date": "1925",
+        "label": "El choque con el tranvía"
+       }
+      ]
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "d79fd3cd",
+    "narration": "Se fracturó la columna, la clavícula, las costillas, la pelvis, y la pierna y el pie derechos. Pasó meses inmovilizada con un corsé de yeso.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Sus lesiones",
+      "items": [
+       "Columna",
+       "Clavícula",
+       "Costillas",
+       "Pelvis",
+       "Pierna y pie derechos"
+      ]
+     }
+    }
+   },
+   {
+    "id": "aefbdf18",
+    "narration": "Para combatir el aburrimiento, empezó a pintar. Un espejo sobre su cama la llevó a su propio rostro. Así, la estudiante de medicina se convirtió en pintora.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Frida Kahlo autorretrato pintura",
+       "caballete pintura cama espejo",
+       "Frida Kahlo pintando en cama"
+      ],
+      "alt": "Frida empieza a pintar"
+     }
+    }
+   },
+   {
+    "id": "4c42addd",
+    "narration": "El 21 de agosto de 1929, Frida se casó con el muralista Diego Rivera. Ella tenía veintidós años. Él, cuarenta y tres. Los llamaban la paloma y el elefante.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "1929",
+      "label": "Frida, 22 años, se casa con Diego Rivera, 43"
+     }
+    },
+    "sfx": "ding",
+    "chapter": "Diego Rivera: amor, dolor y colores"
+   },
+   {
+    "id": "5a5128c7",
+    "narration": "Fue un amor enorme y también una herida abierta. Hubo infidelidades, incluso con la hermanastra de Frida. Ella también tuvo sus propias aventuras. Se separaron en 1939 y volvieron a casarse en 1940.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Amor, ruptura y reencuentro",
+      "events": [
+       {
+        "date": "1929",
+        "label": "Primera boda"
+       },
+       {
+        "date": "1939",
+        "label": "Separación"
+       },
+       {
+        "date": "1940",
+        "label": "Segunda boda"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "a305c24e",
+    "narration": "Mientras tanto, el cuerpo de Frida no le daba tregua. Según Britannica, pasó por más de treinta procedimientos médicos a lo largo de su vida. Y aun así, nunca dejó de crear.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "30",
+      "unit": "+",
+      "label": "procedimientos médicos a lo largo de su vida"
+     }
+    }
+   },
+   {
+    "id": "1cc204f1",
+    "narration": "Su gran tema fue ella misma. Pintó más de setenta autorretratos. En ellos convirtió su cuerpo, su identidad y su herida en imagen, para reconstruirse y mirarse de frente.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Frida Kahlo self-portrait painting",
+       "Frida Kahlo Thorn Necklace Hummingbird",
+       "Frida Kahlo The Two Fridas painting"
+      ],
+      "alt": "Autorretratos de Frida Kahlo"
+     }
+    }
+   },
+   {
+    "id": "6a764d37",
+    "narration": "En esos cuadros el dolor se vuelve símbolo: un collar de espinas, clavos, un corsé de hierro, un mono que recuerda a Diego. Nada está ahí por casualidad.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Símbolos del dolor",
+      "items": [
+       "Collar de espinas",
+       "Clavos",
+       "Corsé de hierro",
+       "Un mono: su vida en pareja"
+      ],
+      "style": "keywords",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "ce73aedf",
+    "narration": "Pero su obra no es solo sufrimiento. Está llena de flores y de color. Del dolor, los colores. De las heridas, flores. Frida hizo de su propia vida una obra de arte.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Del dolor, los colores. De las heridas, flores.",
+      "emphasis": "flores"
+     }
+    }
+   },
+   {
+    "id": "a5683b26",
+    "narration": "En noviembre de 2025, una pintura de una mujer dormida en una cama alcanzó un precio que ninguna otra artista había logrado en una subasta.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "54.7",
+      "prefix": "$",
+      "unit": "M",
+      "label": "El sueño (La cama), 1940, en Sotheby's, con comisiones"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "Por qué Frida es un icono hoy"
+   },
+   {
+    "id": "31645d54",
+    "narration": "Se llama El sueño, La cama, y es de 1940. Un autorretrato con un esqueleto sobre el dosel. Superó los 44,4 millones que costó una obra de Georgia O'Keeffe.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Obras de mujeres más caras en subasta",
+      "labels": [
+       "O'Keeffe",
+       "Kahlo"
+      ],
+      "values": [
+       44.4,
+       54.7
+      ],
+      "unit": "M$",
+      "highlight": 1
+     }
+    }
+   },
+   {
+    "id": "7b49340b",
+    "narration": "Lo curioso es que ella decía: \"Nunca pinté sueños. Pinté mi propia realidad\". Se negaba a que la encerraran en una etiqueta.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "Nunca pinté sueños. Pinté mi propia realidad.",
+      "attribution": "Frida Kahlo"
+     }
+    }
+   },
+   {
+    "id": "ade99d7a",
+    "narration": "Pero tanto valor abre una disputa. Desde 1984, toda su obra que estaba en territorio mexicano es monumento artístico, y la ley prohíbe su exportación definitiva.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Monumento artístico",
+      "definition": "Declaratoria mexicana de 1984 que protege la obra de Kahlo y prohíbe su exportación definitiva."
+     }
+    }
+   },
+   {
+    "id": "c5869091",
+    "narration": "Según el Los Angeles Times, en noviembre de 2026 México pidió frenar la subasta de otra obra en Nueva York. Christie's retiró el lote para investigar más a fondo.",
+    "scene": {
+     "type": "headline",
+     "props": {
+      "headlines": [
+       {
+        "text": "México frena subasta de cuadro de Frida Kahlo en Nueva York",
+        "outlet": "Los Angeles Times",
+        "date": "21 Nov 2026"
+       }
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "f049ae0d",
+    "narration": "Mientras tanto, su imagen se reinventa en el arte pop, entre flores y colores. Frida no fue solo la mujer que sufrió: fue la mujer que creó.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Frida Kahlo mural street art",
+       "Frida Kahlo pop art portrait",
+       "Frida Kahlo Casa Azul Coyoacán"
+      ],
+      "alt": "Frida Kahlo en el arte actual"
+     }
+    }
+   },
+   {
+    "id": "f8c4c0f6",
+    "narration": "Convirtió su dolor, su amor y su rostro en una obra de arte. Por eso, más de setenta años después, Frida Kahlo todavía nos sigue hablando.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Convirtió su vida en una obra de arte, y por eso nos sigue hablando.",
+      "emphasis": "obra de arte"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Frida Kahlo | Biography, Paintings, Self-Portrait, Accident, Husband, & Facts | Britannica",
+    "url": "https://www.britannica.com/biography/Frida-Kahlo",
+    "publisher": "britannica.com",
+    "license": "",
+    "date": "Mon, 20 Jul 1998 00:00:00 GMT"
+   },
+   {
+    "title": "Frida Kahlo Biography: Life, Paintings, Pain and Legacy | TryHerCare",
+    "url": "https://www.tryhercare.com/biographies/frida-kahlo",
+    "publisher": "tryhercare.com",
+    "license": "",
+    "date": "Tue, 24 Nov 2026 15:00:00 GMT"
+   },
+   {
+    "title": "The 10 Most Expensive Artworks by Women | Paintings, Artist, List, & Facts | Britannica",
+    "url": "https://www.britannica.com/art/Most-Expensive-Artworks-by-Women",
+    "publisher": "britannica.com",
+    "license": "",
+    "date": "Thu, 23 Oct 2025 00:00:00 GMT"
+   },
+   {
+    "title": "México frena subasta de cuadro de Frida Kahlo en Nueva York - Los Angeles Times",
+    "url": "https://www.latimes.com/espanol/entretenimiento/articulo/2026-11-20/mexico-frena-subasta-de-cuadro-de-frida-kahlo-en-nueva-york",
+    "publisher": "latimes.com",
+    "license": "",
+    "date": "Sat, 21 Nov 2026 02:53:28 GMT"
+   },
+   {
+    "title": "Frida Kahlo - Phoenix Art Museum",
+    "url": "https://phxart.org/es/artists/frida-kahlo",
+    "publisher": "phxart.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How a Devastating Accident Changed Frida Kahlo's Life and Inspired Her Art | HISTORY",
+    "url": "https://www.history.com/articles/frida-kahlo-bus-accident-art",
+    "publisher": "history.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "La vida amorosa de Frida Kahlo y Diego Rivera",
+    "url": "https://www.revistaurbanus.com/post/la-vida-amorosa-de-frida-kahlo-y-diego-rivera",
+    "publisher": "revistaurbanus.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Frida Kahlo: autorretratos de dualidad y desamparo - Blog de AntiguoRincon.com Historia, cultura y curiosidades.",
+    "url": "https://www.antiguorincon.com/blog/frida-kahlo-autorretratos-de-dualidad-y-desamparo",
+    "publisher": "antiguorincon.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 56.2,
+  "before_first_script_call_s": 21.5,
+  "script_s": 34.7
+ },
+ "cost": {
+  "script_small": 0.00071,
+  "research": 0.0053,
+  "script_big": 0.25845,
+  "search_api": 0.104,
+  "total": 0.36846
+ },
+ "calls": {
+  "small": 3,
+  "tools": 9,
+  "big": 6
+ },
+ "tokens": {
+  "in": 136641,
+  "out": 10539
+ },
+ "rules": {
+  "length": {
+   "words": 564,
+   "expected_words": 537,
+   "ratio": 1.05,
+   "beats": 20,
+   "expected_beats": 17,
+   "est_speech_s": 254.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Qué pasa cuando una joven que sueña con ser médica queda clavada a una cama? Frida Kahlo respondió con pinceles. Todo empezó con una niña enferma y un autobús en Ciudad de México.",
+   "close_text": "Convirtió su dolor, su amor y su rostro en una obra de arte. Por eso, más de setenta años después, Frida Kahlo todavía nos sigue hablando."
+  },
+  "variety": {
+   "distinct": 12,
+   "counts": {
+    "image": 2,
+    "gallery": 4,
+    "bullets": 2,
+    "timeline": 2,
+    "checklist": 1,
+    "stat": 1,
+    "counter": 2,
+    "kinetic_text": 2,
+    "chart": 1,
+    "quote": 1,
+    "definition": 1,
+    "headline": 1
+   },
+   "max_run": 1,
+   "entropy": 3.42,
+   "top_type": "gallery",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 16,
+   "ungrounded_numbers": [],
+   "entities": 15,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "una obra de arte",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "coverage": 2
+  },
+  "sources": {
+   "cited": 8,
+   "fetched": 32,
+   "notes_len": 30485,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": true,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 5 (timeline): its narration never says ['Nace en la Casa Azul', 'Contrae polio', 'Entra a la Preparatoria']",
+   "beat 9 (timeline): its narration never says ['Primera boda', 'Separación', 'Segunda boda']",
+   "beat 11 (gallery): its narration never says ['Frida Kahlo Thorn Necklace Hummingbird', 'Frida Kahlo The Two Fridas painting']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most dates are correct, but the death in 1954 is missing and some claims are shaky. \"Pintó más de setenta autorretratos\" is false (about 55 of roughly 143 paintings). The 1984 decree is not in the notes. The chart presents the Kahlo record as unverified-sounding."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers polio, the accident, Rivera, symbols and the auction. It omits her death in 1954, Las dos Fridas explained, surrealism, the Casa Azul as a museum, and the political side. About a third of the time goes to auction news."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear. But the timeline in beat 5 already shows 1907 to 1925 and duplicates earlier beats. The end-of-life section is missing, and the last third drifts into legal and auction detail."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about a would-be doctor tied to a bed creates tension. The ending ('nos sigue hablando') is decent but a little summary-like."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, accessible narration suited to a general audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The variety is good and the chart and counter use real figures. But a bar chart with two bars is thin, the gallery queries mix English and Spanish, and the Revolution photo adds little."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Concrete details such as the 1910 birth year, the paloma y elefante nickname and the quote add interest. But the Facebook slogan is reused and parts are generic."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It covers the requested items, but the length is likely above the ~537 words and the death and surrealism are missing. Too much goes to the news item about the auction."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct Spanish, with minor issues such as 'Según el Los Angeles Times' and the stiff 'con seis años'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Pintó más de setenta autorretratos.",
+    "issue": "Not in the notes and false: she painted about 55 self-portraits.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Un mono: su vida en pareja",
+    "issue": "The monkey is a symbol of companionship or tenderness, not 'vida en pareja', and the narration ties it to Diego loosely.",
+    "beat": 12
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Por eso, más de setenta años después, Frida Kahlo todavía nos sigue hablando.",
+    "issue": "Her death in 1954 is never narrated, though the ending alludes to it. Her last years are also missing.",
+    "beat": 20
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Pero tanto valor abre una disputa.",
+    "issue": "Auction and legal news takes up a large share and crowds out her painting, such as Las dos Fridas and surrealism.",
+    "beat": 17
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Desde 1984, toda su obra que estaba en territorio mexicano es monumento artístico",
+    "issue": "The 1984 date is not in the notes.",
+    "beat": 17
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Todo empezó con una niña enferma y un autobús",
+    "issue": "The timeline in beat 5 repeats earlier information.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Los médicos dudaban que sobreviviera.",
+    "issue": "The sources support this, but the Kahlo chart of record prices simplifies a non-comparable list.",
+    "beat": 15
+   }
+  ],
+  "missing": [
+   "Death in 1954",
+   "Las dos Fridas and surrealism",
+   "Casa Azul as a museum",
+   "Her political commitments",
+   "Her relationship with her sister and the miscarriages"
+  ],
+  "wrong_facts": [
+   "Más de setenta autorretratos: she painted about 55 self-portraits",
+   "1984 decree unverified in the notes"
+  ],
+  "would_publish": false,
+  "summary": "A competent, warm script, but it omits her death and surrealism and gives too much room to auction news. It also contains an invented figure of 70 self-portraits.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Según el Los Angeles Times",
+     "problem": "Awkward double article.",
+     "better": "Según Los Angeles Times"
+    },
+    {
+     "quote": "con seis años, contrajo polio",
+     "problem": "Stiff phrasing.",
+     "better": "a los seis años contrajo polio"
+    },
+    {
+     "quote": "Era una de pocas decenas de chicas",
+     "problem": "Slightly unnatural.",
+     "better": "Era una de las pocas decenas de chicas"
+    }
+   ]
+  },
+  "mean": 3.33,
+  "cost_usd": 0.034946,
+  "tokens": [
+   9503,
+   1594
+  ]
+ }
+}

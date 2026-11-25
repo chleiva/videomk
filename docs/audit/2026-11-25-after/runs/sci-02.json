@@ -1,0 +1,657 @@
+{
+ "id": "sci-02",
+ "category": "concept explainer (science)",
+ "language": "es",
+ "difficulty": "medium",
+ "prompt": "¿Por qué el cielo es azul y los atardeceres son rojos? Explícamelo como si tuviera 15 años.",
+ "great": "Dispersión de Rayleigh, la luz solar contiene todos los colores, azul se dispersa más, por qué no violeta, atardecer = camino más largo por la atmósfera; analogías sencillas, tono para adolescente.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:53:14",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Por qué el cielo es azul y los atardeceres rojos es un fenómeno físico atemporal (dispersión de Rayleigh), bien explicado en fuentes enciclopédicas; no depende de información reciente.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "science-wonder",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 40.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 36.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 32.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 19.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 15.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 9,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 3229,
+  "n_sources": 2,
+  "n_fetched": 3,
+  "fetched": [
+   "Dispersión de Rayleigh",
+   "Rayleigh",
+   "Cielo"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Dispersión de Rayleigh\nLa dispersión de Rayleigh, también conocida como esparcimiento de tipo Rayleigh, es la dispersión de la luz visible o cualquier otra radiación electromagnética por partículas cuyo tamaño es mucho menor que la longitud de onda de los fotones dispersados. Ocurre cuando la luz viaja por sólidos y fluidos transparentes, pero se ve con mayor frecuencia en los gases. La dispersión de Rayleigh de la luz solar en la atmósfera es la principal razón de que el cielo se vea azul.\nSegún el electromagnetismo clásico, la dispersión de Rayleigh es el resultado de la polarización eléctrica de las partículas. El campo eléctrico oscilatorio de una onda luminosa actúa sobre las cargas de las partículas provocando que oscilen en la misma frecuencia. La partícula se convierte en un pequeño dipolo radiante cuya radiación visible es la luz dispersada.\nDesde un punto de vista semiclásico (cuántico) más moderno, la dispersión de Rayleigh puede considerarse la suma de una dispersión elástica pura (línea central de Cabannes) más una dispersión de Raman puramente rotacional con líneas que ocurren cerca de la línea de Cabannes.​​\nSi bien el término dispersión está muy extendido en la literatura científica (junto…\n\n## Rayleigh\nEl término Rayleigh puede referirse a:\nRayleigh (Essex), Inglaterra.\nDispersión de Rayleigh\nSylvers Rayleigh, personaje ficticio del manga One Piece.\nJohn Strutt, tercer barón Rayleigh, físico y profesor universitario británico que da nombre a:\ndistribución de Rayleigh, función de distribución de teoría de la probabilidad y la estadística.\ndispersión de Rayleigh\nley de Rayleigh-Jeans\nnúmero de Rayleigh, número adimensional utilizado en mecánica de los fluidos.\ninestabilidad Rayleigh-Taylor\ncriterio de Rayleigh\nUnidad Rayl\ndos cráteres y un asteroide:\nRayleigh (cráter), en la Luna\nRayleigh (cráter marciano), en Marte\n(22740) Rayleigh, asteroide\nInterferómetro de Rayleigh, interferómetro empleado para comparar los índices de refracción entre dos gases o líquidos.\n\n## Cielo\nCielo (del latín caelum; de caelum tangi: ser –tocado– herido por el rayo)​ se define a menudo como el espacio en el que se mueven los astros y que por efecto visual parece rodear la Tierra. \nEn astronomía, cielo es sinónimo de esfera celeste: una bóveda imaginaria sobre la cual se distribuyen el Sol, las estrellas, los planetas y la Luna. La esfera celeste se divide en regiones denominadas constelaciones.​\nEn la mitología romana, Caelus era el dios del cielo, equivalente al Urano griego.\nEn meteorología el término cielo hace referencia a la zona gaseosa más densa de la atmósfera de un planeta.\nAlgunos de los fenómenos naturales vistos en el cielo son las nubes, el arcoíris y el orto. El relámpago se puede ver en el cielo durante las tormentas eléctricas. Como resultado de actividades humanas, la neblina se ve a menudo sobre ciudades grandes durante las primeras horas del día. \nNormalmente, el término cielo se refiere informalmente a una perspectiva desde la superficie de la Tierra; sin embargo, el significado y el uso pueden variar. Un observador en la superficie de la Tierra puede ver una pequeña parte del cielo, que se asemeja a una cúpula (a veces llamada cuenco celeste) que parece…",
+ "plan": {
+  "title": "¿Por qué el cielo es azul y el atardecer rojo?",
+  "description": "Descubre cómo la dispersión de Rayleigh explica el azul del cielo y los rojos del atardecer. Una explicación sencilla, pensada para adolescentes.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "a50847ab",
+    "narration": "Si la luz del Sol es blanca, ¿por qué el cielo es azul? Y lo más raro: ¿por qué al atardecer todo se vuelve naranja y rojo? Tiene truco.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "¿Por qué el cielo es azul?",
+      "subtitle": "Y por qué los atardeceres son rojos"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "El misterio"
+   },
+   {
+    "id": "ada960c3",
+    "narration": "Mira el cielo de día: un azul intenso de horizonte a horizonte. Parece que el aire fuera azul, pero no lo es. Veamos qué pasa en realidad.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "blue sky clouds",
+      "alt": "cielo azul despejado de día"
+     }
+    }
+   },
+   {
+    "id": "fba7accd",
+    "narration": "Primero, una idea clave. La luz blanca del Sol es una mezcla de todos los colores, como en un arcoíris. Cada color viaja como una onda con distinto tamaño.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "rainbow over green landscape",
+      "alt": "arcoíris que muestra los colores de la luz",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "La luz del Sol"
+   },
+   {
+    "id": "258e3983",
+    "narration": "El azul tiene una onda corta. El rojo tiene una onda larga. Esa diferencia lo cambia todo, porque el aire trata distinto a cada tamaño de onda.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Luz azul",
+       "tagline": "Onda corta"
+      },
+      "b": {
+       "name": "Luz roja",
+       "tagline": "Onda larga"
+      },
+      "rows": [
+       {
+        "label": "Longitud de onda",
+        "a": "Corta",
+        "b": "Larga"
+       },
+       {
+        "label": "Choque con el aire",
+        "a": "Se desvía mucho",
+        "b": "Se desvía poco"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "40d1b902",
+    "narration": "El aire está lleno de moléculas diminutas, mucho más pequeñas que la longitud de onda de la luz. Cuando la luz choca con ellas, se desvía en todas direcciones. A eso se le llama dispersión de Rayleigh.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Dispersión de Rayleigh",
+      "definition": "Dispersión de la luz por partículas mucho más pequeñas que su longitud de onda.",
+      "origin": "Lleva el nombre del físico John Strutt, barón Rayleigh"
+     }
+    },
+    "chapter": "La dispersión de Rayleigh"
+   },
+   {
+    "id": "476ca695",
+    "narration": "Y aquí viene lo bueno: la luz azul se dispersa mucho más que la roja. Las moléculas del aire reparten el azul por todo el cielo, como si lo salpicaran.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Del Sol a tus ojos",
+      "nodes": [
+       {
+        "id": "sol",
+        "label": "Luz del Sol",
+        "icon": "sun"
+       },
+       {
+        "id": "aire",
+        "label": "Moléculas del aire",
+        "icon": "cloud"
+       },
+       {
+        "id": "azul",
+        "label": "Azul en todas direcciones",
+        "icon": "sparkle"
+       },
+       {
+        "id": "ojo",
+        "label": "Tus ojos",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "sol",
+        "aire"
+       ],
+       [
+        "aire",
+        "azul",
+        "se dispersa"
+       ],
+       [
+        "azul",
+        "ojo"
+       ]
+      ],
+      "style": "cards",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "5d8b2ba7",
+    "narration": "Por eso, mires donde mires, te llega luz azul desviada desde todos lados. Según los físicos, esta dispersión es la principal razón de que el cielo se vea azul.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El cielo es azul porque el aire dispersa la luz azul en todas direcciones.",
+      "emphasis": "dispersa la luz azul"
+     }
+    }
+   },
+   {
+    "id": "b6a66588",
+    "narration": "Quizá preguntes: ¿y el violeta? Tiene onda aún más corta. Pero el Sol emite menos, y nuestros ojos lo ven peor. Así que el azul gana.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "¿Y el violeta?",
+      "items": [
+       "Onda más corta que el azul",
+       "El Sol emite menos",
+       "Nuestros ojos lo ven peor"
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "888470f8",
+    "narration": "Ahora, el atardecer. Cuando el Sol está bajo, su luz atraviesa mucha más atmósfera para llegar a ti. El camino es larguísimo, y eso cambia el color.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Camino de la luz",
+      "nodes": [
+       {
+        "id": "mediodia",
+        "label": "Mediodía: camino corto",
+        "icon": "sun"
+       },
+       {
+        "id": "tarde",
+        "label": "Atardecer: camino largo",
+        "icon": "road"
+       },
+       {
+        "id": "ojo",
+        "label": "Tus ojos",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "mediodia",
+        "ojo",
+        "poco aire"
+       ],
+       [
+        "tarde",
+        "ojo",
+        "mucho aire"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    },
+    "chapter": "El atardecer"
+   },
+   {
+    "id": "93d8b1c7",
+    "narration": "Primero, un atardecer naranja sobre las montañas. Luego, un rojo intenso con árboles en silueta. En ambos casos, el azul se perdió por el camino y solo llegan los colores largos.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "sunset orange sky mountains",
+       "red sunset silhouette trees"
+      ],
+      "alt": "atardeceres naranjas y rojos"
+     }
+    }
+   },
+   {
+    "id": "a1253dc9",
+    "narration": "En el largo viaje, el azul se dispersa tanto que se aparta de tu mirada. Sobreviven el naranja y el rojo, que se desvían poco y llegan directos a tus ojos.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Qué llega al atardecer",
+      "items": [
+       "El azul se dispersa por el camino",
+       "El naranja sobrevive",
+       "El rojo llega directo"
+      ],
+      "style": "rail",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "41d63788",
+    "narration": "Y el azul que se perdió para ti no desaparece. Sigue iluminando el cielo de otros lugares, donde para la gente es de día. Es la misma luz, repartida.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "sunset sky timelapse",
+      "alt": "cielo cambiando de color al caer el sol"
+     }
+    }
+   },
+   {
+    "id": "81c45a05",
+    "narration": "Así que, en resumen: la luz blanca lleva todos los colores. El aire dispersa más el azul que el rojo. De día vemos ese azul; al atardecer, tras un viaje largo, solo llega el rojo.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "La historia completa",
+      "steps": [
+       {
+        "label": "Luz blanca",
+        "detail": "Mezcla de todos los colores"
+       },
+       {
+        "label": "El aire dispersa el azul",
+        "detail": "Cielo azul de día"
+       },
+       {
+        "label": "Viaje largo",
+        "detail": "El azul se pierde"
+       },
+       {
+        "label": "Llega el rojo",
+        "detail": "Atardecer rojo"
+       }
+      ]
+     }
+    },
+    "chapter": "La idea final"
+   },
+   {
+    "id": "45055252",
+    "narration": "La próxima vez que veas un atardecer, recuerda: no es que el cielo cambie de color. Es la misma luz, haciendo un camino más largo hasta ti.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Mismo Sol, mismo aire: solo cambia el camino de la luz.",
+      "emphasis": "el camino de la luz"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Dispersión de Rayleigh",
+    "url": "https://es.wikipedia.org/wiki/Dispersi%C3%B3n_de_Rayleigh",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Cielo",
+    "url": "https://es.wikipedia.org/wiki/Cielo",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "science-wonder",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 93.7,
+  "before_first_script_call_s": 40.9,
+  "script_s": 52.8
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.1534,
+  "search_api": 0.0,
+  "total": 0.15366
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 38524,
+  "out": 8156
+ },
+ "rules": {
+  "length": {
+   "words": 414,
+   "expected_words": 402,
+   "ratio": 1.03,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 185.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 27,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Si la luz del Sol es blanca, ¿por qué el cielo es azul? Y lo más raro: ¿por qué al atardecer todo se vuelve naranja y rojo? Tiene truco.",
+   "close_text": "La próxima vez que veas un atardecer, recuerda: no es que el cielo cambie de color. Es la misma luz, haciendo un camino más largo hasta ti."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 1,
+    "clip": 2,
+    "image": 1,
+    "versus": 1,
+    "definition": 1,
+    "diagram": 2,
+    "kinetic_text": 2,
+    "bullets": 2,
+    "gallery": 1,
+    "steps": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "clip",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "es la misma luz",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 3,
+   "notes_len": 3229,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 9 (diagram): its narration never says ['Mediodía: camino corto', 'Atardecer: camino largo', 'Tus ojos']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core physics is correct, but \"Cada color viaja como una onda con distinto tamaño\" is loose and \"El azul que se perdió... sigue iluminando el cielo de otros lugares\" is oversimplified. Rayleigh scattering is not 100% of the story either, and the ozone and the Sun's actual emission are missing."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers Rayleigh scattering, the violet question and the longer path at sunset. It lacks any quantitative hint (1/λ⁴), the actual reason violet loses out (atmospheric absorption), and any concrete everyday analogy."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is logical (light, scattering, violet, sunset, recap) and builds clearly. The ending recap in beat 13 repeats beats 7 and 11."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question with the \"Tiene truco\" tension is good, and the closing image of the same light on a longer path lands. The hook is a fairly standard question, though."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "It is friendly and direct with a second-person address that suits a 15-year-old. It is slightly flat and has no humour or teen-level analogy."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types are varied. A rainbow image is used for white light, the versus table is thin, and the beat 10 gallery narration (\"Primero... Luego...\") is awkward. Beat 12 shows a sunset timelapse while the narration talks about the sky elsewhere."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The content is the standard explanation, with only \"como si lo salpicaran\" as a mild image. There are few surprising facts and no concrete analogy."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, aimed at a teen, and covers both the blue sky and the red sunsets. The length is roughly right."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and correct. There are a few stiff phrases such as \"se aparta de tu mirada\" and \"Según los físicos\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "el azul se dispersa tanto que se aparta de tu mirada",
+    "issue": "The blue is scattered away from the line of sight, and the phrasing is vague. \"Tanto que se aparta\" is imprecise, and \"se desvían poco y llegan directos\" implies the red is not scattered at all.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Pero el Sol emite menos, y nuestros ojos lo ven peor.",
+    "issue": "This is incomplete. The Sun's emission is not much lower in violet, and the atmosphere absorbs part of it. The explanation is partial and stated too confidently.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Cada color viaja como una onda con distinto tamaño.",
+    "issue": "Imprecise wording. The colors differ in wavelength, not in the wave's \"size\".",
+    "beat": 3
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Según los físicos, esta dispersión es la principal razón de que el cielo se vea azul.",
+    "issue": "This lifts the encyclopedia wording and sounds like a citation, not a spoken explanation for a teen.",
+    "beat": 7
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Primero, un atardecer naranja sobre las montañas. Luego, un rojo intenso con árboles en silueta.",
+    "issue": "The narration describes the images instead of explaining anything, which is filler.",
+    "beat": 10
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Así que, en resumen: la luz blanca lleva todos los colores.",
+    "issue": "The full recap repeats what was just said and adds nothing new.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "An everyday analogy, such as a ball bouncing off pebbles or a comparison with waves",
+   "The 1/λ⁴ dependence, even in plain words",
+   "The explanation of why the sky near the horizon looks paler",
+   "The role of dust and pollution in vivid sunsets",
+   "Violet is absorbed in the upper atmosphere"
+  ],
+  "wrong_facts": [
+   "\"Cada color viaja como una onda con distinto tamaño\" is imprecise: the colors differ in wavelength.",
+   "\"Sigue iluminando el cielo de otros lugares\" is a simplification, since the scattered blue light mostly goes in all directions."
+  ],
+  "would_publish": false,
+  "summary": "A correct, clear and tidy standard explanation of the blue sky and red sunsets, with a sensible structure. It stays generic, with no strong analogy, a thin treatment of the violet question and a repetitive recap.",
+  "mean": 3.44,
+  "cost_usd": 0.027994,
+  "tokens": [
+   5887,
+   1622
+  ]
+ }
+}

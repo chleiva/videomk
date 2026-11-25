@@ -1,0 +1,518 @@
+{
+ "id": "how-01",
+ "category": "how-to / tutorial",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how to change a flat tire",
+ "great": "Safety first (flat ground, hazards, handbrake), tools, loosen lug nuts before jacking, jack points, swap, tighten star pattern, torque, check pressure, get the spare repaired; ordered steps, clear.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:54:29",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Changing a flat tire is a timeless, well-established procedure that does not depend on recent information, so encyclopedic sources are sufficient.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 6,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2696,
+  "n_sources": 1,
+  "n_fetched": 3,
+  "fetched": [
+   "Tire changer",
+   "Tire",
+   "Flat tire"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Tire changer\nA tire changer is a machine used to help tire technicians dismount and mount tires with automobile wheels. After the wheel and tire assembly are removed from the automobile, the tire changer has all the components necessary to remove and replace the tire from the wheel. Different tire changers allow technicians to replace tires on automobiles, motorcycles and heavy-duty trucks. New tire and wheel technology has improved certain tire changers to be able to change a low profile tire or a run-flat tire.\n\n## Tire\nA tire (North American English) or tyre (Commonwealth English) is a ring-shaped component that surrounds a wheel's rim to transfer a vehicle's load from the axle through the wheel to the ground and to provide traction on the surface over which the wheel travels. Most tires, such as those for automobiles and bicycles, are pneumatically inflated structures, providing a flexible cushion that absorbs shock as the tire rolls over rough features on the surface. Tires provide a footprint, called a contact patch, designed to match the vehicle's weight and the bearing on the surface that it rolls over by exerting a pressure that will avoid deforming the surface.\nThe materials of modern pneumatic tires are synthetic rubber, natural rubber, fabric, and wire, along with carbon black and other chemical compounds. They consist of a tread and a body. The tread provides traction while the body provides containment for a quantity of compressed air. Before rubber was developed, tires were metal bands fitted around wooden wheels to hold the wheel together under load and to prevent wear and tear. Early rubber tires were solid (not pneumatic). Pneumatic tires are used on many vehicles, including cars, bicycles...\n\n## Flat tire\nA flat tire (British English: flat tyre) is a deflated pneumatic tire, which can cause the rim of the wheel to ride on the tire tread or the ground, potentially resulting in loss of control of the vehicle or irreparable damage to the tire. The most common cause of a flat tire is the puncturing of the tire by a sharp object, such as a nail or pin, which allows the air escape. Depending on the size of the blowout, the tire may deflate slowly or rapidly.\nBesides puncturing of the tire a flat can be caused by: failure of or damage to the valve stem; a nail in the tire; rubbing of the tire against the road; ripping of the tire; separation of tire and rim by collision with another object; excessive wear of the tire tread allowing explosive tire failure or road debris tearing through the tire. Some tires, particularly those with a slow leak, can be repaired and re-inflated; others, especially those with worn tread, must be replaced.",
+ "plan": {
+  "title": "How to Change a Flat Tire, Step by Step",
+  "description": "Learn how to change a flat tire safely, from pulling over to tightening the lug nuts. This step-by-step guide covers what you need and the mistakes to avoid.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "3d09e685",
+    "narration": "A nail, a hiss, and suddenly your car is sinking on one side. A flat tire can strike anywhere. The good news: you can fix it yourself in a few steps.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car driving on highway",
+      "alt": "vehicle moving along a road"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "Before you start"
+   },
+   {
+    "id": "733ad3c3",
+    "narration": "A flat tire is simply a deflated tire. Most often a sharp object, like a nail, punctures it and lets the air escape. Driving on it can damage the wheel and the tire.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Flat tire",
+      "definition": "A deflated pneumatic tire, most often caused by a sharp object puncturing it and letting the air escape."
+     }
+    }
+   },
+   {
+    "id": "4a1d82fc",
+    "narration": "First, gather what you need. You need a spare tire, a jack, and a lug wrench. Check that the spare is inflated before you ever need it.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you need",
+      "items": [
+       "Spare tire",
+       "Jack",
+       "Lug wrench"
+      ]
+     }
+    }
+   },
+   {
+    "id": "df2f3a77",
+    "narration": "Now the process. Step one, pull over somewhere flat and safe. Step two, loosen the lug nuts a little. Step three, jack up the car. Step four, swap the tire and tighten.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Changing a flat",
+      "steps": [
+       {
+        "label": "Pull over safely",
+        "detail": "Flat, firm ground"
+       },
+       {
+        "label": "Loosen lug nuts",
+        "detail": "Just a little, wheel on the ground"
+       },
+       {
+        "label": "Jack up the car",
+        "detail": "Lift until the tire is clear"
+       },
+       {
+        "label": "Swap and tighten",
+        "detail": "Spare on, nuts snug"
+       }
+      ]
+     }
+    },
+    "chapter": "The steps"
+   },
+   {
+    "id": "3b972475",
+    "narration": "Start by pulling over. Choose level, solid ground away from traffic. Turn on your hazard lights and apply the parking brake, so the car cannot roll while you work.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "car parked roadside hazard lights",
+      "alt": "car stopped safely at roadside",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "ded53c82",
+    "narration": "Next, loosen the lug nuts with the wrench, but only a half turn. Do this while the wheel is still on the ground, so it cannot spin.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "lug wrench loosening wheel nut",
+      "alt": "wrench on a lug nut",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "c08b1181",
+    "narration": "Then place the jack under the car and lift until the flat tire is off the ground. Remove the nuts, pull the wheel off, and mount the spare.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "car jack lifting vehicle",
+      "alt": "jack lifting a car",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "94666b60",
+    "narration": "Put the nuts back on by hand, lower the car, then tighten them fully with the wrench. Work in a star pattern, so the wheel sits evenly.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Finishing up",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Nuts on by hand",
+        "icon": "hand"
+       },
+       {
+        "id": "b",
+        "label": "Lower the car",
+        "icon": "car"
+       },
+       {
+        "id": "c",
+        "label": "Tighten in a star",
+        "icon": "star"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "f0b8abf2",
+    "narration": "Avoid three common mistakes. Loosening nuts in the air, because the wheel just spins. Jacking on soft ground, because the car can slip. And a flat spare tire, so check it often.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Common mistakes",
+      "items": [
+       "Loosening nuts in the air",
+       "Jacking on soft ground",
+       "Flat spare tire"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "wrench",
+       "car",
+       ""
+      ]
+     }
+    },
+    "chapter": "Avoid mistakes"
+   },
+   {
+    "id": "2cfe41e0",
+    "narration": "That is the whole job. Stop somewhere safe, loosen, lift, swap, and tighten. Then get the flat tire checked, because some can be repaired, but worn ones must be replaced.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Park safe, loosen, lift, swap, tighten, then have the flat checked.",
+      "emphasis": "Park safe"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Flat tire",
+    "url": "https://en.wikipedia.org/wiki/Flat_tire",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 54.4,
+  "before_first_script_call_s": 21.8,
+  "script_s": 32.5
+ },
+ "cost": {
+  "script_small": 0.00023,
+  "script_big": 0.11754,
+  "search_api": 0.0,
+  "total": 0.11777
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 36365,
+  "out": 4932
+ },
+ "rules": {
+  "length": {
+   "words": 296,
+   "expected_words": 267,
+   "ratio": 1.109,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 132.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "A nail, a hiss, and suddenly your car is sinking on one side. A flat tire can strike anywhere. The good news: you can fix it yourself in a few steps.",
+   "close_text": "That is the whole job. Stop somewhere safe, loosen, lift, swap, and tighten. Then get the flat tire checked, because some can be repaired, but worn ones must be replaced."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "clip": 1,
+    "definition": 1,
+    "checklist": 1,
+    "steps": 1,
+    "image": 3,
+    "diagram": 1,
+    "bullets": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 3,
+   "entropy": 2.85,
+   "top_type": "image",
+   "top_share": 0.3,
+   "flag_low_variety": false,
+   "flag_run": true
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "loosen the lug nuts",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 1,
+   "fetched": 3,
+   "notes_len": 2696,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "scene_run_3plus",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly correct, but \"only a half turn\" is loose, the jack-point step is missing, and the spare-tire advice omits the temporary-use speed and distance limits. The 'flat spare' mistake is a preparation issue rather than a process error."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Omits jack points and the vehicle manual, wheel chocks, torque specs, checking spare pressure after the swap, re-torquing after about 50 miles, and the temporary-spare speed limit. Beat 3 does not list the owner's manual or a flashlight."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Order is logical, but beat 4 previews all the steps and beats 5-8 then repeat them, and beat 10 summarizes them a third time. Beat 2's definition wastes time."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening image, \"A nail, a hiss, and suddenly your car is sinking\", works. The ending is a plain recap with a useful repair note."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear beginner register that suits a how-to."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary reasonably, but the opening is a generic highway clip and the checklist is thin. The diagram covers only the final steps."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Generic advice with no surprising tips such as chocking wheels, the owner's manual, or pre-tightening torque. The definition beat restates the obvious."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Roughly 2 minutes of English, a how-to as requested. It misses some points from the reviewer's note: torque, pressure check, jack points."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clean; minor redundancy."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Then place the jack under the car and lift until the flat tire is off the ground.",
+    "issue": "No mention of the correct jack points or the owner's manual; placing the jack incorrectly is a real safety risk.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "Now the process. Step one, pull over somewhere flat and safe. Step two, loosen the lug nuts a little.",
+    "issue": "Previews all the steps, then the next beats repeat them in detail, and the ending recaps again.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Work in a star pattern, so the wheel sits evenly.",
+    "issue": "No torque value, no re-check of lug nuts after driving, and no check of the spare's pressure after fitting it or of its speed limit.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "but only a half turn",
+    "issue": "Rough guidance; it should be 'break them loose', roughly a quarter to half turn. Chocks and removing hubcaps are also absent.",
+    "beat": 6
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "A flat tire is simply a deflated tire.",
+    "issue": "Spends time on an obvious definition instead of safety content such as chocking wheels or what to do on a highway shoulder.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Check that the spare is inflated before you ever need it.",
+    "issue": "The spare is listed, but the list omits the owner's manual, a flashlight and wheel chocks.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "Jack points and the owner's manual",
+   "Wheel chocks",
+   "Torque specification and re-checking lug nuts after about 50 miles",
+   "Checking the spare's pressure and the temporary spare's speed and distance limits",
+   "Avoid working on a highway shoulder; call roadside help if unsafe"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, friendly but generic walkthrough that covers the basic steps, with repetition and missing key safety details such as jack points, chocks and torque. The recap ending is flat and the content is thin for two minutes.",
+  "mean": 3.11,
+  "cost_usd": 0.021512,
+  "tokens": [
+   4006,
+   1350
+  ]
+ }
+}

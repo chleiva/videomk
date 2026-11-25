@@ -1,0 +1,710 @@
+{
+ "id": "fin-02",
+ "category": "personal finance",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "explícame la inflación",
+ "great": "Qué es (alza generalizada y sostenida de precios), cómo se mide (IPC), causas (demanda, costes, monetaria), efectos en poder adquisitivo, ejemplo cotidiano, qué hacen los bancos centrales; claro.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:57:59",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La inflación es un concepto económico atemporal que se explica con principios estables (definición, causas, medición), así que una enciclopedia basta. No depende de datos recientes.",
+  "queries": [
+   "qué es la inflación",
+   "causas de la inflación economía",
+   "cómo se mide la inflación IPC"
+  ],
+  "searches": 3,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 3,
+   "reads": 0,
+   "sources": 10,
+   "seconds": 11.9,
+   "cost_usd": 0.0017999000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 57.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 53.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 48.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 48.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 44.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 40.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 39.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 35.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 26.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 13.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 13.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 5.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 18,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 9000,
+  "n_sources": 4,
+  "n_fetched": 10,
+  "fetched": [
+   "Qué es el IPC, qué mide y cómo se calcula | B100",
+   "¿Qué es el IPC y cómo se calcula? | CaixaBank",
+   "Qué es el IPC y cómo te afecta | Pictet para Ti",
+   "INEbase / Nivel y condiciones de vida (IPC) /Índices de precios de consumo y vivienda /Índice de precios de consumo (IPC) / Preguntas frecuentes",
+   "CEOE prevé un IPC del 3,7% de media anual para 2026 por la moderación de las tensiones geopolíticas|CEOE",
+   "IPC octubre 2026: la inflación se mantiene en el 4,9%",
+   "El BCE sube los tipos al 2,25 % para combatir la inflación sin estrangular el crecimiento",
+   "Inflación: estas son las causas y herramientas para combatirla",
+   "LA ESTABILIDAD DE PRECIOS: ¿POR QUÉ ES IMPORTANTE ...",
+   "Price stability objective and the strategy review"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Qué es el IPC, qué mide y cómo se calcula | B100\n## ¿Qué es el IPC? El IPC, o Índice de Precios de Consumo, es el indicador estadístico que mide cada mes la variación media de los precios de una cesta de bienes y servicios representativa del consumo de los hogares españoles. Como señala el Instituto Nacional de Estadística (INE) -organismo responsable de calcular y publicar este dato de forma mensual-, es la referencia oficial para saber cómo evolucionan los precios en España. ## ¿Qué mide el IPC? [...] Este proceso está detallado en la metodología oficial del INE, que revisa la composición de la cesta de forma periódica para que siga siendo representativa. Llegados a este punto, conviene señalar la importancia de no confundir el IPC con la inflación: el IPC es el instrumento de medida; la inflación es el fenómeno económico -la subida generalizada y sostenida de precios- que ese instrumento permite cuantificar. ## ¿Para qué sirve el IP\n\n## ¿Qué es el IPC y cómo se calcula? | CaixaBank\nEl IPC España se publica mensualmente por el Instituto Nacional de Estadística (INE). Este índice se calcula tomando como referencia una cesta de bienes y servicios que representa el consumo medio de las familias en diferentes ámbitos: alimentación, transporte, vivienda, ocio, salud, educación y otros servicios esenciales. El IPC es, por tanto, un indicador que permite conocer de forma precisa cómo cambian los precios y cómo estos cambios afectan al poder adquisitivo de los ciudadanos. [...] ## ¿Qué es el IPC? El IPC o Índice de Precios al Consumidor es un indicador que refleja la evolución de los precios de un conjunto de bienes y servicios representativos del consumo de los hogares españoles. Su función principal es medir la variación del coste de la vida en España y servir como referencia económica para ajustar salarios, pensiones y otros contratos. [...] ### Cómo interpretar el Índic\n\n## Qué es el IPC y cómo te afecta | Pictet para Ti\nCada mes, el dato del IPC, uno de los indicadores macroeconómicos más seguidos, ocupa titulares y abre informativos. Pero ¿qué es el IPC exactamente? El Índice de Precios de Consumo (IPC) es el indicador que elabora el Instituto Nacional de Estadística (INE) para medir cómo varían los precios de los bienes y servicios que consumen los hogares en España. Repasamos cómo funciona este indicador y dónde se nota su efecto. ### ¿Cómo se calcula el IPC? [...] Este indicador parte de una cesta de bienes y servicios representativa del consumo de los hogares: alimentación, vivienda, transporte, ocio, ropa, etc. Cada mes, el INE recoge los precios de esos productos en establecimientos de todo el país y analiza cómo han cambiado. [...] ### ¿En qué se diferencia el IPC de la inflación? La inflación es el aumento generalizado y sostenido de los precios, mientras que el IPC es una de las herramientas q\n\n## INEbase / Nivel y condiciones de vida (IPC) /Índices de precios de consumo y vivienda /Índice de precios de consumo (IPC) / Preguntas frecuentes\n- ¿Qué es el IPC? - El Índice de Precios de Consumo (IPC) es una medida estadística que refleja la evolución de los precios de los bienes y servicios que consume la población residente en viviendas familiares en España. [...] - El IPC se emplea como referencia para analizar la evolución de los precios y la inflación, para revisar contratos y rentas que incluyen actualización de importes y para tomar decisiones económicas y de política pública, entre otros usos. - ¿Cómo se calcula el IPC? - El IPC se calcula comparando la variación del precio de una cesta fija de bienes y servicios representativa del consumo de los hogares a lo largo del tiempo. [...] - ¿Es la inflación lo mismo que el IPC? - La inflación -aumento del nivel general de precios de los bienes y servicios que los hogares adquieren para su consumo- se suele considerar como la evolución anual del IPC -es decir, la variación en \n\n## CEOE prevé un IPC del 3,7% de media anual para 2026 por la moderación de las tensiones geopolíticas|CEOE\nPublished: Fri, 13 Nov 2026 13:00:00 GMT\nEn la Unión Monetaria, el IPC armonizado de octubre situó su tasa interanual en el 4,0%, dos décimas más que el mes anterior. En España, este indicador disminuyó una décima hasta el 4,9%, por lo que el diferencial se reduce ligeramente, hasta nueve décimas. Análisis desagregado [...] al precio del crudo, favoreciendo su descenso durante los primeros días de noviembre. [...] Dentro de la inflación subyacente, la mayor presión proviene de los servicios, que elevan su tasa de variación dos décimas hasta el 4,1%. Por otro lado, los bienes industriales sin productos energéticos aceleran su incremento de precios en una décima hasta el 2,1%. Por su parte, los alimentos elaborados, bebidas y tabaco continúan su senda de moderación, recortando su avance en tres décimas para situar su tasa en el 1,2%. ### Actualidad relacionada Economía\n\n## IPC octubre 2026: la inflación se mantiene en el 4,9%\nPublished: Fri, 13 Nov 2026 17:28:53 GMT\nEn los productos de alimentación la tasa anual se ha moderado tres décimas, hasta el 2,4%, y el INE señala que, junto con la ropa, ha contribuido a contener el índice general al subir menos que en octubre de 2025. ## Evolución anual del IPC [...] La congelación de la inflación nacional en el 4,9% ha provocado variaciones moderadas en la tasa por Comunidades, sin grandes cambios de tendencia. Siete comunidades registran tasas iguales o superiores al 5%. [...] A pesar de la congelación de la tasa general en el 4,9%, el resto de referencias del IPC apuntalan el aumento y apuntan hacia un cierre anual próximo al 4,9%. La variación mensual de precios con respecto a septiembre ha vuelto a subir, hasta el 0,6%, tres décimas más que el mes anterior, y suma nueve meses consecutivos de alzas.\n\n## El BCE sube los tipos al 2,25 % para combatir la inflación sin estrangular el crecimiento\n## Estamos ante un ‘shock’ de oferta El BCE tiene un mandato claro de estabilidad de precios, y una inflación persistente por encima del objetivo del 2% puede poner en riesgo su credibilidad. Cuando el origen del problema está en el encarecimiento de la energía o de otras materias primas, la subida de tipos no corrige la causa, pero sí puede limitar su propagación al conjunto de la economía. [...] La reciente decisión del Banco Central Europeo (BCE) de elevar los tipos de interés del 2 al 2,25 % ha reabierto un debate recurrente en política económica: hasta qué punto es eficaz la política monetaria cuando la inflación no surge de un exceso de demanda sino de un shock de oferta. [...] Este instrumento se diseñó, principalmente, para combatir la inflación de demanda. Cuando el detonante es un shock energético o una interrupción de las cadenas de suministro, subir los tipos no elimina la ca\n\n## Inflación: estas son las causas y herramientas para combatirla\nEn el caso del Banco Central Europeo (BCE), su objetivo es mantener la estabilidad de los precios en el medio plazo. Pero esto no significa una inflación de 0. La institución europea apunta a mantener una inflación de en torno al 2% en el medio plazo. En palabras del propio BCE: “consideramos que una inflación demasiado baja es tan negativa como una inflación demasiado alta”. ## 'Podcast': ¿Cómo nos afecta el repunte de la inflación? 00:00 18:32 [...] El Banco Central Europeo mantiene su objetivo de estabilidad de precios en el 2% y, tras su última reunión en Florencia, decidió mantener los tipos de interés sin cambios ante la cercanía del objetivo y la mejora moderada de la economía europea. ## ¿Hasta cuándo durará la inflación? La historia económica, sobre todo la anglosajona, cuenta que la inflación vuelve a niveles normales en un tiempo de un año y en casos extraordinarios, dos. [...\n\n## LA ESTABILIDAD DE PRECIOS: ¿POR QUÉ ES IMPORTANTE ...\nEl Consejo de Gobierno del BCE ha definido la estabilidad de precios como un incremento interanual del IAPC para la zona del euro inferior al 2 % y ha precisado que, en el contexto de esta definición, su objetivo es mantener la tasa de inflación interanual en un nivel inferior, aunque próximo, al 2 % a medio plazo. [...] el hecho de que, durante ese horizonte temporal, la evolución de los precios se ve fuertemente influida por la interacción de oferta y demanda en los mercados de bienes y servicios y de factores de producción, es decir, de capital y trabajo. El BCE denomina esta perspectiva «análisis económico». El segundo pilar, denominado «análisis monetario», atiende a horizontes más prolongados, considerando la relación a largo plazo entre la cantidad de dinero en circulación y los precios. El análisis [...] Son muchos los factores específicos que pueden dar lugar a un aumento de la \n\n## Price stability objective and the strategy review\nNuestra función es mantener los precios estables. La economía ha cambiado mucho desde la última vez que revisamos nuestra estrategia, en 2003. Queremos asegurarnos de que nuestro objetivo de estabilidad de precios sea claro, predecible",
+ "plan": {
+  "title": "La inflación explicada: qué es y cómo se mide",
+  "description": "Explicamos qué es la inflación, cómo el INE la mide con el IPC y qué hace el Banco Central Europeo para controlarla. Con datos de octubre de 2026 en España.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "35f2b9b1",
+    "narration": "¿Por qué con el mismo dinero cada año llenas menos la bolsa de la compra? No es tu imaginación. Tiene nombre: inflación. Vamos a entenderla paso a paso.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "La inflación, explicada",
+      "subtitle": "Por qué tu dinero compra cada vez menos"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "03825a19",
+    "narration": "La inflación es la subida generalizada y sostenida de los precios. No se trata de que suba un producto concreto, sino de que, en general, todo cueste algo más con el tiempo.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Aumento generalizado y sostenido de los precios de los bienes y servicios que los hogares compran para su consumo."
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "4b5f9338",
+    "narration": "Pero ojo: la inflación no es lo mismo que el IPC. La inflación es el fenómeno. El IPC, el Índice de Precios de Consumo, es el instrumento que sirve para medirlo.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Inflación",
+       "tagline": "El fenómeno"
+      },
+      "b": {
+       "name": "IPC",
+       "tagline": "La herramienta"
+      },
+      "rows": [
+       {
+        "label": "Qué es",
+        "a": "Subida de precios",
+        "b": "Indicador estadístico"
+       },
+       {
+        "label": "Para qué",
+        "a": "Describe lo que pasa",
+        "b": "Lo cuantifica"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "e38a34f1",
+    "narration": "El INE define una cesta de productos representativa de lo que consumen los hogares. Compara cada mes sus precios en tiendas de todo el país. Y después publica el IPC.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo se calcula el IPC",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Cesta de productos",
+        "icon": "van"
+       },
+       {
+        "id": "b",
+        "label": "Compara cada mes",
+        "icon": "chart-column"
+       },
+       {
+        "id": "c",
+        "label": "Publica el IPC",
+        "icon": "megaphone"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Cómo se mide"
+   },
+   {
+    "id": "9f0901bb",
+    "narration": "La cesta incluye alimentación, vivienda, transporte, ocio, ropa, salud o educación. Si esos precios suben de media, tu poder adquisitivo, lo que realmente puedes comprar con tu dinero, baja.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "food",
+        "label": "Alimentación"
+       },
+       {
+        "icon": "house",
+        "label": "Vivienda"
+       },
+       {
+        "icon": "car",
+        "label": "Transporte"
+       },
+       {
+        "icon": "ticket",
+        "label": "Ocio"
+       }
+      ],
+      "title": "Dentro de la cesta"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "d07433fa",
+    "narration": "En octubre de 2026, la inflación en España se mantuvo en el 4,9%. Y los precios subieron un 0,6% respecto a septiembre, nueve meses seguidos de alzas.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "4,9%",
+      "label": "Inflación anual en España, octubre de 2026"
+     }
+    },
+    "sfx": "ding",
+    "speaker": "narrator",
+    "chapter": "Un dato real"
+   },
+   {
+    "id": "984ac4ba",
+    "narration": "No todo sube igual. Los alimentos moderaron su subida hasta el 2,4%, mientras que el índice general se quedó en el 4,9%. Cada categoría tiene su propio ritmo.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Tasa anual, octubre 2026",
+      "labels": [
+       "Alimentos",
+       "General"
+      ],
+      "values": [
+       2.4,
+       4.9
+      ],
+      "unit": "%",
+      "highlight": 1
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "0a375cdc",
+    "narration": "El Banco Central Europeo busca una inflación cercana al 2% a medio plazo. Una inflación demasiado baja es tan mala como una demasiado alta, según el propio BCE.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El objetivo del BCE es una inflación cercana al 2%.",
+      "emphasis": "2%"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Cómo se combate"
+   },
+   {
+    "id": "3fb5e19c",
+    "narration": "Su herramienta principal son los tipos de interés. Primero, el BCE sube tipos. Con dinero más caro, se modera la demanda. Y así, a medio plazo, hay menos inflación.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo actúan los tipos de interés",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "BCE sube tipos",
+        "icon": "landmark"
+       },
+       {
+        "id": "b",
+        "label": "Se modera la demanda",
+        "icon": "van"
+       },
+       {
+        "id": "c",
+        "label": "Menos inflación",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "cards",
+      "accent": "teal"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "def9ba86",
+    "narration": "Para recordar una idea: el IPC es el instrumento que la mide. Y el objetivo del BCE: cerca del 2%. Así, cuando oigas el dato cada mes, sabrás qué significa para tu bolsillo.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lo esencial",
+      "items": [
+       "IPC: el instrumento que la mide",
+       "Objetivo del BCE: cerca del 2%"
+      ],
+      "style": "spotlight",
+      "accent": "amber"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Qué es el IPC, qué mide y cómo se calcula | B100",
+    "url": "https://b100.es/es/blog/ipc-que-es-como-se-calcula",
+    "publisher": "b100.es",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "IPC octubre 2026: la inflación se mantiene en el 4,9%",
+    "url": "https://www.ecoavant.com/economia/inflacion-se-mantiene-en-49-en-octubre-por-alza-gas_17807_102.html",
+    "publisher": "ecoavant.com",
+    "license": "",
+    "date": "Fri, 13 Nov 2026 17:28:53 GMT"
+   },
+   {
+    "title": "El BCE sube los tipos al 2,25 % para combatir la inflación sin estrangular el crecimiento",
+    "url": "https://theconversation.com/el-bce-sube-los-tipos-al-2-25-para-combatir-la-inflacion-sin-estrangular-el-crecimiento-285181",
+    "publisher": "theconversation.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Inflación: estas son las causas y herramientas para combatirla",
+    "url": "https://www.bbva.com/es/salud-financiera/inflacion-estas-son-las-causas-y-herramientas-para-combatirla",
+    "publisher": "bbva.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 94.2,
+  "before_first_script_call_s": 68.7,
+  "script_s": 25.5
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "research": 0.0018,
+  "script_big": 0.10149,
+  "search_api": 0.024,
+  "total": 0.12759
+ },
+ "calls": {
+  "small": 4,
+  "tools": 3,
+  "big": 2
+ },
+ "tokens": {
+  "in": 43341,
+  "out": 5681
+ },
+ "rules": {
+  "length": {
+   "words": 299,
+   "expected_words": 267,
+   "ratio": 1.12,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 134.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 33,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Por qué con el mismo dinero cada año llenas menos la bolsa de la compra? No es tu imaginación. Tiene nombre: inflación. Vamos a entenderla paso a paso.",
+   "close_text": "Para recordar una idea: el IPC es el instrumento que la mide. Y el objetivo del BCE: cerca del 2%. Así, cuando oigas el dato cada mes, sabrás qué significa para tu bolsillo."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "definition": 1,
+    "versus": 1,
+    "diagram": 2,
+    "icons": 1,
+    "stat": 1,
+    "chart": 1,
+    "kinetic_text": 1,
+    "bullets": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "diagram",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 5,
+   "ungrounded_numbers": [],
+   "entities": 8,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 10,
+   "notes_len": 9000,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The figures match the notes (4.9%, 0.6%, nine months of increases, food at 2.4%). But \"hay menos inflación\" is stated flatly, and the ECB's current rate hike goes unmentioned. Calling 4.9% the \"inflación anual\" without saying it is the year-on-year CPI change is loose. The 2% target is simplified, since the ECB phrases it as \"inferior, aunque próximo\" in the older definition."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It covers the definition, the CPI and the ECB, but omits causes (demand, costs, monetary), has no everyday example, and gives little on the effects of inflation. The sections on the CPI basket and the data are thin."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical (definition, measurement, data, ECB). The ending is weak and repeats earlier points. The stat and the chart in beats 6-7 are somewhat redundant, and the causes are missing."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question about the shopping bag is relatable. The ending is a bare recap (\"el IPC es el instrumento que la mide\") plus a generic line about your pocket, with no image or insight."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear and accessible for a beginner, using the informal tú consistently."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary well. But the diagram icon \"van\" is used for a basket and for demand, which doesn't fit. The bar chart compares only two values. The icons scene lists 4 of the 7 categories mentioned."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Largely generic textbook content. Its one concrete specific is the October 2026 data point, and it has no vivid example or surprising fact."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Roughly the right length and in Spanish. But it skips required elements (causes, an everyday example) and does little to explain the effects."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, correct Spanish with natural phrasing. Minor stiffness in places, such as \"Para recordar una idea\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Cómo se combate",
+    "issue": "The video never explains what causes inflation (demand, costs, monetary), yet it jumps straight to how it is fought.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "tu poder adquisitivo, lo que realmente puedes comprar con tu dinero, baja.",
+    "issue": "There is no concrete everyday example (e.g. a price that rises from €1 to €1.05), and the effects of inflation are barely developed.",
+    "beat": 5
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "major",
+    "quote": "Para recordar una idea: el IPC es el instrumento que la mide.",
+    "issue": "The ending is a flat summary; it repeats beat 3 and ignores the main takeaway.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Y así, a medio plazo, hay menos inflación.",
+    "issue": "Presents the effect of rate hikes as certain. The notes say hikes don't fix supply shocks, and the video ignores the recent ECB rise to 2.25%.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"label\": \"Se modera la demanda\", \"icon\": \"van\"",
+    "issue": "The van icon is a poor fit for demand, and it is also used for the basket.",
+    "beat": 9
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "No todo sube igual. Los alimentos moderaron su subida hasta el 2,4%",
+    "issue": "A two-bar chart adds little beyond the previous stat, and it makes beats 6-7 repetitive.",
+    "beat": 7
+   }
+  ],
+  "missing": [
+   "Causes of inflation: demand, costs, monetary",
+   "A simple everyday example with numbers",
+   "Effects on savings, wages and pensions",
+   "Why moderate inflation is desired and what deflation is",
+   "The ECB's current context (rate hike to 2.25%)"
+  ],
+  "wrong_facts": [
+   "Unverified framing: the ECB target is described in the notes as 'inferior, aunque próximo, al 2%' (older definition), while the script says 'cercana al 2%' (consistent with the newer symmetric target, OK)."
+  ],
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Pero ojo: la inflación no es lo mismo que el IPC.",
+     "problem": "Colloquial but fine; slight register shift.",
+     "better": "Pero ojo: inflación e IPC no son lo mismo."
+    },
+    {
+     "quote": "Para recordar una idea:",
+     "problem": "Stiff, formulaic phrase.",
+     "better": "Quédate con esto:"
+    }
+   ]
+  },
+  "would_publish": false,
+  "summary": "A clear, accurate beginner script that uses the October 2026 data well, but it skips causes, an everyday example and the effects. It is generic with a weak recap ending.",
+  "mean": 3.0,
+  "cost_usd": 0.032122,
+  "tokens": [
+   7626,
+   1687
+  ]
+ }
+}

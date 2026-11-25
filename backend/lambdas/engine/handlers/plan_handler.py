@@ -63,7 +63,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     user_id = str(event.get("user_id", ""))
     prompt = str(event.get("prompt", ""))[:2000]
-    minutes = min(MAX_MINUTES, max(1.0, float(event.get("target_minutes") or DEFAULT_MINUTES)))
+    minutes = min(MAX_MINUTES, max(0.25, float(event.get("target_minutes") or DEFAULT_MINUTES)))
     base = {"video_id": video_id, "user_id": user_id, "usage_day": event.get("usage_day")}
 
     update_status(video_id, "PLOT_CREATION")

@@ -1,0 +1,361 @@
+{
+ "id": "mkt-01",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "30-60 second promo for a coffee subscription called Ember Roasters: small-batch beans roasted to order, ships every two weeks, pause or cancel anytime, first bag 50% off.",
+ "great": "Hook on problem (stale coffee), product benefits from the brief only, no invented claims or prices beyond the given offer, clear call to action, brand name used; punchy.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:06:07",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 4,
+   "candidates": 4,
+   "checked": 4,
+   "flagged": 3,
+   "repaired": 3,
+   "unsupported": 3,
+   "common": 0,
+   "supported": 1,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 3685,
+  "n_sources": 1,
+  "n_fetched": 5,
+  "fetched": [
+   "Cometeer Coffee",
+   "Black Rifle Coffee Company",
+   "Coffee roasting",
+   "Home roasting coffee",
+   "Promotional merchandise"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "grounding: 3 beats had unsupported specifics, 3 rewritten"
+ ],
+ "notes": "## Cometeer Coffee\nCometeer Coffee is an American coffee technology and manufacturing company based in Gloucester, Massachusetts. The brand uses brewing technology and flash-freezes it using liquid nitrogen for preservation.\nThe company's primary product is single-serve flash-frozen coffee capsules, but it also offers a subscription service that delivers frozen capsules to customers regularly.\n\n## Black Rifle Coffee Company\nBlack Rifle Coffee Company (BRCC) is a coffee company based in West Valley City, Utah, United States. Founded in 2014 by former U.S. Army Green Beret Evan Hafer, it gained national attention in 2017 after pledging to hire 10,000 veterans in response to Starbucks's pledge to hire 10,000 refugees. Their SEC filings at the end of 2025 show they have just under 500 total employees with about 150 being veterans or military spouses.\n\n## Coffee roasting\nRoasting coffee transforms the chemical and physical properties of green coffee beans into roasted coffee products. The roasting process produces the characteristic flavor of coffee by causing the green coffee beans to change in taste. Unroasted beans contain similar if not higher levels of acids, protein, sugars, and caffeine as those that have been roasted, but lack the taste of roasted coffee beans due to the Maillard and other chemical reactions which occur during roasting.\nCoffee tends to be roasted close to where it will be consumed, as green coffee is more stable than roasted beans. The vast majority of coffee is roasted commercially on a large scale, but small-scale commercial roasting has grown significantly with the trend toward \"single-origin\" coffees served at specialty shops. Some coffee drinkers roast coffee at home as a hobby in order to both experiment with the flavor profile of the beans and to ensure the freshest possible roasted coffee.\n\n## Home roasting coffee\nHome roasting is the process of roasting coffee from green coffee beans on a small scale for personal consumption. Home roasting of coffee has been practiced for centuries, using simple methods such as roasting in cast-iron skillets over a wood fire and hand-turning small steel drums on a kitchen stovetop.\nUntil the early 20th century, it was more common to roast coffee at home than to buy pre-roasted coffee. Following World War I, commercial coffee roasting became prevalent, and, combined with the distribution of instant coffee, home roasting decreased substantially.\nIn recent years, there has been a revival in home roasting. What was originally a necessity has now become a hobby. The attractions are four-fold: enjoying fresh, flavorful coffee; experimenting with various beans and roasting methods; perfecting the roasting process, and saving money. Other factors that have contributed to the renewed interest in home roasting coffee include coffee suppliers selling green coffee in small quantities and manufacturers making counter-top roasters.\n\n## Promotional merchandise\nPromotional merchandise are products branded with a logo or slogan and distributed at little or no cost to promote a brand, corporate identity, or event. Such products, which are often informally called promo products, swag (mass nouns), or freebies (count nouns), are used in marketing and sales. Often they are of the tchotchke type. They are given away or sold at a loss to promote a company, corporate image, brand, or event. They are often distributed as handouts at trade shows, at conferences, on sales calls (that is, visits to companies that are purchasing or might purchase), and as bonus items in shipped orders. They are often used in guerrilla marketing campaigns. Ones for video games are often called feelies.",
+ "plan": {
+  "title": "Ember Roasters: Fresh Coffee Roasted to Order",
+  "description": "Ember Roasters delivers small-batch beans roasted to order every two weeks. Pause or cancel anytime, and get your first bag 50% off.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "bd05fce0",
+    "narration": "Is your morning coffee already stale? Many beans sit on shelves for a while before they reach your cup. By then, the flavor you were hoping for has faded. Your first sip should taste like it was roasted just for you.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "morning coffee pouring cup",
+      "alt": "steaming coffee poured into a mug"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "37f52a51",
+    "narration": "Meet Ember Roasters. We roast small batches of beans, and only after you order. Nothing waits on a shelf. Your bag goes from roaster to doorstep fresh, with all that rich, warm flavor still locked inside.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Ember Roasters",
+      "subtitle": "Small-batch beans, roasted to order"
+     }
+    },
+    "sfx": "whoosh",
+    "speaker": "narrator",
+    "chapter": "Roasted just for you"
+   },
+   {
+    "id": "7777168c",
+    "narration": "Here is how it works. First, pick the beans you like. Second, we roast them fresh to order. Third, they ship to your door every two weeks, so your cup is never empty.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How it works",
+      "steps": [
+       {
+        "label": "Pick your beans",
+        "detail": "Choose what you like"
+       },
+       {
+        "label": "Roasted to order",
+        "detail": "Small batch, fresh"
+       },
+       {
+        "label": "Ships every two weeks",
+        "detail": "Right to your door"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "4e91f180",
+    "narration": "Life changes, and your subscription can too. Pause it when you travel. Cancel anytime. And to get you started, your first bag is fifty percent off. Try Ember Roasters today.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Easy to love",
+      "items": [
+       "Pause anytime",
+       "Cancel anytime",
+       "First bag 50% off"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "emphasis": 2,
+      "icons": [
+       "clock",
+       "heart",
+       "banknote"
+      ]
+     }
+    },
+    "sfx": "chime",
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Coffee roasting",
+    "url": "https://en.wikipedia.org/wiki/Coffee_roasting",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 18.2,
+  "before_first_script_call_s": 6.5,
+  "script_s": 11.7
+ },
+ "cost": {
+  "script_small": 0.00129,
+  "script_big": 0.03199,
+  "search_api": 0.0,
+  "total": 0.03328
+ },
+ "calls": {
+  "small": 4,
+  "big": 1
+ },
+ "tokens": {
+  "in": 16071,
+  "out": 2558
+ },
+ "rules": {
+  "length": {
+   "words": 140,
+   "expected_words": 134,
+   "ratio": 1.045,
+   "beats": 4,
+   "expected_beats": 4,
+   "est_speech_s": 62.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 41,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": true,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Is your morning coffee already stale? Many beans sit on shelves for a while before they reach your cup. By then, the flavor you were hoping for has faded. Your first sip should taste like it was roast",
+   "close_text": "Life changes, and your subscription can too. Pause it when you travel. Cancel anytime. And to get you started, your first bag is fifty percent off. Try Ember Roasters today."
+  },
+  "variety": {
+   "distinct": 4,
+   "counts": {
+    "clip": 1,
+    "title": 1,
+    "steps": 1,
+    "bullets": 1
+   },
+   "max_run": 1,
+   "entropy": 2.0,
+   "top_type": "clip",
+   "top_share": 0.25,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 1,
+   "fetched": 5,
+   "notes_len": 3685,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "hook_long"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Uses only the brief's claims; minor additions like 'Pick your beans' and 'Pause it when you travel' are mild inventions, and 'Many beans sit on shelves' is generic but plausible."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "All brief points are present (roast to order, two-week shipping, pause/cancel, 50% off), but it is thin on specifics and has no concrete example or non-obvious fact."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear problem, solution, how it works, offer, CTA flow; the final beat is slightly rushed."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question 'Is your morning coffee already stale?' is a decent problem hook, but the ending is a bare 'Try Ember Roasters today' with no memorable image or urgency."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, upbeat, consumer-friendly promo voice that suits the format."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary sensibly (clip, title, steps, bullets) and match the narration; the bullets list matches what is spoken."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Generic promo phrasing like 'rich, warm flavor still locked inside' and 'Life changes, and your subscription can too'; no distinctive angle or ember imagery."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Content matches the brief, but at about 120 words it is slightly short of the 134-word target, and 'Pick your beans' adds a choice feature the brief never stated."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, grammatical, natural English."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "First, pick the beans you like.",
+    "issue": "The brief never says customers choose their beans, so this is an invented feature.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Nothing waits on a shelf.",
+    "issue": "This is a slightly overreaching absolute claim not in the brief.",
+    "beat": 2
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Try Ember Roasters today.",
+    "issue": "A flat CTA with no urgency, no website or action, and no closing image or line.",
+    "beat": 4
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "with all that rich, warm flavor still locked inside",
+    "issue": "Cliché marketing filler.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Pause it when you travel.",
+    "issue": "Pause and cancel are split into separate fragments, and the offer and CTA are packed into one short beat, so the strongest incentive is underplayed.",
+    "beat": 4
+   }
+  ],
+  "missing": [
+   "A more specific or vivid freshness detail, such as roast-to-ship timing, using only brief-safe claims",
+   "A clear, actionable CTA (for example, 'Claim your 50% off first bag') with the offer emphasized",
+   "Distinctive brand imagery tying the 'Ember' name to the roast",
+   "Use of the full ~134-word length"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, accurate promo that covers every point in the brief with fitting visuals, but its language is generic and the ending is weak. It is also a bit short of the target length and adds a small invented bean-picking feature.",
+  "mean": 3.56,
+  "cost_usd": 0.01848,
+  "tokens": [
+   3590,
+   1130
+  ]
+ }
+}

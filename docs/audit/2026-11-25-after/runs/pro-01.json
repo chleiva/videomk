@@ -1,0 +1,599 @@
+{
+ "id": "pro-01",
+ "category": "productivity / self-improvement",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "the Pomodoro technique",
+ "great": "25 min work, 5 min break, long break after four, Francesco Cirillo, tomato timer, why it works, adapting intervals, common mistakes; concrete.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:04:25",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The Pomodoro technique is a timeless productivity method with a stable history and well-documented explanation, so encyclopedic sources are sufficient and no recent information is needed.",
+  "queries": [
+   "Pomodoro technique time management method",
+   "Pomodoro technique how it works origin"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 4.8,
+   "cost_usd": 0.0007585000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 32.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 28.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 19.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 15.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 9,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5821,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Pomodoro Technique – Academic Resource Center",
+   "Francesco Cirillo and the Kitchen Timer: The True Origin of Pomodoro | The Boring Clock",
+   "Pomodoro Technique - Wikipedia",
+   "What Is the Pomodoro Technique? A College Student’s Guide | CWI",
+   "The Pomodoro Technique - Wellness Resources from MacMillan Law Library - Research Guides at Emory University Libraries",
+   "Pomodoro® Technique - Time Management Method"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Pomodoro Technique – Academic Resource Center\nHe used a common household item, a tomato shaped kitchen timer, and thus was born the Pomodoro Technique. Pomodoro means tomato in Italian! It’s a simple tool, that can give you small wins that will accumulate over time. ## How Does It Work? 1. Define the task to be worked on 2. Set a timer for 25 minutes 3. Concentrate only on this task until the time is up 4. Take a 5-minute break (preferably not on a screen) 5. Every 4 Pomodoros take a longer 15-30 minute break ### Key Points [...] ## What Is It? The Pomodoro Technique was developed in the late 1980’s by Francesco Cirillo, an Italian college student struggling with the typical student concerns of managing distractions and combatting mental fatigue and procrastination. Francesco realized that breaking down assignments into more manageable chunks and focusing intently for more frequent but shorter periods of time across his week, rather\n\n## Francesco Cirillo and the Kitchen Timer: The True Origin of Pomodoro | The Boring Clock\nCirillo codified his method into five steps — choose a task, set a 25-minute timer, work until it rings, take a 5-minute break, and take a longer 15-30 minute break after every four cycles. He named it \"Pomodoro\" (Italian for tomato) after the kitchen timer that started it all. The technique accumulated rules through experimentation: [...] Why 25 specifically? Partly experimentation, partly the timer itself. Most kitchen timers of the era had 30-minute maximums. 25 minutes of work plus a 5-minute break fit the constraint. The 25/5 structure that now defines Pomodoro wasn't scientifically derived—it emerged from practical testing and kitchen timer limitations. ### The Five-Minute Break Cirillo discovered that forcing himself to take breaks—even when he felt like continuing—sustained his focus across longer study sessions. [...] Cirillo developed his technique for studying in the 1980s. Mo\n\n## Pomodoro Technique - Wikipedia\nThe Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s. It uses a kitchen timer to break work into intervals, typically 25 minutes in length, separated by short breaks. Each interval is known as a pomodoro, from the Italian word for tomato, after the tomato-shaped kitchen timer that Cirillo used while he was a university student. [...] [edit] The original technique consists of deciding on the task, setting the timer (typically for 25 minutes), working on the task, taking a short break (typically 5–10 minutes) when the timer rings. This repeats until four pomodori are completed, after which a long break (typically 20 to 30 minutes) is taken before starting the cycle again. For the purposes of the technique, a pomodoro is an interval of work time (and pomodori is the plural form). [...] ## Tools [edit] The creator and his proponents encourage a \n\n## What Is the Pomodoro Technique? A College Student’s Guide | CWI\nThe Pomodoro Technique® was invented in the late 1980s by author Francesco Cirillo. At the time, he was a young college student living in Italy. While preparing for a final exam, he found himself unable to focus. Frustrated and desperate to concentrate, Cirillo took the tomato-shaped egg timer from the kitchen windowsill and set it for just two minutes. He focused on the material until the timer went off and found that this approach made concentrating easier. [...] He began experimenting with different intervals, and after years of perfecting his technique, Cirillo concluded that a 25-minute work period followed by five minutes of rest was the ideal ratio. Not coincidentally, “pomodoro” means tomato in Italian. That’s right, this time-management strategy used by millions of people around the world is based on a humble wind-up kitchen appliance. ## How to apply the Pomodoro study method [\n\n## The Pomodoro Technique - Wellness Resources from MacMillan Law Library - Research Guides at Emory University Libraries\nPronounced poh-moh-DOH-roh (\"tomato\" in italian) and developed in the 1980s by an Italian college student using a tomato-shaped kitchen timer, the Pomodoro Method is a time-management strategy which breaks work down into focused, 25-minute intervals (a Pomodoro) separated by short, 5-minute breaks. After four Pomodoros, the break is expanded to 15 minutes. Taken from the Francesco Cirillo Work Smarter, Not Harder website: The Core Process of the Pomodoro Technique consists of six steps: [...] 6. Every 4 Pomodoros, Take a Longer Break Once you've completed four Pomodoros, you can take a longer break. Twenty minutes is good. Or 30. Your brain will use this time to assimilate new information and rest before the next round of Pomodoros. The Pomodoro Technique is organized into Six Incremental Goals: Goal #1 - Find out how much effort an activity requires. Goal #2 - Cut down on interruptions.\n\n## Pomodoro® Technique - Time Management Method\n#### Focus Work on one activity at a time, handle interruptions and use regular breaks to protect your focus. #### Reflect Record your effort, compare estimates with reality and make small improvements to your process. Be gentle with yourself. The goal is not to force yourself to do more. It is to understand how you work, make realistic choices and gradually develop a healthier relationship with time. Productivity comes from improving that relationship, not from forcing yourself. [...] ## More than 25 minutes The Pomodoro® Technique is a complete system for dealing with time. With simple tools — a timer, pencil and paper — you learn to plan your work, understand and estimate effort, handle interruptions, take restorative breaks, record what happens and improve the way you work. #### Plan Use the Activity Inventory and To Do Today Sheet to choose your work and estimate effort realisticall",
+ "plan": {
+  "title": "The Pomodoro Technique: Focus in 25-Minute Bursts",
+  "description": "The Pomodoro Technique is a time management method created by Francesco Cirillo with a tomato-shaped kitchen timer. Learn the five steps, why it works, and how to try one pomodoro today.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "1acf7e52",
+    "narration": "A tomato-shaped kitchen timer changed how millions of people work. How can a cheap gadget beat procrastination? The answer starts with one desperate student, a final exam, and a mind that would not focus.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "red tomato shaped kitchen timer",
+      "alt": "Tomato-shaped kitchen timer",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Where it began"
+   },
+   {
+    "id": "c21e946f",
+    "narration": "In the late 1980s, Francesco Cirillo was a college student in Italy. First, he tried just two minutes of focus. Then, after years of testing, he settled on 25 minutes work, 5 rest.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "How Cirillo found his rhythm",
+      "events": [
+       {
+        "date": "Late 1980s",
+        "label": "Student can't focus before exam"
+       },
+       {
+        "date": "First try",
+        "label": "Just two minutes of focus"
+       },
+       {
+        "date": "Years later",
+        "label": "25 minutes work, 5 rest"
+       }
+      ]
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "0f264a44",
+    "narration": "He named it after the timer. Pomodoro is the Italian word for tomato. Each work interval is called a pomodoro, and the plural is pomodori.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Pomodoro",
+      "definition": "Italian for tomato; one focused work interval, typically 25 minutes.",
+      "origin": "Named after Cirillo's tomato-shaped kitchen timer"
+     }
+    }
+   },
+   {
+    "id": "52634ce7",
+    "narration": "Here is the method. Choose one task. Set the timer for 25 minutes. Work until it rings. Take a 5-minute break. Then, after four rounds, take a longer break.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "The five steps",
+      "steps": [
+       {
+        "label": "Choose one task"
+       },
+       {
+        "label": "Set timer: 25 minutes"
+       },
+       {
+        "label": "Work until it rings"
+       },
+       {
+        "label": "Take a 5-minute break"
+       },
+       {
+        "label": "Longer break after four"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "2b924154",
+    "narration": "Why exactly 25 minutes? It was not derived from science. Most kitchen timers of the era topped out at 30 minutes, so 25 minutes of work plus a 5-minute break simply fit.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "25 + 5",
+      "label": "Minutes of work plus break, shaped by a 30-minute kitchen timer"
+     }
+    }
+   },
+   {
+    "id": "fa783ecf",
+    "narration": "During those 25 minutes, only one thing matters: your task. No switching, no checking your phone. When the timer rings, you stop, even if you feel like continuing.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person studying focused at desk",
+      "alt": "Student concentrating while working"
+     }
+    }
+   },
+   {
+    "id": "20b334e4",
+    "narration": "Now picture the cycle. Pomodoro 1, then a short break. Pomodoro 2, short break. Pomodoro 3, short break. Pomodoro 4, and then the long break, fifteen to thirty minutes.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "One full cycle",
+      "nodes": [
+       {
+        "id": "p1",
+        "label": "Pomodoro 1"
+       },
+       {
+        "id": "p2",
+        "label": "Pomodoro 2"
+       },
+       {
+        "id": "p3",
+        "label": "Pomodoro 3"
+       },
+       {
+        "id": "p4",
+        "label": "Pomodoro 4"
+       },
+       {
+        "id": "lb",
+        "label": "Long break"
+       }
+      ],
+      "edges": [
+       [
+        "p1",
+        "p2",
+        "short break"
+       ],
+       [
+        "p2",
+        "p3",
+        "short break"
+       ],
+       [
+        "p3",
+        "p4",
+        "short break"
+       ],
+       [
+        "p4",
+        "lb"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "8529abe5",
+    "narration": "Breaks matter. Cirillo found that forcing himself to rest sustained his focus over longer study sessions. Ideally, step away from screens. Your brain uses that time to absorb and recover.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why breaks work",
+      "items": [
+       "Sustains focus",
+       "Step away from screens",
+       "Brain absorbs and rests"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "target",
+       "eye",
+       "brain"
+      ]
+     }
+    }
+   },
+   {
+    "id": "1f6ab2c9",
+    "narration": "It is also about learning. Record your effort, compare your estimates with reality, and improve. The goal is not to force yourself to do more, but to understand how you work.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The goal is not to do more, but to understand how you work.",
+      "emphasis": "understand"
+     }
+    },
+    "chapter": "Make it yours"
+   },
+   {
+    "id": "56ddcb7e",
+    "narration": "So pick one task, set a timer for 25 minutes, and focus on only that. Small wins add up over time. One tomato at a time.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "One task. 25 minutes. Begin.",
+      "subtitle": "Small wins accumulate, one pomodoro at a time"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Pomodoro Technique – Academic Resource Center",
+    "url": "https://arc.duke.edu/pomodoro-technique",
+    "publisher": "arc.duke.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Francesco Cirillo and the Kitchen Timer: The True Origin of Pomodoro | The Boring Clock",
+    "url": "https://theboringclock.com/blog/history-of-pomodoro-technique",
+    "publisher": "theboringclock.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Pomodoro Technique - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Pomodoro_Technique",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What Is the Pomodoro Technique? A College Student’s Guide | CWI",
+    "url": "https://cwi.edu/news/what-pomodoro-technique-college-students-guide",
+    "publisher": "cwi.edu",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 58.2,
+  "before_first_script_call_s": 34.2,
+  "script_s": 24.0
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "research": 0.00076,
+  "script_big": 0.08824,
+  "search_api": 0.016,
+  "total": 0.10531
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 33355,
+  "out": 4289
+ },
+ "rules": {
+  "length": {
+   "words": 300,
+   "expected_words": 267,
+   "ratio": 1.124,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 134.5,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 35,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "A tomato-shaped kitchen timer changed how millions of people work. How can a cheap gadget beat procrastination? The answer starts with one desperate student, a final exam, and a mind that would not fo",
+   "close_text": "So pick one task, set a timer for 25 minutes, and focus on only that. Small wins add up over time. One tomato at a time."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "image": 1,
+    "timeline": 1,
+    "definition": 1,
+    "steps": 1,
+    "stat": 1,
+    "clip": 1,
+    "diagram": 1,
+    "bullets": 1,
+    "kinetic_text": 1,
+    "title": 1
+   },
+   "max_run": 1,
+   "entropy": 3.32,
+   "top_type": "image",
+   "top_share": 0.1,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 3,
+   "ungrounded_numbers": [],
+   "entities": 3,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "timer for 25 minutes",
+    "count": 2
+   },
+   {
+    "phrase": "a 5 minute break",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 5821,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Facts track the notes (25/5, long break 15-30, late 1980s, 30-minute timer limit). Minor issues: \"settled on 25 minutes work, 5 rest\" and the timeline's \"Years later\" are fine, but \"changed how millions\" and \"cheap gadget\" are loose; the five steps omit the notes' six-step nuance."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers origin, 25/5, long break, why 25, and breaks. Lacks adapting intervals, handling interruptions, common mistakes, and any real why-it-works beyond a vague claim."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear arc from origin to method to rationale to takeaway. Beat 7 repeats Beat 4's cycle, and the 25-minute rationale comes after the steps."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The hook poses a question and a desperate student. The ending, \"One tomato at a time,\" is a decent image, though it mostly restates the steps."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear, suited to a beginner US audience."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Varied scene types (image, timeline, definition, steps, diagram, clip, kinetic text) and they match the narration. The stat scene \"25 + 5\" is a bit forced."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The kitchen-timer constraint behind 25 minutes is a good non-obvious fact, but the rest is standard explainer content."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Length is roughly right and in English. It skips the adapting-intervals and common-mistakes points that the brief's reviewer note expects."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural. Beat 7 reads as a choppy list."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "The goal is not to force yourself to do more, but to understand how you work.",
+    "issue": "The \"Make it yours\" chapter never explains adapting intervals; it only paraphrases the official site's philosophy. There is also no section on common mistakes or handling interruptions.",
+    "beat": 9
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Pomodoro 1, then a short break. Pomodoro 2, short break.",
+    "issue": "Repeats the cycle already stated in Beat 4, which uses up time that could have gone to new content.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Your brain uses that time to absorb and recover.",
+    "issue": "This is asserted as fact without scientific support, and the script concedes the structure isn't science-derived. It never explains why the technique works.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "How can a cheap gadget beat procrastination?",
+    "issue": "The question is framed around the gadget, and the \"cheap\" detail is not in the notes. The answer given never really returns to it.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "25 + 5",
+    "issue": "A stat card for a non-statistical pairing; the label is long and the scene mostly duplicates the narration.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "Adapting interval lengths (e.g., 50/10) for different tasks",
+   "Common mistakes (multitasking, skipping breaks, checking the phone)",
+   "Handling interruptions or the idea of an unfinished pomodoro",
+   "Why it works (urgency, small chunks, reduced decision fatigue)"
+  ],
+  "wrong_facts": [
+   "Unverified in the notes: \"cheap gadget\" and \"changed how millions of people work\" (the notes say 'millions use it')."
+  ],
+  "would_publish": false,
+  "summary": "A clean, accurate beginner overview with a good origin story and the kitchen-timer rationale for 25 minutes. It is shallow on adapting intervals, common mistakes and why it works, and it spends a beat repeating the cycle.",
+  "mean": 3.67,
+  "cost_usd": 0.024436,
+  "tokens": [
+   5493,
+   1345
+  ]
+ }
+}

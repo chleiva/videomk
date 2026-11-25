@@ -1,0 +1,618 @@
+{
+ "id": "hea-01",
+ "category": "health and wellbeing",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how does sleep affect memory and what can I do to sleep better",
+ "great": "Sleep stages and consolidation (slow-wave and REM), hippocampus to cortex transfer, effects of sleep deprivation, practical hygiene tips (consistent schedule, light, caffeine, screens), 7-9 hours for adults; avoids medical overclaiming; suggests a doctor for persistent insomnia.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:12:31",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Sleep's role in memory consolidation and general sleep hygiene are well-established, timeless science that an encyclopedia covers accurately; no recent news, prices, or changing facts are needed.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 4,
+  "grounding": {
+   "beats": 15,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2377,
+  "n_sources": 2,
+  "n_fetched": 2,
+  "fetched": [
+   "Memory consolidation",
+   "Sleep and memory"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 451 words in 15 beats but a 3-minute video needs about 402 (at most 422). Cut about 49 words: write 13 to 15 beats of at most 37 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 369 words"
+ ],
+ "notes": "## Memory consolidation\nMemory consolidation is a process in the brain that stabilizes newly learned information, allowing the memory to be stored long-term. A memory trace is the biological change in neural circuits that occurs during learning. Memory consolidation is essential for learning as it allows experiences to be transformed into stable long-term memories that can guide future behavior.\nConsolidation is divided into two main processes, synaptic consolidation and systems consolidation. Synaptic consolidation occurs rapidly on a small scale in the individual synapses within the first few hours of learning. Systems consolidation occurs on a larger scale and involves gradual reorganization and reduced reliance on the hippocampus and increased involvement of cortical networks over a period of weeks to years.\nThese processes involve molecular and cellular changes that stabilize neural representations, referred to as a neural ensemble (engram).\nA third process, reconsolidation, has been proposed, in which previously consolidated memories can become unstable again after retrieval and may need to be updated before being re-stabilized.\n\n## Sleep and memory\nThe relationship between sleep and memory has been studied since at least the early 19th century. Memory, the cognitive process of storing and retrieving past experiences, learning and recognition, is a product of brain plasticity, the structural changes within synapses that create associations between stimuli. Stimuli are encoded within milliseconds; however, the long-term maintenance of memories can take additional minutes, days, or even years to fully consolidate and become a stable memory that is accessible (more resistant to change or interference). Therefore, the formation of a specific memory occurs rapidly, but the evolution of a memory is often an ongoing process.\nMemory processes have been shown to be stabilized and enhanced (sped up and/or integrated) and memories better consolidated by nocturnal sleep and daytime naps. Certain sleep stages have been demonstrated as improving an individual's memory, though this is task-specific. Generally, declarative memories are believed to be enhanced by slow-wave sleep, while non-declarative memories are enhanced by rapid eye movement (REM) sleep, although there are some inconsistencies among experimental results. The effect of sleep...",
+ "plan": {
+  "title": "How Sleep Locks In Memory, and How to Sleep Better",
+  "description": "Learn how the sleeping brain turns fresh experiences into lasting memories through consolidation and sleep stages. Then discover simple habits that help you sleep better tonight.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "34483ff7",
+    "narration": "You study hard all evening, then stay up late to cram more. It feels productive. But your brain may be doing its most important learning work after you close your eyes.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person sleeping in dark bedroom",
+      "alt": "night sleep peaceful bed"
+     }
+    },
+    "chapter": "Why sleep matters for memory"
+   },
+   {
+    "id": "02adadc4",
+    "narration": "Here is the surprise. A memory is formed in milliseconds, but it is fragile at first. Making it stable and lasting can take minutes, days, or even years.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Learning is fast. Making it last is the slow part.",
+      "emphasis": "last"
+     }
+    }
+   },
+   {
+    "id": "04c475da",
+    "narration": "That stabilizing job has a name: memory consolidation. It turns a fresh experience into a stable long-term memory that can guide what you do later.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Memory consolidation",
+      "definition": "A brain process that stabilizes newly learned information so it can be stored long-term.",
+      "example": "Turning today's lesson into something you still know next month."
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "42d2ef38",
+    "narration": "Consolidation works on two scales. Synaptic consolidation is quick and small, happening in individual connections within the first few hours. Systems consolidation is slower and larger, reorganizing networks over weeks to years.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Synaptic",
+       "tagline": "Fast and small"
+      },
+      "b": {
+       "name": "Systems",
+       "tagline": "Slow and large"
+      },
+      "rows": [
+       {
+        "label": "Scale",
+        "a": "Single synapses",
+        "b": "Brain networks"
+       },
+       {
+        "label": "Timing",
+        "a": "First few hours",
+        "b": "Weeks to years"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "469f13e4",
+    "narration": "During systems consolidation, memories lean less on the hippocampus and more on the cortex. Think of the hippocampus as a temporary inbox, and the cortex as the long-term filing system.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Memory on the move",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "New experience",
+        "icon": "eye"
+       },
+       {
+        "id": "b",
+        "label": "Hippocampus",
+        "icon": "brain"
+       },
+       {
+        "id": "c",
+        "label": "Cortex",
+        "icon": "book"
+       },
+       {
+        "id": "d",
+        "label": "Long-term memory",
+        "icon": "lock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "encoded"
+       ],
+       [
+        "b",
+        "c",
+        "reorganized"
+       ],
+       [
+        "c",
+        "d",
+        "stored"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "aaa50587",
+    "narration": "So where does sleep come in? Research shows that both nighttime sleep and daytime naps stabilize and strengthen memories. People have studied this link since at least the early nineteenth century.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person napping on sofa",
+      "alt": "person taking a daytime nap",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "What sleep does to memories"
+   },
+   {
+    "id": "aa5f0a17",
+    "narration": "Different sleep stages help different kinds of memory, though this depends on the task. Slow-wave sleep is generally linked to declarative memories, like facts. REM sleep is linked to non-declarative memories, like skills.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Slow-wave sleep",
+       "tagline": "Deep sleep"
+      },
+      "b": {
+       "name": "REM sleep",
+       "tagline": "Rapid eye movement"
+      },
+      "rows": [
+       {
+        "label": "Helps most",
+        "a": "Declarative memory",
+        "b": "Non-declarative memory"
+       },
+       {
+        "label": "Example",
+        "a": "Facts, events",
+        "b": "Skills, habits"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "26949544",
+    "narration": "Scientists add a caution: some experimental results are inconsistent. So the safe message is not that one stage is magic. It is that getting full, complete nights gives every stage its chance.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What we know",
+      "items": [
+       "Sleep stabilizes memories",
+       "Stages help different memory types",
+       "Results are not always consistent",
+       "Full nights cover every stage"
+      ],
+      "style": "cards",
+      "accent": "sky",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "9a531e52",
+    "narration": "There is one more twist. When you recall an old memory, it can become unstable again and may need updating before it is stored once more. This is called reconsolidation.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Reconsolidation",
+      "definition": "Recalled memories can become unstable again and may be updated before being re-stabilized."
+     }
+    }
+   },
+   {
+    "id": "946fd7b7",
+    "narration": "If sleep protects what you learn, how do you get more of it? These are common, practical habits, not medical advice. Start with a steady schedule: go to bed and wake up at similar times.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "alarm clock bedside morning",
+      "alt": "morning wake up routine"
+     }
+    },
+    "chapter": "How to sleep better"
+   },
+   {
+    "id": "c90477c1",
+    "narration": "Next, make your bedroom work for sleep. Keep it dark, quiet, and cool. Many people also find that putting screens away before bed helps the mind wind down.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "A sleep-friendly room",
+      "items": [
+       "Dark",
+       "Quiet",
+       "Cool",
+       "Screens away before bed"
+      ]
+     }
+    }
+   },
+   {
+    "id": "acc11e3f",
+    "narration": "Watch what you take in late in the day. Caffeine and heavy meals close to bedtime can make it harder to fall asleep. A calm routine, like reading or stretching, signals that the day is over.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "coffee",
+        "label": "Less late caffeine"
+       },
+       {
+        "icon": "book",
+        "label": "Read"
+       },
+       {
+        "icon": "moon",
+        "label": "Calm routine"
+       }
+      ],
+      "title": "Wind down"
+     }
+    }
+   },
+   {
+    "id": "6d4ce8b5",
+    "narration": "Learning something important? Review it before bed, then give yourself a full night. If you are tired in the afternoon, a short nap can also help consolidate what you studied.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "A memory-friendly plan",
+      "steps": [
+       {
+        "label": "Study in the evening"
+       },
+       {
+        "label": "Review before bed"
+       },
+       {
+        "label": "Sleep a full night"
+       },
+       {
+        "label": "Nap if needed"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "1b531043",
+    "narration": "If you struggle with sleep for weeks, talk with a doctor. They can check for causes that habits alone cannot fix.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "doctor talking with patient",
+      "alt": "doctor consultation",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "8851c9d2",
+    "narration": "Here is the takeaway. Sleep is when your brain turns fragile new learning into lasting memory. Protect your nights, and you protect what you worked so hard to learn.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Sleep is where learning becomes memory.",
+      "emphasis": "memory"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Memory consolidation",
+    "url": "https://en.wikipedia.org/wiki/Memory_consolidation",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Sleep and memory",
+    "url": "https://en.wikipedia.org/wiki/Sleep_and_memory",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 51.1,
+  "before_first_script_call_s": 5.9,
+  "script_s": 45.2
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "script_big": 0.13656,
+  "search_api": 0.0,
+  "total": 0.13686
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 36070,
+  "out": 7034
+ },
+ "rules": {
+  "length": {
+   "words": 455,
+   "expected_words": 402,
+   "ratio": 1.132,
+   "beats": 15,
+   "expected_beats": 13,
+   "est_speech_s": 203.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You study hard all evening, then stay up late to cram more. It feels productive. But your brain may be doing its most important learning work after you close your eyes.",
+   "close_text": "Here is the takeaway. Sleep is when your brain turns fragile new learning into lasting memory. Protect your nights, and you protect what you worked so hard to learn."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "clip": 2,
+    "kinetic_text": 2,
+    "definition": 2,
+    "versus": 2,
+    "diagram": 1,
+    "image": 2,
+    "bullets": 1,
+    "checklist": 1,
+    "icons": 1,
+    "steps": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "clip",
+   "top_share": 0.13,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 2,
+   "fetched": 2,
+   "notes_len": 2377,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 8 (bullets): its narration never says ['Sleep stabilizes memories', 'Stages help different memory types', 'Results are not always consistent']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The consolidation facts match the notes, but the sleep-deprivation and 7-9 hour points are missing. The line 'Review before bed' goes beyond the notes, and 'REM... skills, habits' oversimplifies, though the script does hedge it."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The script never gives a recommended sleep duration (7-9 hours) and never covers the effects of sleep deprivation. It also skips light exposure and mechanisms such as replay. Roughly half the runtime goes to generic consolidation definitions."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chapters run in a clear order: why, what sleep does, then how to sleep better. It ends on a takeaway. Beats 3-5 are somewhat repetitive, and reconsolidation is a tangent."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The cramming opener sets up a tension, and the closing line 'Sleep is where learning becomes memory' lands, though it is slightly summary-like."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is friendly and suited to beginners, and it hedges appropriately with 'not medical advice'."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well, and the versus, diagram and checklist scenes match the narration. The 'What we know' bullets and the generic stock images add little."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The inbox and filing-system analogy is nice. The sleep tips are standard generic advice, and there are no concrete studies or numbers."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The script covers both parts of the request and stays near the target length. It omits the key sleep-deprivation and duration content, and its tips are thin relative to the explanation."
+   },
+   "language": {
+    "score": 5,
+    "reason": "The English is fluent, clean and natural."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "If sleep protects what you learn, how do you get more of it?",
+    "issue": "No recommended sleep duration (7-9 hours for adults) is ever given, so 'a full night' stays vague.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Protect your nights, and you protect what you worked so hard to learn.",
+    "issue": "The script never describes what happens to memory when sleep is lost, which is a core part of 'how sleep affects memory'.",
+    "beat": 15
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Synaptic consolidation is quick and small, happening in individual connections within the first few hours.",
+    "issue": "Time is spent on technical consolidation detail instead of sleep-specific mechanisms or the practical tips.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Review it before bed, then give yourself a full night.",
+    "issue": "This advice is not in the notes and is stated with no evidence, so it overreaches.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Many people also find that putting screens away before bed helps the mind wind down.",
+    "issue": "The script gives no explanation of light, blue light or circadian rhythm.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "There is one more twist. When you recall an old memory",
+    "issue": "Reconsolidation is a tangent that does not connect to the sleep advice that follows.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Recommended 7-9 hours for adults",
+   "Effects of sleep deprivation on learning and memory",
+   "Role of light exposure and circadian rhythm",
+   "Memory replay during slow-wave sleep"
+  ],
+  "wrong_facts": [
+   "Skills and habits are placed under REM, which oversimplifies; the script does hedge it with 'depends on the task'."
+  ],
+  "would_publish": false,
+  "summary": "The script is clear, well paced and well written, with good visuals. But it spends too long on consolidation definitions and omits sleep duration and the effects of sleep deprivation, which a great answer needs.",
+  "mean": 3.56,
+  "cost_usd": 0.022772,
+  "tokens": [
+   4721,
+   1333
+  ]
+ }
+}

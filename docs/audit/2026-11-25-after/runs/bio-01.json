@@ -1,0 +1,685 @@
+{
+ "id": "bio-01",
+ "category": "biography",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Marie Curie",
+ "great": "Born Maria Sklodowska in Warsaw 1867, Paris, radioactivity, polonium and radium, two Nobel Prizes (1903 physics, 1911 chemistry), WWI X-ray units, death 1934 from radiation exposure; accurate dates; narrative.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:02:08",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Marie Curie's life, discoveries, and Nobel Prizes are well-documented historical facts that do not change, so an encyclopedia source is sufficient for an accurate explainer script.",
+  "queries": [
+   "Marie Curie biography",
+   "Marie Curie scientific discoveries radioactivity"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 8,
+   "seconds": 5.9,
+   "cost_usd": 0.0007425999999999999,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 48.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 44.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 40.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 39.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 35.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 12,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 1,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 7171,
+  "n_sources": 6,
+  "n_fetched": 8,
+  "fetched": [
+   "Marie Curie: Biography, Scientist, Nobel Prize, Radioactivity",
+   "Marie Curie | Biography, Nobel Prize, Accomplishments, & Facts | Britannica",
+   "Marie Curie – Biographical - NobelPrize.org",
+   "Marie Curie - Wikipedia",
+   "Marie Curie - Research Breakthroughs (1897-1904)",
+   "Manhattan Project Pioneers: Marie Curie (U.S. National Park Service)",
+   "The Enduring Legacy of Marie Curie: Impacts of Radium in 21st Century Radiological and Medical Sciences",
+   "The legacy of Marie Curie: perpetuating the spirit of a pioneer - Institut Curie"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 369 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## Marie Curie: Biography, Scientist, Nobel Prize, Radioactivity\nIn 1891, Curie finally made her way to Paris and enrolled at Sorbonne University, a famed research institution in Paris. She threw herself into her studies, but this dedication had a personal cost: With little money, Curie survived on buttered bread and tea, and her health sometimes suffered because of her poor diet. Curie completed her master’s degree in physics in 1893 and earned another degree in mathematics the following year. ## Husband Pierre Curie and Children [...] Marie Curie became the first woman to win a Nobel Prize and the first person to win the award twice. Marie’s efforts, with help from husband Pierre Curie, led to the discovery of polonium and radium and, after Pierre’s death, the further development of X-rays. The famed scientist died in 1934 of aplastic anemia, likely caused by exposure to radiation. ## Quick Facts [...] Marie suffered a tremendous loss in 1906 when P\n\n## Marie Curie | Biography, Nobel Prize, Accomplishments, & Facts | Britannica\nWorking with her husband, Pierre Curie, Marie Curie discovered polonium and radium in 1898. In 1903 they won the Nobel Prize for Physics for discovering radioactivity. In 1911 she won the Nobel Prize for Chemistry for isolating pure radium. Following work on X-rays during World War I, she studied radioactive substances and their medical applications. ### What awards did Marie Curie win? [...] Marie Curie, with her husband, Pierre Curie, discovered two radioactive elements, polonium and radium. She was also able to isolate radium in its pure metallic state. She won the 1903 Nobel Prize for Physics, along with Pierre Curie and Henri Becquerel, for their work with radioactivity, and she won the 1911 Nobel Prize for Chemistry for her work in isolating radium. ### How did Marie Curie die? [...] The birth of her two daughters, Irène and Ève, in 1897 and 1904, did not interrupt Marie’s intensiv\n\n## Marie Curie – Biographical - NobelPrize.org\nSorbonne where she obtained Licenciateships in Physics and the Mathematical Sciences. She met Pierre Curie, Professor in the School of Physics in 1894 and in the following year they were married. She succeeded her husband as Head of the Physics Laboratory at the Sorbonne, gained her Doctor of Science degree in 1903, and following the tragic death of Pierre Curie in 1906, she took his place as Professor of General Physics in the Faculty of Sciences, the first time a woman had held this position. [...] Marie Curie, née Maria Sklodowska, was born in Warsaw on November 7, 1867, the daughter of a secondary-school teacher. She received a general education in local schools and some scientific training from her father. She became involved in a students’ revolutionary organization and found it prudent to leave Warsaw, then in the part of Poland dominated by Russia, for Cracow, which at that time \n\n## Marie Curie - Wikipedia\nBy 1898 the Curies had obtained traces of radium, but appreciable quantities, uncontaminated with barium, were still beyond reach.\\ The Curies undertook the arduous task of separating out radium salt by differential crystallisation. From a tonne of pitchblende, one-tenth of a gram of radium chloride was separated in 1902. In 1910, she isolated pure radium metal.\\\\ She never succeeded in isolating polonium, which has a half-life of only 138 days.\\ [...] In July 1898, Curie and her husband published a joint paper announcing the existence of an element they named 'polonium', in honour of her native Poland,\\ which would for another twenty years remain partitioned among three empires (Russia, Austria, and Prussia).\\ On 26 December 1898, the Curies announced the existence of a second element, which they named 'radium', from the Latin word for 'ray'.\\\\\\\\ In the course of their research, they al\n\n## Marie Curie - Research Breakthroughs (1897-1904)\nthe industrial assistance the Curies received, it took Marie over three years to isolate one tenth of a gram of pure radium chloride. For reasons that would not be fully understood until the concept of radioactive decay was developed, Marie never succeeded in isolating polonium, which has a half-life of only 138 days. | | | Next: Founding the Radium Industry Also: \"Radium and Radioactivity\" by Marie Curie Discovery Paper announcing Radium Periodic Table of Elements Marie Curie [...] mostly bismuth and the other containing mostly barium, were strongly radioactive. In July 1898 the Curies published their conclusion: the bismuth fraction contained a new element. Chemically it acted almost exactly like bismuth, but since it was radioactive, it had to be something new. They named it \"polonium\" in honor of the country of Marie's birth. A second publication, in December 1898, explained their di\n\n## Manhattan Project Pioneers: Marie Curie (U.S. National Park Service)\nKnowing that uranium emitted radiation, Curie researched other elements to see if they produced the same. Soon she learned the element thorium also produced radiation, leading her to deduce that radiation emitted directly from atoms, not from how they are arranged within molecules. In 1898 Curie and her husband discovered two new elements, radium and polonium. In 1903 the couple received the Nobel Prize in Physics for their groundbreaking research on radioactivity. Pierre Curie died after being [...] died after being hit by a horse-drawn cart in Paris in 1906. In 1911 Marie won the Nobel Prize in Chemistry for the discovery of radium and polonium and the isolation of pure radium. [...] During World War I, Marie Curie directed the Red Cross Radiology Service, providing x-rays for approximately 1 million soldiers. After the war she traveled to the United States to raise funds for more radi\n\n## The Enduring Legacy of Marie Curie: Impacts of Radium in 21st Century Radiological and Medical Sciences\nHer lifelong journey with radium (among other radioactive materials) began with Henri Becquerel’s discovery of natural radiation in 1896. Inspired to further investigate pitchblende – a uranium source that was found to be more radioactive than uranium itself – they eventually discovered and isolated both radium and polonium as sources of the excess radioactivity. Her 1903 PhD thesis, Recherches sur les substances radioactives ((Curie 1903); (Curie 1961); (Wolke 1988)), secured her share of the [...] In 1898, Marie and Pierre Curie discovered radium, although the experiments were done by both examining radium chloride ore mined from the spa town of Jáchymov (which at that time was called Joachimsthal) in today’s Czech Republic (for more information, see below). While both were credited with the discovery Marie actually did the experiments that led to the finding, while Pierre added his ow\n\n## The legacy of Marie Curie: perpetuating the spirit of a pioneer - Institut Curie\nactivity of these rays, Pierre and Marie Curie identified other elements with the same properties: polonium and then radium. Marie Curie called this natural ability to emit radiation “radioactivity”. For these discoveries, the Nobel Prize in Physics was awarded jointly to Henri Becquerel and Pierre and Marie Curie in 1903.",
+ "plan": {
+  "title": "Marie Curie: The Woman Who Won Two Nobel Prizes",
+  "description": "Marie Curie went from a poor student in Paris to the first person to win two Nobel Prizes. This video follows her discovery of polonium and radium, her work in World War I, and the cost of her research.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "79a07875",
+    "narration": "She lived on buttered bread and tea. Her health sometimes suffered. Yet this student would become the first person ever to win two Nobel Prizes. How did Marie Curie get there?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Marie Curie",
+      "subtitle": "From buttered bread and tea to two Nobel Prizes"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "A poor student with a big question"
+   },
+   {
+    "id": "e6a56026",
+    "narration": "She was born Maria Sklodowska in Warsaw on November 7, 1867. Her father was a secondary-school teacher, and he gave her some early scientific training.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Warsaw old town street",
+      "alt": "Warsaw, Poland",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "13ebf07f",
+    "narration": "Warsaw was then part of Poland dominated by Russia. After joining a students' revolutionary organization, she found it wise to leave for Cracow.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "route",
+      "title": "Leaving Warsaw",
+      "caption": "Warsaw, then Cracow, then Paris",
+      "stops": [
+       "Warsaw",
+       "Krakow",
+       "Paris"
+      ]
+     }
+    }
+   },
+   {
+    "id": "aa335382",
+    "narration": "In 1891 she finally reached Paris and enrolled at the Sorbonne. With little money, she threw herself into study. She finished a physics degree in 1893, and a mathematics degree the next year.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Student in Paris",
+      "events": [
+       {
+        "date": "1891",
+        "label": "Enrolls at the Sorbonne"
+       },
+       {
+        "date": "1893",
+        "label": "Physics degree"
+       },
+       {
+        "date": "1894",
+        "label": "Mathematics degree"
+       },
+       {
+        "date": "1895",
+        "label": "Marries Pierre Curie"
+       }
+      ]
+     }
+    },
+    "chapter": "Paris and the discovery"
+   },
+   {
+    "id": "a4b2d498",
+    "narration": "In 1894 she met Pierre Curie, a professor of physics. They married the next year. Together they would change science.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "A partnership",
+      "items": [
+       "Met Pierre in 1894",
+       "Married in 1895",
+       "Daughters Irène and Ève"
+      ],
+      "style": "icons",
+      "accent": "rose",
+      "icons": [
+       "heart",
+       "gem",
+       "house"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2dc4b903",
+    "narration": "Uranium gave off rays. Marie tested other elements and found that thorium did too. She concluded that radiation comes from atoms themselves, not from how they are arranged in molecules.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Where radiation comes from",
+      "nodes": [
+       {
+        "id": "u",
+        "label": "Uranium rays",
+        "icon": "atom"
+       },
+       {
+        "id": "t",
+        "label": "Thorium rays",
+        "icon": "atom"
+       },
+       {
+        "id": "a",
+        "label": "Comes from atoms",
+        "icon": "flask-conical"
+       }
+      ],
+      "edges": [
+       [
+        "u",
+        "t",
+        "tested more"
+       ],
+       [
+        "t",
+        "a",
+        "so"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "3bb02d6d",
+    "narration": "In 1898 the Curies announced two new elements. First came polonium, named for her native Poland. Then radium, from the Latin word for ray. Marie called this natural glow radioactivity.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "periodic table of elements",
+       "vintage laboratory glassware"
+      ],
+      "alt": "The periodic table and old laboratory glassware"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "e00d343a",
+    "narration": "Proving it was brutal. From a tonne of pitchblende, they separated only one-tenth of a gram of radium chloride. It took Marie over three years.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "0.1",
+      "unit": "g",
+      "label": "Radium chloride from one tonne of pitchblende"
+     }
+    }
+   },
+   {
+    "id": "7cb36df6",
+    "narration": "In 1903, Marie and Pierre shared the Nobel Prize in Physics with Henri Becquerel for their work on radioactivity. Marie was the first woman to win a Nobel Prize.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Prizes and loss",
+      "events": [
+       {
+        "date": "1903",
+        "label": "Nobel Prize in Physics"
+       },
+       {
+        "date": "1906",
+        "label": "Pierre dies in Paris"
+       },
+       {
+        "date": "1910",
+        "label": "Isolates pure radium"
+       },
+       {
+        "date": "1911",
+        "label": "Nobel Prize in Chemistry"
+       }
+      ]
+     }
+    },
+    "sfx": "chime",
+    "chapter": "Two Nobel Prizes"
+   },
+   {
+    "id": "e35360a5",
+    "narration": "Then tragedy struck. In 1906 Pierre was hit by a horse-drawn cart in Paris and died. Marie took his place as professor at the Sorbonne, the first woman ever to hold that post.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Sorbonne University Paris building",
+      "alt": "The Sorbonne in Paris",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "777bd4b7",
+    "narration": "In 1910 she isolated pure radium metal. In 1911 she won a second Nobel Prize, this time in Chemistry. No one had ever won twice.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The first person ever to win two Nobel Prizes.",
+      "emphasis": "two Nobel Prizes"
+     }
+    }
+   },
+   {
+    "id": "5b54a9d1",
+    "narration": "During World War I, she directed the Red Cross Radiology Service. Her X-ray work reached about one million soldiers.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "1 million",
+      "label": "Soldiers received X-rays through her Red Cross service"
+     }
+    },
+    "chapter": "War, cost and legacy"
+   },
+   {
+    "id": "f21a9533",
+    "narration": "Radiation had a cost. Marie died in 1934 of aplastic anemia, likely caused by years of exposure to radiation.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "scientist working in laboratory",
+      "alt": "researcher in a lab"
+     }
+    }
+   },
+   {
+    "id": "e16a341b",
+    "narration": "Her work still shapes radiology and medicine today. Her lesson is simple: patient, stubborn curiosity can change the world. Next time you see an X-ray, remember her.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Patient curiosity can change the world.",
+      "emphasis": "curiosity"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Marie Curie: Biography, Scientist, Nobel Prize, Radioactivity",
+    "url": "https://www.biography.com/scientists/marie-curie",
+    "publisher": "biography.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Marie Curie | Biography, Nobel Prize, Accomplishments, & Facts | Britannica",
+    "url": "https://www.britannica.com/biography/Marie-Curie",
+    "publisher": "britannica.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Marie Curie – Biographical - NobelPrize.org",
+    "url": "https://www.nobelprize.org/prizes/physics/1903/marie-curie/biographical",
+    "publisher": "nobelprize.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Marie Curie - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Marie_Curie",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Marie Curie - Research Breakthroughs (1897-1904)",
+    "url": "https://history.aip.org/exhibits/curie/resbr2.htm",
+    "publisher": "history.aip.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Manhattan Project Pioneers: Marie Curie (U.S. National Park Service)",
+    "url": "https://www.nps.gov/people/manhattan-project-pioneers-marie-curie.htm",
+    "publisher": "nps.gov",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 87.7,
+  "before_first_script_call_s": 44.1,
+  "script_s": 43.6
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "research": 0.00074,
+  "script_big": 0.15309,
+  "search_api": 0.016,
+  "total": 0.1701
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 48181,
+  "out": 7690
+ },
+ "rules": {
+  "length": {
+   "words": 374,
+   "expected_words": 402,
+   "ratio": 0.93,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 169.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "She lived on buttered bread and tea. Her health sometimes suffered. Yet this student would become the first person ever to win two Nobel Prizes. How did Marie Curie get there?",
+   "close_text": "Her work still shapes radiology and medicine today. Her lesson is simple: patient, stubborn curiosity can change the world. Next time you see an X-ray, remember her."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "image": 2,
+    "map": 1,
+    "timeline": 2,
+    "bullets": 1,
+    "diagram": 1,
+    "gallery": 1,
+    "counter": 1,
+    "kinetic_text": 2,
+    "stat": 1,
+    "clip": 1
+   },
+   "max_run": 1,
+   "entropy": 3.38,
+   "top_type": "image",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 10,
+   "ungrounded_numbers": [
+    "7,1867"
+   ],
+   "entities": 21,
+   "ungrounded_entities": [
+    "Nobel Prizes"
+   ],
+   "ungrounded_share": 0.065,
+   "ungrounded_number_share": 0.1,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 6,
+   "fetched": 8,
+   "notes_len": 7171,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 9 (timeline): its narration never says ['Pierre dies in Paris', 'Isolates pure radium']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Core dates and facts match the notes. Minor slips: the Nobel Prize 'for their work' attribution, 'Marie called this natural glow radioactivity', and the degree years (the 1894 degree is described as a mathematics degree, while the NobelPrize source gives a licenciateship)."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It hits all the checklist items, but it omits her Polish identity beyond polonium, the radium industry and the mobile 'little Curies' X-ray vans, the 1934 death date detail, and the second prize controversy. Depth is thin for the length."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chronological order is clear and chaptered, and the hook is paid off in the ending. Beat 9 says 'first woman to win a Nobel Prize' before the timeline moves on, and Pierre's death is placed after the 1903 prize, which is fine."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening 'She lived on buttered bread and tea' is concrete and curious. The ending 'Next time you see an X-ray, remember her' lands, though the moral is a little stock."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The register is clear and suits a general audience, with short punchy sentences."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The mix of scene types is varied. But the uranium-to-thorium diagram is a weak fit, the generic 'scientist working in laboratory' clip for her death is mismatched, and the bullets scene lists daughters that are never narrated."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Buttered bread and the tonne of pitchblende yielding a tenth of a gram are good details. Much of the rest is a standard recap of the notes."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, about the right length, covering the requested points. It is somewhat short on narrative and personal story."
+   },
+   "language": {
+    "score": 5,
+    "reason": "The grammar is clean and the phrasing natural."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Daughters Irène and Ève",
+    "issue": "The bullets scene shows daughters that the narration never mentions.",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "scientist working in laboratory",
+    "issue": "A generic lab clip is shown while the narration covers her death from radiation, so it does not match.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Marie called this natural glow radioactivity.",
+    "issue": "'Glow' is a loose paraphrase of her term for radiation emission, and it might mislead viewers into thinking radioactivity is visible light.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Proving it was brutal. From a tonne of pitchblende, they separated only one-tenth of a gram of radium chloride. It took Marie over three years.",
+    "issue": "This was 1902, and the three-year effort is attributed to Marie alone. The notes frame it as the work of both Curies with industrial help.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Her X-ray work reached about one million soldiers.",
+    "issue": "The mobile 'little Curie' X-ray vans and her own driving are omitted, even though they are the most vivid wartime detail.",
+    "beat": 12
+   }
+  ],
+  "missing": [
+   "Little Curies mobile X-ray vans",
+   "Her daughter Irène's own Nobel Prize, and the Institut Curie",
+   "The fact that her notebooks are still radioactive",
+   "The Polish identity and the cost of being a woman in science, such as the Académie rejection"
+  ],
+  "wrong_facts": [
+   "Unverified, but true: the 1894 degree was a licence in mathematical sciences, loosely called a mathematics degree."
+  ],
+  "would_publish": false,
+  "summary": "A clean, accurate chronological biography with a good hook and a solid recap of the notes. It is generic in places, has some visual mismatches, and misses the vivid wartime and legacy details.",
+  "mean": 3.78,
+  "cost_usd": 0.026468,
+  "tokens": [
+   6509,
+   1345
+  ]
+ }
+}

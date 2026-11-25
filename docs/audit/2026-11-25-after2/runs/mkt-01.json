@@ -1,0 +1,397 @@
+{
+ "id": "mkt-01",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "30-60 second promo for a coffee subscription called Ember Roasters: small-batch beans roasted to order, ships every two weeks, pause or cancel anytime, first bag 50% off.",
+ "great": "Hook on problem (stale coffee), product benefits from the brief only, no invented claims or prices beyond the given offer, clear call to action, brand name used; punchy.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:13:50",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 4,
+   "seconds": 6.4,
+   "cost_usd": 0.0009943,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 5,
+   "candidates": 5,
+   "checked": 5,
+   "flagged": 1,
+   "repaired": 1,
+   "unsupported": 1,
+   "common": 0,
+   "supported": 4,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 3633,
+  "n_sources": 1,
+  "n_fetched": 4,
+  "fetched": [
+   "Ember Coffee Company on Facebook: \"Unboxing the best coffee subscriptions from Minnesota’s best coffee, voted 4 years in a row! ☕📦 Fres…\"",
+   "Ember Coffee Company on Instagram: \"Unbox the BEST coffee subscription with me. ☕️📦🚛 Sign up and save 15% on your first 5 shipments. Fre…\"",
+   "Ember Coffee Roasters — small-batch coffee, roasted by fire",
+   "Ember Coffee Company on Facebook: \"Here's your weekly update to get your coffee ordered fresh to your doorstep. Join the Ember Circle f…\""
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "grounding: 1 beats had unsupported specifics, 1 rewritten"
+ ],
+ "notes": "## Ember Coffee Company on Facebook: \"Unboxing the best coffee subscriptions from Minnesota’s best coffee, voted 4 years in a row! ☕📦 Fres…\"\nWith The Ember Circle, you can choose your favorite coffee beans or grounds or let our roasters surprise you with something fresh every month. 🏆 Voted Minnesota’s Best Coffee 4 years in a row 🔥 Freshly air-roasted coffee 📦 Flexible coffee deliveries ☕ Low-acid, smooth specialty coffee 🎁 Exclusive subscriber rewards and perks The best part? You can skip, pause, or cancel anytime. Explore our coffee subscriptions at the link in our bio! [...] # Ember Coffee Company on Facebook: \"Unboxing the best coffee subscriptions from Minnesota’s best coffee, voted 4 years in a row! ☕📦 Fres…\" Unboxing the best coffee subscriptions from Minnesota’s best coffee, voted 4 years in a row! ☕📦 Freshly air-roasted specialty coffee, delivered straight to your door from our small-batch roastery in Big Lake, Minnesota. [...] #CoffeeSubscription #SpecialtyCoffee #CoffeeDelivery #AirRoastedCoffee #MinnesotaCoffee -\n\n## Ember Coffee Company on Instagram: \"Unbox the BEST coffee subscription with me. ☕️📦🚛 Sign up and save 15% on your first 5 shipments. Fre…\"\n# Ember Coffee Company on Instagram: \"Unbox the BEST coffee subscription with me. ☕️📦🚛 Sign up and save 15% on your first 5 shipments. Fre…\" Unbox the BEST coffee subscription with me. ☕️📦🚛 Sign up and save 15% on your first 5 shipments. Fresh coffee delivered quick. Skip, pause, cancel anytime. ☕️🙌 #coffeesubscription #coffeeroaster #coffeebeans #coffeeeducation #coffeeathome [Image: Video by Ember Coffee Company on October 30, 2026. May be an image of box and text.] [...] - Author: @embercoffeeco (Ember Coffee Company) (verified) - Posted: 2026-10-30T16:47:13+00:00 - Type: clips - Audio: embercoffeeco - Hashtags: #coffeesubscription #coffeeroaster #coffeebeans #coffeeeducation #coffeeathome - Likes: 9 - Comments: 0\n\n## Ember Coffee Roasters — small-batch coffee, roasted by fire\nEmber. Shop beans A slow pour of coffee in low light Small batch · roasted by fire # Coffee worth slowing down for A small roastery working in cast-iron drums. Seasonal single origins, roasted dark or bright, shipped within days of the cooling tray. Explore the roastsOur story Portland, OREst. 2019Roasted to order Freshly roasted✶Small batch✶Single origin✶Roasted to order✶Shipped in days✶ Freshly roasted✶Small batch✶Single origin✶Roasted to order✶Shipped in days✶ Why we do this [...] The subscription ## Fresh beans, every fortnight Pick a roast, pick a rhythm. We grind to order and post it the morning it's roasted. Skip or cancel any time. You're on the list — check your inbox to confirm. [...] We buy seasonally, in small lots, straight from farms we've sat down with. What lands in your cup was green a few weeks ago and roasted a few days back. How we roast A slow pour-over brew The ritu\n\n## Ember Coffee Company on Facebook: \"Here's your weekly update to get your coffee ordered fresh to your doorstep. Join the Ember Circle f…\"\n# Ember Coffee Company on Facebook: \"Here's your weekly update to get your coffee ordered fresh to your doorstep. Join the Ember Circle f…\" Here's your weekly update to get your coffee ordered fresh to your doorstep. Join the Ember Circle for 15% off your first 5 shipments! [Image: May be an image of studying, book and text] [Image: May be an image of studying and text] [Image: May be an image of cornflower and text] [Image: May be an image of cornflower and text] [...] - Author: Ember Coffee Company - Posted: 2026-10-20T21:01:33+00:00 - Links: - Reactions: 7 - Comment count: 0 - Shares: 0 - Privacy: Public",
+ "plan": {
+  "title": "Ember Roasters: Fresh Coffee Every Two Weeks",
+  "description": "Ember Roasters is a coffee subscription of small-batch beans roasted to order and shipped every two weeks. Pause or cancel anytime, and your first bag is 50% off.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "38ba1c9f",
+    "narration": "What if your coffee was roasted only for you? Not months ago, not on a warehouse shelf. This morning, in a small batch, just for your order. That's the idea behind Ember Roasters.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "coffee beans roasting drum",
+      "alt": "Fresh coffee beans being roasted"
+     }
+    }
+   },
+   {
+    "id": "185d75e3",
+    "narration": "Every bag is small-batch, roasted to order. Pick a roast, pick a rhythm. We grind to your liking, and the beans ship within days of leaving the cooling tray.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Roasted for you",
+      "items": [
+       "Small batch",
+       "Roasted to order",
+       "Shipped in days"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "flame",
+       "coffee",
+       "package"
+      ]
+     }
+    }
+   },
+   {
+    "id": "e2be2877",
+    "narration": "Your coffee arrives every two weeks. First, choose your roast. Second, we roast it fresh. Third, it lands at your door, right on schedule, ready to brew.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How it works",
+      "steps": [
+       {
+        "label": "Choose your roast"
+       },
+       {
+        "label": "We roast it fresh"
+       },
+       {
+        "label": "Ships every two weeks"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "7cf062e3",
+    "narration": "Life changes, so your plan can too. Pause when you're away. Cancel anytime. You stay in control of every delivery.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Total flexibility",
+      "items": [
+       "Ships every two weeks",
+       "Pause anytime",
+       "Cancel anytime"
+      ]
+     }
+    }
+   },
+   {
+    "id": "01c8f54f",
+    "narration": "And right now, your first bag is fifty percent off. Try Ember Roasters today. Fresh, small-batch coffee, roasted to order, waiting for your first cup.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "50% OFF",
+      "label": "Your first bag of Ember Roasters"
+     }
+    },
+    "sfx": "ding"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Ember Coffee Roasters — small-batch coffee, roasted by fire",
+    "url": "https://ember-coffee-lake.vercel.app",
+    "publisher": "ember-coffee-lake.vercel.app",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 18.5,
+  "before_first_script_call_s": 9.3,
+  "script_s": 9.3
+ },
+ "cost": {
+  "script_small": 0.0011,
+  "research": 0.00099,
+  "script_big": 0.03302,
+  "search_api": 0.016,
+  "total": 0.05112
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 1
+ },
+ "tokens": {
+  "in": 23469,
+  "out": 2800
+ },
+ "rules": {
+  "length": {
+   "words": 136,
+   "expected_words": 134,
+   "ratio": 1.015,
+   "beats": 5,
+   "expected_beats": 4,
+   "est_speech_s": 61.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "What if your coffee was roasted only for you? Not months ago, not on a warehouse shelf. This morning, in a small batch, just for your order. That's the idea behind Ember Roasters.",
+   "close_text": "And right now, your first bag is fifty percent off. Try Ember Roasters today. Fresh, small-batch coffee, roasted to order, waiting for your first cup."
+  },
+  "variety": {
+   "distinct": 5,
+   "counts": {
+    "clip": 1,
+    "bullets": 1,
+    "steps": 1,
+    "checklist": 1,
+    "stat": 1
+   },
+   "max_run": 1,
+   "entropy": 2.32,
+   "top_type": "clip",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 1,
+   "fetched": 4,
+   "notes_len": 3633,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Core offer facts match the brief, but \"grind to your liking\" and \"within days of leaving the cooling tray\" come from a third-party site's notes, not the brief. \"This morning\" for every order is an overclaim."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "All brief points are present (small-batch, roasted to order, two weeks, pause/cancel, 50% off). The problem of stale coffee is only lightly touched, and there is no real CTA such as a URL or \"subscribe\"."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear flow from hook to benefits, how it works, flexibility and offer. The two-week cadence is repeated in beats 3 and 4."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "\"What if your coffee was roasted only for you?\" is a decent hook. The ending is a soft \"waiting for your first cup\" with no concrete action step."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, upbeat promo voice that suits the brief."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary and match the narration. Three bullet/step/checklist scenes in a row feel template-like, and there is little imagery beyond the opening clip."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Some nice phrases (\"Not months ago, not on a warehouse shelf\"), but the rest is generic promo copy such as \"Life changes, so your plan can too\"."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Covers every brief item and uses the brand name. The script is about 120 words, close to the target, and the video runs about a minute. It adds claims not in the brief."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, natural, grammatical English."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "This morning, in a small batch, just for your order.",
+    "issue": "Claims same-morning roasting, which is not in the brief and contradicts the later \"ship within days\"; it is an invented specific.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "We grind to your liking, and the beans ship within days of leaving the cooling tray.",
+    "issue": "Taken from a third-party site's notes and not in the brief, so it is an unrequested claim.",
+    "beat": 2
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Try Ember Roasters today.",
+    "issue": "The call to action is vague, with no link, button or \"start your subscription\" instruction.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Your coffee arrives every two weeks.",
+    "issue": "The cadence is repeated in beats 3 and 4 (scenes and narration), which wastes time in a short promo.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Not months ago, not on a warehouse shelf.",
+    "issue": "The stale-coffee problem gets one line and is never developed.",
+    "beat": 1
+   }
+  ],
+  "missing": [
+   "Clear call to action (URL or sign-up prompt)",
+   "Stronger stale-coffee problem framing",
+   "Mention that the 50% discount applies only to the first bag, stated plainly"
+  ],
+  "wrong_facts": [
+   "\"This morning\" roasting for each order is unsupported by the brief",
+   "Grind-to-order and cooling-tray details come from an unrelated site, not the brief"
+  ],
+  "would_publish": false,
+  "summary": "A clean, on-brief promo with all key offer points and fluent copy. It adds unsupported claims such as same-morning roasting, has a weak CTA, and leans on template-style scenes.",
+  "mean": 3.56,
+  "cost_usd": 0.020114,
+  "tokens": [
+   4002,
+   1211
+  ]
+ }
+}

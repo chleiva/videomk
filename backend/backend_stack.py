@@ -523,7 +523,7 @@ class BackendStack(Stack):
                 properties={
                     "prompt": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=10, max_length=2000),
                     "client_request_id": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=8, max_length=64),
-                    "target_minutes": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=1, maximum=12),
+                    "target_minutes": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=0.25, maximum=12),
                     "theme": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["midnight", "paper", "sunrise"]),
                     "max_images_per_minute": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=0, maximum=10),
                     "captions": apigw.JsonSchema(type=apigw.JsonSchemaType.BOOLEAN),

@@ -1,0 +1,502 @@
+{
+ "id": "rec-01",
+ "category": "recipe / cooking",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "shakshuka",
+ "great": "Ingredients with quantities, sauteing onion and pepper, spices (cumin, paprika), tomatoes, simmer, wells for eggs, cover and cook, finish with herbs, serving tips; accurate ordering and times.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:03:57",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Shakshuka is a timeless dish whose origin, history, and preparation are well documented, so an encyclopedia source is sufficient for an accurate explainer script without needing recent information.",
+  "queries": [
+   "shakshuka recipe origin history",
+   "shakshuka ingredients how it is made"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 1554,
+  "n_sources": 2,
+  "n_fetched": 3,
+  "fetched": [
+   "Shakshouka",
+   "The Shakshuka System",
+   "Pilpelchuma"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Shakshouka\nShakshouka is a Maghrebi dish of eggs poached in a sauce of tomatoes, olive oil, peppers, onion, and garlic, commonly spiced with cumin, paprika, and cayenne pepper. Shakshouka is a popular dish throughout North Africa and the Middle East.\n\n## The Shakshuka System\nThe Shakshuka System (Hebrew: שיטת השקשוקה) is a 2008 Israeli documentary film created by the Israeli investigative journalist Mickey Rosenthal and the Israeli director Ilan Aboody. The film focuses on the connection between private capital and government in Israel and suggests that a system exists whereby the State of Israel sells its limited resources, cheaply, to a handful of wealthy families. The film shows this by specifically focusing on the business relationship between the political leadership in Israel and one of the wealthiest families in the Israeli economy – the Ofer family.\nThe film won the Ophir Award for Best Documentary film in 2009.\nWhile the film was being produced, the Ofer Brothers Group filed a lawsuit against the creators of the film and no Israeli TV channel would show it. Initially the film was screened in Cinematheques, different events, and in the Knesset. A year after the premiere, it was broadcast on Channel 1, followed by a film produced by the Ofer Brothers in response. In February 2010 the lawsuit was dismissed.\n\n## Pilpelchuma\nPilpelchuma (Hebrew: פלפלצ'ומה), also spelled pilpelshuma (lit: \"pepper garlic\"), is a chilli-garlic paste similar to a hot sauce originating from the Libyan Jews and commonly used in Israeli cuisine.",
+ "plan": {
+  "title": "Shakshuka: Eggs Poached in Spiced Tomato Sauce",
+  "description": "Shakshuka is a Maghrebi dish of eggs poached in a sauce of tomatoes, olive oil, peppers, onion, and garlic. Learn what goes into it, how it comes together, and how to serve it.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "d932dde5",
+    "narration": "Imagine a single pan holding a bubbling red sauce, with eggs gently cooking right in the middle. That is shakshuka, a dish that turns simple ingredients into a feast.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "shakshuka in cast iron pan",
+      "alt": "Shakshuka with eggs in tomato sauce",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "sparkle",
+    "chapter": "What it is"
+   },
+   {
+    "id": "8e28950e",
+    "narration": "Shakshuka is a Maghrebi dish, meaning it comes from North Africa's west. Eggs are poached in a sauce of tomatoes, olive oil, peppers, onion, and garlic.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Shakshuka",
+      "definition": "A Maghrebi dish of eggs poached in a sauce of tomatoes, olive oil, peppers, onion, and garlic.",
+      "origin": "Maghreb, North Africa"
+     }
+    }
+   },
+   {
+    "id": "7b96a559",
+    "narration": "Today it is popular throughout North Africa and the Middle East. You will find it on breakfast tables, at brunch spots, and in family kitchens from morning until night.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "regions",
+      "title": "Where shakshuka is loved",
+      "caption": "North Africa and the Middle East",
+      "regions": [
+       "Morocco",
+       "Algeria",
+       "Tunisia",
+       "Libya",
+       "Egypt",
+       "Israel"
+      ]
+     }
+    }
+   },
+   {
+    "id": "597eeab9",
+    "narration": "Let's look at what goes in. You need tomatoes, olive oil, peppers, onion, garlic, and of course eggs. Nothing fancy, and most of it is probably in your kitchen.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "tomato",
+        "label": "Tomatoes"
+       },
+       {
+        "icon": "drop",
+        "label": "Olive oil"
+       },
+       {
+        "icon": "pepper",
+        "label": "Peppers"
+       },
+       {
+        "icon": "onion",
+        "label": "Onion"
+       },
+       {
+        "icon": "garlic",
+        "label": "Garlic"
+       },
+       {
+        "icon": "egg",
+        "label": "Eggs"
+       }
+      ],
+      "title": "The base"
+     }
+    },
+    "chapter": "What goes in"
+   },
+   {
+    "id": "55a06cd4",
+    "narration": "The flavor comes from the spices. Cumin adds earthiness, paprika adds color and sweetness, and cayenne pepper brings the heat. Adjust them to your own taste.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The spices",
+      "items": [
+       "Cumin",
+       "Paprika",
+       "Cayenne pepper"
+      ],
+      "style": "keywords",
+      "accent": "coral",
+      "icons": [
+       "space",
+       "",
+       "flame"
+      ]
+     }
+    }
+   },
+   {
+    "id": "04a29c95",
+    "narration": "Many cooks add a spoonful of pilpelchuma on the side. It is a chilli and garlic paste from Libyan Jews, used widely in Israeli cuisine, and the name means pepper garlic.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Pilpelchuma",
+      "definition": "A chilli-garlic paste, similar to a hot sauce, originating from the Libyan Jews and commonly used in Israeli cuisine.",
+      "origin": "Literally: pepper garlic"
+     }
+    }
+   },
+   {
+    "id": "a37e32bb",
+    "narration": "Now the method. First, heat olive oil and soften the onion and peppers. Then add garlic and spices. Next, pour in the tomatoes and let the sauce simmer. Finally, crack in the eggs.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Making shakshuka",
+      "steps": [
+       {
+        "label": "Soften onion and peppers",
+        "detail": "In hot olive oil"
+       },
+       {
+        "label": "Add garlic and spices"
+       },
+       {
+        "label": "Simmer the tomatoes"
+       },
+       {
+        "label": "Crack in the eggs"
+       }
+      ]
+     }
+    },
+    "sfx": "click",
+    "chapter": "How it comes together"
+   },
+   {
+    "id": "c479f147",
+    "narration": "Cover the pan and let the eggs poach gently in the sauce. Watch closely. You want the whites set and the yolks still soft, ready to be broken into the sauce.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "eggs cooking in tomato sauce",
+      "alt": "Simmering pan of sauce on stove"
+     }
+    }
+   },
+   {
+    "id": "3fc840c9",
+    "narration": "Bring the pan straight to the table. Scoop it up with warm bread, so every bite catches a bit of sauce, a bit of egg, and a little heat.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "shakshuka served with bread",
+       "shakshuka breakfast table",
+       "shakshuka with fresh herbs"
+      ],
+      "alt": "Shakshuka served at the table"
+     }
+    }
+   },
+   {
+    "id": "aff83c9b",
+    "narration": "So that is shakshuka: eggs poached in a spiced tomato sauce, built from humble ingredients. Make it once, and you will understand why so many kitchens share it.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Simple ingredients, one pan, a dish shared across continents.",
+      "emphasis": "one pan"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Shakshouka",
+    "url": "https://en.wikipedia.org/wiki/Shakshouka",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Pilpelchuma",
+    "url": "https://en.wikipedia.org/wiki/Pilpelchuma",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 17.1,
+  "before_first_script_call_s": 5.5,
+  "script_s": 11.6
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "script_big": 0.04018,
+  "search_api": 0.0,
+  "total": 0.04048
+ },
+ "calls": {
+  "small": 4,
+  "big": 1
+ },
+ "tokens": {
+  "in": 12887,
+  "out": 2030
+ },
+ "rules": {
+  "length": {
+   "words": 291,
+   "expected_words": 267,
+   "ratio": 1.09,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 130.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Imagine a single pan holding a bubbling red sauce, with eggs gently cooking right in the middle. That is shakshuka, a dish that turns simple ingredients into a feast.",
+   "close_text": "So that is shakshuka: eggs poached in a spiced tomato sauce, built from humble ingredients. Make it once, and you will understand why so many kitchens share it."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "image": 1,
+    "definition": 2,
+    "map": 1,
+    "icons": 1,
+    "bullets": 1,
+    "steps": 1,
+    "clip": 1,
+    "gallery": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "definition",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 6,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "tomatoes olive oil peppers",
+    "count": 2
+   },
+   {
+    "phrase": "olive oil peppers onion",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 3,
+   "notes_len": 1554,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The notes support the core claims, but \"Maghrebi... comes from North Africa's west\" is loose, and \"Many cooks add a spoonful of pilpelchuma on the side\" is not in the notes and is shaky as a general claim."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "There are no quantities, no cooking times, no heat level, no mention of making wells for the eggs, and no herb finish, all of which the reviewer's note expects. The viewer would struggle to actually cook it."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical (what it is, ingredients, method, serving), but beats 2 and 4 repeat the ingredient list nearly verbatim and the pilpelchuma detour interrupts the flow."
+   },
+   "hook_ending": {
+    "score": 2,
+    "reason": "The opener \"Imagine a single pan holding a bubbling red sauce\" is a mild image with no tension. The ending is a bare summary with a generic line, \"Make it once, and you will understand why.\""
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is friendly and suits a beginner home-cook audience in the US."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary (image, definition, map, icons, steps, clip, gallery). However, the pilpelchuma definition card is off-core, the map lists Israel under North Africa and the Middle East, and the steps scene omits wells and cover."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The content is generic and encyclopedic, with no origin story, no etymology of the name, and no surprising facts or tips beyond the tangential pilpelchuma."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The length is roughly right and the language is English, but the script does not deliver recipe-level detail such as quantities, wells for the eggs, and herbs."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The writing is clean and fluent, with only minor phrasing issues such as \"comes from North Africa's west\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Next, pour in the tomatoes and let the sauce simmer. Finally, crack in the eggs.",
+    "issue": "There are no quantities, no simmer time, no instruction to make wells in the sauce, and no timing for the eggs, so the recipe cannot be followed.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Bring the pan straight to the table.",
+    "issue": "There is no finish with fresh herbs such as cilantro or parsley, even though the gallery query mentions herbs; there are also no serving tips like feta or the cooking time.",
+    "beat": 9
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "You need tomatoes, olive oil, peppers, onion, garlic, and of course eggs.",
+    "issue": "This repeats the ingredient list already given in beat 2, which wastes limited time.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Many cooks add a spoonful of pilpelchuma on the side.",
+    "issue": "The notes do not support the claim that many cooks add it; it is a tangent presented as common practice.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "meaning it comes from North Africa's west",
+    "issue": "This is an imprecise gloss of Maghrebi; the Maghreb is northwest Africa.",
+    "beat": 2
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Imagine a single pan holding a bubbling red sauce",
+    "issue": "The opener is a generic scene-setting line with no curiosity gap or tension.",
+    "beat": 1
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Make it once, and you will understand why so many kitchens share it.",
+    "issue": "The ending is a cliché and offers no concrete takeaway or image.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "Ingredient quantities (e.g., 4-6 eggs, a can of tomatoes, 1 onion, 1 pepper)",
+   "Making wells in the sauce for the eggs",
+   "Cooking times (simmer 10-15 min, eggs 5-8 min)",
+   "Finishing with herbs such as cilantro or parsley and crumbled feta",
+   "Origin and name meaning (Tunisian/Maghrebi roots, 'a mixture')",
+   "Serving tips and variations"
+  ],
+  "wrong_facts": [
+   "Doubtful: \"Many cooks add a spoonful of pilpelchuma on the side\" is not in the notes."
+  ],
+  "would_publish": false,
+  "summary": "The script is clean and accurate to its thin notes, but it reads as an encyclopedia summary rather than a usable recipe video. It lacks quantities, times, wells, herbs, and a strong hook or ending.",
+  "mean": 2.89,
+  "cost_usd": 0.023796,
+  "tokens": [
+   3933,
+   1593
+  ]
+ }
+}

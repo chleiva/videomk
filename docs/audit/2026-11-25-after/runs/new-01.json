@@ -1,0 +1,571 @@
+{
+ "id": "new-01",
+ "category": "current events / news",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "What happened at the most recent Formula 1 Grand Prix?",
+ "great": "Name the actual latest race with date, winner, podium, key moment, championship standing, sourced from a recent article; correct as of today.",
+ "minutes": 2.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:59:45",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The most recent Grand Prix depends on the current F1 calendar and changes frequently, so it requires up-to-date results beyond my training data.",
+  "queries": [
+   "most recent Formula 1 Grand Prix results",
+   "F1 Grand Prix race winner 2026"
+  ],
+  "searches": 2,
+  "reads": 0,
+  "iterations": 2,
+  "seconds": 11.4,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "news-explainer",
+   "recap-summary"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 10,
+   "candidates": 3,
+   "checked": 1,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 3,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 4771,
+  "n_sources": 3,
+  "n_fetched": 5,
+  "fetched": [
+   "2026 Las Vegas Grand Prix race report and highlights: Max Verstappen wins exhilarating Las Vegas Grand Prix from Lando Norris and Oscar Piastri",
+   "Winners and losers from F1's 2026 Las Vegas Grand Prix",
+   "2026 Results - Formula 1 Las Vegas Grand Prix",
+   "2026 Formula 1 Sao Paulo Grand Prix report: Lando Norris beats Max Verstappen in wet Sao Paulo GP thriller as Mercedes win title",
+   "Las Vegas Grand Prix results: Max Verstappen wins drama-packed race in Sin City - as it happened - ESPN"
+  ],
+  "research_agent_cost_usd": 0.0009756000000000001
+ },
+ "warnings": [],
+ "notes": "## 2026 Las Vegas Grand Prix race report and highlights: Max Verstappen wins exhilarating Las Vegas Grand Prix from Lando Norris and Oscar Piastri\nPublished: Sun, 22 Nov 2026 05:58:16 GMT\nMax Verstappen has taken victory in a thrilling and frenetic Las Vegas Grand Prix, the four-time World Champion managing to hold off a race-long challenge from the Mercedes pair – who both dramatically fell back from the podium positions in the final laps – to seal his third win on the streets of Nevada ahead of the McLaren duo. [...] Antonelli settled for fourth, with Gasly managing the cooling issues on his Alpine to take P5 ahead of team mate Colapinto. Hamilton followed in seventh, while Sainz claimed some valuable points for Williams in eighth and Russell and Leclerc rounded out the top 10. [...] Lewis Hamilton was seventh for Ferrari in an eventful race for the Scuderia, the Briton having taken a 10-second time penalty for leaving the track and gaining an advantage in an earlier battle with Norris while he also made contact with team mate Charles Leclerc later on, for which the Mon\n\n## Winners and losers from F1's 2026 Las Vegas Grand Prix\nPublished: Sun, 22 Nov 2026 08:22:46 GMT\n## Winner: Max Verstappen (1st) In such a chaotic race with karting-levels of passes for the lead, it's little surprise that a racing animal such as Verstappen emerged on top. Verstappen judged things beautifully, keeping a calm head, outdriving and out-strategising both Mercedes drivers for a fourth victory in six races. - JS ## Loser: Kimi Antonelli (4th) [...] But you can choose to take a much more positive view of this. He suggested what would have arguably been a better race strategy, to keep swapping positions at the front to try and build a gap, which Verstappen seemingly vetoed on track. He was the most threatening for a win that he's looked so far too and, as in Baku, he showed on these sorts of street circuits that he's a proper contender. A loser from the result, but certainly not in performance. - JB ## Winner: Carlos Sainz (8th) [...] Having lifted off to keep the ideal gap \n\n## 2026 Results - Formula 1 Las Vegas Grand Prix\nPublished: Sun, 22 Nov 2026 06:05:04 GMT\nRace # 2026 Results ## 2026 Winners 1. First placeMax VerstappenNetherlands25 PointsTime 1:27:39.624 2. Second placeLando NorrisUnited Kingdom18 PointsTime +0.639s 3. Third placeOscar PiastriAustralia15 PointsTime +1.529s ## 2026 Race Results [...] | Pos. | No. | Driver | Team | Laps | Time / Retired | Pts. | --------- | 1 | 3 | Max VerstappenVER | Red Bull Racing | 50 | 1:27:39.624 | 0 | | 2 | 1 | Lando NorrisNOR | McLaren | 50 | +0.639s | 0 | | 3 | 81 | Oscar PiastriPIA | McLaren | 50 | +1.529s | 0 | | 4 | 12 | Kimi AntonelliANT | Mercedes | 50 | +2.574s | 0 | | 5 | 10 | Pierre GaslyGAS | Alpine | 50 | +2.927s | 0 | | 6 | 43 | Franco ColapintoCOL | Alpine | 50 | +7.955s | 0 | | 7 | 44 | Lewis HamiltonHAM | Ferrari | 50 | +12.795s | 0 | [...] | 8 | 55 | Carlos SainzSAI | Williams | 50 | +12.938s | 0 | | 9 | 63 | George RussellRUS | Mercedes | 50 | +13.192s | 0 | | 10 | 16 | Charles Lecl\n\n## 2026 Formula 1 Sao Paulo Grand Prix report: Lando Norris beats Max Verstappen in wet Sao Paulo GP thriller as Mercedes win title\nPublished: Sun, 08 Nov 2026 18:51:28 GMT\nVerstappen climbed to the podium from P21 on the grid during a frenetic Grand Prix, as team mate Isack Hadjar made it a double podium for Red Bull. George Russell and Kimi Antonelli finished fourth and fifth, the latter having spun twice – once even before the start – after leading early on, but with the result enough for Mercedes to claim the title. [...] Lando Norris beat Max Verstappen to victory in a thrilling wet Sao Paulo Grand Prix as Mercedes clinched the 2026 Constructors' Championship. Norris claimed his third win of the season during Sunday's 71-lap race at the Autódromo José Carlos Pace, which began wet and dried out before the McLaren driver had to navigate a late rain shower, eventually claiming victory by 14.6 seconds after starting from pole. [...] | Pos. | Driver | Time | Points | ------| | 1 | Lando NorrisNOR | 1:35:23.504 | 25 | | 2 | Max VerstappenVER | +14.602s | 18 \n\n## Las Vegas Grand Prix results: Max Verstappen wins drama-packed race in Sin City - as it happened - ESPN\nPublished: Sun, 22 Nov 2026 05:25:00 GMT\nMax Verstappen fended off his rivals in stunning fashion to win a thrilling Las Vegas Grand Prix. McLaren's Lando Norris and Oscar Piastri finished second and third after Mercedes' George Russell collided with the wall and Kimi Antonelli dropped back in the closing stages. Relive the live action below. \\- Max Verstappen wins thrilling Las Vegas GP as Ferraris collide in closing stages \\- Ferrari's Lewis Hamilton and Charles Leclerc clash at Las Vegas Grand Prix",
+ "plan": {
+  "title": "Verstappen Wins a Chaotic 2026 Las Vegas Grand Prix",
+  "description": "Max Verstappen won the 2026 Las Vegas Grand Prix after a frantic race on the Nevada streets. Here is how Mercedes lost the lead, McLaren took the podium and Ferrari collided.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "f6d1e515",
+    "narration": "Two Mercedes cars fought for the lead all race long, and then both fell off the podium in the final laps. Here is how the Las Vegas Grand Prix turned upside down.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Chaos on the Las Vegas Strip",
+      "subtitle": "The 2026 Las Vegas Grand Prix, run on November 22"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "The race"
+   },
+   {
+    "id": "454d61c2",
+    "narration": "Max Verstappen won. The four-time World Champion held off a race-long challenge to take his third victory on the streets of Nevada, finishing the 50 laps in one hour, twenty-seven minutes and thirty-nine seconds.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "1:27:39.624",
+      "label": "Verstappen's winning time over 50 laps"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "a618577e",
+    "narration": "It was a frantic race, with karting-style passes for the lead. Verstappen kept a calm head, outdriving and out-strategising both Mercedes drivers, for his fourth win in six races.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Karting-style passes for the lead, and a calm head won it.",
+      "emphasis": "calm head"
+     }
+    }
+   },
+   {
+    "id": "886b636c",
+    "narration": "The Mercedes pair led the fight for most of the race. Then George Russell hit the wall, and Kimi Antonelli dropped back late. That let McLaren take second and third.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How the podium changed",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Mercedes lead the fight"
+       },
+       {
+        "id": "b",
+        "label": "Russell hits the wall"
+       },
+       {
+        "id": "c",
+        "label": "Antonelli drops back"
+       },
+       {
+        "id": "d",
+        "label": "McLaren take 2nd and 3rd"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "1e88391d",
+    "narration": "Lando Norris finished second, just 0.639 seconds behind the winner. Oscar Piastri took third, 1.529 seconds back. Kimi Antonelli was fourth, only 2.574 seconds off the lead.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Pos",
+       "Driver",
+       "Team",
+       "Gap"
+      ],
+      "rows": [
+       [
+        "1",
+        "Verstappen",
+        "Red Bull",
+        "Winner"
+       ],
+       [
+        "2",
+        "Norris",
+        "McLaren",
+        "+0.639s"
+       ],
+       [
+        "3",
+        "Piastri",
+        "McLaren",
+        "+1.529s"
+       ],
+       [
+        "4",
+        "Antonelli",
+        "Mercedes",
+        "+2.574s"
+       ]
+      ],
+      "title": "Top four",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "2f812318",
+    "narration": "Pierre Gasly took fifth, managing cooling problems on his Alpine. Team mate Franco Colapinto was sixth, so Alpine had two cars well inside the points.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Alpine's strong day",
+      "items": [
+       "Gasly: fifth",
+       "Cooling issues managed",
+       "Colapinto: sixth"
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "icons": [
+       "trophy",
+       "flame",
+       "flag"
+      ]
+     }
+    },
+    "chapter": "Behind the podium"
+   },
+   {
+    "id": "2a53bb24",
+    "narration": "Ferrari had an eventful afternoon. Lewis Hamilton took a ten-second penalty for leaving the track and gaining an advantage against Norris. Later he made contact with team mate Charles Leclerc.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Ferrari's messy race",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Hamilton battles Norris"
+       },
+       {
+        "id": "p",
+        "label": "10-second penalty"
+       },
+       {
+        "id": "c",
+        "label": "Contact with Leclerc"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "p",
+        "track limits"
+       ],
+       [
+        "p",
+        "c",
+        "later"
+       ]
+      ],
+      "style": "cards",
+      "accent": "rose",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "6c7a42e9",
+    "narration": "Hamilton finished seventh. Carlos Sainz scored valuable points for Williams in eighth. Russell recovered to ninth, and Leclerc rounded out the top ten.",
+    "scene": {
+     "type": "ranking",
+     "props": {
+      "items": [
+       {
+        "label": "Lewis Hamilton, Ferrari",
+        "value": "P7"
+       },
+       {
+        "label": "Carlos Sainz, Williams",
+        "value": "P8"
+       },
+       {
+        "label": "George Russell, Mercedes",
+        "value": "P9"
+       },
+       {
+        "label": "Charles Leclerc, Ferrari",
+        "value": "P10"
+       }
+      ],
+      "title": "Positions seven to ten"
+     }
+    }
+   },
+   {
+    "id": "72c3e603",
+    "narration": "Antonelli lost out on the result, but not on pace. He was the most threatening for the win he has looked so far, and he showed he is a proper contender on street circuits.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "A loser from the result, but certainly not in performance.",
+      "attribution": "Winners and losers, F1 report"
+     }
+    }
+   },
+   {
+    "id": "318b20c6",
+    "narration": "So the lesson from Las Vegas: the fastest car does not always win. Verstappen stayed calm while Mercedes faded, and McLaren collected the podium behind him.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Las Vegas in three lines",
+      "items": [
+       "Verstappen wins, calm and clever",
+       "Norris and Piastri follow",
+       "Mercedes fade late"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 0
+     }
+    },
+    "sfx": "chime",
+    "chapter": "Takeaway"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Winners and losers from F1's 2026 Las Vegas Grand Prix",
+    "url": "https://www.the-race.com/formula-1/f1-2026-las-vegas-grand-prix-winners-losers",
+    "publisher": "the-race.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 08:22:46 GMT"
+   },
+   {
+    "title": "2026 Results - Formula 1 Las Vegas Grand Prix",
+    "url": "https://www.f1lasvegasgp.com/2026-results",
+    "publisher": "f1lasvegasgp.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 06:05:04 GMT"
+   },
+   {
+    "title": "Las Vegas Grand Prix results: Max Verstappen wins drama-packed race in Sin City - as it happened - ESPN",
+    "url": "https://www.espn.com/f1/story/_/id/50530089/max-verstappen-las-vegas-grand-prix-2026-live-updates-results-analysis-commentary",
+    "publisher": "espn.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 05:25:00 GMT"
+   }
+  ],
+  "skills": [
+   "news-explainer",
+   "recap-summary"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 51.7,
+  "before_first_script_call_s": 12.7,
+  "script_s": 38.9
+ },
+ "cost": {
+  "script_small": 0.00053,
+  "research": 0.00098,
+  "script_big": 0.13973,
+  "search_api": 0.016,
+  "total": 0.15724
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 49420,
+  "out": 7106
+ },
+ "rules": {
+  "length": {
+   "words": 300,
+   "expected_words": 267,
+   "ratio": 1.124,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 134.5,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Two Mercedes cars fought for the lead all race long, and then both fell off the podium in the final laps. Here is how the Las Vegas Grand Prix turned upside down.",
+   "close_text": "So the lesson from Las Vegas: the fastest car does not always win. Verstappen stayed calm while Mercedes faded, and McLaren collected the podium behind him."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "stat": 1,
+    "kinetic_text": 1,
+    "diagram": 2,
+    "table": 1,
+    "bullets": 2,
+    "ranking": 1,
+    "quote": 1
+   },
+   "max_run": 1,
+   "entropy": 2.92,
+   "top_type": "diagram",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 4,
+   "ungrounded_numbers": [
+    "0639",
+    "1529",
+    "2574"
+   ],
+   "entities": 20,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.125,
+   "ungrounded_number_share": 0.75,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 5,
+   "notes_len": 4771,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": true,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "numbers_mostly_ungrounded"
+  ],
+  "mismatch_scenes": [
+   "beat 10 (bullets): its narration never says ['Norris and Piastri follow', 'Mercedes fade late']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Core result matches the notes, but the script misses that the Las Vegas GP was run on Saturday night local time (notes publish Nov 22 GMT) and adds an unsupported 'fastest car' moral. It also leaves out the championship status and the Hamilton–Leclerc detail."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Gives result and podium but no championship standings (a key requirement), no explanation of the final-lap drama or the Antonelli/Russell sequence, and no mention of what's next."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Logical flow from result to podium to midfield to takeaway, but the beat 8-9 midfield lists are dull and the ending moral isn't tied to the story."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook about both Mercedes falling off the podium is decent. The ending 'fastest car does not always win' is a weak, unsupported moral."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, clear news-explainer voice suited to US viewers."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Variety is good, but the stat is just a race time, the diagram is simplistic, and the beat 9 quote is a paraphrase that does not match the narration. The table, bullets, and ranking all repeat the same result data."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly restates the report's lines ('karting-style passes', 'calm head'); little vivid detail or new insight."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It names the latest race, winner and podium, but gives no championship standing, and the stated length is only roughly met."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical, though some phrasing is awkward ('the win he has looked so far')."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "the fastest car does not always win",
+    "issue": "Unsupported moral; the notes never say Mercedes had the fastest car, and the line is not tied to the evidence.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Verstappen stayed calm while Mercedes faded",
+    "issue": "No championship standings or season context, which the brief requires; the Sao Paulo race notes (Mercedes took the constructors' title) are ignored.",
+    "beat": 10
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "A loser from the result, but certainly not in performance.",
+    "issue": "The quote card is not spoken in the narration, and it is attributed vaguely.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Russell recovered to ninth",
+    "issue": "'Recovered' is invented; the notes only say Russell hit the wall and finished ninth.",
+    "beat": 8
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Hamilton finished seventh. Carlos Sainz scored valuable points for Williams in eighth.",
+    "issue": "Reads like a list of positions; no insight.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "The 2026 Las Vegas Grand Prix, run on November 22",
+    "issue": "The race is a Saturday-night event in Las Vegas, so the date is questionable; the notes only give the GMT publication time.",
+    "beat": 1
+   }
+  ],
+  "missing": [
+   "Drivers' championship standings after the race",
+   "Details of the Russell crash and Antonelli's late drop",
+   "Hamilton–Leclerc clash as a key late moment",
+   "What comes next (final races)",
+   "Mercedes already champions (Sao Paulo)"
+  ],
+  "wrong_facts": [
+   "Date Nov 22 possibly off (race likely Nov 21 local time); unverified",
+   "'fastest car does not always win' unsupported"
+  ],
+  "would_publish": false,
+  "summary": "Accurate on the result and podium, but it lacks championship context and the key late-race moment. The generic moral and list-heavy middle make it thin and uneven for a two-minute explainer.",
+  "mean": 3.0,
+  "cost_usd": 0.024698,
+  "tokens": [
+   5734,
+   1323
+  ]
+ }
+}

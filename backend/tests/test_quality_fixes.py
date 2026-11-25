@@ -10,6 +10,7 @@ from engine import director, netsafe, plan as plan_mod, quality, research, resea
 @pytest.fixture(autouse=True)
 def _fixes_on(monkeypatch):
     monkeypatch.delenv("QUALITY_FIXES", raising=False)
+    research._cooldown_until[0] = 0.0
 
 
 def beat(text, scene=None):
@@ -48,6 +49,28 @@ def test_with_retry_does_not_retry_a_404_and_bounds_the_total_time():
     with pytest.raises(netsafe.FetchError):   # Retry-After 60 is capped, and the budget of 10 s is never exceeded
         netsafe.with_retry(lambda: (_ for _ in ()).throw(http_error(503, 60)), sleep=lambda s: (sleeps.append(s), t.__setitem__(0, t[0] + s)), clock=lambda: t[0], max_total_s=5.0)
     assert sum(sleeps) <= 5.0
+
+
+def test_a_long_retry_after_is_not_waited_for_and_opens_a_cooldown():
+    sleeps, calls = [], []
+
+    def fn():
+        calls.append(1)
+        raise http_error(429, retry_after=57)
+
+    with pytest.raises(netsafe.FetchError):
+        netsafe.with_retry(fn, sleep=sleeps.append)
+    assert len(calls) == 1 and sleeps == []           # no point waiting 4 s when the server says 57
+    n = []
+
+    def fetch(url):
+        n.append(url)
+        raise http_error(429, retry_after=57)
+
+    errors = []
+    research.gather_notes("q", fetch=fetch, errors=errors, ask=lambda s, u: "one query\nsecond query")
+    assert len(n) == 1                                # the first 429 opened the cooldown: the other calls were skipped without a request
+    assert any(e["attempt"] == 0 and e["status"] == 429 for e in errors)
 
 
 def test_with_retry_succeeds_on_second_try():
@@ -381,7 +404,7 @@ def test_long_script_is_trimmed_once_and_the_shorter_one_used():
         return answers[len(seen) - 1]
 
     plan, warns = plan_mod.generate_plan("topic", "n", 1, llm)
-    assert len(seen) == 2 and "Trim it" in seen[1]
+    assert len(seen) == 2 and "Cut about" in seen[1]
     assert abs(plan_mod.spoken_words(plan["beats"]) - target * 1.03) < target * 0.06 and not any(w.startswith("length") for w in warns)
 
 

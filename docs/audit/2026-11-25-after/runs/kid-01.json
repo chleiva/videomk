@@ -1,0 +1,512 @@
+{
+ "id": "kid-01",
+ "category": "education / lesson for kids",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Explain how volcanoes erupt for six-year-olds",
+ "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:06:33",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How volcanoes erupt is a timeless geology explanation that does not depend on recent information, so the encyclopedia is sufficient for an accurate kid-friendly script.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 25.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 21.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 16.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 16.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 12.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 8.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 7.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 3.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 8,
+  "grounding": {
+   "beats": 9,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2072,
+  "n_sources": 1,
+  "n_fetched": 2,
+  "fetched": [
+   "Shield volcano",
+   "Newberry Volcano"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Shield volcano\nA shield volcano is a type of volcano named for its low profile, resembling a shield lying on the ground. It is formed by the eruption of highly fluid (low viscosity) lava, which travels farther and forms thinner flows than the more viscous lava erupted from a stratovolcano. Repeated eruptions result in the steady accumulation of broad sheets of lava, building up the shield volcano's distinctive form.\nShield volcanoes are found wherever fluid, low-silica lava reaches the surface of a rocky planet. However, they are most characteristic of ocean island volcanism associated with hot spots or with continental rift volcanism. They include the largest active volcanoes on Earth, such as Mauna Loa. Giant shield volcanoes are found on other planets of the Solar System, including Olympus Mons on Mars and Sapas Mons on Venus.\n\n## Newberry Volcano\nNewberry Volcano is a large, active, shield-shaped stratovolcano located about 20 miles (32 km) south of Bend, Oregon, United States, 35 miles (56 km) east of the major crest of the Cascade Range, within the Newberry National Volcanic Monument. Its highest point is Paulina Peak. Newberry is the largest volcano in the Cascade Volcanic Arc, with an area of 1,200 square miles (3,100 km2) when its lava flows are taken into account. From north to south, the volcano has a length of 75 miles (121 km), with a width of 27 miles (43 km) and a total volume of approximately 120 cubic miles (500 km3). It was named for the geologist and surgeon John Strong Newberry, who explored central Oregon for the Pacific Railroad Surveys in 1855.\nThe volcano contains a large caldera, 4 by 5 miles (6.4 km × 8.0 km) in diameter, known as the Newberry Caldera. Within the caldera are two lakes: Paulina Lake and East Lake. The volcano and its vicinity include many pyroclastic cones, lava flows and lava domes; Newberry has more than 400 vents, the most of any volcano in the contiguous United States. Glaciers may have once been present at the volcano, though this remains contested. The area has a dry climate with low...",
+ "plan": {
+  "title": "How Volcanoes Erupt: A Story for Kids",
+  "description": "A gentle explainer for six-year-olds about how a volcano erupts, from hot rock deep underground to lava flowing out. It shows why some volcanoes are tall and some are wide like a shield.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "75850334",
+    "narration": "Did you know the ground under your feet has hot, melted rock inside it? Sometimes that rock bursts out with a big boom! Let's find out how a volcano erupts.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "How Does a Volcano Erupt?",
+      "subtitle": "A story for curious kids"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "What is inside the Earth"
+   },
+   {
+    "id": "69703704",
+    "narration": "A volcano is a mountain with a hole at the top. Deep down below it, the Earth is so hot that rock can melt, just like an ice cream on a sunny day.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Volcano",
+      "definition": "A mountain with an opening where hot melted rock can come out of the Earth."
+     }
+    }
+   },
+   {
+    "id": "3d1c32bb",
+    "narration": "Look at some real volcanoes! Some are tall and pointy like a party hat. Some are wide and low, like a shield lying on the ground.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Mount Fuji volcano",
+       "Mauna Loa volcano Hawaii",
+       "volcano crater",
+       "Mount St Helens"
+      ],
+      "alt": "Different kinds of volcanoes"
+     }
+    }
+   },
+   {
+    "id": "f3ffcd4d",
+    "narration": "Here is how it works. First, hot rock melts deep down. Next, it gathers in a pocket under the volcano. Then it pushes up and out of the top!",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From Deep Down to Eruption",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Hot rock melts",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Gathers in a pocket",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Pushes up and out",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    },
+    "sfx": "click",
+    "chapter": "The eruption"
+   },
+   {
+    "id": "1e6ac05a",
+    "narration": "Think of shaking a bottle of fizzy juice. The bubbles push and push, and then pop! The top flies open. A volcano is a bit like that, but much, much bigger.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "bubbles fizzing in glass",
+      "alt": "fizzy drink bubbles rising"
+     }
+    }
+   },
+   {
+    "id": "e0fbe433",
+    "narration": "When the melted rock comes out, we call it lava. Lava is glowing red and very hot. Please never go near it. Scientists watch volcanoes from far away to stay safe.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "lava flowing from volcano",
+      "alt": "Glowing lava flowing",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "07268feb",
+    "narration": "Some lava is runny, like syrup on pancakes. Runny lava spreads far and wide. Over many eruptions, it piles up into a low, wide mountain called a shield volcano.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Runny lava",
+      "items": [
+       "Runny like syrup",
+       "Spreads far and wide",
+       "Builds a shield volcano"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "droplet",
+       "map",
+       "mountain"
+      ]
+     }
+    },
+    "chapter": "Different kinds of lava"
+   },
+   {
+    "id": "da54f943",
+    "narration": "The biggest active volcano on Earth is a shield volcano named Mauna Loa. It is enormous! There are giant shield volcanoes on Mars and Venus too.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Mauna Loa shield volcano",
+      "alt": "Mauna Loa, a huge shield volcano",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "3e131749",
+    "narration": "So let's remember. Hot rock melts underground, gathers, and pushes up. Then it comes out as lava and builds the mountain bigger. That is how a volcano erupts!",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hot rock pushes up and out, and that is an eruption!",
+      "emphasis": "eruption"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Shield volcano",
+    "url": "https://en.wikipedia.org/wiki/Shield_volcano",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 61.0,
+  "before_first_script_call_s": 28.1,
+  "script_s": 32.9
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "script_big": 0.11737,
+  "search_api": 0.0,
+  "total": 0.11761
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 36793,
+  "out": 4855
+ },
+ "rules": {
+  "length": {
+   "words": 263,
+   "expected_words": 267,
+   "ratio": 0.985,
+   "beats": 9,
+   "expected_beats": 9,
+   "est_speech_s": 118.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Did you know the ground under your feet has hot, melted rock inside it? Sometimes that rock bursts out with a big boom! Let's find out how a volcano erupts.",
+   "close_text": "So let's remember. Hot rock melts underground, gathers, and pushes up. Then it comes out as lava and builds the mountain bigger. That is how a volcano erupts!"
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "definition": 1,
+    "gallery": 1,
+    "diagram": 1,
+    "clip": 1,
+    "image": 2,
+    "bullets": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.95,
+   "top_type": "image",
+   "top_share": 0.22,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 4,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "how a volcano erupts",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 1,
+   "fetched": 2,
+   "notes_len": 2072,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 3 (gallery): its narration never says ['volcano crater', 'Mount St Helens']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The script never explains why eruptions happen (gas, pressure) and uses \"hot rock melts deep down\" as the cause. It also says \"The ground under your feet has hot, melted rock inside it\" and \"mountain with a hole at the top\", which oversimplify, and \"pocket\" is a loose description of a magma chamber."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It lacks the magma vs lava distinction (magma is never named), the layers of the Earth, and the real mechanism of gas pressure. About half the runtime goes to shield volcanoes, which is not what the request asks for."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and the chapters are logical, but the shield-volcano section is a tangent and the ending only recaps."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "\"Did you know the ground under your feet has hot, melted rock inside it?\" is a decent hook for kids. The ending is a bare recap with no question or image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, short sentences and suitable for six-year-olds, with a good safety note."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary and mostly match the narration. But there is no cross-section diagram of the Earth's layers, and the fizzy-bubbles clip is only a loose match for a shaken bottle."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The ice cream and party hat comparisons are cute, but the fizzy bottle analogy is standard and there are no surprising fun facts."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The language and audience are right, but it is about 250 words and omits key elements such as magma vs lava and the real eruption cause."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, simple and grammatical, with a few repetitive phrases."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Hot rock melts deep down. Next, it gathers in a pocket",
+    "issue": "It never mentions magma, gas, or pressure, so the actual cause of an eruption is missing. The soda analogy is left unconnected to anything in the diagram.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "When the melted rock comes out, we call it lava.",
+    "issue": "Magma is never named, so the magma vs lava distinction is lost.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "There are giant shield volcanoes on Mars and Venus too.",
+    "issue": "This is a tangent that takes time from explaining eruptions, and it is not a safe, fun fact tied to the topic.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Then it comes out as lava and builds the mountain bigger.",
+    "issue": "This oversimplifies, since not all eruptions build the mountain, and it conflicts with the earlier \"pushes up\" framing.",
+    "beat": 9
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "That is how a volcano erupts!",
+    "issue": "The ending is a plain recap with no closing question or memorable image.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "A volcano is a mountain with a hole at the top.",
+    "issue": "This is oversimplified, and some volcanoes are not mountains (e.g. fissure vents).",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "Magma vs lava",
+   "Layers of the Earth (crust, mantle)",
+   "Gas pressure as the cause, tied to the soda analogy",
+   "Ash and smoke",
+   "A fun fact such as Hawaii's islands or volcanoes under the sea",
+   "A closing question for the child"
+  ],
+  "wrong_facts": [
+   "Unverified, but true: Mauna Loa is the largest active volcano on Earth by volume."
+  ],
+  "would_publish": false,
+  "summary": "A friendly, age-appropriate script that skips the core mechanism of gas pressure, never separates magma from lava, and spends time on shield volcanoes. The ending is a flat recap.",
+  "mean": 3.11,
+  "cost_usd": 0.020954,
+  "tokens": [
+   3702,
+   1355
+  ]
+ }
+}

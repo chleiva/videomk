@@ -1,0 +1,873 @@
+{
+ "id": "tra-03",
+ "category": "travel / destination",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "Plan a first trip to Japan for a couple in spring: how many days, a Tokyo-Kyoto-Osaka route, how the rail pass situation works now, cherry blossom timing, budget range and etiquette tips.",
+ "great": "Itinerary 10-14 days, route logic, JR Pass price change in 2023 and alternatives (check current), sakura timing late March to early April, daily budget, etiquette; current prices flagged with dates.",
+ "minutes": 4.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:03:46",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "practical or current facts (rules, prices, schedules) need the web",
+  "queries": [],
+  "searches": 15,
+  "reads": 0,
+  "iterations": 4,
+  "seconds": 23.1,
+  "error": "",
+  "fallback": null,
+  "section_searches": 11,
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Timing the blossoms and choosing your days",
+    "Tokyo, Kyoto, Osaka: route and rail passes",
+    "What it costs and how to behave"
+   ]
+  },
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 20,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 1,
+   "repaired": 1,
+   "unsupported": 1,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 3,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 35032,
+  "n_sources": 8,
+  "n_fetched": 42,
+  "fetched": [
+   "KKday and JR East Expand Partnership to Open Up Eastern Japan Rail Travel - The National Law Review",
+   "JR Central locks debut for Tokaido Shinkansen’s new top-tier bullet train cabins - travelweekly.com.au",
+   "Cherry Blossom Forecast 2027: 43 Best Spots & Expected Dates",
+   "Cherry Blossom Season in Japan 2027: Peak Dates, Best Spots and How to Plan",
+   "Cherry Blossom Forecast 2027: Dates, Data and Planning",
+   "Japan Trip Cost Calculator 2026: How Much Will Your Trip Cost? | Self Guide Japan",
+   "Japan Travel Budget 2026 — Real Daily Costs by Tier — Wander Japan",
+   "Where to Stay in Japan: Types of Stay and Prices (2026)",
+   "10 or 14 Days in Japan? What Four Extra Nights Cost for Two | Self Guide Japan",
+   "Japan Cherry Blossom 2027: When to Expect Peak Bloom - Juniper Tours",
+   "Cherry Blossom Forecast 2027: Full Bloom Dates, City by City",
+   "Kyoto Cherry Blossom 2027: Dates, Best Spots & Itinerary | LuggAgent",
+   "Japan Cherry Blossom Season 2027: Complete Sakura Guide",
+   "Japan in March 2027: The Month Cherry Blossom Season Begins — Weather, Dates & Timing | Self Guide Japan",
+   "Release of 2026 Cherry Blossom Forecast (14th forecast) | ニュース | 日本気象株式会社",
+   "Price Increases are Coming to the Nationwide Japan Rail Pass (2026)",
+   "JR Pass 2026 Price Update: Is It Still Worth It?",
+   "Japan Rail Pass Prices 2026: Child Fares and Worth It",
+   "The Navigatio Japan on Facebook: \"The prices of the JR pass are going up AGAIN in October 2026. I already don't think it's worth getti…\"",
+   "Is the JR Pass Worth It in 2026? Real Route Maths",
+   "JR Pass Prices 2026: Adult, Child & Cost Comparison | Japan Train",
+   "Japan 2026: Complete Guide for Travelers | Pixidia",
+   "Tokyo to Kyoto Shinkansen 2026: Fares, JR Pass & Luggage | LuggAgent",
+   "Shinkansen Fare Tables | Route & Seat Comparison, Discount Booking | NAVITIME Travel",
+   "How Much Does it Cost to Ride the Shinkansen? | Tokyo Cheapo",
+   "Japan Cherry Blossom Forecast 2026: Sakura Bloom Tracker",
+   "Japan Cherry Blossom Forecast 2026: Best Time & Places to See Sakura - Out of Town Blog",
+   "2026 Cherry Blossom Forecast",
+   "Cherry Blossom Forecast 2026",
+   "When and where to see cherry blossoms in Tokyo in 2026 | The Official Tokyo Travel Guide, GO TOKYO",
+   "Cashless Payments in Japan 2026: PayPay, Suica, Apple Pay for Foreigners | Modern Living Tokyo",
+   "【2026 Latest】Tap Your Credit Card to Ride Tokyo Trains: Is It Time to Say Goodbye to Suica--and Its Famous Penguin? | Japan Tips | Other | JCB Special Offers",
+   "Credit card tap payment on trains in Japan",
+   "JR Pass Price History: How Much the Pass Has Changed",
+   "Price Changes for the Japan Rail Pass",
+   "Japan Trip Budget 2026: Real Daily Costs",
+   "Japan Travel Budget Breakdown for First-Time Visitors: Realistic 2026 Cost Guide",
+   "When Is Cherry Blossom Season In Kyoto?",
+   "Cherry Blossom Calendar 2026 | Kyoto Travel",
+   "Japan Etiquette Guide for Tourists 2026",
+   "Japan Etiquette Guide 2026 — Do's and Don'ts for Visitors",
+   "Must-Know Japan Etiquette for Travelers"
+  ],
+  "research_agent_cost_usd": 0.0034367
+ },
+ "warnings": [
+  "section 1: some scenes list items their narration never mentions: beat 4 (gallery): its narration never says [\"Philosopher's Path Kyoto sakura\", 'Osaka Castle cherry blossoms']; beat 6 (bullets): its narration never says ['Forecasts arrive in January', \"Kyoto's week is busiest\"]. Say each item's key words in the order shown",
+  "section 3: some scenes list items their narration never mentions: beat 2 (chart): its narration never says ['Budget high', 'Mid low', 'Mid high']. Say each item's key words in the order shown",
+  "grounding: 1 beats had unsupported specifics, 1 rewritten"
+ ],
+ "notes": "## KKday and JR East Expand Partnership to Open Up Eastern Japan Rail Travel - The National Law Review\nPublished: Wed, 29 Apr 2026 10:53:27 GMT\n### KKday and JR East Expand Partnership to Open Up Eastern Japan Rail Travel. ### KKday and JR East Expand Partnership to Open Up Eastern Japan Rail Travel. TOKYO, JAPAN, April 29, 2026 /EINPresswire.com/ -- KKday announced an expanded partnership with East Japan Railway Company (JR East), pairing JR East's extensive rail network with KKday's global travel platform to drive tourism across Eastern Japan. KKday already lists a range of JR East rail products, including popular options such as the JR East Rail Pass and the JR Tokyo Wide Pass, allowing travellers to lock in their transport before they fly. KKday plans to work more closely with JR East Group's hotel brands, ski resorts and other business units, and will continue partnering with local governments, tourism organisations and travel operators to develop products that combine rail transport with regional experiences, building towa\n\n## JR Central locks debut for Tokaido Shinkansen’s new top-tier bullet train cabins - travelweekly.com.au\nPublished: Tue, 25 Aug 2026 03:01:49 GMT\nReading: JR Central locks debut for Tokaido Shinkansen’s new top-tier bullet train cabins. # JR Central locks debut for Tokaido Shinkansen’s new top-tier bullet train cabins. JR is launching a “supreme class” on the Tokaido Shinkansen. **JR Central and JR West have confirmed 1 October 2026 as the launch date for Supreme Class, a new private-cabin tier that will sit above the Green Car on the Tokaido and Sanyo Shinkansen – the bullet train corridor linking Tokyo with Nagoya, Kyoto, Osaka, Hiroshima and Fukuoka.**. The move is being pitched as the biggest shift in the line’s onboard hierarchy in decades. ## **Two cabin types, one new class**. * Car No. 10: a single-seat cabin for one guest. * Car No. 7: a two-seat cabin for up to two guests, with a sofa for travelling companions. | Route | Car 7 cabin (up to two guests) | Car 10 cabin (one guest) |.\n\n## Cherry Blossom Forecast 2027: 43 Best Spots & Expected Dates\nPublished: Sun, 18 Oct 2026 07:27:13 GMT\nBased on the JMA normal (24 March) and the 2025 and 2026 dates, Tokyo is expected to open around 22 March 2027 and reach full bloom around 30 March. Treat the week from 27 March to 3 April as the most likely peak until the forecasts come out. ### When is the best time to see cherry blossoms in Kyoto in 2027? Kyoto’s expected first bloom is around 25 March and full bloom around 3 April 2027. The normal is 26 March and 4 April, but 2026 was earlier, at 23 and 30 March. [...] Early April: full bloom in Tokyo, Kyoto, Osaka and Hiroshima in the first days; Kanazawa, Himeji, Kaizu Osaki, Takada and Sendai follow. Mid-April: Takato, Matsumoto, Yoshino’s upper slopes, the Japan Mint and Shinjuku Gyoen’s double cherries; Kakunodate and Kitakami open. Late April: Hirosaki, Hakodate and Matsumae; Nara-no-yaezakura in Nara Park. Early May: Sapporo and Matsumae’s late varieties, overlapping with Gold\n\n## Cherry Blossom Season in Japan 2027: Peak Dates, Best Spots and How to Plan\nPublished: Tue, 17 Nov 2026 00:00:00 GMT\n| Region | Typical first bloom | Typical full bloom | Notes | ------| | Tokyo | Late March | End of March to early April | Somei Yoshino is the main variety; Shinjuku Gyoen also has early and late varieties | | Kyoto and Osaka | Late March | Early April | The busiest week of the year in Kyoto; book early and start at dawn | | Kanazawa and the Hokuriku coast | Late March to early April | Early April | Around Kyoto's peak or a few days after, with fewer international visitors | [...] Japan's cherry blossom season is short and crowded, so it pays to plan. The blossoms usually open in Tokyo, Kyoto and Osaka in the second half of March and reach full bloom in the first week of April, then move north to Tohoku in mid-April and Hokkaido in late April and early May. The 2027 forecasts are not out yet. The first ones usually arrive in January, so the dates in this guide are the typical averages y\n\n## Cherry Blossom Forecast 2027: Dates, Data and Planning\nPublished: Wed, 18 Nov 2026 01:26:35 GMT\nRecent springs have tended to run ahead of those averages. In 2026, Tokyo’s sample tree reached first bloom on March 19 and full bloom on March 28. Kyoto followed with first bloom on March 23 and full bloom on March 30. Osaka was close to its average, with full bloom on April 3. The previous spring was closer to normal. In 2025, first bloom came on March 24 in Tokyo and March 27 in both Kyoto and Osaka. One year early, one year average: that is the realistic range to hold in mind for 2027. [...] ## What the Data Says About Spring 2027 Without a forecast, the most reliable guide is the long-term record. The Japan Meteorological Agency publishes 30-year average dates for every observation station, currently calculated over 1991 to 2020. ### The 30-Year Averages for Tokyo, Kyoto, and Osaka For Somei Yoshino, the variety that forecasts track, the averages are: - Tokyo: first bloom March 24, \n\n## Japan Trip Cost Calculator 2026: How Much Will Your Trip Cost? | Self Guide Japan\nPublished: Sun, 05 Apr 2026 00:00:00 GMT\nAdd ¥5,500 business hotel → total: ~$77/day. ## Real Trip Scenarios #### A: Budget Couple, 10 Days $2,160/person Flights (LAX, shoulder)$950 Business hotel, 9 nights$405 7-day JR Pass$330 Food (¥6,000/day for 2)$200 Activities + misc$275 #### B: Mid-Range Couple, 14 Days + Ryokan $3,720/person Flights (SFO, autumn)$1,200 Hotels, 11 nights$715 Ryokan, 2 nights (dinner incl.)$300 14-day JR Pass$530 Food (¥10,000/day for 2)$465 Activities + misc$510 #### C: Family of Four, 7 Days [...] Not anymore. The yen's depreciation since 2022 has made Japan 30–40% cheaper for Western visitors. Hotel rooms, meals, and transport cost less than equivalent quality in France, Italy, or the UK. How much spending money per day?expand\\_more Budget: $40–60/day (accommodation included). Mid-range: $100–150/day. Luxury: $300+/day. Is the Japan Rail Pass worth it?expand\\_more [...] Set your trip below — the estim\n\n## Japan Travel Budget 2026 — Real Daily Costs by Tier — Wander Japan\nPublished: Thu, 29 Oct 2026 00:00:00 GMT\nPhoto: Unsplash Japan has a reputation for being expensive that's increasingly out of date. A prolonged weak yen has quietly made ground costs — hotels, meals, transport, shopping — roughly 25–30% cheaper for anyone paying in dollars, euros, or pounds than it was a few years ago. Exchange rates move, so treat the figures below as a planning baseline and check the current rate closer to your trip. Daily budget ## Three Ways to Travel 節約 ### Budget ¥9,000–13,000 ~$60–90/day [...] Excluding international flights, a 10-day trip runs roughly ¥90,000–130,000 (~$600–870) traveling budget-style, ¥220,000–320,000 (~$1,500–2,150) mid-range, or ¥650,000+ (~$4,300+) for a luxury trip. Add a JR Pass or individual Shinkansen fares on top if you're visiting multiple cities. ### Is Japan expensive to visit in 2026? [...] Less than most first-time visitors expect. A prolonged weak yen has made ground cos\n\n## Where to Stay in Japan: Types of Stay and Prices (2026)\nPublished: Sun, 22 Nov 2026 00:00:00 GMT\nPulling the sourced figures together, per night as of the dates above: a capsule runs about 2,000-5,000 yen ($13-32), a Tokyo business hotel around 9,000-14,000 yen ($57-88), and a ryokan around 15,000 to 45,000 yen and more per person ($95-280) with dinner and breakfast. For whole-trip budgets, including food and transport, read our Japan trip cost guide. ## My advice [...] Japan accommodation covers far more than hotels. The table below sets the main types side by side, with a typical price only where we have a dated source. All prices are per night, in yen with US dollars at 158.64 JPY per USD (20 November 2026). [...] From business hotels to high-end ones, hotels are a reassuring choice for a first trip to Japan, and a natural fit for Tokyo, Osaka and other busy urban stops. A business hotel in Tokyo costs around 9,000-14,000 yen (about $57-88) a night for a compact en-suite room, as\n\n## 10 or 14 Days in Japan? What Four Extra Nights Cost for Two | Self Guide Japan\nPublished: Sat, 21 Nov 2026 00:00:00 GMT\nThe room, meals and local rides are budgeting allowances. The regular package prices below come from the booking calendar. Replace them with live prices for your own dates. The rate of ¥150 to $1 is a round planning number, not the current exchange rate. ### Hotels: $140 a Night for a Shared Twin [...] The slow 14-day plan costs less per day than the 10-day plan: about $285 a day for two, against $293. The Tokyo-to-Kyoto train is a fixed cost, so longer trips spread it more thinly. ### Price four extra nights for two Use the same 10-day budget for both routes. The Hiroshima option adds ¥34,200 for two eligible adult rail passes and two island visitor taxes. Enter a room rate for the four extra nights only. Four more nights in Kansai $3,990\n\n## Japan Cherry Blossom 2027: When to Expect Peak Bloom - Juniper Tours\nNo one can tell you the exact dates yet: the first 2027 forecasts from Japan’s weather companies usually appear between late December and late January. What the records can tell you is the window. Over the 1991–2020 normals kept by the Japan Meteorological Agency (JMA), Tokyo’s cherry trees reach full bloom on average on March 31, and Kyoto, Osaka and Nara on April 4. Over the last four springs, Kyoto’s full bloom has fallen anywhere from March 24 to April 5. Plan around late March to early [...] - Tokyo blooms first among the classic cities. JMA’s average is first flowers on March 24 and full bloom on March 31. - Kyoto, Osaka and Nara follow a few days later. All three share an average full-bloom date of April 4. - The spread between years is wide. Tokyo’s full bloom ran from March 22 (2023) to April 4 (2024) over the last four years. [...] ## When will the cherry blossoms bloom in Japa\n\n## Cherry Blossom Forecast 2027: Full Bloom Dates, City by City\nFrom late March to mid-April across Tokyo, Kyoto and Osaka, by the Japan Meteorological Agency's 1991 to 2020 normals: full bloom around 31 March in Tokyo and around 4 April in Kyoto and Osaka. Kyushu opens a little earlier, Tohoku in mid to late April, and Hokkaido in early May. ### When is the 2027 cherry blossom forecast released? [...] When is cherry blossom season in Japan in 2027? On the Japan Meteorological Agency's averages, the season runs from late March in Tokyo, Kyoto and Osaka to early May in Hokkaido. Tokyo's cherry trees open around 24 March and reach full bloom around 31 March; Kyoto and Osaka reach full bloom around 4 April, Kanazawa around 8 April, Sendai around 13 April, Hakodate around 2 May and Sapporo around 6 May. In 2026 the blossom came early from Hiroshima to Hokkaido: Tokyo was in full bloom on 28 March, [...] questions ## Questions ### When is cherry blossom s\n\n## Kyoto Cherry Blossom 2027: Dates, Best Spots & Itinerary | LuggAgent\n| Year | Flowering | Full bloom | --- | Normal (1991–2020 average) | March 26 | April 4 | | 2025 | March 27 | April 5 | | 2026 | March 23 | March 30 | Sources: JMA flowering dates and full-bloom dates. If you can only go for one week, aim for around March 28 to April 5 and check the latest forecast two weeks before you leave. ## Best cherry blossom spots in Kyoto: Philosopher's Path, Ninna-ji and Kiyomizu-dera [...] The official 2027 forecasts haven't been published yet; weather companies usually release them early in the year. JMA data puts Kyoto's normal flowering on March 26 and full bloom on April 4, and in 2026 the dates were March 23 and March 30, so plan around late March to early April. ### How many days do I need for cherry blossoms in Kyoto? [...] - Kyoto's normal flowering date is March 26 and full bloom April 4 (1991–2020 average); in 2026 flowering was March 23 and full bloo\n\n## Japan Cherry Blossom Season 2027: Complete Sakura Guide\nThe first forecasts for the 2026 season came out between December 18, 2025 and January 29, 2026, so the first 2027 forecasts are likely to appear between December 2026 and late January 2027. As of October 5, 2026, none has been published. Last season, the JMA recorded full bloom in Tokyo on March 28 (3 days before normal), Kyoto on March 30 (5 days early), Osaka on April 3 (1 day early) and Sapporo on April 24 (12 days early). [...] | Region | First Bloom | Full Bloom (Mankai) | --- | Kyushu (Fukuoka) | March 22 | March 31 | | Kansai (Kyoto) | March 26 | April 4 | | Kansai (Osaka) | March 27 | April 4 | | Kansai (Nara) | March 28 | April 4 | | Kanto (Tokyo) | March 24 | March 31 | | Kanto (Yokohama) | March 25 | April 1 | | Tohoku (Sendai) | April 8 | April 13 | | Tohoku (Aomori, near Hirosaki) | April 22 | April 26 | | Hokkaido (Hakodate) | April 28 | May 2 | | Hokkaido (Sapporo) | May \n\n## Japan in March 2027: The Month Cherry Blossom Season Begins — Weather, Dates & Timing | Self Guide Japan\n- Weather: a real transition — Tokyo starts the month around 12°C by day and ends it near 17°C; nights stay cool (4–8°C). Rain picks up after the dry winter. Hokkaido is still snow-covered. - Cherry blossoms: Fukuoka and the south open first around the third week; Tokyo's average first bloom is around 24 March with full bloom around 31 March; Kyoto and Osaka follow within days. The forecast peak for Tokyo, Kyoto and Osaka is 28 March – 5 April. [...] - Around 24 March: Tokyo's average first bloom (kaika), with full bloom (mankai) around 31 March on the long-run averages. A tree stays in bloom for roughly 10–14 days from first opening, but peak viewing lasts only 5–7 days once full bloom is reached. - 28 March – 5 April: the current forecast peak window for Tokyo, Kyoto, Hakone and Osaka. - April onward: Kanazawa and the Alps in the first week of April, Tohoku mid-to-late April, Hokkaido \n\n## Release of 2026 Cherry Blossom Forecast (14th forecast) | ニュース | 日本気象株式会社\n| | | | | | | --- --- --- | | Location | Forecasted flowering date | Flowering deviation (days) | Forecasted full bloom date | Full bloom deviation (days) | Flowering date in average year | | Sapporo | 4/18 | -13 | 4/24 | -12 | 5/1 | | Aomori | 4/13 | -9 | 4/16 | -10 | 4/22 | | Sendai | 3/31 | -8 | 4/4 | -9 | 4/8 | | Tokyo | 3/19 | -5 | 3/28 | -3 | 3/24 | | Kanazawa | 3/29 | -5 | 4/3 | -5 | 4/3 | | Nagano | 3/31 | -11 | 4/6 | -10 | 4/11 | | Nagoya | 3/17 | -7 | 3/30 | -3 | 3/24 | [...] | Kyoto | 3/23 | -3 | 3/30 | -5 | 3/26 | | Osaka | 3/26 | -1 | 4/3 | -1 | 3/27 | | Wakayama | 3/24 | 0 | 4/2 | -1 | 3/24 | | Hiroshima | 3/19 | -6 | 3/30 | -4 | 3/25 | | Kochi | 3/16 | -6 | 3/31 | 1 | 3/22 | | Fukuoka | 3/24 | 2 | 4/3 | 3 | 3/22 | | Kagoshima | 3/27 | 1 | 4/5 | 0 | 3/26 | [...] App \"Sakura Navi - Forecast in 2026\" \"Sakura Navi\" ranked No. 1 in the App Store travel category (paid) in 11 cou\n\n## Price Increases are Coming to the Nationwide Japan Rail Pass (2026)\nIn a press release issued April 9th, JR Group announced that prices for the nationwide Japan Rail Pass will be increasing as of October 1st, 2026 (local time at the location of purchase). This follows a rollout of various price changes across the regional JR corridors covered by the pass. 1) Price Changes ( \\Adult Fare / Child Fare) Pass Type Former Price New Price (as of Oct. 1st, 2026) Ordinary (Adult Fare) 7-Day 50,000 / 25,000 53,000 / 27,000 14-Day 80,000 / 40,000 [...] 80,000 / 40,000 84,000 / 42,000 21-Day 100,000 / 50,000 105,000 / 53,000 Green Car (Adult Fare) 7-Day 70,000 / 35,000 74,000 / 37,000 14-Day 110,000 / 55,000 116,000 / 58,000 21-Day 140,000/ 70,000 147,000 / 74,000 \\All prices above indicated are in Japanese Yen \\\\Child fare applicable to children ages 6-11 [...] With this said, smart shoppers should be advised that there is a way to save money on the pass, even afte\n\n## JR Pass 2026 Price Update: Is It Still Worth It?\nYes, a smaller increase is scheduled for some purchase channels from October 1, 2026. The 7-day Ordinary pass remains ¥50,000 before that date, while overseas agency purchases are scheduled to rise to ¥53,000. Prices through the official JR Pass website are expected to remain unchanged for a limited period, but the details can change, so always verify the latest prices on theofficial JR Pass website before purchasing. ### Is the JR Pass still worth buying after the 2023 price increase? [...] | Pass Type | Before Oct 2023 | 2026 Price Before Oct. 1 | % Change | --- --- | | 7-day Ordinary | ¥29,650 | ¥50,000 | +69% | | 14-day Ordinary | ¥47,250 | ¥80,000 | +69% | | 21-day Ordinary | ¥60,450 | ¥100,000 | +65% | | 7-day Green Car | ¥39,600 | ¥70,000 | +77% | | 14-day Green Car | ¥64,120 | ¥110,000 | +72% | | 21-day Green Car | ¥83,390 | ¥140,000 | +68% | 💡 Click any current price to jump to \n\n## Japan Rail Pass Prices 2026: Child Fares and Worth It\nOfficial Prices ## The official 2026 prices, adult and child. | Pass | Adult (12+) | Child (6 to 11) | Green Car (Adult / Child) | --- --- | | 7-Day Pass | ¥50,000 | ¥25,000 | ¥70,000 / ¥35,000 | | 14-Day Pass | ¥80,000 | ¥40,000 | ¥110,000 / ¥55,000 | | 21-Day Pass | ¥100,000 | ¥50,000 | ¥140,000 / ¥70,000 | 7-Day Pass Adult¥50,000 (Green Car ¥70,000) Child¥25,000 (Green Car ¥35,000) 14-Day Pass Adult¥80,000 (Green Car ¥110,000) Child¥40,000 (Green Car ¥55,000) 21-Day Pass [...] An adult Ordinary Japan Rail Pass costs ¥50,000 for seven days, ¥80,000 for fourteen and ¥100,000 for twenty-one. Children aged 6 to 11 pay half, and up to two under-6s per ticket holder aged 6 or over ride free unless given their own reserved seat. For most families the math no longer works in the pass’s favor. On the classic Tokyo, Kyoto and Osaka route, separate Shinkansen tickets cost less and can use the fa\n\n## The Navigatio Japan on Facebook: \"The prices of the JR pass are going up AGAIN in October 2026. I already don't think it's worth getti…\"\n- David Max: everything in Japan is going up crazy, especially the hotel..at least 20%... - Nina Byzantina: Lo\n\n## Japan Rail Pass Prices 2026: Child Fares and Worth It\nAn adult Ordinary Japan Rail Pass costs ¥50,000 for seven days, ¥80,000 for fourteen and ¥100,000 for twenty-one. Children aged 6 to 11 pay half, and up to two under-6s per ticket holder aged 6 or over ride free unless given their own reserved seat. For most families the math no longer works in the pass’s favor. On the classic Tokyo, Kyoto and Osaka route, separate Shinkansen tickets cost less and can use the faster Nozomi, which the pass does not cover; on JR’s own fares, the pass won 1 of 20 [...] Official Prices ## The official 2026 prices, adult and child. | Pass | Adult (12+) | Child (6 to 11) | Green Car (Adult / Child) | --- --- | | 7-Day Pass | ¥50,000 | ¥25,000 | ¥70,000 / ¥35,000 | | 14-Day Pass | ¥80,000 | ¥40,000 | ¥110,000 / ¥55,000 | | 21-Day Pass | ¥100,000 | ¥50,000 | ¥140,000 / ¥70,000 | 7-Day Pass Adult¥50,000 (Green Car ¥70,000) Child¥25,000 (Green Car ¥35,000) 14-Day \n\n## JR Pass Price History: How Much the Pass Has Changed\nIn April 2026, JR Group announced a further increase for overseas travel agents from October 1, 2026, with the 7-day ordinary pass rising from ¥50,000 to ¥53,000 through those channels. As of mid-2026, the official JR Pass online reservation website is holding its current prices for a limited period. The Japan Tourism Agency's official announcement has the full details, but note that the end date for the promotional pricing window has not been confirmed. Always check the live price on the [...] Q: Has the JR Pass price changed again after 2023?A: Yes, JR Group announced a further increase for overseas agents taking effect from October 1, 2026. Q: What is the JR Pass price history for the 7-day pass?A: It held at ¥29,650 for many years, rose to ¥50,000 in October 2023, and is set to rise again in October 2026. [...] Q: Why is the JR Pass so expensive now?A: The 2023 repricing reflected ri\n\n## Price Changes for the Japan Rail Pass\nof the Exchange Order from the agency, the child pass is still valid for use even if the child is 12 years old at the time of use. 2. Effective Date of the Price Changes For purchases made on or after October 1, 2026 The local time at the location of the purchase 3. Other There are no changes to the procedures for purchasing or using the pass. For details, please visit the Japan Rail Pass website. ( (Unit: yen) [...] Price Changes for the Japan Rail Pass April 9, 2026 JR Group The Japan Rail Pass is a convenient pass that allows visiting tourists to Japan to travel by train throughout the country. It is sold by the JR Group through overseas JR designated sales offices, agencies and via the online purchasing service on its dedicated website (JAPAN RAIL PASS Reservation). Since the last price changes of the Japan Rail Pass on October 1, 2023, some JR companies adjusted their ticket prices.\n\n## Japan Trip Budget 2026: Real Daily Costs\nExcluding international flights and long-distance rail, plan roughly $55–90 (¥9,000–14,000) per person per day for a hostel-based budget trip, $115–190 (¥18,000–30,000) for a solo mid-range trip using business hotels, or $220–380 and above (¥35,000–60,000+) for a comfortable trip. Couples sharing a room can spend less per person than solo travelers. [...] ### Solo and Couple Budgets Are Not the Same A $102 (¥16,000) double room costs a solo traveler $102 and two travelers about $51 (¥8,000) each. Most published “per person per day” estimates hide this assumption. For couples, calculate the room first and divide it. For solo travelers, compare three different products rather than three booking sites only: 1. a private business-hotel room; 2. a hostel private room or dorm bed; 3. a capsule, checking luggage, noise and bathing arrangements. [...] - Budget: $55–90 per day (¥9,000–14,000) bef\n\n## Japan Travel Budget Breakdown for First-Time Visitors: Realistic 2026 Cost Guide\n## Introduction Japan is not a cheap destination if compared to other Asian countries like Vietnam or Thailand, but it is still highly manageable. In 2026, a first-time trip to Japan for solo/budget travellers costs approximately $65-$150 (¥10,000–¥23,000) per day, mid-range travellers expect to spend around $150–$250 (¥23,000–¥38,000) per day excluding international flights. [...] If you avoid turning every day into a paid checklist, the sightseeings are actually quite affordable in Japan. By balancing inexpensive street food and free neighbourhood walks with a few curated paid attractions, you can save money while also enjoy authentic Japan cultures. A realisitc budget for sightseeings as follows: Budget: ¥1,000 to ¥2,000 per day Mid-range: ¥2,000 to ¥4,500 per day Comfort: ¥5,000+ per day [...] Tight budget: It means supermarket or convenience store meals, udon, soba, donburi, curry, \n\n## When Is Cherry Blossom Season In Kyoto?\nIn Kyoto, the cherry blossoms (sakura) usually bloom in the last week of March and the first two weeks of April in Kyoto (roughly between 20 March and 14 April). In an average year, the blooms peak on 1 April in Kyoto. Once they bloom, they are notoriously fickle: sometimes almost all the trees will come into full bloom (mankai) at the same time and stay in full bloom for a week or even longer. [...] Depending on the weather, the cherries can start blooming as early as 20 March and as late as 1 April. In some years, all the trees seem to bloom at the same time, while in other years, they bloom and peak at different times across the city. Worse yet, heavy rains can strike just after most trees have reached peak, bringing the petals down several days earlier than they might have lasted. Top Activities In Kyoto Kimono Rental In Kyoto Rent a kimono and hire a photographer for the afternoon. \n\n## 2026 Cherry Blossom Forecast\nSign In # Cherry Blossom Forecast 2026 ## 2026 Nationwide Timing Last updated: ### Major Cities | Place | Best Viewing | --- | | Tokyo | March 28 - April 4 | | Kyoto | March 29 - April 5 | | Osaka | April 1 - 7 | | Nagoya | March 26 - April 1 | | Fukuoka | April 1 - 8 | ### Kyushu, Shikoku and Chugoku | Place | Best Viewing | --- | | Fukuoka | April 1 - 8 | | Kumamoto | March 30 - April 4 | | Hiroshima | March 29 - April 4 | | Matsuyama | March 30 - April 4 | | Takamatsu | April 2 - 9 | [...] ### Kansai | Place | Best Viewing | --- | | Kyoto | March 29 - April 5 | | Osaka | April 1 - 7 | | Nara | March 29 - April 4 | | Yoshino | April 2 - 8 | ### Kanto and Chubu | Place | Best Viewing | --- | | Tokyo | March 28 - April 4 | | Nagoya | March 26 - April 1 | | Yokohama | March 29 - April 5 | | Kanazawa | April 2 - 9 | | Takayama | April 8 - 13 | | Fuji Five Lakes | April 6 - 12 | | Matsumoto\n\n## Cherry Blossom Calendar 2026 | Kyoto Travel\nSpring Illuminations and Special Opening Events 【PDF】 Last updated | April 10, 2026 The updates for 2026 have ended on April 10. ## Spot ### Bloom Progression Tap an icon to filter Click an icon to filter Scroll | Locations | Peak Viewing Time in Previous Years | 19th Mar | 23rd Mar | 25th Mar | 27th Mar | 30th Mar | 1st Apr | 3rd Apr | 6th Apr | 8th Apr | 10th Apr | --- --- --- --- --- --- | ## Cherry Blossom Report ## Our Partners []( []( Another Kyoto [...] Special admissions and evening light-ups will be held at some temples and shrines during cherry blossom season. Download the full Kyoto Cherry Blossom Calendar 2025: Cherry Blossom Calendar 2025 【PDF】 This calendar from the previous season is here for your consideration. New updates will be posted as the next season draws closer, so be sure to check back! Special admission and evening light-up will be held at some temples and shrin\n\n## Japan Etiquette Guide for Tourists 2026\n## Quick Summary Most important: Remove shoes when entering homes, ryokan, temples, and some restaurants — look for a shoe shelf or step-up at the entrance Trains: Keep quiet, do not talk on the phone, and give up priority seats for elderly and disabled passengers Eating: Do not tip — ever. Say “itadakimasu” before eating and “gochisousama” when finished General\n\n## Japan Rail Pass Prices 2026: Child Fares and Worth It\nPublished: Thu, 29 May 2025 12:37:20 GMT\nAn adult Ordinary Japan Rail Pass costs ¥50,000 for seven days, ¥80,000 for fourteen and ¥100,000 for twenty-one. Children aged 6 to 11 pay half, and up to two under-6s per ticket holder aged 6 or over ride free unless given their own reserved seat. For most families the math no longer works in the pass’s favor. On the classic Tokyo, Kyoto and Osaka route, separate Shinkansen tickets cost less and can use the faster Nozomi, which the pass does not cover; on JR’s own fares, the pass won 1 of 20 [...] Official Prices ## The official 2026 prices, adult and child. | Pass | Adult (12+) | Child (6 to 11) | Green Car (Adult / Child) | --- --- | | 7-Day Pass | ¥50,000 | ¥25,000 | ¥70,000 / ¥35,000 | | 14-Day Pass | ¥80,000 | ¥40,000 | ¥110,000 / ¥55,000 | | 21-Day Pass | ¥100,000 | ¥50,000 | ¥140,000 / ¥70,000 | 7-Day Pass Adult¥50,000 (Green Car ¥70,000) Child¥25,000 (Green Car ¥35,000) 14-Day \n\n## Is the JR Pass Worth It in 2026? Real Route Maths\nPublished: Sun, 18 Oct 2026 07:17:17 GMT\nOn the official website: ¥50,000 (7 days), ¥80,000 (14 days) and ¥100,000 (21 days) for ordinary class. From 1 October 2026, overseas agencies charge ¥53,000, ¥84,000 and ¥105,000. Green passes are ¥70,000, ¥110,000 and ¥140,000 online. ### Can I ride the Nozomi with a JR Pass? Yes, with a special add-on ticket sold only to pass holders: ¥4,960 from Tokyo to Kyoto or Shin-Osaka, ¥6,500 to Hiroshima. Buy it at JR ticket machines or ticket offices up to one month ahead. [...] ## How much does the JR Pass cost in 2026? The JR Group raised pass prices in October 2023, then announced a second change on 9 April 2026. From 1 October 2026, passes bought through overseas JR-designated agencies cost more. The official online shop kept the old prices “for a limited time”, and JR says it will announce when that freeze ends. [...] Is the JR Pass worth it in 2026? For most first-timers doing Tokyo, Ky\n\n## JR Pass Prices 2026: Adult, Child & Cost Comparison | Japan Train\nPublished: Sat, 09 May 2026 17:18:32 GMT\n| Nationwide JR Pass: adult Ordinary prices in yen | | | --- | Validity | Official online purchase | Overseas designated agency | | 7 days | ¥50,000 | ¥53,000 | | 14 days | ¥80,000 | ¥84,000 | | 21 days | ¥100,000 | ¥105,000 | Green passes have different prices. Use the class you intend to travel in on both sides of the comparison. Do not compare a Green pass with the lowest available Ordinary single-ticket fare and call the difference a like-for-like saving. [...] ### How much are 14-day and 21-day Ordinary JR Passes? As checked on 10 October 2026, adult official-online prices are ¥80,000 for 14 days and ¥100,000 for 21 days. Overseas designated-agency prices are ¥84,000 and ¥105,000. Use the current price for your actual purchase channel. ### Is a child JR Pass always exactly half the adult price? [...] No. Use the official child price and age/date rules for your channel. For example, \n\n## Japan 2026: Complete Guide for Travelers | Pixidia\nPublished: Mon, 02 Feb 2026 11:10:58 GMT\nSince the massive 70% increase in October 2023, the national JR Pass (53,000 JPY for 7 days for purchases made from October 1, 2026; 50,000 JPY on the official website as of November 11, 2026) is no longer cost-effective for a classic Tokyo-Kyoto-Tokyo itinerary. The winning strategy in 2026: mix Regional JR Passes with individual tickets. #### Recommended Regional Passes [...] Rarely for a classic first trip (Tokyo-Kyoto-Osaka). After the 70% increase in 2023, the national pass (~$340 USD for 7 days) is only worth it for very long journeys. Prefer regional passes like the JR West Kansai-Hiroshima Pass (5 days, ~$115 USD). ### What budget should I plan per day in Japan? [...] - JR West Kansai-Hiroshima Pass (5 days, ~17,000 JPY): Osaka, Kyoto, Hiroshima, Miyajima. Unbeatable value. - JR East Tohoku Pass (5 days, ~30,000 JPY): Tokyo to the north (Sendai, Aomori). - Hayatoku Tickets: 20-30\n\n## Tokyo to Kyoto Shinkansen 2026: Fares, JR Pass & Luggage | LuggAgent\nA Tokaido Shinkansen N700S at Tokyo Station. Photo: 電車(新幹線)でゴー！ / Wikimedia Commons / CC BY-SA 4.0 ## How much is the Shinkansen from Tokyo to Kyoto in 2026? A one-way Shinkansen ticket from Tokyo to Kyoto costs from ¥13,320 in 2026, and a reserved seat costs ¥13,850–¥14,170 in regular season. JR Central did not raise Tokaido Shinkansen fares in 2026 (the March 2026 fare increase was JR East's), so prices are the same as in 2025. ### Do reserved-seat fares change by season? [...] ### How much is a one-way Shinkansen ticket from Tokyo to Kyoto? In 2026, a regular-season one-way adult ticket costs ¥13,320 non-reserved, ¥13,850 reserved on the Hikari/Kodama and ¥14,170 reserved on the Nozomi. Reserved seats cost ¥200–¥400 more in peak seasons and ¥200 less in off-peak season, and booking a reserved seat on smartEX saves about ¥200. ### How long does the Shinkansen take from Tokyo to Kyoto? \n\n## Shinkansen Fare Tables | Route & Seat Comparison, Discount Booking | NAVITIME Travel\n| Route | Line | Non-Reserved (Ordinary) | Reserved Ordinary (Regular Season) | ------| | Tokyo〜Shin-Osaka | Tokaido Shinkansen | 13,870JPY | 14,720JPY | | Tokyo〜Kyoto | Tokaido Shinkansen | 13,320JPY | 14,170JPY | | Tokyo〜Nagoya | Tokaido Shinkansen | 10,560JPY | 11,300JPY | | Tokyo〜Hakata | Tokaido-Sanyo Shinkansen | 22,220JPY | 23,810JPY | | Tokyo〜Sendai(Miyagi) | Tohoku Shinkansen | 10,780JPY | 11,630JPY | | Tokyo〜Shin-Aomori | Tohoku Shinkansen | \\- | 18,110JPY | [...] # Shinkansen Fare Tables | Fares by Route & Seat Type Shinkansen fares vary depending on the route, seat type, and train class. This page provides fare tables for all 9 Shinkansen lines (Tokaido-Sanyo, Sanyo-Kyushu, Nishi Kyushu, Tohoku, Hokkaido, Akita, Yamagata, Joetsu, and Hokuriku). Learn about fare differences between non-reserved, reserved, Green Car and GranClass seats, as well as child fares and discount booki\n\n## How Much Does it Cost to Ride the Shinkansen? | Tokyo Cheapo\nSo during super-peak season, that one-way reserved seat between Tokyo and Kyoto costs ¥14,250 (for Hikari or Kodama services). Meanwhile, the same ticket costs just ¥13,650 during off-peak season. If you’re just making one trip, the price changes don’t make too much of a difference. However, if you’re planning something like a multi-leg journey, probably don’t do it during super-peak season. Or stick to non-reserved seating, where these seasonal surcharges don’t apply. [...] That’s from Tokyo Station to Kyoto Station, on either the Hikari or Kodama service (as opposed to the faster Nozomi service), for a non-reserved seat during regular season. We’ll cover more scenarios as we go. If you made the same journey to Kyoto on regular trains, the trip would cost just the base fare of ¥8,360, but would take all day (literally). [...] Instead, what makes the Shinkansen (and any Ltd. Express trai\n\n## Japan Cherry Blossom Forecast 2026: Sakura Bloom Tracker\nTypical-year averages place peak Tokyo bloom at April 1-7, Kyoto at April 5-12, and Osaka at April 1-8. Hokkaido finishes the country in early May. The 2026 forecast should track these averages closely — winter 2025-26 temperatures have not shown the warm anomaly that pushed 2023 and 2024 peaks 5-10 days earlier than normal. [...] When will cherry blossoms peak in Japan in 2026? Typical-year peak (mankai) in Tokyo, Kyoto, and Osaka is April 1-10, 2026. The bloom front starts in Okinawa in late January, hits Kyushu and Shikoku late March, sweeps through the major Honshu cities in early April, and finishes in Hokkaido in early May. Current-year forecasts from JMA and JMC published in early March may shift these dates ±1-2 weeks based on winter temperatures. When should I book a 2026 cherry blossom trip to Japan? [...] 1. March 25-31: Fukuoka, Hiroshima — bloom front arrives in Kyushu 2. Ap\n\n## Japan Cherry Blossom Forecast 2026: Best Time & Places to See Sakura - Out of Town Blog\nThe best time to see cherry blossoms in Japan in 2026 depends entirely on geography. Japan stretches long north-to-south, so spring arrives gradually. | Region | Estimated Bloom | Peak Bloom Japan 2026 | --- | Fukuoka / Kyushu | ~March 20 | ~March 28–30 | | Tokyo | ~March 20–22 | ~March 26–29 | | Kyoto / Osaka | ~March 24–25 | ~April 1–2 | | Kanazawa / Alps | Early April | ~April 3–8 | | Tohoku | Mid April | ~April 15–25 | | Hokkaido | Late April | ~April 29–May 2 | [...] | Item | Kyoto | Osaka | --- | First bloom | Mar 24–25, 2026 | Mar 24–25, 2026 | | Full bloom (peak) | Apr 1–2 | Apr 1 | | Best viewing window | Mar 30 – Apr 7 | Mar 29 – Apr 6 | | Bloom tendency | Slightly later & longer | Slightly earlier | | Crowd level | Very crowded (historic sites) | Busy but more spacious parks | | Best time of day | Early morning/evening | Afternoon/night illumination | [...] In 2026, the Kyoto \n\n## 2026 Cherry Blossom Forecast\nSign In # Cherry Blossom Forecast 2026 ## 2026 Nationwide Timing Last updated:",
+ "plan": {
+  "title": "Japan for Two in Spring: Route, Blossoms, Budget",
+  "description": "A first-timer's plan for a couple visiting Japan in spring: how many days to take, a Tokyo-Kyoto-Osaka route, and when the cherry blossoms are likely to peak. It also covers rail pass choices, realistic budget ranges and the etiquette that keeps a trip smooth.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "e37c4a5c",
+    "narration": "Cherry blossoms peak for about one week. Miss it by a few days, and you may find bare branches or petals on the ground. So timing decides this whole trip.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "cherry blossoms full bloom Kyoto",
+      "alt": "Cherry trees in full bloom",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Timing the blossoms and choosing your days"
+   },
+   {
+    "id": "9f2c8d47",
+    "narration": "Tokyo's thirty-year average puts first bloom on 24 March. For 2027, estimates suggest first bloom around 22 March, and full bloom around 30 March.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Tokyo blossom timing",
+      "events": [
+       {
+        "date": "24 Mar",
+        "label": "30-year average first bloom"
+       },
+       {
+        "date": "22 Mar",
+        "label": "2027 estimated first bloom"
+       },
+       {
+        "date": "30 Mar",
+        "label": "2027 estimated full bloom"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "d7520f81",
+    "narration": "Kyoto is expected to open around 25 March, with full bloom around 3 April 2027. Normal is 26 March and 4 April. Osaka also peaks in early April.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Kyoto",
+       "First bloom",
+       "Full bloom"
+      ],
+      "rows": [
+       [
+        "2027 estimate",
+        "25 March",
+        "3 April"
+       ],
+       [
+        "Normal",
+        "26 March",
+        "4 April"
+       ]
+      ],
+      "title": "Kyoto 2027 vs normal",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "e6b051f3",
+    "narration": "Recent years show the range. In 2026, spring ran early, with Tokyo in full bloom on 28 March. In 2025, it was closer to normal.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Tokyo cherry blossoms Chidorigafuchi",
+       "Philosopher's Path Kyoto sakura",
+       "Osaka Castle cherry blossoms"
+      ],
+      "alt": "Blossoms in Tokyo, Kyoto and Osaka"
+     }
+    }
+   },
+   {
+    "id": "1b61b70a",
+    "narration": "Official 2027 forecasts are not out yet. The first usually arrive in January, so stay flexible with bookings, and expect Kyoto's blossom week to be the busiest of the year.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "January",
+      "label": "When the first 2027 forecasts usually arrive"
+     }
+    }
+   },
+   {
+    "id": "4a1e522b",
+    "narration": "How many days? For a first couple's trip, plan ten to fourteen days. That gives time for Tokyo, Kyoto and Osaka without rushing, and room to shift with the blossoms.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Planning your window",
+      "items": [
+       "Ten to fourteen days for two",
+       "Forecasts arrive in January",
+       "Kyoto's week is busiest"
+      ],
+      "style": "icons",
+      "accent": "rose",
+      "icons": [
+       "calendar",
+       "cloud",
+       "users"
+      ]
+     }
+    }
+   },
+   {
+    "id": "60ed3bb6",
+    "narration": "Here is a simple route. Start in Tokyo, move on to Kyoto, and finish in Osaka. Osaka becomes your last base and your departure point.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "route",
+      "title": "Your route",
+      "caption": "Tokyo, Kyoto, Osaka",
+      "stops": [
+       "Tokyo",
+       "Kyoto",
+       "Osaka"
+      ]
+     }
+    },
+    "chapter": "Tokyo, Kyoto, Osaka: route and rail passes"
+   },
+   {
+    "id": "6312905c",
+    "narration": "One train line ties it together. The Tokaido Shinkansen links Tokyo, Nagoya, Kyoto and Osaka, so there is no need for complicated connections.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Tokaido Shinkansen",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Tokyo",
+        "icon": "train"
+       },
+       {
+        "id": "n",
+        "label": "Nagoya"
+       },
+       {
+        "id": "k",
+        "label": "Kyoto"
+       },
+       {
+        "id": "o",
+        "label": "Osaka"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "n"
+       ],
+       [
+        "n",
+        "k"
+       ],
+       [
+        "k",
+        "o"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "f4b2e226",
+    "narration": "There is also something new. Since 1 October 2026, a private-cabin tier called Supreme Class sits above the Green Car on these trains. It is optional, so ordinary seats still work fine.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Tokaido Shinkansen N700S Tokyo Station",
+       "Shinkansen Green Car interior",
+       "Shinkansen train passing Mount Fuji"
+      ],
+      "alt": "Tokaido Shinkansen trains"
+     }
+    }
+   },
+   {
+    "id": "0917780c",
+    "narration": "Now, the pass question. With only Tokyo, Kyoto and Osaka, add up single fares first. Tokyo to Kyoto is about 13,320 yen non-reserved, and Tokyo to Shin-Osaka is 13,870 yen.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "One-way Shinkansen fares from Tokyo",
+      "labels": [
+       "Kyoto",
+       "Shin-Osaka"
+      ],
+      "values": [
+       13320.0,
+       13870.0
+      ],
+      "unit": "¥",
+      "highlight": 0
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "76ed78db",
+    "narration": "Compare that with a nationwide seven-day pass at 50,000 yen. For this route, single tickets usually come out cheaper, and they let you ride the faster Nozomi.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Single tickets",
+       "tagline": "Pay per ride"
+      },
+      "b": {
+       "name": "7-day JR Pass",
+       "tagline": "50,000 yen online"
+      },
+      "rows": [
+       {
+        "label": "Fast Nozomi train",
+        "a": "Included",
+        "b": "Extra add-on ticket"
+       },
+       {
+        "label": "Best for",
+        "a": "Tokyo-Kyoto-Osaka",
+        "b": "Long, far-ranging trips"
+       }
+      ],
+      "verdict": "Do the fare maths first",
+      "winner": "a"
+     }
+    }
+   },
+   {
+    "id": "ffb92715",
+    "narration": "Be careful with regional passes. The JR East Rail Pass and JR Tokyo Wide Pass cover eastern Japan around Tokyo. They do not reach Kyoto or Osaka.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Regional passes",
+      "items": [
+       "JR East Rail Pass: eastern Japan",
+       "JR Tokyo Wide Pass: eastern Japan",
+       "Neither covers Kyoto or Osaka"
+      ],
+      "style": "keywords",
+      "accent": "amber",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "c825fffb",
+    "narration": "Two last tips. Book hotels early for blossom week, because it is the busiest week of the year. And in Kyoto, start your sightseeing at dawn to beat the crowds.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Kyoto Fushimi Inari early morning",
+       "Philosopher's Path cherry blossoms Kyoto",
+       "Arashiyama bamboo grove morning"
+      ],
+      "alt": "Quiet Kyoto sights at dawn"
+     }
+    }
+   },
+   {
+    "id": "12630df8",
+    "narration": "So what will it cost? Less than you might fear. A long weak yen has made ground costs roughly 25 to 30 percent cheaper for visitors paying in dollars, according to Wander Japan.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "25-30%",
+      "label": "Cheaper ground costs for visitors paying in dollars"
+     }
+    },
+    "sfx": "ding",
+    "speaker": "narrator",
+    "chapter": "What it costs and how to behave"
+   },
+   {
+    "id": "f6482c16",
+    "narration": "Per person, per day, without flights: budget is about 60 to 90 dollars. Mid-range is about 100 to 150. Luxury starts at 300 dollars and goes up.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Daily budget per person, no flights",
+      "labels": [
+       "Budget low",
+       "Budget high",
+       "Mid low",
+       "Mid high",
+       "Luxury"
+      ],
+      "values": [
+       60.0,
+       90.0,
+       100.0,
+       150.0,
+       300.0
+      ],
+      "unit": "$",
+      "highlight": 4
+     }
+    }
+   },
+   {
+    "id": "d8423cab",
+    "narration": "Beds vary widely. A capsule is 2,000 to 5,000 yen a night. A Tokyo business hotel is 9,000 to 14,000. A ryokan, with dinner and breakfast, runs 15,000 to 45,000 yen or more per person.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Stay",
+       "Yen"
+      ],
+      "rows": [
+       [
+        "Capsule",
+        "2,000-5,000"
+       ],
+       [
+        "Tokyo business hotel",
+        "9,000-14,000"
+       ],
+       [
+        "Ryokan, per person",
+        "15,000-45,000+"
+       ]
+      ],
+      "title": "Sample stays per night",
+      "highlight": {
+       "row": 2
+      }
+     }
+    }
+   },
+   {
+    "id": "278d1b9e",
+    "narration": "For whole trips, Self Guide Japan shows a budget couple's ten days at about 2,160 dollars each, flights included. A mid-range fourteen days with two ryokan nights is about 3,720 dollars each.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Budget, 10 days",
+       "tagline": "Per person, flights included"
+      },
+      "b": {
+       "name": "Mid-range, 14 days",
+       "tagline": "Per person, with ryokan"
+      },
+      "rows": [
+       {
+        "label": "Per person",
+        "a": "$2,160",
+        "b": "$3,720"
+       },
+       {
+        "label": "Nights",
+        "a": "10 days",
+        "b": "14 days"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "29f8f232",
+    "narration": "Now the manners. Keep quiet on trains. In many areas, don't eat while walking. Take off your shoes where indicated. And carry your rubbish with you, because bins are rare.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "train",
+        "label": "Quiet on trains"
+       },
+       {
+        "icon": "food",
+        "label": "No eating while walking"
+       },
+       {
+        "icon": "shoe",
+        "label": "Shoes off"
+       },
+       {
+        "icon": "trash",
+        "label": "Carry your rubbish"
+       }
+      ],
+      "title": "Everyday etiquette"
+     }
+    }
+   },
+   {
+    "id": "7c73dba0",
+    "narration": "Under the blossoms, don't shake branches or climb trees, and keep to the picnic areas. The trees are shared by everyone.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "people picnic under cherry blossoms park",
+      "alt": "Picnic under cherry blossoms",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "8b2ddf0a",
+    "narration": "So the takeaway: plan ten to fourteen days, budget sensibly for each day, and be quiet, tidy and kind. Do that, and spring in Japan is yours.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Budget smart, travel quietly, leave no trace.",
+      "emphasis": "leave no trace"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "KKday and JR East Expand Partnership to Open Up Eastern Japan Rail Travel - The National Law Review",
+    "url": "https://natlawreview.com/press-releases/kkday-and-jr-east-expand-partnership-open-eastern-japan-rail-travel",
+    "publisher": "natlawreview.com",
+    "license": "",
+    "date": "Wed, 29 Apr 2026 10:53:27 GMT"
+   },
+   {
+    "title": "Cherry Blossom Season in Japan 2027: Peak Dates, Best Spots and How to Plan",
+    "url": "https://travel.japanvoyage.jp/guides/cherry-blossom-season-japan-2027-guide",
+    "publisher": "travel.japanvoyage.jp",
+    "license": "",
+    "date": "Tue, 17 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Japan Trip Cost Calculator 2026: How Much Will Your Trip Cost? | Self Guide Japan",
+    "url": "https://selfguidejapan.com/blog/how-much-is-a-trip-to-japan",
+    "publisher": "selfguidejapan.com",
+    "license": "",
+    "date": "Sun, 05 Apr 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Japan Travel Budget 2026 — Real Daily Costs by Tier — Wander Japan",
+    "url": "https://www.wanderjapan.guide/japan-travel-budget",
+    "publisher": "wanderjapan.guide",
+    "license": "",
+    "date": "Thu, 29 Oct 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Where to Stay in Japan: Types of Stay and Prices (2026)",
+    "url": "https://www.shantitravel.com/en/guide-travel-japan/hotels-japan-guide",
+    "publisher": "shantitravel.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Is the JR Pass Worth It in 2026? Real Route Maths",
+    "url": "https://www.thejapanpro.com/blog/is-jr-pass-worth-it",
+    "publisher": "thejapanpro.com",
+    "license": "",
+    "date": "Sun, 18 Oct 2026 07:17:17 GMT"
+   },
+   {
+    "title": "Shinkansen Fare Tables | Route & Seat Comparison, Discount Booking | NAVITIME Travel",
+    "url": "https://japantravel.navitime.com/en/booking/jr/superexpress/fare",
+    "publisher": "japantravel.navitime.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Japan Etiquette Guide for Tourists 2026",
+    "url": "https://japan-travel-concierge.net/japan-etiquette",
+    "publisher": "japan-travel-concierge.net",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 66.2,
+  "before_first_script_call_s": 25.0,
+  "script_s": 41.2
+ },
+ "cost": {
+  "script_small": 0.00096,
+  "research": 0.01093,
+  "script_big": 0.28326,
+  "search_api": 0.12,
+  "total": 0.41515
+ },
+ "calls": {
+  "small": 3,
+  "tools": 13,
+  "big": 6
+ },
+ "tokens": {
+  "in": 196495,
+  "out": 12805
+ },
+ "rules": {
+  "length": {
+   "words": 584,
+   "expected_words": 537,
+   "ratio": 1.088,
+   "beats": 20,
+   "expected_beats": 17,
+   "est_speech_s": 262.3,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 27,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Cherry blossoms peak for about one week. Miss it by a few days, and you may find bare branches or petals on the ground. So timing decides this whole trip.",
+   "close_text": "So the takeaway: plan ten to fourteen days, budget sensibly for each day, and be quiet, tidy and kind. Do that, and spring in Japan is yours."
+  },
+  "variety": {
+   "distinct": 12,
+   "counts": {
+    "image": 2,
+    "timeline": 1,
+    "table": 2,
+    "gallery": 3,
+    "stat": 2,
+    "bullets": 2,
+    "map": 1,
+    "diagram": 1,
+    "chart": 2,
+    "versus": 2,
+    "icons": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.48,
+   "top_type": "gallery",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 25,
+   "ungrounded_numbers": [
+    "100",
+    "13870",
+    "60"
+   ],
+   "entities": 16,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.073,
+   "ungrounded_number_share": 0.12,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "plan ten to fourteen",
+    "count": 2
+   },
+   {
+    "phrase": "ten to fourteen days",
+    "count": 2
+   },
+   {
+    "phrase": "tokyo kyoto and osaka",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "coverage": 2,
+   "other": 1
+  },
+  "sources": {
+   "cited": 8,
+   "fetched": 42,
+   "notes_len": 35032,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": false,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 4 (gallery): its narration never says [\"Philosopher's Path Kyoto sakura\", 'Osaka Castle cherry blossoms']",
+   "beat 6 (bullets): its narration never says ['Forecasts arrive in January', \"Kyoto's week is busiest\"]",
+   "beat 15 (chart): its narration never says ['Budget high', 'Mid low', 'Mid high']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 2,
+    "reason": "The 7-day JR Pass is stated as 50,000 yen, which is wrong: it is ¥50,000 for the 7-day Ordinary pass, a correct figure, but the script never mentions the October 2023 price hike. Also, a nationwide pass cannot use Nozomi without a supplement, a claim that is partly true but oversimplified. The versus slide's 'Fast Nozomi train: Single tickets Included' is ambiguous. Yen fares are presented without dates, and the Tokyo-Kyoto fare of 13,320 non-reserved is stale-ish."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "All requested topics appear, but the pass section is thin: no price-change history, no 2023 context, and no mention of alternatives like the Kansai pass or ICOCA/Suica. Itinerary lacks day allocation and day trips (Nara, Hiroshima)."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Order is logical, but blossom timing takes six beats before the days or route. Beat 13 mixes tips with Kyoto and repeats the 'busiest week' point from Beat 5."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening on the one-week bloom has tension. The ending is a generic summary with a cliché closer ('spring in Japan is yours')."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear, and suited to first-time US couples."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety of scene types and real numbers charted. A 'timeline' of mixed years is odd for the dates, and the budget chart mixes ranges as separate bars."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Contains some specifics like Supreme Class, but much is generic travel-blog content. Etiquette tips are standard."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It covers the requested points, but the rail pass 'situation now' is under-explained, the length is roughly on target, and flights and 'current prices flagged with dates' are not met."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clean, with short sentences. 'Rubbish' is British usage for a US audience."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Compare that with a nationwide seven-day pass at 50,000 yen.",
+    "issue": "It never explains that the price jumped from about 29,650 yen in October 2023, which is the core of 'how the pass works now'. It also omits that the pass excludes Nozomi and Mizuho trains.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Single tickets\",\"tagline\":\"Pay per ride\"},\"b\":{\"name\":\"7-day JR Pass\"",
+    "issue": "The row 'Fast Nozomi train: Included vs Extra add-on ticket' misleads. A JR Pass cannot ride the Nozomi even with an add-on ticket, except by paying the full fare.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Per person, flights included",
+    "issue": "The $2,160 figure comes from a 2026 calculator and uses a 7-day JR Pass at $330, which contradicts the script's own advice against the pass. Prices are undated.",
+    "beat": 17
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Tokyo to Kyoto is about 13,320 yen non-reserved",
+    "issue": "Presented without date caveat, and the Shin-Osaka fare comparison is not tied to a source date.",
+    "beat": 10
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Book hotels early for blossom week, because it is the busiest week of the year.",
+    "issue": "Repeats the earlier 'busiest week of the year' point, and appears in the rail section.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Here is a simple route. Start in Tokyo, move on to Kyoto, and finish in Osaka.",
+    "issue": "There is no night split, no day trips, and no logic for the order, and no mention of flying into Tokyo and out of Osaka (open-jaw).",
+    "beat": 7
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Carry your rubbish with you",
+    "issue": "British word choice for a US viewer; 'trash' is the American term.",
+    "beat": 18
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Official 2027 forecasts are not out yet.",
+    "issue": "Beats 2-3 use blog estimates based on averages, not official forecasts, and are labeled 'estimates' only loosely.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "JR Pass price jump of October 2023 and the current pass price context",
+   "Alternatives like IC cards, Kansai area passes, and booking Shinkansen online",
+   "Day-by-day split across Tokyo, Kyoto, Osaka and day trips like Nara",
+   "Date flags for current prices and exchange rates",
+   "Practical etiquette like tipping, cash, and escalator rules"
+  ],
+  "wrong_facts": [
+   "Versus slide implies a JR Pass can add a Nozomi ticket; Nozomi is not covered by the JR Pass.",
+   "Omits that the JR Pass price rose about 70% in October 2023, which is central to the request."
+  ],
+  "would_publish": false,
+  "summary": "A tidy, friendly script that covers the requested topics but is shallow and misleading on the rail pass question, which was the key 'now' point. Blossom timing is well sourced, but the route lacks depth and the ending is generic.",
+  "mean": 3.22,
+  "cost_usd": 0.037462,
+  "tokens": [
+   9436,
+   1859
+  ]
+ }
+}

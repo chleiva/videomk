@@ -1,0 +1,611 @@
+{
+ "id": "tec-01",
+ "category": "technology / AI",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how do large language models like ChatGPT work",
+ "great": "Tokens, next-token prediction, transformer attention, pretraining on text, fine-tuning with human feedback (RLHF), hallucinations and why; accessible analogies, no jargon dumps, correct.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:58:41",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How large language models work is a timeless technical explanation (neural networks, transformers, training on text, next-token prediction) that an encyclopedia covers accurately, so no recent web res",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 16.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 12.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 8.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 8.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 4.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 13,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 3146,
+  "n_sources": 4,
+  "n_fetched": 4,
+  "fetched": [
+   "Transformer (deep learning)",
+   "Mamba (deep learning architecture)",
+   "Self-supervised learning",
+   "List of large language models"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Transformer (deep learning)\nIn deep learning, the transformer is a family of artificial neural network architectures based on the multi-head attention mechanism, in which input data such as text, images, or audio is  converted to a sequence of numerical representations called tokens, and each token is converted into a vector through an embedding layer. At each layer, each token is then contextualized within the scope of the context window with other (unmasked) tokens via a parallel multi-head attention mechanism, allowing the signal for key tokens to be amplified and less important tokens to be diminished. Because self-attention alone is permutation-invariant, transformers inject positional information, typically through positional encodings or learned positional embeddings, so token order can affect the output.\nBecause transformers do not process tokens one at a time, their computations can be parallelized across sequence positions during training more readily than those of recurrent neural networks like long short-term memory (LSTM). Later variations have been widely adopted for training large language models (LLMs) on large (language) datasets.\nThe original version of the transformer architecture was proposed...\n\n## Mamba (deep learning architecture)\nMamba is a deep learning architecture focused on sequence modeling. It was developed by two researchers Albert Gu from Carnegie Mellon University and Tri Dao from Princeton University to address some limitations of transformer models, especially in processing long sequences, and it is based on the Structured State Space sequence (S4) model.\n\n## Self-supervised learning\nSelf-supervised learning (SSL) is a paradigm in machine learning where a model is trained on a task using the data itself to generate supervisory signals, rather than relying on externally-provided labels. In the context of neural networks, self-supervised learning aims to leverage inherent structures or relationships within the input data to create meaningful training signals. SSL tasks are designed so that solving them requires capturing essential features or relationships in the data. The input data is typically augmented or transformed in a way that creates pairs of related samples, where one sample serves as the input, and the other is used to formulate the supervisory signal. This augmentation can involve introducing noise, cropping, rotation, or other transformations. Self-supervised learning more closely imitates the way humans learn to classify objects.\nDuring SSL, the model learns in two steps. First, the task is solved based on an auxiliary or pretext classification task using pseudo-labels, which help to initialize the model parameters. Next, the actual task is performed with supervised or unsupervised learning.\nSelf-supervised learning has produced promising results in...\n\n## List of large language models\nA large language model (LLM) is a type of machine learning model designed for natural language processing tasks such as language generation. LLMs are language models with many parameters, and are trained with self-supervised learning on a vast amount of text.",
+ "plan": {
+  "title": "How ChatGPT-Style Language Models Actually Work",
+  "description": "Large language models like ChatGPT predict text using a transformer and attention. This video explains tokens, vectors, attention and self-supervised training in plain language.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "8d25fd16",
+    "narration": "How can a machine write an essay, explain a joke, or fix your code? It has no mind like yours. Underneath, it does one surprisingly simple thing, over and over.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "How do ChatGPT-style models work?",
+      "subtitle": "One simple trick, repeated at huge scale"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "The big puzzle"
+   },
+   {
+    "id": "16071319",
+    "narration": "Think of your phone's autocomplete. You type a few words, and it guesses the next one. A large language model is that idea, grown enormously and made far smarter.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands typing on smartphone",
+      "alt": "person typing a message on a phone"
+     }
+    }
+   },
+   {
+    "id": "36513a0d",
+    "narration": "A large language model, or LLM, is a machine learning model with many parameters, trained on a vast amount of text. Its job is language generation.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Large language model (LLM)",
+      "definition": "A machine learning model with many parameters, trained on a vast amount of text, designed for tasks such as language generation."
+     }
+    }
+   },
+   {
+    "id": "6ab59d02",
+    "narration": "But computers do not read words. So first, text is chopped into pieces called tokens. Each token then becomes a list of numbers, a vector, through an embedding layer.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Text becomes numbers",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Text",
+        "icon": "book"
+       },
+       {
+        "id": "k",
+        "label": "Tokens",
+        "icon": "puzzle"
+       },
+       {
+        "id": "e",
+        "label": "Embedding layer",
+        "icon": "grid"
+       },
+       {
+        "id": "v",
+        "label": "Vectors",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "k",
+        "split"
+       ],
+       [
+        "k",
+        "e"
+       ],
+       [
+        "e",
+        "v",
+        "numbers"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    },
+    "chapter": "From words to numbers"
+   },
+   {
+    "id": "694be84a",
+    "narration": "Tokens become vectors. Then position is added, because order matters. Order changes the output: dog bites man means something very different from man bites dog.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Numbers with order",
+      "items": [
+       "Tokens become vectors",
+       "Position is added",
+       "Order changes the output"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "grid",
+       "pin",
+       "replace"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cc395cca",
+    "narration": "Now comes the key idea of the transformer: attention. Each token looks at the other tokens around it, and decides which ones matter most for its own meaning.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person reading book highlighting text",
+      "alt": "reader focusing on important words",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "The attention trick"
+   },
+   {
+    "id": "94027345",
+    "narration": "Attention weighs them. Key tokens are amplified, and less important ones are diminished. The result is context-rich vectors, where each word carries the meaning of its neighbors.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "What attention does",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Attention weighs them",
+        "icon": "scale"
+       },
+       {
+        "id": "b",
+        "label": "Key tokens amplified",
+        "icon": "star"
+       },
+       {
+        "id": "c",
+        "label": "Context-rich vectors",
+        "icon": "layers"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "778b8ebd",
+    "narration": "This happens in many heads at once, which is why it is called multi-head attention. And because tokens are not handled one at a time, training can run in parallel. That is why transformers scale so well.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Many attention heads work in parallel, so transformers scale.",
+      "emphasis": "parallel"
+     }
+    }
+   },
+   {
+    "id": "838539bc",
+    "narration": "So how does it learn? Nobody labels billions of sentences by hand. Instead, the text itself provides the answer. Hide the next word, and ask the model to guess it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "library shelves of books",
+      "alt": "rows of books in a large library"
+     }
+    },
+    "chapter": "How it learns"
+   },
+   {
+    "id": "4d39eed8",
+    "narration": "This is self-supervised learning: the data generates its own training signal, instead of relying on outside labels. Guess, check against the real text, adjust, and repeat across a vast amount of writing.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Learning from raw text",
+      "steps": [
+       {
+        "label": "Hide the next word"
+       },
+       {
+        "label": "Model guesses"
+       },
+       {
+        "label": "Check the real text"
+       },
+       {
+        "label": "Adjust parameters"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "54fd47c3",
+    "narration": "Repeat that enormous number of times, and the model has to capture the patterns and relationships in language to keep guessing well. Grammar, facts and style all emerge from that single goal.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "SSL tasks are designed so that solving them requires capturing essential features or relationships in the data.",
+      "attribution": "Self-supervised learning overview"
+     }
+    }
+   },
+   {
+    "id": "bff80e53",
+    "narration": "Transformers also have rivals. Mamba, built by Albert Gu and Tri Dao, targets limits of transformers on long sequences. The field is still evolving.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "futuristic server room data center",
+      "alt": "data center with glowing servers",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "The takeaway"
+   },
+   {
+    "id": "d4a77172",
+    "narration": "So the whole idea fits in two lines. The transformer is attention over tokens. LLMs are trained on vast text. Together, they predict one token at a time, and that prediction becomes fluent writing.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The one idea",
+      "items": [
+       "Transformer: attention over tokens",
+       "LLMs: trained on vast text"
+      ],
+      "style": "spotlight",
+      "accent": "teal",
+      "emphasis": 0
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Transformer (deep learning)",
+    "url": "https://en.wikipedia.org/wiki/Transformer_(deep_learning)",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Mamba (deep learning architecture)",
+    "url": "https://en.wikipedia.org/wiki/Mamba_(deep_learning_architecture)",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Self-supervised learning",
+    "url": "https://en.wikipedia.org/wiki/Self-supervised_learning",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "List of large language models",
+    "url": "https://en.wikipedia.org/wiki/List_of_large_language_models",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 52.2,
+  "before_first_script_call_s": 22.1,
+  "script_s": 30.0
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.09292,
+  "search_api": 0.0,
+  "total": 0.09317
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 25531,
+  "out": 4687
+ },
+ "rules": {
+  "length": {
+   "words": 386,
+   "expected_words": 402,
+   "ratio": 0.96,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 173.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 34,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "How can a machine write an essay, explain a joke, or fix your code? It has no mind like yours. Underneath, it does one surprisingly simple thing, over and over.",
+   "close_text": "So the whole idea fits in two lines. The transformer is attention over tokens. LLMs are trained on vast text. Together, they predict one token at a time, and that prediction becomes fluent writing."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "clip": 2,
+    "definition": 1,
+    "diagram": 2,
+    "bullets": 2,
+    "image": 2,
+    "kinetic_text": 1,
+    "steps": 1,
+    "quote": 1
+   },
+   "max_run": 1,
+   "entropy": 3.09,
+   "top_type": "clip",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 3,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "a large language model",
+    "count": 2
+   },
+   {
+    "phrase": "a vast amount of",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 4,
+   "notes_len": 3146,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly consistent with the notes, but \"Grammar, facts and style all emerge from that single goal\" is overconfident, and the script never separates pretraining from chat tuning, so it implies the base model is ChatGPT."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It covers tokens, embeddings, attention and pretraining, but omits RLHF/fine-tuning, hallucinations and why they happen, and generation/sampling. Two of the six expected points are missing."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical (tokens, attention, learning), but the Mamba aside in the 'takeaway' chapter is a tangent, and the ending summary is thin and repeats beat 3."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is decent, but the ending is a bare two-line recap with no memorable image or punch."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly and accessible for beginners, though the definition beat reads like a dictionary."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, and the diagrams match the narration. The quote scene is a weak use of a Wikipedia sentence, the data-center image fits the Mamba aside poorly, and the bullets repeat the narration."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The autocomplete analogy and the dog/man example are good but common. Much of the script is paraphrased Wikipedia wording."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "The length is about right, but the request's core topic of how ChatGPT works is only partly answered, since the chat/RLHF stage is missing."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clean, with minor stiffness such as \"Attention weighs them\" with no antecedent."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Together, they predict one token at a time, and that prediction becomes fluent writing.",
+    "issue": "There is no RLHF or fine-tuning, so the script never explains how a text predictor becomes a helpful chatbot like ChatGPT.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Grammar, facts and style all emerge from that single goal.",
+    "issue": "Hallucinations are never mentioned, though they follow directly from next-token prediction. The claim that facts emerge also invites the misconception that the model is reliably factual.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Mamba, built by Albert Gu and Tri Dao, targets limits of transformers on long sequences.",
+    "issue": "A tangent that uses scarce time on a niche architecture instead of the missing core topics. It is also placed in the 'takeaway' chapter.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Nobody labels billions of sentences by hand. Instead, the text itself provides the answer.",
+    "issue": "It does not say that the model predicts over a vocabulary of tokens, or that outputs are sampled from probabilities. Next-token prediction is stated only loosely as 'guess the word'.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "SSL tasks are designed so that solving them requires capturing essential features or relationships in the data.",
+    "issue": "A dry encyclopedia sentence presented as a quote adds no insight and duplicates the narration.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "A large language model, or LLM, is a machine learning model with many parameters, trained on a vast amount of text. Its job is language generation.",
+    "issue": "A textbook definition that repeats the same words shown on screen and slows the pacing early.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "RLHF / fine-tuning with human feedback that turns a base model into an assistant",
+   "Hallucinations and why they happen",
+   "Probabilities and sampling of the next token",
+   "Scale: parameters, data and compute figures",
+   "Why the model does not truly understand or look things up"
+  ],
+  "wrong_facts": [
+   "\"It has no mind like yours\" is a philosophical claim, not a fact, and goes unsupported.",
+   "Implying that pretraining alone yields ChatGPT-like behavior is misleading."
+  ],
+  "would_publish": false,
+  "summary": "A clear, beginner-friendly walk through tokens, attention and self-supervised pretraining, but it skips RLHF and hallucinations, which are central to how ChatGPT works. It also spends time on a Mamba tangent and ends on a flat recap.",
+  "mean": 3.0,
+  "cost_usd": 0.024292,
+  "tokens": [
+   4566,
+   1516
+  ]
+ }
+}

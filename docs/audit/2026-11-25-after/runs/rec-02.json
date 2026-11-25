@@ -1,0 +1,706 @@
+{
+ "id": "rec-02",
+ "category": "recipe / cooking",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "Receta de la paella valenciana auténtica: ingredientes, orden de cocción, el socarrat y los errores típicos que hay que evitar.",
+ "great": "Pollo, conejo, garrofón, judía verde (ferraura), tomate, pimentón, azafrán, arroz bomba, proporciones y caldo, no remover, socarrat, reposo, errores (chorizo, mezclar), cantidades fiables; auténtica y específica.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:04:24",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La receta tradicional de la paella valenciana, el orden de cocción y el socarrat son conocimiento estable y atemporal que una enciclopedia cubre bien; no depende de información reciente ni de datos qu",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto",
+   "listicle-ranking"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 1162,
+   "searches": 2,
+   "reads": 0,
+   "sources": 8,
+   "seconds": 5.2,
+   "cost_usd": 0.0006382,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 32.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 5.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 5.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 11,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5819,
+  "n_sources": 4,
+  "n_fetched": 9,
+  "fetched": [
+   "Paella Valenciana Recipe: Authentic Spanish Socarrat",
+   "\"THE AUTHENTIC Valencian Paella. Traditional Recipe Step by Step\"",
+   "Receta Paella Valenciana -",
+   "¿Cómo hacer socarrat perfecto en tu paella?",
+   "Receta de la paella valenciana auténtica con D. O.",
+   "Los 10 errores que harán que tu paella valenciana no sea perfecta",
+   "Errores comunes al hacer paella y cómo evitarlos - Gastraval",
+   "Los errores más comunes al hacer una paella",
+   "Arroz a banda"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Paella Valenciana Recipe: Authentic Spanish Socarrat\n- 1/3 cup extra-virgin olive oil - 1 pound bone-in chicken thighs, cut into pieces - 8 ounces rabbit pieces (or additional chicken thighs) - 1 teaspoon kosher salt - 6 ounces flat green beans (judias verdes), trimmed and snapped in half - 4 ounces butter beans (garrofon) or large lima beans - 1 medium ripe tomato, grated on a box grater (skin discarded) - 1 teaspoon sweet smoked paprika (pimenton) - Generous pinch of saffron threads (about 1/2 gram), steeped in 2 tablespoons warm water [...] 3. Add the grated tomato to the center of the pan. Cook for 3-4 minutes, stirring, until the tomato darkens and the moisture cooks out. Add the paprika and stir for 30 seconds. 4. Return the meat to the pan. Pour in the warm stock and the saffron with its soaking liquid. Add the rosemary sprig. Bring to a boil and let it cook on medium-high for 15 minutes to develop the broth. Taste and adjust salt. \n\n## \"THE AUTHENTIC Valencian Paella. Traditional Recipe Step by Step\"\n[0:00 Introduction and secrets 01:15 Leveling the paella and the oil 01:20 Sautéing the meat 02:46 Adding the vegetables 03:56 The perfect amount of water and paprika 05:18 The timing of the rice and its distribution 07:13 How to achieve the perfect socarrat 07:30 Final result and resting #paellavalenciana #paella #paellarecetaleñaleña #comohacerpaellavalenciana #arrozvalenciana #socarratperfecto #paellaoriginalvalencia #cocinasaludable #cocinaconsabor [...] durante un minuto. Comprobamos con el rabo de una cuchara si se está agarrando y si ya no escurre. [música] Como veis aquí es que el deseado socarrat ya se ha formado y ya la tenemos. Buah, espectacular. [música] Ahora, como las brasas continúan cociendo, hay que sacarla del fuego y dejarla reposar al menos 5 minutos. [música] El arrón necesita sentarse y aunque parezca que no, en este reposo es cuando se acaba de hacer. [música] [mú\n\n## Receta Paella Valenciana -\nIr al contenido 500 g de arroz (variedad J. Sendra). 750 g de pollo 200 g de conejo 150 g de judías verdes (ferraura) 150 g de judías verdes planas (rotjet) 60 g de garrofó (un tipo de judía blanca) 200 g de tomate rallado 150 ml de aceite de oliva virgen extra 30 g de sal CONSEJOS DE LOS MAESTROS DEL ARROZ: [...] El fuego y el socarrat: El secreto está en controlar las fases de cocción: fuego alto al principio para sellar las carnes, lento para los ingredientes principales, y un toque final al mínimo para conseguir ese fondo dorado y crujiente que distingue a los expertos. [...] Pro-tip: Intensifica el sabor repitiendo el proceso del sofrito con agua tres veces. Este “sofrito triple” es el sello de los maestros. 4. La mezcla: Junta todos los ingredientes en el centro de la paellera. Añade las alubias (Garrofó) y deja que todo se impregne del sofrito durante unos minutos. 5. El caldo: Añ\n\n## ¿Cómo hacer socarrat perfecto en tu paella?\nLa cantidad de aceite resulta fundamental en el proceso para la obtención del socarrat, la tradicional paella valenciana incorpora carnes muy poco grasas como son el pollo y el conejo por lo que adicionar la cantidad de aceite justa resulta clave para el socarrat y para otros elementos claves como que nuestro arroz tenga la palatabilidad perfecta (que esté sabroso). Se estipula que la cantidad perfecta de aceite a añadir son entre 25 y 30 ml. [...] - Paella Valenciana: 25-30 ml por persona. - Paella de marisco: 30-35 ml por persona. - Paella de verduras: 35-37 ml por persona. - Paellas con costilla y panceta: 15-20 ml por persona. ## ¿Puedo hacer socarrat en una fideua? Si, puedes obtener un socarrat con una fideua ya que se producen exactamente las mismas reacciones químicas, en este caso con los almidones que provienen del trigo de la pasta. ## ¿Afecta el tipo de paellera en como hacer\n\n## Receta de la paella valenciana auténtica con D. O.\nEn esta receta utilizamos arroz, pollo, conejo, judías verdes, garrofó, tomate, aceite de oliva, agua y sal. Completamos el sabor con pimentón,\n\n## Los 10 errores que harán que tu paella valenciana no sea perfecta\n10 principales errores · 1. No elegir el tipo de arroz para que se nos pase · 2. Que las medidas de agua y arroz no sean proporcionadas · 3. Poner\n\n## Errores comunes al hacer paella y cómo evitarlos - Gastraval\nElegir el arroz incorrecto · Añadir demasiados ingredientes · Cocinar a fuego inadecuado · No dejar reposar la paella · Evita errores y apuesta por la tradición.\n\n## Los errores más comunes al hacer una paella\nLos errores más comunes al hacer una paella · 1.1. El sofrito para paella se hace solo con el fuego interior y a fuego lento · 1.2. Que no falte agua, pero\n\n## Arroz a banda\nEl arroz a banda (en valenciano, arròs a banda) es un plato de arroz típico de la provincia de Alicante.​​​​​​​​​ (Comunidad Valenciana). Su popularidad se ha extendido por el Levante español, desde la Región de Murcia,​ hasta el  Garraf, (Barcelona) Cataluña​ e Islas Baleares. Se trata de un típico arroz mediterráneo, propio de pescadores, con un caldo o fondo de pescado, normalmente morralla (pescado con muchas espinas, poca molla y fuerte sabor), ñora y alioli; con ese caldo se cocina un arroz separado (a banda) del pescado y otro día se cocina un guiso con ese caldo en el que flota el alioli, patata y el pescado desmenuzado. Normalmente se prepara con mezcla de marisco y pescado, como puede ser atún, mejillones, anillas de calamar, es por ello que no debe confundirse con el caldero, siendo este último servido tradicionalmente caldoso y normalmente solo lleva pescado, este último es muy típico en Cartagena y costa del Mar Menor en la Región de Murcia y lugares de Alicante como la isla de Tabarca, Santa Pola, Torrevieja y Guardamar del Segura, o Ibiza. Como todos los arroces alicantinos, su receta original es con salmorreta.​",
+ "plan": {
+  "title": "Paella valenciana auténtica: orden, socarrat y errores",
+  "description": "Aprende la receta de la paella valenciana auténtica: ingredientes, orden de cocción y cómo lograr el socarrat. Descubre también los errores típicos que conviene evitar.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "21fd8758",
+    "narration": "¿Sabías que lo más valioso de una paella es lo que se pega al fondo? Se llama socarrat, y hoy vas a aprender a conseguirlo paso a paso.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Paella valenciana auténtica",
+      "subtitle": "Ingredientes, orden de cocción, socarrat y errores típicos"
+     }
+    },
+    "sfx": "whoosh",
+    "chapter": "Qué lleva de verdad"
+   },
+   {
+    "id": "6987f379",
+    "narration": "La receta tradicional lleva pollo, conejo, judías verdes planas, garrofón, tomate rallado, aceite de oliva, sal y pimentón. Y un buen pellizco de azafrán, que da color y aroma al caldo.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "raw chicken pieces paella",
+       "rabbit meat raw",
+       "green flat beans",
+       "saffron threads"
+      ],
+      "alt": "Ingredientes de la paella valenciana"
+     }
+    }
+   },
+   {
+    "id": "bc842165",
+    "narration": "Las cantidades de una receta para varias raciones: quinientos gramos de arroz, setecientos cincuenta de pollo, doscientos de conejo y doscientos de tomate rallado. Además, ciento cincuenta mililitros de aceite de oliva virgen extra.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Ingrediente",
+       "Cantidad"
+      ],
+      "rows": [
+       [
+        "Arroz",
+        "500 g"
+       ],
+       [
+        "Pollo",
+        "750 g"
+       ],
+       [
+        "Conejo",
+        "200 g"
+       ],
+       [
+        "Tomate rallado",
+        "200 g"
+       ],
+       [
+        "Aceite de oliva",
+        "150 ml"
+       ]
+      ],
+      "title": "Cantidades base"
+     }
+    }
+   },
+   {
+    "id": "8e8582cb",
+    "narration": "Primero, el aceite en la paellera bien nivelada. Después, sella la carne a fuego alto, con sal. Dorada por todos lados, aparta la carne o déjala a un lado y añade las verduras.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Primeras fases",
+      "steps": [
+       {
+        "label": "Nivela la paellera y echa el aceite"
+       },
+       {
+        "label": "Sella el pollo y el conejo"
+       },
+       {
+        "label": "Añade las judías verdes"
+       }
+      ]
+     }
+    },
+    "chapter": "El orden de cocción"
+   },
+   {
+    "id": "47bc46db",
+    "narration": "Luego llega el tomate rallado, en el centro de la paella. Cocínalo tres o cuatro minutos hasta que se oscurezca y pierda el agua. Después, añade el pimentón y remueve apenas treinta segundos.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "cooking sofrito in pan",
+      "alt": "Sofrito friéndose en una sartén grande"
+     }
+    }
+   },
+   {
+    "id": "cf5e60d2",
+    "narration": "Devuelve la carne a la paellera. Vierte el caldo caliente con el azafrán y su agua de infusión, y añade una ramita de romero. Hierve a fuego medio-alto quince minutos para que el caldo coja sabor.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Del sofrito al caldo",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Carne y verduras",
+        "icon": "ham"
+       },
+       {
+        "id": "b",
+        "label": "Tomate y pimentón",
+        "icon": "hamburger"
+       },
+       {
+        "id": "c",
+        "label": "Caldo y azafrán",
+        "icon": "droplet"
+       },
+       {
+        "id": "d",
+        "label": "15 minutos de hervor",
+        "icon": "clock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "f536ccfb",
+    "narration": "Es el momento de echar el arroz. Repártelo con cuidado por toda la paellera, sin removerlo después. Ese gesto es clave, porque el arroz debe cocerse de forma uniforme y quedar suelto.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "rice being added to paella",
+      "alt": "Arroz repartido en la paellera",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "0051ca91",
+    "narration": "El fuego manda en toda la receta. Alto al principio para sellar las carnes, lento para los ingredientes principales, y un toque final al mínimo para conseguir ese fondo dorado y crujiente.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Control del fuego",
+      "items": [
+       "Fuerte: sellar la carne",
+       "Lento: ingredientes principales",
+       "Mínimo: toque final del fondo"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "flame",
+       "clock",
+       "star"
+      ]
+     }
+    }
+   },
+   {
+    "id": "98685c9f",
+    "narration": "El socarrat es la capa de arroz tostado que se forma en el fondo. Para conseguirlo, sube un momento el fuego al final y escucha un ligero crepitar durante un minuto.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Socarrat",
+      "definition": "Capa de arroz dorado y crujiente que se forma en el fondo de la paellera."
+     }
+    },
+    "chapter": "El socarrat"
+   },
+   {
+    "id": "888e5cf3",
+    "narration": "Comprueba con el rabo de una cuchara si el arroz se agarra y ya no suelta líquido. Si es así, el socarrat está hecho. Retira la paella del fuego antes de que se queme.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "paella cooking over fire",
+      "alt": "Paella cocinándose al fuego"
+     }
+    }
+   },
+   {
+    "id": "b3a51eaf",
+    "narration": "La cantidad de aceite es fundamental. Con carnes tan magras como pollo y conejo, lo justo son entre veinticinco y treinta mililitros por persona. Ni más ni menos.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "30",
+      "unit": "ml",
+      "label": "Aceite por persona en una paella valenciana",
+      "from": "25",
+      "delta": "entre 25 y 30 ml"
+     }
+    }
+   },
+   {
+    "id": "33a1c85e",
+    "narration": "Después, deja reposar la paella al menos cinco minutos. Aunque parezca que no, en ese reposo es cuando el arroz termina de hacerse.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "5 min",
+      "label": "Reposo mínimo antes de servir"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "d21dbe2e",
+    "narration": "Los errores más habituales: elegir un arroz incorrecto, añadir demasiados ingredientes, cocinar a fuego inadecuado y no dejar reposar la paella. Además, las medidas de agua y arroz deben ir proporcionadas.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Errores que evitar",
+      "items": [
+       "Arroz incorrecto",
+       "Demasiados ingredientes",
+       "Fuego inadecuado",
+       "No dejar reposar",
+       "Agua y arroz desproporcionados"
+      ],
+      "checked": [
+       false,
+       false,
+       false,
+       false,
+       false
+      ]
+     }
+    },
+    "chapter": "Errores típicos"
+   },
+   {
+    "id": "9293e0d9",
+    "narration": "Así que ya sabes el camino: buen sofrito, caldo con sabor, arroz repartido, fuego controlado y reposo. Respeta la tradición y tu paella tendrá un socarrat digno de Valencia.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Respeta el fuego, el aceite y el reposo, y el socarrat llegará.",
+      "emphasis": "socarrat"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Paella Valenciana Recipe: Authentic Spanish Socarrat",
+    "url": "https://honestcooking.com/paella-valenciana",
+    "publisher": "honestcooking.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Receta Paella Valenciana -",
+    "url": "https://ricepaella.com/receta-paella-valenciana",
+    "publisher": "ricepaella.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "¿Cómo hacer socarrat perfecto en tu paella?",
+    "url": "https://originalpaella.es/blog/185_como-hacer-socarrat-perfecto-en-tu-paella.html",
+    "publisher": "originalpaella.es",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Errores comunes al hacer paella y cómo evitarlos - Gastraval",
+    "url": "https://gastraval.com/errores-comunes-al-hacer-paella-y-como-evitarlos",
+    "publisher": "gastraval.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "tutorial-howto",
+   "listicle-ranking"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 91.6,
+  "before_first_script_call_s": 41.6,
+  "script_s": 50.0
+ },
+ "cost": {
+  "script_small": 0.00028,
+  "research": 0.00064,
+  "script_big": 0.15935,
+  "search_api": 0.016,
+  "total": 0.17627
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 46953,
+  "out": 8372
+ },
+ "rules": {
+  "length": {
+   "words": 436,
+   "expected_words": 402,
+   "ratio": 1.085,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 195.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Sabías que lo más valioso de una paella es lo que se pega al fondo? Se llama socarrat, y hoy vas a aprender a conseguirlo paso a paso.",
+   "close_text": "Así que ya sabes el camino: buen sofrito, caldo con sabor, arroz repartido, fuego controlado y reposo. Respeta la tradición y tu paella tendrá un socarrat digno de Valencia."
+  },
+  "variety": {
+   "distinct": 13,
+   "counts": {
+    "title": 1,
+    "gallery": 1,
+    "table": 1,
+    "steps": 1,
+    "clip": 2,
+    "diagram": 1,
+    "image": 1,
+    "bullets": 1,
+    "definition": 1,
+    "counter": 1,
+    "stat": 1,
+    "checklist": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.66,
+   "top_type": "clip",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 9,
+   "notes_len": 5819,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 2 (gallery): its narration never says ['rabbit meat raw', 'green flat beans', 'saffron threads']",
+   "beat 6 (diagram): its narration never says ['Tomate y pimentón', '15 minutos de hervor']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 2,
+    "reason": "The script omits the broth quantity and the rice variety, and it blurs the traditional method: it adds rosemary, which is not strictly required, and says 'judías verdes planas' only. The quantities 500 g rice with 150 ml oil conflict with the 25-30 ml per person figure, and the number of servings is never stated."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It never gives the water or broth quantity, never names bomba or a rice variety, and omits ferraura and the chorizo/mixing mistakes. The error list is generic."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical, but the oil and rest sections come after the socarrat. The ending recap is a bare list."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook is a question and is acceptable. The ending is a summary with a cliché ('digno de Valencia')."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is friendly and uses a consistent tú form."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene variety is good, but the diagram icons (ham, hamburger) are absurd. The counter showing '30 ml' from 25 is odd, and the checklist is shown unchecked."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The content is mostly a paraphrase of the notes and the errors are generic, with no surprising detail."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It covers the four requested topics, but only superficially. It is around the target length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent, with a few awkward phrasings."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "quinientos gramos de arroz, setecientos cincuenta de pollo",
+    "issue": "No number of servings is given, and 150 ml of oil contradicts the later figure of 25-30 ml per person without any explanation. The broth quantity is missing, so the recipe cannot be followed.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "elegir un arroz incorrecto",
+    "issue": "It never says which rice to use (bomba or Sendra) or the rice-to-water ratio, even though these are the key errors.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "añade una ramita de romero",
+    "issue": "Rosemary comes from a non-Valencian recipe and is not part of the authentic one; it is presented as standard.",
+    "beat": 6
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"icon\": \"hamburger\"",
+    "issue": "The hamburger and ham icons do not fit a tomato and paprika sofrito.",
+    "beat": 6
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Los errores más habituales",
+    "issue": "It omits the typical errors such as adding chorizo or other foreign ingredients, and stirring the rice. It also leaves out the ferraura bean.",
+    "beat": 13
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Sube un momento el fuego al final",
+    "issue": "This contradicts the earlier line about a minimum final heat ('toque final al mínimo') for the socarrat.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Rice variety (bomba) and rice-to-broth ratio",
+   "Broth quantity and number of servings",
+   "Chorizo and onion/garlic as a classic error",
+   "Not stirring the rice after adding it, as a listed error",
+   "Ferraura bean and garrofón explained",
+   "Pan size and wood fire"
+  ],
+  "wrong_facts": [
+   "Rosemary is not necessary in the authentic recipe, and the notes treat it as optional.",
+   "The script contradicts itself on heat for the socarrat: a minimum final heat in beat 8 and raising the heat in beat 9.",
+   "150 ml of oil for 500 g of rice, with no number of servings stated, does not match 25-30 ml per person."
+  ],
+  "would_publish": false,
+  "summary": "The script follows the notes in a reasonable order but lacks key specifics (rice variety, water ratio, real typical errors), and it contains an internal contradiction about heat. It reads as generic and is not a reliable authentic recipe.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "aparta la carne o déjala a un lado",
+     "problem": "redundant",
+     "better": "aparta la carne a un lado"
+    },
+    {
+     "quote": "para que el caldo coja sabor",
+     "problem": "slightly informal and repetitive",
+     "better": "para que el caldo tome sabor"
+    },
+    {
+     "quote": "Las cantidades de una receta para varias raciones",
+     "problem": "awkward, no verb",
+     "better": "Estas son las cantidades para varias raciones"
+    }
+   ]
+  },
+  "mean": 2.89,
+  "cost_usd": 0.029794,
+  "tokens": [
+   7112,
+   1557
+  ]
+ }
+}

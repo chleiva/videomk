@@ -13,10 +13,15 @@ import logging
 from . import language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, voices
 from .netsafe import quality_fixes
 
+SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S = 1.0, 1.5   # the same under a minute (15, 30, 45 s): the music-only frame is 2.5 s, not 6 (plan.SHORT_PHOTO_FRAME_S)
 PHOTO_INTRO_S = 2.5   # seconds of music and pictures before the first word of a video made from the user's photos
 PHOTO_OUTRO_S = 3.5   # seconds of music alone after the last word
 
 Ask = Callable[..., str]  # (system, user, max_tokens=...) -> text
+
+
+SHORT_RESEARCH_BUDGET = researcher.Budget(max_iterations=3, max_searches=2, max_reads=1, max_seconds=30.0)   # a video under a minute: one or two searches, one page
+SHORT_NOTES_CHARS = 2500   # grounding notes for a video under a minute (15 seconds is about 30 words)
 
 
 def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[str, str], str],
@@ -38,14 +43,15 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     skill_ids = skills_mod.select(prompt, lambda s, u: ask_small(s, u, 120), minutes)   # the producer: which kind of video is this, and so which craft guides apply
     if photos and "photo-memories" not in skill_ids:   # a video of the person's own photos always follows the photo guide (pacing, pauses, music), whatever else it is about
         skill_ids = ["photo-memories"] + skill_ids
-    craft = skills_mod.render(skill_ids) + plan_mod.frame_prompt(options)   # options: {platform, aspect, brief} from the create request
+    craft = skills_mod.render(skill_ids) + plan_mod.frame_prompt(options, minutes)   # options: {platform, aspect, brief} from the create request
     info["skills"] = skill_ids
     notes, sources = "", []
     if web_provider is not None and ask_tools is not None:
         decision = researcher.decide(prompt, language=language, region=region, today=today, ask=lambda s, u, n=260: ask_small(s, u, n))
         info.update({"decided": decision.mode, "reason": decision.reason, "queries": decision.queries})
         if decision.mode == "web":
-            r = researcher.research_web(prompt, decision=decision, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools, budget=budget)
+            r = researcher.research_web(prompt, decision=decision, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools,
+                                        budget=budget or (SHORT_RESEARCH_BUDGET if plan_mod.is_short(minutes) else None))
             info.update({"searches": r.searches, "reads": r.reads, "iterations": r.iterations, "seconds": round(r.seconds, 1), "cost_usd": r.cost_usd, "error": r.error})
             if r.sources:
                 notes, sources, info["mode"] = r.notes, r.sources, "web"
@@ -55,7 +61,9 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     staged = staged_mod.is_staged(minutes, len(photos or []))
     if info["mode"] != "web":
         notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120), errors=fetch_errors)
-        if (quality_fixes() and web_provider is not None and ask_tools is not None and not staged and not photos and not info.get("fallback")
+        if plan_mod.is_short(minutes):   # a video under a minute needs a paragraph of facts: notes are capped, and thin notes never trigger a web agent (only a time-sensitive request is researched on the web)
+            notes = notes[:SHORT_NOTES_CHARS]
+        elif (quality_fixes() and web_provider is not None and ask_tools is not None and not staged and not photos and not info.get("fallback")
                 and (len(notes) < research.MIN_USEFUL_NOTES_CHARS or not sources)):
             # thin notes (the audit: 16 of 40 videos had under 1,500 characters, 14 none): escalate to the web research agent, within its own budget, before writing
             dec = researcher.Decision(mode="web", queries=list(info.get("queries") or []), topic="general", reason="thin encyclopedia notes")
@@ -67,6 +75,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                 notes = (r.notes + ("\n\n" + notes if notes else ""))[:researcher.MAX_NOTES_CHARS + research.MAX_NOTES_CHARS]
                 have = {s["title"] for s in r.sources}
                 sources = r.sources + [s for s in sources if s["title"] not in have]
+    if plan_mod.is_short(minutes):
+        notes = notes[:SHORT_NOTES_CHARS]
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
     if staged_mod.is_staged(minutes, len(photos or [])):
@@ -112,7 +122,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             if sr["repaired"]:
                 warnings.append(f"scenes corrected: {sr['repaired']} of {sr['rejected']}")
         brief = options.get("brief") if isinstance((options or {}).get("brief"), dict) else {}
-        g = quality.ground_check(plan, written_from, lambda s, u, n=2400: ask_small(s, u, n), request=prompt, brief=" ".join(str(v) for v in brief.values() if v), review_claims="product-marketing" in skill_ids)
+        g = quality.ground_check(plan, written_from, lambda s, u, n=4500: ask_small(s, u, n), request=prompt, brief=" ".join(str(v) for v in brief.values() if v), review_claims="product-marketing" in skill_ids)
         info["grounding"] = g
         if g["flagged"]:
             warnings.append(f"grounding: {g['flagged']} beats had unsupported specifics, {g['repaired']} rewritten")
@@ -125,7 +135,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
-        plan["intro_s"], plan["outro_s"] = PHOTO_INTRO_S, PHOTO_OUTRO_S
+        plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
     if region:
         plan["region"] = region
     if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)

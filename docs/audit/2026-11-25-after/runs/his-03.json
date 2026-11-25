@@ -1,0 +1,633 @@
+{
+ "id": "his-03",
+ "category": "history",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "great": "Housing boom, subprime lending, MBS and CDOs, rating agencies, leverage, Bear Stearns, Lehman 15 Sep 2008, TARP, Fed actions, lasting effects; narrative arc; correct figures.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:56:38",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The 2008 financial crisis is a well-documented historical event; an accurate explainer on housing boom, subprime mortgages, securitization, Lehman Brothers and the government response is timeless and ",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 17.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 13.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 4.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6127,
+  "n_sources": 3,
+  "n_fetched": 5,
+  "fetched": [
+   "Financial crisis",
+   "2008 financial crisis",
+   "Subprime mortgage crisis",
+   "Government policies and the subprime mortgage crisis",
+   "Commercial mortgage-backed security"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Financial crisis\nA financial crisis is any of a broad variety of situations in which some financial assets suddenly lose a large part of their nominal value. A broader reduction of economic activity affecting the whole economy is known as an economic crisis. In the 19th and early 20th centuries, many financial crises were associated with banking panics, and many recessions coincided with these panics. Other situations that are often called financial crises include stock market crashes and the bursting of other financial bubbles, currency crises, and sovereign defaults. Financial crises directly result in a loss of paper wealth but do not necessarily result in significant changes in the real economy (for example, the crisis resulting from the famous tulip mania bubble in the 17th century).\nMany economists have offered theories about how financial crises develop and how they could be prevented. There is little consensus and financial crises continue to occur from time to time. It is apparent however that a consistent feature of both economic (and other applied finance disciplines) is the obvious inability to predict and avert financial crises. This realization raises the question as to what is known and...\n\n## 2008 financial crisis\nThe 2008 financial crisis was a major worldwide financial crisis which started in the United States. The first phase was the subprime mortgage crisis, which began in early 2007 as mortgage-backed securities (MBS) tied to U.S. real estate, and a vast web of derivatives linked to those MBS, collapsed in value. A liquidity crisis spread to global institutions by mid-2007 and climaxed with the bankruptcy of Lehman Brothers in September 2008, which triggered a stock market crash and bank runs in several countries. The crisis exacerbated the Great Recession, a global recession that began in late 2007, and contributed to major crises in Iceland and the eurozone.\nDuring the 1990s, the U.S. Congress passed legislation intended to expand affordable housing through looser financing laws, and in 1999 parts of the 1933 Banking Act (Glass–Steagall Act) were repealed, enabling institutions to mix low-risk operations, such as commercial banking and insurance, with higher-risk operations such as investment banking and proprietary trading. As the Federal Reserve (Fed) lowered the federal funds rate from 2000 to 2003, institutions increasingly targeted low-income homebuyers, largely belonging to racial...\n\n## Subprime mortgage crisis\nThe American subprime mortgage crisis was a multinational financial crisis that occurred between 2007 and 2010, contributing to the 2008 financial crisis. It led to a severe economic recession, with millions becoming unemployed and many businesses going bankrupt. The U.S. government intervened with a series of measures to stabilize the financial system, including the Troubled Asset Relief Program (TARP) and the American Recovery and Reinvestment Act of 2009 (ARRA).\nThe collapse of the 2000s United States housing bubble and high interest rates led to unprecedented numbers of borrowers missing mortgage repayments and becoming delinquent. This ultimately led to mass foreclosures and the devaluation of housing-related securities. The housing bubble preceding the crisis was financed with mortgage-backed securities (MBSes) and collateralized debt obligations (CDOs), which initially offered higher interest rates (i.e., better returns) than government securities, along with attractive risk ratings from rating agencies. Despite being highly rated, most of these financial instruments were made up of high-risk subprime mortgages.\nWhile elements of the crisis first became more visible during 2007...\n\n## Government policies and the subprime mortgage crisis\nGovernment policies and the subprime mortgage crisis covers the United States government policies and its impact on the subprime mortgage crisis of 2007–2009. The U.S. subprime mortgage crisis was a set of events and conditions that led to the 2008 financial crisis and subsequent recession. It was characterized by a rise in subprime mortgage delinquencies and foreclosures, and the resulting decline of securities backed by said mortgages. Several major financial institutions collapsed in September 2008, with significant disruption in the flow of credit to businesses and consumers and the onset of a severe global recession.\nGovernment housing policies, over-regulation, failed regulation and deregulation have all been claimed as causes of the crisis, along with many others. While the modern financial system evolved, regulation did not keep pace and became mismatched with the risks building in the economy. The Financial Crisis Inquiry Commission (FCIC) tasked with investigating the causes of the crisis reported in January 2011 that: \"We had a 21st-century financial system with 19th-century safeguards.\"\nIncreasing home ownership has been the goal of several presidents, including Roosevelt...\n\n## Commercial mortgage-backed security\nCommercial mortgage-backed securities (CMBS) are a type of mortgage-backed security backed by commercial and multifamily mortgages rather than residential real estate.  CMBS tend to be more complex and volatile than residential mortgage-backed securities due to the unique nature of the underlying property assets. \nThe typical structure for the securitization of commercial real estate loans is a real estate mortgage investment conduit (REMIC), a creation of the tax law that allows the trust to be a pass-through entity which is not subject to tax at the trust level.\nMany American CMBS transactions carry less prepayment risk than other MBS types, thanks to the structure of commercial mortgages. Commercial mortgages often contain lockout provisions (typically a period of 1–5 years where there can be no prepayment of the loan) which they can be subject to defeasance, yield maintenance and prepayment penalties to protect bondholders. European CMBS issues typically have less prepayment protection. Interest on the bonds may be a fixed rate or a floating rate, i.e. based on a benchmark (like LIBOR/EURIBOR) plus a spread.",
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It explains how a problem in American housing became a worldwide crisis.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "69698267",
+    "narration": "In September 2008, a single bankruptcy shook the entire world economy. Banks stopped trusting each other. Stock markets crashed. How did a problem in American housing become a global crisis?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "What Really Caused the 2008 Financial Crisis",
+      "subtitle": "From a housing boom to a global crash"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "The boom"
+   },
+   {
+    "id": "4baf91f3",
+    "narration": "The story starts with a dream: owning a home. In the 1990s, Congress passed laws to expand affordable housing through looser financing rules. More families could borrow than ever before.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "suburban American houses street",
+      "alt": "Row of suburban American homes",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "7629f88d",
+    "narration": "Then in 1999, parts of the old Glass-Steagall Act were repealed. Banks could now mix safe businesses, like commercial banking and insurance, with riskier ones like investment banking and proprietary trading.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Rules loosen",
+      "items": [
+       "1990s: looser financing laws",
+       "1999: Glass-Steagall partly repealed",
+       "Safe and risky banking mix"
+      ],
+      "style": "rail",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "dd7a0f43",
+    "narration": "From 2000 to 2003, the Federal Reserve lowered the federal funds rate. Borrowing got cheaper. Lenders increasingly targeted low-income homebuyers, and home prices climbed. A housing bubble was growing.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "houses under construction neighborhood",
+      "alt": "Homes being built in a new development"
+     }
+    }
+   },
+   {
+    "id": "0bac69ff",
+    "narration": "Many of those loans were subprime mortgages, given to borrowers with a higher risk of not paying them back. While prices rose, nobody worried much. Everyone assumed the party would last.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Subprime mortgage",
+      "definition": "A home loan made to a borrower with a higher risk of missing repayments."
+     }
+    },
+    "chapter": "Subprime and securitization"
+   },
+   {
+    "id": "857bcab3",
+    "narration": "Here is the trick. Lenders did not keep these loans. They sold them to banks, which bundled thousands together into mortgage-backed securities, and sold slices to investors around the world.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Securitization",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Homebuyers",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Lenders",
+        "icon": "landmark"
+       },
+       {
+        "id": "c",
+        "label": "Bundled securities",
+        "icon": "package"
+       },
+       {
+        "id": "d",
+        "label": "Investors",
+        "icon": "banknote"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "borrow"
+       ],
+       [
+        "b",
+        "c",
+        "sell loans"
+       ],
+       [
+        "c",
+        "d",
+        "sold on"
+       ]
+      ],
+      "style": "cards",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "dd75db9d",
+    "narration": "These securities paid higher interest than government bonds, and rating agencies gave them attractive ratings. But most were built from high-risk subprime loans. Safe on paper, risky underneath.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "On paper",
+       "tagline": "What investors saw"
+      },
+      "b": {
+       "name": "Underneath",
+       "tagline": "What they held"
+      },
+      "rows": [
+       {
+        "label": "Rating",
+        "a": "Attractive",
+        "b": "Hidden risk"
+       },
+       {
+        "label": "Returns",
+        "a": "Above government bonds",
+        "b": "Paid by subprime loans"
+       }
+      ],
+      "verdict": "Highly rated, yet mostly high-risk loans"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "3d989bbe",
+    "narration": "Regulation had not kept up. A federal inquiry later put it bluntly: we had a twenty-first-century financial system with nineteenth-century safeguards.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "We had a 21st-century financial system with 19th-century safeguards.",
+      "attribution": "Financial Crisis Inquiry Commission, January 2011"
+     }
+    }
+   },
+   {
+    "id": "5763f33e",
+    "narration": "Then the bubble burst. Housing prices fell and interest rates were high. Borrowers missed payments, and foreclosures spread. In early 2007, the securities tied to those mortgages collapsed in value.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "empty house for sale sign",
+      "alt": "Abandoned home with a sale sign"
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "d0f4a3a6",
+    "narration": "Nobody knew who held the bad assets, so a liquidity crisis, a shortage of easy cash, spread to global institutions by mid-2007. Lenders grew afraid to lend, even to each other.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Trouble spreads",
+      "events": [
+       {
+        "date": "Early 2007",
+        "label": "Mortgage securities collapse"
+       },
+       {
+        "date": "Mid-2007",
+        "label": "Liquidity crisis goes global"
+       },
+       {
+        "date": "Late 2007",
+        "label": "Great Recession begins"
+       },
+       {
+        "date": "Sep 2008",
+        "label": "Lehman Brothers fails"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "5f007950",
+    "narration": "In September 2008, investment bank Lehman Brothers filed for bankruptcy. It was the climax. Stock markets crashed, and bank runs hit several countries.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Wall Street New York stock exchange",
+      "alt": "Wall Street financial district",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "1ea6f247",
+    "narration": "First came the Lehman collapse. Then credit dries up, as businesses and consumers cannot borrow. The shock then reaches abroad, with crises in the eurozone and Iceland.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The chain reaction",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Lehman collapse",
+        "icon": "landmark"
+       },
+       {
+        "id": "b",
+        "label": "Credit dries up",
+        "icon": "lock"
+       },
+       {
+        "id": "c",
+        "label": "Eurozone and Iceland crise",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "791b6aa0",
+    "narration": "Governments stepped in. The United States launched the Troubled Asset Relief Program, called TARP, to stabilize the financial system, and later the American Recovery and Reinvestment Act of 2009.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Government response",
+      "items": [
+       "TARP: stabilize the financial system",
+       "ARRA: 2009 recovery act"
+      ],
+      "style": "cards",
+      "accent": "emerald"
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "f4a037ec",
+    "narration": "The damage was still huge: millions lost their jobs and many businesses went bankrupt. The lesson is that cheap credit, hidden risk and weak rules together can turn a housing problem into a global one.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hidden risk plus weak rules can turn one market's problem into everyone's.",
+      "emphasis": "Hidden risk"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "2008 financial crisis",
+    "url": "https://en.wikipedia.org/wiki/2008_financial_crisis",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Subprime mortgage crisis",
+    "url": "https://en.wikipedia.org/wiki/Subprime_mortgage_crisis",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Government policies and the subprime mortgage crisis",
+    "url": "https://en.wikipedia.org/wiki/Government_policies_and_the_subprime_mortgage_crisis",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 69.5,
+  "before_first_script_call_s": 22.3,
+  "script_s": 47.2
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.15251,
+  "search_api": 0.0,
+  "total": 0.15277
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 40795,
+  "out": 7611
+ },
+ "rules": {
+  "length": {
+   "words": 413,
+   "expected_words": 402,
+   "ratio": 1.027,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 185.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 35,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In September 2008, a single bankruptcy shook the entire world economy. Banks stopped trusting each other. Stock markets crashed. How did a problem in American housing become a global crisis?",
+   "close_text": "The damage was still huge: millions lost their jobs and many businesses went bankrupt. The lesson is that cheap credit, hidden risk and weak rules together can turn a housing problem into a global one"
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 1,
+    "image": 2,
+    "bullets": 2,
+    "clip": 2,
+    "definition": 1,
+    "diagram": 2,
+    "versus": 1,
+    "quote": 1,
+    "timeline": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "image",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 7,
+   "ungrounded_numbers": [],
+   "entities": 12,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 5,
+   "notes_len": 6127,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 10 (timeline): its narration never says ['Mortgage securities collapse', 'Great Recession begins', 'Lehman Brothers fails']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly traceable to the notes, but the 'Great Recession begins' item is placed on the timeline after the Mid-2007 entry and before Lehman, which is fine. The causal chain is loose: 'interest rates were high' is vague, and the 1990s housing laws and Glass-Steagall are presented as direct causes without caveats, although the notes say causes are disputed."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Omits CDOs, leverage, Bear Stearns, the Fed's emergency actions, AIG, the specific 15 Sep date, and lasting effects. Rating agencies get only a passing mention, and TARP has no dollar figure. Thin for 'what really caused' it."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear chapters: boom, subprime and securitization, collapse, response. The order is chronological and the closing lesson is a single takeaway. Beat 10 narration covers the timeline only partly."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is decent, but 'a single bankruptcy shook' is a generic setup. The ending states the lesson, but the line is a bit abstract and slightly repeats beat 8."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Accessible, storytelling voice suited to a general US audience. Slightly flat in places."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Good variety of scene types and the diagrams match the narration. The beat 12 diagram has a typo ('crise'), the on-screen text is partly in present tense, and the 'versus' scene is somewhat redundant. Generic stock queries."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly a paraphrase of Wikipedia intro text with a stock FCIC quote and little concrete color, such as no figures, names, or vivid examples."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Covers the requested items (boom, subprime, securitization, Lehman, response) in story form, but the story is thin. Length is close to the target."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clean. Tense shifts in beat 12 ('credit dries up') and the 'crise' typo."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Eurozone and Iceland crise",
+    "issue": "Typo in the on-screen diagram label.",
+    "beat": 12
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Then credit dries up, as businesses and consumers cannot borrow.",
+    "issue": "Tense shift from the past-tense narration.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Housing prices fell and interest rates were high.",
+    "issue": "Vague and misleading as a cause; the reset of adjustable-rate mortgages and the end of rising prices are not explained.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "The United States launched the Troubled Asset Relief Program, called TARP, to stabilize the financial system",
+    "issue": "No Fed actions, no $700bn figure, no Bear Stearns or AIG rescues, and no explanation of why Lehman was not rescued.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "sold slices to investors around the world.",
+    "issue": "No CDOs, leverage, or detail on the role of rating agencies, which are central to the causes.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "In the 1990s, Congress passed laws to expand affordable housing through looser financing rules.",
+    "issue": "Presented as a settled cause; the notes say the causes are contested. No balance is given.",
+    "beat": 2
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Everyone assumed the party would last.",
+    "issue": "Cliché filler; the script lacks concrete figures or vivid examples.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "CDOs and leverage",
+   "Bear Stearns and AIG",
+   "Fed emergency actions and the TARP amount",
+   "Exact Lehman date, 15 Sep 2008",
+   "Lasting effects such as Dodd-Frank, unemployment and foreclosure figures",
+   "Role of rating agency incentives"
+  ],
+  "wrong_facts": [
+   "Glass-Steagall 'partly repealed' in 1999 is true, but presenting it as a direct cause is contested"
+  ],
+  "would_publish": false,
+  "summary": "A clean, well-ordered but shallow retelling of the Wikipedia intro that skips CDOs, leverage, rating agency incentives, Bear Stearns and the Fed. It has no concrete numbers, and a typo on a diagram.",
+  "mean": 3.11,
+  "cost_usd": 0.027642,
+  "tokens": [
+   6066,
+   1551
+  ]
+ }
+}

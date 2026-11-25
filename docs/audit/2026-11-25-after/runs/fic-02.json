@@ -1,0 +1,477 @@
+{
+ "id": "fic-02",
+ "category": "creative story / fiction",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "Un cuento corto sobre una niña que descubre que el mar de su pueblo guarda las voces de quienes se fueron. Tono melancólico pero esperanzador, final abierto.",
+ "great": "Voz literaria propia, imágenes concretas, tono melancólico-esperanzado, estructura narrativa completa con final abierto pero satisfactorio; español natural y cuidado, sin lugares comunes.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:06:06",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": 0,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "inspiration-motivation",
+   "kids-family"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 0,
+   "reads": 0,
+   "sources": 0,
+   "seconds": 2.2,
+   "cost_usd": 0.0002805,
+   "error": ""
+  },
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "La niña que escuchaba al mar",
+  "description": "Un cuento corto sobre Alba, una niña que descubre que el mar de su pueblo guarda las voces de quienes se fueron. Una historia melancólica y esperanzadora, con final abierto.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "ca5a6142",
+    "narration": "¿Y si el mar no se llevara las voces de quienes se van, sino que las guardara? Eso se preguntó Alba, una niña de un pueblo pequeño, una mañana de niebla y silencio.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "pueblo costero con niebla amanecer",
+      "alt": "Pueblo costero envuelto en niebla",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "dcd307e6",
+    "narration": "En su pueblo, casi todos tenían a alguien lejos. Un abuelo, un tío, una vecina. Se habían ido en barco o en autobús, y las casas hablaban bajito, como con miedo.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "La niña que escuchaba al mar",
+      "subtitle": "Un cuento sobre las voces que no se van del todo"
+     }
+    },
+    "chapter": "El pueblo de las casas calladas"
+   },
+   {
+    "id": "1c71ea33",
+    "narration": "Cada tarde, Alba bajaba a la orilla. Le gustaba el vaivén de las olas, ese rumor constante que parecía respirar. Allí, sentada, se sentía menos sola que en casa.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "olas suaves orilla atardecer",
+      "alt": "Olas llegando a la orilla"
+     }
+    }
+   },
+   {
+    "id": "df995701",
+    "narration": "Su madre le decía que el mar solo era agua y sal. Pero Alba notaba algo distinto. Un murmullo que subía y bajaba, como una conversación lejana que no terminaba nunca.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "niña sentada frente al mar",
+      "alt": "Niña mirando el mar",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Un murmullo en la caracola"
+   },
+   {
+    "id": "472ac4eb",
+    "narration": "Una tarde apoyó la oreja en una caracola y escuchó una risa. Era una risa conocida. Alba contuvo el aliento, porque creyó reconocer la de su abuelo, el que se fue.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Una tarde, dentro de una caracola, Alba reconoció una risa.",
+      "emphasis": "una risa"
+     }
+    }
+   },
+   {
+    "id": "b72970d2",
+    "narration": "Corrió a casa y se lo contó a todos. Algunos sonrieron con ternura. Otros se enfadaron, porque no querían abrir una herida. Y Alba se quedó sola con su secreto.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "caracola en la arena",
+      "alt": "Caracola sobre la arena",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "72354302",
+    "narration": "Volvió al mar a buscar pruebas. Vio una red de pesca en el muelle, vieja y mojada, que crujía como una voz. Luego, un atardecer en la playa vacía, lleno de susurros.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "red de pesca en el muelle",
+       "atardecer en la playa vacía"
+      ],
+      "alt": "Red de pesca y playa al atardecer"
+     }
+    }
+   },
+   {
+    "id": "7428e0a5",
+    "narration": "Esa noche no durmió. Escuchó la marea subir y entendió algo. Las voces no hablaban para quedarse. Hablaban para que alguien, en la orilla, las recordara en voz alta.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "mar de noche luz de luna",
+      "alt": "Mar nocturno bajo la luna"
+     }
+    },
+    "chapter": "Lo que el mar guarda"
+   },
+   {
+    "id": "6b96af0b",
+    "narration": "A la mañana siguiente llevó a su madre a la playa. No dijo nada. Solo le ofreció la caracola. Su madre dudó, y después, muy despacio, se acercó la caracola al oído.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "madre e hija en la playa",
+      "alt": "Madre e hija en la orilla",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "92cad15c",
+    "narration": "Lloró un poco. Luego sonrió. No supo decir qué había oído, pero apretó la mano de Alba con fuerza. Esa tarde, por primera vez en años, hablaron del abuelo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Esa tarde, por primera vez en años, hablaron del abuelo.",
+      "emphasis": "hablaron del abuelo"
+     }
+    }
+   },
+   {
+    "id": "638c4557",
+    "narration": "Poco a poco, otros vecinos bajaron a la orilla. Traían una carta antigua, y también una vela encendida junto al mar. Decían los nombres en voz alta, por si el mar quería guardarlos.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "carta antigua sobre madera",
+       "vela encendida junto al mar"
+      ],
+      "alt": "Carta antigua y vela junto al mar"
+     }
+    }
+   },
+   {
+    "id": "5dced6ee",
+    "narration": "Alba aprendió dos cosas sencillas. Escuchar consuela, aunque duela un poco. Y recordar es quedarse, porque quien se nombra sigue cerca, incluso del otro lado del agua.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lo que aprendió Alba",
+      "items": [
+       "Escuchar consuela",
+       "Recordar es quedarse"
+      ],
+      "style": "spotlight",
+      "accent": "teal"
+     }
+    },
+    "chapter": "Lo que Alba aprendió"
+   },
+   {
+    "id": "7a8e2d71",
+    "narration": "Aún no sabe si el mar responde de verdad, o si solo devuelve lo que ella le da. Quizá no importe. Cada tarde sigue llegando, con la oreja abierta.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "niña caminando por la playa",
+      "alt": "Persona caminando por la orilla al atardecer"
+     }
+    }
+   },
+   {
+    "id": "4e786703",
+    "narration": "Y tú, ¿qué voz echas de menos? Tal vez el mar la guarde. Tal vez baste con decir su nombre en voz alta. Esta noche, prueba a escucharlo.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "¿Qué voz escucharías tú?",
+      "subtitle": "Quizá el mar todavía la guarda"
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "inspiration-motivation",
+   "kids-family"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 72.4,
+  "before_first_script_call_s": 6.3,
+  "script_s": 66.1
+ },
+ "cost": {
+  "script_small": 0.00038,
+  "research": 0.00028,
+  "script_big": 0.15813,
+  "search_api": 0.0,
+  "total": 0.15879
+ },
+ "calls": {
+  "small": 3,
+  "tools": 1,
+  "big": 3
+ },
+ "tokens": {
+  "in": 35761,
+  "out": 9987
+ },
+ "rules": {
+  "length": {
+   "words": 424,
+   "expected_words": 402,
+   "ratio": 1.055,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 190.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si el mar no se llevara las voces de quienes se van, sino que las guardara? Eso se preguntó Alba, una niña de un pueblo pequeño, una mañana de niebla y silencio.",
+   "close_text": "Y tú, ¿qué voz echas de menos? Tal vez el mar la guarde. Tal vez baste con decir su nombre en voz alta. Esta noche, prueba a escucharlo."
+  },
+  "variety": {
+   "distinct": 6,
+   "counts": {
+    "image": 4,
+    "title": 2,
+    "clip": 3,
+    "kinetic_text": 2,
+    "gallery": 2,
+    "bullets": 1
+   },
+   "max_run": 1,
+   "entropy": 2.47,
+   "top_type": "image",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [
+    "Alba"
+   ],
+   "ungrounded_share": 1.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "It is fiction, so there are no facts to check; the internal logic holds, apart from a small inconsistency: the caracola was never planted as an object before beat 5."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a full arc (discovery, conflict, reconciliation, open ending), but the beats are summarized rather than dramatized; the 'pruebas' in beat 7 are thin and the town stays abstract."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear, but the title appears at beat 2 and the 'aprendió dos cosas' beat reads like a moral at the end of a fable. Beat 10 repeats the on-screen line word for word."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question is a real hook and the ending addresses the viewer. The 'Esta noche, prueba a escucharlo' close is a bit didactic, but it works."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is melancholic and hopeful, and the register is gentle and suited to a tale."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The variety is good, but the stock images are generic, and the bullets scene for a story breaks the fiction. The title card comes in at beat 2 rather than at the start."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Some images are fresh ('las casas hablaban bajito', the net creaking like a voice), but the shell that holds the sea's sound and the explicit moral are clichés."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is a short tale in Spanish with the requested tone and an open ending. It is about 360 words, slightly under the target length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and correct, with short sentences and some repeated 'Tal vez'/'Quizá'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Alba aprendió dos cosas sencillas. Escuchar consuela, aunque duela un poco.",
+    "issue": "An explicit moral that tells the viewer the lesson instead of showing it, and the bullets scene breaks the narrative spell.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Esa tarde, por primera vez en años, hablaron del abuelo.",
+    "issue": "The kinetic text repeats the narration verbatim, and beat 5 does the same.",
+    "beat": 10
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Su madre le decía que el mar solo era agua y sal.",
+    "issue": "A stock skeptical-adult trope with no specific detail.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Volvió al mar a buscar pruebas.",
+    "issue": "The search is summarized quickly and the evidence is vague; it does not build any real tension.",
+    "beat": 7
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Corrió a casa y se lo contó a todos.",
+    "issue": "A generic shell image is shown while the narration is about a social conflict at home.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "A specific concrete voice or memory of the grandfather (a phrase, a song)",
+   "The town's name and sensory details that give it its own identity",
+   "A moment of real doubt or cost for Alba"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A tender, coherent tale with a good hook and an open ending, but it is told in summary and sometimes moralizes, with few concrete details of its own. The visuals are generic and it falls somewhat short of the requested length.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Alba contuvo el aliento, porque creyó reconocer la de su abuelo, el que se fue.",
+     "problem": "'la' refers back to 'risa' awkwardly.",
+     "better": "porque creyó reconocer la risa de su abuelo, el que se fue."
+    },
+    {
+     "quote": "con la oreja abierta",
+     "problem": "An unnatural image; 'oreja' is also colloquial.",
+     "better": "con el oído atento"
+    },
+    {
+     "quote": "Esta noche, prueba a escucharlo.",
+     "problem": "'escucharlo' has no clear referent; 'la voz' is feminine.",
+     "better": "Esta noche, prueba a escucharla."
+    }
+   ]
+  },
+  "mean": 3.56,
+  "cost_usd": 0.022224,
+  "tokens": [
+   3982,
+   1426
+  ]
+ }
+}

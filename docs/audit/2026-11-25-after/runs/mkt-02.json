@@ -1,0 +1,660 @@
+{
+ "id": "mkt-02",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "launch video for a note-taking app",
+ "great": "Reasonable positioning even with missing details: avoids inventing specific features/numbers or flags them as placeholders; problem-solution-benefit arc, call to action.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:06:18",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 4,
+   "seconds": 6.8,
+   "cost_usd": 0.0007567,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 39.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 35.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 30.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 30.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 26.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 21.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 17.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 13.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 9,
+  "grounding": {
+   "beats": 14,
+   "candidates": 14,
+   "checked": 14,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 1,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 3811,
+  "n_sources": 3,
+  "n_fetched": 4,
+  "fetched": [
+   "How to Decide If You Should Switch Note-Taking Apps - Mem – Your AI Thought Partner",
+   "Why note-taking apps don't make us smarter",
+   "Note-Taking App Showdown: The 4 Apps Used by 75% of People",
+   "Medium"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## How to Decide If You Should Switch Note-Taking Apps - Mem – Your AI Thought Partner\n- You spend more time organizing than capturing. If maintaining your system -- moving notes, updating tags, reorganizing folders -- feels like a second job, the tool is demanding too much overhead. - Your work and personal notes live in different apps. If you have a work notes app and a personal notes app and neither has the full picture, you're paying a context-switching tax every time you need cross-domain information. [...] - You don't take notes at all. No app fixes the note-taking habit. If you're not capturing anything, a new tool will just be a different empty app. - You don't review your notes. If notes go in and never come out, the problem is a workflow problem, not a tool problem. Though AI retrieval can help here -- it makes reviewing effortless. [...] For a deeper look at how different tools compare, see our comparison pages for Notion vs Mem, Obsidian vs Mem, and Apple Notes\n\n## Why note-taking apps don't make us smarter\nMy gusto for concept-based, link-heavy note-taking diminished. Roam’s development slowed to a crawl, and I spent a season with the lightweight, mostly free alternative known as Obsidian. Obsidian’s brutalist design wore on me, though, and eventually I decamped for the more polished user interface of Mem. (These apps all enable the exporting of your notes in Markdown, making switching relatively painless.) [...] Note-taking, after all, does not take place in a vacuum. It takes place on your computer, next to email, and Slack, and Discord, and iMessage, and the text-based social network of your choosing. In the era of alt-tabbing between these and other apps, our ability to build knowledge and draw connections is permanently challenged by what might be our ultimately futile efforts to multitask. Ezra Klein wrote beautifully about this situation this week in the New York Times: [...] Still,\n\n## Note-Taking App Showdown: The 4 Apps Used by 75% of People\n[1:21] choice this survey and the next both include returning students to building a second brain so it reflects people who have been deeply studying notetaking for [1:30] a while as well as complete newbies in first place evernote had 30 percent of all students notion came in second place [1:38] with 19 third was rome increasing to 18 of students surveyed up quite a bit from the previous sample fourth was newcomer [...] [0:33] we have evernote which took 38 of all the votes second place was notion representing 23 of the students surveyed [0:42] third place was rome research coming up with eleven percent another nine percent of students said that they hadn't picked a note-taking app yet next we had one [0:50] note at seven percent google docs with four percent and another four percent of students claiming other which makes sense as we only had ten choices for [...] ### Transcript [0:00] \n\n## Medium\nOn the flip side, if you gave a lousy tool to a good practitioner, he may still make something out of it. Most people are obsessed with shiny objects and eagerly look for the latest colorful apps on the Appstore. But those apps will not help you if you use them the wrong way. Because switching from one app to another takes a lot of time. You have to transfer your old notes to a new system. The cost of switching is high. [...] Just because the UI changes, this doesn’t mean that your way of taking notes will change. Because here’s the major problem with taking notes: We take notes. But never revisit them. Our note appsare mostly note graveyards. We have the feeling that we’re doing things right in storing more and more notes into our apps, but is this the rightthing to do? Of course, the more notes we have, the more sense we have of making progress. But are we really making progress in jus",
+ "plan": {
+  "title": "A Note App That Works While You Think",
+  "description": "A launch video for a note-taking app built to cut the overhead of organizing and help you find your notes again. It shows why notes often become graveyards and how a simpler workflow fixes that.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "ac5667ed",
+    "narration": "Be honest. When did you last open an old note and actually use it? Most of us save and save, and then never look again.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Your notes deserve a second life",
+      "subtitle": "Meet the note app that works while you think"
+     }
+    },
+    "sfx": "whoosh",
+    "chapter": "The problem"
+   },
+   {
+    "id": "7f6dc27c",
+    "narration": "Many people call their note apps graveyards. We take notes, but we never revisit them. Storing more feels like progress, even when nothing comes back out.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Note graveyard",
+      "definition": "An app where notes go in and never come out again."
+     }
+    }
+   },
+   {
+    "id": "3b23dbd0",
+    "narration": "And the work around the notes grows. Moving them, updating tags, reorganizing folders. When your system feels like a second job, the tool is demanding too much.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Organizing becomes a second job",
+      "items": [
+       "Moving notes",
+       "Updating tags",
+       "Reorganizing folders"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "folder",
+       "tag",
+       "clock"
+      ]
+     }
+    }
+   },
+   {
+    "id": "019ec4fc",
+    "narration": "Then there is the split. A work app here, a personal app there, and neither has the full picture. Every search for something across both costs you a context switch.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Work notes",
+       "tagline": "One app"
+      },
+      "b": {
+       "name": "Personal notes",
+       "tagline": "Another app"
+      },
+      "rows": [
+       {
+        "label": "Full picture",
+        "a": "No",
+        "b": "No"
+       },
+       {
+        "label": "Cross-domain search",
+        "a": "Slow",
+        "b": "Slow"
+       },
+       {
+        "label": "Context switching",
+        "a": "Constant",
+        "b": "Constant"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "30dd5453",
+    "narration": "Switching apps has always been expensive. You have to move your old notes into a new system, and it takes time. So people stay stuck with tools they have outgrown.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The cost of switching is high, so people stay stuck.",
+      "emphasis": "cost of switching"
+     }
+    },
+    "chapter": "Why switching felt hard"
+   },
+   {
+    "id": "e3af2dd6",
+    "narration": "Notes also live next to email, Slack, and messages. Constant alt-tabbing challenges our ability to build knowledge and draw connections. A note app should calm that, not add to it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person switching between computer windows",
+      "alt": "hands typing on a laptop with many windows"
+     }
+    }
+   },
+   {
+    "id": "61684299",
+    "narration": "So we built our app around three simple ideas. Capture fast. Find anything instantly. And bring your notes back to you at the moment you need them.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How it works",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Capture fast",
+        "icon": "pen"
+       },
+       {
+        "id": "b",
+        "label": "Find instantly",
+        "icon": "search"
+       },
+       {
+        "id": "c",
+        "label": "Resurface notes"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "stored"
+       ],
+       [
+        "b",
+        "c",
+        "retrieved"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 0
+     }
+    },
+    "sfx": "pop"
+   },
+   {
+    "id": "2f441a5f",
+    "narration": "First, capture. Open the app, type or paste, and you are done. No folders to pick, no tags to remember. You write the thought and move on.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Capture in seconds",
+      "steps": [
+       {
+        "label": "Open the app"
+       },
+       {
+        "label": "Type or paste your thought"
+       },
+       {
+        "label": "Move on, nothing to file"
+       }
+      ]
+     }
+    },
+    "chapter": "What changes for you"
+   },
+   {
+    "id": "709488ef",
+    "narration": "Second, retrieval. Ask for what you remember, in your own words. AI retrieval makes reviewing effortless, so notes that go in finally come back out.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "You",
+        "text": "What did I note about the launch plan?"
+       },
+       {
+        "speaker": "App",
+        "text": "Here are your notes on it, from work and home."
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "07cc916d",
+    "narration": "Third, one home for everything. Work and personal notes sit together, so the full picture is always there. No more paying the context switching tax.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "briefcase",
+        "label": "Work notes"
+       },
+       {
+        "icon": "home",
+        "label": "Personal notes"
+       },
+       {
+        "icon": "search",
+        "label": "One search"
+       }
+      ],
+      "title": "One home for everything"
+     }
+    }
+   },
+   {
+    "id": "a6ad66c2",
+    "narration": "And leaving your old app is painless. Many note apps let you export your notes as Markdown, so moving your notes over does not mean starting from zero.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Bring your notes with you",
+      "items": [
+       "Export from your old app",
+       "Import as Markdown",
+       "Keep everything you wrote"
+      ]
+     }
+    },
+    "sfx": "chime"
+   },
+   {
+    "id": "44cf521c",
+    "narration": "One honest point. No app fixes a missing habit. If you are not capturing anything, a new tool is just a different empty app. The habit still starts with you.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "No app fixes the note-taking habit.",
+      "attribution": "Mem, on switching note-taking apps"
+     }
+    },
+    "chapter": "An honest note"
+   },
+   {
+    "id": "522a9b07",
+    "narration": "What we can do is remove the friction. Less time organizing, more time thinking. A tool that stays out of your way, so the habit is easier to keep.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Less friction, better habit",
+      "items": [
+       "Less time organizing",
+       "More time thinking",
+       "A tool out of your way"
+      ],
+      "style": "spotlight",
+      "accent": "emerald",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "55c4141f",
+    "narration": "So here is the idea. Stop filing notes into a graveyard. Capture quickly, find anything, and let your notes come back to you. Try the app today, and write your first note.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Capture it. Find it. Use it. Start your first note today.",
+      "emphasis": "Start your first note"
+     }
+    },
+    "sfx": "sparkle",
+    "chapter": "Start today"
+   }
+  ],
+  "sources": [
+   {
+    "title": "How to Decide If You Should Switch Note-Taking Apps - Mem – Your AI Thought Partner",
+    "url": "https://get.mem.ai/guides/decide-switch-note-taking-apps",
+    "publisher": "get.mem.ai",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Why note-taking apps don't make us smarter",
+    "url": "https://www.platformer.news/why-note-taking-apps-dont-make-us",
+    "publisher": "platformer.news",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Medium",
+    "url": "https://mattgiaro.medium.com/why-you-dont-need-a-new-note-taking-app-f1a9f85b7721",
+    "publisher": "mattgiaro.medium.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 60.4,
+  "before_first_script_call_s": 36.2,
+  "script_s": 24.2
+ },
+ "cost": {
+  "script_small": 0.00184,
+  "research": 0.00076,
+  "script_big": 0.04499,
+  "search_api": 0.016,
+  "total": 0.06359
+ },
+ "calls": {
+  "small": 5,
+  "tools": 2,
+  "big": 1
+ },
+ "tokens": {
+  "in": 22456,
+  "out": 5203
+ },
+ "rules": {
+  "length": {
+   "words": 392,
+   "expected_words": 402,
+   "ratio": 0.975,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 176.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 25,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Be honest. When did you last open an old note and actually use it? Most of us save and save, and then never look again.",
+   "close_text": "So here is the idea. Stop filing notes into a graveyard. Capture quickly, find anything, and let your notes come back to you. Try the app today, and write your first note."
+  },
+  "variety": {
+   "distinct": 12,
+   "counts": {
+    "title": 1,
+    "definition": 1,
+    "bullets": 2,
+    "versus": 1,
+    "kinetic_text": 2,
+    "clip": 1,
+    "diagram": 1,
+    "steps": 1,
+    "dialogue": 1,
+    "icons": 1,
+    "checklist": 1,
+    "quote": 1
+   },
+   "max_run": 1,
+   "entropy": 3.52,
+   "top_type": "bullets",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 4,
+   "notes_len": 3811,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The script presents product features (AI retrieval, one search across work and personal notes, no folders) as the user's own app, which the brief never specified. It also attributes a generic Mem quote to the app's pitch, and the Markdown export claim is hedged only with 'many'."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a problem, solution, benefit arc and a CTA, but there is no app name, no placeholder flags, no pricing or platform info, and no concrete demo. The problem section runs long (beats 1-6) relative to the product section."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Chapters run problem, why switching felt hard, what changes, honest note and start today. The flow is clear, though beat 2 and beat 3 overlap somewhat and beat 12 slows momentum before the CTA."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opener 'When did you last open an old note and actually use it?' is a good tension-creating question. The ending's 'graveyard' callback with a CTA works, though 'write your first note' is somewhat soft."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational and brand-appropriate for a launch video, with a candid 'honest note' beat. The tone is slightly generic marketing."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well. However, the versus table with 'No/No', 'Slow/Slow' and 'Constant/Constant' rows is a weak comparison, the diagram edge labels 'stored' and 'retrieved' do not match the nodes, and the clip query is generic."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The 'note graveyard' and 'second job' framing is lifted from the sources. The content is mostly competitor-blog language repurposed, with no unique product detail."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is a launch video of roughly the right length, but it invents product capabilities without flagging them as placeholders and never names the app."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Clean, natural English with short punchy sentences. There are minor fragment-heavy rhythms."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "AI retrieval makes reviewing effortless, so notes that go in finally come back out.",
+    "issue": "This is a claim lifted from Mem's marketing and presented as the new app's feature, with no basis in the brief.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Mem, on switching note-taking apps",
+    "issue": "A competitor's line is attributed on screen inside the launch video for a different app, which is confusing and wrongly implies endorsement.",
+    "beat": 12
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "So we built our app around three simple ideas.",
+    "issue": "The script invents specific product features without flagging them as placeholders and never names the app.",
+    "beat": 7
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"rows\": [{\"label\": \"Full picture\", \"a\": \"No\", \"b\": \"No\"}",
+    "issue": "The versus table has identical values on both sides, so it shows no contrast.",
+    "beat": 4
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "[\"a\", \"b\", \"stored\"], [\"b\", \"c\", \"retrieved\"]",
+    "issue": "The edge labels do not match the 'capture, find, resurface' flow described in the narration.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Try the app today, and write your first note.",
+    "issue": "The call to action gives no concrete next step such as a platform, download or price.",
+    "beat": 14
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Many people call their note apps graveyards.",
+    "issue": "This repeats the beat 1 point that people never revisit their notes, and the problem section drags.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "App name and platforms/availability",
+   "Placeholder flags for unspecified features",
+   "A concrete use-case story or demo",
+   "Pricing or a clear call-to-action link"
+  ],
+  "wrong_facts": [
+   "Mem's quote is attributed within another app's launch video; the features (AI retrieval, one search) are unverified for the unnamed app."
+  ],
+  "would_publish": false,
+  "summary": "A well-structured problem-solution arc with a good hook, but it borrows Mem's marketing claims and quote and invents features without flagging them as placeholders. Visuals are mostly sensible but a few are weak.",
+  "mean": 3.44,
+  "cost_usd": 0.024766,
+  "tokens": [
+   4888,
+   1499
+  ]
+ }
+}

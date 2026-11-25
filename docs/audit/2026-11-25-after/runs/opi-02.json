@@ -1,0 +1,493 @@
+{
+ "id": "opi-02",
+ "category": "opinion / essay",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "por qué deberíamos leer más",
+ "great": "Tesis clara y personal, argumentos concretos (empatía, concentración, vocabulario) con alguna evidencia verificable, ejemplos, cierre memorable; voz de ensayo, no lista genérica.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:07:43",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Explicar por qué leer más es un tema atemporal sobre beneficios cognitivos, emocionales y educativos de la lectura, que una enciclopedia cubre bien sin necesidad de información reciente.",
+  "queries": [
+   "beneficios de leer",
+   "por qué leer más"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2090,
+  "n_sources": 1,
+  "n_fetched": 2,
+  "fetched": [
+   "Lectura",
+   "Concepción de salud en Psicología social"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Lectura\nLa lectura es la interpetación (por parte de una persona, el lector/la lectora) del significado de algún tipo de información o ideas almacenadas en un soporte (véase palabra y texto) y transmitidas mediante algún tipo de código (usualmente un lenguaje, que puede ser visual o táctil; por ejemplo, el sistema braille) o de otros que pueden no estar basados en el lenguaje, tales como la notación o los pictogramas. Se usa generalmente para fines informativos, de enseñanza-aprendizaje, de análisis y de comprensión. Se trata de una de las habilidades humanas para descifrar letras o cualquier otro idioma.\n \nMax Weber ha planteado tres definiciones para la lectura:\nSaber pronunciar las palabras escritas.\nSaber identificar las palabras y el significado de cada una de ellas.\nSaber extraer y comprender el significado de un texto.​\n\n## Concepción de salud en Psicología social\nLa psicología social, fundada por Kurt lewin,​ es definida como una ciencia que estudia las relaciones entre lo interpersonal y la relación con la sociedad. La psicología social de Enrique Pichon-Rivière comparte este amplio campo de problematizaciones, aunque particularmente para este autor la psicología social es la \"ciencia de las interacciones orientadas hacia un cambio social planificado. La psicología social que postulamos tiene como objeto de estudio el desarrollo y transformación de una relación dialéctica, la que se da entre estructura social y fantasía inconsciente del sujeto, asentada sobre sus relaciones de necesidad. Dicho de otra manera, la relación entre estructura social y configuración del mundo interno del sujeto, relación que es abordada a través de la noción de vínculo\".​ Esto hace que la perspectiva pichoniana sobre la concepción de salud y enfermedad incluya algunas categorías particulares, principalmente vinculadas a la determinación de la salud o enfermedad en virtud de capacidad para participar activamente (con capacidad de transformación) en el mundo.\nDesde la Teoría del Vínculo, no puede entenderse la emergencia de la enfermedad mental como un hecho aislado…",
+ "plan": {
+  "title": "Por qué deberíamos leer más",
+  "description": "Leer es mucho más que pasar páginas: es interpretar el significado de un texto. Descubre qué implica realmente leer y por qué conviene hacerlo más a menudo.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "644c6a52",
+    "narration": "¿Sabías que puedes pronunciar cada palabra de una página y, aun así, no haber leído nada? Leer es mucho más que mover los ojos sobre las letras.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Leer no es solo pasar los ojos por las letras",
+      "emphasis": "Leer"
+     }
+    }
+   },
+   {
+    "id": "a4a3941f",
+    "narration": "Muchos creen que leer es pronunciar palabras en voz alta. Es una idea común, pero incompleta. Veamos qué dice una definición más completa de la lectura.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "¿Qué significa leer?",
+      "subtitle": "Más que descifrar letras: entender"
+     }
+    },
+    "chapter": "Qué es leer de verdad"
+   },
+   {
+    "id": "0cf99b72",
+    "narration": "La lectura es la interpretación, por parte de una persona, del significado de información o ideas guardadas en un soporte y transmitidas mediante un código, normalmente un lenguaje.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Lectura",
+      "definition": "Interpretación que hace una persona del significado de ideas almacenadas en un soporte y transmitidas mediante un código, como un lenguaje."
+     }
+    }
+   },
+   {
+    "id": "8e773581",
+    "narration": "Max Weber planteó tres niveles. Primero, saber pronunciar las palabras escritas. Segundo, identificar las palabras y el significado de cada una. Tercero, extraer y comprender el significado del texto.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Tres definiciones de lectura",
+      "steps": [
+       {
+        "label": "Pronunciar las palabras escritas"
+       },
+       {
+        "label": "Identificar palabras y su significado"
+       },
+       {
+        "label": "Extraer y comprender el texto"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "e6c5cc9a",
+    "narration": "Entonces, ¿para qué leemos? Porque la lectura nos sirve para informarnos, para aprender y enseñar, para analizar lo que nos rodea y para comprenderlo mejor.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Para qué sirve leer",
+      "items": [
+       "Informarnos",
+       "Enseñar y aprender",
+       "Analizar",
+       "Comprender"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "book",
+       "school",
+       "search",
+       "lightbulb"
+      ]
+     }
+    },
+    "chapter": "Para qué sirve"
+   },
+   {
+    "id": "7e636c63",
+    "narration": "Leer es una de las habilidades humanas para descifrar letras o cualquier otro idioma. Y no solo con los ojos: el sistema braille permite leer con el tacto.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "persona leyendo libro biblioteca",
+       "manos leyendo braille",
+       "niño leyendo cuento"
+      ],
+      "alt": "Distintas formas de leer"
+     }
+    }
+   },
+   {
+    "id": "7b2bbb77",
+    "narration": "Cada vez que lees, practicas algo más difícil que reconocer letras: darle sentido a un texto. Es un ejercicio de comprensión que se fortalece cuanto más lo usas.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "pasando páginas de un libro",
+      "alt": "manos hojeando un libro"
+     }
+    }
+   },
+   {
+    "id": "df5ec876",
+    "narration": "Además, leer nos conecta con otras personas y con su manera de ver el mundo. Cada texto es una puerta hacia ideas que quizá nunca habríamos imaginado.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "estantería llena de libros biblioteca",
+      "alt": "Biblioteca con muchos libros",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "93dea6ae",
+    "narration": "Así que la próxima vez que abras un libro, no busques solo terminarlo. Busca entender, preguntarte y comparar. Esa es la lectura que realmente transforma.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Leer con intención",
+      "items": [
+       "Entender lo que dice",
+       "Preguntarte qué significa",
+       "Comparar con lo que sabes"
+      ]
+     }
+    },
+    "chapter": "Tu siguiente paso"
+   },
+   {
+    "id": "97ba90ea",
+    "narration": "Leer más es ejercitar la comprensión, aprender y ver el mundo con más claridad. Empieza hoy con unas pocas páginas.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Leer más es comprender mejor el mundo",
+      "emphasis": "comprender"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Lectura",
+    "url": "https://es.wikipedia.org/wiki/Lectura",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 29.6,
+  "before_first_script_call_s": 18.7,
+  "script_s": 11.0
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "script_big": 0.03817,
+  "search_api": 0.0,
+  "total": 0.03848
+ },
+ "calls": {
+  "small": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 12940,
+  "out": 1842
+ },
+ "rules": {
+  "length": {
+   "words": 263,
+   "expected_words": 267,
+   "ratio": 0.985,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 119.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 27,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 20,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Sabías que puedes pronunciar cada palabra de una página y, aun así, no haber leído nada? Leer es mucho más que mover los ojos sobre las letras.",
+   "close_text": "Leer más es ejercitar la comprensión, aprender y ver el mundo con más claridad. Empieza hoy con unas pocas páginas."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "kinetic_text": 2,
+    "title": 1,
+    "definition": 1,
+    "steps": 1,
+    "bullets": 1,
+    "gallery": 1,
+    "clip": 1,
+    "image": 1,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "kinetic_text",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 1,
+   "fetched": 2,
+   "notes_len": 2090,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The script stays close to the notes, but it presents Weber's three definitions as 'tres niveles' and claims reading 'se fortalece cuanto más lo usas' with no evidence."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The brief asked why we should read more, but most of the script defines reading. It leaves out empathy, concentration, vocabulary and any verifiable evidence."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and has chapters, but about half of it is definitions. The 'why' only appears at the end and the argument never builds."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook, 'puedes pronunciar cada palabra... y no haber leído nada', is decent. The ending is a generic summary plus a call to action."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is friendly and clear, but it reads like a school lesson, not a personal essay voice."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary sensibly (definition, steps, gallery with braille, clip) and match the narration."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It draws on Wikipedia's definition and a generic list ('informarnos, aprender, analizar'). It offers no surprising fact or example."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "It does not answer 'por qué deberíamos leer más' with real arguments. It is also somewhat short of the target length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is correct and fluent, with minor stiffness in the definition beats."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "La lectura es la interpretación, por parte de una persona, del significado de información o ideas guardadas en un soporte",
+    "issue": "A dictionary-style definition fills the time that should go to arguments for reading more.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Leer más es ejercitar la comprensión, aprender y ver el mundo con más claridad.",
+    "issue": "The central claim has no empathy, concentration or vocabulary argument and no evidence.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Max Weber planteó tres niveles.",
+    "issue": "The notes give three definitions, not levels. The script does not say which Weber it means (the sociologist), and the attribution is dubious.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Es un ejercicio de comprensión que se fortalece cuanto más lo usas.",
+    "issue": "An unsupported claim stated as fact.",
+    "beat": 7
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Cada texto es una puerta hacia ideas que quizá nunca habríamos imaginado.",
+    "issue": "A cliché metaphor.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Muchos creen que leer es pronunciar palabras en voz alta.",
+    "issue": "Beat 2 repeats the hook from beat 1, and beat 4 repeats the same point again.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "Empathy and fiction research",
+   "Concentration and attention",
+   "Vocabulary and writing benefits",
+   "Verifiable data, such as Spanish reading habits",
+   "A personal thesis and a concrete example",
+   "A memorable closing image"
+  ],
+  "wrong_facts": [
+   "Weber's 'tres definiciones' are presented as 'niveles', which is a slight reframing, and the sociologist is not clearly identified."
+  ],
+  "would_publish": false,
+  "summary": "The script spends most of its time defining reading from a Wikipedia entry and never builds the case for reading more. It is clean and well illustrated, but the arguments and the memorable close the brief asks for are missing.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Veamos qué dice una definición más completa de la lectura.",
+     "problem": "Stiff, textbook-like phrasing.",
+     "better": "Veamos cómo se define de verdad."
+    },
+    {
+     "quote": "Esa es la lectura que realmente transforma.",
+     "problem": "Calque of 'really transforms'.",
+     "better": "Esa lectura es la que de verdad te cambia."
+    }
+   ]
+  },
+  "mean": 2.89,
+  "cost_usd": 0.022398,
+  "tokens": [
+   4159,
+   1408
+  ]
+ }
+}

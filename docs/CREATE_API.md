@@ -19,10 +19,14 @@ An unknown value is a 400 with a plain message. `aspect`/`resolution` not listed
 ```json
 {"aspects": [{"id": "16:9", "label": "Landscape", "ready": true, "beta": false}, {"id": "9:16", "label": "Vertical", "ready": true, "beta": true}],
  "resolutions": [{"id": "720p", "label": "720p"}, {"id": "1080p", "label": "1080p"}],
- "platforms": [{"id": "youtube", "label": "YouTube", "aspect": "16:9", "resolution": "1080p", "note": "Landscape 16:9 · 1080p"}, ...],
+ "platforms": [{"id": "linkedin", "label": "LinkedIn", "aspect": "4:5", "resolution": "1080p", "recommended_minutes": 1, "max_minutes": 10, "other_aspects": ["1:1", "16:9"], "note": "Portrait 4:5 · 1080p · about 1 min"}, ...],
  "languages": [{"id": "en", "label": "English"}, {"id": "es", "label": "Español"}],
- "lengths": {"min_minutes": 1, "max_minutes": 12}, "max_photos": 100, "intake": true}
+ "lengths": {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]}, "max_photos": 100, "intake": true}
 ```
+**Lengths.** `target_minutes` is a number from 0.25 (15 s) to 12; `presets` are the chips to show (15 s, 30 s, 45 s, 1 min, 2 min ...). Credits are the started minutes, at least 1: 15, 30, 45 and 60 seconds cost 1 credit, 61 seconds costs 2. Under a minute the engine writes a short-form script (about 2 to 4 beats, hook in the first 2 seconds), see `docs/SHORT_VIDEOS.md`.
+
+**Platform fields.** `aspect` and `resolution` are the recommendation; `recommended_minutes` (always one of the presets) is the length the app should preselect when the person picks the platform (the person may still choose any length: the chosen length always wins in the engine); `max_minutes` is the platform's soft limit (null = none), for a hint such as "TikTok videos can be longer, but 30 s works best"; `other_aspects` are acceptable alternatives to show as secondary choices; `note` is the one-line text under the chips ("Portrait 4:5 · 1080p · about 1 min"). Sources and doubts: `docs/CREATE_OPTIONS_FLOW.md`. Everything is server-driven.
+
 `beta: true` means it works but not every scene has a native layout yet (a framed fallback is used for those scenes).
 
 ## Request check (intake)

@@ -110,6 +110,8 @@ def with_retry(fn: Callable[..., Any], *args: Any, max_tries: int = 3, base_dela
             if attempt >= max_tries or not retryable(e):
                 raise
             ra = getattr(e, "retry_after", None)
+            if ra is not None and ra > max_wait:   # "come back in a minute": waiting a few seconds only burns the request's time (the caller falls back instead)
+                raise
             wait = min(max_wait, ra if ra is not None else base_delay * (2 ** (attempt - 1)))
             if clock() - t0 + wait > max_total_s:
                 raise

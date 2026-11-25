@@ -1,0 +1,612 @@
+{
+ "id": "tri-01",
+ "category": "trivia / listicle",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "10 surprising facts about the human body",
+ "great": "Ten distinct, correct, genuinely surprising facts (not myths like 10% of brain), brief explanation each, counted; punchy; no misinformation.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:08:17",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Surprising facts about the human body are timeless physiology and anatomy that an encyclopedia covers well; no recent or fast-changing information is needed.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "listicle-ranking",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 8,
+   "seconds": 4.4,
+   "cost_usd": 0.0007789,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 39.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 34.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 30.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 30.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 26.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 21.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 21.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 17.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 13.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 12.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 8.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 4.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 4.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 13,
+  "grounding": {
+   "beats": 9,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 1,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 7654,
+  "n_sources": 6,
+  "n_fetched": 8,
+  "fetched": [
+   "50 Mind-Boggling Fun Facts About the Human Body",
+   "10 Amazing Facts About the Human Body | OSG",
+   "Ten Amazing Facts about the human body! | STEM Newcastle",
+   "15 Interesting Facts about the Human Body that you probably didn’t know | Body Worlds Amsterdam",
+   "Amazing Facts - Universum, Museo de las Ciencias de la UNAM",
+   "16 of the weirdest and wackiest facts on the human body",
+   "15 Facts About The Human Body! - National Geographic Kids",
+   "Human body | Organs, Systems, Structure, Diagram, & Facts | Britannica"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## 50 Mind-Boggling Fun Facts About the Human Body\n20. The skeleton contains 206 bones. 21. The human body has over 600 muscles. 22. It takes around 17 muscles to smile. 23. Human tongues have unique prints like fingerprints. 24. Sneezes can travel up to 20 miles per hour. 25. The area between your eyebrows is called the glabella. 26. Many people born with blue eyes have their eyes change color later. 27. Humans have about 4 pounds of bacteria living on and in their bodies. 28. Human eyes can distinguish between 10 million different colors. [...] 12. An adult’s network of blood vessels is more than 60,000 miles long. 13. About 50,000 of your cells die every 3 to 4 minutes. 14. An unborn baby has fingerprints three months after conception. 15. Human bones are five times stronger than steel. 16. Humans are most likely to have a heart attack on a Monday. 17. By the age of 60, humans lose about half of their taste buds. 18. Your left lung is\n\n## 10 Amazing Facts About the Human Body | OSG\n1. Infants are born with approximately 300 bones, but as they grow some of these bones fuse together. By the time they reach adulthood, they only have 206 bones. 2. More than half of your bones are located in the hands, wrists, feet, and ankles. 3. Every second, your body produces 25 million new cells. That means in 15 seconds, you will have produced more cells than there are people in the United States. [...] 4. The largest bone in the human body is the femur, also known as the thigh bone. The smallest bone is the stirrup bone, which is located inside your ear drum. 5. There is anywhere between 60,000-100,000 miles of blood vessels in the human body. If they were taken out and laid end-to-end, they would be long enough to travel around the world more than three times. 6. Teeth are considered part of the skeletal system, but are not counted as bones. [...] 8. While humans are not the big\n\n## Ten Amazing Facts about the human body! | STEM Newcastle\n#### 4. An individual blood cell takes about 60 seconds to make a complete circuit of the body. The average heart pumps about 70ml of blood out with each beat and a healthy heart beats around 70 times a minute. #### 5. By the time you go to bed at night you are about 1 cm shorter than when you woke up that morning. This is because the cartilage between your bones is compressed throughout the day. #### 6. Nerve impulses to and from the brain can travel as fast as 250 miles per hour. [...] There are about 37 trillion cells in the human body, all of them containing about 5cm of of DNA (when uncoiled). DNA is made up of lots of different nucleotide pairs that can decide some of our features such as eye and hair colour. #### 2. The average human body contains ten times more bacterial cells than human cells. [...] Humans are not quite the naked apes that we’re made out to be. We have lots of h\n\n## 15 Interesting Facts about the Human Body that you probably didn’t know | Body Worlds Amsterdam\nDid you know that an adult has fewer bones than a baby? A baby is born with 350 bones. Over time, some bones fuse together, meaning that an adult’s body consists of around 206 bones. Did you know that your whole body is constantly renewing itself? Or rather, the cells that make up your body. There are around 50 to 75 trillion cells in the human body, and each cell type has its own lifespan or regeneration cycle. [...] Red blood cells, for example, live for about four months, whilst white blood cells live for over a year on average. Your skin cells live for about two or three weeks, which means your body gets a fresh coat every few weeks. [...] Your heart beats around 115,000 times a day to pump between 8,000 and 9,000 litres of blood through your body. That’s about 6 litres per minute. The sound of your heartbeat is actually the sound of the heart valves opening and closing. This vital m\n\n## Amazing Facts - Universum, Museo de las Ciencias de la UNAM\nThe heart beats around 3 billion times in the average person’slife. About 2 million blood cells die in the human body every second,and the same number are born each second. Within a tiny droplet of blood, there are some 5 million red bloodcells, 300,000 platelets and 10,000 white cells. It takes about 1 minute for a red blood cell to circle the wholebody. Red blood cells make approximately 250,000 round trips of the bodybefore returning to the bone marrow, where they were born, to die. [...] At rest, the adult body takes in and breathes out about one-fourthof a cubic foot of air each minute. The right lung is slightly larger than the left. Hairs in the nose help to clean the air we breathe as well aswarming it. The highest recorded “sneeze speed” is 103 miles per hour. The surface area of the lungs is roughly the same size as a tenniscourt. The capillaries in the lungs would extend nearl\n\n## 16 of the weirdest and wackiest facts on the human body\nDid you know that 206 bones make up the human skeleton? It’s just one of the many fun facts you’ll find in Operation Ouch!: The HuManual. Here are 16 weird, wacky and sometimes-a-bit-gross facts… 1. Your eyes blink around 20 times a minute. That’s over ten million times a year! 2. Your ears never stop growing! 3. Earwax is actually a type of sweat! An illustration of grumpy looking earwax from Operation Ouch!: The HuManual Illustration: Dan Green | Operation Ouch!: The HuManual [...] 10. The entire surface of your skin is replaced every month, which put another way means you have about 1,000 different skins in your life! 11. The body has 2.5 million sweat pores. 12. Every minute you shed over 30,000 dead skin cells. An illustration of a happy looking brain from Operation Ouch!: The HuManual Illustration: Dan Green | Operation Ouch!: The HuManual 13. If you live to age 70, your heart will\n\n## 15 Facts About The Human Body! - National Geographic Kids\n5. Bodies give off a tiny amount of light that’s too weak for the eye to see. 6. The average person has 67 different species of bacteria in their belly button. 7. You lose about 4kg of skin cells every year! 8. Babies don’t shed tears until they’re at least one month old. 9. Information zooms along nerves at about 400kmph! 10. The human heart beats more than three billion times in an average lifespan. [...] > Did you know we have a FREE downloadable primary resource about the human heart? Great for teachers, homeschoolers and parents alike! 11. Your left lung is about 10 percent smaller than your right one. 12. Human teeth are just as strong as shark teeth. 13. Scientists estimate that the nose can recognise a trillion different scents! 14. Humans are the only species known to blush. 15. Your blood makes up about eight percent of your body weight. [...] Right, gang, it’s time to take a l\n\n## Human body | Organs, Systems, Structure, Diagram, & Facts | Britannica\nLipids—chiefly fats, phospholipids, and steroids—are major structural components of the human body. Fats provide an energy reserve for the body, and fat pads also serve as insulation and shock absorbers. Phospholipids and the steroid compound cholesterol are major components of the membrane that surrounds each cell. [...] Chemically, the human body consists mainly of water and organic compounds, such as lipids, proteins, carbohydrates, and nucleic acids. The human body is about 60 percent water by weight. ### How many bones are in the adult human body? [...] In general structure, the human body follows a plan that can be described as a cylinder enclosing two tubes and a rod. This body plan is most clearly evident in the embryo; by birth, the plan is apparent only in the trunk region—i.e., in the thorax and abdomen.",
+ "plan": {
+  "title": "10 Surprising Facts About the Human Body",
+  "description": "Ten surprising facts about the human body, from bones that fuse to cells that renew constantly. Discover how your skeleton, blood and skin are more extraordinary than you think.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "65315c46",
+    "narration": "You started life with about 300 bones, but you have only 206 now. Where did the rest go? Your body is full of strange surprises, and here are ten.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "206",
+      "unit": "bones",
+      "label": "Adult bones, down from about 300 at birth",
+      "from": "300",
+      "delta": "Some bones fuse as you g"
+     }
+    },
+    "chapter": "Bones and cells"
+   },
+   {
+    "id": "7e18d19f",
+    "narration": "Fact one: babies are born with roughly 300 bones, and as they grow, some fuse together. Fact two: more than half of your bones are in your hands, wrists, feet and ankles.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Bones",
+      "items": [
+       "Babies: about 300 bones",
+       "Adults: 206 bones",
+       "Over half in hands and feet"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "baby",
+       "bone",
+       "footprints"
+      ]
+     }
+    }
+   },
+   {
+    "id": "3bb0b327",
+    "narration": "Fact three: your body makes 25 million new cells every second. In just 15 seconds, you produce more cells than there are people in the United States.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "25 million",
+      "label": "new cells made by your body every second"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "e4edc217",
+    "narration": "Fact four: the largest bone is the femur, your thigh bone. The smallest is the stirrup, tucked inside your ear. Fact five: you are about one centimeter shorter at bedtime than when you woke up.",
+    "scene": {
+     "type": "scale_compare",
+     "props": {
+      "items": [
+       {
+        "label": "Femur",
+        "value": 50.0,
+        "note": "Largest bone, the thigh"
+       },
+       {
+        "label": "Stirrup",
+        "value": 1.0,
+        "note": "Smallest bone, in the ear"
+       }
+      ],
+      "unit": "",
+      "title": "Bone extremes"
+     }
+    }
+   },
+   {
+    "id": "5aba3669",
+    "narration": "Fact six: your blood vessels stretch between 60,000 and 100,000 miles. Laid end to end, they would circle the world more than three times.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "60,000",
+      "unit": "miles",
+      "label": "Minimum length of your blood vessels",
+      "delta": "Up to 100,000 miles"
+     }
+    },
+    "chapter": "Blood and nerves"
+   },
+   {
+    "id": "e5efceb1",
+    "narration": "Fact seven: a blood cell circles your whole body in about 60 seconds. It leaves the Heart, travels through the Body, and comes Back again, ready for another lap.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "One minute, one lap",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Heart",
+        "icon": "heart"
+       },
+       {
+        "id": "b",
+        "label": "Body",
+        "icon": "user"
+       },
+       {
+        "id": "a",
+        "label": "Back again",
+        "icon": "repeat"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "b",
+        "pumped out"
+       ],
+       [
+        "b",
+        "a",
+        "returns"
+       ]
+      ],
+      "style": "pills",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "b5159e8a",
+    "narration": "Fact eight: nerve impulses can travel as fast as 250 miles per hour. A signal from your toe reaches your brain before you can blink.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "fast lights traffic night",
+      "alt": "speeding light trails"
+     }
+    }
+   },
+   {
+    "id": "ef675328",
+    "narration": "Fact nine: your skin cells live only two or three weeks, so you get a fresh coat every few weeks. You even lose about four kilograms of skin cells every year.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Skin renewal",
+      "items": [
+       "Skin cells live 2 to 3 weeks",
+       "Fresh coat every few weeks",
+       "About 4 kg shed per year"
+      ],
+      "style": "rail",
+      "accent": "teal"
+     }
+    },
+    "chapter": "Skin and surprises"
+   },
+   {
+    "id": "6fdd3f99",
+    "narration": "Fact ten: humans are the only species known to blush. So remember, your body is renewing, racing and surprising you every single second.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Humans are the only species known to blush.",
+      "emphasis": "blush"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "50 Mind-Boggling Fun Facts About the Human Body",
+    "url": "https://www.boredteachers.com/post/human-body-facts",
+    "publisher": "boredteachers.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "10 Amazing Facts About the Human Body | OSG",
+    "url": "https://osgpc.com/amazing-facts-about-the-human-body",
+    "publisher": "osgpc.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Ten Amazing Facts about the human body! | STEM Newcastle",
+    "url": "https://blogs.ncl.ac.uk/stem/2017/04/03/ten-amazing-facts-about-the-human-body",
+    "publisher": "blogs.ncl.ac.uk",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "15 Interesting Facts about the Human Body that you probably didn’t know | Body Worlds Amsterdam",
+    "url": "https://www.bodyworlds.nl/en/blog/15-interesting-facts-about-the-human-body-that-you-probably-didn-t-know",
+    "publisher": "bodyworlds.nl",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Amazing Facts - Universum, Museo de las Ciencias de la UNAM",
+    "url": "https://www.universum.unam.mx/bodyworlds/en/vital/curiosidades",
+    "publisher": "universum.unam.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "15 Facts About The Human Body! - National Geographic Kids",
+    "url": "https://www.natgeokids.com/uk/discover/science/general-science/15-facts-about-the-human-body",
+    "publisher": "natgeokids.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "listicle-ranking",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 79.9,
+  "before_first_script_call_s": 48.3,
+  "script_s": 31.6
+ },
+ "cost": {
+  "script_small": 0.00028,
+  "research": 0.00078,
+  "script_big": 0.13293,
+  "search_api": 0.016,
+  "total": 0.14999
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 49036,
+  "out": 5599
+ },
+ "rules": {
+  "length": {
+   "words": 257,
+   "expected_words": 267,
+   "ratio": 0.963,
+   "beats": 9,
+   "expected_beats": 9,
+   "est_speech_s": 115.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 23,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You started life with about 300 bones, but you have only 206 now. Where did the rest go? Your body is full of strange surprises, and here are ten.",
+   "close_text": "Fact ten: humans are the only species known to blush. So remember, your body is renewing, racing and surprising you every single second."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "counter": 2,
+    "bullets": 2,
+    "stat": 1,
+    "scale_compare": 1,
+    "diagram": 1,
+    "clip": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.73,
+   "top_type": "counter",
+   "top_share": 0.22,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 8,
+   "ungrounded_numbers": [],
+   "entities": 4,
+   "ungrounded_entities": [
+    "Back"
+   ],
+   "ungrounded_share": 0.083,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 6,
+   "fetched": 8,
+   "notes_len": 7654,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Several claims are shaky: \"about 300 bones\" (the notes say 300 and 350), the nerve speed claim \"before you can blink\" is invented, and the \"60,000 to 100,000 miles\" vessel range is stated without hedging. The stirrup is described as \"inside your ear\", which is fine. The ear-bone pairing in the visual (femur 50 vs stirrup 1) is invented scale data."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has ten counted facts, but they cluster on bones (facts 1, 2 and 4), and facts 4 and 5 are crammed into one beat. Explanations are thin, and there is little on the brain, senses or microbiome."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and the facts are numbered, but it is a flat list with weak transitions. The bone cluster up front feels repetitive, and the ending is hurried."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question about where the bones went is a decent hook. The ending is a generic summary line, \"renewing, racing and surprising you\", tacked onto fact ten."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational and suited to a general audience, though somewhat flat."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, but the scale_compare uses invented values (50 vs 1) that are not real data. The traffic light-trails clip is only loosely tied to nerve speed. The diagram uses capitalised labels awkwardly, and the narration reads them out: \"Heart... Body... Back again\"."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The facts are the standard listicle fare (206 bones, blushing, shrinking at night). The 25 million cells versus US population comparison is the only slightly fresher touch."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It delivers ten numbered facts in English at roughly the right length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The grammar is clean. The capitalised \"Heart\", \"Body\" and \"Back again\" in beat 6 read awkwardly."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "A signal from your toe reaches your brain before you can blink.",
+    "issue": "This is an invented, unsupported claim. A blink takes about 100-150 ms, and a toe-to-brain signal at 250 mph takes roughly 20 ms, so it is plausible but not in the notes, and it is stated as fact.",
+    "beat": 7
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "\"value\": 50.0, \"note\": \"Largest bone, the thigh\"",
+    "issue": "The chart values are made up. The femur is about 48 cm and the stirrup about 0.3 cm, so the 1.0 value misrepresents the real ratio.",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Fact four: the largest bone is the femur, your thigh bone. The smallest is the stirrup, tucked inside your ear. Fact five: you are about one centimeter shorter",
+    "issue": "Two facts are crammed into one beat, and the shrinking-at-night fact gets no visual or explanation.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "babies are born with roughly 300 bones",
+    "issue": "The sources give both 300 and 350, and the script does not acknowledge the discrepancy.",
+    "beat": 2
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Fact two: more than half of your bones are in your hands, wrists, feet and ankles.",
+    "issue": "Three of the ten facts are about bone counts or bone location, which makes the list repetitive. Fact one is also already spoken in the hook.",
+    "beat": 2
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "So remember, your body is renewing, racing and surprising you every single second.",
+    "issue": "This is a generic summary, tacked onto the final fact, and it does not leave a memorable image.",
+    "beat": 9
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "It leaves the Heart, travels through the Body, and comes Back again",
+    "issue": "Odd capitalisation, copied from the diagram labels, makes the narration read awkwardly.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "Brain or senses facts, such as a nose able to recognise a trillion scents",
+   "Microbiome facts, such as bacteria in the belly button",
+   "Explanations of why each fact is true",
+   "Fewer bone-related repeats"
+  ],
+  "wrong_facts": [
+   "Femur 50 vs stirrup 1 chart values are invented",
+   "\"before you can blink\" is unsupported by the notes",
+   "Bones at birth: sources vary between 300 and 350"
+  ],
+  "would_publish": false,
+  "summary": "A serviceable, correctly counted listicle with a decent opening hook, but it leans on bone facts, includes an invented chart and an unsupported claim, and ends with a generic wrap-up. It is acceptable but not publishable as is.",
+  "mean": 3.33,
+  "cost_usd": 0.02885,
+  "tokens": [
+   6010,
+   1683
+  ]
+ }
+}

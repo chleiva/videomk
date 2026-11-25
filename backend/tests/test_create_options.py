@@ -263,7 +263,7 @@ def test_editor_view_reports_the_frame():
 def test_frame_prompt_is_empty_for_the_default_and_short_otherwise():
     assert plan_mod.frame_prompt(None) == "" and plan_mod.frame_prompt({}) == "" and plan_mod.frame_prompt({"aspect": "16:9", "platform": "other"}) == ""
     v = plan_mod.frame_prompt({"aspect": "9:16", "platform": "shorts"})
-    assert "Frame: vertical 9:16 for Shorts" in v and "hook in the first 3 seconds" in v and len(v) < 220
+    assert "Frame: vertical 9:16 for Shorts" in v and "hook in the first 3 seconds" in v and len(v) < 300
     assert "square 1:1" in plan_mod.frame_prompt({"aspect": "1:1"}) and "for YouTube" in plan_mod.frame_prompt({"platform": "youtube"})
     b = plan_mod.frame_prompt({"brief": {"audience": "kids", "tone": "calm", "summary": "x"}})
     assert "audience kids" in b and "tone calm" in b and "summary" not in b
@@ -303,12 +303,12 @@ def test_capabilities_shape_and_defaults(monkeypatch):
                                {"id": "1:1", "label": "Square", "ready": False, "beta": False}, {"id": "4:5", "label": "Portrait", "ready": False, "beta": False}]
     assert body["resolutions"] == [{"id": "720p", "label": "720p"}, {"id": "1080p", "label": "1080p"}]
     assert body["languages"] == [{"id": "en", "label": "English"}, {"id": "es", "label": "Español"}]
-    assert body["lengths"] == {"min_minutes": 1, "max_minutes": 12} and body["max_photos"] == 100 and body["intake"] is False
+    assert body["lengths"] == {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]} and body["max_photos"] == 100 and body["intake"] is False
     plat = {p["id"]: p for p in body["platforms"]}
-    assert set(plat) == set(fo.PLATFORM_IDS) and all(set(p) == {"id", "label", "aspect", "resolution", "note"} for p in plat.values())
+    assert set(plat) == set(fo.PLATFORM_IDS) and all(set(p) == {"id", "label", "aspect", "resolution", "note", "recommended_minutes", "max_minutes", "other_aspects"} for p in plat.values())
     assert [(plat[k]["aspect"], plat[k]["resolution"]) for k in ("youtube", "shorts", "tiktok", "reels", "instagram_feed", "linkedin", "x", "other")] == [
-        ("16:9", "1080p"), ("9:16", "1080p"), ("9:16", "1080p"), ("9:16", "1080p"), ("4:5", "1080p"), ("16:9", "1080p"), ("16:9", "1080p"), ("16:9", "1080p")]
-    assert "1:1" in plat["linkedin"]["note"] and plat["youtube"]["note"] == "Landscape 16:9 · 1080p"
+        ("16:9", "1080p"), ("9:16", "1080p"), ("9:16", "1080p"), ("9:16", "1080p"), ("4:5", "1080p"), ("4:5", "1080p"), ("16:9", "1080p"), ("16:9", "1080p")]
+    assert "1:1" in plat["linkedin"]["other_aspects"] and plat["youtube"]["note"] == "Landscape 16:9 · 1080p · about 3 min"
 
 
 def test_capabilities_follow_the_server_settings(monkeypatch):

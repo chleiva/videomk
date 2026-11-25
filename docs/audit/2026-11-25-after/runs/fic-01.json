@@ -1,0 +1,486 @@
+{
+ "id": "fic-01",
+ "category": "creative story / fiction",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "a short fable about a fox who wants to buy time from a clockmaker",
+ "great": "A real story with characters, a want, an obstacle, a twist and a moral that lands; vivid but economical; original rather than a generic fable template; no research needed.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:05:32",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "A fable about a fox and a clockmaker is an original creative piece, not a fact-dependent explainer, so no current or encyclopedic research is needed for an accurate script.",
+  "queries": [],
+  "searches": 0,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "inspiration-motivation"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 0,
+   "reads": 0,
+   "sources": 0,
+   "seconds": 1.8,
+   "cost_usd": 0.00021160000000000002,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 24.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 20.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 16.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 9,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "The Fox Who Tried to Buy Time",
+  "description": "A short fable about a fox who visits a clockmaker hoping to buy more time. It shows what time really is, and how to spend it well.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "105b6c1d",
+    "narration": "What would you pay for one more hour? A fox once asked that question out loud, and the only person who could answer was the old clockmaker at the edge of the forest.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "The Fox Who Tried to Buy Time",
+      "subtitle": "A short fable"
+     }
+    },
+    "chapter": "A strange request"
+   },
+   {
+    "id": "5bed7b28",
+    "narration": "The fox was always in a hurry. She ran to the river, ran to the hills, ran home again. And each night she sighed, because the day had simply not been long enough.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "fox running through forest",
+      "alt": "red fox moving through woodland"
+     }
+    }
+   },
+   {
+    "id": "cb6f2f67",
+    "narration": "One morning she heard clocks ticking from a small shop. Inside sat the clockmaker, an old owl with tiny glasses. The fox said, I would like to buy some time.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Narrator",
+        "text": "The fox entered a shop full of ticking clocks."
+       },
+       {
+        "speaker": "Fox",
+        "text": "I would like to buy some time, please."
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "82f029c8",
+    "narration": "The owl smiled. I do not sell time, he said. I only make clocks that count it. But I will trade you something. Give me what you do not need, and we will see.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "I do not sell time. I only make clocks that count it.",
+      "attribution": "The clockmaker, in the fable"
+     }
+    },
+    "chapter": "The offer"
+   },
+   {
+    "id": "c5710c7d",
+    "narration": "The fox thought hard. She offered her shiny acorns, then her softest feathers, then her best songs. The owl shook his head each time. None of these, he said, are the thing.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What the fox offered",
+      "items": [
+       "Shiny acorns",
+       "Soft feathers",
+       "Her best songs"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "gift",
+       "feather",
+       "music"
+      ]
+     }
+    }
+   },
+   {
+    "id": "a730394f",
+    "narration": "Then the owl opened a clock and showed her the gears inside. Every wheel turned at its own pace, and none could be rushed. Hurry a gear, he said, and the whole clock breaks.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Inside the clock",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Small gear",
+        "icon": "cog"
+       },
+       {
+        "id": "b",
+        "label": "Big gear",
+        "icon": "cog"
+       },
+       {
+        "id": "c",
+        "label": "Steady hands",
+        "icon": "clock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "turns"
+       ],
+       [
+        "b",
+        "c",
+        "moves"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "d6a6038b",
+    "narration": "The fox sat quietly for the first time in years. She heard the ticking, slow and even. For once she was not racing anywhere, and the afternoon seemed to stretch out around her.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "clock ticking close up",
+      "alt": "old clock pendulum swinging"
+     }
+    },
+    "sfx": "chime",
+    "chapter": "The lesson"
+   },
+   {
+    "id": "dd0227f4",
+    "narration": "Time cannot be bought, the owl said gently. It comes to everyone at the same pace. But you can choose how to spend it, and slowing down can make an hour feel larger.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Time cannot be bought, but it can be spent well.",
+      "emphasis": "spent well"
+     }
+    }
+   },
+   {
+    "id": "1ab32da6",
+    "narration": "The fox thanked him and walked home slowly. She watched the river, listened to the birds, and finished the day without a sigh. So this week, what will you slow down for?",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The fox's new day",
+      "items": [
+       "Walk, do not run",
+       "Watch the river",
+       "Listen to the birds",
+       "End the day without a sigh"
+      ],
+      "style": "spotlight",
+      "accent": "emerald",
+      "emphasis": 0
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "kids-family",
+   "inspiration-motivation"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 24.0,
+  "before_first_script_call_s": 13.4,
+  "script_s": 10.5
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "research": 0.00021,
+  "script_big": 0.03575,
+  "search_api": 0.0,
+  "total": 0.03625
+ },
+ "calls": {
+  "small": 3,
+  "tools": 1,
+  "big": 1
+ },
+ "tokens": {
+  "in": 13528,
+  "out": 1867
+ },
+ "rules": {
+  "length": {
+   "words": 294,
+   "expected_words": 267,
+   "ratio": 1.101,
+   "beats": 9,
+   "expected_beats": 9,
+   "est_speech_s": 131.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "What would you pay for one more hour? A fox once asked that question out loud, and the only person who could answer was the old clockmaker at the edge of the forest.",
+   "close_text": "The fox thanked him and walked home slowly. She watched the river, listened to the birds, and finished the day without a sigh. So this week, what will you slow down for?"
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "title": 1,
+    "clip": 2,
+    "dialogue": 1,
+    "quote": 1,
+    "bullets": 2,
+    "diagram": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.73,
+   "top_type": "clip",
+   "top_share": 0.22,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.11,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "A fable needs no research and nothing is false. The owl's gear line is a plausible metaphor, though the claim that 'slowing down can make an hour feel larger' is loosely stated."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a want, obstacles and a moral. The twist is weak: the owl simply declines and lectures. The offers of acorns, feathers and songs lead nowhere, and 'give me what you do not need' is never paid off."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and chaptered. The trade offer sets up an expectation that the gear lesson never resolves, and the moral is stated outright and repeated in beats 7-9."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is decent. The ending ('what will you slow down for?') is a generic call to action, and it follows a bullet list that restates the moral."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Gentle fable voice suited to a general audience, though it drifts toward a self-help register."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "A clip, a dialogue scene and a quote make a fair mix. Bullets for the fox's offers and the new day feel like a slide deck. The gear diagram with 'Steady hands' is a mismatch for a story. The quote scene duplicates the narration, and the kinetic text duplicates the moral."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It is a stock fable template: a wise old owl, 'slow down', and an obvious moral. The only fresh touch is the clock gears."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is a short fable about a fox and a clockmaker, in English, at about 270 words. The time purchase is not really attempted."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clean. Dialogue lacks quotation marks, and 'the only person who could answer' is odd for an owl."
+   },
+   "originality_note": {
+    "score": 3,
+    "reason": "n/a"
+   }
+  },
+  "defects": [
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Time cannot be bought, the owl said gently. It comes to everyone at the same pace.",
+    "issue": "The moral is a cliché stated flatly, with no twist or surprise.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "Give me what you do not need, and we will see.",
+    "issue": "Setup without payoff: the trade is never resolved, and the owl's rejection of the offers does not connect to the lesson.",
+    "beat": 4
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Steady hands",
+    "issue": "A technical gear diagram in a fable feels like a slide, and 'Steady hands' is an odd label for clock hands.",
+    "beat": 6
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Walk, do not run",
+    "issue": "A bullet list restates what was just narrated and reads like a slide deck instead of a story image.",
+    "beat": 9
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "So this week, what will you slow down for?",
+    "issue": "A generic direct-address ending that undercuts the fable's close.",
+    "beat": 9
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "the only person who could answer was the old clockmaker",
+    "issue": "'Person' is inconsistent with the owl character.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Hurry a gear, he said, and the whole clock breaks.",
+    "issue": "The claim is mechanically dubious and only loosely tied to the fox's problem.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "A real twist, such as the fox giving up something meaningful or the owl revealing a surprising trade",
+   "Vivid sensory detail and a distinctive voice",
+   "A subtler moral that is shown instead of stated",
+   "A payoff for the 'give me what you do not need' trade"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A tidy, readable fable with clear structure, but it is generic: the trade setup has no payoff, the moral is stated outright, and the bullet and diagram scenes feel like a slide deck. It is competent but would not stand out.",
+  "mean": 3.33,
+  "cost_usd": 0.019624,
+  "tokens": [
+   2892,
+   1384
+  ]
+ }
+}

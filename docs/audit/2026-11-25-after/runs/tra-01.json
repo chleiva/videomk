@@ -1,0 +1,624 @@
+{
+ "id": "tra-01",
+ "category": "travel / destination",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "great": "Day-by-day structure: Alfama, Belem (tower, pasteis), Baixa, Tram 28, LX Factory, Sintra optional; local food (bacalhau, pasteis de nata, ginjinha), practical tips; specific, not generic.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:03:31",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "Travel recommendations for Lisbon (attractions, restaurants, prices, opening hours, and transit or ticket changes) shift often, and a script for a 3-day trip should reflect current options rather than",
+  "queries": [
+   "best things to see Lisbon 3 days",
+   "Lisbon food guide traditional dishes",
+   "Lisbon itinerary 2026 tips"
+  ],
+  "searches": 3,
+  "reads": 0,
+  "iterations": 2,
+  "seconds": 7.5,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 16,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 9000,
+  "n_sources": 6,
+  "n_fetched": 12,
+  "fetched": [
+   "Lisbon Itinerary: 3, 4 and 5 Day Plans | Portugal Getaways",
+   "3 Day Lisbon Itinerary: What to See, Do & Eat",
+   "Lisbon Itinerary: 3 Perfect Days Curated by a Frequent Visitor | Condé Nast Traveler",
+   "What to Eat in Lisbon: 12 Must-Try Portuguese Dishes",
+   "Lisbon Food Guide: Best Dishes & Restaurants (2026)",
+   "Best Bacalhau & Codfish in Lisbon (2026 Guide)",
+   "Portuguese Food: What I’d Eat & What I’d Skip (From Someone Who Has Eaten Everything Here)",
+   "Portuguese Food: 25 Dishes to Try in Portugal (With Recipes)",
+   "Lisbon Tram Guide: Routes, Tram 28 & Tips (2026)",
+   "Tram 28 Lisbon Route: Stops, Tickets & Tips | Boost Portugal",
+   "Lisbon 3-Day Itinerary: Day-by-Day Guide for 2026",
+   "Francesca Giovinazzo & Tommaso Fogliata on Instagram: \"Lisbon Travel Guide 🇵🇹❤️🌞 (⬇️ Save for later) 📸 What to do: - Wander through the historic streets of…\""
+  ],
+  "research_agent_cost_usd": 0.0011142
+ },
+ "warnings": [],
+ "notes": "## Lisbon Itinerary: 3, 4 and 5 Day Plans | Portugal Getaways\nby João Machado Updated November 2026 • 10 min read ✈️ THE SHORT VERSION Three days in Lisbon cover the essentials: Alfama and the castle, Belém, and a day trip to Sintra. With four days you add Graça, Mouraria, the best viewpoints and Parque das Nações. Five days leave room for Cascais and the coast, and a slower last evening in the city. The plan below is built so the first three days work on their own. Stop after day 3, 4 or 5 depending on how long you have. [...] ## Shorter Versions of This Itinerary ### Lisbon in 3 Days Follow days 1, 2 and 3: Alfama, the castle and the Baixa, then Belém and Príncipe Real, then Sintra. You miss Mouraria, Parque das Nações and Cascais, but you see the main sights of the city and its most famous day trip. Colorful tins of traditional Portuguese canned sardines displayed in a Lisbon shop, representing Portugal’s long-established fish canning tradition.\n\n## 3 Day Lisbon Itinerary: What to See, Do & Eat\nHere are some of my favorite things we did, saw and ate during our short trip to Lisbon. Itinerary in Brief: Day 1: Arrive, tile shopping, food tour Day 2: Day trip to Sintra, dinner in Chiado Day 3: Castelo de São Jorge , Alfama, Belem sights Day 4: Depart ## Tile Shopping [...] Stay somewhere central. Chiado, Baixa, and Alfama are convenient areas for exploring many of Lisbon's major sights on foot. Don't skip a food or wine tour. It's a fun way to try Portuguese specialties while learning more about the city's food and culture. Plan at least one day for Sintra. It's an easy day trip from Lisbon and one of the highlights of visiting the area. [...] ## Alfama After visiting the castle, take some time to walk around the Alfama neighborhood. It’s right nearby, so it’s an easy area to explore while you’re already in this part of Lisbon. There are narrow streets, colorful buildings and plen\n\n## Lisbon Itinerary: 3 Perfect Days Curated by a Frequent Visitor | Condé Nast Traveler\nJump to: Where to stay Day 1: Campo de Ourique Day 2: Alfama Day 3: Belém ### Where to stay --- Create Your Own Lisbon Itinerary ## Day 1: Campo de Ourique ### Breakfast spot: French Toast at Heim Cafe Santos Pedro Guimaraes Pedro Guimaraes Pedro Guimaraes ### Heim Café With a vast menu to suit everyone, it’s a great place to fuel you up ready for your trip. For me, it’s always the savory French toast with green sauce. Read Full Review [...] ### Do Beco This padaria is always doing something new—a recent favorite of mine was the matcha, coconut, and passionfruit choux bun. Read Full Review ### Morning activity: Belém Tower Views Getty Michal Bajus/Unsplash ### Belém Tower This 16th-century fortress and UNESCO site is especially fascinating to see up close, while the nearby Mosterio de Jeronimos (monastery) is a great follow-up. Read Full Review ### Lunch spot: Sweet treats at Pastéis de \n\n## What to Eat in Lisbon: 12 Must-Try Portuguese Dishes\nNo trip to Lisbon is complete without tasting a warm pastel de nata. These small custard tarts are made with creamy egg yolk custard nestled in a crisp, flaky puff pastry shell. You’ll often find them dusted with cinnamon or powdered sugar and best enjoyed warm, straight from the oven. The original recipe comes from the Belém district’s famous Pastéis de Belém bakery, but countless cafés around the city offer equally delicious versions of this beloved treat. ## 2. Bacalhau à Brás [...] ## What Are the Best Foods in Lisbon? The best foods in Lisbon include pastéis de nata, bacalhau à Brás, grilled sardines, bifana sandwiches, octopus à lagareiro and arroz de marisco. But that’s just the start — every dish in this city tells a story. Whether you’re exploring the bustling Mercado da Ribeira or sipping ginjinha in a quiet square, Lisbon’s cuisine invites you to slow down and savor every bite\n\n## Lisbon Food Guide: Best Dishes & Restaurants (2026)\nLisbon’s food scene has a logic to it. The city eats well because it always had to — Atlantic fish on the doorstep, olive oil and wine from the interior, spices routed through the port from half the world. That history is still on the plate. Century-old tascas serve bacalhau from the same recipes their grandmothers used. Seafood arrives fresh from the Atlantic every morning. Pastéis de nata come out of the oven around the clock. And a younger generation of chefs is now pulling all of it apart [...] The Portuguese claim 365 ways to cook bacalhau — one for every day of the year. This salt-preserved cod has been the backbone of Portuguese cooking since the Age of Discovery, when it sustained sailors on long Atlantic voyages. In Lisbon, the most common preparations are Bacalhau à Brás (shredded cod stir-fried with eggs, onions, and matchstick potatoes), Bacalhau com Natas (cod baked in a ric\n\n## Best Bacalhau & Codfish in Lisbon (2026 Guide)\n| | | | --- | Dish | Texture & Flavor | Where to Find It | | Pastéis de Bacalhau | Crisp, deep fried fritter | Casa Portuguesa do Pastel de Bacalhau | | Bacalhau à Brás | Soft, shredded, scrambled with egg | Time Out Market (Miguel Castro e Silva) | | Bacalhau à Gomes de Sá | Baked, milk stewed, almost custardy | Restaurant D’Bacalhau | | Bacalhau à Narcisa | Fried, oniony, from Braga | Canto da Atalaia (Lisbon) or Casa do Povo (Braga day trip) | [...] Another one of my favorites! Bacalhau com natas: layers of shredded cod, thin-sliced potatoes, and onion under a blanket of cream sauce, then baked until the top turns golden and slightly crisp. It’s closer in spirit to a gratin than anything else on this list. We also like to eat it cold. ### Ti Natércia Address: Rua das Escolas Gerais, Alfama A small, family-run spot in Alfama that regularly gets called out for having one of the best ver\n\n## Portuguese Food: What I’d Eat & What I’d Skip (From Someone Who Has Eaten Everything Here)\nI’ll eat any of them. The three I order most: Bacalhau com natas — cod and potatoes baked in cream. The gateway version. Bacalhau à lagareiro — roasted, with an almost aggressive amount of olive oil. Bacalhau com broa — topped with cornbread crumb. The texture is the whole point. #### Go and look at the supermarket bacalhau [...] There’s much more where this came from in my full guide to Portuguese cakes and pastries. ## The Actual Advice: Go Deeper Into the Regions Here’s the thing that bothers me about most Portugal food posts, including, for a long time, this one. They list the same eight dishes. Pastel de nata, bifana, francesinha, bacalhau, sardines. And those dishes are on menus in every corner of the country, which is exactly why they’re on every list. They’re the safe ones. [...] Price is usually €1 to €2. Order a café (espresso) if you like it strong, or an abatanado for somethi\n\n## Portuguese Food: 25 Dishes to Try in Portugal (With Recipes)\nThe pastel de nata refers to egg tarts invented in the 17th century by monks at the Jeronimos Monastery in Lisbon. At the time, egg whites were used to starch clothing which left the monks with a surplus of egg yolks to be used in cakes and pastries. One of the pastries they invented was the pastel de nata. [...] ## PORTUGUESE SEAFOOD DISHES ### 9. Bacalhau Together with pastel de nata, bacalhau is perhaps the most well-known dish in Portuguese cuisine. It’s a Portuguese national dish and far and away the most commonly eaten type of fish in Portugal. [...] You can have pastel de nata anywhere in Portugal, but the most famous Portuguese custard tarts are from Pasteis de Belem in Lisbon. It’s home to the original Jeronimos Monastery recipe for these delicious egg tarts, a Portuguese recipe that’s remains unchanged even after 180 years.\n\n## Lisbon Tram Guide: Routes, Tram 28 & Tips (2026)\n| Tram | Route | Key Stops | Best for | ------| | 28E | Martim Moniz → Campo de Ourique | Alfama, Sé, Chiado, Estrela | Iconic experience, sightseeing | | 15E | Praça da Figueira → Belém | Cais do Sodré, Belém Tower | Practical transport to Belém | | 12E | Martim Moniz → Praça Luís de Camões | Sé, Portas do Sol, Graça (return) | Another vintage line through the old town | | 18E | Cemitério Ajuda → Cais do Sodré | Western neighborhoods | Locals, quiet route | [...] - Largo das Portas do Sol — Tram 28 climbing the hill with Alfama rooftops behind - Rua da Conceição — vintage trams approaching Sé Cathedral - Calçada do Combro — descending into Bica, classic frame - Praça Luís de Camões — Tram 28 at the edge of Bairro Alto - Estrela — turning point with the basilica behind For shots from inside the tram, sit on the right side travelling east-to-west on Tram 28 — the views over Alfama and the\n\n## Tram 28 Lisbon Route: Stops, Tickets & Tips | Boost Portugal\nThe Tram 28 Lisbon route runs 7 km from Martim Moniz to Campo de Ourique, Prazeres, and takes 45 to 50 minutes end to end. It passes through Graça, Alfama, Baixa, Chiado and Estrela. An on board ticket costs €3.30 in 2026, or €1.72 with Zapping credit on a Navegante card. Ride before 09:00 or after 19:",
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A three-day Lisbon plan covering Alfama and the castle, Belém, and a day trip to Sintra. Plus the pastries, cod and sardines you should taste along the way.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "49e34a01",
+    "narration": "Imagine a yellow tram rattling up a steep hill, a warm custard tart in your hand, and the Atlantic glittering below. Lisbon packs all of that into just three days.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "yellow tram Lisbon hill",
+       "pastel de nata warm",
+       "Lisbon rooftops river Tagus"
+      ],
+      "alt": "Lisbon tram, tart and rooftops"
+     }
+    },
+    "chapter": "Why Lisbon works in three days"
+   },
+   {
+    "id": "9f3e4bfd",
+    "narration": "Three days cover the essentials: Alfama and the castle, then Belém, then a day trip to Sintra. Each day works on its own, so you can adjust the order.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Your three days",
+      "steps": [
+       {
+        "label": "Alfama and the castle",
+        "detail": "Day 1"
+       },
+       {
+        "label": "Belém",
+        "detail": "Day 2"
+       },
+       {
+        "label": "Sintra",
+        "detail": "Day 3"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "6e111a38",
+    "narration": "Stay somewhere central. Chiado, Baixa and Alfama let you reach many major sights on foot, which saves time and tired legs.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "points",
+      "title": "Where to stay",
+      "caption": "Central, walkable areas",
+      "points": [
+       {
+        "name": "Chiado"
+       },
+       {
+        "name": "Baixa"
+       },
+       {
+        "name": "Alfama"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "8b514ce9",
+    "narration": "Start high, at Castelo de São Jorge. Afterwards, wander down into Alfama. Narrow streets, colorful buildings and tiny squares are all right next to the castle.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Castelo de São Jorge Lisbon",
+       "Alfama narrow streets",
+       "Alfama colorful buildings"
+      ],
+      "alt": "Castle and Alfama streets"
+     }
+    },
+    "chapter": "Day 1: Alfama and the castle"
+   },
+   {
+    "id": "4af015ba",
+    "narration": "Then ride Tram 28. It runs seven kilometers from Martim Moniz to Campo de Ourique, passing Graça, Alfama, Baixa, Chiado and Estrela.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "route",
+      "title": "Tram 28",
+      "caption": "About 45 to 50 minutes end to end",
+      "stops": [
+       "Martim Moniz",
+       "Alfama",
+       "Baixa",
+       "Chiado",
+       "Estrela",
+       "Campo de Ourique"
+      ]
+     }
+    }
+   },
+   {
+    "id": "0f399432",
+    "narration": "A ticket on board costs €3.30 in 2026. Ride before nine in the morning or after seven in the evening, when it is calmer.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "3.30",
+      "prefix": "€",
+      "label": "Tram 28 on-board ticket, 2026"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "073466bf",
+    "narration": "Day two heads west to Belém. Climb the sixteenth-century Belém Tower, a UNESCO site, then visit the nearby Jerónimos Monastery.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Belém Tower Lisbon",
+       "Jerónimos Monastery Lisbon"
+      ],
+      "alt": "Belém Tower and monastery"
+     }
+    },
+    "chapter": "Day 2: Belém and its tarts"
+   },
+   {
+    "id": "cbfe0faa",
+    "narration": "Now the reward. Monks at the Jerónimos Monastery invented the pastel de nata. Pastéis de Belém still uses the original recipe, unchanged after 180 years.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Pastéis de Belém custard tarts",
+      "alt": "Custard tarts at Pastéis de Belém",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "sparkle"
+   },
+   {
+    "id": "791a0d4f",
+    "narration": "Eat them warm, with cinnamon or powdered sugar. Tram 15E from Praça da Figueira takes you to Belém, so getting there is easy.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Pastel de nata",
+      "definition": "A small custard tart of creamy egg yolk custard in a crisp, flaky puff pastry shell.",
+      "origin": "Invented by monks at Jerónimos Monastery"
+     }
+    }
+   },
+   {
+    "id": "b14f06bb",
+    "narration": "Lisbon eats well because it always had to. Atlantic fish sits on the doorstep. That history is still on the plate.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "grilled sardines Lisbon",
+       "canned sardines Lisbon shop",
+       "Lisbon seafood market"
+      ],
+      "alt": "Lisbon seafood and sardines"
+     }
+    },
+    "chapter": "What to eat in Lisbon"
+   },
+   {
+    "id": "9741c775",
+    "narration": "Try bacalhau, salt-preserved cod. The Portuguese claim 365 ways to cook it, one for every day of the year.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "365",
+      "label": "ways the Portuguese claim to cook bacalhau"
+     }
+    }
+   },
+   {
+    "id": "207403f1",
+    "narration": "Start with bacalhau à Brás, shredded cod with eggs, onions and matchstick potatoes. Then bacalhau com natas, baked in cream like a gratin.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Dish",
+       "Texture"
+      ],
+      "rows": [
+       [
+        "Bacalhau à Brás",
+        "Soft, shredded, with e"
+       ],
+       [
+        "Bacalhau com natas",
+        "Creamy, baked, golden"
+       ]
+      ],
+      "title": "Cod to try"
+     }
+    }
+   },
+   {
+    "id": "1c04a6d1",
+    "narration": "Also taste grilled sardines, bifana sandwiches, octopus à lagareiro and arroz de marisco. A food tour is a fun way to try them all.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "More to taste",
+      "items": [
+       "Grilled sardines",
+       "Bifana sandwiches",
+       "Octopus à lagareiro",
+       "Arroz de marisco"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "fish",
+       "utensils",
+       "",
+       "soup"
+      ]
+     }
+    }
+   },
+   {
+    "id": "f8541e9f",
+    "narration": "On day three, take the easy day trip to Sintra. It is one of the highlights of visiting the area, so plan at least one full day.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Sintra Pena Palace",
+      "alt": "Pena Palace in Sintra",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Day 3: Sintra"
+   },
+   {
+    "id": "c6caa660",
+    "narration": "Back in the city, end with a slow evening and a small glass of ginjinha in a quiet square.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "ginjinha cherry liqueur Lisbon",
+      "alt": "Ginjinha in Lisbon",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "e2fc1619",
+    "narration": "So: castle and Alfama, Belém and tarts, then Sintra. Eat cod, sardines and custard tarts, and Lisbon will stay with you long after three days.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Climb the hills, ride the tram, and never skip a warm pastel de nata.",
+      "emphasis": "pastel de nata"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Lisbon Itinerary: 3, 4 and 5 Day Plans | Portugal Getaways",
+    "url": "https://portugalgetaways.com/en-us/destinations/portugal/lisbon/lisbon-itinerary",
+    "publisher": "portugalgetaways.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "3 Day Lisbon Itinerary: What to See, Do & Eat",
+    "url": "https://www.themainechick.com/post/lisbon",
+    "publisher": "themainechick.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What to Eat in Lisbon: 12 Must-Try Portuguese Dishes",
+    "url": "https://www.royalcaribbean.com/inspire/what-to-eat-in-lisbon",
+    "publisher": "royalcaribbean.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Lisbon Food Guide: Best Dishes & Restaurants (2026)",
+    "url": "https://www.lisbontourism.org/lisbon-food-guide",
+    "publisher": "lisbontourism.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Portuguese Food: 25 Dishes to Try in Portugal (With Recipes)",
+    "url": "https://www.willflyforfood.net/portuguese-food-guide",
+    "publisher": "willflyforfood.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Tram 28 Lisbon Route: Stops, Tickets & Tips | Boost Portugal",
+    "url": "https://boostportugal.com/en/blog/tram-28-lisbon-route",
+    "publisher": "boostportugal.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 41.4,
+  "before_first_script_call_s": 9.4,
+  "script_s": 32.0
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "research": 0.00111,
+  "script_big": 0.11146,
+  "search_api": 0.024,
+  "total": 0.13682
+ },
+ "calls": {
+  "small": 2,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 39248,
+  "out": 6016
+ },
+ "rules": {
+  "length": {
+   "words": 381,
+   "expected_words": 402,
+   "ratio": 0.948,
+   "beats": 16,
+   "expected_beats": 13,
+   "est_speech_s": 173.9,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 25,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Imagine a yellow tram rattling up a steep hill, a warm custard tart in your hand, and the Atlantic glittering below. Lisbon packs all of that into just three days.",
+   "close_text": "So: castle and Alfama, Belém and tarts, then Sintra. Eat cod, sardines and custard tarts, and Lisbon will stay with you long after three days."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "gallery": 4,
+    "steps": 1,
+    "map": 2,
+    "counter": 1,
+    "image": 3,
+    "definition": 1,
+    "stat": 1,
+    "table": 1,
+    "bullets": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 2,
+   "entropy": 3.08,
+   "top_type": "gallery",
+   "top_share": 0.25,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 6,
+   "ungrounded_numbers": [],
+   "entities": 22,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "day trip to sintra",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 6,
+   "fetched": 12,
+   "notes_len": 9000,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly traceable to the notes, but the 'Monks at Jerónimos invented' claim and 'unchanged after 180 years' are repeated uncritically, and 'Tram 28 ... passing Graça' is correct per the notes. The pastel de nata was invented before Pastéis de Belém began selling it in 1837, and 'Atlantic glittering below' is the Tagus estuary, which is loose."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers Alfama, Belém, Sintra, bacalhau, ginjinha and Tram 28, but skips Baixa and LX Factory, gives no real day-three content for Sintra, and names no restaurants or concrete costs and tips beyond the tram."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Day structure is clear, but food is split into its own section while Belém tarts are covered in day 2. Sintra gets one beat, and the ending recaps."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The sensory 'Imagine a yellow tram...' opening is decent, but the ending is a bare recap with a generic closing line."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear and suitable for US travelers; slightly brochure-like."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary sensibly (map, counter, table, gallery), but the table cell text 'Soft, shredded, with e' is truncated, the stat '365' is a folk claim and not a real number, and the same layouts repeat."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly the standard list of dishes and sights. Phrases like 'Lisbon eats well because it always had to' and 'One of the highlights' are generic, and the script offers few surprising specifics."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is a 3-day plan with sights and food, but it runs well under the roughly 402 words and has thin practical tips."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical, with short clear sentences; a few are choppy."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Soft, shredded, with e",
+    "issue": "Table cell text is truncated mid-word and would appear broken on screen.",
+    "beat": 12
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "On day three, take the easy day trip to Sintra. It is one of the highlights of visiting the area, so plan at least one full day.",
+    "issue": "The whole Sintra day is one vague beat with no palaces, transport or tips, even though it is a full day of the itinerary.",
+    "beat": 14
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Three days cover the essentials: Alfama and the castle, then Belém, then a day trip to Sintra.",
+    "issue": "Baixa, LX Factory and the city viewpoints are omitted from the plan; the tram is placed on Day 1 with no timing, so the day seems overloaded.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Monks at the Jerónimos Monastery invented the pastel de nata. Pastéis de Belém still uses the original recipe, unchanged after 180 years.",
+    "issue": "Marketing claims are stated as flat fact, with no hedge such as 'they say'.",
+    "beat": 8
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Lisbon eats well because it always had to. Atlantic fish sits on the doorstep.",
+    "issue": "Pads the food section with generic framing lifted from a source rather than adding concrete tips.",
+    "beat": 10
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "So: castle and Alfama, Belém and tarts, then Sintra.",
+    "issue": "The ending repeats the earlier overview instead of landing a new image or takeaway.",
+    "beat": 16
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Also taste grilled sardines, bifana sandwiches, octopus à lagareiro and arroz de marisco.",
+    "issue": "A bare list with no places or descriptions, and nothing on where to eat (Time Out Market, Ti Natércia and similar spots were in the notes).",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "Baixa and LX Factory",
+   "Specific restaurants or markets",
+   "Sintra details such as Pena Palace, the train from Rossio, and tickets",
+   "Viewpoints (miradouros)",
+   "Practical tips such as the Navegante card, hills, and pickpockets on Tram 28"
+  ],
+  "wrong_facts": [
+   "Pastel de nata origin and '180 years unchanged' are marketing claims, not firmly verified"
+  ],
+  "would_publish": false,
+  "summary": "A clean, readable three-day skeleton that stays close to its sources but is generic, short on specifics, and thin on Sintra, Baixa and LX Factory. A truncated table cell and a recap ending keep it from publishable quality.",
+  "mean": 3.11,
+  "cost_usd": 0.032382,
+  "tokens": [
+   7991,
+   1640
+  ]
+ }
+}

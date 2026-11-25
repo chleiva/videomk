@@ -209,7 +209,7 @@ def ground_check(plan: Dict[str, Any], texts: Sequence[str], ask_small: Ask, *, 
         user = (f"REQUEST: {request[:1500]}\n" + (f"BRIEF: {brief[:600]}\n" if brief else "") + f"\nRESEARCH NOTES (may be empty):\n{relevant_notes(texts, [x['narration'] for x in items]) or '(none)'}\n\n"
                 + "BEATS TO CHECK:\n\n" + "\n\n".join(lines) + "\n\nReturn the JSON now.")
         stats["calls"] = 1
-        d = _json_obj(ask_small(SYSTEM, user, 2400))
+        d = _json_obj(ask_small(SYSTEM, user, 4500))   # 14 rewritten beats took 2,380 tokens: a cap of 2,400 cut the answer off in the audit and the whole check came back empty
         by_beat = {int(r["beat"]): r for r in (d.get("beats") or []) if isinstance(r, dict) and str(r.get("beat", "")).lstrip("-").isdigit()}
         for x in items:
             r = by_beat.get(x["i"] + 1)

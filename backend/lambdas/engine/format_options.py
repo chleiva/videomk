@@ -27,17 +27,38 @@ LANGUAGE_LABELS = {"en": "English", "es": "Español"}   # every language the eng
 _RATIOS: Dict[str, Tuple[int, int]] = {"16:9": (16, 9), "9:16": (9, 16), "1:1": (1, 1), "4:5": (4, 5)}
 _SHORT = {"720p": 720, "1080p": 1080}
 
-# What each platform is for. The note is shown under the chips; `aspect`/`resolution` are the recommendation, never a restriction.
-PLATFORMS: List[Dict[str, str]] = [
-    {"id": "youtube", "label": "YouTube", "aspect": "16:9", "resolution": "1080p", "note": "Landscape 16:9 · 1080p"},
-    {"id": "shorts", "label": "YouTube Shorts", "aspect": "9:16", "resolution": "1080p", "note": "Vertical 9:16 · 1080p"},
-    {"id": "tiktok", "label": "TikTok", "aspect": "9:16", "resolution": "1080p", "note": "Vertical 9:16 · 1080p"},
-    {"id": "reels", "label": "Instagram Reels", "aspect": "9:16", "resolution": "1080p", "note": "Vertical 9:16 · 1080p"},
-    {"id": "instagram_feed", "label": "Instagram feed", "aspect": "4:5", "resolution": "1080p", "note": "Portrait 4:5 · 1080p"},
-    {"id": "linkedin", "label": "LinkedIn", "aspect": "16:9", "resolution": "1080p", "note": "Landscape 16:9 · 1080p (1:1 and 4:5 also work well)"},
-    {"id": "x", "label": "X", "aspect": "16:9", "resolution": "1080p", "note": "Landscape 16:9 · 1080p"},
-    {"id": "other", "label": "Just a video", "aspect": "16:9", "resolution": "1080p", "note": "Landscape 16:9 · 1080p"},
+LENGTH_PRESETS: List[float] = [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]   # minutes: 15 s, 30 s, 45 s, 1 min ... (the apps show them; credits are the started minutes, minimum 1)
+MIN_MINUTES, MAX_MINUTES = 0.25, 12
+
+
+def _p(id: str, label: str, aspect: str, other: List[str], minutes: float, max_minutes: Optional[float], dur: str) -> Dict[str, Any]:
+    shape = {"16:9": "Landscape", "9:16": "Vertical", "1:1": "Square", "4:5": "Portrait"}[aspect]
+    return {"id": id, "label": label, "aspect": aspect, "resolution": "1080p", "recommended_minutes": minutes, "max_minutes": max_minutes, "other_aspects": other,
+            "note": f"{shape} {aspect} · 1080p · about {dur}"}
+
+
+# What each platform is for. The note is shown under the chips; aspect/resolution/recommended_minutes are the RECOMMENDATION (a default in the app), never a restriction.
+# max_minutes is the platform's soft limit (for a hint in the app), null when there is none; sources and doubts: docs/CREATE_OPTIONS_FLOW.md.
+PLATFORMS: List[Dict[str, Any]] = [
+    _p("youtube", "YouTube", "16:9", ["1:1", "4:5"], 3, None, "3 min"),
+    _p("shorts", "YouTube Shorts", "9:16", ["1:1"], 0.75, 3, "45 s"),
+    _p("tiktok", "TikTok", "9:16", ["1:1"], 0.5, 30, "30 s"),
+    _p("reels", "Instagram Reels", "9:16", ["4:5", "1:1"], 0.5, 3, "30 s"),
+    _p("instagram_feed", "Instagram feed", "4:5", ["1:1", "9:16", "16:9"], 0.5, None, "30 s"),
+    _p("linkedin", "LinkedIn", "4:5", ["1:1", "16:9"], 1, 10, "1 min"),
+    _p("x", "X", "16:9", ["1:1", "9:16"], 0.75, 2.33, "45 s"),
+    _p("other", "Just a video", "16:9", ["9:16", "1:1", "4:5"], 3, None, "3 min"),
 ]
+# One compact style line per platform for the director (plan.platform_hint)
+PLATFORM_STYLE: Dict[str, str] = {
+    "youtube": "clear explanation with a strong hook and a steady pace",
+    "shorts": "hook in 2 seconds, fast cuts, one idea",
+    "tiktok": "hook in 2 seconds, fast cuts, casual tone",
+    "reels": "hook in 2 seconds, fast cuts, visual first",
+    "instagram_feed": "visual first, short and easy to watch muted, big text, captions on",
+    "linkedin": "professional but human tone, the insight first, no hype, captions on (many watch muted)",
+    "x": "blunt and punchy, the point in the first sentence, captions on",
+}
 PLATFORM_IDS = tuple(p["id"] for p in PLATFORMS)
 ASPECT_IDS = tuple(a["id"] for a in ASPECTS)
 RESOLUTION_IDS = tuple(r["id"] for r in RESOLUTIONS)
@@ -97,9 +118,9 @@ def capabilities() -> Dict[str, Any]:
     return {
         "aspects": [{"id": a["id"], "label": a["label"], "ready": a["id"] in ready, "beta": a["id"] in ready and a["id"] in beta} for a in ASPECTS],
         "resolutions": [dict(r) for r in RESOLUTIONS],
-        "platforms": [dict(p) for p in PLATFORMS],
+        "platforms": [{**p, "other_aspects": list(p["other_aspects"])} for p in PLATFORMS],
         "languages": [{"id": x, "label": LANGUAGE_LABELS[x]} for x in langs],
-        "lengths": {"min_minutes": 1, "max_minutes": 12},
+        "lengths": {"min_minutes": MIN_MINUTES, "max_minutes": MAX_MINUTES, "presets": list(LENGTH_PRESETS)},
         "max_photos": MAX_PHOTOS,
         "intake": os.environ.get("INTAKE_ENABLED") == "1",
     }

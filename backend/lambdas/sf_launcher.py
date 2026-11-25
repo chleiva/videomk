@@ -74,7 +74,7 @@ def request_region(event: Dict[str, Any]) -> Optional[str]:
 
 
 THEMES = ("midnight", "paper", "sunrise")
-MIN_MINUTES, MAX_MINUTES = 1.0, 12.0
+MIN_MINUTES, MAX_MINUTES = 0.25, 12.0   # 15 seconds to 12 minutes; credits are still the started minutes, minimum 1 (common/wallet.py)
 MAX_IMAGES_PER_MINUTE = 10.0   # the ceiling a request can ask for; the planner treats it as a maximum, never a target
 
 

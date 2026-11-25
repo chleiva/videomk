@@ -1,0 +1,473 @@
+{
+ "id": "tri-03",
+ "category": "trivia / listicle",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "5 weird facts about space",
+ "great": "Five correct, surprising space facts (e.g. day on Venus longer than year, neutron star density), concise.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:08:22",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Space trivia like these is timeless and well covered by encyclopedic sources, so no recent web search is needed for an accurate script.",
+  "queries": [
+   "weird facts about space",
+   "strange facts outer space"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "listicle-ranking",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 6.3,
+   "cost_usd": 0.0008934,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 35.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 26.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 22.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 18.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 14.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 9.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 9,
+  "grounding": {
+   "beats": 4,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5296,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine",
+   "Extreme Space Facts - Cloudfront.net",
+   "15 awe-inspiring space and astronomy discoveries | Royal Observatory",
+   "50 Fun Facts About Space for Kids",
+   "The 13 Most Fascinating Astronomy Major Facts | Florida Tech Ad Astra",
+   "Solar System: Facts - NASA Science"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine\nSpace is a vacuum and sound waves can’t travel through it in the same way they do on Earth, meaning you wouldn't be able to hear anything in space. But space isn’t entirely silent. Electromagnetic vibrations, like plasma waves or magnetic field interactions, can be translated into sound by instruments. NASA has even 'sonified' data from planets, stars, black holes and nebulae, turning invisible cosmic phenomena into eerie soundtracks. You can hear what this sounds like in the video above. [...] Image of Mercury taken by the MESSENGER spacecraft. Credit: NASA/JPL-Caltech - NASA/JHUAPL Technically, one Mercurian day lasts 59 Earth days, while a year lasts 88. However, due to Mercury’s very eccentric orbit and alignment with the Sun, the length of time from sunrise to sunrise, known as a ‘solar day’, is equal to 176 Earth days — twice as long as a Mercurian year. ## All the other planets co\n\n## Extreme Space Facts - Cloudfront.net\nNational Aeronautics and Space Administration www.nasa.gov Extreme Space Facts National Aeronautics and Space Administration JPL 400-1086 Rev. 1 8/10 Better stick with a rubber ducky Saturn is the only planet in our solar system that is less dense than water. It could float in a bathtub if anybody could build a bathtub big enough. To learn many more cool facts about the solar system, visit: solarsystem.nasa.gov 16 eXtreme space facts!\n\n## 15 awe-inspiring space and astronomy discoveries | Royal Observatory\nIn 2017, astronomer Robert Weryk, working in Hawaii, detected a strange object travelling through our Solar System. It was given the name ‘Oumuamua, from the Hawaiian for ‘scout’, after observations confirmed that it was of extrasolar origin. This bizarre, cigar-shaped object was unlike anything that had been seen before and its temporary visit to the Solar System sparked a fierce debate about its origins that continues to this day. [...] In 2019, astronomers combined data from the Kepler Space Telescope with new results from the European Space Agency’s Gaia mission, concluding that, on average, as many as one in six stars hosts an Earth-sized planet in its habitable zone. Potentially tens of billions of such worlds are strewn across the Milky Way. [...] In recent years, astronomers have identified a number of potentially diamond-rich exoplanet candidates – worlds orbiting stars other th\n\n## 50 Fun Facts About Space for Kids\n42. Shooting stars aren’t stars. They are tiny pieces of space dust that burn and glow. 43. Suction cups won’t work in outer space because there is no air. 44. The hottest stars in outer space are blue. 45. Pluto is smaller than the United States. 46. Astronauts have said space smells metallic or like seared steak. 47. One teaspoon of neutron star weighs the same as the combined weight of all the humans on Earth. 48. Neptune has only orbited around the Sun once since it was discovered in 1846. [...] 24. Your body would be stretched like spaghetti if you got too close to a black hole. 25. Neutron stars are the smallest stars in the universe and can spin 600 times per second. 26. If two kinds of metal touch each other in outer space, they will be welded together. 27. There is water floating in outer space. It is a huge water vapor cloud that contains more water than exists on Earth. 28. Th\n\n## The 13 Most Fascinating Astronomy Major Facts | Florida Tech Ad Astra\n10\\. Venus spins backward on its axis compared to all the other planets in our solar system. 11\\. The other galaxies in the universe are moving away from us, and some are millions of light-years away. 12\\. Neutron stars, which are leftover from the deaths of massive stars in supernova explosions, are so dense that just a bowlful of neutron star material has more mass than the Moon. [...] 2\\. The planet Saturn would float on water—it’s the only planet in our solar system that would. 3\\. The black hole in the center of the Milky Way galaxy is millions of times the mass of the Sun. 4\\. The planet with the hottest surface temperature is not Mercury, but Venus, because of the Greenhouse Effect of its atmosphere. 5\\. Earth is the only known planet with plate tectonics. [...] 6\\. The Sun’s core releases energy equivalent to 100 billion nuclear bombs per second, and that energy travels thousands\n\n## Solar System: Facts - NASA Science\nBeyond the fringes of the Kuiper Belt is the Oort Cloud. This giant spherical shell surrounds our solar system. It has never been directly observed, but its existence is predicted based on mathematical models and observations of comets that likely originate there. [...] Two NASA spacecraft launched in 1977 have crossed the termination shock: Voyager 1 in 2004 and Voyager 2 in 2007. Voyager 1 went interstellar in 2012 and Voyager 2 joined it in 2018. But it will be many thousands of years before the two Voyagers exit the Oort Cloud. ## Moons In addition to Earth's Moon, our solar system has hundreds of moons orbiting planets, dwarf planets, and asteroids. [...] The Oort Cloud is made of icy pieces of space debris - some bigger than mountains – orbiting our Sun as far as 1.6 light-years away. This shell of material is thick, extending from 5,000 astronomical units to 100,000 astronomical u",
+ "plan": {
+  "title": "5 Weird Facts About Space",
+  "description": "Five strange facts about space, from a planet that would float to a day longer than a year. A quick tour of the oddities in our solar system and beyond.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "00dc2107",
+    "narration": "Imagine a planet so light it could float in a bathtub. Space is full of facts that sound made up, but are real. Here are five. Number one: Saturn is less dense than water.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Saturn planet rings close up",
+      "alt": "Saturn and its rings",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Five strange facts"
+   },
+   {
+    "id": "0942a7a1",
+    "narration": "Number two: Mercury has a day longer than its year. It circles the Sun in 88 Earth days, but sunrise to sunrise takes 176. Number three: the hottest planet is Venus, not Mercury, thanks to its thick atmosphere.",
+    "scene": {
+     "type": "bar_race",
+     "props": {
+      "periods": [
+       "Start",
+       "Now",
+       "End"
+      ],
+      "series": [
+       {
+        "label": "Mercury year",
+        "values": [
+         88.0,
+         88.0,
+         88.0
+        ]
+       },
+       {
+        "label": "Solar day",
+        "values": [
+         176.0,
+         176.0,
+         176.0
+        ]
+       },
+       {
+        "label": "Mercury rotation",
+        "values": [
+         59.0,
+         59.0,
+         59.0
+        ]
+       }
+      ],
+      "unit": "days",
+      "title": "Mercury: year vs sunrise to sunrise"
+     }
+    }
+   },
+   {
+    "id": "317f1933",
+    "narration": "Number four: a single teaspoon of neutron star weighs as much as all the humans on Earth combined. These stars can also spin 600 times every second. Number five: space is silent, because sound cannot travel through a vacuum.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Extreme space",
+      "items": [
+       "Neutron star: a teaspoon outweighs humanity",
+       "Spins 600 times per second",
+       "Space has no sound",
+       "Vacuum carries no sound waves"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "star",
+       "clock",
+       "mic",
+       "space"
+      ]
+     }
+    }
+   },
+   {
+    "id": "45760b5e",
+    "narration": "Even so, NASA turns data from planets, stars and black holes into eerie sounds we can hear. The universe is stranger than fiction, so look up tonight and wonder what else is out there.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The universe is stranger than fiction.",
+      "emphasis": "stranger"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine",
+    "url": "https://www.skyatnightmagazine.com/space-science/facts-about-astronomy-space",
+    "publisher": "skyatnightmagazine.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Extreme Space Facts - Cloudfront.net",
+    "url": "https://d2pn8kiwq2w21t.cloudfront.net/documents/ss_extreme_poster.pdf",
+    "publisher": "d2pn8kiwq2w21t.cloudfront.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "50 Fun Facts About Space for Kids",
+    "url": "https://www.boredteachers.com/post/space-fun-facts-for-kids",
+    "publisher": "boredteachers.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The 13 Most Fascinating Astronomy Major Facts | Florida Tech Ad Astra",
+    "url": "https://news.fit.edu/academics-research/13-fascinating-astronomy-major-facts",
+    "publisher": "news.fit.edu",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "listicle-ranking",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 41.2,
+  "before_first_script_call_s": 35.0,
+  "script_s": 6.2
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "research": 0.00089,
+  "script_big": 0.03465,
+  "search_api": 0.016,
+  "total": 0.05179
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 1
+ },
+ "tokens": {
+  "in": 20741,
+  "out": 1601
+ },
+ "rules": {
+  "length": {
+   "words": 145,
+   "expected_words": 134,
+   "ratio": 1.082,
+   "beats": 4,
+   "expected_beats": 4,
+   "est_speech_s": 64.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 34,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 34,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Imagine a planet so light it could float in a bathtub. Space is full of facts that sound made up, but are real. Here are five. Number one: Saturn is less dense than water.",
+   "close_text": "Even so, NASA turns data from planets, stars and black holes into eerie sounds we can hear. The universe is stranger than fiction, so look up tonight and wonder what else is out there."
+  },
+  "variety": {
+   "distinct": 4,
+   "counts": {
+    "image": 1,
+    "bar_race": 1,
+    "bullets": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.0,
+   "top_type": "image",
+   "top_share": 0.25,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 3,
+   "ungrounded_numbers": [],
+   "entities": 5,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 5296,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The facts match the notes, but \"a teaspoon of neutron star weighs as much as all the humans\" is a shaky claim, and \"Mercury has a day longer than its year\" is true only for the solar day, which the script half-explains. Saturn is stated flatly, and \"can spin 600 times\" is hedged properly."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It delivers five facts, but they are mostly well-known ones. Beat 2 packs two facts into one beat and the Mercury explanation is thin. The bonus sonification fact is a nice touch."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The numbered list is clear, but the pacing is uneven: beat 2 carries two facts while beat 1 carries one. Fact 5 (silence) is then contradicted by the closing sonification, which muddies the takeaway."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "\"Imagine a planet so light it could float in a bathtub\" is a decent hook. The ending, \"stranger than fiction... look up tonight\", is a cliché."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is casual, brisk and suitable for a general audience."
+   },
+   "visuals": {
+    "score": 2,
+    "reason": "The bar_race for Mercury has identical values across every period, so it is a meaningless animation and misuses the chart. The bullets in beat 3 repeat the narration, and no scene shows Venus."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "These are the standard stock space facts, and the closing line is a cliché."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It gives five facts in about 1 minute, in English, close to the word target."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The grammar is fluent. Minor awkwardness remains in \"facts that sound made up, but are real\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "\"values\": [88.0, 88.0, 88.0]",
+    "issue": "The bar_race has constant values over time, so it conveys no race or change. A simple static comparison would do.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Mercury has a day longer than its year.",
+    "issue": "This is true only for the solar day. Mercury's rotation is 59 days, and the script does not clarify that.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Number five: space is silent",
+    "issue": "Fact five is undercut right away by the sonification line, which blurs the takeaway.",
+    "beat": 4
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "The universe is stranger than fiction, so look up tonight and wonder what else is out there.",
+    "issue": "This is a generic cliché ending.",
+    "beat": 4
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Space has no sound\", \"Vacuum carries no sound waves",
+    "issue": "The two bullets are redundant, and the list repeats the narration.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "a visual for Venus",
+   "a more surprising fact such as Venus's day being longer than its year",
+   "a clearer explanation of the Mercury solar day"
+  ],
+  "wrong_facts": [
+   "\"Mercury has a day longer than its year\" is true only for the solar day",
+   "the teaspoon-of-neutron-star claim is repeated from a kids' source; the figure is roughly billions of tonnes, so \"all humans combined\" is plausible but loose"
+  ],
+  "would_publish": false,
+  "summary": "The script is a clean, on-length list of five stock facts, but it is generic and unsurprising. The Mercury chart is a meaningless animation, and the ending is a cliché.",
+  "mean": 3.11,
+  "cost_usd": 0.021336,
+  "tokens": [
+   4548,
+   1224
+  ]
+ }
+}

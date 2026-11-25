@@ -1,0 +1,265 @@
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+already spent in saved results: $0.000 (cap $9.6)
+[1/40] sci-01   ok         run $0.078   running total $0.178   76s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=2 checked=2
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+[2/40] sci-03   ok         run $0.309   running total $0.594   104s
+[3/40] sci-02   ok         run $0.154   running total $0.622   106s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[4/40] how-01   ok         run $0.118   running total $0.761   140s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:SCENE_REPAIR rejected=1 repaired=1
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=2 checked=2
+[5/40] how-02   ok         run $0.152   running total $1.501   205s
+[6/40] his-01   ok         run $0.292   running total $1.639   210s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[7/40] his-02   ok         run $0.338   running total $1.680   219s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+[8/40] hea-01   ok         run $0.139   running total $1.999   285s
+[9/40] his-03   ok         run $0.153   running total $2.026   285s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[10/40] hea-03   ok         run $0.247   running total $2.385   325s
+[11/40] fin-01   ok         run $0.079   running total $2.420   328s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=3 sources=10
+WARNING:root:SCENE_REPAIR rejected=1 repaired=1
+[12/40] tec-01   ok         run $0.093   running total $2.947   390s
+[13/40] fin-02   ok         run $0.128   running total $2.980   391s
+WARNING:root:GROUNDING flagged=1 repaired=1 candidates=1 checked=1
+[14/40] fin-03   ok         run $0.395   running total $3.129   404s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=3 checked=1
+[15/40] new-01   ok         run $0.157   running total $3.689   453s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=1 checked=1
+[16/40] tec-03   ok         run $0.430   running total $3.883   469s
+[17/40] new-02   ok         run $0.216   running total $4.233   509s
+WARNING:root:SCENE_REPAIR rejected=1 repaired=0
+[18/40] cmp-01   ok         run $0.138   running total $4.384   530s
+[19/40] new-03   ok         run $0.192   running total $4.415   535s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[20/40] cmp-03   ok         run $0.033   running total $4.529   550s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=8
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=2 checked=2
+[21/40] cmp-02   ok         run $0.217   running total $4.748   594s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=1 checked=1
+[22/40] bio-02   ok         run $0.368   running total $5.269   617s
+[23/40] bio-01   ok         run $0.170   running total $5.405   633s
+[24/40] bio-03   ok         run $0.129   running total $5.530   644s
+[25/40] tra-01   ok         run $0.137   running total $5.713   671s
+[26/40] rec-01   ok         run $0.040   running total $5.737   672s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:GROUNDING flagged=1 repaired=1 candidates=1 checked=1
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=1162 searches=2 sources=8
+[27/40] tra-03   ok         run $0.415   running total $6.159   713s
+[28/40] pro-01   ok         run $0.105   running total $6.393   739s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=0 sources=0
+[29/40] fic-01   ok         run $0.036   running total $6.674   773s
+[30/40] rec-02   ok         run $0.176   running total $6.704   773s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=0 sources=0
+[31/40] pro-02   ok         run $0.155   running total $6.736   784s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:GROUNDING flagged=3 repaired=3 candidates=4 checked=4
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[32/40] mkt-01   ok         run $0.033   running total $6.836   800s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=4
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=14 checked=14
+[33/40] mkt-02   ok         run $0.064   running total $7.114   856s
+[34/40] fic-02   ok         run $0.159   running total $7.197   866s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[35/40] kid-01   ok         run $0.118   running total $7.237   870s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[36/40] kid-02   ok         run $0.240   running total $7.576   903s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[37/40] opi-02   ok         run $0.038   running total $7.599   909s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=2 error=FetchError
+[38/40] opi-01   ok         run $0.132   running total $7.708   942s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=3 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=8
+[39/40] tri-03   ok         run $0.052   running total $7.782   958s
+[40/40] tri-01   ok         run $0.150   running total $7.960   995s
+
+DONE. total spent $7.960 of $9.6

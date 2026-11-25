@@ -1,0 +1,537 @@
+{
+ "id": "rec-01",
+ "category": "recipe / cooking",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "shakshuka",
+ "great": "Ingredients with quantities, sauteing onion and pepper, spices (cumin, paprika), tomatoes, simmer, wells for eggs, cover and cook, finish with herbs, serving tips; accurate ordering and times.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:13:32",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Shakshuka is a traditional dish whose origins, ingredients, and preparation are timeless and well covered by encyclopedic sources, so no recent information is needed for an accurate explainer script.",
+  "queries": [
+   "shakshuka recipe history origins"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto",
+   "funny-light"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 4.9,
+   "cost_usd": 0.0008114,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 25.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 4,
+  "grounding": {
+   "beats": 10,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 1,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 5805,
+  "n_sources": 5,
+  "n_fetched": 6,
+  "fetched": [
+   "Chakchouka / Shakshuka — Definition, Origin, and Meaning",
+   "Shakshuka History: North Africa, Ottoman Spice Routes, and 2026 Brunch | The Foods That Shaped Us",
+   "Shakshuka — Meaning, Origin & Etymology | The Journey",
+   "A Thousand And One Shakshukas: How Did Shakshuka Take Over The Brunch Menus of the World?",
+   "This Food in History #13 Shakshuka — Uncultured Palate",
+   "Shakshouka - Wikipedia"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Chakchouka / Shakshuka — Definition, Origin, and Meaning\nThe tomato-and-egg form of the dish could only have developed after tomatoes and peppers reached North Africa following the sixteenth-century Columbian exchange. There is no evidence of an Ottoman egg-based predecessor; Ottoman şakşuka refers to a different, eggless vegetable dish. Because early home cooking was rarely recorded in print, the dish’s history is reconstructed through linguistic evidence, ingredient history, and comparative culinary scholarship rather than a single founding text. [...] ## Origins and early history Authoritative culinary reference works locate chakchouka/shakshuka in the Maghreb (North Africa). The strongest regional documentation points to Tunisia and Libya, within a wider North African cooking tradition of vegetable stews prepared in olive oil. In Tunisia, related egg-and-pepper stews such as ojja form a distinct but connected culinary category. [...] From \n\n## Shakshuka History: North Africa, Ottoman Spice Routes, and 2026 Brunch | The Foods That Shaped Us\n## Historical Timeline Post-1492 New World tomatoes and peppers reach the Ottoman and Maghreb worlds via Spanish and Ottoman trade, eventually reshaping regional egg dishes. Ottoman era (16th–19th c.) Egg-and-tomato/pepper dishes circulate across the Maghreb, Levant, and Yemen under various names; \"shakshuka\" stabilizes in North African usage. 1950s–1970s Yemeni Jewish immigrants bring shakshuka-style eggs to Israel; the dish takes root in simple roadside and home kitchens. 1990s–2000s [...] For The Foods That Shaped Us, shakshuka links chickpea, chili pepper, olive oil, harissa, and sumac — a cluster of Maghreb-Levantine ingredients that converged, post-Columbian Exchange, into one of the most traveled egg dishes of the 21st century. The honest origin is North African and Ottoman; the modern format is Israeli and global. [...] •Shakshuka could not exist in its current form before the Co\n\n## Shakshuka — Meaning, Origin & Etymology | The Journey\nJewish immigrants from North Africa — primarily Tunisia, Libya, and Morocco — brought shakshuka to Israel in the 1950s. The dish became associated with Israeli breakfast culture so thoroughly that many Israelis assumed it was Israeli. Haaretz columnist Ronit Vered documented its Libyan-Tunisian origins in the 2000s, to considerable surprise. [...] ### Today Shakshuka demonstrates how food travels faster than acknowledgment. Israeli cafés served it for decades before the world knew it existed. North African Jewish immigrants brought it; Israel made it famous; the internet spread it globally. The origin story arrived long after the recipe. [...] The dish's origin is contested in the way all beloved foods' origins are contested. Tunisia claims it as Tunisian. Libya claims it. The Ottoman Empire serves as a common ancestor — tomatoes and peppers arrived in the Middle East via the Ottomans fr\n\n## A Thousand And One Shakshukas: How Did Shakshuka Take Over The Brunch Menus of the World?\nIf you want to know the likely origin of modern shakshuka in the spicy form that most of us know and love , there’s a clue in the name, which comes from a Tunisian dialect word meaning ‘a mixture’ (although it’s also very close to a Turkish word, Şakşuka, meaning an oil-rich vegetable stew but since this stew contains no eggs, the similarity of the two words may be a coincidence). Tunisian artist and writer Rafram Chaddad has noted that shakshuka is a dish – or series of dishes - belonging to [...] There are regional variations and Libyan shakshukas are said to be especially spicy and may include a kind of dried lamb jerky known as ‘gideed’. In Tunisia, shakshuka is not always made from tomatoes. Other vegetables are used in season, ranging from artichokes to broad beans to carrots. The first written mention of shakshuka comes in 1894 in a French document describing it as a Tunisian dish\n\n## This Food in History #13 Shakshuka — Uncultured Palate\nThe vast majority of people report this as coming out of Northern Africa but from exactly which part and who seems to be a little up for discussion. Most things that I found named it as an Ottoman dish Şakşuka that was made of cooked vegetables and minced meat. I found a source that says the word shakshuka roughly can be translated to shaked or mixed up which is not technically wrong for how you make it. Some histories give its origins to Yemen while most give it to a Lybian-Tunisia background. [...] Rafram Chaddad, Tunisian food historian, attributes the dish to the early peoples in Tunisia called the Amazigh. The origins he gives have it growing in the ‘Amazigh triangle' which consists in the area spanning a small part of eastern Algeria bordering Tunisia, southern Tunisia, and the north western part of Libya bordering Tunisia. The Amazigh people are descended from stone age tribes and\n\n## Shakshouka - Wikipedia\n# Shakshouka | Shakshouka | | ---| | Alternative names | Shakshuka, chakchouka | | Type | Main dish | | Place of origin | Ottoman North Africa | | Main ingredients | Tomatoes, olive oil, peppers, onion, garlic, spices | Shakshouka\\[a]\\[b] is a Maghrebi\\\\\\ dish of eggs poached in a sauce of tomatoes, olive oil, peppers, onion, and garlic, commonly spiced with cumin, paprika, and cayenne pepper. Shakshouka is a popular dish throughout North Africa and the Middle East.\\ ## Etymology [...] Shakshuka is a word for \"mixture\" in Algerian Arabic, and \"mixed\" in Tunisian Arabic.\\\\ The Oxford English Dictionary describes the English version of the word as being borrowed from more than one origin: an onomatopoeic Maghribi Arabic word, related to the verb shakshaka meaning \"to bubble, to sizzle, to be mixed up, to be beaten together\", and the French word Chakchouka, which was borrowed into English i",
+ "plan": {
+  "title": "Shakshuka: How Eggs in Tomato Sauce Conquered Brunch",
+  "description": "Shakshuka is a North African dish of eggs poached in spiced tomato and pepper sauce. Follow its journey from the Maghreb to Israeli kitchens and brunch tables around the world.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "c0955e80",
+    "narration": "Eggs poached in a bubbling red sauce, served right in the pan. Millions of people think they know where it comes from. Many of them are surprised by the real answer.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "eggs simmering in tomato sauce",
+      "alt": "skillet of bubbling tomato sauce"
+     }
+    },
+    "chapter": "A dish with a secret"
+   },
+   {
+    "id": "03691189",
+    "narration": "This is shakshuka. Eggs gently cooked in a sauce of tomatoes, olive oil, peppers, onion and garlic, usually spiced with cumin, paprika and cayenne.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What goes in the pan",
+      "items": [
+       "Tomatoes and peppers",
+       "Olive oil, onion, garlic",
+       "Cumin, paprika, cayenne",
+       "Eggs, poached on top"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "hamburger",
+       "amphora",
+       "space",
+       "egg"
+      ]
+     }
+    }
+   },
+   {
+    "id": "6f53d383",
+    "narration": "The name is a clue. In Tunisian Arabic, shakshuka means mixed. In Algerian Arabic it means a mixture. It may also echo the sound of sizzling and bubbling.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Shakshuka",
+      "definition": "Means \"mixture\" or \"mixed\" in North African Arabic dialects, and may echo the sound of bubbling.",
+      "origin": "Maghrebi Arabic"
+     }
+    }
+   },
+   {
+    "id": "eb82898d",
+    "narration": "Most histories point to the Maghreb, especially Tunisia and Libya. Cooks there already made vegetable stews in olive oil. Eggs and tomato joined them later.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "regions",
+      "title": "Home of shakshuka",
+      "caption": "The Maghreb",
+      "regions": [
+       "Tunisia",
+       "Libya"
+      ]
+     }
+    },
+    "chapter": "Where it began"
+   },
+   {
+    "id": "b6df4fe2",
+    "narration": "Why later? Tomatoes and peppers come from the Americas. They only reached North Africa after the sixteenth century. So the dish as we know it could not exist before that.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "fresh red tomatoes and peppers market",
+      "alt": "tomatoes and peppers",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "da7a4eb5",
+    "narration": "There is a lookalike word. Turkish şakşuka is an oily vegetable dish, but it has no eggs. The similar name may simply be a coincidence.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Shakshuka",
+       "tagline": "Maghreb"
+      },
+      "b": {
+       "name": "Şakşuka",
+       "tagline": "Turkey"
+      },
+      "rows": [
+       {
+        "label": "Main base",
+        "a": "Tomato and pepper sauce",
+        "b": "Oily vegetables"
+       },
+       {
+        "label": "Eggs",
+        "a": "Yes",
+        "b": "No"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "094c8ba4",
+    "narration": "Tunisian cooks vary it with the season. Artichokes, broad beans or carrots can replace tomatoes. Libyan versions are said to be especially spicy, sometimes with dried lamb jerky.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "artichokes at market",
+       "broad beans in pod",
+       "carrots bunch",
+       "spicy red chili peppers"
+      ],
+      "alt": "seasonal vegetables for shakshuka"
+     }
+    }
+   },
+   {
+    "id": "b6994ade",
+    "narration": "First, tomatoes and peppers reach North Africa. Then, in the 1950s, immigrants bring it to Israel. Finally, in the 2000s, its origins are documented, to surprise, since many Israelis thought it was Israeli.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "The journey",
+      "events": [
+       {
+        "date": "1500s on",
+        "label": "Tomatoes and peppers reach North Africa"
+       },
+       {
+        "date": "1950s",
+        "label": "Immigrants bring it to Israel"
+       },
+       {
+        "date": "2000s",
+        "label": "Origins documented, to surprise"
+       }
+      ]
+     }
+    },
+    "sfx": "ding",
+    "chapter": "How it went global"
+   },
+   {
+    "id": "4c531312",
+    "narration": "From Israeli cafés, the internet carried it everywhere. Today it fills brunch menus around the world. Food, it turns out, often travels faster than credit.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "shakshuka in cast iron pan",
+       "brunch table with shakshuka",
+       "shakshuka with bread",
+       "cafe breakfast eggs tomato"
+      ],
+      "alt": "shakshuka served at brunch"
+     }
+    }
+   },
+   {
+    "id": "97659c1b",
+    "narration": "So next time you dip bread into that red sauce, remember. It is a North African classic, made famous by migration, and still bubbling after centuries.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A North African classic, carried across the world by the people who cooked it.",
+      "emphasis": "carried across the world"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Chakchouka / Shakshuka — Definition, Origin, and Meaning",
+    "url": "https://www.mychakchouka.com/post/shakshuka-chakchouka",
+    "publisher": "mychakchouka.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Shakshuka History: North Africa, Ottoman Spice Routes, and 2026 Brunch | The Foods That Shaped Us",
+    "url": "https://thefoodthatshapedus.com/food/shakshuka",
+    "publisher": "thefoodthatshapedus.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Shakshuka — Meaning, Origin & Etymology | The Journey",
+    "url": "https://www.etymology.life/word/shakshuka",
+    "publisher": "etymology.life",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "A Thousand And One Shakshukas: How Did Shakshuka Take Over The Brunch Menus of the World?",
+    "url": "https://kitchenbee.substack.com/p/a-thousand-and-one-shakshukas-how",
+    "publisher": "kitchenbee.substack.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Shakshouka - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Shakshouka",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "tutorial-howto",
+   "funny-light"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 45.9,
+  "before_first_script_call_s": 8.5,
+  "script_s": 37.4
+ },
+ "cost": {
+  "script_small": 0.00056,
+  "research": 0.00081,
+  "script_big": 0.13753,
+  "search_api": 0.016,
+  "total": 0.1549
+ },
+ "calls": {
+  "small": 5,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 50802,
+  "out": 6339
+ },
+ "rules": {
+  "length": {
+   "words": 275,
+   "expected_words": 267,
+   "ratio": 1.03,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 124.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Eggs poached in a bubbling red sauce, served right in the pan. Millions of people think they know where it comes from. Many of them are surprised by the real answer.",
+   "close_text": "So next time you dip bread into that red sauce, remember. It is a North African classic, made famous by migration, and still bubbling after centuries."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "clip": 1,
+    "bullets": 1,
+    "definition": 1,
+    "map": 1,
+    "image": 1,
+    "versus": 1,
+    "gallery": 2,
+    "timeline": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "gallery",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [],
+   "entities": 11,
+   "ungrounded_entities": [
+    "Americas"
+   ],
+   "ungrounded_share": 0.077,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 5,
+   "fetched": 6,
+   "notes_len": 5805,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 9 (gallery): its narration never says ['shakshuka with bread', 'cafe breakfast eggs tomato']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The claims match the notes (the Maghreb origin, the Tunisian and Algerian meanings, the 1950s move to Israel, the 2000s documentation). \"Tomatoes... after the sixteenth century\" is slightly off, since the notes say post-1492 and 1500s. \"Still bubbling after centuries\" is fine."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The request is for a dish, and the reviewer's note expects quantities, sautéing, wells for eggs, covering, timing, herbs and serving. The script has none of the method, only a one-line ingredient list and history."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chapters run in a clear order (definition, origin, spread, close) with no repetition."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook, \"Many of them are surprised by the real answer\", is a mild tease. The ending is decent but restates the point."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The voice is friendly, conversational and suited to a US general audience."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary and match the narration (map, versus, timeline, gallery). The gallery of artichokes and carrots is loosely relevant. A true cooking clip is missing."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The Şakşuka contrast, the lamb jerky and the \"travels faster than credit\" line are nice touches, but most of the content is standard background."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "The script is a history video, not a recipe. The viewer's simple request, \"shakshuka\", most likely expects how to make it. The length is roughly right."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Clean, fluent English with short sentences. \"Made famous by migration\" is a little vague."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Eggs gently cooked in a sauce of tomatoes, olive oil, peppers, onion and garlic, usually spiced with cumin, paprika and cayenne.",
+    "issue": "This is the only description of the dish. There are no quantities, no steps (sauté, simmer, make wells, cover and cook), no timing, and no herbs or serving tips.",
+    "beat": 2
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "So next time you dip bread into that red sauce, remember.",
+    "issue": "The viewer never learns how to make the dish. The video is history-heavy for a plain dish query.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "They only reached North Africa after the sixteenth century.",
+    "issue": "Imprecise. The notes say they arrived during the 1500s, after 1492. \"After the sixteenth century\" would mean the 1600s.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Artichokes, broad beans or carrots can replace tomatoes.",
+    "issue": "Fine, but the gallery shows chili peppers, which is a mismatch with the narration.",
+    "beat": 7
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Millions of people think they know where it comes from.",
+    "issue": "The hook is a generic teaser that promises a secret and delivers only a modest surprise.",
+    "beat": 1
+   }
+  ],
+  "missing": [
+   "Ingredient quantities",
+   "Sautéing onion and pepper step by step",
+   "Simmering the sauce and making wells for the eggs",
+   "Covering and cooking times",
+   "Finishing with herbs and feta, and serving with bread",
+   "Tips such as not overcooking the yolks"
+  ],
+  "wrong_facts": [
+   "\"after the sixteenth century\" is imprecise; tomatoes and peppers arrived during the 1500s"
+  ],
+  "would_publish": false,
+  "summary": "The script is well structured and accurate history, but it ignores the recipe that a dish request implies, with no method, quantities or timing. It reads as a history explainer and would disappoint most viewers.",
+  "mean": 3.33,
+  "cost_usd": 0.024658,
+  "tokens": [
+   5759,
+   1314
+  ]
+ }
+}

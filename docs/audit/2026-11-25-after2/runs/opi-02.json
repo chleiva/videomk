@@ -1,0 +1,560 @@
+{
+ "id": "opi-02",
+ "category": "opinion / essay",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "por qué deberíamos leer más",
+ "great": "Tesis clara y personal, argumentos concretos (empatía, concentración, vocabulario) con alguna evidencia verificable, ejemplos, cierre memorable; voz de ensayo, no lista genérica.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:14:17",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Explicar por qué leer más es una explicación atemporal sobre beneficios cognitivos, emocionales y educativos de la lectura, que no depende de información reciente.",
+  "queries": [
+   "beneficios de la lectura",
+   "por qué leer más"
+  ],
+  "searches": 3,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "inspiration-motivation",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 3,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 7.8,
+   "cost_usd": 0.0012566,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 38.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 4,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5181,
+  "n_sources": 3,
+  "n_fetched": 6,
+  "fetched": [
+   "Los numerosos beneficios de la lectura - Blog de RMHP",
+   "9 Beneficios de la lectura en la salud -canalSALUD",
+   "Reading for Pleasure and Brain Health: Cambridge Research",
+   "Observational study finds reading associated with 33% lower risk of Alzheimer's disease — Evidence Review | News | The Consensus Research Library",
+   "Reading activity prevents long-term decline in cognitive function in older people: evidence from a 14-year longitudinal study.",
+   "Lifelong Learning May Decrease Alzheimer's Risk | Rush"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Los numerosos beneficios de la lectura - Blog de RMHP\nPor qué deberías leer todos los días, según la ciencia · 1. Leer mejora tus habilidades comunicativas. · 2. Leer ejercita literalmente tu cerebro. · 3. Leer puede\n\n## 9 Beneficios de la lectura en la salud -canalSALUD\nMás allá de hacernos pasar un buen rato, la lectura tiene otros interesantes beneficios: estimula la concentración, memoria, atención…; reduce el estrés; fomenta la imaginación… Encontrar cada día un pequeño espacio para leer, 10-15 minutos, puede ser suficiente para empezar a instaurar el hábito. La biblioterapia es una disciplina incipiente que nos ayuda a afrontar las dificultades de la vida. Un libro también puede tener una función muy terapéutica. [...] Nos ayuda a evadirnos de las preocupaciones del día a día nos permite descansar y oxigenarnos. Se abre un “mundo paralelo” donde podemos tener otras vivencias diferentes y donde podemos relajarnos, ayudándonos a mejorar nuestro estado de ánimo. Al relajarnos también se estimula el sueño, reduciéndose el insomnio. La lectura puede considerarse un hábito de autocuidado, que mejora nuestra salud mental y física. ## 3. Aumenta la empatía\n\n## Reading for Pleasure and Brain Health: Cambridge Research\nAnother study discussed in the Cambridge review followed 1,962 adults older than 64 over 14 years. Participants who reported reading at least once a week had a significantly lower risk of cognitive decline at assessments conducted after six, ten, and fourteen years. The association appeared across different educational levels, suggesting that it was not limited to people with extensive formal education. [...] The distinction is crucial: the study did not show that reading alone reduces Alzheimer’s risk by 33%. The result reflects a combined measure of intellectual activity, not a specific reading routine or an absolute percentage-point reduction in risk. Nevertheless, the finding contributes to evidence associating intellectual engagement with cognitive health in later life. ### 2. Regular reading was associated with slower cognitive decline [...] One major investigation involved 10,243 \n\n## Observational study finds reading associated with 33% lower risk of Alzheimer's disease — Evidence Review | News | The Consensus Research Library\nA consistent body of evidence indicates that frequent engagement in reading and other cognitively stimulating activities is associated with a lower risk of developing Alzheimer's disease and cognitive impairment in later life. The new Cambridge study's finding of a 33% lower risk of Alzheimer's among regular readers is broadly in line with prior cohort and meta-analytic studies, which report similar magnitudes of risk reduction. [...] As rates of reading for enjoyment decline among younger generations, understanding its potential health benefits has become increasingly urgent. This study, conducted by researchers at the University of Cambridge in collaboration with The Queen's Reading Room, examines the connection between reading for pleasure and a range of cognitive, emotional, and health outcomes. The research is particularly timely, given the global rise in dementia rates and concerns\n\n## Reading activity prevents long-term decline in cognitive function in older people: evidence from a 14-year longitudinal study.\n# Reading activity prevents long-term decline in cognitive function in older people: evidence from a 14-year longitudinal study. Yu-Hung Chang, I-Chien Wu, Chao A Hsiung International psychogeriatrics · 2020-06-05 · 33(1):63-74 · DOI: 10.1017/S1041610220000812 · PMID: 32498728 · PMCID: PMC8482376 Publication type: Journal Article, Research Support, Non-U.S. Gov't ## Objective [...] ## Measurements Baseline reading frequencies were measured based on a scale of leisure activity. The Short Portable Mental Status Questionnaire was used to measure cognitive performance. We performed logistic regression to assess associations between baseline reading and later cognitive decline. Interaction terms between reading and education were to compare the reading effects on cognitive decline at different education levels. ## Results [...] ## Results After adjusting for covariates, those with higher read\n\n## Lifelong Learning May Decrease Alzheimer's Risk | Rush\nIt also includes subscribing to a newspaper, reading books and having library cards in middle age, reading, writing, and playing board games that are intellectually stimulating — like chess or solving puzzles, in late life. “In this study, we looked at sustained engagement over time — a general pattern of how engaged a person is with these cognitive enriching activities,” Zammit said. ## Could help fend off cognitive decline [...] A study by Rush researchers shows that lifelong learning is associated with lower Alzheimer's risk and a slower decline in cognition Brain Health & Conditions 2-minute read Feb. 13, 2026 Brain Health & Conditions 2-minute read Feb. 13, 2026 Share to: Older man reading Mentally stimulating activities such as reading, writing and learning a new language could affect your risk of developing Alzheimer’s disease, according to a study by researchers at Rush. [...] Re",
+ "plan": {
+  "title": "Por qué deberíamos leer más: lo que dice la ciencia",
+  "description": "Descubre cómo la lectura cuida tu cerebro, reduce el estrés y mejora tu comunicación. Basado en estudios sobre salud mental y envejecimiento cognitivo.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "c513e45f",
+    "narration": "¿Y si un hábito de solo diez minutos al día pudiera proteger tu cerebro durante décadas? No hace falta una pastilla ni un gimnasio. Basta con abrir un libro.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person reading book quietly",
+      "alt": "hands turning pages of a book"
+     }
+    }
+   },
+   {
+    "id": "631ada2f",
+    "narration": "Primero, la lectura ejercita literalmente tu cerebro. Estimula la concentración, la memoria y la atención. Igual que un músculo, la mente mejora cuando la usas con regularidad.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lo que entrena la lectura",
+      "items": [
+       "Concentración",
+       "Memoria",
+       "Atención",
+       "Imaginación"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "target",
+       "brain",
+       "eye",
+       "star"
+      ]
+     }
+    },
+    "chapter": "Un ejercicio para tu mente"
+   },
+   {
+    "id": "0ade7790",
+    "narration": "Segundo, leer mejora tus habilidades comunicativas. Cuanto más lees, más palabras conoces y mejor expresas lo que piensas, tanto al hablar como al escribir.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "De la lectura a la comunicación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Leer",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Más vocabulario",
+        "icon": "text-wrap"
+       },
+       {
+        "id": "c",
+        "label": "Mejor expresión",
+        "icon": "speech"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "9eb0ef32",
+    "narration": "Además, leer reduce el estrés. Un libro abre un mundo paralelo donde te evades de las preocupaciones del día, descansas y te relajas, y tu estado de ánimo mejora.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person reading on sofa relaxing",
+      "alt": "persona leyendo relajada",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Cuerpo y ánimo"
+   },
+   {
+    "id": "cc37f140",
+    "narration": "Al relajarte, también favoreces el sueño y reduces el insomnio. Por eso se considera la lectura un hábito de autocuidado, que mejora tu salud mental y también la física.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Leer como autocuidado",
+      "items": [
+       "Menos estrés",
+       "Mejor ánimo",
+       "Mejor sueño"
+      ],
+      "style": "spotlight",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "78015d2f",
+    "narration": "También aumenta la empatía. Al seguir a un personaje, te pones en su lugar y vives otras vidas. Es una forma silenciosa de entender mejor a las personas que te rodean.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Leer te permite vivir otras vidas y entender a los demás.",
+      "emphasis": "otras vidas"
+     }
+    }
+   },
+   {
+    "id": "9187864d",
+    "narration": "Ahora, lo más sorprendente. Un estudio siguió durante catorce años a 1.962 adultos mayores de sesenta y cuatro. Quienes leían al menos una vez por semana tuvieron menor riesgo de deterioro cognitivo.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "1,962",
+      "label": "adultos mayores de 64 años seguidos durante 14 años"
+     }
+    },
+    "chapter": "Protege tu cerebro"
+   },
+   {
+    "id": "7c4e53f2",
+    "narration": "El efecto apareció en distintos niveles educativos, así que no depende de haber estudiado mucho. Eso sí, hablamos de una asociación: no prueba que leer, por sí solo, evite el Alzheimer.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Qué dice el estudio",
+      "items": [
+       "Leer cada semana, menor deterioro",
+       "Vale para distintos niveles educativos",
+       "Es una asociación, no una garantía"
+      ],
+      "checked": [
+       true,
+       true,
+       false
+      ]
+     }
+    }
+   },
+   {
+    "id": "27956a83",
+    "narration": "Otras investigaciones apuntan igual: mantener la mente activa con libros, escritura o juegos como el ajedrez se asocia con menor riesgo de Alzheimer y un declive cognitivo más lento.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "older man reading book",
+       "chess game close up",
+       "library bookshelves",
+       "person writing notebook"
+      ],
+      "alt": "actividades que estimulan la mente"
+     }
+    }
+   },
+   {
+    "id": "ed8f8445",
+    "narration": "No necesitas leer horas. Encontrar un pequeño espacio cada día, de diez a quince minutos, puede ser suficiente para instaurar el hábito. Elige un libro que te guste y empieza esta noche.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Tu hábito de lectura",
+      "steps": [
+       {
+        "label": "Elige un libro que te guste"
+       },
+       {
+        "label": "Reserva 10-15 minutos"
+       },
+       {
+        "label": "Repite cada día"
+       }
+      ]
+     }
+    },
+    "chapter": "Empieza hoy"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Los numerosos beneficios de la lectura - Blog de RMHP",
+    "url": "https://www.rmhp.org/es/the-many-benefits-of-reading",
+    "publisher": "rmhp.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "9 Beneficios de la lectura en la salud -canalSALUD",
+    "url": "https://www.salud.mapfre.es/cuerpo-y-mente/habitos-saludables/lectura-beneficios-psicologicos",
+    "publisher": "salud.mapfre.es",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Reading for Pleasure and Brain Health: Cambridge Research",
+    "url": "https://blog.cognifit.com/reading-for-pleasure-may-help-protect-your-brain-cambridge-researchers-say",
+    "publisher": "blog.cognifit.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "inspiration-motivation",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 50.4,
+  "before_first_script_call_s": 12.4,
+  "script_s": 38.1
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "research": 0.00126,
+  "script_big": 0.13364,
+  "search_api": 0.024,
+  "total": 0.1592
+ },
+ "calls": {
+  "small": 3,
+  "tools": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 49051,
+  "out": 6662
+ },
+ "rules": {
+  "length": {
+   "words": 294,
+   "expected_words": 267,
+   "ratio": 1.101,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 132.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si un hábito de solo diez minutos al día pudiera proteger tu cerebro durante décadas? No hace falta una pastilla ni un gimnasio. Basta con abrir un libro.",
+   "close_text": "No necesitas leer horas. Encontrar un pequeño espacio cada día, de diez a quince minutos, puede ser suficiente para instaurar el hábito. Elige un libro que te guste y empieza esta noche."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "clip": 1,
+    "bullets": 2,
+    "diagram": 1,
+    "image": 1,
+    "kinetic_text": 1,
+    "counter": 1,
+    "checklist": 1,
+    "gallery": 1,
+    "steps": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "bullets",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 6,
+   "notes_len": 5181,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 5 (bullets): its narration never says ['Menos estrés', 'Mejor ánimo']",
+   "beat 9 (gallery): its narration never says ['chess game close up', 'library bookshelves', 'person writing notebook']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The hook promises 'proteger tu cerebro durante décadas' with ten minutes a day, which the notes don't support (the study is about weekly reading and is observational). The 1,962 adults over 64 and 14 years figures match the notes. The ten-to-fifteen-minute advice is for building a habit, not for brain protection."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers concentration, vocabulary, empathy, stress and one real study. The empathy and vocabulary claims have no evidence behind them, and there are no concrete examples such as a book or an experiment."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chapters run logically from mind to body to brain to action. The bulleted benefits feel listy, and beats 4 and 5 overlap."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is a decent hook but overpromises. The ending is a practical call to action ('empieza esta noche') rather than a memorable image."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is friendly and clear, but it reads as a generic health-benefits list, not the personal essay voice the brief asked for."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well and match the narration. The counter shows a real number, though it is shown as '1,962' with an English comma. The gallery queries fit the narration."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Phrases like 'ejercita literalmente tu cerebro' and 'mundo paralelo' are generic. There is no personal thesis, anecdote or surprising detail."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The language is right and the length is about right. The request implied a personal, essay-style argument, and this delivers a list of benefits."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and correct, with consistent use of tú. Some phrases are stiff, and there is the '1,962' formatting."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "¿Y si un hábito de solo diez minutos al día pudiera proteger tu cerebro durante décadas?",
+    "issue": "It overclaims causal protection and a duration the evidence doesn't give. The study is observational and about weekly reading; the script itself later warns it is only an association.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Igual que un músculo, la mente mejora cuando la usas con regularidad.",
+    "issue": "This is a common analogy, not supported by the notes, and presented as fact.",
+    "beat": 2
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Primero, la lectura ejercita literalmente tu cerebro.",
+    "issue": "This is a generic claim, and 'literalmente' is an overused filler word.",
+    "beat": 2
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Cuanto más lees, más palabras conoces y mejor expresas lo que piensas",
+    "issue": "There is no evidence or example for the vocabulary and empathy claims.",
+    "beat": 3
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "1,962",
+    "issue": "The counter uses English decimal formatting, while the narration and Spanish convention write 1.962.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Por eso se considera la lectura un hábito de autocuidado",
+    "issue": "It repeats the stress and wellbeing points from the previous beat.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "A personal thesis or voice",
+   "A concrete example, such as a book or an anecdote",
+   "Evidence for empathy, for example studies on fiction and theory of mind",
+   "Reading's decline among young people and attention in the age of screens",
+   "A memorable closing image"
+  ],
+  "wrong_facts": [
+   "The hook claims ten minutes a day protects the brain for decades; the notes only show an association with weekly reading."
+  ],
+  "would_publish": false,
+  "summary": "A clear, correct, well-ordered script that reads like a generic list of benefits, with an overclaiming hook and little evidence beyond one study. It lacks the personal essay voice and a memorable ending.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Ahora, lo más sorprendente.",
+     "problem": "It sounds slightly abrupt and formulaic.",
+     "better": "Pero lo que más sorprende viene ahora."
+    },
+    {
+     "quote": "instaurar el hábito",
+     "problem": "This is stiff and copied from the source text.",
+     "better": "crear el hábito"
+    },
+    {
+     "quote": "adultos mayores de sesenta y cuatro",
+     "problem": "The phrasing is ambiguous and clumsy.",
+     "better": "adultos de más de sesenta y cuatro años"
+    }
+   ]
+  },
+  "mean": 3.22,
+  "cost_usd": 0.0269,
+  "tokens": [
+   5610,
+   1568
+  ]
+ }
+}

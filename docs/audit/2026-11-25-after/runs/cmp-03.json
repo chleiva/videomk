@@ -1,0 +1,384 @@
+{
+ "id": "cmp-03",
+ "category": "comparison (A vs B)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "Kindle vs paper books",
+ "great": "Short fair comparison: portability, eye strain, battery, feel, price, environmental angle; takeaway by reader type.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:02:03",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Comparing Kindle e-readers with paper books is a timeless explanation of trade-offs (reading experience, portability, eye strain, cost, durability, environmental impact) that an encyclopedia covers we",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 4,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5179,
+  "n_sources": 3,
+  "n_fetched": 5,
+  "fetched": [
+   "E-reader",
+   "Ebook",
+   "Electronic paper",
+   "Flexible display",
+   "Phonics"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## E-reader\nAn e-reader, also called an e reader or e device, is a mobile electronic device that is designed primarily for the purpose of reading digital e-books and periodicals.\nAny device that can display text on a screen may act as an e-reader; however, specialized e-reader devices may optimize portability, readability, and battery life for this purpose. Their main advantage over printed books is portability: an e-reader is capable of storing thousands of books while weighing less than a single one. Another advantage is the convenience provided by add-on features.\n\n## Ebook\nAn ebook (short for \"electronic book\"), also spelled as e-book or eBook, is a book publication made available in electronic form, consisting of text, images, or both, readable on the flat-panel display of computers or other electronic devices. Although sometimes defined as \"an electronic version of a printed book\", some e-books exist without a printed equivalent. E-books can be read on dedicated e-reader devices, also on any computer device that features a controllable viewing screen, including desktop computers, laptops, tablets and smartphones.\nIn the 2000s, there was a trend of print and e-book sales moving to the Internet, where readers buy traditional paper books and e-books on websites using e-commerce systems. With print books, readers are increasingly browsing through images of the covers of books on publisher or bookstore websites and selecting and ordering titles online. The paper books are then delivered to the reader by mail or any other delivery service. With e-books, users can browse through titles online, select and order titles, then the e-book can be sent to them online or the user can download the e-book. By the early 2010s, e-books had begun to overtake hardcover...\n\n## Electronic paper\nElectronic paper or intelligent paper, is a display device that reflects ambient light, thereby mimicking the appearance of ordinary ink on paper. This is in contrast to conventional flat-panel displays, which require additional energy to emit their own light. This configuration may make them more comfortable to read, and provide a wider viewing angle than most light-emitting displays. An ideal e-paper display can be read in direct sunlight without the image appearing to fade.\nTechnologies include Gyricon, electrowetting, interferometry, and plasmonics.\nMany electronic paper technologies hold static text and images indefinitely without electricity. Flexible electronic paper uses plastic substrates and plastic electronics for the display backplane. Applications of e-paper include electronic shelf labels and digital signage, bus station time tables, electronic billboards, smartphone displays, and e-readers able to display digital versions of books and magazines.\n\n## Flexible display\nA flexible display or rollable display is an electronic visual display which is flexible in nature, as opposed to the traditional flat screen displays used in most electronic devices. In recent years there has been a growing interest from numerous consumer electronics manufacturers to apply this display technology in e-readers, mobile phones and other consumer electronics. Such screens can be rolled up like a scroll without the image or text being distorted. Technologies involved in building a rollable display include electronic ink, Gyricon, Organic LCD, and OLED.\nElectronic paper displays which can be rolled up have been developed by E Ink. At CES 2006, Philips showed a rollable display prototype, with a screen capable of retaining an image for several months without electricity.[1]  In 2007, Philips launched a 5-inch, 320 × 240-pixel rollable display based on E Ink’s electrophoretic technology. Some flexible organic light-emitting diode displays have been demonstrated.[2]The first commercially sold flexible display was an electronic paper wristwatch. A rollable display is an important part of the development of the roll-away computer.\n\n## Phonics\nPhonics is a method for teaching reading and writing to beginners. To use phonics is to teach the relationship between the sounds of the spoken language (phonemes), and the letters (graphemes) or groups of letters or syllables of the written language. Phonics is also known as the alphabetic principle or the alphabetic code. It can be used with any writing system that is alphabetic, such as that of English, Russian, and most other languages. Phonics is also sometimes used as part of the process of teaching people from China (and other foreign students) to read and write Chinese characters, which are not alphabetic, using pinyin, which is alphabetic.\nWhile the principles of phonics generally apply regardless of the language or region, the examples in this article are from General American English pronunciation. For more about phonics as it applies to British English, see Synthetic phonics, a method by which the student learns the sounds represented by letters and letter combinations, and blends these sounds to pronounce words.\nPhonics is taught using a variety of approaches:\nlearning individual sounds and their corresponding letters (e.g., the word cat has three letters and three sounds...",
+ "plan": {
+  "title": "Kindle vs Paper Books: Which Should You Read?",
+  "description": "A quick comparison of e-readers and printed books on portability, readability and convenience. Learn what makes each one worth picking up.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "a1586283",
+    "narration": "One small device can hold thousands of books and weigh less than a single one. So why do paper books still fill our shelves? Let's compare the two on what matters to a reader.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person reading paperback book",
+      "alt": "Person reading a paper book",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "The choice"
+   },
+   {
+    "id": "e62f9ba9",
+    "narration": "Start with portability. An e-reader stores thousands of books and weighs less than one. A paper book holds just one story, and the more you carry, the heavier your bag gets.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "E-reader",
+       "tagline": "Thousands of books"
+      },
+      "b": {
+       "name": "Paper book",
+       "tagline": "One story at a time"
+      },
+      "rows": [
+       {
+        "label": "Portability",
+        "a": "Thousands, lighter than one",
+        "b": "One book, one weight"
+       },
+       {
+        "label": "Power",
+        "a": "Holds text without electricity",
+        "b": "No device needed"
+       },
+       {
+        "label": "Buying",
+        "a": "Download online",
+        "b": "Delivered by mail"
+       }
+      ],
+      "verdict": "It depends on how and where you read"
+     }
+    },
+    "sfx": "ding",
+    "chapter": "Where each wins"
+   },
+   {
+    "id": "f97f40dd",
+    "narration": "Next, the screen. E-paper reflects ambient light, like ink on paper, so it can be comfortable to read, even in direct sunlight. Many e-paper screens hold a page without using electricity.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why e-paper reads like paper",
+      "items": [
+       "Reflects ambient light",
+       "Readable in direct sunlight",
+       "Holds text without electricity"
+      ],
+      "style": "icons",
+      "accent": "sky",
+      "icons": [
+       "sun",
+       "book",
+       "lock"
+      ]
+     }
+    }
+   },
+   {
+    "id": "401e1beb",
+    "narration": "So which one? If you travel, or want a whole library in your hand, pick an e-reader. If you love the feel of pages and a full shelf, pick paper. Either way, you're reading.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Travel light? Pick an e-reader. Love pages and shelves? Pick paper.",
+      "emphasis": "Pick"
+     }
+    },
+    "sfx": "chime",
+    "chapter": "Your pick"
+   }
+  ],
+  "sources": [
+   {
+    "title": "E-reader",
+    "url": "https://en.wikipedia.org/wiki/E-reader",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Ebook",
+    "url": "https://en.wikipedia.org/wiki/Ebook",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Electronic paper",
+    "url": "https://en.wikipedia.org/wiki/Electronic_paper",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "comparison-versus"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 12.8,
+  "before_first_script_call_s": 6.7,
+  "script_s": 6.1
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.03279,
+  "search_api": 0.0,
+  "total": 0.03306
+ },
+ "calls": {
+  "small": 4,
+  "big": 1
+ },
+ "tokens": {
+  "in": 13882,
+  "out": 1037
+ },
+ "rules": {
+  "length": {
+   "words": 134,
+   "expected_words": 134,
+   "ratio": 1.0,
+   "beats": 4,
+   "expected_beats": 4,
+   "est_speech_s": 59.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 34,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 35,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "One small device can hold thousands of books and weigh less than a single one. So why do paper books still fill our shelves? Let's compare the two on what matters to a reader.",
+   "close_text": "So which one? If you travel, or want a whole library in your hand, pick an e-reader. If you love the feel of pages and a full shelf, pick paper. Either way, you're reading."
+  },
+  "variety": {
+   "distinct": 4,
+   "counts": {
+    "image": 1,
+    "versus": 1,
+    "bullets": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.0,
+   "top_type": "image",
+   "top_share": 0.25,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "thousands of books and",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 5,
+   "notes_len": 5179,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Claims track the notes (thousands of books, e-paper reflects light, readable in sunlight, holds text without power). The comfort claim is hedged, but 'Kindle' in the title is not distinguished from e-readers generally."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Covers only portability and the e-paper screen. It omits price, environmental impact, battery life in practice, and feel. The brief's takeaway by reader type is reduced to two choices."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Order is clear: hook, portability, screen, pick. It is very short, and the screen beat overlaps the 'Power' row in the versus table."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening paradox is decent. The ending 'Either way, you're reading' is a mild, cliched close."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly and neutral, suited to a general US audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary. The versus table includes a 'Buying' row that the narration never mentions, and the 'Power' row is not spoken either. The 'Kinetic_text' scene simply repeats the narration."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Generic points taken straight from Wikipedia, with no surprising fact or concrete example."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "Misses requested points (eye strain nuance, battery, price, environment, feel). It is also only about 125 words, roughly on length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Clean, fluent English. 'One book, one weight' is slightly awkward."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Let's compare the two on what matters to a reader.",
+    "issue": "Promises a fair comparison but omits price, environmental angle, and battery. Feel is mentioned only in the verdict.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Buying",
+    "issue": "The versus row is not narrated and is unrelated to the spoken points.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "so it can be comfortable to read",
+    "issue": "Eye strain is not actually compared with paper. The claim is vague and hedged.",
+    "beat": 3
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Either way, you're reading.",
+    "issue": "A generic closing platitude.",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Many e-paper screens hold a page without using electricity.",
+    "issue": "Repeats the 'Power' row and bullet already shown. It does not address battery life, which is what viewers care about.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "Price: e-book and device cost versus book prices",
+   "Environmental footprint of device versus paper",
+   "Battery life in weeks",
+   "Tactile feel, no-screen focus, resale and lending",
+   "Recommendation by reader type (commuter, collector, heavy reader)"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, accurate but thin script that covers only portability and the e-paper screen. It omits price, environment, battery and feel, so it does not deliver the fair comparison requested.",
+  "mean": 3.0,
+  "cost_usd": 0.018834,
+  "tokens": [
+   4022,
+   1079
+  ]
+ }
+}

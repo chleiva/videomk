@@ -29,3 +29,26 @@ Both Lambdas get the same values from the same context keys, so they cannot disa
 
 ## Platform recommendations: what was verified
 Searched official pages 2026-11-25. YouTube Shorts: Google Ads help says 9:16 at 1080x1920 is recommended for Shorts (verified). LinkedIn: its ad help page lists 16:9, 1:1, 4:5 (recommended for vertical) and 9:16 as supported; for organic posts only third-party sources, so LinkedIn stays 16:9 with a note that 1:1 and 4:5 work. Instagram feed 4:5 1080x1350 and Reels/TikTok 9:16: only third-party guides found (no official page retrieved). X 16:9: not verified from an official page. Treat these as defaults, they are changeable in `engine/format_options.PLATFORMS`.
+
+
+## Platform length and format recommendations (2026-11-25, short videos)
+Each platform now carries `recommended_minutes` (a preset), `max_minutes` (soft limit or null), `other_aspects` and a note "Shape ratio · 1080p · about N". They are defaults for the app; the length the person picks always wins, and `frame_prompt` tells the director the platform's default and style in one line (never the limit).
+
+| Platform | Format | Recommended | max_minutes | Other aspects |
+|---|---|---|---|---|
+| YouTube | 16:9 1080p | 3 min | none | 1:1, 4:5 |
+| YouTube Shorts | 9:16 1080p | 45 s | 3 | 1:1 |
+| TikTok | 9:16 1080p | 30 s | 30 | 1:1 |
+| Instagram Reels | 9:16 1080p | 30 s | 3 | 4:5, 1:1 |
+| Instagram feed | 4:5 1080p | 30 s | none | 1:1, 9:16, 16:9 |
+| LinkedIn | 4:5 1080p | 1 min | 10 | 1:1, 16:9 |
+| X | 16:9 1080p | 45 s | 2.33 (2:20) | 1:1, 9:16 |
+| Just a video | 16:9 1080p | 3 min | none | 9:16, 1:1, 4:5 |
+
+Sources checked (searches of the official help centres, 2026-11-25) and doubts:
+* YouTube Shorts: help.google.com "Understand three-minute YouTube Shorts": vertical or square videos up to 3 minutes are Shorts (since 15 Oct 2024). Verified. 45 s is our editorial choice (the feed is built for under a minute; music licences allow up to 60 or 90 s).
+* Instagram Reels: the current help article says reels can be up to 20 minutes but reels over 3 minutes are not recommended to new audiences; an older help page and the Reels marketing page still say 3 minutes. We keep 3 as the soft limit because it is the recommendation boundary. Feed video has no limit we could confirm, so null.
+* TikTok: the support page says uploads can be up to 30 minutes (the in-app recorder offers 15 s, 60 s and 10 min). The owner's figure was 10 minutes; the official upload limit is higher, so `max_minutes` is 30. 720x1280 or higher is the stated minimum.
+* LinkedIn: the sources disagree. Help for Pages says up to 10 minutes and 1:2.4 to 2.4:1 (any ratio between); another help article says 15 minutes on desktop and 10 on the mobile app; the ads help recommends 4:5 for vertical and lists 16:9, 1:1, 4:5, 9:16 for ads, 15 to 30 seconds. We use 4:5 (most screen in the mobile feed), 1:1 and 16:9 as alternatives, and 10 minutes as the soft limit (the lower figure).
+* X: the help page says accounts without Premium can upload videos up to 140 seconds (2:20), 512 MB; aspect ratio 1:2.39 to 2.39:1. Ads: 2:20, recommending 15 s or less. Verified. Premium accounts can upload much longer videos, so `max_minutes` 2.33 is for standard accounts only.
+* Instagram feed 4:5 1080x1350 and 1080p everywhere remain third-party recommendations (no official page retrieved earlier). Retune in `engine/format_options.PLATFORMS`.

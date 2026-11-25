@@ -1,0 +1,543 @@
+{
+ "id": "how-02",
+ "category": "how-to / tutorial",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo empezar a correr si nunca he hecho ejercicio",
+ "great": "Plan realista para principiante (caminar/correr alternado, 3 veces por semana, 20-30 min), calzado, ritmo conversacional, progresión gradual, descanso, lesiones comunes, consulta médica si hay condiciones; motivador y práctico.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:54:57",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Cómo empezar a correr desde cero es una explicación atemporal sobre fisiología del ejercicio y progresión de entrenamiento, que no depende de información reciente. La enciclopedia basta para un guion ",
+  "queries": [
+   "cómo empezar a correr principiante",
+   "programa de running para principiantes"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto",
+   "health-wellbeing"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 56.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 52.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 48.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 47.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 43.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 39.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 6,
+  "grounding": {
+   "beats": 15,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 3688,
+  "n_sources": 3,
+  "n_fetched": 4,
+  "fetched": [
+   "Entrenamiento de resistencia",
+   "Entrenamiento de fuerza",
+   "Carrera a pie",
+   "Running Man"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 541 words but a 3-minute video needs about 402 (at most 422). Trim it: shorter sentences, fewer words per beat, drop the least important details; keep the hook, the key points and the ending, keep at least 13 beats, and do not go under 369 words"
+ ],
+ "notes": "## Entrenamiento de resistencia\nEl entrenamiento de resistencia es el acto de hacer ejercicio para aumentar la resistencia. El término entrenamiento de resistencia generalmente se refiere al entrenamiento del sistema aeróbico en oposición al sistema anaeróbico. La necesidad de resistencia en los deportes a menudo se predica como la necesidad de resistencia cardiovascular y muscular simple, pero el problema de la resistencia es mucho más complejo. La resistencia se puede dividir en dos categorías que incluyen: resistencia general y resistencia específica. Se puede demostrar que la resistencia en el deporte está estrechamente vinculada a la ejecución de habilidades y técnicas. Un atleta bien condicionado puede definirse como el atleta que ejecuta su técnica de manera consistente y efectiva con el menor esfuerzo.​ La clave para medir la resistencia es la frecuencia cardíaca, la potencia en el ciclismo y el ritmo en la carrera.​\n\n## Entrenamiento de fuerza\nEl ejercicio de fuerza, es el uso de la resistencia (como el levantamiento de pesas o la calistenia) para lograr la contracción muscular,​ y así incrementar la resistencia anaeróbica, la fuerza muscular y el tamaño de los músculos.\nEl entrenamiento de fuerza se basa en el principio fundamental de ejercitar repetidamente un grupo muscular. Esto se logra contrayendo los músculos durante el ejercicio y luego regresando a la posición inicial. Este proceso se puede repetir varias veces hasta que los músculos alcancen el punto de fatiga.​​ El entrenamiento de fuerza generalmente sigue el principio de sobrecarga progresiva (progressive overload), en el que los músculos se someten a una resistencia que aumenta gradualmente con el tiempo para estimular la adaptación y el crecimiento.​\nLas actividades de fortalecimiento muscular se asociaron con un riesgo entre un 10 % y un 17 % menor de mortalidad por todas las causas, enfermedades cardiovasculares (ECV), cáncer en general, y diabetes.​ Entre los beneficios del entrenamiento se incluyen la mejora del rendimiento físico, el control del movimiento, la velocidad al caminar, la independencia funcional, las capacidades cognitivas y la autoestima…\n\n## Carrera a pie\nLa carrera a pie es un proceso de locomoción terrestre que permite el movimiento a pie de forma veloz en muchas especies de animales. En los seres humanos existen aspectos generales de los movimientos de carrera aunque hay variaciones individuales en la técnica. \nComo deporte forma un conjunto de disciplinas del atletismo, donde se busca determinar cuál de los competidores corre determinada distancia en el menor tiempo. Las carreras se dividen en tres categorías: de velocidad, de mediofondo y de fondo. Las carreras de velocidad consisten en distancias de hasta 400m, de mediofondo hasta 3000m y de fondo entre 5000m y 42196m. Además, se utiliza el anglicismo running para referirse a la práctica deportiva-recreativa de esta actividad de distancias de fondo o mayores.\n\n## Running Man\nRunning Man (en hangul, 런닝맨; romanización revisada, Leonning Maen) es un espectáculo de variedades de Corea del Sur que se transmite desde el 11 de julio de 2010 a través de SBS. El programa forma parte de la formación de \"Good Sunday\".\nEl programa fue creado por Jo Hyo-jin, Kim Joo-hyung y Im Hyung-taek. El 11 de julio de 2020 el programa celebró su 10° aniversario.​\nEn julio de 2021 se anunció que el 11 de julio del mismo año el programa rompería el récord de ser el programa de variedades de televisión coreano de mayor duración en la historia.​ En agosto del mismo año, el programa había superado a Infinite Challenge de la MBC para convertirse en el programa de variedades coreano con mayor duración.​",
+ "plan": {
+  "title": "Cómo empezar a correr si nunca has hecho ejercicio",
+  "description": "Una guía sencilla para empezar a correr desde cero: cómo preparar el cuerpo, medir tu esfuerzo y avanzar poco a poco. Aprende a construir resistencia sin lesionarte ni desanimarte.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "dc7d22aa",
+    "narration": "¿Y si correr no fuera cuestión de talento, sino de empezar bien? Mucha gente lo intenta una vez, termina agotada en cinco minutos y abandona. Hoy vamos a evitar ese error desde el primer paso.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Empezar a correr desde cero",
+      "subtitle": "Un plan sencillo para quien nunca ha hecho ejercicio"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "El punto de partida"
+   },
+   {
+    "id": "7541a3ea",
+    "narration": "Primero, una idea que alivia. Correr es una forma natural de moverse: los seres humanos compartimos los rasgos generales del movimiento, aunque cada persona tiene su propia técnica. No necesitas copiar a nadie para empezar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person jogging park morning",
+      "alt": "runner in a park at sunrise"
+     }
+    }
+   },
+   {
+    "id": "b26222c1",
+    "narration": "Lo que sí necesitas es resistencia. Es la capacidad de mantener un esfuerzo durante más tiempo, y se entrena. Correr trabaja sobre todo el sistema aeróbico, el que usa oxígeno para darte energía de forma sostenida.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Resistencia",
+      "definition": "Capacidad que se desarrolla con el ejercicio para sostener un esfuerzo durante más tiempo, sobre todo con el sistema aeróbico."
+     }
+    }
+   },
+   {
+    "id": "c43c9fba",
+    "narration": "Piensa en tres ideas clave. Primera, empieza despacio. Segunda, mide tu esfuerzo. Tercera, aumenta poco a poco. Con estas tres reglas ya tienes la base de cualquier plan para principiantes.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Tres reglas para empezar",
+      "items": [
+       "Empieza despacio",
+       "Mide tu esfuerzo",
+       "Aumenta poco a poco"
+      ],
+      "style": "spotlight",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "ec0569d6",
+    "narration": "¿Cómo sabes si vas demasiado rápido? Los entrenadores miden la resistencia con tres referencias: la frecuencia cardíaca, la potencia en el ciclismo y el ritmo en la carrera. Para ti, lo más útil será el ritmo y cómo respiras.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "heart",
+        "label": "Frecuencia cardíaca"
+       },
+       {
+        "icon": "bike",
+        "label": "Potencia en ciclismo"
+       },
+       {
+        "icon": "clock",
+        "label": "Ritmo al correr"
+       }
+      ],
+      "title": "Cómo se mide la resistencia"
+     }
+    },
+    "chapter": "Cómo medir el esfuerzo"
+   },
+   {
+    "id": "e064335c",
+    "narration": "Una pista sencilla: si no puedes hablar con frases cortas mientras corres, vas demasiado rápido. Baja el ritmo, incluso hasta caminar. Terminar la sesión con ganas de repetir es mejor que terminar destrozado.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Si no puedes hablar mientras corres, ve más despacio.",
+      "emphasis": "más despacio"
+     }
+    }
+   },
+   {
+    "id": "64b04669",
+    "narration": "Por eso conviene alternar. Camina unos minutos para calentar, luego combina trote suave y caminata, y termina caminando otra vez. Así el cuerpo se adapta sin sufrir y tu cabeza asocia correr con algo posible.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Una sesión para principiantes",
+      "steps": [
+       {
+        "label": "Camina para calentar"
+       },
+       {
+        "label": "Alterna trote y caminata"
+       },
+       {
+        "label": "Termina caminando"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "72928263",
+    "narration": "Cuando termines, tu cuerpo ya ha empezado a adaptarse. Esa es la clave: el progreso no ocurre mientras sufres, sino cuando descansas después de un esfuerzo razonable. Por eso los días de descanso también forman parte del plan.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person stretching outdoors calm",
+      "alt": "relaxed stretching after exercise"
+     }
+    }
+   },
+   {
+    "id": "b7baa44c",
+    "narration": "Ahora, el principio que usa el entrenamiento de fuerza y que también te sirve a ti: la sobrecarga progresiva. Es aumentar la exigencia gradualmente con el tiempo, para que el cuerpo se adapte y se haga más fuerte.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Sobrecarga progresiva",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Esfuerzo moderado",
+        "icon": "play"
+       },
+       {
+        "id": "b",
+        "label": "Descanso",
+        "icon": "moon"
+       },
+       {
+        "id": "c",
+        "label": "Adaptación",
+        "icon": "heart"
+       },
+       {
+        "id": "d",
+        "label": "Un poco más",
+        "icon": "x-line-top"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "emerald"
+     }
+    },
+    "chapter": "Progresar sin lesionarte"
+   },
+   {
+    "id": "ff7760f2",
+    "narration": "En la práctica, eso significa añadir un poco más de trote cada semana, no cada día. Sube el tiempo o la distancia de forma pequeña. Si algo duele de verdad, para y descansa; el cansancio normal no es lo mismo que el dolor.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Antes de aumentar",
+      "items": [
+       "Termino las sesiones con energía",
+       "Puedo hablar mientras troto",
+       "Descanso entre sesiones",
+       "No siento dolor agudo"
+      ]
+     }
+    }
+   },
+   {
+    "id": "f3c5b424",
+    "narration": "Fortalecer los músculos también ayuda. Las actividades de fortalecimiento muscular se asociaron con un riesgo entre un diez y un diecisiete por ciento menor de mortalidad por todas las causas. Unas sentadillas y planchas pueden acompañar tu carrera.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "10-17%",
+      "label": "menos riesgo de mortalidad con fortalecimiento muscular"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "596fcf85",
+    "narration": "Además, el entrenamiento de fuerza mejora el control del movimiento, la velocidad al caminar, las capacidades cognitivas y la autoestima. Todo eso se nota al correr, porque un cuerpo más fuerte mantiene mejor la técnica.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Beneficios de ganar fuerza",
+      "items": [
+       "Control del movimiento",
+       "Velocidad al caminar",
+       "Capacidades cognitivas",
+       "Autoestima"
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "bbac4027",
+    "narration": "Un atleta bien condicionado es el que ejecuta su técnica de forma constante con el menor esfuerzo. Tú buscarás lo mismo: correr cada vez más cómodo, no más rápido. La eficiencia llega con la práctica repetida.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "Un atleta bien condicionado ejecuta su técnica de manera consistente y efectiva con el menor esfuerzo.",
+      "attribution": "Definición de entrenamiento de resistencia"
+     }
+    },
+    "chapter": "Hacia tu primera meta"
+   },
+   {
+    "id": "f7e50892",
+    "narration": "Cuando te sientas listo, ponte una meta. Las carreras de fondo van de cinco mil metros en adelante, así que cinco kilómetros es un objetivo clásico para empezar. Elige una fecha, apúntate y deja que te motive.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Del sofá a los 5 km",
+      "events": [
+       {
+        "date": "Semana 1",
+        "label": "Caminar y trotar suave"
+       },
+       {
+        "date": "Semana 4",
+        "label": "Más tiempo de trote"
+       },
+       {
+        "date": "Semana 8",
+        "label": "Trotar sin parar"
+       },
+       {
+        "date": "Meta",
+        "label": "Carrera de 5 km"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "37025768",
+    "narration": "Recuerda: empieza despacio, mide tu esfuerzo, descansa y aumenta poco a poco. Hoy no necesitas correr lejos, solo salir. Ponte unas zapatillas cómodas y da el primer paso; lo demás vendrá con constancia.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "running shoes on path",
+      "alt": "zapatillas de correr en un camino",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Entrenamiento de resistencia",
+    "url": "https://es.wikipedia.org/wiki/Entrenamiento_de_resistencia",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Entrenamiento de fuerza",
+    "url": "https://es.wikipedia.org/wiki/Entrenamiento_de_fuerza",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Carrera a pie",
+    "url": "https://es.wikipedia.org/wiki/Carrera_a_pie",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "tutorial-howto",
+   "health-wellbeing"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 77.0,
+  "before_first_script_call_s": 23.6,
+  "script_s": 53.4
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.15173,
+  "search_api": 0.0,
+  "total": 0.15201
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 38888,
+  "out": 7945
+ },
+ "rules": {
+  "length": {
+   "words": 541,
+   "expected_words": 402,
+   "ratio": 1.346,
+   "beats": 15,
+   "expected_beats": 13,
+   "est_speech_s": 239.7,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 35,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 33,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si correr no fuera cuestión de talento, sino de empezar bien? Mucha gente lo intenta una vez, termina agotada en cinco minutos y abandona. Hoy vamos a evitar ese error desde el primer paso.",
+   "close_text": "Recuerda: empieza despacio, mide tu esfuerzo, descansa y aumenta poco a poco. Hoy no necesitas correr lejos, solo salir. Ponte unas zapatillas cómodas y da el primer paso; lo demás vendrá con constanc"
+  },
+  "variety": {
+   "distinct": 13,
+   "counts": {
+    "title": 1,
+    "clip": 2,
+    "definition": 1,
+    "bullets": 2,
+    "icons": 1,
+    "kinetic_text": 1,
+    "steps": 1,
+    "diagram": 1,
+    "checklist": 1,
+    "stat": 1,
+    "quote": 1,
+    "timeline": 1,
+    "image": 1
+   },
+   "max_run": 1,
+   "entropy": 3.64,
+   "top_type": "clip",
+   "top_share": 0.13,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "aumenta poco a poco",
+    "count": 2
+   },
+   {
+    "phrase": "el entrenamiento de fuerza",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 3,
+   "fetched": 4,
+   "notes_len": 3688,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 9 (diagram): its narration never says ['Esfuerzo moderado', 'Descanso', 'Adaptación', 'Un poco más']",
+   "beat 14 (timeline): its narration never says ['Caminar y trotar suave', 'Más tiempo de trote', 'Trotar sin parar']"
+  ]
+ },
+ "judge_error": "judge answer unusable: Extra data: line 1 column 4231 (char 4230)"
+}

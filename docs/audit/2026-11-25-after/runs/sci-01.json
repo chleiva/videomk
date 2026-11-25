@@ -1,0 +1,552 @@
+{
+ "id": "sci-01",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "explain entropy",
+ "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:53:14",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Entropy is a timeless scientific concept with stable definitions in physics and information theory, so an encyclopedia source is sufficient and no recent information is needed.",
+  "queries": [
+   "entropy thermodynamics explanation",
+   "entropy second law of thermodynamics"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 41.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 37.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 32.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 31.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 23.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 15.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 10.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 3,
+    "retry_after": 6.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 5.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 2,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 11,
+  "grounding": {
+   "beats": 9,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2458,
+  "n_sources": 2,
+  "n_fetched": 2,
+  "fetched": [
+   "Entropy",
+   "Laws of thermodynamics"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Entropy\nEntropy is a thermodynamic state variable that quantifies the probabilistic distribution of accessible microstates in a system. The term and the concept are used in diverse fields, from classical thermodynamics (where it was first recognized), to the microscopic description of nature in statistical physics, and the principles of information theory. It has far-ranging applications in chemistry and physics, in biological systems and their relation to life, in cosmology, economics, and information systems including the transmission of information in telecommunication.\nEntropy is central to the second law of thermodynamics, which states that the entropy of an isolated system left to spontaneous evolution cannot decrease with time. As a result, isolated systems evolve toward thermodynamic equilibrium, where the entropy is highest. \"High\" entropy means that energy is more uniformly distributed or dispersed within a system, while \"low\" entropy means that energy is more unevenly distributed or concentrated at a specific point or points within a system. A consequence of the second law of thermodynamics is that certain processes are irreversible.\nThe thermodynamic concept was referred to by Scottish...\n\n## Laws of thermodynamics\nThe laws of thermodynamics are a set of scientific laws which define a group of physical quantities, such as temperature, energy, and entropy, that characterize thermodynamic systems in thermodynamic equilibrium. The laws also use various parameters for thermodynamic processes, such as thermodynamic work and heat, and establish relationships between them. They state empirical facts that form a basis of precluding the possibility of certain phenomena, such as perpetual motion. In addition to their use in thermodynamics, they are important fundamental laws of physics in general and are applicable in other natural sciences.\nTraditionally, thermodynamics has recognized three fundamental laws, simply named by an ordinal identification, the first law, the second law, and the third law. A more fundamental statement was later labelled as the zeroth law after the first three laws had been established.\nThe zeroth law of thermodynamics defines thermal equilibrium and forms a basis for the definition of temperature: if two systems are each in thermal equilibrium with a third system, then they are in thermal equilibrium with each other.\nThe first law of thermodynamics states that, when energy passes...",
+ "plan": {
+  "title": "Entropy: Why Time Only Runs One Way",
+  "description": "Entropy measures how spread out energy is within a system. This video explains the second law of thermodynamics and why some processes can never be undone.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "8fca2f05",
+    "narration": "Why can you scramble an egg, but never unscramble it? Nothing in the energy books forbids it. Yet it never happens. The answer is a quantity called entropy.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Why Can't You Unscramble an Egg?",
+      "subtitle": "Entropy and the arrow of time"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "A broken egg"
+   },
+   {
+    "id": "6079062a",
+    "narration": "Think of a tidy desk. There are very few ways to arrange it neatly, and countless ways to make it messy. Left alone, things drift toward the many messy arrangements.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "cluttered messy desk papers",
+      "alt": "scattered papers on a table"
+     }
+    }
+   },
+   {
+    "id": "256158b3",
+    "narration": "Scientists call each detailed arrangement a microstate. Entropy describes how many microstates a system can access. More ways to arrange the same thing means higher entropy.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A thermodynamic state variable that quantifies the distribution of accessible microstates in a system."
+     }
+    }
+   },
+   {
+    "id": "68ac7d9f",
+    "narration": "In physical terms, high entropy means energy is spread out evenly. Low entropy means energy is concentrated in one place, like a hot spot or a charged battery.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Low entropy",
+       "tagline": "Energy concentrated"
+      },
+      "b": {
+       "name": "High entropy",
+       "tagline": "Energy dispersed"
+      },
+      "rows": [
+       {
+        "label": "Energy",
+        "a": "Uneven, in one place",
+        "b": "Spread out evenly"
+       },
+       {
+        "label": "Arrangements",
+        "a": "Few",
+        "b": "Many"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f1e9e719",
+    "narration": "Watch what happens to a hot cup of coffee. It starts with uneven energy. Then energy spreads into the cool room, until everything sits at one temperature, in equilibrium.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Coffee cooling down",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Uneven energy",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Energy spreads",
+        "icon": "wind"
+       },
+       {
+        "id": "c",
+        "label": "Equilibrium",
+        "icon": "scale"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "heat flows"
+       ],
+       [
+        "b",
+        "c",
+        "settles"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "0ac81797",
+    "narration": "This is the second law of thermodynamics. In an isolated system left alone, entropy cannot decrease with time. Systems evolve toward equilibrium, where entropy is highest.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy never decreases.",
+      "emphasis": "never decreases"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "7c24ed63",
+    "narration": "A consequence is that certain processes are irreversible. The scrambled egg, the mixed cream, the cooled coffee. Going backward is not impossible by energy rules, just overwhelmingly unlikely.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "scrambled eggs in pan",
+       "cream swirling in coffee",
+       "steaming coffee cup"
+      ],
+      "alt": "everyday irreversible processes"
+     }
+    }
+   },
+   {
+    "id": "e700fd6e",
+    "narration": "The idea reaches far beyond kitchens. Entropy appears in chemistry, in living things, in cosmology, in economics, and in how information is sent through telecommunication.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "flask",
+        "label": "Chemistry"
+       },
+       {
+        "icon": "heart",
+        "label": "Life"
+       },
+       {
+        "icon": "star",
+        "label": "Cosmos"
+       },
+       {
+        "icon": "money",
+        "label": "Economics"
+       },
+       {
+        "icon": "phone",
+        "label": "Information"
+       }
+      ],
+      "title": "Where entropy shows up"
+     }
+    }
+   },
+   {
+    "id": "f49fd6b4",
+    "narration": "So entropy is not mysterious disorder. It counts the ways energy can be arranged, and nature drifts toward the most likely arrangement. Next time something cools or mixes, you are watching entropy rise.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy counts the ways energy can spread, and nature favors the most.",
+      "emphasis": "nature favors the most"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Entropy",
+    "url": "https://en.wikipedia.org/wiki/Entropy",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Laws of thermodynamics",
+    "url": "https://en.wikipedia.org/wiki/Laws_of_thermodynamics",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 67.6,
+  "before_first_script_call_s": 46.7,
+  "script_s": 21.0
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.07767,
+  "search_api": 0.0,
+  "total": 0.07793
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 25072,
+  "out": 3260
+ },
+ "rules": {
+  "length": {
+   "words": 253,
+   "expected_words": 267,
+   "ratio": 0.948,
+   "beats": 9,
+   "expected_beats": 9,
+   "est_speech_s": 114.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 33,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Why can you scramble an egg, but never unscramble it? Nothing in the energy books forbids it. Yet it never happens. The answer is a quantity called entropy.",
+   "close_text": "So entropy is not mysterious disorder. It counts the ways energy can be arranged, and nature drifts toward the most likely arrangement. Next time something cools or mixes, you are watching entropy ris"
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "clip": 1,
+    "definition": 1,
+    "versus": 1,
+    "diagram": 1,
+    "kinetic_text": 2,
+    "gallery": 1,
+    "icons": 1
+   },
+   "max_run": 1,
+   "entropy": 2.95,
+   "top_type": "kinetic_text",
+   "top_share": 0.22,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "entropy means energy is",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 2,
+   "notes_len": 2458,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Consistent with the notes and physics; \"Nothing in the energy books forbids it\" is loosely true, and the tidy-desk analogy leans on disorder, but there are no invented numbers."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers microstates, energy spreading, the second law, irreversibility and an example, but omits the arrow of time beyond the title, says nothing on why life doesn't violate the law (open vs isolated systems), and gives no Boltzmann or Clausius context."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Egg question, then microstates, then energy spread, then the second law, then irreversibility, then a takeaway, building logically; beat 8 is a brief list-like detour."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The unscrambling-an-egg hook is strong, and the ending gives a usable takeaway, though it is a bit summary-like."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Clear, conversational and suited to beginners."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Varied scene types that match the narration (definition, versus, diagram, gallery); the icons scene is generic and the star icon for cosmos is weak."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The egg, desk and coffee examples are standard; beat 8 is a generic list lifted from the notes."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "About 260 words for a 2-minute English video; it covers the main request but skips the life and arrow-of-time points the brief implies."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, natural, grammatical."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Entropy appears in chemistry, in living things, in cosmology, in economics",
+    "issue": "Mentions life only as a list item and never explains how living things coexist with the second law (open systems, exporting entropy).",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Why Time Only Runs One Way",
+    "issue": "The title promises the arrow of time, but the narration never explains it.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Think of a tidy desk. There are very few ways to arrange it neatly",
+    "issue": "This is the disorder analogy that the narration later disclaims, which makes the framing slightly inconsistent.",
+    "beat": 2
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Entropy appears in chemistry, in living things, in cosmology, in economics, and in how information is sent",
+    "issue": "A generic list with no concrete example.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Nothing in the energy books forbids it.",
+    "issue": "Vague phrasing, though energy conservation does permit it.",
+    "beat": 1
+   }
+  ],
+  "missing": [
+   "Why life doesn't violate the second law (open systems)",
+   "How the arrow of time follows from entropy",
+   "Why overwhelmingly unlikely: a numerical sense of scale or a shuffled-deck example",
+   "Brief history (Clausius, Boltzmann)"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, accurate beginner explanation with a good hook and sensible visuals. It stays generic and omits the arrow of time and the life question, so it falls short of a great answer.",
+  "mean": 3.89,
+  "cost_usd": 0.018974,
+  "tokens": [
+   3877,
+   1122
+  ]
+ }
+}

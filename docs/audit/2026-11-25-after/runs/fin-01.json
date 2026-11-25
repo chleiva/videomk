@@ -1,0 +1,696 @@
+{
+ "id": "fin-01",
+ "category": "personal finance",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "index funds vs a savings account: where should I put my savings?",
+ "great": "Different purposes (emergency fund vs long-term), inflation erodes cash, index funds diversified low cost but volatile, time horizon, emergency fund first; balanced, caveats, not personalised advice, numbers with sources or flagged as historical averages.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:57:58",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "Savings account rates and market conditions change often, so the script needs current figures to be accurate. The comparison itself is general, but today's rates and index fund performance may be newe",
+  "queries": [
+   "high yield savings account rates 2026",
+   "index fund vs savings account returns"
+  ],
+  "searches": 3,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 8.8,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "finance-business"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 8999,
+  "n_sources": 7,
+  "n_fetched": 11,
+  "fetched": [
+   "Best high-yield savings interest rates today, Wednesday, November 25, 2026: Earn up to 4.4% APY",
+   "10 Best High-Yield Savings Accounts Of 2026 (Up To 4.25% APY) – Forbes Advisor",
+   "Best Savings Account Rates in November 2026",
+   "How much money should you keep in a high-yield savings account?",
+   "7 Signs Your Savings Account Is Quietly Costing You Money",
+   "5 Investments That Have Been Beating Inflation - Yahoo Finance",
+   "The Stock Market Is Shaky Right Now. Here's Why I'm Not Worried.",
+   "Warren Buffett Said Stocks Are Better Than Bonds for Long-Term Investors. History Shows He Was Right.",
+   "Stock market today: Dow, S&P 500, Nasdaq futures fall ahead of inflation data",
+   "Stock market today: Dow, S&P 500, Nasdaq slip as hot CPI fuels rate hike odds, Nvidia stock sinks",
+   "Vanguard and Fidelity have a warning for retirement savers"
+  ],
+  "research_agent_cost_usd": 0.0013748000000000002
+ },
+ "warnings": [
+  "beat 10: checklist twice in a row"
+ ],
+ "notes": "## Best high-yield savings interest rates today, Wednesday, November 25, 2026: Earn up to 4.4% APY\n# Best high-yield savings interest rates today, Wednesday, November 25, 2026: Earn up to 4.4% APY. Today, **Wednesday, November 25, 2026**, the highest savings account rate available from our partners is **4.4%** APY. The average interest rate on a traditional savings account is only 0.39%, according to the FDIC. However, today's high-yield savings accounts pay around 4% APY. If you want to supercharge your savings, a high-yield savings account can offer a competitive interest rate to help your balance grow faster. However, not all banks offer high savings account rates, so shop around to find the most competitive savings interest rates available. | Bask Interest Savings Account | Up to 4.3% APY | For a limited time, earn a 0.4% APY Rate Boost totaling 4.3% APY by opening a new Bask Interest Savings Account and a Bask Interest Checking Account between October 1, 2026, and December 31, 20\n\n## 10 Best High-Yield Savings Accounts Of 2026 (Up To 4.25% APY) – Forbes Advisor\n# The Best High-Yield Savings Accounts Of 2026 (Up To 4.25% APY). ## Compare the Best High Interest Savings Accounts. Synchrony High-Yield Savings is a stand-alone savings account that offers a competitive interest rate, few fees or minimums and access to ATMs. Keep in mind, though, that Synchrony is an online-only bank and doesn’t offer a checking account. This combined checking and savings account has no fees and earns interest on both savings and checking balances. ​Happen Bank’s LevelUp savings account comes with an optional ATM card, making it a suitable choice for individuals seeking a high-earning savings account with easy access to funds. The account earns one of the highest APYs on this list and has no monthly fees or minimum deposit requirements. ​The Marcus by Goldman Sachs High-Yield Online Savings account is a suitable option for both new and established savers thanks to its\n\n## Best Savings Account Rates in November 2026\nAs of November 2026, the average APY for the top 1% of savings accounts is 4.05%, according to DepositAccounts.com. 1% top-yielding money-market accounts is 3.\n\n## How much money should you keep in a high-yield savings account?\n2. Best High-Yield Savings Accounts. # How much money should you keep in a high-yield savings account? There's no one-size-fits-all answer for how much money to keep in your high-yield savings account (HYSA), but there are some guidelines to follow. If you don't have an emergency fund, your HYSA is where you want to deposit (or start building) that fund. * **Competitive rates**: Banks reward you for leaving your money on deposit in an HYSA by paying higher rates than most traditional deposit accounts. In fact, the best high-yield savings accounts today offer 4% APY and up. *Read more:* *How much money should I have in an emergency savings account?*. Additionally, there are a few more considerations you should keep in mind when deciding how much money to keep in your HYSA. Credit card interest rates are so high, they'll eat up all the returns you earn on your HYSA balance, and then some.\n\n## 7 Signs Your Savings Account Is Quietly Costing You Money\n# 7 Signs Your Savings Account Is Quietly Costing You Money. - Banks rarely volunteer your rate, so look up your APY now; \"nobody's going to tap you on the shoulder\" when you're losing out. The account where you keep your savings can cost you money without a single charge on your statement. It sits buried in a disclosure you scanned when you opened the account, and your bank has no reason to bring it up again. An adviser on a February 2026 episode of *The Clark Howard Podcast* said \"nobody's going to tap you on the shoulder\" to tell you that you are losing out, because banks \"like that interest rate spread.\". That spread is the gap between what the bank earns on your deposit and what it pays you, so log in, find the annual percentage yield (APY), and write it down. FinanceBuzz did the digging for its 2026 Best of Banking Awards and keeps a running short list of the top-rated high-yield s\n\n## 5 Investments That Have Been Beating Inflation - Yahoo Finance\nS&P 500 Compound Annual Growth Rate (CAGR) per year: 9.5% Inflation-adjusted value in 2020: $15.7K Value in 2025: $19.6K Real total return over\n\n## The Stock Market Is Shaky Right Now. Here's Why I'm Not Worried.\nFor the first time in years, that same \"Total Conviction\" signal is flashing for a company 1/100th the size of Nvidia.* Continue ». The S&P 500 has generated an average annual total return of more than 10% since its inception in 1957, even as the U.S. endured ten official recessions and 11 bear markets. ## Should you buy stock in S&P 500 Index right now? Before you buy stock in S&P 500 Index, consider this:. The *Motley Fool Stock Advisor* analyst team just identified what they believe are the **10 best stocks** for investors to buy now… and S&P 500 Index wasn't one of them. if you invested $1,000 at the time of our recommendation, **you'd have $344,878**!* Or when **Nvidia** made this list on April 15, 2005... Now, it's worth noting *Stock Advisor's* total average return is 852% — a market-crushing outperformance compared to 208% for the S&P 500.\n\n## Warren Buffett Said Stocks Are Better Than Bonds for Long-Term Investors. History Shows He Was Right.\nMany people think of bonds as being \"less risky\" than stocks, and that can be true. *Missed AI's \"Act 1\"? Let's look at why Buffett said that stocks are a better buy than bonds for most long-term investors. He had made a friendly bet with an investment advisory firm, Protégé Partners, to see if professional hedge fund managers could outperform the **S&P 500** (SNPINDEX:^GSPC) for the next 10 years, starting in 2008. He believed that most professional money managers would fail to beat the S&P 500 for that long. All five of the professional hedge fund managers chosen by Protégé failed to beat the S&P 500. To fund the bet, Buffett and Protégé each bought a package of zero-coupon U.S. Treasury bonds worth $318,250 when purchased at the start of the bet (about 64% of face value) and would be worth $500,000 after 10 years (for a total of $1 million at the end of the bet).\n\n## Stock market today: Dow, S&P 500, Nasdaq futures fall ahead of inflation data\n# Stock market today: Dow, S&P 500, Nasdaq futures fall ahead of inflation data. US stock futures fell on Wednesday as investors braced for Personal Consumption Expenditures (PCE) data and monitored tech volatility ahead of the Thanksgiving holiday. Futures on the Dow Jones Industrial Average (YM=F) declined by 0.3%, while those on the S&P 500 (ES=F) slid by 0.9%. Contracts for the Nasdaq-100 (NQ=F) fell 1%. Markets started the day on a weaker footing after a sell-off in semiconductor stocks, with Nvidia (NVDA) shares losing nearly 6% Tuesday and continuing to decline on Wednesday. The focus on Wednesday turns to the latest PCE data and whether it shifts bets on the Federal Reserve's expected December rate hike. Core PCE, which excludes fuel and food and is the Fed's preferred inflation measure, is expected to tick up to 3.2% year over year. The stock and bond markets will be closed tomo\n\n## Stock market today: Dow, S&P 500, Nasdaq slip as hot CPI fuels rate hike odds, Nvidia stock sinks\n# Stock market today: Dow, S&P 500, Nasdaq slip as hot CPI fuels rate hike odds, Nvidia stock sinks. US stocks slipped Tuesday as investors digested a hotter-than-expected inflation report, cementing bets that the Federal Reserve will raise interest rates next month. The Dow Jones Industrial Average (^DJI) fell 0.3%, while the S&P 500 (^GSPC) decreased roughly 0.4% and the tech-heavy Nasdaq Composite (^IXIC) tumbled 0.7%. The Consumer Price Index, released on Tuesday morning, showed prices rose 0.4% in October from a month earlier, higher than the 0.3% economists were expecting but cooler than September's 0.6% gain. Traders now overwhelmingly expect the Fed to hike interest rates by 25 basis points, with a subset of Fed watchers expecting a 50 basis point jumbo hike. Nvidia stock dropped more than 5% on Tuesday after falling over 4% the day before. US stocks declined Tuesday after a hott\n\n## Vanguard and Fidelity have a warning for retirement savers\nFor retirees, these projections could translate to slower growth over time and less money in their retirement accounts if these predictions hold or decrease. ## What lower stock returns could mean for your retirement savings. These forecasts suggest that your retirement savings may grow more slowly over the next decade or two, and while this could change over time, it may be a good time to revisit your long-term retirement strategy. \"While the stock market's trajectory is relatively unpredictable, it is possible that if its returns fall below historical averages, savers could be surprised by the pace of their retirement cushion's growth,\" said Brianna Rodgers, director of investor education at",
+ "plan": {
+  "title": "Index Funds vs Savings Account: Where Should Savings Go?",
+  "description": "Compare a high-yield savings account with an index fund on safety, growth and time horizon. Learn which fits an emergency fund and which fits long-term goals.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "05e9c2b1",
+    "narration": "The average savings account pays just 0.39 percent. The best ones pay over ten times that. So where should your money actually sit: a savings account, or an index fund?",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "0.39%",
+      "label": "Average savings account rate, according to the FDIC"
+     }
+    },
+    "sfx": "ding",
+    "speaker": "narrator",
+    "chapter": "The decision"
+   },
+   {
+    "id": "e4aaee57",
+    "narration": "This is general information, not advice. The choice comes down to three things: how safe the money is, how fast it can grow, and when you will need it.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "lock",
+        "label": "Safety"
+       },
+       {
+        "icon": "rocket",
+        "label": "Growth"
+       },
+       {
+        "icon": "clock",
+        "label": "Timing"
+       }
+      ],
+      "title": "Three criteria"
+     }
+    }
+   },
+   {
+    "id": "51ffc858",
+    "narration": "First, savings. A high-yield savings account, called an HYSA, is an online account that pays far more than a traditional one. Today the top rate is 4.4 percent APY, which is the yearly rate including compounding.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "HYSA",
+      "definition": "A high-yield savings account: an account that pays a much higher interest rate than a traditional savings account.",
+      "example": "Top rate today: up to 4.4% APY"
+     }
+    },
+    "chapter": "The savings account"
+   },
+   {
+    "id": "685ab4a1",
+    "narration": "Compare the numbers. A traditional account averages 0.39 percent. High-yield accounts pay around 4 percent. The top one percent of accounts average 4.05 percent, according to DepositAccounts.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Savings rates, November 2026",
+      "labels": [
+       "Traditional",
+       "Top 1% average",
+       "Best rate"
+      ],
+      "values": [
+       0.39,
+       4.05,
+       4.4
+      ],
+      "unit": "%",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "880e7445",
+    "narration": "Banks rarely tell you your rate. One adviser said nobody is going to tap you on the shoulder. So log in, find your APY, and write it down.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "Nobody's going to tap you on the shoulder.",
+      "attribution": "Adviser on The Clark Howard Podcast, February 2026"
+     }
+    }
+   },
+   {
+    "id": "60e58925",
+    "narration": "Now the index fund. It holds a slice of many companies at once. The S&P 500 index has averaged more than 10 percent a year in total return since 1957.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "10",
+      "prefix": ">",
+      "unit": "%",
+      "label": "Average yearly total return of the S&P 500 since 1957",
+      "delta": "Past results"
+     }
+    },
+    "chapter": "The index fund"
+   },
+   {
+    "id": "64925d5c",
+    "narration": "That ride is bumpy. Over that time the market went through ten official recessions and 11 bear markets. Just this week, stocks slipped after a hotter inflation report, and Nvidia dropped more than five percent.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The cost of higher growth",
+      "items": [
+       "10 official recessions",
+       "11 bear markets",
+       "Stocks slipped on hot inflation data",
+       "Nvidia fell more than 5% in one day"
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "f53cd127",
+    "narration": "And the future may differ from the past. Vanguard and Fidelity forecasts suggest stock returns could fall below historical averages, so savings might grow more slowly than people expect.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Past returns are not a promise of future returns.",
+      "emphasis": "not a promise"
+     }
+    }
+   },
+   {
+    "id": "f322694a",
+    "narration": "Side by side, then. On safety, the savings account pays a set rate, while the index fund rises and falls. On growth, the index fund has historically paid more. On timing, savings suits short goals, and stocks suit long ones.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "High-yield savings",
+       "tagline": "Steady and predictable"
+      },
+      "b": {
+       "name": "Index fund",
+       "tagline": "Bumpy but higher growth"
+      },
+      "rows": [
+       {
+        "label": "Safety",
+        "a": "Set interest rate",
+        "b": "Value rises and falls"
+       },
+       {
+        "label": "Growth",
+        "a": "Around 4% APY today",
+        "b": "10%+ yearly historically"
+       },
+       {
+        "label": "Best timing",
+        "a": "Short-term goals",
+        "b": "Long-term goals"
+       }
+      ]
+     }
+    },
+    "chapter": "Side by side"
+   },
+   {
+    "id": "6720e308",
+    "narration": "Your emergency fund belongs in the savings account. If you do not have one yet, an HYSA is where to start building it. You need that cash steady and ready.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Savings account fits",
+      "items": [
+       "Emergency fund",
+       "Money needed soon",
+       "Cash you cannot risk losing"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2b250180",
+    "narration": "Money you will not touch for many years is where an index fund can fit. Time gives it room to recover from the bad years, which is why even Warren Buffett favored stocks for long-term investors.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Index fund fits",
+      "items": [
+       "Retirement far away",
+       "Goals many years out",
+       "Money you can leave alone"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cd7aea04",
+    "narration": "One more warning. Credit card interest is so high that it can eat all your savings returns and more. Paying that debt down often comes before either choice.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Start",
+        "kind": "start"
+       },
+       {
+        "id": "b",
+        "label": "High-interest card debt?",
+        "kind": "decision"
+       },
+       {
+        "id": "c",
+        "label": "Pay it down first",
+        "kind": "step"
+       },
+       {
+        "id": "d",
+        "label": "Emergency fund in HYSA",
+        "kind": "step"
+       },
+       {
+        "id": "e",
+        "label": "Long-term goals: index fund",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c",
+        "yes"
+       ],
+       [
+        "b",
+        "d",
+        "no"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "e"
+       ]
+      ],
+      "title": "A simple order of thinking"
+     }
+    },
+    "chapter": "What to do"
+   },
+   {
+    "id": "68a2e35f",
+    "narration": "So the answer is not one or the other. Many people use both: a high-yield savings account for safety and near-term needs, and an index fund for money with a long runway.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Match money to its job",
+      "nodes": [
+       {
+        "id": "m",
+        "label": "Your savings",
+        "icon": "banknote"
+       },
+       {
+        "id": "s",
+        "label": "High-yield savings",
+        "icon": "lock"
+       },
+       {
+        "id": "i",
+        "label": "Index fund",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "m",
+        "s",
+        "needed soon"
+       ],
+       [
+        "m",
+        "i",
+        "needed later"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "a4055bd6",
+    "narration": "If you need the money within a few years, pick the savings account. If you can wait a decade or more, an index fund may fit. Either way, check your rate today.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Soon means savings. Later means stocks. Check your rate today.",
+      "emphasis": "Check your rate"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Best high-yield savings interest rates today, Wednesday, November 25, 2026: Earn up to 4.4% APY",
+    "url": "https://finance.yahoo.com/personal-finance/banking/article/best-high-yield-savings-interest-rates-today-wednesday-november-25-2026-earn-up-to-44-apy-110042892.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Best Savings Account Rates in November 2026",
+    "url": "https://www.wsj.com/buyside/personal-finance/banking/savings-rates",
+    "publisher": "wsj.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How much money should you keep in a high-yield savings account?",
+    "url": "https://finance.yahoo.com/personal-finance/banking/article/how-much-money-in-hysa-214435626.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "7 Signs Your Savings Account Is Quietly Costing You Money",
+    "url": "https://finance.yahoo.com/markets/currencies/articles/7-signs-savings-account-quietly-105849192.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The Stock Market Is Shaky Right Now. Here's Why I'm Not Worried.",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/stock-market-shaky-now-heres-190500262.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Stock market today: Dow, S&P 500, Nasdaq slip as hot CPI fuels rate hike odds, Nvidia stock sinks",
+    "url": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-november-10-dow-sp-500-nasdaq-inflation-data-cpi-090627830.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Vanguard and Fidelity have a warning for retirement savers",
+    "url": "https://finance.yahoo.com/personal-finance/investing/article/vanguard-and-fidelity-have-a-warning-for-retirement-savers-195925771.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "finance-business"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 28.1,
+  "before_first_script_call_s": 11.6,
+  "script_s": 16.5
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "research": 0.00137,
+  "script_big": 0.05325,
+  "search_api": 0.024,
+  "total": 0.07892
+ },
+ "calls": {
+  "small": 3,
+  "tools": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 26624,
+  "out": 3355
+ },
+ "rules": {
+  "length": {
+   "words": 452,
+   "expected_words": 402,
+   "ratio": 1.124,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 201.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "The average savings account pays just 0.39 percent. The best ones pay over ten times that. So where should your money actually sit: a savings account, or an index fund?",
+   "close_text": "If you need the money within a few years, pick the savings account. If you can wait a decade or more, an index fund may fit. Either way, check your rate today."
+  },
+  "variety": {
+   "distinct": 12,
+   "counts": {
+    "stat": 1,
+    "icons": 1,
+    "definition": 1,
+    "chart": 1,
+    "quote": 1,
+    "counter": 1,
+    "bullets": 1,
+    "kinetic_text": 2,
+    "versus": 1,
+    "checklist": 2,
+    "flowchart": 1,
+    "diagram": 1
+   },
+   "max_run": 2,
+   "entropy": 3.52,
+   "top_type": "kinetic_text",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 6,
+   "ungrounded_numbers": [],
+   "entities": 6,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "a high yield savings",
+    "count": 2
+   },
+   {
+    "phrase": "high yield savings account",
+    "count": 2
+   },
+   {
+    "phrase": "the savings account if",
+    "count": 2
+   },
+   {
+    "phrase": "savings account if you",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 7,
+   "fetched": 11,
+   "notes_len": 8999,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core numbers (0.39% FDIC, 4.4% APY, 4.05% top 1%, >10% since 1957, 10 recessions, 11 bear markets) trace to the notes. But \"over ten times that\" compares the best HYSAs to the 0.39% average, and no inflation figure is given. \"Just this week\" is based on notes that mention a CPI report dated about Nov 10. The Buffett claim is also stretched beyond what the notes show."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the emergency fund, time horizon, volatility, and debt first. It omits inflation erosion, the real return of cash, index fund diversification and low cost, the 'time in market' evidence, and any figure for a typical drawdown."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear arc from criteria to savings, then index funds, then comparison, then action, with a clean closing rule. The side-by-side beat repeats earlier content, and the debt step is awkwardly placed near the end."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening stat (0.39% vs ten times that) is decent, but the question that follows is generic. The ending is a practical rule, 'Soon means savings. Later means stocks.', though the closing 'check your rate today' is a bit flat."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, clear and beginner-friendly, with a not-advice caveat and balanced framing."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary sensibly, and the chart uses real figures. The flowchart is mismatched to its narration, which only mentions card debt, and the counter scene shows only a '>10%'."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The Clark Howard quote and the bear market counts add some specificity, but most of the content is standard comparison material."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, US audience, balanced, includes a disclaimer and the emergency-fund-first point. The word count is probably near the target."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural, with short sentences. 'Savings might grow more slowly' in beat 8 is ambiguous, because it refers to stock returns."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Just this week, stocks slipped after a hotter inflation report, and Nvidia dropped more than five percent.",
+    "issue": "The CPI article source is dated Nov 10, so 'this week' is wrong for Nov 25. It also adds noisy day-to-day news that is irrelevant to a long-term comparison.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "which is why even Warren Buffett favored stocks for long-term investors",
+    "issue": "This is loosely supported. Buffett's cited view was stocks over bonds, and the 'time gives it room to recover' reasoning is not from the notes. The index fund aspect of the bet is also unexplained.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "So where should your money actually sit: a savings account, or an index fund?",
+    "issue": "Inflation erosion, a core point of the comparison, is never explained, even though the notes offer inflation-adjusted S&P figures. The script also omits index fund diversification and low fees.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Vanguard and Fidelity forecasts suggest stock returns could fall below historical averages, so savings might grow more slowly than people expect.",
+    "issue": "It is unclear whether 'savings' means retirement savings or savings accounts, which muddles the point.",
+    "beat": 8
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "One more warning. Credit card interest is so high that it can eat all your savings returns and more.",
+    "issue": "The full flowchart is shown but the narration covers only the first node. The viewer sees steps that are never spoken.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Side by side, then. On safety, the savings account pays a set rate",
+    "issue": "This recaps what was just covered, and beats 10 and 11 repeat the short-term vs long-term idea again, so the script circles the same point.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "10%+ yearly historically",
+    "issue": "The comparison ignores that the 10% is a nominal long-run average and not guaranteed. The 'bumpy' warning also lacks a concrete drawdown figure.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Inflation erodes cash, and real returns of savings vs stocks",
+   "Index funds are diversified and low cost, with expense ratios",
+   "A typical size of market drops (e.g. -30% or more) to make the risk concrete",
+   "Rule of thumb of 3-6 months of expenses for an emergency fund",
+   "Savings account rates vary and can fall; FDIC insurance up to $250,000",
+   "Taxes or retirement accounts such as a 401(k) or IRA"
+  ],
+  "wrong_facts": [
+   "'Just this week' for stock news is stale, since the CPI article is from around Nov 10.",
+   "'Over ten times that' compares the best HYSAs to the 0.39% average; it is arithmetically fine but a loose framing.",
+   "The Buffett claim is stretched beyond what the notes show."
+  ],
+  "would_publish": false,
+  "summary": "A clear, balanced and well-structured script with mostly traceable numbers, a sensible time-horizon rule and an emergency-fund-first message. It misses inflation and index fund fundamentals, includes stale or irrelevant market-day news, and its flowchart visual outruns the narration.",
+  "mean": 3.56,
+  "cost_usd": 0.034572,
+  "tokens": [
+   7846,
+   1888
+  ]
+ }
+}

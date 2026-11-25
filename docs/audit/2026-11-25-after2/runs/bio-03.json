@@ -1,0 +1,538 @@
+{
+ "id": "bio-03",
+ "category": "biography",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "tell me about Alan Turing",
+ "great": "Computability, Enigma at Bletchley Park, Turing test, prosecution in 1952, pardon 2013, death 1954; accurate and respectful.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:13:12",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Alan Turing is a historical figure whose life and work are well documented and timeless, so an encyclopedia source is sufficient for an accurate explainer script.",
+  "queries": [
+   "Alan Turing biography",
+   "Alan Turing contributions computing"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 4178,
+  "n_sources": 4,
+  "n_fetched": 5,
+  "fetched": [
+   "Alan Turing",
+   "Alan Turing Institute",
+   "Alan Turing Year",
+   "Turing machine",
+   "Reverse Turing test"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Alan Turing\nAlan Mathison Turing (; 23 June 1912 – 7 June 1954) was an English mathematician and logician widely regarded as the father of theoretical computer science. He formalised the concepts of algorithm and computation with the Turing machine, a model of a general-purpose computer, and his contributions to cryptanalysis helped the Allies of World War II decipher messages encrypted by the German Enigma machine. He also contributed the Turing test to philosophy of artificial intelligence and the Turing pattern concept to mathematical and theoretical biology.\nBorn in London and raised in southern England, Turing graduated from King's College, Cambridge, and earned a doctorate from Princeton University in 1938. During World War II, he worked at the Government Code and Cypher School at Bletchley Park, Britain's codebreaking centre, and focused on decrypting German naval messages as the head of Hut 8. His techniques improved on the pre-war Polish bomba method and hastened cryptanalysis of the Enigma ciphering system. The resulting intelligence, known as Ultra, proved helpful in the Battle of the Atlantic. After the war, Turing joined the National Physical Laboratory, where he designed the Automatic...\n\n## Alan Turing Institute\nThe Alan Turing Institute is the United Kingdom's national institute for data science and artificial intelligence, founded in 2015 and largely funded by the UK Government. It is named after Alan Turing, the British mathematician and computing pioneer. Since 2025, the institute focuses on defense and national security, following demands by the UK Government.\n\n## Alan Turing Year\nThe Alan Turing Year, 2012, marked the celebration of the life and scientific influence of Alan Turing during the centenary of his birth on 23 June 1912. Turing had an important influence on computing, computer science, artificial intelligence, developmental biology, and the mathematical theory of computability and made important contributions to code-breaking during the Second World War. The Alan Turing Centenary Advisory committee (TCAC) was originally set up by Professor S. Barry Cooper\nThe international impact of Turing's work is reflected in the list of countries in which Alan Turing Year was celebrated, including: Bolivia, Brazil, Canada, China, Czech Republic, France, Germany, Hong Kong, India, Israel, Italy, Netherlands, Mexico, New Zealand, Norway, Philippines, Portugal, Spain, Switzerland, the U.K., and the U.S.A. 41+ countries were involved.\n\n## Turing machine\nA Turing machine is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules. Despite the model's simplicity, it is capable of implementing any computer algorithm.\nThe machine operates on an infinite memory tape divided into discrete cells, each of which can hold a single symbol drawn from a finite set of symbols called the alphabet of the machine. It has a \"head\" that, at any point in the machine's operation, is positioned over one of these cells, and a \"state\" selected from a finite set of states. At each step of its operation, the head reads the symbol in its cell. Then, based on the symbol and the machine's own present state, the machine writes a symbol into the same cell, and moves the head one step to the left or the right, or halts the computation. The choice of which replacement symbol to write, which direction to move the head, and whether to halt is based on a finite table that specifies what to do for each combination of the current state and the symbol that is read. As with a real computer program, it is possible for a Turing machine to go into an infinite loop which will never halt.\nThe...\n\n## Reverse Turing test\nA reverse Turing test is a Turing test in which failure suggests that the test-taker is human, while success suggests the test-taker is automated. \nConventionally, the Turing test is conceived as having a few computer AI subjects communicate with each other and one human subject which attempts to also appear as a computer AI. After a few questions the AI subjects need to correctly guess which of the participants is a human subject.",
+ "plan": {
+  "title": "Alan Turing: The Man Who Imagined Computers",
+  "description": "Alan Turing was an English mathematician who defined computation, helped break the German Enigma code, and posed the question of machine intelligence. This video follows his life and why his ideas still shape our world.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "58afd50a",
+    "narration": "Could a simple strip of tape and a few rules do anything a computer can do? One English mathematician said yes, and he changed the modern world. His name was Alan Turing.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "The mathematician who imagined the computer"
+     }
+    },
+    "chapter": "A mind ahead of its time"
+   },
+   {
+    "id": "acf2ec41",
+    "narration": "Alan Mathison Turing was born in London on 23 June 1912. He studied at King's College, Cambridge, and earned a doctorate from Princeton University in 1938.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Early life",
+      "events": [
+       {
+        "date": "1912",
+        "label": "Born in London"
+       },
+       {
+        "date": "Cambridge",
+        "label": "Graduates from King's College"
+       },
+       {
+        "date": "1938",
+        "label": "Doctorate at Princeton"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "70443827",
+    "narration": "His big idea was the Turing machine. The head reads symbol in a cell on an endless tape. Then it will write and move, left or right, following a table of rules.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "A Turing machine",
+      "nodes": [
+       {
+        "id": "tape",
+        "label": "Infinite tape",
+        "icon": "ribbon"
+       },
+       {
+        "id": "read",
+        "label": "Head reads symbol",
+        "icon": "eye"
+       },
+       {
+        "id": "write",
+        "label": "Write and move",
+        "icon": "pencil"
+       }
+      ],
+      "edges": [
+       [
+        "tape",
+        "read"
+       ],
+       [
+        "read",
+        "write"
+       ],
+       [
+        "write",
+        "tape",
+        "repeat"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "The idea of computation"
+   },
+   {
+    "id": "022b239f",
+    "narration": "Despite its simplicity, this imaginary machine can carry out any computer algorithm. That is why Turing is widely regarded as the father of theoretical computer science.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Any algorithm can run on a simple machine with tape and rules.",
+      "emphasis": "any algorithm"
+     }
+    }
+   },
+   {
+    "id": "f8f9feec",
+    "narration": "Then war came. At Bletchley Park, Britain's codebreaking centre, Turing led Hut 8 and worked on German naval messages protected by the Enigma machine.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Bletchley Park mansion",
+      "alt": "Bletchley Park, Britain's codebreaking centre",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Breaking Enigma"
+   },
+   {
+    "id": "5f606da7",
+    "narration": "His methods improved on the earlier Polish bomba and sped up the breaking of Enigma. The intelligence, called Ultra, helped the Allies in the Battle of the Atlantic.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Enigma machine",
+       "Turing Bombe replica",
+       "Battle of the Atlantic convoy"
+      ],
+      "alt": "Enigma, the bombe and the Atlantic convoys"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "027716ee",
+    "narration": "After the war he joined the National Physical Laboratory and designed an early stored-program computer. He also asked whether machines could think, and proposed what we now call the Turing test.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "After the war",
+      "items": [
+       "National Physical Laboratory",
+       "Designed an early computer",
+       "The Turing test",
+       "Turing patterns in biology"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "building",
+       "computer",
+       "message-circle",
+       "leaf"
+      ]
+     }
+    }
+   },
+   {
+    "id": "6db547cb",
+    "narration": "His life was cut short. Turing died on 7 June 1954, aged just 41. Yet his ideas only grew, from artificial intelligence to the mathematics of living patterns.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "A short life",
+      "events": [
+       {
+        "date": "1912",
+        "label": "Born"
+       },
+       {
+        "date": "1938",
+        "label": "Princeton doctorate"
+       },
+       {
+        "date": "1954",
+        "label": "Dies, aged 41"
+       }
+      ]
+     }
+    },
+    "chapter": "Why he still matters"
+   },
+   {
+    "id": "ae1aa19e",
+    "narration": "In 2012, the centenary of his birth, more than 41 countries celebrated Alan Turing Year. In the UK, a national institute for data science and artificial intelligence bears his name.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "41+",
+      "label": "countries celebrated Alan Turing Year in 2012"
+     }
+    }
+   },
+   {
+    "id": "4e687277",
+    "narration": "So next time you use a phone or ask a machine a question, remember the quiet mathematician who first imagined it all, with nothing but a tape and a few rules.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person using smartphone",
+      "alt": "A person using a smartphone",
+      "ken_burns": "in"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Alan Turing",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Alan Turing Institute",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing_Institute",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Alan Turing Year",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing_Year",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Turing machine",
+    "url": "https://en.wikipedia.org/wiki/Turing_machine",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 37.3,
+  "before_first_script_call_s": 5.5,
+  "script_s": 31.8
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.12382,
+  "search_api": 0.0,
+  "total": 0.12408
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 38726,
+  "out": 5149
+ },
+ "rules": {
+  "length": {
+   "words": 289,
+   "expected_words": 267,
+   "ratio": 1.082,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 129.9,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Could a simple strip of tape and a few rules do anything a computer can do? One English mathematician said yes, and he changed the modern world. His name was Alan Turing.",
+   "close_text": "So next time you use a phone or ask a machine a question, remember the quiet mathematician who first imagined it all, with nothing but a tape and a few rules."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "timeline": 2,
+    "diagram": 1,
+    "kinetic_text": 1,
+    "image": 2,
+    "gallery": 1,
+    "bullets": 1,
+    "stat": 1
+   },
+   "max_run": 1,
+   "entropy": 2.92,
+   "top_type": "timeline",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 6,
+   "ungrounded_numbers": [],
+   "entities": 19,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "tape and a few",
+    "count": 2
+   },
+   {
+    "phrase": "and a few rules",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 5,
+   "notes_len": 4178,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 8 (timeline): its narration never says ['Born', 'Princeton doctorate']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most facts match the notes. But \"more than 41 countries\" misreads the notes' \"41+\", and \"first imagined it all\" overclaims. The Turing machine model is described loosely."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It omits the 1952 prosecution, the 2013 pardon and the circumstances of his death, all of which the reviewer's note requires. Computability and the halting problem are barely touched, and the Enigma section is thin."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and chronological, but the early-life beat is thin and beat 8 repeats the timeline. The ending is weak, and the Turing test gets one line."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about a strip of tape is a good hook. The closing smartphone image is decent but somewhat clichéd."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is neutral and accessible, but it is not respectful of the full story. \"His life was cut short\" glosses over the persecution."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary sensibly and the diagram fits the narration. The 41+ stat is a trivial number to put on screen, and the second timeline duplicates the first. The 'Cambridge' timeline entry has no real date."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The script is generic encyclopedia summary. It has no anecdote, no surprising detail and no human story."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "The length is about right at roughly 270 words. But it omits key points a good answer must contain, and it ignores the US viewer context."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is fluent overall. \"The head reads symbol in a cell\" is ungrammatical and \"Then it will write and move\" is slightly awkward."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "critical",
+    "quote": "His life was cut short. Turing died on 7 June 1954, aged just 41.",
+    "issue": "It never mentions his 1952 conviction for homosexuality, the chemical castration, the circumstances of his death or the 2013 royal pardon. This is a central part of his story.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "more than 41 countries celebrated",
+    "issue": "The notes say \"41+\", meaning 41 or more. \"More than 41\" is a slight misreading.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "the quiet mathematician who first imagined it all",
+    "issue": "This is an overclaim. Babbage, Lovelace and others imagined computing earlier, and smartphones are not \"it all\".",
+    "beat": 10
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "The head reads symbol in a cell on an endless tape.",
+    "issue": "The article is missing, and the sentence is clumsy.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "proposed what we now call the Turing test.",
+    "issue": "The Turing test gets one line with no explanation of what it is or of the 1950 paper.",
+    "beat": 7
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"date\": \"Cambridge\"",
+    "issue": "A timeline entry has a place instead of a date.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "A short life",
+    "issue": "The second timeline repeats the 1912 and 1938 entries from the first timeline.",
+    "beat": 8
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Despite its simplicity, this imaginary machine can carry out any computer algorithm.",
+    "issue": "The script gives a generic textbook summary and offers no concrete example or story.",
+    "beat": 4
+   }
+  ],
+  "missing": [
+   "1952 prosecution for homosexuality and chemical castration",
+   "2013 royal pardon",
+   "Circumstances of his death (reported as suicide)",
+   "Halting problem / 1936 paper on computable numbers",
+   "Concrete Enigma detail such as the bombe or the scale of lives saved",
+   "How the Turing test works"
+  ],
+  "wrong_facts": [
+   "\"more than 41 countries\" misreads the notes' \"41+\"",
+   "\"first imagined it all\" is an overclaim"
+  ],
+  "would_publish": false,
+  "summary": "The script is clean and well organized but generic. It omits the prosecution, the pardon and the circumstances of his death, which the brief treats as essential, and it explains the Turing test and computability only briefly. It is fluent but not respectful or complete enough to publish.",
+  "mean": 2.89,
+  "cost_usd": 0.02436,
+  "tokens": [
+   4615,
+   1513
+  ]
+ }
+}

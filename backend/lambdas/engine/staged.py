@@ -117,7 +117,7 @@ def section_user(topic: str, outline: Dict[str, Any], idx: int, notes: str, toda
             f"The whole outline (so you fit in and never repeat the other sections):\n{lines}\n\n"
             f"Key points this section must cover: " + "; ".join(sec["key_points"]) + "\n\n"
             f"Length: this section is {sec['minutes']:g} minutes. This is a hard requirement: its narration totals between {int(words * (plan_mod.TARGET_LOW if quality_fixes() else 0.9))} and {int(words * (plan_mod.TARGET_HIGH if quality_fixes() else 1.1))} words (about {words}) "
-            f"across at least {beats} beats of roughly {max(20, words // beats)} words each; the viewer pays per minute.\n"
+            f"across {plan_mod.beats_phrase(beats)} of roughly {max(20, words // beats)} words each; the viewer pays per minute.\n"
             f"Stock photographs in this section: at most {int(rate * sec['minutes'] + 1e-9)}.\n\n"
             + (f"Today's date: {today}. Time-sensitive facts must come from the notes below.\n\n" if today else "")
             + f"Research notes for this section (may be empty; use them for facts and numbers):\n{notes or plan_mod.no_notes_text()}\n\n"
@@ -134,8 +134,8 @@ def _section_problem(plan_check: Dict[str, Any], sec: Dict[str, Any]) -> Optiona
         return (f"the section narration totals {have} words but a {sec['minutes']:g}-minute section needs about {target} words in at least "
                 f"{plan_mod.expected_beats(sec['minutes'])} beats. Lengthen the beats and add beats with new, concrete material until it is about {target} words")
     if quality_fixes() and have > SECTION_MAX_SHARE * target:
-        return (f"the section narration totals {have} words but a {sec['minutes']:g}-minute section needs about {target} (at most {int(target * plan_mod.TARGET_HIGH)}). Trim it: shorter sentences, "
-                f"fewer words per beat, drop the least important details; keep the beats, the key points and do not go under {int(target * plan_mod.TARGET_LOW)} words")
+        return (f"the section narration totals {have} words in {len(beats)} beats but a {sec['minutes']:g}-minute section needs about {target} (at most {int(target * plan_mod.TARGET_HIGH)}). "
+                f"Cut about {have - target} words: {plan_mod.beats_phrase(plan_mod.expected_beats(sec['minutes']))}, shorter sentences, drop the least important details; keep the key points and do not go under {int(target * plan_mod.TARGET_LOW)} words")
     from . import sync as sync_mod
 
     gaps = sync_mod.coverage_problems(beats)

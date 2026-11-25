@@ -1,0 +1,622 @@
+{
+ "id": "pro-02",
+ "category": "productivity / self-improvement",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo dejar de procrastinar",
+ "great": "Por qué procrastinamos (regulación emocional, no pereza), regla de los 2 minutos, dividir tareas, reducir fricción, intención de implementación, perdón a uno mismo; práctico y empático, sin clichés vacíos.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T16:05:06",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Procrastination strategies are timeless psychology and self-management knowledge that an encyclopedia covers well; no recent information is needed for an accurate script.",
+  "queries": [
+   "cómo dejar de procrastinar",
+   "causas de la procrastinación",
+   "técnicas contra la procrastinación"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 13,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5009,
+  "n_sources": 4,
+  "n_fetched": 5,
+  "fetched": [
+   "Procrastinación",
+   "Procrastinación a la hora de acostarse",
+   "Impuntualidad",
+   "Gestión del tiempo",
+   "Autorregulación emocional"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 355 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## Procrastinación\nLa procrastinación (del latín procrastinare: pro, 'adelante', y crastinus, 'mañana'),​ postergación o posposición es la acción o hábito de retrasar actividades o situaciones que deben atenderse por miedo a afrontarlas o pereza a realizarlas. \nSe trata de un trastorno volitivo del comportamiento que tiene su raíz en la asociación de la acción a realizar con el cambio, el dolor o la incomodidad (estrés). Este puede ser psicológico (en forma de ansiedad o frustración), físico (como el que se experimenta durante actos que requieren trabajo fuerte o ejercicio vigoroso) o intelectual. El término se aplica comúnmente al sentimiento de ansiedad generado ante una tarea pendiente sin tener la necesaria fuerza de voluntad para concluirla. El acto que se pospone puede ser percibido como abrumador, desafiante, inquietante, peligroso, difícil, tedioso o aburrido, es decir, estresante, por lo cual se autojustifica posponerlo a un futuro sine die idealizado, en que lo importante es supeditado a lo urgente.[cita requerida]\nLos individuos de la sociedad contemporánea se caracterizan por desarrollar varias actividades a la vez, lo cual puede ser contradictorio para no llevar a cabo con éxito ninguna actividad…\n\n## Procrastinación a la hora de acostarse\nLa procrastinación a la hora de acostarse es un fenómeno psicológico que consiste en retrasar innecesariamente el dormir por voluntad propia, a pesar de la posibilidad de sentirse peor al día siguiente como resultado.​ Se vincula a menor duración y peor calidad del sueño, además de mayor fatiga durante el día.​ \nLas causas de la procrastinación a la hora de acostarse van desde perder de vista la hora por accidente a intentar deliberadamente aprovechar horas nocturnas debido a una falta percibida de tiempo o control por el día. El segundo fenómeno se ha llamado recientemente procrastinación de venganza a la hora de acostarse. Este término se originó en Weibo, una plataforma china de redes sociales en 2014.​​​\nEn general, a las personas les falta sueño porque no crean condiciones ideales para dormirse, no porque no pueden dormirse. Se sugiere que uno de los factores principales de la procrastinación a la hora de acostarse es el comportamiento humano.​\n\n## Impuntualidad\nLa tardanza o impuntualidad  es el hábito de llegar tarde o retrasar la llegada.​ Se trata de una forma de mala conducta que puede ser castigada formalmente en varios lugares, como el lugar de trabajo, la escuela, entre otros. Un rasgo de personalidad opuesto es la puntualidad.\n\n## Gestión del tiempo\nLa gestión del tiempo,  organización del tiempo o administración del tiempo es el proceso de planear y ejercitar el control consciente del tiempo empleado en actividades concretas, especialmente para aumentar la eficacia, la eficiencia o la productividad. Supone para la persona el manejo simultáneo y la acomodación de actividades laborales, sociales, familiares, hobbys, compromisos e intereses con la finitud del tiempo.\nUtilizar el tiempo eficientemente guía a la persona entre las diferentes actividades que realiza.​ Por el contrario, una utilización ineficiente genera falta de tiempo. Numerosas habilidades, herramientas y técnicas ayudan a gestionar el tiempo cumpliendo tareas, proyectos y objetivos en los plazos fijados. La gestión del tiempo se considera entre los buenos hábitos de trabajo y entre las habilidades gerenciales.\nInicialmente el término \"gestión del tiempo\" solo se refería al ámbito laboral y empresarial, pero ha ampliado su alcance para incluir también actividades personales.\nUn sistema de gestión del tiempo es una combinación diseñada de procesos, herramientas, técnicas y métodos con esta finalidad. La gestión del tiempo normalmente es una necesidad en cualquier desarrollo…\n\n## Autorregulación emocional\nLa autorregulación emocional es la capacidad de responder a las demandas continuas de tal manera que en un ambiente social sea tolerable y lo suficientemente flexible como para permitir reacciones emocionales espontáneas, así como la capacidad de retrasar dichas reacciones según sea necesario.​ También puede ser definida como el proceso extrínseco e intrínseco, responsable de observar, evaluar y modificar las reacciones emocionales.​ La autorregulación emocional pertenece al amplio conjunto de los procesos de autorregulación, los cuales incluyen la regulación de los sentimientos propios y las técnicas para regular las emociones. \nExiste el Modelo Procesual de Regulación Emocional, que es el marco teórico dominante. Define la regulación emocional como el proceso por el cual se influye en qué emociones tenemos, cuándo las tenemos y cómo las experimentamos y expresamos. Divide las estrategias en centradas en el antecedente (antes de que la emoción sea fuerte, como la revaluación) y centradas en la respuesta (después de que la emoción se ha generado, como la supresión)​[1].​​​\nLa regulación emocional ​es un proceso complejo que inicia suponiendo, inhibiendo o modulando un estado o comportamiento…",
+ "plan": {
+  "title": "Cómo dejar de procrastinar: la causa y el primer paso",
+  "description": "La procrastinación no es pereza: es una forma de evitar la incomodidad de una tarea. Descubre por qué ocurre y qué puedes hacer para empezar hoy.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "764e241d",
+    "narration": "Tienes una tarea importante. Sabes que debes hacerla. Y aun así, abres el móvil. ¿Por qué lo haces, si luego te sientes peor? No es lo que crees.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Cómo dejar de procrastinar",
+      "subtitle": "Por qué postergamos y cómo empezar hoy"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "Por qué lo dejamos para mañana"
+   },
+   {
+    "id": "cfa364a5",
+    "narration": "La palabra viene del latín. Pro significa adelante, y crastinus significa mañana. Procrastinar es, literalmente, mandar las cosas hacia mañana.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Procrastinar",
+      "definition": "Retrasar actividades que deben atenderse, por miedo a afrontarlas o pereza a realizarlas.",
+      "origin": "Latín: pro, 'adelante', y crastinus, 'mañana'"
+     }
+    }
+   },
+   {
+    "id": "035ab056",
+    "narration": "Mucha gente piensa que es simple pereza. Pero la raíz es otra: asociamos la tarea con incomodidad. Con estrés, ansiedad o frustración. Evitamos la tarea para evitar ese malestar.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la evitación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea pendiente",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Incomodidad",
+        "icon": "rss"
+       },
+       {
+        "id": "c",
+        "label": "Evitarla",
+        "icon": "phone"
+       },
+       {
+        "id": "d",
+        "label": "Alivio breve",
+        "icon": "heart"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a",
+        "vuelve"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "3fbc9f6c",
+    "narration": "La tarea puede parecer abrumadora, difícil, tediosa o aburrida. Entonces nos decimos que lo haremos más adelante. Lo importante queda por debajo de lo urgente.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Cómo vemos la tarea",
+      "items": [
+       "Abrumadora",
+       "Difícil",
+       "Tediosa",
+       "Aburrida"
+      ],
+      "style": "keywords",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "f9a1b3f6",
+    "narration": "Esto engaña incluso de noche. Hay quien retrasa el sueño a propósito, para ganar tiempo propio. Se llama procrastinación de venganza a la hora de acostarse, y nació en Weibo en 2014.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Procrastinar también al dormir",
+      "events": [
+       {
+        "date": "Durante el d",
+        "label": "Falta de tiempo y control"
+       },
+       {
+        "date": "De noche",
+        "label": "Retrasas el sueño a propósito"
+       },
+       {
+        "date": "2014",
+        "label": "El término nace en Weibo"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "87cdf3fc",
+    "narration": "Entonces, el problema no es el tiempo. Es la emoción que sentimos ante la tarea. Y eso cambia la solución: primero hay que calmar esa emoción.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No te falta tiempo: te sobra incomodidad.",
+      "emphasis": "incomodidad"
+     }
+    },
+    "chapter": "Qué puedes hacer"
+   },
+   {
+    "id": "904ab003",
+    "narration": "Ahí ayuda la autorregulación emocional: observar, evaluar y modificar tus reacciones. Una estrategia es la revaluación, que actúa antes de que la emoción sea fuerte.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Autorregulación emocional",
+      "definition": "Proceso de observar, evaluar y modificar las propias reacciones emocionales."
+     }
+    }
+   },
+   {
+    "id": "21656877",
+    "narration": "Por ejemplo, cambia la pregunta. En vez de pensar que tienes que terminar todo el informe, piensa que solo vas a abrir el documento y escribir una frase.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Pensamiento que bloquea",
+       "tagline": "Todo de golpe"
+      },
+      "b": {
+       "name": "Pensamiento que activa",
+       "tagline": "Solo el inicio"
+      },
+      "rows": [
+       {
+        "label": "Meta",
+        "a": "Terminar el informe",
+        "b": "Escribir una frase"
+       },
+       {
+        "label": "Sensación",
+        "a": "Agobio",
+        "b": "Calma"
+       },
+       {
+        "label": "Resultado",
+        "a": "Lo pospones",
+        "b": "Empiezas"
+       }
+      ],
+      "verdict": "Una tarea pequeña baja la incomodidad.",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "dd6496a3",
+    "narration": "Después, la gestión del tiempo: planear y controlar conscientemente en qué empleas tus horas. Divide la tarea en partes, ponle un plazo y elige cuándo la harás.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Un plan sencillo",
+      "steps": [
+       {
+        "label": "Divide la tarea",
+        "detail": "En partes pequeñas"
+       },
+       {
+        "label": "Fija un plazo",
+        "detail": "Con fecha concreta"
+       },
+       {
+        "label": "Elige un momento",
+        "detail": "Y empieza"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "dedc65dc",
+    "narration": "Y no intentes hacer varias cosas a la vez. La vida actual nos empuja a ello, pero repartir la atención puede impedir que termines con éxito cualquiera de ellas.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Para concentrarte",
+      "items": [
+       "Una tarea a la vez",
+       "Un plazo claro",
+       "Sin distracciones a mano"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c7d5cd8d",
+    "narration": "También ocurre al acostarte. Según se sugiere, a la gente no le falta capacidad de dormir, sino crear condiciones ideales. Así que cuida tres cosas: tu entorno, tus hábitos y tu rutina.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "dark bedroom night calm",
+      "alt": "quiet bedroom at night"
+     }
+    }
+   },
+   {
+    "id": "65383bc6",
+    "narration": "Prepara el terreno así. Primero, una hora fija para acostarte. Segundo, pantallas lejos de la cama. Y tercero, un espacio tranquilo para dormir.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Condiciones para dormir",
+      "items": [
+       "Una hora fija para acostarte",
+       "Pantallas lejos de la cama",
+       "Un espacio tranquilo"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "clock",
+       "phone",
+       "moon"
+      ]
+     }
+    }
+   },
+   {
+    "id": "3d3a6c65",
+    "narration": "Recuerda la idea central: procrastinamos para escapar de una incomodidad, no por falta de tiempo. Hoy elige una tarea, hazla pequeña y empieza solo cinco minutos. El resto será más fácil.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Haz la tarea pequeña y empieza ahora.",
+      "emphasis": "empieza ahora"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Procrastinación",
+    "url": "https://es.wikipedia.org/wiki/Procrastinaci%C3%B3n",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Procrastinación a la hora de acostarse",
+    "url": "https://es.wikipedia.org/wiki/Procrastinaci%C3%B3n_a_la_hora_de_acostarse",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Gestión del tiempo",
+    "url": "https://es.wikipedia.org/wiki/Gesti%C3%B3n_del_tiempo",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Autorregulación emocional",
+    "url": "https://es.wikipedia.org/wiki/Autorregulaci%C3%B3n_emocional",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 58.8,
+  "before_first_script_call_s": 5.9,
+  "script_s": 52.9
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "script_big": 0.15465,
+  "search_api": 0.0,
+  "total": 0.15497
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 39259,
+  "out": 8239
+ },
+ "rules": {
+  "length": {
+   "words": 355,
+   "expected_words": 402,
+   "ratio": 0.883,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 160.3,
+   "flag_short": true,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Tienes una tarea importante. Sabes que debes hacerla. Y aun así, abres el móvil. ¿Por qué lo haces, si luego te sientes peor? No es lo que crees.",
+   "close_text": "Recuerda la idea central: procrastinamos para escapar de una incomodidad, no por falta de tiempo. Hoy elige una tarea, hazla pequeña y empieza solo cinco minutos. El resto será más fácil."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 1,
+    "definition": 2,
+    "diagram": 1,
+    "bullets": 2,
+    "timeline": 1,
+    "kinetic_text": 2,
+    "versus": 1,
+    "steps": 1,
+    "checklist": 1,
+    "clip": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "definition",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 4,
+   "fetched": 5,
+   "notes_len": 5009,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_short"
+  ],
+  "mismatch_scenes": [
+   "beat 3 (diagram): its narration never says ['Evitarla', 'Alivio breve']",
+   "beat 5 (timeline): its narration never says ['Falta de tiempo y control', 'El término nace en Weibo']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The etymology and the Weibo 2014 origin match the notes. But \"El resto será más fácil\" is stated as fact, and \"Pensamiento que activa... Calma\" is oversold. The timeline's date \"Durante el d\" is truncated, and the \"two sentences\" framing of the 2014 term is loose."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers emotional causes, dividing tasks and a small start. It omits the 2-minute rule, friction reduction, implementation intentions and self-forgiveness. Nearly a third of the script goes to bedtime procrastination, which is off-focus."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order runs from cause to solution and ends on one takeaway. The bedtime detour (beats 5, 11 and 12) breaks the flow, and the multitasking beat is loosely attached."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "\"Y aun así, abres el móvil... No es lo que crees\" creates tension. The ending gives a concrete action, but \"Recuerda la idea central\" is a recap lead-in."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Informal \"tú\" address, empathetic and clear. It leans a little toward encyclopedic and lacks warmth about self-compassion."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types are varied and mostly fit the narration. The timeline has a truncated date \"Durante el d\" and mixes non-dates. The diagram icons (rss, book) are arbitrary. The clip of a bedroom does little work."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The avoidance cycle and the revenge bedtime procrastination term are somewhat distinctive. Much of the rest is generic advice (divide the task, set a deadline, no distractions)."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is Spanish, about 3 minutes, with a practical angle. It misses several of the key techniques the brief expects and spends time on sleep, which was not requested."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct, with short sentences that suit narration. A few stiff phrases such as \"Según se sugiere\" and \"Ahí ayuda la autorregulación\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "También ocurre al acostarte. Según se sugiere, a la gente no le falta capacidad de dormir",
+    "issue": "A tangent into sleep hygiene takes time from core anti-procrastination techniques (2-minute rule, friction, implementation intentions, self-forgiveness).",
+    "beat": 11
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Durante el d",
+    "issue": "The timeline date is truncated, and the entries are not real chronological events.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Hoy elige una tarea, hazla pequeña y empieza solo cinco minutos.",
+    "issue": "The two-minute rule and the implementation intention are never explained. The five minutes appears only at the end with no rationale.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "El resto será más fácil.",
+    "issue": "An unsupported promise, with no source behind it.",
+    "beat": 13
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Y no intentes hacer varias cosas a la vez.",
+    "issue": "The multitasking point is tangential and weakly connected to the emotional cause just established.",
+    "beat": 10
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Ahí ayuda la autorregulación emocional: observar, evaluar y modificar tus reacciones.",
+    "issue": "The definition is copied from the encyclopedia and is abstract, with no concrete example of how to regulate.",
+    "beat": 7
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Divide la tarea en partes, ponle un plazo y elige cuándo la harás.",
+    "issue": "Generic time-management advice.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Regla de los 2 minutos",
+   "Reducir fricción (preparar el entorno, quitar el móvil)",
+   "Intención de implementación (si X, entonces Y)",
+   "Perdón a uno mismo / autocompasión",
+   "Ejemplo concreto de reevaluación"
+  ],
+  "wrong_facts": [
+   "The sleep content is true to the notes but off-topic. The claim that the small-task framing yields \"Calma\" is unsupported."
+  ],
+  "would_publish": false,
+  "summary": "A clear and friendly script with a good hook and a correct core premise (avoidance of discomfort, not laziness). It wastes a third of its length on bedtime procrastination and omits key techniques such as the 2-minute rule, friction, implementation intentions and self-forgiveness.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Según se sugiere, a la gente no le falta capacidad de dormir",
+     "problem": "Stiff, calque-like phrasing.",
+     "better": "Parece que a la gente no le falta capacidad para dormir"
+    },
+    {
+     "quote": "Ahí ayuda la autorregulación emocional",
+     "problem": "A somewhat stiff connector.",
+     "better": "Aquí te ayuda la autorregulación emocional"
+    },
+    {
+     "quote": "Lo importante queda por debajo de lo urgente.",
+     "problem": "Slightly literal.",
+     "better": "Lo urgente se come a lo importante."
+    },
+    {
+     "quote": "Prepara el terreno así.",
+     "problem": "Filler phrase.",
+     "better": "Prepara el terreno:"
+    }
+   ]
+  },
+  "mean": 3.33,
+  "cost_usd": 0.031426,
+  "tokens": [
+   6388,
+   1865
+  ]
+ }
+}

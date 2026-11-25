@@ -55,6 +55,8 @@ def queries_for(topic: str, language: str, ask: Optional[Callable[[str, str], st
 WIKI_CONCURRENCY = 2   # Wikimedia answers 429 to bursts from one address: at most this many requests in flight (the whole process, all videos and sections)
 _wiki_slots = threading.BoundedSemaphore(WIKI_CONCURRENCY)
 WIKI_MIN_GAP_S = 0.3   # and no two requests start closer than this (a burst is what Wikimedia answers with a 429)
+_cooldown_until = [0.0]   # a 429 with a long Retry-After: no request goes to Wikimedia until then (the whole process), the caller escalates or writes without notes
+MAX_COOLDOWN_S = 120.0
 _gap_lock = threading.Lock()
 _last_start = [0.0]
 
@@ -72,6 +74,12 @@ def _guarded(fetch: Callable[[str], Any], errors: Optional[List[Dict[str, Any]]]
     """`fetch` with a bounded number of concurrent calls, retries with backoff on 429/5xx (Retry-After honoured, 3 tries, about 10 s at most), and every
     failure logged (url and status only, never any prompt text) and recorded in `errors`."""
     def get(url: str) -> Any:
+        short_url = url.split("&", 1)[0][:160]
+        if time.monotonic() < _cooldown_until[0]:
+            if errors is not None:
+                errors.append({"url": short_url, "status": 429, "attempt": 0, "error": "skipped: Wikimedia asked us to wait"})
+            raise FetchError("skipped: rate limited", status=429)
+
         def failed(e: Exception, attempt: int) -> None:
             status = int(getattr(e, "status", 0) or 0)
             logging.warning("RESEARCH_FETCH_FAILED url=%s status=%s attempt=%s error=%s", url.split("&", 1)[0][:160], status, attempt, type(e).__name__)
@@ -81,8 +89,14 @@ def _guarded(fetch: Callable[[str], Any], errors: Optional[List[Dict[str, Any]]]
             _spaced()
             return fetch(u)
 
-        with _wiki_slots:
-            return with_retry(spaced_fetch, url, on_fail=failed, sleep=sleep)
+        try:
+            with _wiki_slots:
+                return with_retry(spaced_fetch, url, on_fail=failed, sleep=sleep)
+        except FetchError as e:
+            if getattr(e, "status", 0) == 429:
+                _cooldown_until[0] = max(_cooldown_until[0], time.monotonic() + min(MAX_COOLDOWN_S, getattr(e, "retry_after", None) or 5.0))
+                logging.warning("RESEARCH_COOLDOWN seconds=%s", round(_cooldown_until[0] - time.monotonic()))
+            raise
     return get
 
 

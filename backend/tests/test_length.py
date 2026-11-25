@@ -23,7 +23,7 @@ def test_the_targets_come_from_the_measured_speaking_rate():
 
 def test_the_prompt_makes_the_length_a_hard_requirement_with_numbers():
     p = plan_mod.build_user_prompt("All about Paris", "", 5)
-    assert "hard requirement" in p and "5 minute" in p and "at least 21 beats" in p and "pays per minute" in p
+    assert "hard requirement" in p and "5 minute" in p and ("at least 21 beats" in p or "21 to 23 beats" in p) and "pays per minute" in p
     lo, hi = int(plan_mod.expected_words(5) * plan_mod.TARGET_LOW), int(plan_mod.expected_words(5) * plan_mod.TARGET_HIGH)   # QUALITY_FIXES range; 0.9 to 1.1 with QUALITY_FIXES=0 (tests/test_quality_fixes.py)
     assert f"between {lo} and {hi} words" in p
 
@@ -97,7 +97,7 @@ def test_a_video_already_long_enough_is_left_alone():
 def test_stretching_spreads_first_over_speech_then_pauses_then_the_last_scene():
     d = [10.0, 10.0, 4.0, 10.0]
     s = [False, False, True, False]
-    small = tl_mod.stretch_to(d, s, sum(d) + 3 - tl_mod.MIN_VIDEO_MARGIN)
+    small = tl_mod.stretch_to(d, s, sum(d) + 3 - tl_mod.SHORT_VIDEO_MARGIN)   # 37 s asked: under a minute the margin is the short one
     assert small == [11.0, 11.0, 4.0, 11.0]                                                         # 1 s on each spoken scene
     big = tl_mod.stretch_to(d, s, sum(d) + 10)
     assert big[0] == big[1] == 11.6 and big[2] > 4.0 and sum(big) >= sum(d) + 10                   # speech capped at +1.6, then the pause is held longer

@@ -96,7 +96,7 @@ SCENE_DOCS = scene_docs()
 
 # QUALITY_FIXES (docs/QUALITY_FIXES.md): from the 2026-11-25 audit. Kept compact; QUALITY_FIXES=0 leaves the prompt exactly as it was.
 GROUNDING_RULE = ("- Grounding: every number, date, name, quantity, feature, study or quote comes from the grounding notes or the person's own request and brief; when they do not give it, "
-                  "speak in general terms or leave it out. For product, marketing and health topics use only what the person gave or the notes. Never say \"the notes\", \"our notes\", "
+                  "speak in general terms or leave it out (general explanations and well-known facts need no source, and the notes never narrow the topic: cover what the request asks). For product, marketing and health topics use only what the person gave or the notes. Never say \"the notes\", \"our notes\", "
                   "\"the sources\" or \"the research\" (nor \"las notas\", \"las fuentes\") in the narration.")
 LIST_RULE = ("- A bullets, steps, timeline, versus or diagram scene: the beat's narration says every item, in the order shown, in the item's own key words (a timeline event is shown as short "
              "words the narrator also says). Keep items to a few words; a versus has 2 to 5 full rows.")
@@ -176,9 +176,35 @@ _PLATFORM_NAMES = {"youtube": "YouTube", "shorts": "Shorts", "tiktok": "TikTok",
 _BRIEF_KEYS = ("audience", "tone", "focus", "notes")
 
 
-def frame_prompt(options: Optional[Dict[str, Any]]) -> str:
+def short_form_block(minutes: float) -> str:
+    """SHORT-FORM rules for a video under a minute (15, 30 or 45 seconds); empty otherwise. The word budget itself is in the user message."""
+    if minutes is None or not is_short(minutes):
+        return ""
+    secs = int(round(float(minutes) * 60))
+    return (f"\n\nSHORT-FORM: this video is only {secs} seconds long, so it is made like a short, not like a small explainer. "
+            "The hook is the first sentence and is spoken in the first 2 seconds (a surprising fact, a vivid question or a bold claim; never a greeting, never 'in this video', never an agenda). "
+            "One idea only, no preamble, no recap, no list of tips beyond what fits (one to three items at most); every sentence earns its place. "
+            "End on a clear last line: the one takeaway, or a call to action ONLY if the request has one (never invent a brand, link or 'follow for more'). "
+            f"Use at most {min(3, max(2, expected_beats(minutes)))} different scenes of simple types (title, stat, counter, quote, image, icons, kinetic_text, or bullets or checklist with at most 3 short items); no timelines, diagrams, charts with many bars, maps, code, equations or long lists. "
+            "On-screen text is big and readable at a glance: a few words, never the narrated sentence; no pause beats (no silent beats). "
+            "Beats are short, 8 to 20 words, spoken at a lively pace. The word count in the user message is exact (for scale, 15 seconds is only about 28 words): do not write more.")
+
+
+def platform_hint(platform: Optional[str]) -> str:
+    """The platform's recommended length and style in one compact line (the chosen length always wins over the recommendation)."""
+    from .format_options import PLATFORMS, PLATFORM_STYLE
+    p = next((x for x in PLATFORMS if x["id"] == platform), None)
+    if not p or platform == "other":
+        return ""
+    rec = float(p.get("recommended_minutes") or 0)
+    rec_txt = f"{int(round(rec * 60))} seconds" if rec < 1 else (f"{rec:g} minute" + ("s" if rec != 1 else ""))
+    return f" Platform default about {rec_txt} (the length asked for wins); style: {PLATFORM_STYLE.get(platform, '')}."
+
+
+def frame_prompt(options: Optional[Dict[str, Any]], minutes: Optional[float] = None) -> str:
     """One short FORMAT paragraph for the director (appended to the system prompt): the shape of the picture and the platform shape the pacing and the amount of text.
-    Empty for the default (landscape, no platform) so a request without options produces exactly today's prompt. A creator's brief adds one line."""
+    Empty for the default (landscape, no platform, a minute or more) so a request without options produces exactly today's prompt. A creator's brief adds one line.
+    The platform's recommended length and style ride in the same line; a video under a minute adds the SHORT-FORM block."""
     o = options or {}
     aspect = o.get("aspect") if o.get("aspect") in ("16:9", "9:16", "1:1", "4:5") else "16:9"
     platform = _PLATFORM_NAMES.get(o.get("platform"))
@@ -191,7 +217,9 @@ def frame_prompt(options: Optional[Dict[str, Any]]) -> str:
             tip = "keep on-screen text short and large, at most a few items per scene, hook in the first 3 seconds"
         else:
             tip = "normal on-screen text amounts are fine"
-        out = f"\n\nFrame: {shape} {aspect}" + (f" for {platform}" if platform else "") + f": {tip}."
+        out = f"\n\nFrame: {shape} {aspect}" + (f" for {platform}" if platform else "") + f": {tip}." + (platform_hint(o.get("platform")) if platform else "")
+    if minutes is not None:
+        out += short_form_block(minutes)
     brief = o.get("brief")
     if isinstance(brief, dict):
         parts = [f"{k} {str(brief[k])[:200]}" for k in _BRIEF_KEYS if brief.get(k)]
@@ -220,7 +248,8 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
             "visuals: do NOT add stock-photo scenes.\n"
             "- Order them by the date taken when given, otherwise as listed, unless the story the user asked for needs another order.\n"
             "- The brief decides what the narration does: tell the story it asks for as a whole. Do not explain the photos one by one and never read out clothes, colours, poses or small details unless the brief asks for that; the viewer can see them. Never invent names, places, dates or events the captions and the brief do not state.\n"
-            "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n")
+            + ("- The video is very short: no extra scenes at all, exactly one beat per photo, each beat one short sentence.\n\n" if minutes is not None and is_short(minutes) else
+               "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n"))
     from . import curate
     by_id = {p["id"]: p for p in photos}
     out = [f"The user attached {len(photos)} of their own photos. They have been studied and a story worked out (below). The video tells THIS story.\n"
@@ -269,16 +298,35 @@ BEAT_OVERHEAD_S = 0.95        # lead-in and tail of every spoken beat
 MIN_LENGTH_SHARE = 0.93       # a script under this share of the words the length needs is sent back, then accepted (the timeline makes up the rest, never shorter than asked)
 
 
+SHORT_FORM_MINUTES = 1.0      # under a minute (15, 30, 45 s) the video is "short-form": its own beat and word budgets, framing and repair thresholds (docs/SHORT_VIDEOS.md)
+SHORT_BEAT_S = 10.0           # one beat per about 10 seconds in short-form (2 beats at 15 s, 3 at 30 s, 4 at 45 s)
+SHORT_WORDS_CALIBRATION = 0.94   # measured on QA (docs/SHORT_VIDEOS.md): the writer lands 8 to 10 percent over any stated word count in 15 to 45 s, so the count asked for is a little lower
+SHORT_END_S = 1.4             # the final fade (timeline.END_HOLD) is not narration; in a long video it is lost in the rounding, in 15 seconds it is a tenth of the video
+
+
+def is_short(target_minutes: float) -> bool:
+    return float(target_minutes) < SHORT_FORM_MINUTES - 1e-9
+
+
 def expected_beats(target_minutes: float, n_photos: int = 0) -> int:
+    if is_short(target_minutes):
+        return max(2, round(target_minutes * 60 / SHORT_BEAT_S), n_photos)
     return max(4, round(target_minutes * 60 / 14), n_photos)
 
 
 PHOTO_FRAME_S = 6.0           # a video of the person's photos opens and ends on music alone (director.PHOTO_INTRO_S + PHOTO_OUTRO_S): that time is not narration
+SHORT_PHOTO_FRAME_S = 2.5     # under a minute the opening and the ending are 1.0 s and 1.5 s (director.SHORT_PHOTO_INTRO_S + SHORT_PHOTO_OUTRO_S)
+
+
+def photo_frame_s(target_minutes: float) -> float:
+    return SHORT_PHOTO_FRAME_S if is_short(target_minutes) else PHOTO_FRAME_S
 
 
 def expected_words(target_minutes: float, n_photos: int = 0) -> int:
     """The narration words that make a video `target_minutes` long: the speaking time left after every beat's lead-in and tail, at the measured speaking rate."""
-    return max(60, int((target_minutes * 60 - (PHOTO_FRAME_S if n_photos else 0.0) - expected_beats(target_minutes, n_photos) * BEAT_OVERHEAD_S) * SPOKEN_WORDS_PER_S))
+    short = is_short(target_minutes)
+    left = target_minutes * 60 - (photo_frame_s(target_minutes) if n_photos else (SHORT_END_S if short else 0.0)) - expected_beats(target_minutes, n_photos) * BEAT_OVERHEAD_S
+    return max(20 if short else 60, int(left * SPOKEN_WORDS_PER_S * (SHORT_WORDS_CALIBRATION if short else 1.0)))
 
 
 def spoken_words(beats: List[Dict[str, Any]]) -> int:
@@ -288,29 +336,57 @@ def spoken_words(beats: List[Dict[str, Any]]) -> int:
 def length_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0) -> Optional[str]:
     """A message when the script is too short for the length that was asked for (and paid for); None when it is fine or the video is short anyway."""
     target = expected_words(target_minutes, n_photos)
-    if target < 250:  # about a minute and a half or less: the plan lands close enough, and short test plans are common
+    short = is_short(target_minutes)
+    if target < 250 and not short:  # about a minute and a half or less: the plan lands close enough, and short test plans are common
         return None
     have = spoken_words(plan.get("beats") or [])
-    if have >= MIN_LENGTH_SHARE * target:
+    if have >= (SHORT_LOW_SHARE if short else MIN_LENGTH_SHARE) * target:
         return None
+    if short:
+        return (f"the narration totals {have} words but a {length_label(target_minutes)} video needs about {target} words (between {int(target * SHORT_ASK_LOW)} and {int(target * SHORT_ASK_HIGH)}) in {beats_phrase(expected_beats(target_minutes, n_photos), True)}. "
+                f"Add the missing {target - have} words by making the beats a little fuller with concrete material, not by adding filler or a recap; keep the hook and what already works")
     return (f"the narration totals {have} words but a {target_minutes:g}-minute video needs about {target} words in at least {expected_beats(target_minutes, n_photos)} beats. "
             f"Lengthen the beats (about {target // expected_beats(target_minutes, n_photos)} words each) and add beats with new, concrete material until the total is about {target} words; keep what already works")
 
 
 MAX_LENGTH_SHARE = 1.12       # QUALITY_FIXES: a script over this share of the words the length needs is sent back once, to be trimmed (the audit: short videos ran 1.18 to 1.23x)
+SHORT_LOW_SHARE, SHORT_HIGH_SHARE = 0.88, 1.08   # (the writer lands about 8 percent over a stated range, so short-form asks for 0.90 to 1.00 and accepts up to 1.08)
+SHORT_ASK_LOW, SHORT_ASK_HIGH = 0.90, 1.00   # short-form repair thresholds (a few words are a big share): a script outside them is sent back once
 TARGET_HIGH, TARGET_LOW = 1.05, 0.92   # the range the writer is asked for (it was 0.9 to 1.1, and the writer lands at the top of any range)
+
+
+def length_phrase(target_minutes: float) -> str:
+    return f"{int(round(target_minutes * 60))} seconds" if is_short(target_minutes) else f"{target_minutes:g} minute(s)"
+
+
+def length_label(target_minutes: float) -> str:
+    """'30-second' under a minute, '2-minute' otherwise."""
+    return f"{int(round(target_minutes * 60))}-second" if is_short(target_minutes) else f"{target_minutes:g}-minute"
+
+
+def beats_phrase(beats: int, short: bool = False) -> str:
+    """"at least N beats" let the writer add beats until the script ran 20 percent long; with QUALITY_FIXES the count is a range (N to N+1 in short-form: each beat is a big share of the video)."""
+    if short:
+        return f"{beats} to {beats + 1} beats"
+    return f"{beats} to {beats + 2} beats" if quality_fixes() else f"at least {beats} beats"
 
 
 def long_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0) -> Optional[str]:
     """A message when the script would make a longer video than the one asked for (QUALITY_FIXES only); None otherwise. Photo videos are paced by their photos."""
-    if not quality_fixes() or n_photos:
+    if not quality_fixes() or (n_photos and not is_short(target_minutes)):
         return None
     target = expected_words(target_minutes, n_photos)
     have = spoken_words(plan.get("beats") or [])
-    if have <= MAX_LENGTH_SHARE * target:
+    if have <= (SHORT_HIGH_SHARE if is_short(target_minutes) else MAX_LENGTH_SHARE) * target:
         return None
-    return (f"the narration totals {have} words but a {target_minutes:g}-minute video needs about {target} (at most {int(target * TARGET_HIGH)}). Trim it: shorter sentences, fewer words per beat, "
-            f"drop the least important details; keep the hook, the key points and the ending, keep at least {expected_beats(target_minutes, n_photos)} beats, and do not go under {int(target * TARGET_LOW)} words")
+    n = max(1, len(plan.get("beats") or []))
+    beats = expected_beats(target_minutes, n_photos)
+    if is_short(target_minutes):
+        return (f"the narration totals {have} words in {n} beats but a {length_label(target_minutes)} video needs about {target} (between {int(target * SHORT_ASK_LOW)} and {int(target * SHORT_ASK_HIGH)}). Cut about {have - target} words: "
+                f"{beats_phrase(beats, True)} of about {max(6, target // max(beats, 1))} words each (you averaged {have // n}; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line")
+    return (f"the narration totals {have} words in {n} beats but a {target_minutes:g}-minute video needs about {target} (at most {int(target * TARGET_HIGH)}). Cut about {have - target} words: "
+            f"write {beats} to {beats + 2} beats of at most {max(10, int(target * 1.05 / max(beats, 1) * 1.15))} words each (you averaged {have // n}), shorter sentences, drop the least important details; "
+            f"keep the hook, the key points and the ending, and do not go under {int(target * TARGET_LOW)} words")
 
 
 def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None) -> str:
@@ -318,8 +394,8 @@ def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Opti
     words = expected_words(target_minutes, photo_slots(photos, story))
     return (
         f"Topic: {topic}\n\n"
-        f"Target length: {target_minutes:g} minute(s). This is a hard requirement: the narration must total between {int(words * (TARGET_LOW if quality_fixes() else 0.9))} and {int(words * (TARGET_HIGH if quality_fixes() else 1.1))} words "
-        f"(about {words}) across at least {beats} beats of roughly {max(20, words // beats)} words each. The viewer pays per minute, and a shorter script makes a shorter video.\n\n"
+        f"Target length: {length_phrase(target_minutes)}. This is a hard requirement: the narration must total between {int(words * (SHORT_ASK_LOW if is_short(target_minutes) else TARGET_LOW if quality_fixes() else 0.9))} and {int(words * (SHORT_ASK_HIGH if is_short(target_minutes) else TARGET_HIGH if quality_fixes() else 1.1))} words "
+        f"(about {words}) across {beats_phrase(beats, is_short(target_minutes)) if not photos else f'at least {beats} beats'} of roughly {max(8 if is_short(target_minutes) else 20, words // beats)} words each. The viewer pays per minute, and a shorter script makes a shorter video.\n\n"
         + (f"Today's date: {today}. Anything time-sensitive must come from the grounding notes (with the date it refers to), never from memory.\n\n" if today else "")
         + (photos_prompt(photos, story, target_minutes) if photos else "")
         + f"Grounding notes (may be empty):\n{notes or no_notes_text()}\n\n"
