@@ -111,7 +111,7 @@ html[data-t=dark] .t.on .sel{color:#0A0D1F}
 .selbar .b{font-size:12.5px;color:var(--tx2);line-height:16px;margin-top:1px}
 .btn{height:48px;padding:0 20px;border-radius:24px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;font-weight:700;font-size:15.5px;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 html[data-t=dark] .btn{color:var(--onpr)}
-.btn.tonal{background:var(--prc);color:var(--pr)}
+.btn.tonal,html[data-t=dark] .btn.tonal{background:var(--prc);color:var(--pr)}
 .btn.sm{height:40px;padding:0 16px;font-size:14.5px;border-radius:20px}
 .sect{font-size:13px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--tx2);padding:0 20px;margin:14px 0 8px}
 .lens{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 20px}
@@ -127,6 +127,7 @@ html[data-t=dark] .btn{color:var(--onpr)}
 .row .sp{flex:1}.row .v{color:var(--tx2);font-size:15px;display:flex;align-items:center;gap:4px}
 .toggle{width:51px;height:31px;border-radius:16px;background:linear-gradient(135deg,var(--g1),var(--g2));position:relative}
 .toggle:after{content:"";position:absolute;right:2px;top:2px;width:27px;height:27px;border-radius:14px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+.toggle.off{background:var(--s3)}.toggle.off:after{display:none}
 .hr{height:1px;background:var(--ol);margin:0 20px;opacity:.7}
 /* media */
 .tile-top{position:absolute;inset:0}

@@ -428,3 +428,85 @@ Replaces the top banner. A card docked above the bottom bar (12 margin, radius 2
 - **Processing-time labels** assume the server exposes a per-photo "processing / ready" state; if only the library list changes, the client has to poll the library every 2 s while any tile is processing.
 - Look swatches are abstract; real previews of each look would be better once sample frames exist.
 - The language list and "Wi-Fi only" setting are not specified further.
+
+---
+
+## (n) Smart organize (automatic collections)
+
+Goal: after a big upload the app offers to group the photos into collections, in one calm sheet, with no AI and no surprises. Rules are fixed by the backend (place + month, trips are one collection per trip, no place means month only, groups under 5 photos are skipped, later uploads join matching collections). The UI never explains the algorithm beyond "by place and month".
+
+Mockups (light and dark): `organize-sheet`, `organize-sheet-single`, `organize-progress`, `organize-done`, `collections-with-auto`, `settings-organize`, `media-overflow` (the "Organize my library" entry). All in `overview.png`.
+
+### 1. The prompt sheet (`organize-sheet`)
+
+**When it appears:** once per upload batch, when (a) every file of the batch has finished uploading, (b) the photos are ready (the "Getting it ready" wait is over, so the preview sees real data), (c) the batch has **30 or more** ready photos, and (d) the preference is Ask. It appears over the Media tab even if the person navigated elsewhere meanwhile: it waits for the next time Media is visible (it never interrupts the composer or a video). "Not now" means no re-ask for that batch; the Media menu entry stays available.
+
+**Small batches (under 30 ready photos):** no sheet, ever. Preference Ask: nothing happens (the upload summary toast is the only message). Preference Always: organise runs silently (no sheet, no progress bar for fewer than 300 photos, because it is one call); if something joined an existing collection or a new one was created, the collection strip simply updates. No second toast.
+**Large batches with preference Always:** no sheet; the progress bar (section 2) runs and ends with the toast. **Never:** nothing.
+
+**Sheet anatomy** (system sheet, content-height detent about 620 pt, `large` when "+ N more" is opened):
+1. Grabber. Title "Organize 842 new photos?" 23/28 bold. One-line sub 14.5/20 secondary: "We'll group them by place and month into collections. Nothing is moved or deleted."
+2. Preview list: top 5 groups from the API (largest first), rows 56 high, 20 margin: three overlapping 30x30 thumbs (radius 8, 2 px surface ring, -10 overlap, from `sample_ids`), name 15.5 semibold (`London · Apr 2026`, `Phuket · 14-21 Jul 2024`, `Jun 2025`), "214 photos" 13 secondary, and for `existing: true` a small chip "+ Adds to existing" (24 high, primary on primary container, 12 bold). Under the list: "+ 9 more collections" (primary, 14.5 semibold), which expands the list in place (scrollable, sheet goes to large).
+3. One quiet line (13/18 secondary): "37 photos had no clear group and stay as they are." (hidden when `skipped` is 0).
+4. Divider, then the switch row: "Always organize new uploads" 15.5 semibold + "Photos from later uploads join matching collections automatically." 13 secondary. Default **off**. Toggling writes the account preference immediately (Ask to Always, or back), with a selection haptic; Settings reflects it. It does not trigger organising by itself.
+5. Actions, bottom: **Organize** (primary, 52 high, full width); below it a row: **Put all in one collection** (tonal, 46 high, flex 1.5) and **Not now** (text, flex 1, secondary colour).
+
+**Put all in one collection (`organize-sheet-single`):** the sheet content swaps in place (200 ms cross-fade, no new sheet): title "Put all 842 photos in one collection", sub "Give it a name. You can rename it any time.", a 52 high text field (surface 2, 2 pt primary outline when focused, keyboard opens) pre-filled with a suggestion, "Suggestions" label and two chips, buttons "Back" (text) and "Create collection" (primary, 50 high; disabled when the name is empty or over 60 characters). Suggestion logic: if one place holds more than 60 percent of the photos, "Thailand Jul 2024" (place + month, or place + year when the batch spans more than 2 months); second chip is the date range ("14 Jul - 21 Jul 2024", or "Jun 2025 - Jul 2026" across months). No place: only the date range chip.
+
+**States of the sheet**
+| State | Content |
+|---|---|
+| Loading preview | Title shown with count if known; 3 skeleton rows (surface 2 shimmer, same 56 height), buttons disabled. Max wait before error: 15 s |
+| Preview failed / offline | Icon, "Couldn't check your photos", "Try again in a moment." buttons "Try again" and "Not now" |
+| Nothing to organise (groups empty) | From a batch: the sheet is not shown. From "Organize my library": small sheet with sparkle icon, "Nothing to organize right now", "Your photos are already in collections, or there aren't at least 5 from the same place and month yet.", single button "OK" |
+| Only existing groups | Title "Add 214 new photos to your collections?" (when every group is `existing`), same list |
+
+### 2. Progress (`organize-progress`, `organize-done`)
+
+Apply is called repeatedly (about 300 photos per call). The client keeps a persisted job (account, remaining count) and shows real progress.
+
+- **Where:** the same docked card slot as the upload bar (above the bottom bar on Media), same anatomy so people learn one pattern: 40 ring with sparkle icon, **"Organizing... 1,200 of 9,800"** (15 bold), "You can leave this screen." (13 secondary, one line), a cancel "X" button (44), 3 px progress line at the bottom. Never two bars stacked: if an upload starts, the upload bar takes the slot and the sub line of the organise job reads "Organizing after the upload". On Videos or other screens: the 36 pt compact pill ("Organizing 1,200 of 9,800") that opens Media, hidden while the composer is focused.
+- **Running:** determinate ring (remaining/total). Numbers use tabular figures and thousands separators.
+- **Paused, offline:** cloud-off icon, "Waiting for a connection", "1,200 of 9,800 organized" and no cancel change; it resumes by itself. Bar turns neutral (outline colour), not red.
+- **Cancel:** confirm dialog "Stop organizing?" / "Collections already made stay as they are." buttons "Keep going" (primary) and "Stop" (danger text). Stopping simply stops calling apply; nothing is rolled back.
+- **Leaving and returning:** progress survives navigation. After the app is killed, the job resumes on next launch ("Resuming... 1,200 of 9,800") for as long as `remaining` is above 0 (open assumption below).
+- **Done:** the bar is replaced by a snackbar **"Organized into 14 collections"** with the calm action **"View"** (opens the Collections list scrolled to the newest). No undo (the delete menu is the way back). Singular: "Organized into 1 collection". If nothing was created: "Everything is already organized". One haptic success.
+- **Failure mid-way (server error):** bar becomes warning: "Couldn't finish organizing" + "Try again" (resumes where it stopped).
+
+### 3. Auto collections in the strip and the list (`organize-done`, `collections-with-auto`)
+
+- **Strip on Media:** section "Collections" with "See all"; cards 104x104 (radius 18), cover photo (the first `sample_ids` photo of the group), name 13 semibold under it (one line, ellipsis), count 12 secondary. Auto collections carry a small **sparkle badge** (22 circle, dark glass, white icon) at the top-left of the cover; collections made by hand have none. Order: newest first by the date of the latest photo in the collection; the existing "+ New" tile stays first.
+- **List ("See all"):** large title "Collections", sub "Newest first. Auto collections are made for you." Rows 80 high: 60x60 cover (radius 16), name 16.5 semibold, a meta line with an **"Auto" chip** (20 high, sparkle 11 + word, primary on primary container) then "71 photos · 3 May - 28 May", and a "..." button (44) at the right. Tap opens the collection (grid, like the Media grid).
+- **Menu ("..." or long-press / swipe on iOS):** **Rename** and **Delete collection** (danger colour), and under them one quiet line: "Photos stay in My media. Only the collection is removed."
+- **Rename:** small dialog with the field pre-filled, "Cancel" / "Save". The Auto chip stays; the name is the person's.
+- **Delete:** confirm dialog "Delete 'London · Apr 2026'?" body "The collection is removed. Its 214 photos stay in My media." buttons "Cancel" and "Delete" (danger text). When the preference is Always, add the line "New uploads from that month may create it again." Result: row collapses (200 ms), snackbar "Collection deleted" with no undo needed (nothing is lost).
+
+### 4. Settings (`settings-organize`)
+Under a "Photos" group, one card: row title "Organize new uploads" (sparkle icon) with a 3-way segmented control **Ask / Always / Never** (default Ask), and one short explanation under it: "Ask offers after a big upload. Always groups photos by place and month, and adds later uploads to matching collections. Never leaves everything as it is." Android: `SingleChoiceSegmentedButtonRow`; iOS: `Picker(.segmented)`. The sheet's switch writes the same value (switch on = Always, off = Ask); if the preference is Never the switch row is hidden and the sheet is never shown automatically.
+
+### 5. "Organize my library" (`media-overflow`)
+In the Media toolbar pill the overflow "..." opens a menu: **Organize my library** (sparkle), Select, Storage. It runs the preview over the whole library and opens the same sheet with the title "Organize 9,800 photos?" (or "Add N photos to your collections?"). The same states apply (nothing to organise, offline). Present regardless of the preference (even Never, since it is an explicit tap).
+
+### 6. Accessibility
+- **Sheet focus order (VoiceOver / TalkBack):** title, sub, each group row as one element ("London, April 2026. 214 photos. Adds to existing collection." the thumbnails are hidden from assistive tech), "Plus 9 more collections" button, skipped note, switch ("Always organize new uploads, off. Photos from later uploads join matching collections automatically."), Organize, Put all in one collection, Not now. Focus starts at the title; on appearance announce the title once. Escape/back = Not now.
+- **Progress:** announced politely and aggregated, at most every 10 percent or 15 seconds ("Organized 1,200 of 9,800 photos"), never per call; state changes once ("Waiting for a connection", "Organized into 14 collections"). The bar is a single element with a progress value; the cancel button is labelled "Stop organizing".
+- **Collections:** the Auto chip reads "Automatic collection"; the menu is reachable by the standard custom-actions rotor (iOS) / TalkBack actions menu (Android).
+- **Large text:** rows wrap to two lines and the "Adds to existing" chip moves under the count; the three buttons stack full width in the order Organize, Put all, Not now; the Settings segmented control becomes a vertical list of three radio rows.
+- **Reduced motion:** content swap in the sheet and row collapse are instant; ring updates without animation; no shimmer in the loading skeleton (static surface 2).
+- Contrast: all new text uses existing pairs from (i) (primary on primary container 4.9:1 light, 5.8:1 dark; secondary text 6.1:1 or better).
+
+### Acceptance criteria
+1. A batch of 842 ready photos with Ask: after the last photo is ready the sheet appears with at most 5 rows, "+ N more", the skipped line (when skipped > 0), the switch off, and three actions. A batch of 29: nothing appears.
+2. "Organize" starts the bar immediately; it shows real "x of y" numbers from the cumulative apply responses, survives leaving Media, can be cancelled with the confirm dialog, and ends with the toast "Organized into N collections" and a "View" action.
+3. Offline during organising shows the paused state and resumes by itself.
+4. "Put all in one collection" shows a suggested name; creating it ends in the same toast form ("Organized into 1 collection").
+5. Auto collections show the sparkle badge in the strip and the "Auto" chip in the list, newest first; rename works; delete confirms with "photos stay" copy and keeps all photos.
+6. Settings shows Ask / Always / Never and the sheet's switch stays in sync; "Organize my library" opens the same sheet from the Media menu and shows the kind empty state when there is nothing to do.
+
+### Unclear or assumed (for the backend and builders)
+- **"Put all in one collection"** is not in the API you described (preview, apply). It needs a backend call that takes a name and the batch's photo ids; if that does not exist, drop the secondary action and keep the sheet to Organize and Not now.
+- **Resume after the app is killed** assumes apply is idempotent and that `remaining` can be re-queried; otherwise the job restarts from a new preview.
+- **Rename of an auto collection:** if later uploads are matched by the collection's place and month rather than by its name, renaming is safe; if matching uses the name, renaming would stop auto-joining. The design keeps the Auto chip after a rename; revisit if the backend cannot support that.
+- **Delete with preference Always:** the dialog warns that matching uploads can recreate it; the backend may instead remember deletions. Pick one and align the copy.
+- The 30-photo threshold counts photos that are ready in the batch, not files picked.
+- The home city, place names and trip detection are shown as returned; no editing of group names before applying (kept out for simplicity).
