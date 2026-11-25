@@ -25,6 +25,7 @@ class PrepareCtx:
     sources: List[Dict[str, Any]] = field(default_factory=list)   # the plan's cited sources (title, url, publisher): the only place a news headline may come from
     language: str = "en"
     region: Optional[str] = None
+    media_items: List[Dict[str, Any]] = field(default_factory=list)   # the user's own photos of this video: {id, key, w, h, orientation, caption, taken, where}; their clean copies are ready in storage
 
 
 @dataclass

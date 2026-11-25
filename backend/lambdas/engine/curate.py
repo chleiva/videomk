@@ -26,9 +26,12 @@ PER_SHEET = 10
 COLS = 5
 CELL_W, CELL_H = 300, 225
 GAP = PAD = 6
-SECONDS_PER_PHOTO = 3.5       # the least a photo stays on screen on average (a gallery shows several in one beat)
-SHARE_FOR_PHOTOS = 0.8        # the rest of the video's time is for narration without a photo
-MAX_PER_MOMENT = 5
+SECONDS_PER_PHOTO = 1.2       # on average a photo needs this long on screen when several are shown at once (collages, galleries): a 2-minute video can carry about 85 photos
+SHARE_FOR_PHOTOS = 0.85       # the rest of the video's time is for chapter titles and narration without photos
+MAX_PER_MOMENT = 9            # a collage shows up to 9 photos together
+LAYOUTS = ("single", "sequence", "collage")   # one photo | 2-5 photos one after another (gallery) | 3-9 photos at once (photo_collage)
+SESSION_GAP_H = 3.0           # within a day, a pause this long starts a new session (morning, afternoon, evening)
+DATED_SHARE = 0.7             # with this share of photos dated, the order and the day groups are decided here, not by the model
 QUALITIES = ("good", "ok", "poor")
 SUBJECTS = ("landmark", "landscape", "city", "food", "people", "pet", "indoor", "event", "document", "object", "other")
 
@@ -36,6 +39,11 @@ SUBJECTS = ("landmark", "landscape", "city", "food", "people", "pet", "indoor", 
 def max_used(minutes: float) -> int:
     """The most photos a video of this length can show: about SECONDS_PER_PHOTO each over most of its time."""
     return max(3, int(float(minutes) * 60 * SHARE_FOR_PHOTOS / SECONDS_PER_PHOTO))
+
+
+def minutes_for(n_photos: int) -> float:
+    """The shortest video that can show all `n_photos` (the apps tell the person when the length they chose is shorter)."""
+    return n_photos * SECONDS_PER_PHOTO / SHARE_FOR_PHOTOS / 60.0
 
 
 def number(pid: str) -> int:
@@ -169,6 +177,74 @@ def trip_summary(photos: List[Dict[str, Any]]) -> str:
     return "; ".join(bits)
 
 
+def photo_day(p: Dict[str, Any]) -> Optional[str]:
+    return str(p["taken"])[:10] if p.get("taken") else None
+
+
+def dated_share(photos: List[Dict[str, Any]]) -> float:
+    return sum(1 for p in photos if p.get("taken")) / len(photos) if photos else 0.0
+
+
+def _dt(taken: str):
+    import datetime
+    try:
+        return datetime.datetime.strptime(taken[:19], "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        return None
+
+
+def _part_of_day(hour: int) -> str:
+    return "night" if hour < 5 or hour >= 22 else "morning" if hour < 12 else "afternoon" if hour < 18 else "evening"
+
+
+def group_photos(photos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Programmatic groups, in time order: one per DAY, split into sessions when two photos are SESSION_GAP_H or more apart; photos without a date form their own group.
+    [{"id": "G1", "day": "2026-04-11" | None, "label": "Sat 11 Apr, morning, Paris, France", "ids": [...]}]. Empty when too few photos have a date to trust."""
+    if dated_share(photos) < DATED_SHARE:
+        return []
+    dated = sorted((p for p in photos if _dt(p.get("taken", ""))), key=lambda p: (p["taken"], number(p["id"])))
+    groups: List[Dict[str, Any]] = []
+    last = None
+    for p in dated:
+        t = _dt(p["taken"])
+        if groups and groups[-1]["day"] == photo_day(p) and (t - last).total_seconds() < SESSION_GAP_H * 3600:
+            groups[-1]["ids"].append(p["id"])
+        else:
+            groups.append({"day": photo_day(p), "t0": t, "ids": [p["id"]]})
+        last = t
+    by_id = {p["id"]: p for p in photos}
+    for g in groups:
+        places = [by_id[i]["where"].replace("near ", "") for i in g["ids"] if by_id[i].get("where")]
+        top = max(set(places), key=places.count) if places else ""
+        g["label"] = f"{g['t0'].strftime('%a %d %b')}, {_part_of_day(g['t0'].hour)}" + (f", {top}" if top else "")
+        del g["t0"]
+    undated = [p["id"] for p in photos if not _dt(p.get("taken", ""))]
+    if undated:
+        groups.append({"day": None, "label": "no date", "ids": undated})
+    for k, g in enumerate(groups, start=1):
+        g["id"] = f"G{k}"
+    return groups
+
+
+def _ranges(ids: List[str]) -> str:
+    nums = sorted(number(i) for i in ids)
+    out, start, prev = [], None, None
+    for n in nums:
+        if start is None:
+            start = prev = n
+        elif n == prev + 1:
+            prev = n
+        else:
+            out.append(f"P{start}" if start == prev else f"P{start}-P{prev}"); start = prev = n
+    if start is not None:
+        out.append(f"P{start}" if start == prev else f"P{start}-P{prev}")
+    return ", ".join(out)
+
+
+def groups_text(groups: List[Dict[str, Any]]) -> str:
+    return "\n".join(f"{g['id']}: {g['label']} - {_ranges(g['ids'])} ({len(g['ids'])} photos)" for g in groups)
+
+
 def _catalogue_text(photos: List[Dict[str, Any]]) -> str:
     lines = []
     for p in photos:
@@ -188,32 +264,130 @@ def _catalogue_text(photos: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def story_system(minutes: float, cap: int) -> str:
+def story_system(minutes: float, cap: int, grouped: bool = False) -> str:
     return (
         "You are the story producer for a video made from a person's OWN photos. You get the person's request, the video's length and a numbered catalogue of their photos. "
         "First work out what these photos are about and what the person wants the video to be (a holiday memory, a property tour, a family event, a project...). Then plan the video's moments.\n"
         'Return ONLY JSON: {"story": "2-4 sentences: what the photos are about (who, where, when, only as evident from the captions or the request) and what the video is for", '
         '"voice": "first_person" (the person tells their own trip or event: we, I) or "narrator" (a presenter explains it), "tone": "a few words", "title_idea": "<=60 chars", '
-        '"chapters": [{"title": "<=50 chars", "summary": "one sentence", "moments": [{"photos": ["P3"], "role": "opening|establishing|detail|people|climax|transition|closing", '
+        '"chapters": [{"title": "<=50 chars", "summary": "one sentence", "moments": [{"photos": ["P3"], "layout": "single|sequence|collage", "role": "opening|establishing|detail|people|climax|transition|closing", '
         '"note": "<=20 words: what this moment shows and why it is here"}]}], "unused": [{"id": "P9", "reason": "duplicate|blurry|off-topic|surplus"}]}\n'
         "Rules:\n"
-        "- Every photo appears in exactly one moment or in unused. A moment has 1 to 5 photos: 1 for a standout photo, 2 to 5 for photos of the same subject or place that belong together (they are shown as a gallery).\n"
-        "- Order the moments to tell a story: usually the order things happened (use visual clues like daylight and the order the photos were chosen as hints), or by theme when there is no sequence. "
-        "Open with a strong, establishing photo and end with a fitting one.\n"
-        f"- Group into chapters by place, subject or time: 2 to 8 chapters, fewer for short videos. This video is {minutes:g} minutes, so use at most {cap} photos in total: keep the best of near duplicates, "
-        "drop POOR quality photos first, prefer variety and what the request is about; put the rest in unused.\n"
-        "- Lines may say when ('taken Sun 12 Apr 14:32') and where ('GPS place: Paris, France') each photo was taken, from the photo's own data. Trust them over visual guesses for ORDER and for PLACE NAMES: order moments by time, "
-        "start a new chapter when the day changes, and name places as given. A photo without them is placed by what it shows.\n"
-        "- The request decides the emphasis. Never invent names, places, dates or events that the captions and the request do not support; say less rather than guess."
+        "- Every photo appears in exactly one moment or in unused. A moment has 1 to 9 photos and a layout: single (1 standout photo), sequence (2 to 5 photos shown one after another), collage (3 to 9 photos of the same "
+        "subject, place and day shown TOGETHER on one screen, in a styled layout: use collages to fit many photos into a short video).\n"
+        f"- This video is {minutes:g} minutes and can show about {cap} photos. If there are more photos than that, keep the best of near duplicates, drop POOR quality photos first and put the rest in unused; if there "
+        "are fewer, use single and sequence moments for the best photos and collages for the rest. Prefer variety and what the request is about.\n"
+        "- Order the moments to tell a story: usually the order things happened, or by theme when there is no sequence. Open with a strong, establishing photo and end with a fitting one.\n"
+        "- Group into chapters by place, subject or time: 2 to 8 chapters, fewer for short videos (a chapter may be a day, a few days or a week).\n"
+        "- Lines may say when ('taken Sun 12 Apr 14:32') and where ('GPS place: Paris, France') each photo was taken, from the photo's own data. Trust them over visual guesses for ORDER and for PLACE NAMES. "
+        "A photo without them is placed by what it shows.\n"
+        + ("- The photos are already grouped by DAY (and by session within a day) below. NEVER put photos of different days in the same moment (a collage or sequence is always from one day), and never reorder "
+           "moments against the clock; chapters follow the days in order.\n" if grouped else "")
+        + "- The request decides the emphasis. Never invent names, places, dates or events that the captions and the request do not support; say less rather than guess."
     )
 
 
+def fit_layout(m: Dict[str, Any]) -> Dict[str, Any]:
+    """A moment's layout made consistent with its size: 1 photo is single, 2 are a sequence, more than 5 must be a collage, 3 to 5 keep the model's choice (default sequence)."""
+    n = len(m["photos"])
+    want = m.get("layout") if m.get("layout") in LAYOUTS else "sequence"
+    m["layout"] = "single" if n == 1 else "sequence" if n == 2 else "collage" if n > 5 else ("collage" if want == "collage" else "sequence")
+    return m
+
+
+def _moments_of(ids: List[str], per: int = 6) -> List[Dict[str, Any]]:
+    out = []
+    for k in range(0, len(ids), per):
+        part = ids[k:k + per]
+        out.append(fit_layout({"photos": part, "layout": "collage", "role": "detail", "note": ""}))
+    return out
+
+
 def _fallback_story(photos: List[Dict[str, Any]], cap: int) -> Dict[str, Any]:
-    """No model answer: keep the photos in the order given, three to a gallery, ten to a chapter, the best ones if there are too many."""
-    chosen = rank_and_trim([p["id"] for p in photos], {p["id"]: p for p in photos}, cap)
-    moments = [{"photos": chosen[i:i + 3], "role": "detail", "note": ""} for i in range(0, len(chosen), 3)]
-    chapters = [{"title": f"Part {k + 1}" if len(moments) > 4 else "", "summary": "", "moments": moments[i:i + 4]} for k, i in enumerate(range(0, len(moments), 4))]
+    """No model answer: the best photos in the order given (by the clock when dated), a chapter per day, collages of up to six."""
+    by_id = {p["id"]: p for p in photos}
+    chosen = rank_and_trim([p["id"] for p in photos], by_id, cap)
+    groups = [g for g in group_photos([by_id[i] for i in chosen]) if g["ids"]]
+    if groups:
+        chapters = [{"title": g["label"].split(",")[0] if g["day"] else "", "summary": "", "moments": _moments_of(g["ids"])} for g in groups]
+    else:
+        moments = _moments_of(chosen)
+        chapters = [{"title": f"Part {k + 1}" if len(moments) > 4 else "", "summary": "", "moments": moments[i:i + 4]} for k, i in enumerate(range(0, len(moments), 4))]
     return {"story": "", "voice": "narrator", "tone": "", "title_idea": "", "chapters": chapters, "unused": [{"id": p["id"], "reason": "surplus"} for p in photos if p["id"] not in chosen]}
+
+
+def enforce_days(chapters: List[Dict[str, Any]], by_id: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """When most photos have a date the order is decided here, not by the model: a moment never mixes days (it is split at the day change), moments follow the clock,
+    and chapters are the model's own chapters cut into contiguous runs in that order (a chapter that comes back later is titled 'continued')."""
+    flat = []
+    for ci, ch in enumerate(chapters):
+        for m in ch["moments"]:
+            parts: Dict[Any, List[str]] = {}
+            last = None
+            for pid in m["photos"]:
+                d = photo_day(by_id[pid]) or last
+                last = photo_day(by_id[pid]) or last
+                parts.setdefault(d, []).append(pid)
+            for d, ids in parts.items():
+                for k in range(0, len(ids), MAX_PER_MOMENT):
+                    flat.append((ci, fit_layout({**m, "photos": ids[k:k + MAX_PER_MOMENT]})))
+    def stamp(m: Dict[str, Any]) -> str:
+        ts = [by_id[i]["taken"] for i in m["photos"] if by_id[i].get("taken")]
+        return min(ts) if ts else ""
+    keyed, carry = [], ""
+    for n, (ci, m) in enumerate(flat):
+        k = stamp(m) or carry          # an undated moment keeps its place among its neighbours
+        carry = k or carry
+        keyed.append((k or "0", n, ci, m))
+    keyed.sort(key=lambda x: (x[0], x[1]))
+    runs = 0
+    prev_ci = None
+    per_chapter: Dict[int, int] = {}
+    for _, _, ci, _m in keyed:
+        if ci != prev_ci:
+            runs += 1
+            per_chapter[ci] = per_chapter.get(ci, 0) + 1
+            prev_ci = ci
+    if max(per_chapter.values(), default=1) > 1 or runs > len(chapters) + 1:
+        return _day_chapters([m for _, _, _, m in keyed], by_id)   # the model's chapters cut across the days: the chapters follow the days instead
+    out: List[Dict[str, Any]] = []
+    for _, _, ci, m in keyed:
+        if not out or out[-1]["_ci"] != ci:
+            out.append({"_ci": ci, "title": chapters[ci]["title"], "summary": chapters[ci]["summary"], "moments": []})
+        out[-1]["moments"].append(m)
+    for c in out:
+        del c["_ci"]
+    return out
+
+
+def _day_chapters(moments: List[Dict[str, Any]], by_id: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """One chapter per day in time order, titled 'Saturday 11 April' (plus the place when known); with more than 8 days, one per week."""
+    import datetime
+    def day_of(m: Dict[str, Any]) -> str:
+        return next((photo_day(by_id[i]) for i in m["photos"] if photo_day(by_id[i])), "")
+    days = list(dict.fromkeys(day_of(m) for m in moments))
+    weekly = len([d for d in days if d]) > 8
+    def key(d: str) -> str:
+        if not d or not weekly:
+            return d
+        dt = datetime.datetime.strptime(d, "%Y-%m-%d")
+        return (dt - datetime.timedelta(days=dt.weekday())).strftime("%Y-%m-%d")
+    out: List[Dict[str, Any]] = []
+    for m in moments:
+        k = key(day_of(m))
+        if not out or out[-1]["_k"] != k:
+            places = [by_id[i].get("where", "").replace("near ", "") for mm in moments if key(day_of(mm)) == k for i in mm["photos"] if by_id[i].get("where")]
+            top = max(set(places), key=places.count) if places else ""
+            try:
+                d0 = datetime.datetime.strptime(k, "%Y-%m-%d")
+                title = (f"Week of {d0.day} {d0.strftime('%B')}" if weekly else d0.strftime("%A ") + f"{d0.day} {d0.strftime('%B')}") + (f" - {top}" if top else "")
+            except ValueError:
+                title = ""
+            out.append({"_k": k, "title": title[:50], "summary": "", "moments": []})
+        out[-1]["moments"].append(m)
+    for c in out:
+        del c["_k"]
+    return out
 
 
 def rank_and_trim(ids: List[str], by_id: Dict[str, Dict[str, Any]], cap: int) -> List[str]:
@@ -253,7 +427,7 @@ def reconcile(story: Dict[str, Any], photos: List[Dict[str, Any]], cap: int) -> 
             for k in range(0, len(ids), MAX_PER_MOMENT):
                 part = ids[k:k + MAX_PER_MOMENT]
                 placed += part
-                moments.append({"photos": part, "role": _clean(m.get("role"), 20) or "detail", "note": _clean(m.get("note"), 160)})
+                moments.append(fit_layout({"photos": part, "layout": m.get("layout"), "role": _clean(m.get("role"), 20) or "detail", "note": _clean(m.get("note"), 160)}))
         if moments:
             chapters.append({"title": _clean(ch.get("title"), 50), "summary": _clean(ch.get("summary"), 200), "moments": moments})
     if not chapters:
@@ -262,7 +436,7 @@ def reconcile(story: Dict[str, Any], photos: List[Dict[str, Any]], cap: int) -> 
     forgotten = [p["id"] for p in photos if p["id"] not in placed and p["id"] not in left_out]
     if forgotten and len(placed) < cap:
         room = forgotten[: cap - len(placed)]
-        chapters.append({"title": "More moments", "summary": "", "moments": [{"photos": room[i:i + 3], "role": "detail", "note": ""} for i in range(0, len(room), 3)]})
+        chapters.append({"title": "More moments", "summary": "", "moments": _moments_of(room)})
         placed += room
     flat = [i for ch in chapters for m in ch["moments"] for i in m["photos"]]
     keep = set(rank_and_trim(flat, by_id, cap))
@@ -270,8 +444,11 @@ def reconcile(story: Dict[str, Any], photos: List[Dict[str, Any]], cap: int) -> 
         for ch in chapters:
             for m in ch["moments"]:
                 m["photos"] = [i for i in m["photos"] if i in keep]
+                fit_layout(m) if m["photos"] else None
             ch["moments"] = [m for m in ch["moments"] if m["photos"]]
         chapters = [ch for ch in chapters if ch["moments"]]
+    if dated_share(photos) >= DATED_SHARE:
+        chapters = enforce_days(chapters, by_id)
     used = {i for ch in chapters for m in ch["moments"] for i in m["photos"]}
     reasons = {str(u.get("id", "")).upper(): _clean(u.get("reason"), 40) for u in (story.get("unused") or []) if isinstance(u, dict)}
     return {
@@ -284,17 +461,19 @@ def reconcile(story: Dict[str, Any], photos: List[Dict[str, Any]], cap: int) -> 
 def make_story(request: str, minutes: float, photos: List[Dict[str, Any]], ask_text: Callable[[str, str], str]) -> Dict[str, Any]:
     cap = max_used(minutes)
     summary = trip_summary(photos)
-    user = (f"The person's request: {request[:500]}\nVideo length: {minutes:g} minutes (use at most {cap} photos)." + (f"\nAbout the photos: {summary}." if summary else "")
+    groups = group_photos(photos)
+    user = (f"The person's request: {request[:500]}\nVideo length: {minutes:g} minutes (about {cap} photos fit)." + (f"\nAbout the photos: {summary}." if summary else "")
+            + (f"\n\nGroups by day and session (from the photos' own dates):\n{groups_text(groups)}" if groups else "")
             + f"\n\nPhotos:\n{_catalogue_text(photos)}\n\nReturn the JSON now.")
     try:
-        raw = _json_obj(ask_text(story_system(minutes, cap), user)) or {}
+        raw = _json_obj(ask_text(story_system(minutes, cap, bool(groups)), user)) or {}
     except Exception:
         logging.exception("the photo story could not be written; grouping the photos mechanically")
         raw = {}
     return reconcile(raw, photos, cap)
 
 
-def moments(story: Dict[str, Any]) -> List[Dict[str, Any]]:
+def moments(story: Dict[str, Any]) -> List[Dict[str, Any]]:   # each: photos, layout (single|sequence|collage), role, note, chapter (on the first of a chapter)
     """The story's moments in order, each with its chapter title when it opens a chapter."""
     out = []
     for ch in story.get("chapters") or []:

@@ -110,14 +110,15 @@ def test_a_failing_story_call_degrades_to_a_mechanical_grouping_and_never_blocks
     def boom(system, user):
         raise RuntimeError("model down")
     _, story = curate.curate(ph, [jpeg()] * 14, "x", 5, ask_vision=FakeVision(), ask_text=boom)
-    assert sorted(curate.used_ids(story), key=lambda i: int(i[1:])) == [p["id"] for p in ph] and all(1 <= len(m["photos"]) <= 3 for m in curate.moments(story))
+    assert sorted(curate.used_ids(story), key=lambda i: int(i[1:])) == [p["id"] for p in ph] and all(1 <= len(m["photos"]) <= 9 for m in curate.moments(story))
     _, story2 = curate.curate(photos_of(5), [jpeg()] * 5, "x", 5, ask_vision=lambda *a: "garbage", ask_text=lambda s, u: "garbage")
     assert len(curate.used_ids(story2)) == 5
 
 
 # ----------------------------------------------------------------------------- the story
 def test_the_length_decides_how_many_photos_can_be_used():
-    assert curate.max_used(1) == 13 and curate.max_used(3) == 41 and curate.max_used(8) == 109 and curate.max_used(0.1) == 3
+    assert curate.max_used(1) == 42 and curate.max_used(2) == 85 and curate.max_used(3) == 127 and curate.max_used(0.1) == 4 and curate.max_used(0.01) == 3
+    assert 2.3 < curate.minutes_for(100) < 2.4 and curate.max_used(curate.minutes_for(100)) >= 99        # 100 photos need a little over 2 minutes
 
 
 def test_reconcile_makes_a_messy_story_safe():
@@ -128,7 +129,7 @@ def test_reconcile_makes_a_messy_story_safe():
     s = curate.reconcile(messy, ph, 50)
     placed = curate.used_ids(s)
     assert len(placed) == len(set(placed)) and set(placed) <= {p["id"] for p in ph}              # real ids, each once
-    assert all(1 <= len(m["photos"]) <= 5 for m in curate.moments(s)) and all(c["moments"] for c in s["chapters"])
+    assert all(1 <= len(m["photos"]) <= 9 and m["layout"] in curate.LAYOUTS for m in curate.moments(s)) and all(c["moments"] for c in s["chapters"])
     assert "P10" in placed and "P11" in placed                                                  # forgotten photos are kept when there is room
     assert s["voice"] == "narrator" and len(s["story"]) <= 700
     assert s["unused"] == [{"id": "P12", "reason": "blurry"}] and "P12" not in placed           # the model's own decision to leave P12 out stands, with its reason
@@ -163,7 +164,7 @@ def test_the_director_gets_the_story_the_moments_and_the_rules():
     s = curate.reconcile(json.loads(story_json(ph, per=3, drop=("P9",))), ph, 40)
     text = plan_mod.photos_prompt([p for p in ph], s)
     assert "THE STORY: A holiday in Paris." in text and "first person" in text and "Chapter \"Arrival\"" in text and "LEFT OUT (do not use): P9" in text
-    assert "(a gallery)" in text and '{"photos": ["P7", "P8"]' in text and "Write ONE beat per moment" in text
+    assert "[sequence]" in text and "[single]" in text and "photo_collage" in text and "chapter_card" in text and "Write ONE beat per moment" in text
     assert plan_mod.photo_slots(ph, s) == len(curate.moments(s)) and plan_mod.photo_slots(ph, None) == 9
     legacy = plan_mod.photos_prompt(ph, None)
     assert "Use EVERY photo" in legacy                                                          # no story: the old behaviour is untouched
@@ -285,3 +286,69 @@ def test_the_api_schema_allows_exactly_as_many_media_ids_as_the_server_limit():
     src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "backend_stack.py"), encoding="utf-8").read()
     m = re.search(r'"media": apigw\.JsonSchema\(type=apigw\.JsonSchemaType\.ARRAY, min_items=1, max_items=(\d+)', src)
     assert m and int(m.group(1)) == photo_ids.MAX_PHOTOS
+
+
+# ----------------------------------------------------------------------------- grouping by day, never mixing days, layouts
+def _trip(n=30, per_day=10, step_h=1.2):
+    import datetime
+    base = datetime.datetime(2026, 4, 11, 9, 0)
+    ph = []
+    for i in range(n):
+        t = base + datetime.timedelta(days=i // per_day, hours=(i % per_day) * step_h)
+        ph.append({"id": f"P{i + 1}", "taken": t.strftime("%Y-%m-%dT%H:%M:%S"), "where": "Paris, France", "caption": f"c{i + 1}", "quality": "good", "similar": []})
+    return ph
+
+
+def test_photos_are_grouped_by_day_and_split_into_sessions_by_long_pauses():
+    ph = _trip(30)
+    g = curate.group_photos(ph)
+    assert [(x["id"], len(x["ids"])) for x in g] == [("G1", 10), ("G2", 10), ("G3", 10)] and g[0]["label"] == "Sat 11 Apr, morning, Paris, France"
+    assert curate.groups_text(g).splitlines()[1] == "G2: Sun 12 Apr, morning, Paris, France - P11-P20 (10 photos)"
+    import datetime
+    for p in ph[4:10]:                                                           # a gap of hours inside the day starts a new session of the same day
+        p["taken"] = (datetime.datetime.strptime(p["taken"], "%Y-%m-%dT%H:%M:%S") + datetime.timedelta(hours=4)).strftime("%Y-%m-%dT%H:%M:%S")
+    ph.sort(key=lambda p: p["taken"])
+    sessions = [x for x in curate.group_photos(ph) if x["day"] == "2026-04-11"]
+    assert len(sessions) >= 2 and all(x["day"] == "2026-04-11" for x in sessions)
+    undated = _trip(10)
+    for p in undated[:5]:
+        p.pop("taken")
+    assert curate.group_photos(undated) == []                                    # too few dates to trust: the model decides
+    mixed = _trip(10) + [{"id": "P99", "caption": "x"}]
+    assert curate.group_photos(mixed)[-1] == {"day": None, "label": "no date", "ids": ["P99"], "id": f"G{len(curate.group_photos(mixed))}"}
+
+
+def test_a_moment_never_mixes_days_and_moments_follow_the_clock_whatever_the_model_said():
+    ph = _trip(30)
+    messy = {"story": "s", "chapters": [{"title": "Sights", "moments": [{"photos": ["P1", "P2", "P15", "P16", "P25"], "layout": "collage"}]}, {"title": "Food", "moments": [{"photos": ["P11", "P12", "P5"], "layout": "collage"}]}]}
+    s = curate.reconcile(messy, ph, 85)
+    by_id = {p["id"]: p for p in ph}
+    for m in curate.moments(s):
+        assert len({by_id[i]["taken"][:10] for i in m["photos"]}) == 1, m           # one day per moment
+    order = [by_id[m["photos"][0]]["taken"] for m in curate.moments(s)]
+    assert order == sorted(order)                                                  # chronological
+    assert [c["title"] for c in s["chapters"]] == ["Saturday 11 April - Paris, France", "Sunday 12 April - Paris, France", "Monday 13 April - Paris, France"]   # the model's chapters cut across the days: chapters follow the days
+
+
+def test_over_eight_days_the_chapters_are_weeks_and_a_consistent_model_answer_keeps_its_own_chapters():
+    ph = _trip(60, per_day=3, step_h=2)                                             # 20 days
+    s = curate.reconcile({"story": "s", "chapters": [{"title": "X", "moments": [{"photos": [f"P{i}"]} for i in range(1, 61, 7)]}]}, ph, 100)
+    assert all(c["title"].startswith("Week of") for c in s["chapters"]) and len(s["chapters"]) >= 3
+    ph2 = _trip(20, per_day=10)
+    ok = {"story": "s", "chapters": [{"title": "Arrival", "moments": [{"photos": [f"P{i}" for i in range(1, 11)], "layout": "collage"}]}, {"title": "Day two", "moments": [{"photos": [f"P{i}" for i in range(11, 21)], "layout": "collage"}]}]}
+    assert [c["title"] for c in curate.reconcile(ok, ph2, 85)["chapters"]] == ["Arrival", "Day two"]
+
+
+def test_layouts_are_made_consistent_with_the_number_of_photos():
+    f = curate.fit_layout
+    assert f({"photos": ["P1"], "layout": "collage"})["layout"] == "single"
+    assert f({"photos": ["P1", "P2"], "layout": "collage"})["layout"] == "sequence"
+    assert f({"photos": ["P1", "P2", "P3"], "layout": "collage"})["layout"] == "collage" and f({"photos": ["P1", "P2", "P3"]})["layout"] == "sequence"
+    assert f({"photos": [f"P{i}" for i in range(1, 8)], "layout": "sequence"})["layout"] == "collage"
+    assert f({"photos": ["P1", "P2", "P3"], "layout": "nonsense"})["layout"] == "sequence"
+
+
+def test_the_mechanical_fallback_follows_the_days_with_collages():
+    s = curate.reconcile({}, _trip(30), 85)
+    assert [c["title"] for c in s["chapters"]] == ["Sat 11 Apr", "Sun 12 Apr", "Mon 13 Apr"] and all(m["layout"] in ("collage", "sequence") for m in curate.moments(s))
+    assert sorted(curate.used_ids(s), key=lambda i: int(i[1:])) == [f"P{i}" for i in range(1, 31)]

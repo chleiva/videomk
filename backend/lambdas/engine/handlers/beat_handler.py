@@ -210,7 +210,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if el is not None and el.prepare is not None:   # an element that needs outside data (a map's places, ...): a failure falls back, it never fails the video
             try:
                 patch = el.prepare(dict(beat["scene"]["props"]), PrepareCtx(video_id=video_id, beat_id=beat_id, narration=beat.get("narration", ""), duration=float(media["duration"]),
-                                                                            sources=plan.get("sources") or [], language=plan.get("language", "en"), region=plan.get("region")))
+                                                                            sources=plan.get("sources") or [], language=plan.get("language", "en"), region=plan.get("region"),
+                                                                            media_items=plan.get("media_items") or []))
                 media["element"] = patch if isinstance(patch, dict) else {}
             except Exception:
                 logging.exception("element %s could not prepare beat %s", el.name, beat_id)

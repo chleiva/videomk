@@ -10,7 +10,7 @@ from engine.scenes import registry
 from engine.scenes.registry import Element, PrepareCtx
 
 CORE = {"title", "bullets", "diagram", "chart", "timeline", "stat", "quote", "image", "clip", "gallery"}
-FAMILIES = {"Text", "Lists", "Compare", "Data", "Process", "Maps", "Code and math", "People and sources", "Media"}
+FAMILIES = {"Text", "Lists", "Compare", "Data", "Process", "Maps", "Code and math", "People and sources", "Media", "Photos"}
 
 
 def test_no_element_module_failed_to_import():

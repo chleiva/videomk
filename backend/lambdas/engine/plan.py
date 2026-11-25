@@ -184,7 +184,8 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
         out.append(f'Chapter "{ch.get("title") or "-"}"' + (f": {ch['summary']}" if ch.get("summary") else ""))
         for m in ch["moments"]:
             ids = m["photos"]
-            out.append("  - " + (f'photo {ids[0]}: ' if len(ids) == 1 else f'photos {", ".join(ids)} (a gallery): ') + (m.get("note") or "") + f" [{m.get('role', 'detail')}]")
+            lay = m.get("layout") or ("single" if len(ids) == 1 else "sequence")
+            out.append("  - " + (f'photo {ids[0]} [single]: ' if len(ids) == 1 else f'photos {", ".join(ids)} [{lay}]: ') + (m.get("note") or "") + f" [{m.get('role', 'detail')}]")
             for i in ids:
                 if i in by_id:
                     out.append("      " + line(by_id[i]))
@@ -192,12 +193,17 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
         out.append("LEFT OUT (do not use): " + ", ".join(u["id"] for u in story["unused"]))
     out.append(
         "RULES for photo scenes:\n"
-        "- A moment with one photo is an image scene {\"photo\": \"P7\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}. A moment with 2-5 photos is a gallery scene "
-        "{\"photos\": [\"P7\", \"P8\"], \"alt\": \"<<=70 chars>\"} whose photographs follow each other in the order given while the narration of that beat names or describes them in that order.\n"
-        "- Use every photo of every moment, exactly as grouped; use no photo that is not in a moment; do NOT add stock-photo scenes for the user's own story (a map, a counter or another non-photo scene is fine where it helps, "
-        "for example a map of the route or a fact about a landmark from the grounding notes).\n"
-        "- Narrate what is visible and what the story and the request say, in the voice above. Add real facts about a named place or landmark only from the grounding notes. Never invent names, dates, people or events.\n"
-        "- Open the video on the first moment's photograph or a strong title, and let the chapters give the video its chapter titles (set \"chapter\" on the first beat of each chapter).\n\n")
+        "- A [single] moment is an image scene {\"photo\": \"P7\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}, or a photo_frame for one important photo. A [sequence] moment is a gallery scene "
+        "{\"photos\": [\"P7\", \"P8\"], \"alt\": \"<<=70 chars>\"} whose photographs follow each other in the order given. A [collage] moment is a photo_collage scene {\"photos\": [...], \"style\": "
+        "\"mosaic|polaroids|grid|filmstrip|stack\"} showing all its photos together on one screen: pick the style for the mood (polaroids for personal memories, mosaic or grid for variety, filmstrip for a "
+        "stretch of the day, stack for a few favourites) and vary it from beat to beat.\n"
+        "- Use every photo of every moment, exactly as grouped (a moment never mixes days: keep it that way); use no photo that is not in a moment; do NOT add stock-photo scenes for the user's own story "
+        "(a map, a counter or another non-photo scene is fine where it helps, for example a map of the route or a fact about a landmark from the grounding notes).\n"
+        "- When the story has 3 or more chapters you may open a chapter with a chapter_card (title, an optional subtitle and a kicker such as the day and date, for example 'DAY 2 - SUNDAY 12 APRIL', "
+        "optionally with a hero photo) and keep that beat's narration to one short line; set \"chapter\" on the first beat of every chapter anyway. When many photos must fit into a short video, keep the narration of "
+        "photo beats short (one or two sentences of about 12 to 20 words) so the pictures can move on; the number of beats follows the number of moments.\n"
+        "- Narrate what is visible and what the story and the request say, in the voice above. Use the days, times and places given (from the photos' own data: 'On Saturday morning...') and add real facts about "
+        "a named place or landmark only from the grounding notes. Never invent names, dates, people or events.\n\n")
     return "\n".join(out)
 
 
@@ -580,6 +586,20 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
             else:
                 scene = _fallback_scene(narration)
                 warnings.append(f"beat {i}: gallery named photos that do not exist, replaced")
+        if scene["type"] in ELEMENTS and (scene["props"].get("photos") or scene["props"].get("photo")):   # an element about the user's photos: only real ones, with their captions (they time the reveals)
+            ps = [x for x in (scene["props"].get("photos") or []) if x in (photo_ids or [])]
+            if scene["props"].get("photos"):
+                if len(ps) < 2:
+                    scene = _fallback_scene(narration) if not ps else {"type": "image", "props": {"image_query": ((photo_captions or {}).get(ps[0]) or ps[0])[:80], "alt": ((photo_captions or {}).get(ps[0]) or "")[:70], "ken_burns": "in", "photo": ps[0]}}
+                    warnings.append(f"beat {i}: {b.get('scene', {}).get('type')} named photos that do not exist, replaced")
+                else:
+                    scene["props"]["photos"] = ps
+                    scene["props"]["captions"] = [((photo_captions or {}).get(x) or "")[:80] for x in ps]
+            elif scene["props"].get("photo") not in (photo_ids or []):
+                scene = _fallback_scene(narration)
+                warnings.append(f"beat {i}: {b.get('scene', {}).get('type')} named a photo that does not exist, replaced")
+            else:
+                scene["props"]["captions"] = [((photo_captions or {}).get(scene["props"]["photo"]) or "")[:80]]
         if silent and scene["type"] not in SILENT_SCENES:
             warnings.append(f"beat {i}: silent beat dropped (a {scene['type']} scene needs narration)")
             continue
@@ -698,11 +718,11 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
             if photos and plan.get("legit"):
                 from . import curate
                 used: set = set()
-                for b in plan["beats"]:
-                    if b["scene"]["type"] == "image":
-                        used.add(b["scene"]["props"].get("photo"))
-                    elif b["scene"]["type"] == "gallery":
-                        used.update(b["scene"]["props"].get("photos") or [])
+                for b in plan["beats"]:   # any scene that names the user's photos: image {photo}, gallery or an element {photos}, a frame or chapter card {photo}
+                    pr = b["scene"]["props"]
+                    if pr.get("photo"):
+                        used.add(pr["photo"])
+                    used.update(pr.get("photos") or [])
                 needed = set(curate.used_ids(story)) if story and story.get("chapters") else {p["id"] for p in photos}
                 unused = [p for p in photos if p["id"] in needed and p["id"] not in used]
                 if unused and attempt < retries:

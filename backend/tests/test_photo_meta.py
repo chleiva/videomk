@@ -84,7 +84,8 @@ def test_the_story_model_gets_time_place_and_a_trip_summary_and_is_told_to_trust
     curate.make_story("my trip", 3, ph, ask_text)
     assert "taken Sat 11 Apr 09:00" in seen["user"] and "GPS place: Paris, France" in seen["user"] and "2 days" in seen["user"] or "(2 days" in seen["user"]
     assert "places from the photos' GPS: Paris, France, Versailles, France" in seen["user"]
-    assert "Trust them over visual guesses for ORDER and for PLACE NAMES" in seen["system"] and "start a new chapter when the day changes" in seen["system"]
+    assert "Trust them over visual guesses for ORDER and for PLACE NAMES" in seen["system"] and "NEVER put photos of different days in the same moment" in seen["system"]
+    assert "G1: Sat 11 Apr, morning, Paris, France - P1-P3 (3 photos)" in seen["user"] and "G2:" in seen["user"]
     assert curate.trip_summary(photos_of(3)) == ""                                                                      # photos with no data say nothing
 
 
