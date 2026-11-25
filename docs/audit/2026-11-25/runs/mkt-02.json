@@ -1,0 +1,572 @@
+{
+ "id": "mkt-02",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "launch video for a note-taking app",
+ "great": "Reasonable positioning even with missing details: avoids inventing specific features/numbers or flags them as placeholders; problem-solution-benefit arc, call to action.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:07:33",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Meet Jotly: Never Lose an Idea Again",
+  "description": "Jotly is a note-taking app that helps you capture ideas fast and find them instantly. See how it works in three simple steps and how to get started.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "2d218c7a",
+    "narration": "You had a brilliant idea this morning. Where is it now? Scribbled on a receipt, buried in a chat, lost in a tab you closed. Your ideas deserve a better home.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Where did your idea go?",
+      "subtitle": "Meet Jotly, the note-taking app that keeps your thoughts"
+     }
+    },
+    "chapter": "The problem with scattered notes"
+   },
+   {
+    "id": "223820c5",
+    "narration": "Most of us keep notes in five places at once. A phone app, a paper pad, email drafts, sticky notes, and screenshots. Finding anything later becomes a treasure hunt nobody wins.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Notes everywhere",
+      "items": [
+       "Phone app",
+       "Paper pad",
+       "Email drafts",
+       "Sticky notes",
+       "Screenshots"
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "0ae878e9",
+    "narration": "So we built Jotly, a note-taking app around one promise. Capture fast, find instantly, and never lose a thought again. Everything else follows from that single idea.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Capture fast. Find instantly. Never lose a thought.",
+      "emphasis": "Find instantly"
+     }
+    },
+    "sfx": "sparkle"
+   },
+   {
+    "id": "7a4d9a9e",
+    "narration": "Here is how it works in three steps. First, capture: type, speak, or snap a photo. Second, organize: Jotly suggests tags and folders for you. Third, find: search everything in seconds.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three steps",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Type, speak, or snap a photo"
+       },
+       {
+        "label": "Organize",
+        "detail": "Jotly suggests tags and folders"
+       },
+       {
+        "label": "Find",
+        "detail": "Search everything in seconds"
+       }
+      ]
+     }
+    },
+    "chapter": "How Jotly works"
+   },
+   {
+    "id": "f3b23c99",
+    "narration": "Everything flows the same way. Your ideas come in by typing, by voice, or as a photo. They all land in one notebook. Then search pulls up any note you need.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "One place for everything",
+      "nodes": [
+       {
+        "id": "type",
+        "label": "Typing",
+        "icon": "keyboard"
+       },
+       {
+        "id": "voice",
+        "label": "Voice",
+        "icon": "mic"
+       },
+       {
+        "id": "photo",
+        "label": "Photo",
+        "icon": "camera"
+       },
+       {
+        "id": "book",
+        "label": "One notebook",
+        "icon": "book"
+       },
+       {
+        "id": "search",
+        "label": "Search",
+        "icon": "search"
+       }
+      ],
+      "edges": [
+       [
+        "type",
+        "book"
+       ],
+       [
+        "voice",
+        "book"
+       ],
+       [
+        "photo",
+        "book"
+       ],
+       [
+        "book",
+        "search"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "eee01c35",
+    "narration": "The benefits are simple. Speed, because a note opens in a blink. Sync, so your phone and laptop always match. Privacy, with a lock on any notebook. And links, connecting related ideas.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "rocket",
+        "label": "Speed",
+        "sub": "Notes open in a blink"
+       },
+       {
+        "icon": "cloud",
+        "label": "Sync",
+        "sub": "Phone and laptop match"
+       },
+       {
+        "icon": "lock",
+        "label": "Privacy",
+        "sub": "Lock any notebook"
+       },
+       {
+        "icon": "link",
+        "label": "Links",
+        "sub": "Connect related ideas"
+       }
+      ],
+      "title": "What changes for you"
+     }
+    }
+   },
+   {
+    "id": "04f69b80",
+    "narration": "Before Jotly, notes are scattered, hard to search, and stuck on one device. After Jotly, they live in one place, searchable, and ready on every screen you own.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Before Jotly",
+       "tagline": "Scraps everywhere"
+      },
+      "b": {
+       "name": "With Jotly",
+       "tagline": "One calm place"
+      },
+      "rows": [
+       {
+        "label": "Where notes live",
+        "a": "Scattered",
+        "b": "One notebook"
+       },
+       {
+        "label": "Finding a note",
+        "a": "Hard to search",
+        "b": "Instant search"
+       },
+       {
+        "label": "Devices",
+        "a": "Stuck on one",
+        "b": "Every screen"
+       }
+      ],
+      "verdict": "Same ideas, far less hunting",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "00297a11",
+    "narration": "Good notes fit into real life. On a train, in a quiet cafe, between meetings. Jotly works offline too, and catches up the moment you reconnect.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "typing laptop in cafe",
+      "alt": "person working on a laptop at a coffee shop"
+     }
+    }
+   },
+   {
+    "id": "9db57998",
+    "narration": "Here is what you get. Offline mode. Voice notes. Photo capture. Fast search. Shared notebooks. Each one is built to keep you moving rather than slow you down.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What is included",
+      "items": [
+       "Offline mode",
+       "Voice notes",
+       "Photo capture",
+       "Fast search",
+       "Shared notebooks"
+      ]
+     }
+    }
+   },
+   {
+    "id": "3296e27b",
+    "narration": "Who is it for? A student studying in the library. A writer working at her desk. Anyone planning the week with a notebook full of ideas.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "student studying library notebook",
+       "writer working at desk",
+       "person planning with notebook"
+      ],
+      "alt": "People taking notes in different settings"
+     }
+    },
+    "chapter": "Who it is for"
+   },
+   {
+    "id": "d60de034",
+    "narration": "We built Jotly on three beliefs. Notes should be quick to write. They should be easy to find. And they should always belong to you, never trapped behind a wall.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What we believe",
+      "items": [
+       "Quick to write",
+       "Easy to find",
+       "Always yours"
+      ],
+      "style": "spotlight",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "f937d862",
+    "narration": "Getting started takes about a minute. Download the app, create your first notebook, and write one note. Import your old notes later, whenever you feel ready.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Start in a minute",
+      "steps": [
+       {
+        "label": "Download the app"
+       },
+       {
+        "label": "Create a notebook"
+       },
+       {
+        "label": "Write one note",
+        "detail": "Import old notes later"
+       }
+      ]
+     }
+    },
+    "sfx": "click",
+    "chapter": "Getting started"
+   },
+   {
+    "id": "08eceb9f",
+    "narration": "Because the best ideas rarely arrive at a convenient moment. They show up in the shower, on a walk, or just before sleep. Jotly is ready for all of them.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Your best ideas deserve to be found.",
+      "emphasis": "found"
+     }
+    }
+   },
+   {
+    "id": "097eaca4",
+    "narration": "So stop chasing scraps of paper. Download Jotly today, write down one idea, and let it wait for you, safe and easy to find.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Download Jotly today",
+      "subtitle": "Write down one idea. We will keep it safe."
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 66.6,
+  "before_first_script_call_s": 3.8,
+  "script_s": 62.7
+ },
+ "cost": {
+  "script_small": 0.00032,
+  "script_big": 0.14745,
+  "search_api": 0.0,
+  "total": 0.14777
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 33298,
+  "out": 8726
+ },
+ "rules": {
+  "length": {
+   "words": 402,
+   "expected_words": 402,
+   "ratio": 1.0,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 180.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 24,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You had a brilliant idea this morning. Where is it now? Scribbled on a receipt, buried in a chat, lost in a tab you closed. Your ideas deserve a better home.",
+   "close_text": "So stop chasing scraps of paper. Download Jotly today, write down one idea, and let it wait for you, safe and easy to find."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 2,
+    "bullets": 2,
+    "kinetic_text": 2,
+    "steps": 2,
+    "diagram": 1,
+    "icons": 1,
+    "versus": 1,
+    "clip": 1,
+    "checklist": 1,
+    "gallery": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "title",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [
+    "Jotly"
+   ],
+   "ungrounded_share": 1.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The brief gave no product details, yet the script invents a full feature set (offline mode, voice notes, shared notebooks, per-notebook locks, AI-style tag suggestions) and states them as fact, without flagging placeholders."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a problem, solution, benefit and CTA arc, but the features are generic and there is no differentiator, pricing or platform info."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: problem, promise, how it works, benefits, audience, start, CTA. Beats 5, 7 and 9 repeat the capture/find/sync ideas."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "'You had a brilliant idea this morning. Where is it now?' is a relatable hook, and the ending ('let it wait for you, safe and easy to find') closes cleanly with a CTA."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The voice is warm, conversational and suited to a consumer launch video."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well (steps, diagram, versus, gallery, clip) and match the narration. There is no real product UI shown, and the checklist duplicates the earlier bullets."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Phrases like 'treasure hunt nobody wins' and 'one calm place' are stock launch-video language, and nothing is specific to this app."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The length is roughly on target and it is a launch video. Because it invents a product name and features without flagging them as placeholders, it does not do what the reviewer's note asks."
+   },
+   "language": {
+    "score": 5,
+    "reason": "The English is clean, fluent and natural."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Jotly works offline too, and catches up the moment you reconnect.",
+    "issue": "The script invents a specific capability with no source and does not flag it as a placeholder.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Jotly suggests tags and folders for you.",
+    "issue": "The script presents an invented smart-organization feature as fact.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Getting started takes about a minute.",
+    "issue": "The script gives an unsupported time claim.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Here is what you get. Offline mode. Voice notes. Photo capture. Fast search. Shared notebooks.",
+    "issue": "This repeats features already covered in beats 4-8 and adds filler.",
+    "beat": 9
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Finding anything later becomes a treasure hunt nobody wins.",
+    "issue": "The line is a cliché and adds nothing specific.",
+    "beat": 2
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "They should always belong to you, never trapped behind a wall.",
+    "issue": "The script makes a vague ownership claim and never explains what it means, such as export or pricing.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "Placeholders or flags for unspecified details such as price, platforms and the release date",
+   "A real differentiator against Evernote, Notion or Apple Notes",
+   "Product UI or demo footage",
+   "Social proof or a launch offer",
+   "A specific call-to-action URL or store names"
+  ],
+  "wrong_facts": [
+   "Unverified invented features: offline mode, voice notes, shared notebooks, notebook locks and tag suggestions were not in the brief."
+  ],
+  "would_publish": false,
+  "summary": "This is a well-structured, fluent launch script with a clear problem-solution-CTA arc, but it is generic and asserts many invented features as fact. A stronger version would flag placeholders and offer a real differentiator.",
+  "mean": 3.56,
+  "cost_usd": 0.02033,
+  "tokens": [
+   3845,
+   1264
+  ]
+ }
+}

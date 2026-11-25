@@ -24,6 +24,8 @@ from aws_cdk import (
 from constructs import Construct
 
 from media_library import MediaLibrary
+from request_intake import RequestIntake
+from request_options import RequestOptions
 
 from engine_v2 import EngineV2
 
@@ -486,6 +488,13 @@ class BackendStack(Stack):
         wallet_res.add_method("GET", apigw.LambdaIntegration(wallet_fn, proxy=True), **cognito_auth)
         uploads_res.add_method("POST", apigw.LambdaIntegration(uploads_fn, proxy=True), **cognito_auth)
 
+        # The creation options (docs/CREATE_OPTIONS_FLOW.md): GET /capabilities, and the ready formats/languages the launcher enforces. `-c readyAspects=16:9,9:16 -c betaAspects=9:16` switches vertical on.
+        RequestOptions(
+            self, "RequestOptions", make_fn=make_fn, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn,
+            ready_aspects=str(self.node.try_get_context("readyAspects") or "16:9"), beta_aspects=str(self.node.try_get_context("betaAspects") or ""),
+            ready_languages=str(self.node.try_get_context("readyLanguages") or "en,es"), intake_enabled=str(self.node.try_get_context("intakeEnabled") or "").lower() in ("1", "true"),
+        )
+
         # ----------------------------
         # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).
         # ----------------------------
@@ -495,6 +504,12 @@ class BackendStack(Stack):
                 self, "MediaLibrary", extra_env=model_env, stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
                 usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn, assets_bucket_name=ASSETS_BUCKET,
             )
+
+        # The request check (safety, clarity) and the per-account record of safety stops: docs/INTAKE_AND_SAFETY.md. Same small-model override as above.
+        RequestIntake(
+            self, "RequestIntake", account=self.account, is_prod=is_prod, make_fn=make_fn, flags_table=flags_table, usage_table=usage_table, videos_resource=videos, cognito_auth=cognito_auth,
+            launcher_fn=launcher_fn, extra_env={"REVIEW_MODEL_ID": str(self.node.try_get_context("reviewModelId"))} if self.node.try_get_context("reviewModelId") else {},
+        )
 
         # Reject malformed/oversized prompts at the edge, before any Lambda runs.
         generate_model = api.add_model(
@@ -512,7 +527,11 @@ class BackendStack(Stack):
                     "theme": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["midnight", "paper", "sunrise"]),
                     "max_images_per_minute": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=0, maximum=10),
                     "captions": apigw.JsonSchema(type=apigw.JsonSchemaType.BOOLEAN),
-                    "language": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["en", "es"]),
+                    "language": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^(auto|[a-z]{2})$"),   # which ones are ready is a server setting, checked by the launcher
+                    "platform": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["youtube", "shorts", "tiktok", "reels", "instagram_feed", "linkedin", "x", "other"]),
+                    "aspect": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["16:9", "9:16", "1:1", "4:5"]),   # readiness: the launcher
+                    "resolution": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["720p", "1080p"]),
+                    "brief": apigw.JsonSchema(type=apigw.JsonSchemaType.OBJECT),   # bounded and checked in full by the launcher (2 KB)
                     "media_meta": apigw.JsonSchema(type=apigw.JsonSchemaType.OBJECT),   # {media id: {taken, lat, lon}}, checked in full by the launcher
                     "media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=100,
                                               items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),

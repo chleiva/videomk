@@ -1,0 +1,608 @@
+{
+ "id": "tec-01",
+ "category": "technology / AI",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how do large language models like ChatGPT work",
+ "great": "Tokens, next-token prediction, transformer attention, pretraining on text, fine-tuning with human feedback (RLHF), hallucinations and why; accessible analogies, no jargon dumps, correct.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:01:39",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How large language models work is a timeless technical explanation covering architecture, training on text, and next-token prediction, which an encyclopedia covers accurately without needing recent in",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 980,
+  "n_sources": 1,
+  "n_fetched": 1,
+  "fetched": [
+   "Large language model"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 9: scene replaced (sequence needs 3+ messages)",
+  "length: the narration totals 360 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## Large language model\nA large language model (LLM) is a machine learning model (typically a neural network) trained on a vast amount of text for natural language processing tasks, especially language generation. LLMs can typically generate, summarize, translate, and analyze text in many contexts. They are the basis for many modern chatbots, such as ChatGPT, Claude, Vibe, Gemini, Grok, Qwen, DeepSeek and writing assistants such as Grammarly.\nLLMs are typically based on the transformer neural network architecture. Generative pre-trained transformers (GPTs) are a type of LLM that is pre-trained to predict the next word. GPTs are then often fine-tuned to follow instructions and to behave as assistants.\nBiased or inaccurate training data can make an LLM's output less reliable. A software harness can provide LLMs with memory and access to tools such as web search. Benchmark evaluations for LLMs attempt to measure model reasoning, factual accuracy, alignment, and safety.",
+ "plan": {
+  "title": "How ChatGPT Works: Predicting the Next Word",
+  "description": "Large language models like ChatGPT are neural networks trained on vast amounts of text to predict the next word. This video explains how that one simple skill becomes a helpful assistant, and where it can fail.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "55ef4266",
+    "narration": "You type a question, and a fluent answer appears in seconds. But under the hood, the machine is doing something surprisingly simple. It is guessing the next word, over and over.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "How does ChatGPT actually work?",
+      "subtitle": "One simple trick behind a very smart-seeming machine"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "A machine that guesses"
+   },
+   {
+    "id": "f3e56fd8",
+    "narration": "Think of the autocomplete on your phone. You type \"see you\" and it suggests \"soon.\" A large language model is that idea, scaled up enormously.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands typing on smartphone",
+      "alt": "person texting on a phone"
+     }
+    }
+   },
+   {
+    "id": "b8bea5dd",
+    "narration": "A large language model, or LLM, is a neural network trained on a vast amount of text. Its main job is language generation.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Large language model (LLM)",
+      "definition": "A machine learning model, typically a neural network, trained on a vast amount of text for language tasks, especially generating text."
+     }
+    }
+   },
+   {
+    "id": "42aca5f8",
+    "narration": "Because of that training, it can generate, summarize, translate, and analyze text in many contexts. One skill, many uses.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Generate"
+       },
+       {
+        "icon": "book",
+        "label": "Summarize"
+       },
+       {
+        "icon": "globe",
+        "label": "Translate"
+       },
+       {
+        "icon": "search",
+        "label": "Analyze"
+       }
+      ],
+      "title": "What an LLM can do"
+     }
+    }
+   },
+   {
+    "id": "089f886a",
+    "narration": "So how does it learn? First, it reads huge amounts of text. Then it is trained to predict the next word. Then it is adjusted to follow instructions.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "From raw text to assistant",
+      "steps": [
+       {
+        "label": "Read vast text",
+        "detail": "Books, websites, and more"
+       },
+       {
+        "label": "Predict the next word",
+        "detail": "Pre-training"
+       },
+       {
+        "label": "Follow instructions",
+        "detail": "Fine-tuning"
+       }
+      ]
+     }
+    },
+    "chapter": "How it learns"
+   },
+   {
+    "id": "c03460a2",
+    "narration": "Each wrong guess nudges the network's internal settings a little. After countless guesses, it gets very good at patterns in language: grammar, facts, and style.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The learning loop",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Guess next word"
+       },
+       {
+        "id": "b",
+        "label": "Check the answer"
+       },
+       {
+        "id": "c",
+        "label": "Adjust settings"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "a",
+        "repeat"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "51bb9a2c",
+    "narration": "Most of these models are built on the transformer architecture. That design helps the network weigh which earlier words matter most for the next one.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Transformers help a model weigh which earlier words matter most.",
+      "emphasis": "transformers"
+     }
+    }
+   },
+   {
+    "id": "c73d8310",
+    "narration": "That is what GPT stands for. Generative: it produces text. Pre-trained: it learns from vast text first. Transformer: the architecture underneath.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What GPT means",
+      "items": [
+       "Generative: it produces text",
+       "Pre-trained: it learns from vast text first",
+       "Transformer: the architecture underneath"
+      ],
+      "style": "keywords",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "50f107e0",
+    "narration": "A model that only predicts the next word is not yet a helpful assistant. So it is fine-tuned to follow instructions and behave like one.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Pre-trained model",
+       "tagline": "Predicts the next word"
+      },
+      "b": {
+       "name": "Fine-tuned assistant",
+       "tagline": "Follows instructions"
+      },
+      "rows": [
+       {
+        "label": "Goal",
+        "a": "Continue text",
+        "b": "Help the user"
+       },
+       {
+        "label": "Behavior",
+        "a": "Raw patterns",
+        "b": "Assistant-like"
+       }
+      ]
+     }
+    },
+    "chapter": "From guessing to chatting"
+   },
+   {
+    "id": "68bfbd25",
+    "narration": "It then writes its answer one word at a time. Each new word is added to the text, and the model predicts again, until the answer is done.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "It then writes its answer one word at a",
+      "subtitle": ""
+     }
+    }
+   },
+   {
+    "id": "202429f1",
+    "narration": "Add a software harness and it gets more. A harness can give the model memory, and tools like web search. That is how chatbots do more than guess.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The harness around the model",
+      "nodes": [
+       {
+        "id": "m",
+        "label": "LLM",
+        "icon": "brain"
+       },
+       {
+        "id": "h",
+        "label": "Software harness",
+        "icon": "cog"
+       },
+       {
+        "id": "mem",
+        "label": "Memory",
+        "icon": "database"
+       },
+       {
+        "id": "w",
+        "label": "Web search",
+        "icon": "search"
+       }
+      ],
+      "edges": [
+       [
+        "m",
+        "h"
+       ],
+       [
+        "h",
+        "mem"
+       ],
+       [
+        "h",
+        "w"
+       ]
+      ],
+      "style": "cards",
+      "accent": "teal",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "50dcf5a2",
+    "narration": "But there is a catch. Biased or inaccurate training data can make the output less reliable. The model learns patterns, and it can repeat the mistakes in them.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Why answers can fail",
+      "items": [
+       "Biased training data",
+       "Inaccurate training data",
+       "Less reliable output"
+      ],
+      "checked": [
+       false,
+       false,
+       false
+      ]
+     }
+    },
+    "chapter": "Where it goes wrong"
+   },
+   {
+    "id": "2c639d1f",
+    "narration": "That is why researchers use benchmarks. They try to measure reasoning, factual accuracy, alignment, and safety, so we know how far to trust a model.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What benchmarks measure",
+      "items": [
+       "Reasoning",
+       "Factual accuracy",
+       "Alignment",
+       "Safety"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "brain",
+       "check",
+       "target",
+       "shield"
+      ]
+     }
+    }
+   },
+   {
+    "id": "e3bea578",
+    "narration": "So the big idea is simple. A large language model learns patterns from vast text, then predicts the next word, again and again. Enjoy it, but check the facts.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "An LLM predicts the next word, again and again, so check its facts.",
+      "emphasis": "predicts the next word"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Large language model",
+    "url": "https://en.wikipedia.org/wiki/Large_language_model",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 49.3,
+  "before_first_script_call_s": 5.2,
+  "script_s": 44.2
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.13434,
+  "search_api": 0.0,
+  "total": 0.13459
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 35017,
+  "out": 6925
+ },
+ "rules": {
+  "length": {
+   "words": 362,
+   "expected_words": 402,
+   "ratio": 0.9,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 164.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You type a question, and a fluent answer appears in seconds. But under the hood, the machine is doing something surprisingly simple. It is guessing the next word, over and over.",
+   "close_text": "So the big idea is simple. A large language model learns patterns from vast text, then predicts the next word, again and again. Enjoy it, but check the facts."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 2,
+    "clip": 1,
+    "definition": 1,
+    "icons": 1,
+    "steps": 1,
+    "diagram": 2,
+    "kinetic_text": 2,
+    "bullets": 2,
+    "versus": 1,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "title",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "a large language model",
+    "count": 3
+   },
+   {
+    "phrase": "predicts the next word",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1,
+   "length": 1
+  },
+  "sources": {
+   "cited": 1,
+   "fetched": 1,
+   "notes_len": 980,
+   "flag_thin_notes": true,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "repeated_phrase",
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": [
+   "beat 6 (diagram): its narration never says ['Guess next word', 'Check the answer']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly correct and tied to the notes, but 'Each wrong guess nudges the network's internal settings' is oversimplified, and the harness is presented as how chatbots 'do more than guess' without much support."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Tokens, attention mechanics, RLHF/human feedback and the reason hallucinations happen are all missing or only gestured at; only bias in training data is given as the failure cause. Benchmarks and the harness take time that should have gone to core concepts."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Chapters are clear and the ending ties back to the opening, but the fine-tuning and generation sections come after the transformer and GPT-acronym sections, and the harness and benchmark beats feel tacked on."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "'Surprisingly simple. It is guessing the next word' is a decent hook; the ending 'Enjoy it, but check the facts' is a reasonable takeaway but a bit bland."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly and accessible for beginners, with a phone autocomplete analogy and no jargon dumps."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types are varied and mostly fit the narration, but beat 10's title is truncated ('one word at a'), and nearly every beat repeats its narration as on-screen text."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The autocomplete analogy is the only concrete image; the rest is generic restatement of the Wikipedia notes with no surprising examples or numbers."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "English and about the right length, but the required points on tokens, RLHF and hallucinations are not covered."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clean, natural phrasing, though beat 8 repeats the on-screen bullets word for word."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "It then writes its answer one word at a",
+    "issue": "The title text on screen is cut off mid-sentence and has an empty subtitle.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Biased or inaccurate training data can make the output less reliable.",
+    "issue": "Hallucinations are not named, and the real cause (plausible-sounding prediction without checking facts) is not explained; the failure is attributed only to bad data.",
+    "beat": 12
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "it is fine-tuned to follow instructions and behave like one.",
+    "issue": "No mention of human feedback (RLHF) or how fine-tuning actually works.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "That design helps the network weigh which earlier words matter most for the next one.",
+    "issue": "Attention is described in one line with no example, and tokens are never mentioned.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "It then writes its answer one word at a time.",
+    "issue": "'It then' follows the fine-tuning beat, so the generation loop is placed oddly; it should come right after the introduction of next-word prediction.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "That is how chatbots do more than guess.",
+    "issue": "Overstates the harness; chatbots predicting tokens is still the core, and the claim is unsupported.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "They try to measure reasoning, factual accuracy, alignment, and safety",
+    "issue": "The benchmark beat is filler taken from the notes and does not help the viewer understand how LLMs work.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "Tokens (words broken into pieces)",
+   "A concrete attention example",
+   "RLHF: humans rating answers",
+   "Why hallucinations occur (fluent prediction, no fact lookup)",
+   "Scale: billions of parameters and the amount of training text"
+  ],
+  "wrong_facts": [
+   "'Each wrong guess nudges the network's internal settings' is simplified, but acceptable."
+  ],
+  "would_publish": false,
+  "summary": "A clear, friendly but shallow script that mostly paraphrases the encyclopedia notes. It omits tokens, RLHF and the cause of hallucinations, and has a truncated title in beat 10.",
+  "mean": 3.0,
+  "cost_usd": 0.0224,
+  "tokens": [
+   4020,
+   1436
+  ]
+ }
+}

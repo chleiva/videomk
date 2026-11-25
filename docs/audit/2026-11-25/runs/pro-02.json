@@ -1,0 +1,525 @@
+{
+ "id": "pro-02",
+ "category": "productivity / self-improvement",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo dejar de procrastinar",
+ "great": "Por qué procrastinamos (regulación emocional, no pereza), regla de los 2 minutos, dividir tareas, reducir fricción, intención de implementación, perdón a uno mismo; práctico y empático, sin clichés vacíos.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:06:27",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Procrastination advice is a timeless psychology topic; established explanations and techniques (e.g., time-blocking, Pomodoro, understanding emotional avoidance) do not depend on recent information, s",
+  "queries": [
+   "cómo dejar de procrastinar técnicas",
+   "procrastinación causas y estrategias"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Cómo dejar de procrastinar: ciencia y pasos reales",
+  "description": "Descubre por qué postergamos tareas y cómo romper el ciclo con pasos pequeños. Un método sencillo para empezar hoy mismo.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "701472c5",
+    "narration": "Tienes una tarea importante, y llevas días evitándola. ¿Por qué? Quizá pienses que eres vago. Pero la ciencia dice otra cosa: procrastinar casi nunca es un problema de tiempo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Procrastinar no es pereza: es evitar una emoción.",
+      "emphasis": "evitar una emoción"
+     }
+    },
+    "chapter": "El verdadero problema"
+   },
+   {
+    "id": "60d6ef46",
+    "narration": "Nos pasa a casi todos. Un trabajo que aburre, un examen que asusta, un proyecto enorme que abruma. Y, sin darnos cuenta, preferimos limpiar la cocina antes que empezar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person distracted at desk",
+      "alt": "persona distraída trabajando en un escritorio"
+     }
+    }
+   },
+   {
+    "id": "599d2716",
+    "narration": "El mecanismo es simple. Primero, la tarea te provoca una emoción negativa: ansiedad, aburrimiento o duda. Después, buscas una distracción que te alivia al instante. Y por último, el alivio refuerza el hábito de evitar.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la procrastinación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Emoción negativa",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Distracción",
+        "icon": "phone"
+       },
+       {
+        "id": "d",
+        "label": "Alivio",
+        "icon": "heart"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a",
+        "se repite"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "ebb145dd",
+    "narration": "Entonces, la idea clave es esta: no necesitas más fuerza de voluntad, necesitas hacer que empezar sea tan fácil que la emoción apenas aparezca. Veamos cómo, paso a paso.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No necesitas más voluntad: necesitas empezar más fácil.",
+      "emphasis": "empezar más fácil"
+     }
+    }
+   },
+   {
+    "id": "a1356fed",
+    "narration": "Primera herramienta: divide la tarea. Escribir un informe entero abruma. Pero abrir el documento y escribir el título es fácil. Reduce el primer paso hasta que sea ridículamente pequeño.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Haz pequeño el primer paso",
+      "steps": [
+       {
+        "label": "Elige la tarea",
+        "detail": "Escribir un informe"
+       },
+       {
+        "label": "Reduce el primer paso",
+        "detail": "Abrir el documento"
+       },
+       {
+        "label": "Hazlo ya",
+        "detail": "Escribe solo el título"
+       }
+      ]
+     }
+    },
+    "chapter": "Cuatro herramientas"
+   },
+   {
+    "id": "f4c1610e",
+    "narration": "Segunda herramienta: la regla de los dos minutos. Si algo cabe en dos minutos, hazlo ahora. Y si es más largo, comprométete solo a dos minutos. Lo difícil es arrancar; después, seguir cuesta menos.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "2",
+      "unit": "min",
+      "label": "Compromete solo dos minutos y empieza"
+     }
+    }
+   },
+   {
+    "id": "53173798",
+    "narration": "Tercera herramienta: decide cuándo y dónde. En lugar de decir que lo harás algún día, di: mañana a las nueve, en mi escritorio, abriré el documento. Un plan concreto elimina la duda del momento.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Un plan concreto",
+      "items": [
+       "Cuándo: mañana a las nueve",
+       "Dónde: en mi escritorio",
+       "Qué: abrir el documento"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "clock",
+       "pin",
+       "book"
+      ]
+     }
+    }
+   },
+   {
+    "id": "02845d32",
+    "narration": "Cuarta herramienta: trabaja por bloques. Empieza el bloque de trabajo en el minuto cero. A los veinticinco minutos suena el aviso y descansas. A los treinta, comienzas un nuevo bloque de trabajo.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Un bloque de trabajo",
+      "events": [
+       {
+        "date": "0 min",
+        "label": "Empieza el bloque de trabajo"
+       },
+       {
+        "date": "25 min",
+        "label": "Suena el aviso: descanso"
+       },
+       {
+        "date": "30 min",
+        "label": "Nuevo bloque de trabajo"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "ed4a691c",
+    "narration": "Y ahora, el entorno. Deja el móvil en otra habitación, cierra las pestañas que no necesitas y prepara tu espacio. Si la distracción cuesta esfuerzo, ganarás muchas veces sin pensarlo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "quiet organized workspace",
+      "alt": "espacio de trabajo ordenado y tranquilo"
+     }
+    }
+   },
+   {
+    "id": "55a37012",
+    "narration": "Habrá días en que no funcione. Recuerda esto: un fallo no es un fracaso. Y después, retoma con una acción pequeña, sin castigarte. La amabilidad contigo mismo ayuda más que la culpa.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Si fallas hoy",
+      "items": [
+       "Un fallo no es un fracaso",
+       "Retoma con una acción pequeña"
+      ],
+      "style": "spotlight",
+      "accent": "rose"
+     }
+    },
+    "chapter": "Cuando fallas"
+   },
+   {
+    "id": "c82e6ec2",
+    "narration": "Piensa en lo que ganas. Cada vez que empiezas, aunque sea poco, demuestras que puedes. Esa pequeña victoria baja la ansiedad y hace más fácil empezar la próxima vez.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person smiling finishing work",
+      "alt": "persona sonriendo tras terminar su trabajo"
+     }
+    }
+   },
+   {
+    "id": "635c54c0",
+    "narration": "Resumiendo: procrastinar es huir de una emoción incómoda. Divide la tarea, aplica dos minutos, fija cuándo y dónde, trabaja por bloques y limpia tu entorno.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Tu caja de herramientas",
+      "items": [
+       "Divide la tarea",
+       "Dos minutos",
+       "Cuándo y dónde",
+       "Bloques de trabajo",
+       "Entorno sin distracciones"
+      ]
+     }
+    }
+   },
+   {
+    "id": "f71b8d19",
+    "narration": "Así que elige hoy una tarea que evitas. Haz solo su primer paso, durante dos minutos. No busques motivación: empieza, y la motivación llegará después.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Empieza pequeño, empieza hoy, y la motivación te seguirá.",
+      "emphasis": "empieza hoy"
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 38.3,
+  "before_first_script_call_s": 3.4,
+  "script_s": 34.9
+ },
+ "cost": {
+  "script_small": 0.00032,
+  "script_big": 0.0926,
+  "search_api": 0.0,
+  "total": 0.09292
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 22576,
+  "out": 5392
+ },
+ "rules": {
+  "length": {
+   "words": 392,
+   "expected_words": 402,
+   "ratio": 0.975,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 175.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 25,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Tienes una tarea importante, y llevas días evitándola. ¿Por qué? Quizá pienses que eres vago. Pero la ciencia dice otra cosa: procrastinar casi nunca es un problema de tiempo.",
+   "close_text": "Así que elige hoy una tarea que evitas. Haz solo su primer paso, durante dos minutos. No busques motivación: empieza, y la motivación llegará después."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "kinetic_text": 3,
+    "clip": 3,
+    "diagram": 1,
+    "steps": 1,
+    "counter": 1,
+    "bullets": 2,
+    "timeline": 1,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 2.82,
+   "top_type": "kinetic_text",
+   "top_share": 0.23,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Claims are mostly sound (emotion regulation, 2-minute rule, implementation intentions, 25/5 Pomodoro), but \"la ciencia dice\" is asserted without any source, and \"casi nunca es un problema de tiempo\" is loose."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers emotion, splitting tasks, the 2-minute rule, implementation intentions, friction and self-forgiveness, but each is shallow, with no named research or studies and no non-obvious fact. The 2-minute rule is also conflated with Pomodoro."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order runs problem, mechanism, tools, failure, summary, and it builds clearly. The closing summary repeats the tools, and the 'cuatro herramientas' framing then adds a fifth (the environment)."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening \"Tienes una tarea importante, y llevas días evitándola\" is relatable but conventional. The ending is an actionable call, but its \"la motivación llegará\" line is a cliché."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Empathetic, practical and in informal tú, which suits a beginner audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, but the beat 8 timeline is odd, using dates for minutes, and the stock-clip queries are generic. The counter for \"2 min\" is fine, and the beat 5 steps are a good match."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The content is a standard self-help list. The cleaning-the-kitchen example and the 'ridículamente pequeño' phrasing are the only touches of specificity."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, about 3 minutes, and hits the requested points. It is slightly over the word count and says 'cuatro herramientas' but delivers five."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct overall, with a few mildly stiff or repetitive phrasings."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Cuatro herramientas",
+    "issue": "The chapter promises four tools, but the environment is added as a fifth and the checklist lists five.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Pero la ciencia dice otra cosa",
+    "issue": "It appeals to science with no named research or source, which is vague authority.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Si algo cabe en dos minutos, hazlo ahora. Y si es más largo, comprométete solo a dos minutos.",
+    "issue": "This mixes two different rules, David Allen's 2-minute rule and the commit-to-two-minutes trick, without making the distinction clear.",
+    "beat": 6
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Empieza el bloque de trabajo en el minuto cero. A los veinticinco minutos suena el aviso y descansas. A los treinta, comienzas un nuevo bloque de trabajo.",
+    "issue": "Repetitive and mechanical, and it never names the Pomodoro technique or its length.",
+    "beat": 8
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "empieza, y la motivación llegará después",
+    "issue": "A motivational cliché, and the claim is stated with undue certainty.",
+    "beat": 13
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"date\": \"0 min\"",
+    "issue": "The timeline scene uses a date field for minutes, and a simple timer visual would fit better.",
+    "beat": 8
+   }
+  ],
+  "missing": [
+   "Named research or concrete evidence (e.g. Sirois and Pychyl on mood repair)",
+   "Self-compassion backed by evidence of its effect on future procrastination",
+   "A concrete example of friction reduction beyond the phone",
+   "The 'if-then' implementation intention formula named explicitly"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, empathetic and well-organised script that covers the standard anti-procrastination toolkit, but it stays generic, with no cited research, a slightly muddled 2-minute rule, and a 'four tools' count that doesn't match. It is serviceable but not distinctive.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Entonces, la idea clave es esta",
+     "issue": "Stiff, filler-like connector.",
+     "problem": "Stiff, filler-like connector.",
+     "better": "La clave es esta:"
+    },
+    {
+     "quote": "La amabilidad contigo mismo ayuda más que la culpa.",
+     "problem": "Slightly abstract, and 'mismo' is gendered.",
+     "better": "Tratarte con cariño ayuda más que culparte."
+    },
+    {
+     "quote": "Resumiendo:",
+     "problem": "Slightly colloquial for a closing recap.",
+     "better": "En resumen:"
+    }
+   ]
+  },
+  "mean": 3.56,
+  "cost_usd": 0.024898,
+  "tokens": [
+   4194,
+   1651
+  ]
+ }
+}

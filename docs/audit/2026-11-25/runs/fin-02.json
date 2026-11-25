@@ -1,0 +1,540 @@
+{
+ "id": "fin-02",
+ "category": "personal finance",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "explícame la inflación",
+ "great": "Qué es (alza generalizada y sostenida de precios), cómo se mide (IPC), causas (demanda, costes, monetaria), efectos en poder adquisitivo, ejemplo cotidiano, qué hacen los bancos centrales; claro.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:01:11",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La inflación es un concepto económico atemporal que se explica bien con fuentes enciclopédicas; no depende de datos recientes.",
+  "queries": [
+   "qué es la inflación",
+   "inflación definición causas efectos"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 3262,
+  "n_sources": 3,
+  "n_fetched": 3,
+  "fetched": [
+   "Inflación",
+   "Inflación subyacente",
+   "Aumento de la inflación de 2021-2023"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Inflación\nEn economía, la inflación es el aumento sostenido y generalizado de los precios de los bienes y servicios en un mercado durante un período de tiempo, expresado en una determinada unidad monetaria.​ Cuando el nivel general de precios se incrementa, el poder adquisitivo de la moneda disminuye, ya que con la misma cantidad de dinero pueden adquirirse menos bienes y servicios.  \nLa inflación implica, por tanto, una reducción del valor real de la moneda como medio de intercambio y como unidad de cuenta en una economía.​  \nExisten diversos indicadores para medir la inflación, siendo el más habitual el índice de precios al consumidor (IPC), que refleja la variación media de los precios de una canasta de bienes y servicios representativos del consumo de los hogares.​ Otros indicadores relevantes son el deflactor del PIB y el índice de precios al productor.  \nUna variación negativa del nivel general de precios se denomina deflación, mientras que una desaceleración en el ritmo de crecimiento de los precios se conoce como desinflación. Por otro lado, incrementos muy elevados y rápidos en los precios reciben el nombre de hiperinflación.  \nLa inflación puede tener diversos efectos en una economía…\n\n## Inflación subyacente\nLa inflación subyacente, inflación básica, inflación núcleo (en inglés: core inflation) o inflación de bases es la inflación reflejada por el índice de precios al consumo (IPC) cuando éste no toma en cuenta ni los productos energéticos ni los alimenticios sin elaborar. La exclusión de estos componentes del índice se debe a que son componentes cuyos precios sufren grandes fluctuaciones debido a sucesos transitorios tales como conflictos internacionales (ejemplo: guerras), condiciones climáticas que afectan las cosechas o simplemente estacionalidad de los vegetales, por ejemplo.​\nDos razones prácticas motivan la medición de la inflación subyacente. Por un lado, medir la inflación a medio plazo, ya que las perturbaciones transitorias son excluidas. La segunda razón es que esta medición de inflación es más afectada por la política monetaria. Un banco central no tiene mucha influencia sobre los precios estacionales de los vegetales pero sí puede influir con mayor vigor en los precios a mediano plazo. De ahí que los bancos centrales prestan mayor atención a la medición de inflación subyacente como forma de medir el éxito de su política monetaria.\n\n## Aumento de la inflación de 2021-2023\nA partir de 2021, la mayor parte de las economías mundiales comenzaron a sufrir un aumento generalizado y sostenido de los precios de los bienes y servicios. Este aumento inflacionario generalmente es atribuido a la política monetaria expansiva llevada a cabo por los Bancos Centrales para combatir la crisis económica causada por la COVID-19, los estímulos fiscales entregados por el gobierno durante la pandemia, problemas en la cadena de suministros a nivel mundial y la invasión rusa de Ucrania.\nEste aumento de la inflación ha provocado un aumento en la pobreza a nivel mundial,​ una desaceleración económica global,​ caídas en las bolsas de valores​​ y masivas manifestaciones en algunos países,​​ y una gran mayoría de oficialismos que perdieron las elecciones luego de la pandemia,​ dentro del mundo democrático.",
+ "plan": {
+  "title": "La inflación: por qué tu dinero compra menos",
+  "description": "Explicamos qué es la inflación, cómo se mide con el IPC y qué pasó con el aumento de precios entre 2021 y 2023. Un repaso claro de sus causas y sus efectos.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "b53c96a6",
+    "narration": "¿Por qué con el mismo dinero hoy compras menos que hace unos años? No es tu imaginación. Tiene nombre, y afecta a la compra de todos los días: inflación.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Con el mismo dinero, hoy compras menos.",
+      "emphasis": "compras menos"
+     }
+    },
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "1f6ec530",
+    "narration": "La inflación es el aumento sostenido y generalizado de los precios de bienes y servicios durante un período de tiempo. No basta con que suba un producto: deben subir los precios en general.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Aumento sostenido y generalizado de los precios de los bienes y servicios en un mercado durante un período de tiempo."
+     }
+    }
+   },
+   {
+    "id": "c5a2947f",
+    "narration": "Veamos la cadena. Primero, suben los precios. Después, con la misma cantidad de dinero compras menos cosas. Es decir, hay menos poder adquisitivo, y la moneda pierde valor real.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo te afecta",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Suben los precios"
+       },
+       {
+        "id": "b",
+        "label": "Menos poder adquisitivo"
+       },
+       {
+        "id": "c",
+        "label": "La moneda vale menos"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "734fbed4",
+    "narration": "¿Y cómo se mide? El indicador más habitual es el índice de precios al consumidor, o IPC. Refleja cuánto cambian, de media, los precios de una canasta de bienes y servicios que consumen los hogares.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Indicadores de inflación",
+      "items": [
+       "IPC: canasta de los hogares",
+       "Deflactor del PIB",
+       "Índice de precios al productor"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "emphasis": 0,
+      "icons": [
+       "van",
+       "chart-column",
+       "factory"
+      ]
+     }
+    },
+    "chapter": "Cómo se mide"
+   },
+   {
+    "id": "8759c832",
+    "narration": "Existen otros indicadores relevantes: el deflactor del PIB y el índice de precios al productor. Cada uno mira los precios desde un ángulo distinto, pero el IPC es el que más se cita.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "IPC",
+      "label": "El indicador más habitual de la inflación"
+     }
+    }
+   },
+   {
+    "id": "f0addf33",
+    "narration": "Hay también la inflación subyacente. Se calcula sin productos energéticos ni alimentos sin elaborar, porque sus precios saltan por guerras o clima. Así muestra la tendencia a medio plazo, y los bancos centrales la vigilan.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Inflación subyacente",
+      "items": [
+       "Sin productos energéticos",
+       "Sin alimentos sin elaborar",
+       "Muestra la tendencia a medio plazo"
+      ],
+      "style": "rail",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "310c23b4",
+    "narration": "Según el caso, los precios pueden comportarse distinto. Si bajan, se llama deflación. Si suben más despacio, desinflación. Y si se disparan muy rápido, hiperinflación.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Término",
+       "Qué ocurre"
+      ],
+      "rows": [
+       [
+        "Deflación",
+        "Los precios bajan"
+       ],
+       [
+        "Desinflación",
+        "Suben más despacio"
+       ],
+       [
+        "Hiperinflación",
+        "Suben muy rápido"
+       ]
+      ],
+      "title": "Nombres según el cambio",
+      "highlight": {
+       "row": 2
+      }
+     }
+    },
+    "chapter": "Casos y variantes"
+   },
+   {
+    "id": "de19515a",
+    "narration": "Un ejemplo reciente: desde 2021, la mayoría de las economías sufrieron una subida generalizada y sostenida de precios. Se atribuye a la política monetaria expansiva, los estímulos fiscales y los problemas de suministro.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "El aumento de 2021-2023",
+      "events": [
+       {
+        "date": "2020",
+        "label": "Crisis económica por la COVID-19"
+       },
+       {
+        "date": "2021",
+        "label": "Los precios suben en casi todo el mundo"
+       },
+       {
+        "date": "2022",
+        "label": "Invasión rusa de Ucrania"
+       },
+       {
+        "date": "2023",
+        "label": "La inflación sigue afectando a los hogares"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "083882b5",
+    "narration": "Ese aumento se asocia con más pobreza en el mundo, una desaceleración económica global, caídas en las bolsas y protestas en algunos países. La inflación no es solo un número: toca la vida diaria.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "people",
+        "label": "Más pobreza"
+       },
+       {
+        "icon": "chart",
+        "label": "Menos crecimiento"
+       },
+       {
+        "icon": "money",
+        "label": "Bolsas a la baja"
+       },
+       {
+        "icon": "megaphone",
+        "label": "Protestas"
+       }
+      ],
+      "title": "Efectos señalados"
+     }
+    }
+   },
+   {
+    "id": "ff66b9a5",
+    "narration": "En resumen: inflación es que los precios suben de forma general y sostenida, y tu dinero compra menos. Se mide con el IPC, y entenderla te ayuda a leer las noticias económicas.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Inflación: suben los precios y tu dinero compra menos.",
+      "emphasis": "tu dinero compra menos"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Inflación",
+    "url": "https://es.wikipedia.org/wiki/Inflaci%C3%B3n",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Inflación subyacente",
+    "url": "https://es.wikipedia.org/wiki/Inflaci%C3%B3n_subyacente",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Aumento de la inflación de 2021-2023",
+    "url": "https://es.wikipedia.org/wiki/Aumento_de_la_inflaci%C3%B3n_de_2021-2023",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 42.5,
+  "before_first_script_call_s": 4.7,
+  "script_s": 37.7
+ },
+ "cost": {
+  "script_small": 0.00028,
+  "script_big": 0.13264,
+  "search_api": 0.0,
+  "total": 0.13292
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 37358,
+  "out": 6343
+ },
+ "rules": {
+  "length": {
+   "words": 318,
+   "expected_words": 267,
+   "ratio": 1.191,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 142.0,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Por qué con el mismo dinero hoy compras menos que hace unos años? No es tu imaginación. Tiene nombre, y afecta a la compra de todos los días: inflación.",
+   "close_text": "En resumen: inflación es que los precios suben de forma general y sostenida, y tu dinero compra menos. Se mide con el IPC, y entenderla te ayuda a leer las noticias económicas."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "kinetic_text": 2,
+    "definition": 1,
+    "diagram": 1,
+    "bullets": 2,
+    "stat": 1,
+    "table": 1,
+    "timeline": 1,
+    "icons": 1
+   },
+   "max_run": 1,
+   "entropy": 2.92,
+   "top_type": "kinetic_text",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "de bienes y servicios",
+    "count": 2
+   },
+   {
+    "phrase": "el indice de precios",
+    "count": 2
+   },
+   {
+    "phrase": "indice de precios al",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 3,
+   "notes_len": 3262,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 4 (bullets): its narration never says ['IPC: canasta de los hogares', 'Deflactor del PIB']",
+   "beat 8 (timeline): its narration never says ['2020 Crisis económica por la COVID-19', '2021 Los precios suben en casi todo el m', '2022 Invasión rusa de Ucrania', '2023 La inflación sigue afectando a los ']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Faithful to the notes (definition, IPC, subyacente, deflación/desinflación/hiperinflación). It omits the Ukraine invasion from the narration even though the timeline shows it, and the 2023 timeline label is an unsourced gloss."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It lacks the causes (demand, costs, monetary), the role of central banks (only a passing mention), an everyday numerical example, and the ES context (the INE, the ECB's 2% target). Much of the time goes to indicator and term lists."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear (definition, measurement, variants, example, summary), but the subyacente and variants sections are listy and there is no section on causes. The closing summary repeats the opening."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is relatable and works as a hook. The ending is a plain summary with a weak line, 'te ayuda a leer las noticias'."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Informal, direct address in 'tú' register, suitable for a beginner."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, but the 'stat' scene shows the text 'IPC' as if it were a number. The timeline invents a 2023 label, and the highlight of row 2 on the table is arbitrary."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Generic, definition-driven content with no concrete example such as a price rise on a basket item, no real figure and no surprising fact."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is in Spanish and about the right length, but it does not cover the requested typical content of causes, effects on purchasing power with an example, and central bank action."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct. Small calque-like turns such as 'Hay también la inflación subyacente' and 'canasta', which is Latin American usage."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Se atribuye a la política monetaria expansiva, los estímulos fiscales y los problemas de suministro.",
+    "issue": "Causes appear only as a list inside the 2021 example. There is no explanation of demand, costs or money supply, and no explanation of what central banks do.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "y los bancos centrales la vigilan.",
+    "issue": "The central bank response (interest rates, the 2% target) is not explained.",
+    "beat": 6
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"value\": \"IPC\"",
+    "issue": "The stat scene shows a name instead of a figure, so it adds nothing.",
+    "beat": 5
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Con el mismo dinero, hoy compras menos.",
+    "issue": "There is no concrete everyday example with figures, such as a loaf of bread or the price of a coffee.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "La inflación sigue afectando a los hogares",
+    "issue": "The 2023 timeline event is not in the notes, and the narration never mentions the Ukraine invasion shown in 2022.",
+    "beat": 8
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "canasta de bienes y servicios",
+    "issue": "'Canasta' is a Latin American term. In Spain it is 'cesta'. The viewer region is ES.",
+    "beat": 4
+   }
+  ],
+  "missing": [
+   "Causes: demand, costs, money",
+   "Concrete everyday example with numbers",
+   "Central bank action: interest rates, the ECB's 2% target",
+   "Spanish context: INE and recent Spanish data",
+   "Who wins and loses: wages, savings, debt"
+  ],
+  "wrong_facts": [
+   "No clear errors. The 2023 timeline label is unsourced."
+  ],
+  "would_publish": false,
+  "summary": "A correct but generic and list-like script that follows the notes closely and skips causes, central bank action and any concrete example. The Spanish is fluent, but it uses 'canasta' instead of the Spain-appropriate 'cesta'.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "canasta de bienes y servicios",
+     "problem": "Latin American regionalism for a Spain audience",
+     "better": "cesta de bienes y servicios"
+    },
+    {
+     "quote": "Hay también la inflación subyacente.",
+     "problem": "Slightly stiff word order",
+     "better": "También existe la inflación subyacente."
+    },
+    {
+     "quote": "Según el caso, los precios pueden comportarse distinto.",
+     "problem": "Colloquial use of 'distinto' as an adverb",
+     "better": "los precios pueden comportarse de formas distintas."
+    }
+   ]
+  },
+  "mean": 3.11,
+  "cost_usd": 0.025772,
+  "tokens": [
+   5106,
+   1556
+  ]
+ }
+}

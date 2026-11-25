@@ -1,0 +1,589 @@
+{
+ "id": "how-02",
+ "category": "how-to / tutorial",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo empezar a correr si nunca he hecho ejercicio",
+ "great": "Plan realista para principiante (caminar/correr alternado, 3 veces por semana, 20-30 min), calzado, ritmo conversacional, progresión gradual, descanso, lesiones comunes, consulta médica si hay condiciones; motivador y práctico.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:58:57",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Cómo empezar a correr desde cero es una explicación atemporal basada en principios de fisiología y entrenamiento que no cambian con frecuencia, así que no requiere búsqueda web actual.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "health-wellbeing",
+   "tutorial-howto"
+  ],
+  "staged": null,
+  "notes_len": 3590,
+  "n_sources": 2,
+  "n_fetched": 4,
+  "fetched": [
+   "Wave Race: Blue Storm",
+   "Gran Premio de Alemania de Motociclismo de 1970",
+   "Actividad física",
+   "Fitness"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Wave Race: Blue Storm\nWave Race: Blue Storm es un videojuego de carreras de motos de agua desarrollado por Nintendo Software Technology en 2001 para la consola GameCube. Este juego acompañó el lanzamiento de la consola en los tres mercados. Es la secuela de Wave Race 64 para Nintendo 64.\n\n## Gran Premio de Alemania de Motociclismo de 1970\nEl Gran Premio de Alemania de Motociclismo de 1970 fue la primera prueba de la temporada 1970 del Campeonato Mundial de Motociclismo. El Gran Premio se disputó los días 2 y 3 de mayo de 1970 en el Circuito de Nurburgring.\nLa organización en Nürburgring centró la ira de los conductores. Esta carrera fue conducida en los (entonces) 21 km de largo Nordschleife en el contexto de la Eifelrennen. Durante toda la jornada, se realizaron carreras tanto de automóviles como de motocicletas. A los corredores de motos, solo se les dio hora y media para explorar la pista y luego 45 minutos para calificar. Hacía frío, niebla y humedad, y debido a los entrenamientos de los coches de Fórmula 2), la pista se volvió aún más resbaladiza.\nAdemás, la organización entregó permisos iniciales aleatorios. Los pilotos principiantes apenas tuvieron la oportunidad de comenzar (y por lo tanto ganar dinero inicial), mientras que los conductores alemanes apenas pudieron comenzar. El neerlandés Theo Louwes se fue a casa antes de las carreras porque solo se le permitía comenzar en la categoría de 500 cc. Las barreras de choque, que eran necesarias para los automóviles, eran extremadamente peligrosas para los motociclistas…\n\n## Actividad física\nSe considera actividad física a cualquier movimiento corporal producido por los músculos que exija gasto de energía.​​ Una actividad tiene muchos conceptos: nadar, correr, jugar, saltar y montar en bicicleta, entre otros, como con otros jugadores.\nSe describen cuatro áreas o dominios donde se clasifica la actividad física: tiempo libre, transporte, hogar y trabajo (o escuela para niños y niñas).\nLa actividad física a veces se utiliza por error como sinónimo de ejercicio físico, sin embargo, el ejercicio es una forma programada y planificada para mejorar la condición física.​ El ejercicio físico es una forma más de realizar actividad física en el tiempo libre o trabajo. Aparte del ejercicio, la actividad física también incluye otras actividades como puedan ser caminar, trabajar o limpiar.\n\n## Fitness\nLa forma física, también llamada adecuación física o aptitud física, en inglés: physical fitness y comúnmente con la expresión estar en forma, es un estado general de buena salud y fortaleza física. Una buena forma física por lo general se adquiere como resultado de una nutrición adecuada,​ práctica de ejercicio físico vigoroso moderado,​ y un descanso apropiado para la recuperación física.​ \nSe denomina también fitness a la práctica deportiva consistente en realizar ejercicio para ponerse o mantenerse en buena forma.​ En este sentido su significado es muy parecido al de la gimnasia.\nCon anterioridad a la revolución industrial, se definía \"forma física\" como la capacidad de realizar las actividades cotidianas sin experimentar fatiga. Sin embargo, con la automatización y los cambios en el estilo de vida en la actualidad se considera que la forma física es una medida de la capacidad del cuerpo de funcionar de forma eficiente y efectiva durante el trabajo y actividades de esparcimiento, estar en condición saludable, ser capaz de resistir enfermedades hipocinéticas, y poder enfrentarse a situaciones de emergencia.​\nAunque existen clasificaciones diferentes según distintos autores, la forma…",
+ "plan": {
+  "title": "Cómo empezar a correr si nunca has hecho ejercicio",
+  "description": "Una guía sencilla para empezar a correr desde cero, con pasos graduales y consejos para no abandonar. Es información general, no consejo médico.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "214201de",
+    "narration": "¿Y si correr no fuera cosa de atletas? Mucha gente cree que hay que estar en forma para empezar. Es justo al revés: se empieza para llegar a estar en forma.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Empezar a correr desde cero",
+      "subtitle": "Un plan suave para quien nunca ha hecho ejercicio"
+     }
+    },
+    "chapter": "Antes de salir"
+   },
+   {
+    "id": "a31ba8f6",
+    "narration": "Primero, una idea clave. La actividad física es cualquier movimiento que gasta energía: caminar, limpiar, jugar. El ejercicio es la forma planificada de mejorar tu condición. Tú vas a pasar de lo primero a lo segundo.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Actividad física",
+      "definition": "Cualquier movimiento corporal producido por los músculos que exige gasto de energía.",
+      "example": "Caminar, correr, jugar, saltar o montar en bicicleta."
+     }
+    }
+   },
+   {
+    "id": "3ae84a14",
+    "narration": "Antes de empezar, una advertencia amable. Si tienes alguna enfermedad, dolor en el pecho, mareos o llevas años sin moverte, habla con un profesional de la salud. Esto es información general, no consejo médico.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Antes de empezar",
+      "items": [
+       "Consulta a un profesional si tienes dudas",
+       "Elige un día y una hora fijos",
+       "Prepara ropa cómoda",
+       "Ten paciencia contigo"
+      ]
+     }
+    }
+   },
+   {
+    "id": "43ffe2b0",
+    "narration": "No necesitas mucho. Unas zapatillas cómodas, ropa que no moleste y un lugar tranquilo, como un parque o una calle llana. Lo importante no es el equipo, es salir por la puerta.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "running shoes on trail",
+      "alt": "Zapatillas de correr en un camino",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "3db2e921",
+    "narration": "El secreto es empezar muy despacio. Tu cuerpo necesita adaptarse. Si el primer día corres hasta quedarte sin aire, lo más probable es que no quieras repetir. Queremos justo lo contrario.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Empieza tan fácil que mañana quieras repetir.",
+      "emphasis": "tan fácil"
+     }
+    },
+    "chapter": "El plan"
+   },
+   {
+    "id": "8bd2254a",
+    "narration": "Primer paso: camina cinco minutos para calentar. Segundo: alterna un minuto de trote suave con dos de caminata. Tercero: repite unas ocho veces. Cuarto: termina caminando y estirando con calma.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Tu primera sesión",
+      "steps": [
+       {
+        "label": "Camina 5 minutos",
+        "detail": "Calienta el cuerpo"
+       },
+       {
+        "label": "Trota 1 minuto",
+        "detail": "A ritmo suave"
+       },
+       {
+        "label": "Camina 2 minutos",
+        "detail": "Recupera el aliento"
+       },
+       {
+        "label": "Repite y estira",
+        "detail": "Termina con calma"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "c498fe3b",
+    "narration": "¿Cómo saber si el ritmo es el correcto? Prueba a hablar mientras trotas. Si puedes decir una frase entera sin ahogarte, vas bien. Si no puedes, baja la velocidad o camina un poco más.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Tú",
+        "text": "¿Voy demasiado rápido? Me falta el aire."
+       },
+       {
+        "speaker": "Prueba",
+        "text": "Si no puedes hablar una frase entera, baja el ritmo."
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "ec804e70",
+    "narration": "Con tres sesiones por semana basta. Entre una y otra, descansa. Según las notas, la buena forma física nace de ejercicio moderado, buena nutrición y descanso adecuado para recuperarte.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Los tres pilares",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Ejercicio moderado",
+        "icon": "play"
+       },
+       {
+        "id": "b",
+        "label": "Nutrición adecuada",
+        "icon": "utensils"
+       },
+       {
+        "id": "c",
+        "label": "Descanso",
+        "icon": "moon"
+       },
+       {
+        "id": "d",
+        "label": "Buena forma física",
+        "icon": "heart"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "d"
+       ],
+       [
+        "b",
+        "d"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "7d506977",
+    "narration": "Poco a poco, aumenta el tiempo de trote y reduce el de caminata. No hay prisa. Cada semana, un pequeño avance. En unas semanas, tu cuerpo te sorprenderá con lo que ya puede hacer.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Progresa sin prisa",
+      "items": [
+       "Más trote, menos caminata",
+       "Un pequeño avance por semana",
+       "Descansa si algo duele",
+       "Celebra cada sesión"
+      ],
+      "style": "cards",
+      "accent": "emerald",
+      "icons": [
+       "play",
+       "park",
+       "park",
+       "star"
+      ]
+     }
+    },
+    "chapter": "Seguir adelante"
+   },
+   {
+    "id": "607254e0",
+    "narration": "Cuidado con los errores típicos: empezar demasiado rápido, correr todos los días sin descansar y compararte con otros. Si sientes dolor agudo, para. Y si el dolor persiste, consulta a un profesional.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Error común",
+       "tagline": "Muchas prisas"
+      },
+      "b": {
+       "name": "Mejor opción",
+       "tagline": "Constancia"
+      },
+      "rows": [
+       {
+        "label": "Ritmo",
+        "a": "Demasiado rápido",
+        "b": "Suave"
+       },
+       {
+        "label": "Descanso",
+        "a": "Ninguno",
+        "b": "Entre sesiones"
+       },
+       {
+        "label": "Dolor",
+        "a": "Ignorarlo",
+        "b": "Parar y consultar"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "59056416",
+    "narration": "Para no abandonar, hazlo agradable. Sal al amanecer, cuando hace fresco. Ponte unas zapatillas que te gusten. Y busca compañía: unos amigos trotando juntos en el parque hacen que el tiempo pase volando.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "beginner runner sunrise road",
+       "running shoes on trail",
+       "friends jogging together park"
+      ],
+      "alt": "Corredores principiantes al amanecer, zapatillas y amigos"
+     }
+    }
+   },
+   {
+    "id": "c9c97eb9",
+    "narration": "Y cuando no tengas ganas, recuerda que solo te pedimos empezar. Ponte las zapatillas y sal diez minutos. Casi siempre, lo difícil es la puerta, no la carrera. Después te sentirás mejor.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person jogging morning park",
+      "alt": "Persona trotando por la mañana"
+     }
+    }
+   },
+   {
+    "id": "ae717680",
+    "narration": "Resumiendo: consulta si tienes dudas, alterna caminata y trote, habla mientras corres, descansa entre sesiones y avanza poco a poco. Nadie empieza siendo corredor; uno se convierte en corredor corriendo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Nadie empieza siendo corredor: te haces corredor corriendo.",
+      "emphasis": "corriendo"
+     }
+    }
+   },
+   {
+    "id": "d934bc9b",
+    "narration": "Tu tarea de hoy es pequeña: elige un día, prepara tus zapatillas y sal a caminar y trotar suavemente veinte minutos. Ese primer paso es el más importante de todo el camino.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Tu primer paso",
+      "items": [
+       "Elige tu día",
+       "Prepara las zapatillas",
+       "Sal 20 minutos"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Actividad física",
+    "url": "https://es.wikipedia.org/wiki/Actividad_f%C3%ADsica",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Fitness",
+    "url": "https://es.wikipedia.org/wiki/Fitness",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "health-wellbeing",
+   "tutorial-howto"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 60.7,
+  "before_first_script_call_s": 5.1,
+  "script_s": 55.6
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.15071,
+  "search_api": 0.0,
+  "total": 0.15098
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 38032,
+  "out": 7996
+ },
+ "rules": {
+  "length": {
+   "words": 450,
+   "expected_words": 402,
+   "ratio": 1.119,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 200.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si correr no fuera cosa de atletas? Mucha gente cree que hay que estar en forma para empezar. Es justo al revés: se empieza para llegar a estar en forma.",
+   "close_text": "Tu tarea de hoy es pequeña: elige un día, prepara tus zapatillas y sal a caminar y trotar suavemente veinte minutos. Ese primer paso es el más importante de todo el camino."
+  },
+  "variety": {
+   "distinct": 12,
+   "counts": {
+    "title": 1,
+    "definition": 1,
+    "checklist": 1,
+    "image": 1,
+    "kinetic_text": 2,
+    "steps": 1,
+    "dialogue": 1,
+    "diagram": 1,
+    "bullets": 2,
+    "versus": 1,
+    "gallery": 1,
+    "clip": 1
+   },
+   "max_run": 1,
+   "entropy": 3.52,
+   "top_type": "kinetic_text",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 4,
+   "notes_len": 3590,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 9 (bullets): its narration never says ['Descansa si algo duele', 'Celebra cada sesión']",
+   "beat 11 (gallery): its narration never says ['beginner runner sunrise road', 'running shoes on trail', 'friends jogging together park']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The advice is broadly sound, but \"repite unas ocho veces\" gives 5+8×3=29 min, not the \"20 minutos\" of the closing task. Also \"Según las notas\" is spoken aloud, and the pillars diagram invents icons and labels."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the run/walk plan, the talk test, rest, medical advice and errors. It skips common injuries, shoe-buying detail and concrete week-by-week progression, and the notes were of little use."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical and chaptered. But the definition beat 2 is a detour, the summary in beat 13 repeats earlier content, and beats 12 to 14 are redundant."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening \"¿Y si correr no fuera cosa de atletas?\" creates curiosity, and the closing task is concrete. The ending is slightly diluted by the earlier recap."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, encouraging, beginner-friendly and consistent in tú."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary. But the dialogue scene, the \"Los tres pilares\" diagram and the versus table are filler, the same \"running shoes on trail\" query is used twice, and the medical checklist doesn't match the narration."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly generic advice (\"No hay prisa\", \"lo difícil es la puerta\"). Few specific facts or surprising details."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is in Spanish and about 3 minutes, and it covers a plan. It misses injuries and details on shoes. Citing Wikipedia articles about \"Actividad física\" and \"Fitness\" as sources is weak."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural overall, with a few stiff or odd phrases such as \"Según las notas\" and \"Prueba\" as a speaker label."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Según las notas, la buena forma física nace de ejercicio moderado",
+    "issue": "Meta-reference to the research notes breaks the fourth wall in narration, and the claim is vague.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "repite unas ocho veces",
+    "issue": "Eight repetitions of 3 minutes plus 5 minutes of warm-up is about 29 minutes, which contradicts the 20 minutes in the final task.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Primero, una idea clave. La actividad física es cualquier movimiento que gasta energía",
+    "issue": "The abstract definition delays the practical advice and adds little for someone wanting to start running.",
+    "beat": 2
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "running shoes on trail",
+    "issue": "The same image query is used in beat 4 and again in the gallery in beat 11.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Cuidado con los errores típicos",
+    "issue": "There is no mention of common injuries (shin splints, knees), shoe choice at a specialist shop, or a multi-week progression table.",
+    "beat": 10
+   },
+   {
+    "dimension": "instructions",
+    "severity": "minor",
+    "quote": "Resumiendo: consulta si tienes dudas, alterna caminata y trote",
+    "issue": "A recap and then a second closing task make the ending redundant.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "Common beginner injuries and how to prevent them",
+   "A concrete multi-week progression (e.g. 8 weeks to 30 min continuous)",
+   "Advice on choosing shoes",
+   "Surface choice and warm-up/stretching details",
+   "Typical first-weeks sensations (fatigue, soreness)"
+  ],
+  "wrong_facts": [
+   "Eight repetitions of the 1+2 minute cycle plus the warm-up exceeds the 20 minutes suggested at the end."
+  ],
+  "would_publish": false,
+  "summary": "A friendly, well-toned beginner script with a sensible run/walk plan, but generic, padded with filler scenes, and it leaks \"según las notas\" into the narration. It lacks injuries, shoe detail and a concrete progression.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Según las notas, la buena forma física nace",
+     "problem": "Meta reference that is unnatural in narration",
+     "better": "La buena forma física nace de combinar ejercicio moderado, buena alimentación y descanso."
+    },
+    {
+     "quote": "Tú vas a pasar de lo primero a lo segundo.",
+     "problem": "Stiff and abstract",
+     "better": "Y tú vas a ir de una a la otra."
+    },
+    {
+     "quote": "Prueba a hablar mientras trotas.",
+     "problem": "Fine, but the speaker label 'Prueba' on screen is odd",
+     "better": "Usar 'Truco' or 'Consejo' as the label"
+    },
+    {
+     "quote": "Sal al amanecer, cuando hace fresco.",
+     "problem": "A bit generic; in Spain's summer, a time-of-day note would be more useful",
+     "better": "Sal a primera hora o al atardecer, cuando baja el calor."
+    }
+   ]
+  },
+  "mean": 3.22,
+  "cost_usd": 0.029782,
+  "tokens": [
+   6036,
+   1771
+  ]
+ }
+}

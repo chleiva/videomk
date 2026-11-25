@@ -1,0 +1,434 @@
+{
+ "id": "kid-01",
+ "category": "education / lesson for kids",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Explain how volcanoes erupt for six-year-olds",
+ "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:07:49",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How volcanoes erupt is a timeless geological explanation that does not depend on recent information, so an encyclopedia source is sufficient for an accurate kid-friendly script.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "How Volcanoes Erupt: A Story for Kids",
+  "description": "A gentle explanation for six-year-olds of how a volcano erupts, from hot melted rock deep underground to a big bubbly blast. Kids learn about magma, pressure and lava with simple pictures and comparisons.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "c93146c4",
+    "narration": "Did you know some mountains can blow their tops? It is true! Deep inside, a mountain called a volcano can burst open with fire and smoke. Do you want to know why?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "How Does a Volcano Erupt?",
+      "subtitle": "A big blast, explained for curious kids"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "A mountain with a secret"
+   },
+   {
+    "id": "17253690",
+    "narration": "A volcano is a mountain with a hole at the top. The hole is a doorway from deep under the ground. Hot, hot things inside can come up and out through it.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Volcano",
+      "definition": "A mountain with an opening, where hot melted rock from deep underground can come out."
+     }
+    }
+   },
+   {
+    "id": "aaaa66f1",
+    "narration": "Volcanoes come in many shapes. Look at the crater with smoke puffing out. Next, a wide shield volcano, which is low and flat like a big hat. Last, a volcano glowing at sunrise.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "volcano crater smoke",
+       "wide shield volcano",
+       "volcano at sunrise"
+      ],
+      "alt": "Three different kinds of volcanoes"
+     }
+    }
+   },
+   {
+    "id": "9d418f7a",
+    "narration": "Far below the ground, it is so hot that rock melts. Melted rock is called magma. Imagine a giant pot of thick, hot soup bubbling under your feet!",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Magma",
+      "definition": "Rock that is so hot it has melted into a thick, gooey liquid under the ground."
+     }
+    },
+    "chapter": "What is inside"
+   },
+   {
+    "id": "c8328608",
+    "narration": "Here is the trip. Magma starts deep and very hot. Because it is lighter than the rock around it, it slowly rises. Then it reaches the chamber near the top, and it waits there.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The magma's trip",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Deep and very hot",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Magma rises up",
+        "icon": "log-in"
+       },
+       {
+        "id": "c",
+        "label": "Near the top",
+        "icon": "mountain"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "rises"
+       ],
+       [
+        "b",
+        "c",
+        "waits"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "d6139c9d",
+    "narration": "Now the squeeze begins. More magma keeps coming. Gas bubbles hide inside it. Everything pushes harder and harder, like a shaken soda bottle with the lid on tight.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Pressure builds",
+      "items": [
+       "More magma keeps coming",
+       "Gas bubbles hide inside",
+       "Everything pushes harder"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "flame",
+       "cloud",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "7be43c94",
+    "narration": "Pop! When the push is too strong, the magma bursts out of the hole. That is an eruption! Ash, smoke and sparks shoot up into the sky.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano erupting lava",
+      "alt": "fiery eruption with smoke"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "The big blast"
+   },
+   {
+    "id": "26ebf71b",
+    "narration": "Once the magma is outside, we call it lava. It glows orange and red and flows downhill slowly, like thick syrup. Then it cools and turns into hard, dark rock.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "From lava to rock",
+      "steps": [
+       {
+        "label": "Magma comes out",
+        "detail": "It becomes lava"
+       },
+       {
+        "label": "Lava flows downhill",
+        "detail": "Slow like thick syrup"
+       },
+       {
+        "label": "Lava cools",
+        "detail": "It turns into hard rock"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "727ac8a1",
+    "narration": "Over many eruptions, the cooled rock piles up, layer on layer. That is how volcanoes grow taller and taller. Some islands were even built this way!",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "volcanic island lava rock",
+      "alt": "volcanic island made of cooled lava",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "584295ac",
+    "narration": "So remember: hot magma rises, pressure builds, and boom! The volcano erupts. Magma becomes lava, and lava becomes new rock. Now you know the secret inside a mountain!",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hot magma rises, pressure builds, and the volcano erupts!",
+      "emphasis": "erupts"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "kids-family",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 27.1,
+  "before_first_script_call_s": 2.1,
+  "script_s": 25.0
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "script_big": 0.07806,
+  "search_api": 0.0,
+  "total": 0.0783
+ },
+ "calls": {
+  "small": 3,
+  "big": 2
+ },
+ "tokens": {
+  "in": 23193,
+  "out": 3647
+ },
+ "rules": {
+  "length": {
+   "words": 298,
+   "expected_words": 267,
+   "ratio": 1.116,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 133.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Did you know some mountains can blow their tops? It is true! Deep inside, a mountain called a volcano can burst open with fire and smoke. Do you want to know why?",
+   "close_text": "So remember: hot magma rises, pressure builds, and boom! The volcano erupts. Magma becomes lava, and lava becomes new rock. Now you know the secret inside a mountain!"
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "definition": 2,
+    "gallery": 1,
+    "diagram": 1,
+    "bullets": 1,
+    "clip": 1,
+    "steps": 1,
+    "image": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "definition",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Core facts are right (magma lighter than surrounding rock, gas pressure, lava cools to rock, islands built by eruptions). It simplifies a little, e.g. 'a mountain with a hole at the top', and a volcano is not always a mountain."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers magma vs lava, pressure, the soda analogy and layers, but has no fun fact (e.g. Hawaii or Pompeii), no safety note, and no mention of Earth's layers or why gas pushes magma out."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear sequence: what a volcano is, magma, pressure, eruption, lava, growth, recap. Beat 3 on shapes is a slight detour."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook 'Did you know some mountains can blow their tops?' is decent. The ending is a plain recap with 'secret inside a mountain', with no closing question or image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Playful, with short sentences and a soup analogy for kids; 'Hot, hot things' is slightly babyish."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well. But the gallery queries are vague and 'volcano at sunrise' does not show a kind of volcano, and the diagram is labeled with abstract icons like 'log-in'."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The soup and soda analogies are nice but standard, and there are no surprising specifics."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is English, kid-pitched and about the right length (roughly 270 words). It leaves out the fun facts and the closing question that the brief suggests."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and simple. A few clunky bits, such as 'Look at the crater' with no image cue."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Hot, hot things inside can come up and out through it.",
+    "issue": "Vague; this beat does not name magma or give any concrete idea of what comes out.",
+    "beat": 2
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Last, a volcano glowing at sunrise.",
+    "issue": "This is not a kind of volcano. The gallery alt says 'three different kinds' but the queries do not match, so the narration cannot be tied to the images.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Imagine a giant pot of thick, hot soup bubbling under your feet!",
+    "issue": "This suggests magma is a big liquid pool. In reality it is mostly partly molten rock, and the chamber is not 'under your feet' everywhere.",
+    "beat": 4
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Now you know the secret inside a mountain!",
+    "issue": "The ending is a recap with no question or memorable image to land on.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Some islands were even built this way!",
+    "issue": "The fact is mentioned in passing and not named (e.g. Hawaii), so it is not a memorable fun fact.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "a named fun fact (Hawaii, Pompeii, or a biggest volcano)",
+   "a safety note, or that scientists watch volcanoes",
+   "a closing question for the child",
+   "Earth's layers"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, friendly, accurate kid explainer with a good soda-bottle analogy and logical flow. It is generic, though: it lacks fun facts and a strong ending, and the gallery visuals do not match the narration well.",
+  "mean": 3.56,
+  "cost_usd": 0.018548,
+  "tokens": [
+   3114,
+   1232
+  ]
+ }
+}

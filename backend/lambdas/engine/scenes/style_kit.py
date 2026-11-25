@@ -41,6 +41,13 @@ LEFT, RIGHT = 150, 1770      # content margins (logical px): inside the title-sa
 HEAD_Y, HEAD_SIZE = 104, 70
 
 
+def lr(fr) -> Tuple[float, float]:
+    """Left and right content margins (design units) of a frame (None = the landscape default)."""
+    if fr is None or fr.landscape:
+        return LEFT, RIGHT
+    return float(fr.margin_x), float(fr.W - fr.margin_x)
+
+
 # ----------------------------------------------------------------------------- colour
 def _lin(v: float) -> float:
     v /= 255.0
@@ -362,20 +369,31 @@ def draw_lines(cv: Canvas, x: float, cy: float, lines: List[str], weight: str, s
 
 
 # ----------------------------------------------------------------------------- heading
-def title_block(cv: Canvas, th: Theme, pal: Pal, text: str, lt: float) -> float:
-    """Big left-aligned heading with a short gradient bar that draws on. Returns the y below it (content starts there)."""
+def title_block(cv: Canvas, th: Theme, pal: Pal, text: str, lt: float, ctx=None) -> float:
+    """Big left-aligned heading with a short gradient bar that draws on. Returns the y below it (content starts there). With `ctx`, it follows the frame:
+    margins, a larger size, up to two lines, below the platform's top UI zone."""
+    fr = ctx.frame if ctx is not None else None
+    land = fr is None or fr.landscape
+    left, right = lr(fr)
     if not text:
-        return 70.0
+        return 70.0 if land else float(fr.margin_top + 10)
     p = ease_out_cubic(progress(lt, 0.05, 0.55))
-    size, lines = fit_lines(cv, text, "bold", RIGHT - LEFT, 1, HEAD_SIZE, 44)
-    cv.text(LEFT, HEAD_Y + (1 - p) * 22, lines[0], "bold", size, with_alpha(th.text, p), anchor="ls")
+    if land:
+        size, lines = fit_lines(cv, text, "bold", right - left, 1, HEAD_SIZE, 44)
+        head_y = HEAD_Y
+    else:
+        size, lines = fit_lines(cv, text, "bold", right - left, 2, HEAD_SIZE * fr.type_scale, 46, lh=1.12)
+        head_y = fr.margin_top + HEAD_SIZE * fr.type_scale * 0.95
+    for k, line in enumerate(lines):
+        cv.text(left, head_y + k * size * 1.12 + (1 - p) * 22, line, "bold", size, with_alpha(th.text, p), anchor="ls")
+    bar_y = head_y + (len(lines) - 1) * size * 1.12
     bw = 132 * ease_out_cubic(progress(lt, 0.25, 0.6))
     if bw > 2:
         spr = sprite(cv, 132, 9, 4.5, pal.c1, pal.c2)
         w = int(spr.width * bw / 132)
         if w > 1:
-            cv.im.paste(spr.crop((0, 0, w, spr.height)).convert("RGB"), (cv._s(LEFT), cv._s(HEAD_Y + 26)), spr.getchannel("A").crop((0, 0, w, spr.height)))
-    return HEAD_Y + 26 + 9 + 34
+            cv.im.paste(spr.crop((0, 0, w, spr.height)).convert("RGB"), (cv._s(left), cv._s(bar_y + 26)), spr.getchannel("A").crop((0, 0, w, spr.height)))
+    return bar_y + 26 + 9 + 34
 
 
 def area(ctx, y_top: float) -> Tuple[float, float]:

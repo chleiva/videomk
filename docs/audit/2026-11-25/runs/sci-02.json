@@ -1,0 +1,564 @@
+{
+ "id": "sci-02",
+ "category": "concept explainer (science)",
+ "language": "es",
+ "difficulty": "medium",
+ "prompt": "¿Por qué el cielo es azul y los atardeceres son rojos? Explícamelo como si tuviera 15 años.",
+ "great": "Dispersión de Rayleigh, la luz solar contiene todos los colores, azul se dispersa más, por qué no violeta, atardecer = camino más largo por la atmósfera; analogías sencillas, tono para adolescente.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:56:35",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Por qué el cielo es azul y los atardeceres rojos es una explicación científica atemporal (dispersión de Rayleigh), que no depende de información reciente, así que basta con la enciclopedia.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 6267,
+  "n_sources": 3,
+  "n_fetched": 6,
+  "fetched": [
+   "Dispersión de Rayleigh",
+   "Rayleigh",
+   "Cielo",
+   "Celeste (color)",
+   "Dispersión de la luz por partículas",
+   "Refracción atmosférica"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 366 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## Dispersión de Rayleigh\nLa dispersión de Rayleigh, también conocida como esparcimiento de tipo Rayleigh, es la dispersión de la luz visible o cualquier otra radiación electromagnética por partículas cuyo tamaño es mucho menor que la longitud de onda de los fotones dispersados. Ocurre cuando la luz viaja por sólidos y fluidos transparentes, pero se ve con mayor frecuencia en los gases. La dispersión de Rayleigh de la luz solar en la atmósfera es la principal razón de que el cielo se vea azul.\nSegún el electromagnetismo clásico, la dispersión de Rayleigh es el resultado de la polarización eléctrica de las partículas. El campo eléctrico oscilatorio de una onda luminosa actúa sobre las cargas de las partículas provocando que oscilen en la misma frecuencia. La partícula se convierte en un pequeño dipolo radiante cuya radiación visible es la luz dispersada.\nDesde un punto de vista semiclásico (cuántico) más moderno, la dispersión de Rayleigh puede considerarse la suma de una dispersión elástica pura (línea central de Cabannes) más una dispersión de Raman puramente rotacional con líneas que ocurren cerca de la línea de Cabannes.​​\nSi bien el término dispersión está muy extendido en la literatura científica (junto…\n\n## Rayleigh\nEl término Rayleigh puede referirse a:\nRayleigh (Essex), Inglaterra.\nDispersión de Rayleigh\nSylvers Rayleigh, personaje ficticio del manga One Piece.\nJohn Strutt, tercer barón Rayleigh, físico y profesor universitario británico que da nombre a:\ndistribución de Rayleigh, función de distribución de teoría de la probabilidad y la estadística.\ndispersión de Rayleigh\nley de Rayleigh-Jeans\nnúmero de Rayleigh, número adimensional utilizado en mecánica de los fluidos.\ninestabilidad Rayleigh-Taylor\ncriterio de Rayleigh\nUnidad Rayl\ndos cráteres y un asteroide:\nRayleigh (cráter), en la Luna\nRayleigh (cráter marciano), en Marte\n(22740) Rayleigh, asteroide\nInterferómetro de Rayleigh, interferómetro empleado para comparar los índices de refracción entre dos gases o líquidos.\n\n## Cielo\nCielo (del latín caelum; de caelum tangi: ser –tocado– herido por el rayo)​ se define a menudo como el espacio en el que se mueven los astros y que por efecto visual parece rodear la Tierra. \nEn astronomía, cielo es sinónimo de esfera celeste: una bóveda imaginaria sobre la cual se distribuyen el Sol, las estrellas, los planetas y la Luna. La esfera celeste se divide en regiones denominadas constelaciones.​\nEn la mitología romana, Caelus era el dios del cielo, equivalente al Urano griego.\nEn meteorología el término cielo hace referencia a la zona gaseosa más densa de la atmósfera de un planeta.\nAlgunos de los fenómenos naturales vistos en el cielo son las nubes, el arcoíris y el orto. El relámpago se puede ver en el cielo durante las tormentas eléctricas. Como resultado de actividades humanas, la neblina se ve a menudo sobre ciudades grandes durante las primeras horas del día. \nNormalmente, el término cielo se refiere informalmente a una perspectiva desde la superficie de la Tierra; sin embargo, el significado y el uso pueden variar. Un observador en la superficie de la Tierra puede ver una pequeña parte del cielo, que se asemeja a una cúpula (a veces llamada cuenco celeste) que parece…\n\n## Celeste (color)\nEl celeste, también llamado azul celeste, cerúleo, azul cerúleo, azul cielo, azul claro, azul bebé o azur, es un color azul-cian semiclaro, de saturación intensa. Se dice que corresponde a la coloración del cielo diurno despejado. En la franja superior del recuadro de la derecha se proporciona una muestra de esa coloración.\nEl color celeste no es un color específico, por lo que en el uso general y popular su tonalidad varía, entendiéndose por «celeste» casi cualquier azul más o menos claro, a veces purpúreo, o aturquesado como el cian.\n\n## Dispersión de la luz por partículas\nLa dispersión de la luz por las partículas es el proceso mediante el cual las partículas pequeñas (por ejemplo, cristales de hielo, polvo, partículas atmosféricas, polvo cósmico y células sanguíneas) causan fenómenos ópticos, como el arco iris, el color azul del cielo y los halos.\nLas ecuaciones de Maxwell son la base de los métodos teóricos y computacionales que describen la dispersión de la luz, pero como las soluciones exactas de las ecuaciones de Maxwell solo se conocen para geometrías seleccionadas (como partículas esféricas), la dispersión de la luz por las partículas es una rama de la electromagnética computacional relacionada con la dispersión de la radiación electromagnética y Absorción por partículas.\nEn el caso de geometrías para las que se conocen soluciones analíticas (como esferas, agrupaciones de esferas, cilindros infinitos), las soluciones se calculan normalmente en términos de series infinitas. En el caso de geometrías más complejas y de partículas no homogéneas, las ecuaciones de Maxwell originales se discretizan y resuelven. Los efectos de dispersión múltiple de la dispersión de la luz por las partículas se tratan mediante técnicas de transferencia radiativa (ver…\n\n## Refracción atmosférica\nLa refracción atmosférica es un fenómeno óptico que consiste en la desviación de la luz u otra onda electromagnética de una línea recta a medida que atraviesa la atmósfera debido a la variación en la densidad del aire en función de la altura y, por tanto, de su índice de refracción.​\nHistóricamente, los efectos de la refracción en los astros se estudiaron desde la Antigüedad, aunque no fue hasta la Edad Moderna cuando se comenzó a medirlos calcularlos mediante cálculos matemáticos para tablas en efemérides. \nLa refracción atmosférica se considera al medir la posición de los objetos astronómicos y terrestres.\nLa refracción astronómica o celeste hace que los astros, como estrellas, parezcan más altos sobre el horizonte de lo que realmente están. Ejemplos de la refracción son un eclipse lunar selenelion y un falso amanecer o atardecer. Esto se debe a que la velocidad de la luz a través de la atmósfera terrestre disminuye (el índice de refracción aumenta) con el aumento de la densidad del aire. La refracción atmosférica se vuelve más severa cuando los gradientes de temperatura son fuertes. Por ello en astronomía se diferencia la posición aparente de los astros (modificada por la refracción…",
+ "plan": {
+  "title": "¿Por qué el cielo es azul y el atardecer rojo?",
+  "description": "Descubre cómo la dispersión de Rayleigh hace que el cielo se vea azul de día y rojo al atardecer. Una explicación sencilla, pensada para adolescentes.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "c11482c1",
+    "narration": "Si la luz del Sol es blanca, ¿por qué el cielo no se ve blanco? ¿Y por qué, de repente, al atardecer todo se vuelve rojo? Tiene truco, y es más sencillo de lo que parece.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "¿Por qué el cielo es azul?",
+      "subtitle": "Y por qué los atardeceres son rojos"
+     }
+    },
+    "chapter": "El misterio de los colores"
+   },
+   {
+    "id": "e1afa741",
+    "narration": "Primero, una idea clave: la luz blanca del Sol no es blanca de verdad. Es una mezcla de todos los colores, como los que ves en un arcoíris.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "rainbow over field",
+       "light prism spectrum",
+       "sunlight through clouds"
+      ],
+      "alt": "Luz del Sol y sus colores"
+     }
+    }
+   },
+   {
+    "id": "978187fd",
+    "narration": "Cada color es una onda de luz con distinto tamaño. El rojo tiene ondas largas, el azul tiene ondas cortas. Esa diferencia lo cambia todo.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Luz roja",
+       "tagline": "Onda larga"
+      },
+      "b": {
+       "name": "Luz azul",
+       "tagline": "Onda corta"
+      },
+      "rows": [
+       {
+        "label": "Longitud de onda",
+        "a": "Larga",
+        "b": "Corta"
+       },
+       {
+        "label": "Se dispersa",
+        "a": "Poco",
+        "b": "Mucho"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "3c1b4dae",
+    "narration": "Ahora imagina el aire. Está lleno de moléculas diminutas de gas, mucho más pequeñas que las ondas de luz. Cuando la luz del Sol choca con ellas, se desvía en todas direcciones.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Del Sol a tus ojos",
+      "nodes": [
+       {
+        "id": "sol",
+        "label": "Luz del Sol",
+        "icon": "sun"
+       },
+       {
+        "id": "aire",
+        "label": "Moléculas de aire",
+        "icon": "cloud"
+       },
+       {
+        "id": "ojos",
+        "label": "Tus ojos",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "sol",
+        "aire",
+        "entra"
+       ],
+       [
+        "aire",
+        "ojos",
+        "se dispersa"
+       ]
+      ],
+      "style": "cards",
+      "accent": "sky"
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "f468526d",
+    "narration": "Ese fenómeno se llama dispersión de Rayleigh, por el físico británico que lo estudió. Ocurre cuando la luz choca con partículas mucho menores que su longitud de onda.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Dispersión de Rayleigh",
+      "definition": "Desvío de la luz por partículas mucho más pequeñas que su longitud de onda. Es la principal razón de que el cielo se vea azul.",
+      "origin": "Lleva el nombre del físico John Strutt, lord Rayleigh"
+     }
+    }
+   },
+   {
+    "id": "5e486f5d",
+    "narration": "Y aquí viene la clave: las ondas cortas se dispersan mucho más que las largas. El azul rebota por todo el cielo, mientras el rojo sigue casi recto.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Quién se dispersa más",
+      "items": [
+       "El azul rebota muchísimo",
+       "El rojo casi sigue recto",
+       "El aire reparte el azul"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "hand",
+       "log-in",
+       "cloud"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2958c196",
+    "narration": "Por eso, mires donde mires, te llega luz azul desde todos los lados. El cielo no tiene pintura azul: es luz del Sol dispersada por el aire.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "clear blue sky",
+      "alt": "Cielo azul despejado",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "6cf2500e",
+    "narration": "Quizá preguntes: ¿y el violeta, que tiene la onda aún más corta? Nuestros ojos ven peor el violeta, y el Sol emite menos. Así que vemos azul.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Vemos el cielo azul porque el aire dispersa más las ondas cortas.",
+      "emphasis": "azul"
+     }
+    }
+   },
+   {
+    "id": "7b6b1115",
+    "narration": "Vamos al atardecer. Al final del día, el Sol está bajo en el horizonte. Su luz ya no cae desde arriba, sino que llega casi de lado.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "sun low on horizon",
+      "alt": "Sol cerca del horizonte",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "El atardecer rojo"
+   },
+   {
+    "id": "9f5e475f",
+    "narration": "Eso significa que la luz recorre un camino mucho más largo por la atmósfera. Atraviesa muchísimo más aire antes de llegar a tus ojos.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Camino de la luz",
+      "nodes": [
+       {
+        "id": "med",
+        "label": "Mediodía: camino corto",
+        "icon": "sun"
+       },
+       {
+        "id": "atar",
+        "label": "Atardecer: camino largo",
+        "icon": "sunset"
+       },
+       {
+        "id": "ojo",
+        "label": "Tus ojos",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "med",
+        "ojo",
+        "poco aire"
+       ],
+       [
+        "atar",
+        "ojo",
+        "mucho aire"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "27e5986b",
+    "narration": "En ese viaje largo, el azul se dispersa y se pierde por el camino. Casi solo sobrevive la luz de ondas largas: el naranja y el rojo.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Lo que pasa en el viaje",
+      "steps": [
+       {
+        "label": "La luz entra por un camino largo"
+       },
+       {
+        "label": "El azul se dispersa y se pierde"
+       },
+       {
+        "label": "Llegan el naranja y el rojo"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "99b89641",
+    "narration": "Por eso ves un cielo rojo, luego un cielo naranja en la playa, y por último nubes rosadas al anochecer. Son los colores que sobreviven al viaje.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "red sunset sky",
+       "orange sunset beach",
+       "pink dusk clouds"
+      ],
+      "alt": "Atardeceres de distintos colores"
+     }
+    }
+   },
+   {
+    "id": "44746e3d",
+    "narration": "En resumen, el cielo es azul de día y rojo al atardecer por la misma razón: el aire dispersa la luz, y lo que ves depende de cuánto aire atraviesa.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El mismo aire que pinta el cielo de azul pinta el atardecer de rojo.",
+      "emphasis": "el mismo aire"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Dispersión de Rayleigh",
+    "url": "https://es.wikipedia.org/wiki/Dispersi%C3%B3n_de_Rayleigh",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Celeste (color)",
+    "url": "https://es.wikipedia.org/wiki/Celeste_(color)",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Dispersión de la luz por partículas",
+    "url": "https://es.wikipedia.org/wiki/Dispersi%C3%B3n_de_la_luz_por_part%C3%ADculas",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 55.5,
+  "before_first_script_call_s": 5.3,
+  "script_s": 50.2
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.15715,
+  "search_api": 0.0,
+  "total": 0.15741
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 41347,
+  "out": 7960
+ },
+ "rules": {
+  "length": {
+   "words": 366,
+   "expected_words": 402,
+   "ratio": 0.91,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 164.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 36,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Si la luz del Sol es blanca, ¿por qué el cielo no se ve blanco? ¿Y por qué, de repente, al atardecer todo se vuelve rojo? Tiene truco, y es más sencillo de lo que parece.",
+   "close_text": "En resumen, el cielo es azul de día y rojo al atardecer por la misma razón: el aire dispersa la luz, y lo que ves depende de cuánto aire atraviesa."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "gallery": 2,
+    "versus": 1,
+    "diagram": 2,
+    "definition": 1,
+    "bullets": 1,
+    "image": 2,
+    "kinetic_text": 2,
+    "steps": 1
+   },
+   "max_run": 1,
+   "entropy": 3.09,
+   "top_type": "gallery",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "la luz del sol",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 3,
+   "fetched": 6,
+   "notes_len": 6267,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 2 (gallery): its narration never says ['rainbow over field', 'light prism spectrum', 'sunlight through clouds']",
+   "beat 4 (diagram): its narration never says ['Moléculas de aire', 'Tus ojos']",
+   "beat 12 (gallery): its narration never says ['red sunset sky', 'orange sunset beach', 'pink dusk clouds']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core physics is right, but the violet explanation is incomplete and \"Rayleigh... por el físico británico que lo estudió\" is thin. The line \"el Sol emite menos\" is simplistic, and it omits that the atmosphere also absorbs violet. The \"rojo, luego naranja, luego rosadas\" sequence is loosely asserted."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers white light, wavelength, Rayleigh scattering, why not violet, and the longer path at sunset. It lacks any analogy, the 1/λ⁴ dependence, and the non-obvious detail of why the sky overhead stays blue at dusk. It is also under the target length."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: light, then scattering, then blue sky, then sunset, then a summary. Each section builds on the previous one. The ending recap repeats beat 8's text slightly."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question about white light and a non-white sky is decent. The ending is a bare summary of the main point, not an image or a surprise."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "It is friendly and uses \"tú\", which suits a 15-year-old. It is a bit plain and has no teen-level humour or analogies."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well (gallery, versus, diagram, definition, steps). The prop contents match the narration. The \"Se dispersa Poco/Mucho\" rows are acceptable. The rainbow query for white light is only a loose fit."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It is generic textbook explanation with no concrete analogy, such as a pinball or ocean waves, and no surprising example."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, addressed at a teen, and covers both questions. It is about 360 words, slightly under 402."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and correct. There are a few slightly stiff or odd phrases."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Nuestros ojos ven peor el violeta, y el Sol emite menos.",
+    "issue": "This oversimplifies the violet explanation. The upper atmosphere also absorbs some of it, and the Sun's emission is not much lower at violet. The main factor is the sensitivity of our cone cells.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Por eso ves un cielo rojo, luego un cielo naranja en la playa, y por último nubes rosadas",
+    "issue": "This is a muddled sequence that does not clearly follow from the physics. The beach detail is irrelevant, and pink clouds are not explained.",
+    "beat": 12
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Ahora imagina el aire. Está lleno de moléculas diminutas de gas",
+    "issue": "There is no vivid analogy for scattering, so the explanation stays abstract for a 15-year-old.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "El azul rebota por todo el cielo, mientras el rojo sigue casi recto.",
+    "issue": "It does not explain why the sky is still blue overhead at sunset, or that the blue light is scattered away from the line of sight.",
+    "beat": 6
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "En resumen, el cielo es azul de día y rojo al atardecer por la misma razón",
+    "issue": "The ending is a bare recap with no closing image or twist.",
+    "beat": 13
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "rainbow over field",
+    "issue": "The query shows a rainbow, not white light splitting into colours. It is a loose match.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "A concrete analogy, such as pinball or waves hitting obstacles",
+   "The idea that scattering strength rises sharply for short wavelengths (about 1/λ⁴)",
+   "Why the overhead sky still looks blue at sunset",
+   "The effect of dust and pollution on sunset colours",
+   "A closing image or surprising fact, such as the blue light that left the sunset sky lighting other places"
+  ],
+  "wrong_facts": [
+   "The violet explanation (\"el Sol emite menos\") is oversimplified and incomplete."
+  ],
+  "would_publish": false,
+  "summary": "The script is a clear, correct, well-structured basic explanation with good scene variety. It is generic, has no analogies, simplifies the violet explanation, and ends flatly.",
+  "mean": 3.44,
+  "cost_usd": 0.028936,
+  "tokens": [
+   6808,
+   1532
+  ]
+ }
+}

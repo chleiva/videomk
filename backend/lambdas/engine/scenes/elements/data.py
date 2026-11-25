@@ -61,8 +61,10 @@ def _axis_col(th: Theme):
     return th.card_outline if th.name != "paper" else (31, 41, 55, 30)
 
 
-def _top(cv: Canvas, th: Theme, props: Dict[str, Any], lt: float) -> float:
+def _top(cv: Canvas, th: Theme, props: Dict[str, Any], lt: float, ctx: Optional[SceneCtx] = None) -> float:
     t = _title(props)
+    if ctx is not None and not ctx.frame.landscape:     # narrow frames: the frame-aware heading (wraps to two lines, larger type) from the top of the content box
+        return heading(cv, th, t, lt, y=ctx.top + 10, ctx=ctx) if t else ctx.top + 40
     return heading(cv, th, t, lt, y=CONTENT_TOP + 20) if t else CONTENT_TOP + 50
 
 
@@ -82,7 +84,7 @@ def _tick(v: float) -> str:
     return _fmt(v, "")
 
 
-def _grid(cv: Canvas, th: Theme, x0: float, x1: float, y_top: float, y_base: float, lo: float, hi: float, step: float, unit: str, lt: float) -> None:
+def _grid(cv: Canvas, th: Theme, x0: float, x1: float, y_top: float, y_base: float, lo: float, hi: float, step: float, unit: str, lt: float, tsz: float = 24) -> None:
     gp = ease_out_cubic(progress(lt, 0.0, 0.6))
     k = 0
     v = lo
@@ -90,7 +92,7 @@ def _grid(cv: Canvas, th: Theme, x0: float, x1: float, y_top: float, y_base: flo
         gy = y_base - (v - lo) / ((hi - lo) or 1.0) * (y_base - y_top)
         first = k == 0
         cv.line([(x0, gy), (x1, gy)], with_alpha(_axis_col(th), gp * (1.6 if first else 1.0)), 2, round_caps=False)
-        cv.text(x0 - 16, gy, _fmt(v, unit if unit == "%" else ""), "regular", 24, with_alpha(th.muted, gp), anchor="rm")
+        cv.text(x0 - 16, gy, _fmt(v, unit if unit == "%" else ""), "regular", tsz, with_alpha(th.muted, gp), anchor="rm")
         v += step
         k += 1
 
@@ -111,6 +113,15 @@ def _lines_in(cv: Canvas, s: str, weight: str, max_w: float, max_lines: int, sta
             return size, lines
         size -= 2
     return min_size, cv.wrap(s, weight, min_size, max_w)[:max_lines]
+
+
+def _clip_to(cv: Canvas, s: str, weight: str, size: float, max_w: float) -> str:
+    """s, shortened with an ellipsis only when it cannot fit max_w at this size."""
+    if cv.measure(s, weight, size) <= max_w:
+        return s
+    while len(s) > 1 and cv.measure(s + "...", weight, size) > max_w:
+        s = s[:-1]
+    return s.rstrip() + "..."
 
 
 def _anchor_cues(n: int, dur: float, props: Dict[str, Any], first: float = 0.15, last: float = 0.7) -> List[float]:
@@ -165,10 +176,93 @@ def _sc_bar(cv: Canvas, th: Theme, x: float, w: float, base: float, h: float, co
     cv.rrect(x, base - h, w, 30, 14, fill=col + (255,))
 
 
-def _sc_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+def _sc_hbar(cv: Canvas, th: Theme, x: float, y: float, w: float, h: float, col, broken: bool, p: float) -> None:
+    """A horizontal bar for narrow frames; a broken one is cut in two by slanted gaps (the same mark as the vertical bars)."""
+    if w < 1:
+        return
+    r = min(14.0, h / 2)
+    if not broken or w < 120:
+        cv.shadow(x, y, w, h, r, blur=14, dy=8, alpha=th.shadow_alpha * 0.8 * p)
+        cv.rrect(x, y, w, h, r, fill=col + (255,))
+        return
+    xb = x + w * 0.5
+    sl = h * 0.28
+    cv.polygon([(x, y), (xb - 4 + sl, y), (xb - 4 - sl, y + h), (x, y + h)], col + (255,))
+    cv.polygon([(xb + 8 + sl, y), (x + w, y), (x + w, y + h), (xb + 8 - sl, y + h)], col + (255,))
+    cv.rrect(x, y, 30, h, r, fill=col + (255,))
+    cv.rrect(x + w - 30, y, 30, h, r, fill=col + (255,))
+
+
+def _sc_draw_rows(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    """Vertical, square and 4:5 frames: one horizontal bar per item, name above it, value at its end; the same scale, order and reveal times."""
+    fr = ctx.frame
     items = props["items"]
     n = len(items)
-    top = _top(cv, th, props, lt)
+    top = _top(cv, th, props, lt, ctx)
+    unit = props.get("unit", "")
+    bx0, _, bx1, _ = ctx.box
+    values = [float(i["value"]) for i in items]
+    cap = _sc_cap(values)
+    scale_max = cap / 0.72 if cap else max(values)
+    times = _anchor_cues(n, dur, props)
+    gp = ease_out_cubic(progress(lt, 0.0, 0.6))
+    avail = ctx.bottom - top - 6
+    row = min(avail / n, 300.0)
+    y0 = top + (avail - row * n) / 2 * 0.8
+    ls = max(28.0, min(46.0 * fr.type_scale, row * 0.27))
+    vs = max(30.0, min(56.0, row * 0.3))
+    lh = ls * 1.22
+    vw = max(cv.measure(_fmt(v, unit), "bold", vs) for v in values) + 24
+    bar_x = bx0 + 6
+    lmax = bx1 - bar_x - vw
+    big = max(range(n), key=lambda i: values[i])
+    cols = [th.accent2 if i == big else th.accent for i in range(n)]
+    cv.line([(bar_x - 9, y0), (bar_x - 9, y0 + row * n)], with_alpha(_axis_col(th), gp * 1.6), 3, round_caps=False)
+    for i, it in enumerate(items):
+        ry = y0 + i * row
+        p = ease_out_cubic(progress(lt, times[i], 0.9))
+        a = gp * ease_out_cubic(progress(lt, times[i], 0.5))
+        lab = _clip_to(cv, it["label"], "semibold", ls, bx1 - bar_x)
+        cv.text(bar_x, ry + 4, lab, "semibold", ls, with_alpha(th.text, a), anchor="la")
+        by = ry + 4 + lh + 4
+        note = it.get("note")
+        if note:
+            nsz = max(24.0, ls * 0.78)
+            lw = cv.measure(lab, "semibold", ls)
+            room = bx1 - bar_x - lw - 18
+            if cv.measure(note, "regular", nsz) <= room:
+                cv.text(bar_x + lw + 18, ry + 4 + ls * 0.93, note, "regular", nsz, with_alpha(th.muted, a), anchor="ls")
+            elif row >= 150:
+                cv.text(bar_x, by - 2, _clip_to(cv, note, "regular", nsz, bx1 - bar_x), "regular", nsz, with_alpha(th.muted, a), anchor="la")
+                by += nsz * 1.25
+            else:
+                cv.text(bx1, ry + 4 + ls * 0.93, _clip_to(cv, note, "regular", nsz, max(60.0, room)), "regular", nsz, with_alpha(th.muted, a), anchor="rs")
+        bh = max(26.0, min(150.0, ry + row - 16 - by))
+        broken = bool(cap and values[i] > cap)
+        if broken:
+            full = lmax * (0.8 + 0.2 * math.log(values[i] / cap) / math.log(max(values) / cap))
+        else:
+            full = lmax * values[i] / scale_max
+        w = full * p
+        _sc_hbar(cv, th, bar_x, by, w, bh, cols[i], broken, p)
+        if broken and p > 0.85 and w > 160:
+            qa = ease_out_cubic(progress(p, 0.85, 0.15))
+            sz = max(20.0, min(26.0, bh * 0.5))
+            word = "scale break"
+            tw = cv.measure(word, "semibold", sz)
+            xm = bar_x + full * 0.5 + 2
+            cv.rrect(xm - tw / 2 - 10, by + bh / 2 - sz * 0.75, tw + 20, sz * 1.5, sz * 0.75, fill=with_alpha(th.bg_top, 0.92 * qa), outline=with_alpha(cols[i], qa), width=2)
+            cv.text(xm, by + bh / 2, word, "semibold", sz, with_alpha(th.text, qa), anchor="mm")
+        if p > 0.02:
+            cv.text(bar_x + w + 14, by + bh / 2, _fmt(values[i] * p, unit), "bold", vs, with_alpha(th.text, min(1.0, p * 1.6)), anchor="lm")
+
+
+def _sc_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    if not ctx.frame.landscape:
+        return _sc_draw_rows(cv, props, lt, dur, th, ctx)
+    items = props["items"]
+    n = len(items)
+    top = _top(cv, th, props, lt, ctx)
     unit = props.get("unit", "")
     x0, x1 = 200, 1760
     y_base = ctx.bottom - 165
@@ -283,13 +377,37 @@ def _pg_times(filled: int, dur: float) -> Tuple[float, float, List[float]]:
 
 def _pg_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     total, filled, kind = props["total"], props["filled"], props["icon"]
-    top = _top(cv, th, props, lt)
-    gx0, gx1 = 140.0, 1090.0
+    fr = ctx.frame
+    top = _top(cv, th, props, lt, ctx)
+    bx0, _, bx1, _ = ctx.box
+    big, small = _pg_text(filled, total)
+    if fr.landscape:
+        gx0, gx1, px, pw, big_max = 140.0, 1090.0, 1180.0, 600.0, 190
+    elif fr.vertical:            # fraction and label on top (the headline), the grid of icons below it
+        px, pw, big_max = float(bx0), float(bx1 - bx0), int(170 * fr.type_scale)
+    else:                        # square: grid on the left, the fraction on the right
+        gx0, gx1 = float(bx0), bx0 + (bx1 - bx0) * 0.55
+        px = gx1 + 40
+        pw, big_max = bx1 - px, 150
     gy0, gy1 = top + 10, ctx.bottom - 20
+    pcx = px + pw / 2
+    label_size, label_lines = _lines_in(cv, props["label"], "regular", pw, 4 if not fr.vertical else 3, 46 if fr.landscape else int(46 * fr.type_scale), 30)
+    lh = label_size * 1.22
+    small_sz = 38 if fr.landscape else int(38 * fr.type_scale)
+    k = big_max / 190
+    block_h = big_max * 0.92 + 30 + len(label_lines) * lh + ((small_sz * 1.58) if small else 0) if not fr.landscape else 190 * 0.92 + 30 + len(label_lines) * lh + (60 if small else 0)
+    if fr.vertical:
+        py = top + 6
+        gy0 = py + block_h + 54
+        gx0, gx1 = float(bx0), float(bx1)
+    else:
+        py = (gy0 + gy1) / 2 - block_h / 2
     cols, rows, cell = _pg_grid(total, gx1 - gx0, gy1 - gy0)
     cell = min(cell, 110.0)
     gw, gh = cols * cell, rows * cell
     ox, oy = gx0 + (gx1 - gx0 - gw) / 2, gy0 + (gy1 - gy0 - gh) / 2
+    if fr.vertical:
+        oy = gy0 + max(0.0, (gy1 - gy0 - gh) / 2) * 0.7
     t0, wave, ft = _pg_times(filled, dur)
     base_col = _mix(th.muted, th.bg_top, 0.35) if th.name != "paper" else _mix(th.muted, (255, 255, 255), 0.55)
     s = cell * 0.82
@@ -310,31 +428,24 @@ def _pg_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme
             _pg_icon(cv, kind, cx, cy, s * pop, with_alpha(col, fade))
         else:
             _pg_icon(cv, kind, cx, cy, s, with_alpha(base_col, fade * (0.9 if th.name != "paper" else 1.0)))
-    # the fraction beside the grid
-    big, small = _pg_text(filled, total)
-    px, pw = 1180.0, 600.0
-    pcx = px + pw / 2
+    # the fraction beside (or above) the grid
     a = ease_out_cubic(progress(lt, 0.25, 0.6))
-    label_size, label_lines = _lines_in(cv, props["label"], "regular", pw, 4, 46, 30)
-    lh = label_size * 1.22
-    block_h = 190 * 0.92 + 30 + len(label_lines) * lh + (60 if small else 0)
-    py = (gy0 + gy1) / 2 - block_h / 2
     if big.startswith("1 in"):
         shown = big
     else:  # a percentage counts up with the wave
         pct = filled / total * 100
         part = 1.0 if lt >= t0 + wave + 0.4 or not filled else done / filled
         shown = big if part >= 1.0 else (f"{pct * part:.1f}".rstrip("0").rstrip(".") + "%" if pct % 1 else f"{round(pct * part)}%")
-    size = _fit_one(cv, big, "bold", pw, 190, 90)
-    cv.text(pcx, py + 190 * 0.5 * (size / 190) + (190 - size) * 0.2, shown, "bold", size, with_alpha(th.accent, a), anchor="mm")
-    y = py + 190 * 0.92 + 26
+    size = _fit_one(cv, big, "bold", pw, big_max, 90 if fr.landscape else 70)
+    cv.text(pcx, py + big_max * 0.5 * (size / big_max) + (big_max - size) * 0.2, shown, "bold", size, with_alpha(th.accent, a), anchor="mm")
+    y = py + big_max * 0.92 + 26
     cv.rrect(pcx - 60, y + 6, 120 * ease_out_cubic(progress(lt, 0.5, 0.6)), 8, 4, fill=th.accent2)
     y += 36
     la = ease_out_cubic(progress(lt, 0.6, 0.6))
-    for k, line in enumerate(label_lines):
-        cv.text(pcx, y + k * lh, line, "regular", label_size, with_alpha(th.text, la), anchor="ma")
+    for kk, line in enumerate(label_lines):
+        cv.text(pcx, y + kk * lh, line, "regular", label_size, with_alpha(th.text, la), anchor="ma")
     if small:
-        cv.text(pcx, y + len(label_lines) * lh + 12, small, "semibold", 38, with_alpha(th.muted, la), anchor="ma")
+        cv.text(pcx, y + len(label_lines) * lh + 12, small, "semibold", small_sz, with_alpha(th.muted, la), anchor="ma")
 
 
 def _pg_cues(props: Dict[str, Any], dur: float) -> List[float]:
@@ -399,17 +510,48 @@ def _br_pos(lt: float, P: int, dur: float) -> Tuple[int, float]:
 
 def _br_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     series, periods, unit = props["series"], props["periods"], props.get("unit", "")
+    fr = ctx.frame
     P, n = len(periods), len(series)
-    top = _top(cv, th, props, lt)
+    top = _top(cv, th, props, lt, ctx)
     k, e = _br_pos(lt, P, dur)
     rk0, rk1 = _br_ranks(series, k), _br_ranks(series, k + 1)
     vmax = max(max(s["values"]) for s in series) or 1.0
-    lab_r, bx0, bx1 = 440.0, 460.0, 1330.0
-    y0, y1 = top + 10, ctx.bottom - 10
-    row = (y1 - y0) / n
-    bh = min(76.0, row * 0.76)
     g = ease_out_cubic(progress(lt, 0.0, 0.7))
     cols = _series_colors(th, n)
+    near = k + (1 if e >= 0.5 else 0)
+    label = periods[near]
+    ga = ease_out_cubic(progress(lt, 0.15, 0.6))
+    stacked = fr.vertical and fr.aspect == "9:16"          # tall frame: each name sits above its bar
+    if fr.landscape:
+        lab_r, bx0, bx1 = 440.0, 460.0, 1330.0
+        y0, y1 = top + 10, ctx.bottom - 10
+    else:
+        X0, _, X1, _ = ctx.box
+        y1 = ctx.bottom - 10
+        vw = max(cv.measure(_fmt(v, unit), "bold", 38) for s in series for v in s["values"]) + 22
+        if fr.square:                                       # the period is a big faint mark in the free lower right corner
+            y0 = top + 4
+            size = _fit_one(cv, label, "bold", 360, 170, 60)
+            cv.text(X1 - 6, y1 - 4, label, "bold", size, with_alpha(th.accent, 0.3 * ga), anchor="rb")
+        else:                                               # the period is a headline row above the bars
+            psz = int(120 * fr.type_scale) if stacked else 110
+            ph = psz * 1.05
+            size = _fit_one(cv, label, "bold", X1 - X0, psz, 50)
+            cv.text(X1, top + 4 + ph / 2, label, "bold", size, with_alpha(th.accent, ga), anchor="rm")
+            y0 = top + ph + 14
+        if stacked:
+            bx0, bx1 = float(X0 + 4), float(X1 - vw)
+        else:
+            lab_w = 250.0
+            lab_r, bx0, bx1 = X0 + lab_w, X0 + lab_w + 16.0, float(X1 - vw)
+    row = (y1 - y0) / n
+    vsz = 34 if fr.landscape else 38
+    if stacked:
+        lsz = _fit_one(cv, max((s["label"] for s in series), key=len), "semibold", bx1 - bx0 + vw, 38 * fr.type_scale, 28)
+        lh0 = lsz * 1.2
+        bh = max(24.0, min(88.0, row - lh0 - 14))
+    else:
+        bh = min(76.0, row * 0.76)
     cv.line([(bx0 - 2, y0), (bx0 - 2, y1)], with_alpha(_axis_col(th), g * 1.4), 3, round_caps=False)
     order = sorted(range(n), key=lambda i: rk0[i] + (rk1[i] - rk0[i]) * e)
     for i in order:
@@ -417,19 +559,22 @@ def _br_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme
         v = s["values"][k] + (s["values"][k + 1] - s["values"][k]) * e
         pos = rk0[i] + (rk1[i] - rk0[i]) * e
         cy = y0 + (pos + 0.5) * row
+        if stacked:
+            cy += lh0 / 2
         w = max(2.0, (bx1 - bx0) * v / vmax * g)
         cv.shadow(bx0, cy - bh / 2, w, bh, 12, blur=12, dy=6, alpha=th.shadow_alpha * 0.7 * g)
         cv.rrect(bx0, cy - bh / 2, w, bh, 12, fill=cols[i] + (255,))
-        size, lines = _lines_in(cv, s["label"], "semibold", lab_r - 140 + 20, 2, 32, 20)
-        lh = size * 1.12
-        for j, line in enumerate(lines):
-            cv.text(lab_r, cy - (len(lines) - 1) * lh / 2 + j * lh, line, "semibold", size, with_alpha(th.text, g), anchor="rm")
-        cv.text(bx0 + w + 16, cy, _fmt(v * g, unit), "bold", 34, with_alpha(th.text, g), anchor="lm")
-    near = k + (1 if e >= 0.5 else 0)
-    label = periods[near]
-    size = _fit_one(cv, label, "bold", 280, 120, 50)
-    ga = ease_out_cubic(progress(lt, 0.15, 0.6))
-    cv.text(1650, (y0 + y1) / 2, label, "bold", size, with_alpha(th.accent, ga), anchor="mm")
+        if stacked:
+            cv.text(bx0 + 6, cy - bh / 2 - lh0 / 2 - 2, s["label"], "semibold", lsz, with_alpha(th.text, g), anchor="lm")
+        else:
+            size, lines = _lines_in(cv, s["label"], "semibold", lab_r - 140 + 20 if fr.landscape else lab_r - bx0 + 16 + 230, 2, 32, 20 if fr.landscape else 24)
+            lh = size * 1.12
+            for jj, line in enumerate(lines):
+                cv.text(lab_r, cy - (len(lines) - 1) * lh / 2 + jj * lh, line, "semibold", size, with_alpha(th.text, g), anchor="rm")
+        cv.text(bx0 + w + 16, cy, _fmt(v * g, unit), "bold", vsz, with_alpha(th.text, g), anchor="lm")
+    if fr.landscape:
+        size = _fit_one(cv, label, "bold", 280, 120, 50)
+        cv.text(1650, (y0 + y1) / 2, label, "bold", size, with_alpha(th.accent, ga), anchor="mm")
 
 
 def _br_cues(props: Dict[str, Any], dur: float) -> List[float]:
@@ -481,9 +626,24 @@ def _pie_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     labels, values, unit, donut = props["labels"], props["values"], props.get("unit", ""), props.get("donut", False)
     n = len(values)
     total = sum(values)
-    top = _top(cv, th, props, lt)
-    cx, cy = 560.0, (top + ctx.bottom) / 2 + 4
-    R = max(120.0, min(270.0, (ctx.bottom - top) / 2 - 24))
+    top = _top(cv, th, props, lt, ctx)
+    fr = ctx.frame
+    X0, _, X1, _ = ctx.box
+    if fr.landscape:
+        cx, cy = 560.0, (top + ctx.bottom) / 2 + 4
+        R = max(120.0, min(270.0, (ctx.bottom - top) / 2 - 24))
+    elif fr.aspect == "9:16":            # donut on top, the legend as rows below it
+        rowh = min(104.0, (ctx.bottom - top) * 0.075 + 30)
+        legend_h = rowh * n
+        R = max(140.0, min((X1 - X0) / 2 - 30, (ctx.bottom - top - legend_h - 60) / 2))
+        cx, cy = fr.cx, top + 24 + R
+    elif fr.aspect == "4:5":             # donut on top, the legend in two columns of two-line entries below it
+        legend_h = math.ceil(n / 2) * 104.0
+        R = max(130.0, min((X1 - X0) / 2 - 60, (ctx.bottom - top - legend_h - 50) / 2))
+        cx, cy = fr.cx, top + 20 + R
+    else:                                # square: donut left, legend right
+        R = max(120.0, min(250.0, (ctx.bottom - top) / 2 - 14, (X1 - X0) * 0.5 * 0.5))
+        cx, cy = X0 + R + 6, (top + ctx.bottom) / 2 + 2
     r_in = R * 0.58 if donut else 0.0
     times = _anchor_cues(n, dur, props, 0.12, 0.62)
     cols = _series_colors(th, n)
@@ -508,7 +668,7 @@ def _pie_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
         if p > 0.98 and spans[i] >= math.radians(26):
             rr = (r_in + R) / 2 if donut else R * 0.66
             lx, ly = _pt(cx + ox, cy + oy, rr, mid)
-            sz = 40 if spans[i] > math.radians(50) else 32
+            sz = (40 if spans[i] > math.radians(50) else 32) * (1.0 if fr.landscape else 1.1)
             cv.text(lx, ly, _share(values[i], total), "bold", sz, with_alpha(_on(cols[i]), ease_out_cubic(progress(lt, times[i] + 0.8, 0.3))), anchor="mm")
     if donut:
         ca = ease_out_cubic(progress(lt, times[-1] + 0.8, 0.6))
@@ -521,6 +681,8 @@ def _pie_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
         ss_ = _fit_one(cv, sub, "regular", iw, 32, 20)
         cv.text(cx, cy - 8, head, "bold", hs, with_alpha(th.text, ca), anchor="mb")
         cv.text(cx, cy + 4, sub, "regular", ss_, with_alpha(th.muted, ca), anchor="ma")
+    if not fr.landscape:
+        return _pie_legend_narrow(cv, th, ctx, labels, values, unit, cols, times, lt, big, total, top, n)
     # legend with the shares
     lx0, lx1 = 1040.0, 1780.0
     row = min(92.0, (ctx.bottom - top - 20) / n)
@@ -540,6 +702,68 @@ def _pie_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
         if has_val:
             cv.text(lx0 + 56, y + 24, val, "regular", 28, with_alpha(th.muted, q), anchor="lm")
         cv.text(lx1, y, share, "bold", 46, with_alpha(th.accent2 if i == big else th.text, q), anchor="rm")
+
+
+
+
+def _pie_legend_narrow(cv: Canvas, th: Theme, ctx: SceneCtx, labels, values, unit, cols, times, lt: float, big: int, total: float, top: float, n: int) -> None:
+    fr = ctx.frame
+    X0, _, X1, _ = ctx.box
+    if fr.aspect == "9:16":                       # one column, label left and share right, like the landscape legend
+        row = min(104.0, (ctx.bottom - top) * 0.075 + 30)
+        y_start = ctx.bottom - row * n - 6
+        lx0, lx1 = float(X0), float(X1)
+        for i in range(n):
+            q = ease_out_cubic(progress(lt, times[i] + 0.1, 0.5))
+            if q <= 0:
+                continue
+            y = y_start + (i + 0.5) * row
+            cv.rrect(lx0, y - 20, 40, 40, 11, fill=with_alpha(cols[i], q))
+            share, val = _share(values[i], total), _fmt(values[i], unit)
+            has_val = val != share
+            sw_ = cv.measure(share, "bold", 54)
+            size = _fit_one(cv, labels[i], "semibold", lx1 - lx0 - 70 - sw_ - 24, 46, 28)
+            cv.text(lx0 + 60, y - (15 if has_val else 0), labels[i], "semibold", size, with_alpha(th.text, q), anchor="lm")
+            if has_val:
+                cv.text(lx0 + 60, y + 26, val, "regular", 32, with_alpha(th.muted, q), anchor="lm")
+            cv.text(lx1, y, share, "bold", 54, with_alpha(th.accent2 if i == big else th.text, q), anchor="rm")
+        return
+    two_col = fr.aspect == "4:5"
+    if two_col:
+        colw = (X1 - X0 - 30) / 2
+        row = 104.0
+        y_start = ctx.bottom - math.ceil(n / 2) * row - 4
+    else:                                         # square: single column right of the donut
+        R = max(120.0, min(250.0, (ctx.bottom - top) / 2 - 14, (X1 - X0) * 0.25))
+        lx_start = X0 + 2 * R + 12 + 40
+        colw = X1 - lx_start
+        row = min(96.0, (ctx.bottom - top - 10) / n)
+        y_start = (top + ctx.bottom) / 2 - row * n / 2 + 2
+    for i in range(n):
+        q = ease_out_cubic(progress(lt, times[i] + 0.1, 0.5))
+        if q <= 0:
+            continue
+        if two_col:
+            c, r = i % 2, i // 2
+            lx, y = X0 + c * (colw + 30), y_start + (r + 0.5) * row
+        else:
+            lx, y = lx_start, y_start + (i + 0.5) * row
+        cv.rrect(lx, y - 17, 34, 34, 9, fill=with_alpha(cols[i], q))
+        share, val = _share(values[i], total), _fmt(values[i], unit)
+        has_val = val != share
+        tx = lx + 48
+        if not two_col and row < 84:                # six entries in the square: one line each (name left, share right)
+            ssz = 38
+            sw_ = cv.measure(share, "bold", ssz)
+            size = _fit_one(cv, labels[i], "semibold", lx + colw - tx - sw_ - 14, 32, 24)
+            cv.text(tx, y, labels[i], "semibold", size, with_alpha(th.text, q), anchor="lm")
+            cv.text(lx + colw, y, share, "bold", ssz, with_alpha(th.accent2 if i == big else th.text, q), anchor="rm")
+            continue
+        size = _fit_one(cv, labels[i], "semibold", lx + colw - tx, 36, 26)
+        cv.text(tx, y - 20, labels[i], "semibold", size, with_alpha(th.text, q), anchor="lm")
+        cv.text(tx, y + 20, share, "bold", 40, with_alpha(th.accent2 if i == big else th.text, q), anchor="lm")
+        if has_val:
+            cv.text(tx + cv.measure(share, "bold", 40) + 16, y + 21, val, "regular", 28, with_alpha(th.muted, q), anchor="lm")
 
 
 def _pie_cues(props: Dict[str, Any], dur: float) -> List[float]:
@@ -595,17 +819,28 @@ def _area_front(lt: float, times: List[float]) -> float:
 def _area_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     labels, values, unit = props["labels"], props["values"], props.get("unit", "")
     n = len(values)
-    top = _top(cv, th, props, lt)
-    x0, x1 = 200.0, 1760.0
-    y_top, y_base = top + 60, ctx.bottom - 70
+    top = _top(cv, th, props, lt, ctx)
+    fr = ctx.frame
+    land = fr.landscape
+    X0, _, X1, _ = ctx.box
+    ts = 1.0 if land else fr.type_scale
+    x0, x1 = (200.0, 1760.0) if land else (X0 + 92.0, float(X1))
+    px0, px1 = (260.0, 1640.0) if land else (x0 + 44.0, x1 - 44.0)
+    xl_sz = 28 if land else 30
+    slot = (px1 - px0) / max(1, n - 1)
+    stagger = not land and max(cv.measure(l, "regular", xl_sz) for l in labels) > slot * 0.9      # long category names alternate on two lines
+    y_top, y_base = top + (60 if land else 112), ctx.bottom - (70 if land else (112 if stagger else 80))
     lo_raw, hi_raw = min(0.0, min(values)), max(0.0, max(values))
     lo, hi, step = _nice(lo_raw, hi_raw + (hi_raw - lo_raw) * 0.08, 4)
-    _grid(cv, th, x0, x1, y_top, y_base, lo, hi, step, unit, lt)
+    _grid(cv, th, x0, x1, y_top, y_base, lo, hi, step, unit, lt, 24 if land else 28)
 
     def ypos(v: float) -> float:
         return y_base - (v - lo) / ((hi - lo) or 1.0) * (y_base - y_top)
 
-    px0, px1 = 260.0, 1640.0
+    vk = 1.14      # value labels grow a little on narrow frames, but never wider than the room between two points
+    if not land:
+        widest = max(cv.measure(_fmt(v, unit), "semibold", 28) for v in values)
+        vk = max(0.78, min(1.14, slot * 0.92 / widest))
     xs = [px0 + (px1 - px0) * i / (n - 1) for i in range(n)]
     pts = [(xs[i], ypos(values[i])) for i in range(n)]
     gp = ease_out_cubic(progress(lt, 0.0, 0.6))
@@ -619,7 +854,7 @@ def _area_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cv.line(shown, th.accent + (255,), 8)
     hl = props.get("highlight")
     for i in range(n):
-        cv.text(xs[i], y_base + 18, labels[i], "regular", 28, with_alpha(th.muted, gp), anchor="ma")
+        cv.text(xs[i], y_base + 18 + (xl_sz * 1.25 if stagger and i % 2 else 0), labels[i], "regular", xl_sz, with_alpha(th.muted, gp), anchor="ma")
         dp = ease_out_back(progress(lt, times[i] - 0.05, 0.4), 2)
         if dp <= 0:
             continue
@@ -632,7 +867,7 @@ def _area_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
             continue
         nb = [values[k] for k in (i - 1, i + 1) if 0 <= k < n]
         up = not (len(nb) == 2 and all(values[i] < v for v in nb))      # a dip carries its label underneath, away from the line
-        cv.text(xs[i], pts[i][1] + (-28 if up else 28), _fmt(values[i], unit), "bold" if emph else "semibold", 34 if emph else 28,
+        cv.text(xs[i], pts[i][1] + (-28 if up else 28), _fmt(values[i], unit), "bold" if emph else "semibold", (34 if emph else 28) * (1.0 if land else vk),
                 with_alpha(th.text if emph else th.muted, a), anchor="mb" if up else "ma")
     if front >= n - 1:  # the last value is called out
         t_last = times[-1]
@@ -641,10 +876,13 @@ def _area_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         ring = ((lt - t_last) % 1.6) / 1.6
         cv.ellipse(lx, ly, 15 + 22 * ring, 15 + 22 * ring, outline=with_alpha(th.accent2, (1 - ring) * 0.8 * a), width=3)
         txt = _fmt(values[-1], unit)
-        sz = 44
+        sz = 44 if land else 48
         tw = cv.measure(txt, "bold", sz)
         bw_, bh_ = tw + 44, 72
-        bx, by = lx + 34, ly - bh_ / 2
+        if land:
+            bx, by = lx + 34, ly - bh_ / 2
+        else:                                   # above the last point, kept inside the content box
+            bx, by = min(max(lx - bw_ / 2, X0), X1 - bw_), ly - 36 - bh_
         cv.card(bx, by, bw_, bh_, th, r=22, alpha=a)
         cv.rrect(bx, by, bw_, bh_, 22, outline=with_alpha(th.accent2, a), width=3)
         cv.text(bx + bw_ / 2, by + bh_ / 2, txt, "bold", sz, with_alpha(th.text, a), anchor="mm")
@@ -678,10 +916,75 @@ def _st_sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
-def _st_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+def _st_draw_rows(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    """Vertical, square and 4:5 frames: one horizontal stacked bar per category (names on the left, totals at the end), legend wrapped above."""
+    fr = ctx.frame
     labels, series, unit = props["labels"], props["series"], props.get("unit", "")
     n, m = len(labels), len(series)
-    top = _top(cv, th, props, lt)
+    top = _top(cv, th, props, lt, ctx)
+    cols = _series_colors(th, m)
+    X0, _, X1, _ = ctx.box
+    la = ease_out_cubic(progress(lt, 0.1, 0.5))
+    lsz = 30 if fr.square else int(28 * fr.type_scale)
+    lx, ly = float(X0), top + 4
+    for j, s_ in enumerate(series):
+        iw = 38 + cv.measure(s_["name"], "regular", lsz) + 34
+        if lx + iw - 34 > X1 and lx > X0:
+            lx, ly = float(X0), ly + lsz * 1.5
+        cv.rrect(lx, ly + lsz * 0.18, lsz * 0.8, lsz * 0.8, 7, fill=with_alpha(cols[j], la))
+        cv.text(lx + lsz * 0.8 + 12, ly + lsz * 0.58, s_["name"], "regular", lsz, with_alpha(th.text, la), anchor="lm")
+        lx += iw + lsz * 0.8 - 26
+    totals = [sum(s_["values"][i] for s_ in series) for i in range(n)]
+    cat_sz = 30 if not fr.vertical else int(28 * fr.type_scale)
+    lab_w = min(230.0, max(cv.measure(l, "semibold", cat_sz) for l in labels) + 14)
+    tsz = 36
+    vw = max(cv.measure(_fmt(t, unit), "bold", tsz) for t in totals) + 20
+    bx0, bx1 = X0 + lab_w + 12.0, float(X1 - vw)
+    y0, y1 = ly + lsz * 1.5 + 14, ctx.bottom - 48
+    lo, hi, step = _nice(0.0, max(totals) * 1.04, 3 if fr.square else 4)
+    gp = ease_out_cubic(progress(lt, 0.0, 0.6))
+    v, k = lo, 0
+    while v <= hi + step * 1e-6 and k < 8:
+        gx = bx0 + (v - lo) / ((hi - lo) or 1.0) * (bx1 - bx0)
+        cv.line([(gx, y0), (gx, y1)], with_alpha(_axis_col(th), gp * (1.6 if k == 0 else 1.0)), 2, round_caps=False)
+        cv.text(gx, y1 + 10, _fmt(v, unit if unit == "%" else ""), "regular", 26, with_alpha(th.muted, gp), anchor="ma")
+        v += step
+        k += 1
+    row = (y1 - y0) / n
+    bh = min(84.0, row * 0.7)
+    times = _anchor_cues(n, dur, props, 0.15, 0.7)
+    for i in range(n):
+        p = ease_out_cubic(progress(lt, times[i], 0.9))
+        cy = y0 + (i + 0.5) * row
+        cv.text(bx0 - 14 - 0, cy, _clip_to(cv, labels[i], "semibold", cat_sz, lab_w), "semibold", cat_sz, with_alpha(th.muted, gp * ease_out_cubic(progress(lt, times[i], 0.4))), anchor="rm")
+        x = bx0
+        for j, s_ in enumerate(series):
+            val = s_["values"][i]
+            w = val / (hi - lo) * (bx1 - bx0) * p
+            if w > 0.5:
+                lastseg = all(series[kk]["values"][i] <= 0 for kk in range(j + 1, m))
+                if lastseg:
+                    r = min(12.0, bh / 2) if w > 24 else 4.0
+                    cv.rrect(x, cy - bh / 2, w, bh, r, fill=cols[j] + (255,))
+                    if w > r * 2:
+                        cv.polygon([(x, cy - bh / 2), (x + w / 2, cy - bh / 2), (x + w / 2, cy + bh / 2), (x, cy + bh / 2)], cols[j] + (255,))
+                else:
+                    cv.polygon([(x, cy - bh / 2), (x + w - 0.5, cy - bh / 2), (x + w - 0.5, cy + bh / 2), (x, cy + bh / 2)], cols[j] + (255,))
+                txt = _fmt(val, "")
+                vs_ = max(20.0, min(30.0, bh * 0.42))
+                if p > 0.8 and cv.measure(txt, "semibold", vs_) + 14 <= w:
+                    cv.text(x + w / 2, cy, txt, "semibold", vs_, with_alpha(_on(cols[j]), ease_out_cubic(progress(p, 0.8, 0.2))), anchor="mm")
+            x += w
+        if p > 0.02:
+            cv.text(x + 14, cy, _fmt(totals[i] * p, unit), "bold", tsz, with_alpha(th.text, min(1.0, p * 1.6)), anchor="lm")
+
+
+def _st_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    if not ctx.frame.landscape:
+        return _st_draw_rows(cv, props, lt, dur, th, ctx)
+    labels, series, unit = props["labels"], props["series"], props.get("unit", "")
+    n, m = len(labels), len(series)
+    top = _top(cv, th, props, lt, ctx)
     cols = _series_colors(th, m)
     # legend, left to right in stacking order
     lx = 200.0
@@ -811,10 +1114,20 @@ def _place_labels(cv: Canvas, pts: List[Tuple[float, float]], labels: List[str],
 def _sc2_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     points = props["points"]
     n = len(points)
-    top = _top(cv, th, props, lt)
-    x0, x1 = 260.0, 1720.0
-    y_top, y_base = top + 40, ctx.bottom - 110
-    xlo, xhi, xstep = _axis_range([p["x"] for p in points], 6)
+    top = _top(cv, th, props, lt, ctx)
+    fr = ctx.frame
+    land = fr.landscape
+    X0, _, X1, _ = ctx.box
+    if land:
+        x0, x1 = 260.0, 1720.0
+        y_top, y_base = top + 40, ctx.bottom - 110
+        bounds = (x0 - 30, y_top - 10, x1 + 70, y_base + 6)
+    else:
+        x0, x1 = X0 + 96.0, X1 - 50.0
+        y_top, y_base = top + 84, ctx.bottom - 104
+        bounds = (X0, y_top - 10, X1, y_base + 6)
+    tk = 24 if land else 28
+    xlo, xhi, xstep = _axis_range([p["x"] for p in points], 6 if land else 4)
     ylo, yhi, ystep = _axis_range([p["y"] for p in points], 5)
     gp = ease_out_cubic(progress(lt, 0.0, 0.6))
     gc = _axis_col(th)
@@ -825,20 +1138,20 @@ def _sc2_draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
             if horizontal:
                 gy = y_base - f * (y_base - y_top)
                 cv.line([(x0, gy), (x1, gy)], with_alpha(gc, gp * (1.6 if k == 0 else 1.0)), 2, round_caps=False)
-                cv.text(x0 - 16, gy, _tick(v), "regular", 24, with_alpha(th.muted, gp), anchor="rm")
+                cv.text(x0 - 16, gy, _tick(v), "regular", tk, with_alpha(th.muted, gp), anchor="rm")
             else:
                 gx = x0 + f * (x1 - x0)
                 cv.line([(gx, y_top), (gx, y_base)], with_alpha(gc, gp * (1.6 if k == 0 else 0.6)), 2, round_caps=False)
-                cv.text(gx, y_base + 14, _tick(v), "regular", 24, with_alpha(th.muted, gp), anchor="ma")
+                cv.text(gx, y_base + 14, _tick(v), "regular", tk, with_alpha(th.muted, gp), anchor="ma")
             v += step
             k += 1
     if props.get("y_label"):
-        cv.text(x0 - 60, y_top - 44, props["y_label"], "semibold", 28, with_alpha(th.muted, gp), anchor="lm")
+        cv.text(x0 - 60 if land else X0, y_top - 44, props["y_label"], "semibold", 28 if land else 32, with_alpha(th.muted, gp), anchor="lm")
     if props.get("x_label"):
-        cv.text(x1, y_base + 60, props["x_label"], "semibold", 28, with_alpha(th.muted, gp), anchor="ra")
+        cv.text(x1, y_base + 60, props["x_label"], "semibold", 28 if land else 32, with_alpha(th.muted, gp), anchor="ra")
     pts = [(x0 + (p["x"] - xlo) / ((xhi - xlo) or 1.0) * (x1 - x0), y_base - (p["y"] - ylo) / ((yhi - ylo) or 1.0) * (y_base - y_top)) for p in points]
     radii = [20.0 if i == n - 1 else 14.0 for i in range(n)]
-    spots = _place_labels(cv, pts, [p.get("label", "") for p in points], (x0 - 30, y_top - 10, x1 + 70, y_base + 6), radii)
+    spots = _place_labels(cv, pts, [p.get("label", "") for p in points], bounds, radii)
     times = _anchor_cues(n, dur, props, 0.15, 0.7)
     for i, p in enumerate(points):
         q = progress(lt, times[i], 0.5)
@@ -861,13 +1174,15 @@ def _cues_for(count_key):
     return cues
 
 
+ALL_FORMATS = ("16:9", "9:16", "1:1", "4:5")
+
 ELEMENTS = [
     Element(
         name="scale_compare", family="Data",
         doc=("- scale_compare: {title (<=50), unit (<=10), items: 2-6 [{label (<=24), value (positive number), note (<=40, optional)}]}. Things drawn to the same scale so the viewer "
              "feels the difference (heights of buildings, areas of countries, sizes of animals); each is revealed when named. Values >50x apart get a marked scale break. "
              "Never invent statistics: values only from the grounding notes. Never for a trend over time (use chart) or for unrelated units."),
-        sanitize=_sc_sanitize, draw=_sc_draw, cues=_cues_for(lambda p: len(p.get("items") or [])), anchors=lambda p: [i["label"] for i in p.get("items", [])],
+        formats=ALL_FORMATS, sanitize=_sc_sanitize, draw=_sc_draw, cues=_cues_for(lambda p: len(p.get("items") or [])), anchors=lambda p: [i["label"] for i in p.get("items", [])],
         samples=[
             {"title": "How tall is tall?", "unit": "m", "items": [{"label": "Statue of Liberty", "value": 93, "note": "torch to ground"}, {"label": "Big Ben", "value": 96},
                                                                   {"label": "Eiffel Tower", "value": 330}]},
@@ -880,7 +1195,7 @@ ELEMENTS = [
         doc=("- pictogram: {title (<=50, optional), total (integer 10-100, default 100), filled (0..total), icon: \"person\"|\"dot\"|\"square\"|\"heart\"|\"house\", label (<=70)}. "
              "'1 in 5' or '20%' as a grid of icons where `filled` light up in sequence beside the big fraction. Use for one proportion of a population. "
              "Never invent statistics: only a share stated in the grounding notes. Never for several shares (use pie) or changing values (use chart)."),
-        sanitize=_pg_sanitize, draw=_pg_draw, cues=_pg_cues,
+        formats=ALL_FORMATS, sanitize=_pg_sanitize, draw=_pg_draw, cues=_pg_cues,
         samples=[{"title": "Who is affected", "total": 100, "filled": 20, "icon": "person", "label": "of adults report this every week"},
                  {"total": 30, "filled": 7, "icon": "house", "label": "of the homes in this survey have no heating"}]),
     Element(
@@ -888,7 +1203,7 @@ ELEMENTS = [
         doc=("- bar_race: {title (<=50), unit (<=8), periods: 3-10 labels (<=8, e.g. years), series: 3-8 [{label (<=20), values: numbers, one per period}]}. Horizontal bars that grow and "
              "re-rank as the periods advance, with a big period label; the scene time is shared between the periods and the last one holds. Use for who led when. "
              "Never invent statistics: every value from the grounding notes. Never with missing periods or with only one or two series."),
-        sanitize=_br_sanitize, draw=_br_draw, cues=_br_cues,
+        formats=ALL_FORMATS, sanitize=_br_sanitize, draw=_br_draw, cues=_br_cues,
         samples=[{"title": "Largest cities by population", "unit": "M", "periods": ["1950", "1970", "1990", "2010"],
                   "series": [{"label": "Tokyo", "values": [11, 23, 32, 37]}, {"label": "New York", "values": [12, 16, 16, 19]}, {"label": "Mexico City", "values": [3, 9, 15, 20]},
                              {"label": "Sao Paulo", "values": [2, 8, 15, 20]}]},
@@ -901,7 +1216,7 @@ ELEMENTS = [
         doc=("- pie: {title (<=50), labels: 2-6 (<=16), values: positive numbers, unit (<=6), donut: bool}. Parts of one whole; slices appear in order with their share, the largest "
              "is lifted, a donut shows the total or the largest share in the middle. Use for shares that add up to a whole. "
              "Never invent statistics: values from the grounding notes. Never for more than 6 parts, for changes over time, or when the parts are not a whole."),
-        sanitize=_pie_sanitize, draw=_pie_draw, cues=_pie_cues, anchors=lambda p: list(p.get("labels", [])),
+        formats=ALL_FORMATS, sanitize=_pie_sanitize, draw=_pie_draw, cues=_pie_cues, anchors=lambda p: list(p.get("labels", [])),
         samples=[{"title": "Where the electricity comes from", "labels": ["Gas", "Wind", "Nuclear", "Solar", "Other"], "values": [38, 27, 16, 12, 7], "unit": "%", "donut": False},
                  {"title": "Household budget", "labels": ["Housing", "Food", "Transport"], "values": [1200, 600, 400], "unit": "$", "donut": True}]),
     Element(
@@ -909,7 +1224,7 @@ ELEMENTS = [
         doc=("- area: {title (<=50), labels: 3-8 (<=12), values: numbers, unit (<=6), highlight: optional index}. One value over time as a filled line that draws on left to right; the "
              "last value is called out. Use for a smooth trend with a story. "
              "Never invent statistics: values from the grounding notes. Never for unordered categories (use chart) or for several series (use stacked)."),
-        sanitize=_area_sanitize, draw=_area_draw, cues=_cues_for(lambda p: len(p.get("values") or [])), anchors=lambda p: list(p.get("labels", [])),
+        formats=ALL_FORMATS, sanitize=_area_sanitize, draw=_area_draw, cues=_cues_for(lambda p: len(p.get("values") or [])), anchors=lambda p: list(p.get("labels", [])),
         samples=[{"title": "Visitors per year", "labels": ["2018", "2019", "2020", "2021", "2022", "2023"], "values": [4.2, 4.8, 1.1, 1.9, 3.6, 5.1], "unit": "M", "highlight": 2},
                  {"labels": ["Q1", "Q2", "Q3", "Q4"], "values": [120, 150, 210, 340], "unit": "$"}]),
     Element(
@@ -917,7 +1232,7 @@ ELEMENTS = [
         doc=("- stacked: {title (<=50), labels: 3-8 categories (<=12), series: 2-4 [{name (<=16), values: numbers, one per label}], unit (<=6)}. Stacked bars grow in with a legend and the "
              "total above each. Use for how a total is made of parts across categories or years. "
              "Never invent statistics: values from the grounding notes. Never with negative values, with a single series (use chart), or with values 50x apart."),
-        sanitize=_st_sanitize, draw=_st_draw, cues=_cues_for(lambda p: len(p.get("labels") or [])), anchors=lambda p: list(p.get("labels", [])),
+        formats=ALL_FORMATS, sanitize=_st_sanitize, draw=_st_draw, cues=_cues_for(lambda p: len(p.get("labels") or [])), anchors=lambda p: list(p.get("labels", [])),
         samples=[{"title": "Energy mix by decade", "labels": ["1990", "2000", "2010", "2020"], "unit": "TWh",
                   "series": [{"name": "Fossil", "values": [80, 85, 78, 60]}, {"name": "Nuclear", "values": [15, 18, 17, 14]}, {"name": "Renewable", "values": [5, 8, 22, 48]}]},
                  {"title": "Sales by region", "labels": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"], "unit": "$",
@@ -928,7 +1243,7 @@ ELEMENTS = [
         doc=("- scatter: {title (<=50), x_label (<=20), y_label (<=20), points: 3-12 [{label (<=18, optional), x (number), y (number)}]}. Points pop in on labelled axes; the last one is "
              "emphasised. Use to show a relationship or where things sit on two measures. "
              "Never invent statistics: coordinates from the grounding notes. Never for fewer than 3 points, for time series (use area) or for one measure only."),
-        sanitize=_sc2_sanitize, draw=_sc2_draw, cues=_cues_for(lambda p: len(p.get("points") or [])), anchors=_sc2_anchors,
+        formats=ALL_FORMATS, sanitize=_sc2_sanitize, draw=_sc2_draw, cues=_cues_for(lambda p: len(p.get("points") or [])), anchors=_sc2_anchors,
         samples=[{"title": "Wealth and health", "x_label": "Income, $ per person", "y_label": "Life expectancy",
                   "points": [{"label": "Chad", "x": 1700, "y": 53}, {"label": "India", "x": 7000, "y": 70}, {"label": "Brazil", "x": 15000, "y": 76},
                              {"label": "Japan", "x": 43000, "y": 85}, {"label": "Norway", "x": 84000, "y": 83}]},

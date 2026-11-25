@@ -1,0 +1,828 @@
+{
+ "id": "hea-03",
+ "category": "health and wellbeing",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "I get anxious before presentations. Give me a practical guide to handle performance anxiety: why it happens in the body, breathing techniques that work, how to prepare, and when to seek professional help.",
+ "great": "Fight-or-flight explanation, physiological sigh or box breathing, preparation and rehearsal, reframing arousal as excitement, exposure, when to seek help (persistent/impairing anxiety); compassionate, non-diagnostic, evidence-based.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:15:32",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Performance anxiety explainer covers timeless content: the physiology of the stress response, established breathing techniques, preparation strategies, and general guidance on when to seek professiona",
+  "queries": [],
+  "searches": 10,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": 10,
+  "skills": [
+   "health-wellbeing",
+   "tutorial-howto"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Why your body panics before you speak",
+    "Breathing and preparation that help",
+    "When anxiety needs professional help"
+   ]
+  },
+  "notes_len": 26100,
+  "n_sources": 11,
+  "n_fetched": 28,
+  "fetched": [
+   "Stage fright",
+   "Performance Anxiety - New Orleans Musicians' Clinic",
+   "Overcoming Performance Anxiety in Music, Acting, Sports, and More",
+   "Stage fright - Wikipedia",
+   "Managing Performance Anxiety: The Strategies That Work",
+   "Stage Fright: Definition, Causes, & How to Get Over It",
+   "Performance Anxiety Neuroscience: Stage Fright | Neurosity",
+   "Social anxiety disorder (social phobia) - Symptoms and causes - Mayo Clinic",
+   "Social Anxiety Disorder | Fact Sheets | Yale Medicine",
+   "Understanding Social Anxiety in Children - Child Mind Institute",
+   "Slow breathing for reducing stress: The effect of extending exhale - ScienceDirect",
+   "Benefits from one session of deep and slow breathing on vagal tone and anxiety in young and older adults | Scientific Reports",
+   "Brief structured respiration practices enhance mood and reduce physiological arousal",
+   "'Cyclic sighing' can help breathe away anxiety",
+   "Getting excited helps with performance anxiety more than trying to calm down, study finds",
+   "Get excited: reappraising pre-performance anxiety as excitement.",
+   "Public Speaking Anxiety: What Actually Reduces the Fear",
+   "Social Anxiety and Public Speaking: What's Different | EchoPitch",
+   "PUBLIC SPEAKING ANXIETY - National Social Anxiety Center",
+   "Social Anxiety Disorder: What You Need to Know - National Institute of Mental Health (NIMH)",
+   "Overcoming Social Anxiety Disorder – HelpGuide.org",
+   "Social anxiety (social phobia) - NHS",
+   "Long-term outcomes of cognitive behavioural therapy for social anxiety disorder: A meta-analysis of randomised controlled trials - ScienceDirect",
+   "The effectiveness of cognitive behavioural therapy for social anxiety disorder in routine clinical practice.",
+   "The Physiological Sigh | Trauma Research UK",
+   "Mental Health Medications - National Institute of Mental Health (NIMH)",
+   "Social anxiety disorder (social phobia) - Diagnosis and treatment - Mayo Clinic",
+   "Anxiety Disorders - National Institute of Mental Health (NIMH)"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 21: kinetic_text replaced by a title card (at most 3 per video)",
+  "section 2: some scenes list items their narration never mentions: beat 5 (gallery): its narration never says ['empty conference room presentation scree', 'person practicing speech in front of fri', 'small meeting room colleagues listening']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Stage fright\nStage fright or performance anxiety is the anxiety, fear, or persistent phobia that may be aroused in an individual by the requirement to perform in front of an audience, real or imagined, whether actually or potentially (for example, when performing before a camera). Performing in front of an unknown audience can cause significantly more anxiety than performing in front of familiar faces. Conversely, some performers report minimal anxiety when appearing before strangers, but severe stage fright when friends, family, and colleagues are present. This condition can manifest up to 36 hours beforehand, with classic symptoms such as nausea, dry mouth, and eye twitches.\nIn some cases, stage fright may be a part of a larger pattern of social phobia (social anxiety disorder), but many people experience stage fright without any wider problems. Quite often, stage fright arises from the mere anticipation of a performance, often long before it happens. It has numerous manifestations: stuttering, tachycardia, tremor in the hands and legs, sweaty hands, facial nerve tics, dry mouth, and dizziness.\n\n## Performance Anxiety - New Orleans Musicians' Clinic\nPerformance anxiety, or stage fright, is a common human experience that begins when the body's fight-or-flight response is triggered to recognize danger. During this time, the brain sends signals via epinephrine and norepinephrine to prepare the body to react by binding these chemicals to specific beta and alpha receptors. 1 Breathing and heart rate increase; blood vessels constrict, fat and sugar are mobilized to muscles for energy, and the brain activity is heightened. The acute anxiety at [...] In a survey of students at a university music school, 16% of respondents indicated that their musical performance was impaired by anxiety. 5 Stage fright is not one fear on its own, but a combination of several fears, including social anxiety, a specific phobias, panic and general anxiety. Determining which mix is the root cause of a person's stage fright is an important first step in dealing w\n\n## Overcoming Performance Anxiety in Music, Acting, Sports, and More\nBeing the center of attention and having all eyes on you can be stressful. Your body reacts to this situation in much the same way as it would if you were being attacked. Your body's \"fight-or-flight\" mechanism kicks in, which is why symptoms of stage fright are similar to symptoms that occur when you are in real danger. Performance anxiety symptoms may include:\n\n## Stage fright - Wikipedia\nOne of the most notable examples in the treatment of stage fright involves the use of beta blockers. Propranolol is occasionally prescribed off-label to treat performance anxiety.\\ As a beta blocker drug, propranolol prevents adrenaline (epinephrine) released during the \"fight-or-flight\" bodily response from attaching to the heart, lungs, and other parts of the body. This reduces or eliminates the physical symptoms of performance anxiety, including increased heart rate (tachycardia), rapid [...] reactions to occur. This bodily response is known as the \"fight or flight\" syndrome, a naturally occurring process in the body done to protect itself from harm. \"The neck muscles contract, bringing the head down and shoulders up, while the back muscles draw the spine into a concave curve. This, in turn, pushes the pelvis forward and pulls the genitals up, slumping the body into a classic fetal po\n\n## Managing Performance Anxiety: The Strategies That Work\nThe nervous jitters, worried thoughts, and increased heart rate are a direct result of the body’s fight-or-flight response kicking into gear. When this happens our stress hormones are released, preparing the body to respond to perceived danger. What we experience is adrenaline and cortisol being released into the body, which can cause increased heart rate, shallow breathing, temperature changes, shaky hands, and a tensing of our muscles. These are all the elements of the body’s natural ‘alarm’ [...] When we have an important event, meeting, date, or other situation where we value performing well - and fear that we may not - we perceive the potential threat as other’s judging our performance, which can trigger this fight-or-flight response. Luckily, we can learn skills to notice, mange, and reduce this response so that it doesn’t stop us from engaging in these important activities. ## Tip\n\n## Stage Fright: Definition, Causes, & How to Get Over It\nNeuroscientists suggest that stage fright might simply represent the fight-or-flight response: the phenomenon where our body reacts to how it perceives certain dangers.3 During the fight-or-flight response, the amygdala sends the stress response throughout the body, which stimulates epinephrine (commonly known as adrenaline). This adrenaline accounts for the physiological symptoms experienced during stage fright. The patterns happen so quickly that we don’t recognize when it’s happening until [...] While everyone experiences the anxiety differently, common stage fright symptoms include: Excessive dread or worry about the event Feeling distant or withdrawn from others Experiencing a sense of numbness Dry mouth Throat tightness (which can make talking painful) Racing heartbeat Perspiration Nausea or vomiting Stomach pains Excessive blushing Desire to escape and leave the scene Intense para\n\n## Performance Anxiety Neuroscience: Stage Fright | Neurosity\nThe amygdala activates the sympathetic nervous system, triggering adrenaline release. Adrenaline redirects blood flow from fine motor muscles to large muscle groups (preparation for fight or flight), increases heart rate, and triggers trembling. This is adaptive if you need to run from a predator. It's catastrophic if you need to play a violin or type on a keyboard. [...] Step 2: The sympathetic nervous system activates. Your adrenal glands dump adrenaline and noradrenaline into your bloodstream. Heart rate spikes. Blood pressure rises. Breathing quickens. Blood flow redirects from your digestive system and fine motor muscles to your large muscle groups. Your body is preparing to fight or run. [...] Step 3: The HPA axis engages. The hypothalamus signals the pituitary gland, which signals the adrenal cortex to release cortisol. Cortisol is the slower, longer-lasting stress hormone. While \n\n## Social anxiety disorder (social phobia) - Symptoms and causes - Mayo Clinic\nIn contrast to everyday nervousness, social anxiety disorder includes fear, anxiety and avoidance that interfere with relationships, daily routines, work, school or other activities. Social anxiety disorder typically begins in the early to mid-teens, though it can sometimes start in younger children or in adults. ### Emotional and behavioral symptoms Signs and symptoms of social anxiety disorder can include constant: [...] - Temperament. Children who are shy, timid, withdrawn or restrained when facing new situations or people may be at greater risk. - New social or work demands. Social anxiety disorder symptoms typically start in the teenage years, but meeting new people, giving a speech in public or making an important work presentation may trigger symptoms for the first time. [...] For children, anxiety about interacting with adults or peers may be shown by crying, having temper tantru\n\n## Social Anxiety Disorder | Fact Sheets | Yale Medicine\nThe age of onset of social anxiety disorder for the majority of individuals is between 8 and 15 years of age. The disorder is often associated with a history of social inhibition and shyness in early childhood. To be diagnosed in childhood, social anxiety must occur around other children and not just in interactions with adults. Fear in social situations may show up as crying, tantrums, freezing, or clinging to parents. Adolescents may experience a broader range of fears and avoidance of social [...] People with social anxiety disorder may have difficulty making friends and maintaining friendships out of fear of being embarrassed, humiliated, or rejected. The condition, a type of anxiety disorder, was originally known as social phobia. It often begins during the teenage years. [...] Social anxiety disorder is a type of anxiety disorder that makes people intensely fearful of participating\n\n## Understanding Social Anxiety in Children - Child Mind Institute\nSocial anxiety in kids starts between the ages of 8 and 15. They can usually hide their feelings in the beginning, and parents and teachers may not notice that anything is wrong. Social anxiety means that even small things — like answering a question in class or eating with friends in the cafeteria — can feel very scary. That’s because kids worry that they might accidentally do something embarrassing or offensive, and it will change what people think about them. [...] Most people with the disorder start noticing this anxiety when they’re between the ages of 8 and 15. For a while, children are usually able to hide social anxiety disorder. Their parents and teachers may not notice that anything is wrong, especially since kids are often ashamed to admit how anxious they are about things that other people don’t seem to get upset about. [...] ## Quick Read It’s common for children and teenage\n\n## Slow breathing for reducing stress: The effect of extending exhale - ScienceDirect\nclass attendance, home practice, or achieved slow breathing respiratory rate. Participants demonstrated fidelity to assigned breath ratios with home practice as measured by remote biometric assessments through smart garments (HEXOSKIN). Regular slow breathing practice for 12 weeks significantly reduced psychological stress as measured by PROMIS Anxiety (−4.85 S.D. ± 5.53, confidence interval \\[−5.60, −3.00], but not physiological stress as measured by heart rate variability. Group comparisons [...] Group comparisons showed small effect size differences (d = 0.2) with further reductions in psychological stress and physiological stress from baseline to 12 weeks for exhale greater than inhale versus exhale equals inhale, however these differences were not statistically significant. Conclusion While slow breathing significantly reduces psychological stress, breath ratios do not have a signif\n\n## Benefits from one session of deep and slow breathing on vagal tone and anxiety in young and older adults | Scientific Reports\nIn the case of anxiety, it might be preferable to reinforce the parasympathetic activity beyond the point of equilibrium in order to maximize relaxation32. This aim could be achieved by using deep and slow breathing (DSB), a method characterized by a longer exhale than inhale duration. Accordingly, 5 min of DSB efficiently increases parasympathetic activity, as assessed by HF power (i.e., % of HF in the total HRV power) and decreased perceived anxiety level among young adults33,34,35. [...] and the capacity to adapt to changing social demands76. As such, DSB, by promoting vagal nerve activity through a low inhale/exhale ratio, could be a catalyst for optimal anxiety management and emotion regulation. If this is indeed the case then a longer induction might not only greatly increase vagal tone, but it may also decrease state anxiety more greatly among older adults. The present results sti\n\n## Brief structured respiration practices enhance mood and reduce physiological arousal\nand (3) cyclic hyperventilation with retention, with longer inhalations and shorter exhalations. The primary endpoints are improvement in mood and anxiety as well as reduced physiological arousal (respiratory rate, heart rate, and heart rate variability). Using a mixed-effects model, we show that breathwork, especially the exhale-focused cyclic sighing, produces greater improvement in mood (p < 0.05) and reduction in respiratory rate (p < 0.05) compared with mindfulness meditation. Daily 5-min [...] Secondarily, we wanted to investigate if breathing practices with different inhale-exhale ratios have differential effects on physiology and psychological measures. We hypothesized that breathing practices that place emphasis on the exhale versus the inhale portion of each breath would be more effective in reducing anxiety and improving well-being. Accordingly, we hypothesized that cyclic sig\n\n## 'Cyclic sighing' can help breathe away anxiety\nRespiratory rate was also inversely correlated with a change in positive affect, suggesting that the participants whose breathing slowed down the most were also the ones who experienced the greatest improvement in mood. \"We know that people who are breathing very rapidly feel more anxious, such as during a panic attack,\" Spiegel said. \"Controlled breathwork seems to be a straightforward way to do the opposite: lower physiologic arousal and regulate your mood.\" #### Simple, quick and free [...] But, according to a new study from Stanford Medicine, there's an easy, at-home way to help lower your stress level: It's called cyclic sighing, a controlled breathing exercise that emphasizes long exhalations. What's more, it can take as little as five minutes to experience less anxiety, a better mood and even decreased rates of breathing at rest, a sign of overall body calmness. [...] Indeed, whil\n\n## Getting excited helps with performance anxiety more than trying to calm down, study finds\nIn one experiment, 140 participants (63 men and 77 women) were told to prepare a persuasive public speech on why they would be good work partners. To increase anxiety, a researcher videotaped the speeches and said they would be judged by a committee. Before delivering the speech, participants were instructed to say “I am excited” or “I am calm.” The subjects who said they were excited gave longer speeches and were more persuasive, competent and relaxed than those who said they were calm, [...] WASHINGTON — People who tell themselves to get excited rather than trying to relax can improve their performance during anxiety-inducing activities such as public speaking and math tests, according to a study published by the American Psychological Association. [...] Article: “Get Excited: Reappraising Pre-Performance Anxiety as Excitement,” Alison Wood Brooks, PhD, Harvard Business School; Journal\n\n## Get excited: reappraising pre-performance anxiety as excitement.\nIndividuals often feel anxious in anticipation of tasks such as speaking in public or meeting with a boss. I find that an overwhelming majority of people believe trying to calm down is the best way to cope with pre-performance anxiety. However, across several studies involving karaoke singing, public speaking, and math performance, I investigate an alternative strategy: reappraising anxiety as excitement. Compared with those who attempt to calm down, individuals who reappraise their anxious [...] their anxious arousal as excitement feel more excited and perform better. Individuals can reappraise anxiety as excitement using minimal strategies such as self-talk (e.g., saying \"I am excited\" out loud) or simple messages (e.g., \"get excited\"), which lead them to feel more excited, adopt an opportunity mind-set (as opposed to a threat mind-set), and improve their subsequent performance. These \n\n## Public Speaking Anxiety: What Actually Reduces the Fear\n### Why does rehearsing a speech alone not reduce the fear of giving it? Because rehearsal resolves uncertainty about your content, while the fear is a prediction about being watched and judged. Practicing in an empty room never puts that prediction to the test, so it survives intact into the real room. This is why the tenth private run-through often changes very little while the second live attempt changes a great deal, even when the live one goes worse. ## About the Author [...] ## A simple rule for deciding what to do next If the fear is bounded to scheduled performances, you can still make yourself do them, and the cost is a few bad weeks a year, then structured practice plus CBT-based supported self-help is a reasonable first move — a randomized trial found a self-led exposure protocol produced reductions similar to a therapist-led one \\. [...] ### Can you get over a fear of public \n\n## Social Anxiety and Public Speaking: What's Different | EchoPitch\nSafety behaviours — avoiding eye contact, over-preparing, reading from notes, speaking quietly — reduce short-term anxiety but maintain it long-term. True exposure requires progressively dropping safety behaviours. 4 ### Private practice as a first rung For social anxiety, full audience observation creates too much threat. Private practice — recording yourself without an observer — provides exposure to the performance aspects while removing social evaluation. The ideal starting point. [...] Good news: Social anxiety disorder is one of the most responsive conditions to treatment. The exposure-based approach has a strong evidence base, and presenting is one of the most commonly overcome specific fears for people with SAD. ### Start with private practice For social anxiety, private AI-coached practice is the ideal first rung on the exposure ladder. No human observers. No social evaluation. \n\n## PUBLIC SPEAKING ANXIETY - National Social Anxiety Center\nMake eye contact with the audience. Our nerves might tell us to avoid eye contact. Making deliberate eye contact with a friendly face will build confidence and slow our speaking. Join a group. Practice builds confident in public speaking. Groups like Toastmasters International provide peer support to hone our public speaking skill. Repeated exposure allows us to develop new beliefs about our fear and ability to speak in public. [...] ## Learn to relax Remember to breathe. We can reduce anxiety by breathing differently. Take slow inhalations and even slower exhalations with brief pauses in between. We’ll be more likely to use this technique if practiced in times of low stress. Speak slowly. It’s natural to speed up our speech when we are anxious. Practice slowing speech while rehearsing. When we talk quickly, our brain sees it is a threat. Speaking slowly and calmly gives the opposite mes\n\n## Social anxiety disorder (social phobia) - Symptoms and causes - Mayo Clinic\nSocial anxiety disorder symptoms can change over time. They may flare up if you're facing a lot of changes, stress or demands in your life. Although avoiding situations that produce anxiety may make you feel better in the short term, your anxiety is likely to continue over the long term if you don't get treatment. ### When to see a doctor See your doctor or a mental health professional if you fear and avoid normal social situations because they cause embarrassment, worry or panic. ## Causes [...] - Get help early. Anxiety, like many other mental health conditions, can be harder to treat if you wait. - Keep a journal. Keeping track of your personal life can help you and your mental health professional identify what's causing you stress and what seems to help you feel better. - Set priorities in your life. You can reduce anxiety by carefully managing your time and energy. Make sure that yo\n\n## Social Anxiety Disorder: What You Need to Know - National Institute of Mental Health (NIMH)\nIf your anxiety, or the anxiety of a loved one, starts to cause problems in everyday life—such as avoiding social situations at school, at work, or with friends and family—it’s time to seek professional help. ### Practice compassion Be kind and patient with yourself and others. Acknowledge progress, no matter how small, and recognize that managing social anxiety disorder may involve setbacks along the way. ## How can I find help? [...] Blush, sweat, or tremble Have a rapid heart rate Feel their “mind going blank,” or feel sick to their stomach Have a rigid body posture or speak with an overly soft voice Find it difficult to make eye contact, be around people they don’t know, or talk to people in social situations, even when they want to Feel self-consciousness or fear that people will judge them negatively Avoid places where there are other people or situations where they may have to int\n\n## Overcoming Social Anxiety Disorder – HelpGuide.org\n| Can have mild physical symptoms such as blushing | Comes with intense reactions, such as trembling, nausea, and dizziness | | Practicing social skills will build confidence and reduce shyness | Often requires professional treatment, such as therapy or medication | [...] | | | ---| | Shyness | Social anxiety disorder | | Often considered a personality trait | A diagnosable anxiety disorder | | Mild social discomfort that fades as you become familiar with others | Intense fear that is persistent in social situations | | Can cause some awkwardness but doesn’t typically disrupt your life | Disrupts your daily functioning and often leads to avoidance of others | [...] For example, it’s perfectly normal to get the jitters before giving a speech. But if you have social anxiety, you might worry for weeks ahead of time, call in sick to get out of it, or start shaking so badly during the speech \n\n## Social anxiety (social phobia) - NHS\nMany people with social anxiety also have other mental health issues, such as depression, generalised anxiety disorder or panic disorder. ## When to get help for social anxiety It's a good idea to see a GP if you think you have social anxiety, especially if it's having a big impact on your life. It's a common problem and there are treatments that can help. Asking for help can be difficult, but a GP will be aware that many people struggle with social anxiety and will try to put you at ease. [...] It's important to get help if you are having symptoms. There are treatments that can help you manage it. ## Symptoms of social anxiety Social anxiety is more than shyness. It's a fear that does not go away and affects everyday activities, self confidence, relationships and work or school life. Many people occasionally worry about social situations, but someone with social anxiety feels overly wor\n\n## Long-term outcomes of cognitive behavioural therapy for social anxiety disorder: A meta-analysis of randomised controlled trials - ScienceDirect\nThis meta-analysis shows that CBT for SAD is efficacious in producing enduring reduction of social anxiety symptoms 12 months or longer after treatment cessation. Gains achieved in depressive and general anxiety symptoms are also sustained one year or more after treatment. i-CBT produces a modest increase in quality of life and additional gains after treatment is finalised. These trends are evident regardless of specific treatment model, format, treatment duration and number of sessions, and [...] ### Discussion In this study, 25 RCTs provided data on the long-term outcomes of CBT treatment for SAD. The first aim of this study was to investigate the long-term disorder-specific outcomes of CBT for SAD. The second aim was to examine the effects of CBT for secondary symptoms at post-treatment and long-term follow-up. A third aim was to assess whether differences in treatment model, format, \n\n## The effectiveness of cognitive behavioural therapy for social anxiety disorder in routine clinical practice.\na reliable positive change, whereas 1.9% to 3.8% showed a reliable negative change. Depressive symptoms and psychological distress also decreased significantly from pre- to post-assessment, with large effect sizes. Significant treatment gains regarding both primary and secondary outcomes were further observed at 6 and 12 months follow-up. The current findings based on a large sample of patients suggest that psychotherapists in CBT training working under routine conditions can effectively treat [...] symptoms of SAD (defined as primary outcome), depression and psychological distress (defined as secondary outcome). We conducted both completer and intent-to-treat analyses and also assessed the reliability of change with the reliable change index. Results revealed significant reductions in symptoms of SAD between pre- and post-assessments, with effect sizes ranging from d = 0.9 to 1.2. Depen\n\n## The Physiological Sigh | Trauma Research UK\n### Why it Works 1. Balances Oxygen and Carbon Dioxide: Double-inhaling increases oxygen intake and removes carbon dioxide more efficiently, restoring balance and calming the body. 2. Engages the Parasympathetic Nervous System: The long, slow exhale helps activate the relaxation response, reducing the fight-or-flight sensation. 3. Slows Heart Rate: The extended exhale also naturally slows your heart rate, which can reduce feelings of stress and help restore a sense of control. [...] ### What is the Physiological Sigh? The physiological sigh is a quick and effective breathing technique that naturally calms the nervous system. It works by regulating oxygen and carbon dioxide levels in the body, helping to ease feelings of stress and anxiety within moments. How to Do It: 1. Take a long, deep inhale through your nose. 2. Without exhaling, take a second, shorter inhale to fully expand your lu\n\n## Mental Health Medications - National Institute of Mental Health (NIMH)\nMany medications used to treat depression—including SSRIs and SNRIs—may also be used to treat anxiety. In the case of panic disorder or social anxiety disorder, health care providers typically start with SSRIs or other antidepressants as the initial treatment because they have fewer side effects than other medications. [...] Benzodiazepines and beta-blockers are useful as needed to reduce severe anxiety in the short-term. However, taking benzodiazepines over long periods may lead to drug tolerance or even dependence. To avoid these problems, health care providers usually prescribe benzodiazepines for short periods and taper them slowly to reduce the likelihood of withdrawal symptoms or renewed anxiety symptoms. Beta-blockers generally are not recommended for people with asthma or diabetes because they may worsen [...] ## Where can I learn more about mental health medications? ### Finding\n\n## Social anxiety disorder (social phobia) - Diagnosis and treatment - Mayo Clinic\nThough several types of medications are available, selective serotonin reuptake inhibitors (SSRIs) a",
+ "plan": {
+  "title": "Calm Before You Speak: A Guide to Presentation Anxiety",
+  "description": "A practical guide to performance anxiety, covering why stage fright happens in the body, how breathing and preparation can help, and when to seek professional support. It is general information, not medical advice.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "21b59be8",
+    "narration": "Your heart pounds, your hands shake, and you haven't even stood up yet. Why does a simple presentation feel like an attack? Your body is not broken. It is doing its job.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "nervous person waiting backstage",
+      "alt": "anxious person before performing"
+     }
+    },
+    "chapter": "Why your body panics before you speak"
+   },
+   {
+    "id": "f847ac95",
+    "narration": "Stage fright, also called performance anxiety, is fear triggered by having to perform in front of an audience, whether that audience is real or only imagined.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Stage fright",
+      "definition": "Anxiety or fear triggered by having to perform in front of an audience, real or imagined."
+     }
+    }
+   },
+   {
+    "id": "4b8b0ca9",
+    "narration": "Here is the chain. The audience seems risky. Then your brain's alarm fires. Adrenaline floods your body, preparing it to fight or run, as if you faced real danger.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How the alarm starts",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Audience seems risky",
+        "icon": "users"
+       },
+       {
+        "id": "b",
+        "label": "Brain's alarm fires",
+        "icon": "brain"
+       },
+       {
+        "id": "c",
+        "label": "Adrenaline floods in",
+        "icon": "bolt"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "7650b78d",
+    "narration": "That surge explains the signs: a racing heart, trembling hands or legs, sweaty palms, a dry mouth, nausea, dizziness, even stuttering or facial tics.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Common signs",
+      "items": [
+       "Racing heart",
+       "Trembling hands or legs",
+       "Sweaty hands, dry mouth",
+       "Nausea and dizziness",
+       "Stuttering or facial tics"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "heart",
+       "hand",
+       "bubbles",
+       "",
+       "mic"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c3412ce3",
+    "narration": "It can begin up to 36 hours beforehand. Often it starts from mere anticipation, long before you walk into the room.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "36 hours",
+      "label": "Stage fright can start this long before a performance"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "60f3b8a8",
+    "narration": "The audience matters, too. For some people, strangers raise anxiety the most. Others feel fine with strangers, but worse in front of friends, family or colleagues.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Unknown audience",
+       "tagline": "Strangers"
+      },
+      "b": {
+       "name": "Familiar audience",
+       "tagline": "Friends, family, colleagues"
+      },
+      "rows": [
+       {
+        "label": "Anxiety for some",
+        "a": "Higher",
+        "b": "Minimal"
+       },
+       {
+        "label": "Anxiety for others",
+        "a": "Minimal",
+        "b": "Severe"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "02c992d6",
+    "narration": "Here is the reassuring part. Many people have stage fright without any wider problem. Sometimes it is part of social anxiety disorder, which we will come back to.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Stage fright is a normal alarm, not a personal flaw.",
+      "emphasis": "normal alarm"
+     }
+    }
+   },
+   {
+    "id": "fcb4af40",
+    "narration": "So what can you actually do? Start with your breath. Breathe in gently through your nose, then make the exhale longer than the inhale, as if slowly fogging a window.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Slow breathing, longer exhale",
+      "steps": [
+       {
+        "label": "Breathe in gently through your nose"
+       },
+       {
+        "label": "Exhale longer than the inhale"
+       },
+       {
+        "label": "Repeat for about five minutes"
+       }
+      ]
+     }
+    },
+    "chapter": "Breathing and preparation that help"
+   },
+   {
+    "id": "37b5fa10",
+    "narration": "Stanford researchers found that five minutes of exhale-focused breathing, called cyclic sighing, improved mood and slowed breathing more than mindfulness meditation. Another study found that the exact ratio mattered little. Slowing down is what helps.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How strong is the evidence?",
+      "items": [
+       "Five minutes of cyclic sighing eased mood",
+       "Exact breath ratio: no clear difference",
+       "Slowing down is what helps"
+      ],
+      "style": "keywords",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "6934c20a",
+    "narration": "When it works, your breathing slows, your shoulders drop, and your thoughts feel a little quieter. Practice when you are calm, so the skill is ready when you need it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person breathing calmly outdoors",
+      "alt": "calm slow breathing relaxation"
+     }
+    }
+   },
+   {
+    "id": "79c1d953",
+    "narration": "Use it in two places. In the hours before, give it five minutes. Just before you start, take a few slow breaths.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Where to use it",
+      "events": [
+       {
+        "date": "Hours before",
+        "label": "Five minutes of slow breathing"
+       },
+       {
+        "date": "Just before",
+        "label": "A few slow breaths"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "5ce90d37",
+    "narration": "Rehearse out loud, not just in your head. Try an empty room that looks like the real setting, then a friendly listener. Practicing alone never tests the fear of being watched.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "empty conference room presentation screen",
+       "person practicing speech in front of friend",
+       "small meeting room colleagues listening"
+      ],
+      "alt": "rehearsing a presentation in realistic settings"
+     }
+    }
+   },
+   {
+    "id": "a3ea1497",
+    "narration": "Know your opening lines by heart, because anxiety peaks at the start. Memorize your opening lines. Then let your body settle as you speak.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Own your first moments",
+      "items": [
+       "Memorize your opening lines",
+       "Let your body settle"
+      ],
+      "style": "spotlight",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "0f070932",
+    "narration": "Finally, reframe the signals. A pounding heart means your body is getting ready, not that you are failing. In one Harvard study, people who said \"I am excited\" spoke more persuasively than those who tried to calm down.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A fast heart means you are getting ready, not failing.",
+      "emphasis": "getting ready"
+     }
+    }
+   },
+   {
+    "id": "7d1d2632",
+    "narration": "Nerves before a talk are normal. But how do you know when it's become something more? Some signs are worth noticing, and they have little to do with how loud your heart beats.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "When nerves become something more",
+      "subtitle": "Knowing when to ask for professional help"
+     }
+    },
+    "chapter": "When anxiety needs professional help"
+   },
+   {
+    "id": "3751520e",
+    "narration": "Watch for avoidance, like calling in sick to dodge a presentation. Notice worry that starts weeks ahead, or lingers long after. And ask whether it is hurting your work, school, or daily life.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Signs it may be more than nerves",
+      "items": [
+       "Avoiding talks or social situations",
+       "Worry for weeks before or long after",
+       "Hurting your work, school or daily life"
+      ]
+     }
+    }
+   },
+   {
+    "id": "d8035f9b",
+    "narration": "Sometimes stage fright is part of social anxiety disorder. Shyness is a personality trait. Social anxiety is a diagnosable condition, with persistent, intense fear. The good news is that it is treatable.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Normal nerves",
+       "tagline": "Jitters that fade"
+      },
+      "b": {
+       "name": "Social anxiety disorder",
+       "tagline": "Diagnosable and treatable"
+      },
+      "rows": [
+       {
+        "label": "Fear",
+        "a": "Mild, passes",
+        "b": "Intense, persistent"
+       },
+       {
+        "label": "Daily life",
+        "a": "Rarely disrupted",
+        "b": "Often disrupted"
+       },
+       {
+        "label": "Avoidance",
+        "a": "Uncommon",
+        "b": "Common"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "b8b9cba4",
+    "narration": "Avoiding the situation may feel better today, but according to Mayo Clinic, anxiety is likely to continue long term without treatment. Getting help early matters, because anxiety can be harder to treat if you wait.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Avoiding feels better today, but the anxiety tends to stay.",
+      "emphasis": "tends to stay"
+     }
+    }
+   },
+   {
+    "id": "3be8a120",
+    "narration": "Who can you ask? Start with a GP or doctor. They know many people struggle with this. They can refer you to a therapist, and ask about cognitive behavioural therapy, called CBT.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Where to start",
+      "nodes": [
+       {
+        "id": "gp",
+        "label": "GP or doctor",
+        "icon": "stethoscope"
+       },
+       {
+        "id": "th",
+        "label": "Therapist",
+        "icon": "heart"
+       },
+       {
+        "id": "cbt",
+        "label": "CBT",
+        "icon": "brain"
+       }
+      ],
+      "edges": [
+       [
+        "gp",
+        "th",
+        "refers"
+       ],
+       [
+        "th",
+        "cbt",
+        "offers"
+       ]
+      ],
+      "style": "cards",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "fe716bd1",
+    "narration": "A meta-analysis of 25 trials found CBT for social anxiety brought lasting improvement, twelve months or longer after treatment ended. This is general information, not medical advice.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "25 trials",
+      "label": "CBT gains for social anxiety lasted 12 months or longer"
+     }
+    }
+   },
+   {
+    "id": "775fdb7b",
+    "narration": "Get urgent help for chest pain, severe breathlessness, or thoughts of self-harm. Contact emergency services or a crisis line. Support exists, and you don't have to face it alone.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Seek urgent help for",
+      "items": [
+       "Chest pain",
+       "Severe breathlessness",
+       "Thoughts of self-harm"
+      ],
+      "style": "icons",
+      "accent": "rose",
+      "icons": [
+       "heart",
+       "stethoscope",
+       "phone"
+      ]
+     }
+    },
+    "sfx": "none"
+   },
+   {
+    "id": "0ffe08b1",
+    "narration": "So here is your next step. Pick one technique from this video, and practise it before your next talk. And if anxiety keeps holding you back, reach out. Asking for help is a strong move.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "So here is your next step. Pick one technique",
+      "subtitle": ""
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Stage fright",
+    "url": "https://en.wikipedia.org/wiki/Stage_fright",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Performance Anxiety Neuroscience: Stage Fright | Neurosity",
+    "url": "https://neurosity.co/guides/performance-anxiety-neuroscience-stage-fright",
+    "publisher": "neurosity.co",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Social anxiety disorder (social phobia) - Symptoms and causes - Mayo Clinic",
+    "url": "https://www.mayoclinic.org/diseases-conditions/social-anxiety-disorder/symptoms-causes/syc-20353561",
+    "publisher": "mayoclinic.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Slow breathing for reducing stress: The effect of extending exhale - ScienceDirect",
+    "url": "https://www.sciencedirect.com/science/article/pii/S0965229923000249",
+    "publisher": "sciencedirect.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Brief structured respiration practices enhance mood and reduce physiological arousal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947",
+    "publisher": "pmc.ncbi.nlm.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "'Cyclic sighing' can help breathe away anxiety",
+    "url": "https://med.stanford.edu/news/insights/2023/02/cyclic-sighing-can-help-breathe-away-anxiety.html",
+    "publisher": "med.stanford.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Getting excited helps with performance anxiety more than trying to calm down, study finds",
+    "url": "https://www.apa.org/news/press/releases/2013/12/performance-anxiety",
+    "publisher": "apa.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Public Speaking Anxiety: What Actually Reduces the Fear",
+    "url": "https://www.scienceworkshealth.com/post/performance-anxiety-public-speaking",
+    "publisher": "scienceworkshealth.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "PUBLIC SPEAKING ANXIETY - National Social Anxiety Center",
+    "url": "https://nationalsocialanxietycenter.com/social-anxiety/public-speaking-anxiety",
+    "publisher": "nationalsocialanxietycenter.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Social Anxiety Disorder: What You Need to Know - National Institute of Mental Health (NIMH)",
+    "url": "https://www.nimh.nih.gov/health/publications/social-anxiety-disorder-more-than-just-shyness",
+    "publisher": "nimh.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Overcoming Social Anxiety Disorder – HelpGuide.org",
+    "url": "https://www.helpguide.org/mental-health/anxiety/social-anxiety-disorder",
+    "publisher": "helpguide.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "health-wellbeing",
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 43.8,
+  "before_first_script_call_s": 4.8,
+  "script_s": 39.0
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.22857,
+  "research": 0.00563,
+  "search_api": 0.08,
+  "total": 0.31447
+ },
+ "calls": {
+  "small": 3,
+  "big": 6,
+  "tools": 9
+ },
+ "tokens": {
+  "in": 123119,
+  "out": 10039
+ },
+ "rules": {
+  "length": {
+   "words": 655,
+   "expected_words": 537,
+   "ratio": 1.22,
+   "beats": 22,
+   "expected_beats": 17,
+   "est_speech_s": 293.8,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 35,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Your heart pounds, your hands shake, and you haven't even stood up yet. Why does a simple presentation feel like an attack? Your body is not broken. It is doing its job.",
+   "close_text": "So here is your next step. Pick one technique from this video, and practise it before your next talk. And if anxiety keeps holding you back, reach out. Asking for help is a strong move."
+  },
+  "variety": {
+   "distinct": 12,
+   "counts": {
+    "clip": 2,
+    "definition": 1,
+    "diagram": 2,
+    "bullets": 4,
+    "stat": 2,
+    "versus": 2,
+    "kinetic_text": 3,
+    "steps": 1,
+    "timeline": 1,
+    "gallery": 1,
+    "title": 2,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 3.43,
+   "top_type": "bullets",
+   "top_share": 0.18,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [],
+   "entities": 4,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "is part of social",
+    "count": 2
+   },
+   {
+    "phrase": "part of social anxiety",
+    "count": 2
+   },
+   {
+    "phrase": "of social anxiety disorder",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1,
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 11,
+   "fetched": 28,
+   "notes_len": 26100,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 12 (gallery): its narration never says ['empty conference room presentation scree', 'person practicing speech in front of fri', 'small meeting room colleagues listening']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly sound, but \"Harvard study\" (the excitement study was Alison Wood Brooks at Harvard Business School, while the cited source is an APA release) and the \"25 trials\" meta-analysis are not in the notes. The six-word line \"Stanford researchers found... more than mindfulness meditation\" is true but \"Another study found ratio mattered little\" is loosely sourced. The claim that anxiety peaks at the start is unsupported."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers physiology, breathing, rehearsal, reframing and when to seek help, but there is no physiological sigh or box breathing, no exposure practice, and little on beta blockers or on the cognitive side. Too much time goes to the unknown-versus-familiar audience trivia."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Three clear chapters and a logical order, but the physiology section is bloated while preparation is rushed. Beat 13 repeats itself and the \"36 hours\" and audience beats are digressions."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "Opens with a relatable physical image and the line \"Your body is not broken. It is doing its job.\" The ending gives one concrete next step plus encouragement, though it is slightly generic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Compassionate, non-diagnostic, reassuring, with a disclaimer included. Mild US mismatch with \"GP\" and \"behavioural\"."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety (diagram, steps, versus, timeline, gallery, stat). The stat \"25 trials\" is a weak stat, the versus table for audience type is clumsy, and the final title scene shows a sentence fragment as the title."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The fogging-a-window image and the avoidance example (calling in sick) are nice touches, but much of the content is standard advice."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Hits all four requested areas, but the breathing section is thin on specific techniques and is under-practical; the length is roughly right."
+   },
+   "language": {
+    "score": 3,
+    "reason": "Generally fluent, but with a redundant line (\"Know your opening lines by heart... Memorize your opening lines.\"), UK spellings (\"practise\", \"behavioural\") for a US viewer, and the odd \"Own your first moments\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Know your opening lines by heart, because anxiety peaks at the start. Memorize your opening lines.",
+    "issue": "Redundant repetition; the peak-at-start claim is unsourced.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "In one Harvard study, people who said \"I am excited\" spoke more persuasively",
+    "issue": "Not in the notes; the cited source is APA, and attribution and the persuasiveness finding are from memory. The study was by Brooks at Harvard Business School, so the attribution is loosely right but unverified.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "A meta-analysis of 25 trials found CBT for social anxiety brought lasting improvement",
+    "issue": "Specific figure not in the notes; it cannot be traced.",
+    "beat": 20
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Breathe in gently through your nose, then make the exhale longer than the inhale",
+    "issue": "Offers a generic technique but omits the physiological sigh or box breathing named in a good answer, plus exposure practice.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "The audience matters, too. For some people, strangers raise anxiety the most.",
+    "issue": "Trivia digression that uses time better spent on preparation tactics.",
+    "beat": 6
+   },
+   {
+    "dimension": "tone",
+    "severity": "minor",
+    "quote": "Start with a GP or doctor.",
+    "issue": "UK phrasing for a US viewer (say primary care doctor); \"behavioural\" is also UK.",
+    "beat": 19
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "So here is your next step. Pick one technique",
+    "issue": "A sentence fragment used as the title card with an empty subtitle.",
+    "beat": 22
+   }
+  ],
+  "missing": [
+   "Physiological sigh or box breathing",
+   "Gradual exposure and practice in low-stakes settings",
+   "Beta blockers or medication mention and talking to a doctor",
+   "Focusing on the audience or message rather than yourself",
+   "Normalizing a shaky start and pausing"
+  ],
+  "wrong_facts": [
+   "\"Harvard study\" and \"25 trials\" are not in the notes (unverified, but plausibly true).",
+   "\"anxiety peaks at the start\" is unsupported by the notes."
+  ],
+  "would_publish": false,
+  "summary": "A compassionate, well-organized script that covers the basics but is thin on practical technique, spends time on trivia, and relies on a few unsourced specifics. It needs sharper breathing and preparation content and tighter wording.",
+  "mean": 3.33,
+  "cost_usd": 0.034108,
+  "tokens": [
+   8649,
+   1681
+  ]
+ }
+}

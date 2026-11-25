@@ -1,0 +1,748 @@
+{
+ "id": "bio-02",
+ "category": "biography",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "La vida de Frida Kahlo: infancia con polio, el accidente de 1925, su relación con Diego Rivera, su pintura y por qué es un icono hoy.",
+ "great": "Coyoacán 1907, polio, accidente de autobús 1925, empieza a pintar, matrimonio con Rivera, autorretratos y surrealismo (Las dos Fridas), salud, muerte 1954, Casa Azul, icono cultural; fechas correctas.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:04:24",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "recency cue in the brief",
+  "queries": [],
+  "searches": 12,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 15.5,
+  "error": "",
+  "fallback": null,
+  "section_searches": 9,
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Una niña con polio y un autobús que lo cambió todo",
+    "Diego Rivera y la pintura como espejo",
+    "Por qué Frida es un icono hoy"
+   ]
+  },
+  "notes_len": 20283,
+  "n_sources": 9,
+  "n_fetched": 24,
+  "fetched": [
+   "Frida Kahlo | Biography, Paintings, Self-Portrait, Accident, Husband, & Facts | Britannica",
+   "Frida Kahlo Exhibit: Aguayo 22, A New Home for the Kahlo Family | Laura Neave",
+   "El autorretrato en la cama vendido por 54,7 millones de dólares: Frida Kahlo",
+   "Frida Kahlo llega a subasta en Nueva York",
+   "¿Dónde están las obras de Frida Kahlo? El mapa de sus pinturas dentro y ...",
+   "Biografías Frida Kahlo",
+   "Frida Kahlo - Phoenix Art Museum",
+   "Frida Kahlo | Biografía en cuento para niños | Shackleton Kids",
+   "Frida Kahlo - Wikipedia, la enciclopedia libre",
+   "How a Devastating Accident Changed Frida Kahlo's Life and Inspired Her Art | HISTORY",
+   "El accidente de Frida Kahlo y su recuperación | TheHistoryOfArt.org",
+   "Frida Kahlo: Así fue el accidente de autobús que la hirió gravemente",
+   "Museo Frida Kahlo presenta exposición a un siglo del accidente de la artista",
+   "The Two Fridas, 1939 by Frida Kahlo",
+   "Las dos Fridas - Frida Kahlo - Historia Arte (HA!)",
+   "Frida Kahlo llega a Londres y reafirma su legado como icono universal del arte | La Silla Rota",
+   "Frida Kahlo: Vida, Arte e Impacto Cultural Duradero",
+   "Museo | Museo Frida Kahlo",
+   "Frida | Museo Frida Kahlo",
+   "\"El sueño (la cama)\", la pintura de Frida Kahlo que se convirtió en la ...",
+   "Autorretrato de Frida Kahlo subastado por 54,7 mdd rompe récord ...",
+   "Museo Frida Kahlo, La Casa Azul: conoce precios, horarios y exposiciones",
+   "Museo Frida Kahlo - Wikipedia, la enciclopedia libre",
+   "Frida Kahlo | El sueño (La cama) | Exquisite Corpus Evening Auction |"
+  ],
+  "research_agent_cost_usd": 0.0014373
+ },
+ "warnings": [
+  "beat 20: kinetic_text replaced by a title card (at most 3 per video)",
+  "section 1: some scenes list items their narration never mentions: beat 3 (timeline): its narration never says ['1907 Nace en Coyoacán, México', '1925 Choque entre autobús y tranvía']. Say each item's key words in the order shown",
+  "section 2: some scenes list items their narration never mentions: beat 7 (gallery): its narration never says ['Tehuana costume Mexico', 'Mexican folk art colorful']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Frida Kahlo | Biography, Paintings, Self-Portrait, Accident, Husband, & Facts | Britannica\nPublished: Mon, 20 Jul 1998 00:00:00 GMT\n- 1907: Born in Coyoacán, Mexico, on July 6. - 1913: Contracts polio, which leaves Kahlo with a slight limp. - 1925: Seriously injured while riding a bus home from school when it collides with a trolley. During her slow recovery Kahlo teaches herself to paint. - 1929: Marries fellow Mexican artist Diego Rivera. [...] In 1925 Kahlo was riding a bus home from school when it collided with a trolley. She was seriously injured in the accident, with multiple fractures in her spine, right leg, collarbone, ribs, and pelvis. Her shoulder was dislocated, her right foot crushed, and her abdomen and uterus punctured by an iron handrail. She later joked that this was the moment she lost her virginity. The injuries plagued Kahlo for the rest of her life, and she underwent more than 30 medical procedures in subsequent [...] Kahlo was born to a German father of Hungarian descent and a Mexican mother of \n\n## Frida Kahlo Exhibit: Aguayo 22, A New Home for the Kahlo Family | Laura Neave\nThe video captures an indoor museum visit, appearing to be the Casa Azul (Frida Kahlo Museum) in Mexico City ... The Museum is open !! Oct 29, 2026 · 1.6K views.\n\n## El autorretrato en la cama vendido por 54,7 millones de dólares: Frida Kahlo\nPublished: Sun, 22 Nov 2026 15:00:00 GMT\nFrida Kahlo fijó el récord en subasta para una artista. Kahlo pintó Las dos Fridas: Las dos Fridas (1939): dos yoes en el año del divorcio, en el Museo de Arte\n\n## Frida Kahlo llega a subasta en Nueva York\nNotica del día: El autorretrato \"El Sueño (La cama)\", de Frida Kahlo, se vendió este jueves en Nueva York por 54.7 millones de dólares, el precio más alto jamás\n\n## ¿Dónde están las obras de Frida Kahlo? El mapa de sus pinturas dentro y ...\nPublished: Mon, 23 Nov 2026 15:00:00 GMT\nLa polémica por \"Congreso de los pueblos por la paz\" reabre una pregunta: ¿dónde están las pinturas de Frida Kahlo y qué ley protege su legado?\n\n## Biografías Frida Kahlo\nsolo fotografiaba edificios. Frida lo auxiliaba en su laboratorio fotográfico para el retoque de las imágenes que pintaban a color, así como en cuestiones prácticas relacionadas a la toma de las fotos. Guillermo padecía de epilepsia, por eso la pequeña Frida procuraba acompañarle durante las sesiones fotográficas, para auxiliarle si sufría algún ataque. Igualmente, Frida recibió las atenciones médicos de su padre. En 1913, a los seis años de edad, se enferma de poliomielitis, lo cual le deja [...] BIOGRAFÍA DE FRIDA KAHLO FRIDA KAHLO (MAGDALENA CARMEN FRIDAKAHLO CALDERÓN) nació el 6 de julio de 1907 en la Ciudad de México, en la casa que fuera propiedad de sus padres desde 1904, y que hoy se conoce como la Casa Azul. Hija de Wilhelm (Guillermo) Kahlo, de ascendencia alemana, y de la mexicana Matilde Calderón, Frida fue la tercera de cuatro hijas de este matrimonio. Matilde y Adriana, fue\n\n## Frida Kahlo - Phoenix Art Museum\nFrida Kahlo nació en Coyoacán, Mexico en 1907. Su padre era de descendencia alemán-húngaro, mientras que su madre, de México, era de descendencia indígena y española. Contrajo polio de niña, que la dejó con una leve cojera. Fue la primera de muchas enfermedades que sufrió en toda su vida. [...] En 1922, Kahlo inició sus estudios de medicina en la Escuela Nacional Preparatoria en la Ciudad de México, donde conoció a Diego Rivera. En 1925, sobrevivió un accidente de autobús que a raíz del cual tuvo que someterse a más de 30 cirugías durante su vida. Se enseñó a pintar durante su recuperación y al unirse al Partido Comunista Mexicano, se encontró de nuevo con Rivera. En 1929 se casaron y, de 1930 a 1933, viajaron por los Estados Unidos; Rivera pintando murales y Kahlo pintando retratos [...] Los artistas volvieron a México en 1933 y para 1939 se divorciaron, después de años de infidelidad m\n\n## Frida Kahlo | Biografía en cuento para niños | Shackleton Kids\n[0:41] tiempo que pasaba con mi padre solíamos ir de excursión solos él y yo y mientras yo buscaba insectos él hacía fotos y [0:50] pintaba acuarelas cuando tenía sólo seis años cogí la polio un virus que me dejó para siempre [0:58] una ligera malformación en una pierna las niñas de mi escuela se reían de mí y [1:04] me llamaban patapalo mirad por allí va a frida patapalo como no tenía con quién jugar me inventé [...] ¿Cómo te sentirías si tuvieras que sufrir por las dolorosas consecuencias de un accidente muy grave y por los efectos, no menos dolorosos, de una enfermedad infantil? Eso es lo que le pasó a Frida Kahlo. Pero en lugar de abandonarse a la tristeza, encontró en la pintura una pasión a través de la cual podía superar el sufrimiento y llenar su vida de colores. Gracias a su entusiasmo, fue la primera artista mexicana en exhibir sus obras en el Louvre, y se convirtió en una arti\n\n## Frida Kahlo - Wikipedia, la enciclopedia libre\n1 Biografía y carrera + 1.1 1907-1925: primeros años + 1.2 1925-1928: accidente e inicios como pintora + 1.3 1929-1940: primer matrimonio con Diego Rivera + 1.4 1940-1950: segundo matrimonio con Diego Rivera y ascenso artístico + 1.5 1950-1954: deterioro de salud y últimos años 2 Muerte 3 Legado + 3.1 Obra pictórica + 3.2 Museos + 3.3 Mito y leyenda + 3.4 Personificaciones + 3.5 Literatura + 3.6 Juguetes + 3.7 Música + 3.8 Exposiciones 4 Véase también [...] Su vida estuvo marcada por un grave accidente de autobús en su juventud que la mantuvo postrada en cama durante largos periodos, llegando a someterse hasta a 32 operaciones quirúrgicas. Llevó una vida poco convencional. La obra de Kahlo y la de su esposo, el pintor Diego Rivera, se influyeron mutuamente. Ambos compartieron el gusto por el arte popular mexicano de raíces indígenas, inspirando a otros pintores mexicanos del periodo posr\n\n## How a Devastating Accident Changed Frida Kahlo's Life and Inspired Her Art | HISTORY\nOn September 17, 1925, that all changed. After a day of classes, Kahlo and her friend Alejandro Gomez Arias boarded a bus heading toward Coyoacan. Minutes after they sat down on a wooden bench, the bus turned a corner and slammed into an electric trolley car traveling at full speed. “The streetcar crushed the bus against the street corner,” Kahlo told author Raquel Tibol in Frida Kahlo: An Open Life. “It was a strange crash, not violent but dull and slow, and it injured everyone, me much more [...] When the bus Kahlo was riding hit a trolley car, she suffered serious internal injuries as a long metal rod tore through her midsection. On the scene of the accident, an onlooker tried to remove the metal rod from Kahlo’s body. “When he pulled it,” Arias recalled, “Frida screamed so loud that no one heard the siren of the Red Cross ambulance.” [...] By: Elizabeth Svoboda # How a Devastating Ac\n\n## El accidente de Frida Kahlo y su recuperación | TheHistoryOfArt.org\nFrida Kahlo tenía dieciocho años cuando un autobús y un tranvía chocaron en Ciudad de México el 17 de septiembre de 1925. Las lesiones interrumpieron su educación y transformaron las condiciones de su vida cotidiana, pero no crearon de la nada su interés por el trabajo visual: la fotografía, el dibujo, la impresión y la actividad literaria ya formaban parte de su experiencia. Durante una recuperación irregular, la pintura se convirtió en una práctica más sostenida, apoyada por un entorno de [...] ## El choque del 17 de septiembre de 1925 Los hechos centrales coinciden en la cronología del museo de la artista y en las tres noticias de prensa reproducidas en el estudio de Rodríguez Blanco: la fecha fue el 17 de septiembre de 1925 y los vehículos eran un autobús y un tranvía. El autobús cubría la ruta de Coyoacán, mientras que el tranvía se identificaba con Tlalpan. No fue un choque entre u\n\n## Frida Kahlo: Así fue el accidente de autobús que la hirió gravemente\nEra 1925 cuando Frida Kahlo , con tan sólo 19 años, sufrió múltiples heridas en su cuerpo causadas por un accidente, cuando el camión en el que viajaba fue arrollado por un tranvía. Como resultado del choque, Kahlo sufrió fracturas en dos costillas, su columna vertebral quedó fracturada en tres partes, más daños en su pelvis, su pierna y pie derecho, clavícula y hombro izquierdo. Se creía que los daños eran tan graves que incluso le causarían la muerte. La pintora pasó semanas postrada en cama [...] En el hospital de la Cruz Roja se nos dijo que las heridas que recibieron las señoritas Kahlo y Mejía, son de aquellas que necesariamente causan la muerte. Tanto el motorista como el chofer lograron huir. Así fue el accidente de autobús que hirió gravemente a Frida Kahlo Foto: archivo ## Dos de las víctimas del choque de anteayer, siguen graves 19 de septiembre de 1925 [...] {{#values}} {{#ap\n\n## Museo Frida Kahlo presenta exposición a un siglo del accidente de la artista\nEste suceso del 17 de septiembre de 1925 cambió el rumbo de su vida, cuando regresaba del Centro Histórico acompañada de su entonces novio Alejandro Gómez Arias. Habían tomado un autobús, pero al bajar a buscar una sombrilla olvidada, subieron a otro camión que minutos después chocaría contra un tranvía en la calzada de San Antonio Abad, frente al mercado de San Lucas. WhatsAppSuscríbete a nuestro canal [...] > El 17 de septiembre de 1925, a los 18 años, Frida Kahlo sufre un accidente que marca su vida. Desde entonces convive con el dolor, lo que impulsa su vocación: la pintura. > > Un siglo después, desde la Casa Azul reconocemos a través de una exposición temporal ese percance como el… pic.twitter.com/GHQtWGvXL3 > > — Museo Frida Kahlo (@museofridakahlo) September 17, 2025 ## Una inmersión al cuerpo emociones y estilo creativo de Frida [...] Saltar al contenido 24 Horas 24 Horas El Dia\n\n## Frida Kahlo - Phoenix Art Museum\nEn 1922, Kahlo inició sus estudios de medicina en la Escuela Nacional Preparatoria en la Ciudad de México, donde conoció a Diego Rivera. En 1925, sobrevivió un accidente de autobús que a raíz del cual tuvo que someterse a más de 30 cirugías durante su vida. Se enseñó a pintar durante su recuperación y al unirse al Partido Comunista Mexicano, se encontró de nuevo con Rivera. En 1929 se casaron y, de 1930 a 1933, viajaron por los Estados Unidos; Rivera pintando murales y Kahlo pintando retratos [...] Frida Kahlo nació en Coyoacán, Mexico en 1907. Su padre era de descendencia alemán-húngaro, mientras que su madre, de México, era de descendencia indígena y española. Contrajo polio de niña, que la dejó con una leve cojera. Fue la primera de muchas enfermedades que sufrió en toda su vida. [...] Los artistas volvieron a México en 1933 y para 1939 se divorciaron, después de años de infidelidad m\n\n## Frida Kahlo - Wikipedia, la enciclopedia libre\nLa artista contrajo matrimonio con Diego Rivera el 21 de agosto de 1929. En 1930, Kahlo se embarazó por primera vez. Sin embargo, debido a la posición anómala del feto y a las secuelas del accidente de 1925, el embarazo de tres meses debió ser interrumpido, según decidió el médico Jesús Marín. Por aquel entonces otros médicos opinaron que probablemente Kahlo nunca podría tener hijos. y Rita Dar (izquierda), en 1947. [...] El 17 de septiembre de 1925, Kahlo sufrió un grave accidente cuando el autobús en el que ella viajaba fue arrollado por un tranvía, quedando aplastado contra un muro y completamente destruido. Regresaba de la escuela a casa junto a Alejandro Gómez Arias, su novio de entonces. Su columna vertebral quedó fracturada en tres partes, sufriendo además fracturas en dos costillas, en la clavícula y tres en el hueso pélvico. Su pierna derecha se fracturó en once partes, su pie d\n\n## The Two Fridas, 1939 by Frida Kahlo\nThis painting was completed shortly after her divorce with Diego Rivera. This portrait shows Frida's two different personalities. One is the traditional Frida in Tehuana costume, with a broken heart, sitting next to an independent, modern dressed Frida. In Frida's diary, she wrote about this painting and said it is originated from her memory of an imaginary childhood friend. Later she admitted it expressed her desperation and loneliness with the separation from Diego. [...] In this painting, the two Fridas are holding hands. They both have visible hearts and the heart of the traditional Frida is cut and torn open. The main artery, which comes from the torn heart down to the right hand of the traditional Frida, is cut off by the surgical pincers held in the lap of the traditional Frida. The blood keeps dripping on her white dress and she is in danger of bleeding to death. The stormy sky f\n\n## Las dos Fridas - Frida Kahlo - Historia Arte (HA!)\nLas dos Fridas recuerda, en la postura de sus personajes y en el fino simbolismo, a la maternidad del cuadro renacentista Gabrielle d’Estrées y su hermana. En la obra, Frida Kahlo hace una búsqueda de ese equilibrio necesario para sobrellevar su divorcio, el dolor físico que arrastrará toda su vida, debido a un accidente que tuvo a los dieciocho años, y el intenso dolor de una maternidad quedó interrumpida demasiadas ocasiones. Dolor que hizo de Frida Kahlo una de las artistas mas cotizadas e [...] Kahlo nos muestra a una de las Fridas cuando todavía estaba casada con el muralista Diego Rivera; esta luce un vestido tehuano de colores, signo reivindicativo de su nacionalidad mexicana y al amor por su marido. La Frida soltera viste un rico vestido de encaje blanco estilo europeo. Pese a tener los corazones totalmente expuestos, las dos mujeres se muestran tranquilas. Las dos Fridas tiene s\n\n## Frida Kahlo llega a Londres y reafirma su legado como icono universal del arte | La Silla Rota\nLa exposición reunirá más de 200 piezas, entre pinturas, fotografías, materiales de archivo, vestimentas y objetos personales, para mostrar no solo a la artista, sino también el proceso mediante el cual su figura se transformó en un símbolo reconocible a escala mundial. La Tate Modern destaca que la imagen de Frida Kahlo ha permeado la cultura popular contemporánea, presente hoy en productos y objetos cotidianos, confirmando un legado que trasciende el museo y continúa dialogando con el [...] Desarrollada en colaboración con el Museo de Bellas Artes de Houston, la exposición podrá visitarse del 25 de junio al 3 de enero de 2027 y ofrecerá, por primera vez en más de 20 años, un recorrido amplio y continuo por la evolución artística de Kahlo. A partir de la retrospectiva que la Tate le dedicó en 2005, el proyecto amplía su enfoque y sitúa su obra en diálogo con artistas modernos y contempo\n\n## Frida Kahlo: Vida, Arte e Impacto Cultural Duradero\nEl Museo Frida Kahlo y el Museo Dolores Olmedo albergan algunas de las colecciones más importantes de sus obras. Estos espacios no solo preservan su legado artístico, sino que también ofrecen una ventana a su vida y época. ## Frida Kahlo: Símbolo de Fortaleza y Feminismo Frida Kahlo es una figura de empoderamiento y lucha. Su vida y obra simbolizan la resistencia frente a la adversidad y la reivindicación de la mujer en el arte y la sociedad. ### Superación de la Discapacidad y el Dolor [...] La Casa Azul, hogar de Frida Kahlo y Diego Rivera en Coyoacán, se convirtió en un símbolo de su vida y arte. Este lugar, ahora el Museo Frida Kahlo, encapsula la esencia de su relación y sirve como un santuario para sus obras y recuerdos personales. ### Influencia Mutua en su Arte [...] El reconocimiento internacional de Frida Kahlo se ha manifestado en numerosas exposiciones en todo el mundo. Desde\n\n## Museo | Museo Frida Kahlo\n«Un lugar lleno de lugares: la Casa Azul», la nueva exposición del Museo Frida Kahlo, explora el legado artístico y personal de Frida en su emblemático hogar. La exhibición, abierta desde el 28 de julio de 2023, incluye más de 200 obras y objetos personales de Frida, desentrañando el significado único que la Casa Azul tuvo en su vida y creación artística. Esta muestra celebra los 65 años del Museo, un espacio para apreciar a Frida de una manera más apasionante. Anterior #### La Casa Azul [...] A la opinión pública: El legado de Frida y Diego no se manipula, no se distorsiona y no se debilita. Descarga nuestro comunicado ### Comunicado: MFK-MDRA 003/ 2025 Comunicado Oficial La Casa Azul – Museo Frida Kahlo: El hogar de Frida, legado vivo de México. Descarga nuestro comunicado ## EL ANAHUACALLI, NUESTRO MUSEO HERMANO [...] Con rigor y creatividad, Frida organiza en estas carpetas los docu\n\n## Frida | Museo Frida Kahlo\nLas dos Fridas, cuadro en el que se muestran los orígenes de la pintora a través de los atuendos: la herencia europea y la tradición mexicana, conectadas de corazón a corazón. Frida pinta este autorretrato doble -del que hay pocos ejemplos en la historia del arte- para participar en la cuarta “Exposición internacional de surrealismo”. Hoy el cuadro forma parte de la colección del Museo de Arte Moderno, en la Ciudad de México. ### Frida participa en varias exposiciones internacionales.\n\n## \"El sueño (la cama)\", la pintura de Frida Kahlo que se convirtió en la ...\nUna pintura surrealista de la famosa artista mexicana Frida Kahlo se vendió por US$54,7 millones, rompiendo el récord de subasta para una obra\n\n## Autorretrato de Frida Kahlo subastado por 54,7 mdd rompe récord ...\nLa pintura en la que Kahlo aparece durmiendo en una cama, titulada “El sueño (La cama)”, superó el récord que tenía “Jimson Weed/White Flower No\n\n## Museo Frida Kahlo, La Casa Azul: conoce precios, horarios y exposiciones\nEn la sala “Las apariencias engañan: los vestidos de Frida Kahlo”, verás vestidos e indumentaria que Kahlo usaba para exponer su icónico estilo. Y, no menos importante, las cenizas de la pintora descansan en una urna que está colocada en un tocador. ## Calendario de actividades 2026 [...] Ubicada en la colonia del Carmen en Coyoacán, la Casa Azul fue el refugio y taller de toda la vida de Frida Kahlo. Su padre la construyó en 1904 como la casa familiar de los Kahlo Calderón. Artículos recomendados ¡El Cascanueces gratis en el Cenart! Fechas y horarios de las siete funciones de diciembre 2026 Tango, flamenco y una noche de hechizos en Chapultepec: así se despide la Noche de Museos de 2026 en CDMX [...] Recorre la Casa-Museo y explora “Recámara de la artista”, el “Estudio” y “La Cocina”, espacios cuidadosamente preservados para que sientas como si Frida Kahlo siguiera viviendo allí. Verás \n\n## Museo Frida Kahlo - Wikipedia, la enciclopedia libre\nTambién conocido como la Casa Azul, es de los museos más concurridos de la zona. El inmueble, que hoy resguarda y exhibe una colección de piezas de diversa índole, perteneció a la familia Kahlo desde 1904. Cuatro años después de la muerte de la pintora, en julio de 1958, abrió sus puertas al público como casa museo. [...] | Visitantes | 550 000 anuales (2019) | | Horario | Martes a domingo de 10 a 18 horas. | | Colecciones | | Superficie: 2620 m² | | Información del edificio | | Bien inmueble con valor cultural INAH México I-0013600068 | | Edificio | La Casa Azul | | Estilo | Ecléctico | | Construcción | 1904 | | Otros datos | | | | Sitio web oficial | | [editar datos en Wikidata] | [...] Desde la inauguración del Museo en julio de 1958, en la Casa Azul se expone el ambiente en el que Frida se inspiró para su creación artística, así como sus objetos personales. Estos últimos, tardaron en\n\n## Frida Kahlo | El sueño (La cama) | Exquisite Corpus Evening Auction |\nPrivate Collection, Mexico City (acquired from the above) Sotheby’s New York, 9 May 1980, lot 39 (consigned by the above) Acquired at the above sale by the present owner London, Whitechapel Gallery; Berlin, Haus am Waldsee; Hamburg, Kunstverein; Hannover, Kunstverein; Stockholm, Kulturhuset; New York City, New York University, Grey Art Gallery and Mexico City, Museo Nacional de Arte, Frida Kahlo and Tina Modotti, 1982-83, n.p., illustrated in color [...] 13\\. Frida Kahlo El sueño (La cama) Exquisite Corpus: Surrealist Treasures from a Private Collection Auction Closed November 21, 12:43 AM GMT Estimate 40,000,000 - 60,000,000 USD Lot Details Description Frida Kahlo (1907 - 1954) signed Frida Kahlo and dated 1940 (lower right) oil on canvas 29 ⅛ by 38 ⅝ in. 74 by 98 cm. Executed in 1940. We wish to thank Professor Luis-Martín Lozano for his kind assistance in cataloguing this lot. Galería",
+ "plan": {
+  "title": "Frida Kahlo: del dolor al icono mundial",
+  "description": "La vida de Frida Kahlo, desde la polio en su infancia y el accidente de 1925 hasta su matrimonio con Diego Rivera y su pintura. Explica por qué su obra sigue siendo un icono hoy, con un récord de subasta de 54,7 millones de dólares.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "f188a5e1",
+    "narration": "Una joven sobrevivió a un choque que debía matarla, y acabó pintando en una cama. Antes de ser un icono mundial, Frida Kahlo fue una niña enferma de Coyoacán.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Frida Kahlo retrato joven",
+      "alt": "Retrato de Frida Kahlo",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Una niña con polio y un autobús que lo cambió todo"
+   },
+   {
+    "id": "cd8e8a12",
+    "narration": "Nació el 6 de julio de 1907 en Coyoacán, México. Su casa era la Casa Azul. Sus calles coloniales y su patio la vieron crecer, hija de padre alemán de ascendencia húngara y madre mexicana.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Casa Azul Coyoacán Ciudad de México",
+       "Coyoacán calle colonial",
+       "Casa Azul Frida Kahlo patio"
+      ],
+      "alt": "Casa Azul, Coyoacán, calle y patio"
+     }
+    }
+   },
+   {
+    "id": "3bec972a",
+    "narration": "En 1913, con seis años, contrajo polio. Le dejó una leve cojera. Fue la primera de muchas enfermedades. Doce años después, en 1925, llegaría el golpe más duro.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Los años que la marcaron",
+      "events": [
+       {
+        "date": "1907",
+        "label": "Nace en Coyoacán, México"
+       },
+       {
+        "date": "1913",
+        "label": "Contrae polio"
+       },
+       {
+        "date": "1925",
+        "label": "Choque entre autobús y tranvía"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "7f0592c9",
+    "narration": "Estudiaba en la Escuela Nacional Preparatoria y volvía a casa en un autobús de madera, uno de aquellos autobuses antiguos. Aquel día de 1925, el autobús chocó con un tranvía.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Escuela Nacional Preparatoria Ciudad de México",
+       "autobús antiguo años veinte México"
+      ],
+      "alt": "La escuela y un autobús antiguo"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "55584303",
+    "narration": "Las heridas fueron enormes: fracturas en la columna, la pierna derecha, la clavícula, las costillas y la pelvis. Además, el hombro dislocado, el pie derecho aplastado y el abdomen y el útero perforados.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Las heridas del accidente",
+      "items": [
+       "Columna, costillas y pelvis fracturadas",
+       "Pierna derecha y clavícula fracturadas",
+       "Hombro dislocado y pie aplastado",
+       "Abdomen y útero perforados"
+      ]
+     }
+    }
+   },
+   {
+    "id": "018b0c5a",
+    "narration": "Pasó semanas postrada en cama. Para soportar la lenta recuperación, se enseñó a pintar. Lo que parecía el final de su camino se convirtió en el comienzo de su obra.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "En la cama, Frida se enseñó a pintar.",
+      "emphasis": "se enseñó a pintar"
+     }
+    }
+   },
+   {
+    "id": "c6c441de",
+    "narration": "Las secuelas la acompañaron siempre. Pasó por más de 30 procedimientos médicos. Y de ese dolor, que nunca se fue, nacería una pintura que el mundo todavía mira.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "30+",
+      "label": "procedimientos médicos a lo largo de su vida"
+     }
+    }
+   },
+   {
+    "id": "868b0743",
+    "narration": "Frida ya conocía a Diego Rivera desde la preparatoria. Años después, en 1929, se casó con el gran muralista mexicano. Su historia sería intensa y turbulenta.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Diego Rivera mural Mexico",
+      "alt": "Mural de Diego Rivera",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Diego Rivera y la pintura como espejo"
+   },
+   {
+    "id": "260d6f04",
+    "narration": "En 1929 se casan. En 1933 regresan a México, tras viajar por Estados Unidos. Y en 1939 se divorcian, después de años de infidelidades.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Frida y Diego",
+      "events": [
+       {
+        "date": "1929",
+        "label": "Se casan"
+       },
+       {
+        "date": "1933",
+        "label": "Regresan a México"
+       },
+       {
+        "date": "1939",
+        "label": "Se divorcian"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "d10fd892",
+    "narration": "Ese mismo año de la ruptura pintó Las dos Fridas. Dos versiones de ella misma, sentadas juntas, con el corazón expuesto.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "1939: el año del divorcio y de Las dos Fridas",
+      "emphasis": "Las dos Fridas"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "c9b1297f",
+    "narration": "Una viste traje tehuano, con el corazón roto. La otra, vestido europeo de encaje blanco. Se toman de la mano, y la sangre gotea sobre el vestido.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Frida tehuana",
+       "tagline": "Tradición mexicana"
+      },
+      "b": {
+       "name": "Frida europea",
+       "tagline": "Vestido de encaje blanco"
+      },
+      "rows": [
+       {
+        "label": "Vestido",
+        "a": "Traje tehuano",
+        "b": "Encaje blanco"
+       },
+       {
+        "label": "Corazón",
+        "a": "Roto y abierto",
+        "b": "Expuesto"
+       },
+       {
+        "label": "Herencia",
+        "a": "México",
+        "b": "Europa"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "91959558",
+    "narration": "Frida contó que nació de un amigo imaginario de la infancia, y después admitió que expresaba su soledad por la separación de Diego.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "Expresaba su desesperación y soledad por la separación de Diego.",
+      "attribution": "Sobre Las dos Fridas, The Two Fridas, 1939"
+     }
+    }
+   },
+   {
+    "id": "82575c80",
+    "narration": "Sus autorretratos hicieron del cuerpo, el dolor y la identidad el tema central. Pintar fue su manera de mirarse y de resistir.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Los autorretratos de Frida",
+      "items": [
+       "El cuerpo",
+       "El dolor",
+       "La identidad"
+      ],
+      "style": "spotlight",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "95e9d2c4",
+    "narration": "Su obra une la cultura mexicana con una mirada íntima. Vemos el traje tehuano, la Casa Azul en Coyoacán y el arte popular de colores intensos.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Tehuana costume Mexico",
+       "Casa Azul Coyoacán",
+       "Mexican folk art colorful"
+      ],
+      "alt": "Cultura mexicana en la obra de Frida"
+     }
+    }
+   },
+   {
+    "id": "4a19c6e8",
+    "narration": "Una pintura de una mujer dormida en una cama acaba de romper un récord. Pintada en 1940, se vendió en Nueva York por 54,7 millones de dólares.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "54.7",
+      "unit": "M$",
+      "label": "El sueño (La cama), récord en subasta para una artista"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "Por qué Frida es un icono hoy"
+   },
+   {
+    "id": "3a1dcbd4",
+    "narration": "Es un autorretrato: Frida durmiendo, con la muerte velando sobre ella. Nunca había pagado nadie tanto por la obra de una mujer artista. Algo muy íntimo se volvió un tesoro mundial.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lo más íntimo se volvió un tesoro mundial.",
+      "emphasis": "íntimo"
+     }
+    }
+   },
+   {
+    "id": "62f6b3ca",
+    "narration": "Pero Frida no vive solo en las subastas. En Coyoacán, el patio y los jardines de la Casa Azul, su casa desde niña, siguen abiertos como museo desde 1958.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Casa Azul Coyoacán patio",
+       "Museo Frida Kahlo jardín"
+      ],
+      "alt": "La Casa Azul en Coyoacán"
+     }
+    }
+   },
+   {
+    "id": "0514728d",
+    "narration": "Allí se ven su recámara, su estudio y su cocina, además de sus vestidos. Recibía unos 550 mil visitantes al año en 2019. Mucha gente viaja para sentirse cerca de ella.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "550 000",
+      "label": "visitantes anuales en la Casa Azul (2019)"
+     }
+    }
+   },
+   {
+    "id": "111c7170",
+    "narration": "Su legado también genera debate. Una polémica reciente por el Congreso de los pueblos por la paz reabre una pregunta: ¿dónde están sus obras y qué ley protege su legado?",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Preguntas abiertas",
+      "items": [
+       "¿Dónde están sus obras?",
+       "¿Qué ley protege su legado?"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "90849eb6",
+    "narration": "¿Por qué conecta tanto? Porque convirtió el dolor en arte, y muchas personas sienten ese dolor como propio: la enfermedad, el amor roto, la identidad.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Frida Kahlo self-portrait painting",
+      "alt": "Autorretrato de Frida Kahlo",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "bd3e7067",
+    "narration": "Frida nos deja una idea sencilla: lo vivido, incluso lo más duro, puede contarse con verdad. Y al contarlo así, deja de ser solo tuyo.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Frida nos deja una idea sencilla: lo vivido, incluso",
+      "subtitle": ""
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Frida Kahlo | Biography, Paintings, Self-Portrait, Accident, Husband, & Facts | Britannica",
+    "url": "https://www.britannica.com/biography/Frida-Kahlo",
+    "publisher": "britannica.com",
+    "license": "",
+    "date": "Mon, 20 Jul 1998 00:00:00 GMT"
+   },
+   {
+    "title": "¿Dónde están las obras de Frida Kahlo? El mapa de sus pinturas dentro y ...",
+    "url": "https://www.quien.com/cultura/2026/11/23/donde-estan-las-obras-de-frida-kahlo",
+    "publisher": "quien.com",
+    "license": "",
+    "date": "Mon, 23 Nov 2026 15:00:00 GMT"
+   },
+   {
+    "title": "Frida Kahlo - Phoenix Art Museum",
+    "url": "https://phxart.org/es/artists/frida-kahlo",
+    "publisher": "phxart.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Frida Kahlo - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Frida_Kahlo",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The Two Fridas, 1939 by Frida Kahlo",
+    "url": "https://www.fridakahlo.org/the-two-fridas.jsp",
+    "publisher": "fridakahlo.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Las dos Fridas - Frida Kahlo - Historia Arte (HA!)",
+    "url": "https://historia-arte.com/obras/las-dos-fridas",
+    "publisher": "historia-arte.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Frida | Museo Frida Kahlo",
+    "url": "https://www.museofridakahlo.org.mx/frida",
+    "publisher": "museofridakahlo.org.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Museo Frida Kahlo, La Casa Azul: conoce precios, horarios y exposiciones",
+    "url": "https://cdmxsecreta.com/museo-frida-kahlo-casa-azul",
+    "publisher": "cdmxsecreta.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Museo Frida Kahlo - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Museo_Frida_Kahlo",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 51.4,
+  "before_first_script_call_s": 17.5,
+  "script_s": 33.8
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "research": 0.00571,
+  "script_big": 0.27341,
+  "search_api": 0.096,
+  "total": 0.37543
+ },
+ "calls": {
+  "small": 2,
+  "tools": 10,
+  "big": 7
+ },
+ "tokens": {
+  "in": 137220,
+  "out": 11939
+ },
+ "rules": {
+  "length": {
+   "words": 581,
+   "expected_words": 537,
+   "ratio": 1.082,
+   "beats": 21,
+   "expected_beats": 17,
+   "est_speech_s": 262.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 25,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Una joven sobrevivió a un choque que debía matarla, y acabó pintando en una cama. Antes de ser un icono mundial, Frida Kahlo fue una niña enferma de Coyoacán.",
+   "close_text": "Frida nos deja una idea sencilla: lo vivido, incluso lo más duro, puede contarse con verdad. Y al contarlo así, deja de ser solo tuyo."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "image": 3,
+    "gallery": 4,
+    "timeline": 2,
+    "checklist": 1,
+    "kinetic_text": 3,
+    "stat": 2,
+    "versus": 1,
+    "quote": 1,
+    "bullets": 2,
+    "counter": 1,
+    "title": 1
+   },
+   "max_run": 1,
+   "entropy": 3.27,
+   "top_type": "gallery",
+   "top_share": 0.19,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 12,
+   "ungrounded_numbers": [
+    "550"
+   ],
+   "entities": 13,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.04,
+   "ungrounded_number_share": 0.083,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1,
+   "coverage": 2
+  },
+  "sources": {
+   "cited": 9,
+   "fetched": 24,
+   "notes_len": 20283,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": true,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.05,
+  "flags": [
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 3 (timeline): its narration never says ['1907 Nace en Coyoacán, México', '1925 Choque entre autobús y tranvía']",
+   "beat 14 (gallery): its narration never says ['Tehuana costume Mexico', 'Mexican folk art colorful']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Core dates are right, but there are shaky claims: 'Nunca había pagado nadie tanto por la obra de una mujer artista', 'Casa Azul abierta desde 1958', 'El sueño' dated 1940, and a 'Corazón roto/Expuesto' comparison that is muddled. The 550,000 visitors in 2019 is not in the notes."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The script never mentions her death in 1954, the second marriage in 1940, or surrealism. It does not mention her later illness or her amputation. It says very little about the paintings themselves. Rivera is covered only with dates."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The three chapters are in a sensible order, but the Rivera section is thin and the ending jumps to auction trivia and a legal controversy. Beat 4 is weakly connected to the rest."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening about a girl who survived a crash 'que debía matarla' is intriguing. The closing line is reflective, but the final title text is truncated and the idea is somewhat generic."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The register is neutral and clear, but the narration is dry and often just recites the on-screen text. It lacks emotional warmth."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, but the 'versus' scene has an inconsistent comparison, the truncated title is a flaw, and the 'Preguntas abiertas' bullets are weak. Image queries fit the narration."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Some specifics stand out, such as the 'amigo imaginario' and the 54.7M record. Much of the rest is generic, and the closing moral is cliché."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It addresses childhood, the accident, Diego and her status as an icon. Her painting is thin, and the length is about right, but the points the viewer requested are not developed."
+   },
+   "language": {
+    "score": 3,
+    "reason": "The Spanish is generally correct, but it is choppy, with short sentences. 'Frida tehuana' and the 'Corazón roto y abierto' row read awkwardly, and the tone is Mexican-neutral."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Frida nos deja una idea sencilla: lo vivido, incluso lo más duro, puede contarse con verdad.",
+    "issue": "The script never mentions her death in 1954, her second marriage to Rivera, her late-life health decline or surrealism, and the ending does not close her biography.",
+    "beat": 21
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Nunca había pagado nadie tanto por la obra de una mujer artista.",
+    "issue": "This is a risky superlative; the notes say only that it was a record for an artist at auction, and the script adds 'woman' as if it were the only record.",
+    "beat": 16
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Frida nos deja una idea sencilla: lo vivido, incluso",
+    "issue": "The on-screen title is cut off mid-sentence.",
+    "beat": 21
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "siguen abiertos como museo desde 1958",
+    "issue": "The opening year of the museum is not in the notes (it is true, but unverified there). The 550,000 visitors figure is also unsupported.",
+    "beat": 17
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Corazón\", \"a\": \"Roto y abierto\", \"b\": \"Expuesto\"",
+    "issue": "In the painting both hearts are exposed, so this contrast is inaccurate and confusing.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Una polémica reciente por el Congreso de los pueblos por la paz reabre una pregunta",
+    "issue": "This tangent is unexplained and off-topic, and it breaks the flow before the conclusion.",
+    "beat": 19
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Frida ya conocía a Diego Rivera desde la preparatoria.",
+    "issue": "Nothing about their relationship beyond the dates and the infidelities, such as the 1940 remarriage or its dynamic.",
+    "beat": 8
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Su obra une la cultura mexicana con una mirada íntima.",
+    "issue": "Generic filler with no specific works named beyond two.",
+    "beat": 14
+   }
+  ],
+  "missing": [
+   "Death in 1954 and her last years",
+   "Remarriage to Rivera in 1940",
+   "Surrealism and the André Breton episode",
+   "Her style and key works beyond Las dos Fridas",
+   "Her political activism",
+   "Her rediscovery as an icon (Fridamania, merchandise)"
+  ],
+  "wrong_facts": [
+   "'Nunca había pagado nadie tanto por la obra de una mujer artista' – risky superlative",
+   "'Corazón roto / Expuesto' contrast in Las dos Fridas is inaccurate",
+   "Museum 'desde 1958' and 550,000 visitors: not in the notes (the first is true)"
+  ],
+  "would_publish": false,
+  "summary": "The script has correct basic dates and an intriguing hook, but it omits her death, the second marriage and surrealism, and it leans on auction and legal news at the expense of her art. It also has a truncated final title and recites on-screen text without much depth.",
+  "spanish": {
+   "naturalness": 3,
+   "issues": [
+    {
+     "quote": "Una joven sobrevivió a un choque que debía matarla",
+     "problem": "Slightly stiff phrasing.",
+     "better": "Una joven sobrevivió a un choque que parecía mortal"
+    },
+    {
+     "quote": "Sus calles coloniales y su patio la vieron crecer",
+     "problem": "Unnatural personification, given the choppy sentences.",
+     "better": "Creció entre las calles coloniales de Coyoacán y el patio de su casa"
+    },
+    {
+     "quote": "Pasó por más de 30 procedimientos médicos",
+     "problem": "Calque of 'medical procedures'.",
+     "better": "Se sometió a más de 30 operaciones"
+    },
+    {
+     "quote": "Recibía unos 550 mil visitantes al año en 2019.",
+     "problem": "Clumsy tense and structure.",
+     "better": "En 2019 recibió unos 550 000 visitantes."
+    },
+    {
+     "quote": "Frida contó que nació de un amigo imaginario",
+     "problem": "Unclear subject: it is the painting that was born.",
+     "better": "Frida contó que el cuadro nació de una amiga imaginaria de su infancia"
+    }
+   ]
+  },
+  "mean": 3.0,
+  "cost_usd": 0.041226,
+  "tokens": [
+   9678,
+   2187
+  ]
+ }
+}

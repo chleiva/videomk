@@ -1,0 +1,856 @@
+{
+ "id": "sci-03",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "How does CRISPR gene editing actually work? Cover the bacterial origin, how Cas9 finds its target with guide RNA, how the cut gets repaired, and one real therapy that has been approved, plus the main ethical debate.",
+ "great": "Bacterial immune system origin, guide RNA + Cas9 cut, NHEJ vs HDR repair, approved therapy (Casgevy for sickle cell / beta thalassemia), germline editing ethics (He Jiankui); correct and specific, no hype.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:58:33",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": 11,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": 11,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Bacteria's secret defense against viruses",
+    "How Cas9 finds and cuts the right spot",
+    "An approved therapy and the debate it raises"
+   ]
+  },
+  "notes_len": 27003,
+  "n_sources": 10,
+  "n_fetched": 42,
+  "fetched": [
+   "CRISPR–Cas9: A History of Its Discovery and Ethical Considerations of Its Use in Genome Editing",
+   "Origins of CRISPR: How it Came to Be | BioAgilytix",
+   "The Discovery of the CRISPR-Cas System: How Unexpected Bacterial Immunity Transformed the Field of Genetics - Exploratio Journal",
+   "CRISPR Timeline | Broad Institute",
+   "CRISPR Part 1: A Brief History of CRISPR",
+   "Nobel Prize 2020 in Chemistry honors CRISPR: a tool for rewriting the code of life",
+   "The Nobel Prize in Chemistry 2020 - Popular information - NobelPrize.org",
+   "CRISPR-Cas9: A History of Its Discovery and Ethical Considerations of Its Use in Genome Editing.",
+   "Press release: The Nobel Prize in Chemistry 2020 - NobelPrize.org",
+   "Revolutionary breakthrough: FDA approves CASGEVY, the first CRISPR/Cas9 gene therapy for sickle cell disease",
+   "FDA Approves First Gene Therapies to Treat Patients with Sickle Cell Disease | FDA",
+   "Vertex and CRISPR Therapeutics Announce US FDA Approval of CASGEVY™ (exagamglogene autotemcel) for the Treatment of Sickle Cell Disease | CRISPR Therapeutics",
+   "FDA Expands Casgevy Label to Children as Young as 2, Broadening Access to First CRISPR Gene Therapy for Sickle Cell Disease | BioPharm International",
+   "TriStar Centennial Medical Center on Facebook: \"A historic advancement for children with sickle cell disease. The FDA has expanded approval of Casge…\"",
+   "CRISPR 101: Homology Directed Repair",
+   "Genome Editing with CRISPR-Cas9",
+   "Homology-directed repair FAQs",
+   "HDR vs NHEJ: DNA Repair Pathway Comparison - InVivo Biosystems",
+   "Cas9 and DNA identification",
+   "Mechanism of Cas removal from DNA uncovered",
+   "Addgene: CRISPR Guide",
+   "CRISPR-Cas9 PAM​ Resources | BioInnovatise",
+   "DNA repair pathway choices in CRISPR-Cas9 mediated genome editing",
+   "Homology-Directed Repair (HDR) & Non-Homologous End Joining (NHEJ) I Gene Editing Repair Mechanisms",
+   "NHEJ vs HDR: Difference when Repairing CRISPR DSB | IDT",
+   "Systematic quantification of HDR and NHEJ reveals effects of locus, nuclease, and cell type on genome-editing | Scientific Reports",
+   "Methods Favoring Homology-Directed Repair Choice in Response to CRISPR/Cas9 Induced-Double Strand Breaks",
+   "CRISPR 101: Non-Homologous End Joining",
+   "FDA Approves Vertex & CRISPR's Gene Editing Therapy | CAF",
+   "Pricey new gene therapies for sickle cell pose access test",
+   "FDA approves Vertex, CRISPR's Casgevy for beta-thalassemia",
+   "FDA Approves, First CRISPR Gene Therapy, Casgevy, for Sickle Cell Disease",
+   "Affordable Pricing of CRISPR Treatments is a Pressing Ethical Imperative.",
+   "Heritable genome editing | Global Observatory",
+   "CRISPR’d babies: human germline genome editing in the ‘He Jiankui affair’* | Journal of Law and the Biosciences | Oxford Academic",
+   "Human Genome Editing: Our Future Belongs to All of Us",
+   "Harnessing bacterial immunity: CRISPR-Cas system as a versatile tool in combating pathogens and revolutionizing medicine",
+   "What are genome editing and CRISPR-Cas9?: MedlinePlus Genetics",
+   "CRISPR in Nature - Innovative Genomics Institute (IGI)",
+   "Beginner’s guide to CRISPR-Cas9-based gene editing | The Biochemist | Portland Press",
+   "CRISPR Knock-In: Protocol, Mechanism & Applications | Danaher Life Sciences",
+   "HDR vs. NHEJ: CRISPR Gene Editing Techniques | ZeClinics CRO"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "section 1: some scenes list items their narration never mentions: beat 2 (diagram): its narration never says ['Phage virus', 'Bacterium taken over']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Cas9 and DNA identification\nThe binding of the PAM sequence in the PI domain causes the bond between the DNA strands to be broken and allows the gRNA sequence to be compared to the DNA sequence. This allows the gRNA’s 20 nucleotides to form hydrogen bonds to the DNA, which now lies between REC and NUC in the Cas9 protein. The binding between gRNA and DNA occurs by normal Watson-Crick base pairing, which starts at the PAM sequence and continues out of the DNA strand. This forms the gRNA DNA binding, the formation of [...] The successful formation of the gRNA DNA binding, as well as binding to the correct PAM sequence, is a requirement for the activation of the endonucleases in the NUC part of Cas9. RuvC cleaves the DNA strand with the PAM sequence and HNH cleaves the DNA strand that forms part of the gRNA DNA binding. The cleavage occurs in both strands between it 3. and 4th base pair after the PAM sequence, creatin\n\n## Mechanism of Cas removal from DNA uncovered\nFigure 1: CRISPR-Cas9 technology. The guide RNA (sgRNA) molecule forms a complex with the Cas9 enzyme. The PAM sequence is downstream of the target sequence. It acts as a signal within the genomic DNA for the guide RNA to bind. This directs the Cas enzyme to form a double stranded break in the target DNA. Source: Synthego The researchers used dCas to study Cas-DNA interactions. dCas is a modified version of Cas enzymes that binds DNA but does not cut it. [...] CRISPR technology depends on the specific binding of guide RNA molecules to target sequences in the DNA by recognising a downstream PAM (protospacer adjacent motif) sequence (figure 1). This forms an R-loop between the target DNA, where Cas is bound, and the guide RNA. The DNA-bound Cas protein can dissociate spontaneously or be removed by RNAP.\n\n## Addgene: CRISPR Guide\n### Generating a Knockout Using CRISPR Cas9 undergoes a second conformational change upon target binding. In this formation, its nuclease domains, RuvC and HNH, cleave opposite strands of the target DNA. This results in a double-strand break (DSB) within the target DNA, located ∼3–4 nucleotides upstream of the PAM sequence. [...] A schematic of Cas9n used to create DSB. gRNA and gRNA2 are added to Cas9n. An arrow indicates complex formation and target binding. Two Cas9n and gRNAs are bound to a length of double-stranded DNA, one to Target 1 and PAM 1, one to Target 2 and PAM 2, which is ~12 bases away from PAM 1. An arrow indicates Target cleavage and DSB formation. The double-stranded DNA, no longer bound by Cas9n complexes, shows three bases missing on the 5' strand on Target 1, next to the PAM 1 site, and 3 bases [...] Overview of the base editing molecular process. A gRNA molecule co\n\n## Genome Editing with CRISPR-Cas9\n[4:02] in its cut position. Sometimes, it can cut 4 bases upstream, sometimes 5 or even 6 in some instances. [4:10] This means that the double stranded DNA is cut on both strands and if both domains cut 3 [4:16] bases upstream of the PAM, you get a blunt double stranded break in the target DNA. Alternatively, you can get a staggered cut if the RuvC decides to cut a little further upstream. [...] [3:33] Okay, so once the guide RNA pairs with the target strand, Cas9 makes a cut on the target DNA, 3 [3:39] nucleotides upstream of the PAM. The HNH nuclease domain strictly cuts 3 nucleotides upstream of [3:46] NGG. Keep in mind that guide RNA is never cleaved, only the DNA is cleaved. The non-target strand is [3:53] cut by the RuvC domain of Cas9, also 3 nucleotides upstream of NGG. But RuvC is oftentimes flexible [...] [1:55] The PAM scanning step is called PAM verification which leads to th\n\n## CRISPR-Cas9 PAM​ Resources | BioInnovatise\nCRISPR Knock-out: The PAM sequence must be present near the target site for Cas9 to create a double-strand break. When designing a knockout strategy, researchers must identify target sequences with appropriate PAMs. Target early exons or critical domains where the PAM is available. After Cas9 cuts at the PAM-adjacent site, the cell’s error-prone repair mechanisms (NHEJ) often introduce insertions or deletions that may disrupt the gene function. CRISPR Knock-In: [...] It helps the Cas9 enzyme distinguish between self and non-self DNA. It acts as a binding site for the Cas9 protein. It triggers the unwinding of the target DNA, allowing the guide RNA to form a complex with the target sequence. It positions the Cas9 nuclease domains to cleave the DNA at a predetermined precise location [...] The PAM is a short DNA sequence (typically 2-6 base pairs) that must be present immediately following\n\n## DNA repair pathway choices in CRISPR-Cas9 mediated genome editing\n1D diffusion [26, 46]. PAM recognition triggers initial unwinding of the adjacent dsDNA (referred to as the seed region), allowing the gRNA to begin undergoing strand invasion to form a RNA-DNA hybrid and concomitant displacement of the non-complementary DNA strand (Figure 1A) [26, 47]. If the DNA sequence is fully complementary to the gRNA, then seed region of the target dsDNA promotes further RNA-DNA hybrid formation, resulting in the formation of a stable R-loop . During R-loop formation, [...] Cas9 is a large multidomain protein consisting of a recognition (REC) lobe, including the REC1, REC2, and REC3 domains, and a nuclease (NUC) lobe which is composed of a PAM interacting (PI) domain and two nuclease domains: a RuvC-like domain that cleaves the non-target strand and an HNH-like domain that cleaves the target strand (Figure 1A) [4, 8, 27]. The Cas9-gRNA complex searches for its tar\n\n## Homology-Directed Repair (HDR) & Non-Homologous End Joining (NHEJ) I Gene Editing Repair Mechanisms\nOne is fast and disruptive. The other is slow and precise. So, what is it that makes the cell choose one over the other? The first and honestly most striking difference is just their efficiency. NHJ is the cell's workhorse. It handles the vast majority of repairs no problem. HRD, the precision pathway, is a much much rarer event. And that huge difference presents a really fundamental challenge for scientists who want to do precise gene editing. So why is HDR so much less frequent? Well, the [...] # Homology-Directed Repair (HDR) & Non-Homologous End Joining (NHEJ) I Gene Editing Repair Mechanisms 👇 Download Lecture PPT HDR vs NHEJ Non-Homologous End Joining (NHEJ): Fast DNA repair mechanism Does not require a template Error-prone → causes insertions/deletions (mutations) Commonly used for gene knockout Homology-Directed Repair (HDR): Precise repair mechanism Requires a DNA template Used \n\n## NHEJ vs HDR: Difference when Repairing CRISPR DSB | IDT\nIn most eukaryotic cells, the non-homologous end joining (NHEJ) pathway generates insertions and deletions during double-stranded break (DSB) repair. However, in the presence of a DNA template with homology to the sequences flanking the DSB location, homology-directed repair (HDR) can seal the DSB in an error-free manner . [...] Is NHEJ or HDR better? In most cells, both repair pathways are active, however the HDR pathway is generally less efficient than the NHEJ pathway in the absence of a homologous template. This template is naturally present as sister chromatin in late S phase and G2 phase , and may be added artificially as donor DNA [3,4].\n\n## Systematic quantification of HDR and NHEJ reveals effects of locus, nuclease, and cell type on genome-editing | Scientific Reports\nPrecise genome-editing relies on the repair of sequence-specific nuclease-induced DNA nicking or double-strand breaks (DSBs) by homology-directed repair (HDR). However, nonhomologous end-joining (NHEJ), an error-prone repair, acts concurrently, reducing the rate of high-fidelity edits. The identification of genome-editing conditions that favor HDR over NHEJ has been hindered by the lack of a simple method to measure HDR and NHEJ directly and simultaneously at endogenous loci. To overcome this [...] Designer nucleases such as clustered, regularly interspaced, short palindromic repeats (CRISPR)-associated Cas9 are efficient genome-editing tools that hold great promise for experimental biology and therapies1,2,3. These tools induce a nick or a double-strand break (DSB) at targeted regions to activate two DNA repair pathways: homology-directed repair (HDR) and nonhomologous end-joining (NHEJ\n\n## Methods Favoring Homology-Directed Repair Choice in Response to CRISPR/Cas9 Induced-Double Strand Breaks\nCRISPR/Cas9-induced HDR represents a tool to modify genomic DNA in a precise and controlled manner. However, owing to the preference of mammalian cells for NHEJ over HDR, the efficiency of HDR is significantly lower than that of NHEJ (25% vs. 75%). To date, numerous approaches to selectively disrupt NHEJ, directly boost the HDR repair pathway, or supply a favorable cellular context for overcoming the choice limitations of HDR using the CRISPR/Cas9 system have proven successful. Nevertheless, [...] Precise gene editing is—or will soon be—in clinical use fo\n\n## CRISPR–Cas9: A History of Its Discovery and Ethical Considerations of Its Use in Genome Editing\nat the CRISPR locus in response to viral attacks by bacteriophages. The addition of new spacers in this work caused acquired immunity to the corresponding new types of bacteriophages in S. thermophilus: observation which subsequently led to the authors obtaining one of the first patents in this area and the start of bacterial cultures’ “vaccination” with the use of CRISPR-based technology by Danisco in 2005 . [...] prokaryotic immune system, viral DNA fragments (“spacers” 17-84 bases long), separated by short palindromic repeats (23-50 bases ) and grouped into clusters in intergenic regions, represent a library of potentially dangerous genetic information (for an overview of the microbial antiviral arsenal, see reviews by Isaev et al. [9, 10]). Initially, it was assumed that such a system would work by the mechanism of RNA interference. However, in the publication of Marraffini and Sonth\n\n## Origins of CRISPR: How it Came to Be | BioAgilytix\nCRISPR (Clustered Regularly Interspaced Short Palindromic Repeat) sequences were initially discovered in the E. coli genome in 1987, but their function as a safeguard against bacteriophages was not elucidated until 2007. Scientists hypothesized that prokaryotes used CRISPR as part of an adaptive immune system – utilizing various CRISPR-associated (Cas) genes to not only store a record of invading phages but also to destroy the phages upon re-exposure. [...] More technically, Cas9 is a dual RNA-guided DNA endonuclease enzyme associated with the Clustered Regularly Interspaced Short Palindromic Repeats (CRISPR) adaptive immune system in Streptococcus pyogenes. S. pyogenes utilizes CRISPR to memorize and Cas9 to later interrogate and cleave foreign DNA, such as invading bacteriophage DNA or plasmid DNA. Cas9 performs this interrogation by unwinding foreign DNA and checking for sites complem\n\n## The Discovery of the CRISPR-Cas System: How Unexpected Bacterial Immunity Transformed the Field of Genetics - Exploratio Journal\nDirect experimental evidence supporting this hypothesis emerged in 2007 when Barrangou and colleagues studied Streptococcus thermophilus, a bacterial species widely used in yogurt and cheese production. Following exposure to bacteriophages, surviving bacterial strains acquired new spacer sequences derived from the infecting phages. Acquisition of these spacers was associated with resistance to subsequent infection, while removal or addition of particular spacers altered phage resistance [...] Together, the LBP-EC01 and SNIPR001 trials represent important early steps toward translating CRISPR-enhanced phage therapy into humans. The approach directly connects several stages in the history of CRISPR research. CRISPR was first identified as a bacterial defense against bacteriophages; investigation of phage evolution revealed mechanisms for overcoming bacterial CRISPR immunity; and researcher\n\n## CRISPR Timeline | Broad Institute\nHypothetical scheme of adaptive immunity March, 2006 — Eugene Koonin, US National Center for Biotechnology Information, NIH Koonin was studying clusters of orthologous groups of proteins by computational analysis and proposed a hypothetical scheme for CRISPR cascades as bacterial immune system based on inserts homologous to phage DNA in the natural spacer array, abandoning previous hypothesis that the Cas proteins might comprise a novel DNA repair system. (Makarova et al., 2006) [...] Scientists soon began to fill in some of the details on exactly how CRISPR-Cas systems “interfere” with invading phage. The first piece of critical information came from John van der Oost and colleagues who showed that in E-scherichia coli, spacer sequences, which are derived from phage, are transcribed into small RNAs, termed CRISPR RNAs (crRNAs), that guide Cas proteins to the target DNA (Brouns et al., 2\n\n## CRISPR Part 1: A Brief History of CRISPR\nThe authors of the previous paper noticed that Sulfolobus solfataricus, anarchaea that grows in hotsprings, was naturally immune to a virus called SIRV. It also had SIRV DNA in its CRISPR spacers, noteworthy in that viruses use DNA as their weapon to infect hosts. It was hypothesized that CRISPR was a form of bacterial adaptive immunity against viral attack. [...] Barrangou et al., showed that subjecting bacteria to viral attack until it became resistant led to the attacking virus’ DNA being introduced into the CRISPR interspacing regions. To account for false positives, they removed the spacers containing viral DNA from the resistant strain, and subjected it to viral attack once again. Resistance was instantly lost. [...] Mojica et al. sequenced 4500 CRISPR sequences from 67 strains representing both bacteria and archaea, comparing these sequences against repositories within GenBank. Wh\n\n## Nobel Prize 2020 in Chemistry honors CRISPR: a tool for rewriting the code of life\nEmmanuelle Charpentier and Jennifer Doudna have been awarded the 2020 Nobel Prize in Chemistry for their work on CRISPR-Cas9—a method to edit DNA. The two scientists were recognized by the Nobel Committee for their discovery that a microbial immune mechanism can be transformed into a tool that can simply and cheaply edit genomes with high precision. [...] that is involved in recognizing foreign phage sequences in bacteria, so-called trans-activating crRNA (tracrRNA) . A subsequent collaboration of the Charpentier and Doudna laboratories resulted in the landmark 2012 Science paper, which kick-started the era of CRISPR-Cas9 genome editing . The paper showed that a bacterial CRISPR-Cas9 endonuclease is guided by two RNA molecules forming the tracrRNA:crRNA duplex, to direct site-specific DNA cleavage. Importantly, it was shown that the dual [...] 3. Doudna JA, Charpentier E. Genome editing.\n\n## The Nobel Prize in Chemistry 2020 - Popular information - NobelPrize.org\nEmmanuelle Charpentier and Jennifer Doudna are awarded the Nobel Prize in Chemistry 2020 for discovering one of gene technology’s sharpest tools: the CRISPR/Cas9 genetic scissors. Researchers can use these to change the DNA of animals, plants and microorganisms with extremely high precision. This technology has revolutionised the molecular life sciences, brought new opportunities for plant breeding, is contributing to innovative cancer therapies and may make the dream of curing inherited [...] Emmanuelle Charpentier and Jennifer Doudna are awarded the Nobel Prize in Chemistry 2020 for discovering one of gene technology’s sharpest tools: the CRISPR/Cas9 genetic scissors. Researchers can use these to change the DNA of animals, plants and microorganisms with extremely high precision. This technology has revolutionised the molecular life sciences, brought new opportunities for plant breeding\n\n## CRISPR-Cas9: A History of Its Discovery and Ethical Considerations of Its Use in Genome Editing.\nThe development of a method for genome editing based on CRISPR-Cas9 technology was awarded The Nobel Prize in Chemistry in 2020, less than a decade after the discovery of all principal molecular components of the system. For the first time in history a Nobel prize was awarded to two women, Emmanuelle Charpentier and Jennifer Doudna, who made key discoveries in the field of DNA manipulation with the CRISPR-Cas9 system, so-called \"genetic scissors\". It is difficult to overestimate the importance\n\n## Press release: The Nobel Prize in Chemistry 2020 - NobelPrize.org\nEmmanuelle Charpentier and Jennifer A. Doudna have discovered one of gene technology’s sharpest tools: the CRISPR/Cas9 genetic scissors. Using these, researchers can change the DNA of animals, plants and microorganisms with extremely high precision. This technology has had a revolutionary impact on the life sciences, is contributing to new cancer therapies and may make the dream of curing inherited diseases come true. [...] Since Charpentier and Doudna discovered the CRISPR/Cas9 genetic scissors in 2012 their use has exploded. This tool has contributed to many important discoveries in basic research, and plant researchers have been able to develop crops that withstand mould, pests and drought. In medicine, clinical trials of new cancer therapies are underway, and the dream of being able to cure inherited diseases is about to come true. These genetic scissors have taken the life sciences \n\n## Revolutionary breakthrough: FDA approves CASGEVY, the first CRISPR/Cas9 gene therapy for sickle cell disease\nequal to 12 years enables precise modifications in hematopoietic stem cells, resulting in elevated fetal hemoglobin (HbF) levels and a significant reduction in vaso-occlusive events. Unlike conventional treatments, this therapy offers a curative approach and eliminates the need for recurrent transfusions and transplants, thereby improving the quality of life of patients with SCD. Casgevy has emerged as a beacon of hope for SCD patients and signifies a potential paradigm\n\n## Pricey new gene therapies for sickle cell pose access test\nOn Friday, Vertex Pharmaceuticals set the list price of Casgevy, the first CRISPR-based therapy approved by the Food and Drug Administration, at $2.2 million dollars. Bluebird bio, which also received FDA clearance for its genetic medicine Lyfgenia the same day, chose a higher price of $3.1 million. [...] Pharma Biotech FDA Clinical Trials Deals Drug Pricing Gene Therapy An article fromImage 10: site logo # Pricey new gene therapies for sickle cell pose access test Casgevy, the first CRISPR therapy approved by the FDA, will cost $2.2 million, while a competing genetic medicine also cleared Friday is priced at $3.1 million. Published Dec. 8, 2023 Image 11: Ned Pagliarulo's headshot Ned Pagliarulo Lead Editor Image 12Share) [...] But the seven-figure price tags immediately raise questions about access, particularly for a patient population that’s regularly faced discrimination and barriers\n\n## FDA approves Vertex, CRISPR's Casgevy for beta-thalassemia\n### Related Vertex, CRISPR score landmark FDA approval for sickle cell disease gene therapy Casgevy The approval covers TDT patients ages 12 and older who need regular transfusions. Vertex and CRISPR charge $2.2 million for the one-time treatment. A lifetime of healthcare costs in the U.S to manage TDT are estimated to exceed $5 million, the companies said. ### Related Bluebird touts Zynteglo, Skysona launch progress as FDA decision on sickle cell therapy nears [...] On Dec. 8 of last year, on the same day that the FDA gave a thumbs up to Casgevy for SCD, it also approved bluebird's gene therapy for the same condition. Bluebird has priced its treatment, Lyfgenia, at $3.1 million. The Cambridge, Mass. company charges $2.8 million for its TDT drug Zynteglo. CRISPR Vertex Pharmaceuticals FDA Casgevy (exa-cel) beta thalassemia Bluebird Bio sickle cell disease Lyfgenia Pharma [...] Vertex Pha\n\n## FDA Approves, First CRISPR Gene Therapy, Casgevy, for Sickle Cell Disease\n### A Price Worth Saving Lives? However, concerns linger regarding the accessibility and affordability of Casgevy. The therapy carries a price tag of $2.2 million per patient, a figure that has generated both support and criticism. ### Data Supporting Casgevy [...] Vertex Pharmaceuticals and CRISPR Therapeutics jointly announced the FDA's approval of Casgevy™ (exagamglogene autotemcel), a CRISPR/Cas9 genome-edited cell therapy, for sickle cell disease (SCD). This groundbreaking decision opens the door for thousands of SCD patients to become eligible for a durable one-time therapy that offers a functional cure for their disease. [...] In a trial involving 44 patients with Sickle Cell Disease (SCD), Casgevy's safety and efficacy were assessed. Patients, both adults and adolescents, had a history of multiple severe Vaso-Occlusive Crises (VOCs). Over a 24-month follow-up, 93.5% of the 31 eva\n\n## Affordable Pricing of CRISPR Treatments is a Pressing Ethical Imperative.\nCasgevy, the world's first approved CRISPR-based cell therapy, has been priced at $2.2 million per patient. Although this hefty price tag was widely anticipated, the extremely high cost of this and other cell and gene therapies poses a major ethical issue in terms of equitable access and global health. In this Perspective, we argue that lowering the prices of future CRISPR therapies is an urgent ethical imperative. Although we focus on Casgevy as a case study, much of our analysis can be\n\n## Heritable genome editing | Global Observatory\nThis statement was released by the organizing committee of the Second International Summit on Human Genome Editing in Hong Kong in 2018, immediately following the revelation of He Jiankui’s heritable genome editing experiments. Though a scandal was emerging, the statement does not repeat the language from the first summit statement about the need for “broad societal consensus” to proceed with heritable genome editing. Instead, it says that its clinical use “remains irresponsible at this time” [...] In an analysis based largely on the proceedings of the first two International Summits on Human Genome Editing, Morgan Meyer theorizes the process of “irresponsibilization.” Much of this theorization revolves around He Jiankui’s experiments and how they spurred responses and calls for further action at the Second International Summit. ## Statement by the Organizing Committee of the Second Inte\n\n## CRISPR’d babies: human germline genome editing in the ‘He Jiankui affair’* | Journal of Law and the Biosciences | Oxford Academic\nThe NAS and NAM followed up the Summit with a Feb. 14, 2017 consensus report, written by a committee of 22 after many public and private meetings.51 The report contains the ‘official position’ of the Academies. The Valentine's Day report had chapters on basic research, somatic genome editing, heritable (germline) genome editing, enhancement, and public engagement. It offered clear, and strong, conclusions on germline genome editing: ‘In particular, clinical trials using heritable germline [...] What all of these findings have in common is the need for public buy-in—at least acceptance if not full approval or consensus—before proceeding with human germline genome editing. At the Hong Kong Summit where He revealed his work, David Baltimore, chair of the organizing committee, initially struck the right note. Immediately after He's appearance, Baltimore said, forthrightly, ‘There has been a \n\n## Human Genome Editing: Our Future Belongs to All of Us\nthe 2015 summit statement. And yet, prominent scholars refer to the 2015 statement as the international consensus, even after the publication of the 2018 summit statement. For example, in an article in Nature Biotechnology that listed 10 ways in which He Jiankui violated ethics, Sheldon Krimsky, who studies the links between public policy and technology, cited the 2015 summit statement when asserting, “A first problem is that He’s work is a violation of an international consensus on if, [...] A quick review of media reports and various commentaries chastising He for having violated international consensus suggests considerable equivocation about the scope and meaning of consensus. Some commentators referred to a perceived political consensus, others intuited a somewhat amorphous scientific consensus, and a few others complained of a failure to respect the call for broad societal consensu\n\n## Harnessing bacterial immunity: CRISPR-Cas system as a versatile tool in combating pathogens and revolutionizing medicine\nFigure 1 · Major components of the CRISPR–Cas system and their loci. The CRISPR locus contains cas genes and CRISPR arrays made up of repeat and spacer sequences. During immunity, a single guided RNA (sgRNA), which combines a crRNA and tracrRNA, guides the Cas9 protein to the target DNA sequences. Cas9 forms an active complex with the sgRNA and recognizes the protospacer adjacent motif (PAM) on the target DNA, enabling precise DNA cleavage. This mechanism allows for targeted genome editing by [...] that can recognize target sequences. Recent research has shown that Cas9 can prevent viruses from altering host DNA. Without guide RNA, Cas9 is inactive (Jinek et al., 2014). A single strand that forms a T shape with one tetraloop and two or three stem-loops makes up the guide RNA in CRISPR systems. The guide RNA’s 5’ end is made to match the target DNA sequence. Cas9 works a conformational sh\n\n## What are genome editing and CRISPR-Cas9?: MedlinePlus Genetics\nResearchers adapted this immune defense system to edit DNA. They create a small piece of RNA with a short \"guide\" sequence that attaches (binds) to a specific target sequence in a cell's DNA, much like the RNA segments bacteria produce from the CRISPR array. This guide RNA also attaches to the Cas9 enzyme. When introduced into cells, the guide RNA recognizes the intended DNA sequence, and the Cas9 enzyme cuts the DNA at the targeted location, mirroring the process in bacteria. Although Cas9 is [...] CRISPR-Cas9 was adapted from a naturally occurring genome editing system that bacteria use as an immune defense. When infected with viruses, bacteria capture small pieces of the viruses' DNA and insert them into their own DNA in a particular pattern to create segments known as CRISPR arrays. The CRISPR arrays allow the bacteria to \"remember\" the viruses (or closely related ones). If the virus\n\n## CRISPR in Nature - Innovative Genomics Institute (IGI)\nWe’ll explain this in more detail using the CRISPR-Cas9 system as an example. ### THE CRISPR-CAS9 SYSTEM AND ITS PAM Cas9 works by searching for any DNA that is complementary to its CRISPR RNA (crRNA) guide. Once Cas9 finds such DNA, it cuts the DNA apart. Since the bacterial CRISPR array encodes the crRNAs, they are always going to be complementary. The PAM requirement is what prevents Cas9 from cutting the array. But how? [...] About half of bacteria also have an adaptive immune mechanism called a CRISPR-Cas system, w",
+ "plan": {
+  "title": "How CRISPR Edits Genes: From Bacteria to Therapy",
+  "description": "CRISPR began as a bacterial defense against viruses, and scientists turned it into a tool that finds and cuts a chosen stretch of DNA. This video explains how Cas9 and guide RNA find a target, how the cell repairs the cut, one approved therapy, and the main ethical debate.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "2cf46352",
+    "narration": "One of the most powerful tools for editing human DNA was not invented in a lab. It was found inside bacteria, where it has been fighting viruses for a very long time.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "microscope bacteria culture lab",
+      "alt": "scientist looking at bacterial cultures"
+     }
+    },
+    "chapter": "Bacteria's secret defense against viruses"
+   },
+   {
+    "id": "3ec170dd",
+    "narration": "Bacteria get attacked too. Viruses called phages inject their DNA into bacterial cells and take over. Bacteria needed a defense, and many of them evolved one.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "A phage attack",
+      "nodes": [
+       {
+        "id": "p",
+        "label": "Phage virus",
+        "icon": "virus"
+       },
+       {
+        "id": "i",
+        "label": "Injects its DNA",
+        "icon": "syringe"
+       },
+       {
+        "id": "b",
+        "label": "Bacterium taken over",
+        "icon": "tally-1"
+       }
+      ],
+      "edges": [
+       [
+        "p",
+        "i"
+       ],
+       [
+        "i",
+        "b"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "1818640b",
+    "narration": "Here is the trick. When a bacterium survives an attack, it saves a snippet of the virus's DNA in its own genome. It is like a library of wanted posters.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The CRISPR array",
+      "items": [
+       "Snippet of viral DNA saved",
+       "Stored between repeats",
+       "A library of wanted posters"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "dna",
+       "book",
+       "target"
+      ]
+     }
+    },
+    "sfx": "pop"
+   },
+   {
+    "id": "adf0c411",
+    "narration": "That library is called a CRISPR array. CRISPR stands for clustered regularly interspaced short palindromic repeats. Scientists named it after they saw the odd pattern, long before they understood the idea.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "CRISPR",
+      "definition": "Clustered Regularly Interspaced Short Palindromic Repeats: a pattern of repeated DNA with viral snippets stored between the repeats."
+     }
+    }
+   },
+   {
+    "id": "9475b7d4",
+    "narration": "The pattern was first spotted in E. coli in 1987. In 2007, it was shown to defend bacteria against phages. In 2012, it was programmed to cut chosen DNA. In 2020, that earned a Nobel Prize in Chemistry.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "From odd repeats to Nobel Prize",
+      "events": [
+       {
+        "date": "1987",
+        "label": "Odd repeats found in E. coli DNA"
+       },
+       {
+        "date": "2007",
+        "label": "Shown to defend bacteria against phages"
+       },
+       {
+        "date": "2012",
+        "label": "Programmed to cut chosen DNA"
+       },
+       {
+        "date": "2020",
+        "label": "Nobel Prize in Chemistry"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f108b3a5",
+    "narration": "So CRISPR is not a machine built from scratch. It was discovered in nature. Jennifer Doudna and Emmanuelle Charpentier simply showed that the bacterial scissors, Cas9, could be reprogrammed.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "CRISPR was not invented from scratch. It was found in nature.",
+      "emphasis": "found in nature"
+     }
+    }
+   },
+   {
+    "id": "0286d712",
+    "narration": "Think of Cas9 as a pair of molecular scissors. Scissors alone cut anywhere, so they need an address. That address label is the guide RNA, which steers Cas9 to one exact spot.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Scissors plus address label",
+      "nodes": [
+       {
+        "id": "g",
+        "label": "Guide RNA",
+        "icon": "map"
+       },
+       {
+        "id": "c",
+        "label": "Cas9 scissors",
+        "icon": "scissors"
+       },
+       {
+        "id": "d",
+        "label": "Target DNA",
+        "icon": "dna"
+       }
+      ],
+      "edges": [
+       [
+        "g",
+        "c",
+        "loads into"
+       ],
+       [
+        "c",
+        "d",
+        "finds"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    },
+    "chapter": "How Cas9 finds and cuts the right spot"
+   },
+   {
+    "id": "3923bdbd",
+    "narration": "The guide RNA is about 20 letters long. Those letters match the target DNA by base pairing, the same A-to-T and C-to-G rule that holds DNA's two strands together.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The guide RNA",
+      "items": [
+       "About 20 letters long",
+       "Matches target DNA by base pairing",
+       "A pairs with T, C pairs with G"
+      ],
+      "style": "spotlight",
+      "accent": "teal",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "857d4b7b",
+    "narration": "Cas9 doesn't read the whole genome letter by letter. It first scans for a short tag called a PAM. Only beside a PAM does it pry the DNA open and check the guide.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "PAM (protospacer adjacent motif)",
+      "definition": "A short DNA sequence next to the target that Cas9 must find before it unwinds the DNA and checks the guide RNA.",
+      "example": "For the common Cas9, the PAM is NGG."
+     }
+    }
+   },
+   {
+    "id": "88d295a1",
+    "narration": "If the guide matches, Cas9 changes shape and its two cutting domains go to work. One slices each strand, about three letters from the PAM, leaving a clean break through both strands.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "From search to cut",
+      "steps": [
+       {
+        "label": "Scan for a PAM"
+       },
+       {
+        "label": "Unwind the DNA",
+        "detail": "Guide RNA pairs with the target"
+       },
+       {
+        "label": "Match confirmed",
+        "detail": "Cas9 changes shape"
+       },
+       {
+        "label": "Both strands cut",
+        "detail": "About 3 letters from the PAM"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "1a34bc21",
+    "narration": "Now the cell must fix the break. Path one is non-homologous end joining. It is quick but sloppy, often adding or deleting letters, which usually switches the gene off.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "End joining (NHEJ)",
+       "tagline": "Quick and error-prone"
+      },
+      "b": {
+       "name": "Template repair (HDR)",
+       "tagline": "Slower and precise"
+      },
+      "rows": [
+       {
+        "label": "Template needed",
+        "a": "No",
+        "b": "Yes"
+       },
+       {
+        "label": "Result",
+        "a": "Insertions or deletions",
+        "b": "Planned new sequence"
+       },
+       {
+        "label": "Typical use",
+        "a": "Switch a gene off",
+        "b": "Write a new sequence"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "7c7587eb",
+    "narration": "Path two is homology-directed repair. Scientists supply a template, and the cell copies it into the gap, writing a new sequence. It is precise, but much rarer than end joining.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Repair choice in mammalian cells",
+      "labels": [
+       "NHEJ",
+       "HDR"
+      ],
+      "values": [
+       75.0,
+       25.0
+      ],
+      "unit": "%",
+      "highlight": 1
+     }
+    }
+   },
+   {
+    "id": "cf8cbb7c",
+    "narration": "So far we have the cut and two ways to repair it. Next comes the real test: how this turns into an approved therapy, and the debate it raises.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "From cut to cure: the next step is a real patient.",
+      "emphasis": "cure"
+     }
+    }
+   },
+   {
+    "id": "8ac89775",
+    "narration": "So does this actually work in people? Yes. In late 2023, Casgevy became the first CRISPR therapy approved, first in the UK, then by the US FDA.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Casgevy: the first approved CRISPR therapy",
+      "subtitle": "For sickle cell disease and beta thalassemia"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "An approved therapy and the debate it raises"
+   },
+   {
+    "id": "647451ab",
+    "narration": "Doctors take blood stem cells from the patient. In the lab, CRISPR edits them. Then the cells are returned to the patient's body.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How Casgevy is made",
+      "steps": [
+       {
+        "label": "Collect stem cells",
+        "detail": "Taken from the patient"
+       },
+       {
+        "label": "Edit outside the body",
+        "detail": "CRISPR cuts the BCL11A control region"
+       },
+       {
+        "label": "Return the cells",
+        "detail": "Infused back into the patient"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "7c678cad",
+    "narration": "The edit switches off BCL11A's control of fetal hemoglobin. More fetal hemoglobin then makes up for the faulty adult hemoglobin that causes the disease.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Why the edit helps",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "BCL11A switched off",
+        "icon": "scissors"
+       },
+       {
+        "id": "b",
+        "label": "More fetal hemoglobin",
+        "icon": "heart"
+       },
+       {
+        "id": "c",
+        "label": "Faulty adult hemoglobin of",
+        "icon": "shield"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "unlocks"
+       ],
+       [
+        "b",
+        "c",
+        "compensates"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "0938380e",
+    "narration": "But there is a catch. Casgevy was listed at 2.2 million dollars for a one-time treatment. That raises hard questions about who can actually get it.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "2.2",
+      "prefix": "$",
+      "unit": "M",
+      "label": "List price of Casgevy per patient",
+      "delta": "One-time treatment"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "0e2044e8",
+    "narration": "The bigger debate is about whose DNA we edit. Somatic editing changes only the patient's own cells. Germline editing changes embryos, so the changes are heritable and pass to future generations.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Somatic editing",
+       "tagline": "Body cells only"
+      },
+      "b": {
+       "name": "Germline editing",
+       "tagline": "Eggs, sperm, embryos"
+      },
+      "rows": [
+       {
+        "label": "Who is affected",
+        "a": "The patient",
+        "b": "Future generations"
+       },
+       {
+        "label": "Inherited",
+        "a": "No",
+        "b": "Yes"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "0475390e",
+    "narration": "In 2018, He Jiankui announced the birth of gene-edited babies in China. Scientists around the world condemned it, and a summit statement called clinical germline editing irresponsible.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "The germline line is drawn",
+      "events": [
+       {
+        "date": "2018",
+        "label": "He Jiankui reveals gene-edited babies"
+       },
+       {
+        "date": "2018",
+        "label": "Hong Kong summit: use remains irresponsible"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "3da6963c",
+    "narration": "So here is the takeaway. CRISPR is a bacterial defense turned into precise molecular scissors. It already treats disease in one patient. What remains is who gets it, and where we stop.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Bacterial scissors now heal patients; the question is who gets them, and where we stop.",
+      "emphasis": "where we stop"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Origins of CRISPR: How it Came to Be | BioAgilytix",
+    "url": "https://www.bioagilytix.com/blog/origins-of-crispr-how-it-came-to-be",
+    "publisher": "bioagilytix.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "CRISPR Timeline | Broad Institute",
+    "url": "https://www.broadinstitute.org/what-broad/areas-focus/project-spotlight/crispr-timeline",
+    "publisher": "broadinstitute.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Nobel Prize 2020 in Chemistry honors CRISPR: a tool for rewriting the code of life",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7782372",
+    "publisher": "pmc.ncbi.nlm.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Cas9 and DNA identification",
+    "url": "https://www.biotechacademy.dk/en/high-school-projects/crispr-cas9-the-genetic-engineering-revolution/cas9-and-dna-identification",
+    "publisher": "biotechacademy.dk",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Addgene: CRISPR Guide",
+    "url": "https://www.addgene.org/guides/crispr",
+    "publisher": "addgene.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "NHEJ vs HDR: Difference when Repairing CRISPR DSB | IDT",
+    "url": "https://www.idtdna.com/pages/support/faqs/which-repair-pathway-is-most-commonly-used-to-repair-crispr-mediated-double-stranded-breaks-nhej-or-hdr",
+    "publisher": "idtdna.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Methods Favoring Homology-Directed Repair Choice in Response to CRISPR/Cas9 Induced-Double Strand Breaks",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7555059",
+    "publisher": "pmc.ncbi.nlm.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Pricey new gene therapies for sickle cell pose access test",
+    "url": "https://www.biopharmadive.com/news/crispr-sickle-cell-price-millions-gene-therapy-vertex-bluebird/702066",
+    "publisher": "biopharmadive.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "FDA Approves, First CRISPR Gene Therapy, Casgevy, for Sickle Cell Disease",
+    "url": "https://healthandpharma.net/fda-approve-casgevy-crispr-gene-therapy-sickle-cell-disease",
+    "publisher": "healthandpharma.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Heritable genome editing | Global Observatory",
+    "url": "https://global-observatory.org/database/heritable-genome-editing",
+    "publisher": "global-observatory.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 40.4,
+  "before_first_script_call_s": 4.8,
+  "script_s": 35.6
+ },
+ "cost": {
+  "script_small": 0.00034,
+  "script_big": 0.19081,
+  "research": 0.00554,
+  "search_api": 0.088,
+  "total": 0.28468
+ },
+ "calls": {
+  "small": 3,
+  "big": 5,
+  "tools": 8
+ },
+ "tokens": {
+  "in": 108818,
+  "out": 9067
+ },
+ "rules": {
+  "length": {
+   "words": 599,
+   "expected_words": 537,
+   "ratio": 1.115,
+   "beats": 20,
+   "expected_beats": 17,
+   "est_speech_s": 268.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "One of the most powerful tools for editing human DNA was not invented in a lab. It was found inside bacteria, where it has been fighting viruses for a very long time.",
+   "close_text": "So here is the takeaway. CRISPR is a bacterial defense turned into precise molecular scissors. It already treats disease in one patient. What remains is who gets it, and where we stop."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "clip": 1,
+    "diagram": 3,
+    "bullets": 2,
+    "definition": 2,
+    "timeline": 2,
+    "kinetic_text": 3,
+    "steps": 2,
+    "versus": 2,
+    "chart": 1,
+    "title": 1,
+    "counter": 1
+   },
+   "max_run": 1,
+   "entropy": 3.35,
+   "top_type": "diagram",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 8,
+   "ungrounded_numbers": [],
+   "entities": 18,
+   "ungrounded_entities": [
+    "BCL11A's",
+    "China"
+   ],
+   "ungrounded_share": 0.077,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 10,
+   "fetched": 42,
+   "notes_len": 27003,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 2 (diagram): its narration never says ['Phage virus', 'Bacterium taken over']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The overall picture is right, but several claims are wrong or shaky: the bar chart presents the 75/25 NHEJ/HDR figure as if it were exact, the script says Casgevy 'already treats disease in one patient', and it says nothing about the FDA approval date or the second indication."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "Covers origin, PAM and guide RNA, NHEJ vs HDR, Casgevy with its BCL11A mechanism, and He Jiankui. It omits tracrRNA, spacer acquisition, and the CRISPR in-bacteria mechanism, and it does not say which approval came first or when."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clean (origin, mechanism, repair, therapy, ethics) and the beat-13 transition works. Beat 13 is a filler recap and the ethics section is brief."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening line is decent but fairly generic. The ending is a summary with a flawed claim, 'in one patient'."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Clear, beginner-friendly, and not hyped, with good analogies such as 'wanted posters' and 'address label'."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary. But the phage diagram uses an odd 'tally-1' icon, a node label is cut off ('Faulty adult hemoglobin of'), and the bar chart is built on a loose statistic."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The analogies are good but common, and there are few surprising specifics beyond the 1987 E. coli finding and the PAM detail."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Hits every requested element at about the right length. It lacks a clear statement of the approved therapy's date or of the germline ethics beyond the 2018 case."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural English, with minor awkwardness such as 'The germline line is drawn' and 'simply showed'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "It already treats disease in one patient.",
+    "issue": "Casgevy is approved for two diseases and has treated many patients. 'One patient' is wrong or at best unclear.",
+    "beat": 20
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "values\": [75.0, 25.0]",
+    "issue": "The 75/25 figure is a rough, context-dependent estimate from one review, but the chart presents it as a fixed fact. Real HDR rates are often much lower.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "In late 2023, Casgevy became the first CRISPR therapy approved, first in the UK, then by the US FDA.",
+    "issue": "Imprecise. The UK MHRA approved it in November 2023 and the FDA in December 2023 for sickle cell disease. Beta thalassemia FDA approval came in January 2024.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Casgevy was listed at 2.2 million dollars",
+    "issue": "The US list price of $2.2M is correct, but the script does not say it is the US price.",
+    "beat": 17
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Faulty adult hemoglobin of",
+    "issue": "The node label is truncated and reads as a typo on screen.",
+    "beat": 16
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Jennifer Doudna and Emmanuelle Charpentier simply showed that the bacterial scissors, Cas9, could be reprogrammed.",
+    "issue": "No explanation of how the bacterial system works (tracrRNA, spacer acquisition). The 'simply' also undersells the work.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "So far we have the cut and two ways to repair it.",
+    "issue": "A recap-style transition that adds no new content.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "How bacteria use the stored snippets (CRISPR RNA guiding Cas to cut returning viral DNA)",
+   "Casgevy's approval dates and the fact that it covers two diseases",
+   "Off-target edits and other safety concerns",
+   "Wider ethics: enhancement and equity beyond price",
+   "Outcome data from Casgevy trials"
+  ],
+  "wrong_facts": [
+   "'It already treats disease in one patient' is wrong: Casgevy is approved for two diseases and many patients have been treated.",
+   "The 75% vs 25% NHEJ/HDR split is presented as a universal figure; it is a rough estimate.",
+   "Beta thalassemia FDA approval came later, in January 2024, which the script does not mention."
+  ],
+  "would_publish": false,
+  "summary": "A well-organized, beginner-friendly script that covers all the requested elements, with good analogies and varied scenes. It is let down by a wrong closing claim ('one patient'), loose statistics, and thin ethics and bacterial-mechanism depth.",
+  "mean": 3.56,
+  "cost_usd": 0.035538,
+  "tokens": [
+   9429,
+   1668
+  ]
+ }
+}

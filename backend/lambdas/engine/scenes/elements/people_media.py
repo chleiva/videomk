@@ -155,15 +155,18 @@ def draw_headline(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: 
     items = [h for h in props.get("headlines") or [] if isinstance(h, dict)][:3]
     if not items:
         return
+    if not ctx.frame.landscape:
+        _draw_headline_tall(cv, items, props, lt, dur, th, ctx)
+        return
     n = len(items)
-    top, bottom = CONTENT_TOP + 50, ctx.bottom - 20
+    top, bottom = ctx.top + 50, ctx.bottom - 20
     gap = 24
     avail = bottom - top
     h_card = min(500.0 if n == 1 else 330.0, (avail - gap * (n - 1)) / n)
     y0 = top + (avail - (h_card * n + gap * (n - 1))) / 2
     start = {1: 92, 2: 62, 3: 54}[n]
     times = reveal_times(n, dur, props.get("cues"), first=0.12, last=0.7)
-    x, w = 140.0, 1640.0
+    x, w = float(ctx.box[0]), float(ctx.box[2] - ctx.box[0])
     left_w = 340.0 if n == 1 else 300.0 if n == 2 else 250.0
     for i, it in enumerate(items):
         p = progress(lt, times[i], 0.6)
@@ -207,6 +210,73 @@ def draw_headline(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: 
         cv.text(x + w - 44, y + h_card - pad + 6, credit, "regular", 24, with_alpha(th.muted, ease_out_cubic(progress(lt, times[i] + 0.4, 0.5)) * a), anchor="rb")
 
 
+def _draw_headline_tall(cv: Canvas, items: List[Dict[str, Any]], props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    """Vertical / square / 4:5: one full-width card per headline (outlet and date on a header row, the headline in serif below, the source last), stacked."""
+    fr = ctx.frame
+    ts = fr.type_scale
+    n = len(items)
+    bx0, by0, bx1, by1 = ctx.box
+    W = bx1 - bx0
+    top, bottom = by0 + (30 if fr.vertical else 10), by1 - 10
+    gap = 22.0
+    avail = bottom - top
+    cap = {1: 820.0, 2: 560.0, 3: 430.0} if fr.vertical else {1: 640.0, 2: 330.0, 3: 224.0}
+    h_card = min(cap[n], (avail - gap * (n - 1)) / n)
+    y0 = top + (avail - (h_card * n + gap * (n - 1))) / 2
+    start = {1: 100.0, 2: 72.0, 3: 60.0}[n] * (1.0 if fr.vertical else 0.92)
+    times = reveal_times(n, dur, props.get("cues"), first=0.12, last=0.7)
+    x, w = float(bx0), float(W)
+    pad = 34.0 if n < 3 else (24.0 if fr.vertical else 14.0)
+    lx, rx1 = x + 62, x + w - 40
+    iw = rx1 - lx
+    for i, it in enumerate(items):
+        p = progress(lt, times[i], 0.6)
+        if p <= 0:
+            continue
+        a, s = ease_out_cubic(p * 1.6), ease_out_cubic(p)
+        y = y0 + i * (h_card + gap) + (1 - s) * 44
+        cv.card(x, y, w, h_card, th, r=30, alpha=a)
+        cv.rrect(x + 26, y + pad, 10, h_card - 2 * pad, 5, fill=with_alpha(th.accent, a))
+        # header row: outlet (left, accent) and date (right)
+        dsize = 28.0 if n < 3 else 26.0
+        date = it.get("date") or ""
+        dw = cv.measure(date, "regular", dsize) + 24 if date else 0.0
+        osize, olines = cv.fit_text(it["outlet"], "bold", iw - dw, 80, {1: 52.0, 2: 46.0, 3: 40.0}[n] * (1.0 if fr.vertical else 0.9), 26)
+        oline = olines[0] if olines else it["outlet"]
+        while cv.measure(oline, "bold", osize) > iw - dw and osize > 22:
+            osize -= 1
+        hh = osize * 1.2
+        cv.text(lx, y + pad + osize * 0.95, oline, "bold", osize, with_alpha(th.accent, a), anchor="ls")
+        if date:
+            cv.text(rx1, y + pad + osize * 0.95, date, "regular", dsize, with_alpha(th.muted, a), anchor="rs")
+        ry = y + pad + hh + 8
+        cv.line([(lx, ry), (rx1, ry)], with_alpha(th.muted, 0.35 * a), 2, round_caps=False)
+        # the headline itself, serif, as large as fits
+        credit_h = 34.0 if n < 3 else (30.0 if fr.vertical else 38.0)
+        top_t = ry + 14
+        rh = (y + h_card - pad) - top_t - credit_h
+        size, lines, first = float(start), [], None
+        while size >= 26:
+            lines = serif_wrap(cv, it["text"], size, iw)
+            if len(lines) * size * 1.2 <= rh and max(serif_measure(cv, ln, size) for ln in lines) <= iw:
+                first = first or (size, lines)
+                if len(lines) == 1 or len(lines[-1].split()) >= 2:   # no one-word last line
+                    break
+            size -= 3
+        if size < 26 and first:
+            size, lines = first
+        size = max(size, 26.0)
+        lh = size * 1.2
+        sy = top_t + max(0.0, (rh - len(lines) * lh) / 2)
+        for k, line in enumerate(lines):
+            serif_text(cv, lx, sy + k * lh, line, size, with_alpha(th.text, ease_out_cubic(progress(lt, times[i] + 0.1 + k * 0.08, 0.5))))
+        credit = f"Source: {it.get('source') or it['outlet']}"
+        csz = 26.0
+        while cv.measure(credit, "regular", csz) > iw and csz > 20:
+            csz -= 1
+        cv.text(rx1, y + h_card - pad + 6, credit, "regular", csz, with_alpha(th.muted, ease_out_cubic(progress(lt, times[i] + 0.4, 0.5)) * a), anchor="rb")
+
+
 # ===================================================================================================== dialogue
 def sanitize_dialogue(p: Dict[str, Any]) -> Dict[str, Any]:
     turns: List[Dict[str, str]] = []
@@ -243,19 +313,19 @@ def _speakers(turns) -> List[str]:
     return out
 
 
-def _dialogue_layout(cv: Canvas, turns, avail: float):
+def _dialogue_layout(cv: Canvas, turns, avail: float, max_w: float = 1150, start: float = 50.0, max_lines: int = 4, label_gap: float = 28.0):
     """Largest text size at which every bubble fits; returns (size, rows[{lines, w, h, label}], total height)."""
     names = [s.lower() for s in _speakers(turns)]
-    size = 50.0
+    size = start
     while True:
         rows, total, prev = [], 0.0, None
         for t in turns:
-            lines = cv.wrap(t["text"], "regular", size, 1150)[:4]
+            lines = cv.wrap(t["text"], "regular", size, max_w)[:max_lines]
             tw = max(cv.measure(l, "regular", size) for l in lines)
             label = t["speaker"].lower() != prev
             h = len(lines) * size * 1.3 + 28
             rows.append({"lines": lines, "w": tw + 56, "h": h, "label": label, "side": names.index(t["speaker"].lower()) % 2})
-            total += h + (28 if label else 0) + 14
+            total += h + (label_gap if label else 0) + 14
             prev = t["speaker"].lower()
         if total - 14 <= avail or size <= 26:
             return size, rows, total - 14
@@ -266,16 +336,24 @@ def draw_dialogue(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: 
     turns = [t for t in props.get("turns") or [] if isinstance(t, dict)][:6]
     if not turns:
         return
+    fr = ctx.frame
+    land = fr.landscape
     names = [s.lower() for s in _speakers(turns)]
     pal = [th.accent, th.accent2, hue_shift(th.accent, 0.36)]
-    top, bottom = CONTENT_TOP + 20, ctx.bottom - 10
-    size, rows, total = _dialogue_layout(cv, turns, bottom - top)
+    top, bottom = ctx.top + 20, ctx.bottom - 10
+    x0, x1 = float(ctx.box[0]), float(ctx.box[2])
+    av = 80.0 if land else 88.0
+    lab_sz, lab_gap = (24.0, 28.0) if land else (30.0, 38.0)
+    if land:
+        size, rows, total = _dialogue_layout(cv, turns, bottom - top)
+    else:   # narrow frame: bubbles at most ~80% of the width (the other speaker's side stays open), bigger type, more lines
+        size, rows, total = _dialogue_layout(cv, turns, bottom - top, (x1 - x0) - av - 20 - 56 - 64, 50.0 * fr.type_scale, 8, lab_gap)
     times = reveal_times(len(turns), dur, props.get("cues"), first=0.12, last=0.75)
     y0 = top + max(0.0, (bottom - top - total) / 2)
     ys, y = [], y0
     for r in rows:
-        ys.append(y + (28 if r["label"] else 0))
-        y += r["h"] + (28 if r["label"] else 0) + 14
+        ys.append(y + (lab_gap if r["label"] else 0))
+        y += r["h"] + (lab_gap if r["label"] else 0) + 14
     # chat-like scroll, only if even the smallest text does not fit
     offs = [max(0.0, ys[k] + rows[k]["h"] - bottom) for k in range(len(rows))]
     off = 0.0
@@ -284,7 +362,6 @@ def draw_dialogue(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: 
         off = prev + (offs[k] - prev) * ease_in_out_cubic(progress(lt, times[k], 0.45)) if lt >= times[k] else off
         if lt < times[k]:
             break
-    av = 80.0
     for k, t in enumerate(turns):
         r = rows[k]
         col = pal[names.index(t["speaker"].lower())]
@@ -294,14 +371,14 @@ def draw_dialogue(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: 
             continue
         fade = min(1.0, max(0.0, (by + r["h"] - top + 20) / 120.0)) if off > 0 else 1.0
         left = r["side"] == 0
-        ax = 140 + av / 2 if left else 1780 - av / 2
-        bx = 140 + av + 20 if left else 1780 - av - 20 - r["w"]
+        ax = x0 + av / 2 if left else x1 - av / 2
+        bx = x0 + av + 20 if left else x1 - av - 20 - r["w"]
         # typing dots just before the bubble pops
         dot_t0 = max(0.0, times[k] - 0.6)
         if times[k] > 0.12 and dot_t0 <= lt < times[k]:
             da = min(1.0, (lt - dot_t0) / 0.12) * fade
             dw = 120.0
-            dx = 140 + av + 20 if left else 1780 - av - 20 - dw
+            dx = x0 + av + 20 if left else x1 - av - 20 - dw
             cv.rrect(dx, by, dw, 66, 30, fill=with_alpha(col, 0.9 * da))
             for j in range(3):
                 bounce = max(0.0, math.sin(lt * 10 - j * 0.9)) * 7
@@ -315,7 +392,7 @@ def draw_dialogue(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: 
         w, h = r["w"] * sc, r["h"] * sc
         x = bx if left else bx + r["w"] - w
         if r["label"]:
-            cv.text(bx + (4 if left else r["w"] - 4), by - 28, t["speaker"], "semibold", 24, with_alpha(col if th.name != "paper" else col, a), anchor="la" if left else "ra")
+            cv.text(bx + (4 if left else r["w"] - 4), by - lab_gap, t["speaker"], "semibold", lab_sz, with_alpha(col if th.name != "paper" else col, a), anchor="la" if left else "ra")
         cv.shadow(x, by, w, h, 30, blur=14, dy=8, alpha=th.shadow_alpha * 0.7 * a)
         cv.rrect(x, by, w, h, 30, fill=with_alpha(col, a))
         cv.rrect(x if left else x + w - 40, by, 40, 40, 10, fill=with_alpha(col, a))   # the corner nearest the speaker is squarer, like a chat tail
@@ -361,29 +438,47 @@ def icons_cues(p: Dict[str, Any], dur: float) -> List[float]:
     return reveal_times(len(p.get("items") or []), dur, p.get("cues"), first=0.12, last=0.75)
 
 
+def _icon_grid(n: int, fr) -> Tuple[int, int]:
+    """(columns, rows) of the cards: a row in landscape (two rows from 5), stacked rows on a tall frame, two columns for four or more."""
+    if fr.landscape:
+        return (n, 1) if n <= 4 else (3, 2)
+    if fr.square:
+        return (n, 1) if n <= 3 else (2, 2) if n == 4 else (3, 2)
+    if n <= 3:
+        return 1, n
+    return 2, (n + 1) // 2
+
+
 def draw_icons(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     items = [i for i in props.get("items") or [] if isinstance(i, dict)][:6]
     if not items:
         return
+    fr = ctx.frame
+    land = fr.landscape
+    ts = fr.type_scale
     n = len(items)
-    top = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20) + 10 if props.get("title") else CONTENT_TOP + 50
+    top = heading(cv, th, str(props.get("title", "")), lt, y=ctx.top + 20, ctx=ctx) + 10 if props.get("title") else ctx.top + 50
     bottom = ctx.bottom - 10
-    cols = n if n <= 4 else 3
-    rows = 1 if n <= 4 else 2
-    gap = 32.0
-    area_w = 1640.0
-    card_w = min(520.0 if n <= 3 else 440.0, (area_w - gap * (cols - 1)) / cols)
-    card_h = min(620.0, (bottom - top - gap * (rows - 1)) / rows)
+    cols, rows = _icon_grid(n, fr)
+    gap = 32.0 if land else 26.0
+    area_w = float(ctx.box[2] - ctx.box[0])
+    if land:
+        card_w = min(520.0 if n <= 3 else 440.0, (area_w - gap * (cols - 1)) / cols)
+        card_h = min(620.0, (bottom - top - gap * (rows - 1)) / rows)
+    else:
+        card_w = (area_w - gap * (cols - 1)) / cols
+        card_h = min(420.0 if cols == 1 else 440.0, (bottom - top - gap * (rows - 1)) / rows)
+    wide = (not land) and cols == 1 and card_w > 1.45 * card_h   # an icon on the left, the words on the right
     times = reveal_times(n, dur, props.get("cues"), first=0.12, last=0.75)
-    gx0 = 960 - (card_w * cols + gap * (cols - 1)) / 2
+    gx0 = fr.cx - (card_w * cols + gap * (cols - 1)) / 2
     gy0 = top + ((bottom - top) - (card_h * rows + gap * (rows - 1))) / 2
     for i, it in enumerate(items):
         p = progress(lt, times[i], 0.55)
         if p <= 0:
             continue
         r, c = divmod(i, cols)
-        if rows == 2 and r == 1 and n - cols < cols:   # a short last row is centred
-            c_off = (cols - (n - cols)) * (card_w + gap) / 2
+        if rows >= 2 and r == rows - 1 and n - cols * (rows - 1) < cols:   # a short last row is centred
+            c_off = (cols - (n - cols * (rows - 1))) * (card_w + gap) / 2
         else:
             c_off = 0.0
         x = gx0 + c * (card_w + gap) + c_off
@@ -392,24 +487,49 @@ def draw_icons(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cw, ch = card_w * (0.9 + 0.1 * s), card_h * (0.9 + 0.1 * s)
         cx, cy = x + card_w / 2, y + card_h / 2 + (1 - ease_out_cubic(p)) * 24
         cv.card(cx - cw / 2, cy - ch / 2, cw, ch, th, r=30, alpha=a)
+        name, _ = _pm_icons.find_icon(it.get("icon") or it["label"])
+        if wide:
+            _icon_card_wide(cv, th, it, name, cx, cy, card_w, card_h, a, s, ts)
+            continue
         # inside: icon disc, label, sub (the disc takes what the text leaves)
-        lsize, llines = cv.fit_text(it["label"], "bold", card_w - 44, 110, 44, 30)
+        lsize, llines = cv.fit_text(it["label"], "bold", card_w - 44, 110 * (1 if land else ts), 44 * ts, 30)
         llines = llines[:2]
-        slines = cv.wrap(it.get("sub", ""), "regular", 28, card_w - 44)[:2] if it.get("sub") else []
-        text_h = len(llines) * lsize * 1.18 + (len(slines) * 34 + 8 if slines else 0)
+        ssize = 28.0 * (1.0 if land else min(ts, 1.12))
+        slines = cv.wrap(it.get("sub", ""), "regular", ssize, card_w - 44)[:2] if it.get("sub") else []
+        text_h = len(llines) * lsize * 1.18 + (len(slines) * (ssize * 34 / 28) + 8 if slines else 0)
         disc = max(80.0, min(card_h - 2 * 28 - 22 - text_h, card_w * 0.6, 320.0))
         block = disc + 22 + text_h
         by = cy - block / 2
         dcx, dcy = cx, by + disc / 2
         cv.ellipse(dcx, dcy, disc / 2 * s, disc / 2 * s, fill=with_alpha(th.accent, 0.16 * a), outline=with_alpha(th.accent, 0.55 * a), width=3)
-        name, _ = _pm_icons.find_icon(it.get("icon") or it["label"])
         _pm_icons.draw_icon(cv, dcx, dcy, name, disc * 0.52, with_alpha(th.accent, a), scale=s)
         ty = by + disc + 22
         for k, line in enumerate(llines):
             cv.text(cx, ty + k * lsize * 1.18, line, "bold", lsize, with_alpha(th.text, a), anchor="ma")
         ty += len(llines) * lsize * 1.18 + 8
         for k, line in enumerate(slines):
-            cv.text(cx, ty + k * 34, line, "regular", 28, with_alpha(th.muted, a), anchor="ma")
+            cv.text(cx, ty + k * (ssize * 34 / 28), line, "regular", ssize, with_alpha(th.muted, a), anchor="ma")
+
+
+def _icon_card_wide(cv: Canvas, th: Theme, it: Dict[str, Any], name: str, cx: float, cy: float, card_w: float, card_h: float, a: float, s: float, ts: float) -> None:
+    """A full-width card: the icon disc at the left, label and sub-line stacked at the right."""
+    disc = min(card_h - 56.0, 230.0)
+    dcx = cx - card_w / 2 + 40 + disc / 2
+    tx = dcx + disc / 2 + 36
+    tw = cx + card_w / 2 - 36 - tx
+    lsize, llines = cv.fit_text(it["label"], "bold", tw, card_h * 0.5, 56 * ts, 30)
+    llines = llines[:2]
+    ssize = 32.0 * min(ts, 1.15)
+    slines = cv.wrap(it.get("sub", ""), "regular", ssize, tw)[:2] if it.get("sub") else []
+    text_h = len(llines) * lsize * 1.18 + (len(slines) * ssize * 1.22 + 10 if slines else 0)
+    by = cy - text_h / 2
+    cv.ellipse(dcx, cy, disc / 2 * s, disc / 2 * s, fill=with_alpha(th.accent, 0.16 * a), outline=with_alpha(th.accent, 0.55 * a), width=3)
+    _pm_icons.draw_icon(cv, dcx, cy, name, disc * 0.52, with_alpha(th.accent, a), scale=s)
+    for k, line in enumerate(llines):
+        cv.text(tx, by + k * lsize * 1.18, line, "bold", lsize, with_alpha(th.text, a), anchor="la")
+    by += len(llines) * lsize * 1.18 + 10
+    for k, line in enumerate(slines):
+        cv.text(tx, by + k * ssize * 1.22, line, "regular", ssize, with_alpha(th.muted, a), anchor="la")
 
 
 # ===================================================================================================== annotated_image
@@ -519,15 +639,28 @@ def draw_annotated(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th:
     n = len(labels)
     if not n:
         return
-    top, bottom = CONTENT_TOP + 30, ctx.bottom - 40
-    bx0, bx1 = 100.0, 1230.0
-    if src is not None:
-        sc = min((bx1 - bx0) / src.width, (bottom - top) / src.height)
-        pw, ph = src.width * sc, src.height * sc
+    fr = ctx.frame
+    land = fr.landscape
+    times = reveal_times(n, dur, props.get("cues"), first=0.25, last=0.75)
+    num_col = on_color(th.accent)
+    if land:
+        top, bottom = ctx.top + 30, ctx.bottom - 40
+        bx0, bx1 = 100.0, 1230.0
+        leg = None
     else:
-        pw, ph = bx1 - bx0, bottom - top
+        leg = _annotated_layout(cv, labels, src, props, ctx)
+        top, bottom = leg["top"], leg["bottom"]
+        bx0, bx1 = leg["px"], leg["px"] + leg["pw_max"]
+    if src is not None:
+        if land:
+            sc = min((bx1 - bx0) / src.width, (bottom - top) / src.height)
+            pw, ph = src.width * sc, src.height * sc
+        else:
+            pw, ph = leg["pw"], leg["ph"]
+    else:
+        pw, ph = (bx1 - bx0, bottom - top) if land else (leg["pw"], leg["ph"])
     px0 = bx0 + (bx1 - bx0 - pw) / 2
-    py0 = top + (bottom - top - ph) / 2
+    py0 = top + (bottom - top - ph) / 2 if land else leg["py"]
     fa = ease_out_cubic(progress(lt, 0.0, 0.55))
     r_px = 26
     if src is not None:
@@ -544,25 +677,36 @@ def draw_annotated(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th:
         from . import _pm_icons as ic
         ic.draw_icon(cv, px0 + pw / 2, py0 + ph / 2 - 30, "image", 150, with_alpha(th.muted, 0.6 * fa))
         cv.text(px0 + pw / 2, py0 + ph / 2 + 80, str(props.get("alt") or ""), "regular", 32, with_alpha(th.muted, fa), anchor="ma")
-    times = reveal_times(n, dur, props.get("cues"), first=0.25, last=0.75)
-    num_col = on_color(th.accent)
-    # legend, right column
-    lx, lw = 1290.0, 500.0
-    row_h = 118.0
-    ly0 = (top + bottom) / 2 - n * row_h / 2
+    # legend: a right column in landscape; below the photo (one or two columns) on a narrow frame
+    if land:
+        lx, lw = 1290.0, 500.0
+        row_h = 118.0
+        ly0 = (top + bottom) / 2 - n * row_h / 2
     for i, lab in enumerate(labels):
         p = progress(lt, times[i], 0.5)
         if p <= 0:
             continue
         a, s = ease_out_cubic(p * 1.6), ease_out_back(p, 1.6)
-        y = ly0 + i * row_h + row_h / 2
         slide = (1 - ease_out_cubic(p)) * 40
-        cv.card(lx + slide, y - 46, lw, 92, th, r=24, alpha=a, shadow=False)
-        _pin_chip(cv, lx + 48 + slide, y, 27, i + 1, th, num_col, a)
-        size, lines = cv.fit_text(lab, "semibold", lw - 120, 80, 38, 26)
+        if land:
+            y = ly0 + i * row_h + row_h / 2
+            cx0, cw_, chip_h = lx + slide, lw, 92.0
+            max_lines, start_sz = 2, 38.0
+        else:
+            cx0, cy0 = leg["cells"][i]
+            cw_, chip_h = leg["cell_w"], leg["cell_h"]
+            y = cy0 + chip_h / 2
+            cx0 += slide * 0.5
+            max_lines, start_sz = 2, leg["font"]
+        cv.card(cx0, y - chip_h / 2, cw_, chip_h, th, r=24, alpha=a, shadow=False)
+        _pin_chip(cv, cx0 + 48, y, 27 if land else 29, i + 1, th, num_col, a)
+        if land:
+            size, lines = cv.fit_text(lab, "semibold", lw - 120, 80, 38, 26)
+        else:
+            size, lines = cv.fit_text(lab, "semibold", cw_ - 120, chip_h - 12, start_sz, 26, line_h=1.15)
         lh = size * 1.18
-        for k, line in enumerate(lines[:2]):
-            cv.text(lx + 92 + slide, y - (len(lines[:2]) - 1) * lh / 2 + k * lh, line, "semibold", size, with_alpha(th.text, a), anchor="lm")
+        for k, line in enumerate(lines[:max_lines]):
+            cv.text(cx0 + 92, y - (len(lines[:max_lines]) - 1) * lh / 2 + k * lh, line, "semibold", size, with_alpha(th.text, a), anchor="lm")
         if pins:
             x, yy = px0 + pins[i]["x"] * pw, py0 + pins[i]["y"] * ph
             pulse = progress(lt, times[i] + 0.15, 0.9)
@@ -570,6 +714,63 @@ def draw_annotated(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th:
                 cv.ellipse(x, yy, 26 + 40 * pulse, 26 + 40 * pulse, outline=with_alpha(th.accent2 if th.name != "paper" else th.accent, 0.8 * (1 - pulse)), width=4)
             cv.ellipse(x, yy + 5, 30 * s, 30 * s, fill=(0, 0, 0, int(70 * a)))
             _pin_chip(cv, x, yy, 28 * s, i + 1, th, num_col, a)
+
+
+@lru_cache(maxsize=64)
+def _legend_cells(n: int, cols: int, x0: float, w: float, y0: float, cell_h: float, gap: float) -> Tuple[Tuple[float, float, float], ...]:
+    """(x, y, width) of each legend chip in a grid of `cols` columns starting at y0; a short last row is centred."""
+    cw = (w - gap * (cols - 1)) / cols
+    rows = -(-n // cols)
+    out = []
+    for i in range(n):
+        r, c = divmod(i, cols)
+        left = n - cols * (rows - 1) if r == rows - 1 else cols
+        off = (cols - left) * (cw + gap) / 2 if r == rows - 1 and left < cols else 0.0
+        out.append((x0 + c * (cw + gap) + off, y0 + r * (cell_h + gap), cw))
+    return tuple(out)
+
+
+def _annotated_layout(cv: Canvas, labels: List[str], src, props: Dict[str, Any], ctx: SceneCtx) -> Dict[str, Any]:
+    """Narrow frames: the photograph WHOLE (never cropped) in the upper part of the content box, the numbered legend under it in one or two columns,
+    whichever leaves the photograph the larger. Pins keep their position relative to the photograph."""
+    fr = ctx.frame
+    x0, y0, x1, y1 = ctx.box
+    W = float(x1 - x0)
+    top, bottom = float(y0 + (10 if fr.vertical else 0)), float(y1 - 6)
+    n = len(labels)
+    gap = 14.0
+    credit_h = 38.0 if (src is not None and str(props.get("credit") or "").strip()) else 14.0
+    aspect = (src.width / src.height) if src is not None else 4 / 3
+    best = None
+    for cols in ((1, 2) if n > 1 else (1,)):
+        font = 40.0 * min(fr.type_scale, 1.1)
+        cell_w = (W - gap * (cols - 1)) / cols
+        # a label that needs more than two lines at the minimum size does not suit this column count
+        fits = all(len(cv.wrap(l, "semibold", 30, cell_w - 120)) <= 2 for l in labels)
+        cell_h = 104.0
+        rows = -(-n // cols)
+        leg_h = rows * cell_h + (rows - 1) * gap
+        avail_h = bottom - top - leg_h - credit_h - 24
+        if avail_h < 160:
+            continue
+        sc = min(W / (src.width if src else 4), avail_h / (src.height if src else 3)) if src is not None else min(W / 4, avail_h / 3)
+        pw, ph = (src.width * sc, src.height * sc) if src is not None else (min(W, avail_h * 4 / 3), min(avail_h, W * 3 / 4))
+        area = pw * ph * (1.0 if fits else 0.5)
+        if best is None or area > best[0] * 1.02:
+            best = (area, cols, cell_h, leg_h, pw, ph, font, cell_w)
+    if best is None:   # a very tall legend: one column of tight chips
+        cols, cell_h, gap_ = 1, 84.0, gap
+        leg_h = n * cell_h + (n - 1) * gap
+        avail_h = max(160.0, bottom - top - leg_h - credit_h - 24)
+        sc = min(W / (src.width if src else 4), avail_h / (src.height if src else 3))
+        pw, ph = (src.width * sc, src.height * sc) if src is not None else (min(W, avail_h * 4 / 3), min(avail_h, W * 3 / 4))
+        best = (0, cols, cell_h, leg_h, pw, ph, 34.0, W)
+    _, cols, cell_h, leg_h, pw, ph, font, cell_w = best
+    total = ph + credit_h + 24 + leg_h
+    py = top + max(0.0, (bottom - top - total) / 2)
+    ly = py + ph + credit_h + 24
+    cells = [(c[0], c[1]) for c in _legend_cells(n, cols, float(x0), W, ly, cell_h, gap)]
+    return {"top": top, "bottom": bottom, "px": float(x0), "pw_max": W, "pw": pw, "ph": ph, "py": py, "cells": cells, "cell_w": cell_w, "cell_h": cell_h, "font": font}
 
 
 def _pin_chip(cv: Canvas, cx: float, cy: float, r: float, num: int, th: Theme, num_col, a: float) -> None:
@@ -587,6 +788,7 @@ ELEMENTS = [
              "narration cites what a named outlet reported. Only headlines that appear in the grounding notes with their outlet and date; never invented or rephrased (copy "
              "the title exactly). Never for opinion, for a claim with no source in the notes, or for more than 3."),
         sanitize=sanitize_headline, draw=draw_headline, cues=headline_cues, anchors=headline_anchors, prepare=prepare_headline,
+        formats=("16:9", "9:16", "1:1", "4:5"),
         samples=[
             {"headlines": [{"text": "Central bank holds interest rates steady as inflation cools", "outlet": "Reuters", "date": "12 Nov 2026"}]},
             {"headlines": [{"text": "Ministers agree new flood defence funding for coastal towns", "outlet": "BBC News", "date": "3 Nov 2026"},
@@ -600,6 +802,7 @@ ELEMENTS = [
              "two or three voices really talk: a question and its answer, an interview, an argument, a myth and its reply. Never for one speaker, for text nobody says, or "
              "to put invented words in a real person's mouth."),
         sanitize=sanitize_dialogue, draw=draw_dialogue, cues=dialogue_cues, anchors=dialogue_anchors,
+        formats=("16:9", "9:16", "1:1", "4:5"),
         samples=[
             {"turns": [{"speaker": "Maya", "text": "Why does the moon look bigger near the horizon?"}, {"speaker": "Leo", "text": "It is an illusion. The moon is the same size all night."},
                        {"speaker": "Maya", "text": "So my camera would not see a difference?"}]},
@@ -615,6 +818,7 @@ ELEMENTS = [
              "and ONLY when every item has an obviously fitting everyday symbol (lock, cloud, clock, money, map pin, heart). Never for named artworks, people, places or abstract ideas (use bullets), "
              "numbers, long sentences or logos."),
         sanitize=sanitize_icons, draw=draw_icons, cues=icons_cues, anchors=icons_anchors,
+        formats=("16:9", "9:16", "1:1", "4:5"),
         samples=[
             {"title": "Why people love it", "items": [{"icon": "rocket", "label": "Fast", "sub": "Ready in seconds"}, {"icon": "lock", "label": "Private", "sub": "Your data stays yours"},
                                                       {"icon": "money", "label": "Affordable"}]},
@@ -629,6 +833,7 @@ ELEMENTS = [
              "not be visible, for people's faces or names, for abstract ideas (use diagram), or more than 3 per video."),
         sanitize=sanitize_annotated, draw=draw_annotated, cues=annotated_cues, anchors=annotated_anchors, prepare=prepare_annotated, fallback=annotated_fallback,
         max_per_video=3, min_seconds=5.0,
+        formats=("16:9", "9:16", "1:1", "4:5"),
         samples=[
             {"image_query": "bicycle close up", "alt": "A bicycle seen from the side", "labels": ["Front wheel", "Handlebars", "Saddle"]},
             {"image_query": "old stone bridge river", "alt": "A stone arch bridge over a river", "labels": ["Arch", "Parapet"],

@@ -14,6 +14,8 @@ import re
 import unicodedata
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from .netsafe import quality_fixes
+
 Word = Tuple[str, float, float]
 
 LEAD_IN_S = 0.15        # a reveal starts this long before the word that names it, so the picture is there when the word is heard
@@ -248,11 +250,17 @@ def coverage_problems(plan_beats: Sequence[Dict[str, Any]], min_items: int = 3, 
         if stype == "gallery" and props.get("photos"):   # the user's own photos: their captions only time the cuts, the narrator need not say them
             continue
         texts = item_texts(stype, props)
-        if len(texts) < min_items:
+        loose = False
+        if quality_fixes():   # QUALITY_FIXES: judge what the screen needs, not more. A timeline's date is shown but need not be read in the same form ("22 April" / "April twenty-second"):
+            if stype == "timeline":   # the event's own words are what the narrator must say
+                texts = [str(e.get("label", "")) or f"{e.get('date', '')}" for e in (props.get("events") or []) if isinstance(e, dict)]
+            elif stype == "gallery":  # stock photos: the queries are search words, the first photo is there from the start and one shared word anchors each other cut (as `apply` does)
+                texts, loose = texts[1:], True
+        if len(texts) < min_items - (1 if loose else 0):
             continue
         toks = re.findall(r"\S+", b.get("narration", ""))
-        found = find_mentions(texts, [(t, float(k), float(k) + 0.3) for k, t in enumerate(toks)])
-        if sum(f is not None for f in found) < min_share * len(texts):
+        found = find_mentions(texts, [(t, float(k), float(k) + 0.3) for k, t in enumerate(toks)], min_share=0.0 if loose else 0.5)
+        if sum(f is not None for f in found) < (0.4 if loose else min_share) * len(texts):
             missing = [t[:40] for t, f in zip(texts, found) if f is None][:4]
             out.append(f"beat {i + 1} ({stype}): its narration never says {missing}")
     return out

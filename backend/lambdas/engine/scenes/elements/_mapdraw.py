@@ -22,8 +22,9 @@ PANEL_TOP = 84
 CAM_SECONDS = 1.5
 CAM_START = 0.80                 # the camera starts this fraction of the way in and eases to the fit
 FIT_ALL = {"RUS", "FJI", "KIR"}  # countries whose far parts are part of the country picture (the Russian Far East crosses the antimeridian)
-LABEL_PX, SUB_PX, TITLE_PX, CAPTION_PX, NOTE_PX = 40, 30, 52, 30, 24
-PIN_R = 12
+LABEL_PX_, SUB_PX_, TITLE_PX, CAPTION_PX, NOTE_PX = 40, 30, 52, 30, 24
+LABEL_PX, SUB_PX = LABEL_PX_, SUB_PX_
+_PIN_R = 12
 
 Color = Tuple[int, ...]
 
@@ -105,10 +106,44 @@ class Model:
     foot: Tuple[float, float, float, float]    # caption chip rect
     note_pos: Tuple[float, float]
     notes: List[str] = field(default_factory=list)
+    k: float = 1.0                             # type scale of the frame (1.0 landscape): labels, pins and chips grow on narrower frames
+    landscape: bool = True
+    title_size: float = TITLE_PX
+    title_lines: List[str] = field(default_factory=list)
+    foot_size: float = CAPTION_PX
+    foot_lines: List[str] = field(default_factory=list)
+    note_size: float = NOTE_PX
+    y_off: float = 0.0                         # vertical shift of a shortened panel inside the box (world maps on tall frames)
+    ph_box: int = 0                            # the box height the model was asked for
+    need_h: float = 0.0                        # panel height the fitted map needs
 
 
 def _measure(text: str, weight: str, size: float) -> float:
     return load_font(weight, int(round(size * 2))).getlength(text) / 2.0
+
+
+def _fit_lines(text: str, weight: str, size: float, max_w: float, min_size: float, max_lines: int = 2) -> Tuple[float, List[str]]:
+    """The largest size (down to `min_size`) at which `text` fits `max_w` in at most `max_lines` lines (greedy word wrap); a single line is preferred to a smaller wrapped size."""
+    words = text.split()
+    sz = size
+    while True:
+        if _measure(text, weight, sz) <= max_w:
+            return sz, [text]
+        lines: List[str] = []
+        cur = ""
+        for w in words:
+            t = (cur + " " + w).strip()
+            if cur and _measure(t, weight, sz) > max_w:
+                lines.append(cur)
+                cur = w
+            else:
+                cur = t
+        lines.append(cur)
+        if len(lines) <= max_lines and all(_measure(l, weight, sz) <= max_w for l in lines):
+            return sz, lines
+        if sz <= min_size:
+            return sz, lines[:max_lines]
+        sz = max(min_size, sz - 2)
 
 
 def _bbox(a: np.ndarray) -> Tuple[float, float, float, float]:
@@ -283,6 +318,7 @@ def _intersect(a: Tuple[float, float, float, float], b: Tuple[float, float, floa
 
 
 def _place_labels(m: Model, tf) -> None:
+    PIN_R = _PIN_R * m.k
     """Choose, once, where each label sits relative to its pin or region (at the final camera), avoiding other labels, pins, the title and the footer."""
     safe = (16.0, 16.0, m.pw - 16.0, m.ph - 16.0)
     obstacles: List[Tuple[float, float, float, float]] = []
@@ -350,7 +386,20 @@ def _place_labels(m: Model, tf) -> None:
 
 
 @lru_cache(maxsize=6)
-def build_model(key: str, pw: int, ph: int) -> Model:
+def build_model(key: str, pw: int, ph: int, ts: float = 1.0, wide: bool = True) -> Model:
+    """The model for a panel of pw x ph. A world map (Equal Earth, 2:1) on a tall frame gets a panel only as tall as the map needs, centred in the box."""
+    m = _build_model(key, pw, ph, ts, wide)
+    m.ph_box = ph
+    if not wide and m.proj.kind == "equalearth":
+        ph2 = int(min(ph, max(m.need_h + 30, 0.5 * ph)))
+        if ph2 < ph - 60:
+            m = _build_model(key, pw, ph2, ts, wide)
+            m.ph_box, m.y_off = ph, (ph - ph2) / 2.0
+    return m
+
+
+def _build_model(key: str, pw: int, ph: int, ts: float = 1.0, wide: bool = True) -> Model:
+    LABEL_PX, SUB_PX = LABEL_PX_ * ts, SUB_PX_ * ts
     spec = json.loads(key)
     mode = spec["mode"]
     notes: List[str] = []
@@ -455,6 +504,10 @@ def build_model(key: str, pw: int, ph: int) -> Model:
     c_lat = float((allp[:, 1].min() + allp[:, 1].max()) / 2.0)
     half_lat = max(12.0, (allp[:, 1].max() - allp[:, 1].min()) * 1.2)
     half_lon = max(14.0, span_lon * 1.2) / max(0.35, math.cos(math.radians(min(70.0, abs(c_lat)))))
+    if not wide:                         # a narrower panel shows more latitude (or less longitude) than the extent suggests: widen the culling window
+        asp = ph / max(1.0, float(pw))
+        half_lat *= max(1.0, asp / 0.55)
+        half_lon *= max(1.0, 0.55 / asp)
 
     # ---- geometry in the plane
     land = _project_layer(_geo.layer(f"land_{level}"), proj, c_lat, half_lon, half_lat)
@@ -525,17 +578,34 @@ def build_model(key: str, pw: int, ph: int) -> Model:
             p = Path(pts, a, b, i, label=lab)
             if lab:
                 p.label_anchor = (float(pts[len(pts) // 2][0]), float(pts[len(pts) // 2][1]))
-                p.label_wh = (_measure(lab, "semibold", 34), 34 * 1.2)
+                p.label_wh = (_measure(lab, "semibold", 34 * ts), 34 * ts * 1.2)
             paths.append(p)
 
     # ---- the camera
     title, caption = spec.get("title", ""), spec.get("caption", "")
     note = bool(regions)
-    left, right, top, bottom = 90.0, 90.0, 56.0, 56.0
-    if title:
-        top += 100
-    if caption or note:
-        bottom += 52
+    note_size = NOTE_PX * ts
+    note_w = _measure("Borders as of today", "regular", note_size) if note else 0.0
+    t_size, t_lines = TITLE_PX, [title]
+    f_size, f_lines = CAPTION_PX, [caption]
+    if wide:
+        left, right, top, bottom = 90.0, 90.0, 56.0, 56.0
+        if title:
+            top += 100
+        if caption or note:
+            bottom += 52
+        while title and t_size > 34 and _measure(title, "semibold", t_size) > pw - 150:
+            t_size -= 2
+    else:
+        left, right, top, bottom = 48.0, 48.0, 56.0, 56.0
+        if title:
+            t_size, t_lines = _fit_lines(title, "semibold", TITLE_PX * 0.9 * ts, pw - 112.0, 36.0, 2)
+            top = 24.0 + len(t_lines) * t_size * 1.2 + 26 + 24
+        if caption:
+            f_size, f_lines = _fit_lines(caption, "regular", CAPTION_PX * 0.92 * ts, pw - 56.0 - 44 - (note_w + 20 if note else 0), 26.0, 2)
+            bottom = max(bottom, len(f_lines) * f_size * 1.2 + 20 + 28 + 24)
+        elif note:
+            bottom = max(bottom, note_size * 1.2 + 40)
     rw, rh = pw - left - right, ph - top - bottom
     xy: List[np.ndarray] = []
     px, py, pz = proj.forward(allp[:, 0], allp[:, 1])
@@ -557,14 +627,14 @@ def build_model(key: str, pw: int, ph: int) -> Model:
     m = Model(key, mode, pw, ph, proj, level, land, borders, adm1_rows, grat, outline, regions, pins, paths, 0, (cx, cy, scale), centre_px, title, caption, note,
               (0, 0, 0, 0), (0, 0, 0, 0), (pw - 24.0, ph - 16.0), notes)
     # chips (title top-left, caption bottom-left)
+    m.need_h = top + bottom + bh * scale * pad
+    m.k, m.landscape, m.title_size, m.title_lines, m.foot_size, m.foot_lines, m.note_size = ts, wide, t_size, t_lines, f_size, f_lines, note_size
+    m.note_pos = (pw - 24.0, ph - 16.0)
     if title:
-        size = TITLE_PX
-        while size > 34 and _measure(title, "semibold", size) > pw - 150:
-            size -= 2
-        m.chip = (28.0, 24.0, 28.0 + _measure(title, "semibold", size) + 56, 24.0 + size * 1.2 + 26)
+        m.chip = (28.0, 24.0, 28.0 + max(_measure(l, "semibold", t_size) for l in t_lines) + 56, 24.0 + len(t_lines) * t_size * 1.2 + 26)
     if caption:
-        w = _measure(caption, "regular", CAPTION_PX)
-        m.foot = (28.0, ph - 28.0 - CAPTION_PX * 1.2 - 20, 28.0 + w + 44, ph - 28.0)
+        w = max(_measure(l, "regular", f_size) for l in f_lines)
+        m.foot = (28.0, ph - 28.0 - len(f_lines) * f_size * 1.2 - 20, 28.0 + w + 44, ph - 28.0)
 
     def tf(p):
         return centre_px[0] + (p[0] - cx) * scale, centre_px[1] - (p[1] - cy) * scale
@@ -639,9 +709,9 @@ def _paint_base(m: Model, th: Theme, cam, ss: int) -> Canvas:
 
 
 @lru_cache(maxsize=3)
-def _settled_base(key: str, pw: int, ph: int, theme_name: str, ss: int) -> Image.Image:
+def _settled_base(key: str, pw: int, ph: int, theme_name: str, ss: int, k: float = 1.0, wide: bool = True) -> Image.Image:
     from ...theme import get_theme
-    m = build_model(key, pw, ph)
+    m = build_model(key, pw, ph, k, wide)
     return _paint_base(m, get_theme(theme_name), (m.cam_end[0], m.cam_end[1], m.cam_end[2]), ss).im
 
 
@@ -697,13 +767,14 @@ def reveal_schedule(m: Model, times: List[float], dur: float):
     return reg, pins, paths
 
 
-def paint_frame(cv: Canvas, m: Model, th: Theme, times: List[float], lt: float, dur: float, bottom: int) -> None:
+def paint_frame(cv: Canvas, m: Model, th: Theme, times: List[float], lt: float, dur: float, bottom: int, origin: Tuple[float, float] = (PANEL_X, PANEL_TOP)) -> None:
+    k, PIN_R = m.k, _PIN_R * m.k
     ss = cv.ss
     cam = _camera(m, lt)
     settled = lt >= CAM_SECONDS
     if settled:
         mc = Canvas(m.pw, m.ph, ss=ss)
-        mc.im = _settled_base(m.key, m.pw, m.ph, th.name, ss).copy()
+        mc.im = _settled_base(m.key, m.pw, m.ph_box or m.ph, th.name, ss, m.k, m.landscape).copy()
         mc.d = ImageDraw.Draw(mc.im, "RGBA")
     else:
         mc = _paint_base(m, th, cam, ss)
@@ -776,7 +847,7 @@ def paint_frame(cv: Canvas, m: Model, th: Theme, times: List[float], lt: float, 
             continue
         x, y = tf(it.anchor)
         w, h = it.label_wh
-        _halo_text(mc, x + it.label_off[0] + w / 2, y + it.label_off[1] + h / 2 + (1 - p) * 8, it.name, "semibold", LABEL_PX, th.text, halo, p, anchor="mm")
+        _halo_text(mc, x + it.label_off[0] + w / 2, y + it.label_off[1] + h / 2 + (1 - p) * 8, it.name, "semibold", LABEL_PX * k, th.text, halo, p, anchor="mm")
     for it, t0 in zip(m.pins, pin_t):
         if it.anchor is None:
             continue
@@ -788,9 +859,9 @@ def paint_frame(cv: Canvas, m: Model, th: Theme, times: List[float], lt: float, 
         w, h = it.label_wh
         right = it.label_off[0] < -w / 2 - 1
         ax = bx + (w if right else 0)
-        _halo_text(mc, ax, by, it.name, "semibold", LABEL_PX, th.text, halo, p, anchor="ra" if right else "la")
+        _halo_text(mc, ax, by, it.name, "semibold", LABEL_PX * k, th.text, halo, p, anchor="ra" if right else "la")
         if it.sub:
-            _halo_text(mc, ax, by + LABEL_PX * 1.2, it.sub, "regular", SUB_PX, _mix(th.text, th.muted, 0.35), halo, p, anchor="ra" if right else "la")
+            _halo_text(mc, ax, by + LABEL_PX * k * 1.2, it.sub, "regular", SUB_PX * k, _mix(th.text, th.muted, 0.35), halo, p, anchor="ra" if right else "la")
     for pth, (t0, t1) in zip(m.paths, path_t):
         if not pth.label or pth.label_anchor is None:
             continue
@@ -799,33 +870,42 @@ def paint_frame(cv: Canvas, m: Model, th: Theme, times: List[float], lt: float, 
             continue
         x, y = tf(pth.label_anchor)
         w, h = pth.label_wh
-        _halo_text(mc, x + pth.label_off[0] + w / 2, y + pth.label_off[1] + h / 2, pth.label, "semibold", 34, th.text, halo, p, anchor="mm")
+        _halo_text(mc, x + pth.label_off[0] + w / 2, y + pth.label_off[1] + h / 2, pth.label, "semibold", 34 * k, th.text, halo, p, anchor="mm")
 
     # title chip, caption, footnote
     if m.title:
         p = ease_out_cubic(progress(lt, 0.05, 0.5))
         x0, y0, x1, y1 = m.chip
-        size = TITLE_PX
-        while size > 34 and _measure(m.title, "semibold", size) > m.pw - 150:
-            size -= 2
+        size = m.title_size
         mc.rrect(x0, y0, x1 - x0, y1 - y0, 18, fill=with_alpha(th.bg_top, 0.82 * p), outline=with_alpha(th.card_outline, p), width=1.5)
         mc.rrect(x0 + 16, y0 + 14, 7, y1 - y0 - 28, 3.5, fill=with_alpha(th.accent, p))
-        mc.text(x0 + 38, y0 + 13 + (1 - p) * 10, m.title, "semibold", size, with_alpha(th.text, p))
+        for li, line in enumerate(m.title_lines):
+            mc.text(x0 + 38, y0 + 13 + (1 - p) * 10 + li * size * 1.2, line, "semibold", size, with_alpha(th.text, p))
     if m.caption:
         p = ease_out_cubic(progress(lt, 0.4, 0.5))
         x0, y0, x1, y1 = m.foot
         mc.rrect(x0, y0, x1 - x0, y1 - y0, 16, fill=with_alpha(th.bg_top, 0.82 * p), outline=with_alpha(th.card_outline, p), width=1.5)
-        mc.text(x0 + 22, y0 + 10, m.caption, "regular", CAPTION_PX, with_alpha(th.text, p))
+        for li, line in enumerate(m.foot_lines):
+            mc.text(x0 + 22, y0 + 10 + li * m.foot_size * 1.2, line, "regular", m.foot_size, with_alpha(th.text, p))
     if m.note:
         p = ease_out_cubic(progress(lt, 0.6, 0.5))
-        _halo_text(mc, m.note_pos[0], m.note_pos[1], "Borders as of today", "regular", NOTE_PX, th.muted if th.name != "paper" else (80, 88, 104), halo, 0.9 * p, anchor="rd")
+        _halo_text(mc, m.note_pos[0], m.note_pos[1], "Borders as of today", "regular", m.note_size, th.muted if th.name != "paper" else (80, 88, 104), halo, 0.9 * p, anchor="rd")
 
     # onto the page: shadow, the clipped map, a thin frame
-    x, y = PANEL_X, PANEL_TOP
+    x, y = origin[0], origin[1] + m.y_off
     cv.shadow(x, y, m.pw, m.ph, 36, blur=26, dy=14, alpha=th.shadow_alpha * 0.9)
     cv.im.paste(mc.im, (cv._s(x), cv._s(y)), _panel_mask(m.pw, m.ph, 36, ss))
     cv.rrect(x, y, m.pw, m.ph, 36, outline=th.card_outline, width=2)
 
 
-def panel_size(bottom: int) -> Tuple[int, int]:
-    return PANEL_W, max(360, int(bottom - 14 - PANEL_TOP))
+def panel_size(bottom: int, frame=None, box=None) -> Tuple[int, int]:
+    """Panel size in design units. Landscape keeps its panel; other frames use the whole content box (the map is the scene)."""
+    if frame is None or frame.landscape or box is None:
+        return PANEL_W, max(360, int(bottom - 14 - PANEL_TOP))
+    return int(box[2] - box[0]), int(box[3] - box[1])
+
+
+def panel_origin(frame=None, box=None) -> Tuple[float, float]:
+    if frame is None or frame.landscape or box is None:
+        return PANEL_X, PANEL_TOP
+    return float(box[0]), float(box[1])

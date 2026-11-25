@@ -178,6 +178,8 @@ def draw_frame(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
     style = props.get("style") if props.get("style") in STYLES else "polaroid"
     title, subtitle, date = str(props.get("title") or ""), str(props.get("subtitle") or ""), str(props.get("date_label") or "")
     K.backdrop(cv, src, th)
+    if not ctx.frame.landscape:
+        return _draw_flex(cv, src, ratio, style, title, subtitle, date, lt, dur, th, ctx)
 
     landscape = ratio >= 1.15
     in_frame_title = style == "polaroid" and bool(title)
@@ -227,3 +229,54 @@ def draw_frame(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
             K.draw_chip(cv, th, date, lt, 1830, bottom, t0=0.7, anchor="r")
         else:
             K.draw_chip(cv, th, date, lt, 90, bottom - ((lab["h"] + 18) if lab else 0), t0=0.7)
+
+
+def _draw_flex(cv: Canvas, src, ratio: float, style: str, title: str, subtitle: str, date: str, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    """Vertical, square and 4:5 frames: the photo takes the full width of the content box with the text (date chip, label) stacked above it; the whole block is centred."""
+    fr = ctx.frame
+    bx0, by0, bx1, by1 = ctx.box
+    box_w, box_h = float(bx1 - bx0), float(by1 - by0)
+    k = min(1.2, fr.type_scale)
+    lab_title = "" if style == "polaroid" and title else title
+    lab = K.label_metrics(cv, lab_title, subtitle, box_w, k)
+    chip_h = K.chip_metrics(cv, date, k)[1] if date else 0.0
+    text_h = (chip_h + (14.0 if lab else 0.0) if date else 0.0) + (lab["h"] if lab else 0.0)
+    gap = 28.0 if text_h else 0.0
+    bw, bh = box_w, box_h - text_h - gap
+    if style == "pinned":
+        bw, bh = bw - 70, bh - 60
+    elif style == "tilted":
+        bh -= 34
+    z = ease_in_out_cubic(progress(lt, 0.0, max(dur, 1.0)))
+    zoom = (1.0 - ZOOM) + ZOOM * z
+    a = ease_out_cubic(progress(lt, 0.0, 0.7))
+    rise = (1 - a) * 36
+
+    if style == "film":
+        ih = max(120.0, min(bh - 92.0, box_w / ratio))
+        ext = ih + 92.0
+        pw = ph = 0.0
+    else:
+        pw, ph, bd, bt, ang, _ = _fit(style, ratio, bw, bh)
+        fw, fh = pw + 2 * bd, ph + bd + bt
+        r = math.radians(abs(ang))
+        ext = fw * math.sin(r) + fh * math.cos(r) + (34.0 if style == "tilted" else 0.0)
+    total = text_h + gap + ext
+    top = by0 + max(0.0, (box_h - total) / 2)
+    cy = top + text_h + gap + ext / 2
+
+    if style == "pinned":
+        panel = (float(bx0), float(by0), box_w, box_h)
+        K.blit(cv, _cork(cv, panel), panel[0] + panel[2] / 2, panel[1] + panel[3] / 2, alpha=min(1.0, a * 1.6))
+    if style == "film":
+        K.blit(cv, _film_sprite(cv, src, ratio, ih, th), fr.cx, cy + rise, scale=zoom, alpha=a)
+    else:
+        sp = _sprite(cv, style, src, pw, ph, bd, bt, ang, title, th)
+        K.blit(cv, sp, fr.cx, cy + rise + (14.0 if style == "tilted" else 0.0), scale=zoom, alpha=a)
+
+    y = top
+    if date:
+        K.draw_chip(cv, th, date, lt, bx0, y + chip_h, t0=0.7, k=k)
+        y += chip_h + (14.0 if lab else 0.0)
+    if lab:
+        K.draw_label(cv, th, lab, lt, bx0, y + lab["h"], t0=0.5)

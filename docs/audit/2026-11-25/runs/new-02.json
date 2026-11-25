@@ -1,0 +1,649 @@
+{
+ "id": "new-02",
+ "category": "current events / news",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "noticias de esta semana sobre el precio de la gasolina en España",
+ "great": "Precio medio actual (boletín petrolero de la UE / Ministerio), tendencia semanal, causas (Brent, tipo de cambio, impuestos), comparación interanual, fechas de las fuentes; todo fechado.",
+ "minutes": 3.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:02:41",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The user asks for this week's news on Spanish gasoline prices, which changes frequently and may be newer than my training data, so live web search is required.",
+  "queries": [
+   "precio gasolina España esta semana",
+   "precio gasolina España noticias noviembre 2026",
+   "precios carburantes España semana"
+  ],
+  "searches": 3,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 14.0,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "news-explainer",
+   "finance-business"
+  ],
+  "staged": null,
+  "notes_len": 4330,
+  "n_sources": 4,
+  "n_fetched": 7,
+  "fetched": [
+   "El diésel y la gasolina se alejan de los máximos de 2026: el precio de llenar hoy el depósito",
+   "Nuevamente, igual que ocurrió la semana pasada, descienden los precios de la gasolina y del gasóleo: análisis semanal carburantes 20 noviembre 2026",
+   "La gasolina encadena cinco semanas de bajada y se queda en 1729 euros; el diésel vuelve a subir y llenar 55 litros ronda los 104 euros",
+   "Bajan los precios de la gasolina y el gasóleo en España: la gasolina 95 cae un 3,71% semanal - Quilla News",
+   "La gasolina baja un 16,3% y vuelve a niveles de julio | Demócrata",
+   "El precio de la gasolina acumula un abaratamiento del 16,3% y cae a niveles de julio",
+   "Precio de la gasolina y el diésel en 2027: ¿subirán? | GOS"
+  ],
+  "research_agent_cost_usd": 0.001255
+ },
+ "warnings": [],
+ "notes": "## El diésel y la gasolina se alejan de los máximos de 2026: el precio de llenar hoy el depósito\nPublished: Fri, 20 Nov 2026 00:24:11 GMT\nEl precio medio de la gasolina hoy en las estaciones de servicio de España es de 1,578 euros por litro. Estos niveles se sitúan en el entorno del verano. En julio, el coste de este carburante se situó entre 1,529 euros por litro (a fecha de uno de julio) y de 1,672 (a fecha de 31 de julio), según los datos del Ministerio para la Transición Ecológica. Noticia relacionada [...] A pesar de que el diésel y la gasolina empiezan a dar tregua, repostar sigue siendo más caro que hace un año. Con los precios del Boletín Petrolero de la UE de esta semana, llenar un depósito medio de 55 litros de diésel tiene un coste de 101,03 euros, unos 22,66 euros más que hace un año, cuando ascendía a unos 78,37 euros. Por su parte, para los vehículos de gasolina, llenar un depósito medio (55 litros) supone un desembolso actualmente de unos 89,32 euros, unos 8,09 euros más que hace un [...] Las ayudas constitu\n\n## Nuevamente, igual que ocurrió la semana pasada, descienden los precios de la gasolina y del gasóleo: análisis semanal carburantes 20 noviembre 2026\nPublished: Mon, 23 Nov 2026 15:00:00 GMT\nEl precio de la gasolina 95 en España se sitúa esta semana en 1,626 €/l, un 3,71% menos que la semana anterior. El gasóleo A baja hasta 1,847 €/l,\n\n## La gasolina encadena cinco semanas de bajada y se queda en 1729 euros; el diésel vuelve a subir y llenar 55 litros ronda los 104 euros\nPublished: Fri, 20 Nov 2026 15:00:00 GMT\nSegún el Boletín Petrolero de la Unión Europea publicado el 5 de noviembre, el litro de gasolina 95 cuesta de media 1,729 euros en España, un 1,25 % menos\n\n## Bajan los precios de la gasolina y el gasóleo en España: la gasolina 95 cae un 3,71% semanal - Quilla News\nPublished: Fri, 20 Nov 2026 15:00:00 GMT\nLa gasolina 95 se sitúa en 1,626 €/l, un 3,71% menos que la semana anterior · El gasóleo A baja a 1,847 €/l, un 2,12% menos · Es el segundo descenso semanal\n\n## La gasolina baja un 16,3% y vuelve a niveles de julio | Demócrata\nPublished: Thu, 19 Nov 2026 09:14:45 GMT\nCon los valores actuales, el litro de gasolina sin plomo de 95 en España continúa por debajo del promedio de la Unión Europea, situado en 1,829 euros, y también de la media de la eurozona, donde alcanza los 1,910 euros. En el caso del diésel, el precio en España igualmente se mantiene inferior al de la UE, que se coloca en 2,049 euros por litro, y al de la zona euro, donde marca 2,104 euros. [...] El precio de la gasolina encadena ya siete semanas consecutivas de descensos y suma un recorte del 16,3% desde finales de septiembre, hasta situarse en niveles que no se veían desde el mes de julio. Según el Boletín Petrolero de la UE, recogido por Europa Press, el precio medio del litro de gasolina se ha reducido un 3,7% en los últimos siete días, quedando en 1,624 euros. [...] Con las referencias del Boletín Petrolero de la UE de esta semana, llenar un depósito medio de 55 litros de diésel cu\n\n## El precio de la gasolina acumula un abaratamiento del 16,3% y cae a niveles de julio\nPublished: Thu, 19 Nov 2026 15:00:00 GMT\nCon estos niveles, el precio de la gasolina sin plomo de 95 se mantiene en España por debajo de la media de la Unión Europea, situada en 1,829 euros el litro, y\n\n## Precio de la gasolina y el diésel en 2027: ¿subirán? | GOS\nPublished: Fri, 20 Nov 2026 00:00:00 GMT\n| Carburante | Precio medio (16/11/2026) | Sin rebaja, a precios de hoy | Depósito de 55 L | ------| | Gasolina 95 | 1,624 €/L | unos 1,87 €/L | de 89,32 € a unos 102,60 € | | Diésel | 1,837 €/L | unos 2,08 €/L | de 101,03 € a unos 114,35 € | [...] La gasolina acumula siete semanas de bajadas y un 16,3 % menos desde finales de septiembre; el diésel ha bajado algo más de un 7 % en el mismo periodo (Boletín Petrolero de la UE, según Europa Press). La diferencia entre ambos es de 21 céntimos por litro. Llenar un depósito de 55 litros de diésel cuesta 101,03 euros, 22,66 más que hace un año; el de gasolina, 89,32 euros, 8,09 más. [...] El motivo está en el refino. La EIA elevó en noviembre un 12 % su previsión del diésel para 2027 porque espera que la oferta mundial de carburantes refinados siga ajustada hasta finales de año. El crudo puede abaratarse sin que el gasóleo lo haga al mismo ritm",
+ "plan": {
+  "title": "Gasolina en España: qué ha pasado esta semana",
+  "description": "Repasamos las noticias de la semana sobre el precio de la gasolina y el diésel en España, con datos del Boletín Petrolero de la UE. Vemos cuánto baja, cuánto cuesta llenar el depósito y qué puede pasar después.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "d114ecf4",
+    "narration": "Un 16,3 por ciento menos en menos de dos meses. La gasolina en España vuelve a niveles que no veíamos desde julio. Pero antes de celebrar, hay una trampa que afecta al diésel.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "-16,3%",
+      "label": "Gasolina desde finales de septiembre (Boletín Petrolero UE)"
+     }
+    },
+    "sfx": "impact",
+    "speaker": "narrator",
+    "chapter": "La bajada de la semana"
+   },
+   {
+    "id": "a65bbe12",
+    "narration": "Según el Boletín Petrolero de la Unión Europea, recogido por Europa Press, el litro de gasolina baja un 3,7 por ciento en siete días. Se queda en 1,624 euros de media.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "1.624",
+      "unit": "€/l",
+      "label": "Precio medio de la gasolina 95 en España",
+      "from": "1.800",
+      "delta": "-3,7% en una semana"
+     }
+    }
+   },
+   {
+    "id": "8aef0133",
+    "narration": "Es la séptima semana seguida de descensos. Por eso el recorte acumulado desde finales de septiembre llega al 16,3 por ciento, y el precio vuelve al nivel que tenía en julio.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Siete semanas de bajadas",
+      "items": [
+       "Séptima semana consecutiva a la baja",
+       "16,3% menos desde finales de septiembre",
+       "Niveles que no se veían desde julio"
+      ],
+      "style": "rail",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "2caac33a",
+    "narration": "Otras fuentes miden de forma algo distinta. Un análisis semanal sitúa la gasolina 95 en 1,626 euros el litro, un 3,71 por ciento menos. El gasóleo A baja a 1,847 euros, un 2,12 por ciento menos.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Carburante",
+       "Precio",
+       "Variación"
+      ],
+      "rows": [
+       [
+        "Gasolina 95",
+        "1,626 €/l",
+        "-3,71%"
+       ],
+       [
+        "Gasóleo A",
+        "1,847 €/l",
+        "-2,12%"
+       ]
+      ],
+      "title": "Análisis semanal, 20 de noviembre",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "7d7db5b4",
+    "narration": "Para situarnos, miremos julio. El día uno, según el Ministerio para la Transición Ecológica, estaba en 1,529 euros. A finales de septiembre empezaron las bajadas. Y el 16 de noviembre, tras siete semanas de caída, marcaba 1,624.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "De julio a noviembre",
+      "events": [
+       {
+        "date": "1 jul",
+        "label": "1,529 €/l (Ministerio)"
+       },
+       {
+        "date": "Finales sep",
+        "label": "Comienzan las bajadas"
+       },
+       {
+        "date": "16 nov",
+        "label": "1,624 €/l, siete semanas de caída"
+       }
+      ]
+     }
+    },
+    "chapter": "Comparar con julio y con Europa"
+   },
+   {
+    "id": "55a42094",
+    "narration": "El precio de hoy ronda 1,578 euros por litro en las estaciones, según el dato publicado el 20 de noviembre. Está en el entorno del verano, cuando julio osciló entre 1,529 y 1,672 euros.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "gasolinera España precio carburante",
+      "alt": "Surtidor en una gasolinera española",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "dc6dea48",
+    "narration": "Y frente a Europa, España sale bien parada. La gasolina 95 está por debajo de la media de la Unión Europea, 1,829 euros, y de la eurozona, 1,910 euros.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Gasolina 95, euros por litro",
+      "labels": [
+       "España",
+       "Unión Europea",
+       "Eurozona"
+      ],
+      "values": [
+       1.624,
+       1.829,
+       1.91
+      ],
+      "unit": "€",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "cb16fa3e",
+    "narration": "El diésel también está por debajo: 1,837 euros en España, frente a 2,049 en la Unión Europea y 2,104 en la eurozona. Aun así, ha bajado menos: algo más de un 7 por ciento.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Gasolina 95",
+       "tagline": "Siete semanas de bajadas"
+      },
+      "b": {
+       "name": "Diésel",
+       "tagline": "Baja más despacio"
+      },
+      "rows": [
+       {
+        "label": "Precio en España",
+        "a": "1,624 €/l",
+        "b": "1,837 €/l"
+       },
+       {
+        "label": "Caída desde septiembre",
+        "a": "16,3%",
+        "b": "Algo más del 7%"
+       }
+      ],
+      "verdict": "Diferencia: 21 céntimos por litro"
+     }
+    },
+    "chapter": "El diésel, la otra cara"
+   },
+   {
+    "id": "66fc13b2",
+    "narration": "Llenar un depósito medio de 55 litros de diésel cuesta 101,03 euros. Son 22,66 euros más que hace un año, cuando costaba unos 78,37 euros.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "101,03 €",
+      "label": "Depósito de 55 litros de diésel: 22,66 € más que hace un año"
+     }
+    }
+   },
+   {
+    "id": "e73ae7b9",
+    "narration": "En gasolina, el mismo depósito de 55 litros supone unos 89,32 euros. Son 8,09 euros más que hace un año. Es decir, repostar sigue siendo más caro, aunque los precios den tregua.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Depósito de 55 litros, hoy",
+      "labels": [
+       "Gasolina",
+       "Diésel"
+      ],
+      "values": [
+       89.32,
+       101.03
+      ],
+      "unit": "€",
+      "highlight": 1
+     }
+    }
+   },
+   {
+    "id": "39b49e84",
+    "narration": "Una fuente discrepa. Un artículo habla de cinco semanas de bajada, con la gasolina en 1,729 euros según el boletín del 5 de noviembre. Es un dato más antiguo, por eso conviene fijarse en la fecha.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Cómo leer las cifras",
+      "items": [
+       "Comprobar la fecha del dato",
+       "Distinguir gasolina 95 y gasóleo",
+       "Saber qué fuente publica el precio"
+      ]
+     }
+    }
+   },
+   {
+    "id": "f5b1d8da",
+    "narration": "¿Seguirá bajando? Hay una pista en el refino. La Agencia de Información de Energía de Estados Unidos subió un 12 por ciento su previsión del diésel para 2027, porque espera una oferta de carburantes ajustada.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Por qué el diésel no sigue al crudo",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Crudo más barato",
+        "icon": "amphora"
+       },
+       {
+        "id": "b",
+        "label": "Refino ajustado",
+        "icon": "factory"
+       },
+       {
+        "id": "c",
+        "label": "Diésel resiste",
+        "icon": "truck"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "no basta"
+       ],
+       [
+        "b",
+        "c",
+        "oferta corta"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    },
+    "chapter": "¿Y ahora qué?"
+   },
+   {
+    "id": "fa8a4400",
+    "narration": "Por eso el crudo puede abaratarse sin que el gasóleo lo haga al mismo ritmo. Es una previsión, no una certeza, y los precios pueden cambiar cada semana.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El crudo puede bajar sin que el diésel baje igual.",
+      "emphasis": "diésel"
+     }
+    }
+   },
+   {
+    "id": "d4f17525",
+    "narration": "En resumen: la gasolina baja siete semanas seguidas y vuelve a niveles de julio. El diésel cuesta más y resiste. Antes de repostar, mira la fecha del precio y la fuente.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lo que conviene recordar",
+      "items": [
+       "Gasolina: 1,624 €/l, siete semanas de bajada",
+       "Diésel: 1,837 €/l, baja más despacio",
+       "Llenar sigue siendo más caro que hace un año"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "emphasis": 0
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "El diésel y la gasolina se alejan de los máximos de 2026: el precio de llenar hoy el depósito",
+    "url": "https://www.abc.es/economia/cuentas-corrientes/diesel-gasolina-alejan-maximos-2026-precio-llenar-20261120012411-nt.html",
+    "publisher": "abc.es",
+    "license": "",
+    "date": "Fri, 20 Nov 2026 00:24:11 GMT"
+   },
+   {
+    "title": "Bajan los precios de la gasolina y el gasóleo en España: la gasolina 95 cae un 3,71% semanal - Quilla News",
+    "url": "https://quillanews.com/es/noticia/bajan-los-precios-de-la-gasolina-y-el-gasoleo-en-espana-la-gasolina-95-cae-un-3-3ce6070c",
+    "publisher": "quillanews.com",
+    "license": "",
+    "date": "Fri, 20 Nov 2026 15:00:00 GMT"
+   },
+   {
+    "title": "La gasolina baja un 16,3% y vuelve a niveles de julio | Demócrata",
+    "url": "https://www.democrata.es/economia/la-gasolina-se-abarata-un-16-3-desde-septiembre-y-vuelve-a-precios-de-julio",
+    "publisher": "democrata.es",
+    "license": "",
+    "date": "Thu, 19 Nov 2026 09:14:45 GMT"
+   },
+   {
+    "title": "Precio de la gasolina y el diésel en 2027: ¿subirán? | GOS",
+    "url": "https://globaloilshock.com/es/precio-gasolina-diesel-2027",
+    "publisher": "globaloilshock.com",
+    "license": "",
+    "date": "Fri, 20 Nov 2026 00:00:00 GMT"
+   }
+  ],
+  "skills": [
+   "news-explainer",
+   "finance-business"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 71.6,
+  "before_first_script_call_s": 16.0,
+  "script_s": 55.6
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "research": 0.00126,
+  "script_big": 0.16365,
+  "search_api": 0.024,
+  "total": 0.18915
+ },
+ "calls": {
+  "small": 3,
+  "tools": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 46823,
+  "out": 9987
+ },
+ "rules": {
+  "length": {
+   "words": 476,
+   "expected_words": 402,
+   "ratio": 1.184,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 211.6,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 34,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Un 16,3 por ciento menos en menos de dos meses. La gasolina en España vuelve a niveles que no veíamos desde julio. Pero antes de celebrar, hay una trampa que afecta al diésel.",
+   "close_text": "En resumen: la gasolina baja siete semanas seguidas y vuelve a niveles de julio. El diésel cuesta más y resiste. Antes de repostar, mira la fecha del precio y la fuente."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "stat": 2,
+    "counter": 1,
+    "bullets": 2,
+    "table": 1,
+    "timeline": 1,
+    "image": 1,
+    "chart": 2,
+    "versus": 1,
+    "checklist": 1,
+    "diagram": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.38,
+   "top_type": "stat",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 27,
+   "ungrounded_numbers": [],
+   "entities": 11,
+   "ungrounded_entities": [
+    "Agencia",
+    "Energía",
+    "Estados Unidos",
+    "Información"
+   ],
+   "ungrounded_share": 0.105,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "de la union europea",
+    "count": 2
+   },
+   {
+    "phrase": "euros mas que hace",
+    "count": 2
+   },
+   {
+    "phrase": "mas que hace un",
+    "count": 2
+   },
+   {
+    "phrase": "que hace un ano",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 7,
+   "notes_len": 4330,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": true,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 14 (bullets): its narration never says ['Diésel: 1,837 €/l, baja más despacio', 'Llenar sigue siendo más caro que hace un']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most figures match the notes, but the counter starts from an invented 1.800, the video's 'trampa' hook is never explained, and it mixes sources that disagree (1,578 / 1,624 / 1,626) without resolving them."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the price, the weekly trend, the EU comparison and the year-on-year change in tank cost, but it barely addresses causes (Brent, euro exchange rate, taxes) and gives no year-on-year price per litre."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The chapters are logical, but the figures are repeated across beats 1, 3, 5 and 14, and the beat 11 checklist digression interrupts the diesel story."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening '16,3 por ciento menos' with a 'trampa' teaser creates tension, and the ending gives a practical takeaway, though the trap is delivered weakly."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, clear news-explainer register that suits the audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary well, but the counter 'from 1.800' is invented, beat 11's checklist does not match the narration about a discrepant source, and the timeline mixes dates."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The refining explanation for diesel and the source-discrepancy note are useful, but most of the rest is a restatement of the headlines."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is a news video about this week with dated sources, but it is about 390 words and ignores the requested causes; some data is not from 'this week' (the 5 November bulletin)."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, correct Spanish with only minor stiffness."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "\"from\": \"1.800\"",
+    "issue": "The counter's starting value 1.800 is not in the notes; it is an invented figure.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "El precio de hoy ronda 1,578 euros por litro",
+    "issue": "It sits next to 1,624 and 1,626 for the same week without explaining the difference in source or date, which confuses the 'current price'.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "hay una trampa que afecta al diésel",
+    "issue": "The promised 'trap' is never named later; the diesel section just says it falls more slowly.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "¿Seguirá bajando? Hay una pista en el refino.",
+    "issue": "Brent, the exchange rate and taxes are omitted, and the US EIA forecast for 2027 is used as the only explanation.",
+    "beat": 12
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Comprobar la fecha del dato",
+    "issue": "The checklist scene does not match the narration, which talks about a discrepant article.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "1,624 €/l, siete semanas de caída",
+    "issue": "It places a 16 November price in the timeline next to a Ministry price from 1 July, mixing sources.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Es la séptima semana seguida de descensos.",
+    "issue": "It repeats information already given in beat 1.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "Causes: Brent, euro/dollar exchange rate, taxes",
+   "Year-on-year price per litre of petrol",
+   "Explanation of the trap and the diesel-petrol gap in context",
+   "Clear dating of the sources"
+  ],
+  "wrong_facts": [
+   "Counter 'from 1.800' is not in the notes (invented).",
+   "Mixing 1,578 (ABC) and 1,624 (EU bulletin) as 'today' without explanation."
+  ],
+  "would_publish": false,
+  "summary": "A clear, well-sourced news recap with a decent hook, but it has an invented counter start value, unexplained discrepancies between figures and no causes (Brent, exchange rate, taxes). It is repetitive for the length and not publishable without edits.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Para situarnos, miremos julio.",
+     "problem": "Slightly stiff for narration",
+     "better": "Para ponerlo en contexto, veamos julio."
+    },
+    {
+     "quote": "España sale bien parada.",
+     "problem": "Fine but a bit colloquial next to the formal register",
+     "better": "España queda por debajo de la media."
+    },
+    {
+     "quote": "Una fuente discrepa.",
+     "problem": "Abrupt, unclear",
+     "better": "Ojo, hay una fuente que da otro dato."
+    }
+   ]
+  },
+  "mean": 3.33,
+  "cost_usd": 0.029824,
+  "tokens": [
+   6967,
+   1589
+  ]
+ }
+}

@@ -59,6 +59,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     description = "\n\n".join(x for x in (tl.get("description", ""), _chapters_text(tl.get("chapters", []), tl.get("language", "en")), assets.credits_block(tl.get("ledger", []), tl.get("sources", []), tl.get("language", "en"))) if x)
     attrs = {
         "video_uri": f"s3://{OUTPUT_BUCKET}/{vkey}", "duration_s": int(got), "final_rev": rev, "edit_state": "READY",
+        "aspect": (tl.get("frame") or {}).get("aspect", "16:9"), "resolution": (tl.get("frame") or {}).get("resolution", "1080p"),
         "youtube_description": description[:4800], "title": tl.get("title") or "Untitled", "last_rendered_at": int(time.time()),
         **({"preview_gif_uri": f"s3://{OUTPUT_BUCKET}/{gkey}"} if have_gif else {}),
     }

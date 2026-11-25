@@ -57,12 +57,19 @@ AMBIENT_DOWNSCALE = 8  # ambient layer is composed at 1/8 of the supersampled ca
 
 class Canvas:
     def __init__(self, width: int = 1920, height: int = 1080, ss: int = 2):
-        self.W, self.H, self.ss = width, height, ss
+        self.W, self.H, self.ss = width, height, ss   # W, H: DESIGN units (see frame.py); the pixel size is W*ss x H*ss
+        self.min_font = 1e9   # smallest type size drawn (design units): the framed fallback reads it to flag text that became too small
         self.im = Image.new("RGB", (width * ss, height * ss))
         self.d = ImageDraw.Draw(self.im, "RGBA")
 
     # ---------- output ----------
-    def to_rgb(self) -> Image.Image:
+    def to_rgb(self, size=None) -> Image.Image:
+        """The finished image at design size, or at `size` (w, h) when that differs (720p: a box reduce by 3 from the 2x canvas)."""
+        if size and tuple(size) != (self.W, self.H):
+            tw, th = int(size[0]), int(size[1])
+            if self.im.width % tw == 0 and self.im.height % th == 0 and self.im.width // tw == self.im.height // th:
+                return self.im.reduce(self.im.width // tw)
+            return self.im.resize((tw, th), Image.BOX if self.ss > 1 else Image.BILINEAR)
         return self.im.reduce(self.ss) if self.ss > 1 else self.im
 
     # ---------- background ----------
@@ -160,6 +167,8 @@ class Canvas:
         a = int(fill[3]) if len(fill) == 4 else 255
         if a <= 0 or not s:
             return
+        if size < self.min_font:
+            self.min_font = size
         font = self.font(weight, size)
         X, Y = self._s(x), self._s(y)
         if a >= 255:

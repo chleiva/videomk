@@ -76,6 +76,15 @@ def _mosaic_templates(n: int, ax0: float, ay0: float, aw: float, ah: float) -> L
     return out
 
 
+def _mosaic_candidates(n: int, ax0: float, ay0: float, aw: float, ah: float, flex: bool) -> List[List[Rect]]:
+    """The landscape templates, plus (flex: vertical, square and 4:5 frames) the same templates turned on their side: a hero row and rows of the others."""
+    out = _mosaic_templates(n, ax0, ay0, aw, ah)
+    if flex:
+        for t in _mosaic_templates(n, ay0, ax0, ah, aw):
+            out.append([(r[1], r[0], r[3], r[2]) for r in t])
+    return out
+
+
 def _assign(cells: List[Rect], ratios: Tuple[float, ...]) -> Tuple[float, List[int]]:
     """photo index for each cell, minimising how much each photo would be cropped (hero cell: also a mild preference for the first photo)."""
     n = len(cells)
@@ -103,15 +112,15 @@ def _assign(cells: List[Rect], ratios: Tuple[float, ...]) -> Tuple[float, List[i
 
 
 @lru_cache(maxsize=128)
-def mosaic_layout(ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float) -> Tuple[Rect, ...]:
+def mosaic_layout(ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float, flex: bool = False) -> Tuple[Rect, ...]:
     n = len(ratios)
     best: Optional[Tuple[float, List[Rect], List[int]]] = None
-    for cells in _mosaic_templates(n, ax0, ay0, aw, ah):
+    for cells in _mosaic_candidates(n, ax0, ay0, aw, ah, flex):
         c, pick = _assign(cells, ratios)
         if best is None or c < best[0] - 1e-9:
             best = (c, cells, pick)
     if best is None:                                      # no template fits (tiny area): equal tiles
-        return grid_layout(ratios, ax0, ay0, aw, ah)[0]
+        return (grid_layout_flex if flex else grid_layout)(ratios, ax0, ay0, aw, ah)[0]
     _, cells, pick = best
     out: List[Optional[Rect]] = [None] * n
     for ci, pi in enumerate(pick):
@@ -147,6 +156,34 @@ def grid_layout(ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah
     return tuple(rects), 18.0
 
 
+@lru_cache(maxsize=128)
+def grid_layout_flex(ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float) -> Tuple[Tuple[Rect, ...], float]:
+    """Grid for vertical, square and 4:5 frames: 1-4 columns by as many rows as needed (2 columns by N rows, 3 by 3), tiles of one shape that fits the photos."""
+    n = len(ratios)
+    g = GAP + 4
+    best = None
+    for t in (1.5, 1.0, 0.75, 0.6):
+        fit = math.exp(-1.2 * sum(math.log(t / r) ** 2 for r in ratios) / n)         # how little the tiles crop or letterbox the photos
+        for cols in range(1, min(4, n) + 1):
+            rows = math.ceil(n / cols)
+            w = min((aw - (cols - 1) * g) / cols, ((ah - (rows - 1) * g) / rows) * t)
+            score = w * (w / t) * fit * (1.0 if n % cols == 0 else 0.8)
+            if best is None or score > best[0] * 1.03:
+                best = (score, rows, cols, w, w / t)
+    _, rows, cols, w, h = best
+    total_h = rows * h + (rows - 1) * g
+    y = ay0 + (ah - total_h) / 2
+    rects: List[Rect] = []
+    for cnt in _split(n, rows):
+        row_w = cnt * w + (cnt - 1) * g
+        x = ax0 + (aw - row_w) / 2
+        for _ in range(cnt):
+            rects.append((x, y, w, h))
+            x += w + g
+        y += h + g
+    return tuple(rects), 22.0
+
+
 # ----------------------------------------------------------------------------------------------------------------------------- polaroids and stack geometry
 def _frame_size(ratio: float, bw: float, bh: float, border: float = 0.045, bottom: float = 0.17) -> Tuple[float, float, float]:
     """(photo w, photo h, long side s) of the largest framed photo that fits bw x bh; border and bottom are fractions of the photo's long side."""
@@ -156,11 +193,11 @@ def _frame_size(ratio: float, bw: float, bh: float, border: float = 0.045, botto
 
 
 @lru_cache(maxsize=128)
-def polaroid_layout(ids: Tuple[str, ...], ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float):
+def polaroid_layout(ids: Tuple[str, ...], ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float, max_rows: int = 2):
     """For each photo: (cx, cy, photo_w, photo_h, border, bottom_border, angle). Rows of frames, jittered, overlapping about 10%."""
     n = len(ratios)
     best = None
-    for rows in (1, 2):
+    for rows in range(1, max_rows + 1):
         if rows > n:
             continue
         counts = _split(n, rows)
@@ -197,7 +234,7 @@ def polaroid_layout(ids: Tuple[str, ...], ratios: Tuple[float, ...], ax0: float,
 
 
 @lru_cache(maxsize=128)
-def stack_layout(ids: Tuple[str, ...], ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float):
+def stack_layout(ids: Tuple[str, ...], ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float, tall: bool = False):
     """For each photo: (cx, cy, photo_w, photo_h, border, angle): earlier photos smaller and further from the middle, the last one largest and nearly straight."""
     n = len(ratios)
     seed = ",".join(ids)
@@ -206,15 +243,22 @@ def stack_layout(ids: Tuple[str, ...], ratios: Tuple[float, ...], ax0: float, ay
     for i, r in enumerate(ratios):
         t = i / (n - 1) if n > 1 else 1.0
         f = 0.58 + 0.42 * t ** 0.85
-        pw, ph, s = _frame_size(r, min(aw * 0.62, 1100) * f, ah * 0.97 * f, border=0.03, bottom=0.03)
+        if tall:                                           # narrow area: the pile runs down the frame instead of across it
+            pw, ph, s = _frame_size(r, aw * 0.84 * f, ah * 0.70 * f, border=0.03, bottom=0.03)
+        else:
+            pw, ph, s = _frame_size(r, min(aw * 0.62, 1100) * f, ah * 0.97 * f, border=0.03, bottom=0.03)
         bd = 0.03 * s
         ang = K.jitter(seed, i * 3) * 7.0 * (1.0 - 0.55 * t)
         if abs(ang) < 1.5 and i < n - 1:
             ang = 1.5 if i % 2 else -1.5
         side = -1.0 if i % 2 else 1.0
         spread = (1 - t) ** 0.9
-        cx = mx + side * spread * aw * (0.27 + 0.05 * abs(K.jitter(seed, i * 3 + 1)))
-        cy = my + K.jitter(seed, i * 3 + 2) * spread * ah * 0.12
+        if tall:
+            cx = mx + K.jitter(seed, i * 3 + 1) * spread * aw * 0.10
+            cy = my + side * spread * ah * (0.25 + 0.04 * abs(K.jitter(seed, i * 3 + 2)))
+        else:
+            cx = mx + side * spread * aw * (0.27 + 0.05 * abs(K.jitter(seed, i * 3 + 1)))
+            cy = my + K.jitter(seed, i * 3 + 2) * spread * ah * 0.12
         fw, fh = pw + 2 * bd, ph + 2 * bd
         ex = (abs(math.cos(math.radians(ang))) * fw + abs(math.sin(math.radians(ang))) * fh) / 2
         ey = (abs(math.sin(math.radians(ang))) * fw + abs(math.cos(math.radians(ang))) * fh) / 2
@@ -321,6 +365,100 @@ def _draw_film(cv: Canvas, th: Theme, srcs, ratios, times, lt: float, dur: float
                 cv.rrect(cx - fw / 2 - 3, cy - row["ih"] / 2 - 3, fw + 6, row["ih"] + 6, 6, outline=with_alpha(th.accent, p * a), width=5)
 
 
+# ----------------------------------------------------------------------------------------------------------------------------- vertical film strips (vertical, square, 4:5)
+V_FADE, V_DRIFT, V_GAPX = 36.0, 26.0, 22.0
+
+
+@lru_cache(maxsize=64)
+def film_layout_cols(ratios: Tuple[float, ...], ax0: float, ay0: float, aw: float, ah: float):
+    """Film strips running top to bottom, 1-3 side by side: [{x, w, iw, y, h, frames: [(photo index, y, h)], dir}] in logical px. The frames stay clear of the window's ends
+    (fade + drift) so the strips can slide without touching the caption band."""
+    n = len(ratios)
+    inset = V_FADE + V_DRIFT
+    length = ah - 2 * inset
+    inv = [1.0 / max(0.67, min(1.5, r)) for r in ratios]
+    best = None
+    for ncols in range(1, min(3, n) + 1):
+        counts = _split(n, ncols)
+        iw = (aw - (ncols - 1) * V_GAPX) / ncols - 2 * BAND
+        idx = 0
+        for cnt in counts:
+            iw = min(iw, (length - 2 * FRAME_PAD - (cnt - 1) * FRAME_GAP) / sum(inv[idx: idx + cnt]))
+            idx += cnt
+        eff = iw * (1.0 if max(counts) == min(counts) else 0.88)      # strips of equal length look calmer than a long one next to a short one
+        if best is None or eff > best[0] * 1.06:
+            best = (eff, ncols, counts, iw)
+    _, ncols, counts, iw = best
+    sw = iw + 2 * BAND
+    x = ax0 + (aw - (ncols * sw + (ncols - 1) * V_GAPX)) / 2
+    cols = []
+    idx = 0
+    for ci, cnt in enumerate(counts):
+        hs = [iw * inv[idx + j] for j in range(cnt)]
+        total = sum(hs) + (cnt - 1) * FRAME_GAP + 2 * FRAME_PAD
+        y = ay0 + (ah - total) / 2
+        frames = []
+        fy = y + FRAME_PAD
+        for j in range(cnt):
+            frames.append((idx + j, fy, hs[j]))
+            fy += hs[j] + FRAME_GAP
+        cols.append({"x": x, "w": sw, "iw": iw, "y": y, "h": total, "frames": frames, "dir": -1.0 if ci % 2 == 0 else 1.0})
+        x += sw + V_GAPX
+        idx += cnt
+    return cols
+
+
+def _film_col_sprite(cv: Canvas, col: Dict[str, Any], srcs: List[Optional[Image.Image]], th: Theme) -> K.Sprite:
+    ss = cv.ss
+    key = ("filmcol", tuple(K.sid(s) for s in srcs[col["frames"][0][0]: col["frames"][-1][0] + 1]), round(col["w"] * ss), round(col["h"] * ss), round(col["iw"] * ss),
+           tuple(round(f[2] * ss) for f in col["frames"]), th.name if any(s is None for s in srcs) else "")
+
+    def build() -> K.Sprite:
+        W, H = int(round(col["w"] * ss)), int(round(col["h"] * ss))
+        im = Image.new("RGB", (W, H), (17, 17, 21))
+        d = ImageDraw.Draw(im, "RGBA")
+        band = int(BAND * ss)
+        d.rectangle([band - 2 * ss, 0, band - ss, H], fill=(255, 255, 255, 22))
+        d.rectangle([W - band + ss, 0, W - band + 2 * ss, H], fill=(255, 255, 255, 22))
+        pitch, hw, hh = 46 * ss, 16 * ss, 24 * ss
+        y = 6 * ss
+        while y < H:
+            for cx in (band / 2, W - band / 2):
+                d.rounded_rectangle([cx - hw / 2, y, cx + hw / 2, y + hh], 4 * ss, fill=(233, 231, 224, 235))
+            y += pitch
+        for idx, fy, fh in col["frames"]:
+            w, h = int(round(col["iw"] * ss)), int(round(fh * ss))
+            tile = K.rounded(K.photo_tile(srcs[idx], w, h, th, idx).point(lambda v: int(v * 0.36)), 3 * ss)
+            im.paste(tile, (band, int(round((fy - col["y"]) * ss))), tile.getchannel("A"))
+        return K.Sprite(im, Image.new("L", (W, H), 255))
+    return K.cached(key, build, pin=tuple(srcs))
+
+
+def _draw_film_cols(cv: Canvas, th: Theme, srcs, ratios, times, lt: float, dur: float, area: Rect) -> None:
+    ss = cv.ss
+    cols = film_layout_cols(tuple(ratios), *area)
+    n = len(srcs)
+    latest = max([i for i in range(n) if lt >= times[i]] or [-1])
+    y0, y1 = area[1], area[1] + area[3]
+    for col in cols:
+        sp = _film_col_sprite(cv, col, srcs, th)
+        enter = 1 - ease_out_cubic(progress(lt, 0.0, 1.0))
+        off = col["dir"] * (-V_DRIFT + 2 * V_DRIFT * min(1.0, lt / max(dur, 1.0))) + col["dir"] * -1 * enter * 380
+        a = min(1.0, progress(lt, 0.0, 0.5) * 1.5)
+        cx = col["x"] + col["w"] / 2
+        K.blit_clip(cv, sp, cx, col["y"] + col["h"] / 2 + off, y0, y1, V_FADE, alpha=a)
+        for idx, fy, fh in col["frames"]:
+            p = ease_out_cubic(progress(lt, times[idx], REVEAL_S))
+            if p <= 0.01:
+                continue
+            w, h = int(round(col["iw"] * ss)), int(round(fh * ss))
+            tile = K.cached(("filmcollit", K.sid(srcs[idx]), w, h, th.name, idx % 2), lambda: K.sprite_of(K.rounded(K.photo_tile(srcs[idx], w, h, th, idx), 3 * ss)), pin=srcs[idx])
+            cy = fy + fh / 2 + off
+            K.blit_clip(cv, tile, cx, cy, y0, y1, V_FADE, scale=1.0 + 0.05 * (1 - p), alpha=p * a)
+            if idx == latest and y0 + V_FADE < cy - fh / 2 and cy + fh / 2 < y1 - V_FADE:
+                cv.rrect(cx - col["iw"] / 2 - 3, cy - fh / 2 - 3, col["iw"] + 6, fh + 6, 6, outline=with_alpha(th.accent, p * a), width=5)
+
+
 # ----------------------------------------------------------------------------------------------------------------------------- sprites
 def _tile_sprite(cv: Canvas, src, w: float, h: float, r: float, th: Theme, idx: int) -> K.Sprite:
     ss = cv.ss
@@ -391,27 +529,35 @@ def draw_collage(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
     K.backdrop(cv, first, th)
 
     title, subtitle = str(props.get("title") or ""), str(props.get("subtitle") or "")
-    lab = K.label_metrics(cv, title, subtitle, 1000)
+    fr = ctx.frame
+    land = fr.landscape
+    bx0, by0, bx1, _ = ctx.box
+    lab = K.label_metrics(cv, title, subtitle, 1000 if land else min(1000.0, bx1 - bx0), 1.0 if land else min(1.2, fr.type_scale))
     bottom = ctx.bottom - 4
     ay1 = bottom - ((lab["h"] + 14) if lab else 0)
-    area = (AX0, AY0, AX1 - AX0, ay1 - AY0)
+    area = (AX0, AY0, AX1 - AX0, ay1 - AY0) if land else (float(bx0), float(by0), float(bx1 - bx0), ay1 - by0)
+    tall = area[2] < area[3] * 1.05                         # a narrow area (9:16, 4:5): piles and strips run top to bottom
 
     if style == "filmstrip":
-        _draw_film(cv, th, srcs, ratios, times, lt, dur, area)
+        (_draw_film if land else _draw_film_cols)(cv, th, srcs, ratios, times, lt, dur, area)
     elif style in ("mosaic", "grid"):
-        rects, rad = (grid_layout(ratios, *area)) if style == "grid" else (mosaic_layout(ratios, *area), 22.0)
+        if land:
+            rects, rad = (grid_layout(ratios, *area)) if style == "grid" else (mosaic_layout(ratios, *area), 22.0)
+        else:
+            rects, rad = (grid_layout_flex(ratios, *area)) if style == "grid" else (mosaic_layout(ratios, *area, True), 22.0)
         cx_mid = area[0] + area[2] / 2
+        cy_mid = area[1] + area[3] / 2
         for i in range(n):
             p = progress(lt, times[i], REVEAL_S)
             if p <= 0:
                 continue
             x, y, w, h = rects[i]
             sp = _tile_sprite(cv, srcs[i], w, h, rad, th, i)
-            off = ((-1 if x + w / 2 < cx_mid else 1) * 90, 0)
+            off = ((-1 if x + w / 2 < cx_mid else 1) * 90, 0) if land else (0, (-1 if y + h / 2 < cy_mid else 1) * 90)
             dx, dy, sc, a = _anim("pop" if style == "grid" else "slide", p, ids[i], off)
             K.blit(cv, sp, x + w / 2 + dx, y + h / 2 + dy, scale=sc, alpha=a)
     elif style == "polaroids":
-        lay = polaroid_layout(ids, ratios, *area)
+        lay = polaroid_layout(ids, ratios, *area) if land else polaroid_layout(ids, ratios, *area, min(n, 6))
         for i in range(n):
             p = progress(lt, times[i], REVEAL_S + 0.1)
             if p <= 0:
@@ -421,7 +567,7 @@ def draw_collage(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
             dx, dy, sc, a = _anim("fly", p, ids[i])
             K.blit(cv, sp, cx + dx, cy + dy, scale=sc, alpha=a)
     else:                                                    # stack
-        lay = stack_layout(ids, ratios, *area)
+        lay = stack_layout(ids, ratios, *area, tall=not land and tall)
         for i in range(n):
             p = progress(lt, times[i], REVEAL_S + 0.1)
             if p <= 0:
@@ -432,4 +578,4 @@ def draw_collage(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
             K.blit(cv, sp, cx + dx, cy + dy, scale=sc, alpha=a)
 
     if lab:
-        K.draw_label(cv, th, lab, lt, 90, bottom, t0=min(0.9, times[min(1, n - 1)] + 0.2))
+        K.draw_label(cv, th, lab, lt, 90 if land else bx0, bottom, t0=min(0.9, times[min(1, n - 1)] + 0.2))

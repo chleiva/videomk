@@ -1,0 +1,563 @@
+{
+ "id": "hea-01",
+ "category": "health and wellbeing",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how does sleep affect memory and what can I do to sleep better",
+ "great": "Sleep stages and consolidation (slow-wave and REM), hippocampus to cortex transfer, effects of sleep deprivation, practical hygiene tips (consistent schedule, light, caffeine, screens), 7-9 hours for adults; avoids medical overclaiming; suggests a doctor for persistent insomnia.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:00:10",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Sleep's effects on memory (consolidation, REM and slow-wave sleep roles) and general sleep hygiene advice are well-established, timeless science that an encyclopedia covers accurately; no recent devel",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "How Sleep Builds Your Memory (and How to Sleep Better)",
+  "description": "Discover how your brain turns the day's experiences into lasting memories while you sleep. Learn simple, practical habits that help you fall asleep and stay asleep.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "ba7a3c91",
+    "narration": "You study all evening, then stay up late to cram more. It feels productive. But what if the smartest thing you could do for your memory is simply to go to sleep?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Sleep: Your Brain's Memory Machine",
+      "subtitle": "How sleep shapes what you remember, and how to sleep better"
+     }
+    },
+    "chapter": "Why sleep matters for memory"
+   },
+   {
+    "id": "13709eea",
+    "narration": "Here is the common misconception: that sleep is downtime, when the brain switches off. In reality, your brain stays busy all night, sorting, strengthening and filing away what you learned during the day.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person sleeping peacefully night",
+      "alt": "quiet bedroom at night"
+     }
+    }
+   },
+   {
+    "id": "abd3e520",
+    "narration": "Think of your day like a messy desk. Notes and papers pile up everywhere. Sleep is the night shift that tidies the desk, keeps the important pages, and throws away the clutter.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The night shift",
+      "items": [
+       "Sort the day's experiences",
+       "Keep what matters",
+       "Clear out the clutter"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "list",
+       "star",
+       "trash"
+      ]
+     }
+    }
+   },
+   {
+    "id": "df443816",
+    "narration": "Scientists call this process memory consolidation. It is how fragile, new memories become stable, long-lasting ones. Without it, much of what you learned today fades quickly.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Memory consolidation",
+      "definition": "The process by which new, fragile memories are stabilized and stored for the long term, largely during sleep."
+     }
+    }
+   },
+   {
+    "id": "1b45e04c",
+    "narration": "A night of sleep moves through stages. You drift into light sleep, then deep sleep, then dream-rich REM sleep. This cycle repeats several times through the night.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "One sleep cycle",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Light sleep",
+        "icon": "moon"
+       },
+       {
+        "id": "b",
+        "label": "Deep sleep",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "REM sleep",
+        "icon": "eye"
+       },
+       {
+        "id": "d",
+        "label": "Repeat",
+        "icon": "refresh-cw"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    },
+    "chapter": "What happens while you sleep"
+   },
+   {
+    "id": "eaa6d145",
+    "narration": "Deep sleep is thought to help with facts and events. Your brain replays the day's experiences, moving them from short-term storage toward long-term storage. It is like saving a document to a hard drive.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "s",
+        "label": "Learn something new",
+        "kind": "start"
+       },
+       {
+        "id": "t",
+        "label": "Short-term storage",
+        "kind": "step"
+       },
+       {
+        "id": "r",
+        "label": "Replay during deep sleep",
+        "kind": "step"
+       },
+       {
+        "id": "l",
+        "label": "Long-term storage",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "s",
+        "t"
+       ],
+       [
+        "t",
+        "r"
+       ],
+       [
+        "r",
+        "l"
+       ]
+      ],
+      "title": "Deep sleep and facts"
+     }
+    }
+   },
+   {
+    "id": "63d24cc5",
+    "narration": "REM sleep, when most vivid dreaming happens, is linked to skills and emotions. It helps you connect ideas and take the sting out of difficult memories. Both stages matter, so cutting sleep short costs you.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Deep sleep",
+       "tagline": "Facts and events"
+      },
+      "b": {
+       "name": "REM sleep",
+       "tagline": "Skills and emotions"
+      },
+      "rows": [
+       {
+        "label": "Helps with",
+        "a": "Storing what you learned",
+        "b": "Linking ideas"
+       },
+       {
+        "label": "Also supports",
+        "a": "Physical recovery",
+        "b": "Emotional processing"
+       }
+      ],
+      "verdict": "You need both, so you need a full night."
+     }
+    }
+   },
+   {
+    "id": "2c3cbe17",
+    "narration": "Sleep also matters before you learn. A tired brain struggles to take in new information in the first place. So lost sleep hurts you twice: when you learn, and when you remember.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lost sleep hurts you twice: when you learn, and when you remember.",
+      "emphasis": "twice"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "5a6f77a3",
+    "narration": "So how do you give your brain a good night shift? Start with the most powerful habit of all: keep a regular schedule. Go to bed and wake up at about the same time every day.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "alarm clock morning bedroom",
+      "alt": "waking up in morning light"
+     }
+    },
+    "chapter": "How to sleep better"
+   },
+   {
+    "id": "786bf006",
+    "narration": "Next, build a sleep-friendly bedroom. Keep it cool, dark and quiet. Even small lights and noises can pull you out of deep sleep without you realizing it.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "The ideal bedroom",
+      "items": [
+       "Cool temperature",
+       "Dark room",
+       "Quiet space",
+       "Comfortable bed"
+      ]
+     }
+    }
+   },
+   {
+    "id": "46c100ee",
+    "narration": "Then watch your evening. Dim the lights and put screens away an hour before bed. Avoid caffeine in the afternoon and evening, and avoid heavy meals late at night.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Wind down",
+      "items": [
+       "Dim lights, screens off",
+       "No late caffeine",
+       "No heavy late meals",
+       "Quiet routine: read or stretch"
+      ],
+      "style": "rail",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "876aafe7",
+    "narration": "Daytime habits count too. Get some natural light in the morning and move your body regularly. Both help your internal clock know when it is time to be awake, and when it is time to rest.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "sun",
+        "label": "Morning light"
+       },
+       {
+        "icon": "heart",
+        "label": "Regular movement"
+       },
+       {
+        "icon": "clock",
+        "label": "Steady rhythm"
+       }
+      ],
+      "title": "Daytime helpers"
+     }
+    }
+   },
+   {
+    "id": "b24483d4",
+    "narration": "If you lie awake, do not stare at the clock. Get up, do something calm in dim light, and return when sleepy. If sleep problems last for weeks, talk with a doctor.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Can't fall asleep?",
+      "steps": [
+       {
+        "label": "Avoid watching the clock"
+       },
+       {
+        "label": "Get up and relax",
+        "detail": "Dim light, something calm"
+       },
+       {
+        "label": "Return when sleepy"
+       },
+       {
+        "label": "Persistent trouble? See a doctor"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "ce65c9bd",
+    "narration": "So here is the one idea to keep. Sleep is not time lost from learning. It is when learning becomes memory. Protect your sleep tonight, and your brain will do the rest.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Sleep is when learning becomes memory.",
+      "emphasis": "becomes memory"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 19.9,
+  "before_first_script_call_s": 3.5,
+  "script_s": 16.5
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "script_big": 0.04462,
+  "search_api": 0.0,
+  "total": 0.04493
+ },
+ "calls": {
+  "small": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 12095,
+  "out": 2652
+ },
+ "rules": {
+  "length": {
+   "words": 448,
+   "expected_words": 402,
+   "ratio": 1.114,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 200.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You study all evening, then stay up late to cram more. It feels productive. But what if the smartest thing you could do for your memory is simply to go to sleep?",
+   "close_text": "So here is the one idea to keep. Sleep is not time lost from learning. It is when learning becomes memory. Protect your sleep tonight, and your brain will do the rest."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "clip": 2,
+    "bullets": 2,
+    "definition": 1,
+    "diagram": 1,
+    "flowchart": 1,
+    "versus": 1,
+    "kinetic_text": 2,
+    "checklist": 1,
+    "icons": 1,
+    "steps": 1
+   },
+   "max_run": 1,
+   "entropy": 3.38,
+   "top_type": "clip",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [
+    "REM"
+   ],
+   "ungrounded_share": 1.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly sound, but the deep-sleep vs REM split is oversimplified, and the versus table lists \"Linking ideas\" under deep sleep's \"Helps with\" row. The script also never states the 7-9 hours figure."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers stages, consolidation, hygiene tips and seeing a doctor. It omits the hippocampus-to-cortex transfer, any concrete deprivation effects, the 7-9 hour guideline, and any specific study or number."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: hook, mechanism, stages, tips, takeaway. Beats 6 and 7 slightly overlap, and the \"night shift\" and \"messy desk\" ideas run together."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The cram-versus-sleep hook creates tension, and the closing line \"Sleep is when learning becomes memory\" lands. The ending is slightly summary-like."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, accessible and suited to beginners, with appropriate hedging such as \"is thought to\"."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well and match the narration. The diagram icons are arbitrary, and the versus table contradicts the narration."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The messy desk and hard drive analogies are common. There are no surprising specifics, such as numbers, studies or the effect of naps."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The script is on topic, in English and about the right length. It misses the 7-9 hours guideline the brief expects and gives only a light treatment of deprivation."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, clean and natural phrasing throughout."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "\"a\": \"Storing what you learned\", \"b\": \"Linking ideas\"",
+    "issue": "The versus table headers say deep sleep is for \"Facts and events\" and REM is for \"Skills and emotions\", then the row labelled \"Helps with\" repeats the same idea in different words. The result is vague and slightly inconsistent with the narration.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Both stages matter, so cutting sleep short costs you.",
+    "issue": "The script never gives the recommended 7-9 hours for adults or any concrete effect of sleep deprivation.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "moving them from short-term storage toward long-term storage",
+    "issue": "It omits the hippocampus-to-cortex transfer, so the mechanism stays generic.",
+    "beat": 6
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "It is like saving a document to a hard drive.",
+    "issue": "This is a clichéd analogy, and it sits alongside the messy-desk metaphor.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Even small lights and noises can pull you out of deep sleep without you realizing it.",
+    "issue": "This is a plausible claim stated without support.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "Recommended 7-9 hours for adults",
+   "Hippocampus-to-cortex transfer",
+   "Concrete sleep deprivation effects or a study",
+   "Sleep spindles or slow waves",
+   "Alcohol and nap advice"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, friendly, well-structured script that covers the basics and adds a sensible doctor referral. It stays generic: it leaves out the 7-9 hours figure, the hippocampus-to-cortex transfer and any concrete evidence.",
+  "mean": 3.67,
+  "cost_usd": 0.020534,
+  "tokens": [
+   3952,
+   1263
+  ]
+ }
+}

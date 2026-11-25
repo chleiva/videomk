@@ -1,0 +1,343 @@
+{
+ "id": "tri-03",
+ "category": "trivia / listicle",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "5 weird facts about space",
+ "great": "Five correct, surprising space facts (e.g. day on Venus longer than year, neutron star density), concise.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:09:38",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Space trivia like these is timeless and well covered by encyclopedic sources, so no recent information is needed for an accurate script.",
+  "queries": [
+   "weird facts about space",
+   "strange facts about outer space"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 1: scene replaced (versus needs 2+ rows)"
+ ],
+ "notes": "",
+ "plan": {
+  "title": "5 Weird Facts About Space",
+  "description": "Five strange but true facts about space, from silent skies to spoonfuls of star matter. A quick tour of how odd the universe really is.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "6b8a2cd4",
+    "narration": "Space is stranger than any movie. Here are five weird facts. First, space is completely silent. Sound needs air to travel, and between the stars there is almost nothing to carry it.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "5 Weird Facts About Space",
+      "subtitle": "Strange, but true"
+     }
+    },
+    "sfx": "whoosh",
+    "chapter": "Strange but true"
+   },
+   {
+    "id": "128b0106",
+    "narration": "Second, a day on Venus is longer than its year. Venus spins so slowly that one turn takes about 243 Earth days, while its trip around the Sun takes about 225.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Second, a day on Venus is longer than its",
+      "subtitle": ""
+     }
+    }
+   },
+   {
+    "id": "28481134",
+    "narration": "Third, there is a giant cloud of space alcohol. Astronomers found a huge cloud near the center of our galaxy that contains ethyl alcohol. Sadly, it is far too distant and thin to drink.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Milky Way galaxy night sky",
+      "alt": "The Milky Way across the night sky",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "c43eca8e",
+    "narration": "Fourth, neutron stars are absurdly dense. A single teaspoon of their material would weigh billions of tons on Earth. That is the leftover core of a giant star, crushed by its own gravity.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Neutron star",
+      "items": [
+       "Core of a collapsed giant star",
+       "One teaspoon: billions of tons",
+       "Crushed by its own gravity"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "2b484975",
+    "narration": "Fifth, astronauts grow taller in space. With no gravity squeezing the spine, it stretches, and they can gain a couple of inches. Back on Earth, they shrink to normal again. The universe is wonderfully weird.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In space, you can grow taller, and the universe stays wonderfully weird.",
+      "emphasis": "wonderfully weird"
+     }
+    },
+    "sfx": "sparkle"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 10.3,
+  "before_first_script_call_s": 3.6,
+  "script_s": 6.7
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "script_big": 0.0298,
+  "search_api": 0.0,
+  "total": 0.0301
+ },
+ "calls": {
+  "small": 4,
+  "big": 1
+ },
+ "tokens": {
+  "in": 12120,
+  "out": 1145
+ },
+ "rules": {
+  "length": {
+   "words": 165,
+   "expected_words": 134,
+   "ratio": 1.231,
+   "beats": 5,
+   "expected_beats": 4,
+   "est_speech_s": 73.5,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 35,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Space is stranger than any movie. Here are five weird facts. First, space is completely silent. Sound needs air to travel, and between the stars there is almost nothing to carry it.",
+   "close_text": "Fifth, astronauts grow taller in space. With no gravity squeezing the spine, it stretches, and they can gain a couple of inches. Back on Earth, they shrink to normal again. The universe is wonderfully"
+  },
+  "variety": {
+   "distinct": 4,
+   "counts": {
+    "title": 2,
+    "image": 1,
+    "bullets": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 2,
+   "entropy": 1.92,
+   "top_type": "title",
+   "top_share": 0.4,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [
+    "225",
+    "243"
+   ],
+   "entities": 3,
+   "ungrounded_entities": [
+    "Earth",
+    "Sun",
+    "Venus"
+   ],
+   "ungrounded_share": 1.0,
+   "ungrounded_number_share": 1.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1
+  },
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "thin_notes",
+   "no_sources_cited",
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most facts are right (Venus 243 vs 225 days, neutron star density, astronaut spine growth), but \"completely silent\" is overstated, \"a couple of inches\" is a bit high (about 1–2 in is typical), and \"billions of tons\" is an understatement (a teaspoon is roughly a billion tons or more; commonly cited ~6 billion)."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Delivers five facts with one-line explanations, as requested, but each is shallow, and the silence and Venus facts are very familiar."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clean First to Fifth enumeration with a brief closing line; paced for one minute."
+   },
+   "hook_ending": {
+    "score": 2,
+    "reason": "\"Space is stranger than any movie\" is a bland opener, and the ending, \"The universe is wonderfully weird,\" is a generic sign-off."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Light, casual and fitting for a general US audience; the \"Sadly\" aside adds some personality."
+   },
+   "visuals": {
+    "score": 2,
+    "reason": "Beat 2's title card is truncated (\"Second, a day on Venus is longer than its\") and contains no visual. Beat 1 has only a title and no image of silence, and the Milky Way image for the alcohol cloud is generic. Beat 5 puts a sentence in kinetic text instead of showing astronauts."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The space alcohol cloud is a fun, less common fact, but the rest are the standard list."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Five facts, English, about 140 words, close to the target length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clear; the only slip is the awkward cut-off title in beat 2."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Second, a day on Venus is longer than its",
+    "issue": "The title is truncated mid-sentence, leaving a broken fragment on screen, and it is used instead of a Venus visual.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "space is completely silent",
+    "issue": "Overstated: space has plasma waves and sparse gas, and sound can travel in dense clouds. It is better to say sound cannot travel through the vacuum.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "A single teaspoon of their material would weigh billions of tons on Earth.",
+    "issue": "Vague and understated; estimates are around a billion tons or more (often cited as about 6 billion), and \"weigh on Earth\" is loosely phrased.",
+    "beat": 4
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Space is stranger than any movie.",
+    "issue": "A generic opener that creates no tension or curiosity.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "In space, you can grow taller, and the universe stays wonderfully weird.",
+    "issue": "The kinetic text repeats the narration instead of showing astronauts, and it is clumsy.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "they can gain a couple of inches",
+    "issue": "NASA reports up to about 3% of height (1–2 in); \"a couple\" is acceptable but slightly high. Unverified, as there are no notes.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "A stronger curiosity hook",
+   "A visual for each fact, such as Venus or astronaut images",
+   "A memorable closing image or takeaway"
+  ],
+  "wrong_facts": [
+   "\"Completely silent\" is overstated; sound cannot travel through vacuum, but space is not perfectly empty.",
+   "\"Billions of tons\" is imprecise for a teaspoon of neutron star material (~a billion tons or more)."
+  ],
+  "would_publish": false,
+  "summary": "A competent, correctly paced list with mostly true facts, but it has a weak hook and ending, generic facts, and sloppy visuals, including a truncated title card. It needs a stronger opener and better scene matching to be publishable.",
+  "mean": 3.22,
+  "cost_usd": 0.018434,
+  "tokens": [
+   2327,
+   1378
+  ]
+ }
+}

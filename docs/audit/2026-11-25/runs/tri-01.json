@@ -1,0 +1,512 @@
+{
+ "id": "tri-01",
+ "category": "trivia / listicle",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "10 surprising facts about the human body",
+ "great": "Ten distinct, correct, genuinely surprising facts (not myths like 10% of brain), brief explanation each, counted; punchy; no misinformation.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:09:10",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Surprising facts about the human body are timeless physiology and anatomy that an encyclopedia covers well; no recent or fast-changing information is needed.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "listicle-ranking",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 5497,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Human body",
+   "Composition of the human body",
+   "List of common misconceptions about science, technology, and mathematics",
+   "Human sexuality",
+   "Neoteny in humans",
+   "Human hair growth"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Human body\nThe human body is composed of many different types of cells that together create tissues and subsequently organs and then organ systems.\nThe external human body consists of a head, hair, neck, torso (which includes the thorax and abdomen), genitals, arms, hands, legs, and feet. The internal human body includes organs, teeth, bones, muscles, tendons, ligaments, blood vessels and blood, lymphatic vessels and lymph.\nThe study of the human body includes anatomy, physiology, histology, and embryology. The body varies anatomically in known ways. Physiology focuses on the systems and organs of the human body and their functions. Many systems and mechanisms interact in order to maintain homeostasis, with safe levels of substances such as sugar, iron, and oxygen in the blood.\nThe human body is studied by health professionals, physiologists, anatomists, and artists to assist them in their work.\n\n## Composition of the human body\nBody composition may be analyzed in various ways. This can be done in terms of the chemical elements present, or by molecular structure e.g., water, protein, fats (or lipids), hydroxyapatite (in bones), carbohydrates (such as glycogen and glucose) and DNA. In terms of tissue type, the body may be analyzed into water, fat, connective tissue, muscle, bone, etc. In terms of cell type, the body contains hundreds of different types of cells, but notably, the largest number of cells contained in a human body (though not the largest mass of cell) are not human cells, but bacteria residing in the normal human gastrointestinal tract.\n\n## List of common misconceptions about science, technology, and mathematics\nEach entry on this list of common misconceptions is worded as a correction; the misconceptions themselves are implied rather than stated. These entries are concise summaries; the main subject articles can be consulted for more detail.\n\n## Human sexuality\nSexuality is the way people experience and express themselves through sexual activities. This involves biological, psychological, physical, erotic, emotional, social, and spiritual feelings and behaviors. Because it is a broad term which has varied within different historical contexts, it lacks a precise definition. The biological and physical aspects of sexuality largely concern the human reproductive functions, including the human sexual response cycle.\nSomeone's sexual orientation is their pattern of sexual interest (or lack thereof) in the opposite and/or same sex. Physical and emotional aspects of sexuality include bonds between individuals that are expressed through profound feelings or physical manifestations of love, trust, and care. Social aspects deal with the effects of human society on one's sexuality, while spirituality concerns an individual's spiritual connection with others. Sexuality also affects and is affected by cultural, political, legal, philosophical, moral, ethical, and religious aspects of life.\nInterest in sexual activity normally increases when an individual reaches puberty. Although no single theory on the cause of sexual orientation has yet gained widespread...\n\n## Neoteny in humans\nNeoteny is the retention of juvenile traits well into adulthood. In humans, this trend is greatly amplified, especially when compared to non-human primates. Neotenic features of the head include the globular skull; thinness of skull bones; the reduction of the brow ridge; the large brain; the flattened and broadened face; the hairless face; hair on (top of) the head; larger eyes; ear shape; small nose; small teeth; and the small maxilla (upper jaw) and mandible (lower jaw).\nNeoteny of the human body is indicated by glabrousness (hairless body). Neoteny in humans is further indicated by the limbs and body posture, with the limbs proportionately short compared to torso length; longer leg than arm length; the structure of the foot; and the upright stance.\nHumans also retain a plasticity of behavior that is generally found among animals only in the young. The emphasis on learned, rather than inherited, behavior requires the human brain to remain receptive much longer. These neotenic changes may have disparate roots. Some may have been brought about by sexual selection in human evolution. In turn, they may have permitted the development of human capacities such as emotional communication...\n\n## Human hair growth\nThe growth of human hair occurs everywhere on the external body except for the soles of the feet, the palms of the hands,  the lips, the backs of the ears, some external genital areas, the navel, and, apart from eyelashes, the eyelids.  Hair is a stratified squamous keratinized epithelium made of multi-layered flat cells whose rope-like filaments provide structure and strength to the hair shaft. The protein keratin makes up hair and stimulates hair growth. Hair follows a specific growth cycle with three distinct and concurrent phases: anagen, catagen, and telogen. Each phase has specific characteristics that determine the length of the hair.\nThe body has different types of hair, including vellus hair and androgenic hair, each with its own type of cellular construction.  This varied construction  gives the hair unique characteristics, serving specific purposes, mainly warmth (redundant in modern humans) and physical protection.  Most humans develop the longest thickest hair on their scalps and (mostly observed in males) faces. This hair will usually grow to several feet, but some humans develop much longer hair.",
+ "plan": {
+  "title": "10 Surprising Facts About the Human Body",
+  "description": "A fast countdown of ten surprising facts about the human body, from the bacteria that outnumber your cells to the traits we keep from childhood. Learn how the body is built and why it is stranger than it looks.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "9b0bb4d1",
+    "narration": "Here is a strange thought. The largest number of cells in your body are not human at all. They are bacteria, and they live in your gut.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "#1",
+      "label": "Most cells in your body are not human"
+     }
+    },
+    "sfx": "ding",
+    "chapter": "Fact 1: You are mostly not you"
+   },
+   {
+    "id": "46b9a5c5",
+    "narration": "Fact two. Your body has hundreds of different types of cell. Together they form tissues, then organs, then whole organ systems, all working as one.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From cell to body",
+      "nodes": [
+       {
+        "id": "c",
+        "label": "Cells",
+        "icon": "dot"
+       },
+       {
+        "id": "t",
+        "label": "Tissues"
+       },
+       {
+        "id": "o",
+        "label": "Organs",
+        "icon": "heart"
+       },
+       {
+        "id": "s",
+        "label": "Organ systems"
+       }
+      ],
+      "edges": [
+       [
+        "c",
+        "t"
+       ],
+       [
+        "t",
+        "o"
+       ],
+       [
+        "o",
+        "s"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "6dfe1c79",
+    "narration": "Fact three. Bacteria may win on cell count, but not on weight. Human cells still make up most of your mass, so you are not just a bag of microbes.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Bacteria win on cell count, but human cells win on mass.",
+      "emphasis": "mass"
+     }
+    }
+   },
+   {
+    "id": "3ff18d16",
+    "narration": "Fact four. Your body keeps sugar, iron and oxygen in your blood at safe levels, constantly. Scientists call this balancing act homeostasis.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Homeostasis",
+      "definition": "Many systems working together to keep safe levels of substances like sugar, iron and oxygen in the blood."
+     }
+    }
+   },
+   {
+    "id": "1b8e9cea",
+    "narration": "Fact five. You are built from water, protein, fats, carbohydrates and DNA. Even your bones contain a mineral called hydroxyapatite.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What you are made of",
+      "items": [
+       "Water",
+       "Protein and fats",
+       "Carbohydrates like glucose",
+       "DNA",
+       "Hydroxyapatite in bones"
+      ],
+      "style": "icons",
+      "accent": "sky",
+      "icons": [
+       "bubbles",
+       "biceps-flexed",
+       "utensils",
+       "dna",
+       "bone"
+      ]
+     }
+    }
+   },
+   {
+    "id": "1137803d",
+    "narration": "Fact six. Humans keep childlike traits into adulthood. Scientists call it neoteny. Think of our rounded skull, flat face, small teeth and large brain.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Neoteny: staying juvenile",
+      "items": [
+       "Globular skull",
+       "Flattened face",
+       "Small teeth",
+       "Large brain"
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "f6339c5d",
+    "narration": "Fact seven. Our legs are longer than our arms, and we stand upright. Compared to other primates, even our body proportions look youthful.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person standing upright silhouette",
+      "alt": "A person standing upright",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "935b953b",
+    "narration": "Fact eight. Humans stay mentally flexible far longer than most animals. Our brains remain receptive, so we learn far more than we inherit.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Our brains stay open to learning long after childhood.",
+      "emphasis": "learning"
+     }
+    },
+    "sfx": "sparkle"
+   },
+   {
+    "id": "453679b9",
+    "narration": "Fact nine. Hair grows almost everywhere on you. The exceptions are the palms, the soles of your feet, your lips, and the backs of your ears.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "No hair here",
+      "items": [
+       "Palms of the hands",
+       "Soles of the feet",
+       "Lips",
+       "Backs of the ears"
+      ]
+     }
+    }
+   },
+   {
+    "id": "9470e38e",
+    "narration": "Fact ten. Hair grows in three phases: anagen, catagen and telogen. Scalp hair can reach several feet, built from a tough protein called keratin.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "The hair growth cycle",
+      "steps": [
+       {
+        "label": "Anagen",
+        "detail": "Growth phase"
+       },
+       {
+        "label": "Catagen",
+        "detail": "Transition phase"
+       },
+       {
+        "label": "Telogen",
+        "detail": "Resting phase"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "a7526477",
+    "narration": "So your body is a crowd of microbes, a balancing act, and a youthful design. You are far stranger than you look, so stay curious about yourself.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "You are stranger than you look",
+      "subtitle": "Stay curious about the body you live in"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Human body",
+    "url": "https://en.wikipedia.org/wiki/Human_body",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Composition of the human body",
+    "url": "https://en.wikipedia.org/wiki/Composition_of_the_human_body",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Neoteny in humans",
+    "url": "https://en.wikipedia.org/wiki/Neoteny_in_humans",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Human hair growth",
+    "url": "https://en.wikipedia.org/wiki/Human_hair_growth",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "listicle-ranking",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 17.2,
+  "before_first_script_call_s": 6.2,
+  "script_s": 10.9
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "script_big": 0.04147,
+  "search_api": 0.0,
+  "total": 0.04176
+ },
+ "calls": {
+  "small": 4,
+  "big": 1
+ },
+ "tokens": {
+  "in": 14206,
+  "out": 1884
+ },
+ "rules": {
+  "length": {
+   "words": 271,
+   "expected_words": 267,
+   "ratio": 1.015,
+   "beats": 11,
+   "expected_beats": 9,
+   "est_speech_s": 123.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 27,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 27,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Here is a strange thought. The largest number of cells in your body are not human at all. They are bacteria, and they live in your gut.",
+   "close_text": "So your body is a crowd of microbes, a balancing act, and a youthful design. You are far stranger than you look, so stay curious about yourself."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "stat": 1,
+    "diagram": 1,
+    "kinetic_text": 2,
+    "definition": 1,
+    "bullets": 2,
+    "image": 1,
+    "checklist": 1,
+    "steps": 1,
+    "title": 1
+   },
+   "max_run": 2,
+   "entropy": 3.1,
+   "top_type": "kinetic_text",
+   "top_share": 0.18,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 5497,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 2,
+    "reason": "The claim that human cells make up most of your mass is plausible but not in the notes. The 'bacteria outnumber human cells' claim is shaky: the notes say bacteria are the largest number of cells, but modern estimates put the ratio near 1:1. Calling hair-free zones 'almost everywhere' is fine. Fact 2 is presented as a 'fact' though it is not surprising."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Only a few real facts are present, and they are stretched into ten. Facts 1 and 3 are the same fact, and facts 6, 7 and 8 are all neoteny. There are no striking facts such as bone strength, stomach acid, or the brain's energy use."
+   },
+   "structure": {
+    "score": 2,
+    "reason": "The numbering is clear, but the facts repeat (bacteria twice, neoteny three times, hair twice). The sequence follows the source notes, not a build, and the ending is a weak summary."
+   },
+   "hook_ending": {
+    "score": 2,
+    "reason": "'Here is a strange thought' is a mild hook. The ending 'stay curious about yourself' is a generic summary."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is friendly and accessible, but flat and textbook-like for a 'surprising facts' video."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, and the scenes mostly match the narration. But the stat '#1' is meaningless, the diagram is filler, and several scenes are plain bullet lists."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Content is drawn from generic textbook definitions (homeostasis, composition, hair cycle) with little that is surprising or specific."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "It has ten numbered items, but they are not ten distinct, genuinely surprising facts. Several are padded or duplicated."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The English is clean and fluent. A few lines are slightly awkward, such as 'you are not just a bag of microbes'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Fact two. Your body has hundreds of different types of cell.",
+    "issue": "A textbook statement, not a surprising fact, and it is padding to reach ten.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "Fact three. Bacteria may win on cell count, but not on weight.",
+    "issue": "This repeats fact one and counts it as a separate fact.",
+    "beat": 3
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "Fact eight. Humans stay mentally flexible far longer than most animals.",
+    "issue": "Facts six, seven and eight are all neoteny, so the same fact is counted three times.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Human cells still make up most of your mass, so you are not just a bag of microbes.",
+    "issue": "This is not in the notes. The notes only say bacteria are not the largest mass of cells. It is probably true but unsourced.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Fact five. You are built from water, protein, fats, carbohydrates and DNA.",
+    "issue": "This is a bland list of components, not a surprising fact.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "The largest number of cells in your body are not human at all.",
+    "issue": "The claim is stated with unqualified confidence, but modern estimates put bacteria and human cells at roughly 1:1.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "#1",
+    "issue": "The stat scene shows only an item number, not a real statistic.",
+    "beat": 1
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "So your body is a crowd of microbes, a balancing act, and a youthful design.",
+    "issue": "This is a bare recap followed by a generic exhortation.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "Genuinely surprising, distinct facts, such as the brain's energy use, the strength of bone, how often stomach lining or skin renews, the length of blood vessels, or the speed of nerve signals",
+   "A real hook",
+   "Short explanations of why each fact is surprising"
+  ],
+  "wrong_facts": [
+   "The 'bacteria outnumber human cells' claim is overstated: current estimates are roughly 1:1.",
+   "The claim that human cells make up most of your mass is unverified, but probably true."
+  ],
+  "would_publish": false,
+  "summary": "The script pads ten 'facts' from a thin set of encyclopedia notes, repeating bacteria, neoteny and hair, and it offers little that is genuinely surprising. It is clean and clear but generic, with a weak hook and ending.",
+  "mean": 2.44,
+  "cost_usd": 0.02559,
+  "tokens": [
+   4940,
+   1571
+  ]
+ }
+}

@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Any, Dict
 
-from .. import awsio
+from .. import awsio, format_options
 from .. import sync as sync_mod
 from ..timeline import beat_info_from_plan, build_timeline, chunk_plan
 
@@ -44,13 +44,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 info["words"] = awsio.get_json(key)["words"]
             except Exception:
                 pass
-    tl = build_timeline(plan, infos, video_id=video_id, fps=30, min_seconds=float(plan.get("target_seconds") or 0) if rev == 1 and os.environ.get("STRETCH_TO_TARGET", "1") != "0" else 0.0)   # only a first render: an edit that removes scenes must be allowed to be shorter
+    frame = format_options.frame_of(plan)   # a plan made before formats existed has no frame: 16:9 1080p
+    tl = build_timeline(plan, infos, video_id=video_id, fps=30, width=frame["width"], height=frame["height"], min_seconds=float(plan.get("target_seconds") or 0) if rev == 1 and os.environ.get("STRETCH_TO_TARGET", "1") != "0" else 0.0)   # only a first render: an edit that removes scenes must be allowed to be shorter
     rep = sync_mod.report(tl)  # the free alignment check: is every reveal near the word that names it? (no model, a few ms)
     tl["sync"].update({k: rep[k] for k in ("anchored", "early", "late", "mean_abs_delta", "ok")})
     if not rep["ok"]:
         logging.warning("sync check: %s", {k: rep[k] for k in ("items", "anchored", "early", "late", "mean_abs_delta")} | {"worst": sorted((r for r in rep["rows"] if r["delta"] is not None), key=lambda r: -abs(r["delta"]))[:3]})
     if tl["duration"] > MAX_DURATION_S:
         raise ValueError(f"video too long ({tl['duration']:.0f}s > {MAX_DURATION_S:.0f}s)")
+    tl["frame"] = frame
     tl["ledger"] = credits_ledger(plan)
     tl["sources"] = plan.get("sources", [])
     tl["description"] = plan.get("description", "")

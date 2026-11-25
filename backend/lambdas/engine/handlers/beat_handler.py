@@ -168,6 +168,9 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     out: Dict[str, Any] = {"query": query, "pick": None}
     need = timeline_mod.LEAD + speech + timeline_mod.TAIL + 0.6  # the scene's length, with a little margin for the crossfade
     keys = {"pexels_key": get_secret_param("/videomk/pexels_api_key", quiet=True), "pixabay_key": get_secret_param("/videomk/pixabay_api_key", quiet=True)}
+    fr = plan.get("frame") or {}   # vertical and square videos ask the stock libraries for portrait or square footage; landscape calls are exactly as before
+    orient = "portrait" if fr.get("aspect") in ("9:16", "4:5") else "square" if fr.get("aspect") == "1:1" else str(fr.get("orientation") or "landscape")
+    keys = {**keys, **({"orientation": orient} if orient in ("portrait", "square") else {})}
     result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")

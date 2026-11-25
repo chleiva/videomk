@@ -8,7 +8,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from datetime import date
 
-from . import language as lang_mod, plan as plan_mod, research, researcher, skills as skills_mod, staged as staged_mod, voices
+import logging
+
+from . import language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, voices
+from .netsafe import quality_fixes
 
 PHOTO_INTRO_S = 2.5   # seconds of music and pictures before the first word of a video made from the user's photos
 PHOTO_OUTRO_S = 3.5   # seconds of music alone after the last word
@@ -20,7 +23,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
            language: Optional[str] = None, region: Optional[str] = None, theme: Optional[str] = None,
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
            budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None,
-           max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+           max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None,
+           options: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -34,7 +38,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     skill_ids = skills_mod.select(prompt, lambda s, u: ask_small(s, u, 120), minutes)   # the producer: which kind of video is this, and so which craft guides apply
     if photos and "photo-memories" not in skill_ids:   # a video of the person's own photos always follows the photo guide (pacing, pauses, music), whatever else it is about
         skill_ids = ["photo-memories"] + skill_ids
-    craft = skills_mod.render(skill_ids)
+    craft = skills_mod.render(skill_ids) + plan_mod.frame_prompt(options)   # options: {platform, aspect, brief} from the create request
     info["skills"] = skill_ids
     notes, sources = "", []
     if web_provider is not None and ask_tools is not None:
@@ -47,8 +51,23 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                 notes, sources, info["mode"] = r.notes, r.sources, "web"
             else:
                 info["fallback"] = True  # nothing usable came back: fall through to the encyclopedia path
+    fetch_errors: List[Dict[str, Any]] = []   # Wikipedia/Wikimedia failures (status only): the audit could not tell a 429 from an empty search, now it can
+    staged = staged_mod.is_staged(minutes, len(photos or []))
     if info["mode"] != "web":
-        notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120))
+        notes, sources = research.gather_notes(prompt, language=language, ask=lambda s, u: ask_small(s, u, 120), errors=fetch_errors)
+        if (quality_fixes() and web_provider is not None and ask_tools is not None and not staged and not photos and not info.get("fallback")
+                and (len(notes) < research.MIN_USEFUL_NOTES_CHARS or not sources)):
+            # thin notes (the audit: 16 of 40 videos had under 1,500 characters, 14 none): escalate to the web research agent, within its own budget, before writing
+            dec = researcher.Decision(mode="web", queries=list(info.get("queries") or []), topic="general", reason="thin encyclopedia notes")
+            r = researcher.research_web(prompt, decision=dec, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools, budget=budget)
+            info["searches"] = info.get("searches", 0) + r.searches
+            info["escalated"] = {"from_chars": len(notes), "searches": r.searches, "reads": r.reads, "sources": len(r.sources), "seconds": round(r.seconds, 1), "cost_usd": r.cost_usd, "error": r.error}
+            logging.warning("RESEARCH_ESCALATED from_chars=%s searches=%s sources=%s", len(notes), r.searches, len(r.sources))
+            if r.sources:
+                notes = (r.notes + ("\n\n" + notes if notes else ""))[:researcher.MAX_NOTES_CHARS + research.MAX_NOTES_CHARS]
+                have = {s["title"] for s in r.sources}
+                sources = r.sources + [s for s in sources if s["title"] not in have]
+    written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
     if staged_mod.is_staged(minutes, len(photos or [])):
         # a long video is written in stages (outline, then each section on its own, each with its own research): see engine/staged.py
@@ -64,18 +83,39 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                     info["section_searches"] = info.get("section_searches", 0) + r.searches
                 if r.sources:
                     return r.notes, r.sources
-            return research.gather_notes(f"{sec['title']} {prompt}", language=language, ask=lambda s, u: ask_small(s, u, 120))
+            sec_errors: List[Dict[str, Any]] = []
+            out = research.gather_notes(f"{sec['title']} {prompt}", language=language, ask=lambda s, u: ask_small(s, u, 120), errors=sec_errors)
+            if sec_errors:
+                with lock:
+                    fetch_errors.extend(sec_errors)
+            return out
 
         plan, warnings, sinfo = staged_mod.generate(prompt, notes, minutes, ask_big, research=research_section, language=language, region=region,
                                                     today=today if web_provider is not None else None, allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, **rate)
         seen = {s["title"] for s in sources}
         sources = sources + [s for s in sinfo["sources"] if s["title"] not in seen and not seen.add(s["title"])]
         info["staged"] = {"sections": sinfo["sections"], "titles": sinfo["titles"]}
+        written_from = [notes] + list(sinfo.get("notes") or [])
     else:
         plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
                                                   allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
+    rejected = plan.pop("_rejected_scenes", None) or []
+    if fetch_errors:
+        info["fetch_errors"] = fetch_errors[:20]
+        info["fetch_errors_n"] = len(fetch_errors)
+    if quality_fixes() and not photos:
+        if rejected:   # scenes replaced as invalid get one chance to be corrected, instead of a title card
+            sr = quality.repair_scenes(plan, rejected, lambda s, u, n=1800: ask_small(s, u, n), plan_mod.scene_docs())
+            info["scene_repair"] = sr
+            if sr["repaired"]:
+                warnings.append(f"scenes corrected: {sr['repaired']} of {sr['rejected']}")
+        brief = options.get("brief") if isinstance((options or {}).get("brief"), dict) else {}
+        g = quality.ground_check(plan, written_from, lambda s, u, n=2400: ask_small(s, u, n), request=prompt, brief=" ".join(str(v) for v in brief.values() if v), review_claims="product-marketing" in skill_ids)
+        info["grounding"] = g
+        if g["flagged"]:
+            warnings.append(f"grounding: {g['flagged']} beats had unsupported specifics, {g['repaired']} rewritten")
 
     if theme in ("midnight", "paper", "sunrise"):  # the user's choice beats the model's
         plan["theme"] = theme

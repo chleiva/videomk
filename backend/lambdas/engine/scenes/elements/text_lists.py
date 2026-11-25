@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from ...canvas import Canvas, load_font, partial_polyline, with_alpha
 from ...easing import ease_out_back, ease_out_cubic, ease_out_expo, progress, reveal_times
 from ...theme import Theme
-from ..base import CENTER_X, CONTENT_TOP, SceneCtx, format_number, heading, parse_number
+from ..base import SceneCtx, format_number, heading, parse_number
 from ..registry import Element
 
 Props = Dict[str, Any]
@@ -61,8 +61,16 @@ def _list_of(v: Any) -> List[Any]:
     return list(v) if isinstance(v, (list, tuple)) else []
 
 
+def _fit_wide(cv: Canvas, text: str, weight: str, size: float, lines: List[str], max_w: float, floor: float = 28):
+    """fit_text only limits the wrapped height: an unbreakable word can still be wider than the frame. Shrinks until no line is wider than max_w."""
+    while size > floor and max((cv.measure(l, weight, size) for l in lines), default=0) > max_w:
+        size -= 4
+        lines = cv.wrap(text, weight, size, max_w)
+    return size, lines
+
+
 def _mid_y(ctx: SceneCtx) -> float:
-    return (CONTENT_TOP + ctx.bottom) / 2
+    return (ctx.top + ctx.bottom) / 2     # middle of the frame's content box (ctx.top is CONTENT_TOP in landscape)
 
 
 # ============================================================================= kinetic_text
@@ -151,10 +159,10 @@ def kinetic_anchors(props: Props) -> List[str]:
 
 
 @lru_cache(maxsize=32)
-def _kinetic_layout(words: Tuple[str, ...], flags: Tuple[bool, ...], ss: int, max_h: int):
-    """Largest size at which the sentence fits; returns (size, lines, total_h) with lines = [(line_h, [(word index, x, width, font size)])], x centred on 0."""
-    max_w = 1560
-    for size in range(136, 44, -4):
+def _kinetic_layout(words: Tuple[str, ...], flags: Tuple[bool, ...], ss: int, max_h: int, max_w: int = 1560, start: int = 136):
+    """Largest size at which the sentence fits; returns (size, lines, total_h) with lines = [(line_h, [(word index, x, width, font size)])], x centred on 0.
+    Keyed by the frame's width and starting size too (the same sentence lays out differently in each shape)."""
+    for size in range(start, 44, -4):
         base = load_font("bold", int(size * ss))
         space = base.getlength(" ") / ss
         lines: List[Tuple[float, List[Tuple[int, float, float, float]]]] = []
@@ -177,7 +185,7 @@ def _kinetic_layout(words: Tuple[str, ...], flags: Tuple[bool, ...], ss: int, ma
             lh = max(it[3] for it in items) * 1.2
             out.append((lh, [(i, ox - lw / 2, ww, fs) for i, ox, ww, fs in items]))
             total += lh
-        if total <= max_h:
+        if total <= max_h and all(it[2] <= max_w for _, items in lines for it in items):   # (a word wider than the frame forces a smaller size)
             return size, out, total
     return 44, out, total
 
@@ -199,8 +207,12 @@ def draw_kinetic(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
     for idx, em in groups:
         for i in idx:
             flags[i] = em
-    avail = ctx.bottom - CONTENT_TOP - 110
-    size, lines, total = _kinetic_layout(words, tuple(flags), cv.ss, int(avail))
+    fr = ctx.frame
+    cx = fr.cx
+    land = fr.landscape
+    avail = ctx.bottom - ctx.top - 110
+    # the sentence may use the whole width of the content box; narrow frames start larger (fewer words per line, bigger type)
+    size, lines, total = _kinetic_layout(words, tuple(flags), cv.ss, int(avail), 1560 if land else fr.W - 2 * fr.margin_x, 136 if land else int(136 * fr.type_scale))
     when = [0.0] * len(words)
     times = reveal_times(len(groups), dur, props.get("cues"), first=0.15, last=0.7)
     for g, (idx, _) in enumerate(groups):
@@ -214,11 +226,11 @@ def draw_kinetic(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
             p = ease_out_back(progress(lt, when[i], 0.45), 1.2)
             a = ease_out_cubic(progress(lt, when[i], 0.3))
             col = th.accent if flags[i] else th.text
-            cv.text(CENTER_X + ox, base + (1 - p) * 34, words[i], "bold", fs, with_alpha(col, a), anchor="ls")
+            cv.text(cx + ox, base + (1 - p) * 34, words[i], "bold", fs, with_alpha(col, a), anchor="ls")
         y += lh
     end = max(when) + 0.45
     bw = 220 * ease_out_expo(progress(lt, end, 0.6))
-    cv.rrect(CENTER_X - bw / 2, y + 36, bw, 10, 5, fill=th.accent)
+    cv.rrect(cx - bw / 2, y + 36, bw, 10, 5, fill=th.accent)
 
 
 KINETIC = Element(
@@ -227,6 +239,7 @@ KINETIC = Element(
          "large and centred, the emphasis bigger in the accent colour. Use for a thesis, a rule, a punchline, the one sentence to remember. "
          "Never for several ideas, never the same sentence the caption already shows alone, at most 3 per video."),
     sanitize=kinetic_sanitize, draw=draw_kinetic, cues=kinetic_cues, anchors=kinetic_anchors, max_per_video=3,
+    formats=("16:9", "9:16", "1:1", "4:5"),   # converted: the reference example in docs/RESPONSIVE_LAYOUT.md
     samples=[{"text": "Compound interest rewards patience more than talent.", "emphasis": "patience"},
              {"text": "If you cannot explain it simply, you do not understand it well enough yet, and that is fine because understanding is a process, not a switch.",
               "emphasis": "understanding is a process"}],
@@ -260,46 +273,117 @@ def _definition_times(props: Props, dur: float) -> Tuple[float, ...]:
     return tuple(round(t, 3) for t in out)
 
 
-def draw_definition(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+def _definition_layout(cv: Canvas, props: Props, ctx: SceneCtx, cw: float):
+    """Sizes and wrapped lines of the card; in the narrow frames the card is shrunk (step by step) until it fits the content box height."""
     term, defn = str(props["term"]), str(props["definition"])
     origin, example = str(props.get("origin", "")), str(props.get("example", ""))
+    fr = ctx.frame
+    if fr.landscape:                                  # the original layout, numerically unchanged
+        inner = cw - 180
+        t_size, t_lines = cv.fit_text(term, "bold", inner, 230, 136, 60)
+        d_size, d_lines = cv.fit_text(defn, "semibold", inner, 330, 66, 40, line_h=1.28)
+        o_size, o_lines = (cv.fit_text(origin, "regular", inner - 200, 120, 46, 32) if origin else (0, []))
+        e_size, e_lines = (cv.fit_text(example, "regular", inner - 200, 120, 46, 32) if example else (0, []))
+        t_h, d_h = len(t_lines) * t_size * 1.15, len(d_lines) * d_size * 1.28
+        o_h, e_h = len(o_lines) * o_size * 1.25, len(e_lines) * e_size * 1.25
+        extra = (max(o_h, 48) + 28 if origin else 0) + (max(e_h, 48) + 28 if example else 0)
+        card_h = 70 + t_h + 40 + d_h + (34 + extra if extra else 0) + 70
+        return dict(inner=inner, pad=90, t=(t_size, t_lines, t_h), d=(d_size, d_lines, d_h), o=(o_size, o_lines, o_h), e=(e_size, e_lines, e_h), card_h=card_h)
+    # narrow frames: stacked; the labels (ORIGIN / EXAMPLE) sit above their text instead of to its left
+    avail = ctx.bottom - ctx.top
+    ts, pad = fr.type_scale, 60
+    inner = cw - 2 * pad
+    k = 1.0
+    side = bool(fr.square and origin and example)      # square: ORIGIN and EXAMPLE as two columns (the box is short)
+    ow = (inner - 14 - 36) / 2 if side else inner
+    while True:
+        t_size, t_lines = cv.fit_text(term, "bold", inner, avail * 0.2 * k, 136 * ts * k, 52 if k < 0.7 else 60)
+        t_size, t_lines = _fit_wide(cv, term, "bold", t_size, t_lines, inner - 14)
+        d_size, d_lines = cv.fit_text(defn, "semibold", inner, avail * 0.34 * k, 66 * ts * k, 34, line_h=1.28)
+        o_size, o_lines = (cv.fit_text(origin, "regular", ow, avail * (0.2 if side else 0.12) * k, 46 * k, 28 if side else 30) if origin else (0, []))
+        e_size, e_lines = (cv.fit_text(example, "regular", ow, avail * (0.2 if side else 0.12) * k, 46 * k, 28 if side else 30) if example else (0, []))
+        d_size, d_lines = _fit_wide(cv, defn, "semibold", d_size, d_lines, inner - 14)
+        if origin:
+            o_size, o_lines = _fit_wide(cv, origin, "regular", o_size, o_lines, ow)
+        if example:
+            e_size, e_lines = _fit_wide(cv, example, "regular", e_size, e_lines, ow)
+        t_h, d_h = len(t_lines) * t_size * 1.15, len(d_lines) * d_size * 1.28
+        o_h, e_h = len(o_lines) * o_size * 1.25, len(e_lines) * e_size * 1.25
+        extra = (44 + max(o_h, e_h) + 24) if side else sum(44 + h + 24 for h, o in ((o_h, origin), (e_h, example)) if o)     # rule + label row + lines + gap
+        card_h = pad + t_h + 32 + d_h + (30 + extra if extra else 0) + pad
+        if card_h <= avail or k < 0.5:
+            break
+        k -= 0.06
+    return dict(inner=inner, pad=pad, t=(t_size, t_lines, t_h), d=(d_size, d_lines, d_h), o=(o_size, o_lines, o_h), e=(e_size, e_lines, e_h), card_h=card_h, side=side, ow=ow)
+
+
+def draw_definition(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
+    origin, example = str(props.get("origin", "")), str(props.get("example", ""))
     t = _definition_times(props, dur)
-    cw = 1560
-    tx = CENTER_X - cw / 2 + 90
-    inner = cw - 180
-    t_size, t_lines = cv.fit_text(term, "bold", inner, 230, 136, 60)
-    d_size, d_lines = cv.fit_text(defn, "semibold", inner, 330, 66, 40, line_h=1.28)
-    o_size, o_lines = (cv.fit_text(origin, "regular", inner - 200, 120, 46, 32) if origin else (0, []))
-    e_size, e_lines = (cv.fit_text(example, "regular", inner - 200, 120, 46, 32) if example else (0, []))
-    t_h, d_h = len(t_lines) * t_size * 1.15, len(d_lines) * d_size * 1.28
-    o_h, e_h = len(o_lines) * o_size * 1.25, len(e_lines) * e_size * 1.25
-    extra = (max(o_h, 48) + 28 if origin else 0) + (max(e_h, 48) + 28 if example else 0)
-    card_h = 70 + t_h + 40 + d_h + (34 + extra if extra else 0) + 70
+    fr = ctx.frame
+    land = fr.landscape
+    cx = fr.cx
+    cw = 1560 if land else fr.W - 2 * fr.margin_x
+    L = _definition_layout(cv, props, ctx, cw)
+    pad, inner = L["pad"], L["inner"]
+    t_size, t_lines, t_h = L["t"]
+    d_size, d_lines, d_h = L["d"]
+    o_size, o_lines, o_h = L["o"]
+    e_size, e_lines, e_h = L["e"]
+    card_h = L["card_h"]
+    tx = cx - cw / 2 + pad
     top = _mid_y(ctx) - card_h / 2
+    if not land:
+        top = max(top, ctx.top)
     pc = ease_out_cubic(progress(lt, 0.0, 0.6))
-    cv.card(CENTER_X - cw / 2, top + (1 - pc) * 30, cw, card_h, th, r=36, alpha=pc)
-    cv.rrect(CENTER_X - cw / 2 + 36, top + 56 + (1 - pc) * 30, 10, t_h + 40 + d_h - 8 + 28, 5, fill=with_alpha(th.accent, pc))
-    y = top + 70
+    cv.card(cx - cw / 2, top + (1 - pc) * 30, cw, card_h, th, r=36, alpha=pc)
+    if land:
+        cv.rrect(cx - cw / 2 + 36, top + 56 + (1 - pc) * 30, 10, t_h + 40 + d_h - 8 + 28, 5, fill=with_alpha(th.accent, pc))
+        y = top + 70
+        gap1 = 40
+    else:
+        cv.rrect(cx - cw / 2 + 28, top + pad - 14 + (1 - pc) * 30, 8, t_h + 32 + d_h + 4, 4, fill=with_alpha(th.accent, pc))
+        tx += 14
+        inner -= 14
+        y = top + pad
+        gap1 = 32
     p = ease_out_cubic(progress(lt, t[0], 0.6))
     for i, line in enumerate(t_lines):
         cv.text(tx, y + i * t_size * 1.15 + (1 - p) * 26, line, "bold", t_size, with_alpha(th.accent, p))
-    y += t_h + 40
+    y += t_h + gap1
     p = ease_out_cubic(progress(lt, t[1], 0.6))
     for i, line in enumerate(d_lines):
         cv.text(tx, y + i * d_size * 1.28 + (1 - p) * 20, line, "semibold", d_size, with_alpha(th.text, p))
-    y += d_h + 34
+    y += d_h + (34 if land else 30)
     k = 2
-    for label, size, lines, hh, present in (("ORIGIN", o_size, o_lines, o_h, bool(origin)), ("EXAMPLE", e_size, e_lines, e_h, bool(example))):
+    sy = y
+    for j, (label, size, lines, hh, present) in enumerate( (("ORIGIN", o_size, o_lines, o_h, bool(origin)), ("EXAMPLE", e_size, e_lines, e_h, bool(example)))):
         if not present:
             continue
         p = ease_out_cubic(progress(lt, t[k], 0.55))
         k += 1
+        if L.get("side"):
+            y = sy
+            bx0 = tx + j * (L["ow"] + 36)
+            cv.rrect(bx0, y - 6, L["ow"], 2, 1, fill=with_alpha(th.card_outline, p))
+            cv.text(bx0, y + 14, label, "bold", 28, with_alpha(th.accent2, p))
+            for i, line in enumerate(lines):
+                cv.text(bx0, y + 44 + i * size * 1.25 + (1 - p) * 14, line, "regular", size, with_alpha(th.muted, p))
+            continue
         cv.rrect(tx, y - 6, inner, 2, 1, fill=with_alpha(th.card_outline, p))
-        y += 14
-        cv.text(tx, y + 8, label, "bold", 28, with_alpha(th.accent2, p))
-        for i, line in enumerate(lines):
-            cv.text(tx + 200, y + i * size * 1.25 + (1 - p) * 14, line, "regular", size, with_alpha(th.muted, p))
-        y += max(hh, 48) + 14
+        if land:
+            y += 14
+            cv.text(tx, y + 8, label, "bold", 28, with_alpha(th.accent2, p))
+            for i, line in enumerate(lines):
+                cv.text(tx + 200, y + i * size * 1.25 + (1 - p) * 14, line, "regular", size, with_alpha(th.muted, p))
+            y += max(hh, 48) + 14
+        else:
+            y += 14
+            cv.text(tx, y, label, "bold", 28, with_alpha(th.accent2, p))
+            y += 30
+            for i, line in enumerate(lines):
+                cv.text(tx, y + i * size * 1.25 + (1 - p) * 14, line, "regular", size, with_alpha(th.muted, p))
+            y += hh + 24
 
 
 DEFINITION = Element(
@@ -307,7 +391,7 @@ DEFINITION = Element(
     doc=("- definition: {term (<=40), definition (<=160), origin (<=80, optional), example (<=100, optional)}. A card: the term, its plain definition, then the origin "
          "and an example. Use when the narration defines a term or names where a word comes from. Never invent or improve a definition: it must come from the "
          "grounding notes (or be plain common knowledge); leave origin and example out unless the notes give them."),
-    sanitize=definition_sanitize, draw=draw_definition, cues=definition_cues,
+    sanitize=definition_sanitize, draw=draw_definition, cues=definition_cues, formats=("16:9", "9:16", "1:1", "4:5"),
     samples=[{"term": "Inflation", "definition": "A general rise in prices over time, so the same money buys less than before."},
              {"term": "Serendipity", "definition": "Finding something valuable or pleasant by chance while looking for something else entirely.",
               "origin": "Coined by Horace Walpole in 1754, from a Persian fairy tale.", "example": "Penicillin was discovered when mould spoiled a lab dish."}],
@@ -395,10 +479,15 @@ def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
     final = format_number(val, dec, comma)
     # one size for the whole animation, from the widest the number gets
     widest = max(final, format_number(frm, dec, comma), key=len)
-    size = 320.0
-    while size > 90:
+    fr = ctx.frame
+    land = fr.landscape
+    cx = fr.cx
+    max_w = 1560 if land else fr.W - 2 * fr.margin_x          # width of the content box
+    size = 320.0 if land else 320.0 * fr.type_scale
+    floor = 90 if land else 56
+    while size > floor:
         w = _tabular_width(cv, widest, size) + (cv.measure(prefix, "bold", size * 0.55) + 14 if prefix else 0) + (cv.measure(unit, "bold", size * 0.55) + 14 if unit else 0)
-        if w <= 1560:
+        if w <= max_w:
             break
         size -= 8
     small = size * 0.55
@@ -406,14 +495,20 @@ def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
     wu = cv.measure(unit, "bold", small) + 14 if unit else 0
     wn = _tabular_width(cv, shown, size)
     total_w = _tabular_width(cv, widest, size) + wp + wu
-    l_size, l_lines = cv.fit_text(label, "semibold", 1400, 150, 56, 36) if label else (0, [])
+    if not label:
+        l_size, l_lines = 0, []
+    elif land:
+        l_size, l_lines = cv.fit_text(label, "semibold", 1400, 150, 56, 36)
+    else:
+        l_size, l_lines = cv.fit_text(label, "semibold", max_w, 230 if fr.vertical else 170, 56 * fr.type_scale, 34)   # more wrapped lines, bigger type
+        l_size, l_lines = _fit_wide(cv, label, "semibold", l_size, l_lines, max_w)
     chip_h = 76 if delta else 0
     block = size * 0.74 + (78 + len(l_lines) * l_size * 1.25 if label else 0) + (36 + chip_h if delta else 0)
     top = _mid_y(ctx) - block / 2 - 10
     base = top + size * 0.74
     fade = ease_out_cubic(progress(lt, 0.05, 0.5))
     rise = (1 - fade) * 30
-    x = CENTER_X - total_w / 2 + (total_w - wp - wu - wn) / 2   # keep the digits centred while they grow
+    x = cx - total_w / 2 + (total_w - wp - wu - wn) / 2   # keep the digits centred while they grow
     col = with_alpha(th.text, fade)
     if prefix:
         cv.text(x, base - size * 0.18 + rise, prefix, "bold", small, with_alpha(th.accent, fade), anchor="ls")
@@ -424,14 +519,14 @@ def draw_counter(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx
     if label:
         a = ease_out_cubic(progress(lt, 0.6, 0.6))
         for i, line in enumerate(l_lines):
-            cv.text(CENTER_X, y + i * l_size * 1.25 + (1 - a) * 16, line, "semibold", l_size, with_alpha(th.muted, a), anchor="ma")
+            cv.text(cx, y + i * l_size * 1.25 + (1 - a) * 16, line, "semibold", l_size, with_alpha(th.muted, a), anchor="ma")
         y += len(l_lines) * l_size * 1.25
     if delta:
         a = ease_out_back(progress(lt, start + cdur * 0.8, 0.5), 1.2)
         aa = ease_out_cubic(progress(lt, start + cdur * 0.8, 0.35))
-        fs = 40
+        fs = 40 if land else 40 * fr.type_scale
         dw = cv.measure(delta, "semibold", fs) + 56 + 44
-        cx0, cy0 = CENTER_X - dw / 2, y + 36
+        cx0, cy0 = cx - dw / 2, y + 36
         cv.rrect(cx0, cy0, dw, chip_h, chip_h / 2, fill=with_alpha(th.accent2, 0.18 * aa), outline=with_alpha(th.accent2, aa), width=2)
         ax, ay = cx0 + 40, cy0 + chip_h / 2
         s = delta[0]
@@ -450,7 +545,7 @@ COUNTER = Element(
     doc=("- counter: {value (a number like \"4.2\", \"73\" or \"1,250\"), unit (<=8, e.g. \"%\" or \"km\"), prefix (<=4, e.g. \"$\"), label (<=70), from (optional start number, default 0), "
          "delta (<=24, optional, e.g. \"+12% vs 2020\")}. A big number that counts up (or down from `from`) as it is named. Use for one headline figure, a growth, a total. "
          "Only numbers that appear in the grounding notes; never invent or round a figure; not for several numbers (use chart)."),
-    sanitize=counter_sanitize, draw=draw_counter, cues=counter_cues, anchors=counter_anchors,
+    sanitize=counter_sanitize, draw=draw_counter, cues=counter_cues, anchors=counter_anchors, formats=("16:9", "9:16", "1:1", "4:5"),
     samples=[{"value": "4.2", "unit": "B", "prefix": "$", "label": "Annual revenue of the company in 2023"},
              {"value": "1,250", "unit": "km", "label": "Length of the route from coast to coast", "from": "2,000", "delta": "-38% vs the old road"},
              {"value": "73", "unit": "%", "label": "Share of adults who read at least one book a year", "delta": "+12% vs 2020"}],
@@ -479,18 +574,48 @@ def checklist_cues(props: Props, dur: float) -> List[float]:
     return reveal_times(len(props.get("items", [])), dur, props.get("cues"))
 
 
+_CK_FONT: Dict[Any, float] = {}
+
+
+def _checklist_font(cv: Canvas, items: List[str], text_w: float, card_h: float, start: float) -> float:
+    """One font size for all rows (narrow frames): the largest at which every item fits its card (up to 3 lines), floor 30."""
+    key = (tuple(items), cv.ss, int(text_w), int(card_h), int(start))
+    if key in _CK_FONT:
+        return _CK_FONT[key]
+    fs = float(int(start))
+    out = 30.0
+    while fs >= 30:
+        if all(len(cv.wrap(t, "semibold", fs, text_w)) * fs * 1.22 + 22 <= card_h for t in items):
+            out = fs
+            break
+        fs -= 2
+    if len(_CK_FONT) > 256:
+        _CK_FONT.clear()
+    _CK_FONT[key] = out
+    return out
+
+
 def draw_checklist(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     items = [str(i) for i in props["items"]]
     n = len(items)
     checked = [bool(c) for c in props.get("checked", [])] + [True] * n
-    y = heading(cv, th, str(props.get("heading", "")), lt, y=CONTENT_TOP + 20)
-    gap = 18
+    fr = ctx.frame
+    land = fr.landscape
+    y = heading(cv, th, str(props.get("heading", "")), lt, y=ctx.top + 20, ctx=ctx)
+    gap = 18 if land else 16
     avail = ctx.bottom - y - 10
-    card_h = max(84.0, min(126.0, (avail - gap * (n - 1)) / n))
-    font_px = 46 if card_h > 110 else 40
-    x0, w = 140, 1640
+    if land:
+        card_h = max(84.0, min(126.0, (avail - gap * (n - 1)) / n))
+        font_px = 46 if card_h > 110 else 40
+        x0, w = 140, 1640
+    else:
+        card_h = max(72.0, min(230.0 if fr.vertical else 150.0, (avail - gap * (n - 1)) / n))
+        x0, w = fr.margin_x, fr.W - 2 * fr.margin_x
+        y += max(0.0, (avail - n * card_h - gap * (n - 1)) / 2) * 0.7     # few items: centre the stack in the free height instead of hugging the heading
     times = reveal_times(n, dur, props.get("cues"))
-    r = min(34.0, card_h * 0.3)
+    r = min(34.0, card_h * 0.3) if land else min(40.0, card_h * 0.3)
+    if not land:
+        font_px = _checklist_font(cv, items, w - 150 - r * 2 + 40, card_h, 54.0 * fr.type_scale if fr.vertical else 50.0)
     for i, text in enumerate(items):
         p = progress(lt, times[i], 0.5)
         if p <= 0:
@@ -499,7 +624,7 @@ def draw_checklist(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, c
         dx = (1 - ease_out_cubic(p)) * -70
         cy = y + i * (card_h + gap)
         cv.card(x0 + dx, cy, w, card_h, th, r=24, alpha=a)
-        mx, my = x0 + dx + 46 + r, cy + card_h / 2
+        mx, my = x0 + dx + (46 if land else 36) + r, cy + card_h / 2
         ok = checked[i]
         tp = progress(lt, times[i] + 0.2, 0.45)
         cv.ellipse(mx, my, r, r, outline=with_alpha(th.muted, a * 0.8), width=3)
@@ -516,19 +641,19 @@ def draw_checklist(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, c
                 k = 0.34 * r * ease_out_cubic(progress(tp, 0.2, 0.8))
                 cv.line([(mx - k, my - k), (mx + k, my + k)], ink, width=r * 0.26)
                 cv.line([(mx + k, my - k), (mx - k, my + k)], ink, width=r * 0.26)
-        lines = cv.wrap(text, "semibold", font_px, w - 150 - r * 2)[:2]
+        lines = cv.wrap(text, "semibold", font_px, w - 150 - r * 2 + (0 if land else 40))[: (2 if land else 3)]
         lh = font_px * 1.22
         ty = my - (len(lines) * lh) / 2 - lh * 0.06
         tcol = th.text if ok else th.muted
         for li, line in enumerate(lines):
-            cv.text(x0 + dx + 46 + r * 2 + 34, ty + li * lh, line, "semibold", font_px, with_alpha(tcol, a))
+            cv.text(x0 + dx + (46 if land else 36) + r * 2 + (34 if land else 28), ty + li * lh, line, "semibold", font_px, with_alpha(tcol, a))
 
 
 CHECKLIST = Element(
     name="checklist", family="Lists",
     doc=("- checklist: {heading (<=50), items: 2-6 strings (<=70), checked: optional list of true/false, one per item (default all true)}. Rows ticked off one by one as they "
          "are named; false shows a cross. Use for requirements, dos and don'ts, things to check, what is included. Never for steps in order (use steps) or for long sentences."),
-    sanitize=checklist_sanitize, draw=draw_checklist, cues=checklist_cues, anchors=checklist_anchors,
+    sanitize=checklist_sanitize, draw=draw_checklist, cues=checklist_cues, anchors=checklist_anchors, formats=("16:9", "9:16", "1:1", "4:5"),
     samples=[{"heading": "Before you travel", "items": ["Passport valid for six months", "Travel insurance", "Offline maps downloaded"]},
              {"heading": "What counts as a healthy sleep routine", "items": ["Same bedtime every night", "Screens off an hour before bed", "A cool, dark room",
                                                                               "Coffee after 6 pm", "A quiet wind-down habit", "Bright light in the morning"],
@@ -573,14 +698,36 @@ def _steps_grid(n: int, bottom: float, top: float) -> Tuple[int, float, float, f
     return cols, cw, ch, gx, 140, rgap
 
 
+def _steps_narrow_grid(fr, n: int, top: float, bottom: float) -> Tuple[int, float, float, float, float, float]:
+    """Narrow frames: (columns, card width, card height, gap x, x0, row gap). One column of wide rows when they fit, two columns of compact cards otherwise."""
+    avail = bottom - top
+    rgap = 26.0
+    cols = 1 if (fr.vertical and (fr.aspect == "9:16" or n <= 4)) or n <= 3 else 2
+    gx = 44.0
+    x0 = float(fr.margin_x)
+    cw = (fr.W - 2 * fr.margin_x - gx * (cols - 1)) / cols
+    rows = math.ceil(n / cols)
+    ch = min(240.0 if cols == 1 else 270.0, (avail - rgap * (rows - 1)) / rows)
+    return cols, cw, ch, gx, x0, rgap
+
+
 def draw_steps(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     steps = props["steps"]
     n = len(steps)
-    y = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20)
-    cols, cw, ch, gx, x0, rgap = _steps_grid(n, ctx.bottom - 20, y + 20)
+    fr = ctx.frame
+    land = fr.landscape
+    y = heading(cv, th, str(props.get("title", "")), lt, y=ctx.top + 20, ctx=ctx)
+    if land:
+        cols, cw, ch, gx, x0, rgap = _steps_grid(n, ctx.bottom - 20, y + 20)
+    else:
+        cols, cw, ch, gx, x0, rgap = _steps_narrow_grid(fr, n, y, ctx.bottom)
     rows = math.ceil(n / cols)
-    top = y + 20 + ((ctx.bottom - 20 - y - 20) - (rows * ch + (rows - 1) * rgap)) / 2
+    if land:
+        top = y + 20 + ((ctx.bottom - 20 - y - 20) - (rows * ch + (rows - 1) * rgap)) / 2
+    else:
+        top = y + ((ctx.bottom - y) - (rows * ch + (rows - 1) * rgap)) / 2
     times = reveal_times(n, dur, props.get("cues"))
+    ts = fr.type_scale
     for i, st in enumerate(steps):
         col, row = i % cols, i // cols
         cx, cy = x0 + col * (cw + gx), top + row * (ch + rgap)
@@ -595,24 +742,73 @@ def draw_steps(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: 
         cv.card(cx, cy + dy, cw, ch, th, r=28, alpha=a)
         if lit > 0.02:
             cv.rrect(cx, cy + dy, cw, ch, 28, outline=with_alpha(th.accent, a * lit), width=5)
-        rad = 40
-        bx, by = cx + 34 + rad, cy + dy + 34 + rad
-        cv.ellipse(bx, by, rad, rad, fill=with_alpha(_mix(th.muted, th.accent, lit), a))
-        cv.text(bx, by + 1, str(i + 1), "bold", 44, with_alpha(_ink(_mix(th.muted, th.accent, lit)), a), anchor="mm")
-        inner = cw - 68
+        if land:
+            rad = 40
+            bx, by = cx + 34 + rad, cy + dy + 34 + rad
+            badge_fs = 44
+        else:
+            rad = 36 if (cols == 1 and ch >= 150) else (28 if cols == 1 else 24)
+            badge_fs = 40 if rad >= 36 else 32
+        if land:
+            cv.ellipse(bx, by, rad, rad, fill=with_alpha(_mix(th.muted, th.accent, lit), a))
+            cv.text(bx, by + 1, str(i + 1), "bold", badge_fs, with_alpha(_ink(_mix(th.muted, th.accent, lit)), a), anchor="mm")
+            inner = cw - 68
+            tcol = _mix(th.muted, th.text, 0.45 + 0.55 * lit)
+            l_size, l_lines = cv.fit_text(str(st["label"]), "bold", inner, 150, 46, 32)
+            ty = cy + dy + 34 + rad * 2 + 26
+            for k, line in enumerate(l_lines):
+                cv.text(cx + 34, ty + k * l_size * 1.18, line, "bold", l_size, with_alpha(tcol, a))
+            if st.get("detail"):
+                d_size, d_lines = cv.fit_text(str(st["detail"]), "regular", inner, max(60.0, ch - (ty - cy - dy) - len(l_lines) * l_size * 1.18 - 50), 36, 28, line_h=1.25)
+                dy0 = ty + len(l_lines) * l_size * 1.18 + 14
+                for k, line in enumerate(d_lines):
+                    cv.text(cx + 34, dy0 + k * d_size * 1.25, line, "regular", d_size, with_alpha(th.muted, a))
+            if col < cols - 1 and i + 1 < n:                # a chevron towards the next step in the same row
+                ax, ay = cx + cw + gx / 2, cy + dy + ch / 2
+                cv.line([(ax - 8, ay - 16), (ax + 8, ay), (ax - 8, ay + 16)], with_alpha(th.accent, a * 0.9), width=6)
+            continue
+        # ---- narrow frames: the badge on the left of the label; the detail beside the label (one column) or under both (two columns)
+        pad = 28.0 if ch >= 190 else (20.0 if cols == 1 else 16.0)
+        compact = cols == 2
         tcol = _mix(th.muted, th.text, 0.45 + 0.55 * lit)
-        l_size, l_lines = cv.fit_text(str(st["label"]), "bold", inner, 150, 46, 32)
-        ty = cy + dy + 34 + rad * 2 + 26
-        for k, line in enumerate(l_lines):
-            cv.text(cx + 34, ty + k * l_size * 1.18, line, "bold", l_size, with_alpha(tcol, a))
-        if st.get("detail"):
-            d_size, d_lines = cv.fit_text(str(st["detail"]), "regular", inner, max(60.0, ch - (ty - cy - dy) - len(l_lines) * l_size * 1.18 - 50), 36, 28, line_h=1.25)
-            dy0 = ty + len(l_lines) * l_size * 1.18 + 14
-            for k, line in enumerate(d_lines):
-                cv.text(cx + 34, dy0 + k * d_size * 1.25, line, "regular", d_size, with_alpha(th.muted, a))
-        if col < cols - 1 and i + 1 < n:                # a chevron towards the next step in the same row
-            ax, ay = cx + cw + gx / 2, cy + dy + ch / 2
-            cv.line([(ax - 8, ay - 16), (ax + 8, ay), (ax - 8, ay + 16)], with_alpha(th.accent, a * 0.9), width=6)
+        bx, by = cx + pad + rad, cy + dy + pad + rad if compact else cy + dy + ch / 2
+        cv.ellipse(bx, by, rad, rad, fill=with_alpha(_mix(th.muted, th.accent, lit), a))
+        cv.text(bx, by + 1, str(i + 1), "bold", badge_fs, with_alpha(_ink(_mix(th.muted, th.accent, lit)), a), anchor="mm")
+        tx = cx + pad + rad * 2 + 22
+        lw = cx + cw - pad - tx
+        has_d = bool(st.get("detail"))
+        l_max = (ch - 2 * pad) * (0.42 if has_d and not compact else 1.0) if not compact else rad * 2 + 30
+        l_size, l_lines = cv.fit_text(str(st["label"]), "bold", lw, max(l_max, 40), 46 * ts if cols == 1 else 40 * ts, 30)
+        l_h = len(l_lines) * l_size * 1.18
+        if compact:
+            ly = cy + dy + pad + max(0.0, (rad * 2 - l_h) / 2)
+            for k, line in enumerate(l_lines):
+                cv.text(tx, ly + k * l_size * 1.18, line, "bold", l_size, with_alpha(tcol, a))
+            dx0, dw0 = cx + pad, cw - 2 * pad
+            dy0 = cy + dy + pad + max(rad * 2, l_h) + 12
+            d_max = cy + dy + ch - pad * 0.7 - dy0
+        else:
+            dx0, dw0 = tx, lw
+            d_max = ch - 2 * pad - l_h - 8
+        d_lines, d_size = [], 0.0
+        if has_d:
+            d_size, d_lines = cv.fit_text(str(st["detail"]), "regular", dw0, max(d_max, 30), 36 * ts if cols == 1 else 32, 28 if cols == 1 else 24, line_h=1.25)
+        d_h = len(d_lines) * d_size * 1.25
+        if not compact:
+            blk = l_h + (8 + d_h if has_d else 0)
+            ly = cy + dy + (ch - blk) / 2
+            for k, line in enumerate(l_lines):
+                cv.text(tx, ly + k * l_size * 1.18, line, "bold", l_size, with_alpha(tcol, a))
+            dy0 = ly + l_h + 8
+        for k, line in enumerate(d_lines):
+            cv.text(dx0, dy0 + k * d_size * 1.25, line, "regular", d_size, with_alpha(th.muted, a))
+        if i + 1 < n:
+            if col < cols - 1:                               # towards the next step in the same row
+                ax, ay = cx + cw + gx / 2, cy + dy + ch / 2
+                cv.line([(ax - 6, ay - 13), (ax + 6, ay), (ax - 6, ay + 13)], with_alpha(th.accent, a * 0.9), width=5)
+            elif cols == 1:                                  # down, in the gap under the badge column
+                ax, ay = bx, cy + dy + ch + rgap / 2
+                cv.line([(ax - 12, ay - 5), (ax, ay + 6), (ax + 12, ay - 5)], with_alpha(th.accent, a * 0.9), width=5)
 
 
 STEPS = Element(
@@ -620,7 +816,7 @@ STEPS = Element(
     doc=("- steps: {title (<=50), steps: 3-6 [{label (<=40), detail (<=80, optional)}]}. A numbered process in cards with chevrons; each step lights up as it is named, "
          "earlier ones stay visible but muted. Use for how to do something, a procedure, a recipe, a sequence that must happen in order. "
          "Never for unordered points (use bullets/checklist) or branching flows (use diagram)."),
-    sanitize=steps_sanitize, draw=draw_steps, cues=steps_cues, anchors=steps_anchors,
+    sanitize=steps_sanitize, draw=draw_steps, cues=steps_cues, anchors=steps_anchors, formats=("16:9", "9:16", "1:1", "4:5"),
     samples=[{"title": "How a bill becomes law", "steps": [{"label": "Proposal", "detail": "A member writes and introduces the bill"},
                                                          {"label": "Committee", "detail": "It is studied, amended and voted on"},
                                                          {"label": "Floor vote"}, {"label": "Signature", "detail": "The head of state signs it"}]},
@@ -659,13 +855,32 @@ def funnel_cues(props: Props, dur: float) -> List[float]:
 def draw_funnel(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     stages = props["stages"]
     n = len(stages)
-    y = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20)
+    fr = ctx.frame
+    land = fr.landscape
+    stacked = fr.vertical                                  # 9:16 and 4:5: bands span the width, each label under its band; square and landscape: labels to the right
+    y = heading(cv, th, str(props.get("title", "")), lt, y=ctx.top + 20, ctx=ctx)
     gap = 8
     avail = ctx.bottom - y - 20
-    sh = min(140.0, (avail - gap * (n - 1)) / n)
-    top = y + 10 + (avail - (n * sh + gap * (n - 1))) / 2
-    w_top, w_bot = 940.0, 360.0
-    fx = 140 + w_top / 2                                   # funnel axis (left), labels to the right
+    lab_h = 0.0
+    if stacked:
+        lab_size = 44.0 * fr.type_scale if fr.aspect == "9:16" else 44.0
+        lab_h = lab_size * 1.25 + 12
+        sh = min(190.0, (avail - n * lab_h - gap * (n - 1)) / n)      # band height
+        blk = sh + lab_h
+        top = y + 10 + (avail - (n * blk + gap * (n - 1))) / 2
+        w_top, w_bot = fr.W - 2 * fr.margin_x, (fr.W - 2 * fr.margin_x) * 0.36
+        fx = fr.cx
+    elif land:
+        sh = min(140.0, (avail - gap * (n - 1)) / n)
+        top = y + 10 + (avail - (n * sh + gap * (n - 1))) / 2
+        w_top, w_bot = 940.0, 360.0
+        fx = 140 + w_top / 2                               # funnel axis (left), labels to the right
+    else:                                                  # square: a narrower funnel on the left, labels to the right
+        sh = min(140.0, (avail - gap * (n - 1)) / n)
+        top = y + 10 + (avail - (n * sh + gap * (n - 1))) / 2
+        w_top, w_bot = 400.0, 170.0
+        fx = fr.margin_x + w_top / 2
+    blk = sh + lab_h
     times = reveal_times(n, dur, props.get("cues"))
     wid = lambda k: w_top - (w_top - w_bot) * k / n        # noqa: E731
     for i, st in enumerate(stages):
@@ -674,7 +889,7 @@ def draw_funnel(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx:
             continue
         a = ease_out_cubic(progress(lt, times[i], 0.3))
         e = ease_out_cubic(p)
-        t0 = top + i * (sh + gap) + (1 - e) * -26
+        t0 = top + i * (blk + gap) + (1 - e) * -26
         wt, wb = wid(i), wid(i + 1) - 12
         s = 0.8 + 0.2 * e
         col = _mix(th.accent, th.accent2, i / max(1, n - 1))
@@ -682,16 +897,20 @@ def draw_funnel(cv: Canvas, props: Props, lt: float, dur: float, th: Theme, ctx:
         cv.polygon(poly, with_alpha(col, a))
         ink = _ink(col)
         v = str(st.get("value", ""))
-        mid_w = (wt + wb) / 2 - 90
+        mid_w = (wt + wb) / 2 - (90 if land else 60)
         if v:
-            vs, vl = cv.fit_text(v, "bold", mid_w, sh * 0.8, min(72.0, sh * 0.62), 28)
+            vs, vl = cv.fit_text(v, "bold", mid_w, sh * 0.8, min(72.0 if land else 72.0 * fr.type_scale, sh * 0.62), 28)
             cv.text(fx, t0 + sh / 2 + 2, vl[0] if vl else v, "bold", vs, with_alpha(ink, a), anchor="mm")
         else:
             cv.text(fx, t0 + sh / 2 + 2, str(i + 1), "bold", min(60.0, sh * 0.55), with_alpha(ink, a), anchor="mm")
         la = ease_out_cubic(progress(lt, times[i] + 0.15, 0.4))
-        lx = 140 + w_top + 70
+        if stacked:
+            l_size, l_lines = cv.fit_text(str(st["label"]), "semibold", fr.W - 2 * fr.margin_x, lab_h - 8, lab_size, 30)
+            cv.text(fx, t0 + sh + 8 + (1 - la) * 14, l_lines[0] if len(l_lines) == 1 else " ".join(l_lines), "semibold", l_size if len(l_lines) == 1 else 30, with_alpha(th.text, la), anchor="ma")
+            continue
+        lx = (140 if land else fr.margin_x) + w_top + (70 if land else 56)
         cv.line([(fx + wid(i + 1) / 2 * s + 20, t0 + sh / 2), (lx - 22, t0 + sh / 2)], with_alpha(th.card_outline, la), width=3, round_caps=False)
-        l_size, l_lines = cv.fit_text(str(st["label"]), "semibold", 1780 - lx, sh - 8, 50, 32)
+        l_size, l_lines = cv.fit_text(str(st["label"]), "semibold", (1780 if land else fr.W - fr.margin_x) - lx, sh - 8, 50 if land else 44, 32 if land else 30)
         for k, line in enumerate(l_lines):
             cv.text(lx, t0 + sh / 2 + (k - (len(l_lines) - 1) / 2) * l_size * 1.18 + (1 - la) * 14, line, "semibold", l_size, with_alpha(th.text, la), anchor="lm")
 
@@ -701,7 +920,7 @@ FUNNEL = Element(
     doc=("- funnel: {title (<=50), stages: 3-5 [{label (<=30), value (<=12, optional, e.g. \"10,000\" or \"12%\")}]}. Stages that narrow top to bottom, revealed in order as they "
          "are named, the value shown big inside. Use for conversion, selection, filtering, anything that loses members at each stage. Values only from the grounding "
          "notes, never invented. Never for a plain ordered process (use steps) or for a ranking."),
-    sanitize=funnel_sanitize, draw=draw_funnel, cues=funnel_cues, anchors=funnel_anchors,
+    sanitize=funnel_sanitize, draw=draw_funnel, cues=funnel_cues, anchors=funnel_anchors, formats=("16:9", "9:16", "1:1", "4:5"),
     samples=[{"title": "From visitor to customer", "stages": [{"label": "Visit the site", "value": "10,000"}, {"label": "Sign up", "value": "1,200"},
                                                               {"label": "Try the product", "value": "400"}, {"label": "Pay", "value": "90"}]},
              {"title": "How a vaccine reaches approval", "stages": [{"label": "Lab research"}, {"label": "Animal studies"}, {"label": "Phase 1 trial"}, {"label": "Phase 2 trial"},

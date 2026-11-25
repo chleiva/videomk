@@ -1,0 +1,452 @@
+{
+ "id": "sci-01",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "explain entropy",
+ "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:58:33",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Entropy is a timeless scientific concept with well-established explanations (thermodynamics, statistical mechanics), so no recent information is needed for an accurate explainer script.",
+  "queries": [
+   "entropy thermodynamics explained",
+   "entropy second law of thermodynamics"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Entropy: Why Messes Happen and Time Flows",
+  "description": "Entropy is often called disorder, but it is really about how many ways something can be arranged. This video explains why that counting idea makes eggs break, ice melt, and time seem to move forward.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "2c0761e2",
+    "narration": "Why does a dropped egg splatter, but never jump back together? Nothing in the basic laws of motion forbids it. So what stops it? The answer is a idea called entropy.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Why Can't You Unscramble an Egg?",
+      "subtitle": "The idea of entropy, explained"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "The puzzle"
+   },
+   {
+    "id": "8c4c539f",
+    "narration": "Most people say entropy means disorder. That is close, but it hides the real idea. Entropy is really about counting: how many different ways can the parts of something be arranged?",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how many microscopic arrangements match what we see. More ways means higher entropy."
+     }
+    }
+   },
+   {
+    "id": "72652c6e",
+    "narration": "Think of a deck of cards. Only one order is perfectly sorted. But there are astronomically many shuffled orders. So shuffling lands on messy almost always, simply because messy has more ways to happen.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "A shuffled deck",
+      "items": [
+       "One perfectly sorted order",
+       "Astronomically many shuffled orders",
+       "Shuffling lands on 'messy' almost always"
+      ],
+      "style": "rail",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    },
+    "chapter": "Counting arrangements"
+   },
+   {
+    "id": "9eba5eb1",
+    "narration": "Now swap cards for gas. Particles move randomly. That gives many possible arrangements. Most look spread out, not bunched in a corner. So the spread-out state wins, and that is high entropy.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From motion to entropy",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Particles move randomly",
+        "icon": "atom"
+       },
+       {
+        "id": "b",
+        "label": "Many possible arrangements",
+        "icon": "grid"
+       },
+       {
+        "id": "c",
+        "label": "Most look 'spread out'",
+        "icon": "cloud"
+       },
+       {
+        "id": "d",
+        "label": "High entropy",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "7babedb5",
+    "narration": "Here is the surprise. The rule is not a force. It is just probability. Unlikely things are not forbidden, they are fantastically rare. Entropy almost always rises because there are so many more ways to be messy.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy rises not by force, but by probability.",
+      "emphasis": "probability"
+     }
+    }
+   },
+   {
+    "id": "fc2fa066",
+    "narration": "Drop a hot cup of coffee in a cool room. Heat flows out until everything matches. Energy spreads into more arrangements, and it never gathers back on its own.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steam rising from coffee",
+      "alt": "hot drink steaming slowly"
+     }
+    },
+    "chapter": "Heat and time"
+   },
+   {
+    "id": "dd757034",
+    "narration": "This gives time a direction. The laws of motion work the same forwards and backwards. But a movie of an egg unbreaking looks wrong, because it runs toward fewer arrangements.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Egg breaking",
+       "tagline": "Many arrangements"
+      },
+      "b": {
+       "name": "Egg unbreaking",
+       "tagline": "Very few arrangements"
+      },
+      "rows": [
+       {
+        "label": "Likelihood",
+        "a": "Common",
+        "b": "Absurdly rare"
+       },
+       {
+        "label": "Entropy",
+        "a": "Rises",
+        "b": "Falls"
+       }
+      ],
+      "verdict": "Time points toward higher entropy",
+      "winner": "a"
+     }
+    }
+   },
+   {
+    "id": "e80c8689",
+    "narration": "Can entropy ever fall? Yes, locally. A freezer makes ice, and living things build order. But each does it by pushing more heat and disorder into the surroundings, so the total still rises.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Entropy can drop locally, if...",
+      "items": [
+       "A freezer makes ice",
+       "Living things build order",
+       "Waste heat goes outside",
+       "Total entropy still rises"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cfe01634",
+    "narration": "Look around and you can spot it everywhere: broken glass on the floor, a melting ice cube, a burning candle close up, and the old clock face ticking on. All one story, moving toward more arrangements.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "broken glass on floor",
+       "melting ice cube",
+       "burning candle close up",
+       "old clock face"
+      ],
+      "alt": "Everyday signs of entropy"
+     }
+    }
+   },
+   {
+    "id": "dee36cbb",
+    "narration": "So remember one sentence. Entropy counts the ways things can be arranged, and the universe drifts toward the most likely arrangements. That is why eggs break, ice melts, and time runs forward.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Things drift toward the arrangements that have the most ways to happen.",
+      "emphasis": "most ways"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 31.5,
+  "before_first_script_call_s": 4.8,
+  "script_s": 26.7
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.07839,
+  "search_api": 0.0,
+  "total": 0.07865
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 23296,
+  "out": 3698
+ },
+ "rules": {
+  "length": {
+   "words": 326,
+   "expected_words": 267,
+   "ratio": 1.221,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 145.3,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Why does a dropped egg splatter, but never jump back together? Nothing in the basic laws of motion forbids it. So what stops it? The answer is a idea called entropy.",
+   "close_text": "So remember one sentence. Entropy counts the ways things can be arranged, and the universe drifts toward the most likely arrangements. That is why eggs break, ice melts, and time runs forward."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "definition": 1,
+    "bullets": 1,
+    "diagram": 1,
+    "kinetic_text": 2,
+    "clip": 1,
+    "versus": 1,
+    "checklist": 1,
+    "gallery": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "kinetic_text",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "too_long",
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The content is sound: microstate counting, the second law as probability, and local decreases paid for by waste heat. The claim that the laws of motion work the same forwards and backwards is simplified but acceptable, and there are no invented numbers."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "It covers the disorder caveat, the card deck, the second law, the arrow of time and life/freezers. It lacks the energy-spreading framing in depth, the ice-melting example, and any mention of a low-entropy past or the Boltzmann formula."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order runs from puzzle to counting to probability to heat and time to local decreases to takeaway. The takeaway is stated twice (beats 5 and 10), and beat 4 overlaps with beat 3."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening egg question creates curiosity. The ending sentence is a memorable takeaway, though it is somewhat summary-like."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational and clear for a beginner audience, and it avoids jargon."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, but the gallery narration literally reads out the image queries, including 'burning candle close up'. The versus 'winner' framing is odd, and the candle and clock images are weak fits."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The egg and deck of cards are standard examples. The 'not forbidden, just fantastically rare' line is good, but overall it is fairly generic."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in English, aimed at beginners and about the requested length, and it covers the requested points."
+   },
+   "language": {
+    "score": 3,
+    "reason": "There is a grammar error ('a idea'), and the gallery narration is clumsy and reads like a query list."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "The answer is a idea called entropy.",
+    "issue": "Grammar error: should be 'an idea'.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "a burning candle close up, and the old clock face ticking on",
+    "issue": "The narration reads image search queries aloud, which is unnatural. The candle and clock do not clearly illustrate entropy.",
+    "beat": 9
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Entropy almost always rises because there are so many more ways to be messy.",
+    "issue": "This repeats the deck-of-cards point from beat 3, and 'messy' keeps the disorder framing the video had just criticized.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Heat flows out until everything matches.",
+    "issue": "This is a simplification; the energy-spreading explanation is thin, and the coffee example does not explicitly tie heat flow to a count of arrangements.",
+    "beat": 6
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"winner\": \"a\"",
+    "issue": "A versus layout with a 'winner' is a poor fit for a comparison of likelihoods.",
+    "beat": 7
+   }
+  ],
+  "missing": [
+   "Energy spreading as the intuitive picture, with an ice-melting walkthrough",
+   "The low-entropy early universe as the reason for the arrow of time",
+   "Mention of Boltzmann or the S = k log W idea"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, accurate beginner explainer with a good egg hook and a sound counting-based framing. It is held back by a grammar slip, a gallery beat that reads image queries aloud, some repetition, and generic examples.",
+  "mean": 3.67,
+  "cost_usd": 0.01857,
+  "tokens": [
+   3265,
+   1204
+  ]
+ }
+}

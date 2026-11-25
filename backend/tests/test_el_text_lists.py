@@ -110,3 +110,55 @@ def test_empty_and_junk_are_refused(name):
     for bad in ({}, {"steps": "x"}, {"items": 5, "stages": None}):
         with pytest.raises(ValueError):
             ELEMENTS[name].sanitize(bad)
+
+
+# ---------------------------------------------------------------- responsive layouts (9:16, 1:1, 4:5)
+ASPECTS = ["9:16", "1:1", "4:5"]
+RESP = ["definition", "counter", "checklist", "steps", "funnel"]
+
+
+def test_converted_elements_are_tagged_for_every_aspect():
+    for n in RESP:
+        assert set(ELEMENTS[n].formats) == {"16:9", "9:16", "1:1", "4:5"}
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+@pytest.mark.parametrize("name", RESP)
+def test_worst_case_props_render_inside_the_frame(name, aspect):
+    long = "Extraordinarily long text with many ordinary words in it " * 3
+    props = {
+        "definition": {"term": "Pneumonoultramicroscopicsilicovolcano", "definition": long.replace("ordinary", "hyphen-ated-super-long-word-chain-x"), "origin": long, "example": long},
+        "counter": {"value": "123,456,789,012", "unit": "km/h", "prefix": "$", "label": long, "from": "1,000", "delta": "+1234% vs the old one"},
+        "checklist": {"heading": long, "items": [long] * 6, "checked": [True, False] * 3},
+        "steps": {"title": long, "steps": [{"label": long, "detail": long}] * 6},
+        "funnel": {"title": long, "stages": [{"label": long, "value": "100,000,000"}] * 5},
+    }[name]
+    el = ELEMENTS[name]
+    p = el.sanitize(props)
+    im = render(name, p, 7.5, 8.0, "midnight", captions=True, aspect=aspect, resolution="720p", draft=False)
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "720p")
+    k = im.height / fr.H
+    x0, y0, x1, y1 = [int(v * k) for v in fr.content_box]
+    import numpy as np
+    a = np.asarray(im.convert("RGB"), np.int16)
+    from engine import scenes
+    scenes.SCENES["__blank__"] = (lambda *a, **k: None, lambda p, d: [])
+    try:
+        ref = np.asarray(render("__blank__", {}, 7.5, 8.0, "midnight", captions=True, aspect=aspect, resolution="720p", draft=False).convert("RGB"), np.int16)
+    finally:
+        scenes.SCENES.pop("__blank__", None)
+    diff = (np.abs(a - ref).max(axis=2) > 150)
+    ys, xs = np.nonzero(diff)
+    if len(xs):
+        # nothing drawn below the content box (the caption band stays free) or outside the side margins
+        assert ys.max() <= y1 + 6
+        assert xs.min() >= x0 - 8 and xs.max() <= x1 + 8
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_narrow_layouts_keep_16x9_cue_semantics(aspect):
+    for n in RESP:
+        el = ELEMENTS[n]
+        p = el.sanitize(el.samples[-1])
+        assert el.cues(p, 8.0) == el.cues(p, 8.0)

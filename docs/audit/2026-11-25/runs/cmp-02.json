@@ -1,0 +1,648 @@
+{
+ "id": "cmp-02",
+ "category": "comparison (A vs B)",
+ "language": "es",
+ "difficulty": "medium",
+ "prompt": "coche eléctrico vs híbrido: cuál me conviene",
+ "great": "Coste de compra y uso, autonomía y carga, mantenimiento, emisiones, quién se beneficia de cada uno (vivienda con enchufe, kilometraje), ayudas; criterios claros, cifras fiables o con salvedades.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:03:51",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "La conveniencia depende de precios actuales, ayudas públicas vigentes, tarifas eléctricas y oferta de modelos en España, que cambian con frecuencia y pueden ser posteriores a mi entrenamiento.",
+  "queries": [
+   "coche eléctrico vs híbrido España 2026",
+   "precio y ayudas coche eléctrico España",
+   "coche híbrido enchufable vs eléctrico coste"
+  ],
+  "searches": 3,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 13.6,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "finance-business"
+  ],
+  "staged": null,
+  "notes_len": 5882,
+  "n_sources": 3,
+  "n_fetched": 8,
+  "fetched": [
+   "Híbrido o eléctrico en 2026: cuál te conviene según tu uso",
+   "¿Coche eléctrico o híbrido enchufable? Cuál elegir para 2026",
+   "Comprar un coche eléctrico o híbrido en 2026: experto en motor aclara qué es mejor en cada caso",
+   "Plan Auto+ 2026: importe real, calculadora y cómo tramitar ayuda",
+   "Plan Auto+: guía con las ayudas para comprar coches eléctricos",
+   "La Moncloa. Programa Auto+: plazos y requisitos de las ayudas a la compra de vehículos eléctricos y electrificados | 01/10/2026 [Prensa/Actualidad/Industria y T",
+   "BOE-A-2026-16010 Real Decreto 609/2026, de 22 de julio, por el que se regula la concesión directa de ayudas a la compra de vehículos eléctricos y electrificados",
+   "Calculadora de coste de propiedad entre un híbrido y un eléctrico"
+  ],
+  "research_agent_cost_usd": 0.0017748999999999998
+ },
+ "warnings": [
+  "beat 3: scene replaced (versus needs 2+ rows)"
+ ],
+ "notes": "## Híbrido o eléctrico en 2026: cuál te conviene según tu uso\nPublished: Tue, 17 Mar 2026 00:00:00 GMT\nAntes de comprar en 2026, qué cambia entre MHEV, HEV y PHEV, y por qué el contexto energético y regulatorio actual cambia los argumentos de hace dos años.\n\n## ¿Coche eléctrico o híbrido enchufable? Cuál elegir para 2026\nPublished: Thu, 29 Jan 2026 00:00:00 GMT\nAnalizamos si te compensa más un coche eléctrico o híbrido enchufable en 2026 según tus hábitos, posibilidad de carga y presupuesto real.\n\n## Comprar un coche eléctrico o híbrido en 2026: experto en motor aclara qué es mejor en cada caso\nPublished: Wed, 15 Apr 2026 00:00:00 GMT\nComprar un coche eléctrico o híbrido en 2026: experto en motor aclara qué es mejor en cada caso. Cada modelo tiene sus ventajas que conviene conocer antes de\n\n## Plan Auto+ 2026: importe real, calculadora y cómo tramitar ayuda\n| Criterio | Condición | % del tope | Importe (turismo M1) | ------| | E1 · Eléctrico | BEV / FCEV (100% eléctrico) | 50 % | 2.250 € | | E1 · Eléctrico | PHEV / REEV (enchufable) | 25 % | 1.125 € | | E2 · Económico | Precio ≤ 35.000 € sin IVA | 25 % | 1.125 € | | E2 · Económico | Precio 35.001–45.000 € sin IVA | 15 % | 675 € | | E3 · Europeo (vehículo) | Montaje final en la UE | +15 % | +675 € | | E3 · Europeo (batería) | Battery pack ensamblado en UE | +10 % | +450 € | [...] Ejemplo de ayuda máxima: BEV (2.250 €) + precio ≤ 35k (1.125 €) + vehículo ensamblado en UE (675 €) + battery pack UE (450 €) = 4.500 € de ayuda estatal + 1.000 € de descuento obligatorio del concesionario = 5.500 € totales. ¿Cómo sé si mi coche suma los tramos europeos? No tienes que buscar certificados. Los fabricantes registran sus modelos en la Lista Blanca del IDAE. Si tu coche aparece ahí, el sistema aplica lo\n\n## Plan Auto+: guía con las ayudas para comprar coches eléctricos\nEl Programa Auto+ está en vigor desde el 23 de julio de 2026 con su publicación en el BOE, pero tiene carácter retroactivo a cualquier vehículo eléctrico o híbrido enchufable que cumpla con las condiciones y haya sido matriculado desde el 1 de enero de dicho año. ### ¿Cuánto puedo ahorrar con las ayudas? La ayuda máxima que se puede obtener con el Programa Auto+ es de 4.500 euros si se cumplen con todos los criterios EEE (Eléctrico, Económico y Europeo). [...] | Criterio EEE | Detalle del Vehículo | % de la Ayuda Máxima | Importe Ayuda (€) | --- --- | | Eléctrico | Es un vehículo eléctrico puro (BEV) | 50% | 2.250 € | | Económico | Precio en factura inferior a 35.000 € Precio en factura entre 35.000 € y 45.000 € | 25% 15% | 1125 € 675 € | | Europeo | Montaje final en la UE | 15% | 675 € | | Europeo (Plus) | Fabricación/ensamblaje de batería en la UE | 10% | 450 € | [...] No obstante, el \n\n## La Moncloa. Programa Auto+: plazos y requisitos de las ayudas a la compra de vehículos eléctricos y electrificados | 01/10/2026 [Prensa/Actualidad/Industria y T\nEn el caso de la convocatoria de 2026 para la línea 1, el presupuesto máximo del programa es de 350 millones de euros. Para la línea 2, el presupuesto máximo es de 50 millones de euros repartido entre empresas privadas (42 millones de euros) y profesionales autónomos (8 millones de euros). ## ¿Cómo solicitar las ayudas del Programa Auto+? Las solicitudes se realizan a través de un sistema telemático desde la sede electrónica del Ministerio de Industria y Turismo. [...] La ayuda por beneficiario tendrá un importe máximo y su cuantía exacta se determinará en función del tipo de vehículo, su grado de electrificación, su precio y su contribución a la cadena de valor industrial europea. ## ¿Con qué recursos cuenta el Programa? [...] - Reforzar la capacidad propia de producción de vehículos electrificados tanto en Europa como en España. - Garantizar y democratizar el acceso al vehículo eléctri\n\n## BOE-A-2026-16010 Real Decreto 609/2026, de 22 de julio, por el que se regula la concesión directa de ayudas a la compra de vehículos eléctricos y electrificados\n1\\. En el caso de las solicitudes presentadas en la Línea 1, se establecen los siguientes importes máximos de ayuda por vehículo, en euros: Línea 1 Tipo de vehículo Importe máximo de la ayuda – Euros M14.500 N15.000 L3e, L4e, L5e1.100 L6e y L7e1.500 2\\. La ayuda concedida para cada vehículo se calculará de forma acumulativa, limitada al importe máximo de la ayuda y con base en los siguientes criterios, como un porcentaje que se aplicará al importe máximo: [...] a) En el caso de que el solicitante sea un autónomo o una microempresa: Línea 2 (autónomos y microempresas) Tipo de vehículo Importe máximo de la ayuda – Euros M16.000 N17.500 L3e, L4e, L5e1.100 L6e y L7e1.500 b) En el caso de que el solicitante sea una empresa distinta de una microempresa: Línea 2 (otras empresas) Tipo de vehículo Importe máximo de la ayuda – Euros M14.500 N15.000 L3e, L4e, L5e1.100 L6e y L7e1.500 [...] i) Para l\n\n## Calculadora de coste de propiedad entre un híbrido y un eléctrico\nPublished: Mon, 09 Mar 2026 06:00:00 GMT\nEstimaciones orientativas con precios medios en España. En este escenario tipo, el eléctrico compensa su mayor precio inicial gracias al ahorro energético y de mantenimiento. ### ¿En qué casos es más rentable el eléctrico? - Si recorres más de 15.000 km al año. - Si puedes cargar en casa. - Si accedes a ayudas públicas. - Si mantienes el coche al menos 4-5 años. ### ¿Cuándo puede interesar más un híbrido? [...] Un eléctrico medio puede consumir 15–18 kWh/100 km, mientras que un híbrido puede rondar los 4,5–5,5 l/100 km. Cuantos más kilómetros recorras al año, mayor será la ventaja del eléctrico en coste energético. ### Mantenimiento y reparaciones Los eléctricos tienen menos piezas móviles: no hay embrague, aceite, correa de distribución ni sistema de escape. Los híbridos combinan motor térmico y eléctrico, lo que implica revisiones más tradicionales. [...] - Si haces pocos kilómetros an",
+ "plan": {
+  "title": "Coche eléctrico o híbrido: cuál te conviene en 2026",
+  "description": "Comparamos coche eléctrico e híbrido según kilómetros, carga en casa, ayudas del Plan Auto+ y mantenimiento. Así puedes decidir con criterios claros qué encaja con tu uso.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "38c74b1c",
+    "narration": "¿Y si la mejor opción no fuera la más moderna, sino la que encaja con tu forma de vivir? Eléctrico o híbrido: la respuesta depende de cuatro cosas.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Eléctrico o híbrido: cuál te conviene",
+      "subtitle": "Cuatro criterios para decidir en 2026"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "La decisión"
+   },
+   {
+    "id": "d0ce1877",
+    "narration": "Los criterios son: cuántos kilómetros haces al año, si puedes cargar en casa, qué ayudas te tocan y cuánto tiempo mantendrás el coche.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "road",
+        "label": "Kilómetros al año"
+       },
+       {
+        "icon": "home",
+        "label": "Carga en casa"
+       },
+       {
+        "icon": "money",
+        "label": "Ayudas"
+       },
+       {
+        "icon": "clock",
+        "label": "Años de uso"
+       }
+      ],
+      "title": "Tus cuatro criterios"
+     }
+    }
+   },
+   {
+    "id": "ad547608",
+    "narration": "Primero, aclaremos los tipos. El híbrido ligero, MHEV, y el híbrido, HEV, no se enchufan. El híbrido enchufable, PHEV, sí. Y el eléctrico puro, BEV, solo usa batería.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Tipos de coche electrificado",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "MHEV: híbrido ligero"
+       },
+       {
+        "id": "b",
+        "label": "HEV: híbrido"
+       },
+       {
+        "id": "c",
+        "label": "PHEV: enchufable"
+       },
+       {
+        "id": "d",
+        "label": "BEV: eléctrico"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "07c7782b",
+    "narration": "Veamos la energía. Un eléctrico medio consume entre quince y dieciocho kilovatios hora cada cien kilómetros. Un híbrido ronda entre cuatro coma cinco y cinco coma cinco litros.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Veamos la energía. Un eléctrico medio consume entre quince",
+      "subtitle": ""
+     }
+    },
+    "chapter": "El coste real"
+   },
+   {
+    "id": "a8754e61",
+    "narration": "Y cuantos más kilómetros recorras al año, mayor es la ventaja del eléctrico en coste de energía. Por eso el kilometraje pesa tanto en la decisión.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Más kilómetros al año, más ventaja para el eléctrico.",
+      "emphasis": "más ventaja"
+     }
+    }
+   },
+   {
+    "id": "b3390399",
+    "narration": "El mantenimiento también cuenta. El eléctrico no tiene embrague, aceite, correa de distribución ni escape. El híbrido combina dos motores y exige revisiones más tradicionales.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Un eléctrico no necesita",
+      "items": [
+       "Embrague",
+       "Aceite",
+       "Correa de distribución",
+       "Sistema de escape"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2e5137e4",
+    "narration": "Ahora, el dinero público. El Plan Auto+ está en vigor desde el 23 de julio de 2026, y es retroactivo para matriculaciones desde el uno de enero.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Plan Auto+",
+      "events": [
+       {
+        "date": "1 ene 2026",
+        "label": "Matriculaciones que ya cuentan"
+       },
+       {
+        "date": "22 jul 2026",
+        "label": "Real Decreto 609/2026"
+       },
+       {
+        "date": "23 jul 2026",
+        "label": "Entra en vigor con el BOE"
+       }
+      ]
+     }
+    },
+    "chapter": "Las ayudas"
+   },
+   {
+    "id": "a215f574",
+    "narration": "La ayuda máxima para un turismo es de 4.500 euros. Un eléctrico puro suma 2.250. Un precio de hasta 35.000 euros añade 1.125. Montaje europeo, 675. Batería europea, 450.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Criterio",
+       "Importe"
+      ],
+      "rows": [
+       [
+        "Eléctrico puro",
+        "2.250 €"
+       ],
+       [
+        "Precio ≤ 35.000 €",
+        "1.125 €"
+       ],
+       [
+        "Montaje en la UE",
+        "675 €"
+       ],
+       [
+        "Batería en la UE",
+        "450 €"
+       ]
+      ],
+      "title": "Ayuda máxima, turismo",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "8ebeb4ec",
+    "narration": "Un enchufable recibe la mitad por ser eléctrico: 1.125 euros. Y si cumples todo, el descuento obligatorio del concesionario, de mil euros, eleva el total a 5.500.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "5,500",
+      "unit": "€",
+      "label": "Ayuda total máxima con descuento del concesionario"
+     }
+    }
+   },
+   {
+    "id": "9dc0fdd4",
+    "narration": "El eléctrico compensa más si recorres más de quince mil kilómetros al año, cargas en casa, accedes a ayudas y conservas el coche al menos cuatro o cinco años.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "El eléctrico gana si...",
+      "items": [
+       "Más de 15.000 km al año",
+       "Puedes cargar en casa",
+       "Accedes a ayudas",
+       "Lo mantienes 4-5 años"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "road",
+       "home",
+       "banknote",
+       "clock"
+      ]
+     }
+    },
+    "chapter": "Quién gana"
+   },
+   {
+    "id": "c84894a4",
+    "narration": "En un escenario tipo con precios medios en España, el eléctrico compensa su mayor precio inicial con el ahorro en energía y mantenimiento. Son estimaciones orientativas.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "4-5 años",
+      "label": "Tiempo mínimo para que el eléctrico compense, según la calculadora"
+     }
+    }
+   },
+   {
+    "id": "a0dbd82e",
+    "narration": "Y el híbrido interesa más en tres casos. Si haces pocos kilómetros. Si no puedes cargar en casa. O si quieres flexibilidad en viajes, sin depender de cargadores.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "El híbrido encaja si...",
+      "items": [
+       "Haces pocos kilómetros",
+       "No puedes cargar en casa",
+       "Quieres flexibilidad en viajes"
+      ],
+      "style": "rail",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "f7f35645",
+    "narration": "Resumiendo la decisión: con carga en casa y muchos kilómetros, el eléctrico. Sin carga en casa o con pocos kilómetros, el híbrido. Y en ambos casos, revisa las ayudas.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo decidir",
+      "nodes": [
+       {
+        "id": "u",
+        "label": "Tu uso",
+        "icon": "user"
+       },
+       {
+        "id": "h",
+        "label": "Híbrido",
+        "icon": "fuel"
+       },
+       {
+        "id": "e",
+        "label": "Eléctrico",
+        "icon": "bolt"
+       }
+      ],
+      "edges": [
+       [
+        "u",
+        "h",
+        "pocos km, sin carga"
+       ],
+       [
+        "u",
+        "e",
+        "muchos km, con carga"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "6a526f5f",
+    "narration": "La conclusión: no hay un ganador universal. Calcula tus kilómetros, mira si puedes cargar en casa y comprueba tus ayudas. Tu uso decide, no la moda.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No hay un ganador universal: tu uso decide.",
+      "emphasis": "tu uso decide"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Híbrido o eléctrico en 2026: cuál te conviene según tu uso",
+    "url": "https://autonomiacocheselectricos.es/articulos/hibrido-o-electrico-lo-que-nadie-te-explica",
+    "publisher": "autonomiacocheselectricos.es",
+    "license": "",
+    "date": "Tue, 17 Mar 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Plan Auto+ 2026: importe real, calculadora y cómo tramitar ayuda",
+    "url": "https://www.ro-des.com/blog/plan-auto-plus-2026-calculadora-ayudas",
+    "publisher": "ro-des.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Calculadora de coste de propiedad entre un híbrido y un eléctrico",
+    "url": "https://www.autopista.es/noticias-motor/calculadora-coste-total-propiedad-coche-hibrido-vs-electrico-comparativa-real_323166_102.html",
+    "publisher": "autopista.es",
+    "license": "",
+    "date": "Mon, 09 Mar 2026 06:00:00 GMT"
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "finance-business"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 67.4,
+  "before_first_script_call_s": 15.6,
+  "script_s": 51.8
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "research": 0.00177,
+  "script_big": 0.16405,
+  "search_api": 0.024,
+  "total": 0.19009
+ },
+ "calls": {
+  "small": 3,
+  "tools": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 54033,
+  "out": 9672
+ },
+ "rules": {
+  "length": {
+   "words": 385,
+   "expected_words": 402,
+   "ratio": 0.958,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 173.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si la mejor opción no fuera la más moderna, sino la que encaja con tu forma de vivir? Eléctrico o híbrido: la respuesta depende de cuatro cosas.",
+   "close_text": "La conclusión: no hay un ganador universal. Calcula tus kilómetros, mira si puedes cargar en casa y comprueba tus ayudas. Tu uso decide, no la moda."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 2,
+    "icons": 1,
+    "diagram": 2,
+    "kinetic_text": 2,
+    "checklist": 1,
+    "timeline": 1,
+    "table": 1,
+    "counter": 1,
+    "bullets": 2,
+    "stat": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "title",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 9,
+   "ungrounded_numbers": [],
+   "entities": 6,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "puedes cargar en casa",
+    "count": 3
+   },
+   {
+    "phrase": "si puedes cargar en",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1
+  },
+  "sources": {
+   "cited": 3,
+   "fetched": 8,
+   "notes_len": 5882,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": [
+   "beat 7 (timeline): its narration never says ['1 ene 2026 Matriculaciones que ya cuenta', '22 jul 2026 Real Decreto 609/2026']",
+   "beat 10 (bullets): its narration never says ['Puedes cargar en casa', 'Lo mantienes 4-5 años']",
+   "beat 13 (diagram): its narration never says ['Tu uso', 'Eléctrico']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most figures match the notes (2.250, 1.125, 675, 450, 4.500 + 1.000 = 5.500). But the 4-5 years is presented as a calculator result, when the notes only give it as a condition for the electric being worthwhile. The script also leaves out that the aid is tied to a budget and a procedure."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers energy consumption, maintenance, aid, and who each option suits. Missing purchase prices, real euro running costs, range and charging, emissions, and the Spanish label or access to city centres. Aid takes up a disproportionate share of the time."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear order: four criteria, types, cost, aid, then who wins and a conclusion. The final summary partly repeats beats 2 and 10."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is decent. The ending, 'tu uso decide, no la moda', is a clean takeaway but fairly generic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, accessible, suited to a beginner buying a car."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary. But beat 4 is a title scene whose title is a truncated sentence ('Un eléctrico medio consume entre quince'), and beat 11 shows a stat that misrepresents the source. The 'counter' value is written '5,500' instead of Spanish format."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Concrete aid breakdown, but the rest is the standard eléctrico-vs-híbrido checklist."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Spanish, about the right length, and a decision framework is given. The comparison is thin on purchase and running costs and on emissions, and it mixes up hybrid types."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clear. Minor issues with number formatting and some clipped phrasing."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Veamos la energía. Un eléctrico medio consume entre quince",
+    "issue": "The title scene shows a truncated sentence, which looks like a bug.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Tiempo mínimo para que el eléctrico compense, según la calculadora",
+    "issue": "The 4-5 years comes from a list of conditions in the notes, not from a calculator result. This is an invented attribution.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "El eléctrico compensa más si recorres más de quince mil kilómetros",
+    "issue": "There are no euro figures for purchase price, energy cost, or total cost of ownership, and nothing on range, charging, or emissions.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Un enchufable recibe la mitad por ser eléctrico: 1.125 euros.",
+    "issue": "The 5.500 total is built from BEV amounts, so it is not the PHEV's. The aid is also presented as certain, with no mention of the budget cap or the application process.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "5,500",
+    "issue": "The number uses an English decimal/thousands format. In Spain it is 5.500.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "El híbrido combina dos motores y exige revisiones más tradicionales.",
+    "issue": "Superficial, with no cost figures. It also lumps all hybrids together.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "Typical purchase prices for each type",
+   "Euro running cost per 100 km or per year",
+   "Range and public charging",
+   "Emissions and the DGT label",
+   "Spanish aid caveats (budget, application process)",
+   "The PHEV's real-world usage caveat"
+  ],
+  "wrong_facts": [
+   "The 4-5 years is attributed to a calculator result, but the notes give it only as a condition.",
+   "The aid is presented without caveats on the budget and application process."
+  ],
+  "would_publish": false,
+  "summary": "A clear, well-ordered decision framework with accurate aid figures, but thin on actual cost comparison, charging, range and emissions. It also has a truncated title scene and a misattributed stat.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Un híbrido ronda entre cuatro coma cinco y cinco coma cinco litros.",
+     "problem": "'ronda entre' is redundant, and the unit is missing.",
+     "better": "Un híbrido gasta entre 4,5 y 5,5 litros cada cien kilómetros."
+    },
+    {
+     "quote": "Veamos la energía.",
+     "problem": "Stiff, and it reads as a flat transition.",
+     "better": "Hablemos del consumo."
+    },
+    {
+     "quote": "Resumiendo la decisión:",
+     "problem": "Slightly clumsy.",
+     "better": "En resumen:"
+    }
+   ]
+  },
+  "mean": 3.33,
+  "cost_usd": 0.031104,
+  "tokens": [
+   7377,
+   1635
+  ]
+ }
+}

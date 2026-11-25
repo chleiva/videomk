@@ -1,0 +1,575 @@
+{
+ "id": "new-03",
+ "category": "current events / news",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "Summarize the latest developments in global climate policy this month: any COP outcomes, major national announcements, and what experts say happens next.",
+ "great": "Dated, sourced developments (COP31 context, national NDCs, EU or US moves), expert views, what comes next; clearly states the as-of date; no invented outcomes.",
+ "minutes": 3.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:02:51",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The request asks for the latest developments in climate policy this month, which changes often and may postdate training data, so current web sources are needed for an accurate script.",
+  "queries": [
+   "global climate policy news November 2026",
+   "COP31 outcomes 2026",
+   "climate policy national announcements this month"
+  ],
+  "searches": 3,
+  "reads": 0,
+  "iterations": 2,
+  "seconds": 14.1,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "news-explainer",
+   "recap-summary"
+  ],
+  "staged": null,
+  "notes_len": 9000,
+  "n_sources": 8,
+  "n_fetched": 13,
+  "fetched": [
+   "COP31 delivers important progress across negotiations and Action Agenda, advancing implementation, but fails to agree Presidency-Led Decision | UNFCCC",
+   "Global climate summit collapses as countries fail to agree on moving away from fossil fuels | CNN",
+   "Global Update - November 2025 - Little change in warming outlook for four years",
+   "Global climate talks have collapsed. Here’s what just happened. - POLITICO",
+   "COP31: Key outcomes agreed at the UN climate talks in Antalya - Carbon Brief",
+   "STATEMENT: Hollow Outcome at COP31 a Failure of Political Leadership | World Resources Institute",
+   "Highlights and images for 22 November 2026",
+   "COP31 Outcomes - your questions answered",
+   "COP31 ends without climate pact as UN Chief warns there is 'no ambiguity in science'. | United Nations",
+   "Tim Walz defends climate agenda at global summit | Miami Herald",
+   "U.N. COP31 climate conference ends with no agreement after fossil fuel debate reaches standstill",
+   "Here's what's next after climate talks collapse: Reform, individual action, hope and more heat",
+   "Why COP31 Climate Talks Ended Without a Deal | National News | U.S. News"
+  ],
+  "research_agent_cost_usd": 0.0012051000000000002
+ },
+ "warnings": [],
+ "notes": "## COP31 delivers important progress across negotiations and Action Agenda, advancing implementation, but fails to agree Presidency-Led Decision | UNFCCC\nPublished: Mon, 23 Nov 2026 16:00:00 GMT\nUN Climate Change News, Antalya, Türkiye, 23 November 2026 – COP31 concluded with important agreements in key negotiations items, such as on a Just Transition, and concrete real-economy progress across the Global Climate Action Agenda, including a major boost for electrification. [...] <!--THE END--> - EUR 30 billion+ targeted by the European Investment Bank for climate adaptation (2026–2030) <!--THE END--> - ~USD 376 billion in net-zero government export finance, up 58% year on year. In a speech on 19 November 2026, UN Climate Change Executive Secretary, Simon Stiell, said: \"Year on year, the Action Agenda is a power station of progress, and COP31 has already supercharged real-world results. [...] Almost 200 nations represented at COP31 also reached agreements on a range of important mandated items, relating to climate finance, adaptation, mitigation, technology, transparency and the se\n\n## Global climate summit collapses as countries fail to agree on moving away from fossil fuels | CNN\nPublished: Sun, 22 Nov 2026 14:03:19 GMT\nThe \"very disappointed\" President of COP31 Negotiations Chris Bowen at the UN Climate Change Conference (COP31) in Antalya, Turkey, November 22, 2026. Murad Sezer/Reuters COP31 president Murat Kurum acknowledged support was not there to gavel through the pact. “We have done our utmost,” he said, but “it is clear that there are parties in this hall who oppose this text. We recognize that there is no consensus on this document.” Related article [...] Related article Leaders of Botswana, Finland, the Maldives, Turkey, Azerbaijan, Uzbekistan and Pakistan gather together for a photo at the COP31 UN Climate Summit on Wednesday, Nov. 11, 2026, in Antalya, Turkey. Khalil Hamra/AP How two words could derail the world’s biggest climate conference 4 min read [...] 4 min read At the final meeting intended to approve the so-called Antalya Pact on Sunday, it became clear there would not be the necessa\n\n## Global Update - November 2025 - Little change in warming outlook for four years\nPublished: Thu, 12 Nov 2026 15:01:44 GMT\napproximately 12–39% higher than under the Biden Administration’s policy trajectory. USA Climate Action Tracker | Warming Projections Global Update - November 2026 11 ## 2.2 Pledges & targets 2.2.1 The count is in: 2035 NDCs have failed to move the needle As of 6 November 2026, 55 of the countries we assess (including 27 countries within the EU) – and 158 countries worldwide – have submitted their 2035 climate targets (NDCs) to the UNFCCC. These [...] Warming Projections Global Update # Climate Action Tracker # November 2026 # Without rapid # climate action, the # world is heading to # irrecoverable overshoot Climate Action Tracker | Warming Projections Global Update - November 2026 i The Climate Action Tracker's 2026 assessment of governments' collective climate action shows that global warming is headed towards an irrecoverable overshoot of 1.5°C unless they rapidly reduce [...] has no\n\n## Global climate talks have collapsed. Here’s what just happened. - POLITICO\nPublished: Sun, 22 Nov 2026 17:27:00 GMT\n# Global climate talks have collapsed. Here’s what just happened. Two weeks of talks about protecting the planet from global warming ended without a deal. 11/22/2026 12:27 PM EST ANTALYA, Turkey — There’s an old adage in politics: never let a crisis go to waste. Yet governments at crucial U.N. climate talks just did exactly that.\n\n## COP31: Key outcomes agreed at the UN climate talks in Antalya - Carbon Brief\nPublished: Mon, 23 Nov 2026 16:15:51 GMT\nAccording to the report, CO2 emissions from fossil fuels and cement are set to fall by around 0.4% in 2026, largely due to a 1.9% drop in emissions from oil and the energy shock triggered by the Iran conflict and the closure of the strait of Hormuz. (This follows separate analysis by Carbon Brief earlier this year suggesting there would be a 0.5% fall due to the Hormuz crisis.) Meanwhile, it finds that emissions from coal are continuing to increase slightly. [...] “In 2026, millions of people were exposed to unbearable heat, leading to tens of thousands of excess deaths in Europe alone. India and Pakistan and large parts of Asia and North America suffered dangerous heatwaves. And, as we head into the southern hemisphere summer, we will see more. “The catastrophe in China and Nepal showed the dangers of high-mountain disasters for downstream communities.” [...] The first letter, written b\n\n## STATEMENT: Hollow Outcome at COP31 a Failure of Political Leadership | World Resources Institute\nPublished: Sun, 22 Nov 2026 13:00:00 GMT\nAntalya, Türkiye (November 22, 2026) – The UN’s COP31 climate summit in Antalya, Turkiye, ended without reaching agreement after more than two weeks of negotiations that stretched into overtime longer than ever before. Countries became deadlocked over whether the cover decision would reiterate the call to transition away from fossil fuels and concerns that it promoted overreliance on carbon capture and storage. There was also frustration that negotiators could not agree on a specific dollar [...] “The hollow outcome at COP31 was a failure of political leadership, not a failure of the Paris Agreement. When narrow national interests override collective responsibility to confront the climate crisis, the entire world pays the price. Climate summits are not stages for posturing; they require every country to roll up their sleeves and do the hard work of finding ambitious common ground. [...] \n\n## Highlights and images for 22 November 2026\nPublished: Sun, 22 Nov 2026 17:00:00 GMT\n“I leave the deadlock of the negotiations to the judgement of the entire world and humanity.” With these words, COP 31 President Murat Kurum closed the session at 7:33 pm on Sunday, 22 November 2026. Concluding almost 50 hours after its scheduled finish, the Antalya Climate Change Conference marks the longest-running COP to date. To receive free coverage of global environmental events delivered to your inbox, subscribe to the ENB Update newsletter. [...] The most difficult moment came when COP 31 President Murat Kurum presented two proposed cover decisions—one under the Conference of the Parties (COP) and the other under the COP serving as the Meeting of the Parties to the Paris Agreement (CMA)—together comprising the “Antalya Pact.” [...] The Antalya Pact was not the only proposed outcome to fall at the final hurdle. Parties also rejected draft decisions on the Mitigation Work Programme\n\n## COP31 Outcomes - your questions answered\nPublished: Sun, 22 Nov 2026 22:59:37 GMT\n#### Could negotiations restart? COP31 formally concluded on 22 November. Negotiations will continue at the next COP32 in Ethiopia. While Parties as a whole objected to the Antalya Pact, a number of negotiation outcomes were successful, including on climate finance and just transition. #### What does this mean for UK climate policy? [...] Clean energy: Countries backed faster electrification and clean energy, with new UK funding and partnerships to help developing and emerging economies move away from fossil fuels. This included the UK’s endorsement of the COP31 Presidency’s 35x35 Global Electrification Pledge Methane: Countries stepped up action to cut methane emissions, including efforts to reduce emissions from fossil fuel production and new international partnerships, with a UK–Nigeria low-methane partnership. [...] Forests and oceans: New action was taken to protect forests and ocea\n\n## COP31 ends without climate pact as UN Chief warns there is 'no ambiguity in science'. | United Nations\nPublished: Wed, 25 Nov 2026 14:48:13 GMT\nPanama also rejected the outcome, arguing that governments have a responsibility “not to negotiate the minimum threshold, but to act.” The delegation said the pact weakened previously agreed decisions and failed to reflect the urgency of keeping the 1.5°C goal within reach. Recalling a letter sent to the COP presidency outlining several non-negotiable priorities, Panama said its position remained unchanged and that it could not support the agreement as drafted. [...] Addressing the closing plenary, UN Climate Change Executive Secretary Simon Stiell acknowledged the frustration of delegates\") after governments failed to bridge divisions on the summit's main political decisions. “The world cannot afford a repeat of this moment,” he said, urging countries to learn lessons from Antalya. [...] The European Union formally objected to the cover decision, saying it failed to “meet the moment” an\n\n## Tim Walz defends climate agenda at global summit | Miami Herald\nPublished: Wed, 25 Nov 2026 11:01:43 GMT\nThe Walz administration did not respond to a request for comment from The Center Square. In a news release though, his office highlighted how states can \"cut emissions, protect natur",
+ "plan": {
+  "title": "COP31 in Antalya: Talks Collapse, What Happens Next",
+  "description": "COP31 in Antalya ended on 22 November 2026 without its main political deal, the Antalya Pact, though several negotiation items and Action Agenda results did succeed. This video covers what was agreed, what failed, and what experts say comes next.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "6352b40f",
+    "narration": "Two weeks of climate talks. Almost fifty hours of overtime. And still no deal. The longest COP ever ended in Antalya with the world's main political decision left on the table.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "COP31: The Longest Climate Talks Ever",
+      "subtitle": "Antalya, Türkiye, November 2026"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "What happened in Antalya"
+   },
+   {
+    "id": "a0a31296",
+    "narration": "COP31 President Murat Kurum closed the session at 7:33 pm on Sunday, 22 November. He said he was leaving the deadlock to the judgment of the entire world and humanity.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "I leave the deadlock of the negotiations to the judgement of the entire world and humanity.",
+      "attribution": "Murat Kurum, COP31 President, 22 November 2026"
+     }
+    }
+   },
+   {
+    "id": "c38de80d",
+    "narration": "The package was called the Antalya Pact. It had two cover decisions. Kurum admitted there was no consensus, saying some parties in the hall opposed the text.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Antalya Pact",
+      "definition": "The proposed pair of cover decisions, under the COP and the Paris Agreement body, that COP31 failed to adopt.",
+      "example": "Rejected at the closing plenary, 22 November 2026"
+     }
+    }
+   },
+   {
+    "id": "3f4d26bb",
+    "narration": "Why did it fail? Countries split over whether to repeat the call to transition away from fossil fuels. There was also no agreed dollar finance figure. And the mitigation work programme was rejected too.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Where talks deadlocked",
+      "items": [
+       "Fossil fuel transition language",
+       "No agreed dollar finance figure",
+       "Mitigation work programme rejected"
+      ],
+      "style": "rail",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "400b8935",
+    "narration": "The European Union formally objected, saying the text failed to meet the moment. Panama also rejected it, arguing that governments must not negotiate the minimum threshold, but act.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "European Union",
+       "tagline": "Formally objected"
+      },
+      "b": {
+       "name": "Panama",
+       "tagline": "Rejected the outcome"
+      },
+      "rows": [
+       {
+        "label": "Main complaint",
+        "a": "Failed to meet the moment",
+        "b": "Weakened earlier decisions"
+       },
+       {
+        "label": "Stance",
+        "a": "Objected",
+        "b": "Could not support it"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "fb78b71a",
+    "narration": "Yet not everything failed. According to UN Climate Change, almost 200 nations agreed on a Just Transition and on items covering finance, adaptation, technology and transparency.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Agreed despite the collapse",
+      "items": [
+       "Just Transition",
+       "Climate finance",
+       "Adaptation",
+       "Technology and transparency"
+      ]
+     }
+    },
+    "chapter": "What did succeed"
+   },
+   {
+    "id": "1f0b85cb",
+    "narration": "The Action Agenda delivered real-economy progress. The European Investment Bank targets over 30 billion euros for adaptation from 2026 to 2030. Net-zero export finance reached about 376 billion dollars, up 58 percent.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "~$376B",
+      "label": "Net-zero government export finance, up 58% year on year"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "99c5cd0a",
+    "narration": "The UK also backed the Presidency's 35 by 35 Global Electrification Pledge, and announced a UK–Nigeria low-methane partnership. Countries stepped up action on methane, forests and oceans.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "bolt",
+        "label": "Electrification",
+        "sub": "35x35 pledge"
+       },
+       {
+        "icon": "cloud",
+        "label": "Methane",
+        "sub": "UK–Nigeria partnership"
+       },
+       {
+        "icon": "tree",
+        "label": "Forests and oceans"
+       }
+      ],
+      "title": "Action beyond the pact"
+     }
+    }
+   },
+   {
+    "id": "fab27c85",
+    "narration": "Simon Stiell, the UN climate chief, acknowledged the frustration of delegates. He urged countries to learn lessons from Antalya, warning that the world cannot afford a repeat of this moment.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "The world cannot afford a repeat of this moment.",
+      "attribution": "Simon Stiell, UN Climate Change, 22 November 2026"
+     }
+    },
+    "chapter": "The reaction and the science"
+   },
+   {
+    "id": "d66a9384",
+    "narration": "The World Resources Institute called the result hollow. It said this was a failure of political leadership, not a failure of the Paris Agreement itself.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A failure of political leadership, not of the Paris Agreement.",
+      "emphasis": "political leadership"
+     }
+    }
+   },
+   {
+    "id": "93930c71",
+    "narration": "Meanwhile, the Climate Action Tracker says 158 countries have submitted 2035 targets as of 6 November. Its verdict: they have failed to move the needle, and warming is heading for an irrecoverable overshoot of 1.5 degrees.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "158",
+      "label": "Countries submitted 2035 climate targets, as of 6 November 2026",
+      "delta": "Still not enough, says C"
+     }
+    }
+   },
+   {
+    "id": "dfb5151a",
+    "narration": "Carbon Brief reports fossil CO2 may fall about 0.4 percent in 2026, driven by an oil drop and the Hormuz energy shock. That is not a policy success.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "-0.4%",
+      "label": "Expected fall in fossil CO2 emissions in 2026"
+     }
+    }
+   },
+   {
+    "id": "7bc9d0b2",
+    "narration": "Look at the details. Oil emissions down 1.9 percent explains most of it. Coal still edging up shows the underlying trend has not turned.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Behind the small dip",
+      "items": [
+       "Oil emissions down 1.9%",
+       "Coal still edging up"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "33ab0fa0",
+    "narration": "So what now? COP31 formally concluded on 22 November. Negotiations continue at COP32 in Ethiopia, and the successful items on finance and just transition still stand.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "focus",
+      "title": "Next stop: COP32",
+      "caption": "Negotiations resume in Ethiopia",
+      "focus": [
+       "Ethiopia"
+      ]
+     }
+    },
+    "chapter": "What happens next"
+   },
+   {
+    "id": "52fee5f8",
+    "narration": "The takeaway: the headline deal collapsed, but the agreements on finance, just transition and electrification survive. Experts say the real test is whether leaders deliver at COP32.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The pact failed, but the work continues toward COP32.",
+      "emphasis": "COP32"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Global climate summit collapses as countries fail to agree on moving away from fossil fuels | CNN",
+    "url": "https://www.cnn.com/2026/11/22/climate/cop31-summit-collapses-in-fossil-fuel-failure",
+    "publisher": "cnn.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 14:03:19 GMT"
+   },
+   {
+    "title": "Global Update - November 2025 - Little change in warming outlook for four years",
+    "url": "https://climateactiontracker.org/documents/1451/CAT_2026-11-12_GlobalUpdate_COP31.pdf",
+    "publisher": "climateactiontracker.org",
+    "license": "",
+    "date": "Thu, 12 Nov 2026 15:01:44 GMT"
+   },
+   {
+    "title": "Global climate talks have collapsed. Here’s what just happened. - POLITICO",
+    "url": "https://www.politico.com/news/2026/11/22/global-climate-talks-have-collapsed-heres-what-just-happened-01179721",
+    "publisher": "politico.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 17:27:00 GMT"
+   },
+   {
+    "title": "COP31: Key outcomes agreed at the UN climate talks in Antalya - Carbon Brief",
+    "url": "https://www.carbonbrief.org/cop31-key-outcomes-agreed-at-the-un-climate-talks-in-antalya",
+    "publisher": "carbonbrief.org",
+    "license": "",
+    "date": "Mon, 23 Nov 2026 16:15:51 GMT"
+   },
+   {
+    "title": "STATEMENT: Hollow Outcome at COP31 a Failure of Political Leadership | World Resources Institute",
+    "url": "https://www.wri.org/news/statement-hollow-outcome-cop31-failure-political-leadership",
+    "publisher": "wri.org",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 13:00:00 GMT"
+   },
+   {
+    "title": "Highlights and images for 22 November 2026",
+    "url": "https://enb.iisd.org/antalya-un-climate-change-conference-cop31-22Nov2026",
+    "publisher": "enb.iisd.org",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 17:00:00 GMT"
+   },
+   {
+    "title": "COP31 Outcomes - your questions answered",
+    "url": "https://www.gov.uk/government/news/cop31-outcomes-your-questions-answered",
+    "publisher": "gov.uk",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 22:59:37 GMT"
+   },
+   {
+    "title": "COP31 ends without climate pact as UN Chief warns there is 'no ambiguity in science'. | United Nations",
+    "url": "https://www.un.org/en/desa/cop31-ends-without-climate-pact-as-un-chief-warns-there-is-no-ambiguity-in-science",
+    "publisher": "un.org",
+    "license": "",
+    "date": "Wed, 25 Nov 2026 14:48:13 GMT"
+   }
+  ],
+  "skills": [
+   "news-explainer",
+   "recap-summary"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 49.5,
+  "before_first_script_call_s": 15.6,
+  "script_s": 33.9
+ },
+ "cost": {
+  "script_small": 0.00023,
+  "research": 0.00121,
+  "script_big": 0.10963,
+  "search_api": 0.024,
+  "total": 0.13506
+ },
+ "calls": {
+  "small": 2,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 37692,
+  "out": 6295
+ },
+ "rules": {
+  "length": {
+   "words": 439,
+   "expected_words": 402,
+   "ratio": 1.092,
+   "beats": 15,
+   "expected_beats": 13,
+   "est_speech_s": 197.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 27,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Two weeks of climate talks. Almost fifty hours of overtime. And still no deal. The longest COP ever ended in Antalya with the world's main political decision left on the table.",
+   "close_text": "The takeaway: the headline deal collapsed, but the agreements on finance, just transition and electrification survive. Experts say the real test is whether leaders deliver at COP32."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "quote": 2,
+    "definition": 1,
+    "bullets": 2,
+    "versus": 1,
+    "checklist": 1,
+    "stat": 2,
+    "icons": 1,
+    "kinetic_text": 2,
+    "counter": 1,
+    "map": 1
+   },
+   "max_run": 1,
+   "entropy": 3.37,
+   "top_type": "quote",
+   "top_share": 0.13,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 14,
+   "ungrounded_numbers": [
+    "2030"
+   ],
+   "entities": 20,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.029,
+   "ungrounded_number_share": 0.071,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 8,
+   "fetched": 13,
+   "notes_len": 9000,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": true,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly faithful to the notes, but several claims are shaky: the Stiell quote is dated 22 Nov although the notes do not date it, \"Experts say the real test is whether leaders deliver\" is not in the notes, and the Climate Action Tracker 'irrecoverable overshoot' claim is conditional."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers the COP31 collapse, the partial successes and the science, but has almost no major national announcements (US, EU, China, NDC specifics), no real expert forecasts of what comes next, and omits the US angle for a US viewer."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear chapters (what happened, what succeeded, reaction and science, what next) that build logically with one takeaway; beats 12-13 on emissions are slightly repetitive."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opener 'Two weeks of climate talks. Almost fifty hours of overtime. And still no deal.' is decent, but the ending is a summary-style takeaway with a vague 'real test' line."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, news-like and suitable for a general US audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well, but the counter has truncated text ('Still not enough, says C'), the versus card is thin, and the stat is used for a non-headline figure."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Some specifics (7:33 pm close, Hormuz-driven emissions dip) are concrete, but much is a plain rehash of the notes."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "Asked for national announcements and expert views on next steps; delivers mostly the COP outcome, with only the UK and EU mentioned in passing, no as-of date stated, and little on what experts expect."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clean English; a few choppy fragments."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Still not enough, says C",
+    "issue": "The on-screen counter delta text is truncated and unfinished.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Experts say the real test is whether leaders deliver at COP32.",
+    "issue": "This expert claim is not in the notes and is generic; it is presented as sourced.",
+    "beat": 15
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "The UK also backed the Presidency's 35 by 35 Global Electrification Pledge",
+    "issue": "The only national announcements are the UK's; the US, China, India and the EU's NDC moves are missing, despite the request and the US viewer.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Simon Stiell, UN Climate Change, 22 November 2026",
+    "issue": "The date attribution is not supported by the notes, which tie the remark to the closing plenary and the 19 Nov speech.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "warming is heading for an irrecoverable overshoot of 1.5 degrees",
+    "issue": "The CAT claim is conditional ('unless they rapidly reduce'), and the script states it unconditionally.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Look at the details. Oil emissions down 1.9 percent explains most of it.",
+    "issue": "The emissions point is split over two beats, and the claim that oil 'explains most' of the fall is an inference not stated in the notes.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "Explicit as-of date framing",
+   "US position or US reaction",
+   "EU and China climate moves",
+   "Concrete expert forecasts for COP32 or the Antalya Pact",
+   "Which countries blocked the fossil fuel language"
+  ],
+  "wrong_facts": [
+   "Stiell quote dated 22 November is unverified",
+   "'Experts say the real test...' is not supported by the notes"
+  ],
+  "would_publish": false,
+  "summary": "A clear, accurate-ish recap of the COP31 collapse with sensible structure, but it is thin on national announcements, expert outlook and the US angle, and contains a truncated on-screen text. It reads as a COP31 summary rather than a global climate policy roundup.",
+  "mean": 3.22,
+  "cost_usd": 0.02971,
+  "tokens": [
+   7760,
+   1419
+  ]
+ }
+}

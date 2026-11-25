@@ -261,7 +261,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             enriched.append(it)
 
         # Sanitize response: expose only fields needed by clients and a presigned GIF URL
-        allowed_keys = {"user_id", "video_id", "status", "title", "duration_s", "created_at", "video_url", "reject_reason"}
+        allowed_keys = {"user_id", "video_id", "status", "title", "duration_s", "created_at", "video_url", "reject_reason", "aspect", "resolution"}   # aspect/resolution: the picture shape, so the app can size its player (absent: 16:9)
         sanitized: list[dict] = []
         for it in enriched:
             out = {k: v for k, v in it.items() if k in allowed_keys}

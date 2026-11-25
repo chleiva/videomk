@@ -1,0 +1,458 @@
+{
+ "id": "how-01",
+ "category": "how-to / tutorial",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how to change a flat tire",
+ "great": "Safety first (flat ground, hazards, handbrake), tools, loosen lug nuts before jacking, jack points, swap, tighten star pattern, torque, check pressure, get the spare repaired; ordered steps, clear.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:58:33",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Changing a flat tire is a timeless, stable how-to procedure that general knowledge covers well, so no recent web research is needed.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto"
+  ],
+  "staged": null,
+  "notes_len": 356,
+  "n_sources": 0,
+  "n_fetched": 1,
+  "fetched": [
+   "Run-flat tire"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Run-flat tire\nA run-flat tire or run-flat tyre (RFT) is a pneumatic vehicle tire designed to resist the effects of deflation when punctured, allowing the vehicle to continue to be driven at reduced speeds for limited distances. First developed by tire manufacturer Michelin in the 1930s, run-flat tires were introduced to the public market in the 1980s.",
+ "plan": {
+  "title": "How to Change a Flat Tire Safely, Step by Step",
+  "description": "Learn how to change a flat tire safely, from pulling over to tightening the lug nuts. This step-by-step guide covers the tools you need and the common mistakes to avoid.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "7b87591e",
+    "narration": "A flat tire never comes at a good time. But with about twenty minutes and a few tools, you can fix it yourself and get moving again. Here is how.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "How to Change a Flat Tire",
+      "subtitle": "Safe, simple steps anyone can follow"
+     }
+    },
+    "chapter": "Before you start"
+   },
+   {
+    "id": "b4b986ee",
+    "narration": "First, gather what you need. You want a spare tire, a jack, and a lug wrench. Check your owner's manual too, because it shows where your jack points are.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you need",
+      "items": [
+       "Inflated spare tire",
+       "Jack",
+       "Lug wrench",
+       "Owner's manual"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "a077d82c",
+    "narration": "Step one is safety. Pull over to a flat, solid spot, well away from traffic. Turn on your hazard lights, put the car in park, and set the parking brake.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Make the car safe",
+      "steps": [
+       {
+        "label": "Pull over on level ground",
+        "detail": "Away from traffic"
+       },
+       {
+        "label": "Turn on hazard lights"
+       },
+       {
+        "label": "Park and set the brake"
+       }
+      ]
+     }
+    },
+    "chapter": "Getting safe"
+   },
+   {
+    "id": "6e886b19",
+    "narration": "Never work on a slope or soft ground. The car could roll or the jack could slip. If you cannot find a safe spot, drive slowly to one or call for help.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "cars driving on highway",
+      "alt": "traffic passing on a road"
+     }
+    }
+   },
+   {
+    "id": "4583ef3b",
+    "narration": "Next, loosen the lug nuts. Do this while the tire is still on the ground. Turn the wrench counterclockwise, about half a turn each. Do not remove them yet.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "lug wrench loosening wheel nut",
+      "alt": "Loosening lug nuts with a wrench",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "click",
+    "chapter": "Removing the wheel"
+   },
+   {
+    "id": "b446a97e",
+    "narration": "Now place the jack at the jack point shown in your manual. Raise the car until the flat tire is a few inches off the ground. Never put any part of your body under the car.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "car jack lifting vehicle tire",
+      "alt": "Car lifted on a jack",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "dfe4ffcb",
+    "narration": "Then unscrew the lug nuts the rest of the way and keep them together. Pull the flat tire straight toward you and lay it flat on the ground.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Take the flat off",
+      "items": [
+       "Unscrew the lug nuts fully",
+       "Keep the nuts together",
+       "Pull the wheel straight off",
+       "Lay it flat on the ground"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "wrench",
+       "box",
+       "",
+       "log-in"
+      ]
+     }
+    }
+   },
+   {
+    "id": "0b8995d3",
+    "narration": "Line up the spare with the wheel studs and push it on. Then hand-tighten the lug nuts. You should feel each one catch snugly before you go on.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Mounting the spare",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Align spare with studs"
+       },
+       {
+        "id": "b",
+        "label": "Push it on fully",
+        "icon": "hand"
+       },
+       {
+        "id": "c",
+        "label": "Hand-tighten nuts",
+        "icon": "wrench"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    },
+    "chapter": "Putting on the spare"
+   },
+   {
+    "id": "675a0f6b",
+    "narration": "Lower the car until the tire touches the ground, then tighten the nuts with the wrench in a star pattern. This spreads the pressure evenly. Finally, lower the car fully and remove the jack.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Finish tightening",
+      "steps": [
+       {
+        "label": "Lower until the tire touches down"
+       },
+       {
+        "label": "Tighten in a star pattern"
+       },
+       {
+        "label": "Lower fully, remove the jack"
+       }
+      ]
+     }
+    },
+    "sfx": "chime"
+   },
+   {
+    "id": "e1268add",
+    "narration": "Many spares are temporary, so drive slowly and keep to the limit printed on the tire. Get the flat repaired soon. Also, check the spare's pressure at the first chance.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A spare gets you to a repair shop, not across the country.",
+      "emphasis": "repair shop"
+     }
+    },
+    "chapter": "After the change"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 15.1,
+  "before_first_script_call_s": 4.4,
+  "script_s": 10.7
+ },
+ "cost": {
+  "script_small": 0.00023,
+  "script_big": 0.0369,
+  "search_api": 0.0,
+  "total": 0.03712
+ },
+ "calls": {
+  "small": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 12168,
+  "out": 1708
+ },
+ "rules": {
+  "length": {
+   "words": 307,
+   "expected_words": 267,
+   "ratio": 1.15,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 137.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "A flat tire never comes at a good time. But with about twenty minutes and a few tools, you can fix it yourself and get moving again. Here is how.",
+   "close_text": "Many spares are temporary, so drive slowly and keep to the limit printed on the tire. Get the flat repaired soon. Also, check the spare's pressure at the first chance."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "checklist": 1,
+    "steps": 2,
+    "clip": 1,
+    "image": 2,
+    "bullets": 1,
+    "diagram": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 2,
+   "entropy": 2.92,
+   "top_type": "steps",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "the car until the",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 1,
+   "notes_len": 356,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Steps are correct and ordered properly; minor omissions like torque and 'park' only applying to automatics don't create falsehoods, and 'about twenty minutes' is reasonable."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers the core sequence with safety, loosening before jacking and star pattern, but omits wheel chocks, torque spec/re-torque after 50 miles, and the check on hazards or removing hubcaps; there are few non-obvious facts."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clean chronological chapters from preparation through safety, removal, mounting and aftercare, with no repetition."
+   },
+   "hook_ending": {
+    "score": 2,
+    "reason": "The opener 'A flat tire never comes at a good time' is a bland generic line, and the ending is a pressure-check instruction rather than a landing takeaway."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear, beginner-appropriate instructional voice."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene variety is good, but the highway traffic clip does not match the 'never work on a slope' narration, and the 'Inflated spare tire' checklist item is not spoken."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Largely generic how-to content with no surprising tips, such as wheel chocks, a loosen-first reason, or the cost of ignoring the temporary spare's limits."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, US-appropriate, about 2 minutes, and covers the steps; it misses torque and pressure follow-up detail that the brief expects."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, grammatical, natural phrasing."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "hook_ending",
+    "severity": "major",
+    "quote": "A flat tire never comes at a good time.",
+    "issue": "Generic, low-tension opener that does not create curiosity.",
+    "beat": 1
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Also, check the spare's pressure at the first chance.",
+    "issue": "The ending trails off with a tacked-on tip; the strong kinetic line is not spoken.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "then tighten the nuts with the wrench in a star pattern.",
+    "issue": "No mention of torque specification or re-checking lug nut tightness after driving, which is a key safety step.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "cars driving on highway",
+    "issue": "A highway traffic clip does not illustrate slopes or soft ground and may suggest unsafe parking beside traffic.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "put the car in park, and set the parking brake.",
+    "issue": "No wheel chocks, and no mention of manual cars needing gear; also it never mentions removing hubcaps.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Many spares are temporary, so drive slowly",
+    "issue": "Gives no concrete figures such as typical 50 mph and 50-70 mile limits for donut spares.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "wheel chocks",
+   "torque spec and re-torque after about 50 miles",
+   "typical donut spare speed and distance limits",
+   "checking the spare's condition before trips",
+   "hubcap removal"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, correct, well-ordered beginner guide, but generic, with a weak hook and ending and missing torque and chock details. Visuals are mostly fine apart from one mismatched clip.",
+  "mean": 3.44,
+  "cost_usd": 0.018538,
+  "tokens": [
+   3224,
+   1209
+  ]
+ }
+}

@@ -1,0 +1,447 @@
+{
+ "id": "fic-01",
+ "category": "creative story / fiction",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "a short fable about a fox who wants to buy time from a clockmaker",
+ "great": "A real story with characters, a want, an obstacle, a twist and a moral that lands; vivid but economical; original rather than a generic fable template; no research needed.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:07:00",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "A fable about a fox and a clockmaker is an original creative piece; it needs no current or factual information, so the script can be written from general knowledge without web research.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "inspiration-motivation"
+  ],
+  "staged": null,
+  "notes_len": 3447,
+  "n_sources": 1,
+  "n_fetched": 5,
+  "fetched": [
+   "The Fox and the Crow (Aesop)",
+   "The Fox and the Crow",
+   "Sur le Pont d'Avignon",
+   "Aesop's Fables",
+   "Aesop"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## The Fox and the Crow (Aesop)\nThe Fox and the Crow is one of Aesop's Fables, numbered 124 in the Perry Index. Early Latin and Greek versions and the fable exist, and it may even have been depicted on an ancient Greek vase. The story serves as a cautionary tale against heeding flattery.\n\n## The Fox and the Crow\nThe Fox and the Crow (or The Crow and the Fox) may refer to:\nThe Fox and the Crow (Aesop), one of Aesop's Fables\nThe Fox and the Crow (animated characters), a pair of anthropomorphic cartoon characters and series created in 1941\nThe Crow and the Fox (Krylov's fable), a fable by Ivan Krylov, based on Aesop's version\n\n## Sur le Pont d'Avignon\n“Sur le pont d’Avignon” (pronounced [syʁ lə pɔ̃ daviɲɔ̃]) (“On the Bridge of Avignon”; Occitan: Sus la pèira d’Avinhon) is a French song about a dance performed on the Pont d’Avignon (officially Pont Saint-Bénézet) that dates back to the 15th century. The dance actually took place under the bridge and not on the bridge (sous le Pont d’Avignon, not sur).\n\n## Aesop's Fables\nAesop's Fables, or the Aesopica, is a collection of fables credited to Aesop, a slave and storyteller who lived in ancient Greece between 620 and 564 BCE. Of varied and unclear origins, the stories associated with his name have descended to modern times through several sources and continue to be reinterpreted in different verbal registers and in popular as well as artistic media.\nThe fables were part of oral tradition and were not collected until about three centuries after Aesop's death. By that time, a variety of other stories, jokes and proverbs were being ascribed to him, although some of that material was from sources earlier than him or came from beyond the Greek cultural sphere. The process of inclusion has continued until the present, with some of the fables unrecorded before the Late Middle Ages and others arriving from outside Europe. The process is continuous, and new stories are still being added to the Aesop corpus, even when they are demonstrably more recent work and sometimes from known authors.\nManuscripts in Latin and Greek were important avenues of transmission, although poetical treatments in European vernaculars eventually formed another. On the arrival of printing...\n\n## Aesop\nAesop ( EE-sop; Ancient Greek: Αἴσωπος, Aísōpos; c. 620 – 564 BCE; usually written Æsop in the 19th century and Esop before then) was a Greek fabulist and storyteller credited with a number of fables now collectively known as Aesop's Fables. Although his existence remains unclear and no writings by him survive, numerous tales credited to him were gathered across the centuries and in many languages in a storytelling tradition that continues to this day. Many of the tales associated with him are characterized by anthropomorphic animal characters.\nScattered details of Aesop's life can be found in ancient sources, including Aristotle, Herodotus, and Plutarch. An ancient literary work called The Aesop Romance tells an episodic, probably highly fictional version of his life, including the traditional description of him as a strikingly ugly slave (δοῦλος) who by his cleverness acquires freedom and becomes an adviser to kings and city-states. Older spellings of his name have included Esop(e) and Isope. Depictions of Aesop in popular culture over the last 2,500 years have included many works of art and his appearance as a character in numerous books, films, plays, and television programs.",
+ "plan": {
+  "title": "The Fox Who Tried to Buy Time",
+  "description": "A short original fable in the spirit of Aesop: a clever fox asks a clockmaker to sell him time. It ends with a simple lesson about what time really is.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "2c5e6b5b",
+    "narration": "Can you buy time? A fox once believed you could. He was clever, quick, and always in a hurry. One autumn morning, he trotted into a village, looking for a clockmaker.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "The Fox Who Tried to Buy Time",
+      "subtitle": "A short fable in the spirit of Aesop"
+     }
+    },
+    "chapter": "A strange request"
+   },
+   {
+    "id": "09247fff",
+    "narration": "Fables like this one are old. Aesop, a storyteller of ancient Greece, is credited with many of them. Animals talk, act like people, and teach a lesson in just a few lines.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Fable",
+      "definition": "A short story, often with talking animals, that teaches a lesson about how people behave.",
+      "origin": "Many are credited to Aesop, ancient Greece, c. 620 to 564 BCE"
+     }
+    }
+   },
+   {
+    "id": "cbb9ef21",
+    "narration": "The clockmaker's shop was full of ticking. Wall clocks, pocket watches, and tiny brass gears covered every shelf. The fox slipped inside and said, I want to buy some time.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "antique clocks ticking workshop",
+      "alt": "old clock shop with gears and pendulums"
+     }
+    }
+   },
+   {
+    "id": "c7497bc3",
+    "narration": "The old clockmaker smiled and set down her tools. How much time do you want, she asked. The fox grinned. All I can carry. I have so much to do, and never enough hours.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Clockmaker",
+        "text": "How much time do you want, my friend?"
+       },
+       {
+        "speaker": "Fox",
+        "text": "All I can carry. I never have enough hours."
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "6c5879bb",
+    "narration": "The fox emptied his pouch. He had three shiny coins, a golden feather, and a stolen silver spoon. The clockmaker looked at them and shook her head. Time is not sold that way.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The fox's offer",
+      "items": [
+       "Three shiny coins",
+       "A golden feather",
+       "A silver spoon"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "banknote",
+       "feather",
+       "spool"
+      ]
+     }
+    },
+    "chapter": "The price of an hour"
+   },
+   {
+    "id": "3f4b10c7",
+    "narration": "But the fox was a cunning one. He tried flattery. Your clocks are the finest in the land, he said. Surely such a master can bottle a few extra hours for a friend.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Surely such a master can bottle a few extra hours for a friend.",
+      "emphasis": "bottle a few extra hours"
+     }
+    }
+   },
+   {
+    "id": "a96be9ae",
+    "narration": "The clockmaker only laughed. Flattery is an old trick, she said. Even Aesop's crow learned that lesson the hard way. Praise costs nothing, and it buys nothing here either.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "crow perched on branch",
+      "alt": "a crow on a branch",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "05cd3736",
+    "narration": "Then she opened a clock and showed him its works. Every gear turned at the same pace. No one could hurry them, slow them, or stretch them, not for gold, not for words.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "clock gears turning macro",
+      "alt": "close up of watch mechanism moving"
+     }
+    }
+   },
+   {
+    "id": "8e2b7737",
+    "narration": "So, said the clockmaker, I cannot sell you more time. But I can show you how to use what you already have. Stay here one hour, and simply watch the clock.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "The clockmaker's lesson",
+      "steps": [
+       {
+        "label": "Sit down",
+        "detail": "Stop rushing for one hour"
+       },
+       {
+        "label": "Watch the clock",
+        "detail": "Notice each tick pass"
+       },
+       {
+        "label": "Choose what matters",
+        "detail": "Spend the hour on purpose"
+       }
+      ]
+     }
+    },
+    "chapter": "What the fox learned"
+   },
+   {
+    "id": "160e8046",
+    "narration": "The fox fidgeted at first. Then he grew still. He heard the ticking, the wind, and the village outside. For the first time, an hour felt long, full, and entirely his own.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "red fox resting autumn leaves",
+      "alt": "a fox resting in autumn leaves",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "74bad925",
+    "narration": "When the hour ended, the fox bowed and left his coins on the counter anyway. I did not buy time, he said, but I learned what it is worth. And he walked home slowly.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "fox walking village road dusk",
+      "alt": "fox walking home at dusk",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "32bd0a7e",
+    "narration": "The moral is simple. Time cannot be bought, borrowed, or flattered into stretching. You get the same hours as everyone. What matters is how you spend them.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Time cannot be bought. It can only be spent well.",
+      "emphasis": "spent well"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Aesop's Fables",
+    "url": "https://en.wikipedia.org/wiki/Aesop%27s_Fables",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "kids-family",
+   "inspiration-motivation"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 19.7,
+  "before_first_script_call_s": 5.4,
+  "script_s": 14.3
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "script_big": 0.04129,
+  "search_api": 0.0,
+  "total": 0.04152
+ },
+ "calls": {
+  "small": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 13586,
+  "out": 1885
+ },
+ "rules": {
+  "length": {
+   "words": 379,
+   "expected_words": 267,
+   "ratio": 1.419,
+   "beats": 12,
+   "expected_beats": 9,
+   "est_speech_s": 169.3,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 27,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Can you buy time? A fox once believed you could. He was clever, quick, and always in a hurry. One autumn morning, he trotted into a village, looking for a clockmaker.",
+   "close_text": "The moral is simple. Time cannot be bought, borrowed, or flattered into stretching. You get the same hours as everyone. What matters is how you spend them."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "definition": 1,
+    "clip": 2,
+    "dialogue": 1,
+    "bullets": 1,
+    "kinetic_text": 2,
+    "image": 3,
+    "steps": 1
+   },
+   "max_run": 2,
+   "entropy": 2.86,
+   "top_type": "image",
+   "top_share": 0.25,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 1,
+   "fetched": 5,
+   "notes_len": 3447,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The Aesop dates (c. 620 to 564 BCE) and the crow-and-flattery reference match the notes. The claim that the clockmaker 'opened a clock' to show gears that 'turned at the same pace' is plausible. No factual errors."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a want, an obstacle (coins, then flattery), a lesson, and a moral. But there is no real twist or cost, and the fox's change of heart is quick and the moral is the standard 'spend time well' one."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and the build is logical. Beat 2 (the fable definition) interrupts the story just after the hook. The moral is stated twice, in the fox's line and again in the closing beat."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "'Can you buy time?' is a decent hook. The ending is a stated moral ('The moral is simple') that restates the fox's own line instead of landing on an image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Gentle, fable-like storytelling that suits a general audience. It is slightly didactic at the end."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, but the 'definition' card and 'steps' list are non-story templates that clash with a fable. The crow stock image is a tangent, and a bullets list of three items is acceptable but flat."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The 'time can't be bought, spend it well' moral is the generic template. The flattery beat borrows from Aesop's Crow. The mindfulness 'sit and watch the clock' resolution is cliched."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is a short fable about a fox buying time from a clockmaker, and it runs at roughly the requested length. The meta digression about Aesop slightly dilutes the fable."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is fluent and clean. Dialogue appears without quotation marks, which reads awkwardly in places, such as 'I want to buy some time.'"
+   }
+  },
+  "defects": [
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Fables like this one are old. Aesop, a storyteller of ancient Greece, is credited with many of them.",
+    "issue": "A textbook-style digression stalls the story right after the hook and is not needed for the fable.",
+    "beat": 2
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Time cannot be bought. It can only be spent well.",
+    "issue": "A stock moral with no surprising twist. The plot never turns on anything unexpected.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "I did not buy time, he said, but I learned what it is worth.",
+    "issue": "The fox states the lesson, and the narrator repeats it in the next beat, which is redundant.",
+    "beat": 11
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "crow perched on branch",
+    "issue": "A stock crow image for a reference to another fable pulls attention away from the fox's story.",
+    "beat": 7
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "He was clever, quick, and always in a hurry.",
+    "issue": "Generic characterization. The fox's specific reason for wanting time is never given.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "For the first time, an hour felt long, full, and entirely his own.",
+    "issue": "The transformation is told, not earned. The obstacle resolves with no real cost or irony.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "A genuine twist, such as the price of time being something personal",
+   "A specific reason the fox is rushing, to give stakes",
+   "A sharper closing image instead of a stated moral"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A competent, cleanly written fable with a clear arc, but it follows a generic template with a predictable moral and a lecture-like detour about Aesop. Visuals lean on explainer templates (definition, steps) rather than telling the story.",
+  "mean": 3.33,
+  "cost_usd": 0.022336,
+  "tokens": [
+   4508,
+   1332
+  ]
+ }
+}

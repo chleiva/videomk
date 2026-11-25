@@ -1,0 +1,442 @@
+{
+ "id": "rec-01",
+ "category": "recipe / cooking",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "shakshuka",
+ "great": "Ingredients with quantities, sauteing onion and pepper, spices (cumin, paprika), tomatoes, simmer, wells for eggs, cover and cook, finish with herbs, serving tips; accurate ordering and times.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:05:47",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Shakshuka is a dish whose history, ingredients, and preparation are well established and do not change over time, so a timeless encyclopedia explanation is sufficient for an accurate explainer video.",
+  "queries": [
+   "shakshuka recipe history origin"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto",
+   "funny-light"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Shakshuka: The One-Pan Egg Dish of North Africa",
+  "description": "Shakshuka is a dish of eggs poached in a spiced tomato and pepper sauce, loved across North Africa and the Middle East. Learn what goes into it, how it is made, and why it is so easy to love.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "2e448921",
+    "narration": "Eggs, cracked into a bubbling red sauce, cooked right where they land. One pan, a handful of cheap ingredients, and breakfast that people argue about across a whole region. Meet shakshuka.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "eggs cooking in skillet",
+      "alt": "sauce simmering in a frying pan"
+     }
+    },
+    "chapter": "What shakshuka is"
+   },
+   {
+    "id": "bc57bb03",
+    "narration": "Shakshuka is a dish of eggs gently poached in a spiced sauce of tomatoes, peppers and onions. It is usually served straight from the pan, with bread for scooping up every last drop.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Shakshuka",
+      "definition": "Eggs poached in a spiced sauce of tomatoes, peppers and onions, served in the pan with bread."
+     }
+    }
+   },
+   {
+    "id": "55bb8593",
+    "narration": "It is most strongly linked with North Africa, especially Tunisia, Libya, Algeria and Morocco. From there it spread to Israel and across the Middle East, where families made it their own.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "regions",
+      "title": "Where shakshuka is loved",
+      "caption": "North Africa and the Middle East",
+      "regions": [
+       "Tunisia",
+       "Libya",
+       "Algeria",
+       "Morocco",
+       "Israel"
+      ]
+     }
+    }
+   },
+   {
+    "id": "41e7f3b1",
+    "narration": "The word is often said to mean a mixture, which fits. Nothing here is fancy. It is a pantry dish, built from things most kitchens already have, then brought to life with spice.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Simple ingredients, big flavor, one pan.",
+      "emphasis": "big flavor"
+     }
+    },
+    "chapter": "The ingredients"
+   },
+   {
+    "id": "3ed64b28",
+    "narration": "Start with ripe red tomatoes, the heart of the sauce. Add colorful bell peppers for sweetness and body. And finish with fresh brown eggs, which cook gently on top of the simmering sauce.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "ripe red tomatoes market",
+       "colorful bell peppers",
+       "fresh brown eggs basket"
+      ],
+      "alt": "Tomatoes, peppers and eggs"
+     }
+    }
+   },
+   {
+    "id": "537e30ad",
+    "narration": "Spices do the rest. Cumin brings earthy warmth, paprika adds color and gentle smoke, and chili brings the heat. Garlic and onion sit underneath, giving the sauce its deep savory base.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The flavor builders",
+      "items": [
+       "Cumin: earthy warmth",
+       "Paprika: color and smoke",
+       "Chili: the heat",
+       "Garlic and onion: savory base"
+      ],
+      "style": "keywords",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "03f44cae",
+    "narration": "First, soften the onions and peppers in oil. Second, stir in garlic and spices. Third, add tomatoes and simmer until thick. Fourth, make small wells and crack in the eggs. Finally, cover and cook.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Making shakshuka",
+      "steps": [
+       {
+        "label": "Soften onions and peppers"
+       },
+       {
+        "label": "Add garlic and spices"
+       },
+       {
+        "label": "Simmer the tomatoes until thick"
+       },
+       {
+        "label": "Crack eggs into wells"
+       },
+       {
+        "label": "Cover and cook gently"
+       }
+      ]
+     }
+    },
+    "chapter": "How it comes together"
+   },
+   {
+    "id": "a5c5d215",
+    "narration": "The common mistake is overcooking. Pull the pan off the heat while the whites are set but the yolks still tremble. They keep cooking in the hot sauce, and a runny yolk is the whole point.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Eggs done right",
+      "items": [
+       "Whites set and opaque",
+       "Yolks still soft",
+       "Pan off the heat in time"
+      ]
+     }
+    }
+   },
+   {
+    "id": "99741843",
+    "narration": "Serve it hot with crusty bread, a scatter of fresh herbs, and maybe some crumbled feta. Tear, scoop, dip. Nobody needs a fork, and nobody leaves the table hungry.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "shakshuka pan with bread",
+      "alt": "Shakshuka served in a pan with bread",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Why it works"
+   },
+   {
+    "id": "def09b83",
+    "narration": "That is the magic of shakshuka. Humble ingredients, one pan, and about half an hour. Tonight, try cracking a few eggs into a simmering tomato sauce, and you will see why it travels so well.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Shakshuka",
+      "subtitle": "Humble ingredients, one pan, endless comfort"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "tutorial-howto",
+   "funny-light"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 27.5,
+  "before_first_script_call_s": 2.6,
+  "script_s": 24.9
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.07801,
+  "search_api": 0.0,
+  "total": 0.07826
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 23263,
+  "out": 3659
+ },
+ "rules": {
+  "length": {
+   "words": 326,
+   "expected_words": 267,
+   "ratio": 1.221,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 145.3,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 35,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Eggs, cracked into a bubbling red sauce, cooked right where they land. One pan, a handful of cheap ingredients, and breakfast that people argue about across a whole region. Meet shakshuka.",
+   "close_text": "That is the magic of shakshuka. Humble ingredients, one pan, and about half an hour. Tonight, try cracking a few eggs into a simmering tomato sauce, and you will see why it travels so well."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "clip": 1,
+    "definition": 1,
+    "map": 1,
+    "kinetic_text": 1,
+    "gallery": 1,
+    "bullets": 1,
+    "steps": 1,
+    "checklist": 1,
+    "image": 1,
+    "title": 1
+   },
+   "max_run": 1,
+   "entropy": 3.32,
+   "top_type": "clip",
+   "top_share": 0.1,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 5,
+   "ungrounded_entities": [
+    "Israel",
+    "Middle East",
+    "Morocco",
+    "North Africa",
+    "Tunisia Libya Algeria"
+   ],
+   "ungrounded_share": 1.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Broadly correct, but 'The word is often said to mean a mixture' is hedged and fine, while the Tunisia/Libya/Algeria/Morocco origin claim and the 'about half an hour' timing are not sourced. Origin is debated (Ottoman or Maghrebi) and the script glosses over this."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The brief wants ingredients with quantities, times and specific steps. The script gives no quantities, no simmer or cook times, and no heat levels. Herbs, feta and the 'tremble' doneness cue are the only extra detail."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear order from definition to origin, ingredients, method, doneness and serving. The chapter label 'Why it works' sits oddly over the serving beat."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening image of eggs in bubbling sauce is decent, and 'people argue about across a whole region' promises tension that is never paid off. The ending is a generic 'try it tonight' with 'travels so well'."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, accessible and suited to a beginner cooking explainer."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety (clip, definition, map, gallery, steps, checklist). The map and the steps scene fit the narration. The kinetic text beat is filler."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly generic recipe-video language ('Nothing here is fancy', 'endless comfort', 'nobody leaves the table hungry'). The argument over origin is teased but never explained."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is about the right length and in English, but it omits the quantities and times the brief expects. It also frames the dish as 'North Africa' only."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural, with only minor filler phrases."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "First, soften the onions and peppers in oil.",
+    "issue": "No quantities, heat levels or times for any step, so a viewer cannot actually cook from it.",
+    "beat": 7
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "major",
+    "quote": "breakfast that people argue about across a whole region",
+    "issue": "The hook promises an argument that is never explained, such as the dispute over origin or the Israeli versus Maghrebi claims.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Humble ingredients, one pan, and about half an hour.",
+    "issue": "The time is never established earlier in the script and is not sourced.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "It is most strongly linked with North Africa, especially Tunisia, Libya, Algeria and Morocco.",
+    "issue": "The origin is presented without noting that it is debated, and the sources are not cited.",
+    "beat": 3
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Why it works",
+    "issue": "The chapter title does not match the serving content, and no 'why it works' is explained.",
+    "beat": 9
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Simple ingredients, big flavor, one pan.",
+    "issue": "A filler beat that repeats earlier points and adds no information.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Garlic and onion sit underneath",
+    "issue": "Onion is presented as a spice, and tomato is never given a quantity or a type, such as canned versus fresh.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "Ingredient quantities (e.g. 6 eggs, 1 can tomatoes)",
+   "Cooking times (simmer 10-15 min, eggs 5-8 min)",
+   "The origin debate",
+   "Regional variations (green shakshuka, with feta or merguez)",
+   "Heat level and pan choice (a skillet with a lid)",
+   "Finishing herbs named (cilantro or parsley)"
+  ],
+  "wrong_facts": [
+   "The origin is presented as settled in North Africa without nuance (unverified but broadly accepted)."
+  ],
+  "would_publish": false,
+  "summary": "A pleasant, well-ordered overview that reads as generic and never gives the quantities or times a cooking video needs. The hook's promise of an argument is not delivered, and the ending is a standard call to action.",
+  "mean": 3.22,
+  "cost_usd": 0.020886,
+  "tokens": [
+   3218,
+   1445
+  ]
+ }
+}

@@ -1,0 +1,83 @@
+"""POST /users/{user_id}/videos/brief: the request check, called by the app when the person taps Create, before `generate` (docs/CREATE_API.md).
+
+Safety, 'can we make this' and 'is it clear enough' in one small-model call. Nothing is charged here, nothing is stored except a stop (common/safety.py).
+Stateless: the answers carry all state, so calling again with the same input gives the same kind of result. The app treats any failure of this endpoint as 'ok'.
+"""
+import json
+import logging
+import os
+from typing import Any, Dict, Optional
+
+from common import intake, safety, usage
+from common.http import json_response
+from common.identity import extract_cognito_sub
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+DAILY_CALLS = int(os.environ.get("BRIEF_DAILY_LIMIT", "400"))   # generous: a person editing a prompt ten times a day is far below this
+
+
+def _body(event: Dict[str, Any]) -> Dict[str, Any]:
+    body = event.get("body")
+    if isinstance(body, str):
+        try:
+            body = json.loads(body or "{}")
+        except json.JSONDecodeError as e:
+            raise intake.Invalid("Body must be valid JSON") from e
+    if not isinstance(body, dict):
+        raise intake.Invalid("Body must be a JSON object")
+    return body
+
+
+def _ok(brief: Dict[str, Any]) -> Dict[str, Any]:
+    return json_response(200, {"status": "ok", "brief": brief})
+
+
+def handler(event: Dict[str, Any], context: Any, *, ask: Optional[intake.Ask] = None):
+    path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
+    user_id = extract_cognito_sub(event)
+    if not user_id:
+        return json_response(401, {"message": "Unauthorized"})
+    if not path_user or path_user != user_id:
+        return json_response(403, {"message": "Forbidden"})
+    try:
+        body = _body(event)
+        prompt = intake.clean_prompt(body.get("prompt"))
+        options = intake.clean_options(body.get("options"))
+        answers = intake.clean_answers(body.get("answers"))
+        media_count = intake.clean_media_count(body.get("media_count"))
+    except intake.Invalid as e:
+        return json_response(400, {"message": str(e)})
+
+    lang = safety.guess_language(prompt, options.get("language") if options.get("language") in ("en", "es") else None)
+    stopped = intake.paused(user_id, lang)
+    if stopped:
+        return json_response(429, stopped, {"Retry-After": str(stopped["retry_after"])})
+
+    brief = intake.apply_answers(answers)
+    try:
+        usage.consume(f"brief:{user_id}", limit=DAILY_CALLS)
+    except usage.QuotaExceeded:
+        # over the generous cap: no model call, only the free deterministic screen; generate checks the request again anyway
+        cat = safety.screen(prompt + " " + intake.free_text(answers))
+        if cat:
+            return json_response(200, intake.stop(user_id, intake.Check(block=cat, source="fallback"), prompt, lang))
+        return _ok(brief)
+    except Exception:
+        logger.exception("brief rate limiter unavailable")
+
+    # Round two with only option taps (no free text) changes nothing about the request that was already checked in round one: skip the model, build the brief.
+    # (generate checks the request itself again, so skipping the first call cannot bypass anything.)
+    if answers and not intake.free_text(answers):
+        return _ok(brief)
+
+    chk = intake.check(prompt, options=options, media_count=media_count, answers=answers, ask=ask)
+    logger.info("BRIEF_CHECK ms=%s source=%s block=%s unsupported=%s questions=%s", chk.ms, chk.source, bool(chk.block), bool(chk.unsupported), len(chk.questions))
+    if chk.block:
+        return json_response(200, intake.stop(user_id, chk, prompt, lang))
+    if chk.unsupported:
+        return json_response(200, {"status": "not_supported", "message": chk.unsupported["message"], "suggestion": chk.unsupported["suggestion"]})
+    if chk.questions:
+        return json_response(200, {"status": "questions", "questions": chk.questions})
+    return _ok(brief)

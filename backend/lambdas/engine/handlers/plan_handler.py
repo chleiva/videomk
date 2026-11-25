@@ -7,7 +7,7 @@ from generate_video.db import set_attributes, update_status
 
 from common.secrets import get_secret_param
 
-from .. import curate, library, awsio, costs, director, llm, plan as plan_mod, usermedia, voices, websearch
+from .. import curate, library, awsio, costs, director, format_options, llm, plan as plan_mod, usermedia, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -89,7 +89,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
     catalog = library.load_catalog(awsio.get_json)
-    result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=event.get("language"),
+    result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
+                             options={k: event.get(k) for k in ("platform", "aspect", "brief")},
                              region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
                              max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
                              music_tracks=catalog)
@@ -97,8 +98,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     spent["research"] = spent.get("research", 0.0) + float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     for part, usd in spent.items():
         costs.add_cost(video_id, usd, part=part)
-    if r.get("mode") == "web" or r.get("fallback"):
-        logging.warning("research: %s", {k: r.get(k) for k in ("mode", "decided", "searches", "reads", "iterations", "seconds", "error", "fallback")})
+    if r.get("mode") == "web" or r.get("fallback") or r.get("escalated") or r.get("fetch_errors_n"):
+        logging.warning("research: %s", {k: r.get(k) for k in ("mode", "decided", "searches", "reads", "iterations", "seconds", "error", "fallback", "escalated", "fetch_errors_n", "grounding")})
     if result.get("warnings"):
         logging.warning("plan warnings: %s", result["warnings"][:10])  # WARNING level: Lambda drops INFO by default
     if not result["legit"]:
@@ -111,6 +112,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if chosen:
         plan["music"] = chosen
     plan["target_seconds"] = round(minutes * 60)   # the length asked and billed: the timeline never comes out shorter
+    plan["frame"] = format_options.frame_dict(event.get("aspect"), event.get("resolution"), event.get("platform"))   # the picture size: the timeline, the renderer and every edit read it back
     plan["captions"] = bool(event.get("captions", True))   # the creator's choice: subtitles on (default) or off
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     forced = os.environ.get("TTS_VOICE", "")

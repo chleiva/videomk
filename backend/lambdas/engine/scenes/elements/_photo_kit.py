@@ -9,6 +9,7 @@ from collections import OrderedDict
 from functools import lru_cache
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 from ...canvas import Canvas, with_alpha
@@ -113,6 +114,35 @@ def blit(cv: Canvas, sp: Sprite, cx: float, cy: float, scale: float = 1.0, alpha
         k = int(alpha * 256)
         a = a.point(lambda v: v * k >> 8)
     cv.im.paste(rgb, (int(round(cx * cv.ss - rgb.width / 2)), int(round(cy * cv.ss - rgb.height / 2))), a)
+
+
+def blit_clip(cv: Canvas, sp: Sprite, cx: float, cy: float, y0: float, y1: float, fade: float = 0.0, scale: float = 1.0, alpha: float = 1.0) -> None:
+    """`blit`, but only the part between logical rows y0 and y1 is drawn, fading out over `fade` logical px at both ends of that window (vertical film strips
+    slide through a window that stays clear of the caption band and the platform buttons)."""
+    if alpha <= 0.004 or scale <= 0.01:
+        return
+    ss = cv.ss
+    rgb, a = sp.rgb, sp.a
+    if abs(scale - 1.0) > 0.003:
+        size = (max(1, int(round(sp.w * scale))), max(1, int(round(sp.h * scale))))
+        rgb, a = rgb.resize(size, Image.BILINEAR), a.resize(size, Image.BILINEAR)
+    if alpha < 0.996:
+        k = int(alpha * 256)
+        a = a.point(lambda v: v * k >> 8)
+    px, py = int(round(cx * ss - rgb.width / 2)), int(round(cy * ss - rgb.height / 2))
+    wy0, wy1 = int(round(y0 * ss)), int(round(y1 * ss))
+    t0, t1 = max(py, wy0), min(py + rgb.height, wy1)
+    if t1 <= t0:
+        return
+    box = (0, t0 - py, rgb.width, t1 - py)
+    rgb, a = rgb.crop(box), a.crop(box)
+    if fade > 0:
+        f = max(1.0, fade * ss)
+        ys = np.arange(t0, t1, dtype=np.float32)
+        ramp = np.clip(np.minimum(ys - wy0, wy1 - 1 - ys) / f, 0.0, 1.0)
+        ramp = ramp * ramp * (3.0 - 2.0 * ramp)
+        a = Image.fromarray((np.asarray(a, np.float32) * ramp[:, None]).astype(np.uint8), "L")
+    cv.im.paste(rgb, (px, t0), a)
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- image fitting
@@ -258,20 +288,21 @@ def backdrop(cv: Canvas, src: Optional[Image.Image], th: Theme, dark: float = 0.
 
 
 # ----------------------------------------------------------------------------------------------------------------------------- label and chip
-def label_metrics(cv: Canvas, title: str, subtitle: str, max_w: float) -> Optional[Dict[str, Any]]:
-    """Size of the lower-third label (None when there is no text)."""
+def label_metrics(cv: Canvas, title: str, subtitle: str, max_w: float, k: float = 1.0) -> Optional[Dict[str, Any]]:
+    """Size of the lower-third label (None when there is no text). `k` > 1 makes its type larger (narrow frames)."""
     if not title and not subtitle:
         return None
     inner = max_w - 56
     tsize, tlines = (0, [])
     if title:
-        tsize = 46
-        while tsize > 34 and cv.measure(title, "bold", tsize) > inner:
+        tsize = 46 if k == 1.0 else int(round(46 * k))
+        lo = 34 if k == 1.0 else int(round(34 * k))
+        while tsize > lo and cv.measure(title, "bold", tsize) > inner:
             tsize -= 4
         tlines = cv.wrap(title, "bold", tsize, inner)[:2]
     ssize, slines = (0, [])
     if subtitle:
-        ssize = 28
+        ssize = 28 if k == 1.0 else int(round(28 * k))
         slines = cv.wrap(subtitle, "regular", ssize, inner)[:2]
     tw = max([cv.measure(l, "bold", tsize) for l in tlines] + [cv.measure(l, "regular", ssize) for l in slines] + [200.0])
     h = 18 + len(tlines) * tsize * 1.2 + (6 if tlines and slines else 0) + len(slines) * ssize * 1.3 + 18
@@ -301,20 +332,22 @@ def draw_label(cv: Canvas, th: Theme, m: Dict[str, Any], lt: float, x: float, bo
         ty += m["ssize"] * 1.3
 
 
-def chip_metrics(cv: Canvas, text: str) -> Tuple[float, float]:
+def chip_metrics(cv: Canvas, text: str, k: float = 1.0) -> Tuple[float, float]:
+    if k != 1.0:
+        return cv.measure(text, "semibold", int(round(30 * k))) + 44, round(58.0 * k)
     return cv.measure(text, "semibold", 30) + 44, 58.0
 
 
-def draw_chip(cv: Canvas, th: Theme, text: str, lt: float, x: float, y: float, t0: float = 0.6, anchor: str = "l") -> None:
+def draw_chip(cv: Canvas, th: Theme, text: str, lt: float, x: float, y: float, t0: float = 0.6, anchor: str = "l", k: float = 1.0) -> None:
     """A small rounded chip (the date). `x` is its left edge, or its right edge with anchor 'r'; `y` is its bottom."""
     p = ease_out_cubic(progress(lt, t0, 0.45))
     if p <= 0.01 or not text:
         return
-    w, h = chip_metrics(cv, text)
+    w, h = chip_metrics(cv, text, k)
     x0 = x - w if anchor == "r" else x
     y0 = y - h + (1 - p) * 14
     cv.rrect(x0, y0, w, h, h / 2, fill=with_alpha(th.accent, 0.95 * p))
-    cv.text(x0 + w / 2, y0 + h / 2 + 1, text, "semibold", 30, with_alpha((255, 255, 255), p), anchor="mm")
+    cv.text(x0 + w / 2, y0 + h / 2 + 1, text, "semibold", 30 if k == 1.0 else int(round(30 * k)), with_alpha((255, 255, 255), p), anchor="mm")
 
 
 def spaced_text(cv: Canvas, x: float, y: float, s: str, weight: str, size: float, fill, track: float = 0.16, anchor: str = "l") -> float:

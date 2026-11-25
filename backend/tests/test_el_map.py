@@ -302,3 +302,69 @@ def test_a_region_alias_shared_by_several_areas_is_not_a_guess():
     with pytest.raises(R.NotFound):
         R.resolve_offline("Tuscany", "shape")             # Natural Earth has provinces there, not the region
     assert R.resolve_offline("Florida", "shape")["id"].startswith("USA")
+
+
+# ----------------------------------------------------------------------------- responsive layouts (9:16, 1:1, 4:5)
+ASPECTS = ["9:16", "1:1", "4:5"]
+
+
+def _panel(aspect):
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "1080p")
+    box = fr.box(True)
+    return fr, box, MD.panel_size(fr.content_bottom(True), fr, box)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_the_panel_is_the_content_box_and_the_element_is_tagged_for_every_aspect(aspect):
+    fr, box, (pw, ph) = _panel(aspect)
+    assert (pw, ph) == (box[2] - box[0], box[3] - box[1]) and MD.panel_origin(fr, box) == (box[0], box[1])
+    assert set(EL.formats) == {"16:9", "9:16", "1:1", "4:5"}
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+@pytest.mark.parametrize("i", range(len(EL.samples)))
+def test_every_pin_and_label_ends_inside_the_panel_on_every_aspect(aspect, i):
+    fr, box, (pw, ph) = _panel(aspect)
+    sample = EL.sanitize(copy.deepcopy(EL.samples[i]))
+    m = MD.build_model(maps._spec_key(sample), pw, ph, fr.type_scale, False)
+    assert m.notes == [] and m.pw == pw and m.ph <= ph and 0 <= m.y_off
+    cx, cy, s = m.cam_end
+    for it in m.pins:
+        x, y = m.centre_px[0] + (it.anchor[0] - cx) * s, m.centre_px[1] - (it.anchor[1] - cy) * s
+        assert 0 < x < m.pw and 0 < y < m.ph
+        assert x + it.label_off[0] > 0 and x + it.label_off[0] + it.label_wh[0] < m.pw and y + it.label_off[1] > 0 and y + it.label_off[1] + it.label_wh[1] < m.ph
+    for r in (m.chip, m.foot):
+        assert r[2] <= m.pw and r[3] <= m.ph
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_the_map_is_drawn_inside_the_content_box_and_reveals_in_every_aspect(aspect):
+    fr, box, _ = _panel(aspect)
+    props = EL.sanitize({"mode": "route", "stops": ["Paris", "Lyon", "Marseille"], "title": "A rail trip across France", "caption": "Roughly west to east"})
+    a = render("map", props, 0.0, 8.0, "midnight", captions=True, draft=True, aspect=aspect)
+    b = render("map", props, 8.0, 8.0, "midnight", captions=True, draft=True, aspect=aspect)
+    assert changed(a, b) > 0.004
+    assert a.size[0] * fr.height == a.size[1] * fr.width
+
+
+def test_a_long_title_and_caption_wrap_instead_of_overflowing_a_tall_panel():
+    props = EL.sanitize({"mode": "regions", "regions": ["France"], "title": "T" * 6 + " word" * 9, "caption": "c" * 4 + " lorem" * 9})
+    fr, box, (pw, ph) = _panel("9:16")
+    m = MD.build_model(maps._spec_key(props), pw, ph, fr.type_scale, False)
+    assert len(m.title_lines) == 2 and len(m.foot_lines) == 2 and m.chip[2] <= pw and m.foot[2] <= pw - 200
+    assert MD._fit_lines("short", "semibold", 40, 500, 30)[1] == ["short"]
+
+
+def test_a_world_map_on_a_tall_frame_gets_a_shorter_centred_panel_and_other_maps_fill_the_box():
+    fr, box, (pw, ph) = _panel("9:16")
+    world = MD.build_model(maps._spec_key(EL.sanitize(copy.deepcopy(EL.samples[4]))), pw, ph, fr.type_scale, False)
+    assert world.ph < ph - 60 and abs(world.y_off - (ph - world.ph) / 2) < 1
+    pt = MD.build_model(maps._spec_key(EL.sanitize(copy.deepcopy(EL.samples[0]))), pw, ph, fr.type_scale, False)
+    assert pt.ph == ph and pt.y_off == 0
+
+
+def test_landscape_model_is_unchanged_by_the_frame_parameters():
+    key = maps._spec_key(EL.sanitize(copy.deepcopy(EL.samples[5])))
+    a, b = MD.build_model(key, 1700, 900), MD.build_model(key, 1700, 900, 1.0, True)
+    assert (a.k, a.landscape, a.y_off, a.cam_end, a.title_size) == (b.k, b.landscape, b.y_off, b.cam_end, b.title_size) and a.ph == 900 and a.y_off == 0

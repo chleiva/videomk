@@ -18,7 +18,8 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import library, usage, wallet
+from common import intake, library, safety, usage, wallet
+from engine import format_options
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
 logger = logging.getLogger()
@@ -111,10 +112,20 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(m, bool) or not isinstance(m, (int, float)) or not (0 <= m <= MAX_IMAGES_PER_MINUTE):
             raise BadRequest(f"'max_images_per_minute' must be a number from 0 to {MAX_IMAGES_PER_MINUTE:g}")
         out["max_images_per_minute"] = float(m)
-    if "language" in body and body["language"] is not None:
-        if body["language"] not in ("en", "es"):
-            raise BadRequest("'language' must be 'en' or 'es'")
-        out["language"] = body["language"]
+    if "language" in body and body["language"] is not None:   # 'auto' (the default) keeps the detection from the description; an explicit language overrides it
+        lang = body["language"]
+        if not isinstance(lang, str) or (lang != "auto" and lang not in format_options.LANGUAGE_LABELS):
+            raise BadRequest("'language' must be 'auto' or one of: " + ", ".join(format_options.LANGUAGE_LABELS))
+        if lang != "auto" and lang not in format_options.ready_languages():
+            raise BadRequest("This language is not available yet")
+        out["language"] = lang
+    for field, allowed in (("platform", format_options.PLATFORM_IDS), ("aspect", format_options.ASPECT_IDS), ("resolution", format_options.RESOLUTION_IDS)):
+        if field in body and body[field] is not None:
+            if not isinstance(body[field], str) or body[field] not in allowed:
+                raise BadRequest(f"'{field}' must be one of: " + ", ".join(allowed))
+            out[field] = body[field]
+    if out.get("aspect", format_options.DEFAULT_ASPECT) not in format_options.ready_aspects():
+        raise BadRequest("This format is not available yet")
     if "theme" in body and body["theme"] is not None:
         if body["theme"] not in THEMES:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
@@ -177,6 +188,21 @@ def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *
     _dynamodb.Table(os.environ.get("VIDEOS_TABLE", "Videos")).put_item(**kwargs)
 
 
+def safety_gate(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """None to go on; else the response: 429 `paused` for a paused or held account, 400 `blocked` (recorded) for a request that must be stopped.
+    One attempt with a 4 s timeout, then the deterministic screen (no retry here: the function has a 10 s budget and a clear prompt must never wait on this)."""
+    if not safety.enabled():
+        return None
+    lang = safety.guess_language(prompt, options.get("language"))
+    stopped = intake.paused(user_id, lang)
+    if stopped:
+        return json_response(429, stopped, {"Retry-After": str(stopped["retry_after"])})
+    chk = intake.check(prompt + " " + intake.brief_text(brief) if brief else prompt, options={}, attempts=1)
+    if chk.block:
+        return json_response(400, intake.stop(user_id, chk, prompt, lang))
+    return None
+
+
 def handler(event: Dict[str, Any], context: Any):
     path_user_id = ((event or {}).get("pathParameters") or {}).get("user_id")
     auth_user_id = extract_cognito_sub(event)
@@ -191,7 +217,10 @@ def handler(event: Dict[str, Any], context: Any):
         body = parse_body(event)
         prompt = validate_prompt(body)
         options = validate_options(body)
+        brief = intake.clean_brief(body.get("brief"))   # the answers to the clarifying questions: known keys, short strings, at most 2 KB
     except BadRequest as e:
+        return json_response(400, {"message": str(e)})
+    except intake.Invalid as e:
         return json_response(400, {"message": str(e)})
 
     sm_arn = os.environ.get("STATE_MACHINE_ARN")
@@ -210,6 +239,13 @@ def handler(event: Dict[str, Any], context: Any):
         existing = _dynamodb.Table(os.environ.get("VIDEOS_TABLE", "Videos")).get_item(Key={"video_id": video_id}).get("Item")
         if existing:
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
+
+    # Safety gate: before any charge, copy or duplicate claim. The same check as POST .../videos/brief, so skipping `brief` skips nothing.
+    gated = safety_gate(user_id, prompt, brief, options)
+    if gated:
+        return gated
+    if brief:
+        options["brief"] = brief
 
     for mid in options.get("media", []):  # every photo must really be uploaded, into this user's own folder
         try:

@@ -36,6 +36,11 @@ MAX_SOURCE_BYTES = 70_000_000      # never pull more than this for one source fi
 MAX_CLIP_SECONDS = 20.0            # a clip behind narration never needs more
 MIN_SOURCE_SECONDS = 3.0
 CLIP_W, CLIP_H, CLIP_FPS = 1280, 720, 30
+ORIENTATIONS = {"landscape": (1280, 720), "portrait": (720, 1280), "square": (720, 720)}   # footage is normalised to the video's shape (frame.orientation; 4:5 uses portrait)
+
+
+def _orient(o: str) -> str:
+    return o if o in ORIENTATIONS else "landscape"
 MAX_CANDIDATES = 8
 
 Candidate = Dict[str, Any]
@@ -47,10 +52,10 @@ def _slug_words(url: str) -> str:
     return m.group(1).replace("-", " ")[:120] if m else ""
 
 
-def pexels_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, per_page: int = 10) -> List[Candidate]:
+def pexels_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, per_page: int = 10, orientation: str = "landscape") -> List[Candidate]:
     if not key:
         return []
-    q = urllib.parse.urlencode({"query": query[:120], "orientation": "landscape", "size": "medium", "per_page": per_page})
+    q = urllib.parse.urlencode({"query": query[:120], "orientation": _orient(orientation), "size": "medium", "per_page": per_page})
     data = fetch(f"{PEXELS_API}?{q}", headers={"Authorization": key})
     out: List[Candidate] = []
     for v in data.get("videos") or []:
@@ -58,8 +63,9 @@ def pexels_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, 
             files = [f for f in v.get("video_files") or [] if str(f.get("file_type")) == "video/mp4" and str(f.get("link", "")).startswith("https://") and f.get("width")]
             if not files:
                 continue
-            ok = [f for f in files if 1280 <= int(f["width"]) <= 1920]
-            best = max(ok, key=lambda f: int(f["width"])) if ok else max(files, key=lambda f: int(f["width"]))
+            long_side = (lambda f: max(int(f["width"]), int(f.get("height") or 0)))
+            ok = [f for f in files if 1280 <= long_side(f) <= 1920]
+            best = max(ok, key=long_side) if ok else max(files, key=long_side)
             w, h, dur = int(v["width"]), int(v["height"]), float(v["duration"])
             user = v.get("user") or {}
             name = str(user.get("name") or "Unknown")[:80]
@@ -89,7 +95,7 @@ def _cached(key: str, load: Callable[[], Any], now: Callable[[], float] = time.t
     return value
 
 
-def pixabay_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, per_page: int = 12) -> List[Candidate]:
+def pixabay_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, per_page: int = 12, orientation: str = "landscape") -> List[Candidate]:
     if not key:
         return []
     q = urllib.parse.urlencode({"key": key, "q": query[:100], "per_page": per_page, "safesearch": "true", "video_type": "film", "order": "popular"})
@@ -100,10 +106,14 @@ def pixabay_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json,
             vids = {n: v for n, v in (h.get("videos") or {}).items() if isinstance(v, dict) and str(v.get("url", "")).startswith("https://") and int(v.get("width") or 0) > 0}
             if not vids:
                 continue
-            ok = [n for n in ("medium", "large", "small", "tiny") if n in vids and int(vids[n]["width"]) >= 1280]
-            pick = vids[ok[0]] if ok else max(vids.values(), key=lambda v: int(v["width"]))   # the smallest rendition that is at least 720p; we render at 720p anyway
+            ls = (lambda v: max(int(v["width"]), int(v.get("height") or 0)))
+            ok = [n for n in ("medium", "large", "small", "tiny") if n in vids and ls(vids[n]) >= 1280]
+            pick = vids[ok[0]] if ok else max(vids.values(), key=ls)   # the smallest rendition that is at least 720p; we render at 720p anyway
             w, hh, size = int(pick["width"]), int(pick["height"]), int(pick.get("size") or 0)
-            if hh <= 0 or w / hh < 1.3 or size > MAX_SOURCE_BYTES:
+            if hh <= 0 or size > MAX_SOURCE_BYTES:
+                continue
+            ratio = w / hh   # Pixabay has no orientation filter: keep what suits the video's shape
+            if (_orient(orientation) == "landscape" and ratio < 1.3) or (orientation == "portrait" and ratio > 0.85) or (orientation == "square" and not 0.8 <= ratio <= 1.25):
                 continue
             user, uid = str(h.get("user") or "Unknown")[:80], h.get("user_id")
             page = str(h.get("pageURL") or "https://pixabay.com")
@@ -179,10 +189,11 @@ def commons_usable() -> bool:
     return any(c in netsafe.USER_AGENT for c in ("@", "http", "("))
 
 
-def gather(query: str, *, pexels_key: str = "", pixabay_key: str = "", fetch: Callable[..., Any] = fetch_json, limit: int = MAX_CANDIDATES) -> List[Candidate]:
+def gather(query: str, *, pexels_key: str = "", pixabay_key: str = "", fetch: Callable[..., Any] = fetch_json, limit: int = MAX_CANDIDATES, orientation: str = "landscape") -> List[Candidate]:
     """Pexels and Pixabay first (better footage), Commons to fill; one provider failing never blocks the others. Only usable footage survives."""
     pools: List[List[Candidate]] = []
-    providers = [lambda: pexels_search(query, pexels_key, fetch), lambda: pixabay_search(query, pixabay_key, fetch)]
+    o = {} if orientation == "landscape" else {"orientation": orientation}   # landscape keeps the exact old calls
+    providers = [lambda: pexels_search(query, pexels_key, fetch, **o), lambda: pixabay_search(query, pixabay_key, fetch, **o)]
     if commons_usable():
         providers.append(lambda: commons_search(query, fetch))
     for fn in providers:
@@ -293,8 +304,9 @@ def verify(mp4: bytes, narration: str, alt: str, query: str, seconds: float, *, 
 
 
 # ----------------------------------------------------------------------------- normalise
-def transcode(src_path: str, out_path: str, *, start: float, seconds: float, loop: bool) -> None:
-    """Trim, crop to 16:9, 1280x720, 30 fps, no audio, H.264: small, uniform, cheap to decode frame by frame."""
+def transcode(src_path: str, out_path: str, *, start: float, seconds: float, loop: bool, orientation: str = "landscape") -> None:
+    """Trim, crop to the video's shape (16:9 1280x720 by default, 9:16 720x1280 portrait, 720x720 square), 30 fps, no audio, H.264: small, uniform, cheap to decode frame by frame."""
+    CLIP_W, CLIP_H = ORIENTATIONS[_orient(orientation)]
     cmd = [media.ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error"]
     if loop:
         cmd += ["-stream_loop", "-1"]
@@ -306,7 +318,7 @@ def transcode(src_path: str, out_path: str, *, start: float, seconds: float, loo
         raise RuntimeError(f"clip transcode failed: {proc.stderr[-400:]}")
 
 
-def normalise(raw: bytes, *, need_seconds: float, source_seconds: float, suffix: str = ".bin") -> Tuple[bytes, float]:
+def normalise(raw: bytes, *, need_seconds: float, source_seconds: float, suffix: str = ".bin", orientation: str = "landscape") -> Tuple[bytes, float]:
     """-> (mp4 bytes, seconds it plays before looping). Takes a little footage from after the first second (openings are often a fade)."""
     seconds = max(2.0, min(MAX_CLIP_SECONDS, need_seconds))
     loop = source_seconds < seconds
@@ -315,7 +327,7 @@ def normalise(raw: bytes, *, need_seconds: float, source_seconds: float, suffix:
         src, out = os.path.join(tmp, "in" + suffix), os.path.join(tmp, "out.mp4")
         with open(src, "wb") as fh:
             fh.write(raw)
-        transcode(src, out, start=start, seconds=seconds, loop=loop)
+        transcode(src, out, start=start, seconds=seconds, loop=loop, orientation=orientation)
         with open(out, "rb") as fh:
             data = fh.read()
     return data, (source_seconds if loop else seconds)
@@ -339,13 +351,15 @@ def scout_clip(
     review: Optional[Callable[..., Tuple[Optional[int], str, float, List[int]]]] = _review,
     normalise_fn: Callable[..., Tuple[bytes, float]] = normalise,
     verify_fn: Optional[Callable[..., Tuple[bool, str, float]]] = verify,
+    orientation: str = "landscape",
 ) -> Optional[Dict[str, Any]]:
-    """Find, review, download and normalise one clip. Never raises. Returns
+    """Find, review, download and normalise one clip. `orientation` ('landscape' | 'portrait' | 'square', the video's `Frame.orientation`; 4:5 is portrait) asks
+    the stock providers for footage of that shape and normalises it to it. Never raises. Returns
     {mp4, entry, credit, chosen, candidates, review, loops_after} | {mp4: None, rejected_all: True, ...} | None when nothing usable exists."""
     cands: List[Candidate] = []
     for q in (query, " ".join(query.split()[:2])) if len(query.split()) > 2 else (query,):  # long queries often match nothing: retry shorter
         try:
-            cands = gather(q, pexels_key=pexels_key, pixabay_key=pixabay_key, fetch=fetch_json_fn)
+            cands = gather(q, pexels_key=pexels_key, pixabay_key=pixabay_key, fetch=fetch_json_fn, orientation=orientation)
         except Exception:
             logging.exception("clip gather crashed for %r", q)
             cands = []
@@ -373,7 +387,8 @@ def scout_clip(
         c = cands[i]
         try:
             raw = fetch_bytes_fn(c["video_url"], max_bytes=MAX_SOURCE_BYTES, timeout=60)
-            mp4, loops_after = normalise_fn(raw, need_seconds=need_seconds, source_seconds=float(c.get("duration") or need_seconds), suffix=_suffix(c["video_url"]))
+            mp4, loops_after = normalise_fn(raw, need_seconds=need_seconds, source_seconds=float(c.get("duration") or need_seconds), suffix=_suffix(c["video_url"]),
+                                              **({"orientation": orientation} if orientation != "landscape" else {}))
         except Exception as e:
             logging.warning("clip download/transcode failed (%s) for %r: %s: %s", candidate_key(c), query, type(e).__name__, e)
             continue

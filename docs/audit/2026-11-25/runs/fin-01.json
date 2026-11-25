@@ -1,0 +1,527 @@
+{
+ "id": "fin-01",
+ "category": "personal finance",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "index funds vs a savings account: where should I put my savings?",
+ "great": "Different purposes (emergency fund vs long-term), inflation erodes cash, index funds diversified low cost but volatile, time horizon, emergency fund first; balanced, caveats, not personalised advice, numbers with sources or flagged as historical averages.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:00:40",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "finance-business"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 2: definition twice in a row"
+ ],
+ "notes": "",
+ "plan": {
+  "title": "Index Funds vs Savings Account: Where Should Savings Go?",
+  "description": "A plain-language comparison of index funds and savings accounts, based on risk, growth, access and time. Learn how your timeline decides where each pot of money belongs.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "7f3cde0c",
+    "narration": "Your savings account feels safe. But what if safe money slowly shrinks? Choosing between a savings account and index funds comes down to one question: when will you need this money?",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "When will you need this money?",
+      "emphasis": "when"
+     }
+    }
+   },
+   {
+    "id": "1402d0eb",
+    "narration": "A savings account is a bank account that pays interest. Your balance does not drop when markets fall, and you can usually withdraw your money whenever you need it.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Savings account",
+      "definition": "A bank account that pays interest. The balance does not fall when markets fall, and money can usually be withdrawn at any time."
+     }
+    },
+    "chapter": "Two places for your money"
+   },
+   {
+    "id": "9699e38f",
+    "narration": "An index fund is different. It holds tiny pieces of many companies at once, tracking a market index. Its price moves every day, so your balance can rise or fall.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Index fund",
+      "definition": "A fund that holds small pieces of many companies to track a market index. Its value rises and falls with the market."
+     }
+    }
+   },
+   {
+    "id": "74538ec1",
+    "narration": "Compare three things. Risk: savings is low, index funds can drop. Growth: savings grows slowly, index funds have historically grown faster over long periods. Access: savings is instant, selling funds takes a few days.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Savings account",
+       "tagline": "Steady and simple"
+      },
+      "b": {
+       "name": "Index fund",
+       "tagline": "Bumpy but bigger potential"
+      },
+      "rows": [
+       {
+        "label": "Risk",
+        "a": "Low",
+        "b": "Can drop"
+       },
+       {
+        "label": "Growth",
+        "a": "Slow",
+        "b": "Faster over years"
+       },
+       {
+        "label": "Access",
+        "a": "Instant",
+        "b": "A few days"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "d36e8cf5",
+    "narration": "Savings accounts have real strengths. Deposits are insured in many countries. Withdrawals are easy. And the balance is stable, which makes it perfect for money you cannot afford to lose.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why savings works",
+      "items": [
+       "Deposits insured in many countries",
+       "Easy withdrawals",
+       "Stable balance"
+      ],
+      "style": "cards",
+      "accent": "teal"
+     }
+    },
+    "chapter": "Strengths and risks"
+   },
+   {
+    "id": "21909f13",
+    "narration": "Index funds have strengths too. They spread risk across many companies. Fees are usually low. And over long periods, stocks have often beaten savings interest. But there are no guarantees, and losses happen.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why index funds work",
+      "items": [
+       "Spread across many companies",
+       "Usually low fees",
+       "Often beat savings over decades"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "globe",
+       "banknote",
+       "trending-up"
+      ]
+     }
+    }
+   },
+   {
+    "id": "84c8f4a3",
+    "narration": "Markets are like weather. Some seasons are sunny, others stormy. Over a few months, a fund can fall sharply. Over many years, the storms have often passed. That is why time matters most.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "storm clouds clearing sky",
+      "alt": "dark clouds giving way to sunshine"
+     }
+    }
+   },
+   {
+    "id": "094c3c77",
+    "narration": "Now the hidden risk of cash. Cash earns interest, but prices rise over time. When prices rise faster than interest, your buying power changes: the same balance buys less. Safe is not risk free.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The hidden risk of cash",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Cash earns interest",
+        "icon": "banknote"
+       },
+       {
+        "id": "b",
+        "label": "Prices rise",
+        "icon": "chart-column"
+       },
+       {
+        "id": "c",
+        "label": "Buying power changes",
+        "icon": "scale"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "ba6a67c1",
+    "narration": "Before investing, check three things. Do you have an emergency fund? Do you have no high-interest debt? And can your money stay put for years? If any answer is no, start with savings.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Ready to invest?",
+      "items": [
+       "Emergency fund in place",
+       "No high-interest debt",
+       "Money can stay put for years"
+      ]
+     }
+    }
+   },
+   {
+    "id": "82928afe",
+    "narration": "Now, an emergency fund: savings account. In one to three years, a planned purchase: savings account. At five years, a gray zone: depends on your comfort. At ten plus years, long-term goals: index funds.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Your timeline decides",
+      "events": [
+       {
+        "date": "Now",
+        "label": "Emergency fund: savings account"
+       },
+       {
+        "date": "1-3 years",
+        "label": "Planned purchase: savings account"
+       },
+       {
+        "date": "5 years",
+        "label": "Gray zone: depends on comfort"
+       },
+       {
+        "date": "10+ years",
+        "label": "Long-term goals: index funds"
+       }
+      ]
+     }
+    },
+    "chapter": "Matching money to time"
+   },
+   {
+    "id": "882709ef",
+    "narration": "Here is a simple path. Step one, build an emergency fund in savings. Step two, pay off costly debt. Step three, invest steadily in a low-cost index fund. Step four, review once a year.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "A simple path",
+      "steps": [
+       {
+        "label": "Build an emergency fund in savings"
+       },
+       {
+        "label": "Pay off costly debt"
+       },
+       {
+        "label": "Invest steadily in a low-cost index fund"
+       },
+       {
+        "label": "Review once a year"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "7e6e71d9",
+    "narration": "This is general information, not personal advice. Taxes, fees and rules differ by country, so check your own situation or talk to a licensed adviser before you decide.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Keep in mind",
+      "items": [
+       "Taxes differ",
+       "Fees differ",
+       "Rules differ by country"
+      ],
+      "style": "keywords",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "e2172c06",
+    "narration": "Short-term money belongs in savings. Long-term money can grow in index funds. Match each pot of money to its deadline, and you choose well.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Match each pot of money to its deadline.",
+      "emphasis": "deadline"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "comparison-versus",
+   "finance-business"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 49.2,
+  "before_first_script_call_s": 3.6,
+  "script_s": 45.6
+ },
+ "cost": {
+  "script_small": 0.00033,
+  "script_big": 0.10824,
+  "search_api": 0.0,
+  "total": 0.10857
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 23269,
+  "out": 6822
+ },
+ "rules": {
+  "length": {
+   "words": 412,
+   "expected_words": 402,
+   "ratio": 1.025,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 184.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Your savings account feels safe. But what if safe money slowly shrinks? Choosing between a savings account and index funds comes down to one question: when will you need this money?",
+   "close_text": "Short-term money belongs in savings. Long-term money can grow in index funds. Match each pot of money to its deadline, and you choose well."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "kinetic_text": 2,
+    "definition": 2,
+    "versus": 1,
+    "bullets": 3,
+    "clip": 1,
+    "diagram": 1,
+    "checklist": 1,
+    "timeline": 1,
+    "steps": 1
+   },
+   "max_run": 2,
+   "entropy": 3.03,
+   "top_type": "bullets",
+   "top_share": 0.23,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.08,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Nothing is wrong outright, but there are no numbers, no sources and no US specifics such as FDIC's $250,000 limit. The line 'Deposits insured in many countries' is vague, and 'selling funds takes a few days' glosses over T+1 settlement."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers purpose, inflation, volatility, time horizon and the emergency fund first. It gives no concrete figures such as the S&P 500's roughly 10% historical average, current high-yield savings rates, or a worked inflation example, so the content stays generic."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical, from definitions to compare to risks to a decision framework. The checklist in beat 9 comes before the timeline and repeats the emergency-fund advice from beats 10-11, and the ending partly restates the timeline."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "'What if safe money slowly shrinks?' is a decent hook. The ending 'Match each pot of money to its deadline' is a tidy takeaway but is mostly a summary."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, beginner-appropriate and balanced, with a sensible disclaimer."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well, with versus, timeline, steps and diagram all matching the narration. The stat or chart scene a numbers-based topic could use is missing, and the weather clip is a bit generic."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The 'markets are like weather' metaphor and phrases like 'Safe is not risk free' are stock. There are no surprising facts or examples."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in English at about the right length, and it is balanced with a disclaimer. It is not tailored to the US and gives no numbers."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The language is clear and fluent. Some lines are awkward, such as 'Do you have no high-interest debt?' and 'Now, an emergency fund: savings account.'"
+   }
+  },
+  "defects": [
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Do you have no high-interest debt?",
+    "issue": "The double-negative question is confusing, and a 'yes' answer would mean the wrong thing.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Deposits insured in many countries",
+    "issue": "The viewer is in the US but the script never mentions FDIC insurance or its $250k limit, and it gives no concrete figures.",
+    "beat": 5
+   },
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Over many years, the storms have often passed.",
+    "issue": "The weather cliché replaces concrete data such as historical returns, drawdowns or inflation rates.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "your buying power changes: the same balance buys less",
+    "issue": "The inflation point is vague, with no example or rate, and 'changes' is evasive wording.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Now, an emergency fund: savings account.",
+    "issue": "The timeline narration reads as a clipped list, and the emergency fund is covered twice (beats 9 and 11).",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Access: savings is instant, selling funds takes a few days.",
+    "issue": "This is oversimplified. Funds settle in about 1-2 business days, and savings transfers are not always instant.",
+    "beat": 4
+   }
+  ],
+  "missing": [
+   "Concrete numbers flagged as historical averages (stock returns, current savings APY, inflation rate)",
+   "FDIC insurance limit for US viewers",
+   "Mention of high-yield savings accounts, and of tax-advantaged accounts such as a 401(k) or IRA",
+   "A worked example of $10,000 over time",
+   "How big an emergency fund should be (3-6 months of expenses)"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, balanced and safe script that follows the right framework (time horizon, emergency fund first, inflation), but it is generic and number-free. It is also not tailored to US viewers, and it leans on cliché.",
+  "mean": 3.33,
+  "cost_usd": 0.021336,
+  "tokens": [
+   3663,
+   1401
+  ]
+ }
+}

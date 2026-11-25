@@ -1,0 +1,552 @@
+{
+ "id": "tra-01",
+ "category": "travel / destination",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "great": "Day-by-day structure: Alfama, Belem (tower, pasteis), Baixa, Tram 28, LX Factory, Sintra optional; local food (bacalhau, pasteis de nata, ginjinha), practical tips; specific, not generic.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:05:10",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "Travel recommendations for Lisbon depend on current openings, closures, ticket prices, and popular restaurants, which change often, so a recent web search is needed for an accurate script rather than ",
+  "queries": [
+   "things to see Lisbon 3 days",
+   "best places to eat Lisbon",
+   "Lisbon travel guide 2026"
+  ],
+  "searches": 2,
+  "reads": 0,
+  "iterations": 2,
+  "seconds": 5.0,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ],
+  "staged": null,
+  "notes_len": 7748,
+  "n_sources": 7,
+  "n_fetched": 8,
+  "fetched": [
+   "3 Day Lisbon Itinerary: What to See, Do & Eat",
+   "3 Days In Lisbon: A Perfect Itinerary For First Timers",
+   "The perfect 3 days in Lisbon itinerary | PACKTHESUITCASES",
+   "Lisbon Itinerary: 3 Perfect Days Curated by a Frequent Visitor | Condé Nast Traveler",
+   "The best restaurants in Lisbon include tascas, seafood spots and Michelin-star favourite | CN Traveller",
+   "12 Lisbon Restaurants You’ll Want to Fly For | Will Fly for Food",
+   "23 Great Restaurants in Lisbon (Selected by Locals)",
+   "Cheap eats guide to Lisbon - BudgetTraveller"
+  ],
+  "research_agent_cost_usd": 0.0007589999999999999
+ },
+ "warnings": [],
+ "notes": "## 3 Day Lisbon Itinerary: What to See, Do & Eat\nHere are some of my favorite things we did, saw and ate during our short trip to Lisbon. Itinerary in Brief: Day 1: Arrive, tile shopping, food tour Day 2: Day trip to Sintra, dinner in Chiado Day 3: Castelo de São Jorge , Alfama, Belem sights Day 4: Depart ## Tile Shopping [...] It’s a great area to walk around while taking in the views of the Tagus River, and the monument itself is pretty impressive to see up close. #### Belém Tower Belém Tower is one of Lisbon’s most iconic landmarks and is definitely worth seeing while you’re in the area. It’s right along the water, so you can easily combine it with the riverfront walk. #### Jerónimos Monastery [...] ## Alfama After visiting the castle, take some time to walk around the Alfama neighborhood. It’s right nearby, so it’s an easy area to explore while you’re already in this part of Lisbon. There are narrow streets, colorful buildings and \n\n## 3 Days In Lisbon: A Perfect Itinerary For First Timers\nMiradouro de São Pedro de Alcntara: A nice view out to the northeast where you’ll find a great view that is more accessible from central Lisbon and also has a nice little guide to the various hills and landmarks you can see. Spoiler alert: you’ll be seeing this point from the hill across the valley later in the evening! Jardim do Príncipe Real: The top of the hill! Or close to it. I met Humberto, my guide for the LisboaLove walk I did on my last trip to Lisbon, here. [...] Our biggest tip for Lisbon (or any city, really) is to prioritize tours that connect you with locals and allow you to get a unique perspective on the city (which is what you’re going to see in this itinerary). Here is what the itinerary we’ll detail below looks like written out: Day 1: Getting Oriented (Baixa, Chiado, and Alfama) Day 2: Dive into Lisbon’s Food Culture + Belém Day 3: A Day Trip to Sintra [...] Alfama is\n\n## The perfect 3 days in Lisbon itinerary | PACKTHESUITCASES\nGiven how much I tend to eat for evening meals in Lisbon, I’m always on the hunt for fairly healthy lunches. So far, nothing has beaten Augusto. It’s also beautiful inside. If you can get a seat in the window on a sunny day, it’s bliss. ### Visit Castelo de São Jorge to see views and peacocks After lunch, head to Castelo de São Jorge (only a 5/10-min walk). The castle towers above Lisbon on a hill, with lovely views over the river and the city from its walls. [...] If you don’t fancy tiles, you could go to the excellent National Museum of Contemporary Art (MNAC) instead. I love that museum and feel bad that I’ve not found space/time for it in this guide. But as you’ve already seen plenty of art on day 2 of this 3-day Lisbon itinerary, I’d recommend giving the tiles a go even if you think they’re not your thing. They really are impressive and a classic Portuguese thing to see. ### Walk do\n\n## Lisbon Itinerary: 3 Perfect Days Curated by a Frequent Visitor | Condé Nast Traveler\n### Do Beco This padaria is always doing something new—a recent favorite of mine was the matcha, coconut, and passionfruit choux bun. Read Full Review ### Morning activity: Belém Tower Views Getty Michal Bajus/Unsplash ### Belém Tower This 16th-century fortress and UNESCO site is especially fascinating to see up close, while the nearby Mosterio de Jeronimos (monastery) is a great follow-up. Read Full Review ### Lunch spot: Sweet treats at Pastéis de Belém [...] ### Mesa de Frades The traditional, melancholic music drifts through the streets of Alfama each evening, and gives guests a deeper understanding of the heart of the city. There’s much debate about the best, but you won’t go wrong with Mesa de Frades, where fado singers go for inspiration. Read Full Review ## Day 3: Belém ### Breakfast spot: Pastries at Do Beco @dobeco\\_padaria @dobeco\\_padaria ### Do Beco [...] Seeing Lisbon from \n\n## The best restaurants in Lisbon include tascas, seafood spots and Michelin-star favourite | CN Traveller\nThere’s no denying now that Lisbon’s restaurants are some of the most talked-about in Europe. It may seem sudden to some, but Lisbon's growth as a foodie hotspot began some time ago – Prado opened in late-2017, while 100 Manieras came in 2019, the same year that Belcanto secured its spot on the World's 50 Best Restaurants list. Since then, new crowds have descended upon the cobbled streets at a rapid pace, cementing the city as one of the fastest-growing, most inventive foodie hotspots in [...] So, where should you eat in Lisbon? Most people visiting the city will want to try some form of traditional food at one of the city’s tascas: typical casual eateries serving very local dishes such as bacalhau (salted cod) and prego or bifana (beef or pork sandwiches). Those who are more familiar with the city or want to experience everything on offer might prefer one of the many modern or Michelin\n\n## 12 Lisbon Restaurants You’ll Want to Fly For | Will Fly for Food\n### 4. Casa da India Our friend Luke from A Chef’s Tour saw we were in Lisbon so he sent me a message recommending this place. He described it as one of the best places to eat in Lisbon. In spite of its name, Casa da India doesn’t serve Indian food. Instead, it’s a restaurant that offers traditional Portuguese food. They’re known for serving an extensive menu of grilled meat and seafood. [...] Among all the pasteis de nata I tried in Portugal, I enjoyed the offerings at Manteigaria and Pasteis de Belem the best. You can try Manteigaria’s pastel de nata at Time Out Market. Pasteis de Belem is a TripAdvisor Certificate of Excellence awardee with a stellar 4.5-star rating and a staggering 52,000 reviews. They make and sell about 20,000 of these pastries a day. Like Cervejaria Ramiro, you’ll find it on many articles listing the best places to eat in Lisbon. [...] If you’ve been doing researc\n\n## 23 Great Restaurants in Lisbon (Selected by Locals)\nWhat we do know is that José Avillez’s Chiado dining temple offers Portugal’s best products prepared with imagination and precision. From blue lobster to carabineiros (giant red prawns), it’s all on the menu as well as incredible fresh fish and creative versions of traditional dishes like cozido à portuguesa. Reservations are an absolute must for those who want to dine at Belcanto. A significant bank account is also a must. Dig deeper with our Belcanto review. [...] Discreto’s menu features gussied-up Portuguese dishes like hearty arroz de coelho (rabbit rice) and a fine version of Bacalhau à Brás. It also has fun shareable dishes like grilled leeks with goat cheese. This fare may sound tasca-esque. It is. But Discreto’s intimate space, which belies that humble description, is a great place to enjoy a romantic meal. Pro TipDiscreto is a great option if you want to eat like a local near t\n\n## Cheap eats guide to Lisbon - BudgetTraveller\nJust steps away from Rossio is one of Lisbon’s most delightful little eateries- Café Beira Gare. You know the food is good because of the high percentage of locals that grace the establishment. The interior reminds me a little of an American diner and it’s a little cramped but the food is good. The Bifana is a thing of sheer joy. Never has a pork steak, packed with garlic goodness and placed in a long bread roll tasted better. Wash down with a cold cerveja. The soups here are delicious and [...] Another favourite for locals is Tascardoso in the heart of the fancy Príncipe Real neighbourhood. The seafood here is fab – go for the sardines, octopus or sea bass or grilled sea bream plus the grilled veal rib steak is fantastic. [...] When in Lisbon or for that fact, anywhere in Portugal, you have to eat in a tasca. Tascas are family run, hole in the wall Taverna style restaurants dotted aroun",
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A three-day Lisbon itinerary covering Alfama, Sintra, Belém and the best local food. Learn where to walk, what to taste and how to order like a local.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "5cd016ce",
+    "narration": "Imagine a city where fado drifts down narrow streets at night. Picture an Alfama lane, a yellow tram rattling past, and red rooftops stretching to the river. That is Lisbon, and three days is enough to taste it.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Alfama street Lisbon evening",
+       "Lisbon yellow tram Alfama",
+       "Lisbon rooftops red tiles view"
+      ],
+      "alt": "Lisbon street, tram and rooftops"
+     }
+    },
+    "chapter": "Lisbon in three days"
+   },
+   {
+    "id": "a4fae9ca",
+    "narration": "Here is the plan. Day one, get oriented in the old center and Alfama. Day two, dive into food and Belém. Day three, take a day trip to Sintra.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Your three days",
+      "steps": [
+       {
+        "label": "Day 1: Get oriented",
+        "detail": "Baixa, Chiado, Alfama"
+       },
+       {
+        "label": "Day 2: Food and Belém",
+        "detail": "Eat, then see the riverfront"
+       },
+       {
+        "label": "Day 3: Sintra",
+        "detail": "A day trip from Lisbon"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "51dfc86c",
+    "narration": "One tip from the guides: choose tours that connect you with locals. A walk with a local guide gives you a view of the city you will not get from a map.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Choose tours that connect you with locals.",
+      "emphasis": "locals"
+     }
+    }
+   },
+   {
+    "id": "0e3b6351",
+    "narration": "Start downtown. Walk through Baixa under the grand arch on Rua Augusta. Then climb up to Chiado, with its lively streets, shops and cafés, a perfect place to find your feet.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Baixa Lisbon Rua Augusta arch",
+       "Chiado Lisbon street"
+      ],
+      "alt": "Baixa and Chiado"
+     }
+    }
+   },
+   {
+    "id": "3ad2f6b7",
+    "narration": "Stop at Miradouro de São Pedro de Alcântara. It looks northeast over the city, and it has a little guide to the hills and landmarks you can see.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Miradouro de São Pedro de Alcântara Lisbon",
+      "alt": "Viewpoint over Lisbon",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "53d7afb0",
+    "narration": "After lunch, walk five or ten minutes to Castelo de São Jorge. It towers over the city on a hill, with lovely views over the river and, yes, peacocks.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Castelo de São Jorge Lisbon",
+      "alt": "Castelo de São Jorge",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "95887f02",
+    "narration": "Then wander Alfama, right nearby. Expect narrow streets and colorful buildings. In the evening, fado music drifts through, and Mesa de Frades is a place where fado singers go for inspiration.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "points",
+      "title": "Old Lisbon",
+      "caption": "Castle, Alfama and fado",
+      "points": [
+       {
+        "name": "Castelo de São Jorge"
+       },
+       {
+        "name": "Alfama"
+       },
+       {
+        "name": "Mesa de Frades"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "16217ddd",
+    "narration": "Day two is Belém. Start at Belém Tower, a sixteenth-century fortress and UNESCO site right on the water. Then visit the nearby Jerónimos Monastery.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Belém Tower Lisbon",
+       "Jerónimos Monastery Lisbon"
+      ],
+      "alt": "Belém Tower and Jerónimos Monastery"
+     }
+    }
+   },
+   {
+    "id": "0b52fd59",
+    "narration": "Now the sweet reward. Pastéis de Belém makes and sells about 20,000 custard tarts a day. Manteigaria is another favorite, and you can try it at Time Out Market.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "20,000",
+      "label": "pastries sold daily at Pastéis de Belém"
+     }
+    }
+   },
+   {
+    "id": "d28a1c1b",
+    "narration": "To eat like a local, find a tasca, a family-run, hole-in-the-wall tavern. Order the bifana, a pork sandwich. Try a prego, a beef sandwich. Then go for sardines and octopus.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Order at a tasca",
+      "items": [
+       "Bifana: pork sandwich",
+       "Prego: beef sandwich",
+       "Sardines and octopus"
+      ],
+      "style": "keywords",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "7e9fb352",
+    "narration": "Look for the bifana, packed with garlic. Then grilled sardines, and the cozy tasca interior where locals gather. Finish with grilled octopus. Bacalhau, salted cod, is the classic dish.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "bifana Portuguese pork sandwich",
+       "grilled sardines Lisbon",
+       "Lisbon tasca restaurant interior",
+       "grilled octopus Portugal"
+      ],
+      "alt": "Lisbon tasca food"
+     }
+    }
+   },
+   {
+    "id": "71828b09",
+    "narration": "For a splurge, Belcanto in Chiado, from José Avillez, serves blue lobster and giant red prawns. Reservations are a must, and so is a significant bank account.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Belcanto",
+      "definition": "José Avillez’s Chiado restaurant serving Portugal’s best products with imagination and precision.",
+      "example": "Blue lobster and giant red prawns"
+     }
+    }
+   },
+   {
+    "id": "912788e1",
+    "narration": "Day three, escape to Sintra. It is an easy day trip from Lisbon, and your evening can end back in Chiado over dinner.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "route",
+      "title": "Day trip",
+      "caption": "Lisbon to Sintra",
+      "stops": [
+       "Lisbon",
+       "Sintra"
+      ]
+     }
+    }
+   },
+   {
+    "id": "1fafede4",
+    "narration": "So walk the hills, eat in a tasca, and save room for a warm custard tart. Three days will not be enough, and that is exactly why you will come back.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Walk the hills, eat in a tasca, save room for a custard tart.",
+      "emphasis": "tasca"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "3 Day Lisbon Itinerary: What to See, Do & Eat",
+    "url": "https://www.themainechick.com/post/lisbon",
+    "publisher": "themainechick.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "3 Days In Lisbon: A Perfect Itinerary For First Timers",
+    "url": "https://wheatlesswanderlust.com/3-days-in-lisbon-itinerary",
+    "publisher": "wheatlesswanderlust.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The perfect 3 days in Lisbon itinerary | PACKTHESUITCASES",
+    "url": "https://www.packthesuitcases.com/3-days-in-lisbon-itinerary",
+    "publisher": "packthesuitcases.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Lisbon Itinerary: 3 Perfect Days Curated by a Frequent Visitor | Condé Nast Traveler",
+    "url": "https://www.cntraveler.com/story/lisbon-itinerary-curated-by-a-frequent-visitor",
+    "publisher": "cntraveler.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The best restaurants in Lisbon include tascas, seafood spots and Michelin-star favourite | CN Traveller",
+    "url": "https://www.cntraveller.com/gallery/best-restaurants-lisbon",
+    "publisher": "cntraveller.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "12 Lisbon Restaurants You’ll Want to Fly For | Will Fly for Food",
+    "url": "https://www.willflyforfood.net/lisbon-food-guide",
+    "publisher": "willflyforfood.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Cheap eats guide to Lisbon - BudgetTraveller",
+    "url": "https://budgettraveller.org/cheap-eats-guide-to-lisbon",
+    "publisher": "budgettraveller.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 37.7,
+  "before_first_script_call_s": 6.4,
+  "script_s": 31.3
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "research": 0.00076,
+  "script_big": 0.10425,
+  "search_api": 0.016,
+  "total": 0.12125
+ },
+ "calls": {
+  "small": 2,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 34925,
+  "out": 5438
+ },
+ "rules": {
+  "length": {
+   "words": 417,
+   "expected_words": 402,
+   "ratio": 1.037,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 187.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 38,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Imagine a city where fado drifts down narrow streets at night. Picture an Alfama lane, a yellow tram rattling past, and red rooftops stretching to the river. That is Lisbon, and three days is enough t",
+   "close_text": "So walk the hills, eat in a tasca, and save room for a warm custard tart. Three days will not be enough, and that is exactly why you will come back."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "gallery": 4,
+    "steps": 1,
+    "kinetic_text": 2,
+    "image": 2,
+    "map": 2,
+    "counter": 1,
+    "bullets": 1,
+    "definition": 1
+   },
+   "max_run": 2,
+   "entropy": 2.81,
+   "top_type": "gallery",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 20,
+   "ungrounded_entities": [
+    "Alcântara",
+    "Rua Augusta"
+   ],
+   "ungrounded_share": 0.095,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 7,
+   "fetched": 8,
+   "notes_len": 7748,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly traceable to the notes, but 'Pastéis de Belém makes and sells about 20,000... a day' comes from one blog, and Manteigaria is said to be 'another favorite' and 'at Time Out Market' only loosely. Tram 28 is implied in the hook but never covered, and Belcanto is described in marketing language."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Omits Tram 28, LX Factory, ginjinha, pasteis de nata detail, and all practical tips (transport, tickets, Sintra sights). Sintra gets one sentence, though it is a full day. Belém tower visit has no tips."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Day-by-day order is clear, with a preview in beat 2. But day 2 is mostly food and day 3 is a stub; the Belcanto beat sits oddly before Sintra. Beat 3 is a filler tip that interrupts the flow."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The 'Imagine a city where fado drifts...' opening is atmospheric but generic. The ending, 'Three days will not be enough... why you will come back', is a decent but familiar close."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, suitable travel-guide voice for US beginners, with only mild cliché."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary (gallery, map, steps, counter), and the queries match the narration. Weaknesses: the counter is a trivia number, the Sintra route map is thin, and the Belcanto definition scene is text-heavy."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Content is a paraphrase of listicles: 'lovely views... and, yes, peacocks', 'perfect place to find your feet', 'Choose tours that connect you with locals'. Few surprising specifics."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Covers 3 days, sights and food in English at about the right length. It misses the requested practical tips and key sights such as Tram 28 and LX Factory, and Sintra is barely treated."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical. Some choppy repetition: 'Order the bifana... Try a prego... Look for the bifana'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Day three, escape to Sintra. It is an easy day trip from Lisbon",
+    "issue": "A whole day is given one sentence, with no sights (Pena Palace, Quinta da Regaleira), no transport, and no tips.",
+    "beat": 13
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "One tip from the guides: choose tours that connect you with locals.",
+    "issue": "Generic filler early in a 3-minute video that adds no actionable content and delays the itinerary.",
+    "beat": 3
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Look for the bifana, packed with garlic.",
+    "issue": "Repeats beat 10's bifana content, wasting time.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "a yellow tram rattling past",
+    "issue": "The tram is teased in the hook but Tram 28 is never explained or used, and LX Factory and ginjinha are missing.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "and your evening can end back in Chiado over dinner.",
+    "issue": "Presented as part of the plan, but it was just one blogger's day-2 dinner; it is padding with no content.",
+    "beat": 13
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Bacalhau, salted cod, is the classic dish.",
+    "issue": "The signature dish gets a single throwaway line, with no where or how to eat it.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Then visit the nearby Jerónimos Monastery.",
+    "issue": "No details: no queue tips, no detail on the monastery, no mention that Tuesday-style closures or booking matter.",
+    "beat": 8
+   }
+  ],
+  "missing": [
+   "Tram 28 and how to ride it",
+   "LX Factory",
+   "ginjinha",
+   "Sintra highlights and how to get there",
+   "practical tips (transit card, hills, shoes, booking, closed days)",
+   "Time Out Market and pastel de nata specifics (cinnamon)",
+   "where to eat bacalhau"
+  ],
+  "wrong_facts": [
+   "Unverified: '20,000 pastries a day' comes from a single blog",
+   "Day plan mixes sources and differs from the 'Alfama' day sources, but is not wrong"
+  ],
+  "would_publish": false,
+  "summary": "A competent but generic listicle paraphrase with a clear day structure; it skips Tram 28, LX Factory, ginjinha and practical tips, and treats Sintra as an afterthought. Language and tone are fine, but originality and coverage are weak.",
+  "mean": 3.0,
+  "cost_usd": 0.030476,
+  "tokens": [
+   7138,
+   1620
+  ]
+ }
+}

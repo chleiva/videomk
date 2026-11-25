@@ -342,16 +342,104 @@ def _code_geometry(n_lines: int, cols: int, has_note: bool, mode: str, top: floa
             "note_y": py + ph + 30}
 
 
+def _wrap_line(t: str, wc: int) -> List[Tuple[int, int, int]]:
+    """One logical line -> display rows (start col, end col, indent in columns): breaks after a space or a comma/paren near the limit, continuation rows hang
+    two columns past the line's own indent. A word longer than a row is cut."""
+    wc = max(8, wc)
+    if len(t) <= wc:
+        return [(0, len(t), 0)]
+    hang = min(len(t) - len(t.lstrip()) + 2, wc // 3)
+    rows: List[Tuple[int, int, int]] = []
+    pos, avail, ind = 0, wc, 0
+    while len(t) - pos > avail:
+        end = pos + avail
+        cut = end
+        for i in range(end, pos + avail // 2, -1):
+            if t[i - 1] in " ,;(" or t[i] in " ).":
+                cut = i
+                break
+        rows.append((pos, cut, ind))
+        pos = cut
+        while pos < len(t) and t[pos] == " ":
+            pos += 1
+        ind, avail = hang, wc - hang
+    rows.append((pos, len(t), ind))
+    return rows
+
+
+@lru_cache(maxsize=64)
+def _code_rows(lines: Tuple[_Line, ...], wc: int) -> Tuple[Tuple[int, int, int, int], ...]:
+    """Display rows (line index, start col, end col, indent cols) for every line at `wc` columns per row."""
+    out = []
+    for i, ln in enumerate(lines):
+        for a, b, ind in _wrap_line(ln.text, wc - (1 if ln.sign else 0)):
+            out.append((i, a, b, ind))
+    return tuple(out)
+
+
+@lru_cache(maxsize=64)
+def _code_geometry_tall(lines: Tuple[_Line, ...], has_note: bool, mode: str, x0: float, x1: float, top: float, bottom: float, fs_max: float, min_fs: float) -> Dict[str, Any]:
+    """A tall editor for the vertical / square frames: as wide as the content box, the largest font at which the (wrapped) code fits the height."""
+    n_lines = len(lines)
+    pw = x1 - x0
+    note_h = 150.0 if has_note else 0.0
+    area_h = max(200.0, bottom - top - note_h)
+    chrome, pad_y, pad_x = 60.0, 26.0, 30.0
+    show_nums = mode != "terminal"
+    gut_cols = (len(str(n_lines)) + 1) if show_nums else 0
+    extra = 34 if mode == "diff" else 0
+    best = None
+    for allow_wrap in (False, True):
+        floor = min_fs if not allow_wrap else 18
+        for ratio in (1.5, 1.4, 1.3):
+            fs = fs_max
+            while fs >= floor:
+                cw = fs * MONO_ADV
+                gutter = gut_cols * cw + (26 if show_nums else 0) + extra
+                wc = int((pw - 2 * pad_x - gutter - cw) / cw)
+                rows = _code_rows(lines, wc)
+                if (allow_wrap or len(rows) == n_lines) and chrome + pad_y * 2 + len(rows) * fs * ratio <= area_h:
+                    best = (fs, ratio, wc, rows)
+                    break
+                fs -= 1
+            if best:
+                break
+        if best:
+            break
+    if best is None:
+        fs, ratio = 18.0, 1.3
+        cw = fs * MONO_ADV
+        gutter = gut_cols * cw + (26 if show_nums else 0) + extra
+        wc = int((pw - 2 * pad_x - gutter - cw) / cw)
+        best = (fs, ratio, wc, _code_rows(lines, wc))
+    fs, ratio, wc, rows = best
+    roomy = (area_h * 0.6 - chrome - pad_y * 2) / max(1, len(rows) * fs)   # few lines in a tall frame: open the line spacing so the editor fills the frame
+    ratio = max(ratio, min(1.85, roomy))
+    lh, cw = fs * ratio, fs * MONO_ADV
+    gutter = gut_cols * cw + (26 if show_nums else 0) + extra
+    ph = chrome + pad_y * 2 + len(rows) * lh
+    py = top + max(0.0, (bottom - top - (ph + note_h)) / 2.0)
+    return {"fs": fs, "lh": lh, "cw": cw, "gutter": gutter, "pw": pw, "ph": ph, "px": x0, "py": py, "chrome": chrome, "pad_x": pad_x, "pad_y": pad_y,
+            "note_y": py + ph + 26, "rows": rows}
+
+
 def draw_code(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     mode = props.get("mode", "code")
     lang = props.get("language", "")
     lines = _parse_lines(props["code"], lang, mode)
     steps = props.get("steps") or []
     title = props.get("title", "")
-    compact = bool(title) and len(lines) > 11   # a long snippet needs the room: the title moves into the window bar
-    top = heading(cv, th, title, lt, y=CONTENT_TOP + 20) if (title and not compact) else CONTENT_TOP + (30 if compact else 50)
+    fr = ctx.frame
+    land = fr.landscape
+    compact = bool(title) and len(lines) > (11 if land else (14 if fr.vertical else 8))   # a long snippet needs the room: the title moves into the window bar
+    top = heading(cv, th, title, lt, y=ctx.top + 20, ctx=ctx) if (title and not compact) else ctx.top + (30 if compact else 50)
     cols = max(len(ln.text) + (1 if ln.sign else 0) + (2 if mode == "terminal" else 0) for ln in lines)
-    g = _code_geometry(len(lines), cols, bool(steps), mode, float(top), float(ctx.bottom - 6))
+    if land:
+        g = _code_geometry(len(lines), cols, bool(steps), mode, float(top), float(ctx.bottom - 6))
+        rows = tuple((i, 0, len(ln.text), 0) for i, ln in enumerate(lines))
+    else:
+        g = _code_geometry_tall(lines, bool(steps), mode, float(ctx.box[0]), float(ctx.box[2]), float(top), float(ctx.bottom - 6), 44.0 if fr.vertical else 40.0, 34.0 if fr.vertical else 30.0)
+        rows = g["rows"]
     fs, lh, cw, px, py, pw, ph = g["fs"], g["lh"], g["cw"], g["px"], g["py"], g["pw"], g["ph"]
     p_in = ease_out_cubic(progress(lt, 0.0, 0.45))
     if p_in <= 0:
@@ -367,7 +455,11 @@ def draw_code(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     label = {"terminal": "terminal", "diff": f"diff  {lang}".strip()}.get(mode, lang or "code")
     if compact:
         label = title
-    cv.text(px + pw / 2, py + ch / 2, label, "semibold", 26, with_alpha((148, 163, 184), p_in), anchor="mm")
+    lsz = 26.0
+    if not land:
+        while lsz > 20 and cv.measure(label, "semibold", lsz) > pw - 330:
+            lsz -= 1
+    cv.text(px + pw / 2, py + ch / 2, label, "semibold", lsz, with_alpha((148, 163, 184), p_in), anchor="mm")
     cv.rrect(px + pw - 40 - 80, py + ch / 2 - 3, 80, 6, 3, fill=with_alpha(th.accent, 0.9 * p_in))
 
     sched, type_end = _type_schedule(lines, float(dur))
@@ -387,48 +479,77 @@ def draw_code(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     x_num = px + g["pad_x"]
     x_code = x_num + g["gutter"]
     y0 = py + ch + g["pad_y"]
-    for i, ln in enumerate(lines):
-        y = y0 + i * lh
+    row_n: Dict[int, int] = {}
+    first_row: Dict[int, int] = {}
+    for ri, (li, _a, _b, _ind) in enumerate(rows):
+        row_n[li] = row_n.get(li, 0) + 1
+        first_row.setdefault(li, ri)
+    for ri, (i, rs, re_, ind) in enumerate(rows):
+        ln = lines[i]
+        y = y0 + ri * lh
+        first = first_row[i] == ri
         b0, s0 = emph(cur - 1, i)
         b1, s1 = emph(cur, i)
         bright, band = _lerp(b0, b1, k), _lerp(s0, s1, k)
         bright = max(0.0, min(1.0, bright)) * p_in
-        if ln.sign:
+        span = lh * row_n[i]   # a wrapped line keeps one band / tint
+        if first and ln.sign:
             tint = ADD if ln.sign == "+" else DEL
-            cv.rrect(px + 6, y + 2, pw - 12, lh - 4, 6, fill=_mix(_mix(tint, PANEL, 0.20), PANEL, 0.4 + 0.6 * bright))
-        if band > 0.01:
-            cv.rrect(px + 8, y + 2, pw - 16, lh - 4, 8, fill=_mix(_mix(th.accent, PANEL, 0.26), PANEL, band))
-            cv.rrect(px + 8, y + 7, 6, lh - 14, 3, fill=_mix(th.accent, PANEL, band))
+            cv.rrect(px + 6, y + 2, pw - 12, span - 4, 6, fill=_mix(_mix(tint, PANEL, 0.20), PANEL, 0.4 + 0.6 * bright))
+        if first and band > 0.01:
+            cv.rrect(px + 8, y + 2, pw - 16, span - 4, 8, fill=_mix(_mix(th.accent, PANEL, 0.26), PANEL, band))
+            cv.rrect(px + 8, y + 7, 6, span - 14, 3, fill=_mix(th.accent, PANEL, band))
         base = y + lh * 0.5 + fs * 0.33
-        if mode != "terminal":
-            _draw_text(cv, x_num + g["gutter"] - 26 - (34 if mode == "diff" else 0), base, str(i + 1), MONO, fs * 0.82, _mix((200, 208, 224) if band > 0.5 else GUTTER, PANEL, bright), anchor="rs")
-        if ln.sign:
-            _draw_text(cv, x_code - 22, base, ln.sign, MONO_BOLD, fs, _mix(ADD if ln.sign == "+" else DEL, PANEL, bright), anchor="ms")
+        if first:
+            if mode != "terminal":
+                _draw_text(cv, x_num + g["gutter"] - 26 - (34 if mode == "diff" else 0), base, str(i + 1), MONO, fs * 0.82, _mix((200, 208, 224) if band > 0.5 else GUTTER, PANEL, bright), anchor="rs")
+            if ln.sign:
+                _draw_text(cv, x_code - 22, base, ln.sign, MONO_BOLD, fs, _mix(ADD if ln.sign == "+" else DEL, PANEL, bright), anchor="ms")
         a, b = sched[i]
         vis = int(round(progress(lt, a, max(1e-3, b - a)) * len(ln.text))) if ln.typed else (len(ln.text) if lt >= a else 0)
         for col, text, kind in ln.tokens:
-            if col >= vis:
-                break
-            _draw_text(cv, x_code + col * cw, base, text[: vis - col], MONO, fs, _mix(PALETTE.get(kind, PALETTE["text"]), PANEL, bright))
+            lo, hi = max(col, rs), min(col + len(text), re_, vis)
+            if hi <= lo:
+                if col >= vis:
+                    break
+                continue
+            _draw_text(cv, x_code + (lo - rs + ind) * cw, base, text[lo - col: hi - col], MONO, fs, _mix(PALETTE.get(kind, PALETTE["text"]), PANEL, bright))
     # typing cursor
     if TYPE_START <= lt < type_end + 0.9 and int(lt * 2.6) % 2 == 0:
         idx = max((i for i, (a, _) in enumerate(sched) if lt >= a), default=0)
         ln = lines[idx]
         a, b = sched[idx]
         vis = int(round(progress(lt, a, max(1e-3, b - a)) * len(ln.text))) if ln.typed else len(ln.text)
-        cv.rrect(x_code + vis * cw + 2, y0 + idx * lh + lh * 0.18, cw * 0.55, lh * 0.64, 2, fill=with_alpha(th.accent2 if th.name != "paper" else (125, 211, 252), 0.85))
+        cand = [ri for ri, r in enumerate(rows) if r[0] == idx]
+        ri = next((r for r in cand if rows[r][1] <= vis <= rows[r][2]), cand[-1])
+        _, rs, _, ind = rows[ri]
+        cv.rrect(x_code + (vis - rs + ind) * cw + 2, y0 + ri * lh + lh * 0.18, cw * 0.55, lh * 0.64, 2, fill=with_alpha(th.accent2 if th.name != "paper" else (125, 211, 252), 0.85))
     if steps and cur >= 0:
         for j, alpha in ((cur - 1, 1 - k), (cur, k)):
             if j >= 0 and alpha > 0.02:
-                _draw_note(cv, th, steps[j], j, alpha, g["note_y"])
+                _draw_note(cv, th, steps[j], j, alpha, g["note_y"], ctx.frame, px, pw)
 
 
-def _draw_note(cv: Canvas, th: Theme, st: Dict[str, Any], j: int, alpha: float, y: float) -> None:
+def _draw_note(cv: Canvas, th: Theme, st: Dict[str, Any], j: int, alpha: float, y: float, fr=None, px: float = 0.0, pw: float = 0.0) -> None:
     nums = st["lines"]
     note = st.get("note") or ("Line %d" % nums[0] if len(nums) == 1 else "Lines %d-%d" % (nums[0], nums[-1]))
+    rad = 30
+    if fr is not None and not fr.landscape:   # narrow frame: the note may take two lines under the editor
+        ts = fr.type_scale
+        size, wrapped = cv.fit_text(note, "semibold", pw - rad * 2 - 26 - 20, 2 * 44 * ts * 1.18, 36 * ts, 30)
+        wrapped = wrapped[:2] or [note]
+        lh = size * 1.18
+        total = rad * 2 + 26 + max(cv.measure(w, "semibold", size) for w in wrapped)
+        x = px + pw / 2 - total / 2
+        ry = y + 8 + (1 - alpha) * 12
+        cy = ry + 36 + (len(wrapped) - 1) * lh / 2
+        cv.ellipse(x + rad, cy, rad, rad, fill=with_alpha(th.accent, alpha))
+        cv.text(x + rad, cy, str(j + 1), "bold", 34, with_alpha((255, 255, 255), alpha), anchor="mm")
+        for k, line in enumerate(wrapped):
+            cv.text(x + rad * 2 + 26, ry + 36 + k * lh, line, "semibold", size, with_alpha(th.text, alpha), anchor="lm")
+        return
     size, wrapped = cv.fit_text(note, "semibold", 1380, 60, 44, 32)
     line = wrapped[0] if wrapped else note
-    rad = 30
     total = rad * 2 + 26 + cv.measure(line, "semibold", size)
     x = 960 - total / 2
     ry = y + 8 + (1 - alpha) * 12
@@ -1038,39 +1159,158 @@ def _eq_plan(formulas: Tuple[str, ...], notes: Tuple[str, ...], top: float, bott
     return out
 
 
+_REL_CH = "=<>"
+
+
+def _split_points(f: str) -> List[Tuple[int, int]]:
+    """Top-level places to break a formula over lines, as (index, rank): rank 0 before a relation (=, <=, ...), rank 1 before a + or - that joins terms.
+    Nothing inside brackets or braces, never between a script marker and its operand."""
+    pts: List[Tuple[int, int]] = []
+    depth, i = 0, 0
+    prev = ""
+    while i < len(f):
+        ch = f[i]
+        if ch in "({[":
+            depth += 1
+        elif ch in ")}]":
+            depth = max(0, depth - 1)
+        elif depth == 0 and i > 0:
+            if ch in _REL_CH or (ch in "!~-" and f[i + 1:i + 2] in (">", "=") and ch != "-") or (ch == "-" and f[i + 1:i + 2] == ">"):
+                if prev not in _REL_CH + "!~-" and prev not in ("^", "_"):
+                    pts.append((i, 0))
+            elif ch in "+-" and prev not in ("^", "_", "(", "{", "+", "-", "*", "/", "=", "<", ">", "") and f[i + 1:i + 2] != "-":
+                pts.append((i, 1))
+        if ch != " ":
+            prev = ch
+        i += 1
+    return pts
+
+
+def _greedy(pieces: List[str], max_ref_w: float) -> List[str]:
+    out: List[str] = []
+    cur = pieces[0]
+    for pc in pieces[1:]:
+        joined = cur + " " + pc
+        if layout_formula(joined)[0] <= max_ref_w:
+            cur = joined
+        else:
+            out.append(cur)
+            cur = pc
+    out.append(cur)
+    return out
+
+
+@lru_cache(maxsize=128)
+def _formula_lines(f: str, max_ref_w: float) -> Tuple[str, ...]:
+    """The formula cut at top-level relations first, then at term joins, into lines no wider than `max_ref_w` (font-size-100 units) where that can be done
+    (every line must parse on its own); (f,) otherwise."""
+    if layout_formula(f)[0] <= max_ref_w:
+        return (f,)
+    try:
+        lines = [f]
+        for rank in (0, 1):
+            nxt: List[str] = []
+            for ln in lines:
+                cs = [0] + [i for i, r in _split_points(ln) if r == rank] + [len(ln)]
+                if len(cs) == 2 or layout_formula(ln)[0] <= max_ref_w:
+                    nxt.append(ln)
+                    continue
+                pieces = [ln[cs[k]:cs[k + 1]].strip() for k in range(len(cs) - 1)]
+                for pc in pieces:
+                    layout_formula(pc)
+                nxt += _greedy(pieces, max_ref_w)
+            lines = nxt
+        for ln in lines:
+            layout_formula(ln)
+        return tuple(lines)
+    except ValueError:
+        return (f,)
+
+
+@lru_cache(maxsize=64)
+def _eq_plan_tall(formulas: Tuple[str, ...], notes: Tuple[str, ...], top: float, bottom: float, inner_w: float, ts: float, vertical: bool) -> List[Tuple]:
+    """Narrow frames: per step (scale, row top, row height, note size, padding, line formulas, note lines), formulas broken into stacked lines, notes up to two lines."""
+    n = len(formulas)
+    target = ({1: 250.0, 2: 210.0, 3: 180.0, 4: 150.0} if vertical else {1: 220.0, 2: 170.0, 3: 130.0, 4: 100.0})[n] * (1.0 if vertical else 1.0)
+    pad, gap, note_gap = (30.0, 24.0, 30.0) if n == 1 else (20.0, 16.0, 14.0)
+    avail = bottom - top
+    f = 1.0
+    dummy = Canvas(8, 8, 1)
+    while True:
+        rows = []
+        for fm, note in zip(formulas, notes):
+            nsz = max(26.0, (40.0 if n == 1 else 36.0) * ts * min(1.0, f + 0.15))
+            pd = pad * max(0.5, f)
+            lines = _formula_lines(fm, inner_w / (target * f * 0.62 / 100.0))
+            boxes = [layout_formula(x) for x in lines]
+            k = min([target * f / 100.0] + [inner_w / b[0] for b in boxes])
+            hh = sum((b[1] + b[2]) * k for b in boxes) + (len(lines) - 1) * 0.16 * 100 * k
+            nl = _note_lines(dummy, note, nsz, inner_w) if note else []
+            rows.append((k, pd * 2 + hh + ((note_gap * max(0.5, f) + len(nl) * nsz * 1.25) if nl else 0.0), nsz, lines, nl, pd))
+        total = sum(r[1] for r in rows) + gap * (n - 1)
+        if total <= avail or f < 0.25:
+            break
+        f *= 0.95
+    y = top + max(0.0, (avail - total) / 2)
+    out = []
+    for k, h, nsz, lines, nl, pd in rows:
+        out.append((k, y, h, nsz, pd, lines, nl))
+        y += h + gap
+    return out
+
+
+def _note_lines(cv: Canvas, note: str, size: float, max_w: float) -> List[str]:
+    return cv.wrap(note, "semibold", size, max_w)[:2]
+
+
 def draw_equation(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     steps = props["steps"]
     n = len(steps)
+    fr = ctx.frame
+    land = fr.landscape
     title = props.get("title", "")
-    top = heading(cv, th, title, lt, y=CONTENT_TOP + 20) if title else CONTENT_TOP + 40
-    plan = _eq_plan(tuple(s["formula"] for s in steps), tuple(s.get("note", "") for s in steps), float(top), float(ctx.bottom - 10))
+    top = heading(cv, th, title, lt, y=ctx.top + 20, ctx=ctx) if title else ctx.top + 40
+    fx, fw = (140.0, 1640.0) if land else (float(ctx.box[0]), float(ctx.box[2] - ctx.box[0]))
+    cx = fr.cx
+    if land:
+        plan = [p + ([s["formula"]], []) for p, s in zip(_eq_plan(tuple(s["formula"] for s in steps), tuple(s.get("note", "") for s in steps), float(top), float(ctx.bottom - 10)), steps)]
+    else:
+        plan = _eq_plan_tall(tuple(s["formula"] for s in steps), tuple(s.get("note", "") for s in steps), float(top), float(ctx.bottom - 10), fw - 80.0, fr.type_scale, fr.vertical)
     times = reveal_times(n, dur, props.get("cues"), first=0.12, last=0.70)
     for i, st in enumerate(steps):
         a = ease_out_cubic(progress(lt, times[i], 0.6))
         if a <= 0.01:
             continue
-        k, ry, rh, nsz, pad = plan[i]
+        k, ry, rh, nsz, pad, flines, nl = plan[i]
         dim = 1.0 - 0.5 * ease_out_cubic(progress(lt, times[i + 1], 0.5)) if i + 1 < n else 1.0
         ry += (1 - a) * 26
-        cv.card(140, ry, 1640, rh, th, r=30, alpha=a * (0.6 + 0.4 * dim))
+        cv.card(fx, ry, fw, rh, th, r=30, alpha=a * (0.6 + 0.4 * dim))
         if dim > 0.99:
-            cv.rrect(160, ry + 22, 8, rh - 44, 4, fill=with_alpha(th.accent, a))
-        w, asc, desc, ops = layout_formula(st["formula"])
-        x0 = 960 - w * k / 2
-        base_y = ry + pad + asc * k
+            cv.rrect(fx + 20, ry + 22, 8, rh - 44, 4, fill=with_alpha(th.accent, a))
         col = with_alpha(th.text, a * dim)
-        for o in ops:
-            if o[0] == "t":
-                _draw_text(cv, x0 + o[1] * k, base_y + o[2] * k, o[3], _STYLE_FONT[o[4]], o[5] * k, col, anchor="ls")
-            elif o[0] == "l":
-                cv.line([(x0 + o[1] * k, base_y + o[2] * k), (x0 + o[3] * k, base_y + o[4] * k)], col, max(2.0, o[5] * k), round_caps=False)
-            else:
-                cv.line([(x0 + x * k, base_y + y * k) for x, y in o[1]], col, max(2.0, o[2] * k))
+        yy = ry + pad
+        for fm in flines:
+            w, asc, desc, ops = layout_formula(fm)
+            x0 = cx - w * k / 2
+            base_y = yy + asc * k
+            for o in ops:
+                if o[0] == "t":
+                    _draw_text(cv, x0 + o[1] * k, base_y + o[2] * k, o[3], _STYLE_FONT[o[4]], o[5] * k, col, anchor="ls")
+                elif o[0] == "l":
+                    cv.line([(x0 + o[1] * k, base_y + o[2] * k), (x0 + o[3] * k, base_y + o[4] * k)], col, max(2.0, o[5] * k), round_caps=False)
+                else:
+                    cv.line([(x0 + x * k, base_y + y * k) for x, y in o[1]], col, max(2.0, o[2] * k))
+            yy += (asc + desc) * k + 16.0 * k
+        yy -= 16.0 * k
         note = st.get("note")
-        if note:
+        if note and land:
             ny = ry + pad + (asc + desc) * k + (34 if n == 1 else 14) + nsz * 0.62 + (1 - a) * 10
             size, wrapped = cv.fit_text(note, "semibold", 1440, nsz * 1.3, nsz, 28)
             cv.text(960, ny, wrapped[0] if wrapped else note, "semibold", size, with_alpha(th.muted, a * dim), anchor="mm")
+        elif note and nl:
+            ny = yy + (30 if n == 1 else 14) * (pad / (30.0 if n == 1 else 20.0)) + (1 - a) * 10
+            for q, line in enumerate(nl):
+                cv.text(cx, ny + nsz * 0.62 + q * nsz * 1.25, line, "semibold", nsz, with_alpha(th.muted, a * dim), anchor="mm")
 
 
 EQUATION_DOC = ("- equation: {title (<=50), steps: 1-4 [{formula (<=80 chars, plain linear notation: `E = m c^2`, `x = (-b + sqrt(b^2 - 4ac)) / (2a)`, "
@@ -1089,6 +1329,8 @@ EQUATION_SAMPLES = [
 ]
 
 ELEMENTS = [
-    Element("code", FAMILY, CODE_DOC, sanitize_code, draw_code, code_cues, CODE_SAMPLES, anchors=code_anchors, max_per_video=4, min_seconds=5.0),
-    Element("equation", FAMILY, EQUATION_DOC, sanitize_equation, draw_equation, equation_cues, EQUATION_SAMPLES, anchors=equation_anchors, max_per_video=3, min_seconds=3.0),
+    Element("code", FAMILY, CODE_DOC, sanitize_code, draw_code, code_cues, CODE_SAMPLES, anchors=code_anchors, max_per_video=4, min_seconds=5.0,
+            formats=("16:9", "9:16", "1:1", "4:5")),
+    Element("equation", FAMILY, EQUATION_DOC, sanitize_equation, draw_equation, equation_cues, EQUATION_SAMPLES, anchors=equation_anchors, max_per_video=3, min_seconds=3.0,
+            formats=("16:9", "9:16", "1:1", "4:5")),
 ]

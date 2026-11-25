@@ -1,0 +1,543 @@
+{
+ "id": "bio-01",
+ "category": "biography",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Marie Curie",
+ "great": "Born Maria Sklodowska in Warsaw 1867, Paris, radioactivity, polonium and radium, two Nobel Prizes (1903 physics, 1911 chemistry), WWI X-ray units, death 1934 from radiation exposure; accurate dates; narrative.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:04:21",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Marie Curie's biography, scientific work, and Nobel Prizes are well-established historical facts that do not change, so an encyclopedia source is sufficient for an accurate explainer.",
+  "queries": [
+   "Marie Curie life and discoveries",
+   "Marie Curie radioactivity Nobel Prize"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Marie Curie: The Woman Who Found Glowing Elements",
+  "description": "Marie Curie left Warsaw for Paris, discovered polonium and radium, and won two Nobel Prizes. This video follows her life, her cost, and her legacy.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "4cdd0681",
+    "narration": "She won two Nobel Prizes in two different sciences. Nobody had done that before. And she started out as a woman barred from university in her own country.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Marie Curie",
+      "subtitle": "The woman who found glowing elements"
+     }
+    },
+    "chapter": "A hunger to learn"
+   },
+   {
+    "id": "fa1a7059",
+    "narration": "Born Maria Sklodowska in Warsaw, she was a brilliant student. But women could not attend university there, so she worked as a tutor and saved money for a different future.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Warsaw old town Poland",
+      "alt": "Warsaw, Poland",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "592ceba8",
+    "narration": "She was born in 1867 in Warsaw, Poland. In 1891 she moved to Paris and studied at the Sorbonne. Then in 1895 she married the physicist Pierre Curie.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Early life",
+      "events": [
+       {
+        "date": "1867",
+        "label": "Born in Warsaw, Poland"
+       },
+       {
+        "date": "1891",
+        "label": "Moves to Paris, studies at the Sorbonne"
+       },
+       {
+        "date": "1895",
+        "label": "Marries physicist Pierre Curie"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "869d3ebe",
+    "narration": "In Paris she lived simply and studied hard. First came the Sorbonne University. Then a Paris laboratory with vintage equipment. And finally, old scientific notebooks, still kept today, which are so radioactive they are stored in lead-lined boxes.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Sorbonne University Paris",
+       "Paris laboratory vintage equipment",
+       "old scientific notebooks"
+      ],
+      "alt": "Paris science scenes"
+     }
+    }
+   },
+   {
+    "id": "9699508e",
+    "narration": "Then a strange discovery appeared. Marie takes up the mystery. Her question: where does the energy come from? Uranium gave off rays without any fuel, and nobody could explain it.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "A puzzle",
+      "items": [
+       "Marie takes up the mystery",
+       "Question: where does the energy come from?"
+      ],
+      "style": "spotlight",
+      "accent": "violet"
+     }
+    },
+    "chapter": "The glowing mystery"
+   },
+   {
+    "id": "041ed3af",
+    "narration": "She tested many materials and found that the rays came from the atoms themselves. She gave this property a name: radioactivity. It was a new idea about what matter could do.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Radioactivity",
+      "definition": "The property of some atoms to give off energy as rays by themselves, a term coined by Marie Curie."
+     }
+    }
+   },
+   {
+    "id": "2bae97be",
+    "narration": "Pitchblende, an ore, was more radioactive than its uranium alone explained. So something else was hidden inside. Marie and Pierre set out to find it, working in a leaky shed.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "scientist laboratory glass flasks",
+      "alt": "chemist working in lab"
+     }
+    }
+   },
+   {
+    "id": "29f566f1",
+    "narration": "They processed tons of ore by hand, stirring boiling vats for years. From it they isolated two new elements. They named the first polonium, after her homeland, and the second radium.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The discovery",
+      "nodes": [
+       {
+        "id": "o",
+        "label": "Pitchblende ore",
+        "icon": "stone"
+       },
+       {
+        "id": "p",
+        "label": "Polonium",
+        "icon": "test-tube"
+       },
+       {
+        "id": "r",
+        "label": "Radium",
+        "icon": "star"
+       }
+      ],
+      "edges": [
+       [
+        "o",
+        "p",
+        "isolated"
+       ],
+       [
+        "o",
+        "r",
+        "isolated"
+       ]
+      ],
+      "style": "cards",
+      "accent": "emerald"
+     }
+    },
+    "chapter": "Two new elements"
+   },
+   {
+    "id": "a9d71107",
+    "narration": "Radium glowed faintly in the dark. People were amazed, and the discovery soon opened the door to new medicine, including treatments for cancer.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Radium glowed in the dark, and medicine changed.",
+      "emphasis": "glowed"
+     }
+    }
+   },
+   {
+    "id": "686790a3",
+    "narration": "Honors followed fast. The first was the 1903 Nobel Prize in Physics. Then in 1906, Pierre died in a street accident, and Marie took his post. Five years later, in 1911, she won the Nobel Prize in Chemistry.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Prizes and loss",
+      "events": [
+       {
+        "date": "1903",
+        "label": "Nobel Prize in Physics"
+       },
+       {
+        "date": "1906",
+        "label": "Pierre dies; Marie takes his post"
+       },
+       {
+        "date": "1911",
+        "label": "Nobel Prize in Chemistry"
+       }
+      ]
+     }
+    },
+    "chapter": "Honor and loss"
+   },
+   {
+    "id": "5a81ea67",
+    "narration": "During the First World War she helped build mobile X-ray units for field hospitals. Soldiers with wounds could be seen inside, and many lives were helped.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "World War I field hospital X-ray",
+      "alt": "early wartime X-ray unit",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "8ee7627d",
+    "narration": "But the danger was real. Nobody then understood radiation's harm. She carried samples in her pockets, and she died in 1934 of a blood disease, most likely linked to her years of exposure.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The cost",
+      "items": [
+       "Samples carried in pockets",
+       "Radiation harm not yet understood",
+       "Died in 1934"
+      ],
+      "style": "cards",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "a30fd436",
+    "narration": "Her legacy is huge. She became the first woman to win a Nobel Prize, and her work underlies cancer therapy and modern physics. Her daughter Irene later won a Nobel too.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "2 Nobels",
+      "label": "Physics in 1903, Chemistry in 1911"
+     }
+    }
+   },
+   {
+    "id": "f51c434b",
+    "narration": "So remember this. Curiosity, patience and stubborn work can open a new world. Marie Curie showed that one person, refusing to give up, can change how we see matter itself.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Patient, stubborn curiosity can change how we see the world.",
+      "emphasis": "curiosity"
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 32.7,
+  "before_first_script_call_s": 3.5,
+  "script_s": 29.3
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.08773,
+  "search_api": 0.0,
+  "total": 0.08799
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 23348,
+  "out": 4634
+ },
+ "rules": {
+  "length": {
+   "words": 429,
+   "expected_words": 402,
+   "ratio": 1.067,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 192.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "She won two Nobel Prizes in two different sciences. Nobody had done that before. And she started out as a woman barred from university in her own country.",
+   "close_text": "So remember this. Curiosity, patience and stubborn work can open a new world. Marie Curie showed that one person, refusing to give up, can change how we see matter itself."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "title": 1,
+    "image": 2,
+    "timeline": 2,
+    "gallery": 1,
+    "bullets": 2,
+    "definition": 1,
+    "clip": 1,
+    "diagram": 1,
+    "kinetic_text": 2,
+    "stat": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "image",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 7,
+   "ungrounded_numbers": [
+    "1867",
+    "1891",
+    "1895",
+    "1903",
+    "1906",
+    "1911",
+    "1934"
+   ],
+   "entities": 18,
+   "ungrounded_entities": [
+    "Chemistry",
+    "First World War",
+    "Irene",
+    "Maria Sklodowska",
+    "Nobel",
+    "Nobel Prize",
+    "Nobel Prizes",
+    "Paris",
+    "Physics",
+    "Pierre",
+    "Pierre Curie",
+    "Sorbonne",
+    "Sorbonne University",
+    "Warsaw",
+    "Warsaw Poland",
+    "X-ray"
+   ],
+   "ungrounded_share": 0.92,
+   "ungrounded_number_share": 1.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "numbers_mostly_ungrounded",
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Core dates are right (1867, 1891, 1895, 1903, 1906, 1911, 1934), but \"Nobody had done that before\" is loosely worded, and the notebooks claim is shaky in context. Several claims are vague or inexact."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers the key points (polonium, radium, two Nobels, WWI X-ray units, death in 1934). It omits Becquerel, the \"petites Curies\" detail, the shared 1903 prize, and the Sorbonne professorship, and it gives little depth to the discovery."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The chronological chapters are clear. Beat 3 repeats beat 2 (born in Warsaw) and beat 13 repeats the Nobels from beat 10. Beat 5 is a clumsy read-out of the bullets."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening fact about two Nobels in two sciences is decent but conventional. The ending is a generic moral about curiosity and patience."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Accessible and appropriate for a general audience, though slightly bland."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary. But the gallery queries are narrated as a sequence (\"First came the Sorbonne... Then a Paris laboratory\"), which is awkward. The stat scene repeats earlier information, and a 'clip' of generic lab flasks is weak."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly generic textbook content with cliché closings. The lead-lined notebooks is the only vivid detail, and it is awkwardly placed."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, roughly on length, covers the points the reviewer's note lists."
+   },
+   "language": {
+    "score": 3,
+    "reason": "Mostly fluent, but there are awkward lines: \"Marie takes up the mystery\" in the present tense, \"Then a strange discovery appeared\", and the gallery narration."
+   },
+   "originality_note": {
+    "score": 0,
+    "reason": ""
+   }
+  },
+  "defects": [
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Then a strange discovery appeared. Marie takes up the mystery.",
+    "issue": "The tense shifts, and the narration just reads out the bullets. The \"strange discovery\" is never named (Becquerel's uranium rays).",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "First came the Sorbonne University. Then a Paris laboratory with vintage equipment. And finally, old scientific notebooks",
+    "issue": "The narration describes the stock images instead of telling the story, which is filler. The notebook claim also sits oddly with the 'lived simply' framing.",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "She was born in 1867 in Warsaw, Poland.",
+    "issue": "Repeats the 'Born Maria Sklodowska in Warsaw' line from the previous beat.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "She became the first woman to win a Nobel Prize",
+    "issue": "True, but the script never mentions that she shared the 1903 prize with Pierre Curie and Becquerel, and it implies she was alone.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Pitchblende, an ore, was more radioactive than its uranium alone explained.",
+    "issue": "Correct, but it omits Becquerel's role, and the claim that she found the rays came from the atoms is oversimplified.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Her legacy is huge.",
+    "issue": "A stat card repeating the two Nobels adds nothing and makes the ending redundant.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Soldiers with wounds could be seen inside, and many lives were helped.",
+    "issue": "Vague. It omits the 'petites Curies' vehicles and the roughly 20 cars and 200 fixed units, and Marie drove one herself.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "Becquerel's discovery of uranium rays",
+   "The 'petites Curies' vehicles and Marie driving them",
+   "The shared 1903 prize with Pierre and Becquerel",
+   "Her professorship at the Sorbonne, the first woman to hold it",
+   "Specific human details such as the glowing vials by her bed",
+   "Cause of death named as aplastic anemia"
+  ],
+  "wrong_facts": [
+   "Unverified but true: the notebooks are stored in lead-lined boxes.",
+   "\"Nobody had done that before\" is true for two Nobels in different sciences."
+  ],
+  "would_publish": false,
+  "summary": "A competent but generic chronological overview with correct main dates and all the key milestones. It is padded with repetition and image-description narration, with little vivid detail and a bland ending.",
+  "mean": 3.11,
+  "cost_usd": 0.023696,
+  "tokens": [
+   3673,
+   1635
+  ]
+ }
+}

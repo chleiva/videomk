@@ -165,6 +165,8 @@ def draw_chapter(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
     hero = K.backdrop(cv, src, th, dark=0.34, mix=0.9, blur=4.0, wash=False)
     ink = th.caption_text if hero else th.text
     soft = th.caption_text if hero else th.muted
+    if not ctx.frame.landscape:
+        return _draw_chapter_flex(cv, title, kicker, subtitle, hero, ink, soft, lt, th, ctx)
     if not hero:                                              # theme ambience: two slow rings as a quiet ornament
         grow = ease_out_cubic(progress(lt, 0.0, 1.4))
         for r, w, a in ((300, 3, 0.16), (440, 2, 0.10), (590, 2, 0.06)):
@@ -209,10 +211,67 @@ def draw_chapter(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
             cv.text(text_x, ty + th_h + 30 + i * ssize * 1.3 + (1 - p) * 16, l, "regular", ssize, with_alpha(soft, 0.9 * p))
 
 
+def _draw_chapter_flex(cv: Canvas, title: str, kicker: str, subtitle: str, hero: bool, ink, soft, lt: float, th: Theme, ctx: SceneCtx) -> None:
+    """Vertical, square and 4:5 frames: kicker, a larger title, a short accent rule and the subtitle, all centred in the content box."""
+    fr = ctx.frame
+    bx0, by0, bx1, by1 = ctx.box
+    cx, max_w = fr.cx, float(bx1 - bx0) - 24
+    box_h = float(by1 - by0)
+    if not hero:                                              # theme ambience: slow rings centred behind the title
+        grow = ease_out_cubic(progress(lt, 0.0, 1.4))
+        for r, w, a in ((260, 3, 0.16), (390, 2, 0.10), (520, 2, 0.06)):
+            rr = r * (0.85 + 0.15 * grow)
+            cv.ellipse(cx, by0 + box_h / 2, rr, rr, outline=with_alpha(th.accent, a * grow), width=w)
+    k = fr.type_scale
+    ksize = int(round(32 * k))
+    ssize = int(round(42 * k))
+    slines = cv.wrap(subtitle, "regular", ssize, max_w)[:3] if subtitle else []
+    kh = ksize + 36 if kicker else 0
+    sh = (46 + len(slines) * ssize * 1.3) if slines else 0
+    rule = 10 + 40
+    size, lines = cv.fit_text(title, "bold", max_w, max(200.0, box_h - kh - sh - rule - 40), int(128 * k), 60, line_h=1.12)
+    for _ in range(30):                                       # more than 5 lines, or an unbreakable word wider than the box: smaller type
+        wide = max([cv.measure(l, "bold", size) for l in lines] + [0.0]) > max_w
+        if (not wide and (len(lines) <= 5 or size <= 40)) or size <= 24:
+            break
+        size -= 4
+        lines = cv.wrap(title, "bold", size, max_w)
+    lines = lines[:5]
+    th_h = len(lines) * size * 1.12
+    total = kh + th_h + rule + sh
+    top = max(float(by0), by0 + (box_h - total) / 2)
+
+    if kicker:
+        p = ease_out_cubic(progress(lt, 0.1, 0.6))
+        K.spaced_text(cv, cx, top + ksize + (1 - p) * -14, kicker, "semibold", ksize, with_alpha(th.accent if not hero else th.accent2, p), track=0.2, anchor="m")
+    ty = top + kh
+    words = [(li, j, w) for li, l in enumerate(lines) for j, w in enumerate(l.split())]
+    step = min(0.13, 1.3 / max(1, len(words)))
+    t_word = 0.5
+    for kk, (li, j, w) in enumerate(words):
+        line_w = cv.measure(lines[li], "bold", size)
+        pre = " ".join(lines[li].split()[:j])
+        wx = cx - line_w / 2 + (cv.measure(pre + " ", "bold", size) if j else 0.0)
+        p = ease_out_cubic(progress(lt, t_word + kk * step, 0.45))
+        if p <= 0.01:
+            continue
+        y = ty + li * size * 1.12 + (1 - p) * 26
+        if hero:
+            cv.text(wx + 3, y + 5, w, "bold", size, (0, 0, 0, int(110 * p)))
+        cv.text(wx, y, w, "bold", size, with_alpha(ink, p))
+    bar = ease_out_cubic(progress(lt, 0.2, 0.7))
+    cv.rrect(cx - 70 * bar, ty + th_h + 24, 140 * bar, 10, 5, fill=with_alpha(th.accent, 1.0))
+    t_sub = t_word + len(words) * step + 0.25
+    if slines:
+        p = ease_out_cubic(progress(lt, t_sub, 0.6))
+        for i, l in enumerate(slines):
+            cv.text(cx, ty + th_h + rule + 24 + i * ssize * 1.3 + (1 - p) * 16, l, "regular", ssize, with_alpha(soft, 0.9 * p), anchor="ma")
+
+
 # ===================================================================================================== registry
 ELEMENTS = [
     Element(
-        name="photo_collage", family="Photos",
+        name="photo_collage", family="Photos", formats=("16:9", "9:16", "1:1", "4:5"),
         doc=("- photo_collage: {photos: 3-9 ids from the user's photo list (like \"P7\"), style: \"mosaic\"|\"polaroids\"|\"grid\"|\"filmstrip\"|\"stack\" (optional), title (<=50), "
              "subtitle (<=80), alt (<=70)}. The user's OWN photos on screen together, appearing one by one as the narration names them, in the order given. Use for 3-9 photos "
              "of the same day or place shown together, and to fit many photos into a short video: polaroids for personal memories, mosaic or grid for variety, filmstrip for a "
@@ -228,7 +287,7 @@ ELEMENTS = [
         ],
     ),
     Element(
-        name="photo_frame", family="Photos",
+        name="photo_frame", family="Photos", formats=("16:9", "9:16", "1:1", "4:5"),
         doc=("- photo_frame: {photo: one id from the user's photo list (like \"P7\"), style: \"polaroid\"|\"matte\"|\"tilted\"|\"film\"|\"pinned\" (optional), title (<=50), subtitle (<=80), "
              "date_label (<=30, only a date the photo list gives), alt (<=70)}. ONE of the user's OWN photos shown as a framed piece with a slow zoom. Use for the one important "
              "photo of a moment or chapter (polaroid for a personal memory, matte for a landscape, pinned for a keepsake). Never for several photos (use photo_collage), stock or "
@@ -243,7 +302,7 @@ ELEMENTS = [
         ],
     ),
     Element(
-        name="chapter_card", family="Photos",
+        name="chapter_card", family="Photos", formats=("16:9", "9:16", "1:1", "4:5"),
         doc=("- chapter_card: {title (<=60), subtitle (<=100), kicker (<=40, small uppercase line above, e.g. 'DAY 2 - SUNDAY 12 APRIL' or 'PARIS'), photo (optional id from the user's "
              "photo list, used as a blurred background)}. A full-screen opener for one chapter of a story, the title revealing word by word. Use only when the video has 3 or more "
              "chapters, and keep the beat's narration to one short line. Never as the video's first scene (use title), for one-chapter videos, or with an invented date or place."),

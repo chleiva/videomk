@@ -13,7 +13,7 @@ from ..easing import ease_in_out_cubic, ease_out_back, ease_out_cubic, progress,
 from ..theme import Theme
 from .base import SceneCtx
 from .style_kit import (
-    LEFT, RIGHT, Pal, area, backdrop, clamp_first, draw_lines, emphasis_of, fit_lines, flow_style, focus, glow_blob, icon, icon_for, mix, pal_for, paste_sprite, pop,
+    LEFT, RIGHT, Pal, area, backdrop, lr, clamp_first, draw_lines, emphasis_of, fit_lines, flow_style, focus, glow_blob, icon, icon_for, mix, pal_for, paste_sprite, pop,
     soft_shadow, sprite, title_block,
 )
 from .viz_scenes import MAX_NODES, layout_diagram
@@ -43,8 +43,60 @@ def effective_style(style: str, n_layers: int) -> str:
     return "cards" if style in ("ladder", "stack") and n_layers > 5 else style
 
 
-def layout(cv: Canvas, style: str, nodes, layer, n_layers: int, edges, top: float, bot: float) -> Tuple[Dict[str, Rect], str, str]:
+def layout_tall(cv: Canvas, style: str, nodes, layer, n_layers: int, edges, top: float, bot: float, fr) -> Tuple[Dict[str, Rect], str, str]:
+    """Tall and square frames: the flow runs top to bottom, one layer per row (branches sit side by side in their row), nodes large. When the rows would get too
+    small (many layers in the square frame) the flow wraps into two columns, the second running back up (a U), so the story still reads in one sweep."""
+    left, right = lr(fr)
+    w_area = right - left
+    cols: Dict[int, List[str]] = {}
+    for n in nodes:
+        cols.setdefault(layer[str(n["id"])], []).append(str(n["id"]))
+    max_col = max(len(v) for v in cols.values())
+    has_label = any(lab for _, _, lab in edges)
+    avail = bot - top
+    pos: Dict[str, Rect] = {}
+    pill = style == "pills"
+    ladder = style == "ladder"
+    gap = (78.0 if has_label and n_layers <= 4 else 64.0 if n_layers <= 3 else 50.0 if n_layers == 4 else 40.0 if n_layers <= 6 else 30.0)
+    hmax = (150.0 if n_layers <= 4 else 132.0) if pill else (210.0 if n_layers <= 3 else 190.0 if n_layers <= 4 else 160.0 if n_layers == 5 else 140.0 if n_layers == 6 else 124.0)
+    h_fit = (avail - gap * (n_layers - 1)) / n_layers
+    snake = max_col == 1 and n_layers > 4 and h_fit < 92 and fr.W - 2 * fr.margin_x < 1000 and (fr.square or fr.aspect == "4:5")
+    wgap = 36.0
+    if snake:
+        per = math.ceil(n_layers / 2)
+        cw = (w_area - 44) / 2
+        vg = 34.0
+        h = _clamp((avail - vg * (per - 1)) / per, 74, 140)
+        total = h * per + vg * (per - 1)
+        y0 = top + (avail - total) / 2
+        order = [str(n["id"]) for li in range(n_layers) for n in nodes if layer[str(n["id"])] == li]
+        for k, nid in enumerate(order):
+            col, row = (0, k) if k < per else (1, per - 1 - (k - per))
+            pos[nid] = (left + col * (cw + 44), y0 + row * (h + vg), cw, h)
+        return pos, ("pill" if pill else "row"), style
+    h = _clamp(h_fit, 78 if not pill else 84, hmax)
+    total = h * n_layers + gap * (n_layers - 1)
+    y0 = top + (avail - total) / 2
+    step = 0.0
+    wmain = w_area - 100
+    if ladder and n_layers > 1:
+        wmain = w_area * 0.66
+        step = min(110.0, (w_area - wmain) / (n_layers - 1))
+    for li in range(n_layers):
+        ids = cols.get(li, [])
+        k_ = max(1, len(ids))
+        w = wmain if k_ == 1 else (w_area - wgap * (k_ - 1)) / k_
+        row_w = w * k_ + wgap * (k_ - 1)
+        x_row0 = (left + (w_area - row_w) / 2) if not ladder else left + step * li * (1 if n_layers > 1 else 0)
+        for k, nid in enumerate(ids):
+            pos[nid] = (x_row0 + k * (w + wgap), y0 + li * (h + gap), w, h)
+    return pos, ("pill" if pill else "row"), style
+
+
+def layout(cv: Canvas, style: str, nodes, layer, n_layers: int, edges, top: float, bot: float, fr=None) -> Tuple[Dict[str, Rect], str, str]:
     """-> (rect per node id, variant 'col'|'row'|'pill', effective style)."""
+    if fr is not None and not fr.landscape:
+        return layout_tall(cv, style, nodes, layer, n_layers, edges, top, bot, fr)
     style = effective_style(style, n_layers)
     cols: Dict[int, List[str]] = {}
     for n in nodes:
@@ -277,11 +329,11 @@ def draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ct
     nodes, by_id, layer, n_layers, order, edges = _model(props)
     pal = pal_for(th, props.get("accent"))
     backdrop(cv, th, pal, lt)
-    y = title_block(cv, th, pal, str(props.get("title", "")).strip(), lt) if props.get("title") else 90.0
+    y = title_block(cv, th, pal, str(props.get("title", "")).strip(), lt, ctx) if props.get("title") else float(ctx.top + 20)
     if not nodes:
         return
     top, bot = area(ctx, y + 6)
-    pos, variant, style = layout(cv, flow_style(props), nodes, layer, n_layers, edges, top, bot)
+    pos, variant, style = layout(cv, flow_style(props), nodes, layer, n_layers, edges, top, bot, ctx.frame)
     times = clamp_first(reveal_times(len(order), dur, props.get("cues"), first=0.12, last=0.78))
     t_of = {nid: times[i] for i, nid in enumerate(order)}
     rank = {nid: i for i, nid in enumerate(order)}
@@ -298,13 +350,13 @@ def draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ct
         elif variant == "pill":
             mw, ml, start, mh = w - (h - _row_tile("pill", w, h)) / 2 - _row_tile("pill", w, h) - 16 - 18, 2, 46.0, h - 22
         else:
-            mw, ml, start, mh = w - 18 - _row_tile("row", w, h) - 16 - 18, 2, _clamp(h * 0.4, 30, 54), h - 20
+            mw, ml, start, mh = w - 18 - _row_tile("row", w, h) - 16 - 18, 2, _clamp(h * 0.4, 30, 54 if ctx.frame.landscape else 66), h - 20
         fits[nid] = (mw, ml)
         sizes.append(fit_lines(cv, lab[nid], "semibold", mw, ml, start, 22, mh, 1.16)[0])
     size = min(sizes)
     # connectors under the nodes
     pos_row = {nid: pos[nid] for nid in pos}
-    vertical = style == "stack"
+    vertical = style == "stack" or not ctx.frame.landscape
     for a_id, b_id, label in edges:
         back = layer[b_id] <= layer[a_id]
         pts = route(pos_row[a_id], pos_row[b_id], back, vertical)

@@ -1,0 +1,38 @@
+{
+ "id": "hea-03",
+ "category": "health and wellbeing",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "I get anxious before presentations. Give me a practical guide to handle performance anxiety: why it happens in the body, breathing techniques that work, how to prepare, and when to seek professional help.",
+ "great": "Fight-or-flight explanation, physiological sigh or box breathing, preparation and rehearsal, reframing arousal as excitement, exposure, when to seek help (persistent/impairing anxiety); compassionate, non-diagnostic, evidence-based.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:00:25",
+ "error": "ValueError: section 1 could not be written: no JSON object in model output",
+ "plan": null,
+ "research": {},
+ "warnings": [],
+ "notes": "",
+ "cost": {
+  "script_small": 0.00027110000000000003,
+  "script_big": 0.27001200000000003,
+  "research": 0.0054763,
+  "total": 0.27576
+ },
+ "timings": {
+  "total_s": 45.9
+ },
+ "calls": {
+  "small": 3,
+  "big": 7,
+  "tools": 8
+ }
+}

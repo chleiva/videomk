@@ -225,4 +225,5 @@ def chunk_timeline(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]
         "fps": timeline["fps"], "width": timeline["width"], "height": timeline["height"], "theme": timeline.get("theme", "midnight"),
         "captions": timeline.get("captions", True), "scenes": sub, "lead": scenes[lo - 1] if lo > 0 else None,
         "outro": hi == len(scenes), "duration": round(sum(float(x["duration"]) for x in sub), 6),
+        **({"frame": timeline["frame"]} if timeline.get("frame") else {}),
     }

@@ -42,6 +42,7 @@ class Element:
     fallback: Optional[Callable[[Props], Tuple[str, Props]]] = None  # (stype, props) to show instead when prepare fails; default is a title card
     max_per_video: Optional[int] = None         # budget for heavy elements; extra uses become title cards
     min_seconds: float = 0.0                    # shortest sensible scene length
+    formats: Tuple[str, ...] = ("16:9",)        # the aspects `draw` lays out natively from ctx.frame (docs/RESPONSIVE_LAYOUT.md); any other aspect is shown framed (scenes/formats.py)
 
 
 ELEMENTS: Dict[str, Element] = {}

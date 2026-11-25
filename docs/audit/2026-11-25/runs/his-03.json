@@ -1,0 +1,574 @@
+{
+ "id": "his-03",
+ "category": "history",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "great": "Housing boom, subprime lending, MBS and CDOs, rating agencies, leverage, Bear Stearns, Lehman 15 Sep 2008, TARP, Fed actions, lasting effects; narrative arc; correct figures.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:00:08",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The 2008 financial crisis is a well-documented historical event; an explainer on its causes (housing boom, subprime mortgages, securitization, Lehman Brothers, government response) is timeless and doe",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "staged": null,
+  "notes_len": 6198,
+  "n_sources": 4,
+  "n_fetched": 5,
+  "fetched": [
+   "Financial crisis",
+   "2008 financial crisis",
+   "Subprime mortgage crisis",
+   "Government policies and the subprime mortgage crisis",
+   "Collateralized debt obligation"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Financial crisis\nA financial crisis is any of a broad variety of situations in which some financial assets suddenly lose a large part of their nominal value. A broader reduction of economic activity affecting the whole economy is known as an economic crisis. In the 19th and early 20th centuries, many financial crises were associated with banking panics, and many recessions coincided with these panics. Other situations that are often called financial crises include stock market crashes and the bursting of other financial bubbles, currency crises, and sovereign defaults. Financial crises directly result in a loss of paper wealth but do not necessarily result in significant changes in the real economy (for example, the crisis resulting from the famous tulip mania bubble in the 17th century).\nMany economists have offered theories about how financial crises develop and how they could be prevented. There is little consensus and financial crises continue to occur from time to time. It is apparent however that a consistent feature of both economic (and other applied finance disciplines) is the obvious inability to predict and avert financial crises. This realization raises the question as to what is known and...\n\n## 2008 financial crisis\nThe 2008 financial crisis was a major worldwide financial crisis which started in the United States. The first phase was the subprime mortgage crisis, which began in early 2007 as mortgage-backed securities (MBS) tied to U.S. real estate, and a vast web of derivatives linked to those MBS, collapsed in value. A liquidity crisis spread to global institutions by mid-2007 and climaxed with the bankruptcy of Lehman Brothers in September 2008, which triggered a stock market crash and bank runs in several countries. The crisis exacerbated the Great Recession, a global recession that began in late 2007, and contributed to major crises in Iceland and the eurozone.\nDuring the 1990s, the U.S. Congress passed legislation intended to expand affordable housing through looser financing laws, and in 1999 parts of the 1933 Banking Act (Glass–Steagall Act) were repealed, enabling institutions to mix low-risk operations, such as commercial banking and insurance, with higher-risk operations such as investment banking and proprietary trading. As the Federal Reserve (Fed) lowered the federal funds rate from 2000 to 2003, institutions increasingly targeted low-income homebuyers, largely belonging to racial...\n\n## Subprime mortgage crisis\nThe American subprime mortgage crisis was a multinational financial crisis that occurred between 2007 and 2010, contributing to the 2008 financial crisis. It led to a severe economic recession, with millions becoming unemployed and many businesses going bankrupt. The U.S. government intervened with a series of measures to stabilize the financial system, including the Troubled Asset Relief Program (TARP) and the American Recovery and Reinvestment Act of 2009 (ARRA).\nThe collapse of the 2000s United States housing bubble and high interest rates led to unprecedented numbers of borrowers missing mortgage repayments and becoming delinquent. This ultimately led to mass foreclosures and the devaluation of housing-related securities. The housing bubble preceding the crisis was financed with mortgage-backed securities (MBSes) and collateralized debt obligations (CDOs), which initially offered higher interest rates (i.e., better returns) than government securities, along with attractive risk ratings from rating agencies. Despite being highly rated, most of these financial instruments were made up of high-risk subprime mortgages.\nWhile elements of the crisis first became more visible during 2007...\n\n## Government policies and the subprime mortgage crisis\nGovernment policies and the subprime mortgage crisis covers the United States government policies and its impact on the subprime mortgage crisis of 2007–2009. The U.S. subprime mortgage crisis was a set of events and conditions that led to the 2008 financial crisis and subsequent recession. It was characterized by a rise in subprime mortgage delinquencies and foreclosures, and the resulting decline of securities backed by said mortgages. Several major financial institutions collapsed in September 2008, with significant disruption in the flow of credit to businesses and consumers and the onset of a severe global recession.\nGovernment housing policies, over-regulation, failed regulation and deregulation have all been claimed as causes of the crisis, along with many others. While the modern financial system evolved, regulation did not keep pace and became mismatched with the risks building in the economy. The Financial Crisis Inquiry Commission (FCIC) tasked with investigating the causes of the crisis reported in January 2011 that: \"We had a 21st-century financial system with 19th-century safeguards.\"\nIncreasing home ownership has been the goal of several presidents, including Roosevelt...\n\n## Collateralized debt obligation\nA collateralized debt obligation (CDO) is a type of structured asset-backed security (ABS). Originally developed as instruments for the corporate debt markets, after 2002 CDOs became vehicles for refinancing mortgage-backed securities (MBS). Like other private label securities backed by assets, a CDO can be thought of as a promise to pay investors in a prescribed sequence, based on the cash flow the CDO collects from the pool of bonds or other assets it owns. Distinctively, CDO credit risk is typically assessed based on a probability of default (PD) derived from ratings on those bonds or assets.\nThe CDO is \"sliced\" into sections known as \"tranches\", which \"catch\" the cash flow of interest and principal payments in sequence based on seniority. If some loans default and the cash collected by the CDO is insufficient to pay all of its investors, those in the lowest, most \"junior\" tranches suffer losses first. The last to lose payment from default are the safest, most senior tranches. Consequently, coupon payments (and interest rates) vary by tranche with the safest/most senior tranches receiving the lowest rates and the lowest tranches receiving the highest rates to compensate for higher...",
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It explains how each piece led to the next.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "48ba7b49",
+    "narration": "In September 2008, one of Wall Street's oldest banks went bankrupt, and the world's financial system nearly froze. How did a bet on American homes bring down the global economy?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "What Really Caused the 2008 Financial Crisis",
+      "subtitle": "A story that begins with American homes"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "The housing boom"
+   },
+   {
+    "id": "d0b0eab8",
+    "narration": "It starts in the 1990s. Congress passed laws meant to expand affordable housing by loosening financing rules. Owning a home was a goal of several presidents, and lenders were encouraged to reach more buyers.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "suburban American houses neighborhood",
+      "alt": "Suburban American homes",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "c87b96aa",
+    "narration": "Then the Fed cuts rates, from 2000 to 2003. Borrowing got cheap, so there were more buyers. More buyers meant rising house prices, and rising prices made everyone feel safe lending more.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The boom loop",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Fed cuts rates",
+        "icon": "landmark"
+       },
+       {
+        "id": "b",
+        "label": "More buyers",
+        "icon": "users"
+       },
+       {
+        "id": "c",
+        "label": "Rising house prices",
+        "icon": "house"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "cheap loans"
+       ],
+       [
+        "b",
+        "c",
+        "demand"
+       ],
+       [
+        "c",
+        "b",
+        "confidence"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "c56bca15",
+    "narration": "Lenders increasingly targeted low-income homebuyers with subprime mortgages: loans to borrowers with a higher risk of not paying them back. As long as prices kept rising, the danger stayed hidden.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Subprime mortgage",
+      "definition": "A home loan made to a borrower with a higher risk of missing repayments."
+     }
+    },
+    "chapter": "Subprime and securitization"
+   },
+   {
+    "id": "42eb95bc",
+    "narration": "Banks then bundled thousands of these loans into mortgage-backed securities and sold them to investors. Later, collateralized debt obligations, called CDOs, repackaged those securities again. Risk was passed along, and spread everywhere.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Home loans",
+        "kind": "start"
+       },
+       {
+        "id": "m",
+        "label": "Mortgage-backed securities",
+        "kind": "step"
+       },
+       {
+        "id": "c",
+        "label": "CDOs sliced into tranches",
+        "kind": "step"
+       },
+       {
+        "id": "i",
+        "label": "Investors worldwide",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "m"
+       ],
+       [
+        "m",
+        "c"
+       ],
+       [
+        "c",
+        "i"
+       ]
+      ],
+      "title": "Securitization"
+     }
+    }
+   },
+   {
+    "id": "b67041f4",
+    "narration": "A CDO is sliced into tranches. The senior tranche is safest and pays the lowest rate. Middle tranches carry some risk. The junior tranche takes losses first, so it pays the highest rate.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How a CDO is sliced",
+      "items": [
+       "Senior tranche: safest, lowest rate",
+       "Middle tranches: some risk",
+       "Junior tranche: losses first, highest rate"
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "4d03035c",
+    "narration": "Rating agencies gave many of these products top ratings. Yet most were made up of high-risk subprime mortgages. They paid better than government bonds, so investors around the world bought them.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Highly rated on paper, built from high-risk loans.",
+      "emphasis": "high-risk loans"
+     }
+    }
+   },
+   {
+    "id": "26c8a8c8",
+    "narration": "Then house prices fell. Borrowers missed payments, foreclosures spread, and the securities built on those loans lost value. In early 2007 the subprime crisis began, and by mid-2007 a liquidity crisis had reached global institutions.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "empty houses for sale street",
+      "alt": "abandoned neighborhood homes"
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "0998f75e",
+    "narration": "Regulation had not kept up. In 1999, parts of Glass-Steagall were repealed. From 2000 to 2003 the Fed lowered the federal funds rate. And in September 2008, Lehman Brothers went bankrupt.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Road to collapse",
+      "events": [
+       {
+        "date": "1999",
+        "label": "Parts of Glass-Steagall repealed"
+       },
+       {
+        "date": "2000-2003",
+        "label": "Fed lowers the federal funds rate"
+       },
+       {
+        "date": "Sept 2008",
+        "label": "Lehman Brothers goes bankrupt"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "a7099caa",
+    "narration": "Lehman's bankruptcy triggered a stock market crash and bank runs in several countries. Credit to businesses and consumers dried up, and a severe global recession followed, with millions losing their jobs.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Wall Street stock exchange traders",
+      "alt": "Wall Street trading floor",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "riser"
+   },
+   {
+    "id": "c09b4376",
+    "narration": "A later US commission put the root problem simply: we had a twenty-first-century financial system with nineteenth-century safeguards.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "We had a 21st-century financial system with 19th-century safeguards.",
+      "attribution": "Financial Crisis Inquiry Commission, January 2011"
+     }
+    }
+   },
+   {
+    "id": "44b5c039",
+    "narration": "The government stepped in. It launched the Troubled Asset Relief Program, called TARP, to stabilize the financial system. In 2009 it added the American Recovery and Reinvestment Act to support the wider economy.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The government response",
+      "items": [
+       "TARP: stabilize the financial system",
+       "ARRA, 2009: support the economy"
+      ],
+      "style": "spotlight",
+      "accent": "emerald"
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "702baf3f",
+    "narration": "The damage spread beyond America. The crisis worsened the Great Recession and contributed to major crises in Iceland and the eurozone. Economists still debate the causes: housing policy, failed regulation, deregulation, and more.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "regions",
+      "title": "Aftershocks",
+      "caption": "Crises beyond the US",
+      "regions": [
+       "United States",
+       "Iceland"
+      ]
+     }
+    }
+   },
+   {
+    "id": "5979628d",
+    "narration": "The lesson: cheap credit, hidden risk and weak oversight can feed each other. When rules lag behind the financial system, a problem in one market can become everyone's problem.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "When regulation lags behind risk, one market's problem becomes everyone's.",
+      "emphasis": "regulation lags behind risk"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "2008 financial crisis",
+    "url": "https://en.wikipedia.org/wiki/2008_financial_crisis",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Subprime mortgage crisis",
+    "url": "https://en.wikipedia.org/wiki/Subprime_mortgage_crisis",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Government policies and the subprime mortgage crisis",
+    "url": "https://en.wikipedia.org/wiki/Government_policies_and_the_subprime_mortgage_crisis",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Collateralized debt obligation",
+    "url": "https://en.wikipedia.org/wiki/Collateralized_debt_obligation",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 55.9,
+  "before_first_script_call_s": 5.4,
+  "script_s": 50.4
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.15637,
+  "search_api": 0.0,
+  "total": 0.15663
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 40204,
+  "out": 8117
+ },
+ "rules": {
+  "length": {
+   "words": 440,
+   "expected_words": 402,
+   "ratio": 1.095,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 196.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 29,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In September 2008, one of Wall Street's oldest banks went bankrupt, and the world's financial system nearly froze. How did a bet on American homes bring down the global economy?",
+   "close_text": "The lesson: cheap credit, hidden risk and weak oversight can feed each other. When rules lag behind the financial system, a problem in one market can become everyone's problem."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "image": 2,
+    "diagram": 1,
+    "definition": 1,
+    "flowchart": 1,
+    "bullets": 2,
+    "kinetic_text": 2,
+    "clip": 1,
+    "timeline": 1,
+    "quote": 1,
+    "map": 1
+   },
+   "max_run": 1,
+   "entropy": 3.38,
+   "top_type": "image",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 7,
+   "ungrounded_numbers": [],
+   "entities": 15,
+   "ungrounded_entities": [
+    "Wall Street's"
+   ],
+   "ungrounded_share": 0.045,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 5,
+   "notes_len": 6198,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly consistent with the notes, but the 'Then the Fed cuts rates' causal framing and 'Lehman: one of Wall Street's oldest banks' are loose, and the script leaves out the Fed's lender-of-last-resort actions, Bear Stearns and the 15 Sep date."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers boom, subprime, MBS/CDO, Lehman and TARP, but omits Bear Stearns, AIG, leverage, Fed emergency actions, bailout size, fraud and predatory lending, and lasting effects; the government response is only two lines."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Chaptered and chronological, but the timeline in beat 9 repeats earlier points and places 1999 and 2000 after the 2007 collapse. The closing lesson restates the FCIC quote."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook, 'one of Wall Street's oldest banks went bankrupt... How did a bet on American homes bring down the global economy?', is decent. The ending is a generic moral about regulation lagging risk."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Clear, neutral, beginner-friendly explainer voice that suits the topic, though it is not much of a story."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety (diagram, flowchart, timeline, quote, map) and the visuals match the narration. The map highlights only the US and Iceland while the narration mentions the eurozone."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Largely paraphrases the Wikipedia notes. There are no human stories, no concrete figures, and no vivid examples such as NINJA loans or the Big Short."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Includes the requested elements, but the 'tell it as a story' brief is only weakly met since it reads as a list of facts. Length is about right."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical, with short clear sentences. Some are choppy."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "The government stepped in. It launched the Troubled Asset Relief Program, called TARP, to stabilize the financial system.",
+    "issue": "Thin government response: no $700bn figure, no Fed actions, no Bear Stearns or AIG bailouts, and no explanation of why Lehman was allowed to fail.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "Regulation had not kept up. In 1999, parts of Glass-Steagall were repealed. From 2000 to 2003 the Fed lowered the federal funds rate.",
+    "issue": "Backtracks to 1999-2003 after narrating 2007 and repeats beat 3's rate cuts, which breaks the chronology and wastes words.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Rating agencies gave many of these products top ratings.",
+    "issue": "Rating agencies are mentioned in one line, with no conflict of interest and no mention of leverage or Bear Stearns, which the note says a great video includes.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Then the Fed cuts rates, from 2000 to 2003.",
+    "issue": "Presents the rate cuts as following the 1990s laws and as a straightforward cause. The cuts began in 2001, per the usual record, and the notes say 2000-2003 only loosely.",
+    "beat": 3
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Risk was passed along, and spread everywhere.",
+    "issue": "Generic phrasing with no concrete example or figure.",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"regions\": [\"United States\", \"Iceland\"]",
+    "issue": "The map omits the eurozone mentioned in the narration, and the claim about spread is weakly illustrated.",
+    "beat": 13
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "The lesson: cheap credit, hidden risk and weak oversight can feed each other.",
+    "issue": "A bare moral summary that repeats the FCIC quote's point; it offers no lasting image or effects.",
+    "beat": 14
+   }
+  ],
+  "missing": [
+   "Bear Stearns collapse",
+   "Exact Lehman date, 15 September 2008",
+   "AIG bailout and credit default swaps",
+   "Leverage at investment banks",
+   "Size of TARP ($700bn) and Fed emergency lending",
+   "Conflicts of interest at rating agencies",
+   "Lasting effects such as unemployment, foreclosures and the Dodd-Frank reforms",
+   "Concrete human stories and numbers"
+  ],
+  "wrong_facts": [
+   "'Then the Fed cuts rates, from 2000 to 2003' is imprecise; the cuts began in January 2001, but it follows the notes."
+  ],
+  "would_publish": false,
+  "summary": "A competent but generic recap that closely paraphrases the Wikipedia notes, leaving out Bear Stearns, AIG, leverage, figures and the Fed response. It reads as a list of facts rather than a story, and the timeline beat repeats earlier points out of order.",
+  "wrong_facts_note": "",
+  "mean": 3.22,
+  "cost_usd": 0.029574,
+  "tokens": [
+   6072,
+   1743
+  ]
+ }
+}

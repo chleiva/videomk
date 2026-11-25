@@ -1,0 +1,361 @@
+{
+ "id": "mkt-01",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "30-60 second promo for a coffee subscription called Ember Roasters: small-batch beans roasted to order, ships every two weeks, pause or cancel anytime, first bag 50% off.",
+ "great": "Hook on problem (stale coffee), product benefits from the brief only, no invented claims or prices beyond the given offer, clear call to action, brand name used; punchy.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:07:30",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Ember Roasters: Fresh Coffee Every Two Weeks",
+  "description": "Ember Roasters is a coffee subscription with small-batch beans roasted to order and shipped every two weeks. Pause or cancel anytime, and get 50% off your first bag.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "f8a50306",
+    "narration": "That bag of coffee in your cupboard? It may have been roasted months ago. By the time it reaches your cup, the flavor you paid for has already faded. Your mornings deserve better than that.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "morning coffee pouring cup",
+      "alt": "pouring hot coffee into a mug at sunrise"
+     }
+    },
+    "chapter": "The problem with stale coffee"
+   },
+   {
+    "id": "8fd7fbf9",
+    "narration": "Meet Ember Roasters. We roast small batches of beans, and we roast them only after you order. Nothing sits on a shelf. Nothing waits in a warehouse. Your coffee is fresh when it leaves us.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Ember Roasters",
+      "subtitle": "Small-batch beans, roasted to order"
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "76eb1913",
+    "narration": "Here is how it works. First, pick the beans you like. Second, we roast them fresh just for you. Third, they arrive at your door, and a new bag ships every two weeks.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "From order to your cup",
+      "steps": [
+       {
+        "label": "Pick your beans",
+        "detail": "Choose what suits your taste"
+       },
+       {
+        "label": "We roast to order",
+        "detail": "Small batch, made just for you"
+       },
+       {
+        "label": "Delivered every two weeks",
+        "detail": "A fresh bag on a steady rhythm"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "538a16fc",
+    "narration": "Life changes, and so can your plan. Pause when you travel. Skip a delivery when you have plenty. Or cancel anytime. There are no contracts and no awkward phone calls. You stay in control.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "clock",
+        "label": "Pause",
+        "sub": "When you are away"
+       },
+       {
+        "icon": "calendar",
+        "label": "Skip",
+        "sub": "When you have enough"
+       },
+       {
+        "icon": "heart",
+        "label": "Cancel anytime",
+        "sub": "No strings attached"
+       }
+      ],
+      "title": "Your plan, your rules"
+     }
+    }
+   },
+   {
+    "id": "69fda74f",
+    "narration": "Ready to taste the difference? Your first bag is fifty percent off. That is fresh, small-batch coffee for half the price, with no risk and nothing to lose.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "50% off",
+      "label": "your first bag of Ember Roasters coffee"
+     }
+    },
+    "sfx": "ding",
+    "chapter": "Try it"
+   },
+   {
+    "id": "9427683b",
+    "narration": "Fresh roasted, delivered every two weeks, yours to pause or cancel. Start your Ember Roasters subscription today, and make your next cup the best part of your morning.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Fresh coffee, roasted for you. Start your Ember Roasters subscription today.",
+      "emphasis": "roasted for you"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 11.2,
+  "before_first_script_call_s": 3.3,
+  "script_s": 7.9
+ },
+ "cost": {
+  "script_small": 0.00034,
+  "script_big": 0.03185,
+  "search_api": 0.0,
+  "total": 0.03219
+ },
+ "calls": {
+  "small": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 12285,
+  "out": 1408
+ },
+ "rules": {
+  "length": {
+   "words": 194,
+   "expected_words": 134,
+   "ratio": 1.448,
+   "beats": 6,
+   "expected_beats": 4,
+   "est_speech_s": 86.5,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 35,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "That bag of coffee in your cupboard? It may have been roasted months ago. By the time it reaches your cup, the flavor you paid for has already faded. Your mornings deserve better than that.",
+   "close_text": "Fresh roasted, delivered every two weeks, yours to pause or cancel. Start your Ember Roasters subscription today, and make your next cup the best part of your morning."
+  },
+  "variety": {
+   "distinct": 6,
+   "counts": {
+    "clip": 1,
+    "title": 1,
+    "steps": 1,
+    "icons": 1,
+    "stat": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.58,
+   "top_type": "clip",
+   "top_share": 0.17,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Core offer facts are right, but it adds claims beyond the brief: \"no contracts and no awkward phone calls\", \"Skip a delivery\", \"Nothing waits in a warehouse\", and the stale-coffee \"roasted months ago\" claim."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "It covers every brief point: small-batch, roasted to order, two-week shipping, pause/cancel, 50% off, brand name and a CTA. It offers little depth beyond that, which suits a promo."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is problem, product, how it works, flexibility, offer, CTA, and it flows well. The last beat repeats the earlier benefits."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question about the cupboard bag is a decent problem hook. The ending is a generic CTA with a cliché line, \"best part of your morning\"."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, punchy and consumer-friendly, appropriate for a promo. It drifts into a little marketing fluff."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene mix of clip, title, steps, icons, stat and kinetic text fits the narration. The \"Skip\" icon is not in the brief, and the heart icon for cancel is a slightly odd match."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Competent but generic copy: \"Your mornings deserve better\", \"nothing to lose\", \"Ready to taste the difference?\"."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Length and language are on target, but the script invents a skip option, no-contracts and no-phone-calls claims, and \"no risk\" that the brief did not give."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, clean, natural English with short rhythmic sentences."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "There are no contracts and no awkward phone calls.",
+    "issue": "Invented policy claim not in the brief.",
+    "beat": 4
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "Skip a delivery when you have plenty.",
+    "issue": "A skip feature was never specified; the brief only gives pause or cancel.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "It may have been roasted months ago.",
+    "issue": "Unsupported generalisation about store-bought coffee, though hedged with \"may\".",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "with no risk and nothing to lose",
+    "issue": "Overpromise; no guarantee or refund policy was given.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Fresh roasted, delivered every two weeks, yours to pause or cancel.",
+    "issue": "Repeats benefits already stated, adding little at the close.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Nothing waits in a warehouse.",
+    "issue": "Embellished logistics claim not in the brief.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "A concrete detail on flavor or roast date to make freshness tangible",
+   "A website or action cue such as where to sign up"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, well-paced promo that hits every brief point and reads well. It invents several policy claims (skip, no contracts, no risk), and the generic copy and soft ending keep it from publishable.",
+  "mean": 3.67,
+  "cost_usd": 0.01709,
+  "tokens": [
+   2680,
+   1173
+  ]
+ }
+}

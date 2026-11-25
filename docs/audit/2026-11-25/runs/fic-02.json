@@ -1,0 +1,521 @@
+{
+ "id": "fic-02",
+ "category": "creative story / fiction",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "Un cuento corto sobre una niña que descubre que el mar de su pueblo guarda las voces de quienes se fueron. Tono melancólico pero esperanzador, final abierto.",
+ "great": "Voz literaria propia, imágenes concretas, tono melancólico-esperanzado, estructura narrativa completa con final abierto pero satisfactorio; español natural y cuidado, sin lugares comunes.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:07:16",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "inspiration-motivation",
+   "kids-family"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "La niña que escuchó las voces del mar",
+  "description": "Un cuento corto sobre Inés, una niña que descubre que el mar de su pueblo guarda las voces de quienes se fueron. Un relato melancólico, esperanzador y de final abierto.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "504faf9c",
+    "narration": "¿Y si el mar no se llevara las voces de quienes se van, sino que las guardara? Eso creyó Inés, una niña de un pueblo pequeño, una tarde de invierno.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "La niña que escuchó el mar",
+      "subtitle": "Un cuento sobre las voces que no se pierden"
+     }
+    },
+    "chapter": "El pueblo que se vacía"
+   },
+   {
+    "id": "8727942a",
+    "narration": "En su pueblo las casas son blancas y las barcas esperan en la orilla. Cada año, alguien se marcha. Primero fue su abuelo, luego su tío Mateo, después casi todos los jóvenes.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "pueblo pescador casas blancas barcas",
+      "alt": "Pueblo de pescadores junto al mar",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "39702b37",
+    "narration": "Inés los echaba de menos. Se sentaba al final del muelle y escuchaba las olas durante horas, porque en casa el silencio pesaba demasiado desde que faltaba la risa del abuelo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "olas rompiendo muelle atardecer",
+      "alt": "Mar tranquilo junto a un muelle"
+     }
+    }
+   },
+   {
+    "id": "e98003e5",
+    "narration": "Una tarde, entre una ola y la siguiente, oyó algo distinto. Alguien susurraba su nombre. Inés miró a su alrededor y no había nadie. Solo el mar, respirando despacio, muy cerca.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entre dos olas, el mar pronunció su nombre.",
+      "emphasis": "su nombre"
+     }
+    },
+    "sfx": "riser",
+    "chapter": "Lo que dijo la ola"
+   },
+   {
+    "id": "43cbd1dd",
+    "narration": "Se agachó junto al agua y se pegó una caracola a la oreja. Dentro oyó a su abuelo tarareando la canción de marineros que siempre cantaba mientras remendaba las redes.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "niña caracola orilla del mar",
+      "alt": "Niña con una caracola en la orilla",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "599765fd",
+    "narration": "Entonces lo entendió. Las voces de quienes se fueron viajan por el mundo, llegan hasta el mar, y el mar las trae de vuelta, una a una, hasta la orilla de Inés.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El camino de las voces",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Quienes se fueron",
+        "icon": "users"
+       },
+       {
+        "id": "b",
+        "label": "El mar",
+        "icon": "droplet"
+       },
+       {
+        "id": "c",
+        "label": "La caracola",
+        "icon": "shell"
+       },
+       {
+        "id": "d",
+        "label": "Inés",
+        "icon": "heart"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "viajan"
+       ],
+       [
+        "b",
+        "c",
+        "traen"
+       ],
+       [
+        "c",
+        "d",
+        "susurran"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "45853888",
+    "narration": "Con los días oyó muchas más. La risa de su tío Mateo. La canción del abuelo. El nombre de la vecina Rosa, llamando a sus hijos para la cena, como hacía antes.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lo que guardaba el mar",
+      "items": [
+       "La risa de su tío Mateo",
+       "La canción del abuelo",
+       "La llamada de la vecina Rosa"
+      ],
+      "style": "spotlight",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "0b1b8fc7",
+    "narration": "Hubo noches de viento en que el mar rugía y las voces llegaban rotas. Inés tenía miedo de perderlas. Pero seguía escuchando, con las manos frías y el corazón abierto.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "mar agitado noche viento",
+      "alt": "Olas oscuras bajo el viento"
+     }
+    }
+   },
+   {
+    "id": "22c761f2",
+    "narration": "Volvió cada tarde. Dejaba huellas en la arena mojada, y la marea las borraba despacio. Las gaviotas sobre el mar al anochecer parecían vigilar su secreto, sin decir nada.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "huellas en la arena mojada",
+       "gaviotas sobre el mar al anochecer"
+      ],
+      "alt": "Huellas en la arena y gaviotas al anochecer"
+     }
+    }
+   },
+   {
+    "id": "5209696f",
+    "narration": "Un día se lo contó a los mayores del muelle. Algunos sonrieron con ternura, otros se rieron. Pero la anciana Rosa dejó de remendar su red y la miró muy seria.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "ancianos sentados en el muelle",
+      "alt": "Ancianos conversando en un muelle",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Lo que se cuenta y lo que se guarda"
+   },
+   {
+    "id": "46e7b85c",
+    "narration": "Rosa no dijo que le creyera. Dijo solo que, de joven, también ella se quedaba mirando el agua, esperando algo. Y que nunca se había atrevido a contárselo a nadie.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "anciana mirando el mar",
+      "alt": "Anciana mirando el horizonte",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "3cb25d4c",
+    "narration": "Esa noche Inés comprendió algo importante. Quizá nadie se va del todo mientras alguien siga escuchando. La ausencia duele, sí, pero el cariño también encuentra caminos muy largos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Nadie se va del todo mientras alguien sigue escuchando.",
+      "emphasis": "escuchando"
+     }
+    }
+   },
+   {
+    "id": "c6cd9534",
+    "narration": "Al amanecer, Inés bajó sola a la playa. El agua estaba lisa como un espejo y el cielo se encendía despacio. Esta vez no venía a recibir una voz. Traía una.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "amanecer mar calma horizonte",
+      "alt": "Amanecer sobre el mar en calma"
+     }
+    }
+   },
+   {
+    "id": "04aed796",
+    "narration": "Se acercó a la orilla y habló bajito. Contó que Rosa sonreía más, que las barcas seguían ahí, que el pueblo los esperaba. Y entonces, muy lejos, algo respondió. No era el abuelo.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "niña hablando al mar amanecer",
+      "alt": "Niña frente al mar al amanecer",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "sparkle"
+   },
+   {
+    "id": "0dc5ea52",
+    "narration": "Era una voz nueva, que no conocía, llamándola desde el otro lado del agua. Inés sostuvo la caracola con las dos manos, respiró hondo, y se quedó escuchando.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "¿De quién era esa voz?",
+      "subtitle": "El mar guarda todas las voces. Tú solo tienes que escuchar."
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "inspiration-motivation",
+   "kids-family"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 69.2,
+  "before_first_script_call_s": 4.1,
+  "script_s": 65.1
+ },
+ "cost": {
+  "script_small": 0.00038,
+  "script_big": 0.15096,
+  "search_api": 0.0,
+  "total": 0.15135
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 33993,
+  "out": 9063
+ },
+ "rules": {
+  "length": {
+   "words": 458,
+   "expected_words": 402,
+   "ratio": 1.139,
+   "beats": 15,
+   "expected_beats": 13,
+   "est_speech_s": 205.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Y si el mar no se llevara las voces de quienes se van, sino que las guardara? Eso creyó Inés, una niña de un pueblo pequeño, una tarde de invierno.",
+   "close_text": "Era una voz nueva, que no conocía, llamándola desde el otro lado del agua. Inés sostuvo la caracola con las dos manos, respiró hondo, y se quedó escuchando."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "title": 2,
+    "image": 5,
+    "clip": 3,
+    "kinetic_text": 2,
+    "diagram": 1,
+    "bullets": 1,
+    "gallery": 1
+   },
+   "max_run": 2,
+   "entropy": 2.55,
+   "top_type": "image",
+   "top_share": 0.33,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 3,
+   "ungrounded_entities": [
+    "Inés",
+    "Mateo",
+    "Rosa"
+   ],
+   "ungrounded_share": 1.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [
+   {
+    "phrase": "las voces de quienes",
+    "count": 2
+   },
+   {
+    "phrase": "voces de quienes se",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "It is fiction, so there are no facts to check. There is a small internal inconsistency: Rosa is first a neighbor who calls her children for dinner, then an elderly woman mending nets."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "The story has a full arc from loss to discovery to an open ending. Characters and imagery are thin and conventional, and the middle (beats 7-9) is repetitive."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Setup, discovery, deepening, a turn with Rosa, and an open ending follow clearly. Beat 6 explains the mechanism a bit mechanically, and the final line of beat 14 sits oddly against the reveal."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question is intriguing. The ending, with a new unknown voice and Inés listening, is open and satisfying, though the title card text 'Tú solo tienes que escuchar' is a moralizing tag."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Melancholic and hopeful as requested. It is somewhat sentimental, and the line 'Comprendió algo importante' states the moral outright."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The variety is good, but the diagram and bullets are out of place in a literary tale and spell out the story, and the 'shell' icon may not exist. Image queries fit the narration, and several are generic stock."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The premise is charming, but the voices in a shell and 'el cariño encuentra caminos muy largos' are clichés. The new voice at the end is a good touch."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is a short tale about a girl, with a melancholic-hopeful tone and an open ending. The length is about 400 words, which fits."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and clean. There is a tense shift in beat 2 (present) versus the past elsewhere, and the register is slightly generic."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Entonces lo entendió. Las voces de quienes se fueron viajan por el mundo, llegan hasta el mar",
+    "issue": "The narration explains the magic mechanically, with a diagram. This breaks the poetic register and over-explains it.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "El nombre de la vecina Rosa, llamando a sus hijos para la cena, como hacía antes.",
+    "issue": "Rosa is heard as a voice of someone who left, but she is later alive at the pier, mending a net. This contradicts the premise.",
+    "beat": 7
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "el cariño también encuentra caminos muy largos",
+    "issue": "This is a stock sentimental phrase, and the moral is stated outright.",
+    "beat": 12
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "En su pueblo las casas son blancas y las barcas esperan en la orilla.",
+    "issue": "The present tense clashes with the past tense of the rest of the story.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Y entonces, muy lejos, algo respondió. No era el abuelo.",
+    "issue": "The voice is introduced twice, in beats 14 and 15, so beat 15 partly repeats it.",
+    "beat": 14
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "La risa de su tío Mateo",
+    "issue": "The bullets repeat the narration word for word and look like a slide in a tale.",
+    "beat": 7
+   }
+  ],
+  "missing": [
+   "More concrete sensory detail and a distinctive voice, such as Galician or Andalusian coastal specifics",
+   "A deeper emotional beat about Inés's own loss, beyond the grandfather's laugh"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A competent, well-structured tale with a nice open ending, but its imagery and morals lean on clichés. The diagram and bullets weaken the literary feel.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Esa noche Inés comprendió algo importante.",
+     "problem": "Generic and explanatory phrasing.",
+     "better": "Esa noche, Inés entendió algo que no supo decir en voz alta."
+    },
+    {
+     "quote": "En su pueblo las casas son blancas",
+     "problem": "Tense shift.",
+     "better": "En su pueblo las casas eran blancas"
+    },
+    {
+     "quote": "Inés los echaba de menos.",
+     "problem": "Flat; it does not clarify who 'los' refers to.",
+     "better": "Inés echaba de menos a todos."
+    }
+   ]
+  },
+  "mean": 3.67,
+  "cost_usd": 0.024032,
+  "tokens": [
+   4266,
+   1550
+  ]
+ }
+}

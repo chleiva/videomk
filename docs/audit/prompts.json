@@ -1,0 +1,402 @@
+[
+ {
+  "id": "sci-01",
+  "category": "concept explainer (science)",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "explain entropy",
+  "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers."
+ },
+ {
+  "id": "sci-02",
+  "category": "concept explainer (science)",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "¿Por qué el cielo es azul y los atardeceres son rojos? Explícamelo como si tuviera 15 años.",
+  "great": "Dispersión de Rayleigh, la luz solar contiene todos los colores, azul se dispersa más, por qué no violeta, atardecer = camino más largo por la atmósfera; analogías sencillas, tono para adolescente."
+ },
+ {
+  "id": "sci-03",
+  "category": "concept explainer (science)",
+  "language": "en",
+  "minutes": 4,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "How does CRISPR gene editing actually work? Cover the bacterial origin, how Cas9 finds its target with guide RNA, how the cut gets repaired, and one real therapy that has been approved, plus the main ethical debate.",
+  "great": "Bacterial immune system origin, guide RNA + Cas9 cut, NHEJ vs HDR repair, approved therapy (Casgevy for sickle cell / beta thalassemia), germline editing ethics (He Jiankui); correct and specific, no hype."
+ },
+ {
+  "id": "how-01",
+  "category": "how-to / tutorial",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "how to change a flat tire",
+  "great": "Safety first (flat ground, hazards, handbrake), tools, loosen lug nuts before jacking, jack points, swap, tighten star pattern, torque, check pressure, get the spare repaired; ordered steps, clear."
+ },
+ {
+  "id": "how-02",
+  "category": "how-to / tutorial",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "cómo empezar a correr si nunca he hecho ejercicio",
+  "great": "Plan realista para principiante (caminar/correr alternado, 3 veces por semana, 20-30 min), calzado, ritmo conversacional, progresión gradual, descanso, lesiones comunes, consulta médica si hay condiciones; motivador y práctico."
+ },
+ {
+  "id": "his-01",
+  "category": "history",
+  "language": "en",
+  "minutes": 5,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "the fall of Constantinople in 1453",
+  "great": "Context (Byzantine decline, Ottoman rise), Mehmed II, walls and Theodosian defenses, Orban's cannons, chain across the Golden Horn and ships overland, final assault 29 May, Constantine XI, consequences (end of Eastern Roman Empire, trade routes, Renaissance debate); accurate dates, chaptered."
+ },
+ {
+  "id": "his-02",
+  "category": "history",
+  "language": "es",
+  "minutes": 4,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "Historia de la Revolución Mexicana",
+  "great": "Porfiriato, Madero y el Plan de San Luis (1910), Zapata, Villa, Huerta, Carranza, Constitución de 1917, fin del conflicto y legado; periodización clara, fechas correctas, personajes, consecuencias."
+ },
+ {
+  "id": "his-03",
+  "category": "history",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+  "great": "Housing boom, subprime lending, MBS and CDOs, rating agencies, leverage, Bear Stearns, Lehman 15 Sep 2008, TARP, Fed actions, lasting effects; narrative arc; correct figures."
+ },
+ {
+  "id": "hea-01",
+  "category": "health and wellbeing",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "how does sleep affect memory and what can I do to sleep better",
+  "great": "Sleep stages and consolidation (slow-wave and REM), hippocampus to cortex transfer, effects of sleep deprivation, practical hygiene tips (consistent schedule, light, caffeine, screens), 7-9 hours for adults; avoids medical overclaiming; suggests a doctor for persistent insomnia."
+ },
+ {
+  "id": "hea-03",
+  "category": "health and wellbeing",
+  "language": "en",
+  "minutes": 4,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "I get anxious before presentations. Give me a practical guide to handle performance anxiety: why it happens in the body, breathing techniques that work, how to prepare, and when to seek professional help.",
+  "great": "Fight-or-flight explanation, physiological sigh or box breathing, preparation and rehearsal, reframing arousal as excitement, exposure, when to seek help (persistent/impairing anxiety); compassionate, non-diagnostic, evidence-based."
+ },
+ {
+  "id": "fin-01",
+  "category": "personal finance",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "index funds vs a savings account: where should I put my savings?",
+  "great": "Different purposes (emergency fund vs long-term), inflation erodes cash, index funds diversified low cost but volatile, time horizon, emergency fund first; balanced, caveats, not personalised advice, numbers with sources or flagged as historical averages."
+ },
+ {
+  "id": "fin-02",
+  "category": "personal finance",
+  "language": "es",
+  "minutes": 2,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "explícame la inflación",
+  "great": "Qué es (alza generalizada y sostenida de precios), cómo se mide (IPC), causas (demanda, costes, monetaria), efectos en poder adquisitivo, ejemplo cotidiano, qué hacen los bancos centrales; claro."
+ },
+ {
+  "id": "fin-03",
+  "category": "personal finance",
+  "language": "en",
+  "minutes": 5,
+  "difficulty": "detailed",
+  "time_sensitive": true,
+  "prompt": "Explain how a mortgage works for a first-time buyer in the US: down payment, fixed vs adjustable rate, how amortization shifts interest vs principal over time, PMI, closing costs, and what the current 30-year rate environment looks like.",
+  "great": "Components of the payment, amortization example with correct maths, fixed vs ARM, PMI under 20% down, closing costs 2-5%, current rates from research with date; honest caveats."
+ },
+ {
+  "id": "tec-01",
+  "category": "technology / AI",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "how do large language models like ChatGPT work",
+  "great": "Tokens, next-token prediction, transformer attention, pretraining on text, fine-tuning with human feedback (RLHF), hallucinations and why; accessible analogies, no jargon dumps, correct."
+ },
+ {
+  "id": "tec-03",
+  "category": "technology / AI",
+  "language": "en",
+  "minutes": 4,
+  "difficulty": "medium",
+  "time_sensitive": true,
+  "prompt": "what are the most important AI model releases and trends of the past few months",
+  "great": "Recent releases and trends with dates from research, who released what, capabilities, agents/reasoning/cost trends, caveats; must be fresh and sourced, not stale 2023 content."
+ },
+ {
+  "id": "new-01",
+  "category": "current events / news",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": true,
+  "prompt": "What happened at the most recent Formula 1 Grand Prix?",
+  "great": "Name the actual latest race with date, winner, podium, key moment, championship standing, sourced from a recent article; correct as of today."
+ },
+ {
+  "id": "new-02",
+  "category": "current events / news",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "vague",
+  "time_sensitive": true,
+  "prompt": "noticias de esta semana sobre el precio de la gasolina en España",
+  "great": "Precio medio actual (boletín petrolero de la UE / Ministerio), tendencia semanal, causas (Brent, tipo de cambio, impuestos), comparación interanual, fechas de las fuentes; todo fechado."
+ },
+ {
+  "id": "new-03",
+  "category": "current events / news",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "detailed",
+  "time_sensitive": true,
+  "prompt": "Summarize the latest developments in global climate policy this month: any COP outcomes, major national announcements, and what experts say happens next.",
+  "great": "Dated, sourced developments (COP31 context, national NDCs, EU or US moves), expert views, what comes next; clearly states the as-of date; no invented outcomes."
+ },
+ {
+  "id": "cmp-01",
+  "category": "comparison (A vs B)",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "React vs Vue: which should I learn first?",
+  "great": "Fair comparison: learning curve, ecosystem, jobs, performance, tooling, philosophy; a recommendation by situation; no tribalism; accurate."
+ },
+ {
+  "id": "cmp-02",
+  "category": "comparison (A vs B)",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "coche eléctrico vs híbrido: cuál me conviene",
+  "great": "Coste de compra y uso, autonomía y carga, mantenimiento, emisiones, quién se beneficia de cada uno (vivienda con enchufe, kilometraje), ayudas; criterios claros, cifras fiables o con salvedades."
+ },
+ {
+  "id": "cmp-03",
+  "category": "comparison (A vs B)",
+  "language": "en",
+  "minutes": 1,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "Kindle vs paper books",
+  "great": "Short fair comparison: portability, eye strain, battery, feel, price, environmental angle; takeaway by reader type."
+ },
+ {
+  "id": "bio-01",
+  "category": "biography",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "Marie Curie",
+  "great": "Born Maria Sklodowska in Warsaw 1867, Paris, radioactivity, polonium and radium, two Nobel Prizes (1903 physics, 1911 chemistry), WWI X-ray units, death 1934 from radiation exposure; accurate dates; narrative."
+ },
+ {
+  "id": "bio-02",
+  "category": "biography",
+  "language": "es",
+  "minutes": 4,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "La vida de Frida Kahlo: infancia con polio, el accidente de 1925, su relación con Diego Rivera, su pintura y por qué es un icono hoy.",
+  "great": "Coyoacán 1907, polio, accidente de autobús 1925, empieza a pintar, matrimonio con Rivera, autorretratos y surrealismo (Las dos Fridas), salud, muerte 1954, Casa Azul, icono cultural; fechas correctas."
+ },
+ {
+  "id": "bio-03",
+  "category": "biography",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "tell me about Alan Turing",
+  "great": "Computability, Enigma at Bletchley Park, Turing test, prosecution in 1952, pardon 2013, death 1954; accurate and respectful."
+ },
+ {
+  "id": "tra-01",
+  "category": "travel / destination",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "3 days in Lisbon: what to see and eat",
+  "great": "Day-by-day structure: Alfama, Belem (tower, pasteis), Baixa, Tram 28, LX Factory, Sintra optional; local food (bacalhau, pasteis de nata, ginjinha), practical tips; specific, not generic."
+ },
+ {
+  "id": "tra-03",
+  "category": "travel / destination",
+  "language": "en",
+  "minutes": 4,
+  "difficulty": "detailed",
+  "time_sensitive": true,
+  "prompt": "Plan a first trip to Japan for a couple in spring: how many days, a Tokyo-Kyoto-Osaka route, how the rail pass situation works now, cherry blossom timing, budget range and etiquette tips.",
+  "great": "Itinerary 10-14 days, route logic, JR Pass price change in 2023 and alternatives (check current), sakura timing late March to early April, daily budget, etiquette; current prices flagged with dates."
+ },
+ {
+  "id": "rec-01",
+  "category": "recipe / cooking",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "shakshuka",
+  "great": "Ingredients with quantities, sauteing onion and pepper, spices (cumin, paprika), tomatoes, simmer, wells for eggs, cover and cook, finish with herbs, serving tips; accurate ordering and times."
+ },
+ {
+  "id": "rec-02",
+  "category": "recipe / cooking",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "Receta de la paella valenciana auténtica: ingredientes, orden de cocción, el socarrat y los errores típicos que hay que evitar.",
+  "great": "Pollo, conejo, garrofón, judía verde (ferraura), tomate, pimentón, azafrán, arroz bomba, proporciones y caldo, no remover, socarrat, reposo, errores (chorizo, mezclar), cantidades fiables; auténtica y específica."
+ },
+ {
+  "id": "pro-01",
+  "category": "productivity / self-improvement",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "the Pomodoro technique",
+  "great": "25 min work, 5 min break, long break after four, Francesco Cirillo, tomato timer, why it works, adapting intervals, common mistakes; concrete."
+ },
+ {
+  "id": "pro-02",
+  "category": "productivity / self-improvement",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "cómo dejar de procrastinar",
+  "great": "Por qué procrastinamos (regulación emocional, no pereza), regla de los 2 minutos, dividir tareas, reducir fricción, intención de implementación, perdón a uno mismo; práctico y empático, sin clichés vacíos."
+ },
+ {
+  "id": "fic-01",
+  "category": "creative story / fiction",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "a short fable about a fox who wants to buy time from a clockmaker",
+  "great": "A real story with characters, a want, an obstacle, a twist and a moral that lands; vivid but economical; original rather than a generic fable template; no research needed."
+ },
+ {
+  "id": "fic-02",
+  "category": "creative story / fiction",
+  "language": "es",
+  "minutes": 3,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "Un cuento corto sobre una niña que descubre que el mar de su pueblo guarda las voces de quienes se fueron. Tono melancólico pero esperanzador, final abierto.",
+  "great": "Voz literaria propia, imágenes concretas, tono melancólico-esperanzado, estructura narrativa completa con final abierto pero satisfactorio; español natural y cuidado, sin lugares comunes."
+ },
+ {
+  "id": "mkt-01",
+  "category": "marketing / product / business",
+  "language": "en",
+  "minutes": 1,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "30-60 second promo for a coffee subscription called Ember Roasters: small-batch beans roasted to order, ships every two weeks, pause or cancel anytime, first bag 50% off.",
+  "great": "Hook on problem (stale coffee), product benefits from the brief only, no invented claims or prices beyond the given offer, clear call to action, brand name used; punchy."
+ },
+ {
+  "id": "mkt-02",
+  "category": "marketing / product / business",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "launch video for a note-taking app",
+  "great": "Reasonable positioning even with missing details: avoids inventing specific features/numbers or flags them as placeholders; problem-solution-benefit arc, call to action."
+ },
+ {
+  "id": "kid-01",
+  "category": "education / lesson for kids",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "Explain how volcanoes erupt for six-year-olds",
+  "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap."
+ },
+ {
+  "id": "kid-02",
+  "category": "education / lesson for kids",
+  "language": "es",
+  "minutes": 4,
+  "difficulty": "detailed",
+  "time_sensitive": false,
+  "prompt": "Una lección de fracciones para niños de 10 años: qué son, numerador y denominador, comparar fracciones, sumar con el mismo denominador y un par de ejemplos con pizza y chocolate. Con un repaso al final.",
+  "great": "Objetivos claros, ejemplos concretos con pizza/chocolate, numerador/denominador, comparar, suma con mismo denominador, repaso y pregunta final; lenguaje para 10 años; matemáticamente correcto."
+ },
+ {
+  "id": "opi-01",
+  "category": "opinion / essay",
+  "language": "en",
+  "minutes": 3,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "Is remote work better than working in an office? Give me a balanced essay with a clear conclusion.",
+  "great": "Clear thesis, both sides with evidence (productivity studies, collaboration, commute, inequality), nuance, a committed conclusion; not mushy; avoids invented studies."
+ },
+ {
+  "id": "opi-02",
+  "category": "opinion / essay",
+  "language": "es",
+  "minutes": 2,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "por qué deberíamos leer más",
+  "great": "Tesis clara y personal, argumentos concretos (empatía, concentración, vocabulario) con alguna evidencia verificable, ejemplos, cierre memorable; voz de ensayo, no lista genérica."
+ },
+ {
+  "id": "tri-01",
+  "category": "trivia / listicle",
+  "language": "en",
+  "minutes": 2,
+  "difficulty": "medium",
+  "time_sensitive": false,
+  "prompt": "10 surprising facts about the human body",
+  "great": "Ten distinct, correct, genuinely surprising facts (not myths like 10% of brain), brief explanation each, counted; punchy; no misinformation."
+ },
+ {
+  "id": "tri-03",
+  "category": "trivia / listicle",
+  "language": "en",
+  "minutes": 1,
+  "difficulty": "vague",
+  "time_sensitive": false,
+  "prompt": "5 weird facts about space",
+  "great": "Five correct, surprising space facts (e.g. day on Venus longer than year, neutron star density), concise."
+ }
+]

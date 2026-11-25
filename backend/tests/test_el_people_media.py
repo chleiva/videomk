@@ -251,3 +251,92 @@ def test_annotated_draws_the_photo_pins_and_credit_and_the_plain_photo_when_no_p
     plain = render("annotated_image", bare, 4.0, 8.0, image_loader=load)
     assert changed(plain, render("annotated_image", props, 8.0, 8.0, image_loader=load)) > 0.004
     assert ELEMENTS["annotated_image"].max_per_video == 3
+
+
+# ------------------------------------------------------------------------------------------------ responsive layouts (9:16, 1:1, 4:5)
+ASPECTS = ("9:16", "1:1", "4:5")
+
+
+def _inside(name, props, aspect, dur=8.0, loader=None):
+    import numpy as np
+    from engine.frame import Frame
+    from tests.element_utils import make_renderer
+    from tests.test_formats import _bg
+    fr = Frame.parse(aspect, "720p")
+    r, sc = make_renderer(name, props, dur, "midnight", [], True, loader, True, aspect, "720p")
+    img = r._draw_spec(sc, dur * 0.95)
+    ref = _bg(aspect, "midnight", dur * 0.95, draft=True)
+    a, b = np.asarray(img.convert("RGB"), np.int16), np.asarray(ref.convert("RGB"), np.int16)
+    ys, xs = np.where(np.abs(a - b).max(axis=2) > 60)
+    assert len(xs), f"{name} {aspect} blank"
+    cx0, cy0, cx1, cy1 = fr.content_box
+    s = 1.0   # draft frames are drawn at design size
+    assert xs.min() >= (cx0 - 40) * s and xs.max() <= (cx1 + 40) * s, f"{name} {aspect} side overflow"
+    assert ys.max() <= (cy1 + 40) * s and ys.min() >= (fr.margin_top - 45) * s, f"{name} {aspect} vertical overflow {ys.min()} {ys.max()}"
+    assert not fr.landscape and r.fallbacks.get("t") is None, "must be native, not framed"
+
+
+def test_people_media_elements_are_tagged_for_every_aspect():
+    for n in ("headline", "dialogue", "icons", "annotated_image"):
+        assert ELEMENTS[n].formats == ("16:9", "9:16", "1:1", "4:5")
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_headline_three_long_cards_fit(aspect):
+    hs = [{"text": "Parliament passes the comprehensive infrastructure and housing reform bill after an overnight session ends", "outlet": "The Very Long Named Daily Courier", "date": "12 November 2026", "source": "www.verylongnameddailycourier.co.uk"},
+          {"text": "Supercalifornialisticexpialidocious announcement shocks markets worldwide today", "outlet": "Wire", "date": "1 Jan 2026"},
+          {"text": "Short one", "outlet": "AP"}]
+    _inside("headline", pm.sanitize_headline({"headlines": hs}) | {}, aspect)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_dialogue_six_long_turns_fit(aspect):
+    t = [{"speaker": s, "text": "A fairly long spoken line that goes on for a while so that it needs several rows of text in a bubble " * 1} for s in ("Host", "Dr. Okafor", "Host", "Dr. Okafor", "Student", "Dr. Okafor")]
+    _inside("dialogue", pm.sanitize_dialogue({"turns": t}), aspect)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+@pytest.mark.parametrize("n", [2, 3, 4, 5, 6])
+def test_icons_every_count_fits(aspect, n):
+    items = [{"icon": "rocket", "label": "Unlimited cloud storage", "sub": "Files anywhere, any time of day"} for _ in range(n)]
+    _inside("icons", pm.sanitize_icons({"title": "A title that is fairly long for a heading", "items": items}), aspect)
+
+
+def test_icons_grid_per_shape():
+    from engine.frame import Frame
+    g = pm._icon_grid
+    assert g(5, Frame.parse("16:9")) == (3, 2) and g(3, Frame.parse("9:16")) == (1, 3) and g(6, Frame.parse("9:16")) == (2, 3)
+    assert g(3, Frame.parse("1:1")) == (3, 1) and g(6, Frame.parse("1:1")) == (3, 2)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+@pytest.mark.parametrize("asset", ["photo#1", "photoport#1", None])
+def test_annotated_photo_is_shown_whole_with_pins_inside_it(aspect, asset):
+    from tests import format_samples as fs
+    props = {"image_query": "bicycle", "alt": "A bicycle", "credit": "Photo: Someone", "labels": ["Front wheel", "Handlebars with a long name", "Saddle", "Rear light"],
+             "pins": [{"label": "Front wheel", "x": 0.2, "y": 0.7}, {"label": "Handlebars with a long name", "x": 0.7, "y": 0.3}, {"label": "Saddle", "x": 0.5, "y": 0.5}, {"label": "Rear light", "x": 0.9, "y": 0.9}]}
+    if asset:
+        props["asset"] = asset
+    else:
+        props.pop("pins")
+    props = pm.sanitize_annotated(props)
+    _inside("annotated_image", props, aspect, loader=fs.image_loader)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_annotated_layout_keeps_the_photo_aspect_and_fits(aspect):
+    from engine.frame import Frame
+    from engine.canvas import Canvas
+    from engine.scenes.base import SceneCtx
+    from tests import format_samples as fs
+    fr = Frame.parse(aspect, "720p")
+    c = SceneCtx(frame=fr, captions=True)
+    cv = Canvas(fr.W, fr.H, 1)
+    for key in ("photo#1", "photoport#1"):
+        src = fs.synth_image(key)
+        lay = pm._annotated_layout(cv, ["A", "B", "C", "D"], src, {"credit": "x"}, c)
+        assert abs(lay["pw"] / lay["ph"] - src.width / src.height) < 0.01          # never stretched or cropped
+        assert lay["pw"] <= lay["pw_max"] + 1e-6
+        assert lay["py"] >= lay["top"] - 1e-6
+        last = max(y for _, y in lay["cells"]) + lay["cell_h"]
+        assert last <= lay["bottom"] + 1e-6

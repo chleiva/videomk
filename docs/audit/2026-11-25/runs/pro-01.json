@@ -1,0 +1,487 @@
+{
+ "id": "pro-01",
+ "category": "productivity / self-improvement",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "the Pomodoro technique",
+ "great": "25 min work, 5 min break, long break after four, Francesco Cirillo, tomato timer, why it works, adapting intervals, common mistakes; concrete.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:06:25",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The Pomodoro technique is a timeless productivity method with a stable, well-documented history and mechanics, so an encyclopedia source is sufficient for an accurate explainer.",
+  "queries": [
+   "Pomodoro technique how it works",
+   "Pomodoro technique history Francesco Cirillo"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "The Pomodoro Technique: Focus in 25-Minute Bursts",
+  "description": "The Pomodoro technique splits work into 25-minute focus sessions separated by short breaks. Learn how it works, why it helps, and how to start today.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "89231ee6",
+    "narration": "You sit down to work, and an hour later you have checked your phone ten times and written two sentences. What if the fix was a kitchen timer shaped like a tomato?",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "tomato shaped kitchen timer",
+      "alt": "A tomato shaped kitchen timer",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "pop",
+    "chapter": "The problem"
+   },
+   {
+    "id": "acc5cd7e",
+    "narration": "In the late 1980s, a university student named Francesco Cirillo struggled to concentrate. He grabbed a tomato timer and challenged himself to focus for just a few minutes. Pomodoro is Italian for tomato.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Where it began",
+      "events": [
+       {
+        "date": "Late 1980s",
+        "label": "Francesco Cirillo struggles to focus"
+       },
+       {
+        "date": "The test",
+        "label": "He sets a tomato timer"
+       },
+       {
+        "date": "The name",
+        "label": "Pomodoro means tomato in Italian"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "67f6afe7",
+    "narration": "The big idea is simple. Do not try to focus all day. Focus hard for one short, fixed block of time, then rest. That is the whole technique.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Focus hard for one short block, then rest.",
+      "emphasis": "short block"
+     }
+    }
+   },
+   {
+    "id": "142beca2",
+    "narration": "Here is the method. First, pick one task. Second, set a timer for twenty-five minutes. Third, work on nothing else until it rings. Fourth, take a five-minute break.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "One Pomodoro",
+      "steps": [
+       {
+        "label": "Pick one task"
+       },
+       {
+        "label": "Set a 25-minute timer"
+       },
+       {
+        "label": "Work until it rings"
+       },
+       {
+        "label": "Take a 5-minute break"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "bda3a496",
+    "narration": "Put together, the cycle is this. Work 25 minutes. Then a short break of 5 minutes. Repeat four times, and after the fourth round, take a longer break.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The Pomodoro cycle",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Work 25 min",
+        "icon": "clock"
+       },
+       {
+        "id": "b",
+        "label": "Short break 5 min",
+        "icon": "coffee"
+       },
+       {
+        "id": "c",
+        "label": "Repeat four times",
+        "icon": "repeat"
+       },
+       {
+        "id": "d",
+        "label": "Long break",
+        "icon": "heart"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "0f9298da",
+    "narration": "If a distraction pops into your head mid-session, do not act on it. Jot it on a piece of paper and go back to work. It will still be there at your break.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Mind",
+        "text": "I should check my email right now."
+       },
+       {
+        "speaker": "You",
+        "text": "Noted on paper. Back to the task until the timer rings."
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "8e9a07ce",
+    "narration": "Why does a tiny timer help? Starting is the hardest part of any task, and twenty-five minutes feels small enough to begin. Once you start, momentum often carries you.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person focused working at desk",
+      "alt": "Person concentrating at a desk",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Why it works"
+   },
+   {
+    "id": "db466ce2",
+    "narration": "Three things make it work. A small, easy start lowers resistance. Built-in urgency keeps your attention sharp. And visible progress, one finished Pomodoro after another, feels rewarding.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why it helps",
+      "items": [
+       "Small, easy start",
+       "Built-in urgency",
+       "Visible progress"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "rocket",
+       "clock",
+       "check"
+      ]
+     }
+    }
+   },
+   {
+    "id": "8b03735d",
+    "narration": "It is not magic, and it is not rigid. If your work needs longer stretches, such as deep writing, adjust the lengths. The point is a focused block followed by a real rest.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Make it yours",
+      "items": [
+       "Adjust the block length",
+       "Keep the break real",
+       "Protect the focus block"
+      ]
+     }
+    }
+   },
+   {
+    "id": "a33dff67",
+    "narration": "So today, pick one task, set a timer for twenty-five minutes, and give it everything. One focused tomato at a time is how big work gets done.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Pick one task. Set the timer. Start one Pomodoro.",
+      "emphasis": "Start one Pomodoro"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 25.5,
+  "before_first_script_call_s": 3.5,
+  "script_s": 22.0
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "script_big": 0.07466,
+  "search_api": 0.0,
+  "total": 0.07498
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 22697,
+  "out": 3553
+ },
+ "rules": {
+  "length": {
+   "words": 304,
+   "expected_words": 267,
+   "ratio": 1.139,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 136.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You sit down to work, and an hour later you have checked your phone ten times and written two sentences. What if the fix was a kitchen timer shaped like a tomato?",
+   "close_text": "So today, pick one task, set a timer for twenty-five minutes, and give it everything. One focused tomato at a time is how big work gets done."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "image": 2,
+    "timeline": 1,
+    "kinetic_text": 2,
+    "steps": 1,
+    "diagram": 1,
+    "dialogue": 1,
+    "bullets": 1,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 2.92,
+   "top_type": "image",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [
+    "1980",
+    "25"
+   ],
+   "entities": 3,
+   "ungrounded_entities": [
+    "Francesco Cirillo",
+    "Italian"
+   ],
+   "ungrounded_share": 0.8,
+   "ungrounded_number_share": 1.0,
+   "no_notes": true
+  },
+  "repeats": [
+   {
+    "phrase": "set a timer for",
+    "count": 2
+   },
+   {
+    "phrase": "a timer for twenty",
+    "count": 2
+   },
+   {
+    "phrase": "timer for twenty five",
+    "count": 2
+   },
+   {
+    "phrase": "for twenty five minutes",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Core facts are correct (25/5, long break after four, Cirillo, tomato timer). It omits that Cirillo was a university student in the late 1980s only by implication, and the timeline's 'He sets a tomato timer' is slightly loose. The 'challenged himself to focus for just a few minutes' is correct (he said ten minutes)."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It hits the basics and the distraction-jotting tip, but the long break length (15-30 min) is missing. Common mistakes are barely covered and adapting intervals gets a single line. 'Why it works' is generic and has no research behind it."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: problem, origin, method, why, adapt, call to action. There is slight redundancy between beats 4 and 5, which both state the cycle."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The hook is a relatable scenario followed by the tomato-timer question. The ending is an actionable image ('One focused tomato at a time'), though it is a little cliche."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear and suited to beginners in the US."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary and match the narration: timeline, steps, diagram, dialogue, checklist. The checklist's 'Protect the focus block' is not spoken. The dialogue scene is a bit gimmicky."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Mostly the standard explainer content. The jot-down-distractions tip is useful, but there is no surprising fact, such as the tomato timer's origin in his kitchen or the 'ticking' mechanism."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Roughly the right length (about 270 words) and in English. It misses some of the reviewer's points: the long-break duration, common mistakes and concrete adaptations."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, natural and clean spoken English."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "after the fourth round, take a longer break.",
+    "issue": "The long break duration (typically 15-30 minutes) is never given, so the cycle is not concrete.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "If your work needs longer stretches, such as deep writing, adjust the lengths.",
+    "issue": "There are no concrete alternative intervals (e.g. 50/10) and no common mistakes such as skipping breaks or multitasking.",
+    "beat": 9
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Starting is the hardest part of any task, and twenty-five minutes feels small enough to begin.",
+    "issue": "Generic psychology with no specific evidence or example.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Put together, the cycle is this. Work 25 minutes.",
+    "issue": "Largely repeats the steps in beat 4.",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Protect the focus block",
+    "issue": "The checklist item is not mentioned in the narration.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Long break length of 15-30 minutes",
+   "Common mistakes (skipping breaks, multitasking, treating interruptions casually)",
+   "Concrete alternative intervals such as 50/10",
+   "Cirillo's use of a tomato-shaped kitchen timer and the book/name origin",
+   "Tracking completed Pomodoros"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, well-paced beginner explainer with a decent hook and sensible visuals. It stays shallow: no long-break length, no common mistakes and little on adapting intervals.",
+  "mean": 3.89,
+  "cost_usd": 0.018764,
+  "tokens": [
+   3137,
+   1249
+  ]
+ }
+}

@@ -222,10 +222,12 @@ def _spec_key(props: Dict[str, Any]) -> str:
 
 
 def draw(cv, props, lt, dur, theme, ctx) -> None:
-    pw, ph = MD.panel_size(ctx.bottom)
-    m = MD.build_model(_spec_key(props), pw, ph)
+    fr = ctx.frame
+    pw, ph = MD.panel_size(ctx.bottom, fr, ctx.box)
+    k = 1.0 if fr.landscape else fr.type_scale
+    m = MD.build_model(_spec_key(props), pw, ph, k, fr.landscape)
     times = [min(dur, c) for c in (reveal_times(_count(props), dur, props.get("cues"), first=0.14, last=0.70) if anchors(props) else [0.45])]
-    MD.paint_frame(cv, m, theme, times, lt, dur, ctx.bottom)
+    MD.paint_frame(cv, m, theme, times, lt, dur, ctx.bottom, MD.panel_origin(fr, ctx.box))
 
 
 # ----------------------------------------------------------------------------- prepare / fallback
@@ -296,5 +298,5 @@ SAMPLES = [
 ]
 
 ELEMENTS = [Element(
-    name="map", family="Maps", doc=DOC, sanitize=sanitize, draw=draw, cues=cues, samples=SAMPLES, anchors=anchors, prepare=prepare, fallback=fallback, max_per_video=3, min_seconds=3.0,
+    name="map", family="Maps", doc=DOC, sanitize=sanitize, draw=draw, cues=cues, samples=SAMPLES, anchors=anchors, prepare=prepare, fallback=fallback, max_per_video=3, min_seconds=3.0, formats=("16:9", "9:16", "1:1", "4:5"),
 )]

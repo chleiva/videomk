@@ -30,3 +30,6 @@ An element is one new kind of scene the director can use (`map`, `code`, `versus
 4. **Look at it**: `../.venv/bin/python scripts/element_preview.py <names> --theme midnight --out /tmp/<name>-midnight.png` (also `paper`, `sunrise`), then open the PNG and fix what is wrong. Do this for every element before you report.
 5. Do **not** run the whole test suite (it takes minutes and other people's work is in progress), do not commit, do not deploy, do not touch git. Do not edit files you did not create.
 6. Final report: per element, one line of what it does and its props; anything that needs a shared-file change; anything you could not do and why; the path of your preview sheets.
+
+## Formats (vertical, square, 4:5)
+New and converted elements lay out in design units from `ctx.frame` and tag `formats=(...)`; until then they render in a framed fallback. Read `docs/RESPONSIVE_LAYOUT.md` before writing `draw`.

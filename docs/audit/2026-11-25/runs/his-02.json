@@ -1,0 +1,793 @@
+{
+ "id": "his-02",
+ "category": "history",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "Historia de la Revolución Mexicana",
+ "great": "Porfiriato, Madero y el Plan de San Luis (1910), Zapata, Villa, Huerta, Carranza, Constitución de 1917, fin del conflicto y legado; periodización clara, fechas correctas, personajes, consecuencias.",
+ "minutes": 4.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:59:25",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La Revolución Mexicana es un hecho histórico bien documentado y estable en el tiempo, por lo que una enciclopedia basta para un guion preciso sin necesidad de información reciente.",
+  "queries": [
+   "Revolución Mexicana historia resumen",
+   "Revolución Mexicana 1910 causas y etapas"
+  ],
+  "searches": 11,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": 11,
+  "skills": [
+   "history-story"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Por qué estalló un país dormido",
+    "De la caída de Díaz a la guerra de facciones",
+    "La Constitución de 1917 y su herencia"
+   ]
+  },
+  "notes_len": 24960,
+  "n_sources": 11,
+  "n_fetched": 26,
+  "fetched": [
+   "Plan of San Luis Potosí - Wikipedia",
+   "Plan de San Luis - Wikipedia, la enciclopedia libre",
+   "Elaboración del Plan de San Luis - Memórica",
+   "Entrevista Díaz-Creelman - Wikipedia, la enciclopedia libre",
+   "Memoria Política de México",
+   "James Creelman Interview of Porfirio Diaz for Pearson's Magazine ...",
+   "La Revolución Mexicana: Causas, Personajes Clave y Su Legado | UMM",
+   "¿Cuáles fueron las causas de la Revolución Mexicana? - México Desconocido",
+   "La Decena Trágica de 1913, historia, causas y personajes - México Desconocido",
+   "Decena Trágica - Wikipedia, la enciclopedia libre",
+   "Decena trágica: Cronología - Filmoteca UNAM",
+   "¿Qué fue La Decena Trágica? - Causas y consecuencias",
+   "Plan de Ayala - historiauniversal.org",
+   "Emiliano Zapata and the Plan of Ayala, 1879–1919",
+   "Plan de Ayala - Wikipedia, la enciclopedia libre",
+   "Plan de Ayala - bibliotecadigital.scjn.gob.mx",
+   "Convención de Aguascalientes - Wikipedia, la enciclopedia libre",
+   "La Constitución de 1917 - La Revolución Mexicana y los Estados Unidos en las colecciones de la Biblioteca del Congreso | Exposiciones - La Biblioteca del Congre",
+   "#Constitución1917 Un siglo de constitucionalismo social | Archivo General de la Nación | Gobierno | gob.mx",
+   "Mexico: Constitución, 1917",
+   "Constitución Política de los Estados Unidos Mexicanos, que reforma ...",
+   "LOS MILLONES DESAPARECIDOS: EL COSTO HUMANO DE LA REVOLUCIÓN MEXICANA* Robert McCaa** Introducción En",
+   "Revolución mexicana - Wikipedia, la enciclopedia libre",
+   "La Revolución Mexicana y su costo demográfico | El Universal",
+   "Emiliano Zapata - Wikipedia, la enciclopedia libre",
+   "Asesinato de Francisco Villa, líder revolucionario del norte del país"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "section 1: some scenes list items their narration never mentions: beat 3 (gallery): its narration never says ['ferrocarril México siglo XIX', 'locomotora antigua México', 'estación de tren histórica México']. Say each item's key words in the order shown"
+ ],
+ "notes": "## Plan of San Luis Potosí - Wikipedia\nThe Plan declared the 1910 election illegal, and declared Madero provisional president pending new elections. It called for the people to rise up in arms on Sunday, 20 November 1910, at 6:00 pm and revolt against Díaz and overthrow his government. Few initially heeded the call. ## Subsequent impact [edit] [...] now the only way to remove him from office. It was published on 5 October 1910. It called for nullifying the fraudulent 1910 election of Porfirio Díaz, proclaimed Madero as provisional president, and called on the Mexican people to revolt on 20 November 1910. [...] The Plan of San Luis Potosí (Spanish: Plan de San Luis) is a key political document of the Mexican Revolution, written by presidential candidate Francisco I. Madero following his escape from jail. He had challenged President Porfirio Díaz in the 1910 presidential elections, when Díaz was 80 years old, and garnered a bro\n\n## Plan de San Luis - Wikipedia, la enciclopedia libre\nEl Plan de San Luis fue un manifiesto fechado el 5 de octubre de 1910[\\[1\\]](#cite_note-1) por Francisco I. Madero, líder del movimiento revolucionario Mexicano y candidato presidencial por el Partido Nacional Antirreeleccionista, bajo el lema \"sufragio efectivo, no reelección\". Se llamó pitó bélico al pueblo mexicano a tomar las armas para el 20 de noviembre siguiente. El documento convocaba a levantarse en armas para la culminación de la dictadura de Porfirio Díaz y establecer elecciones [...] Aunque no se inició un verdadero movimiento el 20 de noviembre, como resultado de la convocatoria de Madero —pero sobre todo sus promesas de una reforma agraria— comenzaron a surgir levantamientos armados a lo largo de México en 1910, en el norte comandados por Pascual Orozco y Pancho Villa y en Morelos por Emiliano Zapata,[\\[11\\]](#cite_note-11) cuyos triunfos militares finalmente culminaron con\n\n## Elaboración del Plan de San Luis - Memórica\nSin embargo, se le puso la fecha del último día que Madero pasó en suelo mexicano antes de trasladarse a los Estados Unidos, hacia donde huyó debido a la persecución por parte del régimen porfirista. Mediante este plan, Madero declaró ilegítimas laselecciones del 10 de julio e hizo un llamado a tomar las armas el día 20 de noviembre de ese año. La idea era, además de terminar con el mandato del dictador, convocar a elecciones libres y devolver las tierras a los campesinos despojados de ellas [...] El Plan de San Luis ha sido considerado como el detonante de la Revolución mexicana, pues no sólo fue un llamado a derrocar al gobierno de Porfirio Díaz, sino que también se expresaron en él los deseos de edificar un país democrático y de llevar a cabo una reforma en el campo. Este documento, elaborado por Francisco I. Madero el 5 de octubre de 1910, comenzó a planearse en San Luis Potosí, de a\n\n## Entrevista Díaz-Creelman - Wikipedia, la enciclopedia libre\nEn marzo de 1908, relativamente cerca de las elecciones, la revista británica Pearson's Magazine publicó una entrevista de su reportero James Creelman con el presidente Porfirio Díaz, que había tenido lugar unos meses atrás en el Castillo de Chapultepec. Creelman vino a México para entrevistar a Díaz, mostrando la preocupación de los norteamericanos hacia este país. Sin embargo, esta preocupación también era interna, como se evidenció cuando Justo Sierra Méndez le sugirió considerar lo negativa [...] Se conoce como entrevista Díaz-Creelman a la entrevista concedida por el presidente Porfirio Díaz Mori al periodista canadiense James Creelman, radicado en el Estado de México el y que fue el parteaguas que detonó la efervescencia política con miras a las elecciones de 1910. Publicada en el número de marzo de 1908 de la revista británica Pearson's Magazine con el título Presidente Díaz Méxic\n\n## Memoria Política de México\nEl periodista norteamericano James J. Creelman llegó a México a mediados de noviembre de 1907, para realizar una entrevista a Porfirio Díaz. Creelman traía consigo una carta de presentación del presidente de los Estados Unidos Teodoro Roosevelt en la que le inquiría a Díaz si pensaba reelegirse y sobre las inversiones extranjeras en México. La entrevista tuvo amplia difusión tanto en la prensa norteamericana como en la mexicana. [...] Los días 3 y 4 de marzo de 1908, el diario “El Imparcial”, de la Ciudad de México, reproduce en español el texto de la entrevista que el presidente Porfirio Díaz había concedido, seis meses antes, a Creelman. Causa gran expectación y diversas reacciones en la opinión pública: [...] | | | | --- | | | | | | | | Autora: Doralicia Carmona Dávila. © Derechos Reservados ISBN 970-95193 Este Sitio es un proyecto personal y no recibe ni ha recibido financiamiento pú\n\n## James Creelman Interview of Porfirio Diaz for Pearson's Magazine ...\nJames Creelman Interview of Porfirio Diaz for Pearson’s Magazine, March 1908 From the heights of Chapultepec Castle President Diaz looked down upon the venerable capital of his country, spread out on a vast plain, with a ring of mountains flung up grandly about it, and I, who had come nearly four thousand miles from New York to see the master and hero of modern Mexico--the inscrutable leader in whose veins is blended the blood of the primitive Mixtecs with that of the invading Spaniards--watched [...] exist in peace as a republic? Are you satisfied that its future is assured under free institutions?\" It was worthwhile to have come from New York to Chapultepec Castle to see the hero's face at that moment. Strength, patriotism, warriorship, prophethood seemed suddenly to shine in his brown eyes. \"The future of Mexico is assured,\" he said in a clear voice. \"The principles of democracy have \n\n## La Revolución Mexicana: Causas, Personajes Clave y Su Legado | UMM\n- Desigualdad social: Aunque México experimentó crecimiento económico durante el Porfiriato, la riqueza se concentró en pocas manos nacionales y extranjeras. - Falta de libertad política: Porfirio Díaz impuso a los líderes en todos los niveles, negando al pueblo el derecho a elegir a sus representantes. - Despojo de tierras: Reformas de Díaz permitieron que empresas extranjeras adquirieran tierras de campesinos e indígenas, dejando a estos sin sustento. [...] - Concentración de tierras en latifundios: Las grandes haciendas pertenecían a pocos, mientras la mayoría de los mexicanos vivía en condiciones de pobreza extrema. - Pobre educación: La calidad educativa era tan baja que el 80% de la población era analfabeta. - Censura y falta de libertad de expresión: La prensa estaba controlada y las huelgas prohibidas. - Sobreexplotación laboral: Jornadas de trabajo de más de 12 horas eran comune\n\n## ¿Cuáles fueron las causas de la Revolución Mexicana? - México Desconocido\nLas causas de la Revolución Mexicana fueron de carácter social, político y económico. Entre ellas se encuentran la nula libertad de expresión, la desigualdad social, la sobreexplotación laboral y muchas otras que condujeron al hartazgo del pueblo mexicano, lo que culminó con una serie de levantamientos armados y con el derrocamiento del régimen porfirista. ## Principales causas de la Revolución Mexicana Descubre las mejores imágenes de la Revolución Mexicana aquí [...] Con esto en mente, Madero huyó hacia San Antonio Texas. Desde ahí publicó el Plan de San Luis, donde se incitaba al levantamiento armado contra el régimen porfirista. La fecha de la convocatoria era para el 20 de noviembre de 1910. Cuando el ansiado día llegó, la sublevación fue enorme. A partir de ese momento, se considera que inició la Revolución Mexicana. Después, con el transcurrir de los meses, la lucha se había exten\n\n## La Constitución de 1917 - La Revolución Mexicana y los Estados Unidos en las colecciones de la Biblioteca del Congreso | Exposiciones - La Biblioteca del Congre\nConsideramos que la promulgación de la Constitución de 1917 marca la culminación de la Revolución Mexicana. Esa constitución, todavía vigente casi cien años después, insistió en la completa separación iglesia-estado (artículo 3), la división de grandes haciendas en ejidos (tierras comunales) y soberanía nacional sobre el sub-suelo (artículo 27), y el derecho de los obreros a organizarse, ir a la huelga y a recibir compensación por accidentes laborales (artículo 123). Esta constitución sirvió [...] podría asumir el control de todas las tierras que no estuvieran siendo usadas “apropiadamente” y usarlas para el beneficio público. Este mismo artículo también declaraba que los extranjeros no podían poseer tierras a menos de 100 km de la frontera nacional o de 50 km del mar. El Artículo 123 estableció la jornada laboral de 8 horas, 6 días a la semana, el salario mínimo, y una remuneración equi\n\n## #Constitución1917 Un siglo de constitucionalismo social | Archivo General de la Nación | Gobierno | gob.mx\nArchivo General de la Nación | 05 de febrero de 2017 . Constitución Política de los Estados Unidos Mexicanos de 1917. En ese sentido nuestra norma fundamental —que cumple su primer siglo de vida—, se colocó a la vanguardia a nivel mundial, pues elevó a rango constitucional los derechos sociales, con los artículos 3°, 27 y 123. [...] El programa del PLM de 1906 se convirtió en la base de la Constitución de 1917, no sólo en lo que se estipuló en el artículo 123 constitucional, referente al derecho colectivo de trabajo, sino también en el derecho a la educación laica y obligatoria, en el fortalecimiento de los municipios y en la nacionalización de la tierra. [...] La Constitución de 1917 consta de 9 títulos, 136 artículos y 16 transitorios. Primera constitución de la historia que incluye derechos sociales. La Constitución fue firmada por 209 diputados con la misma pluma con la que fue firma\n\n## Mexico: Constitución, 1917\nARTICULO 123 - Toda persona tiene derecho al trabajo digno y socialmente útil; al efecto, se promoverán la creación de empleos y la organización social para el trabajo, conforme a la ley. El Congreso de la Unión, sin contravenir a las bases siguientes, deberá expedir leyes sobre el trabajo, las cuales regirán: A. Entre los obreros, jornaleros, empleados, domésticos, artesanos, y de una manera general, todo contrato de trabajo: I. La duración de la jornada máxima será de ocho horas; [...] En el sistema de planeación democrática, el Congreso de la Unión tendrá la intervención que señale la ley. ARTICULO 27 - La propiedad de las tierras y aguas comprendidas dentro de los límites del territorio nacional corresponde originariamente a la Nación, la cual ha tenido y tiene el derecho de transmitir el dominio de ellas a los particulares constituyendo la propiedad privada. Las expropiaciones sólo \n\n## Constitución Política de los Estados Unidos Mexicanos, que reforma ...\nConstitución Política de los Estados Unidos Mexicanos, que reforma la de 5 de febrero de 1857 1 Centro de Documentación y Análisis, Archivos y Compilación de Leyes cdaacl@scjn.gob.mx TITULO PRIMERO. CAPITULO I. DE LAS GARANTÍAS INDIVIDUALES. (REFORMADA SU DENOMINACIÓN, D.O.F. 10 DE JUNIO DE 2011) CAPITULO I. DE LOS DERECHOS HUMANOS Y SUS GARANTÍAS. Texto Original D.O.F. 05 de febrero de 1917 Art. 27.- La propiedad de las tierras y aguas comprendidas dentro de los límites del territorio nacional, [...] A DICHA FECHA, EN EL ÍNDICE RESPECTIVO DE SU HISTORIA LEGISLATIVA. (REFORMADO, D.O.F. 10 DE ENERO DE 1934) Art. 27.- La propiedad de las tierras y aguas comprendidas dentro de los límites del territorio nacional, corresponde originariamente a la Nación, la cual ha tenido y tiene el derecho de transmitir el dominio de ellas a los particulares, constituyendo la propiedad privada. Las expropia\n\n## LOS MILLONES DESAPARECIDOS: EL COSTO HUMANO DE LA REVOLUCIÓN MEXICANA* Robert McCaa** Introducción En\nmodelos máximos de Collver son inverosímiles. Los datos propuestos aquí intersectan sus modelos en un punto cercano a dos tercios del máximo número de defunciones y 90% de su modelo de error máximo (véase cuadro 1). Mis estimaciones se aproximan más a los altos, pero plausibles, hallazgos sobre la mortalidad de Ordorica y Lezama (1993). De acuerdo al análisis de estos autores y del mío propio, durante el período 1910-1921 ocurrieron cerca de un millón y medio de muertes en exceso. Nuestras [...] 1% ResEUA30 56% ResMEX30 44% de 7.6 millones vivos en 1910 habían muerto en 1930 3.8% residía en los EUA en 1930 (6.65% de los supervivientes) Hombres 1910: 141,472 residentes en EUA; 1930: 284,947 mayores de 20 años 9% guerra 35% muertes 2% ResEUA10 2% ResEUA30 52% ResMEX30 39 decir, cerca de 400 000 defunciones femeninas y 700 000 masculinas en exceso. Estas estimaciones no incluyen a los niños\n\n## Revolución mexicana - Wikipedia, la enciclopedia libre\nLos estudios demográficos que se realizaron posteriormente sobre el tema subieron la cifra de muertes. De esta manera, Manuel Gamio sostendría que hubo dos millones de muertos, mientras que Gilberto Loyo, padre de la demografía mexicana, elevó el número a dos millones y medio de muertos. Más recientemente, Moisés González Navarro en un estudio inédito bajaría la cifra a 1.9 millones. Mientras, en un estudio estadounidense, Andrew Collver haría variar la estadística de este dato entre 2.5 y 3.1 [...] No se tiene un número exacto de la cantidad de muertos que hubo durante la Revolución mexicana. La mayoría de las fuentes apuntan que entre un millón, y tres millones de personas murieron durante esta etapa de la historia de México. Estas cifras se basan en los datos proporcionados por los censos realizados en el país en los años de 1910 y 1921. El censo de 1910 arrojó una cantidad de 15 160 \n\n## La Revolución Mexicana y su costo demográfico | El Universal\nJavier Garciadiego refirió que el tema de la letalidad en la revolución sigue siendo muy discutido por las diferencias en las cifras estadísticas, pues mientras algunos autores consideran que no fue tan mortífera, otros dicen que sí. El más reciente de los análisis estadísticos realizado por el profesor Robert Mc Caa, de la Universidad de Minnesota, señala que hubo un millón 400 mil muertos durante esta etapa, derivados no exclusivamente de la violencia, por lo que la pregunta entonces de [...] Suele ser una “frase pagajosa y popular” decir que hubo un millón de muertos en la revolución, pero en realidad hubo muchos más debido a una serie de factores que contribuyeron a la complejidad de la historia, y las muertes no obedecieron precisamente al movimiento armado, sostuvo Javier Garciadiego, miembro de El Colegio Nacional (COLNAL), durante su participación en la mesa “La muerte en nuestra\n\n## Emiliano Zapata - Wikipedia, la enciclopedia libre\nMéxico Venustiano Carranza en 1919. De ascendencia indígena nahua, es considerado un símbolo de lucha y resistencia campesina en México. [...] \"), Morelos, el 10 de abril de 1919. Zapata acampó con sus fuerzas a las afueras de la hacienda, y se acercó a la misma acompañado únicamente por una escolta de diez hombres. Al cruzar el dintel, un ordenanza apostado a la entrada, tocó con su clarín la llamada a honores. Esa fue la señal para que los tiradores, escondidos en las azoteas, abrieran fuego contra Zapata, que alcanzó a sacar su pistola, pero un balazo se la tumbó; después el caudillo cayó muerto. No pocos condenaron el [...] su guerra de guerrillas a partir de ese mismo año, continuando así hasta su muerte en 1919.\n\n## Asesinato de Francisco Villa, líder revolucionario del norte del país\nel 12 de abril de 1912 cuando la maestra Elisa Griensen lideró la defensa de la ciudad de Parral.5 La misión estadounidense fracasó, de modo que el 17 de febrero de 1917 se retiraron las tropas lideradas por John J. Pershing.6 Villa salió de su escondite, y de 1917 a 1920 inició diferentes actividades guerrilleras en Chihuahua. Últimos años El 21 de mayo de 1920 Carranza fue asesinado en Tlaxcalontongo, Puebla; esto colocó el punto ﬁnal a la primera etapa de la Revolución mexicana, marcada por [...] ﬁn del símbolo agrarista del norte El 20 de julio 1923 Francisco Villa se encontraba circulando en un auto en la ciudad de Parral, Chihuahua, a fin de asistir a una fiesta familiar. Sin embargo, ocho personas, contratadas por Melitón Lozoya y el diputado Jesús Salas Barraza, interceptaron el auto en la esquina de las calles Juárez y Gabino Barrera. Momentos después, inició una lluvia de balas\n\n## La Decena Trágica de 1913, historia, causas y personajes - México Desconocido\nLa Decena Trágica comenzó el 9 de febrero de 1913, cuando un grupo de inconformes se levantaron en armas en contra del gobierno de Francisco I. Madero y terminó el 19 del mismo mes. A partir de este movimiento, tuvieron lugar una serie de enfrentamientos entre traidores y leales al gobierno que culminaron con el asesinato de Madero el 22 de febrero del mismo año y con la llegada ilegítima de Victoriano Huerta a la presidencia. ## La Decena Trágica: los últimos días de Francisco I. Madero [...] En dicho Pacto, se desconocía el gobierno de Madero y se imponía a Huerta como presidente. Poco tiempo después, el hermano de Francisco, Gustavo A. Madero fue torturado y asesinado el 18 de febrero en el Cuartel de La Ciudadela. [...] El Presidente de la República de inmediato se refugió en el edificio de la fotografía llamado «Daguerre«. Poco a poco, los maderistas retomaron el control del Centro \n\n## Decena Trágica - Wikipedia, la enciclopedia libre\n# Decena Trágica Decena Trágica Parte de Revolución mexicana Soldados sublevados en acción durante la Decena Trágica Fecha 9 de febrero de 1913-19 de febrero de 1913 (10 días) LugarCiudad de México Resultado Victoria Rebelde Traición de Victoriano Huerta Asesinato de: Francisco I. Madero y José María Pino Suárez Beligerantes Figuras políticas Comandantes Bajas México (Gobierno de Madero) Militares sublevados Apoyados por: Estados Unidos Francisco I. Madero Gustavo A. Madero [...] 5500 Se conoce como Decena Trágica al golpe de Estado militar que tuvo lugar del 9 al 19 de febrero\\ de 1913 para derrocar al presidente de México Francisco I. Madero. La sublevación se inició en la Ciudad de México, donde un grupo de disidentes comandado por el general Manuel Mondragón se levantó en armas y puso en libertad a los generales Bernardo Reyes y Félix Díaz, quienes estaban presos. Posteriormente, asa\n\n## Decena trágica: Cronología - Filmoteca UNAM\nDurante días, el ejército maderista combatió a los insurrectos en calles de la Ciudad de México sin lograr una victoria contundente. Las consecuencias de la rebelión. Al poco tiempo, la verdad se reveló: Huerta traicionó a Madero, e instigado por Henry Lane Wilson, embajador estadounidense, sostuvo reuniones secretas con Félix Díaz que derivaron en la firma del “Pacto de la Ciudadela” el 18 de febrero de 1913, el cual permitió a Huerta ascender a la presidencia de la República. [...] El 9 de febrero de 1913, soldados del antiguo Ejército Federal de Tacubaya, así como estudiantes de la Escuela Militar de Aspirantes de Tlalpan, se rebelaron en contra del presidente Madero. En acciones simultáneas, los generales Manuel Mondragón y Gregorio Ruiz liberaron de su presidio a Bernardo Reyes y Félix Díaz, ofreciéndoles el liderazgo de la rebelión. Por otra parte, los insurrectos atacaron el Palac\n\n## ¿Qué fue La Decena Trágica? - Causas y consecuencias\nPublicidad Se llama Decena Trágica a un golpe militar contra el gobierno del presidente reformista Francisco Madero. Se inició el 9 de febrero de 1913 y finalizó el 19 de febrero con el derrocamiento del primer mandatario, que el día 22 fue asesinado junto a su vicepresidente, José María Pino Suárez. El propósito del golpe de Estado era ponerle fin al gobierno de Madero, al que se acusaba de haber provocado una gran inestabilidad política, e instaurar una dictadura militar. [...] Los líderes del movimiento golpista fueron los generales Manuel Mondragón y Victoriano Huerta, que habían integrado el ejército porfirista. Huerta era hombre de confianza de Madero pero lo traicionó al pactar con los sublevados, derrocarlo y asumir de manera ilegal el gobierno de la República. La Decena Trágica forma parte de la Revolución mexicana, que se extendió entre 1910 y 1920. Los historiadores la conside\n\n## Plan de Ayala - historiauniversal.org\nEl Plan de Ayala fue un documento político y social emitido por el líder revolucionario Emiliano Zapata el 28 de noviembre de 1911, durante la Revolución Mexicana. Esta proclama fue un llamado a la reivindicación de los derechos de los campesinos y exigía la restitución de las tierras comunales que les habían sido arrebatadas por los terratenientes y empresas extranjeras. [...] El Plan de Ayala fue un documento histórico que se emitió durante la Revolución Mexicana en el año 1911. Fue redactado por Emiliano Zapata y su objetivo principal era luchar por la justicia social y la restitución de tierras a los campesinos. [...] El Plan de Ayala fue un documento político y social muy importante en la historia de México. Fue promulgado el 28 de noviembre de 1911 por Emiliano Zapata, líder revolucionario y principal representante de los campesinos en la Revolución Mexicana. El Plan de Ayala estab\n\n## Emiliano Zapata and the Plan of Ayala, 1879–1919\nOn November 28, 1911, Zapata proclaimed the Plan of Ayala, a document that would become the magna carta of the Zapatista movement. Drafted with Otilio Montaño’s help in Ayala, Morelos, the plan was a scathing indictment of President Madero’s betrayal of revolutionary ideals and a blueprint for radical land reform . It opened by denouncing Madero for failing to fulfill the promises of the Plan de San Luis Potosí – particularly the promise of returning stolen lands – and for allowing the old [...] First page of the original Plan of Ayala document (1911). Zapata’s plan called for the restitution of village lands and the redistribution of large haciendas with compensation, to be enforced “arms in hand” if necessary . It became the blueprint for the Zapatistas’ agrarian revolt after their break with Madero. [...] lands taken “unjustly” from communities as one of its revolutionary pledges. Ins\n\n## Plan de Ayala - Wikipedia, la enciclopedia libre\n\") expuestas en el plan de San Luis Potosí. Redactado por Emiliano Zapata y Otilio Montaño, el plan fue publicado el 15 de diciembre de 1911 en el periódico Diario del Hogar, concluyendo con el lema «Libertad, Justicia y Ley». Según el historiador John Womack Jr., el plan de Ayala representaba para los zapatistas «mucho más que un programa de acción, casi una Sagrada Escritura». El nombre del manifiesto se debe a que fue promulgado en Ayala, en el estado mexicano de Morelos. [...] En el plan de Ayala, los zapatistas llaman a las armas para restituir la propiedad de las tierras a los campesinos, pues se sostiene que las tierras le habían sido arrebatadas al pueblo por caciques, hacendados y terratenientes, y deben ser devueltas a sus dueños originarios. Por ello, el plan sostiene que los campesinos deben presentar sus títulos de propiedad, los cuales en su mayoría eran de tipo comunal y s\n\n## Plan de Ayala - bibliotecadigital.scjn.gob.mx\nPueblo mexicano, apoyad con las armas en la mano este Plan, y hareis la prosperidad y bienestar de la Patria. Justicia y Ley. Ayala, Nov. 28 -- 1911. [...] Los que subscribimos, constituidos en Junta Revolucionaria para sostener y llevar á cabo las promesas que hizo la revolución del 20 de noviembre de 1910, próximo pasado, declaramos solemnemente ante la faz del mundo civilizado que nos juzga y ante la Nación á que pertenecemos y amamos, los principios que hemos formulado para acabar con la tiranía que nos oprime y redimir á la patria de las dictaduras que se nos imponen las cuales quedan determinadas en el siguiente Plan: 1o.- Teniendo en [...] (Rúbricas) Gral. Emiliano Zapata Gral. José F. Ruiz Gral. O. E. Montaño Gral. Jesús Morales Gral. Fran/co Mendoza Gral. Eufemio Zapata Gral. Próculo Capistrán Gral. Agustín Cázares El Coronel Rafael Sánchez El Coronel Cristóbal Domínguez Santiag\n\n## Convención de Aguascalientes - Wikipedia, la enciclopedia libre\nLa Convención se declaró soberana, eligió al general Eulalio Gutiérrez Ortiz como Presidente de la República, y nombró a Villa comandante del ejército convencionalista, que pronto se enfrentaría al ejército constitucionalista de Carranza. Villa y Zapata, entraron a la Ciudad de México el 6 de diciembre, con un ejército de 60,000 hombres, mientras Carranza y sus seguidores se trasladaban a Veracruz. [...] Victoriano Huerta fue vencido por las fuerzas revolucionarias de Pancho Villa, Pablo González y Álvaro Obregón en 1914. Venustiano Carranza pretendía discutir con los demás jefes revolucionarios el programa político y los asuntos de gobierno y, como había prometido, presentó su renuncia a la jefatura del Ejército y se retiró de la reunión. Ante la inasistencia de los representantes de Emiliano Zapata, que no reconocían la autoridad de Carranza, y la negativa de Francisco Villa a presenta",
+ "plan": {
+  "title": "La Revolución Mexicana: de Díaz a la Constitución",
+  "description": "La Revolución Mexicana comenzó en 1910 contra la larga dictadura de Porfirio Díaz y se transformó en una guerra civil de una década. Este video explica por qué estalló, quiénes la lideraron y qué dejó en la Constitución de 1917.",
+  "language": "es",
+  "mood": "tense",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "a285f6d8",
+    "narration": "¿Cómo se sostiene un solo hombre en el poder durante más de treinta años? Porfirio Díaz lo logró, y su país parecía dormido, hasta que despertó de golpe.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "retrato Porfirio Díaz presidente",
+      "alt": "Retrato de Porfirio Díaz",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Por qué estalló un país dormido"
+   },
+   {
+    "id": "289d8e15",
+    "narration": "Díaz gobernó desde 1876. Tras una breve pausa de 1880 a 1884, volvió al poder. Y no se fue hasta 1911, con su renuncia y su exilio.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "El largo mandato de Díaz",
+      "events": [
+       {
+        "date": "1876",
+        "label": "Díaz llega al poder"
+       },
+       {
+        "date": "1880-1884",
+        "label": "Breve pausa en su mando"
+       },
+       {
+        "date": "1911",
+        "label": "Renuncia y exilio"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "1b9a7889",
+    "narration": "Llegó el progreso: crecieron los ferrocarriles, con sus locomotoras y estaciones, y entró la inversión extranjera. Pero ese progreso llegó solo a unos pocos.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "ferrocarril México siglo XIX",
+       "locomotora antigua México",
+       "estación de tren histórica México"
+      ],
+      "alt": "Ferrocarriles del porfiriato"
+     }
+    }
+   },
+   {
+    "id": "9d5f006b",
+    "narration": "La tierra se concentró en pocas haciendas. Muchos campesinos perdieron sus tierras, y sin sustento vivían en la pobreza. El orden de Díaz se apoyaba en la desigualdad.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "El costo del orden",
+      "items": [
+       "Tierra en pocas haciendas",
+       "Campesinos despojados",
+       "Riqueza en pocas manos"
+      ],
+      "style": "rail",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "91a85016",
+    "narration": "En 1908, en la entrevista Creelman, Díaz dijo que México estaba listo para la democracia. Muchos lo tomaron en serio, y la política se encendió.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "El futuro de México está asegurado. Los principios de la democracia han echado raíces.",
+      "attribution": "Porfirio Díaz, entrevista Creelman, 1908"
+     }
+    }
+   },
+   {
+    "id": "b7c47d7f",
+    "narration": "Francisco I. Madero lo desafió. Tras huir de la cárcel, publicó el Plan de San Luis: declaraba ilegales las elecciones y llamaba a levantarse el 20 de noviembre de 1910.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Francisco I. Madero retrato",
+      "alt": "Francisco I. Madero",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "e7684a50",
+    "narration": "Al principio pocos respondieron. Pero en mayo de 1911 cayó Ciudad Juárez, Díaz renunció y partió al exilio. El país dormido había despertado.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "points",
+      "title": "La caída del régimen",
+      "caption": "Ciudad Juárez, mayo de 1911",
+      "points": [
+       {
+        "name": "Ciudad Juárez"
+       },
+       {
+        "name": "Ciudad de México"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "7659cb54",
+    "narration": "Madero llegó a la presidencia en 1911, pero los campesinos esperaban tierras y no las recibieron. Zapata se sintió traicionado y rompió con él.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Francisco I. Madero retrato presidente",
+      "alt": "Francisco I. Madero, presidente de México",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "De la caída de Díaz a la guerra de facciones"
+   },
+   {
+    "id": "39c40dfb",
+    "narration": "En noviembre de 1911 proclamó el Plan de Ayala. Acusa a Madero de traición, exige restitución de tierras comunales y termina con el lema: Libertad, Justicia y Ley.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Plan de Ayala, 1911",
+      "items": [
+       "Zapata acusa a Madero de traición",
+       "Restitución de tierras comunales",
+       "Lema: Libertad, Justicia y Ley"
+      ],
+      "style": "rail",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "d0b13fc2",
+    "narration": "El 9 de febrero de 1913 se sublevan militares en la Ciudad de México. El 18, Huerta firma el Pacto de la Ciudadela. El 19 cae el gobierno, y el 22 asesinan a Madero y Pino Suárez.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "La Decena Trágica, 1913",
+      "events": [
+       {
+        "date": "9 feb",
+        "label": "Se sublevan militares en la Ciudad"
+       },
+       {
+        "date": "18 feb",
+        "label": "Pacto de la Ciudadela"
+       },
+       {
+        "date": "19 feb",
+        "label": "Cae el gobierno de Madero"
+       },
+       {
+        "date": "22 feb",
+        "label": "Asesinan a Madero y Pino Suárez"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "c56860ca",
+    "narration": "Huerta, hombre de confianza de Madero, lo había traicionado y tomó el poder de forma ilegal. Su dictadura provocó una respuesta armada en todo el país.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Victoriano Huerta general retrato",
+      "alt": "Victoriano Huerta",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "5b52a046",
+    "narration": "Contra él se unieron Venustiano Carranza, Pancho Villa, Álvaro Obregón y Emiliano Zapata. En 1914, Huerta renunció, pero la victoria común dejó a los vencedores sin acuerdo.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Venustiano Carranza retrato",
+       "Pancho Villa retrato",
+       "Álvaro Obregón retrato",
+       "Emiliano Zapata retrato"
+      ],
+      "alt": "Los líderes revolucionarios contra Huerta"
+     }
+    }
+   },
+   {
+    "id": "91291666",
+    "narration": "En la Convención de Aguascalientes, Carranza se retiró y Zapata no reconoció su autoridad. La Convención eligió a Eulalio Gutiérrez como presidente y nombró a Villa jefe de su ejército.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Ruptura en Aguascalientes",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Convención de Aguascalient",
+        "icon": "users"
+       },
+       {
+        "id": "b",
+        "label": "Carranza se retira",
+        "icon": "door-open"
+       },
+       {
+        "id": "c",
+        "label": "Eulalio Gutiérrez presiden",
+        "icon": "flag"
+       },
+       {
+        "id": "d",
+        "label": "Villa jefe del ejército",
+        "icon": "shield"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "a",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "59f03f46",
+    "narration": "Villa y Zapata entraron a la capital en diciembre con 60,000 hombres. Carranza se fue a Veracruz, y la guerra entre facciones comenzó.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "60,000",
+      "label": "hombres de Villa y Zapata entran a la Ciudad de México, 6 de diciembre"
+     }
+    }
+   },
+   {
+    "id": "844d8a1b",
+    "narration": "Tras años de guerra, Venustiano Carranza convocó a un Congreso Constituyente en Querétaro. Allí se escribió una nueva ley fundamental, promulgada el 5 de febrero de 1917.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Teatro de la República Querétaro",
+      "alt": "Teatro de la República en Querétaro",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "La Constitución de 1917 y su herencia"
+   },
+   {
+    "id": "54e87b29",
+    "narration": "Era un texto pionero. Según el Archivo General de la Nación, fue la primera constitución que incluyó derechos sociales, firmada por 209 diputados.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Constitución de 1917",
+      "items": [
+       "Querétaro, 5 de febrero de 1917",
+       "Primera con derechos sociales",
+       "Firmada por 209 diputados"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "e001db26",
+    "narration": "El artículo 27 declaró que tierras y aguas pertenecen originariamente a la Nación. Con ello se abrió la puerta al reparto agrario y a los ejidos.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Artículo 27",
+      "definition": "La propiedad de las tierras y aguas pertenece originariamente a la Nación, que puede transmitirla a particulares."
+     }
+    }
+   },
+   {
+    "id": "8473b465",
+    "narration": "El artículo 123 reconoció derechos laborales: jornada máxima de ocho horas, salario mínimo, derecho a organizarse y a la huelga.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Artículo 123",
+      "items": [
+       "Jornada de ocho horas",
+       "Salario mínimo",
+       "Derecho a organizarse",
+       "Derecho de huelga"
+      ]
+     }
+    }
+   },
+   {
+    "id": "fd42ab6b",
+    "narration": "Pero la paz tardó. Zapata fue asesinado en 1919, Carranza en 1920 y Villa en 1923. Ese mismo 1920, Álvaro Obregón llegó a la presidencia.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "El final de los caudillos",
+      "events": [
+       {
+        "date": "1919",
+        "label": "Asesinato de Zapata"
+       },
+       {
+        "date": "1920",
+        "label": "Asesinato de Carranza; Obregón presidente"
+       },
+       {
+        "date": "1923",
+        "label": "Asesinato de Villa"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "a7964fe7",
+    "narration": "¿Cuántos murieron? Nadie lo sabe con exactitud. Las estimaciones van de uno a tres millones, y McCaa calcula cerca de un millón y medio de muertes en exceso.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "1 a 3 millon",
+      "label": "Estimación de muertes; los historiadores no coinciden"
+     }
+    }
+   },
+   {
+    "id": "1bb3f147",
+    "narration": "Los historiadores también discrepan sobre cuándo terminó la Revolución. La Revolución dejó derechos sociales escritos en la ley, pero su cumplimiento sigue siendo un debate abierto.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Derechos escritos en la ley; su cumplimiento, un debate abierto.",
+      "emphasis": "un debate abierto"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Plan of San Luis Potosí - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Plan_of_San_Luis_Potos%C3%AD",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Entrevista Díaz-Creelman - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Entrevista_D%C3%ADaz-Creelman",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "La Revolución Mexicana: Causas, Personajes Clave y Su Legado | UMM",
+    "url": "https://www.umm.edu.mx/blog/la-revolucion-mexicana-causas-personajes-clave-y-su-legado",
+    "publisher": "umm.edu.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Decena trágica: Cronología - Filmoteca UNAM",
+    "url": "https://www.filmoteca.unam.mx/archivo_vivo/decena-tragica-cronologia",
+    "publisher": "filmoteca.unam.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Plan de Ayala - historiauniversal.org",
+    "url": "https://historiauniversal.org/plan-de-ayala",
+    "publisher": "historiauniversal.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Convención de Aguascalientes - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Convenci%C3%B3n_de_Aguascalientes",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "#Constitución1917 Un siglo de constitucionalismo social | Archivo General de la Nación | Gobierno | gob.mx",
+    "url": "https://www.gob.mx/agn/articulos/constitucionde1917-cien-anos-de-constitucionalismo-social-la-constitucion-de-1917?idiom=es",
+    "publisher": "gob.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Mexico: Constitución, 1917",
+    "url": "https://pdba.georgetown.edu/Constitutions/Mexico/mexico1917.html",
+    "publisher": "pdba.georgetown.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "La Revolución Mexicana y su costo demográfico | El Universal",
+    "url": "https://www.eluniversal.com.mx/articulo/ciencia-y-salud/ciencia/2016/10/21/la-revolucion-mexicana-y-su-costo-demografico",
+    "publisher": "eluniversal.com.mx",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Emiliano Zapata - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Emiliano_Zapata",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Asesinato de Francisco Villa, líder revolucionario del norte del país",
+    "url": "https://www.cndh.org.mx/sites/default/files/documentos/2025-07/FRN_JUL_20-1.pdf",
+    "publisher": "cndh.org.mx",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "history-story"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 45.8,
+  "before_first_script_call_s": 3.0,
+  "script_s": 42.8
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.22965,
+  "research": 0.00559,
+  "search_api": 0.088,
+  "total": 0.3235
+ },
+ "calls": {
+  "small": 4,
+  "big": 6,
+  "tools": 8
+ },
+ "tokens": {
+  "in": 121568,
+  "out": 10361
+ },
+ "rules": {
+  "length": {
+   "words": 556,
+   "expected_words": 537,
+   "ratio": 1.035,
+   "beats": 21,
+   "expected_beats": 17,
+   "est_speech_s": 251.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Cómo se sostiene un solo hombre en el poder durante más de treinta años? Porfirio Díaz lo logró, y su país parecía dormido, hasta que despertó de golpe.",
+   "close_text": "Los historiadores también discrepan sobre cuándo terminó la Revolución. La Revolución dejó derechos sociales escritos en la ley, pero su cumplimiento sigue siendo un debate abierto."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "image": 5,
+    "timeline": 3,
+    "gallery": 2,
+    "bullets": 3,
+    "quote": 1,
+    "map": 1,
+    "diagram": 1,
+    "stat": 2,
+    "definition": 1,
+    "checklist": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.2,
+   "top_type": "image",
+   "top_share": 0.24,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 20,
+   "ungrounded_numbers": [
+    "1876",
+    "1880",
+    "1884"
+   ],
+   "entities": 32,
+   "ungrounded_entities": [
+    "Congreso Constituyente",
+    "Querétaro"
+   ],
+   "ungrounded_share": 0.096,
+   "ungrounded_number_share": 0.15,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "llego a la presidencia",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 11,
+   "fetched": 26,
+   "notes_len": 24960,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 3 (gallery): its narration never says ['ferrocarril México siglo XIX', 'locomotora antigua México', 'estación de tren histórica México']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Some factual errors: the Pact of the Ciudadela was signed as the 'Pacto de la Embajada' on 18 Feb (the Ciudadela rebels with Díaz and Huerta signed the Embajada pact); the script's 'Huerta firma el Pacto de la Ciudadela' is a muddle. Also 'Decena Trágica' 9-19 Feb, Madero resigned 19th and killed 22nd, fine. Huerta resigned in July 1914 (OK). The Convention elected Gutiérrez and Villa as head of the Convention's army (fine)."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers Porfiriato, Madero, Zapata, Huerta, Carranza, 1917, but Villa and Orozco get little development, and Carranza's Plan de Guadalupe, Constitutionalist war, and Obregón's role are absent; Díaz's 30+ years are given a long section."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Three chapters in a clear order, but proportions are uneven: the Constitutionalist-Villa-Zapata war ends abruptly at beat 14 and jumps to 1917 with no account of the war's outcome (Celaya, Carranza's victory)."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is a decent hook; the ending, 'su cumplimiento sigue siendo un debate abierto', is a summary-like line with no strong image, and it repeats the death-toll debate in two lines."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Neutral, clear explanatory register suited to a general audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Variety is good (timeline, map, stat, diagram), but the diagram labels are truncated ('Convención de Aguascalient', 'Eulalio Gutiérrez presiden'), the stat '1 a 3 millon' is truncated, and the map shows only two points."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The Creelman quote and the figure of 60,000 men are concrete, but much of the narration is generic."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Spanish, close to the requested length, covers the requested points though thinly."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, with few awkwardnesses; some staccato sentences and a tense shift in beat 9 ('Acusa')."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "El 18, Huerta firma el Pacto de la Ciudadela.",
+    "issue": "The pact signed on 18 Feb 1913 was the Pacto de la Embajada (Félix Díaz and Huerta, at the US embassy); the Ciudadela was the rebels' barracks.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Tras huir de la cárcel, publicó el Plan de San Luis",
+    "issue": "The Plan was issued from San Antonio, Texas, after his escape; the narration does not say where, and the map is irrelevant.",
+    "beat": 6
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Convención de Aguascalient",
+    "issue": "Truncated diagram labels ('presiden', 'millon') are visible on screen.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Carranza se fue a Veracruz, y la guerra entre facciones comenzó.",
+    "issue": "The war between factions is never resolved (Celaya, Obregón's victories over Villa); the story jumps to 1917.",
+    "beat": 14
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Los historiadores también discrepan sobre cuándo terminó la Revolución.",
+    "issue": "A new idea is introduced without development, and the death-toll point is separated from the closing legacy; the ending is weak.",
+    "beat": 21
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Díaz gobernó desde 1876. Tras una breve pausa de 1880 a 1884, volvió al poder.",
+    "issue": "A whole beat is spent on dates that the voiceover reads out, at the expense of Villa, Orozco and the Plan de Guadalupe.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Díaz dijo que México estaba listo para la democracia.",
+    "issue": "Simplification: in the interview Díaz said he would welcome opposition parties and would not stand again, a promise that he later broke.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "Plan de Guadalupe and the Constitutionalist movement",
+   "Pancho Villa's and Orozco's roles in 1911",
+   "Celaya and the defeat of Villa",
+   "Obregón's coup of 1920 (Plan de Agua Prieta)",
+   "legacy: PNR/PRI, land reform under Cárdenas"
+  ],
+  "wrong_facts": [
+   "Pacto de la Ciudadela attributed to Huerta on 18 Feb 1913; it was the Pacto de la Embajada",
+   "Doubtful: 'Díaz dijo que México estaba listo para la democracia'"
+  ],
+  "would_publish": false,
+  "summary": "A clear, orderly survey with good visual variety but a rushed middle, an incomplete resolution of the faction war, a factual slip on the 1913 pact and truncated on-screen labels. Coverage of Villa and the Constitutionalists is thin, and the ending is flat.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Acusa a Madero de traición, exige restitución de tierras comunales y termina con el lema",
+     "problem": "Tense shift from past to present within the same account",
+     "better": "Acusó a Madero de traición, exigió la restitución de tierras comunales y terminó con el lema"
+    },
+    {
+     "quote": "se sublevan militares en la Ciudad de México",
+     "problem": "Historical present mixed with the past narration",
+     "better": "se sublevaron militares en la Ciudad de México"
+    },
+    {
+     "quote": "Llegó el progreso: crecieron los ferrocarriles, con sus locomotoras y estaciones",
+     "problem": "Redundant filler",
+     "better": "Llegó el progreso: se extendió el ferrocarril"
+    }
+   ]
+  },
+  "mean": 3.33,
+  "cost_usd": 0.040328,
+  "tokens": [
+   9799,
+   2073
+  ]
+ }
+}

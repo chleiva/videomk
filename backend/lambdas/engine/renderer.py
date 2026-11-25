@@ -7,7 +7,9 @@ from typing import Any, Callable, Dict, Iterator, List, Optional
 from PIL import Image
 
 from .canvas import Canvas
+from .frame import Frame
 from .scenes import SCENES
+from .scenes.formats import draw_framed, is_native
 from .scenes.base import SceneCtx
 from .scenes.captions import draw_captions
 from .theme import get_theme
@@ -26,7 +28,11 @@ class Renderer:
         self.W = int(timeline.get("width", 1920))
         self.H = int(timeline.get("height", 1080))
         self.fps = int(timeline.get("fps", 30))
-        self.out_w, self.out_h = (self.W // 2, self.H // 2) if draft else (self.W, self.H)
+        self.out_w, self.out_h = (max(2, self.W // 4 * 2), max(2, self.H // 4 * 2)) if draft else (self.W, self.H)   # draft: half size, kept even (yuv420p): 4:5 at 1080p is 540x674, not 675
+        fr = timeline.get("frame")
+        # the shape: the timeline's `frame` (aspect, resolution), else inferred from its pixel size; scenes lay out in the frame's design units
+        self.frame = Frame.parse(fr.get("aspect"), fr.get("resolution")) if isinstance(fr, dict) and fr.get("aspect") else Frame.from_size(self.W, self.H)
+        self.fallbacks: Dict[str, Dict[str, Any]] = {}   # scene id -> framed-fallback report (scale, min_text_px, readable), for the preview tooling
         self.theme = get_theme(timeline.get("theme", "midnight"))
         self.scenes: List[Dict[str, Any]] = timeline["scenes"]
         self.lead: Optional[Dict[str, Any]] = timeline.get("lead")
@@ -35,7 +41,7 @@ class Renderer:
         last = self.scenes[-1]
         self.total = float(timeline.get("duration") or (float(last["start"]) + float(last["duration"])))
         self.total_frames = int(round(self.total * self.fps))
-        self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)))
+        self.ctx = SceneCtx(resolve_image=self._load_image, resolve_clip=self._load_clip, captions=bool(timeline.get("captions", True)), frame=self.frame)
         self._clip_loader = clip_loader
         self._clips: Dict[str, Any] = {}
         self._image_loader = image_loader
@@ -79,24 +85,32 @@ class Renderer:
 
     def _draw_spec(self, sc: Dict[str, Any], lt: float) -> Image.Image:
         draw = SCENES.get(sc["type"])
-        cv = Canvas(self.W, self.H, ss=self.ss)
-        cv.background(self.theme, max(0.0, lt) + self._ambient_phase(sc), ambience=sc["type"] != "image")
+        fr = self.frame
+        cv = Canvas(fr.W, fr.H, ss=self.ss)   # design units; the finished image is scaled to the real output size below
+        bg_t = max(0.0, lt) + self._ambient_phase(sc)
+        amb = sc["type"] != "image"
+        cv.background(self.theme, bg_t, ambience=amb)
         if draw is None:
-            cv.text(self.W / 2, self.H / 2, f"unknown scene type: {sc['type']}", "semibold", 48, (255, 255, 255, 255), anchor="mm")
-        else:
+            cv.text(fr.W / 2, fr.H / 2, f"unknown scene type: {sc['type']}", "semibold", 48, (255, 255, 255, 255), anchor="mm")
+        elif is_native(sc["type"], fr):
             draw[0](cv, sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx)
+        else:   # no layout for this shape yet: the landscape scene as a card on the themed frame (never fails, never blank)
+            rep = draw_framed(cv, draw[0], sc.get("props") or {}, max(0.0, lt), float(sc["duration"]), self.theme, self.ctx, bg_t=bg_t, ambience=amb)
+            self.fallbacks[str(sc.get("id", ""))] = dict(rep, type=sc["type"])
         if self.ctx.captions:
             words = sc.get("words")
             if words:
-                draw_captions(cv, self.theme, words, lt)
-        return cv.to_rgb()
+                draw_captions(cv, self.theme, words, lt, fr)
+        return cv.to_rgb()   # design size; frame_at scales it to the output size
 
     def scene_index(self, t: float) -> int:
         return max(0, min(len(self.scenes) - 1, bisect.bisect_right(self.starts, t) - 1))
 
     def frame_at(self, t: float) -> Image.Image:
         img = self._compose(t)
-        return img.resize((self.out_w, self.out_h), Image.BILINEAR) if self.draft else img
+        if img.size != (self.out_w, self.out_h):   # draft (half size) or 720p: design units -> output pixels
+            img = img.resize((self.out_w, self.out_h), Image.BILINEAR if self.draft else Image.LANCZOS)
+        return img
 
     def _compose(self, t: float) -> Image.Image:
         idx = self.scene_index(t)

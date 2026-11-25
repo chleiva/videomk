@@ -1,0 +1,598 @@
+{
+ "id": "cmp-01",
+ "category": "comparison (A vs B)",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "React vs Vue: which should I learn first?",
+ "great": "Fair comparison: learning curve, ecosystem, jobs, performance, tooling, philosophy; a recommendation by situation; no tribalism; accurate.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:03:23",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Choosing between React and Vue as a first framework is a timeless conceptual comparison that an encyclopedic explainer can cover without needing current news or prices, so no web research is required.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ],
+  "staged": null,
+  "notes_len": 3533,
+  "n_sources": 5,
+  "n_fetched": 5,
+  "fetched": [
+   "Web framework",
+   "JavaScript library",
+   "Vue.js",
+   "Nuxt",
+   "React (software)"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 365 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## Web framework\nA web framework (WF), web application framework (WAF), or web development framework is a software framework that is designed to support the development of web applications including web services, web resources, and web APIs. Web frameworks provide a standard way to build and deploy web applications on the World Wide Web. Web frameworks aim to automate the overhead associated with common activities performed in web development. For example, many web frameworks provide libraries for database access, templating frameworks, and session management, and they often promote code reuse. Although they often target development of dynamic web sites, they are also applicable to static websites.\n\n## JavaScript library\nA JavaScript library is a library of pre-written JavaScript code that allows for easier development of JavaScript-based applications, especially for AJAX and other web-centric technologies. They can be included in a website by embedding it directly in the HTML via a script tag.\n\n## Vue.js\nVue.js (commonly referred to as Vue; pronounced \"view\") is an open-source model–view–viewmodel front end JavaScript framework for building user interfaces and single-page applications. It was created by Evan You and is maintained by him and the rest of the active core team members. Vue features an incrementally adaptable architecture that focuses on declarative rendering and component composition.\n\n## Nuxt\nNuxt is a free and open source full-stack web framework based on Vue.js, Nitro, and Vite. Nuxt is inspired by Next.js, which is a similar framework based on React rather than the Vue JavaScript library.\nThe main advantage of Nuxt over using Vue alone is its universal rendering system. The framework works as both an in-browser single-page application (SPA) as well as a server-rendered static website, by \"hydrating\" a server-rendered page to a full SPA after it is loaded. This allows websites to have the search engine optimization and performance benefits of a server-rendered site in addition to the interactivity of a client-rendered application. Nuxt largely abstracts the server-rendering features from the developer, and it's therefore able to have a similar development experience to a traditional SPA using Vue's single-file component (SFC) system.\nIn addition to its universal rendering mechanism, Nuxt also provides many other benefits and quality-of-life features, such as path-based routing, hot module replacement (HMR), TypeScript support out of the box, and middleware and server logic.\n\n## React (software)\nReact (also known as React.js or ReactJS) is a free and open-source front-end JavaScript library that aims to make building user interfaces based on components more \"seamless\". It is maintained by Meta (formerly Facebook) and a community of individual developers and companies. According to the 2025 Stack Overflow Developer Survey, React is one of the most commonly used web technologies. Based on W3Techs, it is used by 6% of all websites.\nReact can be used to develop single-page, mobile, or server-rendered applications with frameworks like Next.js and React Router. Because React is only concerned with the user interface and rendering components to the DOM, React applications often rely on libraries for routing and other client-side functionality. A key advantage of React is that it – by default – only re-renders those parts of the page that have changed, avoiding unnecessary re-rendering of unchanged DOM elements. React is used by an estimated 6% of all websites.",
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A fair comparison of React and Vue.js for beginners, covering what each one is, how they differ, and who each suits best. Learn which front-end tool fits your goals.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "5c666f90",
+    "narration": "You want to build websites that feel alive. Two names keep popping up: React and Vue. Pick the wrong one and you lose weeks. So which one should you learn first?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "React vs Vue",
+      "subtitle": "Which should you learn first?"
+     }
+    },
+    "sfx": "riser"
+   },
+   {
+    "id": "d0b43577",
+    "narration": "Both help you build user interfaces, the buttons, forms and pages people click. Both use components, small reusable pieces of a screen. The differences are in how they are built and run.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Both build interfaces from components",
+      "nodes": [
+       {
+        "id": "c",
+        "label": "Components",
+        "icon": "puzzle"
+       },
+       {
+        "id": "u",
+        "label": "User interface",
+        "icon": "cast"
+       },
+       {
+        "id": "w",
+        "label": "Web page",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "c",
+        "u",
+        "build"
+       ],
+       [
+        "u",
+        "w",
+        "renders to"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "What they are"
+   },
+   {
+    "id": "840897a6",
+    "narration": "React is a free, open-source JavaScript library. It is maintained by Meta, formerly Facebook, and a community of developers and companies.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "React",
+      "definition": "A free, open-source front-end JavaScript library for building user interfaces from components.",
+      "example": "Maintained by Meta and a community"
+     }
+    }
+   },
+   {
+    "id": "a92b9767",
+    "narration": "According to the 2025 Stack Overflow Developer Survey, React is one of the most commonly used web technologies. W3Techs says it runs on about 6 percent of all websites.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "6%",
+      "label": "of all websites use React, according to W3Techs"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "fc488df7",
+    "narration": "Vue, pronounced like view, is an open-source JavaScript framework created by Evan You. He and the active core team still maintain it today.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Vue.js",
+      "definition": "An open-source front-end JavaScript framework for building user interfaces and single-page applications.",
+      "origin": "Created by Evan You"
+     }
+    }
+   },
+   {
+    "id": "1f7c40ca",
+    "narration": "Here is the key difference. React is a library focused only on the interface. Vue calls itself a framework, and is built to be adopted step by step.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Library for interfaces"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Incrementally adaptable"
+      },
+      "rows": [
+       {
+        "label": "Type",
+        "a": "Library",
+        "b": "Framework"
+       },
+       {
+        "label": "Maintainer",
+        "a": "Meta and community",
+        "b": "Evan You and core team"
+       },
+       {
+        "label": "Focus",
+        "a": "UI and rendering",
+        "b": "Declarative rendering"
+       }
+      ]
+     }
+    },
+    "chapter": "How they differ"
+   },
+   {
+    "id": "e6dce368",
+    "narration": "Because React only handles the interface, apps often rely on other libraries for routing and similar features. That means more choices for you to make, which some people love and others find tiring.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "React plus add-ons",
+      "nodes": [
+       {
+        "id": "r",
+        "label": "React",
+        "icon": "atom"
+       },
+       {
+        "id": "ro",
+        "label": "Routing library",
+        "icon": "map"
+       },
+       {
+        "id": "o",
+        "label": "Other libraries",
+        "icon": "box"
+       },
+       {
+        "id": "a",
+        "label": "Your app",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "r",
+        "a"
+       ],
+       [
+        "ro",
+        "a"
+       ],
+       [
+        "o",
+        "a"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "d7953b48",
+    "narration": "React does have a smart default. It only re-renders the parts of the page that changed, avoiding needless work on everything else.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "React re-renders only the parts of the page that changed.",
+      "emphasis": "only the parts"
+     }
+    }
+   },
+   {
+    "id": "a24ccbca",
+    "narration": "Vue focuses on declarative rendering and component composition. You describe what the screen should look like, and Vue keeps it in sync.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Vue's core ideas",
+      "items": [
+       "Declarative rendering",
+       "Component composition",
+       "Incrementally adaptable"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "eye",
+       "puzzle",
+       "door-stairwell"
+      ]
+     }
+    }
+   },
+   {
+    "id": "4fece957",
+    "narration": "Both can grow into full applications. Next.js builds on React. Nuxt builds on Vue, and adds server rendering, file-based routing and TypeScript support out of the box.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Base",
+       "Full framework"
+      ],
+      "rows": [
+       [
+        "React",
+        "Next.js"
+       ],
+       [
+        "Vue",
+        "Nuxt"
+       ]
+      ],
+      "title": "Bigger frameworks on top",
+      "highlight": {
+       "row": 1
+      }
+     }
+    }
+   },
+   {
+    "id": "323f1cf1",
+    "narration": "Pick React if you want wide, common usage. Choose it if you like choosing your own libraries. And it suits you if you may build mobile or server apps later.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Choose React if...",
+      "items": [
+       "You want wide, common usage",
+       "You like choosing your own libraries",
+       "You may build mobile or server apps"
+      ],
+      "style": "rail",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "Which to pick"
+   },
+   {
+    "id": "772b3a4e",
+    "narration": "Pick Vue if you like gradual, step-by-step adoption, where you add features as you need them. And you may add Nuxt later for server rendering and search friendliness.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Choose Vue if...",
+      "items": [
+       "You like gradual, step-by-step adoption",
+       "You may add Nuxt later"
+      ],
+      "style": "cards",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "54d10c17",
+    "narration": "There is no wrong first choice. Both teach components, the idea behind modern interfaces. If you want the most common tool, start with React. If you prefer a gentler, all-in-one feel, start with Vue. Skills carry over either way.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Learn components first. The framework is just the doorway.",
+      "emphasis": "components"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Web framework",
+    "url": "https://en.wikipedia.org/wiki/Web_framework",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "JavaScript library",
+    "url": "https://en.wikipedia.org/wiki/JavaScript_library",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Vue.js",
+    "url": "https://en.wikipedia.org/wiki/Vue.js",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Nuxt",
+    "url": "https://en.wikipedia.org/wiki/Nuxt",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "React (software)",
+    "url": "https://en.wikipedia.org/wiki/React_(software)",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 48.5,
+  "before_first_script_call_s": 5.5,
+  "script_s": 42.9
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.1372,
+  "search_api": 0.0,
+  "total": 0.13745
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 37389,
+  "out": 6741
+ },
+ "rules": {
+  "length": {
+   "words": 374,
+   "expected_words": 402,
+   "ratio": 0.93,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 168.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 41,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You want to build websites that feel alive. Two names keep popping up: React and Vue. Pick the wrong one and you lose weeks. So which one should you learn first?",
+   "close_text": "There is no wrong first choice. Both teach components, the idea behind modern interfaces. If you want the most common tool, start with React. If you prefer a gentler, all-in-one feel, start with Vue. "
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "diagram": 2,
+    "definition": 2,
+    "stat": 1,
+    "versus": 1,
+    "kinetic_text": 2,
+    "bullets": 3,
+    "table": 1
+   },
+   "max_run": 2,
+   "entropy": 2.87,
+   "top_type": "bullets",
+   "top_share": 0.23,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 9,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 5,
+   "fetched": 5,
+   "notes_len": 3533,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.08,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 2 (diagram): its narration never says ['User interface', 'Web page']",
+   "beat 7 (diagram): its narration never says ['Other libraries', 'Your app']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most claims trace to the notes, but \"gentler, all-in-one feel\" for Vue is unsupported, and the \"Vue is a framework\" vs React \"library\" framing is oversimplified. Nuxt/Next facts are fine."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "Omits jobs market, learning curve, performance, tooling, and syntax (JSX vs templates); it leans on Wikipedia definitions and has no code or concrete example."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear (what/how differ/pick), but it spends three beats on definitions and stats and repeats the library/framework point; the ending is rushed."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook, \"Pick the wrong one and you lose weeks,\" is mild and a bit contradicted by the ending \"no wrong first choice.\" The ending line is decent but generic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, beginner-appropriate and non-tribal."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, and the stat is a real number. The first diagram is trivial, the versus table has weak rows, and the table highlight is arbitrary."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly paraphrased encyclopedia text with generic lines like \"which some people love and others find tiring\"; no surprising facts."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It gives a recommendation by situation and stays near the target length, but it skips key comparison areas (jobs, learning curve, performance) that a fair comparison needs."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Clean, fluent English, though a few sentences are choppy and repetitive (\"Pick... Choose... Pick\")."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Pick React if you want wide, common usage.",
+    "issue": "There is no job-market data or learning-curve comparison, which is what a learner deciding needs most; \"common usage\" is vague.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "If you prefer a gentler, all-in-one feel, start with Vue.",
+    "issue": "This is unsupported by the notes. The earlier beats call Vue incrementally adaptable, and Vue is not really all-in-one, so the claim contradicts the script's own framing.",
+    "beat": 13
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Vue calls itself a framework, and is built to be adopted step by step.",
+    "issue": "It implies React is less capable, while React is used for full apps via Next.js. The library-versus-framework distinction is oversimplified.",
+    "beat": 6
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Pick the wrong one and you lose weeks.",
+    "issue": "This contradicts the closing \"There is no wrong first choice.\"",
+    "beat": 1
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "According to the 2025 Stack Overflow Developer Survey, React is one of the most commonly used web technologies.",
+    "issue": "This is a vague statistic with no comparison to Vue, so it gives the viewer nothing to weigh.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Vue focuses on declarative rendering and component composition.",
+    "issue": "React is also declarative, so this is not a differentiator. The script never shows the real difference, such as JSX vs templates or the two reactivity models.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Both build interfaces from components",
+    "issue": "The diagram is a trivial three-node chain that adds little.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "Job market and hiring numbers",
+   "Learning curve and syntax differences (JSX vs single-file templates)",
+   "Performance comparison",
+   "Tooling (Vite, devtools, CLI)",
+   "Ecosystem size",
+   "Prerequisite advice such as learning JavaScript first",
+   "A concrete code example"
+  ],
+  "wrong_facts": [
+   "\"all-in-one feel\" for Vue is unsupported and arguably inaccurate"
+  ],
+  "would_publish": false,
+  "summary": "A clean, neutral, readable script, but it is thin: it paraphrases Wikipedia and skips jobs, learning curve, performance and tooling. The recommendation is vague and slightly self-contradictory.",
+  "mean": 3.0,
+  "cost_usd": 0.024234,
+  "tokens": [
+   4772,
+   1469
+  ]
+ }
+}

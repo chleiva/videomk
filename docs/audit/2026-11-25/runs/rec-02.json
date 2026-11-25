@@ -1,0 +1,591 @@
+{
+ "id": "rec-02",
+ "category": "recipe / cooking",
+ "language": "es",
+ "difficulty": "detailed",
+ "prompt": "Receta de la paella valenciana auténtica: ingredientes, orden de cocción, el socarrat y los errores típicos que hay que evitar.",
+ "great": "Pollo, conejo, garrofón, judía verde (ferraura), tomate, pimentón, azafrán, arroz bomba, proporciones y caldo, no remover, socarrat, reposo, errores (chorizo, mezclar), cantidades fiables; auténtica y específica.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:06:00",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La receta tradicional de la paella valenciana, el orden de cocción, el socarrat y los errores comunes son conocimiento culinario estable y atemporal que no depende de información reciente, así que una",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "tutorial-howto",
+   "listicle-ranking"
+  ],
+  "staged": null,
+  "notes_len": 4542,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Paella",
+   "Concurso Internacional de Paella Valenciana de Sueca",
+   "Socarrat",
+   "Arroz pegado",
+   "Arroz con pollo",
+   "Arroz a la valenciana"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Paella\nLa paella,​ o también arroz a la paella,​ (del valenciano paella, que significa 'sartén' y se refiere al recipiente con el que se hace la receta y que le da nombre, y este a su vez del latín patella)​ es una receta de cocina con base de arroz, con origen en la actual Comunidad Valenciana, hoy en día muy popular en toda España y servida en restaurantes de todo el mundo.​ En esta receta, el arroz se cocina junto a otros alimentos en una sartén, generalmente ancha y con asas. El nombre de paella hace referencia tanto a la receta o plato cocinado como al recipiente que se utiliza para su elaboración,​ aunque este último recibe también el nombre de paellera,​​ término originalmente considerado incorrecto pero que con el uso se ha ido aceptando en español.​ Se trata de un plato de origen humilde, descrito por primera vez en España en el área de la Albufera de Valencia.​​\nLa popularidad de este plato ha hecho que, en la actualidad, se haya expandido con gran cantidad de variantes adaptadas en los ingredientes a las diversas regiones de la cocina española.​​ La paella se ha convertido en uno de los iconos de la gastronomía española.​\nEl 9 de noviembre de 2021 fue declarada bien de interés cultural…\n\n## Concurso Internacional de Paella Valenciana de Sueca\nEl Concurso Internacional de Paella Valenciana de Sueca (en valenciano y oficialmente Concurs Internacional de Paella Valenciana) es una competición culinaria para elaborar una paella valenciana, según unos parámetros establecidos y con unos ingredientes determinados, que se celebra anualmente en la localidad española de Sueca.\n\n## Socarrat\nEl socarrat es una placa de barro cocido o baldosín grueso, esmaltado en blanco y decorado generalmente en tonos rojizos o amarronados y negruzcos, destinado a colocarse entre vigas, en techos y aleros de edificios. Pieza de origen medieval típica de la alfarería del Levante español, el término «socarrat», en valenciano significa ‘chamuscado’.​ Se conocen otras palabras que nombran piezas con funciones semejantes a los «socarrats» como rajola, maó prim, atovó o cairó. La primera mención registrada de su existencia la hizo en 1604 el obispo de Segorbe, Feliciano de Figueroa. Representativo de la cerámica de Paterna, el socarrat y piezas similares han sido documentados también en Benetúser, Manises y muchos otros lugares de Valencia, Aragón, Cataluña y Baleares.\n\n## Arroz pegado\nEl arroz pegado, también llamado concolón o cocolón (Ecuador, Panamá, Perú, Venezuela), concón (República Dominicana), costra (Costa Rica), cucayo o pega (Colombia), raspa (Cuba) entre otras denominaciones, es la capa inferior resultante de la cocción del arroz que se adhiere al fondo de la olla, quedando tostada y con textura crujiente. Puede quemarse más o menos dependiendo del tiempo de cocción, la variedad de arroz usada y de los otros ingredientes en la olla, bien sean grasas como el aceite o mantequilla, o bien azúcares que se caramelizan junto con el almidón del arroz para formar la fina capa.​ Es considerado como «manjar de aprovechamiento» en diversos sitios.​​\n\n## Arroz con pollo\nEl arroz con pollo es un plato típico de América Latina y España​ con variaciones regionales según el país. Consiste en arroz cocinado con pollo, en presas o desmechado, verduras, y sazonado con especias.\n\n## Arroz a la valenciana\nArroz a la valenciana (en valenciano, arròs a la valenciana) es la denominación para multitud de platos de arroz de diversas gastronomías del mundo, que tienen como origen la tradición arrocera del antiguo Reino de Valencia, en el este de España. \nLa paella es una de las recetas modernas derivadas de la técnica de cocinar el arroz a la valenciana,​ de la cual se tiene constancia en Valencia desde la Edad Media. La receta fue llevada a América durante la época imperial, mano a mano con la introducción del cultivo del arroz, y actualmente se encuentra en las gastronomías argentina, boliviana, colombiana, cubana, nicaragüense, uruguaya y venezolana, e históricamente en la mexicana o la puertorriqueña entre otras.​ Incluso en la cocina filipina se encuentra el arosbalensiyana.​ En cambio, la paella española, tal y como se conoce hoy día, no surgiría hasta finales del siglo XIX, entre los campesinos de la huerta valenciana. Popularmente en España, cuando una paella lleva otros ingredientes que no son los «propiamente valencianos» recibe el nombre coloquial y despectivo de «arroz con cosas».​​​​\nAunque existe una amplia variedad de recetas de arroz a la valenciana, todas tienen en común que…",
+ "plan": {
+  "title": "Paella valenciana auténtica: receta, socarrat y errores",
+  "description": "Aprende la receta de la paella valenciana auténtica: ingredientes, orden de cocción y cómo conseguir el socarrat. Descubre también los errores típicos que debes evitar.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "89451a0c",
+    "narration": "¿Por qué un valenciano se enfada si le pones chorizo a la paella? Porque la auténtica tiene reglas claras. Veremos ingredientes, orden de cocción, el socarrat y los errores que debes evitar.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "paella valenciana paellera",
+      "alt": "Paella valenciana en su paellera",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Las reglas de la paella"
+   },
+   {
+    "id": "80eeaa7d",
+    "narration": "Paella significa sartén en valenciano. Es un plato de origen humilde, descrito por primera vez en la Albufera de Valencia. Hoy es un icono de la gastronomía española y bien de interés cultural.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Paella",
+      "definition": "Receta de arroz cocinado en una sartén ancha con asas. Nombre del plato y del recipiente.",
+      "origin": "Del valenciano paella, 'sartén', y este del latín patella"
+     }
+    }
+   },
+   {
+    "id": "0e9a5f79",
+    "narration": "Primero, la carne: pollo y conejo. Segundo, verduras: judía verde plana y garrofón. Tercero, tomate rallado. Cuarto, arroz, azafrán, aceite, agua y sal. Nada más.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Los ingredientes auténticos",
+      "items": [
+       "Pollo y conejo",
+       "Judía verde y garrofón",
+       "Tomate rallado",
+       "Arroz, azafrán, aceite, agua y sal"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "ham",
+       "leaf",
+       "hamburger",
+       "gem"
+      ]
+     }
+    },
+    "chapter": "Ingredientes"
+   },
+   {
+    "id": "a739d85e",
+    "narration": "Mira la carne de pollo y conejo, bien troceada. Después, la judía verde con el garrofón. Y por último el azafrán en hebras, que da color y aroma al caldo.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "pollo y conejo troceados",
+       "judía verde y garrofón",
+       "azafrán en hebras"
+      ],
+      "alt": "Ingredientes de la paella valenciana"
+     }
+    }
+   },
+   {
+    "id": "9a49eb15",
+    "narration": "Primero, sofríe la carne en aceite hasta dorarla. Después, añade la verdura. Luego el tomate rallado y el agua, que hierve unos minutos. Echa el arroz y el azafrán. Al final, deja reposar.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Orden de cocción",
+      "steps": [
+       {
+        "label": "Dorar la carne"
+       },
+       {
+        "label": "Añadir la verdura"
+       },
+       {
+        "label": "Tomate y agua"
+       },
+       {
+        "label": "Arroz y azafrán"
+       },
+       {
+        "label": "Reposar"
+       }
+      ]
+     }
+    },
+    "chapter": "El orden de cocción"
+   },
+   {
+    "id": "4bcffdef",
+    "narration": "El fuego cuenta mucho. Al principio, fuerte, para que el caldo hierva con ganas. Cuando entra el arroz, se baja poco a poco, y el grano se cuece sin prisa.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "llamas de fuego cocina",
+      "alt": "Fuego de leña bajo una sartén"
+     }
+    }
+   },
+   {
+    "id": "afec40c3",
+    "narration": "Y ahora, el tesoro: el socarrat. En valenciano, socarrat significa chamuscado. Es la capa de arroz tostado y crujiente que se pega al fondo de la paella.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Socarrat",
+      "definition": "Capa de arroz tostado y crujiente que queda pegada al fondo de la paella.",
+      "origin": "En valenciano, 'chamuscado'"
+     }
+    },
+    "chapter": "El socarrat"
+   },
+   {
+    "id": "ad904800",
+    "narration": "Se forma al final. Cuando el caldo se evapora, el arroz y el aceite se tuestan. Sube el fuego unos segundos y escucha el crepitar. Así nace el socarrat, sin llegar a quemarse.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo nace el socarrat",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Caldo evaporado",
+        "icon": "droplet"
+       },
+       {
+        "id": "b",
+        "label": "Arroz y aceite",
+        "icon": "gem"
+       },
+       {
+        "id": "c",
+        "label": "Fuego fuerte",
+        "icon": "flame"
+       },
+       {
+        "id": "d",
+        "label": "Socarrat",
+        "icon": "star"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "db7a0773",
+    "narration": "Evita estos errores. No remuevas el arroz una vez echado. No añadas chorizo ni guisantes. No tapes la paella mientras cuece. Y sí, déjala reposar unos minutos.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Errores típicos",
+      "items": [
+       "Remover el arroz",
+       "Añadir chorizo o guisantes",
+       "Taparla mientras cuece",
+       "Dejarla reposar unos minutos"
+      ],
+      "checked": [
+       false,
+       false,
+       false,
+       true
+      ]
+     }
+    },
+    "chapter": "Errores típicos"
+   },
+   {
+    "id": "84ebdaa6",
+    "narration": "En España, una paella con ingredientes que no son propiamente valencianos recibe el nombre despectivo de arroz con cosas. La auténtica lleva pollo, conejo y garrofón; la otra, lo que haya a mano.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Paella valenciana",
+       "tagline": "La receta tradicional"
+      },
+      "b": {
+       "name": "Arroz con cosas",
+       "tagline": "Nombre coloquial"
+      },
+      "rows": [
+       {
+        "label": "Carne",
+        "a": "Pollo y conejo",
+        "b": "Cualquiera"
+       },
+       {
+        "label": "Verdura",
+        "a": "Judía y garrofón",
+        "b": "Otras"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "c49a6638",
+    "narration": "Usa una paellera ancha. Extiende el arroz en capa fina. Y mide bien el caldo: demasiado lo vuelve blando, y poco lo deja duro.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Más claves",
+      "items": [
+       "Paellera ancha",
+       "Capa fina de arroz",
+       "Caldo bien medido"
+      ],
+      "style": "spotlight",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "adc782df",
+    "narration": "Sirve la paella valenciana a la mesa, en su propia sartén. Tapa la paellera con un paño y déjala reposando unos minutos. Y come con cuchara de madera, como manda la tradición.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "paella valenciana servida mesa",
+       "paellera con paño reposando",
+       "cuchara de madera paella"
+      ],
+      "alt": "Servir y comer la paella"
+     }
+    },
+    "chapter": "A la mesa"
+   },
+   {
+    "id": "5621ac1f",
+    "narration": "Recuerda: sofríe con paciencia, no remuevas el arroz y busca ese socarrat dorado. Con eso, y buenos ingredientes, tu paella sabrá a Valencia.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No remuevas el arroz y busca el socarrat: así sabe Valencia.",
+      "emphasis": "socarrat"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Paella",
+    "url": "https://es.wikipedia.org/wiki/Paella",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Socarrat",
+    "url": "https://es.wikipedia.org/wiki/Socarrat",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Arroz pegado",
+    "url": "https://es.wikipedia.org/wiki/Arroz_pegado",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Arroz a la valenciana",
+    "url": "https://es.wikipedia.org/wiki/Arroz_a_la_valenciana",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "tutorial-howto",
+   "listicle-ranking"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 80.9,
+  "before_first_script_call_s": 5.2,
+  "script_s": 75.6
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "script_big": 0.19126,
+  "search_api": 0.0,
+  "total": 0.19153
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 39625,
+  "out": 11746
+ },
+ "rules": {
+  "length": {
+   "words": 382,
+   "expected_words": 402,
+   "ratio": 0.95,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 171.5,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 23,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Por qué un valenciano se enfada si le pones chorizo a la paella? Porque la auténtica tiene reglas claras. Veremos ingredientes, orden de cocción, el socarrat y los errores que debes evitar.",
+   "close_text": "Recuerda: sofríe con paciencia, no remuevas el arroz y busca ese socarrat dorado. Con eso, y buenos ingredientes, tu paella sabrá a Valencia."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "image": 1,
+    "definition": 2,
+    "bullets": 2,
+    "gallery": 2,
+    "steps": 1,
+    "clip": 1,
+    "diagram": 1,
+    "checklist": 1,
+    "versus": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "definition",
+   "top_share": 0.15,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 3,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "no remuevas el arroz",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 4542,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Several doubtful or wrong points. 'Nada más' omits pimentón and rosemary, which are common in the traditional recipe. The checklist lists 'Taparla mientras cuece' as an error and 'reposar' as correct, which is fine. The order puts the water after the tomato, and the beat 12 'come con cuchara de madera' is shaky. Beat 5 also omits the rice type."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "There are no quantities or proportions, no arroz bomba and no pimentón. The broth is never quantified and the rice type is missing. Cooking times are absent. The socarrat and the errors are covered only superficially."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear, but beat 11 repeats the resting point and the 'no remuevas' advice from earlier. The 'arroz con cosas' section sits oddly after the errors."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The chorizo question is a decent hook. The ending is a summary recap, though 'sabrá a Valencia' gives it a small image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, direct tú-form address that suits the audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary. But the diagram icons ('gem' for rice) are odd, and the 'versus' compares only two rows. The 'Fuego de leña' clip is queried as generic flames. The checklist mixes an error with a recommendation."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Mostly generic recipe-blog content. The 'arroz con cosas' term is the one specific touch, and it comes from the notes."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It covers ingredients, order, socarrat and errors. But it lacks reliable quantities, and about 400 words are used on filler such as the definition beat."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Mostly natural and correct Spanish. Some stiff or odd phrasing: 'el fuego cuenta mucho' and 'que hierve unos minutos'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "arroz, azafrán, aceite, agua y sal. Nada más.",
+    "issue": "It omits pimentón, which is standard, and the optional ramillete of romero. 'Nada más' is overly absolute.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Y mide bien el caldo: demasiado lo vuelve blando, y poco lo deja duro.",
+    "issue": "It gives no proportions, such as grams of rice or litres of broth per person. The rice variety (bomba or senia) is also not named.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Sirve la paella valenciana a la mesa, en su propia sartén. Tapa la paellera con un paño",
+    "issue": "This is shaky and partly contradicts 'No tapes la paella'. The cuchara de madera tradition is stated as fact without support.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Y sí, déjala reposar unos minutos.",
+    "issue": "Resting is repeated in beats 5, 9 and 12, and the 'no remuevas' advice is repeated in beat 13.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Dejarla reposar unos minutos",
+    "issue": "A correct step is listed inside an 'errors' checklist, which is confusing.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Luego el tomate rallado y el agua, que hierve unos minutos.",
+    "issue": "The traditional order puts the tomato and pimentón before the water, and it omits the broth stage and the position of the garrofón.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "Pimentón dulce and the moment it is added",
+   "Rice proportions (e.g. about 100 g of rice per person) and the litres of liquid",
+   "Arroz bomba or senia",
+   "Cooking times (about 18-20 minutes)",
+   "Rice not being washed",
+   "The traditional wood fire (naranjo)",
+   "Other typical errors such as rinsing or too much saffron"
+  ],
+  "wrong_facts": [
+   "'Nada más' ignores pimentón, which is standard in the recipe.",
+   "The 'socarrat' is shown as the 'tesoro' formed with a burst of heat; this is fine, but the notes only support the meaning of the word, not the technique."
+  ],
+  "would_publish": false,
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "El fuego cuenta mucho.",
+     "problem": "Somewhat awkward phrasing.",
+     "better": "El fuego es clave."
+    },
+    {
+     "quote": "para que el caldo hierva con ganas",
+     "problem": "Colloquial and imprecise.",
+     "better": "para que el caldo hierva con fuerza"
+    },
+    {
+     "quote": "Mira la carne de pollo y conejo, bien troceada.",
+     "problem": "Redundant ('carne de pollo y conejo').",
+     "better": "Mira el pollo y el conejo, bien troceados."
+    }
+   ]
+  },
+  "summary": "A tidy, friendly overview with a good hook, but it is generic and lacks the quantities, pimentón and rice type that an authentic recipe needs. It also repeats advice and places 'reposar' awkwardly in the errors list.",
+  "mean": 3.0,
+  "cost_usd": 0.030482,
+  "tokens": [
+   6306,
+   1787
+  ]
+ }
+}

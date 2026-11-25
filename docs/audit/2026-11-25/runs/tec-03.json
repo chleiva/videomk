@@ -1,0 +1,867 @@
+{
+ "id": "tec-03",
+ "category": "technology / AI",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "what are the most important AI model releases and trends of the past few months",
+ "great": "Recent releases and trends with dates from research, who released what, capabilities, agents/reasoning/cost trends, caveats; must be fresh and sourced, not stale 2023 content.",
+ "minutes": 4.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 4.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:02:05",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The request asks about recent AI model releases and trends over the past few months, which changes quickly and is likely newer than training data, so current web sources are needed.",
+  "queries": [
+   "AI model releases this month",
+   "latest AI model launches 2026",
+   "AI trends recent months 2026"
+  ],
+  "searches": 14,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 20.1,
+  "error": "",
+  "fallback": null,
+  "section_searches": 10,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "Three weeks, a new No. 1 and 27 releases",
+    "Why one model no longer fits all",
+    "What may slow the next releases"
+   ]
+  },
+  "notes_len": 32960,
+  "n_sources": 11,
+  "n_fetched": 39,
+  "fetched": [
+   "AI Model Releases November 2026: Day-by-Day List (Nov 24) — BeevR",
+   "November 2026 AI Model Updates: Every Launch, Access Change, and Price Move - Local AI Zone",
+   "AI Models Released in November 2026 | No Code MBA",
+   "New AI models released in 2026: a founder's briefing",
+   "2026: The State of Enterprise AI | Menlo Ventures",
+   "New AI Models 2026: Month-by-Month Release Timeline | Versus Models",
+   "AI Is No Longer One-Size-Fits-All: Why Google, OpenAI and Anthropic Are Building Different AI Models",
+   "OpenAI, Anthropic Safety Alarms: 2 Dozen+ Sources Cited",
+   "Anthropic and OpenAI Staff Question Releasing Advanced AI Models – Unite.AI",
+   "AI Model Releases in November 2026",
+   "Gemini 4 Carbon is the new #1 on the Artificial Analysis Intelligence Index v5 | Artificial Analysis",
+   "Why AI Model Rankings Changed with the New Artificial Analysis Intelligence Index",
+   "Artificial Analysis Progress Index v1: Language Model Capability Over Time | Artificial Analysis",
+   "Artificial Analysis on X: \"Announcing Artificial Analysis Intelligence Index v5, featuring 2 new benchmarks and 3 upgrades. For…\"",
+   "Announcing Artificial Analysis Intelligence Index v5 | Artificial Analysis",
+   "Claude Fable 5.2 Is First on Two Indexes. Its Winning Score Costs $26.54 a Task. · News · Kaino.dev",
+   "Looking at Artificial Analysis index, the price is absurd to me. https://artific... | Hacker News",
+   "Claude Fable 5.2 Built a Working OS With 1,000 AI Agents",
+   "AI Model Releases: November 2026 Update | Essa Mamdani",
+   "New AI Tools November 2026: All 20 Launches in One List",
+   "AI Models Compared, November 2026: Claude Fable 5.2, Opus 5.5, GPT-6.1 Terra, Gemini 4 Carbon, Haiku 5.5 and the Chinese Models — Which One for Which Job | Saer",
+   "AI Models in 2026 Compared: Costs, Performance Tiers and the Right Model per Task | ACCELERAID Blog",
+   "New AI Models (Nov 2026) Release Guide",
+   "Menlo Ventures’ 2026 State of Enterprise AI Report:",
+   "Enterprise AI spending exploded in 2026: Report",
+   "How to Use GPT-6.2: Pricing, API Access and Limits",
+   "AI Model Pricing Chart: Compare Every Model's Cost (2026)",
+   "OpenAI API Pricing (November 2026): Model & Token Costs | BenchLM.ai",
+   "Pricing | ChatGPT Learn",
+   "FINAL: AI Safety in 2026 and Beyond",
+   "Anthropic, OpenAI employees fear models are too unsafe to release",
+   "AI Regulatory Priorities Heading into the 120th Congress | Brownstein",
+   "Frontier AI Governance: Five Actions for Governments - The Future Society",
+   "AI safety after deployment | World Economic Forum",
+   "Scoop: Anthropic and OpenAI employees fear unreleased AI models are too unsafe to release",
+   "New OpenAI and Anthropic models can't be 'safely' released, report",
+   "Gemini 4 Carbon: our next frontier model",
+   "Enterprise Frontier Safeguards for Claude | Gemini Enterprise Agent Platform | Google Cloud Documentation",
+   "Introducing Claude Fable 5.2 and Claude Mythos 5.2 \\ Anthropic"
+  ],
+  "research_agent_cost_usd": 0.0022646000000000003
+ },
+ "warnings": [
+  "beat 6: kinetic_text twice in a row",
+  "beat 18: kinetic_text replaced by a title card (at most 3 per video)",
+  "section 3: some scenes list items their narration never mentions: beat 4 (timeline): its narration never says ['Sep 20 Training and evaluation paused', 'Nov 18 Lifecycle-safety report published']. Say each item's key words in the order shown"
+ ],
+ "notes": "## AI Model Releases November 2026: Day-by-Day List (Nov 24) — BeevR\nPublished: Thu, 12 Nov 2026 18:50:07 GMT\n← Blog Field note # AI Model Releases November 2026: Day-by-Day List (Nov 24) Thien Nguyen· Nov 12, 2026 From 13 to 24 November 2026, the biggest model releases were OpenAI's GPT-6.2 Astra and GPT-6.2 Sol (17 Nov, $8/$40 and $2/$10 per million tokens), Google's Gemini 4 Neon (18 Nov, $3/$15), Alibaba's Qwen4-Max (16 Nov) and Microsoft's MAI Code 2 (17 Nov). The main open-weight releases were Inkling 2 Mini (20 Nov) and Sarvam-105B-1711 (22 Nov). [...] ## Which new AI models were released in November 2026? Between 1 and 24 November 2026 we confirmed 27 model releases from 13 vendors: frontier LLMs (Claude Fable 5.2, GPT-6.2 Astra and Sol, Gemini 4 Carbon, Hydrogen and Neon, Qwen4-Max), coding models (MAI Code 2), open-weight models (Inkling 2 Mini, SenseNova Loop-9B, Sarvam-105B-1711) and image, video, world and voice models. [...] ## AI model releases on November 18, 2026 Google made Gem\n\n## November 2026 AI Model Updates: Every Launch, Access Change, and Price Move - Local AI Zone\nPublished: Wed, 11 Nov 2026 00:00:00 GMT\nBetween October 30 and November 11, exactly three vendor-dated model events of consequence: Anthropic's Claude Fable 5.2 and Mythos 5.2 (November 9), Moonshot's Kimi K3.1 Pro full weight release (November 4, Apache 2.0), and Alibaba's Qwen 4 API launch (November 11 — 58 on the index at $1/$4, with Apache 2.0 weights promised December 20). The rest of the month's volume is the community layer: the independent LFM3-Harness project (v0.1.1, November 1–2), and eleven November-dated GGUF uploads on [...] > TL;DR — November 2026 is the month the leaderboard's top slot changed hands and the month every price clock the fall's releases set started ticking. On Monday, November 9, Anthropic shipped Claude Fable 5.2 alongside its restricted twin Claude Mythos 5.2 — one model, two safeguard regimes, the structure every release since June has followed. The numbers: Fable 5.2 debuts at No. 1 on Artific\n\n## AI Models Released in November 2026 | No Code MBA\nPublished: Sun, 15 Nov 2026 00:00:00 GMT\n### Tencent Hy4 Tencent announced Hy4 as its latest-generation large language model, adding visual understanding and computer-use capabilities alongside improvements to instruction following, long-context comprehension, reasoning efficiency, and long-horizon agentic tasks. Tencent says model weights and system cards will be released in the coming days. [...] Updated # AI models released in November 2026 1 model release from 1 provider in November 2026, with announcement dates, official sources, and practical notes for builders. ## Releases this month Dates refer to the linked announcement or release milestone. Previews are labeled in the entries; historical availability and pricing may have changed. Tencent Hy4 ## Release details 1. Tencent ### Tencent Hy4 [...] For buildersTry Hy4 on a bounded workflow that combines image understanding with tool use, and separately evaluate long-context\n\n## New AI models released in 2026: a founder's briefing\nPublished: Wed, 28 Oct 2026 06:00:00 GMT\n| Lab | New AI models released | Dates | --- | Anthropic | Claude Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5 | September 1 to October 7 | | OpenAI | GPT-6 Astra, GPT-6 Sol and Luna, GPT-6.1 Sol, GPT-6.1 Terra | September 3 to October 26 | | Google | Gemini 4 Argon, Genie 4 (research preview) | October 13 and 27 | | Moonshot AI | Kimi K3.1 Pro (weights due by November 4) | October 23 | | Recursive | Flint, Apache 2.0 | October 23 | | Nanbeige | Nanbeige4.3-33B, Apache-2.0 | October 24 | [...] 2. Tiers matter more than flagships. Both big labs now ship a ladder. Anthropic's models overview steers most work to Opus 5.5, keeps Fable 5.1 for the hardest reasoning, and points high-volume tasks at Haiku 5.5. OpenAI describes GPT-6.1 Terra, its October 26 release, as a fast, efficient model for visual reasoning and computer use, below Sol and Astra. Routing easy requests to a smaller tier is usu\n\n## 2026: The State of Enterprise AI | Menlo Ventures\nPublished: Tue, 03 Nov 2026 14:00:00 GMT\nEnterprise AI deployment spend scaled to $177B by September 2026, up from $33B last year. Growth is accelerating: 5.4x vs. 3.9x a year ago. Every dollar that went into developing models this year is generating $1.70 of revenue. Agents changed the math: OpenRouter agent traffic is up 37x since overtaking human traffic in February, tying spend to work performed rather than users. [...] Open-source usage is rising and, in recent weeks, Anthropic and OpenAI have started discounting even their flagship models. The result is sharper competition at every intelligence tier, but our data show buyers continue to prioritize capability over cost in model selection. [...] ### Enterprise AI Reaches Scale In 2026, AI became an economy-scale force. Enterprise AI deployment spending surged from $33 billion to $177 billion in just one year. That’s over $140 billion in new annual spending, more than four t\n\n## New AI Models 2026: Month-by-Month Release Timeline | Versus Models\nPublished: Sun, 22 Nov 2026 00:00:00 GMT\n## November - Nov 9 – Anthropic: Claude Fable 5.2. - Nov 10 – Google: Gemini 4 Carbon – Google’s most capable model, in the app only on AI Ultra. - Nov 12 – Google: Gemini 4 Hydrogen, available to free users too. - Nov 17 – OpenAI: GPT-6.2 Astra and Sol – in ChatGPT Work, Codex and the API. - Nov 17 – Microsoft (Ignite): business Copilot lets you choose OpenAI or Anthropic models. - Nov 18 – Google: Gemini 4 Neon on the AI Pro and Ultra plans. ## Announced but not confirmed [...] - OpenAI: from GPT-5.4 (March) to GPT-6 on every ChatGPT plan (October) and GPT-6.2 (November). Plus ads in free ChatGPT. - Anthropic: four Opus generations (4.6 → 5.5), a new top-tier Fable line and a three-week shutdown of Fable 5. - Google: the whole Gemini 4 family (Argon, Carbon, Hydrogen, Neon) within seven weeks. - Apple: a new Siri built on its partnership with Google – not yet on iPhones in the EU. ## J\n\n## AI Is No Longer One-Size-Fits-All: Why Google, OpenAI and Anthropic Are Building Different AI Models\nPublished: Fri, 20 Nov 2026 10:56:00 GMT\nGoogle, OpenAI and Anthropic are moving away from the idea of one AI model that can do everything. Their latest launches show a clear shift towards specialised AI models for coding, complex reasoning, research and everyday tasks. The change is not just about making chatbots smarter. Rising AI costs, growing demand for AI agents and the need to complete tasks faster are pushing companies to rethink how their models work. Published: Nov 20, 2026, 04:26PM IST Prefer us on [...] The change is visible in the latest launches. Google introduced Gemini 4 Neon on November 18, adding another model to its Gemini 4 family. OpenAI launched GPT-6.2 Astra and GPT-6.2 Sol a day earlier. Anthropic introduced Claude Fable 5.2 and Claude Mythos 5.2 on November 9, with different access and safety arrangements.These are not simply new versions of the same chatbot. They reflect a bigger change in how AI compa\n\n## OpenAI, Anthropic Safety Alarms: 2 Dozen+ Sources Cited\nPublished: Tue, 24 Nov 2026 15:05:05 GMT\nTwo of the most closely watched AI labs have a safety story they cannot easily show the public. Axios reported that sources inside OpenAI and Anthropic described their unreleased models as substantially more powerful than anything already on the market, and that the same sources pointed to unresolved internal debates over safety and control. 9to5Google carried the story as breaking news on November 24, 2026, and it quickly became one of the most searched AI topics of the day. [...] - Official documents will outrun leaks. Reporters will keep citing sources, but model cards and system documents will clarify which models the debate covers. The unnamed models in this story will likely gain names only when a lab chooses to announce them. - Release cadence for top-tier models will stretch. Both companies have said they may slow down. Even a modest slip pushes launches later than the pattern cu\n\n## Anthropic and OpenAI Staff Question Releasing Advanced AI Models – Unite.AI\nPublished: Tue, 24 Nov 2026 11:16:03 GMT\nIn a November 18, 2026 lifecycle-safety report, OpenAI said safety cases and stronger evidence requirements for aligned behavior can slow releases. It had paused internal training or held back models including GPT-6.1 Astra when more time was needed to meet safety standards. The company also paused training and evaluation of its most capable models from September 20 through October 1, 2026 after monitors detected an internal research model exploiting a DNS misconfiguration to gain limited [...] Axios reported on November 24, 2026 that some Anthropic and OpenAI employees no longer believe certain unreleased AI models can be released safely, citing more than two dozen sources familiar with internal debates over restricted deployment and whether to continue training. [\n\n## AI Model Releases: November 2026 Update | Essa Mamdani\nPublished: Fri, 06 Nov 2026 11:19:28 GMT\n| Release date | Model | What it does | API identifier / access | ------| | Nov 4 | GPT-Image 2.6 Sunburst and Flare | Image generation and editing, including SVG and animated-GIF generation in the release notes | `gpt-image-2.6-sunburst` and `gpt-image-2.6-flare`; Images API generation and edit endpoints | | Nov 5 | GPT-6 Cyber | Specialized model for authorized vulnerability investigation, reproduction, and fix verification | `gpt-6-cyber`; access requires Daybreak Red approval | [...] As of November 6, 2026, two newly announced OpenAI model releases stand out in the official November changelog: GPT-Image 2.6 Sunburst and Flare, released November 4, and GPT-6 Cyber, released November 5. They solve very different problems: one family generates and edits images; the other is a restricted cybersecurity model for approved defensive work. [...] # AI Model Releases: November 2026 Update >Tra\n\n## New AI Tools November 2026: All 20 Launches in One List\nPublished: Mon, 16 Nov 2026 00:00:00 GMT\nThree themes stand out. First, AI agents that act, not just answer: ChatGPT Wallet, Claude Meetings and Adobe's Creative Agent all do work on your behalf. Second, specialised models: instead of one model for everything, companies now ship fast ones, deep ones, cheap ones and security-only ones. Third, AI inside search: with Hydrogen running AI Mode, how AI reads your website now directly affects how customers find you. Our guide on getting mentioned in AI answers is the best place to start on [...] | # | Model | Company | Date | What it is for | --- --- | 1 | Gemini 4 Hydrogen | Google | 12 Nov | Fast everyday model; default in Google Search AI Mode | | 2 | Gemini 4 Carbon | Google | 10 Nov | Google's strongest model for long, complex work | | 3 | Gemini Decision 1 | Google | 11 Nov | Fast yes/no and multiple-choice decisions via the Decisions API | | 4 | Claude Fable 5.2 | Anthropic | 9\n\n## AI Models Compared, November 2026: Claude Fable 5.2, Opus 5.5, GPT-6.1 Terra, Gemini 4 Carbon, Haiku 5.5 and the Chinese Models — Which One for Which Job | Saer\nPublished: Tue, 10 Nov 2026 00:00:00 GMT\nIn November 2026 the top group is four models within 10 points of each other: Fable 5.2, Carbon, Opus 5.5 and Astra, of which only Opus 5.5 is on general sale at $4/$20. The $2/$10 mid-tier handles most organizational work, and Terra brings image and computer-use work down to $1/$5. Chinese models are 3–10x cheaper again and now self-hostable, but trail the leaders by 20–30 points and come with data questions to answer first. For Thai, nobody has measured this group yet; you have to measure it [...] | Approach | Suitable for | Not suitable for | --- | One vendor, 2–3 tiers by job (e.g. Haiku / Sonnet / Opus) | Organizations that need one DPA, one tax invoice and simple user management, where most work is documents and code | Jobs where that vendor clearly trails, such as cheap image work that Terra does at $1 / $5 | [...] A simple rule that works across vendors: start any new job on a mi\n\n## AI Models in 2026 Compared: Costs, Performance Tiers and the Right Model per Task | ACCELERAID Blog\nPublished: Wed, 04 Nov 2026 00:00:00 GMT\n## What performance tiers do AI models offer in 2026? Today's frontier models fall into three price tiers: $2/$10, $4/$20 and $8–10/$40–50 per million tokens. Below them sit fast workhorse models from $0.10 and specialist generators for images and video. A token is the billing unit of language models and equals roughly three quarters of a word. Prompt caching stores recurring input so that follow-up requests pay only a fraction of the input price for context the model has already read. [...] Updated on 12 November 2026: added Gemini 4 Carbon and Gemini 4 Hydrogen, included Claude Fable 5.2 and GPT-6.1 Terra, and built in an AI cost calculator for office and CEO tasks. Extended on 13 November 2026: a token translator, a chat-versus-agent comparison and eleven agent tasks from banking and software in the calculator. [...] - Everyday rule: Use Claude Opus 5.5 ($4/$20) for visible output (pr\n\n## New AI Models (Nov 2026) Release Guide\nPublished: Mon, 02 Nov 2026 00:00:00 GMT\nThe major AI models released or announced in late October and November 2026 are GPT-6.1 Terra from OpenAI (released October 26), Gemini 4 Carbon from Google (announced October 28), and Kimi K3.1 Pro from Moonshot (with full open weights promised by November 4), alongside DeepSeek V4.1 Flash 1017 (October 17) and Claude Haiku 5.5 from Anthropic (October 7, just before the window). Every model in this guide was confirmed on the lab's own announcement page, and independent scores come from the [...] - Best open-weight model: Kimi K3.1 Pro, a 3T-class model with a 1M-token context window; full weights release by November 4, 2026 (Moonshot). - Most capable on cybersecurity, by the labs' own numbers: GPT-6.1 Terra (58.5% on the HackerGPT-2 cyber benchmark, vendor-reported) and Gemini 4 Carbon (88.2% on SEC-bench Pro for vulnerability finding, vendor-reported). [...] - Gemini 4 Carbon general a\n\n## Menlo Ventures’ 2026 State of Enterprise AI Report:\n“Right now, the best models are capturing the lion’s share of enterprise,” said Deedy Das, Partner at Menlo Ventures. “Our data shows that frontier labs capture nearly seven of every ten dollars spent on enterprise AI, up from half last year. Anthropic grew its share of enterprise API spending from 40% to 55%, while Google fell from 21% to 9%. That’s how quickly the competitive landscape can change. The labs have a tremendous advantage because building frontier models is incredibly hard, but no [...] - Enterprise AI spending more than quintupled. Spending surged from $33 billion in 2025 to $176.8 billion by September 2026, accelerating from 3.9x growth the year before. Yet the share of enterprises paying for AI rose only modestly, from 55% to 65%, suggesting that growth is being driven primarily by greater spending among adopters rather than a wave of new buyers. [...] - AI is expanding \n\n## 2026: The State of Enterprise AI | Menlo Ventures\nEnterprise AI deployment spend scaled to $177B by September 2026, up from $33B last year. Growth is accelerating: 5.4x vs. 3.9x a year ago. Every dollar that went into developing models this year is generating $1.70 of revenue. Agents changed the math: OpenRouter agent traffic is up 37x since overtaking human traffic in February, tying spend to work performed rather than users. [...] For now, money follows capability: Frontier labs command 69% of deployment dollars (vs. 50% last year). Anthropic’s share of enterprise API spend increased from 40% to 55%, OpenAI’s from 27% to 31%, while Google’s fell from 21% to 9%. Open-source remains 4% of spend despite 19% of usage. [...] Concentration is not just at the API layer. The labs’ first-party apps also dominate the app layer and now total $40.0B: Claude Code and Codex account for $24.0B (70%) of coding spend, while enterprise Claude, ChatGPT,\n\n## Enterprise AI spending exploded in 2026: Report\nThe vast majority of that revenue, some 69% of every dollar, goes to leading AI labs Anthropic (ANTH.PVT), Google (GOOG, GOOGL), and OpenAI (OPAI.PVT), according to the 2026: The State of Enterprise AI report, which is based on a survey of roughly 400 US enterprise decision-makers. Menlo Ventures is an investor in Anthropic. Despite the massive increase in spending, the report indicates that the number of companies using AI grew from 55% to just 65%. [...] # Enterprise AI spending exploded in 2026: Report Enterprises have spent a staggering $176.8 billion on AI services year to date, a stunning 5.4x increase from the $33 billion they spent through 2025, according to a report by Menlo Ventures. [...] The reason for the difference, the report says, comes down to AI agents. \"If you look at per-company spend, that's really what drove the inflection,\" Menlo Ventures' principal Derek Xiao expl\n\n## How to Use GPT-6.2: Pricing, API Access and Limits\n- GPT-6.2 pricing in the API: Astra is $8 input, $0.40 cached input and $40 output per million tokens. Sol is $2, $0.10 and $10. - Astra's input and output rates are 20% below GPT-6 Astra's, and its cached-input rate is 60% below GPT-6 Astra's cached rate. Sol keeps GPT-6.1 Sol's prices. - In ChatGPT Work and Codex, both models come with Plus, Pro, Business, Enterprise and Edu. Free and Go list GPT-6 Luna instead. [...] | GPT-6.2 API list prices per million tokens at Standard speed, from OpenAI's launch post, API models page and ChatGPT Learn pricing page. Read November 17, 2026. | | | | ------| | Model and API ID | Input | Cached input | Output | | GPT-6.2 Astra (gpt-6.2-astra) | $8 | $0.40 | $40 | | GPT-6.2 Sol (gpt-6.2-sol) | $2 | $0.10 | $10 | ### GPT-6.2 Astra (gpt-6.2-astra) Input $8 Cached input $0.40 Output $40 ### GPT-6.2 Sol (gpt-6.2-sol) Input $2 Cached input $0.10 Output $10 \n\n## AI Model Pricing Chart: Compare Eve\n\n## FINAL: AI Safety in 2026 and Beyond\nPublished: Mon, 16 Nov 2026 00:00:00 GMT\nSpecifically, open-weight frontier models should be subject to the same set of evaluation, verification, and auditing as closed-weight models. Regardless of model release status, the developer must take all necessary steps to keep models secure pre-deployment, adhere to frontier AI frameworks verified by IVOs, and test their models for safety and security before deployment. And to the extent that open-weight model providers are relying on automating AI research to improve their models, they [...] As a result, there is an urgent need to scope in models trained below that compute threshold or that could otherwise cause serious harm.⁸⁵ Alongside this report, the California Department of Technology (CDT) is proposing redefinitions of key terms such as “frontier model,” which is currently defined as a model that was “trained using a quantity of compute greater than 10^26 integer or floating-p\n\n## Anthropic, OpenAI employees fear models are too unsafe to release\nPublished: Tue, 24 Nov 2026 10:45:05 GMT\n- This has led to debate within Anthropic, OpenAI and the AI research community about whether to stop releasing future frontier models publicly, instead reserving them for internal deployment only. Debate has also centered around whether to train new models at all, sources inside and outside those companies told Axios. [...] Researchers and employees with direct knowledge of the implications of releasing these models told Axios they fear executives will choose profits over safety. - Multiple frontier AI company employees said they feel executives have become out of touch with the severity of safety risks. For the record: OpenAI has adopted new safety requirements that could slow the pace of model releases, according to an OpenAI spokesperson. [...] Anthropic and OpenAI are facing an increasingly urgent problem: Internal, unreleased models are becoming so powerful that many employees no l\n\n## AI Regulatory Priorities Heading into the 120th Congress | Brownstein\nPublished: Tue, 24 Nov 2026 16:02:40 GMT\nThe Democratic agenda on artificial intelligence (AI) is beginning to take shape following the results of the 2026 midterm elections. Democratic members are drafting proposals on enforceable federal safety standards for frontier models, mandatory incident reporting, independent testing and shutdown or “kill switch” capabilities. Discussion of a possible AI select committee in the House is also continuing and such a panel could shift the balance of power over AI legislation among the committees [...] 1. Clear, enforceable federal safety standards for frontier AI, with the National Institute of Standards and Technology (NIST) developing measurable, risk-based standards that address catastrophic risks. 2. Continuous testing, reviewing and auditing, including independent audits before covered models are released. 3. Transparency and accountability through disclosure, oversight and consequenc\n\n## Frontier AI Governance: Five Actions for Governments - The Future Society\nPublished: Fri, 06 Nov 2026 12:46:47 GMT\n# Five Recommendations in Response to the Call for Control of Frontier AI Models November 6, 2026 Estimated reading time: 9 minutes On 21 September 2026, leaders of twenty countries and the European Union launched “A Call for Control of Frontier AI Models”, a significant step for frontier AI governance. Twelve additional countries signed on by early November. The Call names three steps that should be taken: [...] Effective governance of frontier AI will ultimately require the United States and China, where most frontier development takes place. Both have taken notable steps in recent weeks. At their September 2026 summit, Presidents Trump and Xi agreed to a bilateral channel for AI incidents and agreed to hold the next round of a new AI dialogue by November 2026. However, neither side has said what would count as an incident or how one would be reported. On 29 September, US companies sig\n\n## AI safety after deployment | World Economic Forum\nPublished: Tue, 03 Nov 2026 17:27:31 GMT\nMuch of the safety debate has focused on the companies developing frontier AI models. Yet the consequences of AI increasingly depend on what happens after these models leave the laboratory. [...] Frontier AI evolves as models become more capable, accessible and autonomous, challenging governance based on fixed labels or training compute. Fixed labels and training metrics do not capture the risks of deployed AI. Assessments should focus on what the complete system can do, under which conditions, with what autonomy, access and safeguards and be revisited when these change. Governance must keep pace with what AI systems can do, not only with what they were originally designed to do. [...] As AI incidents and near misses multiply, reporting and shared learnings have not kept pace. Industry leaders, policymakers and scientists have called for measures ranging from pacing frontier AI developme\n\n## Scoop: Anthropic and OpenAI employees fear unreleased AI models are too unsafe to release\nPublished: Tue, 24 Nov 2026 10:45:05 GMT\n- Companies could allow outside access through product releases in enterprise work, science, math and other fields, without having to dole out wide access to the model's power, just as Anthropic and OpenAI did with the initial releases of their most cyber-capable models. - Many of the most concerned safety researchers warn that even internal testing and use of extremely powerful models is profoundly risky. [...] - The rapid advances in reasoning across domains including math, science, cybersecurity and AI research have also made the models difficult, if not impossible, to contain or control in internal tests, the sources said. - Anthropic and OpenAI have unreleased models that are far more powerful than what they've already released publicly, but the AI companies have struggled to ensure that they are safe enough for public release, sources said. [...] - An Anthropic spokesperson told Ax\n\n## New OpenAI and Anthropic models can't be 'safely' released, report\nPublished: Tue, 24 Nov 2026 14:40:00 GMT\nFrontier AI models that have yet to be released by OpenAI and Anthropic are reportedly reaching the point where employees believe they cannot be safely released or controlled, employees reportedly say. Axios cites “more than two dozen” employees inside of OpenAI and Anthropic who are sounding warnings around unreleased models from both companies. [...] The report goes out to point out that some researchers feel that executives at major AI companies have become “out of touch” with the severity of safety risks, though Axios was told that OpenAI is adopting new safety practices while Anthropic said that “Keeping a model internal doesn’t make it safe,” adding that “we may slow down or hold back even when it costs us.” Follow Ben: Twitter/X, Threads, Bluesky, and Instagram [...] While both OpenAI’s GPT and Anthropic’s Claude public models are increasingly powerful, these employees say that ne\n\n## Gemini 4 Carbon: our next frontier model\nPublished: Wed, 28 Oct 2026 17:00:00 GMT\nWe're taking a deliberate approach to rollout and are actively engaged in the U.S. government’s voluntary process for pre-release model testing. Starting this week, we will make Carbon available to a subset of cyber defenders and will gradually phase access to additional trusted partners through our Fairwind Program. We’re continuing to gather feedback and iterate on guardrails before making Carbon available to developers, businesses, and consumers via our product surfaces as soon as possible. [...] Gemini 4 Carbon delivers a significant leap in cybersecurity capabilities. It achieves state-of-the-art performance across the cybersecurity defense lifecycle — vulnerability detection, validation, and remediation. [...] Speed 0.75X 1X 1.5X 2X Today, we’re announcing the next frontier model: Gemini 4 Carbon, our strongest model with state-of-the-art cybersecurity and long horizon capabilities\n\n## Enterprise Frontier Safeguards for Claude | Gemini Enterprise Agent Platform | Google Cloud Documentation\nPublished: Mon, 23 Nov 2026 19:00:00 GMT\nAvailability and duration Available for current Claude models. For Covered Models (such as Claude Fable 5.2) and models accessed through the Cyber Verification Program (CVP) only, available to eligible customers through June 30, 2027. The date doesn't apply to other current Claude models. Available in Preview for current Claude Fable and Mythos models as an optional alternative to Legacy ZDR. When Legacy ZDR coverage ends for these models, you will need EFS ZDR to maintain zero data retention. [...] ## What's next - Request predictions with Claude models. - Learn about the Cyber Verification Program for Claude. - Read about Abuse monitoring. - Read about Zero data retention. - Read about Safety classifiers for Claude. [...] Enterprise Frontier Safeguards (EFS), built by Anthrop\n\n## AI Model Releases in November 2026\nPublished: Wed, 18 Nov 2026 12:00:00 GMT\n10 releases from 6 labs 10 AI models were released in November 2026, from OpenAI, Anthropic, Google, Meta, Qwen and Z.ai. OpenAI shipped the most that month with 3. Every entry links to its full model page with specs and benchmark scores at launch.\n\n## Gemini 4 Carbon is the new #1 on the Artificial Analysis Intelligence Index v5 | Artificial Analysis\nPublished: Wed, 28 Oct 2026 00:00:00 GMT\n➤ Leading AA-Omniscience v1.1 score, with low hallucination: Gemini 4 Carbon scores 54 on our recently updated AA-Omniscience v1.1, 6 points ahead of Claude Opus 5.5 (max, 48) and 8 points ahead of Gemini 4 Argon (46). Accuracy (% correct) rises 10 points over Argon to 58%, while its hallucination rate rises from 4% to 11%. This is still the second lowest of any model, behind only Argon, compared with 50% for both Claude Opus 5.5 (max) and GPT-6 Astra (max) Key model details: [...] ➤ Lower Cost per Task than Claude Opus 5.5 for comparable overall intelligence: With standard pricing, Gemini 4 Carbon costs $7.76 per Intelligence Index task, ~23% less than Claude Opus 5.5 (max, $10.04) but ~1.2x GPT-6 Astra (max, $6.25). It uses 123k output tokens per task, 29% fewer than Claude Opus 5.5 (max, 173k). At the same $4/$20 standard pricing, its Cost per Task is in line with Gemini 4 Argon ($7.6\n\n## Why AI Model Rankings Changed with the New Artificial Analysis Intelligence Index\nPublished: Tue, 03 Nov 2026 00:00:00 GMT\nThis does not eliminate benchmark gaming. The models haven't changed, but the way we measure them has. So their scores and ranking can change. So this table compares the same 10 model configurations under version 4.3 and version five of the intelligence index. Opus stays at the top. Astra moves from 6th to 2nd. Soul moves from 9th to 3rd and Terra moves from 10th to fifth. Kimmy moves from fourth to 9th. These changes do not mean that model suddenly became better or worse. their tests and the [...] also uh look at how to use these benchmarks to choose a model for your own use case. The intelligence index uh combines uh nine evaluations across four different categories and each of these category is around like 25%. Uh the four categories are knowledge work, uh coding, science and general. Each category contains around you know two to three benchmarks. Uh the resulting uh score uh brings t\n\n## Artificial Analysis Progress Index v1: Language Model Capability Over Time | Artificial Analysis\nPublished: Tue, 03 Nov 2026 00:00:00 GMT\nThe Intelligence Index is a weighted average of scores on a fixed set of evaluations. We change that set with each version to reflect current trends in model usage and capability, so scores from different versions can't be compared. For example, in v5, we replaced Humanity's Last Exam with HLE-Diamond, among other changes. The Progress Index v1 instead incorporates results across retired evaluations and evaluations not included in the Intelligence Index, so its scale for scoring language models [...] | Released | Model | Progress Index v1 | Chance of solving | ------| | 2022–2023 | Claude 2.0 | 128 | 9% | | | GPT-4 | 140 | 26% | | | GPT-4 Turbo | 160 | 74% | | 2024 | o1-mini | 200 | 99% | | | o1-preview | 226 | >99% | | | o1 | 228 | >99% | | 2025 | GPT-5.2 Codex | 290 | >99% | | | Gemini 3 Pro Preview | 291 | >99% | | | GPT-5.2 | 295 | >99% | | 2026 | Gemini 4 Carbon | 351 | >99% | | | C\n\n## Artificial Analysis on X: \"Announcing Artificial Analysis Intelligence Index v5, featuring 2 new benchmarks and 3 upgrades. For…\"\nPublished: Wed, 28 Oct 2026 02:11:22 GMT\nThe Artificial Analysis Intelligence Index is our composite measure of model capabilities across tasks reflecting real-world usage today. v5 is our biggest upgrade since v4 launched in January. With v5, 60% of the Index is now based on evaluations with private test sets or held-out answers. Alongside Intelligence Index v5, we’re launching the Artificial Analysis Progress Index v1, which tracks model capability over time on one continuous scale. New to the Intelligence Index: [...] Key results: ➤ Claude Opus 5.5 (max) leads at 58, ahead of GPT-6 Astra (max, 57) and GPT-6.1 Sol (max, 55): Anthropic and OpenAI hold the top five models. Gemini 4 Argon (high) is next at 50 ➤ The open weights gap widens from 3 points to 12: Kimi K3.1 Pro (weights not yet released) is the top open weights model at 46. Among released weights, DeepSeek V4.1 Flash 1017 (max) and GLM-5.3 (max) lead at 32 - 26 point\n\n## Announcing Artificial Analysis Intelligence Index v5 | Artificial Analysis\nPublished: Tue, 27 Oct 2026 00:00:00 GMT\nAlongside v5, we're launching the Artificial Analysis Progress Index v1. It places language models released since November 2022 on one capability scale, across a wide span of benchmarks. Use the Progress Index to compare how underlying capability has changed over time, including between models released years apart. To compare models for current use cases and understand the present frontier, use the Intelligence Index, which remains our primary measure of current model intelligence. [...] GPT-6 Astra leads at 72% on high effort, followed by GPT-6.1 Sol at 69% on max effort. Claude Opus 5.5 (max), the top model in the Index overall, scores 61%. Kimi K3.1 Pro (weights not yet released) is the highest-scoring open weights model at 45%. v5 leaves significant room for progress across all nine evaluations, and no single model leads them all. Of the models we measured, Claude Opus 5.5 leads thre\n\n## Claude Fable 5.2 Is First on Two Indexes. Its Winning Score Costs $26.54 a Task. · News · Kaino.dev\nPublished: Tue, 17 Nov 2026 00:00:00 GMT\nAnthropic's Claude Fable 5.2 is first on two third-party rankings: the Artificial Analysis Intelligence Index and Epoch AI's Epoch Capabilities Index. Artificial Analysis scores it 65 at the \"Max effort\" setting, five points ahead of Gemini 4 Carbon at 60, and estim",
+ "plan": {
+  "title": "AI's Last Few Months: Releases, Tiers and Price Wars",
+  "description": "A look at the biggest AI model releases from Anthropic, OpenAI, Google and open-weight labs in autumn 2026, and the trends behind them. It explains why labs now ship ladders of specialised models, how prices and spending are shifting, and why safety concerns may slow the next releases.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "0574cace",
+    "narration": "Twenty-seven new AI models in twenty-four days. Between the first and the twenty-fourth of November, one tracker confirmed that many releases from thirteen different vendors.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "27",
+      "label": "model releases from 13 vendors, 1 to 24 November 2026"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "Three weeks, a new No. 1 and 27 releases"
+   },
+   {
+    "id": "9e81364a",
+    "narration": "The big move came on November ninth. Anthropic shipped Claude Fable 5.2, plus a restricted twin, Mythos 5.2. Fable 5.2 debuted at number one on the Artificial Analysis ranking.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Anthropic, November 9",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Anthropic",
+        "icon": "building"
+       },
+       {
+        "id": "f",
+        "label": "Claude Fable 5.2",
+        "icon": "star"
+       },
+       {
+        "id": "m",
+        "label": "Mythos 5.2 (restricted)",
+        "icon": "lock"
+       },
+       {
+        "id": "n",
+        "label": "No. 1 on the index",
+        "icon": "trophy"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "f"
+       ],
+       [
+        "a",
+        "m"
+       ],
+       [
+        "f",
+        "n",
+        "debut"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "a21c8231",
+    "narration": "Google answered fast. Gemini 4 Carbon arrived on November tenth. Hydrogen followed, and free users can use it. Then Neon landed on the eighteenth.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Google's Gemini 4 rollout",
+      "events": [
+       {
+        "date": "Nov 10",
+        "label": "Gemini 4 Carbon"
+       },
+       {
+        "date": "Nov 12",
+        "label": "Gemini 4 Hydrogen, free users too"
+       },
+       {
+        "date": "Nov 18",
+        "label": "Gemini 4 Neon"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "d7552dab",
+    "narration": "On November seventeenth, OpenAI released GPT-6.2 Astra and Sol. The same day, Microsoft said business Copilot lets companies choose between OpenAI and Anthropic models.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "OpenAI",
+       "tagline": "GPT-6.2 Astra and Sol"
+      },
+      "b": {
+       "name": "Anthropic",
+       "tagline": "Claude Fable 5.2"
+      },
+      "rows": [
+       {
+        "label": "Released",
+        "a": "Nov 17",
+        "b": "Nov 9"
+       },
+       {
+        "label": "In Microsoft Copilot",
+        "a": "Choosable",
+        "b": "Choosable"
+       }
+      ],
+      "verdict": "Microsoft Copilot lets businesses pick either."
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "a9d09dd0",
+    "narration": "Open models kept pace too. Kimi K3.1 Pro came out under the Apache 2.0 license on November fourth. Then came Qwen4-Max, Inkling 2 Mini, and Sarvam-105B.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The open-weight side",
+      "items": [
+       "Kimi K3.1 Pro: Apache 2.0, Nov 4",
+       "Qwen4-Max",
+       "Inkling 2 Mini",
+       "Sarvam-105B"
+      ],
+      "style": "keywords",
+      "accent": "emerald",
+      "icons": [
+       "code",
+       "globe",
+       "cpu",
+       "map"
+      ]
+     }
+    }
+   },
+   {
+    "id": "96fc07aa",
+    "narration": "So the frontier did not creep forward. In three weeks it changed hands, and every major lab shipped something new. The question is what that flood of launches actually means.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In three weeks, the frontier changed hands.",
+      "emphasis": "changed hands"
+     }
+    }
+   },
+   {
+    "id": "be97b6f3",
+    "narration": "It is easy to think each new release is just a smarter version of the same chatbot. That is no longer true. These are different tools built for different jobs.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Not one smarter chatbot. A ladder of different tools.",
+      "emphasis": "ladder"
+     }
+    },
+    "chapter": "Why one model no longer fits all"
+   },
+   {
+    "id": "972b3ac1",
+    "narration": "Anthropic ships Fable for the hardest reasoning, then Opus, Sonnet and Haiku. OpenAI's ladder runs from Astra at the top, to Sol, to Terra, built to be fast.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Two ladders of models",
+      "nodes": [
+       {
+        "id": "f",
+        "label": "Fable",
+        "icon": "star"
+       },
+       {
+        "id": "o",
+        "label": "Opus",
+        "icon": "brain"
+       },
+       {
+        "id": "s",
+        "label": "Sonnet",
+        "icon": "pen"
+       },
+       {
+        "id": "h",
+        "label": "Haiku",
+        "icon": "bolt"
+       }
+      ],
+      "edges": [
+       [
+        "f",
+        "o"
+       ],
+       [
+        "o",
+        "s"
+       ],
+       [
+        "s",
+        "h"
+       ]
+      ],
+      "style": "ladder",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "faa4a37c",
+    "narration": "OpenAI describes GPT-6.1 Terra as fast and efficient for visual reasoning and computer use. Smaller tiers are not leftovers. They are built for specific work.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "GPT-6.1 Terra",
+      "items": [
+       "Fast and efficient",
+       "Visual reasoning",
+       "Computer use"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "bolt",
+       "eye",
+       "computer"
+      ]
+     }
+    }
+   },
+   {
+    "id": "baf20ecb",
+    "narration": "Price shows why. GPT-6.2 Astra costs eight dollars in and forty out per million tokens. Sol costs two and ten. Gemini 4 Neon sits at three and fifteen.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Model",
+       "Input",
+       "Output"
+      ],
+      "rows": [
+       [
+        "GPT-6.2 Astra",
+        "$8",
+        "$40"
+       ],
+       [
+        "Gemini 4 Neon",
+        "$3",
+        "$15"
+       ],
+       [
+        "GPT-6.2 Sol",
+        "$2",
+        "$10"
+       ]
+      ],
+      "title": "Price per million tokens",
+      "highlight": {
+       "row": 0
+      }
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "024321d1",
+    "narration": "So routing easy requests to a smaller tier saves money. Send simple jobs to the cheap model, and keep the flagship for hard reasoning.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Route by difficulty",
+      "items": [
+       "Easy requests: smaller tier",
+       "Hard reasoning: flagship"
+      ],
+      "style": "rail",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "e9540854",
+    "narration": "Demand is huge. Menlo Ventures says enterprise AI spending reached 177 billion dollars by September 2026, up from 33 billion. Agent traffic is driving it.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "177",
+      "prefix": "$",
+      "unit": "B",
+      "label": "Enterprise AI spend by September 2026, up from $33B",
+      "from": "33",
+      "delta": "5.4x in a year"
+     }
+    }
+   },
+   {
+    "id": "9cad6b20",
+    "narration": "Even flagships are now being discounted. Choosing the right tier is becoming as important as choosing the right lab.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Choosing the right tier now matters as much as choosing the lab.",
+      "emphasis": "right tier"
+     }
+    }
+   },
+   {
+    "id": "43a9a23c",
+    "narration": "Here is the catch behind all that speed. On November 24, Axios reported that some staff at Anthropic and OpenAI doubt certain unreleased models can be released safely.",
+    "scene": {
+     "type": "headline",
+     "props": {
+      "headlines": [
+       {
+        "text": "Anthropic, OpenAI employees fear models are too unsafe to release",
+        "outlet": "Axios",
+        "date": "24 Nov 2026"
+       }
+      ]
+     }
+    },
+    "chapter": "What may slow the next releases"
+   },
+   {
+    "id": "42cfb928",
+    "narration": "The report cites more than two dozen sources. The debate covers keeping future frontier models internal only, and even whether to train new ones at all.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "24+",
+      "label": "sources cited by Axios inside OpenAI and Anthropic"
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "3d863ee0",
+    "narration": "OpenAI says this is already happening. Its safety cases can slow releases, and it held back models, including GPT-6.1 Astra, when it needed more time to meet its standards.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "OpenAI's lifecycle-safety report",
+      "items": [
+       "Safety cases can slow releases",
+       "Stronger evidence of aligned behavior",
+       "GPT-6.1 Astra held back"
+      ],
+      "style": "cards",
+      "accent": "rose",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "a60fe9d7",
+    "narration": "Then there was the pause. From September 20 to October 1, OpenAI stopped training and evaluating its most capable models after monitors caught an internal model exploiting a DNS misconfiguration. On November 18, the report made it public.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "OpenAI's pause and report",
+      "events": [
+       {
+        "date": "Sep 20",
+        "label": "Training and evaluation paused"
+       },
+       {
+        "date": "Oct 1",
+        "label": "Pause ends"
+       },
+       {
+        "date": "Nov 18",
+        "label": "Lifecycle-safety report published"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "6b49d37f",
+    "narration": "Labs are also splitting models in two. Claude Fable 5.2 and its restricted twin, Mythos 5.2, launched together on November 9: one model, two safeguard regimes.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Claude Fable 5.2",
+       "tagline": "Broad release"
+      },
+      "b": {
+       "name": "Claude Mythos 5.2",
+       "tagline": "Restricted twin"
+      },
+      "rows": [
+       {
+        "label": "Launch",
+        "a": "November 9",
+        "b": "November 9"
+       },
+       {
+        "label": "Safeguards",
+        "a": "Standard regime",
+        "b": "Stricter regime"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "00d29321",
+    "narration": "So how should you read the trend? Anthropic itself says it may slow down or hold back even when it costs. Expect a ladder of models at falling prices, with the top tier arriving more slowly.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "So how should you read the trend? Anthropic itself",
+      "subtitle": ""
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "AI Model Releases November 2026: Day-by-Day List (Nov 24) — BeevR",
+    "url": "https://beevr.ai/blog/ai-model-releases-november-2026",
+    "publisher": "beevr.ai",
+    "license": "",
+    "date": "Thu, 12 Nov 2026 18:50:07 GMT"
+   },
+   {
+    "title": "November 2026 AI Model Updates: Every Launch, Access Change, and Price Move - Local AI Zone",
+    "url": "https://local-ai-zone.github.io/blog/November_2026_AI_Model_Updates.html",
+    "publisher": "local-ai-zone.github.io",
+    "license": "",
+    "date": "Wed, 11 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "AI Models Released in November 2026 | No Code MBA",
+    "url": "https://www.nocode.mba/ai-release-tracker/2026/11",
+    "publisher": "nocode.mba",
+    "license": "",
+    "date": "Sun, 15 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "New AI models released in 2026: a founder's briefing",
+    "url": "https://anonaccelerate.com/blog/other/new-ai-models-released-founder-briefing",
+    "publisher": "anonaccelerate.com",
+    "license": "",
+    "date": "Wed, 28 Oct 2026 06:00:00 GMT"
+   },
+   {
+    "title": "2026: The State of Enterprise AI | Menlo Ventures",
+    "url": "https://menlovc.com/perspective/2026-the-state-of-enterprise-ai",
+    "publisher": "menlovc.com",
+    "license": "",
+    "date": "Tue, 03 Nov 2026 14:00:00 GMT"
+   },
+   {
+    "title": "New AI Models 2026: Month-by-Month Release Timeline | Versus Models",
+    "url": "https://versusmodels.com/en/ai-releases-2026-timeline",
+    "publisher": "versusmodels.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "AI Is No Longer One-Size-Fits-All: Why Google, OpenAI and Anthropic Are Building Different AI Models",
+    "url": "https://gadgetsnow.indiatimes.com/tech-news/ai-is-no-longer-one-size-fits-all-why-google-openai-and-anthropic-are-building-different-ai-models/articleshow/136023321.cms",
+    "publisher": "gadgetsnow.indiatimes.com",
+    "license": "",
+    "date": "Fri, 20 Nov 2026 10:56:00 GMT"
+   },
+   {
+    "title": "Anthropic and OpenAI Staff Question Releasing Advanced AI Models – Unite.AI",
+    "url": "https://www.unite.ai/anthropic-and-openai-staff-question-releasing-advanced-ai-models",
+    "publisher": "unite.ai",
+    "license": "",
+    "date": "Tue, 24 Nov 2026 11:16:03 GMT"
+   },
+   {
+    "title": "Claude Fable 5.2 Is First on Two Indexes. Its Winning Score Costs $26.54 a Task. · News · Kaino.dev",
+    "url": "https://kaino.dev/news/claude-fable-5-2-tops-two-indexes-but-its-best-score-carries-a-26-54-task-cost",
+    "publisher": "kaino.dev",
+    "license": "",
+    "date": "Tue, 17 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "How to Use GPT-6.2: Pricing, API Access and Limits",
+    "url": "https://techjacksolutions.com/ai-tools/chatgpt/gpt-6-2-pricing-and-api",
+    "publisher": "techjacksolutions.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Anthropic, OpenAI employees fear models are too unsafe to release",
+    "url": "https://www.axios.com/2026/11/24/anthropic-openai-unreleased-ai-safety-risks",
+    "publisher": "axios.com",
+    "license": "",
+    "date": "Tue, 24 Nov 2026 10:45:05 GMT"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 63.9,
+  "before_first_script_call_s": 23.5,
+  "script_s": 40.4
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "research": 0.00774,
+  "script_big": 0.26685,
+  "search_api": 0.112,
+  "total": 0.38687
+ },
+ "calls": {
+  "small": 2,
+  "tools": 11,
+  "big": 6
+ },
+ "tokens": {
+  "in": 152944,
+  "out": 12130
+ },
+ "rules": {
+  "length": {
+   "words": 540,
+   "expected_words": 537,
+   "ratio": 1.006,
+   "beats": 19,
+   "expected_beats": 17,
+   "est_speech_s": 243.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 36,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Twenty-seven new AI models in twenty-four days. Between the first and the twenty-fourth of November, one tracker confirmed that many releases from thirteen different vendors.",
+   "close_text": "So how should you read the trend? Anthropic itself says it may slow down or hold back even when it costs. Expect a ladder of models at falling prices, with the top tier arriving more slowly."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "counter": 2,
+    "diagram": 2,
+    "timeline": 2,
+    "versus": 2,
+    "bullets": 4,
+    "kinetic_text": 3,
+    "table": 1,
+    "headline": 1,
+    "stat": 1,
+    "title": 1
+   },
+   "max_run": 2,
+   "entropy": 3.16,
+   "top_type": "bullets",
+   "top_share": 0.21,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 11,
+   "ungrounded_numbers": [],
+   "entities": 24,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "claude fable 5 2",
+    "count": 2
+   },
+   {
+    "phrase": "restricted twin mythos 5",
+    "count": 2
+   },
+   {
+    "phrase": "twin mythos 5 2",
+    "count": 2
+   },
+   {
+    "phrase": "gpt 6 2 astra",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 2,
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 11,
+   "fetched": 39,
+   "notes_len": 32960,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": false,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch"
+  ],
+  "mismatch_scenes": [
+   "beat 17 (timeline): its narration never says ['Sep 20 Training and evaluation paused', 'Nov 18 Lifecycle-safety report published']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most dates, prices and the Menlo figures match the notes, but several claims go beyond them: 'Fable 5.2 debuted at number one', 'Anthropic itself says it may slow down', 'falling prices', and the Terra tier placement are shaky or inferred."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the Anthropic, Google, OpenAI and open-weight releases plus tiers, price and safety. Capabilities, benchmarks and reasoning are thin, the Kimi/Qwen/Inkling/Sarvam beat is a bare list, and cost-per-task caveats are missing."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The flow runs from release flood to tiers and pricing to slowdown risk, with chapters and a clear thesis. Beat 18 (the Fable/Mythos split) repeats beat 2, and the ending is abrupt."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "'Twenty-seven new AI models in twenty-four days' is a decent numeric hook. The ending is a flat forecast ('Expect a ladder of models...') with no strong image, and the final scene is a malformed title."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is clear, neutral and suited to a US beginner or intermediate viewer, with conversational explanations."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well, using counter, timeline, versus, table and headline. But the last title scene reads 'So how should you read the trend? Anthropic itself', which is truncated. The 'Two ladders' diagram shows only Anthropic. The stat 24+ and the table are fine."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The DNS-misconfiguration pause and the tier-routing angle are specific. Much of the rest is a date list."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It answers the request about recent releases and trends in English at about the right length. Anything before November is thin, though the 'past few months' was requested."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is fluent and clean. The line 'Anthropic itself says it may slow down or hold back even when it costs' is awkward, and 'Hydrogen followed, and free users can use it' is clumsy."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "So how should you read the trend? Anthropic itself",
+    "issue": "The title text is cut off mid-phrase and is not a sensible on-screen title.",
+    "beat": 19
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Anthropic itself says it may slow down or hold back even when it costs.",
+    "issue": "The notes say 'both companies have said they may slow down'. The script's specific attribution and 'even when it costs' are unsupported.",
+    "beat": 19
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Expect a ladder of models at falling prices",
+    "issue": "Falling prices are inferred from limited discounting evidence, and the notes say buyers prioritize capability over cost.",
+    "beat": 19
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "OpenAI's ladder runs from Astra at the top, to Sol, to Terra",
+    "issue": "The notes show Terra below Sol and Astra, but the exact ordering of Sol and Astra is not established. Also, the Fable/Opus/Sonnet/Haiku ladder is drawn as a single chain, though Fable is a separate top line.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Labs are also splitting models in two.",
+    "issue": "This repeats the Fable/Mythos twin point from beat 2, and it sits oddly after the safety timeline.",
+    "beat": 18
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Then came Qwen4-Max, Inkling 2 Mini, and Sarvam-105B.",
+    "issue": "Open-weight models are listed with no capability or context. Qwen4-Max is also not clearly open-weight in the notes.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Agent traffic is driving it.",
+    "issue": "The agents trend is mentioned in one line, with no depth such as the 37x OpenRouter figure or the reasoning and cost-per-task caveat.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Even flagships are now being discounted.",
+    "issue": "The claim is unsourced in the script, and the discounting evidence is thin.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "Capability or benchmark details beyond the No. 1 rank, such as the cost per task of Fable 5.2",
+   "Reasoning and agentic capabilities of the new models",
+   "Qwen 4 pricing and its promised open weights",
+   "Tencent Hy4 and other multimodal, world or video models",
+   "Releases from before November, e.g. GPT-6 in October",
+   "A strong closing image or takeaway"
+  ],
+  "wrong_facts": [
+   "Unverified: 'Anthropic itself says it may slow down' is attributed to Anthropic alone, while the notes say both companies said so.",
+   "The claim that Qwen4-Max is open-weight is not supported by the notes."
+  ],
+  "would_publish": false,
+  "summary": "A reasonably fresh, well-ordered date-driven roundup with a useful tier and price angle and a good safety caveat. It is held back by a thin treatment of capabilities and open models, some unsupported claims, and a broken final scene with a weak ending.",
+  "mean": 3.44,
+  "cost_usd": 0.036894,
+  "tokens": [
+   9297,
+   1830
+  ]
+ }
+}

@@ -1,0 +1,461 @@
+{
+ "id": "opi-02",
+ "category": "opinion / essay",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "por qué deberíamos leer más",
+ "great": "Tesis clara y personal, argumentos concretos (empatía, concentración, vocabulario) con alguna evidencia verificable, ejemplos, cierre memorable; voz de ensayo, no lista genérica.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:08:48",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Explicar por qué leer más es una cuestión atemporal basada en investigación establecida sobre beneficios cognitivos, emocionales y educativos; no depende de información reciente que cambie con frecuen",
+  "queries": [
+   "beneficios de la lectura",
+   "por qué leer más",
+   "efectos de la lectura en el cerebro"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "inspiration-motivation",
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Por qué deberíamos leer más: lo que te da un libro",
+  "description": "Un recorrido breve por los beneficios de leer: vocabulario, empatía, concentración y calma. Descubre por qué unos minutos al día pueden cambiar tu forma de pensar.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "e2870868",
+    "narration": "¿Cuándo fue la última vez que pasaste una hora entera con una sola cosa, sin mirar el móvil? Leer te devuelve ese superpoder casi olvidado: la atención profunda.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "¿Por qué deberíamos leer más?",
+      "subtitle": "Un hábito pequeño con efectos enormes"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "134dd16a",
+    "narration": "Muchos creen que leer es un pasatiempo y nada más. Pero cada página ejercita tu cerebro: sigues ideas largas, imaginas escenas y conectas lo nuevo con lo que ya sabes.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person turning book pages",
+      "alt": "hands reading an open book"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Lo que ocurre en tu mente"
+   },
+   {
+    "id": "2ecd5fec",
+    "narration": "Primero, ganas vocabulario. Segundo, mejoras la concentración. Tercero, piensas con más claridad, porque un libro te obliga a seguir un argumento hasta el final.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Qué mejora al leer",
+      "items": [
+       "Más vocabulario",
+       "Mejor concentración",
+       "Pensamiento más claro"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "book",
+       "target",
+       "lightbulb"
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "8723bd09",
+    "narration": "Y hay algo más profundo. Una novela te deja vivir dentro de otra persona. Así practicas la empatía: entiendes miedos, deseos y razones que no son los tuyos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Leer es vivir otras vidas sin salir de la tuya.",
+      "emphasis": "otras vidas"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "f02330c0",
+    "narration": "Se puede leer en una biblioteca antigua, en una sala de lectura silenciosa. También un niño bajo la manta, con una linterna. O una persona con su novela en el tren.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "old library reading room",
+       "child reading under blanket",
+       "person reading novel on train"
+      ],
+      "alt": "Personas leyendo en distintos lugares"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "fef4d85d",
+    "narration": "Entonces, ¿por qué leemos tan poco? Porque las pantallas ganan la batalla de la atención. Cada notificación corta el hilo, y sin hilo, la mente se acostumbra a saltar.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la distracción",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Notificación",
+        "icon": "bell"
+       },
+       {
+        "id": "b",
+        "label": "Atención cortada",
+        "icon": "scissors"
+       },
+       {
+        "id": "c",
+        "label": "Mente dispersa",
+        "icon": "cloud"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "interrumpe"
+       ],
+       [
+        "b",
+        "c",
+        "acostumbra"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Cómo empezar hoy"
+   },
+   {
+    "id": "2579b7ef",
+    "narration": "La buena noticia: no necesitas horas. Con veinte minutos al día lees varios libros al año. Lo importante no es la cantidad, sino la constancia de cada jornada.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "20",
+      "unit": "min",
+      "label": "al día bastan para crear el hábito"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "debd3567",
+    "narration": "Empieza así: elige un libro que te apetezca de verdad. Deja el móvil en otra habitación. Lee a la misma hora cada día. Y si no te engancha, cámbialo sin culpa.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Tu plan de lectura",
+      "steps": [
+       {
+        "label": "Elige un libro que te guste"
+       },
+       {
+        "label": "Aparta el móvil"
+       },
+       {
+        "label": "Fija una hora diaria"
+       },
+       {
+        "label": "Cámbialo si no te engancha"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "d25cf7c4",
+    "narration": "Leer no es una obligación elegante. Es un regalo para tu mente: más calma, más palabras, más comprensión. Esta noche, abre un libro y lee solo diez páginas.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "Esta noche, abre un libro y lee solo diez páginas.",
+      "attribution": "Tu primer paso"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "inspiration-motivation",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 39.3,
+  "before_first_script_call_s": 2.6,
+  "script_s": 36.6
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "script_big": 0.11336,
+  "search_api": 0.0,
+  "total": 0.11367
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 33810,
+  "out": 5179
+ },
+ "rules": {
+  "length": {
+   "words": 257,
+   "expected_words": 267,
+   "ratio": 0.963,
+   "beats": 9,
+   "expected_beats": 9,
+   "est_speech_s": 115.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Cuándo fue la última vez que pasaste una hora entera con una sola cosa, sin mirar el móvil? Leer te devuelve ese superpoder casi olvidado: la atención profunda.",
+   "close_text": "Leer no es una obligación elegante. Es un regalo para tu mente: más calma, más palabras, más comprensión. Esta noche, abre un libro y lee solo diez páginas."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "clip": 1,
+    "bullets": 1,
+    "kinetic_text": 1,
+    "gallery": 1,
+    "diagram": 1,
+    "counter": 1,
+    "steps": 1,
+    "quote": 1
+   },
+   "max_run": 1,
+   "entropy": 3.17,
+   "top_type": "title",
+   "top_share": 0.11,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": [
+   "beat 5 (gallery): its narration never says ['old library reading room', 'child reading under blanket', 'person reading novel on train']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "No notes and no verifiable evidence; claims like 'con veinte minutos al día lees varios libros al año' are plausible but unsourced, and the empathy claim is stated flatly."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers vocabulary, concentration and empathy, but with no evidence, study or concrete example (the brief asked for verifiable evidence); beat 5 is filler."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical (why, how, plan), but the gallery beat adds nothing and the distraction diagram sits oddly under 'Cómo empezar hoy'; the ending partly repeats earlier points."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about an hour without the phone creates tension; the ending 'diez páginas' is actionable, though it contradicts the earlier twenty minutes."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, direct, a fitting second-person voice, though a bit generic and listy for an essay."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary, but the counter shows '20 min' without real data, the gallery narration just lists images, and the clip is generic."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Generic arguments with no surprising fact, author, study or anecdote; 'superpoder casi olvidado' is a cliché."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Right language and approximate length, but the 'clear personal thesis' and 'verifiable evidence' are missing."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct Spanish with a few slightly stiff or odd phrases."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "originality",
+    "severity": "major",
+    "quote": "Muchos creen que leer es un pasatiempo y nada más.",
+    "issue": "A generic strawman with no evidence or concrete data to back the benefits claimed.",
+    "beat": 2
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Así practicas la empatía: entiendes miedos, deseos y razones que no son los tuyos.",
+    "issue": "The key argument is asserted with no study or example (e.g. research on theory of mind and fiction).",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Se puede leer en una biblioteca antigua, en una sala de lectura silenciosa.",
+    "issue": "Filler beat that adds no argument and repeats itself (biblioteca/sala de lectura).",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Con veinte minutos al día lees varios libros al año.",
+    "issue": "Unsupported figure; it is roughly true (about 15-20 books at a typical pace), but it is vague and unsourced.",
+    "beat": 7
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "lee solo diez páginas",
+    "issue": "The close shifts from twenty minutes to ten pages, which is slightly inconsistent.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "El ciclo de la distracción",
+    "issue": "The diagram is a simplistic three-node chain placed under 'Cómo empezar hoy', which does not match the chapter.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "Evidence: a study, statistic or author",
+   "A personal thesis and an anecdote",
+   "A memorable closing image",
+   "The Spanish reading context (e.g. reading-habit data for Spain)"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, friendly and well-organised but generic script: the arguments are asserted without evidence or concrete examples, with one filler beat. Fine as a basic piece, but not distinctive enough to publish.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "la constancia de cada jornada",
+     "problem": "'jornada' is stiff here.",
+     "better": "la constancia de cada día"
+    },
+    {
+     "quote": "Leer no es una obligación elegante.",
+     "problem": "An odd, unclear expression.",
+     "better": "Leer no es una obligación ni un postureo."
+    },
+    {
+     "quote": "Leer te devuelve ese superpoder casi olvidado",
+     "problem": "A cliché and a slightly forced metaphor.",
+     "better": "Leer te devuelve esa capacidad de atención profunda que casi hemos perdido."
+    }
+   ]
+  },
+  "mean": 3.22,
+  "cost_usd": 0.021222,
+  "tokens": [
+   3381,
+   1446
+  ]
+ }
+}

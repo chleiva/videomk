@@ -1,0 +1,569 @@
+{
+ "id": "opi-01",
+ "category": "opinion / essay",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Is remote work better than working in an office? Give me a balanced essay with a clear conclusion.",
+ "great": "Clear thesis, both sides with evidence (productivity studies, collaboration, commute, inequality), nuance, a committed conclusion; not mushy; avoids invented studies.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:08:37",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The question asks for a balanced explanation of a debate about remote versus office work. The core arguments (productivity, collaboration, costs, wellbeing) are well established and do not depend on v",
+  "queries": [
+   "remote work vs office productivity",
+   "benefits and drawbacks of remote work"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "explainer-education"
+  ],
+  "staged": null,
+  "notes_len": 0,
+  "n_sources": 0,
+  "n_fetched": 0,
+  "fetched": [],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "",
+ "plan": {
+  "title": "Remote Work vs Office: A Fair Verdict",
+  "description": "A balanced look at remote work and office work, judged on focus, connection, flexibility and career growth. It ends with a clear conclusion about who should choose what.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "0c1303d6",
+    "narration": "Would you trade a ninety minute commute for your kitchen table? Millions of people have, and the argument is still raging. Is remote work actually better than the office? Let's weigh it fairly.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Remote Work vs Office",
+      "subtitle": "Which one is actually better?"
+     }
+    },
+    "chapter": "The question"
+   },
+   {
+    "id": "b3ce2a21",
+    "narration": "We'll judge both on the same four things: focus, connection, flexibility, and career growth. Same questions for each side, and no cheering for a team before we've looked at the evidence.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Four fair tests",
+      "items": [
+       "Focus",
+       "Connection",
+       "Flexibility",
+       "Career growth"
+      ],
+      "style": "rail",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "0a6c4d65",
+    "narration": "Start with remote work's biggest win: time. With no commute, you get hours back every week, and you can shape your day around your life, instead of the other way round.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person working laptop at home",
+      "alt": "working from a home desk"
+     }
+    },
+    "chapter": "The case for remote"
+   },
+   {
+    "id": "39f154cd",
+    "narration": "Quiet helps focus, so deep work often goes faster at home. Money matters too: less spent on fuel, lunches, and work clothes. And companies can hire talented people from anywhere.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Remote strengths",
+      "items": [
+       "Time back",
+       "Quiet focus",
+       "Lower costs",
+       "Wider hiring"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "clock",
+       "target",
+       "banknote",
+       "globe"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c3c00706",
+    "narration": "But remote work has real costs. Isolation is common, and some people feel lonely. The line between work and home blurs, so the laptop follows you to dinner.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Remote risks",
+      "items": [
+       "Loneliness",
+       "Blurred boundaries",
+       "Fewer chance chats"
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "671f6161",
+    "narration": "Now the office. Picture an open plan office team working side by side, colleagues meeting around a whiteboard, and an office coffee break chat. Trust and ideas grow in these small, unplanned moments.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "open plan office team",
+       "colleagues meeting whiteboard",
+       "office coffee break chat"
+      ],
+      "alt": "People together in an office"
+     }
+    },
+    "chapter": "The case for the office"
+   },
+   {
+    "id": "46a2e75f",
+    "narration": "Offices make mentoring easy. A new hire can watch how a senior colleague handles a hard call, and ask a question in ten seconds instead of waiting for a reply.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How office learning flows",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "New hire",
+        "icon": "user"
+       },
+       {
+        "id": "b",
+        "label": "Quick question",
+        "icon": "message-circle"
+       },
+       {
+        "id": "c",
+        "label": "Senior colleague",
+        "icon": "user"
+       },
+       {
+        "id": "d",
+        "label": "Faster growth",
+        "icon": "trending-up"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "6ba623db",
+    "narration": "Yet the office has its own price. Long commutes, noisy rooms, and constant interruptions can wreck concentration, and a fixed schedule leaves little room for family or health.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "crowded commuter train morning",
+      "alt": "commuters in rush hour"
+     }
+    }
+   },
+   {
+    "id": "826b7770",
+    "narration": "Side by side, the picture is mixed. Remote wins on flexibility and quiet focus. The office wins on connection and mentoring. Career growth leans office, especially early on.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Remote",
+       "tagline": "Freedom at home"
+      },
+      "b": {
+       "name": "Office",
+       "tagline": "People in person"
+      },
+      "rows": [
+       {
+        "label": "Focus",
+        "a": "Quiet, fewer interruptions",
+        "b": "Noisier, more distractions"
+       },
+       {
+        "label": "Connection",
+        "a": "Takes deliberate effort",
+        "b": "Happens naturally"
+       },
+       {
+        "label": "Flexibility",
+        "a": "High",
+        "b": "Limited"
+       },
+       {
+        "label": "Career growth",
+        "a": "Harder to be seen",
+        "b": "Easier mentoring"
+       }
+      ]
+     }
+    },
+    "chapter": "Putting them side by side"
+   },
+   {
+    "id": "bcdaa153",
+    "narration": "Here is the honest catch. Research results vary, and studies disagree on productivity, so no one can claim a universal winner. The answer depends on the person, the job, and the team.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The best place to work depends on the person, the job, and the team.",
+      "emphasis": "depends"
+     }
+    }
+   },
+   {
+    "id": "236b3b3c",
+    "narration": "Hybrid work tries to capture both. A few days together for planning, mentoring, and relationships, and the other days at home for focused tasks. It is not perfect, but it fits many teams.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The hybrid mix",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Home days",
+        "icon": "house"
+       },
+       {
+        "id": "m",
+        "label": "Hybrid balance",
+        "icon": "scale"
+       },
+       {
+        "id": "o",
+        "label": "Office days",
+        "icon": "building"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "m",
+        "focus"
+       ],
+       [
+        "o",
+        "m",
+        "connection"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "59b521fa",
+    "narration": "So who should choose what? If your work is solo and focused, or you need flexibility, remote fits. If you are early in your career or your work is collaborative, the office helps.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Match the setting to you",
+      "items": [
+       "Solo, focused work: remote",
+       "Need flexible hours: remote",
+       "Early career: office",
+       "Heavy teamwork: office"
+      ]
+     }
+    },
+    "chapter": "The verdict"
+   },
+   {
+    "id": "c26e6e29",
+    "narration": "Whichever you pick, protect what it lacks. Remote workers should schedule real contact with people. Office workers should guard quiet time for deep thinking.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Fix the weak spot",
+      "items": [
+       "Remote: plan face time",
+       "Office: protect quiet hours"
+      ],
+      "style": "spotlight",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "e53ab6b4",
+    "narration": "So, is remote work better? Not always. It is better for some people and some tasks. The smartest choice is the one that fits your work, your stage of life, and your team.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Neither wins everywhere: choose the setting that fits your work.",
+      "emphasis": "fits your work"
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "comparison-versus",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 60.8,
+  "before_first_script_call_s": 2.5,
+  "script_s": 58.3
+ },
+ "cost": {
+  "script_small": 0.00028,
+  "script_big": 0.14408,
+  "search_api": 0.0,
+  "total": 0.14436
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 34148,
+  "out": 8134
+ },
+ "rules": {
+  "length": {
+   "words": 427,
+   "expected_words": 402,
+   "ratio": 1.062,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 191.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 33,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Would you trade a ninety minute commute for your kitchen table? Millions of people have, and the argument is still raging. Is remote work actually better than the office? Let's weigh it fairly.",
+   "close_text": "So, is remote work better? Not always. It is better for some people and some tasks. The smartest choice is the one that fits your work, your stage of life, and your team."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "title": 1,
+    "bullets": 4,
+    "clip": 2,
+    "gallery": 1,
+    "diagram": 2,
+    "versus": 1,
+    "kinetic_text": 2,
+    "checklist": 1
+   },
+   "max_run": 2,
+   "entropy": 2.81,
+   "top_type": "bullets",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": true
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 0,
+   "fetched": 0,
+   "notes_len": 0,
+   "flag_thin_notes": true,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "thin_notes",
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": [
+   "beat 4 (bullets): its narration never says ['Time back', 'Lower costs', 'Wider hiring']",
+   "beat 5 (bullets): its narration never says ['Loneliness', 'Blurred boundaries', 'Fewer chance chats']",
+   "beat 7 (diagram): its narration never says ['Senior colleague', 'Faster growth']",
+   "beat 11 (diagram): its narration never says ['Office days', 'Hybrid balance']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "No invented studies, but claims like \"deep work often goes faster at home\" and \"Isolation is common\" are asserted with no evidence; the script is safe but vague."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The brief asks for evidence (productivity studies, inequality), yet the script cites no study, figure or named example, and it never mentions hybrid findings or equity issues; the points are all common-sense generalities."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Four criteria, then a case for each side, a comparison, hybrid, and a verdict. The order is clear, but the conclusion repeats the point several times (beats 10, 12, 14)."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The commute-for-kitchen-table question is a decent hook. The ending, \"Not always\", is a bland summary line rather than an image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Plain, balanced and accessible for a US general audience, with a slightly flat register."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary (bullets, diagram, versus, clip, gallery), but there are many bullet slides. The gallery queries are lifted straight from the narration, and the beat 7 diagram is trivial."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Generic pros and cons throughout, with no surprising fact or specific example."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "It is balanced and has a conclusion, but the conclusion is \"it depends\", which the brief warned against as mushy. It also lacks evidence, and at roughly 390 words it is near the target length."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clean, but beat 6's narration reads awkwardly: \"Picture an open plan office team working side by side... and an office coffee break chat\" repeats the image queries verbatim."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "language",
+    "severity": "major",
+    "quote": "Picture an open plan office team working side by side, colleagues meeting around a whiteboard, and an office coffee break chat.",
+    "issue": "The narration copies the image search queries, so it sounds stilted and unnatural.",
+    "beat": 6
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Research results vary, and studies disagree on productivity",
+    "issue": "The script gestures at research but names no study or number, which is the evidence the brief wanted.",
+    "beat": 10
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "Not always. It is better for some people and some tasks.",
+    "issue": "The conclusion is hedged and does not commit to a clear verdict as requested.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Quiet helps focus, so deep work often goes faster at home.",
+    "issue": "This is an unsupported generalization, and the script itself later says studies disagree.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Money matters too: less spent on fuel, lunches, and work clothes.",
+    "issue": "The point is generic. Inequality, caregiving and the career-visibility penalty are never explored, and the script just asserts that career growth \"leans office\".",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "The answer depends on the person, the job, and the team.",
+    "issue": "The point is repeated in beats 10, 12 and 14, which pads the ending.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "Concrete evidence such as the Stanford/Bloom randomized trial or hybrid experiment findings",
+   "Commute time statistics",
+   "Inequality and equity effects of each arrangement",
+   "Promotion and visibility (proximity bias) data",
+   "A committed thesis"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A tidy, balanced, readable script, but it is generic and evidence-free, with no studies or data, and it ends on a hedged \"it depends\". The visuals are fine, but beat 6 reads awkwardly because it repeats the image queries.",
+  "mean": 3.0,
+  "cost_usd": 0.02081,
+  "tokens": [
+   3770,
+   1327
+  ]
+ }
+}

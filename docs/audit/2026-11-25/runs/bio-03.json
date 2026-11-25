@@ -1,0 +1,542 @@
+{
+ "id": "bio-03",
+ "category": "biography",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "tell me about Alan Turing",
+ "great": "Computability, Enigma at Bletchley Park, Turing test, prosecution in 1952, pardon 2013, death 1954; accurate and respectful.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:05:06",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Alan Turing's life, work in computing, codebreaking, and legacy is a well-established historical topic that does not change often, so an encyclopedia source is sufficient for an accurate explainer scr",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "staged": null,
+  "notes_len": 6198,
+  "n_sources": 6,
+  "n_fetched": 6,
+  "fetched": [
+   "Alan Turing",
+   "Alan Turing Institute",
+   "Turing machine",
+   "Universal Turing machine",
+   "Turing test",
+   "CAPTCHA"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Alan Turing\nAlan Mathison Turing (; 23 June 1912 – 7 June 1954) was an English mathematician and logician widely regarded as the father of theoretical computer science. He formalised the concepts of algorithm and computation with the Turing machine, a model of a general-purpose computer, and his contributions to cryptanalysis helped the Allies of World War II decipher messages encrypted by the German Enigma machine. He also contributed the Turing test to philosophy of artificial intelligence and the Turing pattern concept to mathematical and theoretical biology.\nBorn in London and raised in southern England, Turing graduated from King's College, Cambridge, and earned a doctorate from Princeton University in 1938. During World War II, he worked at the Government Code and Cypher School at Bletchley Park, Britain's codebreaking centre, and focused on decrypting German naval messages as the head of Hut 8. His techniques improved on the pre-war Polish bomba method and hastened cryptanalysis of the Enigma ciphering system. The resulting intelligence, known as Ultra, proved helpful in the Battle of the Atlantic. After the war, Turing joined the National Physical Laboratory, where he designed the Automatic...\n\n## Alan Turing Institute\nThe Alan Turing Institute is the United Kingdom's national institute for data science and artificial intelligence, founded in 2015 and largely funded by the UK Government. It is named after Alan Turing, the British mathematician and computing pioneer. Since 2025, the institute focuses on defense and national security, following demands by the UK Government.\n\n## Turing machine\nA Turing machine is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules. Despite the model's simplicity, it is capable of implementing any computer algorithm.\nThe machine operates on an infinite memory tape divided into discrete cells, each of which can hold a single symbol drawn from a finite set of symbols called the alphabet of the machine. It has a \"head\" that, at any point in the machine's operation, is positioned over one of these cells, and a \"state\" selected from a finite set of states. At each step of its operation, the head reads the symbol in its cell. Then, based on the symbol and the machine's own present state, the machine writes a symbol into the same cell, and moves the head one step to the left or the right, or halts the computation. The choice of which replacement symbol to write, which direction to move the head, and whether to halt is based on a finite table that specifies what to do for each combination of the current state and the symbol that is read. As with a real computer program, it is possible for a Turing machine to go into an infinite loop which will never halt.\nThe...\n\n## Universal Turing machine\nIn computer science, a universal Turing machine (UTM) is a Turing machine capable of computing any computable sequence, as described by Alan Turing in his seminal paper \"On Computable Numbers, with an Application to the Entscheidungsproblem\". Or, in other words, a Turing machine that is capable of simulating any other specialized Turing machines.\nCommon sense might say that a universal machine is impossible, but Turing proves that it is possible. He suggested that we may compare a human in the process of computing a real number to a machine that is only capable of a finite number of conditions ⁠q1,q2,…,qR⁠; which will be called \"m-configurations\". He then described the operation of such machine, as described below, and argued:\nIt is my contention that these operations include all those which are used in the computation of a number. \nTuring introduced the idea of such a machine in 1936–1937.\n\n## Turing test\nThe Turing test was designed by Alan Turing to assess a machine's ability to exhibit intelligent behaviour equivalent to that of a human by imitating interactive dialogue. In the modern version, a human evaluator judges a text transcript of a natural-language conversation between a human and a machine. The evaluator tries to identify the machine, and the machine passes if the evaluator cannot reliably tell them apart. The results would not depend on the machine's ability to answer questions correctly, only on how closely its answers resembled those of a human. Since the Turing test is a test of indistinguishability in performance capacity, the original (verbal) version generalises naturally to all of human performance capacity, including nonverbal (robotic).\nThe test was introduced as the imitation game by Turing in his 1950 paper \"Computing Machinery and Intelligence\" while working at the University of Manchester. It opens with the words: \"I propose to consider the question, 'Can machines think?'.\" Because \"thinking\" is difficult to define, Turing chooses to \"replace the question by another, which is closely related to it and is expressed in relatively unambiguous words\". Turing describes...\n\n## CAPTCHA\nA CAPTCHA ( KAP-chə), a type of challenge-response Turing test, aims to protect computing  user-interfaces. It attempts to deter  bot attacks and  spam by determining whether a  user is a human.\nThe term \"CAPTCHA\" was coined in 2003 by Luis von Ahn, Manuel Blum, Nicholas J. Hopper, and John Langford. It is a contrived acronym for \"Completely Automated Public Turing test to tell Computers and Humans Apart\". A historically common type of CAPTCHA (displayed as reCAPTCHA v1) was first invented in 1997 by two groups working in parallel. This form of CAPTCHA requires interpreting a sequence of letters or numbers from a distorted image. Because the test is administered by a computer, in contrast to the standard Turing test that is administered by a human, CAPTCHAs are sometimes described as reverse Turing tests.\nTwo widely-used CAPTCHA services are Google's reCAPTCHA and Intuition Machines' hCaptcha. Cloudflare, a major website-security service provider, reported in 2021 that it takes the average person approximately 32 seconds to complete a typical CAPTCHA challenge, although an earlier estimate from Stanford University in 2018 reported a shorter solving-time of about 10 seconds.",
+ "plan": {
+  "title": "Alan Turing: The Man Who Imagined Modern Computing",
+  "description": "Alan Turing formalised computation, helped break the Enigma cipher, and asked whether machines can think. This video follows how one mathematician shaped the modern world.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "0ecb6b3a",
+    "narration": "In 1950, a mathematician asked a simple question: can machines think? He didn't try to answer it directly. He replaced it with a game. His name was Alan Turing.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "The mathematician who asked: can machines think?"
+     }
+    },
+    "chapter": "A question about thinking"
+   },
+   {
+    "id": "ea78f7eb",
+    "narration": "Alan Mathison Turing was born in London in 1912. He studied at King's College, Cambridge, and earned a doctorate from Princeton University in 1938. Today he is called the father of theoretical computer science.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Early life",
+      "events": [
+       {
+        "date": "1912",
+        "label": "Born in London, 23 June"
+       },
+       {
+        "date": "1930s",
+        "label": "Graduates from King's College, Cambridge"
+       },
+       {
+        "date": "1938",
+        "label": "Doctorate from Princeton University"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "6b665dba",
+    "narration": "His big idea was the Turing machine. The machine has a tape. Its head reads the symbol in a cell. Then it writes a symbol and moves left or right, following a table of rules.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "A Turing machine",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Infinite tape",
+        "icon": "ribbon"
+       },
+       {
+        "id": "h",
+        "label": "Head reads symbol",
+        "icon": "eye"
+       },
+       {
+        "id": "w",
+        "label": "Write and move",
+        "icon": "pencil"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "h"
+       ],
+       [
+        "h",
+        "w"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    },
+    "chapter": "The imaginary machine"
+   },
+   {
+    "id": "77ab1489",
+    "narration": "Despite its simplicity, this machine can carry out any computer algorithm. Turing also described a universal machine, one that can simulate any other. Common sense said that was impossible. He proved otherwise.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One simple machine can run any algorithm.",
+      "emphasis": "any algorithm"
+     }
+    }
+   },
+   {
+    "id": "ce169044",
+    "narration": "During World War II, Turing worked at Bletchley Park, Britain's codebreaking centre. He headed Hut 8, which focused on German naval messages encrypted by the Enigma machine.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Bletchley Park mansion",
+      "alt": "Bletchley Park, Britain's codebreaking centre",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Breaking Enigma"
+   },
+   {
+    "id": "97d400b4",
+    "narration": "His techniques built on the Polish bomba method. Turing's improvements helped the Allies read Enigma messages. With Enigma broken faster, the intelligence called Ultra proved helpful in the Battle of the Atlantic.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From method to Ultra",
+      "nodes": [
+       {
+        "id": "p",
+        "label": "Polish bomba method",
+        "icon": "cog"
+       },
+       {
+        "id": "i",
+        "label": "Turing's improvements",
+        "icon": "lightbulb"
+       },
+       {
+        "id": "e",
+        "label": "Enigma broken faster",
+        "icon": "lock"
+       },
+       {
+        "id": "u",
+        "label": "Ultra intelligence",
+        "icon": "radio"
+       }
+      ],
+      "edges": [
+       [
+        "p",
+        "i"
+       ],
+       [
+        "i",
+        "e"
+       ],
+       [
+        "e",
+        "u"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "6260058d",
+    "narration": "After the war, he joined the National Physical Laboratory. Later, at the University of Manchester, he wrote his 1950 paper. It opens: \"Can machines think?\" He called his answer the imitation game.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "I propose to consider the question, 'Can machines think?'",
+      "attribution": "Alan Turing, 1950"
+     }
+    },
+    "chapter": "Can machines think?"
+   },
+   {
+    "id": "43247afb",
+    "narration": "A human judge reads a text conversation between a person and a machine. If the judge cannot reliably tell which is which, the machine passes. What matters is resembling a human, not being right.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Judge",
+        "text": "Which of you is the machine? I cannot tell."
+       },
+       {
+        "speaker": "Machine",
+        "text": "Then perhaps I have passed the test."
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "28165fb2",
+    "narration": "His ideas live on. Websites use CAPTCHAs, reverse Turing tests, to spot bots. Cloudflare reported in 2021 that the average person needs about 32 seconds to solve one.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "32",
+      "unit": "sec",
+      "label": "Average time to solve a CAPTCHA, per Cloudflare in 2021"
+     }
+    }
+   },
+   {
+    "id": "53931cc4",
+    "narration": "Turing died in 1954, aged 41. Today the Alan Turing Institute carries his name. His legacy spans theoretical computer science, codebreaking in World War II, and the question of machine intelligence.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Turing's legacy",
+      "items": [
+       "Theoretical computer science",
+       "Codebreaking in World War II",
+       "Machine intelligence"
+      ],
+      "style": "spotlight",
+      "accent": "violet"
+     }
+    },
+    "chapter": "Why he still matters"
+   },
+   {
+    "id": "d2f8186e",
+    "narration": "Next time you solve a CAPTCHA or talk to a chatbot, remember: the question of whether you are speaking to a human began with Alan Turing.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person typing on laptop",
+      "alt": "Person using a computer",
+      "ken_burns": "in"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Alan Turing",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Alan Turing Institute",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing_Institute",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Turing machine",
+    "url": "https://en.wikipedia.org/wiki/Turing_machine",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Universal Turing machine",
+    "url": "https://en.wikipedia.org/wiki/Universal_Turing_machine",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Turing test",
+    "url": "https://en.wikipedia.org/wiki/Turing_test",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "CAPTCHA",
+    "url": "https://en.wikipedia.org/wiki/CAPTCHA",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 31.1,
+  "before_first_script_call_s": 5.5,
+  "script_s": 25.6
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "script_big": 0.09097,
+  "search_api": 0.0,
+  "total": 0.09121
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 27220,
+  "out": 4142
+ },
+ "rules": {
+  "length": {
+   "words": 340,
+   "expected_words": 267,
+   "ratio": 1.273,
+   "beats": 11,
+   "expected_beats": 9,
+   "est_speech_s": 152.1,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In 1950, a mathematician asked a simple question: can machines think? He didn't try to answer it directly. He replaced it with a game. His name was Alan Turing.",
+   "close_text": "Next time you solve a CAPTCHA or talk to a chatbot, remember: the question of whether you are speaking to a human began with Alan Turing."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "title": 1,
+    "timeline": 1,
+    "diagram": 2,
+    "kinetic_text": 1,
+    "image": 2,
+    "quote": 1,
+    "dialogue": 1,
+    "counter": 1,
+    "bullets": 1
+   },
+   "max_run": 1,
+   "entropy": 3.1,
+   "top_type": "diagram",
+   "top_share": 0.18,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 7,
+   "ungrounded_numbers": [
+    "41"
+   ],
+   "entities": 23,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.033,
+   "ungrounded_number_share": 0.143,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "can machines think he",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 6,
+   "fetched": 6,
+   "notes_len": 6198,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The facts are mostly right, but 'Turing died in 1954, aged 41' is true yet given with no context. The 'Common sense said that was impossible' line is a loose paraphrase of the notes. The 1930s Cambridge date is vague."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It omits the 1952 prosecution, the 2013 pardon, and the circumstances of his death, all of which the reviewer's note requires. It skips the Entscheidungsproblem, and Hut 8 gets only a line. Space goes to a CAPTCHA timing stat instead."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is chronological and the chapters are clear. The CAPTCHA stat interrupts the flow, and the ending is a list of topics."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question hooks reasonably well. The close ties back to CAPTCHAs and chatbots, but it is a little forced."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "It is neutral and clear, but it ignores the human side of his story and lacks the respectful treatment the topic needs."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary and mostly fit. The invented dialogue scene is a fabricated exchange, the counter is a trivial stat, and the closing image is a generic laptop photo."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It follows the Wikipedia summary closely. The CAPTCHA 32-second fact is trivia that adds little to a Turing biography."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The length is about right and the language is English. It misses key requested elements (prosecution, pardon), so it is not a complete 'tell me about' biography."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is clear and grammatical, with short sentences that are slightly choppy."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "critical",
+    "quote": "Turing died in 1954, aged 41.",
+    "issue": "It never mentions the 1952 prosecution for homosexuality, the chemical castration, the circumstances of his death, or the 2013 royal pardon. This is a major omission that distorts his story.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Cloudflare reported in 2021 that the average person needs about 32 seconds to solve one.",
+    "issue": "A whole beat goes to a peripheral statistic while core biography is missing.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Then perhaps I have passed the test.",
+    "issue": "The dialogue is invented and presented as an illustration, which may be mistaken for real content.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Common sense said that was impossible. He proved otherwise.",
+    "issue": "It overstates the notes' 'common sense might say'.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "He headed Hut 8, which focused on German naval messages",
+    "issue": "It gives no sense of the stakes, such as lives saved or the bombe machine. It also leaves out the post-war ACE design and the Manchester computers.",
+    "beat": 5
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "His legacy spans theoretical computer science, codebreaking in World War II, and the question of machine intelligence.",
+    "issue": "This is a bare recap of the topics already covered.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "1952 prosecution and its consequences",
+   "2013 royal pardon",
+   "Circumstances of death in 1954",
+   "Entscheidungsproblem and computability context",
+   "Bombe machine and the scale of Enigma's impact",
+   "Turing Award and the Turing pattern"
+  ],
+  "wrong_facts": [
+   "No outright error, but 'Graduates from King's College, 1930s' is vague (he graduated in 1934)."
+  ],
+  "would_publish": false,
+  "summary": "A clear, accurate-ish summary of the Wikipedia lead, but it omits the prosecution, the pardon and the circumstances of his death, which are essential to an honest account of Turing. It also wastes a beat on CAPTCHA timing trivia.",
+  "mean": 2.89,
+  "cost_usd": 0.025196,
+  "tokens": [
+   5648,
+   1390
+  ]
+ }
+}

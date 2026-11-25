@@ -149,3 +149,100 @@ def test_equation_end_state_complete_on_all_themes(i):
     for th in ("midnight", "paper", "sunrise"):
         end = render("equation", p, 8.0, 8.0, th, captions=True)
         assert changed(render("equation", p, 0.0, 8.0, th), end) > 0.01
+
+
+# ----------------------------------------------------------------------------- responsive layouts (9:16, 1:1, 4:5)
+ASPECTS = ("9:16", "1:1", "4:5")
+
+
+def _inside_box(img, aspect, ref_img):
+    import numpy as np
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "720p")
+    a, b = np.asarray(img.convert("RGB"), np.int16), np.asarray(ref_img.convert("RGB"), np.int16)
+    ys, xs = np.where(np.abs(a - b).max(axis=2) > 60)
+    cx0, cy0, cx1, cy1 = fr.content_box
+    s = 1.0   # draft frames are drawn at design size
+    return xs.min() >= (cx0 - 40) * s and xs.max() <= (cx1 + 40) * s and ys.max() <= (cy1 + 40) * s and ys.min() >= (fr.margin_top - 45) * s
+
+
+def _end_state(name, props, aspect, dur=8.0):
+    from tests.element_utils import make_renderer
+    r, sc = make_renderer(name, props, dur, "midnight", [], True, None, True, aspect, "720p")
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "720p")
+    return r._draw_spec(sc, dur * 0.95), fr
+
+
+def test_code_and_equation_are_tagged_for_every_aspect():
+    assert CODE.formats == EQ.formats == ("16:9", "9:16", "1:1", "4:5")
+
+
+def test_wrap_line_hangs_and_never_loses_text():
+    t = "        raise FileNotFoundError(f\"missing configuration file at {cfg.path} please create it\")"
+    rows = cm._wrap_line(t, 40)
+    assert len(rows) >= 3 and rows[0][2] == 0 and all(r[2] > 0 for r in rows[1:])
+    text = "".join(t[a:b] for a, b, _ in rows).replace(" ", "")
+    assert text == t.replace(" ", "")
+    assert all(b - a + i <= 40 for a, b, i in rows)
+    assert cm._wrap_line("short", 40) == [(0, 5, 0)]
+    assert cm._wrap_line("x" * 100, 30)[-1][1] == 100     # a word longer than a row is cut, not dropped
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_code_longest_snippet_fits_the_box_and_the_font_is_not_tiny(aspect):
+    code = "\n".join(("    " * (i % 3)) + f"value_{i} = compute_something(argument_one, argument_two, argument_three_{i})" for i in range(18))
+    props = CODE.sanitize({"title": "Long snippet", "language": "python", "code": code, "steps": [{"lines": [3], "note": "A fairly long explanation of what this line does in plain words"}]})
+    img, fr = _end_state("code", props, aspect)
+    from tests.element_utils import blank
+    from tests.test_formats import _bg
+    assert _inside_box(img, aspect, _bg(aspect, "midnight", 7.6, draft=True))
+    lines = cm._parse_lines(props["code"], "python", "code")
+    c = ctx_for(aspect)
+    g = cm._code_geometry_tall(lines, True, "code", float(c.box[0]), float(c.box[2]), float(c.top + 30), float(c.bottom - 6), 44.0, 34.0)
+    assert g["fs"] >= 18 and g["py"] + g["ph"] + 150 <= c.bottom + 1
+
+
+def ctx_for(aspect):
+    from engine.frame import Frame
+    from engine.scenes.base import SceneCtx
+    return SceneCtx(frame=Frame.parse(aspect, "720p"), captions=True)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_code_vertical_font_is_larger_than_the_landscape_card_would_be(aspect):
+    props = CODE.sanitize(CODE.samples[1])
+    lines = cm._parse_lines(props["code"], "bash", "terminal")
+    c = ctx_for(aspect)
+    g = cm._code_geometry_tall(lines, True, "terminal", float(c.box[0]), float(c.box[2]), float(c.top + 50), float(c.bottom - 6), 44.0, 34.0)
+    assert g["fs"] >= 30 and g["pw"] == c.box[2] - c.box[0]
+
+
+def test_formula_lines_split_at_relations_and_every_line_parses():
+    f = "sum_{i=1}^{n} i^2 = n(n+1)(2n+1)/6 = (2n^3 + 3n^2 + n)/6"
+    lines = cm._formula_lines(f, 600.0)
+    assert len(lines) >= 2 and lines[1].startswith("=")
+    for ln in lines:
+        cm.layout_formula(ln)
+    assert cm._formula_lines("E = m c^2", 600.0) == ("E = m c^2",)     # fits: left alone
+    # nothing inside brackets is cut
+    assert cm._formula_lines("x = (-b + sqrt(b^2 - 4ac)) / (2a)", 150.0)[0] in ("x", "x = (-b + sqrt(b^2 - 4ac)) / (2a)")
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_equation_four_long_steps_fit_the_box(aspect):
+    props = EQ.sanitize({"title": "Four steps of a long derivation", "steps": [
+        {"formula": "x_{n+1} = x_n - f(x_n)/f'(x_n)", "note": "Newton's method with a long explanation"},
+        {"formula": "sum_{i=1}^{n} i^2 = n(n+1)(2n+1)/6 = (2n^3 + 3n^2 + n)/6", "note": "Sum of squares"},
+        {"formula": "int_0^1 x^2 dx + int_1^2 x^3 dx + int_2^3 x^4 dx = 1/3 + 15/4 + 211/5"}, {"formula": "sin(theta)^2 + cos(theta)^2 = 1"}]})
+    img, fr = _end_state("equation", props, aspect)
+    from tests.test_formats import _bg
+    assert _inside_box(img, aspect, _bg(aspect, "midnight", 7.6, draft=True))
+    plan = cm._eq_plan_tall(tuple(s["formula"] for s in props["steps"]), tuple(s.get("note", "") for s in props["steps"]), 200.0, float(ctx_for(aspect).bottom - 10), 840.0, fr.type_scale, fr.vertical)
+    assert plan[-1][1] + plan[-1][2] <= ctx_for(aspect).bottom + 1
+
+
+def test_landscape_code_and_equation_geometry_unchanged():
+    # the landscape path must not be affected by the narrow-frame code
+    g = cm._code_geometry(6, 36, True, "code", 150.0, 794.0)
+    assert g["px"] + g["pw"] / 2 == 960

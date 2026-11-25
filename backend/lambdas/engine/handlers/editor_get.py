@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from common.http import json_response
 
 from ..scenes import SCENE_TYPES
-from .. import awsio, library as library_mod, plan as plan_mod
+from .. import awsio, format_options, library as library_mod, plan as plan_mod
 from ..audio import PLANNER_SFX
 from ..plan import MAX_BEATS
 from .editor_common import load_owned_video
@@ -61,7 +61,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     return json_response(200, {
         "video_id": video_id, "rev": int(item.get("rev", 1)), "status": item.get("status"), "edit_state": state or "READY",
         "edit_mode": item.get("edit_mode"), "edit_error": item.get("edit_error"),
-        "title": plan.get("title"), "description": plan.get("description"), "theme": plan.get("theme"), "mood": plan.get("mood"), "captions": plan.get("captions", True),
+        "frame": format_options.frame_of(plan), "title": plan.get("title"), "description": plan.get("description"), "theme": plan.get("theme"), "mood": plan.get("mood"), "captions": plan.get("captions", True),
         "voice": (plan.get("tts") or {}).get("voice", ""), "voices": plan.get("voices") or {}, "beats": beats, "chapters": [b["chapter"] for b in plan["beats"] if b.get("chapter")],
         "final": {"url": signed("video_uri"), "rev": item.get("final_rev")},
         "preview": {"url": signed("preview_uri"), "rev": item.get("preview_rev")},

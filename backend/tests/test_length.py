@@ -24,7 +24,7 @@ def test_the_targets_come_from_the_measured_speaking_rate():
 def test_the_prompt_makes_the_length_a_hard_requirement_with_numbers():
     p = plan_mod.build_user_prompt("All about Paris", "", 5)
     assert "hard requirement" in p and "5 minute" in p and "at least 21 beats" in p and "pays per minute" in p
-    lo, hi = int(plan_mod.expected_words(5) * 0.9), int(plan_mod.expected_words(5) * 1.1)
+    lo, hi = int(plan_mod.expected_words(5) * plan_mod.TARGET_LOW), int(plan_mod.expected_words(5) * plan_mod.TARGET_HIGH)   # QUALITY_FIXES range; 0.9 to 1.1 with QUALITY_FIXES=0 (tests/test_quality_fixes.py)
     assert f"between {lo} and {hi} words" in p
 
 

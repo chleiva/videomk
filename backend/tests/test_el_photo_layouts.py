@@ -172,3 +172,83 @@ def test_the_samples_draw_on_every_theme_with_photos(name):
         p.update(el.prepare(p, ctx(9)))
         for th in ("midnight", "paper", "sunrise"):
             render(name, p, 3.0, 7.0, th, image_loader=loader, captions=True)
+
+
+# --------------------------------------------------------------------------------------------------------- responsive (9:16, 1:1, 4:5)
+ASPECTS = ("9:16", "1:1", "4:5")
+
+
+def _bbox(a, b, thr=30):
+    import numpy as np
+    d = np.abs(np.asarray(a.convert("RGB"), np.int16) - np.asarray(b.convert("RGB"), np.int16)).max(axis=2) > thr
+    ys, xs = np.where(d)
+    return (xs.min(), ys.min(), xs.max(), ys.max()) if len(xs) else None
+
+
+def _blank_for(aspect, lt, dur):
+    from engine import scenes
+    scenes.SCENES["__blank__"] = (lambda *a, **k: None, lambda p, d: [])
+    try:
+        return render("__blank__", {}, lt, dur, "midnight", aspect=aspect, resolution="720p", draft=False, captions=True)
+    finally:
+        scenes.SCENES.pop("__blank__", None)
+
+
+def test_the_photo_elements_are_tagged_for_every_aspect():
+    for n in NAMES:
+        assert set(ELEMENTS[n].formats) == {"16:9", "9:16", "1:1", "4:5"}
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+@pytest.mark.parametrize("style", STYLES)
+def test_collage_stays_in_the_content_box_in_every_aspect(style, aspect):
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "720p")
+    x0, y0, x1, y1 = fr.content_box
+    for n in (2, 3, 6, 9):
+        p = _props(style, n, title="Saturday in Paris", subtitle="a long lunch")
+        for ld in (None, loader):
+            im = render("photo_collage", p, 8.0, 8.0, aspect=aspect, resolution="720p", draft=False, captions=True, image_loader=ld)
+            assert im.size == (fr.W, fr.H)
+            if ld is None:
+                bb = _bbox(im, _blank_for(aspect, 8.0, 8.0))
+                tol = 70                                   # soft shadows
+                assert bb and bb[0] >= x0 - tol and bb[2] <= x1 + tol and bb[3] <= y1 + tol and bb[1] >= y0 - tol, (style, n, aspect, bb)
+        assert changed(render("photo_collage", p, 0.0, 8.0, aspect=aspect, resolution="720p", image_loader=loader), im) > 0.02
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+@pytest.mark.parametrize("style", FRAME_STYLES)
+def test_frame_and_chapter_in_every_aspect(style, aspect):
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "720p")
+    x0, y0, x1, y1 = fr.content_box
+    for i in (1, 2, 3):
+        p = {"photo": f"P{i}", "style": style, "title": "Golden hour", "subtitle": "From the Trocadero", "date_label": "Sunday 12 April"}
+        p.update(ELEMENTS["photo_frame"].prepare(p, ctx(3)))
+        bare = {k: v for k, v in p.items() if k not in ("asset", "ratio")}
+        im = render("photo_frame", bare, 6.0, 6.0, aspect=aspect, resolution="720p", draft=False, captions=True)
+        bb = _bbox(im, _blank_for(aspect, 6.0, 6.0))
+        assert bb and bb[3] <= y1 + 70 and bb[1] >= y0 - 70, (style, aspect, bb)
+        if style != "film":                                # a film strip bleeds off both sides by design
+            assert bb[0] >= x0 - 70 and bb[2] <= x1 + 70, (style, aspect, bb)
+        render("photo_frame", p, 6.0, 6.0, aspect=aspect, resolution="720p", image_loader=loader)
+
+
+@pytest.mark.parametrize("aspect", ASPECTS)
+def test_chapter_card_is_centred_and_inside_the_box(aspect):
+    from engine.frame import Frame
+    fr = Frame.parse(aspect, "720p")
+    x0, y0, x1, y1 = fr.content_box
+    for title in ("Paris", "The long way round the old harbour and back again to the town square", "Extraordinarilylongwordthatcannotbreakanywhereatall"):
+        im = render("chapter_card", {"title": title, "kicker": "Day 2", "subtitle": "Markets, museums and a long walk home"}, 4.0, 5.0, aspect=aspect, resolution="720p", draft=False, captions=True)
+        bb = _bbox(im, _blank_for(aspect, 4.0, 5.0), thr=140)   # the text, not the faint rings
+        assert bb and bb[0] >= x0 - 20 and bb[2] <= x1 + 20 and bb[1] >= y0 - 20 and bb[3] <= y1 + 20, (aspect, title[:12], bb)
+
+
+def test_vertical_film_strips_keep_their_cues():
+    p = _props("filmstrip", 6)
+    p["cues"] = [0.3, 2.0, 3.0, 4.0, 5.0, 6.0]
+    early = render("photo_collage", p, 1.0, 8.0, aspect="9:16", resolution="720p", image_loader=loader)
+    late = render("photo_collage", p, 2.5, 8.0, aspect="9:16", resolution="720p", image_loader=loader)
+    assert changed(early, late) > 0.005

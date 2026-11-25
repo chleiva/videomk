@@ -1,0 +1,931 @@
+{
+ "id": "fin-03",
+ "category": "personal finance",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "Explain how a mortgage works for a first-time buyer in the US: down payment, fixed vs adjustable rate, how amortization shifts interest vs principal over time, PMI, closing costs, and what the current 30-year rate environment looks like.",
+ "great": "Components of the payment, amortization example with correct maths, fixed vs ARM, PMI under 20% down, closing costs 2-5%, current rates from research with date; honest caveats.",
+ "minutes": 5.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 5.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T15:01:17",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The core mechanics (down payment, fixed vs adjustable, amortization, PMI, closing costs) are timeless and fit an encyclopedia, but the request explicitly asks for the current 30-year rate environment,",
+  "queries": [
+   "30-year mortgage rates this week",
+   "current US mortgage rate environment November 2026",
+   "average closing costs first-time homebuyer 2026"
+  ],
+  "searches": 14,
+  "reads": 0,
+  "iterations": 3,
+  "seconds": 15.4,
+  "error": "",
+  "fallback": null,
+  "section_searches": 10,
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "staged": {
+   "sections": 3,
+   "titles": [
+    "What you actually need to bring to the table",
+    "Rates, amortization and why early payments feel strange",
+    "PMI, the hidden costs, and the trade-off to weigh"
+   ]
+  },
+  "notes_len": 34870,
+  "n_sources": 10,
+  "n_fetched": 48,
+  "fetched": [
+   "Mortgage Rates Above 7% in November 2026: The New Normal? How to Still Find Rental Deals | Main St Landlord",
+   "the first increase in five weeks. Freddie Mac's weekly survey for the week ending November 19, 2026 put the 30-year fixed average at 7.28%, up from 7.11% the we",
+   "USA Global Group on Facebook: \"🏡 MORTGAGE RATES ARE MOVING. IS IT TIME TO REVIEW YOUR OPTIONS? According to Freddie Mac, U.S. mortg…\"",
+   "Diary of an Investress on Instagram: \"The average 30-year mortgage rate is still moving — here is the latest Freddie Mac number. As of Nov…\"",
+   "Mortgage rates are up on the week and up on the year. Freddie Mac's weekly survey put the ...",
+   "Freddie Mac",
+   "Complete costs of buying a house, from down payment to maintenance (and more)",
+   "Today's Mortgage Rates, November 20, 2026: 30-Year ...",
+   "What Is PMI? Many Loans: 80% Request, 78% Automatic",
+   "Gems Concha",
+   "Private Mortgage Insurance, PMI, how to get rid of - Carlson Agency LLC - About PMI",
+   "PMI Calculator 2026 - Private Mortgage Insurance | Tools.RealEstate",
+   "FHA vs Conventional Loan: 3.5% Down, MIP vs PMI, Limits",
+   "Minimum Down Payment Requirements for First-Time Buyers 2026 | Heart Mortgage",
+   "Minimum Mortgage Requirements for 2026 | LendingTree",
+   "Conventional Loan Down Payment: How Much You Need",
+   "How Much Are Closing Costs? Average Costs and Fees in 2026 | LendingTree",
+   "Closing Costs: Fees, Who Pays and How to Lower Them",
+   "Closing Costs: What They Are and How Much You'll Pay | Bankrate",
+   "What Are Closing Costs and How Much Will You Pay? | Zillow",
+   "Mortgage Rates Climb in Freddie Mac's Weekly Average | Today, November 23, 2026 | Mortgage Rates, Home Loan Guides & Expert Insights | The Mortgage Reports",
+   "Mortgage Rates Average 7.28% | Freddie Mac",
+   "Mortgage Rates Today: 30-Year and 15-Year Fixed (Freddie Mac) | MLQ.ai",
+   "Mortgage Rates Climb in Freddie Mac's Weekly Survey | Today, November 20, 2026 | Mortgage Rates, Home Loan Guides & Expert Insights | The Mortgage Reports",
+   "Mortgage Rates Decline for Fourth Consecutive Week to 7.11% | Freddie Mac",
+   "Freddie Mac Mortgage Market Survey Archive - Freddie Mac",
+   "Mortgage Rates",
+   "How Mortgage Amortization Works - SmartAsset",
+   "What Is Amortization? How Loan Payments Actually Work",
+   "What is amortization and how does it work? | Fidelity",
+   "ARM Rate Caps: Initial, Periodic, Lifetime, and Payment Limits - FedLaws",
+   "How Adjustable-Rate Mortgages Work",
+   "What are rate caps with an adjustable-rate mortgage (ARM), and how do they work? | Consumer Financial Protection Bureau",
+   "What to Know About PMI | Fannie Mae",
+   "How to Avoid PMI Without a 20% Down Payment | 2026",
+   "What is private mortgage insurance? | Consumer Financial Protection Bureau",
+   "The Math Behind Putting Down Less Than 20% - My Home by Freddie Mac",
+   "How to Remove PMI from Your Mortgage | Opendoor",
+   "Homeowners Protection Act of 1998",
+   "The Homeowners Protection Act of 1998 Public Law Number 105-216 Summary",
+   "How Does PMI Work? Costs, Cancellation, and Termination - FedLaws",
+   "Homeowners Protection Act (PMI Cancellation Act) | NCUA",
+   "The average US 30-year mortgage rate rises to 7.28% this week, ending a four-week slide – WTOP News",
+   "Mortgage rates today, Nov. 25, 2026 | Fortune",
+   "PMI in 2026: When Private Mortgage Insurance Makes Sense - CUSO Home Lending",
+   "PMI Rates by Credit Score and Down Payment: 2026 Chart",
+   "How Much Does Private Mortgage Insurance (PMI) Cost?",
+   "PMI Calculator - NerdWallet"
+  ],
+  "research_agent_cost_usd": 0.0015572
+ },
+ "warnings": [
+  "beat 3: scene replaced (versus needs 2+ rows)",
+  "section 3: some scenes list items their narration never mentions: beat 5 (timeline): its narration never says ['80% You can request cancellation in writ', \"78% Automatic termination, if you're cur\"]. Say each item's key words in the order shown"
+ ],
+ "notes": "## Mortgage Rates Above 7% in November 2026: The New Normal? How to Still Find Rental Deals | Main St Landlord\nPublished: Sun, 22 Nov 2026 00:00:00 GMT\nMortgage rates spent all of November 2026 above 7%. According to Freddie Mac's weekly survey, the average 30-year fixed rate was 7.18% on November 5, dipped to 7.11% on November 12 (a seven-week low), then jumped to 7.28% on November 19. For comparison, the same survey showed about 6.26% a year earlier. The 15-year fixed rate averaged 6.66% on November 19, up from 5.54% a year ago. [...] Keep in mind that investment property loans usually cost more than these averages, which are for owner-occupied homes. Lenders commonly add somewhere between a quarter and almost a full percentage point for a rental, so an investor may be quoted anywhere from about 7.5% to over 8% right now. | Freddie Mac weekly survey | 30-year fixed | ---| | November 5, 2026 | 7.18% | | November 12, 2026 | 7.11% | | November 19, 2026 | 7.28% | | Same week, 2025 | 6.26% | [...] What history does tell us is that 7% is no\n\n## the first increase in five weeks. Freddie Mac's weekly survey for the week ending November 19, 2026 put the 30-year fixed average at 7.28%, up from 7.11% the we\nFreddie Mac's weekly survey for the week ending November 19, 2026 put the 30-year fixed average at 7.28%, up from 7.11% the week before. week earlier and 6.34%\n\n## USA Global Group on Facebook: \"🏡 MORTGAGE RATES ARE MOVING. IS IT TIME TO REVIEW YOUR OPTIONS? According to Freddie Mac, U.S. mortg…\"\nPublished: Sun, 22 Nov 2026 14:52:06 GMT\n# USA Global Group on Facebook: \"🏡 MORTGAGE RATES ARE MOVING. IS IT TIME TO REVIEW YOUR OPTIONS? According to Freddie Mac, U.S. mortg…\" 🏡 MORTGAGE RATES ARE MOVING. IS IT TIME TO REVIEW YOUR OPTIONS? According to Freddie Mac, U.S. mortgage rates declined during the week ending November 12, 2026. 📉 📊 30-Year Fixed: 7.11% (previously 7.18%) 📊 15-Year Fixed: 6.45% But remember, interest rates are only one part of the homebuying decision! [...] 💰 Consider your monthly mortgage payment. 🏠 Review your down payment requirements. 📑 Understand loan terms and closing costs. ✨ The right homebuying decision starts with understanding the numbers. 💬 Planning to buy a home? Contact us to discuss your financing options! Rates are national weekly averages as of November 12, 2026. Individual rates may vary. [...] ____________ USA Global Group 📍 Address: 10700 Richmond Ave, Ste. 200 Houston, TX 77042 📞 Pho\n\n## Diary of an Investress on Instagram: \"The average 30-year mortgage rate is still moving — here is the latest Freddie Mac number. As of Nov…\"\nPublished: Wed, 18 Nov 2026 18:56:45 GMT\n# Diary of an Investress on Instagram: \"The average 30-year mortgage rate is still moving — here is the latest Freddie Mac number. As of Nov…\" The average 30-year mortgage rate is still moving — here is the latest Freddie Mac number. As of November 12, 2026, the average 30-year fixed mortgage in Freddie Mac's Primary Mortgage Market Survey was 7.11%, down from 7.18% the week before. That was the fourth consecutive weekly decline. A year earlier, the same average was 6.24%. [...] A rate is a number. It will move again. The more useful question is the payment you can live with. Would you rather wait for a lower rate, or start with a payment you can afford today? Tell me in the comments — and vote on the sticker in Stories. #mortgagerates #womenwhoinvest #realestateinvesting #womeninrealestate [Image: Video by Diary of an Investress on November 18, 2026. May be an image of text.] [...] - Au\n\n## Mortgage rates are up on the week and up on the year. Freddie Mac's weekly survey put the ...\nFreddie Mac's weekly survey put the 30-year fixed at 7.28% on November 19. interest runs about $684 a month at 7.28%, against about $616 at 6.26%. November 19,\n\n## Freddie Mac\n# Freddie Mac ID: 1nWvtckNp0dC Website: www.freddiemac.com Legal name: Federal Home Loan Mortgage Corporation Headquarters: McLean, VA, United States LinkedIn: www.linkedin.com/company/freddie-mac · 201,967 followers Industry: Financial Services Industry codes: SIC 62, 621, NAICS 52, 522 Company type: Public Company Parent company: Zions Bancorporation (zionsbancorporation.com/) Founded: 1970 Business model: B2B SaaS: no [...] ## Products and services Business areas: Mortgage Finance, Housing Finance, Mortgage Securities Issuance, Capital Markets Products: Single-Family Mortgage Loans, Multifamily Mortgage Loans, Mortgage Securities, Mortgage Servicing, Loan Lookup Tool, Rental Property Financing Lookup Tool [...] Description: Freddie Mac is a company that supports America's homeowners and renters while serving as a stabilizing force in the U.S. housing finance system.\n\n## Complete costs of buying a house, from down payment to maintenance (and more)\n# Complete costs of buying a house, from down payment to maintenance (and more). - Closing costs alone run 2% to 5% of your loan amount, and the lender fees inside that range are the part you can negotiate. Buying a $300,000 home with 3% down means showing up at closing with somewhere between $14,000 and $24,000. Here's what every stage of a home purchase actually costs, from the cash you need upfront to the expenses that follow you for as long as you own the place. ## Home prices in the U.S. The home price is the biggest single number in the deal. Your required cash to close is your down payment plus your closing costs. - **If you're using a conventional loan with 3% down** and your credit score is at least 620, you'd put down $9,000 and borrow $291,000. - **If you're using an FHA loan** and your credit score is 580 or higher, the minimum down payment is 3.5% ($10,500) on a $289,500 loa\n\n## Today's Mortgage Rates, November 20, 2026: 30-Year ...\nIf your loan scenario reflects a down payment of less than 20%, the monthly payment below also includes private mortgage insurance (PMI).\n\n## What Is PMI? Many Loans: 80% Request, 78% Automatic\n# What Is PMI (Private Mortgage Insurance)? Private mortgage insurance (PMI) protects the lender, not the borrower, if payments stop. Federal law says when a PMI requirement is canceled or ends: on the borrower's written request, with other conditions met, once the balance is scheduled to reach 80 percent of the original value, automatically at 78 percent, and at the latest after the midpoint of the amortization period. Under 12 U.S.C. 4902, a PMI requirement is canceled on the cancellation date, which the definitions put at the date the balance is first scheduled to reach 80 percent of the original value (or reaches it through actual payments), once the borrower asks in writing and meets the other requirements. The statute defines it, for a purchase, as the lesser of the sales price in the contract or the appraised value when the loan was made; for a refinance of the principal residence\n\n## Gems Concha\nTitle: Gems Concha Wednesday, October 28, 2026 at 4:59 PM. October 28 at 4:59 PM ·. There is an executive order signed by our president titled “Decreasing Housing Costs for the American People” (issued on October 22, 2026). The order aims to reduce some costs of having a home loan. It doesn’t guarantee lower home prices or an immediate drop in everyone’s mortgage payment. The order calls for a trial program to remove it automatically for eligible homeowners once they own enough of their home’s value, including increases in value. The order directs an expansion of a program that lets certain borrowers use less expensive alternatives to traditional title insurance, reducing upfront fees. * Certain VA and USDA borrowers could get lower rates. The order directs those departments to lower rates on single-family loans they make. This doesn’t mean every existing VA or USDA mortgage automaticall\n\n## Private Mortgage Insurance, PMI, how to get rid of - Carlson Agency LLC - About PMI\n# Carlson Agency LLC can help you remove your Private Mortgage Insurance. A 20% down payment is typically the standard when purchasing a home. The lender's risk is oftentimes only the remainder between the home value and the sum due on the loan, so the 20% adds a nice buffer against the charges of foreclosure, reselling the home, and regular value variations on the chance that a borrower doesn't pay. PMI guards the lender if a borrower is unable to pay on the loan and the market price of the house is lower than what the borrower still owes on the loan. With the implementation of The Homeowners Protection Act of 1998, lenders are forced to automatically terminate the PMI when the principal balance of the loan reaches 78 percent of the beginning loan amount on most loans. Since it can take several years to get to the point where the principal is just 80% of the original amount borrowed, it\n\n## PMI Calculator 2026 - Private Mortgage Insurance | Tools.RealEstate\nCalculate Private Mortgage Insurance (PMI) costs based on loan-to-value ratio, credit score, and loan type. See when PMI can be removed and compare borrower-paid vs lender-paid options\n\n## How to Remove PMI from Your Mortgage | Opendoor\nThe Homeowners Protection Act of 1998 requires lenders to automatically cancel PMI when your loan balance reaches 78 percent of the home's original value. You can request PMI cancellation in writing once you reach 80 percent loan-to-value, provided you are current on payments and have no subordinate lien. A new appraisal — typically $300–$600 — can document a home-value increase that pushes you under 80 percent LTV earlier than your amortization schedule would. [...] The Homeowners Protection Act of 1998 is a federal law that establishes the rules for cancellation and termination of PMI on residential mortgages. It requires servicers to automatically terminate PMI at 78 percent LTV, honor borrower-requested cancellation at 80 percent LTV (with conditions), and terminate PMI at the loan's midpoint regardless of LTV. The law applies to conventional loans — not FHA, VA, or USDA loans. Autho\n\n## Homeowners Protection Act of 1998\nto reach 80 percent of the original value of the property; – The borrower’s right to request cancellation on an earlier date, if actual payments bring the loan balance to 80 percent of the original value of the property sooner than the date based on the initial amortization schedule; – That PMI will automatically terminate when the LTV ratio reaches 78 percent of the original value of the property, and the date on which that is projected to occur (based on the initial amortization schedule); [...] Homeowners Protection Act 2 (11/07) • HOPA Consumer Compliance Handbook 6. The limit for 2005 was $359,650. 7. As of the date of this publication Fannie Mae and Freddie Mac have not established such a category. Homeowners Protection Act Exceptions to Cancellation and Termination of PMI: High-Risk Residential Mortgage Transactions The borrower-requested cancellation at 80 percent LTV and the aut\n\n## The Homeowners Protection Act of 1998 Public Law Number 105-216 Summary\nof PMI. When must I automatically terminate a borrower’s PMI? You must automatically terminate PMI when: 1. The loan-to-value ratio reaches 78 percent; and 2. The borrower is current on the payments required by the terms of the loan. Automatic termination differs from cancellation in a few important ways. First, the loan-to-value ratio triggers automatic termination at 78 percent, rather than at 80 percent. Second, the 7 borrower need not have a good payment history; the payments must only be [...] payments. The initial notice must explain that you will provide later notice if the borrower reaches the 80 percent loan-to-value ratio based on actual payments. The borrower’s right to cancel PMI is limited by other rules explained below. Automatic Termination Date You must provide notice to a borrower with an adjustable-rate mortgage that you will terminate PMI automatically when the loan-to\n\n## How Does PMI Work? Costs, Cancellation, and Termination - FedLaws\nAutomatic termination kicks in when your loan balance is scheduled to reach 78 percent of the original value based on the amortization schedule. Your servicer must drop the coverage on that date without any action from you, as long as you’re current on payments.4)Office of the Law Revision Counsel. 12 USC 4902 – Termination of Private Mortgage Insurance Notice the gap: you can request cancellation at 80 percent, but if you don’t, the automatic cutoff doesn’t arrive until 78 percent. On a [...] 78 percent. On a 30-year mortgage that gap can mean an extra year or two of premiums, which is why submitting the written request at 80 percent is worth the effort. [...] You have a legal right to request cancellation of borrower-paid PMI once your loan balance reaches 80 percent of the home’s original value. “Original value” means the lesser of the purchase price or the appraised value at the time\n\n## Homeowners Protection Act (PMI Cancellation Act) | NCUA\n3. PMI will automatically terminate when the loan balance is first scheduled to reach 78% of the original value of the mortgaged property regardless of the outstanding balance of the mortgage and the loan is current. (§%20OR%20(granuleid:USC-prelim-title12-section4903)&f=treesort&edition=prelim&num=0&jumpTo=true \"Go to US Code § 4903(a)(1)(B)(ii)\") 4903(a)(1)(B)(ii)%20OR%20(granuleid:USC-prelim-title12-section4903)&f=treesort&edition=prelim&num=0&jumpTo=true)) [...] 4. A notice that PMI will automatically terminate on the date that, based on the amortization schedule and regardless of the outstanding balance of the mortgage, the principal balance is first scheduled to reach 78% of the original value of the mortgaged property if the loan is current. (§%20OR%20(granuleid:USC-prelim-title12-section4903)&f=treesort&edition=prelim&num=0&jumpTo=true \"Go to US Code § [...] | 2(c) | PMI will aut\n\n## Mortgage Rates Average 7.28% | Freddie Mac\nPublished: Thu, 19 Nov 2026 15:00:00 GMT\nNews Facts - The 30-year FRM averaged 7.28% as of November 19, 2026, up from last week when it averaged 7.11%. A year ago at this time, the 30-year FRM averaged 6.26%. - The 15-year FRM averaged 6.66%, up from last week when it averaged 6.45%. A year ago at this time, the 15-year FRM averaged 5.54%. [...] MCLEAN, Va., Nov. 19, 2026 (GLOBE NEWSWIRE) -- Freddie Mac (OTCQB: FMCC) today released the results of its Primary Mortgage Market Survey® (PMMS®), showing the 30-year fixed-rate mortgage (FRM) averaged 7.28%. “While prospective borrowers often shop around for a home, they may not always think to do the same for their mortgage, as comparing multiple rate quotes can potentially save them thousands over a loan’s lifetime,” said Sam Khater, Freddie Mac's Chief Economist. News Facts [...] The PMMS® is focused on conventional, conforming, fully amortizing home purchase loans for borrowers wh\n\n## Mortgage Rates Today: 30-Year and 15-Year Fixed (Freddie Mac) | MLQ.ai\nPublished: Thu, 19 Nov 2026 02:00:00 GMT\n| Week of | 30-year fixed | 15-year fixed | 10-year Treasury | Spread | ------ | Nov 19, 2026 | 7.28 | 6.66 | 5.04 | 2.24 | | Nov 12, 2026 | 7.11 | 6.45 | 5.10 | 2.01 | | Nov 5, 2026 | 7.18 | 6.57 | 4.84 | 2.34 | | Oct 29, 2026 | 7.24 | 6.60 | 4.98 | 2.26 | | Oct 22, 2026 | 7.32 | 6.68 | 4.96 | 2.36 | | Oct 15, 2026 | 7.40 | 6.71 | 5.10 | 2.30 | | Oct 8, 2026 | 7.40 | 6.73 | 5.22 | 2.18 | | Oct 1, 2026 | 7.28 | 6.60 | 5.24 | 2.04 | | Sep 24, 2026 | 7.03 | 6.42 | 5.18 | 1.85 | [...] The 30-year fixed rate averaged 7.28% in the Freddie Mac Primary Mortgage Market Survey® for the week of Nov 19, 2026, up 1.04 percentage points from a year earlier. ### How often are mortgage rates updated? Freddie Mac publishes the survey every Thursday. This page updates after each release. ### Why is my mortgage quote different from the average? [...] # Mortgage rates Average rates on 30-year and 15-year f\n\n## The average US 30-year mortgage rate rises to 7.28% this week, ending a four-week slide – WTOP News\nPublished: Thu, 19 Nov 2026 17:40:59 GMT\nThe average long-term U.S. mortgage rate rose this week for the first time since early October, reflecting a ramp-up in U.S. government bond yields amid signs that inflation is heating up. The average 30-year fixed-rate mortgage in the U.S. rose to 7.28% from 7.11% last week, mortgage buyer Freddie Mac said Thursday. One year ago, the average rate was 6.26%. [...] Borrowing costs on 15-year fixed-rate mortgages, often sought by borrowers refinancing a home loan, also rose this week. That average rate climbed to 6.66% from 6.45% last week. A year ago, it was at 5.54%. Rates on home loans are influenced by inflation, Federal Reserve policy and bond-market investors’ expectations for the economy, among other factors. They generally follow the trajectory of the 10-year Treasury yield, which lenders use as a guide to pricing home loans. [...] That yield had been mostly trending lower since ea\n\n## Mortgage rates today, Nov. 25, 2026 | Fortune\nPublished: Wed, 25 Nov 2026 08:01:00 GMT\nThe current average 30-year mortgage rate is 7.131%. That’s slightly down from 7.145% on the last day’s report. ## 15-year conventional mortgage rates This type of mortgage is popular with homeowners seeking to minimize interest payments over the life of their loan. The current average 15-year mortgage rate is 6.254%. That’s down from 6.312% on the last day’s report. ## 30-year jumbo mortgage rates [...] The average interest rate for a 30-year, fixed-rate conforming mortgage loan in the U.S. is 7.131%, slightly down from the day before, according to data from Mortgage Research Center. Meanwhile, the average rate for a 15-year, fixed-rate conforming mortgage loan is 6.254%, down for the same time period. ## Compare mortgage rates for Nov. 25, 2026 Here’s a quick look at week-over-week rate changes. Fortune reviewed the latest Mortgage Research Center data available on Nov. 24. [...] They’\n\n## PMI in 2026: When Private Mortgage Insurance Makes Sense - CUSO Home Lending\nThe cost of PMI isn’t a one-size-fits-all figure. It is calculated as an an\n\n## Minimum Down Payment Requirements for First-Time Buyers 2026 | Heart Mortgage\nFor most first-time buyers in 2026, FHA loans require a minimum down payment of 3.5% of the home’s purchase price if your credit score is 580 or above. If your score is lower (500-579), you’ll need a 10% down payment. The property must be your primary residence and meet FHA standards. ### How much is required for a conventional loan? [...] In my experience, FHA loans are a favorite for first-time buyers, especially if your credit is less than perfect. The official FHA minimum down payment is 3.5% of the purchase price, based on guidelines found at FHA loan guide for first-time & low credit homebuyers and official HUD sources. This applies if your credit score is 580 or higher. If your score falls between 500 and 579, the down payment jumps to 10%. FHA lets you enter the market with a manageable upfront investment. [...] Most conventional loan programs tailored for first-time buyers, such\n\n## Minimum Mortgage Requirements for 2026 | LendingTree\n| Requirement | Conventional | FHA | VA | USDA | --- --- | Down payment | 3% | 3.50% | 0% | 0% | | Credit score | 620 | 580 with 3.5% down 500 with 10% down | No set minimum, but 620 is common | No set minimum, but 640 is common | | Mortgage insurance or similar fee | PMI 0.58% to 1.86% annually | Upfront MIP 1.75% Annual MIP 0.15% to 0.75% | VA funding fee 2.15% to 3.30% | ​​Upfront guarantee fee 1% Annual guarantee fee 0.35% | | Debt-to-income (DTI) ratio | 45% | 43% | 41% | 41% | [...] Credit score. FHA loan guidelines set the lowest minimum credit score requirements of any standard loan program, allowing scores as low as 500 with a 10% down payment. A 580 score is required for borrowers making the minimum 3.5% down payment. FHA-approved lenders also use the Credit Alert Interactive Verification Reporting System (CAIVRS) to confirm you don’t have any delinquent federal debt, like stud\n\n## Conventional Loan Down Payment: How Much You Need\nThe minimum conventional loan down payment is 3% for some first-time buyers and income-limited programs, and 5% for a standard loan on a one-unit home. However, a second home needs at least 10% down and an investment property needs 15% to 25%. A 2–4 unit home you live in needs 5% or more. The table below gives each minimum under Fannie Mae and Freddie Mac rules as of November 2026. [...] FHA’s minimum is 3.5% down for a borrower with a credit score of 580 or higher, so the gap with a 3% conventional loan is small. However, FHA adds an upfront premium of 1.75% of the loan and an annual premium of 0.55% on most 30-year loans with less than 5% down. With less than 10% down, that annual premium also lasts for the life of the loan. Our guide to the FHA loan down payment covers FHA’s rules, and FHA vs. conventional loans compares the two side by side. [...] | Situation | Minimum down payment |\n\n## How Much Are Closing Costs? Average Costs and Fees in 2026 | LendingTree\n## How much are average closing costs? You’ll typically pay between 2% and 5% of your loan amount toward closing costs when you buy a home. The cost varies based on: - Whether you’re purchasing or refinancing. Refinance closing costs tend to be lower than purchase mortgage costs. - How much you’re borrowing. The smaller the mortgage, the larger closing costs tend to be as a percentage of the loan amount. [...] - Closing costs typically range from 2% to 5% of your loan amount, and most are paid when you finalize your mortgage. - They include lender fees, third-party services and prepaid expenses like property taxes and homeowners insurance. - You may not have to pay them all yourself — sellers, lenders or assistance programs can help cover some costs. [...] | Loan amount | Typical percentage of the loan amount | ---| | Under $100,000 | 4.6% | | $200,000 to $300,000 | 2.1% | | $400,000 to \n\n## Closing Costs: Fees, Who Pays and How to Lower Them\nClosing costs are the fees and prepaid items you pay at closing to complete your mortgage and your home purchase. Your lender’s Loan Estimate lists each one, so it works as your closing costs checklist and worksheet. According to LodeStar’s 2025 data, published April 2026, purchase closing costs averaged $4,528, or 1.04% of the sale price, and LodeStar’s method does not list prepaid items. [...] They depend on your loan amount, price, location and loan type, and your Loan Estimate gives your figures. For context, LodeStar’s 2025 data, published April 2026, averaged 1.04% of the sale price. ### Who pays closing costs? The buyer generally pays them on a purchase. Even so, the contract or state law can assign some to the seller, and the two sides can negotiate a seller credit. ### Do closing costs come out of the list price? [...] ### Refinance closing costs LodeStar’s 2025 refinance report\n\n## Closing Costs: What They Are and How Much You'll Pay | Bankrate\n- Closing costs are the fees you pay to get a mortgage and finalize the purchase, and most of them are due on closing day. - Costs typically range from 2% to 5% of the total loan amount, or about $8,000 to $20,000 for a $400,000 loan. - The biggest line items are lender origination fees, title services, the appraisal and the prepaid taxes and insurance that go into your escrow account, and buyers pay most of the fees. [...] Buying a home comes with more expenses than just your down payment. Expect to pay about 2% to 5% of your total loan amount in mortgage closing costs. If you’ve taken out a $400,000 loan, that means your closing costs might range from $8,000 to $20,000. How much you’ll end up paying depends on factors like the home’s price, your loan type and where you buy. [...] According to a 2025 report from LodeStar, the average purchase closing cost total was $4,528 nationally, or\n\n## What Are Closing Costs and How Much Will You Pay? | Zillow\nIf the transaction doesn't involve an attorney, the buyer and seller pay an escrow fee to the escrow or settlement company conducting the closing. This fee is often split between the parties, and typically runs 1% to 2% of the home's sale price. If you’re using an FHA loan to purchase the home, you’ll be required to pay a premium at closing that totals 1.75% of the loan amount. You can also roll this into your loan if you’d prefer, but note that you would pay interest on the premium amount. [...] There are limits to how much of the buyer’s closing costs the seller can cover. If you make a down payment of 25% of the purchase price or more, the seller can pay for closing costs up to 9% of the total loan amount. If your down payment is between 10% and 24%, they can cover up to 6% of closing costs. For down payments of less than 10%, the seller can assist with closing costs up to a total of \n\n## Mortgage Rates Climb in Freddie Mac's Weekly Average | Today, November 23, 2026 | Mortgage Rates, Home Loan Guides & Expert Insights | The Mortgage Reports\nPublished: Tue, 24 Nov 2026 03:00:00 GMT\n### Recent trends Freddie Mac’s November 19, 2026 Primary Mortgage Market Survey put the weekly 30-year fixed mortgage rate average at 7.28%, rising 17 basis points (0.17 percentage points) from 7.11% the previous week. The 15-year average was 6.66%. Freddie’s data serves as a market barometer and trend tracker, but individual rates vary by lender and depend on personal financial profiles. ### Expert forecasts for mortgage rates [...] | Program | Mortgage Rate | APR | Change | ------| | Conventional 30-year fixed | | | | | Conventional 30-year fixed | 7.424% | 7.491% | +0.01 | | Conventional 20-year fixed | | | | | Conventional 20-year fixed | 7.296% | 7.404% | +0.04 | | Conventional 15-year fixed | | | | | Conventional 15-year fixed | 6.766% | 6.865% | +0.01 | | Conventional 10-year fixed | | | | | Conventional 10-year fixed | 6.703% | 6.804% | -0.04 | | 30-year fixed FHA | | | | [...] \n\n## Mortgage Rates Climb in Freddie Mac's Weekly Survey | Today, November 20, 2026 | Mortgage Rates, Home Loan Guides & Expert Insights | The Mortgage Reports\n### Recent trends Freddie Mac’s November 19, 2026 Primary Mortgage Market Survey put the weekly 30-year fixed mortgage rate average at 7.28%, rising 17 basis points (0.17 percentage points) from 7.11% the previous week. The 15-year average was 6.66%. Freddie’s data serves as a market barometer and trend tracker, but individual rates vary by lender and depend on personal financial profiles. ### Expert forecasts for mortgage rates [...] | Program | Mortgage Rate | APR | Change | ------| | Conventional 30-year fixed | | | | | Conventional 30-year fixed | 7.424% | 7.491% | +0.01 | | Conventional 20-year fixed | | | | | Conventional 20-year fixed | 7.296% | 7.404% | +0.04 | | Conventional 15-year fixed | | | | | Conventional 15-year fixed | 6.766% | 6.865% | +0.01 | | Conventional 10-year fixed | | | | | Conventional 10-year fixed | 6.703% | 6.804% | -0.04 | | 30-year fixed FHA | | | | [...] \n\n## Mortgage Rates Decline for Fourth Consecutive Week to 7.11% | Freddie Mac\nFreddie Mac Home About Our Business Research & Perspectives Media Room Careers Search # Mortgage Rates Decline for Fourth Consecutive Week to 7.11% PDF Version MCLEAN, Va., Nov. 12, 2026 (GLOBE NEWSWIRE) -- Freddie Mac (OTCQB: FMCC) today released the results of its Primary Mortgage Market Survey® (PMMS®), showing the 30-year fixed-rate mortgage (FRM) averaged 7.11%. [...] News Facts The 30-year FRM averaged 7.11% as of November 12, 2026, down from last week when it averaged 7.18%. A year ago at this time, the 30-year FRM averaged 6.24%. The 15-year FRM averaged 6.45%, down from last week when it averaged 6.57%. A year ago at this time, the 15-year FRM averaged 5.49%.\n\n## Freddie Mac Mortgage Market Survey Archive - Freddie Mac\n## Weekly Data | Date | 30‑Yr FRM | Rate Change | 15‑Yr FRM | Rate Change | --- --- | November 05, 2026 | 30‑Yr FRM 7.18% | Rate Change -0.06% | 15‑Yr FRM 6.57% | Rate Change -0.03% | | October 29, 2026 | 30‑Yr FRM 7.24% | Rate Change -0.08% | 15‑Yr FRM 6.60% | Rate Change -0.08% | | October 22, 2026 | 30‑Yr FRM 7.32% | Rate Change -0.08% | 15‑Yr FRM 6.68% | Rate Change -0.03% | Current Mortgage Rates Data Since 1971 Current Mortgage Rates Data as of 1971, Consolidated CSV file\n\n## Mortgage Rates\nSearch 1. Home 2. Research & Perspectives 3. Research # Mortgage Rates Primary Mortgage Market Survey® (PMMS®) results are based on the mortgage rate collected from thousands of loan applications submitted to Freddie Mac through Loan Product Advisor® (LPA®) from lenders across the country when a borrower applies for a mortgage. Learn more in our FAQs. ## Primary Mortgage Market Survey® U.S. weekly mortgage rate averages as of 11/12/2026 30-year Fixed-Rate Mortgage 7.11% [...] The 30-year fixed-rate mortgageaveraged 7.11% as of November 12, 2026, down from last week when it averaged 7.18%. A year ago at this time, the 30-year FRM averaged 6.24%. The 15-year fixed-rate mortgageaveraged 6.45%, down from last week when it averaged 6.57%. A year ago at this time, the 15-year FRM averaged 5.49%. _PMMS results are released weekly on Thursdays at 12 p.m. ET. and are an average of loan rates offe\n\n## How Mortgage Amortization Works - SmartAsset\nSo when you make your first payment, you will pay $708 in interest ($200,000 x 0.00354) and the remaining $276 will go towards your principal ($984 – $708 = $276). That leaves you with a loan balance of $199,724, which is $200,000 – $276 (your principal). Since this is a fixed-rate mortgage, you can multiply the remaining balance by the monthly interest rate to figure out how much of your second payment will go toward interest ($199,724 x 0.00354 = $707). You can then repeat the process to [...] The principal is the amount of money someone borrows from a lender. So if you take out a $250,000 mortgage, your principal balance is originally $250,000. Your interest is effectively the fee your lender charges for allowing you to use their funding. Because of interest, what you’ll owe for buying a home exceeds the $250,000 you took out to finance your purchase. [...] To find out how much of you\n\n## What Is Amortization? How Loan Payments Actually Work\nThe key thing to know: early payments carry the most interest; later payments go mostly to principal. This is because interest is calculated on the remaining loan balance each month. When the balance is high (early in the loan), more of your payment goes to interest. As the balance drops, less goes to interest and more to principal. Stacked area chart showing how a fixed mortgage payment splits between interest and principal — early years mostly interest, later years mostly principal [...] ## A Mortgage Example Consider a $300,000 30-year mortgage at 7%. The monthly payment (for principal and interest only) is about $1,996. - Month 1: About $1,750 goes to interest, only $246 to principal. - Year 10: Around $1,505 to interest, $491 to principal. - Year 20: About $1,009 interest, $987 principal — the split flips early in year 21. - Final month: Almost the entire payment is principal; inter\n\n## What is amortization and how does it work? | Fidelity\nIn an amortizing loan, you pay the same amount according to a payment schedule. Every payment goes toward 2 costs: your principal, which is the amount you borrowed, and interest, which is what the lender charges you for borrowing that money. In the beginning, more of the payment is dedicated to interest. Because interest is charged on the balance, as you pay down the principal, there's less interest left to pay, and more of each subsequent payment goes toward reducing the principal. [...] Amortization is important because it can help borrowers understand how much borrowing money to fund their purchase would cost in total, including interest, if they make the expected monthly payments. Using the earlier example, if a borrower takes out a hypothetical 30-year, $330,000 loan with a 5.27% interest rate, over the 30 years, the borrower will ultimately pay $657,490 ($330,000 in principal plus \n\n## ARM Rate Caps: Initial, Periodic, Lifetime, and Payment Limits - FedLaws\nAdjustable-rate mortgages carry three rate caps that together control how much your interest rate can move: an initial cap on the first reset, a periodic cap on every reset after that, and a lifetime cap that sets the absolute ceiling for the life of the loan. Federal law requires every ARM secured by a home to include at least a lifetime maximum rate, and lenders write all three limits in a shorthand like 2/2/5 so you can read your exposure at a glance.1)Office of the Law Revision Counsel. 12 [...] After the first reset, every subsequent adjustment is governed by the periodic cap. This limits how much the rate can move, up or down, from one adjustment period to the next, regardless of what the index does in between. Most ARMs adjust every six months or annually, and the periodic cap is typically 1% or 2%.5)Consumer Financial Protection Bureau. Consumer Handbook on Adjustable-Rate Mortga\n\n## How Adjustable-Rate Mortgages Work\n| | | | --- | ARM Feature | What It Controls | Example (2/2/5 Cap Structure) | | Initial adjustment cap | The maximum percentage your rate can change at the very first reset. | Rate cannot increase more than 2% above the starting rate. | | Subsequent adjustment cap | The maximum percentage your rate can change at any following periodic reset. | Rate cannot increase more than 2% from the previous year’s rate. | [...] - Starting rate: 6.00% - Initial fixed period: 5 years - Index at first adjustment: 5.00% - Margin: 2.00% - Fully indexed rate: 7.00% - Initial adjustment cap: 2% - Subsequent adjustment cap: 2% - Lifetime cap: 5% #### Step 1: Calculate the fully indexed rate. The quoted index of $5.00 plus the margin of $2.00 equals $7.00. #### Step 2: Apply the initial adjustment cap. [...] Your initial rate is 6.00%. The first adjustment is subject to a maximum change of +2.00%, so the max\n\n## What are rate caps with an adjustable-rate mortgage (ARM), and how do they work? | Consumer Financial Protection Bureau\n1. Initial adjustment cap. This cap says how much the interest rate can increase or decrease the first time it adjusts, after the fixed-rate period expires. It’s common for this cap to be either two or five percent – meaning that, after the first rate change, the new rate can’t be more than two (or five) percentage points higher or lower than the initial rate during the fixed-rate period. [...] 3. Lifetime adjustment cap. This cap says how much the interest rate can increase or decrease in total, over the life of the loan. This cap is most commonly five percent, meaning that the rate can never be more than five percentage points either higher or lower from the initial rate. However, some loans may have a higher cap. Additionally, some loans may have a lifetime adjustment cap for decreases that is diff",
+ "plan": {
+  "title": "How a Mortgage Really Works for First-Time Buyers",
+  "description": "A plain-English guide to how a US mortgage works, from down payment and fixed versus adjustable rates to amortization, PMI and closing costs. It also looks at where 30-year mortgage rates stand in November 2026, according to Freddie Mac.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "f933b8db",
+    "narration": "You find a $300,000 home and put just 3% down. So you need $9,000, right? Not even close. At closing, you may need between $14,000 and $24,000 in cash.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "$14,000-$24,",
+      "label": "Cash at closing on a $300,000 home with 3% down"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "What you actually need to bring to the table"
+   },
+   {
+    "id": "74d67964",
+    "narration": "Here is why. A mortgage is a loan backed by the house. The lender is the bank, you are the buyer, and the home is the security if payments stop.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How a mortgage works",
+      "nodes": [
+       {
+        "id": "l",
+        "label": "Lender",
+        "icon": "landmark"
+       },
+       {
+        "id": "b",
+        "label": "You, the buyer",
+        "icon": "user"
+       },
+       {
+        "id": "h",
+        "label": "The home",
+        "icon": "house"
+       }
+      ],
+      "edges": [
+       [
+        "l",
+        "b",
+        "lends money"
+       ],
+       [
+        "b",
+        "h",
+        "buys"
+       ],
+       [
+        "h",
+        "l",
+        "secures loan"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "7202fc6f",
+    "narration": "Your down payment is your own share of the price. The loan covers the rest. Think of it as your stake in the house from day one.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "suburban house for sale sign",
+       "couple signing mortgage documents"
+      ],
+      "alt": "Buying a home"
+     }
+    }
+   },
+   {
+    "id": "d534ae12",
+    "narration": "Take a conventional loan. With a credit score of at least 620, you can put down 3 percent. On a $300,000 home, that is $9,000 down and $291,000 borrowed.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Take a conventional loan. With a credit score of",
+      "subtitle": ""
+     }
+    }
+   },
+   {
+    "id": "dc91a9c2",
+    "narration": "FHA loans are another route. With a credit score of 580 or higher, the minimum down payment is 3.5 percent. On the same home, that is $10,500.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Loan",
+       "Credit score",
+       "Down"
+      ],
+      "rows": [
+       [
+        "Conventional",
+        "620+",
+        "$9,000"
+       ],
+       [
+        "FHA",
+        "580+",
+        "$10,500"
+       ]
+      ],
+      "title": "Minimum down on $300,000",
+      "highlight": {
+       "row": 1
+      }
+     }
+    }
+   },
+   {
+    "id": "1c1792e8",
+    "narration": "Now the surprise. Closing costs run about 2 to 5 percent of the loan amount. They cover lender fees, title services, the appraisal, and prepaid taxes and insurance.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Closing costs: 2% to 5% of the loan",
+      "items": [
+       "Lender fees",
+       "Title services",
+       "Appraisal",
+       "Prepaid taxes and insurance"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "landmark",
+       "file-text",
+       "house",
+       "shield"
+      ]
+     }
+    }
+   },
+   {
+    "id": "e61b0621",
+    "narration": "Good news: the lender fees inside that range are the part you can negotiate. Compare quotes, and ask questions before you sign.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "couple signing mortgage documents",
+       "young couple holding house keys"
+      ],
+      "alt": "Closing day"
+     }
+    }
+   },
+   {
+    "id": "1fdbac9f",
+    "narration": "One last myth. You do not need 20 percent down. But how much you put down changes your cost, and that is where mortgage insurance comes in.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "You don't need 20% down, but it changes what you pay.",
+      "emphasis": "20% down"
+     }
+    }
+   },
+   {
+    "id": "3cb1fe90",
+    "narration": "Next comes the rate. A fixed rate never changes for the life of the loan. An adjustable rate, or ARM, is fixed for an initial period, then resets with market rates.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Fixed rate",
+       "tagline": "Same rate every month"
+      },
+      "b": {
+       "name": "Adjustable (ARM)",
+       "tagline": "Fixed first, then resets"
+      },
+      "rows": [
+       {
+        "label": "Rate",
+        "a": "Never changes",
+        "b": "Resets with market"
+       },
+       {
+        "label": "Payment",
+        "a": "Predictable",
+        "b": "Can move later"
+       }
+      ]
+     }
+    },
+    "chapter": "Rates, amortization and why early payments feel strange"
+   },
+   {
+    "id": "0177c735",
+    "narration": "So where are rates now? Freddie Mac's weekly survey had the 30-year fixed at 7.18% on November 5, 7.11% on November 12, a seven-week low, then 7.28% on November 19.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "30-year fixed, Freddie Mac survey",
+      "labels": [
+       "Nov 5",
+       "Nov 12",
+       "Nov 19"
+      ],
+      "values": [
+       7.18,
+       7.11,
+       7.28
+      ],
+      "unit": "%",
+      "highlight": 2
+     }
+    },
+    "sfx": "ding"
+   },
+   {
+    "id": "d274a44e",
+    "narration": "A year earlier, the 30-year average was about 6.26%. The 15-year fixed was 6.66% on November 19, up from 5.54% a year ago.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Loan",
+       "Now",
+       "Year ago"
+      ],
+      "rows": [
+       [
+        "30-year fixed",
+        "7.28%",
+        "6.26%"
+       ],
+       [
+        "15-year fixed",
+        "6.66%",
+        "5.54%"
+       ]
+      ],
+      "title": "Average rates, Nov 19, 2026",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "8885b5c0",
+    "narration": "That gap shows up in your budget. On the loan in our notes, interest alone runs about $684 a month at 7.28%, versus about $616 at 6.26%.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "$684",
+      "label": "Interest per month at 7.28%, vs about $616 at 6.26%"
+     }
+    }
+   },
+   {
+    "id": "88f28c7e",
+    "narration": "Now the strange part. Your payment stays the same every month, but what it buys changes. Early on, most of it is interest. Each month, the principal share grows. That is amortization.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Amortization",
+      "definition": "Equal payments where each month's interest is charged on the remaining balance, so the principal share grows over time."
+     }
+    }
+   },
+   {
+    "id": "5236f357",
+    "narration": "Try a $300,000 loan at 7.28% for 30 years. The payment is about $2,053. Month one's interest is the balance times the rate, divided by twelve: about $1,820.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "300000 * 0.0728 / 12 = 1820",
+        "note": "Balance x annual rate / 12 months"
+       }
+      ],
+      "title": "Month one interest"
+     }
+    }
+   },
+   {
+    "id": "62749336",
+    "narration": "Subtract that from the payment, and only about $233 goes to principal. Your balance falls to roughly $299,767. Almost nothing, after a whole month of paying.",
+    "scene": {
+     "type": "pie",
+     "props": {
+      "labels": [
+       "Interest",
+       "Principal"
+      ],
+      "values": [
+       1820.0,
+       233.0
+      ],
+      "unit": "$",
+      "donut": true,
+      "title": "First payment of about $2,053"
+     }
+    }
+   },
+   {
+    "id": "bbead701",
+    "narration": "Month two: interest is about $1,819, because the balance barely moved. Month one was $1,820. But principal creeps up every month, and later principal takes over.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How the split shifts",
+      "items": [
+       "Month 1: about $1,820 interest",
+       "Month 2: about $1,819 interest",
+       "Later: principal takes over"
+      ],
+      "style": "rail",
+      "accent": "amber",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "5fa34675",
+    "narration": "That is why early payments feel strange. The payment is steady, but the balance shrinks slowly at first, because interest eats most of each check.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The payment stays steady, but early on the balance barely moves.",
+      "emphasis": "barely moves"
+     }
+    }
+   },
+   {
+    "id": "d1b9fa15",
+    "narration": "Put less than twenty percent down, and your lender will probably add a charge you never asked for. It's called private mortgage insurance, or PMI. And here's the catch: it protects the lender.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "PMI (private mortgage insurance)",
+      "definition": "Insurance that protects the lender, not the borrower, if payments stop. Typically required with less than 20% down."
+     }
+    },
+    "chapter": "PMI, the hidden costs, and the trade-off to weigh"
+   },
+   {
+    "id": "c5bb440c",
+    "narration": "If the borrower stops paying, the PMI coverage pays the lender back. You still carry the cost every month, but the protection is not yours.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Who PMI protects",
+      "nodes": [
+       {
+        "id": "b",
+        "label": "Borrower pays premium",
+        "icon": "banknote"
+       },
+       {
+        "id": "p",
+        "label": "PMI coverage",
+        "icon": "shield"
+       },
+       {
+        "id": "l",
+        "label": "Lender protected",
+        "icon": "landmark"
+       }
+      ],
+      "edges": [
+       [
+        "b",
+        "p",
+        "premium"
+       ],
+       [
+        "p",
+        "l",
+        "covers loss"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "8a68e965",
+    "narration": "The good news is that PMI can end. Under the Homeowners Protection Act, you can ask to cancel once your balance is scheduled to reach eighty percent of the original value.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "80%",
+      "label": "Balance of original value: you can request PMI cancellation"
+     }
+    }
+   },
+   {
+    "id": "8f048ff5",
+    "narration": "First, send a written request. Second, be current on your payments. Third, expect other conditions, such as having no second lien. Don't wait around, because it won't happen unless you ask.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "To cancel PMI at 80%",
+      "items": [
+       "Send a written request",
+       "Be current on payments",
+       "Meet other conditions, like no second lien"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "e1f9b562",
+    "narration": "If you never ask, PMI ends automatically at seventy-eight percent. On a conventional loan, that can mean an extra year or two of premiums. And a new executive order, signed October twenty-second, directs a trial of automatic PMI removal.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "When PMI ends",
+      "events": [
+       {
+        "date": "80%",
+        "label": "You can request cancellation in writing"
+       },
+       {
+        "date": "78%",
+        "label": "Automatic termination, if you're current"
+       },
+       {
+        "date": "Oct 22, 2026",
+        "label": "Order directs trial of automatic removal"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "97e9dbdb",
+    "narration": "Now the whole picture. Your monthly bill is principal, interest and PMI, plus other homeownership costs. Upfront, you also need cash for the down payment and closing costs, often two to five percent of the loan.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The total cost picture",
+      "items": [
+       "Principal and interest",
+       "PMI, until it ends",
+       "Other homeownership costs",
+       "Upfront: down payment plus closing costs"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "home",
+       "shield",
+       "wrench",
+       "banknote"
+      ]
+     }
+    }
+   },
+   {
+    "id": "bd034fa4",
+    "narration": "Rates keep moving. The thirty-year average was seven point two eight percent in mid-November, up from six point two six a year earlier. Nobody can tell you where it goes next.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "7.28%",
+      "label": "30-year fixed average, Nov 19, 2026 (Freddie Mac)"
+     }
+    }
+   },
+   {
+    "id": "a44e0219",
+    "narration": "So here is the takeaway. A rate is a number that will move. Focus on the monthly payment you can sustain, and the cash you need at closing. This is general information, not financial advice.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A rate will move. Your sustainable payment and your cash at closing are what you can plan around.",
+      "emphasis": "sustainable payment"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Mortgage Rates Above 7% in November 2026: The New Normal? How to Still Find Rental Deals | Main St Landlord",
+    "url": "https://www.mainstlandlord.com/blog/mortgage-rates-above-7-percent-november-2026",
+    "publisher": "mainstlandlord.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Mortgage rates are up on the week and up on the year. Freddie Mac's weekly survey put the ...",
+    "url": "https://www.facebook.com/61587187374937/posts/mortgage-rates-are-up-on-the-week-and-up-on-the-yearfreddie-macs-weekly-survey-p/122152133049239579",
+    "publisher": "facebook.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Complete costs of buying a house, from down payment to maintenance (and more)",
+    "url": "https://finance.yahoo.com/real-estate/articles/complete-costs-buying-house-down-211911257.html",
+    "publisher": "finance.yahoo.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What Is PMI? Many Loans: 80% Request, 78% Automatic",
+    "url": "https://fedratecalc.com/what-is-pmi",
+    "publisher": "fedratecalc.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Gems Concha",
+    "url": "https://www.facebook.com/gems.concha.3/posts/there-is-an-executive-order-signed-by-our-president-titled-decreasing-housing-co/1764573757970091",
+    "publisher": "facebook.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Minimum Down Payment Requirements for First-Time Buyers 2026 | Heart Mortgage",
+    "url": "https://heartmortgage.com/blog/minimum-down-payment-first-time-home-buyer-fha-conventional-va-usda-down-payment-minimum",
+    "publisher": "heartmortgage.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Minimum Mortgage Requirements for 2026 | LendingTree",
+    "url": "https://www.lendingtree.com/home/mortgage/minimum-mortgage-requirements",
+    "publisher": "lendingtree.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How Much Are Closing Costs? Average Costs and Fees in 2026 | LendingTree",
+    "url": "https://www.lendingtree.com/home/mortgage/understanding-mortgage-closing-costs",
+    "publisher": "lendingtree.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What Is Amortization? How Loan Payments Actually Work",
+    "url": "https://moneyinstructor.com/money/credit-debt/what-is-amortization",
+    "publisher": "moneyinstructor.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How to Remove PMI from Your Mortgage | Opendoor",
+    "url": "https://www.opendoor.com/articles/how-to-remove-pmi",
+    "publisher": "opendoor.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 81.3,
+  "before_first_script_call_s": 17.2,
+  "script_s": 64.1
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "research": 0.00656,
+  "script_big": 0.36149,
+  "search_api": 0.112,
+  "total": 0.48033
+ },
+ "calls": {
+  "small": 2,
+  "tools": 10,
+  "big": 7
+ },
+ "tokens": {
+  "in": 164940,
+  "out": 16825
+ },
+ "rules": {
+  "length": {
+   "words": 760,
+   "expected_words": 672,
+   "ratio": 1.131,
+   "beats": 25,
+   "expected_beats": 21,
+   "est_speech_s": 340.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 35,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You find a $300,000 home and put just 3% down. So you need $9,000, right? Not even close. At closing, you may need between $14,000 and $24,000 in cash.",
+   "close_text": "So here is the takeaway. A rate is a number that will move. Focus on the monthly payment you can sustain, and the cash you need at closing. This is general information, not financial advice."
+  },
+  "variety": {
+   "distinct": 14,
+   "counts": {
+    "stat": 4,
+    "diagram": 2,
+    "gallery": 2,
+    "title": 1,
+    "table": 2,
+    "bullets": 3,
+    "kinetic_text": 3,
+    "versus": 1,
+    "chart": 1,
+    "definition": 2,
+    "equation": 1,
+    "pie": 1,
+    "checklist": 1,
+    "timeline": 1
+   },
+   "max_run": 1,
+   "entropy": 3.62,
+   "top_type": "stat",
+   "top_share": 0.16,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 28,
+   "ungrounded_numbers": [
+    "1819",
+    "1820",
+    "2053",
+    "233",
+    "299767",
+    "5,7.11"
+   ],
+   "entities": 4,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.188,
+   "ungrounded_number_share": 0.214,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "with a credit score",
+    "count": 2
+   },
+   {
+    "phrase": "a credit score of",
+    "count": 2
+   },
+   {
+    "phrase": "percent of the loan",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1,
+   "coverage": 1
+  },
+  "sources": {
+   "cited": 10,
+   "fetched": 48,
+   "notes_len": 34870,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": false,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase",
+   "narration_screen_mismatch",
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": [
+   "beat 22 (timeline): its narration never says ['80% You can request cancellation in writ', \"78% Automatic termination, if you're cur\"]"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Core numbers match the notes and the amortization math is right (payment about $2,053, month-one interest $1,820, principal $233). But the $684 vs $616 'interest' figure belongs to an unspecified loan and does not fit the $300k example, and the closing-cost range is conflated."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "Covers down payment, FHA vs conventional, closing costs, fixed vs ARM, amortization with a worked example, PMI cancellation rules, current rates and a caveat. ARM detail (caps, initial periods) and PMI cost are thin."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "Three chapters flow logically, but the opening beats are choppy (beats 3-5 repeat the down-payment point). The $684 figure interrupts the amortization build, and rates sit awkwardly in the middle."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The hook, '$300,000 home... put just 3% down. So you need $9,000, right? Not even close', is strong. The ending takeaway, 'A rate is a number that will move', lands, though the disclaimer ends it flatly."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational, beginner-friendly and clear, with a suitable disclaimer."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well and the chart and table use real numbers. But beat 1's stat value is truncated ('$14,000-$24,'), beat 4's title is a cut-off sentence, and the beat 22 timeline mixes percentages with a date."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The 3%-down hook and the month-two interest detail are concrete, but most content is standard explainer material. The executive order mention is timely."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Hits every requested topic with a current-rate date. Length is roughly on target, and the ARM treatment is brief."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural. The beat 4 title fragment and a few clipped lines ('Now the surprise.') are minor flaws."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "On the loan in our notes, interest alone runs about $684 a month at 7.28%, versus about $616 at 6.26%.",
+    "issue": "The loan is undefined; $684 is not interest on the $300k loan used later ($1,820). It confuses viewers and refers to 'notes' they cannot see.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "At closing, you may need between $14,000 and $24,000 in cash.",
+    "issue": "The range includes the down payment plus 2-5% closing costs, but it is presented before that is explained. The later 2-5% is quoted without saying it is on top of the down payment.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "$14,000-$24,",
+    "issue": "The stat value is truncated on screen.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Take a conventional loan. With a credit score of",
+    "issue": "The title card is a cut-off sentence that duplicates the narration.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "On a conventional loan, that can mean an extra year or two of premiums.",
+    "issue": "This is an unsupported specific; the delay depends on the loan.",
+    "beat": 22
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Your down payment is your own share of the price. The loan covers the rest.",
+    "issue": "Beats 3-5 are thin and repetitive, with stock images adding nothing.",
+    "beat": 3
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "An adjustable rate, or ARM, is fixed for an initial period, then resets with market rates.",
+    "issue": "There is no example such as 5/1, no mention of caps, and no say on when an ARM makes sense.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Typical PMI cost (about 0.5-1.5% of the loan per year)",
+   "ARM specifics (5/1, caps) and when an ARM might make sense",
+   "Full monthly payment including taxes and insurance (escrow)",
+   "Total interest over 30 years or the point where principal overtakes interest",
+   "Rate shopping and the effect of credit score on rate"
+  ],
+  "wrong_facts": [
+   "The $684 vs $616 'interest' figure is from the notes for an unspecified loan; it does not apply to the $300k example.",
+   "Beat 1's cash-at-closing framing is unverified for the stated range."
+  ],
+  "would_publish": false,
+  "summary": "A solid, accurate-ish explainer with a correct amortization example and current Freddie Mac rates, but marred by a confusing $684 figure, truncated on-screen text, and thin ARM and PMI-cost coverage. Needs a fix pass before publishing.",
+  "mean": 3.56,
+  "cost_usd": 0.03524,
+  "tokens": [
+   9510,
+   1622
+  ]
+ }
+}

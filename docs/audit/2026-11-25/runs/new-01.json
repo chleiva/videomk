@@ -1,0 +1,559 @@
+{
+ "id": "new-01",
+ "category": "current events / news",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "What happened at the most recent Formula 1 Grand Prix?",
+ "great": "Name the actual latest race with date, winner, podium, key moment, championship standing, sourced from a recent article; correct as of today.",
+ "minutes": 2.0,
+ "time_sensitive": true,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-25T14:56:35",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "web",
+  "decided": "web",
+  "reason": "The most recent Grand Prix depends on the current F1 calendar and changes with each race weekend, so it requires up-to-date search results rather than training data.",
+  "queries": [
+   "most recent Formula 1 Grand Prix results",
+   "F1 Grand Prix race winner 2026"
+  ],
+  "searches": 2,
+  "reads": 0,
+  "iterations": 2,
+  "seconds": 10.4,
+  "error": "",
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "news-explainer",
+   "recap-summary"
+  ],
+  "staged": null,
+  "notes_len": 5122,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "F1 2026 Las Vegas Grand Prix results: Verstappen wins over Norris",
+   "2026 Las Vegas Grand Prix race report and highlights: Max Verstappen wins exhilarating Las Vegas Grand Prix from Lando Norris and Oscar Piastri - formula1.com",
+   "2026 Results - Formula 1 Las Vegas Grand Prix",
+   "2026 Las Vegas Grand Prix race report and highlights: Max Verstappen wins exhilarating Las Vegas Grand Prix from Lando Norris and Oscar Piastri - formula1.com",
+   "2026 F1 Las Vegas Grand Prix results: Winner, full finishing order - Yahoo Sports",
+   "F1 2026 Las Vegas Grand Prix race result"
+  ],
+  "research_agent_cost_usd": 0.0010315
+ },
+ "warnings": [],
+ "notes": "## F1 2026 Las Vegas Grand Prix results: Verstappen wins over Norris\nPublished: Mon, 23 Nov 2026 14:00:00 GMT\nMax Verstappen on the 2026 Las Vegas Grand Prix podium # F1 2026 Las Vegas Grand Prix results: Verstappen wins after race-long battle with Russell 23 November 2026 Max Verstappen claimed victory at the F1 2026 Las Vegas Grand Prix after an intense battle with George Russell, holding off Lando Norris in the closing stages to win by just 0.639 seconds. [...] Max Verstappen leads George Russell in the 2026 Las Vegas Grand Prix The battle continued into the closing stages. Russell briefly got ahead again on Lap 37, but Verstappen made another decisive move into Turn 5 to regain the lead. [...] Antonelli finished fourth for Mercedes, with Pierre Gasly taking an impressive fifth for Alpine. Lewis Hamilton recovered from 11th on the grid to finish seventh, after several setbacks including contact with team-mate Charles Leclerc. Arvid Lindblad retired after spinning behind the Safety Car, while \n\n## 2026 Las Vegas Grand Prix race report and highlights: Max Verstappen wins exhilarating Las Vegas Grand Prix from Lando Norris and Oscar Piastri - formula1.com\nPublished: Sun, 22 Nov 2026 05:58:16 GMT\nHulkenberg, Bortoleto, Bearman, Hadjar, Lawson, Camara, Stroll and Bottas completed the classification, with Alonso retiring one lap before the finish. This brought the list of non-finishers to four, the Spaniard joining Lindblad, Perez and Albon. Image 17: LAS VEGAS, NEVADA - NOVEMBER 21: Race winner Max Verstappen of the Netherlands and Oracle Red BullVerstappen was joined on the podium by Norris and Piastri ### Key quote [...] Image 18: LAS VEGAS, NEVADA - NOVEMBER 21: Race winner Max Verstappen of the Netherlands and Oracle Red BullVerstappen responds to Russell comments as rivalry reignites2 hours ago Image 19Norris expects tough Vegas GP amid McLaren speed strugglesNovember 21, 2026 Image 20: LAS VEGAS, NEVADA - NOVEMBER 21: Second placed Lando Norris of Great Britain and McLaren and Third'Exactly the kind of result we needed' in Vegas – Piastri2 hours ago [...] Image 13: LAS VEGAS\n\n## 2026 Results - Formula 1 Las Vegas Grand Prix\nPublished: Sun, 22 Nov 2026 06:05:04 GMT\nRace # 2026 Results ## 2026 Winners 1. First placeMax VerstappenNetherlands25 PointsTime 1:27:39.624 2. Second placeLando NorrisUnited Kingdom18 PointsTime +0.639s 3. Third placeOscar PiastriAustralia15 PointsTime +1.529s ## 2026 Race Results [...] | Pos. | No. | Driver | Team | Laps | Time / Retired | Pts. | --------- | 1 | 3 | Max VerstappenVER | Red Bull Racing | 50 | 1:27:39.624 | 0 | | 2 | 1 | Lando NorrisNOR | McLaren | 50 | +0.639s | 0 | | 3 | 81 | Oscar PiastriPIA | McLaren | 50 | +1.529s | 0 | | 4 | 12 | Kimi AntonelliANT | Mercedes | 50 | +2.574s | 0 | | 5 | 10 | Pierre GaslyGAS | Alpine | 50 | +2.927s | 0 | | 6 | 43 | Franco ColapintoCOL | Alpine | 50 | +7.955s | 0 | | 7 | 44 | Lewis HamiltonHAM | Ferrari | 50 | +12.795s | 0 | [...] | 8 | 55 | Carlos SainzSAI | Williams | 50 | +12.938s | 0 | | 9 | 63 | George RussellRUS | Mercedes | 50 | +13.192s | 0 | | 10 | 16 | Charles Lecl\n\n## 2026 F1 Las Vegas Grand Prix results: Winner, full finishing order - Yahoo Sports\nPublished: Sun, 22 Nov 2026 05:30:04 GMT\n| | | | | ------| | Pos | Driver | Team | Race Time | | 1 | Max Verstappen | Red Bull | | | 2 | Lando Norris | McLaren | +0.639 | | 3 | Oscar Piastri | McLaren | +1.529 | | 4 | Kimi Antonelli | Mercedes | +2.574 | | 5 | Pierre Gasly | Alpine | +2.927 | | 6 | Franco Colapinto | Alpine | +7.955 | | 7 | Lewis Hamilton | Ferrari | +12.795 | | 8 | Carlos Sainz | Williams | +12.938 | | 9 | George Russell | Mercedes | +13.192 | | 10 | Charles Leclerc | Ferrari | +17.554 | [...] Russell locked up with just three laps to go and veered off course, which knocked him back to 9th place, leaving the final two laps between Verstappen and Antonelli. At the end of the penultimate lap, Antonelli appeared to have an issue coming out of Turn 16, knocking him back to 4th position. Ultimately, Verstappen was able to hold off a tough challenge under the lights of Vegas and won by a margin of 0.6 seconds over L\n\n## F1 2026 Las Vegas Grand Prix race result\nPublished: Sun, 22 Nov 2026 05:39:05 GMT\n1 Max Verstappen (Red Bull) 50 laps 2 Lando Norris (McLaren) +0.639s 3 Oscar Piastri (McLaren) +1.529s 4 Kimi Antonelli (Mercedes) +2.574s 5 Pierre Gasly (Alpine) +2.927s 6 Franco Colapinto (Alpine) +7.955s 7 Lewis Hamilton (Ferrari) +12.795s 8 Carlos Sainz (Williams) +12.938s 9 George Russell (Mercedes) +13.192s 10 Charles Leclerc (Ferrari) +17.554s 11 Nico Hulkenberg (Audi) +22.720s 12 Gabriel Bortoleto (Audi) +28.602s 13 Ollie Bearman (Haas) +28.843s [...] 14 Isack Hadjar (Red Bull) +36.488s 15 Liam Lawson (Racing Bulls) +36.588s 16 Rafael Camara (Haas) +47.814s 17 Lance Stroll (Aston Martin) +68.353s 18 Valtteri Bottas (Cadillac) +71.673s 19 Fernando Alonso (Aston Martin) +1 lap DNF Arvid Lindblad (Racing Bulls) DNF Sergio Perez (Cadillac) DNS Alex Albon (Williams) [...] # F1 2026 Las Vegas Grand Prix race result Max Verstappen won a breathless Las Vegas Grand Prix, with just three s",
+ "plan": {
+  "title": "Verstappen Wins Las Vegas GP by 0.639 Seconds",
+  "description": "Max Verstappen won the 2026 Las Vegas Grand Prix after a race-long fight with the Mercedes pair, holding off Lando Norris by 0.639 seconds. Here is how the final laps turned the podium upside down, and what comes next.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "c9261857",
+    "narration": "Less than one second. That is all that separated the winner from second place after fifty laps under the lights of Las Vegas. Max Verstappen took the win by just 0.639 seconds.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "0.639s",
+      "label": "Verstappen's winning margin over Lando Norris"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "A frantic finish"
+   },
+   {
+    "id": "3c8d2127",
+    "narration": "The race was run on November 21st, 2026, on the streets of Nevada. It was a thrilling and frenetic Grand Prix, and for Verstappen, the four-time World Champion, it was his third win in Las Vegas.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "2026 Las Vegas Grand Prix",
+      "subtitle": "Race day: November 21, 2026"
+     }
+    }
+   },
+   {
+    "id": "7aa509ba",
+    "narration": "First, the Las Vegas night race itself, a street circuit glowing under the lights. Then, Max Verstappen and his Red Bull car, which led a race-long fight against the Mercedes pair of Russell and Antonelli.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Las Vegas Grand Prix night race",
+       "Max Verstappen Red Bull F1 car"
+      ],
+      "alt": "Las Vegas night race and Verstappen's Red Bull"
+     }
+    }
+   },
+   {
+    "id": "a84163cf",
+    "narration": "Here is how it unfolded. First came the battle for the lead between Verstappen and George Russell. Then Russell had a lock-up with three laps left. That sent him off the track, and he fell back to ninth.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How the lead was lost",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Battle for the lead",
+        "icon": "flag"
+       },
+       {
+        "id": "b",
+        "label": "Lock-up, 3 laps left",
+        "icon": "triangle-alert"
+       },
+       {
+        "id": "c",
+        "label": "Off the track",
+        "icon": "road"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "Lap 47"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "769e7bc4",
+    "narration": "The late drama reshaped the podium. Russell had a lock-up and finished ninth. Antonelli then had an issue at Turn 16 and finished fourth. That left the McLaren pair to take the podium.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Late twists",
+      "items": [
+       "Russell: lock-up, ninth",
+       "Antonelli finishes fourth",
+       "McLaren pair take podium"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "8ee9db9e",
+    "narration": "The final podium was Max Verstappen for Red Bull with 25 points, Lando Norris second for McLaren with 18, and Oscar Piastri third, 1.529 seconds behind the winner, with 15.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Pos",
+       "Driver",
+       "Team",
+       "Gap"
+      ],
+      "rows": [
+       [
+        "1",
+        "Verstappen",
+        "Red Bull",
+        "Winner"
+       ],
+       [
+        "2",
+        "Norris",
+        "McLaren",
+        "+0.639s"
+       ],
+       [
+        "3",
+        "Piastri",
+        "McLaren",
+        "+1.529s"
+       ]
+      ],
+      "title": "Podium",
+      "highlight": {
+       "row": 0
+      }
+     }
+    }
+   },
+   {
+    "id": "d0ea423e",
+    "narration": "Behind them, Kimi Antonelli was fourth for Mercedes. Pierre Gasly took an impressive fifth for Alpine, and his teammate Franco Colapinto was sixth. Carlos Sainz was eighth for Williams.",
+    "scene": {
+     "type": "ranking",
+     "props": {
+      "items": [
+       {
+        "label": "Kimi Antonelli, Mercedes",
+        "value": "P4"
+       },
+       {
+        "label": "Pierre Gasly, Alpine",
+        "value": "P5"
+       },
+       {
+        "label": "Franco Colapinto, Alpine",
+        "value": "P6"
+       },
+       {
+        "label": "Lewis Hamilton, Ferrari",
+        "value": "P7"
+       },
+       {
+        "label": "Carlos Sainz, Williams",
+        "value": "P8"
+       }
+      ],
+      "title": "Positions four to eight"
+     }
+    }
+   },
+   {
+    "id": "d5e6f292",
+    "narration": "Ferrari had an eventful night. Lewis Hamilton recovered from eleventh on the grid to finish seventh, despite a ten-second penalty and contact with teammate Charles Leclerc, who finished tenth.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Ferrari's messy night",
+      "items": [
+       "Hamilton: 11th on grid to 7th",
+       "10-second penalty for track limits",
+       "Contact with Leclerc, who took 10th"
+      ],
+      "style": "rail",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "212cc794",
+    "narration": "Not everyone finished. Arvid Lindblad spun behind the Safety Car and retired, Sergio Perez and Alex Albon also did not finish, and Fernando Alonso retired one lap before the end.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Did not finish",
+      "items": [
+       "Arvid Lindblad",
+       "Sergio Perez",
+       "Alex Albon",
+       "Fernando Alonso"
+      ],
+      "checked": [
+       false,
+       false,
+       false,
+       false
+      ]
+     }
+    }
+   },
+   {
+    "id": "97fea716",
+    "narration": "What comes next? The Qatar Grand Prix, the penultimate round of the 2026 season, on November 27th to 29th at Lusail. After Vegas, the takeaway is simple: in this season, never count anyone out until the flag.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Qatar is next, the penultimate round of 2026.",
+      "emphasis": "Qatar"
+     }
+    },
+    "sfx": "chime"
+   }
+  ],
+  "sources": [
+   {
+    "title": "F1 2026 Las Vegas Grand Prix results: Verstappen wins over Norris",
+    "url": "https://www.silverstone.co.uk/news/f1-2026-las-vegas-grand-prix-results-verstappen-wins-after-race-long-battle-russell",
+    "publisher": "silverstone.co.uk",
+    "license": "",
+    "date": "Mon, 23 Nov 2026 14:00:00 GMT"
+   },
+   {
+    "title": "2026 Results - Formula 1 Las Vegas Grand Prix",
+    "url": "https://www.f1lasvegasgp.com/2026-results",
+    "publisher": "f1lasvegasgp.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 06:05:04 GMT"
+   },
+   {
+    "title": "2026 F1 Las Vegas Grand Prix results: Winner, full finishing order - Yahoo Sports",
+    "url": "https://sports.yahoo.com/articles/2026-f1-las-vegas-grand-053004403.html",
+    "publisher": "sports.yahoo.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 05:30:04 GMT"
+   },
+   {
+    "title": "F1 2026 Las Vegas Grand Prix race result",
+    "url": "https://www.the-race.com/formula-1/f1-2026-las-vegas-grand-prix-race-result",
+    "publisher": "the-race.com",
+    "license": "",
+    "date": "Sun, 22 Nov 2026 05:39:05 GMT"
+   }
+  ],
+  "skills": [
+   "news-explainer",
+   "recap-summary"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 37.8,
+  "before_first_script_call_s": 12.1,
+  "script_s": 25.8
+ },
+ "cost": {
+  "script_small": 0.00023,
+  "research": 0.00103,
+  "script_big": 0.09645,
+  "search_api": 0.016,
+  "total": 0.11371
+ },
+ "calls": {
+  "small": 2,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 36348,
+  "out": 4893
+ },
+ "rules": {
+  "length": {
+   "words": 336,
+   "expected_words": 267,
+   "ratio": 1.258,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 149.5,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 33,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 37,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Less than one second. That is all that separated the winner from second place after fifty laps under the lights of Las Vegas. Max Verstappen took the win by just 0.639 seconds.",
+   "close_text": "What comes next? The Qatar Grand Prix, the penultimate round of the 2026 season, on November 27th to 29th at Lusail. After Vegas, the takeaway is simple: in this season, never count anyone out until t"
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "stat": 1,
+    "title": 1,
+    "gallery": 1,
+    "diagram": 1,
+    "bullets": 2,
+    "table": 1,
+    "ranking": 1,
+    "checklist": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.12,
+   "top_type": "bullets",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 10,
+   "ungrounded_numbers": [
+    "29"
+   ],
+   "entities": 30,
+   "ungrounded_entities": [
+    "Lusail",
+    "Qatar Grand Prix",
+    "World Champion"
+   ],
+   "ungrounded_share": 0.1,
+   "ungrounded_number_share": 0.1,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "russell had a lock",
+    "count": 2
+   },
+   {
+    "phrase": "had a lock up",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 5122,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": true,
+   "cue": true,
+   "needs_web": true,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 2,
+    "reason": "Several claims are unsupported or wrong: \"third win in Las Vegas\" (he won 2023 and 2024, so a third is plausible, but the notes don't say so), the \"10-second penalty for track limits\" is not in the notes, and \"Lap 47\" is invented. The Mercedes pair \"led a race-long fight\" with Verstappen, but Antonelli's role is unsupported. The Qatar dates also come from outside the notes."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It names the winner, podium and some of the midfield, but gives no championship standings, which the brief asks for. It also gives no real account of the race itself, such as the Safety Car or the lap 37 pass."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical, from margin to date to story to results to what's next. Beats 4 and 5 repeat the Russell lock-up, and the results are read out like a list."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "\"Less than one second\" is a decent hook. The ending, \"never count anyone out until the flag\", is a generic cliché."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is neutral and clear, but some lines are filler, such as \"thrilling and frenetic\", and a US viewer gets little energy."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, but the diagram is a thin three-node flow, the checklist uses unchecked boxes oddly, and the stock image queries are generic."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It is mostly a recitation of results with few vivid details and a cliché ending."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It names the latest race and keeps to the length, but it omits championship standing and the key moment is shaky."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The English is grammatical and fluent, with minor awkwardness such as \"The late drama reshaped the podium\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "despite a ten-second penalty",
+    "issue": "The ten-second penalty for track limits is not in the notes, so the detail is invented or unverified.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "\"Lap 47\"",
+    "issue": "The lap number is invented. The notes say only that the lock-up came with three laps to go, and the race was 50 laps.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "which led a race-long fight against the Mercedes pair of Russell and Antonelli",
+    "issue": "The notes describe a battle with Russell, with Norris closing at the end. They give no basis for a race-long fight with Antonelli.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "it was his third win in Las Vegas",
+    "issue": "This is not in the notes. Verstappen did win in 2023 and 2024, but 2025 was won by Norris, so a third win is plausible but unverified.",
+    "beat": 2
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "After Vegas, the takeaway is simple",
+    "issue": "There is no championship standing or title implication, which a latest-race summary needs.",
+    "beat": 10
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Russell had a lock-up and finished ninth.",
+    "issue": "This repeats beat 4 almost word for word.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Pierre Gasly took an impressive fifth for Alpine",
+    "issue": "The race narrative is thin. It omits the Verstappen–Russell passing duel, the lap 37 move at Turn 5 and the Safety Car, and instead reads out a list of results.",
+    "beat": 7
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "never count anyone out until the flag",
+    "issue": "This is a generic closing cliché.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "Championship standings after the race",
+   "The Verstappen–Russell passing duel (lap 37, Turn 5)",
+   "The Safety Car moment",
+   "Verstappen's or Norris's post-race reaction"
+  ],
+  "wrong_facts": [
+   "The \"ten-second penalty for track limits\" is not in the notes",
+   "\"Lap 47\" is not in the notes",
+   "The Antonelli race-long battle claim is unsupported by the notes",
+   "\"Third win in Las Vegas\" is not in the notes (his 2023 and 2024 wins make it plausible)",
+   "The Qatar dates, Nov 27-29, are unverified from the notes"
+  ],
+  "would_publish": false,
+  "summary": "The script correctly names the Las Vegas GP result and podium, but it adds invented specifics (a penalty, lap 47), leaves out the championship picture and the main race story, and ends on a cliché. It reads as a list of results rather than an account of the race.",
+  "mean": 2.78,
+  "cost_usd": 0.02882,
+  "tokens": [
+   6340,
+   1614
+  ]
+ }
+}
