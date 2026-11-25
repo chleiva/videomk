@@ -98,62 +98,10 @@ def _edge_label(cv: Canvas, th: Theme, text: str, run_a: float, run_b: float, y_
 
 
 def draw_diagram(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
-    top = heading(cv, th, str(props.get("title", "")), lt, y=CONTENT_TOP + 20) if props.get("title") else CONTENT_TOP + 40
-    nodes, edges, pos, order, nw, nh, layer = _diagram_geometry(cv, props, top + 10, ctx.bottom - 10)
-    if not nodes:
-        return
-    times = reveal_times(len(order), dur, props.get("cues"), first=0.12, last=0.78)
-    node_t = {nid: times[i] for i, nid in enumerate(order)}
-    font_px = 42 if nw > 380 else 36 if nw > 260 else 30 if nw > 200 else 26
-    arrow_col = with_alpha(th.accent2, 0.95)
+    """The styled flow (scenes/flow_scenes.py): `style` and `accent` props, the default look when they are missing or unknown."""
+    from .flow_scenes import draw
 
-    for e in edges:  # edges first so nodes sit on top
-        a, b = str(e[0]), str(e[1])
-        if a not in pos or b not in pos or a == b:
-            continue
-        ax, ay = pos[a]
-        bx, by = pos[b]
-        start = max(node_t[a], node_t[b] - 0.15) + 0.25
-        p = ease_in_out_cubic(progress(lt, start, 0.55))
-        if p <= 0:
-            continue
-        x1, y1 = ax + nw, ay + nh / 2
-        x2, y2 = bx, by + nh / 2
-        if bx < ax:  # backward edge: route underneath
-            ymax = max(ay, by) + nh + 26
-            pts = [(ax + nw / 2, ay + nh), (ax + nw / 2, ymax), (bx + nw / 2, ymax), (bx + nw / 2, by + nh)]
-        elif abs(y1 - y2) < 2:
-            pts = [(x1 + 6, y1), (x2 - 14, y2)]
-        else:  # branch: leave the source immediately, then a long straight run into the target
-            bend = x1 + 34
-            pts = [(x1 + 6, y1), (bend, y1), (bend, y2), (x2 - 14, y2)]
-        cv.line(partial_polyline(pts, p), arrow_col, 6)
-        if p > 0.96:
-            _arrowhead(cv, pts, arrow_col)
-        if len(e) >= 3 and e[2] and p > 0.8:
-            run_a, run_b = (pts[-2][0], pts[-1][0]) if len(pts) >= 3 else (pts[0][0], pts[-1][0])
-            _edge_label(cv, th, str(e[2]), run_a, run_b, pts[-1][1], progress(lt, start + 0.45, 0.3))
-
-    for n in nodes:
-        nid = str(n["id"])
-        x, y = pos[nid]
-        p = progress(lt, node_t[nid], 0.5)
-        if p <= 0:
-            continue
-        s = max(0.01, ease_out_back(p, 1.5))
-        a = ease_out_cubic(progress(lt, node_t[nid], 0.25))
-        w, h = nw * s, nh * s
-        x0, y0 = x + (nw - w) / 2, y + (nh - h) / 2
-        primary = layer[nid] == 0
-        cv.shadow(x0, y0, w, h, 24, alpha=th.shadow_alpha * a)
-        fill = with_alpha(th.accent, a) if primary else (255, 255, 255, int(255 * a)) if th.name == "paper" else with_alpha(th.card, a)
-        cv.rrect(x0, y0, w, h, 24, fill=fill, outline=with_alpha(th.accent2 if primary else th.accent, a), width=3)
-        lines = cv.wrap(str(n.get("label", nid)), "semibold", font_px * s, w - 36)[:2]
-        lh = font_px * s * 1.2
-        col = with_alpha((255, 255, 255) if primary else th.text, a)
-        for i, line in enumerate(lines):
-            cv.text(x + nw / 2, y + nh / 2 - (len(lines) - 1) * lh / 2 + i * lh, line, "semibold", font_px * s, col, anchor="mm")
-
+    draw(cv, props, lt, dur, th, ctx)
 
 
 # ------------------------------------------------------------------ chart

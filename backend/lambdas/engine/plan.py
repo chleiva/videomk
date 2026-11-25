@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .scenes import ELEMENTS, SCENE_TYPES
 from .scenes.registry import docs_by_family
+from .scenes.style_kit import clean_icon, sanitize_style_props
 from .theme import THEMES
 from . import library as library_mod
 from . import sync as sync_mod
@@ -26,8 +27,8 @@ WORDS_PER_MIN = 150
 
 SCENE_DOCS_BASE = """Scene types (props):
 - title: {title (<=70 chars), subtitle (<=110)}. Use for the opening and for chapter openers.
-- bullets: {heading (<=50), items: 2-5 short strings (<=80 each)}. Lists, steps, key points.
-- diagram: {title (<=50), nodes: [{id, label (<=26)}] (3-7), edges: [[from_id, to_id, optional label (<=22, 1-3 words)]]}. Processes, causes and effects, architectures, flows. Keep it a left-to-right flow with at most 4 layers.
+- bullets: {heading (<=50), items: 2-5 short strings (<=80), optional style, accent, emphasis (index of key item), icons (one icon word per item)}. Lists, steps, key points. style: "rail" (default, numbered: general), "spotlight" (huge type, one line lit at a time: claims, mottos), "icons" (icon tiles: features, tips), "cards" (card grid: parallel ideas), "keywords" (items as "Keyword: explanation"). accent: indigo (tech, trust), coral (energy, food, kids), teal (health, calm), amber (warmth, money, history), emerald (nature, growth), violet (creative, mystery), rose (love, people), sky (travel, science); omit = theme colour. Match style and accent to topic and mood; VARY them, never the same look twice in a row.
+- diagram: {title (<=50), nodes: [{id, label (<=26), optional icon word}] (3-7), edges: [[from_id, to_id, optional label (<=22, 1-3 words)]], optional style, accent, emphasis (index of the key node)}. Processes, causes and effects, architectures, flows. Left-to-right, at most 4 layers (more wraps into two rows). style: "cards" (default: icon cards, connectors that draw on), "pills" (light chips: short steps), "ladder" (rising steps: progress, growth, levels), "stack" (top to bottom: long labels, hierarchy, chains). accent: same names as bullets. The node being narrated lights up, so the narration names the nodes in order. Vary style and accent from the previous visual.
 - chart: {kind: "bar"|"line", title (<=50), labels: 3-7 strings (<=16), values: numbers, unit (<=6, e.g. "%" or "$"), highlight: optional index}. Only use numbers that appear in the grounding notes; never invent statistics. Avoid values that differ by more than 50x.
 - timeline: {title (<=50), events: [{date (<=12), label (<=55)}] (3-6)}. History, sequences over time.
 - stat: {value (<=12, e.g. "73%" or "$4.2B"), label (<=70)}. One striking number; only if it is in the grounding notes.
@@ -368,7 +369,8 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
         items = [_s(i, 80) for i in _list(p.get("items"), 2, 5) if _s(i, 80)]
         if len(items) < 2:
             raise ValueError("bullets need 2+ items")
-        return {"heading": _s(p.get("heading"), 50), "items": items}
+        out = {"heading": _s(p.get("heading"), 50), "items": items}
+        return sanitize_style_props("bullets", p, out, len(items))
     if stype == "diagram":
         nodes, seen = [], set()
         for n in _list(p.get("nodes"), 2, 8):
@@ -376,7 +378,11 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
             if not nid or nid in seen:
                 continue
             seen.add(nid)
-            nodes.append({"id": nid, "label": _s(n.get("label") or nid, 26)})
+            node = {"id": nid, "label": _s(n.get("label") or nid, 26)}
+            ic = clean_icon(n.get("icon"))
+            if ic:
+                node["icon"] = ic
+            nodes.append(node)
         if len(nodes) < 2:
             raise ValueError("diagram needs 2+ nodes")
         edges = []
@@ -385,7 +391,7 @@ def sanitize_props(stype: str, p: Dict[str, Any]) -> Dict[str, Any]:
                 a, b = re.sub(r"[^A-Za-z0-9_]", "", str(e[0]))[:12], re.sub(r"[^A-Za-z0-9_]", "", str(e[1]))[:12]
                 if a in seen and b in seen and a != b:
                     edges.append([a, b] + ([_s(e[2], 22)] if len(e) >= 3 and _s(e[2], 22) else []))
-        return {"title": _s(p.get("title"), 50), "nodes": nodes, "edges": edges}
+        return sanitize_style_props("diagram", p, {"title": _s(p.get("title"), 50), "nodes": nodes, "edges": edges}, len(nodes))
     if stype == "chart":
         labels = [_s(x, 16) for x in _list(p.get("labels"), 2, 8)]
         values = [_num(x) for x in _list(p.get("values"), 2, 8)]

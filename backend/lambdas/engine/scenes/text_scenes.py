@@ -45,35 +45,10 @@ def bullets_cues(props: Dict[str, Any], dur: float) -> List[float]:
 
 
 def draw_bullets(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
-    items = [str(i) for i in (props.get("items") or [])][:6]
-    y = heading(cv, th, str(props.get("heading", "")), lt, y=CONTENT_TOP + 20)
-    if not items:
-        return
-    gap = 20
-    avail = ctx.bottom - y - 10
-    card_h = max(78.0, min(138.0, (avail - gap * (len(items) - 1)) / len(items)))
-    font_px = 44 if card_h > 110 else 38 if card_h > 92 else 33
-    x0, w = 140, 1640
-    times = reveal_times(len(items), dur, props.get("cues"))
-    for i, text in enumerate(items):
-        p = progress(lt, times[i], 0.55)
-        if p <= 0:
-            continue
-        e = ease_out_back(p, 1.1)
-        a = ease_out_cubic(progress(lt, times[i], 0.3))
-        cy = y + i * (card_h + gap)
-        dx = (1 - e) * -90
-        cv.card(x0 + dx, cy, w, card_h, th, r=24, alpha=a)
-        cv.rrect(x0 + dx + 20, cy + 18, 8, card_h - 36, 4, fill=with_alpha(th.accent, a))
-        rad = min(34, card_h * 0.3)
-        bx, by = x0 + dx + 84 + rad, cy + card_h / 2
-        cv.ellipse(bx, by, rad, rad, fill=with_alpha(th.accent, a))
-        cv.text(bx, by, str(i + 1), "bold", rad * 1.1, with_alpha((255, 255, 255), a), anchor="mm")
-        lines = cv.wrap(text, "semibold", font_px, w - 220 - rad * 2)[:2]
-        lh = font_px * 1.22
-        ty = by - (len(lines) * lh) / 2 - lh * 0.06
-        for li, line in enumerate(lines):
-            cv.text(x0 + dx + 84 + rad * 2 + 30, ty + li * lh, line, "semibold", font_px, with_alpha(th.text, a))
+    """The styled list (scenes/list_scenes.py): `style` and `accent` props, the default look when they are missing or unknown."""
+    from .list_scenes import draw
+
+    draw(cv, props, lt, dur, th, ctx)
 
 
 # ------------------------------------------------------------------ stat

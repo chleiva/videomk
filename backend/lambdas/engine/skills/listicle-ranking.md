@@ -10,3 +10,4 @@ pick: Top 5, top 10, 'best of', 'N things', rankings, lists, countdowns.
 - Vary the delivery so the list does not feel mechanical: a surprise, a comparison or a one-line story for a few items.
 - Keep to the number promised; end with a short wrap-up or a nod to what was left out.
 - Visuals: when the items are places, things or people, give each item its own beat with a gallery of 3-5 photographs of it (the picture is the proof), and use a ranking scene only for the overview; a counter or stat only for a key number. Music: upbeat and light, steady.
+- Looks: give each list or flow its own `style` and `accent` (see the scene docs), fitting the mood and different from the previous one.
