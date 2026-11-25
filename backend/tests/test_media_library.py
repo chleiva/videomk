@@ -738,3 +738,15 @@ def test_the_organize_routes_the_preference_and_isolation(env):
     assert call(B, "POST", "/organize/apply", body={"mode": "auto"})[1]["applied"] == 0 and call(B, "GET", "/collections")[1]["collections"] == []
     assert call(B, "POST", "/organize/apply", body={"mode": "single", "collection_id": lib.collections(A)[0]["id"]})[0] == 404
     assert call(B, "GET", "/summary")[1]["prefs"] == {"organize": "ask"}
+
+
+def test_auto_collections_tell_the_apps_their_dates(env):
+    _library(env)
+    org.apply_auto(A)
+    cols = {c["name"][:6]: c for c in lib.collections(A)}
+    may = next(c for c in lib.collections(A) if c["name"].startswith("May 2026"))
+    assert may["date_from"] == "2026-05-01" and may["date_to"] == "2026-05-31"
+    trip = next(c for c in lib.collections(A) if c["name"].startswith("Phuket"))
+    assert trip["date_from"] == "2026-07-14" and trip["date_to"] >= trip["date_from"]
+    manual = lib.create_collection(A, "Family")
+    assert "date_from" not in manual and cols

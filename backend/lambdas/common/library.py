@@ -544,6 +544,15 @@ def collection_json(c: Dict[str, Any]) -> Dict[str, Any]:
         out["emoji"] = c["em"]
     if c.get("auto"):
         out["auto"] = True   # made by "organize": matched by place and dates, never by name
+        a = c["auto"]
+        lo, hi = a.get("from"), a.get("to")
+        if not lo and a.get("ym"):   # a month: its first and last day
+            import calendar
+
+            y, m = int(a["ym"][:4]), int(a["ym"][5:7])
+            lo, hi = f"{a['ym']}-01", f"{a['ym']}-{calendar.monthrange(y, m)[1]:02d}"
+        if lo and hi:
+            out["date_from"], out["date_to"] = lo, hi   # so the apps can show "3 May - 28 May" and sort newest first
     if c.get("cover"):
         out["cover_id"] = c["cover"]
         out["cover_thumb_url"] = link(thumb_key(c["user_id"], c["cover"]), THUMB_LINK_SECONDS)   # the row's own partition: the cover is always this user's photo
