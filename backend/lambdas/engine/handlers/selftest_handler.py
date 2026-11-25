@@ -81,6 +81,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         import resource
 
+        # A 4K frame needs about 6 GB: on a smaller function the runtime is killed (out of memory), which no except can catch, and the whole self test is lost (seen on QA at 3 GB).
+        if int(os.environ.get("AWS_LAMBDA_FUNCTION_MEMORY_SIZE", "0") or 0) < 8000 and not os.environ.get("SELFTEST_FORCE_4K"):
+            raise RuntimeError("skipped: this function has under 8 GB of memory")
         big = dict(fixture, width=3840, height=2160, frame={"aspect": "16:9", "resolution": "2160p"})
         with tempfile.TemporaryDirectory() as tmp:
             seg = os.path.join(tmp, "k.ts")

@@ -50,7 +50,7 @@ class EngineV2(Construct):
         edit_failed_fn = make_fn("V2EditFailedFn", "v2_edit_failed", f"{base}.edit_failed_handler.handler", timeout=Duration.seconds(10), memory=256, env=env, layers=layers)
         self.editor_get_fn = make_fn("V2EditorGetFn", "v2_editor_get", f"{base}.editor_get.handler", timeout=Duration.seconds(20), memory=512, env=env, layers=layers)
         self.editor_apply_fn = make_fn("V2EditorApplyFn", "v2_editor_apply", f"{base}.editor_apply.handler", timeout=Duration.seconds(20), memory=512, env=env, layers=layers)
-        self.selftest_fn = make_fn("V2SelfTestFn", "engine_selftest", f"{base}.selftest_handler.handler", timeout=Duration.seconds(90), memory=3008, env=env, layers=layers)
+        self.selftest_fn = make_fn("V2SelfTestFn", "engine_selftest", f"{base}.selftest_handler.handler", timeout=Duration.seconds(180), memory=10240, env=env, layers=layers)
 
         # --- least-privilege IAM: the engine can only touch generation/v2/* (+ write videos/*)
         for fn in (plan_fn, beat_fn, finalize_fn):
