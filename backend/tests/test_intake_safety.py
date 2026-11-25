@@ -458,3 +458,9 @@ def test_option_labels_are_clipped_at_a_word_boundary_never_mid_word():
     labels = intake.clean_questions([{"id": "focus", "text": "Que parte quieres destacar?", "options": [{"label": "Evolución biológica y primeros homínidos"}, {"label": "Civilizaciones antiguas hasta la edad media"}, {"label": "Historia completa con énfasis en cultura"}]}]) if hasattr(intake, "clean_questions") else None
     if labels:
         assert all(not l["label"][-1].isalpha() or len(l["label"]) <= 36 for l in labels[0]["options"]) and not any(l["label"].endswith(("primer", "hast", "énfasi")) for l in labels[0]["options"])
+
+
+def test_the_request_check_knows_the_app_fetches_stock_photos_itself():
+    import inspect
+    src = " ".join(inspect.getsource(intake).split())
+    assert "licensed stock PHOTOGRAPHS" in src and "never call any of this unsupported" in src and 'never promise "generated visuals"' in src

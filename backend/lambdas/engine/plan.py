@@ -2,6 +2,7 @@
 normalised here before it can reach the renderer, S3 paths or the database."""
 import hashlib
 import json
+import math
 import os
 import re
 import uuid
@@ -61,7 +62,12 @@ MAX_IMAGES_PER_MINUTE = 10.0
 
 def image_budget(minutes: float, per_minute: float) -> int:
     """The most stock photographs a video of this length may carry (user photos never count)."""
-    return max(0, int(float(per_minute) * float(minutes) + 1e-9))
+    budget = max(0, int(float(per_minute) * float(minutes) + 1e-9))
+    if 0 < float(minutes) < 1 and float(per_minute) >= 1:
+        # A short video is cut fast: a photo every 1.5 s or so, never more than a full minute's allowance. Without this a 15 s video got 2 photos even when the person
+        # asked for "many many photos", and the rest of its scenes became text cards (owner, 2026-11-25).
+        budget = max(budget, min(int(float(per_minute)), math.ceil(float(minutes) * 60 / 1.5)))
+    return budget
 
 
 def images_rule(per_minute: float) -> str:
@@ -71,7 +77,9 @@ def images_rule(per_minute: float) -> str:
             "That is a ceiling, but for VISUAL topics (places, cities, landmarks, nature, food, culture, travel, history of places, people, animals, products) use most of it: real pictures are what "
             "hold the viewer, so nearly every beat of such a video carries a photograph or a gallery of the things the narration names (a gallery of 3-6 photographs for several places, one photograph for one), "
             "and charts, counters, icons and cards are only for the few moments that are really about a number or an idea. For numbers, processes and abstract ideas use few or none. "
-            "A photograph illustrates what is named in the narration; never use one just to fill time.")
+            "A photograph illustrates what is named in the narration; never use one just to fill time. "
+            f"A video shorter than a minute may still carry up to {int(per_minute)} photographs in total (fast cuts, galleries of 3-6). When the person asks for photos, for many photos, for a number "
+            "of photos or for 'only photos', deliver that: every beat is a photograph or a gallery (text may sit over the pictures), with at least the number asked for when the ceiling allows, and no text-only cards.")
 
 
 MUSIC_CHOICE_RULE = ("  How to choose: first decide the video's dominant feeling and purpose (inform calmly, excite, warn, amuse, reflect, inspire, reassure), then pick the recording whose "
@@ -686,8 +694,21 @@ def sanitize_sfx(raw: Any) -> Optional[str]:
 
 
 def _fallback_scene(narration: str) -> Dict[str, Any]:
-    words = narration.split()
-    return {"type": "title", "props": {"title": " ".join(words[:9]).rstrip(",;:"), "subtitle": ""}}
+    return {"type": "title", "props": {"title": card_text(narration), "subtitle": ""}}
+
+
+def card_text(narration: str, max_words: int = 10) -> str:
+    """A short, COMPLETE thought for a fallback text card: the first sentence if it is short, else its first clause, else its first words with an ellipsis. Never a sentence cut
+    mid-way without a sign (a card once read 'Wander Montmartre and Le Marais. Paris is best when')."""
+    text = " ".join(str(narration or "").split())
+    first = re.split(r"(?<=[.!?…。！？])\s+", text, 1)[0].strip()
+    if first and len(first.split()) <= max_words:
+        return first.rstrip(".。").rstrip(",;:") if first[-1:] in ".。" else first
+    clause = re.split(r"\s*[,;:\u2014\u2013]\s+|\s+-\s+", first or text, 1)[0].strip()
+    if clause and 2 <= len(clause.split()) <= max_words:
+        return clause
+    words = (first or text).split()
+    return " ".join(words[:max_words - 2]).rstrip(",;:.") + "…" if words else ""
 
 
 def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, photo_captions: Optional[Dict[str, str]] = None, silence_share: float = 0.25, max_images: Optional[int] = None, allow_clips: bool = True, rejects: Optional[List[Dict[str, Any]]] = None) -> Tuple[Dict[str, Any], List[str]]:

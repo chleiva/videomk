@@ -276,3 +276,15 @@ def test_a_person_can_change_the_music_and_an_effect_and_cannot_choose_nonsense(
             edits.apply_ops(plan, [bad])
     g, _ = edits.apply_ops(plan, [{"op": "set_scene", "id": "aaaaaaa1", "type": "gallery", "props": {"image_queries": ["a b", "c d"]}}])
     assert g["beats"][0]["scene"]["type"] == "gallery"
+
+
+def test_a_short_video_gets_a_real_photo_budget_and_a_fallback_card_is_a_complete_thought():
+    assert [plan_mod.image_budget(m, 10) for m in (0.25, 0.5, 0.75, 1)] == [10, 10, 10, 10]     # 15 s: up to 10 photos, not 2
+    assert plan_mod.image_budget(0.25, 3) == 3 and plan_mod.image_budget(0.25, 0) == 0 and plan_mod.image_budget(0.5, 0.4) == 0   # never above a minute's allowance; "no photos" stays none
+    c = plan_mod.card_text
+    assert c("Wander Montmartre and Le Marais. Paris is best when you leave room to wander.") == "Wander Montmartre and Le Marais"
+    assert c("One city, endless postcards. The Eiffel Tower.") == "One city, endless postcards"
+    assert c("When the river froze in that long winter, the whole town walked across it to the market") == "When the river froze in that long winter"
+    long = c("The quick brown fox jumps over the lazy dog again and again and again without ever stopping")
+    assert long.endswith("…") and len(long.split()) <= 10
+    assert c("") == "" and c("¿Por qué el cielo es azul? Porque la luz se dispersa.") == "¿Por qué el cielo es azul?"
