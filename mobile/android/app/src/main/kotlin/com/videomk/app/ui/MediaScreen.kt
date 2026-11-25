@@ -81,6 +81,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.videomk.app.core.MediaCollection
 import com.videomk.app.core.MediaPhoto
+import com.videomk.app.core.SelectAll
+import androidx.compose.foundation.layout.Spacer
 import com.videomk.app.core.MediaSummary
 import com.videomk.app.core.StorageMeter
 import com.videomk.app.core.UploadTiles
@@ -475,12 +477,18 @@ fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, in
     var confirm by remember { mutableStateOf(false) }
     val n = vm.selection.size
     Surface(color = Vmk.colors.surface, shadowElevation = 8.dp) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.testTag("selectionBar")) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { vm.clearSelection() }, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.Close, "Cancel selection") }
-            Text("$n selected", color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { contentDescription = "$n photos selected" })
+            Text("$n selected", color = Vmk.colors.text, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f).semantics { contentDescription = "$n photos selected" })
+            SelectAllButton(vm)
+        }
+        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
             TextButton(onClick = { pick = true }, enabled = n > 0, modifier = Modifier.heightIn(min = 48.dp).testTag("addToCollection")) { Text("Collection") }
             TextButton(onClick = { onMakeVideo(vm.selectedPhotos().take(100)); vm.clearSelection() }, enabled = n > 0, modifier = Modifier.heightIn(min = 48.dp).testTag("makeVideo")) { Icon(Icons.Filled.Movie, null, Modifier.size(18.dp)); Text(" Video") }
             IconButton(onClick = { confirm = true }, enabled = n > 0, modifier = Modifier.size(48.dp).testTag("deleteSelected")) { Icon(Icons.Filled.Delete, "Delete selected photos", tint = if (n > 0) Vmk.colors.danger else Vmk.colors.textSecondary) }
+        }
         }
     }
     if (pick) CollectionPickerDialog(vm, onDismiss = { pick = false }) { c -> vm.addToCollection(c, vm.selection.toList()); pick = false }
@@ -528,5 +536,18 @@ fun StorageSheet(summary: MediaSummary, live: Pair<Long, Long>?, onDismiss: () -
             Text(PRIVACY_COPY, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             if (summary.canUpgrade) Button(onClick = { runCatching { uri.openUri("https://videomk.com/storage") } }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("upgradeButton")) { Text("Get more storage") }
         }
+    }
+}
+
+/** "Select all 38" next to the count (becomes "Clear" when everything in view is selected). Works on whatever is in view: all photos, a collection, a search. */
+@Composable
+fun SelectAllButton(vm: MediaViewModel, modifier: Modifier = Modifier) {
+    if (vm.photos.isEmpty()) return
+    val all = vm.allInViewSelected
+    val label = SelectAll.label(all, vm.viewCount)
+    TextButton(onClick = { vm.toggleSelectAll() }, enabled = !vm.selectingAll, modifier = modifier.heightIn(min = 48.dp).testTag("selectAllButton")) {
+        if (vm.selectingAll) androidx.compose.material3.CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+        else Icon(Icons.Filled.SelectAll, null, Modifier.size(18.dp))
+        Text("  " + label, fontWeight = FontWeight.Bold)
     }
 }

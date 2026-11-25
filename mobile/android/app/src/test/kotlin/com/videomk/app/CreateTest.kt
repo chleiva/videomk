@@ -263,4 +263,93 @@ class CreateTest {
         server.enqueue(json(429, """{"status":"paused","message":"Paused","retry_after":3600}"""))
         assertEquals(IntakeResult.Paused("Paused", 3600), intake.brief(IntakeRequest("p", CreateOptions(), 0)))
     }
+
+    @Test fun `a video's aspect from the real list response sizes the frame`() {
+        val v = com.videomk.app.core.VideoItem.fromJson(com.videomk.app.core.parseObject("""{"video_id":"a","status":"COMPLETE","aspect":"9:16","resolution":"1080p","duration_s":61}"""))
+        assertEquals("9:16", v.aspect); assertEquals("1080p", v.resolution)
+        assertTrue(v.isTall); assertEquals(9f / 16f, v.frameRatio, 0.001f)
+        val old = com.videomk.app.core.VideoItem.fromJson(com.videomk.app.core.parseObject("""{"video_id":"b","status":"COMPLETE"}"""))
+        assertEquals(16f / 9f, old.frameRatio, 0.001f); assertFalse(old.isTall)
+        assertEquals(1f, com.videomk.app.core.VideoItem.ratioOf("1:1"), 0.001f)
+        assertEquals(0.8f, com.videomk.app.core.VideoItem.ratioOf("4:5"), 0.001f)
+        assertEquals(16f / 9f, com.videomk.app.core.VideoItem.ratioOf("nonsense"), 0.001f)
+    }
+
+    @Test fun `the real capabilities response parses with beta aspects and the Shorts platform`() {
+        val c = Capabilities.fromJson(com.videomk.app.core.parseObject("""{"aspects":[{"id":"16:9","label":"Landscape","ready":true,"beta":false},{"id":"9:16","label":"Vertical","ready":true,"beta":true}],"resolutions":[{"id":"720p","label":"720p"},{"id":"1080p","label":"1080p"}],"platforms":[{"id":"shorts","label":"YouTube Shorts","aspect":"9:16","resolution":"1080p","note":"x"},{"id":"tiktok","label":"TikTok","aspect":"9:16","resolution":"1080p","note":"x"}],"languages":[{"id":"en","label":"English"}],"lengths":{"min_minutes":1,"max_minutes":12},"max_photos":100,"intake":true}"""))
+        assertTrue(c.intake); assertTrue(c.aspect("9:16")!!.beta)
+        val shorts = com.videomk.app.core.CreatePlatforms.chip(c, "shorts")!!
+        assertTrue(shorts.enabled); assertEquals("9:16", shorts.aspect)
+        val o = com.videomk.app.core.CreatePlatforms.select(CreateOptions(), shorts)
+        assertEquals("9:16", o.aspect); assertEquals("1080p", o.resolution)
+    }
+
+    private fun v(id: String, sig: String, date: String = "20261125T120000Z", title: String = "T") = com.videomk.app.core.VideoItem(
+        id, com.videomk.app.core.VideoStatus.Complete, title,
+        previewGifUrl = "https://b.s3.amazonaws.com/u/$id/preview.gif?X-Amz-Date=$date&X-Amz-Signature=$sig", videoUrl = "https://b.s3.amazonaws.com/u/$id/v.mp4?X-Amz-Date=$date&X-Amz-Signature=$sig")
+
+    @Test fun `the image key ignores the signature and differs per video`() {
+        val a = com.videomk.app.core.ImageKeys.stable(v("one", "AAA").previewGifUrl!!)
+        val b = com.videomk.app.core.ImageKeys.stable(v("one", "BBB", "20261125T120400Z").previewGifUrl!!)
+        val c = com.videomk.app.core.ImageKeys.stable(v("two", "AAA").previewGifUrl!!)
+        assertEquals(a, b); assertTrue(a != c)
+        assertEquals("https://x/y.png", com.videomk.app.core.ImageKeys.stable("https://x/y.png"))
+        assertEquals(1_795_608_000L, com.videomk.app.core.ImageKeys.signedAtSeconds(v("one", "A").previewGifUrl))
+    }
+
+    @Test fun `a refresh with the same data keeps the same instances, only real changes replace one`() {
+        val old = listOf(v("one", "AAA"), v("two", "AAA"))
+        val same = com.videomk.app.core.VideoMerge.reuse(old, listOf(v("one", "BBB", "20261125T120004Z"), v("two", "CCC", "20261125T120004Z")))
+        assertTrue(same === old)
+        val changed = com.videomk.app.core.VideoMerge.reuse(old, listOf(v("one", "DDD", "20261125T120008Z"), v("two", "DDD", "20261125T120008Z", title = "New")))
+        assertTrue(changed[0] === old[0]); assertTrue(changed[1] !== old[1]); assertEquals("New", changed[1].title)
+        // links are renewed after ten minutes even when nothing changed (they expire after an hour)
+        val renewed = com.videomk.app.core.VideoMerge.reuse(old, listOf(v("one", "EEE", "20261125T121100Z"), v("two", "EEE", "20261125T121100Z")))
+        assertTrue(renewed[0] !== old[0])
+        // a new video in front, a removed one: the list changes, the others stay the same instances
+        val grown = com.videomk.app.core.VideoMerge.reuse(old, listOf(v("zero", "A"), v("one", "B"), v("two", "B")))
+        assertEquals(3, grown.size); assertTrue(grown[1] === old[0])
+    }
+
+    @Test fun `the new video button does not oscillate on bounce or small changes`() {
+        val f = com.videomk.app.core.FabCollapse()
+        assertTrue(f.update(0)); assertTrue(f.update(30)); assertTrue(f.update(47))
+        assertFalse(f.update(48))
+        // a bouncing or clamped list near the threshold, or a few px of extent change, never flips it
+        for (o in listOf(49, 47, 50, 40, 20, 12, 9, 40, 12)) assertFalse("offset $o", f.update(o))
+        assertFalse(f.update(Int.MAX_VALUE))   // far down or at the bottom edge: stays collapsed
+        assertTrue(f.update(8)); for (o in listOf(0, 20, 47, 5, 30)) assertTrue("offset $o", f.update(o))
+    }
+
+    @Test fun `select all respects the limit, mixed sources and the view`() {
+        val view = (1..38).map { "p$it" }
+        // everything fits
+        assertEquals(view, com.videomk.app.core.SelectAll.toAdd(view, emptyList(), 100))
+        // 6 already chosen (in view or not): only the missing ones are added, in view order
+        val have = listOf("p3", "p5", "other1")
+        val add = com.videomk.app.core.SelectAll.toAdd(view, have, 100)
+        assertEquals(36, add.size); assertFalse("p3" in add); assertEquals("p1", add.first())
+        // photos from the phone use up room: limit 100 - 90 = 10 for My media
+        val tight = com.videomk.app.core.SelectAll.toAdd((1..60).map { "q$it" }, emptyList(), 10)
+        assertEquals((1..10).map { "q$it" }, tight)
+        assertEquals(0, com.videomk.app.core.SelectAll.toAdd(view, (1..10).map { "z$it" }, 10).size)
+        // labels
+        assertEquals("Select all 38", com.videomk.app.core.SelectAll.label(false, 38))
+        assertEquals("Select all", com.videomk.app.core.SelectAll.label(false, null))
+        assertEquals("Clear", com.videomk.app.core.SelectAll.label(true, 38))
+        // all selected: Clear; more pages not loaded and below the limit: not all
+        assertTrue(com.videomk.app.core.SelectAll.allSelected(view, view, 100, false))
+        assertFalse(com.videomk.app.core.SelectAll.allSelected(view, view, 100, true))
+        assertTrue(com.videomk.app.core.SelectAll.allSelected(view, view, 38, true))   // the limit stopped it
+        assertFalse(com.videomk.app.core.SelectAll.allSelected(emptyList(), emptyList(), 100, false))
+        assertTrue(com.videomk.app.core.SelectAll.allSelected(view, (1..10).map { "p$it" }, 10, true))   // 10 of 38 selected and the limit is 10
+        // another view (a collection, a search) is judged on its own photos
+        assertFalse(com.videomk.app.core.SelectAll.allSelected(listOf("c1", "c2"), view, 100, false))
+        // counts: exact when nothing more to load, else the known total, else unknown
+        assertEquals(38, com.videomk.app.core.SelectAll.viewCount(38, false, 500))
+        assertEquals(240, com.videomk.app.core.SelectAll.viewCount(60, true, 240))
+        assertEquals(null, com.videomk.app.core.SelectAll.viewCount(60, true, null))
+        assertEquals("Selected the first 100: the limit for one video.", com.videomk.app.core.SelectAll.limitNote(100))
+        assertTrue(com.videomk.app.core.SelectAll.limitNote(60).contains("40 come from your phone"))
+    }
 }

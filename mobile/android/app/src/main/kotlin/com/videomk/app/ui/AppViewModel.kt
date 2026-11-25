@@ -169,7 +169,7 @@ class AppViewModel(
                 update { s ->
                     val (stages, completions) = track(s, fresh)
                     s.copy(
-                        videos = fresh, stageSince = stages, completions = s.completions + completions, offline = false,
+                        videos = com.videomk.app.core.VideoMerge.reuse(s.videos, fresh), stageSince = stages, completions = s.completions + completions, offline = false,
                         pending = LibraryMerge.stillPending(s.pending, fresh), loadState = LoadState.Loaded,
                     )
                 }

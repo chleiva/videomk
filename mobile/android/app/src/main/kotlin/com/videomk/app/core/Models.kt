@@ -42,7 +42,12 @@ data class VideoItem(
     val previewGifUrl: String? = null,
     val rejectReason: String? = null,
     val editable: Boolean = false,
+    val aspect: String? = null,
+    val resolution: String? = null,
 ) {
+    /** Width over height of the frame, from the server's `aspect` ("16:9", "9:16", "1:1", "4:5"); landscape 16:9 when it is absent (older videos). */
+    val frameRatio: Float get() = VideoItem.ratioOf(aspect)
+    val isTall: Boolean get() = frameRatio < 0.99f
     val displayTitle: String get() = title?.takeIf { it.isNotEmpty() } ?: "Untitled video"
 
     companion object {
@@ -56,7 +61,14 @@ data class VideoItem(
             previewGifUrl = o.str("preview_gif_url"),
             rejectReason = o.str("reject_reason"),
             editable = o.bool("editable") ?: false,
+            aspect = o.str("aspect"), resolution = o.str("resolution"),
         )
+
+        fun ratioOf(aspect: String?): Float {
+            val parts = aspect?.split(":") ?: return 16f / 9f
+            val w = parts.getOrNull(0)?.toFloatOrNull(); val h = parts.getOrNull(1)?.toFloatOrNull()
+            return if (w != null && h != null && w > 0f && h > 0f && parts.size == 2) w / h else 16f / 9f
+        }
     }
 }
 

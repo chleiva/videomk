@@ -10,6 +10,7 @@ import com.videomk.app.core.ApiError
 import com.videomk.app.core.ArrivalPoller
 import com.videomk.app.core.ArrivalTracker
 import com.videomk.app.core.MediaApi
+import com.videomk.app.core.SelectAll
 import com.videomk.app.core.MediaCache
 import com.videomk.app.core.MediaCollection
 import com.videomk.app.core.MediaFilter
@@ -132,25 +133,28 @@ class MediaViewModel(
     }
 
     fun loadMore() {
-        val a = api ?: return
-        if (loadingMore || !hasMore) return
-        searchResult?.let { r ->
-            viewModelScope.launch {
-                loadingMore = true
-                try {
-                    val next = a.search(search.query.trim(), 60, search.dropped, r.cursor)
-                    searchResult = SearchResult(next.understood, r.items + next.items.filter { n -> r.items.none { it.id == n.id } }, next.mode, next.cursor)
-                    photos = searchResult!!.items
-                } catch (e: CancellationException) { throw e } catch (e: Exception) { /* the next scroll tries again */ }
-                loadingMore = false
+        if (api == null || loadingMore || !hasMore) return
+        viewModelScope.launch { loadNextPage() }
+    }
+
+    /** One more page of what is in view (timeline or search result). Returns false when nothing was added (failed, or the end). */
+    private suspend fun loadNextPage(): Boolean {
+        val a = api ?: return false
+        if (loadingMore || !hasMore) return false
+        val before = photos.size
+        loadingMore = true
+        try {
+            val r = searchResult
+            if (r != null) {
+                val next = a.search(search.query.trim(), 60, search.dropped, r.cursor)
+                searchResult = SearchResult(next.understood, r.items + next.items.filter { n -> r.items.none { it.id == n.id } }, next.mode, next.cursor)
+                photos = searchResult!!.items
+            } else {
+                listing.append(a.items(60, listing.cursor, MediaFilter(collection = col))); photos = listing.items
             }
-            return
-        }
-        viewModelScope.launch {
-            loadingMore = true
-            try { listing.append(a.items(60, listing.cursor, MediaFilter(collection = col))); photos = listing.items } catch (e: CancellationException) { throw e } catch (e: Exception) { /* the next scroll tries again */ }
-            loadingMore = false
-        }
+        } catch (e: CancellationException) { throw e } catch (e: Exception) { /* the next scroll tries again */ }
+        loadingMore = false
+        return photos.size > before
     }
 
     /** Thumbnail links last an hour: when the screen comes back after a while, fetch the first page again and swap in fresh links. */
@@ -199,11 +203,34 @@ class MediaViewModel(
         if (id in selection) selection.remove(id) else if (selection.size < limit) { selection.add(id); photos.firstOrNull { it.id == id }?.let { picked[id] = it } } else notice = com.videomk.app.core.AddPhotosLogic.LIMIT_MESSAGE
         if (selection.isEmpty() && limit == Int.MAX_VALUE) selecting = false
     }
-    fun selectAllInView() {
-        selecting = true
-        for (p in photos) if (p.id !in selection && selection.size < limit) { selection.add(p.id); picked[p.id] = p }
-        if (selection.size >= limit && photos.size > selection.size) notice = "Selected the first $limit."
+    /** Photos in the view: exact when everything is loaded, else the library's or the collection's known count, else unknown (null). */
+    val viewCount: Int? get() {
+        val known = if (searchResult != null) null else if (col != null) collections.firstOrNull { it.id == col }?.count else summary?.count
+        return SelectAll.viewCount(photos.size, hasMore, known)
     }
+    val allInViewSelected: Boolean get() = SelectAll.allSelected(photos.map { it.id }, selection, limit, hasMore)
+    var selectingAll by mutableStateOf(false); private set
+
+    /** "Select all" for whatever is in view; loads more pages when needed, up to the limit. Toggles to clearing when everything is already selected. */
+    fun toggleSelectAll() {
+        if (selectingAll) return
+        if (allInViewSelected) { selection.clear(); picked.clear(); return }
+        selecting = true
+        viewModelScope.launch {
+            selectingAll = true
+            try {
+                while (true) {
+                    for (id in SelectAll.toAdd(photos.map { it.id }, selection, limit)) { selection.add(id); photos.firstOrNull { it.id == id }?.let { picked[id] = it } }
+                    if (selection.size >= limit || !hasMore) break
+                    if (!loadNextPage()) break
+                }
+                val more = hasMore || photos.any { it.id !in selection }
+                if (selection.size >= limit && more) notice = SelectAll.limitNote(limit)
+            } finally { selectingAll = false }
+        }
+    }
+    fun selectAllInView() { toggleSelectAllOnly() }
+    private fun toggleSelectAllOnly() { if (!allInViewSelected) toggleSelectAll() }
     fun preselect(ids: List<String>) { selection.clear(); selection.addAll(ids.take(limit)); ids.take(limit).forEach { id -> photos.firstOrNull { it.id == id }?.let { picked[id] = it } }; selecting = true }
     fun clearSelection() { selection.clear(); picked.clear(); selecting = false }
 

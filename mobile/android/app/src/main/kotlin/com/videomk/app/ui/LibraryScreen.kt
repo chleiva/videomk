@@ -106,6 +106,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.videomk.app.core.LibraryEntry
@@ -134,6 +135,12 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     // the button's height (58 dp, growing with the font) plus its 16 dp margin and some air: the last card can always scroll clear of it
     val fabClearance = (58 * androidx.compose.ui.platform.LocalDensity.current.fontScale.coerceIn(1f, 2f)).dp + 40.dp
+    // the label collapses by distance from the top only, with a gap (see FabCollapse); it never changes the list's layout or padding
+    var fabExpanded by remember { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        val machine = com.videomk.app.core.FabCollapse()
+        androidx.compose.runtime.snapshotFlow { if (listState.firstVisibleItemIndex > 0) Int.MAX_VALUE else listState.firstVisibleItemScrollOffset }.collect { fabExpanded = machine.update(it) }
+    }
     val person = (state.phase as? Phase.SignedIn)?.email
     /** Opens Create with what this person used last time; an example prefills the text and length (never sends). */
     fun newVideo(e: Example?) {
@@ -162,7 +169,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         containerColor = Vmk.colors.background,
         contentWindowInsets = WindowInsets(0),
         topBar = { MainTopBar(state.wallet, onOpenWallet, onOpenSettings) },
-        floatingActionButton = { if (state.entries.isNotEmpty() && !com.videomk.app.DebugHooks.emptyHome(context)) NewVideoFab(expanded = !listState.canScrollBackward) { newVideo(null) } },
+        floatingActionButton = { if (state.entries.isNotEmpty() && !com.videomk.app.DebugHooks.emptyHome(context)) NewVideoFab(expanded = fabExpanded) { newVideo(null) } },
         bottomBar = {
             Column {
                 val progress = container?.mediaUploads?.queue?.progress?.collectAsState()?.value
@@ -174,7 +181,11 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            val entries = if (com.videomk.app.DebugHooks.emptyHome(context)) emptyList() else state.entries
+            val many = com.videomk.app.DebugHooks.manyVideos(context)
+            val entries = if (com.videomk.app.DebugHooks.emptyHome(context)) emptyList() else if (many > 1) state.entries.flatMap { e ->
+                if (e is LibraryEntry.Video) (0 until many).map { i -> LibraryEntry.Video(e.video.copy(id = e.video.id + "#" + i)) } else listOf(e)
+            } else state.entries
+            if (many > 1) LaunchedEffect(listState) { androidx.compose.runtime.snapshotFlow { listState.firstVisibleItemIndex * 100000 + listState.firstVisibleItemScrollOffset }.collect { android.util.Log.d("VMKSCROLL", "$it fab=${!listState.canScrollBackward}") } }
             when {
                 entries.isEmpty() && (state.loadState is LoadState.Loading || state.loadState is LoadState.Idle) -> SkeletonFeed()
                 entries.isEmpty() && state.loadState is LoadState.Failed ->
@@ -189,12 +200,12 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                         ) {
                             item(key = "title") { Text("Your videos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
                             if (state.offline) item(key = "offline") { OfflineBanner(onRetry = { scope.launch { app.refresh() } }) }
-                            items(entries, key = { it.id }) { entry ->
+                            items(entries, key = { it.id }, contentType = { if (it is LibraryEntry.Pending) "pending" else (it as LibraryEntry.Video).video.status.let { s -> if (s.isRunning) "making" else if (s == VideoStatus.Complete) "ready" else "failed" } }) { entry ->
                                 when (entry) {
                                     is LibraryEntry.Pending -> PendingCard(entry.pending, onRetry = { app.retry(entry.pending.id) }, onDismiss = { app.dismissPending(entry.pending.id) })
                                     is LibraryEntry.Video -> when {
-                                        entry.video.status.isRunning -> MakingCard(entry.video, state) { onOpenVideo(entry.video.id) }
-                                        entry.video.status == VideoStatus.Complete -> ReadyCard(entry.video) { onOpenVideo(entry.video.id) }
+                                        entry.video.status.isRunning -> { val v = entry.video; MakingCard(v, state) { onOpenVideo(v.id) } }
+                                        entry.video.status == VideoStatus.Complete -> { val v = entry.video; ReadyCard(v, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } }) }
                                         else -> FailedCard(
                                             title = state.briefs[entry.video.id] ?: entry.video.displayTitle, rejected = entry.video.status == VideoStatus.Rejected, reason = entry.video.rejectReason,
                                             thumb = entry.video.previewGifUrl, tag = "videoRow",
@@ -325,12 +336,13 @@ private fun Frame(rotate: Float, dx: androidx.compose.ui.unit.Dp, colors: List<C
 // cards
 
 private val CardHeight = 190.dp
+private val TallCardMax = 420.dp
 
 @Composable
-private fun CardFrame(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit) {
+private fun CardFrame(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, height: Dp = CardHeight, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier.fillMaxWidth().height(CardHeight).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
+        modifier.fillMaxWidth().height(height).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
             .then(if (Vmk.colors.dark) Modifier.border(1.dp, Color.White.copy(alpha = 0.05f), shape) else Modifier)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) { content() }
@@ -342,7 +354,10 @@ private val Scrim = Brush.verticalGradient(0f to Color.Transparent, 0.46f to Col
 private fun ReadyCard(video: VideoItem, onClick: () -> Unit) {
     val now = remember { System.currentTimeMillis() }
     val meta = video.createdAt?.let { DateUtils.getRelativeTimeSpanString(it.toEpochMilli(), now, DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString() }
-    CardFrame(Modifier.semantics(mergeDescendants = true) { contentDescription = "${video.displayTitle}. Ready.${meta?.let { " $it." } ?: ""}" }.testTag("videoRow"), onClick) {
+    // a tall video (9:16, 4:5) gets a taller card at its own shape (capped), so the thumbnail is not cropped to a landscape strip
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+    val h = if (video.isTall) minOf(maxWidth / video.frameRatio, TallCardMax).coerceAtLeast(CardHeight) else CardHeight
+    CardFrame(Modifier.semantics(mergeDescendants = true) { contentDescription = "${video.displayTitle}. Ready.${meta?.let { " $it." } ?: ""}" }.testTag("videoRow"), onClick, h) {
         Thumbnail(video.previewGifUrl, video.status, Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFF3A3F7A), Color(0xFF7A5BC4)))))
         Box(Modifier.fillMaxSize().background(Scrim))
         GlassChip("Ready", Modifier.align(Alignment.TopStart).padding(14.dp), dot = Color(0xFF4ADE80))
@@ -354,6 +369,7 @@ private fun ReadyCard(video: VideoItem, onClick: () -> Unit) {
             meta?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f)) }
         }
         video.durationSeconds?.let { Text(duration(it), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).padding(14.dp).clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).padding(horizontal = 8.dp, vertical = 3.dp)) }
+    }
     }
 }
 
@@ -394,9 +410,11 @@ private fun MakingBody(title: String, line: String, fraction: Double, modifier: 
 }
 
 @Composable
-private fun Steps(fraction: Double) {
-    val fills = MakingSteps.fills(fraction)
-    val current = MakingSteps.current(fraction)
+private fun Steps(target: Double) {
+    // eases to each new estimate over the poll interval instead of jumping
+    val fraction by androidx.compose.animation.core.animateFloatAsState(target.toFloat(), androidx.compose.animation.core.tween(3500, easing = LinearEasing), label = "progress")
+    val fills = MakingSteps.fills(fraction.toDouble())
+    val current = MakingSteps.current(fraction.toDouble())
     Column(Modifier.fillMaxWidth().clearAndSetSemantics { }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             fills.forEach { f ->
@@ -435,7 +453,7 @@ private fun FailedCard(title: String, rejected: Boolean, reason: String?, thumb:
     val grey = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
     CardFrame(Modifier.semantics { contentDescription = "$title. ${if (rejected) "Not allowed" else "Didn't finish"}." }.testTag(tag)) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF5A5252), Color(0xFF2B2425)))))
-        if (thumb != null) coil3.compose.AsyncImage(thumb, null, contentScale = ContentScale.Crop, colorFilter = grey, modifier = Modifier.fillMaxSize().alpha(0.55f))
+        if (thumb != null) StableImage(thumb, ContentScale.Crop, Modifier.fillMaxSize().alpha(0.55f), grey)
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color(0x33200808), 1f to Color(0xE6180A0C))))
         GlassChip(if (rejected) "Not allowed" else "Didn't finish", Modifier.align(Alignment.TopStart).padding(14.dp), container = (if (rejected) Vmk.colors.warning else Color(0xFFB91C1C)).copy(alpha = 0.85f),
             leading = { Icon(Icons.Filled.Warning, null, tint = Color.White, modifier = Modifier.size(14.dp)) })
@@ -513,9 +531,9 @@ fun Thumbnail(url: String?, status: VideoStatus, modifier: Modifier = Modifier) 
                 null, tint = Vmk.colors.textSecondary,
             )
         }
-        if (url != null) {
-            SubcomposeAsyncImage(model = url, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize(), loading = { Box(Modifier.fillMaxSize(), Alignment.Center) { placeholder() } }, error = { Box(Modifier.fillMaxSize(), Alignment.Center) { placeholder() } })
-        } else placeholder()
+        // the placeholder sits behind the picture: it shows on the first load only, never again when the signed link is renewed
+        placeholder()
+        if (url != null) StableImage(url, ContentScale.Crop, Modifier.fillMaxSize())
     }
 }
 
@@ -529,4 +547,20 @@ fun StatusChip(status: VideoStatus) {
     }
     Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = color,
         modifier = Modifier.clip(CircleShape).background(color.copy(alpha = 0.15f)).padding(horizontal = 8.dp, vertical = 3.dp))
+}
+
+/**
+ * A picture cached by its link without the query string (memory and disk): the server signs the link again on every list call, and a new link
+ * must not look like a new picture. The request is built once per picture; a failed load retries once with the newest link.
+ */
+@Composable
+internal fun StableImage(url: String, scale: ContentScale, modifier: Modifier = Modifier, colorFilter: ColorFilter? = null) {
+    val context = LocalContext.current
+    val key = com.videomk.app.core.ImageKeys.stable(url)
+    val latest by androidx.compose.runtime.rememberUpdatedState(url)
+    var retried by remember(key) { mutableStateOf(false) }
+    val request = remember(key, retried) {
+        coil3.request.ImageRequest.Builder(context).data(latest).memoryCacheKey(key).diskCacheKey(key).build()
+    }
+    coil3.compose.AsyncImage(request, null, contentScale = scale, colorFilter = colorFilter, modifier = modifier, onError = { if (!retried) retried = true })
 }

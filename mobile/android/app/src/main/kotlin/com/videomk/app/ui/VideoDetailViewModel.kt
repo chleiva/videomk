@@ -25,7 +25,7 @@ sealed interface PlaybackState {
     data class Error(val message: String) : PlaybackState
 }
 
-data class FullScreenArgs(val url: String, val positionMs: Long, val playWhenReady: Boolean)
+data class FullScreenArgs(val url: String, val positionMs: Long, val playWhenReady: Boolean, val vertical: Boolean = false)
 
 /**
  * One video's player. Lives with the video page (not the composition), so a rotation keeps the picture and the position, and releases the
@@ -90,9 +90,9 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
 
     fun pause() { player?.pause() }
 
-    fun enterFullScreen(): FullScreenArgs? {
+    fun enterFullScreen(vertical: Boolean = false): FullScreenArgs? {
         val p = player ?: return null
-        val args = FullScreenArgs((playback.value as? PlaybackState.Ready)?.url ?: return null, p.currentPosition, p.playWhenReady)
+        val args = FullScreenArgs((playback.value as? PlaybackState.Ready)?.url ?: return null, p.currentPosition, p.playWhenReady, vertical)
         p.pause()
         return args
     }

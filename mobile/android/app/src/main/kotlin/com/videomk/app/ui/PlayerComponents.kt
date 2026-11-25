@@ -6,6 +6,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -34,6 +36,7 @@ class FullScreenContract : ActivityResultContract<FullScreenArgs, FullScreenArgs
         .putExtra(FullScreenPlayerActivity.EXTRA_URL, input.url)
         .putExtra(FullScreenPlayerActivity.EXTRA_POSITION, input.positionMs)
         .putExtra(FullScreenPlayerActivity.EXTRA_PLAYING, input.playWhenReady)
+        .putExtra(FullScreenPlayerActivity.EXTRA_VERTICAL, input.vertical)
 
     override fun parseResult(resultCode: Int, intent: Intent?): FullScreenArgs? {
         val url = intent?.getStringExtra(FullScreenPlayerActivity.EXTRA_URL) ?: return null
@@ -41,11 +44,17 @@ class FullScreenContract : ActivityResultContract<FullScreenArgs, FullScreenArgs
     }
 }
 
-/** An inline 16:9 player with a full screen button. */
+const val MAX_TALL_DP = 460
+
+/** An inline player (16:9 unless the video says otherwise) with a full screen button. */
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier.aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radius)).background(Color.Black).testTag("player")) {
+fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier = Modifier, ratio: Float = 16f / 9f) {
+    // a tall video (9:16, 4:5) is shown at its own shape, at most MAX_TALL dp high and centred; nothing is stretched
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    val frame = if (ratio >= 1f) Modifier.fillMaxWidth().aspectRatio(ratio)
+        else Modifier.height(minOf(maxWidth / ratio, MAX_TALL_DP.dp)).aspectRatio(ratio)
+    Box(frame.clip(RoundedCornerShape(Vmk.radius)).background(Color.Black).testTag("player")) {
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
@@ -69,5 +78,6 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
                 }
             }
         }
+    }
     }
 }

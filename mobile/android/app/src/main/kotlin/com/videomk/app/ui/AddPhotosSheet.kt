@@ -141,7 +141,7 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
                 val note = vm?.notice ?: composer.notice
                 if (note != null) Snack(note, Modifier.align(Alignment.BottomCenter).padding(16.dp))
             }
-            SelectionBar(composer, total, phoneCount, libraryCount, onDone = onDismiss)
+            SelectionBar(composer, total, phoneCount, libraryCount, onDone = onDismiss, selectAll = if (tab == 1 && vm != null) vm else null)
         }
     }
 }
@@ -228,7 +228,7 @@ private fun MyMediaTab(vm: MediaViewModel, composer: ComposerViewModel, phoneCou
             }
             // album chips: All, then each collection
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item { AlbumChip("All", vm.activeCollection == null) { vm.setCollectionFilter(null) } }
+                item { AlbumChip("All photos", vm.activeCollection == null) { vm.setCollectionFilter(null) } }
                 items(vm.collections, key = { it.id }) { c -> AlbumChip(c.name, vm.activeCollection == c.id) { vm.setCollectionFilter(c.id) } }
             }
         }
@@ -266,12 +266,15 @@ private fun Snack(text: String, modifier: Modifier = Modifier) {
 
 /** The one selection bar under both tabs: "7 selected", where they come from, and the button that closes the sheet with them in the strip. */
 @Composable
-private fun SelectionBar(composer: ComposerViewModel, total: Int, phone: Int, library: Int, onDone: () -> Unit) {
+private fun SelectionBar(composer: ComposerViewModel, total: Int, phone: Int, library: Int, onDone: () -> Unit, selectAll: MediaViewModel? = null) {
     Column(Modifier.fillMaxWidth().background(Vmk.colors.surface).navigationBarsPadding()) {
         Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
-                Text(AddPhotosLogic.title(total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("selectedCount"))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(AddPhotosLogic.title(total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("selectedCount"))
+                    if (selectAll != null) { Text("  ·", color = Vmk.colors.textTertiary); SelectAllButton(selectAll) }
+                }
                 Text(AddPhotosLogic.subline(phone, library, composer.options.minutes), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("selectionSubline"))
             }
             val on = total > 0

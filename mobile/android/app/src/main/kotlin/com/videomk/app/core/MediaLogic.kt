@@ -161,3 +161,34 @@ class ArrivalPoller(
 
     fun stop() { job?.cancel(); job = null }
 }
+
+/** "Select all" for whatever is in view (All photos, a collection, a search result): pure, so the limit and the mixed sources are testable. */
+object SelectAll {
+    /** The note when the limit stopped it ("Selected the first 100: the limit for one video"). [limit]: how many My media photos may be selected (100 minus photos from the phone). */
+    fun limitNote(limit: Int, total: Int = com.videomk.app.core.PhotoLimits.MAX_PHOTOS): String =
+        if (limit >= total) "Selected the first $limit: the limit for one video." else "Selected the first $limit: the limit for one video is $total, and ${total - limit} come from your phone."
+
+    /** What to add: the in-view ids not yet selected, in view order, until the selection holds [limit]. */
+    fun toAdd(view: List<String>, selected: Collection<String>, limit: Int): List<String> {
+        val have = selected.toHashSet()
+        var room = limit - have.size
+        val out = ArrayList<String>()
+        for (id in view) { if (room <= 0) break; if (have.add(id)) { out += id; room-- } }
+        return out
+    }
+
+    /** Everything in view (as far as the limit allows) is selected: the control then reads "Clear". */
+    fun allSelected(view: List<String>, selected: Collection<String>, limit: Int, moreToLoad: Boolean): Boolean {
+        if (view.isEmpty()) return false
+        val have = selected.toHashSet()
+        if (have.size >= limit && view.any { it in have }) return true   // the limit is reached: nothing more can be added, so the control offers Clear
+        if (view.all { it in have }) return !moreToLoad
+        return false
+    }
+
+    /** "Select all 38", "Select all" when the count is not known (more pages), "Clear" when all is selected. */
+    fun label(allSelected: Boolean, viewCount: Int?): String = if (allSelected) "Clear" else if (viewCount != null) "Select all $viewCount" else "Select all"
+
+    /** The view holds this many photos: the loaded ones when there is no more, otherwise the known total (library or collection), otherwise unknown. */
+    fun viewCount(loaded: Int, moreToLoad: Boolean, knownTotal: Int?): Int? = if (!moreToLoad) loaded else knownTotal?.takeIf { it >= loaded }
+}

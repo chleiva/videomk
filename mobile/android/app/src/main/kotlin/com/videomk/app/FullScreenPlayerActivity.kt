@@ -51,6 +51,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra(EXTRA_URL)
         if (url == null) { finish(); return }
+        if (intent.getBooleanExtra(EXTRA_VERTICAL, false)) requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT   // a vertical video fills a portrait screen
         val start = savedInstanceState?.getLong(EXTRA_POSITION) ?: intent.getLongExtra(EXTRA_POSITION, 0)
 
         val p = ExoPlayer.Builder(this)
@@ -128,5 +129,6 @@ class FullScreenPlayerActivity : ComponentActivity() {
         const val EXTRA_URL = "url"
         const val EXTRA_POSITION = "position"
         const val EXTRA_PLAYING = "playing"
+        const val EXTRA_VERTICAL = "vertical"
     }
 }

@@ -58,6 +58,9 @@ object DebugHooks {
         return if (f.exists()) FakeIntakeApi { runCatching { f.readText().trim() }.getOrDefault("ok") } else null
     }
 
+    /** `files/fake_many` holds a number N: every video is repeated N times (distinct ids) so the home list is long enough to fling to its bottom. */
+    fun manyVideos(context: android.content.Context): Int = runCatching { java.io.File(context.filesDir, "fake_many").readText().trim().toInt() }.getOrDefault(0)
+
     /** `files/fake_empty_home`: show the home as if there were no videos (the empty state cannot be reached with a QA account that has videos). */
     fun emptyHome(context: android.content.Context): Boolean = java.io.File(context.filesDir, "fake_empty_home").exists()
 }
