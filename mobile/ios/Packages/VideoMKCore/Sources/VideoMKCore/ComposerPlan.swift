@@ -31,6 +31,8 @@ public struct ComposerStatus: Equatable, Sendable {
 }
 
 public enum ComposerPlan {
+    public static func photosTotal(phone: Int, library: Int) -> Int { phone + library }
+
     public static func credits(forMinutes m: Double) -> Int { CreateOptions(minutes: m).credits }
 
     public static func plural(_ n: Int, _ one: String, _ many: String? = nil) -> String { n == 1 ? "\(n) \(one)" : "\(n) \(many ?? one + "s")" }

@@ -187,6 +187,7 @@ struct MediaView: View {
     private func send(_ photos: [LibraryPhoto]) {
         model.composerLibrary = Array(photos.prefix(PhotoLimits.maxPhotos))
         model.selectedTab = 0
+        model.createRequested = true
     }
 }
 

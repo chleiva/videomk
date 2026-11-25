@@ -219,3 +219,26 @@ public actor FakeFilePoster: FilePosting {
         posts.append((url, fields, file.count))
     }
 }
+
+/// Capabilities and the request check for tests and previews. Responses are served in order; the last one repeats.
+public actor FakeCreateAPI: CreateServing {
+    public private(set) var requests: [BriefRequest] = []
+    private var caps: Result<CreateCapabilities, Error>
+    private var responses: [BriefResponse]
+    private var delay: Duration
+    private var fails = false
+
+    public init(capabilities: Result<CreateCapabilities, Error> = .success(CreateCapabilities(aspects: [.init(id: "16:9", label: "Landscape")], resolutions: [.init(id: "1080p")], platforms: CreateCapabilities.platformDefaults, languages: [.init(id: "en", label: "English"), .init(id: "es", label: "Español")])),
+                responses: [BriefResponse] = [.ok(brief: [:])], delay: Duration = .zero) {
+        self.caps = capabilities; self.responses = responses; self.delay = delay
+    }
+    public func setFails(_ b: Bool) { fails = b }
+    public func capabilities() async throws -> CreateCapabilities { try caps.get() }
+    public func checkRequest(_ request: BriefRequest) async throws -> BriefResponse {
+        requests.append(request)
+        if delay != .zero { try await Task.sleep(for: delay) }
+        if fails { throw APIError.network }
+        let i = min(requests.count - 1, responses.count - 1)
+        return responses[i]
+    }
+}

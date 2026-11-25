@@ -113,8 +113,14 @@ public struct CreateOptions: Sendable, Equatable {
     public var minutes: Double
     public var look: VideoLook?  // nil = let the Producer choose
     public var captions: Bool    // subtitles on the video; the creator decides
+    public var platform: String  // what the video is for (youtube, linkedin, x, other, ...)
+    public var aspect: String    // 16:9, 9:16, 1:1, 4:5
+    public var resolution: String // 720p or 1080p
+    public var language: String  // "auto" (the description's language) or a language id
 
-    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true) { self.minutes = minutes; self.look = look; self.captions = captions }
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "other", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto") {
+        self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
+    }
 }
 
 public extension CreateOptions {

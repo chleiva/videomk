@@ -122,7 +122,7 @@ struct CollectionDetailView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if selection.active {
                 HStack {
-                    Button { model.composerLibrary = Array(feed.photos.filter { selection.contains($0.id) }.prefix(100)); model.selectedTab = 0; selection.clear() } label: { Label("Make a video", systemImage: "sparkles.tv") }
+                    Button { model.composerLibrary = Array(feed.photos.filter { selection.contains($0.id) }.prefix(100)); model.selectedTab = 0; model.createRequested = true; selection.clear() } label: { Label("Make a video", systemImage: "sparkles.tv") }
                     Spacer()
                     Button(role: .destructive) { let ids = selection.ids; Task { if await media.edit(current, remove: Array(ids)) { feed.remove(ids); selection.clear() } } } label: { Label("Remove from collection", systemImage: "minus.circle") }
                 }
@@ -132,7 +132,7 @@ struct CollectionDetailView: View {
         .task(id: media.version) { await feed.refreshIfNeeded() }
         .refreshable { await feed.reload() }
         .fullScreenCover(item: $viewing) { ctx in
-            PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { p in viewing = nil; model.composerLibrary = [p]; model.selectedTab = 0 })
+            PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { p in viewing = nil; model.composerLibrary = [p]; model.selectedTab = 0; model.createRequested = true })
         }
         .alert("Rename collection", isPresented: $renaming) {
             TextField("Name", text: $name)

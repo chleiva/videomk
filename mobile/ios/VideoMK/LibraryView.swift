@@ -2,26 +2,20 @@ import PhotosUI
 import SwiftUI
 import VideoMKCore
 
-/// The main screen (docs/UI_DESIGN.md d): top bar, "Your videos" feed of picture-first cards (or the empty hero with examples) and the
-/// docked composer above the tab bar.
+/// The home screen (docs/UI_DESIGN.md d, o): top bar, the "Your videos" feed (or the empty hero with examples) and one clear entry: "New video".
+/// There is no text input on this screen; making a video happens on the Create sheet.
 struct LibraryView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var path: [String] = []
     @State private var showingSettings = false
     @State private var showingWallet = false
-    @State private var showingOptions = false
-    @State private var showingAdd = false
-    @State private var addStartsOnLibrary = false
-    @State private var text = ""
-    @State private var options = LibraryView.defaultOptions()
-    @State private var dictation = Dictation()
-    @State private var photos = PhotoAttachments()
-    @FocusState private var composerFocused: Bool
+    @State private var showingCreate = false
 
     private var balance: Int? { model.wallet.flatMap { $0.unlimited ? nil : $0.balance } }
 
     var body: some View {
+        @Bindable var model = model
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 topBar
@@ -37,58 +31,49 @@ struct LibraryView: View {
             .background(Theme.background.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 0) {
-                if let media = model.media, !composerFocused { UploadPill(media: media) { model.selectedTab = 1 } }
-                ComposerBar(text: $text, options: $options, dictation: dictation, photos: photos, focus: $composerFocused, balance: balance, onSend: send,
-                            onAttach: { addStartsOnLibrary = false; composerFocused = false; showingAdd = true }, onOptions: { composerFocused = false; showingOptions = true }, onAddCredits: { showingWallet = true })
-                }
-            }
+            .overlay(alignment: .bottom) { entry }
         }
         .task { await model.refresh() }
         #if DEBUG
-        .task {
-            await photos.loadDebugFiles()
-            let env = ProcessInfo.processInfo.environment
-            if let t = env["VMK_DEBUG_TEXT"] { text = t }
-            if env["VMK_DEBUG_FOCUS"] == "1" { try? await Task.sleep(for: .milliseconds(600)); composerFocused = true }
-            switch env["VMK_DEBUG_SHEET"] {
-            case "options": showingOptions = true
-            case "settings": showingSettings = true
-            case "addphone": showingAdd = true
-            case "addmedia": addStartsOnLibrary = true; showingAdd = true
-            default: break
-            }
-        }
+        .task { await debugSetup() }
         #endif
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingWallet) { WalletView() }
-        .sheet(isPresented: $showingOptions) { OptionsSheet(options: $options, balance: balance) }
-        .sheet(isPresented: $showingAdd) {
-            AddPhotosSheet(attached: photos.items.count + photos.loading + model.composerLibrary.count, minutes: options.minutes, startOnLibrary: addStartsOnLibrary) { phone, library in
-                photos.add(phone)
-                let known = Set(model.composerLibrary.map(\.id))
-                model.composerLibrary += library.filter { !known.contains($0.id) }
-                photos.libraryCount = model.composerLibrary.count
-            }
-        }
+        .sheet(isPresented: $showingCreate) { CreateView(create: model.createModel) }
+        .sheet(item: $model.createProblem) { CreateProblemSheet(problem: $0) { model.createProblem = nil; model.createModel.open(prefill: $0.prompt); showingCreate = true } }
         .sensoryFeedback(.success, trigger: model.completions)
-        .onAppear { dictation.onText = { text = $0 }; dictation.onKeyboardFallback = { composerFocused = true } }
-        .onDisappear { dictation.stop() }
-        .onChange(of: model.composerDraft) { _, draft in
-            guard let draft else { return }
-            text = draft; model.composerDraft = nil; composerFocused = true
-        }
+        .onChange(of: model.createRequested) { _, v in if v { model.createRequested = false; openCreate() } }
+        .onChange(of: model.composerDraft) { _, draft in if let draft { model.composerDraft = nil; openCreate(prefill: draft) } }
+        .onChange(of: model.requestCredits) { _, v in if v { model.requestCredits = false; showingCreate = false; Task { try? await Task.sleep(for: .milliseconds(400)); showingWallet = true } } }
     }
 
-    private func send() {
-        dictation.cancel()   // not stop(): a final transcript arriving after this would put the sent text back in the field, and a second tap would send it again
-        model.submit(brief: text, options: options, photos: photos.items.map(\.data), meta: photos.items.map(\.meta), libraryMedia: model.composerLibrary.map(\.id))
-        photos.clear()
-        model.composerLibrary = []
-        text = ""
-        composerFocused = false
+    private func openCreate(prefill: String? = nil, minutes: Double? = nil, photos: Bool = false) {
+        model.createModel.open(prefill: prefill, minutes: minutes)
+        showingCreate = true
+    }
+
+    // MARK: the one entry
+
+    /// The labelled floating capsule above the tab bar; on the empty home a full-width filled button.
+    @ViewBuilder private var entry: some View {
+        let empty = model.entries.isEmpty && model.loadState != .loading && model.loadState != .idle
+        VStack(alignment: empty ? .center : .trailing, spacing: 8) {
+            if let media = model.media { UploadPill(media: media) { model.selectedTab = 1 } }
+            Button { openCreate() } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "plus").font(.system(size: 22, weight: .semibold))
+                    Text("New video").font(.system(size: 19, weight: .bold))
+                }
+                .foregroundStyle(.white).frame(maxWidth: empty ? .infinity : nil, minHeight: 58).padding(.horizontal, empty ? 0 : 24)
+                .background(Theme.gradient, in: Capsule())
+                .shadow(color: Theme.gradientStart.opacity(0.4), radius: 14, y: 8)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("New video").accessibilityHint("Opens the screen where you describe your video").accessibilityIdentifier("newVideo")
+        }
+        .frame(maxWidth: .infinity, alignment: empty ? .center : .trailing)
+        .padding(.horizontal, 16).padding(.bottom, 14)
     }
 
     // MARK: top bar
@@ -130,7 +115,7 @@ struct LibraryView: View {
                     ForEach(model.entries) { entry in card(entry) }
                 }
             }
-            .padding(.horizontal, 16).padding(.bottom, 12)
+            .padding(.horizontal, 16).padding(.bottom, 96)
             .animation(reduceMotion ? nil : .snappy, value: model.entries.map(\.id))
         }
         .scrollDismissesKeyboard(.interactively)
@@ -171,7 +156,7 @@ struct LibraryView: View {
                 Text("TRY ONE").font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20).padding(.bottom, 8)
                 VStack(spacing: 10) { ForEach(ExamplePrompt.all) { example in exampleCard(example) } }
             }
-            .padding(.horizontal, 16).padding(.bottom, 12)
+            .padding(.horizontal, 16).padding(.bottom, 96)
         }
         .scrollDismissesKeyboard(.interactively)
         .refreshable { await model.refresh() }
@@ -200,13 +185,8 @@ struct LibraryView: View {
 
     /// Tapping an example fills the composer, sets its length and does not send. The photo example also opens Add photos.
     private func use(_ e: ExamplePrompt) {
-        text = e.text
-        if let m = e.minutes { options.minutes = m }
-        if e.usesPhotos {
-            composerFocused = false
-            addStartsOnLibrary = (model.media?.summary?.count ?? 0) > 0
-            showingAdd = true
-        } else { composerFocused = true }
+        openCreate(prefill: e.text, minutes: e.minutes)
+        if e.usesPhotos { model.createModel.autoOpenPhotos = .init(library: (model.media?.summary?.count ?? 0) > 0) }
     }
 
     private func errorState(_ message: String) -> some View {
@@ -440,5 +420,50 @@ struct StatusChip: View {
         case .failed: Theme.danger
         case .rejected: Theme.warning
         }
+    }
+}
+
+#if DEBUG
+extension LibraryView {
+    /// Screenshots: `VMK_DEBUG_CREATE=empty|filled|photos|options|notaffordable|q1|q2|summary|checking|unsupported|blocked|paused` opens Create in that state.
+    @MainActor func debugSetup() async {
+        let env = ProcessInfo.processInfo.environment
+        await model.createModel.photos.loadDebugFiles()      // VMK_DEBUG_PHOTO_FILES / VMK_DEBUG_FAKE_PHOTOS attach to the Create screen
+        switch env["VMK_DEBUG_SHEET"] { case "settings": showingSettings = true; default: break }
+        guard let state = env["VMK_DEBUG_CREATE"] else { return }
+        let c = model.createModel
+        await c.loadCapabilities(userID: model.userID)
+        c.open()
+        let text = state == "photos" ? "My holiday in Thailand: beaches, street food and the night market" : state == "unsupported" ? "A scene from a famous actor’s new movie" : "How bees make honey, explained for kids"
+        if state != "empty" { c.form.text = text }
+        if state == "photos" {
+            c.form.minutes = 1
+            for i in 0..<100 { let img = MediaModel.fakeImage(seed: "attached\(i)", size: CGSize(width: 112, height: 112)); c.photos.debugAppend(AttachedPhoto(data: img.jpegData(compressionQuality: 0.7) ?? Data(), thumbnail: img)) }
+        }
+        if state == "options" { c.showMore = true }
+        c.debugStage(state)
+        showingCreate = true
+    }
+}
+#endif
+
+/// Generate answered "blocked" or "paused" after Create had closed: the same kind sheet, with Edit request.
+struct CreateProblemSheet: View {
+    let problem: AppModel.CreateProblem
+    let onEdit: (AppModel.CreateProblem) -> Void
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Image(systemName: "exclamationmark.triangle").font(.system(size: 34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).padding(.top, 22).accessibilityHidden(true)
+            Text(problem.paused ? "Creating videos is paused" : "We can’t make this one").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
+            Text(problem.message).font(.system(size: 17)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
+            if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
+            Spacer()
+            Text("Nothing was charged.").font(.system(size: 15)).foregroundStyle(Theme.textSecondary)
+            Button { onEdit(problem) } label: { Text("Edit request").font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
+            Button("Close") { dismiss() }.font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
+        }
+        .padding(.horizontal, 20).padding(.bottom, 6)
+        .presentationBackground(Theme.surface).presentationDetents([.height(470), .large]).presentationDragIndicator(.visible)
     }
 }

@@ -21,6 +21,14 @@ final class AppModel {
     private var uploadedMedia: [String: [Int: String]] = [:]   // photos already uploaded per pending request, so a retry sends only the rest
     private var libraryIDs: [String: [String]] = [:]      // library photo ids per pending request (kept for a retry)
     private(set) var media: MediaModel?
+    private(set) var createModel: CreateModel                                 // the Create screen's state
+    private(set) var userID: String?
+    var requestCredits = false                              // "Add credits" in Create asks the home screen to show the wallet
+    var createRequested = false                             // "Make a video from this" in Media opens Create on the home screen
+    var createProblem: CreateProblem?                       // generate answered blocked or paused after Create closed
+    private var intakeBriefs: [String: [String: String]] = [:]
+
+    struct CreateProblem: Identifiable, Equatable { let id = UUID(); let message: String; let retryAfter: Int?; let paused: Bool; let prompt: String }
     var selectedTab = 0                                    // 0 videos, 1 media
     var composerDraft: String?                             // text to put in the composer (Try again on a failed video)
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
@@ -34,13 +42,14 @@ final class AppModel {
 
     init(config: AppConfig? = AppConfig.fromBundle(), store: any TokenStore = KeychainTokenStore()) {
         self.config = config
-        guard let config else { auth = nil; api = nil; return }
+        guard let config else { auth = nil; api = nil; createModel = CreateModel(api: nil); return }
         let a = AuthService(config: config, store: store)
         auth = a
         api = APIClient(config: config, auth: a, appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0")
         media = api.map { MediaModel(api: LibraryClient(api: $0)) }
+        createModel = CreateModel(api: api)
         #if DEBUG
-        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true) }
+        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: FakeCreateAPI()); userID = "demo-user" }
         selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
         seedDebugScreens()
         #endif
@@ -76,6 +85,7 @@ final class AppModel {
         await seedDebugSession(auth)
         #endif
         phase = await auth.isSignedIn ? .signedIn(email: await auth.email) : .signedOut
+        if userID == nil { userID = (try? await auth.authorization())?.userID }
     }
 
     func signIn() async {
@@ -86,6 +96,7 @@ final class AppModel {
             let callback = try await web.authenticate(url: await auth.beginSignIn(), callbackScheme: config.callbackScheme)
             try await auth.completeSignIn(callback: callback)
             phase = .signedIn(email: await auth.email)
+            userID = (try? await auth.authorization())?.userID
         } catch AuthError.cancelled {
             // the user closed the sheet: nothing to report
         } catch {
@@ -143,10 +154,11 @@ final class AppModel {
     // MARK: ask for a video without leaving the home screen
 
     /// Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more.
-    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = []) {
+    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil) {
         let p = PendingVideo(brief: Brief.normalized(brief), options: options, photoCount: photos.count, state: photos.isEmpty ? .sending : .uploading(done: 0, total: photos.count))
         if !photos.isEmpty { photoData[p.id] = photos; photoMeta[p.id] = meta }
         if !libraryMedia.isEmpty { libraryIDs[p.id] = libraryMedia }
+        if let intake, !intake.isEmpty { intakeBriefs[p.id] = intake }
         pending.insert(p, at: 0)
         Task { await send(p.id) }
     }
@@ -181,7 +193,7 @@ final class AppModel {
                 }
                 if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .sending }
             }
-            let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [])
+            let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id])
             photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil
             briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .accepted(videoID: videoID) }
@@ -189,6 +201,12 @@ final class AppModel {
         } catch let e as PhotoUploadFailure {
             uploadedMedia[id] = e.uploaded
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
+        } catch let e as APIError where { if case .blocked = e { return true }; if case .paused = e { return true }; return false }() {
+            // the safety check (or a pause) stopped it at the last step: nothing was charged; the kind sheet explains and offers Edit request
+            if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
+            var retry: Int? = nil; var isPaused = false
+            if case .paused(_, let t) = e { retry = t; isPaused = true }
+            createProblem = CreateProblem(message: e.message, retryAfter: retry, paused: isPaused, prompt: p.brief)
         } catch let e as APIError {
             if case .insufficientCredits = e { await refreshWallet() }
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .failed(e.message) }
@@ -208,9 +226,9 @@ final class AppModel {
 
     // MARK: create / play
 
-    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = []) async throws -> String {
+    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil) async throws -> String {
         guard let api else { throw APIError.server }
-        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia) }
+        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake) }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 

@@ -10,6 +10,10 @@ public enum APIError: Error, Equatable, Sendable {
     case network
     case server
     case insufficientCredits(balance: Int, needed: Int)
+    /// The safety check stopped the request. Nothing was charged.
+    case blocked(String)
+    /// Creation is paused for this account for a while.
+    case paused(String, retryAfter: Int?)
 
     public var message: String {
         switch self {
@@ -18,6 +22,8 @@ public enum APIError: Error, Equatable, Sendable {
         case .notReady: "This video isn't ready yet."
         case .conflict(let m): m
         case .insufficientCredits(let have, let need): "This video needs \(need) credit\(need == 1 ? "" : "s") and you have \(have)."
+        case .blocked(let m): m
+        case .paused(let m, _): m
         case .network: "Network problem. Check your connection and try again."
         case .server: "Something went wrong on our side. Please try again."
         }
@@ -69,7 +75,7 @@ public struct APIClient: Sendable {
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
-    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = []) async throws -> String {
+    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil) async throws -> String {
         var fields: [String: Any] = ["prompt": Brief.normalized(prompt), "client_request_id": clientRequestID, "target_minutes": options.minutes]
         if !media.isEmpty { fields["media"] = media }
         if !libraryMedia.isEmpty { fields["library_media"] = libraryMedia }
@@ -77,6 +83,9 @@ public struct APIClient: Sendable {
         if !meta.isEmpty { fields["media_meta"] = meta }
         if let look = options.look { fields["theme"] = look.rawValue }
         if !options.captions { fields["captions"] = false }   // on is the server default: only the choice to turn them off is sent
+        fields["platform"] = options.platform; fields["aspect"] = options.aspect; fields["resolution"] = options.resolution
+        if options.language != "auto" { fields["language"] = options.language }
+        if let brief, !brief.isEmpty { fields["brief"] = brief }
         let body = try JSONSerialization.data(withJSONObject: fields)
         let (data, _) = try await send("POST", ["videos", "generate"], body: body)
         return try decode(StartResponse.self, data).videoID
@@ -128,14 +137,19 @@ public struct APIClient: Sendable {
         switch http.statusCode {
         case 200..<300: return (data, http)
         case 401, 403: throw APIError.unauthorized
-        case 400: throw APIError.invalid(Self.message(data) ?? "That brief can't be used.")
+        case 400:
+            if (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status == "blocked" { throw APIError.blocked(Self.message(data) ?? "We can't make this video.") }
+            throw APIError.invalid(Self.message(data) ?? "That brief can't be used.")
         case 409 where conflictIsEdit: throw APIError.conflict(Self.message(data) ?? "This video changed. Reload to continue.")
         case 409: throw APIError.notReady(VideoStatus(serverStatus: (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status ?? ""))
         case 402:
             struct Short: Decodable { let balance: Int?; let needed: Int? }
             let s = try? JSONDecoder().decode(Short.self, from: data)
             throw APIError.insufficientCredits(balance: s?.balance ?? 0, needed: s?.needed ?? 1)
-        case 429: throw APIError.quota(Self.message(data) ?? "You've reached today's limit. Try again tomorrow.")
+        case 429:
+            struct Paused: Decodable { let status: String?; let message: String?; let retry_after: Int? }
+            if let p = try? JSONDecoder().decode(Paused.self, from: data), p.status == "paused" { throw APIError.paused(p.message ?? "Creating videos is paused for now.", retryAfter: p.retry_after) }
+            throw APIError.quota(Self.message(data) ?? "You've reached today's limit. Try again tomorrow.")
         default: throw APIError.server
         }
     }

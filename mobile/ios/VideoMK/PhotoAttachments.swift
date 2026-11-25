@@ -26,6 +26,10 @@ final class PhotoAttachments {
     }
 
     /// Photos chosen in the Add photos sheet: prepared a few at a time like any other pick.
+    #if DEBUG
+    func debugAppend(_ p: AttachedPhoto) { items.append(p) }
+    #endif
+
     func add(_ items: [PhotosPickerItem]) { if !items.isEmpty { picked = items } }
 
     var remaining: Int { ComposerPhotos.room(phone: items.count + loading, library: libraryCount) }
@@ -176,6 +180,7 @@ struct LibraryStripTile: View {
     let photo: LibraryPhoto
     let media: MediaModel?
     let label: String
+    var showRemove = true
     let onRemove: () -> Void
     @State private var image: UIImage?
     var body: some View {
@@ -183,7 +188,7 @@ struct LibraryStripTile: View {
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.system(size: 10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
-            .overlay(alignment: .topTrailing) { RemoveX(label: "Remove \(label)", action: onRemove) }
+            .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: "Remove \(label)", action: onRemove) } }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("\(label). \(MediaGrouping.accessibilityLabel(photo))")
             .accessibilityIdentifier("attachedLibraryPhoto")

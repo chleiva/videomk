@@ -101,3 +101,17 @@ struct FixChip: View {
         else { Text(title) }
     }
 }
+
+/// A short horizontal shake each time `value` goes up by one (animate the change with withAnimation).
+struct Shake: GeometryEffect {
+    var travel: CGFloat
+    var value: CGFloat
+    var animatableData: CGFloat {
+        get { value }
+        set { value = newValue }
+    }
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let phase = value - value.rounded(.down)
+        return ProjectionTransform(CGAffineTransform(translationX: travel * sin(phase * .pi * 4), y: 0))
+    }
+}
