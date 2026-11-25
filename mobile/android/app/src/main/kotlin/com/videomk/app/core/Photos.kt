@@ -38,32 +38,31 @@ object PhotoLimits {
 
 /** How many photos a video of a given length can carry (the server shows several at once), and what to tell the person when it is too short. */
 object PhotoCapacity {
-    fun capacity(minutes: Double): Int = Math.floor(minutes * 51 + 1e-9).toInt()
+    /** The server shows max(3, floor(seconds x 0.85)) photos: 15 s = 12, 30 s = 25, 45 s = 38, 1 min = 51. */
+    fun capacity(minutes: Double): Int = maxOf(3, Math.floor(Math.round(minutes * 60) * 0.85 + 1e-9).toInt())
 
-    fun minimumMinutes(photos: Int): Double = photos * 1.0 / 0.85 / 60
+    /** The shortest length (whole seconds, as the server counts) whose capacity reaches [photos]. */
+    fun minimumMinutes(photos: Int): Double = if (photos <= 0) 0.0 else Math.ceil(photos / 0.85 - 1e-9) / 60
 
     /** The smallest length option that shows all [photos]; null when they already fit or no option is long enough. */
-    fun suggestion(photos: Int, minutes: Double, options: List<Int>): Int? {
+    fun suggestion(photos: Int, minutes: Double, options: List<Number>): Double? {
         if (photos <= capacity(minutes)) return null
         val need = minimumMinutes(photos)
-        return options.sorted().firstOrNull { it >= need - 1e-9 }
+        return options.map { it.toDouble() }.sorted().firstOrNull { it >= need - 1e-9 }
     }
 
-    fun minutesText(m: Double): String {
-        val n = if (m == Math.floor(m)) m.toInt().toString() else m.toString()
-        return "$n minute${if (m == 1.0) "" else "s"}"
-    }
+    fun minutesText(m: Double): String = Lengths.long(m)
 
     /** One line, or null when every photo fits. [options] are the app's length choices (minutes). */
-    fun hint(photos: Int, minutes: Double, options: List<Int>): String? {
+    fun hint(photos: Int, minutes: Double, options: List<Number>): String? {
         if (photos <= capacity(minutes)) return null
         val photoWord = { n: Int -> if (n == 1) "photo" else "photos" }
         val need = minimumMinutes(photos)
-        val suggestion = options.sorted().firstOrNull { it >= need - 1e-9 }
+        val suggestion = options.map { it.toDouble() }.sorted().firstOrNull { it >= need - 1e-9 }
         return if (suggestion != null) {
-            "About ${capacity(minutes)} of your $photos ${photoWord(photos)} fit in ${minutesText(minutes)} (the best ones, no duplicates). Choose ${minutesText(suggestion.toDouble())} to show them all."
+            "About ${capacity(minutes)} of your $photos ${photoWord(photos)} fit in ${minutesText(minutes)} (the best ones, no duplicates). Choose ${minutesText(suggestion)} to show them all."
         } else {
-            val best = capacity((options.maxOrNull() ?: minutes.toInt()).toDouble())
+            val best = capacity(options.maxOfOrNull { it.toDouble() } ?: minutes)
             "About $best of your $photos ${photoWord(photos)} fit in the longest video."
         }
     }

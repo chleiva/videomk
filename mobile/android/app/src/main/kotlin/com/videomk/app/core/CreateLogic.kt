@@ -12,7 +12,10 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /** A "What is it for?" chip. [enabled] only when the server can make its format; the others are dimmed with "Soon". */
-data class PlatformChip(val id: String, val label: String, val aspect: String, val resolution: String, val enabled: Boolean)
+data class PlatformChip(
+    val id: String, val label: String, val aspect: String, val resolution: String, val enabled: Boolean,
+    val recommendedMinutes: Double? = null, val maxMinutes: Double? = null, val otherAspects: List<String> = emptyList(), val note: String? = null,
+)
 
 object CreatePlatforms {
     /** The built-in table of docs/UI_DESIGN.md section o; a server list for a platform overrides its format. */
@@ -24,15 +27,40 @@ object CreatePlatforms {
 
     /** Supported platforms first (in the table's order), then the ones that are "Soon". */
     fun chips(caps: Capabilities): List<PlatformChip> {
-        val base = BUILT_IN.map { b -> caps.platforms.firstOrNull { it.id == b.id }?.let { PlatformInfo(b.id, b.label, it.aspect, it.resolution) } ?: b }
-        val all = base.map { p -> PlatformChip(p.id, p.label, p.aspect, p.resolution, caps.isReady(p.aspect) && caps.resolutions.any { it.id == p.resolution }) }
+        // the server's entry decides the format, length advice and note; the built-in table only supplies the label and the order
+        val base = BUILT_IN.map { b -> caps.platforms.firstOrNull { it.id == b.id }?.let { it.copy(label = b.label) } ?: b }
+        val all = base.map { p -> PlatformChip(p.id, p.label, p.aspect, p.resolution, caps.isReady(p.aspect) && caps.resolutions.any { it.id == p.resolution }, p.recommendedMinutes, p.maxMinutes, p.otherAspects.filter { caps.isReady(it) && it != p.aspect }, p.note) }
         return all.filter { it.enabled } + all.filter { !it.enabled }
     }
 
     fun chip(caps: Capabilities, id: String): PlatformChip? = chips(caps).firstOrNull { it.id == id }
 
-    /** Picking a platform sets only the format and resolution. */
-    fun select(o: CreateOptions, chip: PlatformChip): CreateOptions = if (!chip.enabled) o else o.copy(platform = chip.id, aspect = chip.aspect, resolution = chip.resolution)
+    /**
+     * Picking a platform sets its format and resolution, and its recommended length unless the person already chose a length on this screen
+     * ([lengthChosen]); then their length stays and only the recommendation is shown. The length is the nearest preset the server offers.
+     */
+    fun select(o: CreateOptions, chip: PlatformChip, lengthChosen: Boolean = false, presets: List<Double> = Lengths.OLD_PRESETS): CreateOptions {
+        if (!chip.enabled) return o
+        val minutes = if (lengthChosen) o.minutes else chip.recommendedMinutes?.let { nearest(presets, it) } ?: o.minutes
+        return o.copy(platform = chip.id, aspect = chip.aspect, resolution = chip.resolution, minutes = minutes)
+    }
+
+    private fun nearest(presets: List<Double>, m: Double): Double = presets.minByOrNull { Math.abs(it - m) } ?: m
+
+    /** The platform's own limit when the chosen length is over it: "YouTube Shorts allows up to 2:20", with the longest preset that fits (null when none does). */
+    data class OverMax(val text: String, val useMinutes: Double?)
+    fun overMax(o: CreateOptions, caps: Capabilities): OverMax? {
+        val c = chip(caps, o.platform)?.takeIf { it.enabled } ?: return null
+        val max = c.maxMinutes ?: return null
+        if (o.minutes <= max + 1e-9) return null
+        return OverMax("${c.label} allows up to ${Lengths.clock(max)}", caps.presets.filter { it <= max + 1e-9 }.maxOrNull())
+    }
+
+    /** "Also works: Square, Landscape": other formats the platform accepts, each switches only the format. */
+    fun alsoWorks(o: CreateOptions, caps: Capabilities): List<AspectInfo> {
+        val c = chip(caps, o.platform)?.takeIf { it.enabled } ?: return emptyList()
+        return c.otherAspects.mapNotNull { caps.aspect(it) }.filter { it.id != o.aspect }
+    }
 
     /** The format was changed away from the platform's recommendation: the highlight goes and "Custom" shows. */
     fun isCustom(o: CreateOptions, caps: Capabilities): Boolean {
@@ -42,7 +70,9 @@ object CreatePlatforms {
 
     /** "YouTube · Landscape 16:9 · 1080p" (or "Custom · Vertical 9:16 · 720p"). */
     fun recommendation(o: CreateOptions, caps: Capabilities): String {
-        val name = if (isCustom(o, caps)) "Custom" else chip(caps, o.platform)?.label ?: "Just a video"
+        val c = chip(caps, o.platform)
+        if (!isCustom(o, caps) && c?.note != null) return "${c.label} · ${c.note}"   // the server's own words, e.g. "Portrait 4:5 · 1080p · about 1 min"
+        val name = if (isCustom(o, caps)) "Custom" else c?.label ?: "Just a video"
         return "$name · ${aspectText(o.aspect, caps)} · ${o.resolution}"
     }
 
@@ -63,16 +93,16 @@ object CreatePlatforms {
 }
 
 /** What is remembered per person after a successful Create (prompt and photos never). */
-data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Int, val look: String?, val captions: Boolean, val language: String) {
+data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Double, val look: String?, val captions: Boolean, val language: String) {
     fun toJson(): String = buildJsonObject {
         put("platform", platform); put("aspect", aspect); put("resolution", resolution); put("minutes", minutes); look?.let { put("look", it) }; put("captions", captions); put("language", language)
     }.toString()
 
     companion object {
-        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes.toInt(), o.look?.wire, o.captions, o.language)
+        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes, o.look?.wire, o.captions, o.language)
         fun fromJson(text: String?): CreatePrefs? = runCatching {
             val o = parseObject(text ?: return null)
-            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.int("minutes") ?: 3, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto")
+            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.num("minutes") ?: 3.0, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto")
         }.getOrNull()
     }
 }
@@ -90,9 +120,9 @@ object CreateDefaults {
         val aspect = if (caps.isReady(stored.aspect)) stored.aspect else caps.readyAspects.first().id
         val res = if (caps.resolutions.any { it.id == stored.resolution }) stored.resolution else firstRes(caps, "1080p")
         val lang = if (stored.language == "auto" || caps.languages.any { it.id == stored.language }) stored.language else "auto"
-        val minutes = stored.minutes.takeIf { it in caps.minMinutes..caps.maxMinutes && it.toDouble() in CreateOptions.LENGTHS } ?: CreateOptions.DEFAULT_MINUTES.toInt()
+        val minutes = stored.minutes.takeIf { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: CreateOptions.DEFAULT_MINUTES.takeIf { it in caps.presets } ?: caps.presets.first()
         val platform = if (CreatePlatforms.chip(caps, stored.platform)?.enabled == true) stored.platform else "other"
-        return CreateOptions(minutes.toDouble(), VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang)
+        return CreateOptions(minutes, VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang)
     }
 
     private fun firstRes(caps: Capabilities, preferred: String) = caps.resolutions.firstOrNull { it.id == preferred }?.id ?: caps.resolutions.first().id

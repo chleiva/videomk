@@ -109,6 +109,9 @@ import com.videomk.app.core.CreatePlatforms
 import com.videomk.app.core.CreatePrefs
 import com.videomk.app.core.DictationPlan
 import com.videomk.app.core.PhotoCapacity
+import com.videomk.app.core.Lengths
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.width
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.PlatformChip
 import com.videomk.app.core.StatusKind
@@ -148,7 +151,6 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val shake = remember { Animatable(0f) }
     val flash = remember { Animatable(0f) }
     val still = reduceMotion(context)
-    val lengths = remember { CreateOptions.LENGTHS.map { it.toInt() } }
 
     // capabilities: the real ones when the server has the endpoint, else landscape 16:9 at 1080p only
     LaunchedEffect(container) {
@@ -165,6 +167,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         }
     }
 
+    val lengths = caps.presets
     val status = ComposerLogic.status(composer.text, options, balance, 0, listening, sending = false, lengths = lengths, createScreen = true, checking = composer.checking)
     val photoTotal = composer.totalPhotos
     val photoHint = PhotoCapacity.hint(photoTotal, options.minutes, lengths).takeIf { status.sendReady }
@@ -211,7 +214,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
     fun applyFix() {
         val fix = status.fix ?: return
-        if (fix.addCredits) onOpenWallet() else composer.updateOptions(options.copy(minutes = fix.minutes!!.toDouble()))
+        if (fix.addCredits) onOpenWallet() else composer.setLength(fix.minutes!!)
     }
 
     fun close() { if (composer.submitting) return; if (composer.hasDraft) discard = true else { composer.discardDraft(); onClose() } }
@@ -236,7 +239,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("platformChips")) {
                     items(CreatePlatforms.chips(caps), key = { it.id }) { c ->
                         PlatformChipView(c, selected = c.enabled && c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) {
-                            if (c.enabled) composer.updateOptions(CreatePlatforms.select(options, c)) else { tip = "Coming soon"; haptic(false) }
+                            if (c.enabled) composer.selectPlatform(c) else { tip = "Coming soon"; haptic(false) }
                         }
                     }
                 }
@@ -246,18 +249,33 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                     Text(rec, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f).testTag("recommendation"))
                     if (CreatePlatforms.canChangeFormat(caps)) TextButton(onClick = { moreOpen = true }, modifier = Modifier.heightIn(min = 44.dp).testTag("changeFormat")) { Text("Change", fontWeight = FontWeight.Bold) }
                 }
+                // other formats this platform also accepts: small secondary choices that switch only the format
+                val also = CreatePlatforms.alsoWorks(options, caps)
+                if (also.isNotEmpty()) Row(Modifier.testTag("alsoWorks"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Also works:", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                    for (a in also) Text(
+                        a.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary,
+                        modifier = Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button, onClickLabel = "Use ${a.label} format") { composer.updateOptions(options.copy(aspect = a.id)) }
+                            .padding(horizontal = 8.dp).wrapContentHeight(Alignment.CenterVertically).testTag("alsoWorks-${a.id}"),
+                    )
+                }
             }
 
             // length
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Overline("Length", Modifier.semantics { heading() })
-                val grid = LocalDensity.current.fontScale >= 1.3f
-                val chips: @Composable (List<Double>, Modifier) -> Unit = { list, m ->
-                    Row(m, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        for (mi in list) LengthChip(mi.toInt(), CreateOptions(mi).credits, options.minutes == mi, balance != null && CreateOptions(mi).credits > balance, Modifier.weight(1f)) { composer.updateOptions(options.copy(minutes = mi)) }
+                // the presets the server offers, scrolling sideways when there are more than fit
+                androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("lengthChips")) {
+                    items(caps.presets) { mi ->
+                        LengthChip(mi, Lengths.credits(mi), Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, Modifier.width(78.dp)) { composer.setLength(mi) }
                     }
                 }
-                if (grid) { chips(CreateOptions.LENGTHS.take(3), Modifier.fillMaxWidth()); chips(CreateOptions.LENGTHS.drop(3), Modifier.fillMaxWidth()) } else chips(CreateOptions.LENGTHS, Modifier.fillMaxWidth())
+                CreatePlatforms.overMax(options, caps)?.let { om ->
+                    Row(Modifier.fillMaxWidth().testTag("overMaxHint"), verticalAlignment = Alignment.CenterVertically) {
+                        Text(om.text + (om.useMinutes?.let { " · " } ?: ""), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                        om.useMinutes?.let { u -> FixChip("Use ${Lengths.short(u)}", "Use ${Lengths.long(u)} instead", Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
+                    }
+                }
                 if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
             }
 
@@ -371,18 +389,18 @@ private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> 
 }
 
 @Composable
-private fun LengthChip(minutes: Int, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun LengthChip(minutes: Double, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     val tint = if (overBalance) Vmk.colors.warning else if (selected) Vmk.colors.primary else Vmk.colors.textSecondary
     Column(
         modifier.heightIn(min = 58.dp).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
             .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = "$minutes minute${plural(minutes)}, $credits credit${plural(credits)}${if (selected) ", selected" else ""}" }
-            .testTag("length-$minutes").padding(vertical = 8.dp),
+            .semantics { this.selected = selected; contentDescription = "${Lengths.long(minutes)}, $credits credit${plural(credits)}${if (selected) ", selected" else ""}" }
+            .testTag("length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
-        Text("$minutes min", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1)
+        Text(Lengths.short(minutes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(13.dp))
             Text("$credits", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = tint)
@@ -391,12 +409,12 @@ private fun LengthChip(minutes: Int, credits: Int, selected: Boolean, overBalanc
 }
 
 @Composable
-private fun PhotoHintBlock(hint: String, fix: Int?, composer: ComposerViewModel, options: CreateOptions) {
+private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewModel, options: CreateOptions) {
     Column(Modifier.fillMaxWidth().padding(top = 2.dp)) {
         Text(hint, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = Vmk.colors.text, modifier = Modifier.testTag("photoCapacityHint"))
         if (fix != null) {
-            val label = "Use $fix min · ⚡${CreateOptions(fix.toDouble()).credits}"
-            FixChip(label, "Use $fix minutes instead, ${CreateOptions(fix.toDouble()).credits} credits", Modifier.testTag("photoFixChip")) { composer.updateOptions(options.copy(minutes = fix.toDouble())) }
+            val label = "Use ${Lengths.short(fix)} · ⚡${Lengths.credits(fix)}"
+            FixChip(label, "Use ${Lengths.long(fix)} instead, ${Lengths.credits(fix)} credits", Modifier.testTag("photoFixChip")) { composer.setLength(fix) }
         }
     }
 }

@@ -4,11 +4,11 @@ package com.videomk.app.core
 enum class StatusKind { Listening, Sending, TooLong, NotAffordable, NoCredits, TooShort, PhotoHint, Ready, Idle }
 
 /** The one-tap fix that comes with a problem: switch to a length ([minutes]), or open the credits screen. */
-data class StatusFix(val minutes: Int?, val addCredits: Boolean = false) {
-    fun label(): String = if (addCredits) "Add credits" else "Use $minutes min · ⚡${CreateOptions(minutes!!.toDouble()).credits}"
+data class StatusFix(val minutes: Double?, val addCredits: Boolean = false) {
+    fun label(): String = if (addCredits) "Add credits" else "Use ${Lengths.short(minutes!!)} · ⚡${Lengths.credits(minutes)}"
     fun description(): String = if (addCredits) "Add credits" else {
-        val c = CreateOptions(minutes!!.toDouble()).credits
-        "Use $minutes minute${if (minutes == 1) "" else "s"} instead, $c credit${if (c == 1) "" else "s"}"
+        val c = Lengths.credits(minutes!!)
+        "Use ${Lengths.long(minutes)} instead, $c credit${if (c == 1) "" else "s"}"
     }
 }
 
@@ -20,20 +20,19 @@ data class ComposerStatus(val kind: StatusKind, val text: String, val fix: Statu
 
 object ComposerLogic {
     /** The longest length the balance allows (never 0 minutes); null when the balance is 0 (then the fix is "Add credits"). */
-    fun affordableLength(balance: Int, lengths: List<Int>): Int? =
-        lengths.sorted().lastOrNull { CreateOptions(it.toDouble()).credits <= balance }
+    fun affordableLength(balance: Int, lengths: List<Double>): Double? =
+        lengths.sorted().lastOrNull { Lengths.credits(it) <= balance }
 
     /**
      * One message at a time. Priority: listening, sending, too long, not affordable, too short, photo hint, price.
      * [balance] is null for accounts with unlimited credits. [photos] counts phone and My media photos together.
      */
-    fun status(text: String, options: CreateOptions, balance: Int?, photos: Int, listening: Boolean, sending: Boolean, lengths: List<Int> = CreateOptions.LENGTHS.map { it.toInt() }, createScreen: Boolean = false, checking: Boolean = false): ComposerStatus {
+    fun status(text: String, options: CreateOptions, balance: Int?, photos: Int, listening: Boolean, sending: Boolean, lengths: List<Double> = Lengths.OLD_PRESETS, createScreen: Boolean = false, checking: Boolean = false): ComposerStatus {
         if (checking) return ComposerStatus(StatusKind.Sending, "Checking your request…")
         if (listening) return ComposerStatus(StatusKind.Listening, "Listening…")
         if (sending) return ComposerStatus(StatusKind.Sending, "Starting your video…")
         val count = Brief.normalized(text).length
         val credits = options.credits
-        val mins = options.minutes.toInt()
         if (count > Brief.MAX_LENGTH) return ComposerStatus(StatusKind.TooLong, "%,d of %,d. Please shorten it.".format(count, Brief.MAX_LENGTH))
         val short = text.isNotEmpty() && !Brief.isValid(text)
         val valid = Brief.isValid(text)
@@ -44,7 +43,7 @@ object ComposerLogic {
         }
         if (createScreen && !valid) return ComposerStatus(StatusKind.TooShort, "Describe your video to continue")
         if (short) return ComposerStatus(StatusKind.TooShort, "Add a few more words (${Brief.MIN_LENGTH - count} to go)")
-        if (!valid) return ComposerStatus(StatusKind.Idle, "A $mins minute video costs $credits credit${if (credits == 1) "" else "s"}")
+        if (!valid) return ComposerStatus(StatusKind.Idle, "A ${Lengths.adjective(options.minutes)} video costs $credits credit${if (credits == 1) "" else "s"}")
         PhotoCapacity.hint(photos, options.minutes, lengths)?.let { hint ->
             val s = PhotoCapacity.suggestion(photos, options.minutes, lengths)
             return ComposerStatus(StatusKind.PhotoHint, hint, s?.let { StatusFix(it) })
@@ -66,7 +65,7 @@ object AddPhotosLogic {
 
     fun title(selected: Int) = if (selected == 0) "Choose photos" else "$selected selected"
 
-    fun subline(phone: Int, library: Int, minutes: Double, lengths: List<Int> = CreateOptions.LENGTHS.map { it.toInt() }): String {
+    fun subline(phone: Int, library: Int, minutes: Double): String {
         val n = total(phone, library)
         if (n == 0) return "Choose up to ${PhotoLimits.MAX_PHOTOS} photos"
         val parts = buildList {

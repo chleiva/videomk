@@ -210,9 +210,9 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
     }
     Text("Tap an answer to change it.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp))
     Box(Modifier.fillMaxWidth().padding(vertical = 12.dp).size(1.dp).background(Vmk.colors.outline))
-    Text("${CreatePlatforms.recommendation(options, composer.caps)} · ${options.minutes.toInt()} min", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+    Text("${CreatePlatforms.recommendation(options, composer.caps)} · ${com.videomk.app.core.Lengths.short(options.minutes)}", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
     Box(Modifier.weight(1f, fill = false).heightIn(min = 16.dp))
-    StatusLine(status, 0f, 0f) { if (status.fix?.addCredits == true) onWallet() else status.fix?.minutes?.let { composer.updateOptions(options.copy(minutes = it.toDouble())) } }
+    StatusLine(status, 0f, 0f) { if (status.fix?.addCredits == true) onWallet() else status.fix?.minutes?.let { composer.setLength(it) } }
     val ready = status.sendReady
     Box(
         Modifier.fillMaxWidth().padding(top = 6.dp).heightIn(min = 54.dp).clip(CircleShape).then(if (ready) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))

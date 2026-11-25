@@ -284,11 +284,11 @@ class PhotoTest {
 
     @Test fun `capacity is floor of 51 per minute`() {
         assertEquals(51, PhotoCapacity.capacity(1.0)); assertEquals(102, PhotoCapacity.capacity(2.0)); assertEquals(153, PhotoCapacity.capacity(3.0))
-        assertEquals(255, PhotoCapacity.capacity(5.0)); assertEquals(0, PhotoCapacity.capacity(0.0))
+        assertEquals(255, PhotoCapacity.capacity(5.0)); assertEquals(3, PhotoCapacity.capacity(0.0))   // never fewer than 3 photos
     }
 
     @Test fun `minimum minutes for 100 photos is just under two`() {
-        assertEquals(1.9608, PhotoCapacity.minimumMinutes(100), 0.001)
+        assertEquals(118 / 60.0, PhotoCapacity.minimumMinutes(100), 0.0001)   // 118 s: floor(118 x 0.85) = 100
         assertEquals(0.0, PhotoCapacity.minimumMinutes(0), 0.0)
         for (n in 1..153) assertTrue(PhotoCapacity.capacity(PhotoCapacity.minimumMinutes(n) + 1e-6) >= n)   // the two formulas agree
     }

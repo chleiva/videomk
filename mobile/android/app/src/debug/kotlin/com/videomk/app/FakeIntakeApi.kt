@@ -8,8 +8,20 @@ import kotlinx.serialization.json.put
 /** Debug only: capabilities with every format ready and a request check whose answer is picked by a mode, so each sheet can be looked at without a server. */
 class FakeIntakeApi(private val mode: () -> String) : IntakeApi {
     override suspend fun capabilities() = Capabilities(
-        aspects = listOf(AspectInfo("16:9", "Landscape", true, false), AspectInfo("9:16", "Vertical", false, true), AspectInfo("1:1", "Square", false, false), AspectInfo("4:5", "Portrait", false, false)),
-        resolutions = listOf(ResolutionInfo("1080p", "1080p")), platforms = emptyList(), languages = listOf(LanguageInfo("en", "English"), LanguageInfo("es", "Español")), intake = true,
+        aspects = listOf(AspectInfo("16:9", "Landscape", true, false), AspectInfo("9:16", "Vertical", true, true), AspectInfo("1:1", "Square", true, true), AspectInfo("4:5", "Portrait", true, true)),
+        resolutions = listOf(ResolutionInfo("720p", "720p"), ResolutionInfo("1080p", "1080p")),
+        platforms = listOf(
+            PlatformInfo("youtube", "YouTube", "16:9", "1080p", 3.0, null, emptyList(), "Landscape 16:9 · 1080p · about 3 min"),
+            PlatformInfo("shorts", "YouTube Shorts", "9:16", "1080p", 0.75, 3.0, emptyList(), "Vertical 9:16 · 1080p · about 45 s"),
+            PlatformInfo("tiktok", "TikTok", "9:16", "1080p", 0.5, 10.0, emptyList(), "Vertical 9:16 · 1080p · about 30 s"),
+            PlatformInfo("reels", "Instagram Reels", "9:16", "1080p", 0.5, 3.0, emptyList(), "Vertical 9:16 · 1080p · about 30 s"),
+            PlatformInfo("instagram_feed", "Instagram feed", "4:5", "1080p", 0.5, 1.0, listOf("1:1"), "Portrait 4:5 · 1080p · about 30 s"),
+            PlatformInfo("linkedin", "LinkedIn", "4:5", "1080p", 1.0, 10.0, listOf("1:1", "16:9"), "Portrait 4:5 · 1080p · about 1 min"),
+            PlatformInfo("x", "X", "16:9", "1080p", 0.75, 140.0 / 60.0, emptyList(), "Landscape 16:9 · 1080p · about 45 s"),
+            PlatformInfo("other", "Just a video", "16:9", "1080p", 3.0, null, emptyList(), "Landscape 16:9 · 1080p · about 3 min"),
+        ),
+        languages = listOf(LanguageInfo("en", "English"), LanguageInfo("es", "Español")), minMinutes = 0.25, maxMinutes = 12.0,
+        presets = listOf(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 5.0, 8.0, 12.0), intake = true,
     )
 
     private val questions = listOf(

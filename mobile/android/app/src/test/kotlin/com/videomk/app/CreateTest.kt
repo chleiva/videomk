@@ -92,11 +92,11 @@ class CreateTest {
     }
 
     @Test fun `a remembered choice the server no longer offers falls back quietly`() {
-        val stored = CreatePrefs("shorts", "9:16", "720p", 5, "paper", false, "es")
+        val stored = CreatePrefs("shorts", "9:16", "720p", 5.0, "paper", false, "es")
         val o = CreateDefaults.resolve(stored, Capabilities.FALLBACK)
         assertEquals("16:9", o.aspect); assertEquals("1080p", o.resolution); assertEquals("auto", o.language); assertEquals("other", o.platform)
         assertEquals(VideoLook.Paper, o.look); assertEquals(5.0, o.minutes, 0.0)
-        assertEquals(3.0, CreateDefaults.resolve(stored.copy(minutes = 7), FULL).minutes, 0.0)   // not one of the six lengths
+        assertEquals(3.0, CreateDefaults.resolve(stored.copy(minutes = 7.0), FULL).minutes, 0.0)   // not one of the six lengths
     }
 
     // the status line on the Create screen
@@ -105,7 +105,7 @@ class CreateTest {
         fun st(text: String, balance: Int? = 5, photos: Int = 0, minutes: Double = 3.0, checking: Boolean = false) = ComposerLogic.status(text, CreateOptions(minutes), balance, photos, false, false, createScreen = true, checking = checking)
         assertEquals("Describe your video to continue", st("").text); assertEquals("Describe your video to continue", st("trip").text); assertFalse(st("").sendReady)
         assertEquals("3 credits · you'll have 2 left", st("How bees make honey, explained for kids").text)
-        assertEquals("Needs 3 credits, you have 1", st("How bees make honey, explained for kids", balance = 1).text); assertEquals(1, st("How bees make honey, explained for kids", balance = 1).fix!!.minutes)
+        assertEquals("Needs 3 credits, you have 1", st("How bees make honey, explained for kids", balance = 1).text); assertEquals(1.0, st("How bees make honey, explained for kids", balance = 1).fix!!.minutes!!, 0.0)
         assertEquals("You have no credits", st("How bees make honey, explained for kids", balance = 0).text)
         assertEquals("Checking your request…", st("How bees make honey, explained for kids", checking = true).text)
         assertEquals(StatusKind.PhotoHint, st("How bees make honey, explained for kids", photos = 100, minutes = 1.0).kind)
@@ -351,5 +351,52 @@ class CreateTest {
         assertEquals(null, com.videomk.app.core.SelectAll.viewCount(60, true, null))
         assertEquals("Selected the first 100: the limit for one video.", com.videomk.app.core.SelectAll.limitNote(100))
         assertTrue(com.videomk.app.core.SelectAll.limitNote(60).contains("40 come from your phone"))
+    }
+
+    private val PAYLOAD = """{"aspects":[{"id":"16:9","label":"Landscape","ready":true,"beta":false},{"id":"9:16","label":"Vertical","ready":true,"beta":true},{"id":"1:1","label":"Square","ready":true,"beta":true},{"id":"4:5","label":"Portrait","ready":true,"beta":true}],
+        "resolutions":[{"id":"720p","label":"720p"},{"id":"1080p","label":"1080p"}],
+        "platforms":[{"id":"linkedin","label":"LinkedIn","aspect":"4:5","resolution":"1080p","recommended_minutes":1,"max_minutes":10,"other_aspects":["1:1","16:9"],"note":"Portrait 4:5 · 1080p · about 1 min"},
+          {"id":"x","label":"X","aspect":"16:9","resolution":"1080p","recommended_minutes":0.75,"max_minutes":2.3333,"other_aspects":[],"note":"Landscape 16:9 · 1080p · about 45 s"},
+          {"id":"shorts","label":"YouTube Shorts","aspect":"9:16","resolution":"1080p","recommended_minutes":0.5,"max_minutes":3,"other_aspects":[],"note":"Vertical 9:16 · 1080p · about 30 s"},
+          {"id":"youtube","label":"YouTube","aspect":"16:9","resolution":"1080p","recommended_minutes":3,"max_minutes":null,"other_aspects":[],"note":"Landscape 16:9 · 1080p · about 3 min"}],
+        "languages":[],"lengths":{"min_minutes":0.25,"max_minutes":12,"presets":[0.25,0.5,0.75,1,2,3,5,8,12]},"max_photos":100,"intake":true}"""
+
+    @Test fun `short lengths with presets credits labels and capacity`() {
+        val c = Capabilities.fromJson(com.videomk.app.core.parseObject(PAYLOAD))
+        assertEquals(listOf(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 5.0, 8.0, 12.0), c.presets); assertEquals(0.25, c.minMinutes, 0.0)
+        assertEquals(listOf("15 s", "30 s", "45 s", "1 min", "2 min"), c.presets.take(5).map { com.videomk.app.core.Lengths.short(it) })
+        assertEquals(listOf(1, 1, 1, 1, 2), c.presets.take(5).map { com.videomk.app.core.Lengths.credits(it) })
+        assertEquals(2, CreateOptions(61.0 / 60).credits); assertEquals(1, CreateOptions(0.25).credits)
+        assertEquals(12, com.videomk.app.core.PhotoCapacity.capacity(0.25)); assertEquals(25, com.videomk.app.core.PhotoCapacity.capacity(0.5))
+        assertEquals(38, com.videomk.app.core.PhotoCapacity.capacity(0.75)); assertEquals(51, com.videomk.app.core.PhotoCapacity.capacity(1.0))
+        assertEquals("About 12 of your 30 photos fit in 15 seconds (the best ones, no duplicates). Choose 45 seconds to show them all.", com.videomk.app.core.PhotoCapacity.hint(30, 0.25, c.presets)!!.replace("Choose 45 seconds", "Choose 45 seconds"))
+        // no `lengths` in the payload: the old presets
+        assertEquals(com.videomk.app.core.Lengths.OLD_PRESETS, Capabilities.fromJson(com.videomk.app.core.parseObject(PAYLOAD.replace(Regex("\"lengths\":\\{[^}]*\\},"), ""))).presets)
+        // the old whole-minute choice is still remembered; 45 s too
+        assertEquals(0.75, CreateDefaults.resolve(CreatePrefs("other", "16:9", "1080p", 0.75, null, true, "auto"), c).minutes, 0.0)
+        assertEquals(com.videomk.app.core.CreatePrefs.fromJson(CreatePrefs("other", "16:9", "1080p", 0.25, null, true, "auto").toJson())!!.minutes, 0.25, 0.0)
+    }
+
+    @Test fun `LinkedIn and X recommend different formats and lengths, and a length chosen first is kept`() {
+        val c = Capabilities.fromJson(com.videomk.app.core.parseObject(PAYLOAD))
+        val linkedin = com.videomk.app.core.CreatePlatforms.chip(c, "linkedin")!!; val x = com.videomk.app.core.CreatePlatforms.chip(c, "x")!!
+        val a = com.videomk.app.core.CreatePlatforms.select(CreateOptions(), linkedin, false, c.presets)
+        assertEquals("4:5", a.aspect); assertEquals(1.0, a.minutes, 0.0)
+        assertEquals("LinkedIn · Portrait 4:5 · 1080p · about 1 min", com.videomk.app.core.CreatePlatforms.recommendation(a, c))
+        val b = com.videomk.app.core.CreatePlatforms.select(a, x, false, c.presets)
+        assertEquals("16:9", b.aspect); assertEquals(0.75, b.minutes, 0.0)
+        assertEquals("X · Landscape 16:9 · 1080p · about 45 s", com.videomk.app.core.CreatePlatforms.recommendation(b, c))
+        // the person chose 5 min first: the platform pick keeps it, only the recommendation changes
+        val kept = com.videomk.app.core.CreatePlatforms.select(CreateOptions(5.0), x, true, c.presets)
+        assertEquals(5.0, kept.minutes, 0.0); assertEquals("16:9", kept.aspect)
+        // also works: other formats, never the one in use; picking one makes the line "Custom"
+        assertEquals(listOf("1:1", "16:9"), com.videomk.app.core.CreatePlatforms.alsoWorks(a, c).map { it.id })
+        assertEquals(listOf("16:9"), com.videomk.app.core.CreatePlatforms.alsoWorks(a.copy(aspect = "1:1"), c).map { it.id }.filter { it == "16:9" })
+        assertTrue(com.videomk.app.core.CreatePlatforms.recommendation(a.copy(aspect = "1:1"), c).startsWith("Custom"))
+        // over the platform's maximum: a gentle hint with the longest preset that fits
+        val over = com.videomk.app.core.CreatePlatforms.overMax(b.copy(minutes = 3.0), c)!!
+        assertEquals("X allows up to 2:20", over.text); assertEquals(2.0, over.useMinutes!!, 0.0)
+        assertEquals(null, com.videomk.app.core.CreatePlatforms.overMax(b.copy(minutes = 2.0), c))
+        assertEquals(null, com.videomk.app.core.CreatePlatforms.overMax(CreateOptions(12.0, platform = "youtube"), c))
     }
 }

@@ -24,9 +24,9 @@ class ComposerLogicTest {
     @Test fun `not affordable offers the longest length the balance allows`() {
         val s = st(balance = 1)
         assertEquals(StatusKind.NotAffordable, s.kind); assertEquals("Needs 3 credits, you have 1", s.text); assertFalse(s.sendReady)
-        assertEquals(1, s.fix!!.minutes); assertEquals("Use 1 min · ⚡1", s.fix!!.label()); assertEquals("Use 1 minute instead, 1 credit", s.fix!!.description())
-        assertEquals(2, st(minutes = 5.0, balance = 2).fix!!.minutes)
-        assertEquals(3, st(minutes = 8.0, balance = 4).fix!!.minutes)   // 3 is the longest option that costs at most 4
+        assertEquals(1.0, s.fix!!.minutes!!, 0.0); assertEquals("Use 1 min · ⚡1", s.fix!!.label()); assertEquals("Use 1 minute instead, 1 credit", s.fix!!.description())
+        assertEquals(2.0, st(minutes = 5.0, balance = 2).fix!!.minutes!!, 0.0)
+        assertEquals(3.0, st(minutes = 8.0, balance = 4).fix!!.minutes!!, 0.0)   // 3 is the longest option that costs at most 4
     }
 
     @Test fun `one tap on the fix makes the video affordable and ready`() {
@@ -38,7 +38,7 @@ class ComposerLogicTest {
     @Test fun `no credits at all offers add credits instead of a length`() {
         val s = st(balance = 0)
         assertEquals(StatusKind.NoCredits, s.kind); assertEquals("You have no credits", s.text); assertTrue(s.fix!!.addCredits); assertEquals("Add credits", s.fix!!.label())
-        assertNull(ComposerLogic.affordableLength(0, listOf(1, 2, 3)))
+        assertNull(ComposerLogic.affordableLength(0, listOf(1.0, 2.0, 3.0)))
     }
 
     @Test fun `too short and too long`() {
@@ -59,9 +59,9 @@ class ComposerLogicTest {
     @Test fun `too many photos for the length gives a hint with a fix, and send stays ready`() {
         val s = st(minutes = 1.0, balance = 5, photos = 100)
         assertEquals(StatusKind.PhotoHint, s.kind); assertTrue(s.sendReady)
-        assertTrue(s.text.startsWith("About 51 of your 100 photos fit in 1 minute")); assertEquals(2, s.fix!!.minutes); assertEquals("Use 2 min · ⚡2", s.fix!!.label())
+        assertTrue(s.text.startsWith("About 51 of your 100 photos fit in 1 minute")); assertEquals(2.0, s.fix!!.minutes!!, 0.0); assertEquals("Use 2 min · ⚡2", s.fix!!.label())
         assertEquals(StatusKind.Ready, st(minutes = 2.0, photos = 100).kind)
-        assertEquals(2, PhotoCapacity.suggestion(100, 1.0, listOf(1, 2, 3))); assertNull(PhotoCapacity.suggestion(40, 1.0, listOf(1, 2, 3)))
+        assertEquals(2.0, PhotoCapacity.suggestion(100, 1.0, listOf(1.0, 2.0, 3.0))!!, 0.0); assertNull(PhotoCapacity.suggestion(40, 1.0, listOf(1, 2, 3)))
     }
 
     // Add photos sheet

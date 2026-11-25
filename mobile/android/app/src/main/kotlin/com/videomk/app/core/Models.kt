@@ -86,10 +86,10 @@ data class CreateOptions(
     val platform: String = "other", val aspect: String = "16:9", val resolution: String = "1080p", val language: String = "auto",
 ) {
     /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). */
-    val credits: Int get() = maxOf(1, minOf(12, Math.ceil(minutes).toInt()))
+    val credits: Int get() = Lengths.credits(minutes)
 
     companion object {
-        val LENGTHS = listOf(1.0, 2.0, 3.0, 5.0, 8.0, 12.0)
+        val LENGTHS = Lengths.OLD_PRESETS
         const val DEFAULT_MINUTES = 3.0
     }
 }

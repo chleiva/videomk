@@ -16,6 +16,8 @@ import com.videomk.app.DebugHooks
 import com.videomk.app.core.Brief
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.PhotoIntake
+import com.videomk.app.core.PlatformChip
+import com.videomk.app.core.CreatePlatforms
 import com.videomk.app.core.PickedCache
 import com.videomk.app.core.PickedSource
 import com.videomk.app.core.PhotoLimits
@@ -223,9 +225,17 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     /** A choice the person made on the Create screen (a remembered default no longer overrides it when the capabilities arrive). */
     fun updateOptions(o: CreateOptions) { options = o; touched = true }
 
+    /** The length chip (or a one-tap fix): from now on a platform pick keeps this length and only shows its recommendation. */
+    fun setLength(minutes: Double) { options = options.copy(minutes = minutes); touched = true; lengthChosen = true }
+    var lengthChosen = false
+        private set
+
+    /** A platform chip: its format and resolution, and its recommended length unless a length was chosen since this screen opened. */
+    fun selectPlatform(chip: PlatformChip) { options = CreatePlatforms.select(options, chip, lengthChosen, caps.presets); touched = true }
+
     /** The Create screen opened: start from what this person used last time (or the first-time defaults). */
     fun openCreate(stored: CreatePrefs?) {
-        storedPrefs = stored; touched = false
+        storedPrefs = stored; touched = false; lengthChosen = false
         options = CreateDefaults.resolve(stored, caps)
         sheetKind = CreateSheetKind.None; checking = false; stop = null
     }

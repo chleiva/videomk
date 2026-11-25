@@ -9,12 +9,16 @@ import kotlinx.serialization.json.put
 /** `GET /users/{id}/capabilities` (docs/CREATE_API.md): what the app may offer. Absent endpoint means [FALLBACK]. */
 data class AspectInfo(val id: String, val label: String, val ready: Boolean, val beta: Boolean)
 data class ResolutionInfo(val id: String, val label: String)
-data class PlatformInfo(val id: String, val label: String, val aspect: String, val resolution: String)
+/** [recommendedMinutes], [maxMinutes] (a soft limit, or null), [otherAspects] and [note] come from the server ("Portrait 4:5 · 1080p · about 1 min"). */
+data class PlatformInfo(
+    val id: String, val label: String, val aspect: String, val resolution: String,
+    val recommendedMinutes: Double? = null, val maxMinutes: Double? = null, val otherAspects: List<String> = emptyList(), val note: String? = null,
+)
 data class LanguageInfo(val id: String, val label: String)
 
 data class Capabilities(
     val aspects: List<AspectInfo>, val resolutions: List<ResolutionInfo>, val platforms: List<PlatformInfo>, val languages: List<LanguageInfo>,
-    val minMinutes: Int = 1, val maxMinutes: Int = 12, val maxPhotos: Int = 100, val intake: Boolean = false,
+    val minMinutes: Double = 1.0, val maxMinutes: Double = 12.0, val presets: List<Double> = Lengths.OLD_PRESETS, val maxPhotos: Int = 100, val intake: Boolean = false,
 ) {
     val readyAspects: List<AspectInfo> get() = aspects.filter { it.ready }
     fun aspect(id: String) = aspects.firstOrNull { it.id == id }
@@ -30,9 +34,10 @@ data class Capabilities(
         fun fromJson(o: JsonObject): Capabilities = Capabilities(
             aspects = o.arr("aspects")?.mapNotNull { e -> e.asObject()?.let { a -> a.str("id")?.let { AspectInfo(it, a.str("label") ?: it, a.bool("ready") ?: false, a.bool("beta") ?: false) } } } ?: emptyList(),
             resolutions = o.arr("resolutions")?.mapNotNull { e -> e.asObject()?.let { r -> r.str("id")?.let { ResolutionInfo(it, r.str("label") ?: it) } } } ?: emptyList(),
-            platforms = o.arr("platforms")?.mapNotNull { e -> e.asObject()?.let { p -> p.str("id")?.let { PlatformInfo(it, p.str("label") ?: it, p.str("aspect") ?: "16:9", p.str("resolution") ?: "1080p") } } } ?: emptyList(),
+            platforms = o.arr("platforms")?.mapNotNull { e -> e.asObject()?.let { p -> p.str("id")?.let { PlatformInfo(it, p.str("label") ?: it, p.str("aspect") ?: "16:9", p.str("resolution") ?: "1080p", p.num("recommended_minutes"), p.num("max_minutes"), p.arr("other_aspects")?.mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content } ?: emptyList(), p.str("note")) } } } ?: emptyList(),
             languages = o.arr("languages")?.mapNotNull { e -> e.asObject()?.let { l -> l.str("id")?.let { LanguageInfo(it, l.str("label") ?: it) } } } ?: emptyList(),
-            minMinutes = o.obj("lengths")?.int("min_minutes") ?: 1, maxMinutes = o.obj("lengths")?.int("max_minutes") ?: 12,
+            minMinutes = o.obj("lengths")?.num("min_minutes") ?: 1.0, maxMinutes = o.obj("lengths")?.num("max_minutes") ?: 12.0,
+            presets = o.obj("lengths")?.arr("presets")?.mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content?.toDoubleOrNull() }?.filter { it > 0 }?.distinct()?.sorted()?.takeIf { it.isNotEmpty() } ?: Lengths.OLD_PRESETS,
             maxPhotos = o.int("max_photos") ?: 100, intake = o.bool("intake") ?: false,
         ).let { c -> if (c.readyAspects.isEmpty() || c.resolutions.isEmpty()) FALLBACK else c }
     }
