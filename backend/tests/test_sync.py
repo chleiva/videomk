@@ -410,3 +410,27 @@ def test_photos_of_exactly_16_by_9_render_in_images_and_galleries(size):
         tl["scenes"][0]["props"]["ken_burns"] = k
         for t in (0.0, 2.0, 4.4):
             Renderer(tl, lambda key: photo).frame_at(t)
+
+
+# ---------------------------------------------------------------- an element shown ahead of its narration must not freeze after its first part
+def test_lead_in_paces_the_parts_of_an_element_the_narrator_reaches_late():
+    from engine import sync
+
+    late = [4.4, 5.055, 5.71, 6.4]                                  # the real case: a closing line, the voice talks about something else first
+    fixed = sync.lead_in(late)
+    assert fixed[0] == sync.FIRST_REVEAL_S and fixed == sorted(fixed) and fixed[-1] <= late[-1]
+    assert max(b - a for a, b in zip(fixed, fixed[1:])) <= sync.LEAD_IN_GAP_S + 1e-6 and min(b - a for a, b in zip(fixed, fixed[1:])) >= 0.3
+    assert sync.lead_in([0.5, 2.0, 3.0]) == [0.5, 2.0, 3.0]            # a narrator who starts on the text is followed exactly
+    assert sync.lead_in([3.0]) == [sync.FIRST_REVEAL_S] and sync.lead_in([]) == []
+    assert sync.lead_in([1.2, 1.5])[1] - sync.lead_in([1.2, 1.5])[0] >= 0.35
+
+
+def test_a_kinetic_text_closing_line_with_unrelated_narration_before_it_never_freezes():
+    from engine import sync
+
+    words = [("Fiestas,", 0.4, 0.97), ("palacios,", 1.1, 1.73), ("playas", 1.91, 2.25), ("y", 2.25, 2.31), ("montañas.", 2.31, 3.07), ("Lo", 3.64, 3.88), ("mejor", 3.88, 4.2), ("de", 4.2, 4.25),
+             ("cada", 4.25, 4.55), ("aventura", 4.55, 5.29), ("es", 5.29, 5.34), ("hacerla", 5.34, 5.86), ("juntos.", 5.86, 6.15)]
+    props = {"text": "Lo mejor de cada aventura es vivirla juntos.", "emphasis": "juntos"}
+    sync.apply("kinetic_text", props, words, 10.9)
+    cues = props["cues"]
+    assert cues[0] <= sync.FIRST_REVEAL_S and all(b - a <= sync.LEAD_IN_GAP_S + 1e-6 for a, b in zip(cues, cues[1:])), cues

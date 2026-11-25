@@ -264,7 +264,31 @@ def _catalogue_text(photos: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def story_system(minutes: float, cap: int, grouped: bool = False) -> str:
+SPARSE_SPP = 7.0    # seconds of screen time per photo from which photos are shown large, one at a time
+DENSE_SPP = 3.0     # below this they have to share the screen
+
+
+def pace(cap: int, n: int) -> Tuple[str, float]:
+    """("sparse"|"balanced"|"dense", seconds per photo) for n photos in a video whose capacity is `cap` photos (capacity is 1.2 s of screen per photo, so cap x 1.2 is the time available)."""
+    spp = cap * SECONDS_PER_PHOTO / max(1, n)
+    return ("sparse" if spp >= SPARSE_SPP else "dense" if spp < DENSE_SPP else "balanced"), round(spp, 1)
+
+
+def pace_rules(cap: int, n: int) -> str:
+    """How to balance full-page photos and collages for this much time per photo: the producer and the director both get it."""
+    kind, spp = pace(cap, n)
+    head = f"PACE: about {spp:g} seconds of screen time per photo ({kind}). "
+    if kind == "sparse":
+        return head + ("There is plenty of time, so show the photos LARGE: most moments are a single full-page photo (give a standout its own moment), related shots as short sequences of 2 or 3 "
+                       "that follow each other; use a collage only for a real burst of near-identical frames or 4 or more shots of one thing, and at most one moment in six. Do not squeeze photos together to save time you do not need to save.")
+    if kind == "balanced":
+        return head + ("Mix them: standout photos single and full page (about a third of the moments), sequences of 2 to 4 to tell the story, and collages of 4 to 6 for groups of related photos "
+                       "(a market, a hike, a dinner). Vary the rhythm so it does not feel like the same layout repeated.")
+    return head + ("Photos must share the screen: collages of 5 to 9 are the main device, with sequences of 2 to 3 for related shots; keep a few standout photos single and full page (about one moment in "
+                   "six) so the pace varies and the best pictures get their moment.")
+
+
+def story_system(minutes: float, cap: int, grouped: bool = False, n: Optional[int] = None) -> str:
     return (
         "You are the story producer for a video made from a person's OWN photos. You get the person's request, the video's length and a numbered catalogue of their photos. "
         "First work out what these photos are about and what the person wants the video to be (a holiday memory, a property tour, a family event, a project...). Then plan the video's moments.\n"
@@ -277,7 +301,8 @@ def story_system(minutes: float, cap: int, grouped: bool = False) -> str:
         "subject, place and day shown TOGETHER on one screen, in a styled layout: use collages to fit many photos into a short video).\n"
         f"- This video is {minutes:g} minutes and can show about {cap} photos. If there are more photos than that, keep the best of near duplicates, drop POOR quality photos first and put the rest in unused; if there "
         "are fewer, use single and sequence moments for the best photos and collages for the rest. Prefer variety and what the request is about.\n"
-        "- Order the moments to tell a story: usually the order things happened, or by theme when there is no sequence. Open with a strong, establishing photo and end with a fitting one.\n"
+        + (pace_rules(cap, n) + "\n" if n else "")
+        + "- Order the moments to tell a story: usually the order things happened, or by theme when there is no sequence. Open with a strong, establishing photo and end with a fitting one.\n"
         "- Group into chapters by place, subject or time: 2 to 8 chapters, fewer for short videos (a chapter may be a day, a few days or a week).\n"
         "- Lines may say when ('taken Sun 12 Apr 14:32') and where ('GPS place: Paris, France') each photo was taken, from the photo's own data. Trust them over visual guesses for ORDER and for PLACE NAMES. "
         "A photo without them is placed by what it shows.\n"
@@ -295,11 +320,16 @@ def fit_layout(m: Dict[str, Any]) -> Dict[str, Any]:
     return m
 
 
+def _per_moment(cap: int, n: int) -> int:
+    """How many photos the mechanical grouping puts in one moment for this pace: one when there is time to show each large, up to six when they must share."""
+    return {"sparse": 1, "balanced": 3, "dense": 6}[pace(cap, n)[0]]
+
+
 def _moments_of(ids: List[str], per: int = 6) -> List[Dict[str, Any]]:
     out = []
     for k in range(0, len(ids), per):
         part = ids[k:k + per]
-        out.append(fit_layout({"photos": part, "layout": "collage", "role": "detail", "note": ""}))
+        out.append(fit_layout({"photos": part, "layout": "collage" if per >= 4 else "sequence", "role": "detail", "note": ""}))
     return out
 
 
@@ -308,10 +338,11 @@ def _fallback_story(photos: List[Dict[str, Any]], cap: int) -> Dict[str, Any]:
     by_id = {p["id"]: p for p in photos}
     chosen = rank_and_trim([p["id"] for p in photos], by_id, cap)
     groups = [g for g in group_photos([by_id[i] for i in chosen]) if g["ids"]]
+    per = _per_moment(cap, len(photos))
     if groups:
-        chapters = [{"title": g["label"].split(",")[0] if g["day"] else "", "summary": "", "moments": _moments_of(g["ids"])} for g in groups]
+        chapters = [{"title": g["label"].split(",")[0] if g["day"] else "", "summary": "", "moments": _moments_of(g["ids"], per)} for g in groups]
     else:
-        moments = _moments_of(chosen)
+        moments = _moments_of(chosen, per)
         chapters = [{"title": f"Part {k + 1}" if len(moments) > 4 else "", "summary": "", "moments": moments[i:i + 4]} for k, i in enumerate(range(0, len(moments), 4))]
     return {"story": "", "voice": "narrator", "tone": "", "title_idea": "", "chapters": chapters, "unused": [{"id": p["id"], "reason": "surplus"} for p in photos if p["id"] not in chosen]}
 
@@ -436,7 +467,7 @@ def reconcile(story: Dict[str, Any], photos: List[Dict[str, Any]], cap: int) -> 
     forgotten = [p["id"] for p in photos if p["id"] not in placed and p["id"] not in left_out]
     if forgotten and len(placed) < cap:
         room = forgotten[: cap - len(placed)]
-        chapters.append({"title": "More moments", "summary": "", "moments": _moments_of(room)})
+        chapters.append({"title": "More moments", "summary": "", "moments": _moments_of(room, _per_moment(cap, len(photos)))})
         placed += room
     flat = [i for ch in chapters for m in ch["moments"] for i in m["photos"]]
     keep = set(rank_and_trim(flat, by_id, cap))
@@ -466,7 +497,7 @@ def make_story(request: str, minutes: float, photos: List[Dict[str, Any]], ask_t
             + (f"\n\nGroups by day and session (from the photos' own dates):\n{groups_text(groups)}" if groups else "")
             + f"\n\nPhotos:\n{_catalogue_text(photos)}\n\nReturn the JSON now.")
     try:
-        raw = _json_obj(ask_text(story_system(minutes, cap, bool(groups)), user)) or {}
+        raw = _json_obj(ask_text(story_system(minutes, cap, bool(groups), len(photos)), user)) or {}
     except Exception:
         logging.exception("the photo story could not be written; grouping the photos mechanically")
         raw = {}

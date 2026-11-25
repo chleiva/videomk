@@ -160,7 +160,7 @@ def photo_slots(photos: Optional[List[Dict[str, Any]]], story: Optional[Dict[str
     return len(photos or [])
 
 
-def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] = None) -> str:
+def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] = None, minutes: Optional[float] = None) -> str:
     def line(p: Dict[str, Any]) -> str:
         extra = (f' [{p["place"]}]' if p.get("place") and p["place"].lower() not in (p.get("caption") or "").lower() else "")
         gps = (f' GPS place: {p["where"]}' if p.get("where") else "")
@@ -191,9 +191,13 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
                     out.append("      " + line(by_id[i]))
     if story.get("unused"):
         out.append("LEFT OUT (do not use): " + ", ".join(u["id"] for u in story["unused"]))
+    used = sum(len(m["photos"]) for ch in story["chapters"] for m in ch["moments"])
+    if minutes and used:
+        from .curate import pace_rules
+        out.append(pace_rules(max(1, int(minutes * 60 * 0.85 / 1.2)), used))
     out.append(
         "RULES for photo scenes:\n"
-        "- A [single] moment is an image scene {\"photo\": \"P7\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}, or a photo_frame for one important photo. A [sequence] moment is a gallery scene "
+        "- A [single] moment is shown full page: an image scene {\"photo\": \"P7\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"} (the default, clean and large), or a photo_frame (polaroid, matte, tilted, film, pinned) for the one or two photos that deserve a presentation, such as the opening or the emotional high point; do not frame every photo. A [sequence] moment is a gallery scene "
         "{\"photos\": [\"P7\", \"P8\"], \"alt\": \"<<=70 chars>\"} whose photographs follow each other in the order given. A [collage] moment is a photo_collage scene {\"photos\": [...], \"style\": "
         "\"mosaic|polaroids|grid|filmstrip|stack\"} showing all its photos together on one screen: pick the style for the mood (polaroids for personal memories, mosaic or grid for variety, filmstrip for a "
         "stretch of the day, stack for a few favourites) and vary it from beat to beat.\n"
@@ -245,7 +249,7 @@ def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Opti
         f"Target length: {target_minutes:g} minute(s). This is a hard requirement: the narration must total between {int(words * 0.9)} and {int(words * 1.1)} words "
         f"(about {words}) across at least {beats} beats of roughly {max(20, words // beats)} words each. The viewer pays per minute, and a shorter script makes a shorter video.\n\n"
         + (f"Today's date: {today}. Anything time-sensitive must come from the grounding notes (with the date it refers to), never from memory.\n\n" if today else "")
-        + (photos_prompt(photos, story) if photos else "")
+        + (photos_prompt(photos, story, target_minutes) if photos else "")
         + f"Grounding notes (may be empty):\n{notes or '(none)'}\n\n"
         "Return the JSON plan now."
     )

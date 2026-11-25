@@ -144,6 +144,23 @@ def diagram_order(props: Dict[str, Any]) -> List[str]:
 FIRST_REVEAL_S = 1.0   # the latest an element\'s first part may appear (an element draws nothing before its first reveal; a viewer must not stare at a bare background)
 
 
+LEAD_IN_GAP_S = 0.9   # the longest pause between the parts of an element that is shown ahead of its narration
+
+
+def lead_in(cues: List[float]) -> List[float]:
+    """Cues for an element whose first part the narrator names late (the beat starts with other sentences). The first part comes up at FIRST_REVEAL_S so the screen is
+    never bare, and the rest follow at a steady pace (never a longer wait than LEAD_IN_GAP_S, and never later than the narrator reaches them): a text that draws its
+    first word and then freezes for seconds while the voice talks about something else looks like a bug."""
+    n = len(cues)
+    if n == 0 or cues[0] <= FIRST_REVEAL_S:
+        return list(cues)
+    if n == 1:
+        return [FIRST_REVEAL_S]
+    end = min(float(cues[-1]), FIRST_REVEAL_S + LEAD_IN_GAP_S * (n - 1))
+    end = max(end, FIRST_REVEAL_S + 0.35 * (n - 1))
+    return [round(FIRST_REVEAL_S + (end - FIRST_REVEAL_S) * k / (n - 1), 3) for k in range(n)]
+
+
 def _element(stype: str):
     from .scenes.registry import ELEMENTS
 
@@ -203,8 +220,8 @@ def apply(stype: str, props: Dict[str, Any], words: Sequence[Word], scene_dur: f
         if not texts:
             return {}
         cues, idx = anchor_times(texts, words, scene_dur)
-        if cues and cues[0] > FIRST_REVEAL_S:   # a scene must never sit empty: if the narrator names the first part late in a long beat, it still appears at the start
-            cues = [FIRST_REVEAL_S] + list(cues[1:])
+        if cues and cues[0] > FIRST_REVEAL_S:   # a scene must never sit empty: if the narrator names the first part late in a long beat, it still appears at the start, and the rest follows at a steady pace
+            cues = lead_in(cues)
         props["cues"] = cues
         return {"items": len(texts), "anchored": sum(i is not None for i in idx)}
     if stype == "stat":

@@ -350,5 +350,38 @@ def test_layouts_are_made_consistent_with_the_number_of_photos():
 
 def test_the_mechanical_fallback_follows_the_days_with_collages():
     s = curate.reconcile({}, _trip(30), 85)
-    assert [c["title"] for c in s["chapters"]] == ["Sat 11 Apr", "Sun 12 Apr", "Mon 13 Apr"] and all(m["layout"] in ("collage", "sequence") for m in curate.moments(s))
+    assert [c["title"] for c in s["chapters"]] == ["Sat 11 Apr", "Sun 12 Apr", "Mon 13 Apr"] and all(m["layout"] in ("collage", "sequence", "single") for m in curate.moments(s))
     assert sorted(curate.used_ids(s), key=lambda i: int(i[1:])) == [f"P{i}" for i in range(1, 31)]
+
+
+# ----------------------------------------------------------------------------- full-page photos when there is time, collages when there is not
+def test_the_pace_follows_the_seconds_available_per_photo():
+    assert curate.pace(85, 5)[0] == "sparse" and curate.pace(85, 5)[1] == 20.4        # 5 photos in 2 minutes: show them large
+    assert curate.pace(85, 12)[0] == "sparse" and curate.pace(85, 20)[0] == "balanced" and curate.pace(85, 30)[0] == "balanced" and curate.pace(85, 60)[0] == "dense"
+    assert curate.pace(85, 100)[0] == "dense" and curate.pace(42, 100)[0] == "dense"
+    assert "single full-page" in curate.pace_rules(85, 5) and "at most one moment in six" in curate.pace_rules(85, 5)
+    assert "about a third" in curate.pace_rules(85, 30) and "collages of 5 to 9 are the main device" in curate.pace_rules(85, 100)
+
+
+def test_the_story_prompt_carries_the_pace_and_the_mechanical_fallback_follows_it():
+    few = _trip(5, per_day=5)
+    sys_few = curate.story_system(2, curate.max_used(2), False, len(few))
+    assert "PACE: about 20.4 seconds" in sys_few and "show the photos LARGE" in sys_few
+    assert "PACE" not in curate.story_system(2, 85, False)
+    s = curate.reconcile({}, few, 85)
+    assert all(m["layout"] == "single" and len(m["photos"]) == 1 for m in curate.moments(s))                  # plenty of time: one full-page photo each
+    mid = curate.reconcile({}, _trip(30), 85)
+    sizes = [len(m["photos"]) for m in curate.moments(mid)]
+    assert max(sizes) == 3 and sizes.count(3) >= 9 and all(m["layout"] == ("single" if len(m["photos"]) == 1 else "sequence") for m in curate.moments(mid))
+    dense = curate.reconcile({}, _trip(100, per_day=34), 85)
+    assert max(len(m["photos"]) for m in curate.moments(dense)) == 6 and any(m["layout"] == "collage" for m in curate.moments(dense))
+
+
+def test_the_director_is_told_the_pace_and_when_to_frame_a_photo():
+    from engine import plan as plan_mod
+
+    ph = [{"id": f"P{i}", "caption": "c", "orientation": "landscape"} for i in range(1, 6)]
+    story = {"story": "s", "chapters": [{"title": "T", "moments": [{"photos": [f"P{i}"], "layout": "single", "role": "detail", "note": ""} for i in range(1, 6)]}]}
+    text = plan_mod.photos_prompt(ph, story, 2)
+    assert "PACE: about" in text and "(sparse)" in text and "do not frame every photo" in text
+    assert "PACE" not in plan_mod.photos_prompt(ph, story)
