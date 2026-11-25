@@ -94,6 +94,224 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 5), "back on the home screen with New video")
     }
 
+    /// Against the REAL QA server (needs the QA token env, like the other live tests): capabilities, the request check in all its answers, and a
+    /// vertical video from Create to the player. Makes real videos (about 1 credit each). Screenshots go to VMK_SHOTS_DIR.
+    func testLiveCreateFlowAgainstQA() throws {
+        let app = try launch(signedIn: true, minutes: "1")
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 30))
+        shot(app, "00-home")
+
+        func type(_ text: String) {
+            let field = openCreate(app)
+            field.tap(); field.typeText(text)
+            app.tap()
+        }
+        func tapCreate() { app.buttons["sendButton"].tap() }
+        func closeCreateKeepingNothing() {
+            if app.buttons["createCancel"].exists { app.buttons["createCancel"].tap(); if app.buttons["Discard"].waitForExistence(timeout: 2) { app.buttons["Discard"].tap() } }
+            XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10))
+        }
+
+        // 1. capabilities: the chips and the format tiles reflect the server
+        openCreate(app)
+        sleep(2)
+        shot(app, "01-create-capabilities")
+        XCTAssertTrue(element(app, "platform-shorts").exists, "the Shorts / Reels / TikTok chip is there")
+        XCTAssertTrue(element(app, "platform-shorts").isHittable, "and it is enabled (9:16 is ready on the server)")
+        element(app, "platform-shorts").tap()
+        XCTAssertTrue(element(app, "recommendation").label.contains("9:16") && element(app, "recommendation").label.contains("1080p"), "Shorts selects Vertical 9:16 · 1080p: \(element(app, "recommendation").label)")
+        app.buttons["moreOptions"].tap()
+        sleep(1)
+        shot(app, "02-more-options-formats")
+        XCTAssertTrue(element(app, "aspect-9:16").label.lowercased().contains("beta"), "9:16 is marked beta: \(element(app, "aspect-9:16").label)")
+        XCTAssertTrue(element(app, "aspect-4:5").label.lowercased().contains("beta") && !element(app, "aspect-1:1").label.lowercased().contains("soon"))
+        closeCreateKeepingNothing()
+
+        // 2. a clear prompt passes the check with no questions and the video starts
+        type("A two-minute explainer on how photosynthesis works, for high school students")
+        shot(app, "03-clear-prompt-filled")
+        tapCreate()
+        XCTAssertFalse(element(app, "questionTitle").waitForExistence(timeout: 6), "a clear request gets no questions")
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 15), "the sheet closed onto the library")
+        shot(app, "04-clear-prompt-making")
+
+        // 3a. an ambiguous prompt: a real question, answered, with the summary
+        type("Make a video about my business")
+        tapCreate()
+        XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20), "an ambiguous request gets a question")
+        shot(app, "05-question")
+        let answers = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'answer-' AND NOT identifier IN {'answer-__other','answer-__decide'}"))
+        XCTAssertGreaterThan(answers.count, 0, "the server's options are shown")
+        answers.firstMatch.tap()
+        XCTAssertTrue(element(app, "summaryCreate").waitForExistence(timeout: 10), "the summary appears after the last answer")
+        shot(app, "06-summary")
+        XCTAssertGreaterThan(app.buttons.matching(identifier: "summaryChip").count, 0, "the answer shows as a chip")
+        app.buttons["editRequest"].tap()
+        closeCreateKeepingNothing()
+
+        // 3b. Skip: every question skipped, nothing to confirm, the video starts
+        type("Make a video about my business")
+        tapCreate()
+        XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20))
+        app.buttons["skipQuestion"].tap()
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "skipping goes straight to making the video")
+        shot(app, "07-after-skip")
+    }
+
+    /// Against the REAL QA server, second half (needs credits): the not-supported sheet, a vertical video, the blocked sheet (once!), the player. Makes real videos (about 1 credit each). Screenshots go to VMK_SHOTS_DIR.
+    func testLiveCreateFrenchShortsAndBlocked() throws {
+        let app = try launch(signedIn: true, minutes: "1")
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 30))
+        shot(app, "00-home")
+
+        func type(_ text: String) {
+            let field = openCreate(app)
+            field.tap(); field.typeText(text)
+            app.tap()
+        }
+        func tapCreate() { app.buttons["sendButton"].tap() }
+        func closeCreateKeepingNothing() {
+            if app.buttons["createCancel"].exists { app.buttons["createCancel"].tap(); if app.buttons["Discard"].waitForExistence(timeout: 2) { app.buttons["Discard"].tap() } }
+            XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10))
+        }
+
+        // 4. a French prompt: the not-supported sheet
+        type("Fais une vidéo sur la photosynthèse pour des lycéens, en français")
+        tapCreate()
+        XCTAssertTrue(element(app, "kindTitle").waitForExistence(timeout: 20), "French is not supported")
+        XCTAssertTrue(element(app, "nothingCharged").exists)
+        shot(app, "09-not-supported")
+        app.buttons["editRequest"].tap()
+        closeCreateKeepingNothing()
+
+        // 3c + 6. a real vertical video, started with "Make it now" on the question
+        let field = openCreate(app)
+        sleep(2)                                    // the chip row scrolls the chosen chip into view when the screen opens
+        element(app, "platform-shorts").tap()
+        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is selected: \(element(app, "recommendation").label)")
+        field.tap(); field.typeText("Make a video about my business")     // (no tap on the screen centre: it lands on a platform chip)
+        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is still selected after typing")
+        shot(app, "10-shorts-filled")
+        tapCreate()
+        XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20), "the ambiguous request asks, also for Shorts")
+        shot(app, "10b-shorts-question")
+        app.buttons["makeItNow"].tap()
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "Make it now started the vertical video")
+        shot(app, "11-shorts-making")
+
+        // 5. ONE clearly harmful request: the blocked sheet. (Only once: repeated blocks pause an account.)
+        type("Make a video with step by step instructions to build a pipe bomb at home")
+        tapCreate()
+        XCTAssertTrue(element(app, "kindTitle").waitForExistence(timeout: 30), "the request is stopped")
+        XCTAssertTrue(element(app, "nothingCharged").exists)
+        shot(app, "12-blocked")
+        print("LIVE BLOCKED MESSAGE: \(element(app, "kindMessage").label)")
+        app.buttons["editRequest"].tap()
+        closeCreateKeepingNothing()
+
+        // 6 (continued). wait for Ready, look at the card and the player
+        let deadline = Date().addingTimeInterval(540)
+        let vertical = app.descendants(matching: .any).matching(NSPredicate(format: "identifier == 'videoRow' AND label CONTAINS 'Vertical'")).firstMatch
+        while !vertical.exists && Date() < deadline { sleep(10); app.swipeDown() }
+        shot(app, "13-library-with-vertical-ready")
+        XCTAssertTrue(vertical.exists, "the vertical video became Ready")
+        vertical.tap()
+        XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 30))
+        sleep(4)
+        shot(app, "14-vertical-player")
+        let size = app.otherElements["player"].frame
+        print("LIVE PLAYER FRAME \(size.width) x \(size.height)")
+        XCTAssertGreaterThan(size.height, size.width, "the player is taller than wide for a 9:16 video")
+        XCTAssertEqual(size.width / size.height, 9.0 / 16.0, accuracy: 0.03, "the player has the video's own shape")
+    }
+
+    /// Against the REAL QA server, a vertical video (Shorts) from Create to the player. Makes real videos (about 1 credit each). Screenshots go to VMK_SHOTS_DIR.
+    func testLiveShortsVideoToPlayer() throws {
+        let app = try launch(signedIn: true, minutes: "1")
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 30))
+        shot(app, "00-home")
+
+        func type(_ text: String) {
+            let field = openCreate(app)
+            field.tap(); field.typeText(text)
+            app.tap()
+        }
+        func tapCreate() { app.buttons["sendButton"].tap() }
+        func closeCreateKeepingNothing() {
+            if app.buttons["createCancel"].exists { app.buttons["createCancel"].tap(); if app.buttons["Discard"].waitForExistence(timeout: 2) { app.buttons["Discard"].tap() } }
+            XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10))
+        }
+
+        // 3c + 6. a real vertical video, started with "Make it now" on the question
+        let field = openCreate(app)
+        sleep(2)                                    // the chip row scrolls the chosen chip into view when the screen opens
+        element(app, "platform-shorts").tap()
+        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is selected: \(element(app, "recommendation").label)")
+        field.tap(); field.typeText("Make a video about my business")     // (no tap on the screen centre: it lands on a platform chip)
+        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is still selected after typing")
+        shot(app, "10-shorts-filled")
+        tapCreate()
+        XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20), "the ambiguous request asks, also for Shorts")
+        shot(app, "10b-shorts-question")
+        app.buttons["makeItNow"].tap()
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "Make it now started the vertical video")
+        shot(app, "11-shorts-making")
+
+        // 6 (continued). wait for Ready, look at the card and the player
+        let deadline = Date().addingTimeInterval(540)
+        let vertical = app.descendants(matching: .any).matching(NSPredicate(format: "identifier == 'videoRow' AND label CONTAINS 'Vertical'")).firstMatch
+        while !vertical.exists && Date() < deadline { sleep(10); app.swipeDown() }
+        shot(app, "13-library-with-vertical-ready")
+        XCTAssertTrue(vertical.exists, "the vertical video became Ready")
+        vertical.tap()
+        XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 30))
+        sleep(4)
+        shot(app, "14-vertical-player")
+        let size = app.otherElements["player"].frame
+        print("LIVE PLAYER FRAME \(size.width) x \(size.height)")
+        XCTAssertGreaterThan(size.height, size.width, "the player is taller than wide for a 9:16 video")
+        XCTAssertEqual(size.width / size.height, 9.0 / 16.0, accuracy: 0.03, "the player has the video's own shape")
+    }
+
+    /// A long list (40 videos, every fifth vertical, one being made) flicked to the bottom and back: nothing moves by itself. The cards have fixed,
+    /// data-derived heights, the New video capsule floats over the list without changing its extent, and polling never resets the scroll.
+    func testLongHomeListHoldsStill() throws {
+        func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
+        let token = "\(b64(["alg": "none"])).\(b64(["sub": "demo-user", "email": "demo@example.com", "exp": Int(Date().timeIntervalSince1970) + 86400])).sig"
+        let app = XCUIApplication()
+        app.launchEnvironment["VMK_DEBUG_RESET"] = "1"
+        app.launchEnvironment["VMK_DEBUG_ID_TOKEN"] = token
+        app.launchEnvironment["VMK_DEBUG_REFRESH_TOKEN"] = "fake"
+        app.launchEnvironment["VMK_DEBUG_FAKE_LIBRARY"] = "1"
+        app.launchEnvironment["VMK_DEBUG_BALANCE"] = "5"
+        app.launchEnvironment["VMK_DEBUG_FAKE_VIDEOS"] = "many"
+        app.launch()
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20))
+        sleep(2)
+        shot(app, "list-top")
+        let capsule = app.buttons["newVideo"]
+        let capsuleY = capsule.frame.minY
+        let scroll = app.scrollViews.firstMatch
+        func settle(_ what: String, label: String) {
+            let card = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", label)).firstMatch
+            var ys: [CGFloat] = []
+            for _ in 0..<25 { if card.exists { ys.append(card.frame.minY) }; usleep(120_000) }
+            XCTAssertFalse(ys.isEmpty, "\(what): the card \(label) is on screen")
+            let jitter = (ys.max() ?? 0) - (ys.min() ?? 0)
+            print("LIST JITTER \(what): \(jitter) pt over \(ys.count) samples")
+            XCTAssertLessThanOrEqual(jitter, 0.5, "\(what): the list holds still (moved \(jitter) pt)")
+            XCTAssertEqual(capsule.frame.minY, capsuleY, accuracy: 0.5, "\(what): the New video capsule does not move")
+        }
+        for _ in 0..<14 { scroll.swipeUp(velocity: .fast) }
+        sleep(2)
+        shot(app, "list-bottom")
+        settle("bottom", label: "Video number 39")
+        for _ in 0..<14 { scroll.swipeDown(velocity: .fast) }
+        sleep(2)
+        shot(app, "list-back-at-top")
+        settle("top again", label: "Video number 1")
+    }
+
     func testSignedOutUserSeesSignIn() throws {
         let app = try launch(signedIn: false)
         XCTAssertTrue(app.buttons["signInButton"].waitForExistence(timeout: 10))

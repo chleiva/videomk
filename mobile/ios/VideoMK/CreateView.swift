@@ -37,8 +37,10 @@ struct CreateView: View {
                         section("What is it for?").padding(.top, 20)
                         platformChips.padding(.top, 8)
                         recommendation(proxy).padding(.top, 10)
+                        alsoWorks
                         section("Length").padding(.top, 18)
                         lengthChips.padding(.top, 8)
+                        maxHint.padding(.top, 6)
                         photoHint.padding(.top, 8)
                         moreOptions.padding(.top, 18).id("more")
                     }
@@ -238,37 +240,72 @@ struct CreateView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// "Also works: Square, Landscape": the platform's other formats, switching only the format.
+    @ViewBuilder private var alsoWorks: some View {
+        let others = form.alsoWorks(create.caps)
+        if !others.isEmpty {
+            HStack(spacing: 8) {
+                Text("Also works:").font(.system(size: 13.5)).foregroundStyle(Theme.textSecondary)
+                ForEach(others, id: \.id) { o in
+                    Button { create.form.aspect = o.id; UISelectionFeedbackGenerator().selectionChanged() } label: {
+                        Text(o.name).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 12).frame(height: 30).background(Theme.primaryContainer, in: Capsule()).frame(minHeight: 44)
+                    }.buttonStyle(.plain).accessibilityLabel("Use \(o.name) instead").accessibilityIdentifier("also-\(o.id)")
+                }
+                Spacer(minLength: 0)
+            }
+            .accessibilityElement(children: .contain)
+        }
+    }
+
+    /// Longer than the platform allows: one gentle line and a one-tap chip.
+    @ViewBuilder private var maxHint: some View {
+        if let hint = form.maxLengthHint(create.caps) {
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle").font(.system(size: 14)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
+                Text(hint.text).font(.system(size: 14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("maxLengthHint")
+                Spacer(minLength: 4)
+                FixChip(title: "Use \(LengthLabel.chip(hint.fixMinutes))") { create.form.setMinutes(hint.fixMinutes); UISelectionFeedbackGenerator().selectionChanged() }
+                    .accessibilityLabel("Use \(LengthLabel.spoken(hint.fixMinutes)) instead").accessibilityIdentifier("maxFixChip")
+            }
+        }
+    }
+
     // length
 
     private var lengthChips: some View {
-        let cols = typeSize >= .xxxLarge ? 3 : CreateOptions.lengths.count
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: cols), spacing: 8) {
-            ForEach(CreateOptions.lengths, id: \.self) { m in
-                let selected = form.minutes == m, credits = ComposerPlan.credits(forMinutes: m), costly = balance.map { credits > $0 } ?? false
-                Button { create.form.minutes = m; UISelectionFeedbackGenerator().selectionChanged() } label: {
-                    VStack(spacing: 2) {
-                        Text("\(Int(m)) min").font(.system(size: 16, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.8)
-                        HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.system(size: 10)); Text("\(credits)").font(.system(size: 13, weight: .semibold).monospacedDigit()) }
-                            .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 58)
-                    .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("\(ComposerPlan.plural(Int(m), "minute")), \(ComposerPlan.plural(credits, "credit"))")
-                .accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("length-\(Int(m))")
-            }
+        let presets = create.caps.lengthPresets
+        let wide = typeSize >= .xxxLarge
+        return Group {
+            if wide { LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) { ForEach(presets, id: \.self) { lengthChip($0, fixedWidth: nil) } } }
+            else { ScrollViewReader { sp in ScrollView(.horizontal, showsIndicators: false) { HStack(spacing: 8) { ForEach(presets, id: \.self) { lengthChip($0, fixedWidth: 70).id($0) } }.padding(.horizontal, 16) }
+                .onAppear { sp.scrollTo(form.minutes, anchor: .center) }.onChange(of: form.minutes) { _, m in withAnimation { sp.scrollTo(m, anchor: .center) } } }.padding(.horizontal, -16) }
         }
         .accessibilityElement(children: .contain).accessibilityLabel("Length")
     }
 
+    private func lengthChip(_ m: Double, fixedWidth: CGFloat?) -> some View {
+        let selected = form.minutes == m, credits = ComposerPlan.credits(forMinutes: m), costly = balance.map { credits > $0 } ?? false
+        return Button { create.form.setMinutes(m); UISelectionFeedbackGenerator().selectionChanged() } label: {
+            VStack(spacing: 2) {
+                Text(LengthLabel.chip(m)).font(.system(size: 16, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.8)
+                HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.system(size: 10)); Text("\(credits)").font(.system(size: 13, weight: .semibold).monospacedDigit()) }
+                    .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
+            }
+            .frame(width: fixedWidth).frame(maxWidth: fixedWidth == nil ? .infinity : nil, minHeight: 58)
+            .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(LengthLabel.spoken(m)), \(ComposerPlan.plural(credits, "credit"))")
+        .accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("length-\(m < 1 ? "\(Int((m * 60).rounded()))s" : "\(Int(m))")")
+    }
+
     @ViewBuilder private var photoHint: some View {
-        if let hint = PhotoCapacity.hint(photos: totalPhotos, minutes: form.minutes) {
+        if let hint = PhotoCapacity.hint(photos: totalPhotos, minutes: form.minutes, options: create.caps.lengthPresets) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(hint).font(.system(size: 15)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("photoCapacityHint")
-                if let fix = ComposerPlan.photoFix(photos: totalPhotos, minutes: form.minutes, balance: balance) {
-                    FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.minutes = m; UISelectionFeedbackGenerator().selectionChanged() } }.accessibilityIdentifier("fixChip").accessibilityLabel(fix.title.replacingOccurrences(of: "⚡", with: "credits "))
+                if let fix = ComposerPlan.photoFix(photos: totalPhotos, minutes: form.minutes, balance: balance, lengths: create.caps.lengthPresets) {
+                    FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.setMinutes(m); UISelectionFeedbackGenerator().selectionChanged() } }.accessibilityIdentifier("fixChip").accessibilityLabel(fix.title.replacingOccurrences(of: "⚡", with: "credits "))
                 }
             }
         }
@@ -424,7 +461,7 @@ struct CreateView: View {
 
     private func applyFix(_ fix: ComposerStatus.Fix) {
         switch fix {
-        case .useMinutes(let m, _): create.form.minutes = m; UISelectionFeedbackGenerator().selectionChanged()
+        case .useMinutes(let m, _): create.form.setMinutes(m); UISelectionFeedbackGenerator().selectionChanged()
         case .addCredits: model.requestCredits = true
         }
     }

@@ -64,24 +64,44 @@ final class LandscapePlayerController: AVPlayerViewController {
     }
 }
 
-@MainActor enum FullScreen {
-    static func present(_ player: AVPlayer, onClose: @escaping () -> Void) {
-        guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first(where: { $0.activationState == .foregroundActive }) ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
-              var top = scene.keyWindow?.rootViewController else { onClose(); return }
-        while let next = top.presentedViewController { top = next }
-        let vc = LandscapePlayerController()
-        vc.player = player
-        vc.allowsPictureInPicturePlayback = true
-        vc.modalPresentationStyle = .fullScreen
-        vc.onClose = onClose
-        PlaybackAudio.prepare()
-        top.present(vc, animated: true) { player.play() }
+/// Vertical and square videos open full screen in portrait (the phone is not turned sideways for them).
+final class PortraitPlayerController: AVPlayerViewController {
+    var onClose: (() -> Void)?
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed { onClose?() }
     }
 }
 
-/// An inline 16:9 player with a full screen button.
+@MainActor enum FullScreen {
+    static func present(_ player: AVPlayer, landscape: Bool = true, onClose: @escaping () -> Void) {
+        guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first(where: { $0.activationState == .foregroundActive }) ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
+              var top = scene.keyWindow?.rootViewController else { onClose(); return }
+        while let next = top.presentedViewController { top = next }
+        PlaybackAudio.prepare()
+        if landscape {
+            let vc = LandscapePlayerController()
+            vc.player = player
+            vc.allowsPictureInPicturePlayback = true
+            vc.modalPresentationStyle = .fullScreen
+            vc.onClose = onClose
+            top.present(vc, animated: true) { player.play() }
+        } else {
+            let vc = PortraitPlayerController()
+            vc.player = player
+            vc.videoGravity = .resizeAspect
+            vc.allowsPictureInPicturePlayback = true
+            vc.modalPresentationStyle = .fullScreen
+            vc.onClose = onClose
+            top.present(vc, animated: true) { player.play() }
+        }
+    }
+}
+
+/// An inline player with a full screen button. It fills the frame it is given; the caller sizes it to the video's own shape.
 struct InlinePlayer: View {
     let player: AVPlayer
+    var landscape = true
     @State private var fullScreen = false
 
     var body: some View {
@@ -89,7 +109,7 @@ struct InlinePlayer: View {
             PlayerController(player: fullScreen ? nil : player)   // one screen owns the player at a time
             Button {
                 fullScreen = true
-                FullScreen.present(player) { fullScreen = false }
+                FullScreen.present(player, landscape: landscape) { fullScreen = false }
             } label: {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                     .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)

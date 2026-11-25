@@ -27,7 +27,12 @@ struct ReadyCard: View {
         ZStack {
             Theme.makingGradient.opacity(0.55)
             if let url = video.previewGifURL {
-                AsyncImage(url: url) { phase in if let image = phase.image { image.resizable().scaledToFill() } }
+                CachedImage(url: url) { image in
+                    if abs(video.aspectRatio - 16.0 / 9.0) < 0.15 { image.resizable().scaledToFill() }
+                    else {   // a vertical or square picture is shown whole, over a soft copy of itself: never stretched, never cropped to a strip
+                        ZStack { image.resizable().scaledToFill().blur(radius: 24).opacity(0.7); image.resizable().scaledToFit() }
+                    }
+                }
             }
             Theme.mediaScrim
             VStack(alignment: .leading, spacing: 0) {
@@ -52,7 +57,7 @@ struct ReadyCard: View {
         .clipShape(RoundedRectangle(cornerRadius: cardRadius, style: .continuous))
         .elevation(2)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(video.displayTitle). Ready.\(video.durationSeconds.map { " \(VideoRow.duration($0))." } ?? "")")
+        .accessibilityLabel("\(video.displayTitle). Ready.\(video.isPortrait ? " Vertical." : "")\(video.durationSeconds.map { " \(VideoRow.duration($0))." } ?? "")")
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier("videoRow")
     }
@@ -88,7 +93,7 @@ struct MakingCard: View {
                     if let onRemove { Menu { Button("Remove", role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold)).foregroundStyle(.white).frame(width: 44, height: 44) }.accessibilityLabel("More") }
                 }
                 Text(title).font(.system(size: 19, weight: .semibold)).foregroundStyle(.white).lineLimit(typeSize.isAccessibilitySize ? 4 : 2).padding(.top, 10)
-                Text(line).font(.system(size: 15)).foregroundStyle(.white.opacity(0.82)).padding(.top, 4).fixedSize(horizontal: false, vertical: true)
+                Text(line).font(.system(size: 15)).foregroundStyle(.white.opacity(0.82)).padding(.top, 4).lineLimit(typeSize.isAccessibilitySize ? nil : 2)
                 Spacer(minLength: 12)
                 HStack(spacing: 8) {
                     ForEach(Array(MakingProgress.steps.enumerated()), id: \.offset) { i, name in
@@ -97,7 +102,7 @@ struct MakingCard: View {
                                 ZStack(alignment: .leading) {
                                     Capsule().fill(.white.opacity(0.22))
                                     Capsule().fill(Color(hex: 0xC9CBFF)).frame(width: g.size.width * (segments.indices.contains(i) ? segments[i] : 0))
-                                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: segments)
+                                        .animation(reduceMotion ? nil : .linear(duration: 1), value: segments)       // continuous between the one-second ticks
                                 }
                             }.frame(height: 4)
                             Text(name).font(.system(size: 12.5, weight: i == current ? .bold : .regular)).foregroundStyle(i == current ? .white : .white.opacity(0.72)).lineLimit(1).minimumScaleFactor(0.8)
@@ -107,7 +112,7 @@ struct MakingCard: View {
             }
             .padding(14)
         }
-        .frame(minHeight: cardHeight).frame(maxWidth: .infinity)
+        .frame(height: typeSize.isAccessibilitySize ? nil : cardHeight).frame(minHeight: typeSize.isAccessibilitySize ? cardHeight : nil).frame(maxWidth: .infinity)    // fixed from data: text changing between polls never moves the list
         .clipShape(RoundRectangle(radius: cardRadius))
         .elevation(2)
         .accessibilityElement(children: .ignore)
@@ -142,12 +147,12 @@ struct FailedCard: View {
                                 .padding(.horizontal, 16).frame(height: 44).background(.white, in: Capsule())
                         }.buttonStyle(.plain).accessibilityIdentifier("tryAgain")
                     }
-                    Text(message).font(.system(size: 15)).foregroundStyle(.white.opacity(0.86)).fixedSize(horizontal: false, vertical: true)
+                    Text(message).font(.system(size: 15)).foregroundStyle(.white.opacity(0.86)).lineLimit(2)
                 }.padding(.top, 10)
             }
             .padding(14)
         }
-        .frame(minHeight: cardHeight).frame(maxWidth: .infinity)
+        .frame(height: typeSize.isAccessibilitySize ? nil : cardHeight).frame(minHeight: typeSize.isAccessibilitySize ? cardHeight : nil).frame(maxWidth: .infinity)
         .clipShape(RoundRectangle(radius: cardRadius))
         .elevation(2)
         .accessibilityElement(children: .contain)

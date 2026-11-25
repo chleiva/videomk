@@ -255,3 +255,147 @@ extension CoreTests {
         }
     }
 }
+
+@Suite struct VideoShapeTests {
+    @Test func listAndGetResponsesCarryTheVideoShape() throws {
+        let v = try JSONDecoder().decode(VideoItem.self, from: Data(#"{"video_id":"a","status":"COMPLETE","aspect":"9:16","resolution":"1080p"}"#.utf8))
+        #expect(v.aspect == "9:16" && v.resolution == "1080p" && v.isPortrait && abs(v.aspectRatio - 0.5625) < 0.001)
+        let old = try JSONDecoder().decode(VideoItem.self, from: Data(#"{"video_id":"b","status":"COMPLETE"}"#.utf8))
+        #expect(old.aspect == nil && !old.isPortrait && abs(old.aspectRatio - 16.0 / 9.0) < 0.001)       // before formats existed: landscape
+        #expect(VideoItem.ratio("1:1") == 1 && VideoItem.ratio("4:5") == 0.8 && VideoItem.ratio("nonsense") == 16.0 / 9.0 && VideoItem.ratio("0:9") == 16.0 / 9.0)
+    }
+}
+
+@Suite struct StableImageTests {
+    private func url(_ video: String, sig: String) -> URL { URL(string: "https://bucket.s3.eu-west-1.amazonaws.com/u/me/videos/\(video)/preview.gif?X-Amz-Date=20261125T10&X-Amz-Signature=\(sig)")! }
+
+    @Test func theKeyIgnoresTheSignatureButNotTheVideo() {
+        #expect(ImageKey.stable(url("v1", sig: "aaa")) == ImageKey.stable(url("v1", sig: "bbb")))
+        #expect(ImageKey.stable(url("v1", sig: "aaa")) != ImageKey.stable(url("v2", sig: "aaa")))
+        #expect(ImageKey.stable(url("v1", sig: "a")) == "bucket.s3.eu-west-1.amazonaws.com/u/me/videos/v1/preview.gif")
+        #expect(ImageKey.stable(nil as URL?) == nil)
+    }
+
+    private func item(_ id: String, _ status: VideoStatus = .complete, sig: String, title: String? = nil) -> VideoItem {
+        VideoItem(id: id, status: status, title: title ?? id, durationSeconds: 80, createdAt: Date(timeIntervalSince1970: 1_800_000_000), videoURL: url(id, sig: sig), previewGifURL: url(id, sig: sig))
+    }
+
+    @Test func aRefreshWithIdenticalDataChangesNothing() {
+        var stamps: [String: Date] = [:]
+        let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = VideoListMerge.merge(old: [], fresh: [item("a", .running(.writing), sig: "1"), item("b", sig: "1"), item("c", sig: "1")], linkStamp: &stamps, now: t0)
+        #expect(first.changed && first.items.count == 3)
+        // four seconds later: every link has a new signature, nothing else moved
+        let again = VideoListMerge.merge(old: first.items, fresh: [item("a", .running(.writing), sig: "2"), item("b", sig: "2"), item("c", sig: "2")], linkStamp: &stamps, now: t0.addingTimeInterval(4))
+        #expect(!again.changed && again.items == first.items)
+        #expect(zip(again.items, first.items).allSatisfy { $0.previewGifURL == $1.previewGifURL })             // the very same instances, links included
+    }
+
+    @Test func onlyTheVideoThatChangedIsReplaced() {
+        var stamps: [String: Date] = [:]
+        let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = VideoListMerge.merge(old: [], fresh: [item("a", .running(.writing), sig: "1"), item("b", sig: "1")], linkStamp: &stamps, now: t0)
+        let next = VideoListMerge.merge(old: first.items, fresh: [item("a", .running(.voiceAndVisuals), sig: "2"), item("b", sig: "2")], linkStamp: &stamps, now: t0.addingTimeInterval(4))
+        #expect(next.changed && next.items[0].status == .running(.voiceAndVisuals) && next.items[1] == first.items[1])
+        let title = VideoListMerge.merge(old: next.items, fresh: [item("a", .running(.voiceAndVisuals), sig: "3", title: "Renamed"), item("b", sig: "3")], linkStamp: &stamps, now: t0.addingTimeInterval(8))
+        #expect(title.changed && title.items[0].title == "Renamed" && title.items[1] == first.items[1])
+    }
+
+    @Test func orderAndCountChangesAreSeenAndLinksAreRefreshedBeforeTheyExpire() {
+        var stamps: [String: Date] = [:]
+        let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = VideoListMerge.merge(old: [], fresh: [item("a", sig: "1"), item("b", sig: "1")], linkStamp: &stamps, now: t0)
+        #expect(VideoListMerge.merge(old: first.items, fresh: [item("b", sig: "1"), item("a", sig: "1")], linkStamp: &stamps, now: t0).changed)       // order
+        #expect(VideoListMerge.merge(old: first.items, fresh: [item("new", sig: "1"), item("a", sig: "1"), item("b", sig: "1")], linkStamp: &stamps, now: t0).changed)   // a new video
+        let late = VideoListMerge.merge(old: first.items, fresh: [item("a", sig: "9"), item("b", sig: "9")], linkStamp: &stamps, now: t0.addingTimeInterval(31 * 60))
+        #expect(late.changed && ImageKey.stable(late.items[0].previewGifURL) == ImageKey.stable(first.items[0].previewGifURL) && late.items[0].previewGifURL != first.items[0].previewGifURL)   // new signature after 30 minutes
+    }
+}
+
+@Suite struct PlatformRecommendationTests {
+    private let caps = FakeCreateAPI.richCapabilities
+    private func chip(_ id: String) -> PlatformChip { PlatformChips.make(caps).first { $0.members.contains(id) }! }
+
+    @Test func lengthsComeFromTheServerPresetsWithShortOnesFirst() throws {
+        #expect(caps.lengthPresets == [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12])
+        #expect([0.25, 0.5, 0.75, 1, 2, 12].map(LengthLabel.chip) == ["15 s", "30 s", "45 s", "1 min", "2 min", "12 min"])
+        #expect(LengthLabel.clock(2.3333) == "2:20" && LengthLabel.spoken(0.75) == "45 seconds" && LengthLabel.spoken(1) == "1 minute")
+        let json = #"{"aspects":[{"id":"16:9","ready":true}],"resolutions":[{"id":"1080p"}],"platforms":[],"lengths":{"min_minutes":0.25,"max_minutes":12,"presets":[12,0.5,0.25,99,0]}}"#
+        let c = try JSONDecoder().decode(CreateCapabilities.self, from: Data(json.utf8))
+        #expect(c.lengthPresets == [0.25, 0.5, 12])                       // sorted, nothing above the maximum or at zero
+        #expect(CreateCapabilities.fallback.lengthPresets == [1, 2, 3, 5, 8, 12])
+        #expect(try JSONDecoder().decode(CreateCapabilities.self, from: Data(#"{"aspects":[{"id":"16:9","ready":true}]}"#.utf8)).lengthPresets == [1, 2, 3, 5, 8, 12])   // no `lengths`: the old six
+    }
+
+    @Test func creditsFollowCeilingWithAMinimumOfOne() {
+        let credits = [0.25, 0.5, 0.75, 1, 2, 3].map { ComposerPlan.credits(forMinutes: $0) }
+        #expect(credits == [1, 1, 1, 1, 2, 3])
+        #expect(CreateOptions(minutes: 61.0 / 60).credits == 2)                 // 61 seconds costs 2
+        var f = CreateForm(); f.setMinutes(0.25)
+        #expect(ComposerPlan.status(text: "A story about a lighthouse keeper", balance: 1, options: f.options, lengths: caps.lengthPresets).message == "1 credit · you'll have 0 left")
+    }
+
+    @Test func linkedInAndXRecommendDifferentlyAndVisibly() {
+        var f = CreateForm()
+        f.select(chip("linkedin"))
+        #expect(f.aspect == "4:5" && f.resolution == "1080p" && f.minutes == 1)
+        #expect(f.recommendation(caps) == "LinkedIn · Portrait 4:5 · 1080p · about 1 min")
+        f.select(chip("x"))
+        #expect(f.aspect == "16:9" && f.minutes == 0.75)
+        #expect(f.recommendation(caps) == "X · Landscape 16:9 · 1080p · about 45 s")
+        f.select(chip("shorts"))
+        #expect(f.aspect == "9:16" && f.minutes == 0.75 && f.recommendation(caps).hasPrefix("Shorts · Reels · TikTok · Vertical 9:16"))
+    }
+
+    @Test func aLengthChosenByHandSurvivesAPlatformPick() {
+        var f = CreateForm()
+        f.setMinutes(5)
+        f.select(chip("linkedin"))
+        #expect(f.aspect == "4:5" && f.minutes == 5)                            // the format follows, the length stays
+        #expect(f.recommendation(caps) == "LinkedIn · Portrait 4:5 · 1080p · about 1 min")      // and the recommendation is still shown
+        var fresh = CreateForm(); fresh.select(chip("linkedin")); fresh.select(chip("x"))
+        #expect(fresh.minutes == 0.75)                                          // picks alone never count as a chosen length
+    }
+
+    @Test func otherFormatsOfAPlatformAreSecondaryChoicesThatSwitchOnlyTheFormat() {
+        var f = CreateForm(); f.select(chip("linkedin"))
+        #expect(f.alsoWorks(caps).map(\.name) == ["Square", "Landscape"])
+        f.aspect = "1:1"
+        #expect(!f.isCustom(caps) && f.minutes == 1 && f.recommendation(caps) == "LinkedIn · Square 1:1 · 1080p")         // still LinkedIn, same length
+        #expect(f.alsoWorks(caps).map(\.name) == ["Portrait", "Landscape"])
+        f.aspect = "9:16"
+        #expect(f.isCustom(caps) && f.recommendation(caps).hasPrefix("Custom"))                                            // not one the platform endorses
+    }
+
+    @Test func overThePlatformsLimitAGentleHintOffersItsLongestPreset() {
+        var f = CreateForm(); f.select(chip("x")); f.setMinutes(3)
+        let hint = f.maxLengthHint(caps)
+        #expect(hint?.text == "X allows up to 2:20." && hint?.fixMinutes == 2)                    // the longest preset within 2:20
+        f.setMinutes(2); #expect(f.maxLengthHint(caps) == nil)
+        f.select(chip("youtube")); f.setMinutes(12); #expect(f.maxLengthHint(caps) == nil)       // no limit
+        f.select(chip("instagram_feed")); f.setMinutes(0.75)
+        #expect(f.maxLengthHint(caps) == nil)                                                    // 45 s is within a minute
+        f.setMinutes(2); #expect(f.maxLengthHint(caps)?.fixMinutes == 1)
+    }
+
+    @Test func rememberedChoicesNeverOverrideAnExplicitNewPick() {
+        var d = CreateDefaults(); d.platform = "youtube"; d.minutes = 3
+        var f = d.form(caps)
+        #expect(f.platform == "youtube" && f.minutes == 3 && !f.userTouched)
+        f.select(chip("linkedin"))
+        #expect(f.userTouched && f.platform == "linkedin" && f.minutes == 1)                     // the pick wins over what was remembered
+        var g = d.form(caps); g.setMinutes(0.5)
+        #expect(g.userTouched && g.lengthTouched)
+        let short = CreateDefaults({ var x = CreateForm(); x.minutes = 0.25; return x }())
+        #expect(short.form(caps).minutes == 0.25)                                                // a short length can be remembered
+        #expect(short.form(.fallback).minutes == 3)                                              // but not if the server no longer lists it
+    }
+
+    @Test func thePlatformNoteSurvivesDecoding() throws {
+        let json = #"{"aspects":[{"id":"4:5","ready":true}],"resolutions":[{"id":"1080p"}],"platforms":[{"id":"linkedin","label":"LinkedIn","aspect":"4:5","resolution":"1080p","note":"Portrait 4:5 · 1080p · about 1 min","recommended_minutes":1,"max_minutes":10,"other_aspects":["1:1","16:9"]},{"id":"x","label":"X","aspect":"16:9","resolution":"1080p","recommended_minutes":0.75,"max_minutes":null,"other_aspects":[]}]}"#
+        let c = try JSONDecoder().decode(CreateCapabilities.self, from: Data(json.utf8))
+        let li = c.platforms[0], x = c.platforms[1]
+        #expect(li.recommendedMinutes == 1 && li.maxMinutes == 10 && li.otherAspects == ["1:1", "16:9"] && li.note == "Portrait 4:5 · 1080p · about 1 min")
+        #expect(x.recommendedMinutes == 0.75 && x.maxMinutes == nil && x.note == nil)
+    }
+}

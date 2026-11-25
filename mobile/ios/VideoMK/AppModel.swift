@@ -26,6 +26,7 @@ final class AppModel {
     var requestCredits = false                              // "Add credits" in Create asks the home screen to show the wallet
     var createRequested = false                             // "Make a video from this" in Media opens Create on the home screen
     var createProblem: CreateProblem?                       // generate answered blocked or paused after Create closed
+    private var linkStamp: [String: Date] = [:]            // when each video's picture links were last taken (they are swapped quietly before they expire)
     private var intakeBriefs: [String: [String: String]] = [:]
 
     struct CreateProblem: Identifiable, Equatable { let id = UUID(); let message: String; let retryAfter: Int?; let paused: Bool; let prompt: String }
@@ -63,7 +64,7 @@ final class AppModel {
         #if DEBUG
         if media?.isFake == true { return }
         #endif
-        if let w = try? await api.wallet() { wallet = w }
+        if let w = try? await api.wallet(), w != wallet { wallet = w }
     }
 
     func brief(for id: String) -> String? { briefs[id] }
@@ -124,9 +125,12 @@ final class AppModel {
             Task { await refreshWallet() }  // credits load alongside the list
             let fresh = try await api.listVideos()
             track(old: videos, new: fresh)
-            videos = fresh
-            pending = LibraryMerge.stillPending(pending, server: fresh)
-            loadState = .loaded
+            // Every list call brings freshly signed picture links for every video: nothing is replaced unless something visible changed.
+            let merged = VideoListMerge.merge(old: videos, fresh: fresh, linkStamp: &linkStamp)
+            if merged.changed { videos = merged.items }
+            let stillPending = LibraryMerge.stillPending(pending, server: fresh)
+            if stillPending != pending { pending = stillPending }
+            if loadState != .loaded { loadState = .loaded }
         } catch is CancellationError {
         } catch let e as APIError where e == .unauthorized {
             await signOut()
@@ -255,6 +259,16 @@ final class AppModel {
         guard media?.isFake == true else { return }
         let env = ProcessInfo.processInfo.environment
         if let b = env["VMK_DEBUG_BALANCE"].flatMap(Int.init) { wallet = WalletInfo(balance: b) }
+        if env["VMK_DEBUG_FAKE_VIDEOS"] == "many" {
+            // 40 videos, every fifth one vertical, one still being made: a long list to flick through
+            videos = (0..<40).map { n in
+                let vertical = n % 5 == 2
+                return VideoItem(id: "v\(n)", status: n == 0 ? .running(.voiceAndVisuals) : n == 7 ? .failed : .complete, title: "Video number \(n)", durationSeconds: 60 + Double(n), createdAt: .now.addingTimeInterval(-Double(n) * 3600),
+                                 previewGifURL: URL(string: "fake://\(vertical ? "portrait" : "landscape")/v\(n)"), aspect: vertical ? "9:16" : "16:9", resolution: "1080p")
+            }
+            briefs["v0"] = "Making a long list"; minutes["v0"] = 3
+            stageSince["v0"] = (.voiceAndVisuals, Date().addingTimeInterval(-40))
+        }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "1" {
             videos = [
                 VideoItem(id: "v1", status: .running(.voiceAndVisuals), title: "Golden retriever's first summer", createdAt: .now),

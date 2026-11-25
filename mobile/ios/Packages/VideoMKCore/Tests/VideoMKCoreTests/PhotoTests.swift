@@ -365,7 +365,7 @@ extension CoreTests {
 @Suite struct PhotoCapacityTests {
     @Test func capacityFollowsTheServerRule() {
         #expect(PhotoCapacity.capacity(minutes: 1) == 51 && PhotoCapacity.capacity(minutes: 2) == 102 && PhotoCapacity.capacity(minutes: 3) == 153)
-        #expect(PhotoCapacity.capacity(minutes: 12) == 612 && PhotoCapacity.capacity(minutes: 0) == 0)
+        #expect(PhotoCapacity.capacity(minutes: 12) == 612 && PhotoCapacity.capacity(minutes: 0) == 3)        // never fewer than 3
     }
 
     @Test func minimumMinutesIsTheInverse() {
@@ -397,8 +397,16 @@ extension CoreTests {
         #expect(PhotoCapacity.hint(photos: 20, minutes: 1, options: [1]) == nil)
     }
 
+    @Test func shortLengthsFollowTheServerFormulaExactly() {
+        // max_used(sec) = max(3, floor(sec * 0.85))
+        #expect(PhotoCapacity.capacity(minutes: 0.25) == 12 && PhotoCapacity.capacity(minutes: 0.5) == 25 && PhotoCapacity.capacity(minutes: 0.75) == 38 && PhotoCapacity.capacity(minutes: 1) == 51)
+        #expect(PhotoCapacity.hint(photos: 12, minutes: 0.25) == nil && PhotoCapacity.hint(photos: 3, minutes: 0.25) == nil)
+        #expect(PhotoCapacity.hint(photos: 13, minutes: 0.25, options: [0.25, 0.5, 0.75, 1, 2]) == "About 12 of your 13 photos fit in 15 seconds (the best ones, no duplicates). Choose 30 seconds to show them all.")
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 0.75, options: [0.25, 0.5, 0.75, 1, 2, 3]) == "About 38 of your 100 photos fit in 45 seconds (the best ones, no duplicates). Choose 2 minutes to show them all.")
+    }
+
     @Test func singularGrammar() {
-        #expect(PhotoCapacity.hint(photos: 1, minutes: 0.01) == "About 0 of your 1 photo fit in 0.01 minutes (the best ones, no duplicates). Choose 1 minute to show it.")
-        #expect(PhotoCapacity.hint(photos: 2, minutes: 0.03)?.hasPrefix("About 1 of your 2 photos fits in") == true)
+        #expect(PhotoCapacity.hint(photos: 4, minutes: 0.03)?.hasPrefix("About 3 of your 4 photos fit in") == true)         // the floor of 3 photos
+        #expect(PhotoCapacity.hint(photos: 1, minutes: 0.01) == nil)
     }
 }

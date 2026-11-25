@@ -153,3 +153,35 @@ public enum ComposerPhotos {
     /// Room for photos from the phone given the library selection, and vice versa.
     public static func room(phone: Int, library: Int) -> Int { max(0, PhotoLimits.maxPhotos - phone - library) }
 }
+
+/// "Select all" in a list of photos: whatever is in view (All photos, a collection, search results), loading further pages when needed, up to what one
+/// video can hold, counting photos already chosen elsewhere (from the phone).
+public enum SelectAll {
+    public static let limitNote = "Selected the first \(PhotoLimits.maxPhotos): the limit for one video"
+
+    public static func allSelected(view: [String], selected: [String]) -> Bool {
+        let s = Set(selected); return !view.isEmpty && view.allSatisfy(s.contains)
+    }
+
+    /// The label of the control: "Select all 38", "Select all (up to 100)" while more pages exist, "Clear" once everything in view is selected.
+    public static func label(viewCount: Int, hasMore: Bool, allSelected: Bool, limit: Int = PhotoLimits.maxPhotos) -> String {
+        if allSelected { return "Clear" }
+        return hasMore ? "Select all (up to \(limit))" : "Select all \(viewCount)"
+    }
+
+    /// Adds what is in view, in order, until `room` more photos are chosen. `limited` says the limit stopped it.
+    public static func apply(view: [String], selected: [String], room: Int) -> (selected: [String], limited: Bool) {
+        var out = selected
+        var s = Set(selected)
+        var left = max(0, room)
+        var limited = false
+        for id in view where !s.contains(id) {
+            guard left > 0 else { limited = true; break }
+            out.append(id); s.insert(id); left -= 1
+        }
+        return (out, limited)
+    }
+
+    /// "Clear" takes back what is in view and keeps the rest.
+    public static func clear(view: [String], selected: [String]) -> [String] { let v = Set(view); return selected.filter { !v.contains($0) } }
+}

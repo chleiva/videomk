@@ -26,15 +26,25 @@ final class CreateModel {
     private let api: (any CreateServing)?
     private(set) var userID: String?
     private var loaded = false
+    private var openedMinutes: Double?     // a length chosen when the screen opened (an example's) survives the capabilities arriving
 
     init(api: (any CreateServing)?) { self.api = api }
 
     /// Capabilities from the server; any failure (not deployed yet, offline) falls back to 16:9 and 1080p with no request check.
     func loadCapabilities(userID: String?) async {
         self.userID = userID
-        if let api, let c = try? await api.capabilities() { caps = c } else if !loaded { caps = .fallback }
+        let first = !loaded
+        if let api, let c = try? await api.capabilities() { caps = c } else if first { caps = .fallback }
         loaded = true
-        if stage == .form, !form.hasContent { form = CreateDefaults.load(userID: userID).form(caps) } else { form.normalize(caps) }
+        // The stored choices are applied once, when the capabilities first arrive. Later loads (each time the screen opens) only keep the form inside
+        // what the server lists: a chip the person already tapped is never reset.
+        if first, stage == .form, !form.hasContent, !form.userTouched {
+            form = CreateDefaults.load(userID: userID).form(caps)
+            if let m = openedMinutes { form.minutes = m }
+            #if DEBUG
+            if let m = ProcessInfo.processInfo.environment["VMK_DEBUG_DEFAULT_MINUTES"].flatMap(Double.init) { form.minutes = m }
+            #endif
+        } else { form.normalize(caps) }
     }
 
     /// A fresh Create screen with the last used choices (the prompt and the photos are never remembered).
@@ -42,7 +52,8 @@ final class CreateModel {
         stage = .form; showMore = false
         form = CreateDefaults.load(userID: userID).form(caps)
         if let prefill { form.text = prefill }
-        if let minutes { form.minutes = minutes }
+        openedMinutes = minutes
+        if let minutes { form.setMinutes(minutes) }          // an example's length counts as chosen
         #if DEBUG
         if let m = ProcessInfo.processInfo.environment["VMK_DEBUG_DEFAULT_MINUTES"].flatMap(Double.init) { form.minutes = m }
         #endif
@@ -58,7 +69,7 @@ final class CreateModel {
 
     /// The bottom status line: price, reason and fix (the photo hint has its own place under the lengths).
     func status(balance: Int?, dictating: Bool, checking: Bool = false) -> ComposerStatus {
-        ComposerPlan.status(text: form.text, balance: balance, options: form.options, photos: 0, dictating: dictating, sending: checking)
+        ComposerPlan.status(text: form.text, balance: balance, options: form.options, photos: 0, dictating: dictating, sending: checking, lengths: caps.lengthPresets)
     }
 
     // MARK: Create
@@ -118,6 +129,19 @@ final class CreateModel {
     func remember() { CreateDefaults(form).save(userID: userID) }
 
     #if DEBUG
+    /// Screenshots: `VMK_DEBUG_CREATE=linkedin|x|shorts|overmax|shortphotos` picks that platform / length the way a tap would.
+    func debugPick(_ name: String) {
+        func pick(_ id: String) { if let c = PlatformChips.make(caps).first(where: { $0.members.contains(id) }) { form.select(c) } }
+        switch name {
+        case "linkedin": pick("linkedin")
+        case "x": pick("x")
+        case "shorts": pick("shorts")
+        case "overmax": pick("x"); form.setMinutes(3)
+        case "shortphotos": form.setMinutes(0.25)
+        default: break
+        }
+    }
+
     func debugStage(_ name: String) {
         let q = [IntakeQuestion(id: "audience", title: "Who is this for?", helper: "Helps us pick the right words and pace.", options: ["Kids", "Beginners", "Experts", "Everyone"].map { IntakeOption(id: $0.lowercased(), label: $0) }),
                  IntakeQuestion(id: "tone", title: "What tone?", helper: "One word is enough.", options: ["Calm", "Energetic", "Funny", "Serious"].map { IntakeOption(id: $0.lowercased(), label: $0) }),

@@ -8,9 +8,38 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     public struct Resolution: Codable, Sendable, Equatable { public let id: String, label: String
         public init(id: String, label: String? = nil) { self.id = id; self.label = label ?? id }
         public init(from d: Decoder) throws { let c = try d.container(keyedBy: CodingKeys.self); id = try c.decode(String.self, forKey: .id); label = (try? c.decode(String.self, forKey: .label)) ?? id } }
-    public struct Platform: Codable, Sendable, Equatable { public let id: String, label: String, aspect: String, resolution: String; public let note: String?
-        public init(id: String, label: String, aspect: String, resolution: String, note: String? = nil) { self.id = id; self.label = label; self.aspect = aspect; self.resolution = resolution; self.note = note }
-        public init(from d: Decoder) throws { let c = try d.container(keyedBy: CodingKeys.self); id = try c.decode(String.self, forKey: .id); label = (try? c.decode(String.self, forKey: .label)) ?? id; aspect = (try? c.decode(String.self, forKey: .aspect)) ?? "16:9"; resolution = (try? c.decode(String.self, forKey: .resolution)) ?? "1080p"; note = try? c.decode(String.self, forKey: .note) } }
+    public struct Platform: Codable, Sendable, Equatable {
+        public let id: String, label: String, aspect: String, resolution: String
+        public let note: String?
+        public let recommendedMinutes: Double?     // what the platform wants (preselected, unless the person chose a length)
+        public let maxMinutes: Double?             // a soft limit; nil when there is none
+        public let otherAspects: [String]          // formats that also work, shown as small secondary choices
+        enum CodingKeys: String, CodingKey { case id, label, aspect, resolution, note, recommendedMinutes = "recommended_minutes", maxMinutes = "max_minutes", otherAspects = "other_aspects" }
+        public init(id: String, label: String, aspect: String, resolution: String, note: String? = nil, recommendedMinutes: Double? = nil, maxMinutes: Double? = nil, otherAspects: [String] = []) {
+            self.id = id; self.label = label; self.aspect = aspect; self.resolution = resolution; self.note = note; self.recommendedMinutes = recommendedMinutes; self.maxMinutes = maxMinutes; self.otherAspects = otherAspects
+        }
+        public init(from d: Decoder) throws {
+            let c = try d.container(keyedBy: CodingKeys.self)
+            id = try c.decode(String.self, forKey: .id); label = (try? c.decode(String.self, forKey: .label)) ?? id
+            aspect = (try? c.decode(String.self, forKey: .aspect)) ?? "16:9"; resolution = (try? c.decode(String.self, forKey: .resolution)) ?? "1080p"
+            note = try? c.decode(String.self, forKey: .note)
+            recommendedMinutes = try? c.decode(Double.self, forKey: .recommendedMinutes); maxMinutes = try? c.decode(Double.self, forKey: .maxMinutes)
+            otherAspects = (try? c.decode([String].self, forKey: .otherAspects)) ?? []
+        }
+    }
+    public struct Lengths: Codable, Sendable, Equatable {
+        public let minMinutes: Double, maxMinutes: Double
+        public let presets: [Double]
+        enum CodingKeys: String, CodingKey { case minMinutes = "min_minutes", maxMinutes = "max_minutes", presets }
+        public init(minMinutes: Double = 1, maxMinutes: Double = 12, presets: [Double] = CreateOptions.lengths) { self.minMinutes = minMinutes; self.maxMinutes = maxMinutes; self.presets = presets }
+        public init(from d: Decoder) throws {
+            let c = try d.container(keyedBy: CodingKeys.self)
+            minMinutes = (try? c.decode(Double.self, forKey: .minMinutes)) ?? 1; maxMinutes = (try? c.decode(Double.self, forKey: .maxMinutes)) ?? 12
+            let top = (try? c.decode(Double.self, forKey: .maxMinutes)) ?? 12
+            let p = ((try? c.decode([Double].self, forKey: .presets)) ?? []).filter { $0 > 0 && $0 <= top }.sorted()
+            presets = p.isEmpty ? CreateOptions.lengths : p
+        }
+    }
     public struct Language: Codable, Sendable, Equatable { public let id: String, label: String
         public init(id: String, label: String) { self.id = id; self.label = label } }
 
@@ -20,18 +49,23 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     public var languages: [Language]
     public var maxPhotos: Int
     public var intake: Bool
+    public var lengths: Lengths
 
-    enum CodingKeys: String, CodingKey { case aspects, resolutions, platforms, languages, maxPhotos = "max_photos", intake }
+    enum CodingKeys: String, CodingKey { case aspects, resolutions, platforms, languages, lengths, maxPhotos = "max_photos", intake }
 
-    public init(aspects: [Aspect], resolutions: [Resolution], platforms: [Platform], languages: [Language] = [], maxPhotos: Int = 100, intake: Bool = true) {
-        self.aspects = aspects; self.resolutions = resolutions; self.platforms = platforms; self.languages = languages; self.maxPhotos = maxPhotos; self.intake = intake
+    public init(aspects: [Aspect], resolutions: [Resolution], platforms: [Platform], languages: [Language] = [], maxPhotos: Int = 100, intake: Bool = true, lengths: Lengths = Lengths()) {
+        self.lengths = lengths; self.aspects = aspects; self.resolutions = resolutions; self.platforms = platforms; self.languages = languages; self.maxPhotos = maxPhotos; self.intake = intake
     }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
         aspects = (try? c.decode([Aspect].self, forKey: .aspects)) ?? []; resolutions = (try? c.decode([Resolution].self, forKey: .resolutions)) ?? []
         platforms = (try? c.decode([Platform].self, forKey: .platforms)) ?? []; languages = (try? c.decode([Language].self, forKey: .languages)) ?? []
         maxPhotos = (try? c.decode(Int.self, forKey: .maxPhotos)) ?? 100; intake = (try? c.decode(Bool.self, forKey: .intake)) ?? false
+        lengths = (try? c.decode(Lengths.self, forKey: .lengths)) ?? Lengths()
     }
+
+    /// The length chips: the server's presets from 15 seconds up, or 1, 2, 3, 5, 8, 12 when it does not say.
+    public var lengthPresets: [Double] { lengths.presets }
 
     public static let platformDefaults: [Platform] = [
         Platform(id: "youtube", label: "YouTube", aspect: "16:9", resolution: "1080p"), Platform(id: "linkedin", label: "LinkedIn", aspect: "16:9", resolution: "1080p"),
@@ -60,6 +94,10 @@ public struct PlatformChip: Equatable, Sendable, Identifiable {
     public let resolution: String
     public let supported: Bool
     public let members: [String]   // "Shorts · Reels · TikTok" is one chip for three ids
+    public var note: String? = nil
+    public var recommendedMinutes: Double? = nil
+    public var maxMinutes: Double? = nil
+    public var otherAspects: [String] = []
 }
 
 public enum PlatformChips {
@@ -71,7 +109,8 @@ public enum PlatformChips {
         func chip(_ ids: [String], _ label: String) -> PlatformChip? {
             let found = ids.compactMap { byID[$0] }
             guard let first = found.first else { return nil }
-            return PlatformChip(id: first.id, label: label, aspect: first.aspect, resolution: first.resolution, supported: found.allSatisfy { caps.isSupported(aspect: $0.aspect, resolution: $0.resolution) }, members: ids)
+            return PlatformChip(id: first.id, label: label, aspect: first.aspect, resolution: first.resolution, supported: found.allSatisfy { caps.isSupported(aspect: $0.aspect, resolution: $0.resolution) }, members: ids,
+                                note: first.note, recommendedMinutes: first.recommendedMinutes, maxMinutes: first.maxMinutes, otherAspects: first.otherAspects.filter { id in caps.readyAspects.contains { $0.id == id } })
         }
         let all = [chip(["youtube"], "YouTube"), chip(["linkedin"], "LinkedIn"), chip(["x"], "X"), chip(["other"], "Just a video"),
                    chip(["shorts", "reels", "tiktok"], "Shorts · Reels · TikTok"), chip(["instagram_feed"], "Instagram")].compactMap { $0 }
@@ -89,27 +128,56 @@ public struct CreateForm: Equatable, Sendable {
     public var look: VideoLook?
     public var captions = true
     public var language = "auto"
+    /// The person changed the length by hand since the screen opened: a platform pick then keeps it (and only shows its recommendation).
+    public private(set) var lengthTouched = false
+    /// Any explicit pick (platform or length): remembered defaults arriving late never override it.
+    public private(set) var userTouched = false
 
     public init() {}
+
+    public mutating func setMinutes(_ m: Double) { minutes = m; lengthTouched = true; userTouched = true }
+    public mutating func resetTouches() { lengthTouched = false; userTouched = false }
 
     public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language) }
     public var hasContent: Bool { !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     public func chip(_ caps: CreateCapabilities) -> PlatformChip? { PlatformChips.make(caps).first { $0.members.contains(platform) } }
 
-    /// The person changed the format away from what the platform recommends.
-    public func isCustom(_ caps: CreateCapabilities) -> Bool { guard let c = chip(caps) else { return true }; return c.aspect != aspect || c.resolution != resolution }
+    /// The person changed the format away from what the platform recommends (its own "also works" formats do not count as custom).
+    public func isCustom(_ caps: CreateCapabilities) -> Bool { guard let c = chip(caps) else { return true }; return !(c.aspect == aspect || c.otherAspects.contains(aspect)) || c.resolution != resolution }
 
-    /// "YouTube · Landscape 16:9 · 1080p" (or "Custom · Vertical 9:16 · 1080p").
+    /// "LinkedIn · Portrait 4:5 · 1080p · about 1 min": the server's own note for the platform's recommendation, else built from the choices
+    /// ("YouTube · Landscape 16:9 · 1080p", or "Custom · Vertical 9:16 · 1080p").
     public func recommendation(_ caps: CreateCapabilities) -> String {
-        let name = isCustom(caps) ? "Custom" : (chip(caps)?.label ?? "Just a video")
+        let c = chip(caps)
+        let name = isCustom(caps) ? "Custom" : (c?.label ?? "Just a video")
+        if !isCustom(caps), let c, c.aspect == aspect, c.resolution == resolution, let note = c.note, !note.isEmpty { return "\(name) · \(note)" }
         return "\(name) · \(caps.aspectName(aspect)) · \(resolution)"
+    }
+
+    /// "Also works: Square, Landscape": the platform's other formats, as small secondary choices that switch only the format.
+    public func alsoWorks(_ caps: CreateCapabilities) -> [(id: String, name: String)] {
+        guard let c = chip(caps), c.supported else { return [] }
+        return ([c.aspect] + c.otherAspects).filter { $0 != aspect }.compactMap { id in caps.aspect(id).map { (id, $0.label) } }
+    }
+
+    /// Longer than the platform allows: a gentle line and a one-tap chip to use its longest preset within the limit.
+    public func maxLengthHint(_ caps: CreateCapabilities) -> (text: String, fixMinutes: Double)? {
+        guard let c = chip(caps), let max = c.maxMinutes, minutes > max + 1e-9 else { return nil }
+        let presets = caps.lengthPresets.sorted()
+        let fix = presets.last { $0 <= max + 1e-9 } ?? presets.first ?? max
+        return ("\(c.label) allows up to \(LengthLabel.clock(max)).", fix)
     }
 
     /// The Change link exists only when there is a real choice to make.
     public func canChangeFormat(_ caps: CreateCapabilities) -> Bool { caps.readyAspects.count > 1 || caps.resolutions.count > 1 }
 
-    public mutating func select(_ chip: PlatformChip) { guard chip.supported else { return }; platform = chip.id; aspect = chip.aspect; resolution = chip.resolution }
+    /// Picking a platform sets its format and, unless the length was changed by hand since the screen opened, its recommended length.
+    public mutating func select(_ chip: PlatformChip) {
+        guard chip.supported else { return }
+        platform = chip.id; aspect = chip.aspect; resolution = chip.resolution; userTouched = true
+        if !lengthTouched, let m = chip.recommendedMinutes { minutes = m }
+    }
 
     /// One line for the collapsed "More options" row.
     public func moreSummary(_ caps: CreateCapabilities) -> String {
@@ -149,7 +217,7 @@ public struct CreateDefaults: Codable, Sendable, Equatable {
     /// A fresh form with these choices, kept inside the capabilities.
     public func form(_ caps: CreateCapabilities) -> CreateForm {
         var f = CreateForm()
-        f.platform = platform; f.aspect = aspect; f.resolution = resolution; f.minutes = CreateOptions.lengths.contains(minutes) ? minutes : CreateOptions.defaultMinutes
+        f.platform = platform; f.aspect = aspect; f.resolution = resolution; f.minutes = caps.lengthPresets.contains(minutes) ? minutes : (caps.lengthPresets.contains(CreateOptions.defaultMinutes) ? CreateOptions.defaultMinutes : (caps.lengthPresets.first ?? CreateOptions.defaultMinutes))
         f.look = look.flatMap(VideoLook.init(rawValue:)); f.captions = captions; f.language = language
         f.normalize(caps)
         return f
@@ -337,4 +405,15 @@ public enum RetryText {
         if s < 86_400 { return "Try again in about \(ComposerPlan.plural((s + 1800) / 3600, "hour"))." }
         return "Try again in about \(ComposerPlan.plural((s + 43_200) / 86_400, "day"))."
     }
+}
+
+
+/// How lengths are written on chips and in hints.
+public enum LengthLabel {
+    /// "15 s", "30 s", "45 s", "1 min", "2 min".
+    public static func chip(_ minutes: Double) -> String { minutes < 1 ? "\(Int((minutes * 60).rounded())) s" : "\(Int(minutes.rounded())) min" }
+    /// "2:20" for 2 minutes 20 seconds.
+    public static func clock(_ minutes: Double) -> String { let s = Int((minutes * 60).rounded()); return String(format: "%d:%02d", s / 60, s % 60) }
+    /// "15 seconds", "2 minutes" for screen readers.
+    public static func spoken(_ minutes: Double) -> String { minutes < 1 ? "\(Int((minutes * 60).rounded())) seconds" : ComposerPlan.plural(Int(minutes.rounded()), "minute") }
 }

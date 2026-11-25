@@ -56,16 +56,19 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
     public let previewGifURL: URL?
     public let rejectReason: String?
     public let editable: Bool
+    /// The frame shape the video was made in ("16:9", "9:16", "1:1", "4:5") and its resolution; nil for videos from before formats existed.
+    public let aspect: String?
+    public let resolution: String?
 
     enum CodingKeys: String, CodingKey {
         case videoID = "video_id", status, title, durationS = "duration_s", createdAt = "created_at"
-        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable
+        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution
     }
 
     public init(id: String, status: VideoStatus, title: String? = nil, durationSeconds: Double? = nil, createdAt: Date? = nil,
-                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false) {
+                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil) {
         self.id = id; self.status = status; self.title = title; self.durationSeconds = durationSeconds; self.createdAt = createdAt
-        self.videoURL = videoURL; self.previewGifURL = previewGifURL; self.rejectReason = rejectReason; self.editable = editable
+        self.videoURL = videoURL; self.previewGifURL = previewGifURL; self.rejectReason = rejectReason; self.editable = editable; self.aspect = aspect; self.resolution = resolution
     }
 
     public init(from decoder: Decoder) throws {
@@ -79,11 +82,22 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
         previewGifURL = (try? c.decode(String.self, forKey: .previewGifURL)).flatMap(URL.init(string:))
         rejectReason = try? c.decode(String.self, forKey: .rejectReason)
         editable = (try? c.decode(Bool.self, forKey: .editable)) ?? false
+        aspect = try? c.decode(String.self, forKey: .aspect)
+        resolution = try? c.decode(String.self, forKey: .resolution)
     }
 
     static func parseDate(_ s: String) -> Date? {
         let f = ISO8601DateFormatter()
         return f.date(from: s)
+    }
+
+    /// Width over height of the picture (16:9 when unknown or unreadable), so cards and the player never distort a vertical or square video.
+    public var aspectRatio: Double { Self.ratio(aspect) }
+    public var isPortrait: Bool { aspectRatio < 1 }
+
+    public static func ratio(_ aspect: String?) -> Double {
+        let p = (aspect ?? "").split(separator: ":").compactMap { Double($0) }
+        return p.count == 2 && p[0] > 0 && p[1] > 0 ? p[0] / p[1] : 16.0 / 9.0
     }
 
     public var displayTitle: String { (title?.isEmpty == false ? title! : nil) ?? "Untitled video" }
@@ -108,6 +122,7 @@ public enum VideoLook: String, CaseIterable, Sendable, Identifiable {
 }
 
 public struct CreateOptions: Sendable, Equatable {
+    /// What the app offers until the server says otherwise (capabilities carry `lengths.presets`, from 15 seconds up).
     public static let lengths: [Double] = [1, 2, 3, 5, 8, 12]
     public static let defaultMinutes: Double = 3
     public var minutes: Double

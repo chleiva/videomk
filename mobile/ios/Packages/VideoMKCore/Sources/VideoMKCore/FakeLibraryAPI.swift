@@ -228,7 +228,7 @@ public actor FakeCreateAPI: CreateServing {
     private var delay: Duration
     private var fails = false
 
-    public init(capabilities: Result<CreateCapabilities, Error> = .success(CreateCapabilities(aspects: [.init(id: "16:9", label: "Landscape")], resolutions: [.init(id: "1080p")], platforms: CreateCapabilities.platformDefaults, languages: [.init(id: "en", label: "English"), .init(id: "es", label: "Español")])),
+    public init(capabilities: Result<CreateCapabilities, Error> = .success(FakeCreateAPI.richCapabilities),
                 responses: [BriefResponse] = [.ok(brief: [:])], delay: Duration = .zero) {
         self.caps = capabilities; self.responses = responses; self.delay = delay
     }
@@ -240,5 +240,27 @@ public actor FakeCreateAPI: CreateServing {
         if fails { throw APIError.network }
         let i = min(requests.count - 1, responses.count - 1)
         return responses[i]
+    }
+}
+
+extension FakeCreateAPI {
+    /// The capabilities the server now sends: every aspect ready (three of them beta), short lengths, and a recommendation per platform.
+    public static var richCapabilities: CreateCapabilities {
+        typealias P = CreateCapabilities.Platform
+        return CreateCapabilities(
+            aspects: [.init(id: "16:9", label: "Landscape"), .init(id: "9:16", label: "Vertical", ready: true, beta: true), .init(id: "1:1", label: "Square", ready: true, beta: true), .init(id: "4:5", label: "Portrait", ready: true, beta: true)],
+            resolutions: [.init(id: "720p"), .init(id: "1080p")],
+            platforms: [
+                P(id: "youtube", label: "YouTube", aspect: "16:9", resolution: "1080p", note: "Landscape 16:9 · 1080p · about 3 min", recommendedMinutes: 3, maxMinutes: nil, otherAspects: []),
+                P(id: "shorts", label: "YouTube Shorts", aspect: "9:16", resolution: "1080p", note: "Vertical 9:16 · 1080p · about 45 s", recommendedMinutes: 0.75, maxMinutes: 3, otherAspects: []),
+                P(id: "tiktok", label: "TikTok", aspect: "9:16", resolution: "1080p", note: "Vertical 9:16 · 1080p · about 45 s", recommendedMinutes: 0.75, maxMinutes: 10, otherAspects: []),
+                P(id: "reels", label: "Reels", aspect: "9:16", resolution: "1080p", note: "Vertical 9:16 · 1080p · about 30 s", recommendedMinutes: 0.5, maxMinutes: 3, otherAspects: []),
+                P(id: "instagram_feed", label: "Instagram", aspect: "4:5", resolution: "1080p", note: "Portrait 4:5 · 1080p · about 30 s", recommendedMinutes: 0.5, maxMinutes: 1, otherAspects: ["1:1"]),
+                P(id: "linkedin", label: "LinkedIn", aspect: "4:5", resolution: "1080p", note: "Portrait 4:5 · 1080p · about 1 min", recommendedMinutes: 1, maxMinutes: 10, otherAspects: ["1:1", "16:9"]),
+                P(id: "x", label: "X", aspect: "16:9", resolution: "1080p", note: "Landscape 16:9 · 1080p · about 45 s", recommendedMinutes: 0.75, maxMinutes: 2.3333, otherAspects: ["1:1"]),
+                P(id: "other", label: "Just a video", aspect: "16:9", resolution: "1080p", note: "Landscape 16:9 · 1080p · about 3 min", recommendedMinutes: 3, maxMinutes: nil, otherAspects: ["9:16", "1:1", "4:5"]),
+            ],
+            languages: [.init(id: "en", label: "English"), .init(id: "es", label: "Español")], intake: true,
+            lengths: .init(minMinutes: 0.25, maxMinutes: 12, presets: [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]))
     }
 }

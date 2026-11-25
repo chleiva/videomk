@@ -333,10 +333,12 @@ struct SelectionBar: View {
             HStack {
                 Text(selection.count == 0 ? "Select photos" : "\(selection.count) selected").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
                 Spacer()
-                if feed.isSearching, !feed.photos.isEmpty {
-                    Button(feed.canLoadMore ? "Select all (up to 100)" : "Select all \(feed.photos.count) in this view") {
-                        Task { await feed.loadAll(upTo: PhotoLimits.maxPhotos); selection.select(all: feed.photos.prefix(PhotoLimits.maxPhotos).map(\.id)) }
-                    }.font(.footnote.weight(.semibold))
+                if !feed.photos.isEmpty {
+                    let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
+                    Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)) {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
+                    }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44)
                         .accessibilityIdentifier("selectAll")
                 }
             }
@@ -393,5 +395,17 @@ struct StorageSheet: View {
         }
         .presentationDetents([.medium, .large])
         .task { await media.loadSummary() }
+    }
+}
+
+/// Select all / Clear on the Media tab and in a collection: everything in view, more pages loaded up to the limit one video can hold.
+@MainActor enum SelectionActions {
+    static func toggleAll(feed: PhotoFeed, selection: PhotoSelection, limit: Int) async {
+        let view = feed.photos.map(\.id)
+        if SelectAll.allSelected(view: view, selected: selection.ordered) { selection.set(SelectAll.clear(view: view, selected: selection.ordered)); return }
+        await feed.loadAll(upTo: limit)
+        let r = SelectAll.apply(view: feed.photos.map(\.id), selected: selection.ordered, room: limit - selection.count)
+        selection.set(r.selected)
+        if r.limited || (feed.canLoadMore && selection.count >= limit) { UIAccessibility.post(notification: .announcement, argument: SelectAll.limitNote) }
     }
 }

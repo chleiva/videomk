@@ -52,7 +52,7 @@ struct VideoDetailView: View {
 
     @ViewBuilder private func playerSection(_ video: VideoItem) -> some View {
         Group {
-            if let player { InlinePlayer(player: player) }
+            if let player { InlinePlayer(player: player, landscape: video.aspectRatio >= 1.2) }
             else if let playbackError {
                 VStack(spacing: 12) {
                     Text(playbackError).foregroundStyle(Theme.textSecondary)
@@ -60,7 +60,9 @@ struct VideoDetailView: View {
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
         }
-        .aspectRatio(16 / 9, contentMode: .fit)
+        .aspectRatio(video.aspectRatio, contentMode: .fit)
+        .frame(maxHeight: video.isPortrait ? 560 : nil)
+        .frame(maxWidth: .infinity)
         .background(.black)
         .clipShape(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
         .accessibilityIdentifier("player")

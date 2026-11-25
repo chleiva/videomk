@@ -37,6 +37,26 @@ struct AddPhotosSheet: View {
         AttachSelection(attached: attached, phone: phoneIDs, library: librarySelection.ordered)
     }
     private var media: MediaModel? { model.media }
+    private var currentFeed: PhotoFeed? { feeds[collectionID ?? "all"] }
+
+    /// The control next to the count: select everything in view (All photos, a collection, search results), loading more pages up to the limit.
+    private var selectAllLabel: String? {
+        guard source == .library, let feed = currentFeed, !feed.photos.isEmpty else { return nil }
+        return SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: SelectAll.allSelected(view: feed.photos.map(\.id), selected: librarySelection.ordered), limit: selection.libraryCap)
+    }
+
+    private func selectAllTapped() {
+        guard let feed = currentFeed else { return }
+        UISelectionFeedbackGenerator().selectionChanged()
+        Task {
+            if SelectAll.allSelected(view: feed.photos.map(\.id), selected: librarySelection.ordered) { librarySelection.set(SelectAll.clear(view: feed.photos.map(\.id), selected: librarySelection.ordered)); return }
+            let cap = selection.libraryCap
+            await feed.loadAll(upTo: cap)
+            let r = SelectAll.apply(view: feed.photos.map(\.id), selected: librarySelection.ordered, room: cap - librarySelection.count)
+            librarySelection.set(r.selected)
+            if r.limited || (feed.canLoadMore && librarySelection.count >= cap) { showToast(SelectAll.limitNote) }
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -91,7 +111,13 @@ struct AddPhotosSheet: View {
                 .font(.system(size: 11.5)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.top, 8)
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(sel.selected == 0 ? "Choose photos" : sel.title()).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text)
+                    HStack(spacing: 6) {
+                        Text(sel.selected == 0 ? "Choose photos" : sel.title()).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text)
+                        if let label = selectAllLabel {
+                            Text("·").foregroundStyle(Theme.textSecondary)
+                            Button(label) { selectAllTapped() }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 32).accessibilityIdentifier("selectAll")
+                        }
+                    }
                     Text(sel.subline(minutes: minutes)).font(.system(size: 12.5)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
                 .accessibilityElement(children: .combine)
@@ -213,7 +239,7 @@ private struct LibraryChooser: View {
         if !feed.isSearching, !media.collections.isEmpty {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    chip("All", selected: collectionID == nil) { collectionID = nil }
+                    chip("All photos", selected: collectionID == nil) { collectionID = nil }
                     ForEach(media.collections) { c in chip(c.name, selected: collectionID == c.id) { collectionID = c.id } }
                 }.padding(.horizontal, 20)
             }

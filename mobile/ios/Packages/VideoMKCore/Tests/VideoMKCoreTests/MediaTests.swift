@@ -878,3 +878,36 @@ private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
         #expect(a.message(j, now: t0.addingTimeInterval(41)) == nil)
     }
 }
+
+@Suite struct SelectAllTests {
+    private let view = (1...38).map { "p\($0)" }
+
+    @Test func labelsSayWhatWillHappen() {
+        #expect(SelectAll.label(viewCount: 38, hasMore: false, allSelected: false) == "Select all 38")
+        #expect(SelectAll.label(viewCount: 60, hasMore: true, allSelected: false) == "Select all (up to 100)")
+        #expect(SelectAll.label(viewCount: 38, hasMore: false, allSelected: true) == "Clear")
+    }
+
+    @Test func everythingInViewIsAddedAndKeepsWhatWasChosenBefore() {
+        let r = SelectAll.apply(view: view, selected: ["p3", "other"], room: 100)
+        #expect(r.selected.count == 39 && r.selected.prefix(2) == ["p3", "other"] && !r.limited && SelectAll.allSelected(view: view, selected: r.selected))
+        #expect(SelectAll.allSelected(view: view, selected: r.selected) && !SelectAll.allSelected(view: view, selected: ["p1"]) && !SelectAll.allSelected(view: [], selected: ["p1"]))
+    }
+
+    @Test func theLimitStopsItAndSaysSo() {
+        let big = (1...150).map { "q\($0)" }
+        let r = SelectAll.apply(view: big, selected: [], room: 100)
+        #expect(r.selected.count == 100 && r.limited && r.selected.last == "q100")                 // the first 100, in order
+        // 30 photos already chosen from the phone: only 70 more fit
+        let mixed = SelectAll.apply(view: big, selected: [], room: AttachSelection(attached: 0, phone: (1...30).map { "ph\($0)" }).libraryCap)
+        #expect(mixed.selected.count == 70 && mixed.limited)
+        #expect(SelectAll.limitNote == "Selected the first 100: the limit for one video")
+        let exact = SelectAll.apply(view: view, selected: [], room: 38)
+        #expect(exact.selected.count == 38 && !exact.limited)                                       // it fits exactly: no note
+    }
+
+    @Test func clearTakesBackOnlyWhatIsInView() {
+        let all = SelectAll.apply(view: view, selected: ["elsewhere"], room: 100).selected
+        #expect(SelectAll.clear(view: view, selected: all) == ["elsewhere"])
+    }
+}

@@ -155,7 +155,7 @@ private struct SummaryStep: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        let status = ComposerPlan.status(text: create.form.text, balance: balance, options: create.form.options, photos: 0)
+        let status = ComposerPlan.status(text: create.form.text, balance: balance, options: create.form.options, photos: 0, lengths: create.caps.lengthPresets)
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Ready when you are").font(.system(size: 23, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
@@ -177,13 +177,13 @@ private struct SummaryStep: View {
             }.padding(.top, 14)
             Text("Tap an answer to change it.").font(.system(size: 14)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
             Divider().padding(.vertical, 12)
-            HStack(spacing: 8) { Image(systemName: create.form.aspect == "16:9" ? "rectangle" : "rectangle.portrait").font(.system(size: 14)); Text("\(create.form.recommendation(create.caps)) · \(Int(create.form.minutes)) min").font(.system(size: 15)).lineLimit(2) }.foregroundStyle(Theme.textSecondary)
+            HStack(spacing: 8) { Image(systemName: create.form.aspect == "16:9" ? "rectangle" : "rectangle.portrait").font(.system(size: 14)); Text("\(create.form.recommendation(create.caps)) · \(LengthLabel.chip(create.form.minutes))").font(.system(size: 15)).lineLimit(2) }.foregroundStyle(Theme.textSecondary)
             Spacer(minLength: 8)
             HStack(spacing: 8) {
                 Image(systemName: "bolt.fill").font(.system(size: 14)).foregroundStyle(Theme.primary)
                 Text(status.message).font(.system(size: 14, weight: .medium)).foregroundStyle(status.isProblem ? Theme.warning : Theme.textSecondary)
                 Spacer()
-                if let fix = status.fix, status.isProblem { FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.minutes = m } } }
+                if let fix = status.fix, status.isProblem { FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.setMinutes(m) } } }
             }
             Button { create.dismissOverlay(); onSubmit(brief) } label: {
                 HStack(spacing: 8) { Text("Create video ·").font(.system(size: 19, weight: .bold)); HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.system(size: 15)); Text("\(create.form.options.credits)").font(.system(size: 19, weight: .bold).monospacedDigit()) } }

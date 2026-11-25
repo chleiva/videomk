@@ -11,6 +11,7 @@ struct LibraryView: View {
     @State private var showingSettings = false
     @State private var showingWallet = false
     @State private var showingCreate = false
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var balance: Int? { model.wallet.flatMap { $0.unlimited ? nil : $0.balance } }
 
@@ -34,6 +35,7 @@ struct LibraryView: View {
             .overlay(alignment: .bottom) { entry }
         }
         .task { await model.refresh() }
+        .task { await model.createModel.loadCapabilities(userID: model.userID) }       // ready before the sheet opens
         #if DEBUG
         .task { await debugSetup() }
         #endif
@@ -111,7 +113,7 @@ struct LibraryView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
                 Text("Your videos").font(.system(size: 30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 340), spacing: 14, alignment: .top)], spacing: 14) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14, alignment: .top), count: sizeClass == .regular ? 2 : 1), spacing: 14) {
                     ForEach(model.entries) { entry in card(entry) }
                 }
             }
@@ -434,13 +436,14 @@ extension LibraryView {
         let c = model.createModel
         await c.loadCapabilities(userID: model.userID)
         c.open()
-        let text = state == "photos" ? "My holiday in Thailand: beaches, street food and the night market" : state == "unsupported" ? "A scene from a famous actor’s new movie" : "How bees make honey, explained for kids"
+        let text = state == "photos" || state == "shortphotos" ? "My holiday in Thailand: beaches, street food and the night market" : state == "unsupported" ? "A scene from a famous actor’s new movie" : "How bees make honey, explained for kids"
         if state != "empty" { c.form.text = text }
-        if state == "photos" {
-            c.form.minutes = 1
+        if state == "photos" || state == "shortphotos" {
+            if state == "photos" { c.form.setMinutes(1) }
             for i in 0..<100 { let img = MediaModel.fakeImage(seed: "attached\(i)", size: CGSize(width: 112, height: 112)); c.photos.debugAppend(AttachedPhoto(data: img.jpegData(compressionQuality: 0.7) ?? Data(), thumbnail: img)) }
         }
         if state == "options" { c.showMore = true }
+        c.debugPick(state)
         c.debugStage(state)
         showingCreate = true
     }

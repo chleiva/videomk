@@ -121,12 +121,25 @@ struct CollectionDetailView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if selection.active {
+                VStack(spacing: 0) {
+                    HStack {
+                        Text(selection.count == 0 ? "Select photos" : "\(selection.count) selected").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
+                        Spacer()
+                        if !feed.photos.isEmpty {
+                            Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered))) {
+                                UISelectionFeedbackGenerator().selectionChanged()
+                                Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
+                            }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("selectAll")
+                        }
+                    }.padding(.horizontal, 16).padding(.top, 6)
                 HStack {
                     Button { model.composerLibrary = Array(feed.photos.filter { selection.contains($0.id) }.prefix(100)); model.selectedTab = 0; model.createRequested = true; selection.clear() } label: { Label("Make a video", systemImage: "sparkles.tv") }
                     Spacer()
                     Button(role: .destructive) { let ids = selection.ids; Task { if await media.edit(current, remove: Array(ids)) { feed.remove(ids); selection.clear() } } } label: { Label("Remove from collection", systemImage: "minus.circle") }
                 }
-                .disabled(selection.count == 0).padding(.horizontal, 16).padding(.vertical, 12).background(.bar)
+                .disabled(selection.count == 0).padding(.horizontal, 16).padding(.vertical, 12)
+                }
+                .background(.bar)
             }
         }
         .task(id: media.version) { await feed.refreshIfNeeded() }
