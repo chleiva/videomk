@@ -44,6 +44,16 @@ class MediaListing(private val clock: () -> Long = System::currentTimeMillis) {
         cursor = page.cursor; fetchedAt = clock()
     }
 
+    /** Puts the fresh first page at the top and keeps everything loaded after it (and the old cursor), so scroll position and paging survive a refresh. */
+    fun mergeHead(page: MediaPage) {
+        val fresh = page.items.map { it.id }.toSet()
+        val keep = order.filter { it !in fresh }
+        page.items.forEach { byId[it.id] = it }
+        order = page.items.map { it.id } + keep
+        if (keep.isEmpty()) cursor = page.cursor
+        fetchedAt = clock()
+    }
+
     fun remove(ids: Collection<String>) { val s = ids.toSet(); s.forEach { byId.remove(it) }; order = order.filter { it !in s } }
 
     fun update(p: MediaPhoto) { if (p.id in byId) byId[p.id] = p }

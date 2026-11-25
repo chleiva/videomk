@@ -346,4 +346,74 @@ class MediaTest {
         assertFalse("cursor" in Json.parseToJsonElement(server.takeRequest().body!!.utf8()).jsonObject)
         assertEquals("NEXT==", Json.parseToJsonElement(server.takeRequest().body!!.utf8()).jsonObject["cursor"]!!.jsonPrimitive.content)
     }
+
+    // ---- waiting for uploaded photos to be listed
+
+    /** A library that lists new photos only after [readyAfterCalls] calls, like a server still preparing them. */
+    private class SlowLibrary(var count: Int, val newPhotos: Int, val readyAfterCalls: Int) {
+        var calls = 0
+        fun fetch(): Int { calls++; if (calls >= readyAfterCalls) count = newPhotos; return count }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test fun `new photos appear within the polling window and polling stops once they are listed`() = runTest {
+        val t = ArrivalTracker(); t.expect(listedNow = 10, added = 3)
+        val lib = SlowLibrary(10, 13, readyAfterCalls = 3)
+        val p = ArrivalPoller(this, t, { lib.fetch() })
+        p.start(); advanceTimeBy(1999); assertEquals(0, lib.calls); assertEquals(3, t.missing(10))
+        advanceTimeBy(6000); runCurrent()
+        assertEquals(3, lib.calls); assertFalse(t.pending); assertFalse(p.running)
+        advanceTimeBy(60_000); runCurrent(); assertEquals(3, lib.calls)   // no more calls
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test fun `polling gives up after about 90 seconds and then stops saying photos are getting ready`() = runTest {
+        val t = ArrivalTracker(); t.expect(10, 5)
+        var calls = 0
+        val p = ArrivalPoller(this, t, { calls++; 10 })
+        p.start(); advanceTimeBy(89_000); runCurrent(); assertTrue(t.pending)
+        advanceTimeBy(10_000); runCurrent()
+        assertFalse(t.pending); assertFalse(p.running)
+        val after = calls; advanceTimeBy(120_000); runCurrent(); assertEquals(after, calls)
+        assertTrue("about 5 fast then 4-second polls, not hundreds: $calls", calls in 20..30)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test fun `restarting never runs two polling jobs at once`() = runTest {
+        val t = ArrivalTracker(); t.expect(0, 4)
+        var calls = 0
+        val p = ArrivalPoller(this, t, { calls++; 0 })
+        p.start(); advanceTimeBy(1000); p.start(); advanceTimeBy(1000); p.start()
+        advanceTimeBy(2001); runCurrent()
+        assertEquals("one job, one call per 2 seconds after the last restart", 1, calls)
+        p.stop(); advanceTimeBy(30_000); runCurrent(); assertEquals(1, calls)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test fun `a batch of only duplicates expects nothing and does not poll`() = runTest {
+        val t = ArrivalTracker(); t.expect(listedNow = 10, added = 0)
+        var calls = 0
+        val p = ArrivalPoller(this, t, { calls++; 10 })
+        p.start(); advanceTimeBy(120_000); runCurrent()
+        assertFalse(t.pending); assertEquals(0, calls); assertEquals(0, t.missing(10))
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test fun `a failed poll is tried again and later batches add to what is expected`() = runTest {
+        val t = ArrivalTracker(); t.expect(10, 2); t.expect(10, 3)   // the baseline is only taken the first time
+        assertEquals(5, t.missing(10)); assertEquals(1, t.missing(14))
+        var calls = 0
+        val p = ArrivalPoller(this, t, { calls++; if (calls == 1) null else 15 })
+        p.start(); advanceTimeBy(5000); runCurrent()
+        assertEquals(2, calls); assertFalse(t.pending)
+    }
+
+    @Test fun `merging the fresh first page keeps loaded pages, order and the paging cursor`() {
+        val l = MediaListing()
+        l.replace(MediaPage(listOf(photo("b"), photo("c")), "CUR"))
+        l.append(MediaPage(listOf(photo("d")), "CUR2"))
+        l.mergeHead(MediaPage(listOf(photo("a"), photo("b"), photo("c")), "FIRST"))
+        assertEquals(listOf("a", "b", "c", "d"), l.items.map { it.id }); assertEquals("CUR2", l.cursor)
+        val empty = MediaListing(); empty.mergeHead(MediaPage(listOf(photo("x")), "N")); assertEquals("N", empty.cursor)
+    }
 }

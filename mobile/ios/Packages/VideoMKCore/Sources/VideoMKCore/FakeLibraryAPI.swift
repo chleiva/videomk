@@ -12,6 +12,10 @@ public actor FakeLibraryAPI: LibraryAPI {
     public var semanticMode = false
     public private(set) var lastCursorSeen: String?
     private var hashes: [String: String] = [:]
+    /// Uploaded photos only appear in summary() and items() after this many list calls (the server needs seconds to prepare them).
+    public var readyAfter = 0
+    private var listCalls = 0
+    private var visibleAt: [String: Int] = [:]
     private var serial = 0
 
     public init(photos: [LibraryPhoto] = [], collections: [LibraryCollection] = [], limitBytes: Int = 2_000_000_000) {
@@ -20,6 +24,8 @@ public actor FakeLibraryAPI: LibraryAPI {
 
     /// Pretend this content is already in the library (the real server learns a hash only once the file has arrived).
     public func registerExisting(sha256: String, id: String = "existing") { hashes[sha256] = id }
+    public func setReadyAfter(_ n: Int) { readyAfter = n }
+    public var summaryCalls: Int { listCalls }
     public func setFailNext(_ e: LibraryAPIError?) { failNext = e }
     public func setLimit(_ n: Int) { limitBytes = n }
     public func setSemantic(_ b: Bool) { semanticMode = b }
@@ -39,14 +45,15 @@ public actor FakeLibraryAPI: LibraryAPI {
 
     private func check() throws { if let e = failNext { failNext = nil; throw e } }
     private var used: Int { photos.reduce(0) { $0 + $1.bytes } }
-    private func sorted() -> [LibraryPhoto] { photos.sorted { ($0.taken ?? $0.added) > ($1.taken ?? $1.added) } }
+    private func listed() -> [LibraryPhoto] { photos.filter { (visibleAt[$0.id] ?? 0) <= listCalls } }
+    private func sorted() -> [LibraryPhoto] { listed().sorted { ($0.taken ?? $0.added) > ($1.taken ?? $1.added) } }
     private func refreshCollections() { for n in collectionList.indices { let id = collectionList[n].id; let m = photos.filter { $0.collections.contains(id) }; collectionList[n].count = m.count; collectionList[n].coverID = m.first?.id; collectionList[n].coverThumbURL = m.first?.thumbURL } }
 
     public func summary() async throws -> LibrarySummary {
-        try check(); refreshCollections()
+        try check(); listCalls += 1; refreshCollections()
         let years = Dictionary(grouping: photos.compactMap { ($0.taken ?? $0.added).prefix(4) }.compactMap { Int($0) }, by: { $0 }).map { LibrarySummary.Year(year: $0.key, count: $0.value.count) }.sorted { $0.year > $1.year }
         let places = Dictionary(grouping: photos.compactMap(\.place), by: { $0 }).map { LibrarySummary.Place(name: String($0.key.split(separator: ",").first ?? ""), country: $0.key.split(separator: ",").last.map { $0.trimmingCharacters(in: .whitespaces) }, count: $0.value.count) }
-        return LibrarySummary(plan: "free", limitBytes: limitBytes, usedBytes: used, count: photos.count, canUpgrade: canUpgrade, readOnly: used > limitBytes, years: years, places: places, collections: collectionList)
+        return LibrarySummary(plan: "free", limitBytes: limitBytes, usedBytes: used, count: listed().count, canUpgrade: canUpgrade, readOnly: used > limitBytes, years: years, places: places, collections: collectionList)
     }
 
     public func requestUploads(_ items: [UploadRequestItem]) async throws -> UploadsResponse {
@@ -60,6 +67,7 @@ public actor FakeLibraryAPI: LibraryAPI {
             serial += 1
             let id = "u\(serial)"
             reserved += item.size
+            visibleAt[id] = listCalls + readyAfter
             photos.append(LibraryPhoto(id: id, taken: item.taken, added: "2026-11-25T10:00:00Z", w: 0, h: 0, bytes: item.size, thumbURL: URL(string: "fake://thumb/\(id)")))
             out.append(UploadSlotResult(index: n, status: .upload, id: id, url: URL(string: "https://media.example/upload")!, fields: ["key": "u/me/o/\(id).jpg", "policy": "P"]))
         }
@@ -67,7 +75,7 @@ public actor FakeLibraryAPI: LibraryAPI {
     }
 
     public func items(limit: Int, cursor: String?, filter: ItemsFilter) async throws -> ItemsPage {
-        try check(); lastCursorSeen = cursor
+        try check(); listCalls += 1; lastCursorSeen = cursor
         var all = sorted()
         if let c = filter.collection { all = all.filter { $0.collections.contains(c) } }
         if let p = filter.place { all = all.filter { ($0.place ?? "").localizedCaseInsensitiveContains(p) } }

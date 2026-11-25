@@ -114,7 +114,9 @@ fun MediaScreen(
     val progress = uploads?.queue?.progress?.collectAsState()?.value
     val preparing = uploads?.preparing?.collectAsState()?.value
     val skipped = uploads?.skipped?.collectAsState()?.value ?: 0
-    LaunchedEffect(progress?.uploaded) { if ((progress?.uploaded ?: 0) > 0) vm.onUploadsFinished() }
+    LaunchedEffect(progress?.uploaded) { vm.onUploaded(progress?.uploaded ?: 0) }
+    // back on this tab or back in the app: look again now; leaving stops the waiting
+    androidx.lifecycle.compose.LifecycleResumeEffect(vm) { vm.onVisible(); onPauseOrDispose { vm.stopWaiting() } }
     val used = uploads?.queue?.usage?.collectAsState()?.value
 
     Scaffold(
@@ -142,7 +144,7 @@ fun MediaScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 8.dp)) {
                         PrivacyNote()
                         if (uploads != null && progress != null) UploadBanner(
-                            progress, preparing, skipped, onPause = { uploads.pause() }, onResume = { uploads.resume() }, onCancel = { uploads.cancel() },
+                            progress, preparing, skipped, vm.gettingReady, onPause = { uploads.pause() }, onResume = { uploads.resume() }, onCancel = { uploads.cancel() },
                             onRetry = { uploads.retryFailed() }, onDismiss = { uploads.queue.dismissFinished(); uploads.clearSkipped() }, onOpenStorage = { storageOpen = true },
                         )
                         if (!vm.search.active) CollectionsStrip(vm, onOpenCollection)
@@ -204,14 +206,19 @@ fun MediaBody(
     header: (@Composable () -> Unit)?, modifier: Modifier = Modifier, selectionHint: String? = null,
 ) {
     val columns = rememberColumns()
-    Box(modifier.fillMaxSize()) {
+    androidx.compose.material3.pulltorefresh.PullToRefreshBox(isRefreshing = vm.refreshing, onRefresh = { vm.pullRefresh() }, modifier = modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize()) {
         when {
             vm.loading && vm.photos.isEmpty() -> SkeletonGrid(columns, Modifier.padding(top = 4.dp))
             vm.error != null && vm.photos.isEmpty() -> StateMessage("Couldn't load your photos", vm.error!!, "Try again") { vm.refresh() }
             vm.photos.isEmpty() && vm.search.active && !vm.searching -> StateMessage("No photos match", "Try fewer words, or remove a filter above.", "Clear search") { vm.clearSearch() }
+            vm.photos.isEmpty() && !vm.search.active && vm.gettingReady > 0 -> Column(Modifier.fillMaxSize()) {
+                header?.invoke()
+                Text("Getting ${vm.gettingReady} photo${if (vm.gettingReady == 1) "" else "s"} ready…", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(16.dp).testTag("gettingReady"))
+            }
             vm.photos.isEmpty() && !vm.search.active -> Column(Modifier.fillMaxSize()) {
                 header?.invoke()
-                StateMessage("Your photos, in one private place", if (onAdd != null) "Add photos once, then find them by describing them and make videos from them." else "This collection is empty. Add photos from your library.", if (onAdd != null) "Add photos" else null) { onAdd?.invoke() }
+                StateMessage("Your photos, in one private place", if (onAdd != null) "Add photos once, then find them by describing them and make videos from them." else "No photos here yet. Add photos in the Media tab.", if (onAdd != null) "Add photos" else null) { onAdd?.invoke() }
             }
             else -> PhotoGrid(
                 photos = vm.photos, selected = vm.selection.toSet(), selecting = vm.selecting, columns = columns,
@@ -225,6 +232,7 @@ fun MediaBody(
                 Icon(Icons.Filled.SelectAll, null, Modifier.size(18.dp)); Text("  Select all in this view")
             }
         }
+    }
     }
     vm.viewerIndex?.let { idx ->
         MediaViewer(vm, startIndex = idx, onClose = { vm.viewerIndex = null }, onMakeVideo = { onMakeVideo(listOf(it)); vm.viewerIndex = null })

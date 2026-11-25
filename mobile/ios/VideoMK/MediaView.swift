@@ -5,6 +5,7 @@ import VideoMKCore
 struct MediaView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     let media: MediaModel
     @State private var feed: PhotoFeed
     @State private var selection = PhotoSelection()
@@ -48,6 +49,9 @@ struct MediaView: View {
             .refreshable { await media.loadSummary(); await feed.reload() }
         }
         .task { await media.start() }
+        .onAppear { media.setWatching("tab", true); Task { await media.refreshNow() } }      // the tab is shown again: look at the server now
+        .onDisappear { media.setWatching("tab", false) }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await media.refreshNow() } } }
         .task(id: media.version) { await feed.refreshIfNeeded() }
         .onChange(of: pickerItems) { _, items in
             guard !items.isEmpty else { return }
@@ -86,6 +90,8 @@ struct MediaView: View {
             if feed.photos.isEmpty {
                 if feed.isSearching && !feed.searching {
                     MediaMessage(symbol: "magnifyingglass", title: "No photos match", text: "Try fewer words, or remove one of the filters above.", button: nil) {}
+                } else if !feed.isSearching, media.waiting || !media.upload.isEmpty {
+                    SkeletonGrid()          // photos were just uploaded and are being prepared: not an empty library
                 } else if !feed.isSearching {
                     EmptyLibrary(pickerItems: $pickerItems, readOnly: media.summary?.readOnly == true)
                 }
@@ -284,7 +290,9 @@ struct UploadBanner: View {
     }
 
     @ViewBuilder private func finished(_ p: QueueProgress) -> some View {
-        if p.noSpace > 0 {
+        if media.gettingReady > 0, p.noSpace == 0, p.failed == 0 {
+            line(symbol: "hourglass", text: "Uploaded \(p.done) \(p.done == 1 ? "photo" : "photos"). Getting them ready...", tint: Theme.primary) { EmptyView() }
+        } else if p.noSpace > 0 {
             line(symbol: "externaldrive.badge.xmark", text: "\(p.noSpace) \(p.noSpace == 1 ? "photo" : "photos") did not fit in your storage. \(p.done) \(p.done == 1 ? "was" : "were") added.", tint: Theme.danger) {
                 Button("Storage", action: onStorage).font(.footnote.weight(.semibold))
                 Button { media.dismissUploads() } label: { Image(systemName: "xmark") }.accessibilityLabel("Dismiss")

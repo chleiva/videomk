@@ -49,6 +49,9 @@ class MediaUploadController(context: Context, api: MediaApi, http: OkHttpClient,
         HttpSlotPoster(http),
     )
 
+    /** Shared by the Media tab and the composer picker: how many photos should be listed once the server has prepared the uploads. */
+    val arrivals = com.videomk.app.core.ArrivalTracker()
+
     private val _preparing = MutableStateFlow<Pair<Int, Int>?>(null)
     /** (done, total) while photos are being copied and prepared. */
     val preparing: StateFlow<Pair<Int, Int>?> = _preparing.asStateFlow()

@@ -21,6 +21,14 @@ final class MediaModel {
     var notice: String?
     @ObservationIgnored private let images = NSCache<NSString, UIImage>()
     @ObservationIgnored private var started = false
+    // Waiting for the server to list photos it is still preparing (thumbnail, search index: 2 to 10 s after the file arrives).
+    private(set) var readyTarget: Int?        // how many photos the server should list once this batch is ready
+    private(set) var waiting = false
+    @ObservationIgnored private var baseline: Int?
+    @ObservationIgnored private let watcher = ReadyWatcher()
+    @ObservationIgnored private var watching: Set<String> = []     // who is looking (the Media tab, the composer picker)
+    /// Photos uploaded but not listed by the server yet.
+    var gettingReady: Int { waiting ? max(0, (readyTarget ?? 0) - (summary?.count ?? 0)) : 0 }
 
     var meter: StorageMeter? { summary.map { StorageMeter(used: $0.usedBytes, limit: $0.limitBytes) } }
 
@@ -56,13 +64,59 @@ final class MediaModel {
 
     private var lastProcessed = 0
     private func apply(_ p: QueueProgress) {
-        let wasFinished = upload.isFinished
+        let wasEmpty = upload.isEmpty, wasFinished = upload.isFinished
         upload = p
-        if p.isFinished, !wasFinished || p.processed != lastProcessed, !p.running {
+        if wasEmpty, !p.isEmpty { baseline = summary?.count ?? 0 }       // what the server lists before this batch
+        if p.isEmpty { lastProcessed = 0; readyTarget = nil; baseline = nil; waiting = false; watcher.stop(); return }
+        if p.isFinished, !p.running, !wasFinished || p.processed != lastProcessed {
             lastProcessed = p.processed
-            Task { await self.loadSummary(); self.version += 1 }
+            if let target = ReadyWait.target(baseline: baseline ?? summary?.count ?? 0, progress: p) {
+                readyTarget = target
+                beginWaiting()                                          // the server lists the photos only after preparing them
+            } else {
+                Task { await self.loadSummary(); self.version += 1 }   // only duplicates, did-not-fit or failures: nothing to wait for
+            }
         }
-        if p.isEmpty { lastProcessed = 0 }
+    }
+
+    // MARK: waiting for uploaded photos to be listed
+
+    /// Who is looking decides whether the single polling task runs: the Media tab and the composer picker register here.
+    func setWatching(_ who: String, _ on: Bool) {
+        if on { watching.insert(who) } else { watching.remove(who) }
+        if watching.isEmpty { watcher.stop() }
+        else if let t = readyTarget, (summary?.count ?? 0) < t, !watcher.isRunning { beginWaiting() }
+    }
+
+    private func beginWaiting() {
+        guard let target = readyTarget, !watching.isEmpty else {
+            if readyTarget != nil { waiting = true }      // not visible: the banner says so, polling starts when someone looks
+            return
+        }
+        waiting = true
+        watcher.start(target: target, poll: { [weak self] in await self?.pollOnce() }, finished: { [weak self] _ in
+            Task { @MainActor in self?.finishWaiting() }
+        })
+    }
+
+    /// One poll: the summary (its count is what is listed) and, when it changed, a merge of the first page into the open lists.
+    private func pollOnce() async -> Int? {
+        let before = summary?.count
+        await loadSummary()
+        if summary?.count != before { version += 1 }
+        return summary?.count
+    }
+
+    private func finishWaiting() {
+        waiting = false
+        version += 1                                   // final look at the first page
+        if let t = readyTarget, (summary?.count ?? 0) >= t { readyTarget = nil }
+    }
+
+    /// Tab shown again, app active again, pull to refresh: look at the server now.
+    func refreshNow() async {
+        await loadSummary()
+        version += 1
     }
 
     // MARK: adding photos (system picker: no permission prompt)
@@ -169,6 +223,7 @@ final class MediaModel {
         await queue.cancel()
         await store.removeAll()
         images.removeAllObjects()
+        watcher.stop(); waiting = false; readyTarget = nil; baseline = nil; watching = []
         summary = nil; collections = []; upload = QueueProgress(); started = false
     }
 
@@ -232,6 +287,7 @@ final class PhotoFeed {
     /// Loads (or reloads) when the library changed since the last load.
     func refreshIfNeeded() async {
         if loadedVersion == media.version, state == .loaded { return }
+        if isSearching { return }          // results are refreshed when the text changes; no re-search while the person types or reads them
         await reload()
     }
 
@@ -243,7 +299,7 @@ final class PhotoFeed {
         do {
             let page = try await media.api.items(limit: 60, cursor: nil, filter: filter)
             await media.store.savePage(page, key: filter.cacheKey)
-            set(page.items); cursor = page.cursor; state = .loaded; offline = false; chips = []; semantic = false
+            merge(page); state = .loaded; offline = false; chips = []; semantic = false
         } catch is CancellationError {
         } catch {
             if photos.isEmpty { state = .failed((error as? LibraryAPIError)?.message ?? "Couldn't load your photos.") } else { state = .loaded; offline = (error as? LibraryAPIError) == .network }
@@ -308,6 +364,15 @@ final class PhotoFeed {
     }
 
     func drop(_ chip: SearchChip) async { await runSearch(searchQuery, drop: dropped + [chip.label]) }
+
+    /// New photos go to the top; what was already loaded further down stays, so the scroll position (and any selection) is not lost.
+    private func merge(_ page: ItemsPage) {
+        guard !photos.isEmpty, let last = page.items.last?.id, let at = photos.firstIndex(where: { $0.id == last }) else { set(page.items); cursor = page.cursor; return }
+        let ids = Set(page.items.map(\.id))
+        let tail = photos[(at + 1)...].filter { !ids.contains($0.id) }
+        set(page.items + tail)
+        if tail.isEmpty { cursor = page.cursor }
+    }
 
     func remove(_ ids: Set<String>) { set(photos.filter { !ids.contains($0.id) }) }
 

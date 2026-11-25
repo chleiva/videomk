@@ -268,7 +268,7 @@ fun StorageMeterRow(used: Long, limit: Long, onClick: () -> Unit, modifier: Modi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UploadBanner(
-    progress: QueueProgress, preparing: Pair<Int, Int>?, skipped: Int, onPause: () -> Unit, onResume: () -> Unit, onCancel: () -> Unit,
+    progress: QueueProgress, preparing: Pair<Int, Int>?, skipped: Int, gettingReady: Int, onPause: () -> Unit, onResume: () -> Unit, onCancel: () -> Unit,
     onRetry: () -> Unit, onDismiss: () -> Unit, onOpenStorage: () -> Unit, modifier: Modifier = Modifier,
 ) {
     val prep = preparing
@@ -302,7 +302,10 @@ fun UploadBanner(
                         "${progress.noSpace} photo${if (progress.noSpace == 1) "" else "s"} did not fit in your storage. ${parts.joinToString(" ")}",
                         style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.warning, modifier = Modifier.testTag("storageFullMessage"),
                     )
-                } else Text(parts.joinToString(" ").ifBlank { "Done." }, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
+                } else if (gettingReady > 0) Text(
+                    "Uploaded ${progress.uploaded} photo${if (progress.uploaded == 1) "" else "s"}. Getting them ready… ${parts.drop(1).joinToString(" ")}".trim(),
+                    style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.testTag("gettingReadyBanner"),
+                ) else Text(parts.joinToString(" ").ifBlank { "Done." }, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
                 Row {
                     if (progress.noSpace > 0) TextButton(onClick = onOpenStorage, modifier = Modifier.heightIn(min = 48.dp)) { Text("See storage") }
                     if (progress.failed > 0) TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp).testTag("uploadRetry")) { Text("Try again") }

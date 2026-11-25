@@ -7,6 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.videomk.app.core.ApiError
+import com.videomk.app.core.ArrivalPoller
+import com.videomk.app.core.ArrivalTracker
 import com.videomk.app.core.MediaApi
 import com.videomk.app.core.MediaCache
 import com.videomk.app.core.MediaCollection
@@ -27,7 +29,7 @@ import kotlinx.coroutines.launch
  */
 class MediaViewModel(
     private val api: MediaApi?, private val collectionId: String? = null, private val cache: MediaCache? = null,
-    private val limit: Int = Int.MAX_VALUE,
+    private val limit: Int = Int.MAX_VALUE, private val tracker: ArrivalTracker = ArrivalTracker(),
 ) : ViewModel() {
     private val listing = MediaListing()
     var summary by mutableStateOf<MediaSummary?>(null); private set
@@ -47,6 +49,50 @@ class MediaViewModel(
     var fromPrompt by mutableStateOf(false); private set
     private var searchResult: SearchResult? = null
     private var started = false
+
+    /** Photos uploaded but not listed yet (the server is preparing them): the "Getting N photos ready" line. */
+    var gettingReady by mutableStateOf(0); private set
+    var refreshing by mutableStateOf(false); private set
+    private var seenUploaded = 0
+    private val poller = ArrivalPoller(viewModelScope, tracker, { refreshHead() })
+
+    /** Fetches the first page and the summary, puts new photos at the top (scroll position, paging and selection untouched). Returns the library's photo count, or null on failure. */
+    private suspend fun refreshHead(): Int? {
+        val a = api ?: return null
+        return try {
+            val page = a.items(60, null, MediaFilter(collection = collectionId))
+            listing.mergeHead(page); offline = false
+            if (searchResult == null) photos = listing.items
+            val s = a.summary(); summary = s
+            runCatching { collections = a.collections() }
+            gettingReady = tracker.missing(s.count)
+            s.count
+        } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
+    }
+
+    /** The queue says [uploadedTotal] photos have been uploaded so far; the new ones are awaited until the server lists them. Duplicates never raise this number. */
+    fun onUploaded(uploadedTotal: Int) {
+        if (uploadedTotal < seenUploaded) seenUploaded = 0
+        val delta = uploadedTotal - seenUploaded
+        seenUploaded = uploadedTotal
+        if (delta <= 0) return
+        tracker.expect(summary?.count ?: listing.items.size, delta)
+        gettingReady = tracker.missing(summary?.count ?: listing.items.size)
+        if (!search.active) poller.start()
+    }
+
+    /** The screen became visible again (tab, foreground, picker opened): refresh now and keep waiting for anything still pending. */
+    fun onVisible() {
+        if (!started) return
+        viewModelScope.launch { refreshHead() }
+        if (tracker.pending && !search.active) poller.start()
+    }
+
+    fun stopWaiting() { poller.stop() }
+
+    fun pullRefresh() {
+        viewModelScope.launch { refreshing = true; refreshHead(); refreshing = false }
+    }
 
     private val debouncer = SearchDebouncer(viewModelScope, 400) { q -> runSearch(q) }
 
@@ -107,7 +153,7 @@ class MediaViewModel(
 
     // search
 
-    fun onQuery(text: String) { search = search.withQuery(text); debouncer.submit(text) }
+    fun onQuery(text: String) { search = search.withQuery(text); debouncer.submit(text); if (text.isNotBlank()) poller.stop() }
 
     /** "Photos from your prompt": search with the video prompt, then preselect everything found (up to the limit), chips visible so the person can adjust. */
     fun promptSearch(text: String) {
@@ -115,7 +161,7 @@ class MediaViewModel(
         viewModelScope.launch { runSearch(text.trim()); fromPrompt = understoodChips.isNotEmpty() || photos.isNotEmpty(); if (photos.isNotEmpty()) preselect(photos.map { it.id }) }
     }
 
-    fun clearSearch() { debouncer.cancel(); search = SearchState(); searchResult = null; understoodChips = emptyList(); fromPrompt = false; photos = listing.items }
+    fun clearSearch() { debouncer.cancel(); search = SearchState(); searchResult = null; understoodChips = emptyList(); fromPrompt = false; photos = listing.items; if (tracker.pending) poller.start() }
 
     fun dropChip(label: String) {
         search = search.drop(label)
@@ -224,5 +270,5 @@ class MediaViewModel(
     suspend fun fullPhoto(id: String): MediaPhoto? = try { api?.item(id) } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
 
     /** After an upload finished: the new photos belong at the top. */
-    fun onUploadsFinished() { if (searchResult == null) refresh() }
+
 }

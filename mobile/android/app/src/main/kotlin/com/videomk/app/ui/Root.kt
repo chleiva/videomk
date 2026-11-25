@@ -66,7 +66,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
     val showTabs = route == "library" || route == "media"
-    val mediaFactory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, null, MediaCache(FilePageDisk(java.io.File(application.cacheDir, "media-pages")))) } }
+    val mediaFactory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, null, MediaCache(FilePageDisk(java.io.File(application.cacheDir, "media-pages"))), Int.MAX_VALUE, container.mediaUploads?.arrivals ?: com.videomk.app.core.ArrivalTracker()) } }
     Scaffold(
         containerColor = Vmk.colors.background, contentWindowInsets = WindowInsets(0),
         bottomBar = {

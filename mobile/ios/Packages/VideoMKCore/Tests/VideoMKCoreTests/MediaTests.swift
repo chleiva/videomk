@@ -435,3 +435,70 @@ extension CoreTests {
         await #expect(throws: LibraryAPIError.server) { _ = try await client.summary() }
     }
 }
+
+private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
+
+@Suite struct ReadyWaitTests {
+    private let quick = ReadyWait(fast: .milliseconds(4), slow: .milliseconds(8), fastPolls: 3, giveUp: .milliseconds(120))
+
+    @Test func theScheduleIsTwoSecondsThenFourUntilNinetyAndNeverLonger() {
+        let d = ReadyWait().delays()
+        #expect(d.prefix(5).allSatisfy { $0 == .seconds(2) } && d[5] == .seconds(4))
+        let total = d.reduce(Duration.zero, +)
+        #expect(total >= .seconds(90) && total <= .seconds(94))
+    }
+
+    @Test func photosThatAppearAfterAFewCallsAreWaitedFor() async throws {
+        let api = FakeLibraryAPI(); await api.setReadyAfter(3)
+        let q = LibraryUploadQueue(directory: FileManager.default.temporaryDirectory.appendingPathComponent("vmk-\(UUID())"), api: api, poster: FakeFilePoster())
+        let base = try await api.summary().count
+        await q.enqueue([PreparedUpload(data: jpeg(1)), PreparedUpload(data: jpeg(2))])
+        for _ in 0..<400 { let p = await q.progress(); if p.isFinished && !p.running { break }; try? await Task.sleep(for: .milliseconds(5)) }
+        let progress = await q.progress()
+        #expect(try await api.summary().count == base)                                  // a single reload right after the upload sees nothing: the flaw
+        let target = try #require(ReadyWait.target(baseline: base, progress: progress))
+        #expect(target == base + 2)
+        let outcome = await quick.run(target: target) { try? await api.summary().count }
+        #expect(outcome == .ready)
+        let items = try await api.items(limit: 60, cursor: nil, filter: ItemsFilter())
+        #expect(items.items.count == 2)
+    }
+
+    @Test func pollingStopsAtTheCap() async throws {
+        let api = FakeLibraryAPI(); await api.setReadyAfter(100_000)
+        _ = try await api.requestUploads([UploadRequestItem(size: 1, sha256: "a")])
+        let log = CallLog()
+        let outcome = await quick.run(target: 1) { _ = await log.hit(); return try? await api.summary().count }
+        #expect(outcome == .gaveUp)
+        let calls = await log.n
+        #expect(calls == quick.delays().count + 1)                                       // one immediate poll plus one per delay, then it stops
+    }
+
+    @Test func cancellingStopsTheWait() async throws {
+        let wait = ReadyWait(fast: .milliseconds(20), slow: .milliseconds(20), fastPolls: 1, giveUp: .seconds(5))
+        let t = Task { await wait.run(target: 1) { 0 } }
+        try await Task.sleep(for: .milliseconds(50)); t.cancel()
+        #expect(await t.value == .cancelled)
+    }
+
+    @Test func aBatchOfOnlyDuplicatesNeverWaits() {
+        var p = QueueProgress(); p.total = 3; p.duplicates = 3
+        #expect(ReadyWait.target(baseline: 10, progress: p) == nil)
+        p.done = 2
+        #expect(ReadyWait.target(baseline: 10, progress: p) == 12)                       // duplicates are not counted
+    }
+
+    @Test func startingAgainReplacesTheRunningWaitSoOnlyOneRunsAtATime() async throws {
+        let watcher = ReadyWatcher()
+        let slow = ReadyWait(fast: .milliseconds(10), slow: .milliseconds(10), fastPolls: 2, giveUp: .seconds(5))
+        for _ in 0..<4 { watcher.start(slow, target: 1, poll: { 0 }); try await Task.sleep(for: .milliseconds(15)) }
+        #expect(watcher.started == 4 && watcher.peakActive == 1 && watcher.isRunning)
+        let done = CallLog()
+        watcher.start(quick, target: 1, poll: { 1 }, finished: { _ in Task { _ = await done.hit() } })
+        try await Task.sleep(for: .milliseconds(80))
+        #expect(await done.n == 1 && !watcher.isRunning)
+        watcher.start(slow, target: 1, poll: { 0 }); watcher.stop()
+        try await Task.sleep(for: .milliseconds(40))
+        #expect(!watcher.isRunning)
+    }
+}

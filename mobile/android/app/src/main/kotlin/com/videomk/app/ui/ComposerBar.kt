@@ -164,7 +164,7 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
 
     val container = LocalContainerOrNull.current
     var myMedia by remember { mutableStateOf(false) }
-    if (myMedia && container?.mediaApi != null) MyMediaPicker(composer, container.mediaApi!!, onDone = { myMedia = false })
+    if (myMedia && container?.mediaApi != null) MyMediaPicker(composer, container.mediaApi!!, onDone = { myMedia = false }, tracker = container.mediaUploads?.arrivals)
 
     fun onMic() {
         try {

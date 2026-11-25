@@ -67,6 +67,9 @@ struct MediaPickerSheet: View {
             await feed.refreshIfNeeded()
             if promptLooksLikePhotos && initial.isEmpty { fromPrompt() }      // opens already searched, preselected and with the chips visible
         }
+        .task(id: media.version) { await feed.refreshIfNeeded() }      // photos uploaded a moment ago show up here too
+        .onAppear { media.setWatching("picker", true); Task { await media.refreshNow() } }
+        .onDisappear { media.setWatching("picker", false) }
         .onChange(of: feed.photos) { _, photos in
             guard preselecting, !feed.searching, !photos.isEmpty else { return }
             preselecting = false

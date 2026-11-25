@@ -118,3 +118,46 @@ object PromptSearch {
         return EXPLICIT.containsMatchIn(t) || (OWN.containsMatchIn(t) && PHOTOISH.containsMatchIn(t))
     }
 }
+
+/** How many photos the library should list once the uploads of this session are ready (the server needs a few seconds per photo). Duplicates are never counted. */
+class ArrivalTracker {
+    @Volatile var expected: Int? = null
+        private set
+
+    /** [added] photos reached the server; [listedNow] is how many the library lists right now (used as the baseline the first time). */
+    fun expect(listedNow: Int, added: Int) { if (added > 0) expected = (expected ?: listedNow) + added }
+    fun missing(listed: Int): Int = expected?.let { maxOf(0, it - listed) } ?: 0
+    fun settle(listed: Int) { if (expected != null && listed >= expected!!) expected = null }
+    fun clear() { expected = null }
+    val pending: Boolean get() = expected != null
+}
+
+/**
+ * ONE polling job that asks the server for the library until [tracker] is satisfied: every 2 s, every 4 s after 10 s, giving up after 90 s of waiting.
+ * [start] cancels the running job and starts again (more uploads finished); [stop] ends it (the tab left the screen, or the person is searching).
+ * [fetch] returns how many photos the library lists now, or null when the call failed (it is tried again).
+ */
+class ArrivalPoller(
+    private val scope: CoroutineScope, private val tracker: ArrivalTracker, private val fetch: suspend () -> Int?,
+    private val fastMs: Long = 2000, private val slowMs: Long = 4000, private val slowAfterMs: Long = 10_000, private val capMs: Long = 90_000,
+) {
+    private var job: Job? = null
+    val running: Boolean get() = job?.isActive == true
+
+    fun start() {
+        job?.cancel()
+        if (!tracker.pending) return
+        job = scope.launch {
+            var waited = 0L
+            while (waited < capMs && tracker.pending) {
+                val d = if (waited < slowAfterMs) fastMs else slowMs
+                delay(d); waited += d
+                val listed = fetch() ?: continue
+                tracker.settle(listed)
+            }
+            if (tracker.pending) { tracker.clear(); fetch() }   // gave up: stop saying "getting ready"; the next refresh shows whatever has arrived
+        }
+    }
+
+    fun stop() { job?.cancel(); job = null }
+}

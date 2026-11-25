@@ -34,14 +34,14 @@ import java.io.File
 /** "My media" in the composer: the same grid with search and selection, up to what is left of the 100, a count and Done. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyMediaPicker(composer: ComposerViewModel, api: MediaApi, onDone: () -> Unit) {
+fun MyMediaPicker(composer: ComposerViewModel, api: MediaApi, onDone: () -> Unit, tracker: com.videomk.app.core.ArrivalTracker? = null) {
     val limit = composer.libraryRoom
-    val vm: MediaViewModel = viewModel(key = "media-picker", factory = viewModelFactory { initializer { MediaViewModel(api, null, null, limit) } })
+    val vm: MediaViewModel = viewModel(key = "media-picker", factory = viewModelFactory { initializer { MediaViewModel(api, null, null, limit, tracker ?: com.videomk.app.core.ArrivalTracker()) } })
     val existing = remember { composer.library.map { it.id } }
     val prompt = composer.text
     val offerPrompt = remember { PromptSearch.looksLikePhotoRequest(prompt) }
     LaunchedEffect(Unit) {
-        vm.start(); vm.startPicker(existing)
+        vm.start(); vm.startPicker(existing); vm.onVisible()   // photos uploaded since the last time show up; anything still being prepared is awaited
         if (offerPrompt && existing.isEmpty()) vm.promptSearch(prompt)   // opens already searched and preselected, chips visible
     }
     fun done() {
@@ -50,6 +50,7 @@ fun MyMediaPicker(composer: ComposerViewModel, api: MediaApi, onDone: () -> Unit
         composer.setLibrary(chosen)
         onDone()
     }
+    androidx.compose.runtime.DisposableEffect(vm) { onDispose { vm.stopWaiting() } }
     ModalBottomSheet(onDismissRequest = onDone, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = Vmk.colors.background) {
         Column(Modifier.fillHeightSheet().testTag("myMediaPicker")) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
