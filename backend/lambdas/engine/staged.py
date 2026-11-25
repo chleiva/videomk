@@ -18,11 +18,15 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import plan as plan_mod
 from . import voices as voice_mod
+from .netsafe import quality_fixes
 
 STAGE_MIN_MINUTES = 4.0     # from this length on the script is built in stages
 SECTION_MINUTES = 1.5       # about this long each
 MIN_SECTIONS, MAX_SECTIONS = 3, 8
 SECTION_MIN_SHARE = 0.9     # a section under this share of its words is sent back once
+SECTION_MAX_SHARE = 1.15    # QUALITY_FIXES: a section over this share is sent back once to be trimmed
+STRICT_JSON = ("\n\nYour previous answer contained no JSON object. Reply with ONLY one JSON object that starts with { and ends with }, in the beat format above: no commentary, no markdown, "
+               "no refusal text. If the topic is sensitive, still write the section as general, careful, practical information.")
 MAX_WORKERS = 6
 
 Ask = Callable[[str, str], str]
@@ -63,7 +67,7 @@ Rules:
 def outline_user(topic: str, notes: str, minutes: float, n: int, today: Optional[str]) -> str:
     return (f"Topic: {topic}\n\nTarget length: {minutes:g} minutes in exactly {n} sections (about {minutes / n:.1f} minutes each).\n\n"
             + (f"Today's date: {today}. Anything time-sensitive must come from research, never from memory.\n\n" if today else "")
-            + f"Background notes on the topic (may be empty):\n{notes or '(none)'}\n\nReturn the JSON outline now.")
+            + f"Background notes on the topic (may be empty):\n{notes or plan_mod.no_notes_text()}\n\nReturn the JSON outline now.")
 
 
 def parse_outline(raw: Dict[str, Any], minutes: float, n_wanted: int) -> Dict[str, Any]:
@@ -112,11 +116,11 @@ def section_user(topic: str, outline: Dict[str, Any], idx: int, notes: str, toda
     return (f"Topic of the whole video: {topic}\n\nYou are writing section {idx + 1} of {n}: \"{sec['title']}\". Goal: {sec['goal']}\n{role}\n\n"
             f"The whole outline (so you fit in and never repeat the other sections):\n{lines}\n\n"
             f"Key points this section must cover: " + "; ".join(sec["key_points"]) + "\n\n"
-            f"Length: this section is {sec['minutes']:g} minutes. This is a hard requirement: its narration totals between {int(words * 0.9)} and {int(words * 1.1)} words (about {words}) "
+            f"Length: this section is {sec['minutes']:g} minutes. This is a hard requirement: its narration totals between {int(words * (plan_mod.TARGET_LOW if quality_fixes() else 0.9))} and {int(words * (plan_mod.TARGET_HIGH if quality_fixes() else 1.1))} words (about {words}) "
             f"across at least {beats} beats of roughly {max(20, words // beats)} words each; the viewer pays per minute.\n"
             f"Stock photographs in this section: at most {int(rate * sec['minutes'] + 1e-9)}.\n\n"
             + (f"Today's date: {today}. Time-sensitive facts must come from the notes below.\n\n" if today else "")
-            + f"Research notes for this section (may be empty; use them for facts and numbers):\n{notes or '(none)'}\n\n"
+            + f"Research notes for this section (may be empty; use them for facts and numbers):\n{notes or plan_mod.no_notes_text()}\n\n"
             "Return the JSON for this section now.")
 
 
@@ -129,6 +133,9 @@ def _section_problem(plan_check: Dict[str, Any], sec: Dict[str, Any]) -> Optiona
     if have < SECTION_MIN_SHARE * target:
         return (f"the section narration totals {have} words but a {sec['minutes']:g}-minute section needs about {target} words in at least "
                 f"{plan_mod.expected_beats(sec['minutes'])} beats. Lengthen the beats and add beats with new, concrete material until it is about {target} words")
+    if quality_fixes() and have > SECTION_MAX_SHARE * target:
+        return (f"the section narration totals {have} words but a {sec['minutes']:g}-minute section needs about {target} (at most {int(target * plan_mod.TARGET_HIGH)}). Trim it: shorter sentences, "
+                f"fewer words per beat, drop the least important details; keep the beats, the key points and do not go under {int(target * plan_mod.TARGET_LOW)} words")
     from . import sync as sync_mod
 
     gaps = sync_mod.coverage_problems(beats)
@@ -142,7 +149,10 @@ def write_section(topic: str, outline: Dict[str, Any], idx: int, notes: str, ask
     user = section_user(topic, outline, idx, notes, today, rate)
     sec = outline["sections"][idx]
     last: Optional[Exception] = None
-    for attempt in range(retries + 1):
+    attempt, extra = 0, quality_fixes()   # QUALITY_FIXES: one more try, with a stricter reminder, when an answer has no JSON at all (1 of 9 staged videos failed that way)
+    while attempt <= retries or (extra and last is not None and "JSON" in str(last) and "no JSON object" in str(last)):
+        if attempt > retries:
+            extra = False
         text = ask(system, user)
         try:
             raw = plan_mod.parse_plan_json(text)
@@ -156,7 +166,12 @@ def write_section(topic: str, outline: Dict[str, Any], idx: int, notes: str, ask
             return {"beats": beats_in, "sources_used": [x for x in (raw.get("sources_used") or []) if isinstance(x, str)], "warning": problem}
         except (ValueError, json.JSONDecodeError) as e:
             last = e
-            user = (section_user(topic, outline, idx, notes, today, rate) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only, for this section.")
+            if quality_fixes() and "no JSON object" in str(e):
+                logging.warning("SECTION_NO_JSON section=%d attempt=%d answer_start=%r", idx + 1, attempt + 1, (text or "")[:300])
+                user = section_user(topic, outline, idx, notes, today, rate) + STRICT_JSON
+            else:
+                user = (section_user(topic, outline, idx, notes, today, rate) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only, for this section.")
+        attempt += 1
     raise ValueError(f"section {idx + 1} could not be written: {last}")
 
 
@@ -187,6 +202,7 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
     # 2. each section: its own research, then its own call (in parallel; results are kept in order)
     system = plan_mod.system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft + SECTION_ADDENDUM
     sources: List[Dict[str, str]] = []
+    section_notes: List[str] = []   # what each section's writer was given (the grounding check compares the narration with it)
 
     def work(idx: int) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
         sec = sections[idx]
@@ -197,6 +213,7 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
             except Exception:
                 logging.exception("research for section %d failed", idx + 1)
         merged = notes if not sec_notes else (sec_notes + ("\n\n" + notes if notes else ""))   # the section's own research first, the general background after it
+        section_notes.append(sec_notes)
         return write_section(topic, outline, idx, merged[:24000], ask_big, system, today=today, rate=rate, language=language, region=region, allow_clips=allow_clips), sec_sources
 
     with ThreadPoolExecutor(max_workers=max(1, min(workers, len(sections)))) as ex:
@@ -219,7 +236,10 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
         sources += sec_sources
     combined = {"legit": True, "title": outline.get("title"), "description": outline.get("description"), "mood": outline.get("mood"), "theme": outline.get("theme"),
                 "voices": outline.get("voices"), "music": outline.get("music"), "sources_used": used, "beats": raw_beats}
-    plan, warns = plan_mod.validate_plan(combined, language=language, region=region, max_images=plan_mod.image_budget(minutes, rate), allow_clips=allow_clips)
+    rejects: List[Dict[str, Any]] = []
+    plan, warns = plan_mod.validate_plan(combined, language=language, region=region, max_images=plan_mod.image_budget(minutes, rate), allow_clips=allow_clips, rejects=rejects)
+    if rejects and quality_fixes() and plan.get("legit"):
+        plan["_rejected_scenes"] = rejects   # the director asks once for corrected scenes and removes this key
     warns += [f"section {k + 1}: {d[0]['warning']}" for k, d in enumerate(done) if d[0].get("warning")]
     # music: a section that chose different music than the one before it changes the music at its first beat
     chapter_at = {b.get("chapter"): i for i, b in enumerate(plan["beats"]) if b.get("chapter")}
@@ -239,4 +259,7 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
     short = plan_mod.length_problem(plan, minutes)
     if short:
         warns.append("length: " + short)
-    return plan, warns, {"sections": len(sections), "sources": sources, "titles": [s["title"] for s in sections]}
+    long_ = plan_mod.long_problem(plan, minutes)
+    if long_:
+        warns.append("length: " + long_)
+    return plan, warns, {"sections": len(sections), "sources": sources, "titles": [s["title"] for s in sections], "notes": section_notes}

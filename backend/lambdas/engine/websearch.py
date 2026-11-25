@@ -13,7 +13,7 @@ from html.parser import HTMLParser
 from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
 
-from .netsafe import FetchError, fetch_bytes
+from .netsafe import FetchError, fetch_bytes, quality_fixes, user_agent
 
 TAVILY_URL = "https://api.tavily.com/search"
 TOPICS = ("general", "news", "finance")
@@ -43,7 +43,7 @@ class TavilyProvider:
 
     @staticmethod
     def _http_post(url: str, headers: Dict[str, str], body: Dict[str, Any], timeout: float) -> bytes:
-        req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json", **headers})
+        req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json", **({"User-Agent": user_agent()} if quality_fixes() else {}), **headers})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return resp.read(1_000_000)

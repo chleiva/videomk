@@ -15,6 +15,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from .netsafe import quality_fixes
 from .websearch import TOPICS, TIME_RANGES, WebSearchError, domain_of, page_text
 
 Ask = Callable[..., str]                                           # (system, user, max_tokens) -> text
@@ -23,6 +24,14 @@ AskTools = Callable[..., Tuple[List[Dict[str, Any]], str, Dict[str, Any]]]  # (s
 # Words that make a brief time-sensitive. Only a hint and a fallback: the small model decides.
 _RECENT = re.compile(r"\b(latest|today|tonight|yesterday|this (?:week|month|year)|right now|breaking|news|currently|recent(?:ly)?|just (?:released|announced)|"
                      r"price of|score|results?|election|(?:20[2-9]\d)|últim[oa]s?|hoy|ayer|esta (?:semana|mes|año)|ahora|noticias|actualidad|reciente|resultados?|elecciones)\b", re.I)
+# Practical, changeable facts: rules, prices, schedules, availability, visas, regulations, "how it works now". An encyclopedia is stale or silent on these, so they go to the
+# web even when the small model says "encyclopedia" (QUALITY_FIXES). A hint with a few words per language, deliberately specific to keep the web agent for when it pays.
+_PRACTICAL = re.compile(
+    r"\b(?:how .{0,40}\bworks? (?:now|today|at the moment|these days)|(?:current|currently|as of|these days|nowadays|up[- ]to[- ]date|at the moment)\b.{0,60}\b(?:rules?|prices?|rates?|fees?|costs?|laws?|requirements?|policy|policies|situation|schedule)"
+    r"|(?:rules?|prices?|rates?|fees?|costs?|requirements?|regulations?|laws?|situation)\b.{0,30}\b(?:now|today|currently|this year|right now)"
+    r"|visas?|regulations?|opening hours|timetables?|schedules?|availability|ticket prices?|rail pass|(?:rate|price|cost|fee|budget)s? (?:range|environment)|budget range|how much (?:does|do|is|are|will)\b.{0,70}\bcost"
+    r"|best time to (?:visit|go|travel)|blossom|forecast"
+    r"|actualmente|hoy en d[ií]a|a d[ií]a de hoy|vigente|normativa|requisitos|visado|horarios?|tarifas?|precios? actual|cu[aá]nto cuesta|c[oó]mo funciona ahora|situaci[oó]n actual|reglas actuales|disponibilidad)\b", re.I)
 MAX_NOTES_CHARS = 9000
 
 
@@ -85,10 +94,13 @@ def decide(brief: str, *, language: str, region: Optional[str], today: str, ask:
     except Exception:
         d = {}
     mode = d.get("mode") if d.get("mode") in ("web", "encyclopedia") else ("web" if cue else "encyclopedia")
+    practical = quality_fixes() and bool(_PRACTICAL.search(brief))
+    if practical and mode != "web":   # the small model can miss it (the rail-pass brief): current rules, prices and schedules need the web
+        mode, cue = "web", True
     qs = [re.sub(r"\s+", " ", q).strip()[:120] for q in (d.get("queries") or []) if isinstance(q, str) and 2 <= len(q.strip())]
     topic = d.get("topic") if d.get("topic") in TOPICS else ("news" if cue else "general")
     tr = d.get("time_range") if d.get("time_range") in TIME_RANGES else None
-    return Decision(mode=mode, queries=qs[:3], topic=topic, time_range=tr, reason=str(d.get("reason") or ("recency cue in the brief" if cue else ""))[:200])
+    return Decision(mode=mode, queries=qs[:3], topic=topic, time_range=tr, reason=str(d.get("reason") or ("recency cue in the brief" if cue else ""))[:200] if not (practical and d.get("mode") != "web") else "practical or current facts (rules, prices, schedules) need the web")
 
 
 TOOLS = [
