@@ -26,6 +26,7 @@ class PrepareCtx:
     language: str = "en"
     region: Optional[str] = None
     media_items: List[Dict[str, Any]] = field(default_factory=list)   # the user's own photos of this video: {id, key, w, h, orientation, caption, taken, where}; their clean copies are ready in storage
+    frame: Dict[str, Any] = field(default_factory=dict)   # the video's frame ({aspect, resolution, ...}, format_options.frame_dict): a 4K video fetches larger photographs
 
 
 @dataclass

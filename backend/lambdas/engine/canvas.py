@@ -63,13 +63,14 @@ class Canvas:
         self.d = ImageDraw.Draw(self.im, "RGBA")
 
     # ---------- output ----------
-    def to_rgb(self, size=None) -> Image.Image:
+    def to_rgb(self, size=None, resample=None) -> Image.Image:
         """The finished image at design size, or at `size` (w, h) when that differs (720p: a box reduce by 3 from the 2x canvas)."""
         if size and tuple(size) != (self.W, self.H):
             tw, th = int(size[0]), int(size[1])
             if self.im.width % tw == 0 and self.im.height % th == 0 and self.im.width // tw == self.im.height // th:
-                return self.im.reduce(self.im.width // tw)
-            return self.im.resize((tw, th), Image.BOX if self.ss > 1 else Image.BILINEAR)
+                k = self.im.width // tw
+                return self.im.reduce(k) if k > 1 else self.im
+            return self.im.resize((tw, th), resample if resample is not None else (Image.BOX if self.ss > 1 else Image.BILINEAR))
         return self.im.reduce(self.ss) if self.ss > 1 else self.im
 
     # ---------- background ----------
@@ -96,7 +97,10 @@ class Canvas:
             cx = (ax + 0.04 * math.sin(qt * 0.35 + phase)) * sw
             cy = (ay + 0.05 * math.cos(qt * 0.28 + phase)) * sh
             small.paste(Image.new("RGB", blob.size, color), (int(cx - d / 2), int(cy - d / 2)), blob)
-        composed = small.resize(full, Image.BICUBIC)
+        if self.ss >= 4:   # 4K (docs/FOUR_K.md): the glow has no detail, so it is enlarged smoothly to half the canvas and doubled; after the final 2x reduce this is exactly the smooth image
+            composed = small.resize((full[0] // 2, full[1] // 2), Image.BICUBIC).resize(full, Image.NEAREST)
+        else:
+            composed = small.resize(full, Image.BICUBIC)
         if len(_BG_CACHE) >= 4:
             _BG_CACHE.pop(next(iter(_BG_CACHE)))
         _BG_CACHE[key] = composed

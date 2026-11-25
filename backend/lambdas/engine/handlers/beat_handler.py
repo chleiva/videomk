@@ -11,7 +11,7 @@ from common.secrets import get_secret_param
 
 from ..scenes import ELEMENTS
 from ..scenes.registry import PrepareCtx
-from .. import align, assets, audio, awsio, clips, costs, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from .. import align, assets, audio, awsio, clips, costs, format_options, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -95,6 +95,7 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     pfx = awsio.prefix(video_id)
     props = beat["scene"]["props"]
     query, pick = props["image_query"], beat.get("pick")
+    big = format_options.is_4k((plan.get("frame") or {}).get("resolution"))   # a 4K video fetches and keeps larger photos (docs/FOUR_K.md); 720p/1080p exactly as before
     out: Dict[str, Any] = {"query": query, "pick": pick}
     if props.get("photo"):  # the user's own photo: no search, no credit line, nothing to review
         item = next((m for m in plan.get("media_items") or [] if m.get("id") == props["photo"]), None)
@@ -110,13 +111,13 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
             cands = awsio.get_json(cands_key).get("candidates", [])
             chosen = next((c for c in cands if stock.candidate_key(c) == pick), None)
             if chosen:
-                jpeg, _ = assets.to_jpeg(stock.fetch_full(chosen))
+                jpeg, _ = assets.to_jpeg(stock.fetch_full(chosen), max_side=assets.max_side_for(big))
                 stock.track_download(chosen, unsplash_key)
                 result = {"jpeg": jpeg, "entry": stock.ledger_entry(chosen), "credit": stock.credit_line(chosen), "chosen": pick, "candidates": cands, "review": {}}
         except Exception:
             result = None
     if result is None:
-        result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key)
+        result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key, **({"big": True} if big else {}))
         if result:
             costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
             if result.get("candidates"):
@@ -170,7 +171,7 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     keys = {"pexels_key": get_secret_param("/videomk/pexels_api_key", quiet=True), "pixabay_key": get_secret_param("/videomk/pixabay_api_key", quiet=True)}
     fr = plan.get("frame") or {}   # vertical and square videos ask the stock libraries for portrait or square footage; landscape calls are exactly as before
     orient = "portrait" if fr.get("aspect") in ("9:16", "4:5") else "square" if fr.get("aspect") == "1:1" else str(fr.get("orientation") or "landscape")
-    keys = {**keys, **({"orientation": orient} if orient in ("portrait", "square") else {})}
+    keys = {**keys, **({"orientation": orient} if orient in ("portrait", "square") else {}), **({"hd": True} if format_options.is_4k(fr.get("resolution")) else {})}   # 4K: 1080p footage instead of 720p
     result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
@@ -214,7 +215,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             try:
                 patch = el.prepare(dict(beat["scene"]["props"]), PrepareCtx(video_id=video_id, beat_id=beat_id, narration=beat.get("narration", ""), duration=float(media["duration"]),
                                                                             sources=plan.get("sources") or [], language=plan.get("language", "en"), region=plan.get("region"),
-                                                                            media_items=plan.get("media_items") or []))
+                                                                            media_items=plan.get("media_items") or [], frame=dict(plan.get("frame") or {})))
                 media["element"] = patch if isinstance(patch, dict) else {}
             except Exception:
                 logging.exception("element %s could not prepare beat %s", el.name, beat_id)

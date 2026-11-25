@@ -1,7 +1,7 @@
 """Frame: the shape of a video (aspect + resolution) and the layout numbers every scene needs.
 
 Scenes lay out in DESIGN units, a virtual canvas whose short side is 1080 (16:9 -> 1920x1080, 9:16 -> 1080x1920, 1:1 -> 1080x1080, 4:5 -> 1080x1350).
-The renderer scales design units to the real pixel size (720p is just a scale of 2/3), so a scene never knows which resolution it renders at.
+The renderer scales design units to the real pixel size (720p is just a scale of 2/3, 2160p (4K) a scale of 2), so a scene never knows which resolution it renders at.
 Dependency-free on purpose: the options plumbing, the director prompt and the renderer all import it.
 The contract for scenes and elements is in docs/RESPONSIVE_LAYOUT.md.
 """
@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from typing import Dict, Tuple
 
 ASPECTS = ("16:9", "9:16", "1:1", "4:5")
-RESOLUTIONS = ("720p", "1080p")
+RESOLUTIONS = ("720p", "1080p", "2160p")
+SHORT_SIDE: Dict[str, int] = {"720p": 720, "1080p": 1080, "2160p": 2160}   # real pixels of the short side; 2160p is 4K (16:9 -> 3840x2160), docs/FOUR_K.md
 DEFAULT_ASPECT = "16:9"
 DEFAULT_RESOLUTION = "1080p"
 
@@ -57,7 +58,7 @@ class Frame:
 
     @property
     def scale_factor(self) -> float:
-        return (720 / 1080) if self.resolution == "720p" else 1.0
+        return SHORT_SIDE.get(self.resolution, 1080) / 1080
 
     @property
     def width(self) -> int:
@@ -144,7 +145,7 @@ class Frame:
 
     @classmethod
     def parse(cls, aspect=None, resolution=None) -> "Frame":
-        """Lenient: anything unknown falls back to the default (16:9, 1080p). Accepts '9:16', '9x16', 'vertical', '720', 720."""
+        """Lenient: anything unknown falls back to the default (16:9, 1080p). Accepts '9:16', '9x16', 'vertical', '720', 720, '2160p', '4k'."""
         a = str(aspect or "").strip().lower().replace("x", ":").replace("/", ":")
         a = {"vertical": "9:16", "portrait": "9:16", "landscape": "16:9", "square": "1:1", "wide": "16:9"}.get(a, a)
         if a not in ASPECTS:
@@ -154,6 +155,8 @@ class Frame:
             r = "720p"
         elif r in ("1080", "1080p", "fhd", "full hd"):
             r = "1080p"
+        elif r in ("2160", "2160p", "4k", "uhd"):
+            r = "2160p"
         else:
             r = DEFAULT_RESOLUTION
         return FRAMES.get((a, r)) or cls(a, r)
@@ -168,7 +171,7 @@ class Frame:
         ratio = w / h
         a = min(ASPECTS, key=lambda k: abs(_DESIGN[k][0] / _DESIGN[k][1] - ratio))
         short = min(w, h)
-        return cls.parse(a, "720p" if short < 900 else "1080p")
+        return cls.parse(a, "720p" if short < 900 else "1080p" if short < 1620 else "2160p")
 
 
 FRAMES: Dict[Tuple[str, str], Frame] = {(a, r): Frame(a, r) for a in ASPECTS for r in RESOLUTIONS}

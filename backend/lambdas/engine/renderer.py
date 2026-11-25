@@ -1,6 +1,8 @@
 """Timeline -> frames. Pure function of (timeline, t): any frame range can be rendered independently,
 which is what makes chunk-parallel rendering on Lambda possible."""
 import bisect
+import os
+import sys
 import zlib
 from typing import Any, Callable, Dict, Iterator, List, Optional
 
@@ -17,6 +19,33 @@ from .theme import get_theme
 TRANSITION_S = 0.4
 OUTRO_FADE_S = 0.7
 BLACK = (0, 0, 0)
+SS_4K = 4   # 4K supersampling: a canvas 4x the design size reduced 2x, i.e. the same 2x2 samples per output pixel as 1080p (measured against 2x and 3x in docs/FOUR_K.md)
+
+# The dict caches that hold pictures (sprites, composed backgrounds, resized photos), by module: emptied by release_caches. Never clips._CACHE (a provider's search results).
+_PICTURE_DICTS = (("canvas", "_BG_CACHE"), ("scenes.viz_scenes", "_BACKDROP"), ("scenes.viz_scenes", "_SCRIM"), ("scenes.viz_scenes", "_FOCUS"),
+                  ("scenes.elements.people_media", "_PHOTO_CACHE"), ("scenes.elements._photo_kit", "_CACHE"))
+
+
+def release_caches() -> int:
+    """Empties the engine's picture caches (cached sprites, shadows, gradients, backgrounds, resized photos). At 4K each cached picture is 4 times the size it
+    has at 1080p and a warm render function would carry them from chunk to chunk, so the 4K render starts every chunk with empty caches (docs/FOUR_K.md).
+    Data that is loaded once (the map and icon indexes: caches of size 1 or without a limit) is kept. Returns how many caches were emptied."""
+    pkg = __name__.rsplit(".", 1)[0]
+    n = 0
+    for name, mod in list(sys.modules.items()):
+        if mod is None or not (name == pkg or name.startswith(pkg + ".")):
+            continue
+        for v in list(vars(mod).values()):
+            params = getattr(v, "cache_parameters", None)
+            if callable(params) and callable(getattr(v, "cache_clear", None)) and params().get("maxsize") not in (None, 1):
+                v.cache_clear()
+                n += 1
+    for mod_name, attr in _PICTURE_DICTS:
+        d = getattr(sys.modules.get(f"{pkg}.{mod_name}"), attr, None)
+        if isinstance(d, dict):
+            d.clear()
+            n += 1
+    return n
 
 
 class Renderer:
@@ -24,14 +53,16 @@ class Renderer:
                  clip_loader: Optional[Callable[[str], Any]] = None):
         self.tl = timeline
         self.draft = draft
-        self.ss = 1 if draft else 2  # draft: no supersampling, half-size output (the downscale antialiases)
         self.W = int(timeline.get("width", 1920))
         self.H = int(timeline.get("height", 1080))
         self.fps = int(timeline.get("fps", 30))
-        self.out_w, self.out_h = (max(2, self.W // 4 * 2), max(2, self.H // 4 * 2)) if draft else (self.W, self.H)   # draft: half size, kept even (yuv420p): 4:5 at 1080p is 540x674, not 675
         fr = timeline.get("frame")
         # the shape: the timeline's `frame` (aspect, resolution), else inferred from its pixel size; scenes lay out in the frame's design units
         self.frame = Frame.parse(fr.get("aspect"), fr.get("resolution")) if isinstance(fr, dict) and fr.get("aspect") else Frame.from_size(self.W, self.H)
+        self.big = self.frame.scale_factor > 1.0   # 4K: the output is larger than the design canvas
+        self.ss = 1 if draft else (SS_4K if self.big else 2)  # draft: no supersampling, half-size output (the downscale antialiases)
+        dw, dh = (self.frame.design_w, self.frame.design_h) if self.big else (self.W, self.H)   # a draft of a 4K video is the same small preview as a 1080p one
+        self.out_w, self.out_h = (max(2, dw // 4 * 2), max(2, dh // 4 * 2)) if draft else (self.W, self.H)   # draft: half size, kept even (yuv420p): 4:5 at 1080p is 540x674, not 675
         self.fallbacks: Dict[str, Dict[str, Any]] = {}   # scene id -> framed-fallback report (scale, min_text_px, readable), for the preview tooling
         self.theme = get_theme(timeline.get("theme", "midnight"))
         self.scenes: List[Dict[str, Any]] = timeline["scenes"]
@@ -101,6 +132,8 @@ class Renderer:
             words = sc.get("words")
             if words:
                 draw_captions(cv, self.theme, words, lt, fr)
+        if self.big and not self.draft:   # 4K: straight from the supersampled canvas to the output size (never through the 1080 design size)
+            return cv.to_rgb((self.out_w, self.out_h))
         return cv.to_rgb()   # design size; frame_at scales it to the output size
 
     def scene_index(self, t: float) -> int:

@@ -9,6 +9,10 @@ from ..timeline import beat_info_from_plan, build_timeline, chunk_plan
 
 MAX_DURATION_S = float(os.environ.get("MAX_VIDEO_SECONDS", str(13 * 60)))
 CHUNK_SECONDS = int(os.environ.get("CHUNK_SECONDS", "10"))
+# 4K (docs/FOUR_K.md): a frame takes about 2.5 times as long to draw and encode as at 1080p, so chunks are shorter and a long scene is cut into pieces:
+# every render function then finishes in a few minutes of its 10. Previews of a 4K video are small drafts and are chunked like any other video.
+CHUNK_SECONDS_4K = int(os.environ.get("CHUNK_SECONDS_4K", "6"))
+CHUNK_MAX_FRAMES_4K = int(os.environ.get("CHUNK_MAX_FRAMES_4K", "180"))
 
 
 def credits_ledger(plan: Dict[str, Any]) -> list:
@@ -68,5 +72,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "mode": mode,
         "timeline_key": key,
         "duration": tl["duration"],
-        "chunks": [{**c, "video_id": video_id, "timeline_key": key} for c in chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"))],
+        "chunks": [{**c, "video_id": video_id, "timeline_key": key} for c in (
+            chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if format_options.is_4k(frame["resolution"]) and mode != "preview"
+            else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview")))],
     }

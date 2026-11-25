@@ -177,12 +177,16 @@ def _scene_fingerprint(sc: Dict[str, Any]) -> Dict[str, Any]:
     return {k: sc.get(k) for k in ("id", "type", "duration", "props", "words", "transition")}
 
 
-def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool = False) -> List[Dict[str, Any]]:
+def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool = False, max_frames: int = 0) -> List[Dict[str, Any]]:
     """Group whole scenes into ~target_seconds chunks. Each chunk is content-addressed:
 
     hash = f(renderer version, format, theme, draft, its scenes, the scene before it (crossfade), whether it ends the video).
     It deliberately excludes absolute time, so after an edit every chunk the edit didn't touch hashes the same and its cached
     segment is reused; a segment is rendered from t=0 and stitched purely by duration.
+
+    `max_frames` (4K only, docs/FOUR_K.md; 0 = off, the plan is then exactly what it always was): a group with more frames is rendered as several pieces of
+    at most that many frames, so one long scene can never take a render function past its time limit. A piece is {"f0": first frame within the group,
+    "frames": how many}; its hash is the group's hash plus its frame range, so pieces are cached and reused like whole chunks.
     """
     scenes = timeline["scenes"]
     fps = int(timeline["fps"])
@@ -213,7 +217,15 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]
-        out.append({"k": k, "lo": lo, "hi": hi, "frames": max(1, f1 - f0), "hash": h, "draft": draft})
+        n = max(1, f1 - f0)
+        if not max_frames or n <= max_frames:
+            out.append({"k": len(out), "lo": lo, "hi": hi, "frames": n, "hash": h, "draft": draft})
+            continue
+        parts = -(-n // int(max_frames))   # even pieces: 400 frames with a limit of 180 are 133 + 133 + 134, never 180 + 180 + 40
+        for j in range(parts):
+            a, b = n * j // parts, n * (j + 1) // parts
+            hj = hashlib.sha256(f"{h}:{a}:{b}".encode("utf-8")).hexdigest()[:24]
+            out.append({"k": len(out), "lo": lo, "hi": hi, "f0": a, "frames": b - a, "hash": hj, "draft": draft})
     return out
 
 

@@ -4,6 +4,11 @@
 the user picks is the length that is billed and made (the launcher passes it to the workflow). Failed or declined videos refund exactly the
 buckets they were charged to, once.
 
+**A 4K (2160p) video costs double** (decided 2026-11-25): the started minutes times 2, so 1 minute is 2 credits, 3 minutes 6, 12 minutes 24.
+720p and 1080p cost the same as before. One function owns the rule, `common/wallet.credits_for_minutes(minutes, resolution)`; the multiplier
+per resolution is data in `engine/format_options.RESOLUTIONS` and is what `GET /capabilities` shows the apps. A failed 4K video refunds the
+doubled amount; edits stay free. Render cost and reasoning: `docs/FOUR_K.md`.
+
 ## What users get (server config, no app update: `WALLET_*` env, see `common/wallet.py`)
 | Credits | Amount | Expiry |
 |---|---|---|

@@ -77,6 +77,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         out["clip_render_60_frames_s"] = round(time.time() - t, 2)
         out["clip_render_frames"] = info["frames"]
     out["has"]["clip_path"] = out["clip_frames"] >= 85 and out["clip_render_frames"] == 60
+    # 4K (docs/FOUR_K.md): the same mixed timeline at 3840x2160, to read the real ms per frame and memory of this runtime before switching 4K on. Never fails the self test.
+    try:
+        import resource
+
+        big = dict(fixture, width=3840, height=2160, frame={"aspect": "16:9", "resolution": "2160p"})
+        with tempfile.TemporaryDirectory() as tmp:
+            seg = os.path.join(tmp, "k.ts")
+            t = time.time()
+            info = pipeline.render_chunk(big, 45, 75, seg)   # 30 frames across the cut between the two scenes
+            out["ms_per_frame_4k"] = round((time.time() - t) / info["frames"] * 1000, 1)
+            out["segment_bytes_4k"] = os.path.getsize(seg)
+        out["peak_rss_mb"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024)   # Linux reports kilobytes
+    except Exception as e:  # noqa: BLE001
+        out["error_4k"] = f"{type(e).__name__}: {e}"[:200]
     out["tmp_free_mb"] = round(os.statvfs("/tmp").f_bavail * os.statvfs("/tmp").f_frsize / 1e6)
     out["ok"] = all(out["has"].values())
     return out

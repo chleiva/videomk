@@ -6,7 +6,7 @@ this module is the options layer on top: ids, readiness settings, capabilities a
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
-from .frame import Frame
+from .frame import SHORT_SIDE, Frame
 
 MAX_PHOTOS = 100   # keep equal to common.photo_ids.MAX_PHOTOS (a test checks)
 
@@ -20,12 +20,20 @@ ASPECTS: List[Dict[str, str]] = [
     {"id": "1:1", "label": "Square"},
     {"id": "4:5", "label": "Portrait"},
 ]
-RESOLUTIONS: List[Dict[str, str]] = [{"id": "720p", "label": "720p"}, {"id": "1080p", "label": "1080p"}]
+# credits_multiplier: what a video at this resolution costs relative to the same video at 1080p (owner decision: 4K costs double). The rule itself is
+# `common.wallet.credits_for_minutes(minutes, resolution)`; this table is its only input and what capabilities shows.
+RESOLUTIONS: List[Dict[str, Any]] = [
+    {"id": "720p", "label": "720p", "credits_multiplier": 1},
+    {"id": "1080p", "label": "1080p", "credits_multiplier": 1},
+    {"id": "2160p", "label": "4K", "credits_multiplier": 2, "note": "4K (2160p) costs twice the credits. Best for YouTube and large screens."},
+]
+RESOLUTION_4K = "2160p"
+PLATFORMS_4K = ("youtube", "other")   # where a 4K file is worth making (owner decision); every other platform publishes at 1080p or lower
 LANGUAGE_LABELS = {"en": "English", "es": "Español"}   # every language the engine can voice; READY_LANGUAGES picks which are offered
 
-# aspect -> (width units, height units); the SHORT side is 720 or 1080 pixels
+# aspect -> (width units, height units); the SHORT side is 720, 1080 or 2160 pixels
 _RATIOS: Dict[str, Tuple[int, int]] = {"16:9": (16, 9), "9:16": (9, 16), "1:1": (1, 1), "4:5": (4, 5)}
-_SHORT = {"720p": 720, "1080p": 1080}
+_SHORT = dict(SHORT_SIDE)
 
 LENGTH_PRESETS: List[float] = [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]   # minutes: 15 s, 30 s, 45 s, 1 min ... (the apps show them; credits are the started minutes, minimum 1)
 MIN_MINUTES, MAX_MINUTES = 0.25, 12
@@ -35,6 +43,13 @@ def _p(id: str, label: str, aspect: str, other: List[str], minutes: float, max_m
     shape = {"16:9": "Landscape", "9:16": "Vertical", "1:1": "Square", "4:5": "Portrait"}[aspect]
     return {"id": id, "label": label, "aspect": aspect, "resolution": "1080p", "recommended_minutes": minutes, "max_minutes": max_minutes, "other_aspects": other,
             "note": f"{shape} {aspect} · 1080p · about {dur}"}
+
+
+def note_4k(platform: Dict[str, Any]) -> Optional[str]:
+    """What the app shows when the person picks 4K for a platform that does not deliver it (None where 4K makes sense)."""
+    if platform["id"] in PLATFORMS_4K:
+        return None
+    return f"{platform['label']} publishes at 1080p or lower; 4K would cost twice the credits for no visible gain."
 
 
 # What each platform is for. The note is shown under the chips; aspect/resolution/recommended_minutes are the RECOMMENDATION (a default in the app), never a restriction.
@@ -80,13 +95,27 @@ def beta_aspects() -> List[str]:
     return [a for a in _csv("BETA_ASPECTS", "") if a in ASPECT_IDS]
 
 
+def ready_resolutions() -> List[str]:
+    """Server setting READY_RESOLUTIONS (comma list, default 720p,1080p): the resolutions on offer. 4K is switched on by adding 2160p (docs/FOUR_K.md). Unknown ids are ignored."""
+    return [r for r in _csv("READY_RESOLUTIONS", "720p,1080p") if r in RESOLUTION_IDS]
+
+
+def is_4k(resolution: Optional[str]) -> bool:
+    return resolution == RESOLUTION_4K
+
+
+def credits_multiplier(resolution: Optional[str]) -> int:
+    """How many times the credits of a 1080p video a video at this resolution costs (1; 4K: 2). Unknown or absent means 1."""
+    return next((int(r["credits_multiplier"]) for r in RESOLUTIONS if r["id"] == resolution), 1)
+
+
 def ready_languages() -> List[str]:
     """Server setting READY_LANGUAGES (comma list, default en,es). Unknown languages are ignored."""
     return [x for x in _csv("READY_LANGUAGES", "en,es") if x in LANGUAGE_LABELS]
 
 
 def frame_size(aspect: Optional[str] = None, resolution: Optional[str] = None) -> Tuple[int, int]:
-    """(width, height) in pixels. The short side is 720 or 1080; the long side follows the ratio. Unknown or absent values mean 16:9 1080p."""
+    """(width, height) in pixels. The short side is 720, 1080 or 2160; the long side follows the ratio. Unknown or absent values mean 16:9 1080p."""
     f = Frame.parse(aspect if aspect in _RATIOS else None, resolution if resolution in _SHORT else None)
     return f.width, f.height
 
@@ -117,8 +146,9 @@ def capabilities() -> Dict[str, Any]:
     langs = ready_languages()
     return {
         "aspects": [{"id": a["id"], "label": a["label"], "ready": a["id"] in ready, "beta": a["id"] in ready and a["id"] in beta} for a in ASPECTS],
-        "resolutions": [dict(r) for r in RESOLUTIONS],
-        "platforms": [{**p, "other_aspects": list(p["other_aspects"])} for p in PLATFORMS],
+        # only the resolutions on offer are listed (an older app shows every listed one); each says what it costs and the formats it can be made in
+        "resolutions": [{**r, "aspects": [a["id"] for a in ASPECTS if a["id"] in ready]} for r in RESOLUTIONS if r["id"] in ready_resolutions()],
+        "platforms": [{**p, "other_aspects": list(p["other_aspects"]), "supports_4k": p["id"] in PLATFORMS_4K, "note_4k": note_4k(p)} for p in PLATFORMS],
         "languages": [{"id": x, "label": LANGUAGE_LABELS[x]} for x in langs],
         "lengths": {"min_minutes": MIN_MINUTES, "max_minutes": MAX_MINUTES, "presets": list(LENGTH_PRESETS)},
         "max_photos": MAX_PHOTOS,

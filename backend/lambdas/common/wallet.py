@@ -1,4 +1,4 @@
-"""Credits wallet. 1 credit = 1 started minute of video (a 10-second video costs 1, 61 seconds costs 2).
+"""Credits wallet. 1 credit = 1 started minute of video (a 10-second video costs 1, 61 seconds costs 2); a 4K video costs double (docs/FOUR_K.md).
 
 Credits live in *buckets* so each kind can expire on its own and the soonest-expiring is spent first:
   daily   1 free credit a day, expire at the end of the user's local day (no hoarding)
@@ -46,9 +46,12 @@ def rules() -> Dict[str, int]:
             "signup_valid_days": _int("WALLET_SIGNUP_VALID_DAYS", 30)}
 
 
-def credits_for_minutes(minutes: float) -> int:
-    """Started minutes, at least 1: 0.2 -> 1, 1 -> 1, 1.01 -> 2, 12 -> 12."""
-    return max(1, min(MAX_MINUTES, math.ceil(round(float(minutes), 6))))
+def credits_for_minutes(minutes: float, resolution: Optional[str] = None) -> int:
+    """THE price of a video, the one place it is worked out. Started minutes, at least 1: 0.2 -> 1, 1 -> 1, 1.01 -> 2, 12 -> 12; times the resolution's
+    multiplier (`engine.format_options.RESOLUTIONS`: 1 for 720p and 1080p, 2 for 4K), so 3 minutes at 2160p -> 6. No or unknown resolution: times 1."""
+    from engine.format_options import credits_multiplier   # the options table (plain data, no dependencies) is the only input
+
+    return max(1, min(MAX_MINUTES, math.ceil(round(float(minutes), 6)))) * credits_multiplier(resolution)
 
 
 def _table():

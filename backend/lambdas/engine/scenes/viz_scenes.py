@@ -403,6 +403,18 @@ def _user_photo_fits(src: Image.Image, frame, tw: int, tht: int) -> bool:
     return min(sa / fa, fa / sa) >= 0.72
 
 
+HALF_FILL_SS = 4   # 4K canvases (supersampled 4x, see docs/FOUR_K.md)
+
+
+def _fill(src: Image.Image, tw: int, tht: int, box, ss: int = 2) -> Image.Image:
+    """The part `box` of a photograph or clip frame as a tw x tht image (the whole canvas). On a 4K canvas (`ss` 4: supersampled 4x, reduced 2x at the end) the picture is
+    resampled once to the output size and doubled: the final reduce gives back exactly that resample, at about a third of the cost of resampling to the whole canvas.
+    Every other canvas (ss 1 or 2: drafts, 720p, 1080p): one resample, exactly as always."""
+    if ss >= HALF_FILL_SS and tw % 2 == 0 and tht % 2 == 0:
+        return src.resize((tw // 2, tht // 2), Image.BILINEAR, box=box).resize((tw, tht), Image.NEAREST)
+    return src.resize((tw, tht), Image.BILINEAR, box=box)
+
+
 def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     src: Optional[Image.Image] = ctx.resolve_image(str(props.get("asset", ""))) if props.get("asset") else None
     tw, tht = cv.W * cv.ss, cv.H * cv.ss
@@ -430,7 +442,7 @@ def draw_image(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
         cx += lerp(-pan, pan, p)
     cx = min(max(cx, vw / 2), sw - vw / 2)
     cy = min(max(cy, vh / 2), sh - vh / 2)
-    img = src.resize((tw, tht), Image.BILINEAR, box=_box(cx, cy, vw, vh, sw, sh))
+    img = _fill(src, tw, tht, _box(cx, cy, vw, vh, sw, sh), cv.ss)
     cv.im.paste(img)
     # bottom scrim so captions stay legible over any photo
     scrim = _scrim(tw, tht, fr)
@@ -480,7 +492,7 @@ def _box(cx: float, cy: float, vw: float, vh: float, sw: int, sh: int) -> Tuple[
     return (max(0.0, cx - vw / 2), max(0.0, cy - vh / 2), min(float(sw), cx + vw / 2), min(float(sh), cy + vh / 2))
 
 
-def _cover(src: Image.Image, tw: int, tht: int, z: float, motion: str, p: float, focus: Optional[Tuple[float, float]] = None) -> Image.Image:
+def _cover(src: Image.Image, tw: int, tht: int, z: float, motion: str, p: float, focus: Optional[Tuple[float, float]] = None, ss: int = 2) -> Image.Image:
     sw, sh = src.size
     base = max(tw / sw, tht / sh)
     vw, vh = tw / (base * z), tht / (base * z)
@@ -492,7 +504,7 @@ def _cover(src: Image.Image, tw: int, tht: int, z: float, motion: str, p: float,
         cx += lerp(-pan, pan, p)
     cx = min(max(cx, vw / 2), sw - vw / 2)
     cy = min(max(cy, vh / 2), sh - vh / 2)
-    return src.resize((tw, tht), Image.BILINEAR, box=_box(cx, cy, vw, vh, sw, sh))
+    return _fill(src, tw, tht, _box(cx, cy, vw, vh, sw, sh), ss)
 
 
 def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
@@ -522,7 +534,7 @@ def draw_gallery(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
         whole = (srcs[k].width / srcs[k].height < 1.3) if fr.landscape else not _user_photo_fits(srcs[k], fr, tw, tht)
         if props.get("user") and whole:   # a photo of the user's that a crop would hurt: all of it, never a face cropped off
             return _contained_image(srcs[k], tw, tht, lerp(1.0, 1.06, p))
-        return _cover(srcs[k], tw, tht, lerp(1.0, 1.12, p), motions[k % 4], p, None if fr.landscape else focus_point(srcs[k]))
+        return _cover(srcs[k], tw, tht, lerp(1.0, 1.12, p), motions[k % 4], p, None if fr.landscape else focus_point(srcs[k]), cv.ss)
 
     cur = frame(i) or next((f for f in (frame(k) for k in range(n)) if f is not None), None)
     if cur is None:
@@ -569,7 +581,7 @@ def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     else:   # stock footage is mostly landscape: crop its middle (a little above centre), or all of it when it is already tall
         cx, cy = min(max(sw / 2, vw / 2), sw - vw / 2), min(max(sh * 0.46, vh / 2), sh - vh / 2)
         box = _box(cx, cy, vw, vh, sw, sh)
-    cv.im.paste(src.resize((tw, tht), Image.BILINEAR, box=box))
+    cv.im.paste(_fill(src, tw, tht, box, cv.ss))
     scrim = _scrim(tw, tht, fr)
     cv.im.paste(Image.new("RGB", scrim.size, (0, 0, 0)), (0, tht - scrim.height), scrim)
     credit = str(props.get("credit", "")).strip()

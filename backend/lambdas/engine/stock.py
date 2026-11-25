@@ -36,7 +36,10 @@ def _utm(url: str) -> str:
 
 
 # ----------------------------------------------------------------------------- providers
-def unsplash_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, per_page: int = 10) -> List[Candidate]:
+UNSPLASH_W, UNSPLASH_W_4K = 2400, assets.MAX_SIDE_4K   # the width asked of Unsplash's image service: 2400 for 720p/1080p videos (as always), 4400 for a 4K video
+
+
+def unsplash_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json, per_page: int = 10, big: bool = False) -> List[Candidate]:
     if not key:
         return []
     q = urllib.parse.urlencode({"query": query[:120], "per_page": per_page, "orientation": "landscape", "content_filter": "high"})
@@ -49,7 +52,7 @@ def unsplash_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json
             if w < assets.MIN_WIDTH or h <= 0 or w / h < 1.3:  # same bar as Openverse: video needs a wide, large source
                 continue
             raw = urls.get("raw") or urls["full"]
-            full = raw + ("&" if "?" in raw else "?") + "w=2400&q=85&fm=jpg&fit=max"
+            full = raw + ("&" if "?" in raw else "?") + f"w={UNSPLASH_W_4K if big else UNSPLASH_W}&q=85&fm=jpg&fit=max"   # fit=max never enlarges: a smaller original comes as it is
             name = str(user.get("name") or user.get("username") or "Unknown")[:80]
             profile = _utm(str(user.get("links", {}).get("html") or f"https://unsplash.com/@{user.get('username', '')}"))
             landing = _utm(str(r.get("links", {}).get("html") or ""))
@@ -94,10 +97,10 @@ def openverse_search(query: str, fetch: Callable[..., Any] = fetch_json) -> List
     return out
 
 
-def gather(query: str, *, unsplash_key: str = "", fetch: Callable[..., Any] = fetch_json, limit: int = MAX_REVIEW_CANDIDATES) -> List[Candidate]:
+def gather(query: str, *, unsplash_key: str = "", fetch: Callable[..., Any] = fetch_json, limit: int = MAX_REVIEW_CANDIDATES, big: bool = False) -> List[Candidate]:
     """Unsplash first (better photography), Openverse to fill; failures of one provider never block the other."""
     pools: List[List[Candidate]] = []
-    for fn in (lambda: unsplash_search(query, unsplash_key, fetch), lambda: openverse_search(query, fetch)):
+    for fn in (lambda: unsplash_search(query, unsplash_key, fetch, **({"big": True} if big else {})), lambda: openverse_search(query, fetch)):
         try:
             pools.append(fn())
         except (FetchError, ValueError, KeyError, TypeError) as e:
@@ -222,11 +225,13 @@ def scout_reviewed(
     fetch_json_fn: Callable[..., Any] = fetch_json,
     fetch_bytes_fn: Callable[..., bytes] = fetch_bytes,
     review: Optional[Callable[..., Tuple[Optional[int], str, float, List[int]]]] = llm_review,
+    big: bool = False,
 ) -> Optional[Dict[str, Any]]:
-    """Find, review, download and normalise one photo. Never raises. Returns
+    """Find, review, download and normalise one photo. `big` (a 4K video) asks for and keeps a larger picture (assets.MAX_SIDE_4K). Never raises. Returns
     {jpeg, entry, credit, chosen, candidates, review:{reason,cost_usd,source}} or None when nothing suitable exists."""
+    kw = {"big": True} if big else {}   # the 720p/1080p calls stay exactly as they were
     try:
-        cands = gather(query, unsplash_key=unsplash_key, fetch=fetch_json_fn)
+        cands = gather(query, unsplash_key=unsplash_key, fetch=fetch_json_fn, **kw)
     except Exception:
         logging.exception("photo gather crashed for %r", query)
         return None
@@ -234,7 +239,7 @@ def scout_reviewed(
     if not cands and len(words) > 3:  # long queries often match nothing: retry with the leading, most specific words
         short = " ".join(words[:3])
         try:
-            cands = gather(short, unsplash_key=unsplash_key, fetch=fetch_json_fn)
+            cands = gather(short, unsplash_key=unsplash_key, fetch=fetch_json_fn, **kw)
         except Exception:
             logging.exception("photo gather crashed for %r", short)
             cands = []
@@ -257,7 +262,7 @@ def scout_reviewed(
     for i in order:  # first downloadable candidate in preference order
         c = cands[i]
         try:
-            jpeg, _ = assets.to_jpeg(fetch_full(c, fetch_bytes_fn))
+            jpeg, _ = assets.to_jpeg(fetch_full(c, fetch_bytes_fn), max_side=assets.max_side_for(big))
         except (FetchError, OSError, ValueError, Image.DecompressionBombError) as e:
             logging.warning("photo download failed (%s) for %r: %s", candidate_key(c), query, type(e).__name__)
             continue

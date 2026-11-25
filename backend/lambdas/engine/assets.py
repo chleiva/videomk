@@ -15,6 +15,12 @@ from .netsafe import FetchError, fetch_bytes, fetch_json
 OPENVERSE = "https://api.openverse.org/v1/images/"
 ALLOWED_LICENSES = ("cc0", "pdm", "by")
 MIN_WIDTH = 1600
+MAX_SIDE = 2800      # the stored size of a stock photo for 720p and 1080p videos (as always)
+MAX_SIDE_4K = 4400   # ... and for a 4K video: 3840 across plus the 1.14x push-in of an image scene, so the photo is never enlarged when the source is that big (docs/FOUR_K.md)
+
+
+def max_side_for(big: bool = False) -> int:
+    return MAX_SIDE_4K if big else MAX_SIDE
 MAX_PIXELS = 50_000_000
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS  # decompression-bomb guard
 
@@ -54,7 +60,7 @@ def ledger_entry(r: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
-def to_jpeg(raw: bytes, max_side: int = 2800, quality: int = 88) -> Tuple[bytes, Tuple[int, int]]:
+def to_jpeg(raw: bytes, max_side: int = MAX_SIDE, quality: int = 88) -> Tuple[bytes, Tuple[int, int]]:
     """Validate + re-encode (strips metadata, normalises format, bounds size)."""
     im = Image.open(io.BytesIO(raw))
     im.load()

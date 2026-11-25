@@ -489,10 +489,15 @@ class BackendStack(Stack):
         uploads_res.add_method("POST", apigw.LambdaIntegration(uploads_fn, proxy=True), **cognito_auth)
 
         # The creation options (docs/CREATE_OPTIONS_FLOW.md): GET /capabilities, and the ready formats/languages the launcher enforces. `-c readyAspects=16:9,9:16 -c betaAspects=9:16` switches vertical on.
+        # `-c readyResolutions=720p,1080p,2160p` switches 4K on (docs/FOUR_K.md). A 4K render chunk peaks near 5.5 GB (measured), so it is refused where the functions are capped below 10 GB.
+        ready_resolutions = str(self.node.try_get_context("readyResolutions") or "720p,1080p")
+        if "2160p" in [r.strip() for r in ready_resolutions.split(",")] and MEM_CAP < 10240:
+            raise ValueError(f"4K (readyResolutions with 2160p) needs 10240 MB render functions; this stage caps Lambda memory at {MEM_CAP} MB (lambdaMemoryCap). See docs/FOUR_K.md.")
         RequestOptions(
             self, "RequestOptions", make_fn=make_fn, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn,
             ready_aspects=str(self.node.try_get_context("readyAspects") or "16:9"), beta_aspects=str(self.node.try_get_context("betaAspects") or ""),
             ready_languages=str(self.node.try_get_context("readyLanguages") or "en,es"), intake_enabled=str(self.node.try_get_context("intakeEnabled") or "").lower() in ("1", "true"),
+            ready_resolutions=ready_resolutions,
         )
 
         # ----------------------------
@@ -530,7 +535,7 @@ class BackendStack(Stack):
                     "language": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^(auto|[a-z]{2})$"),   # which ones are ready is a server setting, checked by the launcher
                     "platform": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["youtube", "shorts", "tiktok", "reels", "instagram_feed", "linkedin", "x", "other"]),
                     "aspect": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["16:9", "9:16", "1:1", "4:5"]),   # readiness: the launcher
-                    "resolution": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["720p", "1080p"]),
+                    "resolution": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["720p", "1080p", "2160p"]),   # readiness (readyResolutions): the launcher
                     "brief": apigw.JsonSchema(type=apigw.JsonSchemaType.OBJECT),   # bounded and checked in full by the launcher (2 KB)
                     "media_meta": apigw.JsonSchema(type=apigw.JsonSchemaType.OBJECT),   # {media id: {taken, lat, lon}}, checked in full by the launcher
                     "media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=100,

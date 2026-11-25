@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 from PIL import Image
 
-from .. import awsio, pipeline
+from .. import awsio, format_options, pipeline, renderer
 from ..timeline import chunk_timeline
 
 _HASH = re.compile(r"^[0-9a-f]{24}$")
@@ -55,8 +55,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {"k": k, "key": key, "cached": True}
     tl = awsio.get_json(event["timeline_key"])
     ct = chunk_timeline(tl, int(event["lo"]), int(event["hi"]))
+    if not draft and format_options.is_4k((tl.get("frame") or {}).get("resolution")):
+        renderer.release_caches()   # 4K pictures are 4x the size: a warm function must not carry the last chunk's sprites and photos into this one
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "seg.ts")
-        info = pipeline.render_chunk(ct, 0, int(event["frames"]), out, make_image_loader(video_id), draft=draft, clip_loader=make_clip_loader(video_id, tmp))
+        f0 = int(event.get("f0") or 0)   # a piece of a long chunk (4K, timeline.chunk_plan max_frames) starts part-way in; every other chunk at its first frame
+        info = pipeline.render_chunk(ct, f0, f0 + int(event["frames"]), out, make_image_loader(video_id), draft=draft, clip_loader=make_clip_loader(video_id, tmp))
         awsio.upload(out, key, "video/mp2t", working=True)
     return {"k": k, "key": key, "cached": False, **info}

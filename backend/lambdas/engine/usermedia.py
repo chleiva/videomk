@@ -18,6 +18,7 @@ from common.photo_ids import ID_RE, MAX_PHOTOS, MAX_UPLOAD_BYTES, PhotoError, up
 
 MAX_PIXELS = 80_000_000      # a decompression-bomb guard well above any phone camera
 MAX_SIDE = 2048
+MAX_SIDE_4K = 4096           # a 4K video keeps the person's photo up to this size (the apps upload 2048 px today, so this only matters once they send more)
 THUMB_SIDE = 768
 PHOTO_ID_RE = re.compile(r"^P\d{1,3}$")
 
@@ -32,7 +33,7 @@ def _taken(im: Image.Image) -> Optional[str]:
         return None
 
 
-def normalize(raw: bytes) -> Tuple[bytes, bytes, Dict[str, Any]]:
+def normalize(raw: bytes, max_side: int = MAX_SIDE) -> Tuple[bytes, bytes, Dict[str, Any]]:
     """(clean full-size JPEG, 768 px JPEG for the vision model, facts). Raises PhotoError for anything that is not a usable photo."""
     if len(raw) > MAX_UPLOAD_BYTES:
         raise PhotoError("photo is too large")
@@ -50,8 +51,8 @@ def normalize(raw: bytes) -> Tuple[bytes, bytes, Dict[str, Any]]:
     except Exception as e:
         raise PhotoError("not a readable photo") from e
     im = im.convert("RGB")
-    if max(im.size) > MAX_SIDE:
-        s = MAX_SIDE / max(im.size)
+    if max(im.size) > max_side:
+        s = max_side / max(im.size)
         im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
     full = io.BytesIO()
     im.save(full, "JPEG", quality=88, optimize=True)  # a fresh JPEG with no EXIF, ICC or GPS: only pixels are kept
@@ -64,7 +65,7 @@ def normalize(raw: bytes) -> Tuple[bytes, bytes, Dict[str, Any]]:
 
 
 def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[[str], bytes], put: Callable[[str, bytes], None],
-            delete: Callable[[str], None], asset_prefix: str, workers: int = 8, meta: Optional[Dict[str, Dict[str, Any]]] = None) -> Tuple[List[Dict[str, Any]], List[bytes], List[Dict[str, str]]]:
+            delete: Callable[[str], None], asset_prefix: str, workers: int = 8, meta: Optional[Dict[str, Dict[str, Any]]] = None, max_side: int = MAX_SIDE) -> Tuple[List[Dict[str, Any]], List[bytes], List[Dict[str, str]]]:
     """Returns (photos P1..Pn in upload order, their thumbnails, skipped [{id, reason}]). Originals are deleted whether or not they were usable.
     The photos are read, cleaned and stored in parallel (up to 100 of them), but numbered in the order the person gave them."""
     from concurrent.futures import ThreadPoolExecutor
@@ -78,7 +79,7 @@ def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[
     def one(mid: str):
         key = upload_key(user_id, mid)
         try:
-            full, thumb, facts = normalize(get(key))
+            full, thumb, facts = normalize(get(key)) if max_side == MAX_SIDE else normalize(get(key), max_side)
         except PhotoError as e:
             delete(key)
             return mid, None, str(e)

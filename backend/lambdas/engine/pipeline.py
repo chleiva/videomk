@@ -33,10 +33,11 @@ def render_chunk(
     """
     r = Renderer(timeline, image_loader, draft=draft, clip_loader=clip_loader)
     gop = r.fps * GOP_SECONDS
+    enc = media.encode_settings(r.out_w, r.out_h, draft)   # 720p/1080p: CRF 20 veryfast (draft: CRF 28 ultrafast), as always; 4K: docs/FOUR_K.md
     n = media.encode_segment(
         r.frames(f0, f1), out_path,
         width=r.out_w, height=r.out_h, fps=r.fps, start_time=0.0, gop=gop,
-        crf=28 if draft else 20, preset="ultrafast" if draft else "veryfast",
+        crf=enc["crf"], preset=enc["preset"], extra=enc["extra"],
     )
     return {"frames": n}
 

@@ -126,6 +126,8 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             out[field] = body[field]
     if out.get("aspect", format_options.DEFAULT_ASPECT) not in format_options.ready_aspects():
         raise BadRequest("This format is not available yet")
+    if out.get("resolution", format_options.DEFAULT_RESOLUTION) not in format_options.ready_resolutions():   # 4K is on only where the server says so (READY_RESOLUTIONS)
+        raise BadRequest("This resolution is not available yet")
     if "theme" in body and body["theme"] is not None:
         if body["theme"] not in THEMES:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
@@ -171,7 +173,7 @@ def request_timezone(event: Dict[str, Any]) -> Optional[str]:
     return tz if 1 <= len(tz) <= 40 and all(ch.isalnum() or ch in "/_+-" for ch in tz) else None
 
 
-def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool, credits: int = 0, charge: Any = None) -> None:
+def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *, idempotent: bool, credits: int = 0, charge: Any = None, resolution: Optional[str] = None) -> None:
     item = {
         "video_id": video_id,
         "user_id": user_id,
@@ -182,6 +184,8 @@ def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *
         "charge": json.dumps(charge or []),  # exactly which buckets were charged, so a failure refunds exactly those
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
+    if format_options.credits_multiplier(resolution) != 1:   # a 4K video: the record says why it cost double (other videos are recorded exactly as before)
+        item.update({"resolution": resolution, "credits_multiplier": format_options.credits_multiplier(resolution)})
     kwargs: Dict[str, Any] = {"Item": item}
     if idempotent:
         kwargs["ConditionExpression"] = "attribute_not_exists(video_id)"
@@ -270,7 +274,9 @@ def handler(event: Dict[str, Any], context: Any):
     # Quote, then charge exactly the quote: the length that is billed is the length that is made.
     minutes = options.get("target_minutes") or float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
     options["target_minutes"] = minutes
-    credits = wallet.credits_for_minutes(minutes)
+    resolution = options.get("resolution")
+    credits = wallet.credits_for_minutes(minutes, resolution)   # 4K costs double; the rule lives in the wallet
+    multiplier = format_options.credits_multiplier(resolution)
     try:
         charged = wallet.charge(user_id, credits, tz=request_timezone(event))
         if credits and not charged:  # nothing was taken: an unlimited (test/staff) account. Keep a ceiling and a trail in case its token is ever stolen.
@@ -282,10 +288,11 @@ def handler(event: Dict[str, Any], context: Any):
     except wallet.InsufficientCredits as e:
         usage.release_recent(user_id, fingerprint)
         return json_response(402, {"message": f"This video needs {e.needed} credit{'s' if e.needed != 1 else ''} and you have {e.balance}.",
-                                   "code": "insufficient_credits", "balance": e.balance, "needed": e.needed})
+                                   "code": "insufficient_credits", "balance": e.balance, "needed": e.needed,
+                                   **({"resolution": resolution, "credits_multiplier": multiplier} if multiplier != 1 else {})})
 
     try:
-        _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged)
+        _register_intent(user_id, prompt, video_id, usage_day, idempotent=idempotent, credits=credits, charge=charged, resolution=resolution)
         resp = _sfn.start_execution(
             stateMachineArn=sm_arn,
             name=video_id,  # one execution per video; duplicate starts fail fast

@@ -2,14 +2,14 @@
 
 Contract: `docs/CREATE_API.md`. Design: `docs/PIPELINE_V3.md` sections 6 and 7, `docs/UI_DESIGN.md` (o). Geometry: `engine/frame.py` (design units, 720p is a 2/3 scale).
 
-## Pixel table (short side 720 or 1080)
-| aspect | 720p | 1080p |
-|---|---|---|
-| 16:9 | 1280x720 | 1920x1080 |
-| 9:16 | 720x1280 | 1080x1920 |
-| 1:1 | 720x720 | 1080x1080 |
-| 4:5 | 720x900 | 1080x1350 |
-Draft (preview) renders are half size rounded to an even number (4:5 at 1080p: 540x674) because yuv420p needs even sides. A test checks the table.
+## Pixel table (short side 720, 1080 or 2160)
+| aspect | 720p | 1080p | 2160p (4K) |
+|---|---|---|---|
+| 16:9 | 1280x720 | 1920x1080 | 3840x2160 |
+| 9:16 | 720x1280 | 1080x1920 | 2160x3840 |
+| 1:1 | 720x720 | 1080x1080 | 2160x2160 |
+| 4:5 | 720x900 | 1080x1350 | 2160x2700 |
+Draft (preview) renders are half size rounded to an even number (4:5 at 1080p: 540x674) because yuv420p needs even sides; the draft of a 4K video is the same size as the draft of a 1080p one. A test checks the table. 4K (how it is rendered, what it costs, how it is switched on): `docs/FOUR_K.md`.
 
 ## Path, file by file
 1. `backend_stack.py`: the generate request model accepts `platform`, `aspect`, `resolution` (enums), `language` (`auto` or two letters), `brief` (object). `additionalProperties` is unchanged. A `RequestOptions` block (one call) adds the capabilities route.
@@ -25,6 +25,7 @@ Not-ready formats are refused by `generate` and shown `ready: false` by capabili
 * `readyAspects`: comma list (default `16:9`) -> env `READY_ASPECTS` on the capabilities and launcher Lambdas.
 * `betaAspects`: ready formats still using a framed fallback for some scenes -> `beta: true`.
 * `readyLanguages`: default `en,es`. `intakeEnabled=1` -> `intake: true`.
+* `readyResolutions`: comma list (default `720p,1080p`) -> env `READY_RESOLUTIONS`. Add `2160p` to offer 4K: capabilities then lists it and `generate` accepts it (at double credits); without it a 4K request is a 400 `This resolution is not available yet`. The deploy refuses 4K on a stage whose functions are capped below 10 GB of memory (`docs/FOUR_K.md`).
 Both Lambdas get the same values from the same context keys, so they cannot disagree. Context keys must be passed on every deploy (cdk.context.json can hold them for a stage).
 
 ## Platform recommendations: what was verified

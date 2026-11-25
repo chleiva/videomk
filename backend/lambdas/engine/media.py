@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-from typing import Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
 def ffmpeg_bin() -> str:
@@ -36,6 +36,23 @@ def ffprobe_duration(path: str) -> float:
     raise RuntimeError(f"could not read duration of {path}")
 
 
+UHD_PIXELS = 2560 * 1440   # a frame with more pixels than this is encoded with the 4K settings (docs/FOUR_K.md)
+UHD_CRF = int(os.environ.get("UHD_CRF", "21"))
+UHD_PRESET = os.environ.get("UHD_PRESET", "veryfast")
+UHD_MAXRATE_K = int(os.environ.get("UHD_MAXRATE_K", "24000"))   # a ceiling for busy footage: bounds the file (12 min <= about 2.2 GB) without touching ordinary scenes
+
+
+def encode_settings(width: int, height: int, draft: bool = False) -> Dict[str, Any]:
+    """The x264 settings for a frame size. Up to 1080p: exactly what it always was (CRF 20 veryfast, draft CRF 28 ultrafast; profile and level left to x264).
+    4K: High profile at level 5.1 (3840x2160 at 30 fps; every player and platform that takes 4K H.264 takes it), CRF 21 with a bitrate ceiling."""
+    if draft:
+        return {"crf": 28, "preset": "ultrafast", "extra": []}
+    if width * height > UHD_PIXELS:
+        return {"crf": UHD_CRF, "preset": UHD_PRESET,
+                "extra": ["-profile:v", "high", "-level:v", "5.1", "-maxrate", f"{UHD_MAXRATE_K}k", "-bufsize", f"{UHD_MAXRATE_K * 2}k"]}
+    return {"crf": 20, "preset": "veryfast", "extra": []}
+
+
 def encode_segment(
     frames: Iterable[bytes],
     out_path: str,
@@ -48,12 +65,13 @@ def encode_segment(
     crf: int = 20,
     preset: str = "veryfast",
     threads: int = 0,
+    extra: Sequence[str] = (),
 ) -> int:
-    """Encode raw rgb24 frames into an MPEG-TS segment whose timestamps start at `start_time`."""
+    """Encode raw rgb24 frames into an MPEG-TS segment whose timestamps start at `start_time`. `extra`: more encoder options (4K: profile, level, bitrate ceiling)."""
     cmd = [
         ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error",
         "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{width}x{height}", "-r", str(fps), "-i", "-",
-        "-c:v", "libx264", "-preset", preset, "-crf", str(crf), "-pix_fmt", "yuv420p",
+        "-c:v", "libx264", "-preset", preset, "-crf", str(crf), "-pix_fmt", "yuv420p", *extra,
         "-g", str(gop), "-keyint_min", str(gop), "-sc_threshold", "0", "-bf", "2",
         "-x264-params", "open-gop=0", "-threads", str(threads),
         "-output_ts_offset", f"{start_time:.6f}", "-muxdelay", "0", "-muxpreload", "0",

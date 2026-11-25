@@ -589,7 +589,7 @@ def prepare_annotated(props: Dict[str, Any], ctx: PrepareCtx) -> Dict[str, Any]:
 
     p = sanitize_annotated(props)
     beat = {"id": ctx.beat_id, "narration": ctx.narration, "scene": {"type": "image", "props": {"image_query": p["image_query"], "alt": p["alt"]}}}
-    got = make_photo({}, beat, ctx.video_id, "cost_usd")
+    got = make_photo({"frame": ctx.frame} if ctx.frame else {}, beat, ctx.video_id, "cost_usd")   # the frame only says whether this is a 4K video (a larger photograph)
     if not got.get("asset"):
         raise RuntimeError("no photograph found for the annotated image")
     patch: Dict[str, Any] = {"asset": got["asset"], "pins": []}

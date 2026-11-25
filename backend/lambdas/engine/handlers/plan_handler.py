@@ -35,12 +35,13 @@ def _web_tools(spent: Dict[str, float]):
     return websearch.TavilyProvider(key), ask_tools
 
 
-def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, float], prompt: str, minutes: float, media_meta: Any = None):
+def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, float], prompt: str, minutes: float, media_meta: Any = None, big: bool = False):
     """The user's uploads made safe and understood. Returns (usable photos, skipped [{id, reason}], story).
     Cheap by design (engine/curate.py): the photos are shown to a small model on contact sheets of 10, then one text-only call works out the story."""
     ids = usermedia.valid_media_ids(media_ids)
     photos, thumbs, skipped = usermedia.prepare(video_id, user_id, ids, get=lambda k: awsio.get_bytes(k), put=lambda k, b: awsio.put_bytes(k, b, "image/jpeg"),
-                                                delete=awsio.delete, asset_prefix=awsio.prefix(video_id) + "assets/", meta=media_meta if isinstance(media_meta, dict) else None)
+                                                delete=awsio.delete, asset_prefix=awsio.prefix(video_id) + "assets/", meta=media_meta if isinstance(media_meta, dict) else None,
+                                                **({"max_side": usermedia.MAX_SIDE_4K} if big else {}))   # a 4K video keeps the photos larger; everything else exactly as before
     named = usermedia.attach_places(photos)   # place names from the rounded coordinates; the coordinates are forgotten right here
 
     def ask_vision(system: str, user: str, images: Any) -> str:
@@ -85,7 +86,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
     photos, skipped, story = [], [], None
     if event.get("media"):
-        photos, skipped, story = _user_photos(video_id, user_id, event["media"], spent, prompt, minutes, event.get("media_meta"))
+        photos, skipped, story = _user_photos(video_id, user_id, event["media"], spent, prompt, minutes, event.get("media_meta"), big=format_options.is_4k(event.get("resolution")))
         if not photos:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)

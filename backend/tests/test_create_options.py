@@ -301,11 +301,11 @@ def test_capabilities_shape_and_defaults(monkeypatch):
     assert set(body) == {"aspects", "resolutions", "platforms", "languages", "lengths", "max_photos", "intake"}
     assert body["aspects"] == [{"id": "16:9", "label": "Landscape", "ready": True, "beta": False}, {"id": "9:16", "label": "Vertical", "ready": False, "beta": False},
                                {"id": "1:1", "label": "Square", "ready": False, "beta": False}, {"id": "4:5", "label": "Portrait", "ready": False, "beta": False}]
-    assert body["resolutions"] == [{"id": "720p", "label": "720p"}, {"id": "1080p", "label": "1080p"}]
+    assert body["resolutions"] == [{"id": "720p", "label": "720p", "credits_multiplier": 1, "aspects": ["16:9"]}, {"id": "1080p", "label": "1080p", "credits_multiplier": 1, "aspects": ["16:9"]}]   # no 4K unless switched on (tests/test_four_k.py)
     assert body["languages"] == [{"id": "en", "label": "English"}, {"id": "es", "label": "Español"}]
     assert body["lengths"] == {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]} and body["max_photos"] == 100 and body["intake"] is False
     plat = {p["id"]: p for p in body["platforms"]}
-    assert set(plat) == set(fo.PLATFORM_IDS) and all(set(p) == {"id", "label", "aspect", "resolution", "note", "recommended_minutes", "max_minutes", "other_aspects"} for p in plat.values())
+    assert set(plat) == set(fo.PLATFORM_IDS) and all(set(p) == {"id", "label", "aspect", "resolution", "note", "recommended_minutes", "max_minutes", "other_aspects", "supports_4k", "note_4k"} for p in plat.values())
     assert [(plat[k]["aspect"], plat[k]["resolution"]) for k in ("youtube", "shorts", "tiktok", "reels", "instagram_feed", "linkedin", "x", "other")] == [
         ("16:9", "1080p"), ("9:16", "1080p"), ("9:16", "1080p"), ("9:16", "1080p"), ("4:5", "1080p"), ("4:5", "1080p"), ("16:9", "1080p"), ("16:9", "1080p")]
     assert "1:1" in plat["linkedin"]["other_aspects"] and plat["youtube"]["note"] == "Landscape 16:9 · 1080p · about 3 min"
