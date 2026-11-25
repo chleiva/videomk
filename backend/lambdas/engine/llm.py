@@ -42,7 +42,10 @@ _client = None
 def _bedrock():
     global _client
     if _client is None:
-        _client = boto3.client("bedrock-runtime", region_name=BEDROCK_REGION)
+        from botocore.config import Config
+        # A long script (12 minutes, ~10k output tokens plus thinking) takes more than botocore's default 60 s to come back in one response: with the default, the call timed
+        # out and was retried 5 times (5.5 minutes) before failing the video (2026-11-25). One patient attempt and one retry instead.
+        _client = boto3.client("bedrock-runtime", region_name=BEDROCK_REGION, config=Config(read_timeout=int(os.environ.get("LLM_READ_TIMEOUT_S", "420")), connect_timeout=10, retries={"max_attempts": 2, "mode": "standard"}))
     return _client
 
 

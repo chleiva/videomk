@@ -39,7 +39,7 @@ class EngineV2(Construct):
         v2_objects = f"arn:aws:s3:::{assets_bucket}/generation/v2/*"
         videos_objects = f"arn:aws:s3:::{assets_bucket}/videos/*"
 
-        plan_fn = make_fn("V2PlanFn", "v2_plan", f"{base}.plan_handler.handler", timeout=Duration.minutes(10), memory=4096, env=env, layers=layers)   # long videos: an outline, then sections with their own research, in parallel
+        plan_fn = make_fn("V2PlanFn", "v2_plan", f"{base}.plan_handler.handler", timeout=Duration.minutes(15), memory=4096, env=env, layers=layers)   # long videos: an outline, then sections with their own research, in parallel
         beat_fn = make_fn("V2BeatFn", "v2_beat", f"{base}.beat_handler.handler", timeout=Duration.minutes(3), memory=4096, env=env, layers=layers)
         timeline_fn = make_fn("V2TimelineFn", "v2_timeline", f"{base}.timeline_handler.handler", timeout=Duration.seconds(60), memory=512, env=env, layers=layers)
         chunk_fn = make_fn("V2RenderChunkFn", "v2_render_chunk", f"{base}.render_chunk_handler.handler", timeout=Duration.minutes(10), memory=10240, env=env, layers=layers, ephemeral_mb=1024)
