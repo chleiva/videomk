@@ -4,6 +4,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from common import library as lib
+from common import library_organize as organize
 from common import library_search as search
 from common import usage
 from common.http import json_response
@@ -100,6 +101,17 @@ def route(event: Dict[str, Any], user: str) -> Dict[str, Any]:
             if b.get(k) is not None and not (isinstance(b[k], list) and all(isinstance(i, str) for i in b[k])):
                 raise lib.LibraryError(400, f"'{k}' must be a list of photo ids")
         return lib.change_collection(user, params.get("collection_id"), b.get("add") or [], b.get("remove") or [])
+    if res == f"{base}/prefs" and method == "POST":
+        return lib.set_prefs(user, _body(event).get("organize"))
+    if res == f"{base}/organize/preview" and method == "POST":
+        return organize.preview(user, _body(event).get("since"))
+    if res == f"{base}/organize/apply" and method == "POST":
+        b = _body(event)
+        if b.get("mode") == "single":
+            return organize.apply_single(user, b.get("name"), b.get("since"), b.get("collection_id"))
+        if b.get("mode") not in (None, "auto"):
+            raise lib.LibraryError(400, "'mode' must be auto or single")
+        return organize.apply_auto(user, b.get("since"))
     if res == f"{base}/delete-all" and method == "POST":
         if _body(event).get("confirm") != "DELETE":
             raise lib.LibraryError(400, "send {\"confirm\": \"DELETE\"} to delete everything")

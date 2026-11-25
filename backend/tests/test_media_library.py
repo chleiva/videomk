@@ -603,3 +603,138 @@ def test_many_photos_of_one_person_finishing_together_all_become_ready(env):
     with ThreadPoolExecutor(6) as ex:
         results = list(ex.map(lambda m: library_ingest.process(A, m), slots))
     assert results == ["ready"] * 8 and lib.stats(A)["n"] == 8 and lib.facets(A)["y"] == {"2024": 8}
+
+
+# ----------------------------------------------------------------------------- smart collections (deterministic organising)
+from common import library_organize as org  # noqa: E402
+
+PARIS, PHUKET = (48.86, 2.34), (7.88, 98.39)
+
+
+def _bulk(user, n, start, step_h, where, tag):
+    """n photos from `start` (a datetime) every `step_h` hours at `where`; returns ids. Distinct bytes per photo."""
+    import datetime as dt
+
+    ids = []
+    for i in range(n):
+        t = start + dt.timedelta(hours=i * step_h)
+        ids.append(upload(user, jpeg((tag, (i * 7) % 250, (i * 13) % 250), size=(64 + i % 9, 48)), taken=t.strftime("%Y-%m-%dT%H:%M:%S"), lat=None if where is None else where[0], lon=None if where is None else where[1]))
+    return ids
+
+
+def _library(env):
+    import datetime as dt
+
+    home = _bulk(A, 24, dt.datetime(2026, 3, 1, 9), 40, PARIS, 10)        # about 40 days in Paris: March and April (the home place: most photos)
+    trip = _bulk(A, 8, dt.datetime(2026, 7, 14, 10), 20, PHUKET, 90)       # 8 photos over a week in Phuket
+    tiny = _bulk(A, 2, dt.datetime(2026, 9, 2, 10), 5, PHUKET, 120)        # 2 photos elsewhere in September: too few for a group
+    nogps = _bulk(A, 6, dt.datetime(2026, 5, 3, 10), 24, None, 130)        # no place: by month
+    return home, trip, tiny, nogps
+
+
+def test_the_rules_find_home_months_trips_and_leave_small_groups_alone(env):
+    _library(env)
+    pv = org.preview(A)
+    names = {g["name"]: g["count"] for g in pv["groups"]}
+    assert pv["total"] == 40 and pv["home"] == "Paris"
+    assert any(n.startswith("Paris · Mar 2026") for n in names) and any(n.startswith("Paris · Apr 2026") for n in names)
+    assert any(n.startswith("Phuket · ") and "Jul 2026" in n for n in names) and names.get("May 2026") == 6
+    assert pv["skipped"] == 2 and pv["organized"] == 38 and all(not g["existing"] for g in pv["groups"]) and all(len(g["sample_ids"]) <= 3 for g in pv["groups"])
+
+
+def test_a_trip_over_a_month_end_is_one_collection_and_a_long_gap_starts_another(env):
+    import datetime as dt
+
+    a = _bulk(A, 6, dt.datetime(2026, 7, 30, 10), 18, PHUKET, 10)           # 30 Jul - 2 Aug
+    b = _bulk(A, 6, dt.datetime(2026, 8, 20, 10), 18, PHUKET, 90)           # three weeks later: another trip
+    _bulk(A, 30, dt.datetime(2026, 1, 1, 9), 30, PARIS, 160)                # makes Paris the home place
+    names = [g["name"] for g in org.preview(A)["groups"] if g["name"].startswith("Phuket")]
+    assert len(names) == 2 and any("30 Jul - " in n and "Aug 2026" in n for n in names) and any("20-" in n and "Aug 2026" in n for n in names)
+
+
+def test_applying_creates_the_collections_in_chunks_and_a_repeat_changes_nothing(env):
+    _library(env)
+    first = org.apply_auto(A, limit=10)
+    assert first["applied"] >= 10 and first["remaining"] == 38 - first["applied"] and first["created"] >= 1
+    total = first["applied"]
+    for _ in range(10):
+        r = org.apply_auto(A, limit=10)
+        total += r["applied"]
+        if r["remaining"] == 0:
+            break
+    assert total == 38 and org.preview(A)["organized"] == 0                       # everything that has a group is in it; the 2 stragglers stay
+    cols = lib.collections(A)
+    assert len(cols) >= 4 and all(c.get("auto") for c in cols) and sum(c["count"] for c in cols) == 38
+    assert org.apply_auto(A) == {"applied": 0, "remaining": 0, "created": 0, "updated": 0, "skipped": 2}
+    one = next(c for c in cols if c["name"].startswith("May 2026"))
+    items = call(A, "GET", "/items", query={"collection": one["id"]})[1]["items"]
+    assert len(items) == 6 and all(one["id"] in i["collections"] for i in items)
+
+
+def test_a_later_upload_joins_the_matching_collections_instead_of_making_new_ones(env):
+    import datetime as dt
+
+    _library(env)
+    org.apply_auto(A)
+    before = {c["id"]: c["count"] for c in lib.collections(A)}
+    since = lib.now_iso()
+    more_trip = _bulk(A, 3, dt.datetime(2026, 7, 22, 10), 10, PHUKET, 150)    # two days after the trip ended: inside the +4 days
+    more_home = _bulk(A, 2, dt.datetime(2026, 4, 20, 10), 10, PARIS, 160)      # a month that exists
+    r = org.apply_auto(A, since=since)
+    assert r["created"] == 0 and r["applied"] == 5 and r["updated"] == 2
+    after = {c["id"]: c["count"] for c in lib.collections(A)}
+    assert set(after) == set(before) and sum(after.values()) == sum(before.values()) + 5
+    trip = next(c for c in lib.collections(A) if c["name"].startswith("Phuket"))
+    assert "Jul 2026" in trip["name"] and trip["count"] == 11                                # it grew and its name follows its dates
+    far = _bulk(A, 5, dt.datetime(2026, 12, 1, 10), 10, PHUKET, 170)                          # months later: a new trip
+    assert org.apply_auto(A)["created"] == 1 and far
+
+
+def test_a_collection_the_person_renamed_keeps_its_name_and_the_others_are_not_touched(env):
+    import datetime as dt
+
+    _library(env)
+    org.apply_auto(A)
+    trip = next(c for c in lib.collections(A) if c["name"].startswith("Phuket"))
+    call(A, "POST", "/collections/{collection_id}", collection_id=trip["id"], body={"name": "Thailand!"})
+    _bulk(A, 2, dt.datetime(2026, 7, 21, 10), 10, PHUKET, 180)
+    org.apply_auto(A)
+    now = next(c for c in lib.collections(A) if c["id"] == trip["id"])
+    assert now["name"] == "Thailand!" and now["count"] == 10 and now["auto"] is True
+
+
+def test_one_collection_for_a_whole_batch_in_chunks_and_only_for_that_batch(env):
+    import datetime as dt
+
+    _bulk(A, 3, dt.datetime(2025, 1, 1, 10), 10, PARIS, 190)                  # older photos, not part of the batch
+    time.sleep(1.2)                                                           # `added` has a resolution of one second
+    since = lib.now_iso()
+    batch = _bulk(A, 7, dt.datetime(2026, 7, 14, 10), 10, PHUKET, 200)
+    r = org.apply_single(A, "Thailand Jul 2026", since=since, limit=4)
+    assert r["created"] == 1 and r["applied"] == 4 and r["remaining"] == 3
+    r2 = org.apply_single(A, None, since=since, collection_id=r["collection_id"], limit=4)
+    assert r2["applied"] == 3 and r2["remaining"] == 0 and r2["created"] == 0
+    col = next(c for c in lib.collections(A) if c["id"] == r["collection_id"])
+    assert col["count"] == 7 and "auto" not in col and {i["id"] for i in call(A, "GET", "/items", query={"collection": col["id"]})[1]["items"]} == set(batch)
+    with pytest.raises(lib.LibraryError):
+        org.apply_single(A, "   ", since=since)
+    with pytest.raises(lib.LibraryError):
+        org.apply_single(A, None, collection_id="f" * 16)                       # not this person's collection
+
+
+def test_the_organize_routes_the_preference_and_isolation(env):
+    _library(env)
+    assert call(A, "GET", "/summary")[1]["prefs"] == {"organize": "ask"}
+    assert call(A, "POST", "/prefs", body={"organize": "always"})[1] == {"organize": "always"} and call(A, "GET", "/summary")[1]["prefs"]["organize"] == "always"
+    assert call(A, "POST", "/prefs", body={"organize": "sometimes"})[0] == 400
+    code, pv = call(A, "POST", "/organize/preview", body={})
+    assert code == 200 and pv["total"] == 40
+    assert call(A, "POST", "/organize/preview", body={"since": "yesterday"})[0] == 400
+    code, r = call(A, "POST", "/organize/apply", body={"mode": "auto"})
+    assert code == 200 and r["remaining"] == 0 and r["applied"] == 38
+    assert call(A, "POST", "/organize/apply", body={"mode": "everything"})[0] == 400
+    # another person sees and changes nothing of it
+    assert call(B, "POST", "/organize/preview", body={})[1]["total"] == 0
+    assert call(B, "POST", "/organize/apply", body={"mode": "auto"})[1]["applied"] == 0 and call(B, "GET", "/collections")[1]["collections"] == []
+    assert call(B, "POST", "/organize/apply", body={"mode": "single", "collection_id": lib.collections(A)[0]["id"]})[0] == 404
+    assert call(B, "GET", "/summary")[1]["prefs"] == {"organize": "ask"}

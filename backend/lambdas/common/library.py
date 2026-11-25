@@ -37,7 +37,7 @@ SLOT_SECONDS = 900
 THUMB_LINK_SECONDS = 3600
 PHOTO_LINK_SECONDS = 600
 PENDING_MAX_AGE_S = 45 * 60
-MAX_COLLECTIONS = 200
+MAX_COLLECTIONS = 1000   # automatic organising can make many (a place and month each)
 MAX_PER_PHOTO_COLLECTIONS = 50
 THUMB_PX = 480
 
@@ -542,6 +542,8 @@ def collection_json(c: Dict[str, Any]) -> Dict[str, Any]:
     out = {"id": c["sk"][2:], "name": c["nm"], "count": int(c.get("n") or 0)}
     if c.get("em"):
         out["emoji"] = c["em"]
+    if c.get("auto"):
+        out["auto"] = True   # made by "organize": matched by place and dates, never by name
     if c.get("cover"):
         out["cover_id"] = c["cover"]
         out["cover_thumb_url"] = link(thumb_key(c["user_id"], c["cover"]), THUMB_LINK_SECONDS)   # the row's own partition: the cover is always this user's photo
@@ -553,14 +555,17 @@ def collections(user: str) -> List[Dict[str, Any]]:
     return sorted((collection_json(c) for c in res.get("Items", [])), key=lambda c: c["name"].lower())
 
 
-def create_collection(user: str, name: Any, emoji: Any = None) -> Dict[str, Any]:
+def create_collection(user: str, name: Any, emoji: Any = None, auto: Optional[Dict[str, Any]] = None, *, count_hint: Optional[int] = None) -> Dict[str, Any]:
+    """`auto` marks a collection made by the organiser: {"k": "m"|"t", "pk": place key or "", "ym": "YYYY-MM"} (a month) or {"k": "t", "pk": ..., "from": day, "to": day} (a trip)."""
     check_user(user)
-    if len(collections(user)) >= MAX_COLLECTIONS:
+    if (count_hint if count_hint is not None else len(collections(user))) >= MAX_COLLECTIONS:
         raise LibraryError(409, "too many collections")
     cid = uuid.uuid4().hex[:16]
     item = {"user_id": user, "sk": f"c#{cid}", "nm": _name(name), "n": 0, "created": now_iso()}
     if _emoji(emoji):
         item["em"] = emoji
+    if auto:
+        item["auto"] = auto
     table().put_item(Item=item)
     return collection_json(item)
 
@@ -576,8 +581,9 @@ def update_collection(user: str, cid: str, name: Any = None, emoji: Any = "__kee
     c = _collection(user, cid)
     sets, vals, names = [], {}, {}
     if name is not None:
-        sets.append("nm = :n")
+        sets.append("nm = :n, ren = :r")   # a name the person chose is never rewritten by the automatic organiser
         vals[":n"] = _name(name)
+        vals[":r"] = True
     if emoji != "__keep__":
         e = _emoji(emoji)
         sets.append("em = :e" if e else "REMOVE_EM")
@@ -751,9 +757,24 @@ def purge_user(user: str) -> Dict[str, int]:
     return {"objects": n_obj, "photos": len(mids), "rows": len(rows)}
 
 
+ORGANIZE_CHOICES = ("ask", "always", "never")
+
+
+def prefs(user: str) -> Dict[str, Any]:
+    item = table().get_item(Key={"user_id": check_user(user), "sk": "prefs"}).get("Item") or {}
+    return {"organize": item.get("organize") if item.get("organize") in ORGANIZE_CHOICES else "ask"}
+
+
+def set_prefs(user: str, organize: Any) -> Dict[str, Any]:
+    if organize not in ORGANIZE_CHOICES:
+        raise LibraryError(400, "'organize' must be ask, always or never")
+    table().put_item(Item={"user_id": check_user(user), "sk": "prefs", "organize": organize})
+    return prefs(user)
+
+
 def summary(user: str) -> Dict[str, Any]:
     lim, st, fa = limits(user), stats(user), facets(user)
     places = sorted(({"name": n, "country": n.rsplit(",", 1)[1].strip() if "," in n else n, "count": c} for n, c in fa["p"].items()), key=lambda p: -p["count"])[:30]
     return {"plan": lim["plan"], "limit_bytes": lim["limit_bytes"], "used_bytes": st["used"], "read_only": st["used"] > lim["limit_bytes"], "count": st["n"], "can_upgrade": os.environ.get("LIBRARY_CAN_UPGRADE") == "1",
             "years": [{"year": int(y), "count": c} for y, c in sorted(fa["y"].items(), reverse=True)], "places": places,
-            "countries": [{"name": n, "count": c} for n, c in sorted(fa["c"].items(), key=lambda kv: -kv[1])[:30]], "collections": collections(user)}
+            "countries": [{"name": n, "count": c} for n, c in sorted(fa["c"].items(), key=lambda kv: -kv[1])[:30]], "collections": collections(user), "prefs": prefs(user)}
