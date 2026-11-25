@@ -81,7 +81,7 @@ def make_sheets(photos: List[Dict[str, Any]], thumbs: List[bytes]) -> List[Tuple
 
 _SHEET_SYSTEM = (
     "You catalogue a person's OWN photos so a video can be made from them. The image is a contact sheet: every photo has a white number in a black box in its top-left corner. "
-    "For EVERY numbered photo return: caption (at most 18 words: what is visible, plain and factual; name a landmark, city or place only when it is clearly recognisable), "
+    "For EVERY numbered photo return: caption (at most 12 words: the subject, the activity or occasion and the setting, for example family lunch by the lake; leave out clothing, colours, poses, small objects and background detail unless that is the point of the photo; name a landmark, city or place only when it is clearly recognisable), "
     "place (the recognisable place or landmark name, else \"\"), subject (one of: landmark, landscape, city, food, people, pet, indoor, event, document, object, other), "
     "people (true if a person is visible), quality (good, ok or poor: poor = blurred, very dark, accidental, or a near copy of another photo on this sheet), "
     "similar (numbers of other photos on this sheet that are near duplicates of it, else []), exclude (true ONLY for nudity or sexual content, graphic violence or gore, "
@@ -295,8 +295,10 @@ def story_system(minutes: float, cap: int, grouped: bool = False, n: Optional[in
         'Return ONLY JSON: {"story": "2-4 sentences: what the photos are about (who, where, when, only as evident from the captions or the request) and what the video is for", '
         '"voice": "first_person" (the person tells their own trip or event: we, I) or "narrator" (a presenter explains it), "tone": "a few words", "title_idea": "<=60 chars", '
         '"chapters": [{"title": "<=50 chars", "summary": "one sentence", "moments": [{"photos": ["P3"], "layout": "single|sequence|collage", "role": "opening|establishing|detail|people|climax|transition|closing", '
-        '"note": "<=20 words: what this moment shows and why it is here"}]}], "unused": [{"id": "P9", "reason": "duplicate|blurry|off-topic|surplus"}]}\n'
+        '"note": "<=20 words: why this moment matters to the story (its place in the arc), NOT a description of the photos"}]}], "unused": [{"id": "P9", "reason": "duplicate|blurry|off-topic|surplus"}]}\n'
         "Rules:\n"
+        "- You are shaping ONE story told as a whole, not a list of photo descriptions: give it an arc (how it begins, builds, peaks and closes) and group the photos so each moment serves a part of that arc. "
+        "The video's script will be written from your story and the person's request; never write notes that describe what a photo shows.\n"
         "- Every photo appears in exactly one moment or in unused. A moment has 1 to 9 photos and a layout: single (1 standout photo), sequence (2 to 5 photos shown one after another), collage (3 to 9 photos of the same "
         "subject, place and day shown TOGETHER on one screen, in a styled layout: use collages to fit many photos into a short video).\n"
         f"- This video is {minutes:g} minutes and can show about {cap} photos. If there are more photos than that, keep the best of near duplicates, drop POOR quality photos first and put the rest in unused; if there "

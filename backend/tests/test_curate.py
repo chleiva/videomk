@@ -164,7 +164,7 @@ def test_the_director_gets_the_story_the_moments_and_the_rules():
     s = curate.reconcile(json.loads(story_json(ph, per=3, drop=("P9",))), ph, 40)
     text = plan_mod.photos_prompt([p for p in ph], s)
     assert "THE STORY: A holiday in Paris." in text and "first person" in text and "Chapter \"Arrival\"" in text and "LEFT OUT (do not use): P9" in text
-    assert "[sequence]" in text and "[single]" in text and "photo_collage" in text and "chapter_card" in text and "Write ONE beat per moment" in text
+    assert "[sequence]" in text and "[single]" in text and "photo_collage" in text and "chapter_card" in text and "ONE continuous story" in text
     assert plan_mod.photo_slots(ph, s) == len(curate.moments(s)) and plan_mod.photo_slots(ph, None) == 9
     legacy = plan_mod.photos_prompt(ph, None)
     assert "Use EVERY photo" in legacy                                                          # no story: the old behaviour is untouched
@@ -386,3 +386,21 @@ def test_the_director_is_told_the_pace_and_when_to_frame_a_photo():
     text = plan_mod.photos_prompt(ph, story, 2)
     assert "PACE: about" in text and "(sparse)" in text and "do not frame every photo" in text
     assert "PACE" not in plan_mod.photos_prompt(ph, story)
+
+
+# ----------------------------------------------------------------------------- the request and the whole story lead, not a description of each photo
+def test_no_prompt_asks_the_narration_to_describe_each_photo_and_the_request_decides():
+    from engine import plan as plan_mod, usermedia, skills
+
+    ph = [{"id": f"P{i}", "caption": "a family lunch by a lake", "orientation": "landscape"} for i in range(1, 4)]
+    story = {"story": "A weekend at the lake.", "chapters": [{"title": "T", "moments": [{"photos": ["P1", "P2", "P3"], "layout": "sequence", "role": "detail", "note": "the weekend settles in"}]}]}
+    for text in (plan_mod.photos_prompt(ph, story, 2), plan_mod.photos_prompt(ph, None)):
+        low = text.lower()
+        assert "narrate what is visible" not in low and "one beat per moment" not in low
+        assert "do not explain" in low or "do not explain each photo" in low
+    full = plan_mod.photos_prompt(ph, story, 2)
+    assert "THE REQUEST above is the brief" in full and "ONE continuous story" in full and "never read them aloud" in full and "clothes, colours, poses" in full
+    assert "what is visible" not in usermedia._REVIEW and "what is visible" not in curate._SHEET_SYSTEM and "clothing, colours, poses" in curate._SHEET_SYSTEM
+    assert "NOT a description of the photos" in curate.story_system(2, 102, False, 30) and "ONE story told as a whole" in curate.story_system(2, 102, False, 30)
+    body = skills.load()["photo-memories"].body
+    assert "Tell ONE story, not a tour of the photos" in body and "only if the request asks" in body

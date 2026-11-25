@@ -113,10 +113,10 @@ def prepare(video_id: str, user_id: str, media_ids: List[str], *, get: Callable[
 
 _REVIEW = (
     "You help make a video from a person's OWN photos. For each numbered image return a caption and a safety verdict. Return ONLY JSON: "
-    '{"photos":[{"n":1,"caption":"<=18 words, what is visible, plain and factual","people":true|false,"exclude":false,"reason":""}]}.\n'
+    '{"photos":[{"n":1,"caption":"<=12 words: the subject, activity or occasion and setting; no clothing, colours, poses or background detail unless they are the point","people":true|false,"exclude":false,"reason":""}]}.\n'
     "Set exclude=true (with a short reason) ONLY for: nudity or sexual content, graphic violence or gore, identity documents, bank cards or screens showing "
     "personal data, or hate symbols. Ordinary photos of people, children, family, pets, food, places and events are fine: exclude=false.\n"
-    "Describe only what you can see; never guess names, ages or relationships."
+    "Keep captions short and general; never guess names, ages or relationships."
 )
 
 

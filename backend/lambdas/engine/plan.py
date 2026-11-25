@@ -171,7 +171,7 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
             "- Use EVERY photo, as an image scene with props {\"photo\": \"P1\", \"image_query\": \"<3-6 word label>\", \"alt\": \"<<=70 chars>\"}. These scenes are the "
             "visuals: do NOT add stock-photo scenes.\n"
             "- Order them by the date taken when given, otherwise as listed, unless the story the user asked for needs another order.\n"
-            "- Narrate what is visible and what the user told you in the brief. Never invent names, places, dates or events the captions and the brief do not state.\n"
+            "- The brief decides what the narration does: tell the story it asks for as a whole. Do not explain the photos one by one and never read out clothes, colours, poses or small details unless the brief asks for that; the viewer can see them. Never invent names, places, dates or events the captions and the brief do not state.\n"
             "- You may add up to 2 non-photo scenes (title, stat, quote) when they help the story.\n\n")
     from . import curate
     by_id = {p["id"]: p for p in photos}
@@ -179,7 +179,12 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
            f"THE STORY: {story.get('story') or '(not stated: follow the request)'}\n"
            f"VOICE: {'first person: the person tells their own trip or event (we, I, our); never claim feelings or facts the request does not give' if story.get('voice') == 'first_person' else 'a narrator presents it'}"
            + (f". TONE: {story['tone']}" if story.get("tone") else "") + "\n"
-           "MOMENTS, in order. Write ONE beat per moment (you may add beats without photos where the story needs context, facts or a link):"]
+           "THE REQUEST above is the brief and it decides what the narration does: how the story is told, how much is said about the photos, and whether anything is explained photo by photo. Do NOT explain each photo unless the request asks for it.\n"
+           "Write the script as ONE continuous story from beginning to end: first decide its arc (what the whole thing is about, how it builds, where it peaks, how it closes), then cut it into beats at natural breaks. "
+           "The moments below are the pictures shown while each part of the story is told: the narration of a beat tells that part of the story, it does not describe its photos (the viewer can see them). "
+           "Never read out clothes, colours, poses, objects or background details; mention what is in a photo only when the story needs it (a place, an event, a person's role that the request or the captions give). "
+           "The captions and notes below are only there to help you understand the photos: never read them aloud.\n"
+           "MOMENTS, in order. Each is shown during one beat of the story (a moment may be held without narration for a pause, and you may add beats without photos where the story needs context, facts or a link):"]
     for ch in story["chapters"]:
         out.append(f'Chapter "{ch.get("title") or "-"}"' + (f": {ch['summary']}" if ch.get("summary") else ""))
         for m in ch["moments"]:
@@ -206,7 +211,7 @@ def photos_prompt(photos: List[Dict[str, Any]], story: Optional[Dict[str, Any]] 
         "- When the story has 3 or more chapters you may open a chapter with a chapter_card (title, an optional subtitle and a kicker such as the day and date, for example 'DAY 2 - SUNDAY 12 APRIL', "
         "optionally with a hero photo) and keep that beat's narration to one short line; set \"chapter\" on the first beat of every chapter anyway. When many photos must fit into a short video, keep the narration of "
         "photo beats short (one or two sentences of about 12 to 20 words) so the pictures can move on; the number of beats follows the number of moments.\n"
-        "- Narrate what is visible and what the story and the request say, in the voice above. Use the days, times and places given (from the photos' own data: 'On Saturday morning...') and add real facts about "
+        "- Narrate the story the request asks for, in the voice above: the whole arc, the feeling, the why, not the contents of each picture. Use the days, times and places given (from the photos' own data: 'On Saturday morning...') and add real facts about "
         "a named place or landmark only from the grounding notes. Never invent names, dates, people or events.\n\n")
     return "\n".join(out)
 
