@@ -94,7 +94,7 @@ def frame_sizes(mp4: bytes, tmp_path):
     return f, f.frame(0).size
 
 
-def test_normalise_trims_long_footage_crops_to_16_9_and_loops_short_footage(tmp_path):
+def test_normalise_trims_long_footage_crops_to_16_9_and_never_loops_short_footage(tmp_path):
     long_src = make_source(6, "640x480", tmp_path=tmp_path)                      # 4:3 source
     mp4, loops_after = clips.normalise(long_src, need_seconds=3.0, source_seconds=6.0, suffix=".mp4")
     frames, size = frame_sizes(mp4, tmp_path)
@@ -102,7 +102,8 @@ def test_normalise_trims_long_footage_crops_to_16_9_and_loops_short_footage(tmp_
     short_src = make_source(2, tmp_path=tmp_path)
     mp4, loops_after = clips.normalise(short_src, need_seconds=5.0, source_seconds=2.0, suffix=".mp4")
     frames, size = frame_sizes(mp4, tmp_path)
-    assert size == (1280, 720) and abs(len(frames) - 150) <= 2 and loops_after == pytest.approx(2.0)    # 5 s made of a 2 s clip, looping
+    assert size == (1280, 720) and abs(len(frames) - 60) <= 2 and loops_after == pytest.approx(2.0)     # a 2 s clip stays 2 s: it plays once, it is never looped to 5 s
+    assert clips.ClipFrames.frame.__code__ and len(frames) < 100
     with pytest.raises(RuntimeError):
         clips.normalise(b"this is not a video", need_seconds=3.0, source_seconds=5.0, suffix=".mp4")
 
@@ -146,14 +147,17 @@ def fake_world(monkeypatch, cands, bad_urls=()):
 
 
 def test_scout_picks_the_reviewed_clip_and_returns_a_credit_and_ledger_entry(monkeypatch):
-    cands = [cand("commons", 1, dur=4.0), cand("pexels", 2, dur=12.0), cand("commons", 3, dur=9.0)]
+    cands = [cand("commons", 1, dur=4.0), cand("pexels", 2, dur=12.0), cand("commons", 3, dur=9.0)]   # 4 s is under 75% of the 8 s scene: never offered (it would freeze, not loop)
     get, norm = fake_world(monkeypatch, cands)
     seen = {}
     review = lambda cs, n, a, q, **kw: (seen.update(order=[clips.candidate_key(c) for c in cs]) or (1, "the second one fits", 0.003, [0, 1, 2]))
     out = clips.scout_clip("waves", "narration", "alt", need_seconds=8.0, fetch_bytes_fn=get, review=review, normalise_fn=norm)
-    assert seen["order"] == ["pexels:2", "commons:3", "commons:1"]               # footage long enough for the scene is offered first
+    assert seen["order"] == ["pexels:2", "commons:3"]                            # footage long enough for the scene is offered first; too-short footage never is
     assert out["chosen"] == "commons:3" and out["mp4"] == b"MP4:RAW:https://v/commons3.mp4" and out["credit"] == "Video: Z (CC0)"
-    assert out["review"]["reason"] == "the second one fits" and out["entry"]["source"] == "commons" and len(out["candidates"]) == 3
+    assert out["review"]["reason"] == "the second one fits" and out["entry"]["source"] == "commons" and len(out["candidates"]) == 2
+    assert clips.scout_clip("w", "n", need_seconds=8.0, fetch_bytes_fn=get, review=None, normalise_fn=norm, verify_fn=None) is not None
+    monkeypatch.setattr(clips, "gather", lambda q, **kw: [cand("commons", 1, dur=3.0), cand("pexels", 2, dur=5.0)])
+    assert clips.scout_clip("w", "n", need_seconds=10.0, fetch_bytes_fn=get, review=None, normalise_fn=norm, verify_fn=None) is None   # all under 75% of the scene: a photo instead
 
 
 def test_scout_rejects_all_falls_back_on_review_errors_and_tries_the_next_file(monkeypatch):
@@ -297,9 +301,9 @@ def test_gather_asks_three_providers_and_interleaves_them(monkeypatch):
     assert [clips.candidate_key(c) for c in clips.gather("q", pexels_key="a", pixabay_key="b")] == ["pexels:1", "pixabay:1", "commons:1", "pixabay:2"]
 
 
-# ---------------------------------------------------------------- one frame per 30 seconds of the footage we use
-@pytest.mark.parametrize("seconds,times", [(5, [2.5]), (20, [10.0]), (30, [15.0]), (31, [7.75, 23.25]), (61, [10.17, 30.5, 50.83]), (200, [33.33, 100.0, 166.67])])
-def test_verification_samples_one_frame_per_30_seconds_between_one_and_three(seconds, times):
+# ---------------------------------------------------------------- three frames of the footage we use (start, middle, end)
+@pytest.mark.parametrize("seconds,times", [(1.5, [0.75]), (5, [0.6, 2.5, 4.4]), (20, [2.4, 10.0, 17.6])])
+def test_verification_samples_start_middle_and_end_of_the_footage(seconds, times):
     assert clips.verify_frame_times(seconds) == pytest.approx(times, abs=0.02)
 
 
@@ -309,22 +313,24 @@ def test_verification_sends_only_a_few_small_frames_in_a_single_call(tmp_path, m
     seen = {"calls": 0}
     def complete(system, user, images=None, **kw):
         seen.update(calls=seen["calls"] + 1, n=len(images), sizes=[Image.open(__import__("io").BytesIO(i)).size for i in images], model=kw.get("model"), max_tokens=kw.get("max_tokens"))
-        return '{"ok": true, "reason": "calm waves"}', {"cost_usd": 0.0007}
+        return '{"ok": true, "score": 9, "reason": "calm waves"}', {"cost_usd": 0.0007}
     ok, why, cost = clips.verify(mp4, "Waves roll in.", "waves", "waves", 3.0, complete=complete)
-    assert (ok, why, cost) == (True, "calm waves", 0.0007) and seen["calls"] == 1 and seen["n"] == 1      # a 3 s clip: one frame, one call
+    assert (ok, why, cost) == (True, "9/10: calm waves", 0.0007) and seen["calls"] == 1 and seen["n"] == 3      # one call, three frames
+    weak = lambda *a, **k: ('{"ok": true, "score": 5, "reason": "loosely related"}', {"cost_usd": 0.0007})
+    assert clips.verify(mp4, "n", "a", "q", 3.0, complete=weak)[0] is False                              # a loose match is discarded: accuracy over having a clip
     assert seen["sizes"][0][0] == 512 and seen["max_tokens"] == 300
     bad = lambda *a, **k: ('{"ok": false, "reason": "a logo is visible"}', {"cost_usd": 0.0007})
-    assert clips.verify(mp4, "n", "a", "q", 3.0, complete=bad)[:2] == (False, "a logo is visible")
+    assert clips.verify(mp4, "n", "a", "q", 3.0, complete=bad)[:2] == (False, "0/10: a logo is visible")
 
 
-def test_verification_fails_open_and_can_be_switched_off(tmp_path, monkeypatch):
+def test_verification_fails_closed_and_can_be_switched_off(tmp_path, monkeypatch):
     monkeypatch.setenv("CLIP_VERIFY", "1")
     mp4, _ = clips.normalise(make_source(3, tmp_path=tmp_path), need_seconds=2.0, source_seconds=3.0, suffix=".mp4")
     boom = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("bedrock down"))
-    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=boom)[0] is True                         # a broken check never blocks the video
+    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=boom)[0] is False                        # a clip that could not be checked is discarded: a photo is better than an odd clip
     junk = lambda *a, **k: ("no json here", {"cost_usd": 0.0})
-    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=junk)[0] is True
-    assert clips.verify(b"not a video", "n", "a", "q", 2.0, complete=boom)[0] is True              # nothing to check
+    assert clips.verify(mp4, "n", "a", "q", 2.0, complete=junk)[0] is False
+    assert clips.verify(b"not a video", "n", "a", "q", 2.0, complete=boom)[0] is False             # nothing to check
     monkeypatch.setenv("CLIP_VERIFY", "0")
     assert clips.verify(mp4, "n", "a", "q", 2.0, complete=lambda *a, **k: pytest.fail("off means off"))[0] is True
 
@@ -413,9 +419,17 @@ def test_a_brief_that_asks_for_footage_is_told_to_use_clips_freely_with_generic_
     assert "asks for video, footage or clips" in p and "up to 1 beat in 3" in p and "worded generically" in p
 
 
-def test_the_reviewers_reject_contradictions_and_misfits_but_accept_a_fair_generic_fit():
+def test_the_reviewers_reject_contradictions_and_loose_matches_accuracy_over_having_a_clip():
     for prompt in (clips.CLIP_REVIEW_SYSTEM, clips.CLIP_VERIFY_SYSTEM):
         low = " ".join(prompt.lower().split())   # the prompts wrap lines
-        assert "contradict" in low and "intended subject" in low and "another city" in low and ("fair, generic fit" in low)
-        assert "atmosphere" in low
+        assert "contradict" in low and "intended subject" in low and "another city" in low
+        assert "no clip is better than a wrong one" in low or "a wrong or odd clip is worse than none" in low
     assert clips.MAX_CANDIDATES == 8
+
+
+def test_playback_holds_the_last_frame_past_the_end_and_never_loops(tmp_path):
+    mp4, _ = clips.normalise(make_source(2, tmp_path=tmp_path), need_seconds=2.0, source_seconds=2.0, suffix=".mp4")
+    p = tmp_path / "c.mp4"; p.write_bytes(mp4)
+    cf = clips.ClipFrames(str(p))
+    last = cf.frame(len(cf) - 1).tobytes()
+    assert cf.frame(len(cf)).tobytes() == last and cf.frame(len(cf) * 3).tobytes() == last           # past the end: the last frame, not frame 0 again

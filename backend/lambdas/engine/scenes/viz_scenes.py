@@ -557,7 +557,7 @@ def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     if frames is None:  # the file is missing or undecodable: the same elegant placeholder as a missing photo
         _placeholder(cv, th, ctx, str(props.get("alt") or props.get("title") or "Video unavailable"))
         return
-    t = max(0.0, min(lt, dur))  # an outgoing scene holds its final frame during the crossfade; footage shorter than the scene loops inside it
+    t = max(0.0, min(lt, dur))  # an outgoing scene holds its final frame during the crossfade; footage shorter than the scene holds its last frame (never loops)
     src = frames.frame(int(t * frames.fps))
     p = ease_in_out_cubic(progress(t, 0.0, max(dur, 0.5)))
     z = lerp(1.0, 1.06, p)  # a slow push-in hides the modest source resolution and keeps the frame alive
