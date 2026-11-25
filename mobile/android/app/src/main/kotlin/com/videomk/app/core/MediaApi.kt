@@ -17,6 +17,10 @@ interface MediaApi {
     suspend fun updateCollection(id: String, name: String? = null, emoji: String? = null): MediaCollection
     suspend fun deleteCollection(id: String)
     suspend fun editCollection(id: String, add: List<String> = emptyList(), remove: List<String> = emptyList())
+    /** Smart collections. [since] is a UTC "YYYY-MM-DDTHH:MM:SS" (the batch just uploaded); null means every photo that is in no collection. */
+    suspend fun organizePreview(since: String? = null): OrganizePreview
+    suspend fun organizeApply(single: Boolean, since: String? = null, name: String? = null, collectionId: String? = null): OrganizeApplyResult
+    suspend fun setOrganizePref(pref: OrganizePref)
 }
 
 class ApiMediaApi(private val api: ApiClient) : MediaApi {
@@ -66,4 +70,16 @@ class ApiMediaApi(private val api: ApiClient) : MediaApi {
             if (add.isNotEmpty()) put("add", jsonIds(add)); if (remove.isNotEmpty()) put("remove", jsonIds(remove))
         })
     }
+
+    override suspend fun organizePreview(since: String?) =
+        OrganizePreview.fromJson(api.library("POST", listOf("organize", "preview"), buildJsonObject { since?.let { put("since", it) } }))
+
+    override suspend fun organizeApply(single: Boolean, since: String?, name: String?, collectionId: String?) =
+        OrganizeApplyResult.fromJson(api.library("POST", listOf("organize", "apply"), buildJsonObject {
+            put("mode", if (single) "single" else "auto")
+            since?.let { put("since", it) }
+            if (single) { name?.let { put("name", it) }; collectionId?.let { put("collection_id", it) } }
+        }))
+
+    override suspend fun setOrganizePref(pref: OrganizePref) { api.library("POST", listOf("prefs"), buildJsonObject { put("organize", pref.wire) }) }
 }

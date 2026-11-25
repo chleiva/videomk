@@ -39,6 +39,9 @@ private class FakeMedia : MediaApi {
     override suspend fun updateCollection(id: String, name: String?, emoji: String?) = error("unused")
     override suspend fun deleteCollection(id: String) = error("unused")
     override suspend fun editCollection(id: String, add: List<String>, remove: List<String>) = error("unused")
+    override suspend fun organizePreview(since: String?) = error("unused")
+    override suspend fun organizeApply(single: Boolean, since: String?, name: String?, collectionId: String?) = error("unused")
+    override suspend fun setOrganizePref(pref: OrganizePref) = error("unused")
 }
 
 private class Blobs : BlobSource {

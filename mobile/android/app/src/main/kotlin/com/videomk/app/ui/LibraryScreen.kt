@@ -152,7 +152,9 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
             Column {
                 val progress = container?.mediaUploads?.queue?.progress?.collectAsState()?.value
                 val imeVisible = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
+                val org = container?.organize?.bar?.collectAsState()?.value
                 if (progress != null && progress.active && !imeVisible) UploadPill(progress, onOpenMedia)
+                else if (org != null && !imeVisible) OrganizePill(org, onOpenMedia)   // never two pills: uploads first
                 ComposerBar(
                     composer = composer, balance = com.videomk.app.DebugHooks.balanceOverride(context) ?: state.wallet?.let { if (it.unlimited) null else it.balance },
                     onSend = {

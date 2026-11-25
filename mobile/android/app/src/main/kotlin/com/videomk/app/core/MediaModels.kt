@@ -21,9 +21,9 @@ data class MediaPhoto(
     }
 }
 
-data class MediaCollection(val id: String, val name: String, val emoji: String?, val count: Int, val coverId: String?, val coverThumbUrl: String? = null) {
+data class MediaCollection(val id: String, val name: String, val emoji: String?, val count: Int, val coverId: String?, val coverThumbUrl: String? = null, val auto: Boolean = false) {
     companion object {
-        fun fromJson(o: JsonObject) = MediaCollection(o.requireString("id"), o.str("name") ?: "", o.str("emoji"), o.int("count") ?: 0, o.str("cover_id"), o.str("cover_thumb_url"))
+        fun fromJson(o: JsonObject) = MediaCollection(o.requireString("id"), o.str("name") ?: "", o.str("emoji"), o.int("count") ?: 0, o.str("cover_id"), o.str("cover_thumb_url"), o.bool("auto") ?: false)
     }
 }
 
@@ -35,6 +35,8 @@ data class MediaSummary(
     val years: List<YearCount>, val places: List<PlaceCount>, val collections: List<MediaCollection>,
     /** A lapsed plan left the library over its limit: uploads are refused, viewing and deleting still work. */
     val readOnly: Boolean = false,
+    /** What to do after an upload (the server keeps it per account). */
+    val organizePref: OrganizePref = OrganizePref.Ask,
 ) {
     companion object {
         fun fromJson(o: JsonObject) = MediaSummary(
@@ -44,6 +46,7 @@ data class MediaSummary(
             places = o.arr("places")?.mapNotNull { e -> e.asObject()?.let { p -> p.str("name")?.let { PlaceCount(it, p.str("country"), p.int("count") ?: 0) } } } ?: emptyList(),
             collections = o.arr("collections")?.mapNotNull { e -> e.asObject()?.let { runCatching { MediaCollection.fromJson(it) }.getOrNull() } } ?: emptyList(),
             readOnly = o.bool("read_only") ?: false,
+            organizePref = OrganizePref.fromWire(o.obj("prefs")?.str("organize")),
         )
     }
 }
@@ -123,3 +126,33 @@ data class DeleteResult(val deleted: Int, val usedBytes: Long)
 data class MediaFilter(val from: String? = null, val to: String? = null, val collection: String? = null, val place: String? = null)
 
 fun jsonIds(ids: List<String>) = JsonArray(ids.map { JsonPrimitive(it) })
+
+/** Smart collections: what the app does after an upload (docs/MEDIA_LIBRARY.md "Smart collections"). */
+enum class OrganizePref(val wire: String, val label: String) {
+    Ask("ask", "Ask"), Always("always", "Always"), Never("never", "Never");
+    companion object { fun fromWire(s: String?) = entries.firstOrNull { it.wire == s } ?: Ask }
+}
+
+data class OrganizeGroup(val name: String, val count: Int, val existing: Boolean, val sampleIds: List<String>)
+
+data class OrganizePreview(val total: Int, val organized: Int, val skipped: Int, val home: String?, val groups: List<OrganizeGroup>) {
+    companion object {
+        fun fromJson(o: JsonObject) = OrganizePreview(
+            total = o.int("total") ?: 0, organized = o.int("organized") ?: 0, skipped = o.int("skipped") ?: 0, home = o.str("home"),
+            groups = o.arr("groups")?.mapNotNull { e ->
+                e.asObject()?.let { g ->
+                    g.str("name")?.let { n ->
+                        OrganizeGroup(n, g.int("count") ?: 0, g.bool("existing") ?: false, g.arr("sample_ids")?.mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { p -> p.isString }?.content } ?: emptyList())
+                    }
+                }
+            } ?: emptyList(),
+        )
+    }
+}
+
+/** One call of `organize/apply` (about 300 photos). [collectionId] only in single mode: send it back on the next calls. */
+data class OrganizeApplyResult(val applied: Int, val remaining: Int, val created: Int, val updated: Int, val skipped: Int, val collectionId: String?) {
+    companion object {
+        fun fromJson(o: JsonObject) = OrganizeApplyResult(o.int("applied") ?: 0, o.int("remaining") ?: 0, o.int("created") ?: 0, o.int("updated") ?: 0, o.int("skipped") ?: 0, o.str("collection_id"))
+    }
+}

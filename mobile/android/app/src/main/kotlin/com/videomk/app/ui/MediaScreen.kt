@@ -36,6 +36,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Movie
@@ -112,7 +115,7 @@ fun rememberPhotoChooser(onPicked: (List<Uri>) -> Unit): () -> Unit {
 @Composable
 fun MediaScreen(
     vm: MediaViewModel, uploads: MediaUploadController?, onOpenCollection: (String) -> Unit,
-    onMakeVideo: (List<MediaPhoto>) -> Unit,
+    onMakeVideo: (List<MediaPhoto>) -> Unit, organize: com.videomk.app.data.OrganizeController? = null, onOpenCollections: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
@@ -159,6 +162,18 @@ fun MediaScreen(
     val started = remember(progress?.active) { System.currentTimeMillis() }
     val elapsed = System.currentTimeMillis() - started
 
+    // smart collections: the prompt after a batch, the job's bar and its done toast
+    val orgState = organize?.bar?.collectAsState()?.value ?: com.videomk.app.core.OrganizeState.Idle
+    val orgPref = organize?.pref?.collectAsState()?.value ?: com.videomk.app.core.OrganizePref.Ask
+    val orgDone = organize?.doneMessage?.collectAsState()?.value
+    val orgChanges = organize?.changes?.collectAsState()?.value ?: 0
+    var menuOpen by remember { mutableStateOf(false) }
+    androidx.lifecycle.compose.LifecycleResumeEffect(organize) { organize?.setMediaVisible(true); organize?.refreshPref(); onPauseOrDispose { organize?.setMediaVisible(false) } }
+    LaunchedEffect(orgChanges) { if (orgChanges > 0) vm.refresh() }
+    LaunchedEffect(settled, settledGaveUp) { if ((settled || settledGaveUp) && uploads != null) { kotlinx.coroutines.delay(4000); organize?.onBatchReady(uploads.batchStart) } }
+    OrganizeAnnouncements(orgState)
+    if (organize != null) OrganizeSheetHost(organize)
+
     Box(Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Vmk.colors.background,
@@ -170,6 +185,14 @@ fun MediaScreen(
                     Row(Modifier.heightIn(min = 44.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape), verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = 44.dp).testTag("selectMode")) { Text("Select", fontWeight = FontWeight.SemiBold) }
                         if (vm.summary?.readOnly != true) IconButton(onClick = choose, modifier = Modifier.size(44.dp).testTag("addMedia")) { Icon(Icons.Filled.Add, "Add photos to My media", tint = Vmk.colors.primary) }
+                        if (organize != null) Box {
+                            IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(44.dp).testTag("mediaMenu")) { Icon(Icons.Filled.MoreHoriz, "More", tint = Vmk.colors.textSecondary) }
+                            DropdownMenu(menuOpen, { menuOpen = false }) {
+                                DropdownMenuItem(text = { Text("Organize my library") }, leadingIcon = { Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary) }, onClick = { menuOpen = false; organize.organizeLibrary() }, modifier = Modifier.testTag("organizeLibrary"))
+                                DropdownMenuItem(text = { Text("Select") }, onClick = { menuOpen = false; vm.beginSelecting() })
+                                DropdownMenuItem(text = { Text("Storage") }, onClick = { menuOpen = false; storageOpen = true })
+                            }
+                        }
                     }
                 }
             },
@@ -188,7 +211,7 @@ fun MediaScreen(
                     header = {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 8.dp)) {
                             PrivacyNote()
-                            if (!vm.search.active) CollectionsStrip(vm, onOpenCollection)
+                            if (!vm.search.active) CollectionsStrip(vm, orgPref, onOpenCollection, onOpenCollections)
                         }
                     },
                     localTiles = if (items.isNotEmpty() && !vm.search.active) ({
@@ -201,6 +224,13 @@ fun MediaScreen(
         if (barExpanded) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f)).clickable(onClickLabel = "Close upload details") { barExpanded = false })
         Column(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             toast?.let { MediaToast(it, "Got it", { toast = null }) }
+            orgDone?.let { msg ->
+                LaunchedEffect(msg) { view.announceForAccessibility(msg); kotlinx.coroutines.delay(8000); organize?.consumeDone() }
+                MediaToast(msg, "View", { organize?.consumeDone(); onOpenCollections() })
+            }
+            // never two bars: the upload bar owns the slot while photos are going up
+            val uploadBarShown = uploads != null && progress != null && (preparing != null || items.isNotEmpty())
+            if (!uploadBarShown && !vm.selecting && organize != null) OrganizeBar(orgState, onCancel = { organize.cancelJob() }, onRetry = { organize.retryJob() })
             if (uploads != null && progress != null && !vm.selecting) UploadBar(
                 progress, items, listedIds, preparing, elapsed, barExpanded, { barExpanded = it },
                 onPause = { uploads.pause() }, onResume = { uploads.resume() }, onCancel = { uploads.cancel(); barExpanded = false },
@@ -356,52 +386,72 @@ private fun PrivacyNote() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CollectionsStrip(vm: MediaViewModel, onOpen: (String) -> Unit) {
+private fun CollectionsStrip(vm: MediaViewModel, pref: com.videomk.app.core.OrganizePref, onOpen: (String) -> Unit, onSeeAll: () -> Unit) {
     var create by remember { mutableStateOf(false) }
     var menuFor by remember { mutableStateOf<MediaCollection?>(null) }
     var rename by remember { mutableStateOf<MediaCollection?>(null) }
     var delete by remember { mutableStateOf<MediaCollection?>(null) }
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Collections", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
+        TextButton(onClick = onSeeAll, modifier = Modifier.heightIn(min = 44.dp).testTag("seeAllCollections")) { Text("See all", fontWeight = FontWeight.SemiBold) }
+    }
     LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.testTag("collectionsStrip")) {
+        item {
+            Column(
+                Modifier.width(104.dp).clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = "Create a collection") { create = true }.testTag("newCollection"),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Box(Modifier.size(104.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp)) }
+                Text("New", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
+            }
+        }
         items(vm.collections, key = { it.id }) { c ->
             Box {
                 Column(
-                    Modifier.width(112.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surface).heightIn(min = 72.dp)
+                    Modifier.width(104.dp)
                         .combinedClickable(
                             role = androidx.compose.ui.semantics.Role.Button, onClickLabel = "Open collection", onLongClickLabel = "Rename or delete",
                             onClick = { onOpen(c.id) }, onLongClick = { menuFor = c },
-                        ).padding(12.dp).semantics(mergeDescendants = true) { contentDescription = "${c.name}, ${c.count} photo${if (c.count == 1) "" else "s"}" }.testTag("collectionCard"),
+                        ).semantics(mergeDescendants = true) { contentDescription = "${c.name}${if (c.auto) ", automatic collection" else ""}, ${c.count} photo${if (c.count == 1) "" else "s"}" }.testTag("collectionCard"),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    if (c.coverId != null && c.coverThumbUrl != null) PhotoThumb(
-                        MediaPhoto(c.coverId, null, "", null, 0, 0, 0, c.coverThumbUrl), Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(8.dp)),
-                    )
-                    Text(c.emoji ?: "🖼️", style = MaterialTheme.typography.titleLarge)
-                    Text(c.name, style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Box(Modifier.size(104.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
+                        if (c.coverId != null && c.coverThumbUrl != null) PhotoThumb(MediaPhoto(c.coverId, null, "", null, 0, 0, 0, c.coverThumbUrl), Modifier.fillMaxSize())
+                        else Text(c.emoji ?: "🖼️", style = MaterialTheme.typography.headlineMedium)
+                        if (c.auto) Box(Modifier.align(Alignment.TopStart).padding(6.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f)).testTag("autoBadge"), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(13.dp))
+                        }
+                    }
+                    Text(c.name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text("${c.count} photo${if (c.count == 1) "" else "s"}", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                 }
-                DropdownMenu(menuFor?.id == c.id, { menuFor = null }) {
-                    DropdownMenuItem(text = { Text("Rename") }, onClick = { rename = c; menuFor = null })
-                    DropdownMenuItem(text = { Text("Delete", color = Vmk.colors.danger) }, onClick = { delete = c; menuFor = null })
-                }
+                CollectionMenu(menuFor?.id == c.id, { menuFor = null }, onRename = { rename = c; menuFor = null }, onDelete = { delete = c; menuFor = null })
             }
-        }
-        item {
-            Column(
-                Modifier.width(112.dp).heightIn(min = 72.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surfaceRaised)
-                    .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = "Create a collection") { create = true }.padding(12.dp).testTag("newCollection"),
-                verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally,
-            ) { Icon(Icons.Filled.Add, null, tint = MaterialTheme.colorScheme.primary); Text("New", color = Vmk.colors.text) }
         }
     }
     if (create) NameDialog("New collection", "", "Create", onDismiss = { create = false }) { vm.createCollection(it); create = false }
     rename?.let { c -> NameDialog("Rename collection", c.name, "Save", onDismiss = { rename = null }) { vm.renameCollection(c.id, it); rename = null } }
-    delete?.let { c ->
-        AlertDialog(
-            onDismissRequest = { delete = null }, title = { Text("Delete \"${c.name}\"?") }, text = { Text("The photos stay in your library. Only the collection goes away.") },
-            confirmButton = { TextButton(onClick = { vm.deleteCollection(c.id); delete = null }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Delete", color = Vmk.colors.danger) } },
-            dismissButton = { TextButton(onClick = { delete = null }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Cancel") } },
-        )
+    delete?.let { c -> DeleteCollectionDialog(c, pref, onDismiss = { delete = null }) { vm.deleteCollection(c.id); delete = null } }
+}
+
+/** Rename and Delete, with the quiet reassurance under them. */
+@Composable
+fun CollectionMenu(open: Boolean, onDismiss: () -> Unit, onRename: () -> Unit, onDelete: () -> Unit) {
+    DropdownMenu(open, onDismiss) {
+        DropdownMenuItem(text = { Text("Rename") }, onClick = onRename, modifier = Modifier.testTag("collectionRename"))
+        DropdownMenuItem(text = { Text("Delete collection", color = Vmk.colors.danger) }, onClick = onDelete, modifier = Modifier.testTag("collectionDelete"))
+        Text("Photos stay in My media. Only the collection is removed.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(max = 240.dp))
     }
+}
+
+@Composable
+fun DeleteCollectionDialog(c: MediaCollection, pref: com.videomk.app.core.OrganizePref, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss, title = { Text("Delete \"${c.name}\"?") },
+        text = { Text("The collection is removed. Its ${c.count} photo${if (c.count == 1) "" else "s"} stay in My media." + if (c.auto && pref == com.videomk.app.core.OrganizePref.Always) " New uploads from that month may create it again." else "") },
+        confirmButton = { TextButton(onClick = onConfirm, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmDeleteCollection")) { Text("Delete", color = Vmk.colors.danger) } },
+        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text("Cancel") } },
+    )
 }
 
 @Composable

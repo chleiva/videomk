@@ -61,8 +61,13 @@ class MediaUploadController(context: Context, api: MediaApi, http: OkHttpClient,
 
     init { File(app.cacheDir, "media-pick").deleteRecursively() }
 
+    /** When the current upload batch began (device clock): the organise "since" is derived from it. Set when photos are added to an idle queue. */
+    @Volatile var batchStart: Long = 0L
+        private set
+
     fun add(resolver: ContentResolver, uris: List<Uri>) {
         if (uris.isEmpty()) return
+        if (!queue.hasWork() && _preparing.value == null) batchStart = System.currentTimeMillis()
         scope.launch {
             val total = uris.size
             _preparing.value = 0 to total

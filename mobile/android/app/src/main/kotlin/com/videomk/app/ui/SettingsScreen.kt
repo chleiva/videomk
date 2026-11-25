@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +28,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,6 +84,7 @@ fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
                         places, "photoLocationsSwitch",
                     ) { places = it; photoSettings.useLocations = it }
                     Text(PRIVACY_COPY, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp).testTag("mediaPrivacyCopy"))
+                    com.videomk.app.ui.LocalContainerOrNull.current?.organize?.let { OrganizeSetting(it) }
                 }
             }
             Card {
@@ -118,5 +123,33 @@ private fun SwitchRow(title: String, explanation: String, checked: Boolean, tag:
             Text(explanation, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
         }
         Switch(checked = checked, onCheckedChange = null)
+    }
+}
+
+/** "Organize new uploads: Ask / Always / Never": reads and writes the server preference. */
+@Composable
+private fun OrganizeSetting(controller: com.videomk.app.data.OrganizeController) {
+    val pref by controller.pref.collectAsState()
+    androidx.compose.runtime.LaunchedEffect(Unit) { controller.refreshPref() }
+    val big = androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f
+    Column(Modifier.fillMaxWidth().padding(top = 14.dp).testTag("organizeSetting"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Icon(androidx.compose.material.icons.Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary)
+            Text("Organize new uploads", style = MaterialTheme.typography.bodyLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = Vmk.colors.text)
+        }
+        val shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+        val options = com.videomk.app.core.OrganizePref.entries
+        @Composable fun seg(o: com.videomk.app.core.OrganizePref, modifier: Modifier) {
+            val sel = o == pref
+            androidx.compose.foundation.layout.Box(
+                modifier.heightIn(min = 44.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                    .then(if (sel) Modifier.background(if (Vmk.colors.dark) Vmk.colors.surface3 else Vmk.colors.surface) else Modifier)
+                    .toggleable(value = sel, role = androidx.compose.ui.semantics.Role.RadioButton) { controller.setPref(o) }.testTag("organizePref-${o.wire}"),
+                contentAlignment = Alignment.Center,
+            ) { Text(o.label, style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = if (sel) Vmk.colors.text else Vmk.colors.textSecondary) }
+        }
+        if (big) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { options.forEach { seg(it, Modifier.fillMaxWidth()) } }
+        else Row(Modifier.fillMaxWidth().clip(shape).background(Vmk.colors.surfaceRaised).padding(3.dp)) { options.forEach { seg(it, Modifier.weight(1f)) } }
+        Text("Ask offers after a big upload. Always groups photos by place and month, and adds later uploads to matching collections. Never leaves everything as it is.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
     }
 }

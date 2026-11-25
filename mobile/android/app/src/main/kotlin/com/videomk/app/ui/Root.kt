@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.remember
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -88,7 +89,13 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         }
         composable("media") { entry ->
             val vm: MediaViewModel = viewModel(entry, key = "media-home", factory = mediaFactory)
-            MediaScreen(vm, container.mediaUploads, onOpenCollection = { nav.navigate("media/collection/$it") }, onMakeVideo = { composer.addLibrary(it); navigateTab(nav, "library") })
+            MediaScreen(vm, container.mediaUploads, onOpenCollection = { nav.navigate("media/collection/$it") }, onMakeVideo = { composer.addLibrary(it); navigateTab(nav, "library") }, organize = container.organize, onOpenCollections = { nav.navigate("media/collections") })
+        }
+        composable("media/collections") {
+            val parent = remember(it) { nav.getBackStackEntry("media") }
+            val vm: MediaViewModel = viewModel(parent, key = "media-home", factory = mediaFactory)
+            val pref = container.organize?.pref?.collectAsState()?.value ?: com.videomk.app.core.OrganizePref.Ask
+            CollectionsScreen(vm, pref, onBack = { nav.popBackStack() }, onOpen = { id -> nav.navigate("media/collection/$id") })
         }
         composable("media/collection/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
@@ -109,7 +116,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         composable("settings") { SettingsScreen(email, onBack = { nav.popBackStack() }, onSignOut = { app.signOut() }) }
     }
     }
-    androidx.compose.runtime.LaunchedEffect(Unit) { container.mediaUploads?.resumeIfAny() }   // an interrupted upload queue continues on the next launch
+    androidx.compose.runtime.LaunchedEffect(Unit) { container.mediaUploads?.resumeIfAny(); container.organize?.resumeIfAny() }   // an interrupted upload queue continues on the next launch
 }
 
 @Composable
