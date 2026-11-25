@@ -47,6 +47,9 @@ def _bedrock():
 
 
 REVIEW_MODEL = os.environ.get("REVIEW_MODEL_ID", f"{GEO}.anthropic.claude-haiku-5-5")
+# Research decides what the video says (owner, 2026-11-25: at least Sonnet 5.5 at medium effort): it follows the script model unless RESEARCH_MODEL_ID overrides it.
+RESEARCH_MODEL = os.environ.get("RESEARCH_MODEL_ID", "") or PRIMARY_MODEL
+RESEARCH_EFFORT = os.environ.get("RESEARCH_EFFORT", "medium")
 
 
 def complete_tools(
@@ -72,7 +75,7 @@ def complete_tools(
     res = json.loads(_bedrock().invoke_model(modelId=model_id, body=json.dumps(body))["body"].read())
     usage = res.get("usage") or {}
     tin, tout = int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0))
-    blocks = [b for b in res.get("content", []) if isinstance(b, dict) and b.get("type") in ("text", "tool_use")]
+    blocks = [b for b in res.get("content", []) if isinstance(b, dict) and b.get("type") in ("text", "tool_use", "thinking", "redacted_thinking")]   # thinking blocks go back unchanged in the next turn of a tool loop
     return blocks, str(res.get("stop_reason") or ""), {"model": model_id, "tokens_in": tin, "tokens_out": tout, "cost_usd": estimate_cost(model_id, tin, tout)}
 
 

@@ -27,7 +27,8 @@ def _web_tools(spent: Dict[str, float]):
         return None, None
 
     def ask_tools(system, messages, tools, **kw):
-        blocks, stop, meta = llm.complete_tools(system, messages, tools, model=llm.REVIEW_MODEL, **kw)
+        # the research agent runs on the script model at medium effort (not the small model): what it finds is what the video says. Thinking counts against max_tokens, hence the room.
+        blocks, stop, meta = llm.complete_tools(system, messages, tools, model=llm.RESEARCH_MODEL, effort=llm.RESEARCH_EFFORT, max_tokens=4000, **kw)
         spent["research"] = spent.get("research", 0.0) + meta["cost_usd"]
         return blocks, stop, meta
 

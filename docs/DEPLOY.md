@@ -46,3 +46,9 @@ npx aws-cdk@latest deploy videomk-prod -c stage=prod -c engine=v2 -c "@aws-cdk/c
   -c planModelId=us.anthropic.claude-sonnet-4-6 -c reviewModelId=us.anthropic.claude-haiku-4-5-20251001-v1:0 --require-approval never
 ```
 (`planModelId` writes the script model and `reviewModelId` the small model, in the video functions and in the photo library functions.) When Claude 5.x is enabled for the account (Bedrock console, Model access / the Anthropic use-case form, in us-west-2), redeploy without the two `-c` model flags and check with the probe in this section's history (invoke `us.anthropic.claude-sonnet-5-5` and `us.anthropic.claude-haiku-5-5`).
+
+## Which model does what (2026-11-25)
+* **Research** (the web-research agent that gathers the facts a video is built on): the script model at **medium effort** (`RESEARCH_MODEL_ID`, default = `PLAN_MODEL_ID`, i.e. Sonnet 5.5 on QA; `RESEARCH_EFFORT`, default `medium`). Owner rule: never below Sonnet 5.5 medium. It ran on the small model at low effort before.
+* **Script / plan** (writes everything that is said and shown): `PLAN_MODEL_ID`, Sonnet 5.5, medium effort.
+* **Small jobs** (photo and clip review, clip verification, request check, whether to research): `REVIEW_MODEL_ID`, Haiku 5.5, low effort.
+* Prod cannot call Claude 5.x yet, so there research and script both run on Sonnet 4.6 until access is granted.
