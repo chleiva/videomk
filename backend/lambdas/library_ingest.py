@@ -72,7 +72,10 @@ def process(user: str, mid: str, *, attempt: int = 1) -> str:
             raise Retry() from e
         embedded = False
         logger.error("photo kept without a vector after %s attempts (%s)", attempt, type(e).__name__)
-    lib.finalize(user, mid, actual_bytes=len(data), w=w, h=h)
+    try:
+        lib.finalize(user, mid, actual_bytes=len(data), w=w, h=h)
+    except lib.Busy as e:   # other photos of this person are finishing at the same moment: try again shortly
+        raise Retry() from e
     if not embedded:
         lib.table().update_item(Key={"user_id": user, "sk": f"m#{mid}"}, UpdateExpression="SET nov = :t", ExpressionAttributeValues={":t": True})
     return "ready"

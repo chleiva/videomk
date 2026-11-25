@@ -42,7 +42,7 @@ class MediaLibrary(Construct):
             vindex.apply_removal_policy(RemovalPolicy.RETAIN)
 
         dlq = sqs.Queue(self, "IngestDlq", retention_period=Duration.days(14), encryption=sqs.QueueEncryption.SQS_MANAGED, enforce_ssl=True)
-        queue = sqs.Queue(self, "IngestQueue", visibility_timeout=Duration.minutes(4), encryption=sqs.QueueEncryption.SQS_MANAGED, enforce_ssl=True,
+        queue = sqs.Queue(self, "IngestQueue", visibility_timeout=Duration.seconds(150), encryption=sqs.QueueEncryption.SQS_MANAGED, enforce_ssl=True,
                           dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=6, queue=dlq))
         bucket.add_event_notification(s3.EventType.OBJECT_CREATED, s3n.SqsDestination(queue), s3.NotificationKeyFilter(prefix="o/"))   # only originals (thumbnails are under t/)
 

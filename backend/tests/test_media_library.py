@@ -547,3 +547,59 @@ def test_embeddings_use_cohere_with_the_right_request_for_queries_and_for_photos
     assert m1 == m2 == search.EMBED_MODEL
     assert q["input_type"] == "search_query" and q["texts"] == ["a red car"] and q["embedding_types"] == ["float"] and q["output_dimension"] == 1024
     assert d["input_type"] == "search_document" and d["images"][0].startswith("data:image/jpeg;base64,") and d["output_dimension"] == 1024
+
+
+# ----------------------------------------------------------------------------- many photos finishing at once (a real bug on QA: conflicts were mistaken for "already done")
+def _conflicting(monkeypatch, times, code="TransactionConflict"):
+    from botocore.exceptions import ClientError
+
+    client = lib.table().meta.client
+    real = client.transact_write_items
+    state = {"n": 0}
+
+    def flaky(**kw):
+        state["n"] += 1
+        if state["n"] <= times:
+            raise ClientError({"Error": {"Code": "TransactionCanceledException", "Message": "x"}, "CancellationReasons": [{"Code": code}, {"Code": "None"}]}, "TransactWriteItems")
+        return real(**kw)
+
+    monkeypatch.setattr(client, "transact_write_items", flaky)
+    monkeypatch.setattr(lib.time, "sleep", lambda s: None)
+    return state
+
+
+def test_a_transaction_conflict_is_retried_and_a_failed_condition_is_not(env, monkeypatch):
+    data = jpeg()
+    res = lib.create_slots(A, [{"size": len(data), "sha256": sha(data)}], consume=lambda u: None)["uploads"][0]
+    boto3.client("s3", region_name="us-west-2").put_object(Bucket="media-bucket", Key=lib.orig_key(A, res["id"]), Body=data)
+    state = _conflicting(monkeypatch, 3)
+    assert library_ingest.process(A, res["id"]) == "ready" and state["n"] == 4          # three conflicts, then it went through
+    assert lib.get_item(A, res["id"])["st"] == "ready" and lib.stats(A)["n"] == 1
+    assert lib.finalize(A, res["id"], actual_bytes=1, w=1, h=1) is False                # a repeated event: the condition fails, nothing is counted twice
+    assert lib.stats(A)["n"] == 1
+
+
+def test_a_conflict_that_does_not_clear_leaves_the_photo_pending_and_asks_for_another_attempt(env, monkeypatch):
+    data = jpeg()
+    res = lib.create_slots(A, [{"size": len(data), "sha256": sha(data)}], consume=lambda u: None)["uploads"][0]
+    boto3.client("s3", region_name="us-west-2").put_object(Bucket="media-bucket", Key=lib.orig_key(A, res["id"]), Body=data)
+    _conflicting(monkeypatch, 99)
+    with pytest.raises(library_ingest.Retry):
+        library_ingest.process(A, res["id"])
+    ev = {"Records": [{"messageId": "m1", "attributes": {"ApproximateReceiveCount": "1"}, "body": json.dumps({"Records": [{"s3": {"object": {"key": f"o/{A}/{res['id']}.jpg"}}}]})}]}
+    assert library_ingest.handler(ev, None) == {"batchItemFailures": [{"itemIdentifier": "m1"}]}      # the message goes back to the queue, it is never silently dropped
+    assert lib.get_item(A, res["id"], ready_only=False)["st"] == "pending"
+
+
+def test_many_photos_of_one_person_finishing_together_all_become_ready(env):
+    from concurrent.futures import ThreadPoolExecutor
+
+    slots = []
+    for i in range(8):
+        d = jpeg((i * 30, 20, 20))
+        s = lib.create_slots(A, [{"size": len(d), "sha256": sha(d), "taken": f"2024-05-0{i + 1}T10:00:00"}], consume=lambda u: None)["uploads"][0]
+        boto3.client("s3", region_name="us-west-2").put_object(Bucket="media-bucket", Key=lib.orig_key(A, s["id"]), Body=d)
+        slots.append(s["id"])
+    with ThreadPoolExecutor(6) as ex:
+        results = list(ex.map(lambda m: library_ingest.process(A, m), slots))
+    assert results == ["ready"] * 8 and lib.stats(A)["n"] == 8 and lib.facets(A)["y"] == {"2024": 8}

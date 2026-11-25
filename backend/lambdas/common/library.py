@@ -11,6 +11,7 @@ import datetime
 import json
 import logging
 import os
+import random
 import re
 import time
 import uuid
@@ -35,7 +36,7 @@ DAILY_SEARCHES = int(os.environ.get("LIBRARY_SEARCHES_PER_DAY", "400"))
 SLOT_SECONDS = 900
 THUMB_LINK_SECONDS = 3600
 PHOTO_LINK_SECONDS = 600
-PENDING_MAX_AGE_S = 2 * 3600
+PENDING_MAX_AGE_S = 45 * 60
 MAX_COLLECTIONS = 200
 MAX_PER_PHOTO_COLLECTIONS = 50
 THUMB_PX = 480
@@ -277,20 +278,21 @@ def create_slots(user: str, items: Any, *, consume: Callable[[str], None], now: 
                 item[k] = v
         try:
             consume(user)
-            table().meta.client.transact_write_items(TransactItems=[
+            created = transact([
                 {"Put": {"TableName": table().name, "Item": _ser(item), "ConditionExpression": "attribute_not_exists(sk)"}},
                 {"Put": {"TableName": table().name, "Item": _ser({"user_id": user, "sk": f"h#{s['sha256']}", "mid": mid}), "ConditionExpression": "attribute_not_exists(sk)"}},
             ])
-        except ClientError as e:   # lost a race for the same content: it is a duplicate now
+        except Busy:
             release(user, s["size"])
-            if e.response["Error"]["Code"] == "TransactionCanceledException":
-                found = table().get_item(Key={"user_id": user, "sk": f"h#{s['sha256']}"}).get("Item")
-                results[i] = {"index": i, "status": "duplicate", "duplicate_of": (found or {}).get("mid")}
-                continue
-            raise
+            raise LibraryError(503, "Busy, please try again.") from None
         except Exception:
             release(user, s["size"])
             raise
+        if not created:   # lost a race for the same content: it is a duplicate now
+            release(user, s["size"])
+            found = table().get_item(Key={"user_id": user, "sk": f"h#{s['sha256']}"}).get("Item")
+            results[i] = {"index": i, "status": "duplicate", "duplicate_of": (found or {}).get("mid")}
+            continue
         results[i] = {"index": i, **_slot(user, mid, s["size"])}
     for r in results:   # the same content twice in one batch: it points at the first copy, or shares its fate
         if r and "_of" in r:
@@ -304,6 +306,27 @@ def create_slots(user: str, items: Any, *, consume: Callable[[str], None], now: 
                 del r["duplicate_of"]
     st = stats(user)
     return {"uploads": results, "used_bytes": st["used"], "limit_bytes": lim["limit_bytes"], "expires_in": SLOT_SECONDS}
+
+
+class Busy(Exception):
+    """A transaction kept conflicting with others on the same rows (many photos of one person finishing at once). The caller should try again later."""
+
+
+def transact(items: List[Dict[str, Any]], tries: int = 7) -> bool:
+    """Runs a DynamoDB transaction. True when it was applied, False when a condition in it failed (the thing it expected is not there). Conflicts with other
+    transactions on the same rows are retried with a short random backoff and, if they persist, raise Busy: a conflict is never mistaken for a failed condition."""
+    for k in range(tries):
+        try:
+            table().meta.client.transact_write_items(TransactItems=items)
+            return True
+        except ClientError as e:
+            if e.response["Error"]["Code"] != "TransactionCanceledException":
+                raise
+            reasons = [r.get("Code") for r in e.response.get("CancellationReasons") or []]
+            if "ConditionalCheckFailed" in reasons:
+                return False
+            time.sleep(min(0.05 * 2 ** k, 0.8) * (0.5 + random.random()))
+    raise Busy()
 
 
 def _slot(user: str, mid: str, size: int) -> Dict[str, Any]:
@@ -369,13 +392,7 @@ def finalize(user: str, mid: str, *, actual_bytes: int, w: int, h: int) -> bool:
         f = _facet_update(names, 1)
         tx.append({"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": "facets"}), "UpdateExpression": f["UpdateExpression"],
                               "ExpressionAttributeNames": f["ExpressionAttributeNames"], "ExpressionAttributeValues": _ser(f["ExpressionAttributeValues"])}})
-    try:
-        table().meta.client.transact_write_items(TransactItems=tx)
-    except ClientError as e:
-        if e.response["Error"]["Code"] == "TransactionCanceledException":
-            return False
-        raise
-    return True
+    return transact(tx)   # False: it was not pending any more (a repeated event); Busy: other photos of this person are finishing at the same moment, try again
 
 
 def reject(user: str, mid: str) -> None:
@@ -606,25 +623,27 @@ def change_collection(user: str, cid: str, add: Iterable[str] = (), remove: Iter
             continue
         srt = it.get("srt") or sort_key(it, mid)
         try:
-            table().meta.client.transact_write_items(TransactItems=[
+            if transact([
                 {"Put": {"TableName": table().name, "Item": _ser({"user_id": user, "sk": f"cm#{cid}#{srt}", "mid": mid}), "ConditionExpression": "attribute_not_exists(sk)"}},
                 {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"m#{mid}"}), "UpdateExpression": "ADD cols :c", "ExpressionAttributeValues": {":c": {cid}}}},
                 {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"c#{cid}"}), "UpdateExpression": "ADD n :one SET cover = :m", "ExpressionAttributeValues": _ser({":one": 1, ":m": mid})}},
-            ])
-            added += 1
-        except ClientError as e:
-            if e.response["Error"]["Code"] != "TransactionCanceledException":
-                raise
+            ]):
+                added += 1
+        except Busy:
+            raise LibraryError(503, "Busy, please try again.") from None
     for mid in remove:
         it = have.get(mid)
         if not it or cid not in (it.get("cols") or []):
             continue
         srt = it.get("srt") or sort_key(it, mid)
-        table().meta.client.transact_write_items(TransactItems=[
-            {"Delete": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"cm#{cid}#{srt}"})}},
-            {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"m#{mid}"}), "UpdateExpression": "DELETE cols :c", "ExpressionAttributeValues": {":c": {cid}}}},
-            {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"c#{cid}"}), "UpdateExpression": "ADD n :neg", "ExpressionAttributeValues": _ser({":neg": -1})}},
-        ])
+        try:
+            transact([
+                {"Delete": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"cm#{cid}#{srt}"})}},
+                {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"m#{mid}"}), "UpdateExpression": "DELETE cols :c", "ExpressionAttributeValues": {":c": {cid}}}},
+                {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"c#{cid}"}), "UpdateExpression": "ADD n :neg", "ExpressionAttributeValues": _ser({":neg": -1})}},
+            ])
+        except Busy:
+            raise LibraryError(503, "Busy, please try again.") from None
         removed += 1
     if removed and c.get("cover") in remove:
         table().update_item(Key={"user_id": user, "sk": f"c#{cid}"}, UpdateExpression="REMOVE cover")
@@ -677,13 +696,13 @@ def delete_items(user: str, ids: Any) -> Dict[str, int]:
     for mid, it in rows.items():
         for cid in it.get("cols") or []:
             try:
-                table().meta.client.transact_write_items(TransactItems=[
+                transact([
                     {"Delete": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"cm#{cid}#{it.get('srt') or sort_key(it, mid)}"})}},
                     {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"c#{cid}"}), "UpdateExpression": "ADD n :neg", "ExpressionAttributeValues": _ser({":neg": -1}),
                                 "ConditionExpression": "attribute_exists(sk)"}},
                 ])
-            except ClientError:
-                pass
+            except Busy:
+                raise LibraryError(503, "Busy, please try again.") from None
         if it.get("hash"):
             try:
                 table().delete_item(Key={"user_id": user, "sk": f"h#{it['hash']}"}, ConditionExpression="mid = :m", ExpressionAttributeValues={":m": mid})
