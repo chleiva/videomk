@@ -15,6 +15,7 @@ struct MediaView: View {
     @State private var showAddToCollection = false
     @State private var confirmDelete = false
     @State private var newCollection = false
+    @State private var confirmCancelUploads = false
     @State private var newName = ""
     @AppStorage("mediaPrivacyNoteSeen") private var privacySeen = false
 
@@ -44,11 +45,20 @@ struct MediaView: View {
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
             .toolbar { toolbar }
-            .safeAreaInset(edge: .top, spacing: 0) { UploadBanner(media: media) { showStorage = true } }
-            .safeAreaInset(edge: .bottom, spacing: 0) { if selection.active { SelectionBar(selection: selection, feed: feed, onCollection: { showAddToCollection = true }, onVideo: makeVideo, onDelete: { confirmDelete = true }) } }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); withAnimation(.snappy) { media.barExpanded = true } }, onDismiss: { media.dismissToast() }) }
+                    UploadBar(media: media, onManageStorage: { showStorage = true })
+                    if selection.active { SelectionBar(selection: selection, feed: feed, onCollection: { showAddToCollection = true }, onVideo: makeVideo, onDelete: { confirmDelete = true }) }
+                }
+                .animation(reduceMotion ? nil : .snappy, value: media.toast)
+                .animation(reduceMotion ? nil : .snappy, value: media.bar?.kind)
+            }
             .refreshable { await media.loadSummary(); await feed.reload() }
         }
+        .overlay { expandedPanel }
         .task { await media.start() }
+        .onChange(of: settleKey) { _, _ in settleBatchIfDone() }
         .onAppear { media.setWatching("tab", true); Task { await media.refreshNow() } }      // the tab is shown again: look at the server now
         .onDisappear { media.setWatching("tab", false) }
         .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await media.refreshNow() } } }
@@ -87,17 +97,17 @@ struct MediaView: View {
         case .failed(let message):
             MediaMessage(symbol: "wifi.exclamationmark", title: "Couldn't load your photos", text: message, button: "Try again") { Task { await feed.reload() } }
         case .loaded:
+            if showBatch { UploadBatchSection(media: media, listed: listed).padding(.bottom, 4) }
             if feed.photos.isEmpty {
-                if feed.isSearching && !feed.searching {
+                if showBatch { EmptyView() }
+                else if feed.isSearching && !feed.searching {
                     MediaMessage(symbol: "magnifyingglass", title: "No photos match", text: "Try fewer words, or remove one of the filters above.", button: nil) {}
-                } else if !feed.isSearching, media.waiting || !media.upload.isEmpty {
-                    SkeletonGrid()          // photos were just uploaded and are being prepared: not an empty library
                 } else if !feed.isSearching {
                     EmptyLibrary(pickerItems: $pickerItems, readOnly: media.summary?.readOnly == true)
                 }
             } else {
                 if feed.offline { Label("Offline. Showing what's saved on this phone.", systemImage: "icloud.slash").font(.caption).foregroundStyle(Theme.textSecondary) }
-                PhotoGrid(feed: feed, media: media, selection: selection) { open($0) }
+                PhotoGrid(feed: feed, media: media, selection: selection, onOpen: { open($0) }, hidden: batchIDs)
             }
         }
     }
@@ -115,6 +125,41 @@ struct MediaView: View {
                 PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Image(systemName: "plus") }
                     .accessibilityLabel("Add photos to your library").accessibilityIdentifier("addToLibraryButton")
             }
+        }
+    }
+
+    // MARK: the upload batch in the grid
+
+    private var showBatch: Bool { !feed.isSearching && !media.queueItems.isEmpty }
+    /// Photos of the batch that the server already lists: shown in the batch section, so the timeline skips them (no duplicate squares).
+    private var batchIDs: Set<String> { showBatch ? Set(media.queueItems.compactMap(\.libraryID)) : [] }
+    private var listed: [String: LibraryPhoto] { Dictionary(feed.photos.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a }) }
+    private var settleKey: String { "\(media.queueItems.map { "\($0.state.rawValue)" }.joined())|\(feed.photos.count)" }
+
+    /// Everything uploaded is listed: after a beat the "Adding" section folds into the month header (the queue entries are cleared).
+    private func settleBatchIfDone() {
+        let items = media.queueItems
+        guard !items.isEmpty, items.allSatisfy({ $0.state == .done || $0.state == .duplicate }),
+              UploadTiles.isSettled(items, listedIDs: Set(feed.photos.map(\.id))) else { return }
+        Task {
+            try? await Task.sleep(for: .milliseconds(1400))
+            let again = media.queueItems
+            if !again.isEmpty, again.allSatisfy({ $0.state == .done || $0.state == .duplicate }) { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { media.dismissUploads() } }
+        }
+    }
+
+    @ViewBuilder private var expandedPanel: some View {
+        if media.barExpanded, media.bar != nil {
+            ZStack(alignment: .bottom) {
+                Color.black.opacity(0.18).ignoresSafeArea().onTapGesture { withAnimation(.snappy) { media.barExpanded = false } }.accessibilityHidden(true)
+                UploadPanel(media: media, onClose: { withAnimation(.snappy) { media.barExpanded = false } }, cancel: { confirmCancelUploads = true })
+                    .padding(.bottom, 70)
+            }
+            .transition(.opacity)
+            .confirmationDialog("Cancel remaining uploads?", isPresented: $confirmCancelUploads, titleVisibility: .visible) {
+                Button("Cancel remaining", role: .destructive) { media.cancelUploads() }
+                Button("Keep uploading", role: .cancel) {}
+            } message: { Text("Photos already added stay.") }
         }
     }
 
@@ -174,14 +219,14 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            TextField("Search your photos - try 'beach in Thailand 2024'", text: $feed.text)
+            TextField("Search your photos, try ‘beach in Thailand’", text: $feed.text).font(.system(size: 15))
                 .focused($focused).submitLabel(.search).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .accessibilityIdentifier("mediaSearch")
             if feed.searching { ProgressView().controlSize(.small) }
             else if !feed.text.isEmpty { Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary) }.accessibilityLabel("Clear search") }
         }
-        .padding(.horizontal, 12).padding(.vertical, 10)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(.horizontal, 12).frame(minHeight: 40)
+        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .padding(.horizontal, 16)
     }
 }
@@ -263,66 +308,6 @@ struct EmptyLibrary: View {
             }
         }
         .padding(32).frame(maxWidth: .infinity)
-    }
-}
-
-struct UploadBanner: View {
-    let media: MediaModel
-    let onStorage: () -> Void
-
-    var body: some View {
-        let p = media.upload
-        Group {
-            if media.preparingTotal > 0 {
-                line(symbol: "photo.badge.arrow.down", text: "Preparing \(min(media.preparing + 1, media.preparingTotal)) of \(media.preparingTotal)", tint: Theme.primary) { EmptyView() }
-            } else if !p.isEmpty && !p.isFinished {
-                let active = p.paused ? "Paused" : "Uploading"
-                line(symbol: p.paused ? "pause.circle" : "arrow.up.circle", text: p.lastError ?? "\(active) \(min(p.processed + 1, p.total)) of \(p.total) - \(StorageMeter.format(p.doneBytes)) of \(StorageMeter.format(p.totalBytes))", tint: p.lastError != nil ? Theme.warning : Theme.primary, progress: Double(p.processed) / Double(max(p.total, 1))) {
-                    Button { p.paused ? media.resumeUploads() : media.pauseUploads() } label: { Image(systemName: p.paused ? "play.fill" : "pause.fill") }
-                        .accessibilityLabel(p.paused ? "Resume uploads" : "Pause uploads")
-                    Button(role: .destructive) { media.cancelUploads() } label: { Image(systemName: "xmark") }.accessibilityLabel("Cancel uploads")
-                }
-            } else if p.isFinished {
-                finished(p)
-            }
-        }
-        .animation(.snappy, value: p)
-    }
-
-    @ViewBuilder private func finished(_ p: QueueProgress) -> some View {
-        if media.gettingReady > 0, p.noSpace == 0, p.failed == 0 {
-            line(symbol: "hourglass", text: "Uploaded \(p.done) \(p.done == 1 ? "photo" : "photos"). Getting them ready...", tint: Theme.primary) { EmptyView() }
-        } else if p.noSpace > 0 {
-            line(symbol: "externaldrive.badge.xmark", text: "\(p.noSpace) \(p.noSpace == 1 ? "photo" : "photos") did not fit in your storage. \(p.done) \(p.done == 1 ? "was" : "were") added.", tint: Theme.danger) {
-                Button("Storage", action: onStorage).font(.footnote.weight(.semibold))
-                Button { media.dismissUploads() } label: { Image(systemName: "xmark") }.accessibilityLabel("Dismiss")
-            }
-        } else if p.failed > 0 {
-            line(symbol: "exclamationmark.triangle", text: "\(p.failed) \(p.failed == 1 ? "photo" : "photos") couldn't be uploaded. The rest were added.", tint: Theme.warning) {
-                Button("Try again") { media.retryUploads() }.font(.footnote.weight(.semibold))
-                Button { media.dismissUploads() } label: { Image(systemName: "xmark") }.accessibilityLabel("Dismiss")
-            }
-        } else {
-            line(symbol: "checkmark.circle.fill", text: "Added \(p.done) \(p.done == 1 ? "photo" : "photos")." + (p.duplicates > 0 ? " \(p.duplicates) \(p.duplicates == 1 ? "was" : "were") already in your library." : ""), tint: Theme.success) {
-                Button { media.dismissUploads() } label: { Image(systemName: "xmark") }.accessibilityLabel("Dismiss")
-            }
-        }
-    }
-
-    private func line<T: View>(symbol: String, text: String, tint: Color, progress: Double? = nil, @ViewBuilder trailing: () -> T) -> some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Image(systemName: symbol).foregroundStyle(tint).accessibilityHidden(true)
-                Text(text).font(.footnote).foregroundStyle(Theme.text).lineLimit(2).minimumScaleFactor(0.85)
-                Spacer(minLength: 4)
-                HStack(spacing: 14) { trailing() }.foregroundStyle(Theme.textSecondary)
-            }
-            .padding(.horizontal, 16).padding(.vertical, 10)
-            if let progress { ProgressView(value: progress).tint(tint).scaleEffect(x: 1, y: 0.5) }
-        }
-        .background(.bar)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("uploadBanner")
     }
 }
 

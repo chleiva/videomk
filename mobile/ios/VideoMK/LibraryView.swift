@@ -1,60 +1,84 @@
+import PhotosUI
 import SwiftUI
 import VideoMKCore
 
+/// The main screen (docs/UI_DESIGN.md d): top bar, "Your videos" feed of picture-first cards (or the empty hero with examples) and the
+/// docked composer above the tab bar.
 struct LibraryView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var path: [String] = []
     @State private var showingSettings = false
     @State private var showingWallet = false
+    @State private var showingOptions = false
+    @State private var showingAdd = false
+    @State private var addStartsOnLibrary = false
     @State private var text = ""
     @State private var options = LibraryView.defaultOptions()
     @State private var dictation = Dictation()
     @State private var photos = PhotoAttachments()
     @FocusState private var composerFocused: Bool
 
+    private var balance: Int? { model.wallet.flatMap { $0.unlimited ? nil : $0.balance } }
+
     var body: some View {
         NavigationStack(path: $path) {
-            Group {
-                switch (model.loadState, model.entries.isEmpty) {
-                case (.loading, true), (.idle, true): ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-                case (.failed(let message), true): errorState(message)
-                case (_, true): emptyState
-                default: list
+            VStack(spacing: 0) {
+                topBar
+                Group {
+                    switch (model.loadState, model.entries.isEmpty) {
+                    case (.loading, true), (.idle, true): loadingState
+                    case (.failed(let message), true): errorState(message)
+                    case (_, true): emptyState
+                    default: feed
+                    }
                 }
             }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Videos")
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if let wallet = model.wallet {
-                        Button { showingWallet = true } label: {
-                            Label(wallet.unlimited ? "∞" : "\(wallet.balance)", systemImage: "bolt.circle.fill").font(.subheadline.weight(.semibold).monospacedDigit())
-                        }
-                        .accessibilityLabel(wallet.unlimited ? "Unlimited credits" : "\(wallet.balance) credits")
-                        .accessibilityHint("Shows your credits")
-                        .accessibilityIdentifier("balanceChip")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showingSettings = true } label: { Image(systemName: "gearshape") }
-                        .accessibilityLabel("Settings").accessibilityIdentifier("settingsButton")
-                }
-            }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                ComposerBar(text: $text, options: $options, dictation: dictation, photos: photos, focus: $composerFocused, credits: options.credits, balance: model.wallet.flatMap { $0.unlimited ? nil : $0.balance }, onSend: send)
+                VStack(spacing: 0) {
+                if let media = model.media, !composerFocused { UploadPill(media: media) { model.selectedTab = 1 } }
+                ComposerBar(text: $text, options: $options, dictation: dictation, photos: photos, focus: $composerFocused, balance: balance, onSend: send,
+                            onAttach: { addStartsOnLibrary = false; composerFocused = false; showingAdd = true }, onOptions: { composerFocused = false; showingOptions = true }, onAddCredits: { showingWallet = true })
+                }
             }
         }
         .task { await model.refresh() }
         #if DEBUG
-        .task { await photos.loadDebugFiles() }
+        .task {
+            await photos.loadDebugFiles()
+            let env = ProcessInfo.processInfo.environment
+            if let t = env["VMK_DEBUG_TEXT"] { text = t }
+            if env["VMK_DEBUG_FOCUS"] == "1" { try? await Task.sleep(for: .milliseconds(600)); composerFocused = true }
+            switch env["VMK_DEBUG_SHEET"] {
+            case "options": showingOptions = true
+            case "addphone": showingAdd = true
+            case "addmedia": addStartsOnLibrary = true; showingAdd = true
+            default: break
+            }
+        }
         #endif
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingWallet) { WalletView() }
+        .sheet(isPresented: $showingOptions) { OptionsSheet(options: $options, balance: balance) }
+        .sheet(isPresented: $showingAdd) {
+            AddPhotosSheet(attached: photos.items.count + photos.loading + model.composerLibrary.count, minutes: options.minutes, startOnLibrary: addStartsOnLibrary) { phone, library in
+                photos.add(phone)
+                let known = Set(model.composerLibrary.map(\.id))
+                model.composerLibrary += library.filter { !known.contains($0.id) }
+                photos.libraryCount = model.composerLibrary.count
+            }
+        }
         .sensoryFeedback(.success, trigger: model.completions)
         .onAppear { dictation.onText = { text = $0 }; dictation.onKeyboardFallback = { composerFocused = true } }
         .onDisappear { dictation.stop() }
+        .onChange(of: model.composerDraft) { _, draft in
+            guard let draft else { return }
+            text = draft; model.composerDraft = nil; composerFocused = true
+        }
     }
 
     private func send() {
@@ -66,50 +90,122 @@ struct LibraryView: View {
         composerFocused = false
     }
 
-    private var list: some View {
-        List {
-            ForEach(model.entries) { entry in
-                switch entry {
-                case .pending(let p):
-                    PendingRow(pending: p, onRetry: { model.retry(p.id) }, onDismiss: { model.dismissPending(p.id) })
-                        .listRowBackground(Theme.surface)
-                        .swipeActions(edge: .trailing) { Button("Remove", role: .destructive) { model.dismissPending(p.id) } }
-                case .video(let v) where v.status.isRunning:
-                    NavigationLink(value: v.id) { RunningRow(video: v) }
-                        .listRowBackground(Theme.surface)
-                case .video(let v):
-                    NavigationLink(value: v.id) { VideoRow(video: v) }
-                        .listRowBackground(Theme.surface)
-                        .accessibilityIdentifier("videoRow")
+    // MARK: top bar
+
+    private var topBar: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "play.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(.white).frame(width: 30, height: 30)
+                    .background(Theme.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous)).accessibilityHidden(true)
+                Text("videomk").font(.system(size: 21, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+            }
+            Spacer()
+            if let wallet = model.wallet {
+                Button { showingWallet = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "bolt.fill").font(.system(size: 13)).foregroundStyle(Theme.primary)
+                        Text(wallet.unlimited ? "∞" : "\(wallet.balance)").font(.system(size: 17, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
+                    }
+                    .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).frame(minHeight: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(wallet.unlimited ? "Unlimited credits" : ComposerPlan.plural(wallet.balance, "credit"))
+                .accessibilityHint("Shows your credits")
+                .accessibilityIdentifier("balanceChip")
+            }
+            Button { showingSettings = true } label: { Image(systemName: "gearshape").font(.system(size: 20)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+                .accessibilityLabel("Settings").accessibilityIdentifier("settingsButton")
+        }
+        .padding(.leading, 16).padding(.trailing, 8).frame(minHeight: 52)
+    }
+
+    // MARK: feed
+
+    private var feed: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 14) {
+                Text("Your videos").font(.system(size: 30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 340), spacing: 14, alignment: .top)], spacing: 14) {
+                    ForEach(model.entries) { entry in card(entry) }
                 }
             }
+            .padding(.horizontal, 16).padding(.bottom, 12)
+            .animation(reduceMotion ? nil : .snappy, value: model.entries.map(\.id))
         }
-        .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.interactively)
-        .animation(.snappy, value: model.entries.map(\.id))
         .refreshable { await model.refresh() }
     }
 
+    @ViewBuilder private func card(_ entry: LibraryEntry) -> some View {
+        switch entry {
+        case .pending(let p):
+            PendingCard(pending: p, onRetry: { model.retry(p.id) }, onDismiss: { model.dismissPending(p.id) })
+        case .video(let v):
+            switch v.status {
+            case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(.plain)
+            case .complete: NavigationLink(value: v.id) { ReadyCard(video: v) }.buttonStyle(.plain)
+            case .failed:
+                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: "No credits were used.", retry: { model.tryAgain(v) })
+                    .accessibilityIdentifier("failedVideo")
+            case .rejected:
+                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? "Try describing something different.", rejected: true)
+            }
+        }
+    }
+
+    private var loadingState: some View {
+        ScrollView { VStack(spacing: 14) { SkeletonCard(); SkeletonCard() }.padding(.horizontal, 16).padding(.top, 40) }
+            .accessibilityElement(children: .ignore).accessibilityLabel("Loading your videos")
+    }
+
+    // MARK: empty
+
     private var emptyState: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                Image(systemName: "sparkles.tv").font(.system(size: 52)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
-                Text("Make your first video").font(.title2.bold()).foregroundStyle(Theme.text)
-                Text("Type or tap the microphone and say what you want. It appears here while it's made, and you can ask for more.")
-                    .multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
-                VStack(spacing: 10) {
-                    ForEach(ExampleBriefs.all, id: \.self) { example in
-                        Button { text = example; composerFocused = true } label: {
-                            Text(example).font(.callout).foregroundStyle(Theme.text).multilineTextAlignment(.leading)
-                                .frame(maxWidth: .infinity, alignment: .leading).padding(14)
-                                .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
-                        }
-                    }
-                }
+            VStack(spacing: 0) {
+                FilmFrames().frame(height: 120).padding(.top, 6).accessibilityHidden(true)
+                Text("Describe it.\nWe’ll make the video.").font(.system(size: 28, weight: .bold)).tracking(-0.8).multilineTextAlignment(.center).foregroundStyle(Theme.text).padding(.top, 8)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Narrated and illustrated in minutes. Add your own photos if you like.").font(.system(size: 15.5)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary).padding(.top, 8).padding(.horizontal, 24)
+                Text("TRY ONE").font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20).padding(.bottom, 8)
+                VStack(spacing: 10) { ForEach(ExamplePrompt.all) { example in exampleCard(example) } }
             }
-            .padding(24)
+            .padding(.horizontal, 16).padding(.bottom, 12)
         }
         .scrollDismissesKeyboard(.interactively)
+        .refreshable { await model.refresh() }
+    }
+
+    private func exampleCard(_ e: ExamplePrompt) -> some View {
+        Button { use(e) } label: {
+            HStack(spacing: 14) {
+                Image(systemName: e.symbol).font(.system(size: 18)).foregroundStyle(Theme.primary).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                Text(e.text).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 4) {
+                    if e.usesPhotos { Image(systemName: "photo").font(.system(size: 12)) }
+                    Text(e.tag).font(.system(size: 12.5, weight: .semibold)).lineLimit(1).fixedSize()
+                }
+                .foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 30).background(Theme.primaryContainer, in: Capsule())
+            }
+            .padding(.horizontal, 14).frame(minHeight: 64)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(e.text), \(e.tag)")
+        .accessibilityHint("Fills in the description. It does not send.")
+        .accessibilityIdentifier("example")
+    }
+
+    /// Tapping an example fills the composer, sets its length and does not send. The photo example also opens Add photos.
+    private func use(_ e: ExamplePrompt) {
+        text = e.text
+        if let m = e.minutes { options.minutes = m }
+        if e.usesPhotos {
+            composerFocused = false
+            addStartsOnLibrary = (model.media?.summary?.count ?? 0) > 0
+            showingAdd = true
+        } else { composerFocused = true }
     }
 
     private func errorState(_ message: String) -> some View {
@@ -129,12 +225,32 @@ struct LibraryView: View {
     }
 }
 
-enum ExampleBriefs {
+struct ExamplePrompt: Identifiable {
+    let text: String, tag: String, symbol: String
+    var minutes: Double?
+    var usesPhotos = false
+    var id: String { text }
     static let all = [
-        "How a bill becomes law in the United States, explained for teenagers.",
-        "A visual tour of the most famous landmarks of Paris.",
-        "Why the sky is blue, with a simple diagram.",
+        ExamplePrompt(text: "A calm one-minute story about a lighthouse keeper", tag: "1 min", symbol: "film", minutes: 1),
+        ExamplePrompt(text: "How bees make honey, explained for kids", tag: "3 min", symbol: "sparkles", minutes: 3),
+        ExamplePrompt(text: "My holiday in Thailand, told from my photos", tag: "Your photos", symbol: "photo", minutes: nil, usesPhotos: true),
     ]
+}
+
+/// Three overlapping film frames: a quiet picture for the empty state.
+struct FilmFrames: View {
+    var body: some View {
+        ZStack {
+            frame([Color(hex: 0xF5C9A8), Color(hex: 0xB8734F)], -7).offset(x: -78, y: 8)
+            frame([Color(hex: 0x4C3B8F), Color(hex: 0x1F1740)], 7).offset(x: 80, y: 6)
+            frame([Color(hex: 0xFFC77A), Color(hex: 0x7A3E66)], 0).offset(y: -4)
+        }
+    }
+    private func frame(_ colors: [Color], _ angle: Double) -> some View {
+        RoundedRectangle(cornerRadius: 14, style: .continuous).fill(LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom))
+            .frame(width: 104, height: 66).overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white, lineWidth: 2.5))
+            .shadow(color: .black.opacity(0.12), radius: 8, y: 4).rotationEffect(.degrees(angle))
+    }
 }
 
 // MARK: - rows

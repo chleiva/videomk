@@ -25,6 +25,9 @@ final class PhotoAttachments {
         didSet { if !picked.isEmpty { Task { await ingest() } } }
     }
 
+    /// Photos chosen in the Add photos sheet: prepared a few at a time like any other pick.
+    func add(_ items: [PhotosPickerItem]) { if !items.isEmpty { picked = items } }
+
     var remaining: Int { ComposerPhotos.room(phone: items.count + loading, library: libraryCount) }
     var isEmpty: Bool { items.isEmpty && loading == 0 }
     var preparingText: String? { loading > 0 ? "Preparing \(batchTotal - loading + 1) of \(batchTotal)" : nil }
@@ -75,6 +78,12 @@ final class PhotoAttachments {
     #if DEBUG
     /// UI tests: `VMK_DEBUG_PHOTO_FILES=/path/a.jpg:/path/b.jpg` attaches those files at launch (the system picker can't be driven from a test).
     func loadDebugFiles() async {
+        if let n = ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_PHOTOS"].flatMap(Int.init), items.isEmpty {
+            for i in 0..<min(n, PhotoLimits.maxPhotos) {
+                let img = MediaModel.fakeImage(seed: "attached\(i)", size: CGSize(width: 112, height: 112))
+                items.append(AttachedPhoto(data: img.jpegData(compressionQuality: 0.7) ?? Data(), thumbnail: img))
+            }
+        }
         guard items.isEmpty, let paths = ProcessInfo.processInfo.environment["VMK_DEBUG_PHOTO_FILES"], !paths.isEmpty else { return }
         for path in paths.split(separator: ":").prefix(PhotoLimits.maxPhotos) {
             if let raw = FileManager.default.contents(atPath: String(path)), let photo = await Self.prepare(raw) { items.append(photo) }
@@ -83,62 +92,82 @@ final class PhotoAttachments {
     #endif
 }
 
-/// The strip of attached photos above the text field.
+/// The strip of attached photos above the text field: one strip for both sources (This phone and My media).
 struct AttachedPhotosStrip: View {
     @Bindable var photos: PhotoAttachments
-    let minutes: Double
     var library: [LibraryPhoto] = []
     var media: MediaModel?
     var onRemoveLibrary: (String) -> Void = { _ in }
 
+    private var total: Int { photos.items.count + library.count }
+    private var sourceNote: String {
+        switch (photos.items.isEmpty, library.isEmpty) {
+        case (false, false): "From this phone and My media"
+        case (true, false): "From My media"
+        default: "From this phone"
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 8) {
-                    ForEach(Array(library.enumerated()), id: \.element.id) { index, photo in
-                        LibraryStripTile(photo: photo, media: media, label: "My media photo \(index + 1) of \(library.count)") { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
-                    }
-                    ForEach(Array(photos.items.enumerated()), id: \.element.id) { index, photo in
-                        Image(uiImage: photo.thumbnail)
-                            .resizable().scaledToFill()
-                            .frame(width: 56, height: 56)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            .overlay(alignment: .topTrailing) {
-                                Button { withAnimation(.snappy) { photos.remove(photo.id) } } label: {
-                                    Image(systemName: "xmark.circle.fill").font(.system(size: 20)).symbolRenderingMode(.palette).foregroundStyle(.white, Color.black.opacity(0.65))
-                                }
-                                .padding(2)
-                                .accessibilityLabel("Remove photo \(index + 1)")
-                            }
-                            .accessibilityElement(children: .contain)
-                            .accessibilityLabel("Photo \(index + 1) of \(photos.items.count)")
-                            .accessibilityIdentifier("attachedPhoto")
-                    }
-                    if photos.loading > 0 {   // one spinner tile, however many are still being prepared
-                        ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        VStack(alignment: .leading, spacing: 8) {
+            if total > 0 || photos.loading > 0 {
+                HStack {
+                    Text("\(total) of \(PhotoLimits.maxPhotos) photos").font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
+                    Spacer(minLength: 8)
+                    Text(sourceNote).font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(total) of \(PhotoLimits.maxPhotos) photos. \(sourceNote). Location data is removed, and the originals are deleted once your video is made.")
+                .accessibilityIdentifier("photosNote")
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 8) {
+                        ForEach(Array(photos.items.enumerated()), id: \.element.id) { index, photo in
+                            Image(uiImage: photo.thumbnail)
+                                .resizable().scaledToFill()
+                                .frame(width: 56, height: 56)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .overlay(alignment: .topTrailing) { RemoveX(label: "Remove photo \(index + 1)") { withAnimation(.snappy) { photos.remove(photo.id) } } }
+                                .accessibilityElement(children: .contain)
+                                .accessibilityLabel("Photo \(index + 1) of \(photos.items.count)")
+                                .accessibilityIdentifier("attachedPhoto")
+                        }
+                        ForEach(Array(library.enumerated()), id: \.element.id) { index, photo in
+                            LibraryStripTile(photo: photo, media: media, label: "My media photo \(index + 1) of \(library.count)") { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
+                        }
+                        if photos.loading > 0 {   // one spinner tile, however many are still being prepared
+                            ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
                     }
                 }
-                .padding(.horizontal, 20)
+                .frame(height: 60)       // a horizontal scroll view would otherwise take all the height it is offered
             }
             if let preparing = photos.preparingText {
-                Text(preparing).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 20)
+                Text(preparing).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary)
                     .accessibilityIdentifier("photosPreparing")
             }
             if let notice = photos.notice {
-                Text(notice).font(.caption).foregroundStyle(Theme.danger).padding(.horizontal, 20)
+                Text(notice).font(.caption).foregroundStyle(Theme.danger)
                     .accessibilityIdentifier("photosNotice")
-            }
-            Text("\(photos.items.count + library.count) of \(PhotoLimits.maxPhotos) photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.")
-                .font(.caption).foregroundStyle(Theme.textSecondary).padding(.horizontal, 20)
-                .accessibilityIdentifier("photosNote")
-            if let hint = PhotoCapacity.hint(photos: ComposerPhotos.total(phone: photos.items.count + photos.loading, library: library.count), minutes: minutes) {
-                Text(hint)
-                    .font(.caption).foregroundStyle(Theme.warning).padding(.horizontal, 20)
-                    .accessibilityLabel("Length warning. \(hint)")
-                    .accessibilityIdentifier("photosLengthHint")
             }
         }
         .transition(.opacity.combined(with: .move(edge: .bottom)))
+    }
+}
+
+/// The small remove button on a strip tile: 18 pt drawn, 44 pt to hit.
+struct RemoveX: View {
+    let label: String
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
+                .frame(width: 18, height: 18).background(Color.black.opacity(0.62), in: Circle())
+                .frame(width: 44, height: 44).contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .offset(x: 14, y: -14)
+        .frame(width: 0, height: 0, alignment: .topTrailing)
+        .accessibilityLabel(label)
     }
 }
 
@@ -152,12 +181,9 @@ struct LibraryStripTile: View {
     var body: some View {
         Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
             .frame(width: 56, height: 56)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.system(size: 10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
-            .overlay(alignment: .topTrailing) {
-                Button(action: onRemove) { Image(systemName: "xmark.circle.fill").font(.system(size: 20)).symbolRenderingMode(.palette).foregroundStyle(.white, Color.black.opacity(0.65)) }
-                    .padding(2).accessibilityLabel("Remove \(label)")
-            }
+            .overlay(alignment: .topTrailing) { RemoveX(label: "Remove \(label)", action: onRemove) }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("\(label). \(MediaGrouping.accessibilityLabel(photo))")
             .accessibilityIdentifier("attachedLibraryPhoto")

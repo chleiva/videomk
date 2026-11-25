@@ -19,6 +19,22 @@ final class MediaModel {
     private(set) var version = 0              // bumps when photos were added or removed: lists reload
     private(set) var summaryError: String?
     var notice: String?
+    // The upload journey (docs/UI_DESIGN.md m)
+    private(set) var queueItems: [QueueItem] = []
+    private(set) var toast: ToastMessage?
+    var barExpanded = false
+    private(set) var uploadStartedAt: Date?
+    private(set) var hiddenTiles: Set<String> = []        // "Already there" tiles after their 4 seconds
+    @ObservationIgnored private var announcer = UploadAnnouncer()
+    @ObservationIgnored private let localImages = NSCache<NSString, UIImage>()
+    @ObservationIgnored private var toastedBatch = false
+    #if DEBUG
+    @ObservationIgnored var debugLocalImages: [String: UIImage] = [:]
+    @ObservationIgnored var debugFrozen = false          // a screenshot scene: the real queue must not overwrite it
+    #endif
+
+    struct ToastMessage: Identifiable, Equatable { let id = UUID(); let text: String; let action: String? }
+    var bar: UploadBarState? { UploadBarState.make(upload, gettingReady: gettingReady, elapsed: uploadStartedAt.map { Date().timeIntervalSince($0) }) }
     @ObservationIgnored private let images = NSCache<NSString, UIImage>()
     @ObservationIgnored private var started = false
     // Waiting for the server to list photos it is still preparing (thumbnail, search index: 2 to 10 s after the file arrives).
@@ -64,12 +80,26 @@ final class MediaModel {
 
     private var lastProcessed = 0
     private func apply(_ p: QueueProgress) {
+        #if DEBUG
+        if debugFrozen { return }
+        #endif
         let wasEmpty = upload.isEmpty, wasFinished = upload.isFinished
         upload = p
-        if wasEmpty, !p.isEmpty { baseline = summary?.count ?? 0 }       // what the server lists before this batch
-        if p.isEmpty { lastProcessed = 0; readyTarget = nil; baseline = nil; waiting = false; watcher.stop(); return }
+        Task { queueItems = await queue.snapshot() }
+        if wasEmpty, !p.isEmpty { baseline = summary?.count ?? 0; uploadStartedAt = .now; toastedBatch = false; announcer.reset(); hiddenTiles = [] }
+        if p.isEmpty { lastProcessed = 0; readyTarget = nil; baseline = nil; waiting = false; watcher.stop(); uploadStartedAt = nil; barExpanded = false; return }
+        announce(p)
+        if p.noSpace > 0, !p.paused { Task { await self.resumeIfSpaceWasFreed() } }
         if p.isFinished, !p.running, !wasFinished || p.processed != lastProcessed {
             lastProcessed = p.processed
+            if !toastedBatch, p.noSpace == 0, let msg = UploadSummary.message(p) {
+                toastedBatch = true
+                toast = ToastMessage(text: msg.text, action: msg.action)
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                UIAccessibility.post(notification: .announcement, argument: msg.text)
+                let shown = toast
+                Task { try? await Task.sleep(for: .seconds(msg.action == "Review" ? 8 : 8)); if toast == shown { toast = nil } }
+            }
             if let target = ReadyWait.target(baseline: baseline ?? summary?.count ?? 0, progress: p) {
                 readyTarget = target
                 beginWaiting()                                          // the server lists the photos only after preparing them
@@ -77,6 +107,37 @@ final class MediaModel {
                 Task { await self.loadSummary(); self.version += 1 }   // only duplicates, did-not-fit or failures: nothing to wait for
             }
         }
+    }
+
+    private func announce(_ p: QueueProgress) {
+        let msg = announcer.stateMessage(bar) ?? announcer.progressMessage(p)
+        if let msg { UIAccessibility.post(notification: .announcement, argument: msg) }
+    }
+
+    /// Storage was freed (photos deleted, or a bigger plan): the photos that did not fit carry on by themselves.
+    private func resumeIfSpaceWasFreed() async {
+        guard let m = meter, upload.noSpace > 0 else { return }
+        let average = upload.noSpaceBytes / max(1, upload.noSpace)
+        if m.remaining >= average, !(summary?.readOnly ?? false) { await queue.retryNoSpace() }
+    }
+
+    func dismissToast() { toast = nil }
+    func retryItem(_ id: String) { Task { await queue.retry(id) } }
+    func hideTile(_ id: String) { hiddenTiles.insert(id) }
+
+    /// The local picture of a queued photo (decoded small, off the main thread), from memory or the queue's own file.
+    func localImage(for item: QueueItem) async -> UIImage? {
+        if let hit = localImages.object(forKey: item.id as NSString) { return hit }
+        #if DEBUG
+        if let fake = debugLocalImages[item.id] { return fake }
+        #endif
+        let url = await queue.fileURL(item)
+        let img: UIImage? = await Task.detached(priority: .utility) {
+            guard let data = try? Data(contentsOf: url) else { return nil }
+            return PhotoAttachments.thumbnail(of: data, maxPixel: 320)
+        }.value
+        if let img { localImages.setObject(img, forKey: item.id as NSString) }
+        return img
     }
 
     // MARK: waiting for uploaded photos to be listed
@@ -223,7 +284,7 @@ final class MediaModel {
         await queue.cancel()
         await store.removeAll()
         images.removeAllObjects()
-        watcher.stop(); waiting = false; readyTarget = nil; baseline = nil; watching = []
+        watcher.stop(); waiting = false; readyTarget = nil; baseline = nil; watching = []; queueItems = []; toast = nil; localImages.removeAllObjects()
         summary = nil; collections = []; upload = QueueProgress(); started = false
     }
 
@@ -239,17 +300,58 @@ final class MediaModel {
 
     /// Debug builds with `VMK_DEBUG_FAKE_LIBRARY=1`: pictures are drawn locally.
     nonisolated static func fakeFetch(_ url: URL) async throws -> Data {
-        let id = url.lastPathComponent
-        let hue = Double(abs(id.hashValue) % 360) / 360
-        let full = url.host == "full"
-        let size = CGSize(width: full ? 900 : 240, height: full ? 1200 : 240)
-        let img = UIGraphicsImageRenderer(size: size).image { ctx in
-            let colors = [UIColor(hue: hue, saturation: 0.55, brightness: 0.95, alpha: 1).cgColor, UIColor(hue: (hue + 0.12).truncatingRemainder(dividingBy: 1), saturation: 0.7, brightness: 0.55, alpha: 1).cgColor]
+        fakeImage(seed: url.lastPathComponent, size: url.host == "full" ? CGSize(width: 900, height: 1200) : CGSize(width: 240, height: 240)).jpegData(compressionQuality: 0.8) ?? Data()
+    }
+
+    nonisolated static func fakeImage(seed: String, size: CGSize) -> UIImage {
+        var h: UInt64 = 1469598103934665603
+        for b in seed.utf8 { h = (h ^ UInt64(b)) &* 1099511628211 }         // stable across launches, unlike hashValue
+        let hue = Double(h % 360) / 360
+        return UIGraphicsImageRenderer(size: size).image { ctx in
+            let colors = [UIColor(hue: hue, saturation: 0.5, brightness: 0.95, alpha: 1).cgColor, UIColor(hue: (hue + 0.12).truncatingRemainder(dividingBy: 1), saturation: 0.65, brightness: 0.6, alpha: 1).cgColor]
             let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: [0, 1])!
             ctx.cgContext.drawLinearGradient(g, start: .zero, end: CGPoint(x: size.width, y: size.height), options: [])
+            UIColor.white.withAlphaComponent(0.55).setFill()
+            ctx.cgContext.fillEllipse(in: CGRect(x: size.width * 0.55, y: size.height * 0.18, width: size.width * 0.16, height: size.width * 0.16))
+            UIColor(hue: hue, saturation: 0.6, brightness: 0.35, alpha: 0.8).setFill()
+            let path = UIBezierPath(); path.move(to: CGPoint(x: 0, y: size.height)); path.addLine(to: CGPoint(x: 0, y: size.height * 0.78))
+            path.addQuadCurve(to: CGPoint(x: size.width, y: size.height * 0.72), controlPoint: CGPoint(x: size.width * 0.5, y: size.height * 0.55)); path.addLine(to: CGPoint(x: size.width, y: size.height)); path.fill()
         }
-        return img.jpegData(compressionQuality: 0.8) ?? Data()
     }
+
+    #if DEBUG
+    /// Screenshots: `VMK_DEBUG_UPLOAD_SCENE=uploading|queue|done|error` shows that moment of the upload journey without any network.
+    func loadDebugScene(_ name: String) {
+        debugFrozen = true
+        func item(_ n: Int, _ state: QueueItem.State, listed: String? = nil, reason: String? = nil, file: String? = nil) -> QueueItem {
+            let id = "dbg\(n)"
+            debugLocalImages[id] = Self.fakeImage(seed: "local\(n)", size: CGSize(width: 240, height: 240))
+            return QueueItem(id: id, file: file ?? "IMG_\(2000 + n).jpg", size: 1_400_000, sha256: "x\(n)", state: state, libraryID: listed, reason: reason)
+        }
+        var p = QueueProgress()
+        switch name {
+        case "uploading", "queue":
+            var items: [QueueItem] = [item(0, .done, listed: "p00000"), item(1, .done), item(2, .uploading), item(3, .uploading), item(4, .duplicate), item(5, .failed, reason: "Connection dropped. Tap to try again.", file: "IMG_2047.jpg")]
+            items.append(item(6, .failed, reason: "Too large. Photos can be up to 25 MB.", file: "IMG_2042.jpg"))
+            for n in 7..<18 { items.append(item(n, .queued)) }
+            queueItems = items.reversed()          // the queue keeps pick order and the grid shows newest first: the list below is the grid's order, top first
+            p.total = 120; p.done = 38; p.duplicates = 0; p.queued = 71; p.uploading = 6; p.failed = 5
+            p.totalBytes = 1_200_000_000; p.doneBytes = 560_000_000
+            upload = p; uploadStartedAt = Date().addingTimeInterval(-60); readyTarget = 156; waiting = true
+            barExpanded = name == "queue"
+        case "error":
+            var items: [QueueItem] = (0..<4).map { item($0, .done, listed: "p0000\($0)") }
+            items += (4..<16).map { item($0, .noSpace) }
+            queueItems = items
+            p.total = 100; p.done = 38; p.noSpace = 62; p.totalBytes = 1_000_000_000; p.doneBytes = 380_000_000
+            upload = p
+        case "done":
+            upload = QueueProgress(); queueItems = []
+            toast = ToastMessage(text: "120 photos added. 12 were already there.", action: "Got it")
+        default: break
+        }
+    }
+    #endif
 }
 
 private struct FakePoster: FilePosting { func post(_ file: Data, to url: URL, fields: [String: String]) async throws { try await Task.sleep(for: .milliseconds(120)) } }

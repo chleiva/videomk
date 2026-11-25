@@ -37,6 +37,8 @@ struct PhotoGrid: View {
     let media: MediaModel
     @Bindable var selection: PhotoSelection
     var onOpen: (LibraryPhoto) -> Void
+    var onLimit: () -> Void = {}
+    var hidden: Set<String> = []
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var box = FrameBox()
@@ -47,9 +49,11 @@ struct PhotoGrid: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 2, pinnedViews: [.sectionHeaders]) {
             ForEach(feed.sections) { section in
+                let shown = hidden.isEmpty ? section.items : section.items.filter { !hidden.contains($0.id) }
+                if !shown.isEmpty {
                 Section {
-                    ForEach(section.items) { photo in
-                        PhotoTile(photo: photo, media: media, selected: selection.contains(photo.id), selecting: selection.active)
+                    ForEach(shown) { photo in
+                        PhotoTile(photo: photo, media: media, selected: selection.contains(photo.id), selecting: selection.active, order: selection.active ? selection.ordered.firstIndex(of: photo.id).map { $0 + 1 } : nil, dimmed: selection.active && selection.isFull && !selection.contains(photo.id))
                             .onTapGesture { tap(photo) }
                             .gesture(LongPressGesture(minimumDuration: 0.35).sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .named("grid")))
                                 .onChanged { value in
@@ -60,7 +64,8 @@ struct PhotoGrid: View {
                             .onAppear { if photo.id == feed.photos.suffix(15).first?.id || photo.id == feed.photos.last?.id { Task { await feed.loadMore() } } }
                     }
                 } header: {
-                    if !section.title.isEmpty { SectionHeader(title: section.title, count: section.items.count) }
+                    if !section.title.isEmpty { SectionHeader(title: section.title, count: shown.count) }
+                }
                 }
             }
         }
@@ -71,13 +76,13 @@ struct PhotoGrid: View {
 
     private func tap(_ photo: LibraryPhoto) {
         if selection.active {
-            if !selection.toggle(photo.id) { limitHit.toggle() }
+            if !selection.toggle(photo.id) { limitHit.toggle(); onLimit() }
         } else { onOpen(photo) }
     }
 
     private func selectUnder(_ point: CGPoint) {
         guard let hit = box.frames.first(where: { $0.value.contains(point) })?.key else { return }
-        if !selection.contains(hit), selection.isFull { limitHit.toggle(); return }
+        if !selection.contains(hit), selection.isFull { limitHit.toggle(); onLimit(); return }
         selection.select(hit)
     }
 }
@@ -86,9 +91,9 @@ private struct SectionHeader: View {
     let title: String, count: Int
     var body: some View {
         HStack {
-            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
+            Text(title).font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text)
             Spacer()
-            Text("\(count)").font(.caption.monospacedDigit()).foregroundStyle(Theme.textSecondary)
+            Text("\(count)").font(.system(size: 13).monospacedDigit()).foregroundStyle(Theme.textSecondary)
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(.bar)
@@ -103,29 +108,45 @@ struct PhotoTile: View {
     let media: MediaModel
     let selected: Bool
     let selecting: Bool
+    var order: Int?
+    var dimmed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var image: UIImage?
 
     var body: some View {
         Color.clear.aspectRatio(1, contentMode: .fit)
             .overlay {
-                if let image { Image(uiImage: image).resizable().scaledToFill() }
-                else { Rectangle().fill(Theme.surfaceRaised) }
+                ZStack {
+                    Rectangle().fill(Theme.surfaceRaised)
+                    if let image { Image(uiImage: image).resizable().scaledToFill() }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: selected ? 10 : 0, style: .continuous))
+                .scaleEffect(selected && !reduceMotion ? 0.92 : 1)
+                .overlay { if selected { RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.primary.opacity(0.12)).scaleEffect(reduceMotion ? 1 : 0.92) } }
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: selected)
             }
+            .overlay { if selected { Rectangle().stroke(Theme.gradientStart, lineWidth: 3) } }
             .clipped()
-            .overlay { if selected { Rectangle().fill(Theme.primary.opacity(0.25)) } }
-            .overlay(alignment: .bottomTrailing) {
+            .overlay(alignment: .topTrailing) {
                 if selecting {
-                    Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 22)).symbolRenderingMode(.palette)
-                        .foregroundStyle(selected ? .white : Color.white.opacity(0.9), selected ? Theme.primary : Color.black.opacity(0.25))
-                        .padding(6).accessibilityHidden(true)
+                    ZStack {
+                        if selected {
+                            Circle().fill(Theme.gradient)
+                            Text(order.map(String.init) ?? "").font(.system(size: 12, weight: .bold).monospacedDigit()).foregroundStyle(.white)
+                        } else {
+                            Circle().fill(Color.black.opacity(0.18))
+                        }
+                        Circle().stroke(.white, lineWidth: 2)
+                    }
+                    .frame(width: 24, height: 24).padding(6).accessibilityHidden(true)
                 }
             }
+            .opacity(dimmed ? 0.45 : 1)
             .background(GeometryReader { g in Color.clear.preference(key: TileFrames.self, value: [photo.id: g.frame(in: .named("grid"))]) })
             .contentShape(Rectangle())
             .task(id: photo.id) { if image == nil { image = await media.thumbnail(for: photo) } }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(MediaGrouping.accessibilityLabel(photo))
+            .accessibilityLabel(MediaGrouping.accessibilityLabel(photo) + (selected ? ", selected" + (order.map { ", number \($0)" } ?? "") : ""))
             .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
             .accessibilityHint(selecting ? "Double tap to \(selected ? "deselect" : "select")" : "Double tap to open. Press and hold to select.")
             .accessibilityIdentifier("mediaTile")

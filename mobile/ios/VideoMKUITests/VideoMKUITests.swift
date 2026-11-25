@@ -47,7 +47,23 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 15), "signed in")
         XCTAssertTrue(app.tabBars.buttons["Videos"].exists, "the tab bar offers Videos")
         XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 5), "the Videos tab still has the composer")
-        XCTAssertTrue(element(app, "libraryButton").exists, "the composer has the My media button")
+        XCTAssertFalse(element(app, "libraryButton").exists, "there is ONE attach control")
+        let send = app.buttons["sendButton"]
+        XCTAssertTrue(send.exists && (send.value as? String ?? "").contains("Not ready"), "the send button is drawn even when it cannot act")
+        send.tap()                                   // a tonal tap explains instead of doing nothing, and must not crash
+        let field = app.textFields["composerField"]
+        field.tap(); field.typeText("A calm film about my holiday in Thailand")
+        XCTAssertTrue(NSPredicate(format: "value CONTAINS 'Ready'").evaluate(with: send) || send.waitForExistence(timeout: 2), "ready after typing")
+        app.buttons["photoButton"].tap()
+        XCTAssertTrue(element(app, "sourcePicker").waitForExistence(timeout: 5), "Add photos opens one sheet with the source switch")
+        app.buttons["My media"].tap()
+        XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "My media shows the library in the same sheet")
+        element(app, "mediaTile").tap()
+        XCTAssertTrue(app.buttons["addSelected"].label.contains("Add 1"), "one photo selected")
+        app.buttons["addSelected"].tap()
+        XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["photoButton"].value as? String, "1 selected", "the attach control shows the count")
+        XCTAssertTrue(element(app, "attachedLibraryPhoto").waitForExistence(timeout: 5), "the photo lands in the strip")
         app.tabBars.buttons["Media"].tap()
         XCTAssertTrue(element(app, "storageMeter").waitForExistence(timeout: 10), "the storage meter shows")
         XCTAssertTrue(element(app, "mediaSearch").exists)
@@ -70,11 +86,13 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 20), "the composer should be on the home screen")
         XCTAssertTrue(app.buttons["micButton"].exists, "dictation button")
         XCTAssertTrue(app.buttons["optionsMenu"].exists)
-        XCTAssertFalse(app.buttons["sendButton"].exists, "nothing to send yet")
+        XCTAssertTrue(app.buttons["sendButton"].exists, "the send button is always there")
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Not ready"), "but it is not ready until there is a description")
 
         field.tap()
         field.typeText("Explain how rainbows form, in simple terms.")
         XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5))
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Ready"), "ready once the description is long enough")
         shot(app, "10-composer-ready")
         app.buttons["sendButton"].tap()
 
@@ -82,8 +100,8 @@ final class VideoMKUITests: XCTestCase {
         let appeared = element(app, "pendingRow").waitForExistence(timeout: 10) || element(app, "runningRow").waitForExistence(timeout: 30)
         XCTAssertFalse(element(app, "failedRow").exists, "the request failed (daily limit? connection?)")
         XCTAssertTrue(appeared, "a row for the new video should appear")
-        XCTAssertTrue(app.navigationBars["Videos"].exists, "still on the home screen")
-        XCTAssertFalse(app.buttons["sendButton"].exists, "the composer is cleared and ready for another request")
+        XCTAssertTrue(app.tabBars.buttons["Videos"].isSelected, "still on the home screen")
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Not ready"), "the composer is cleared and ready for another request")
         XCTAssertTrue(element(app, "runningRow").waitForExistence(timeout: 60))
         shot(app, "11-live-row")
 
@@ -98,7 +116,7 @@ final class VideoMKUITests: XCTestCase {
         let both = Date().addingTimeInterval(60)
         while liveCount() < 2 && Date() < both { sleep(1) }
         XCTAssertGreaterThanOrEqual(liveCount(), 2, "two videos should be in progress at once")
-        XCTAssertTrue(app.navigationBars["Videos"].exists, "still on the home screen")
+        XCTAssertTrue(app.tabBars.buttons["Videos"].isSelected, "still on the home screen")
         shot(app, "11b-two-live-rows")
 
         // It finishes in place: no running or pending rows are left and the list still shows videos.
@@ -240,8 +258,9 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["costLine"].waitForExistence(timeout: 5), "the composer shows what the video will cost")
         shot(app, "5-composer-filled")
         app.buttons["optionsMenu"].tap()
+        XCTAssertTrue(app.buttons["optionsDone"].waitForExistence(timeout: 5), "the options sheet opens")
         sleep(1); shot(app, "5b-options")
-        app.tap()   // dismiss the menu
+        app.buttons["optionsDone"].tap()
         XCTAssertTrue(app.buttons["balanceChip"].exists, "the credit balance is always visible")
         app.buttons["balanceChip"].tap()
         XCTAssertTrue(app.navigationBars["Credits"].waitForExistence(timeout: 5))
@@ -260,12 +279,17 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.buttons["balanceChip"].waitForExistence(timeout: 20))
         field.tap()
         field.typeText("A very long documentary about the history of Rome")
-        XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 5), "affordable at the default length")
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Ready"), "affordable at the default length")
         app.buttons["optionsMenu"].tap()
-        app.buttons["12 minutes"].tap()
+        app.buttons["length-12"].tap()
+        app.buttons["optionsDone"].tap()
         XCTAssertTrue(app.staticTexts["notEnoughCredits"].waitForExistence(timeout: 5), "12 credits is more than a test account has")
-        XCTAssertFalse(app.buttons["sendButton"].exists)
+        XCTAssertTrue(app.buttons["sendButton"].exists, "the send button never disappears")
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Not ready"))
+        XCTAssertTrue(app.buttons["fixChip"].exists, "the one-tap fix is offered")
         shot(app, "5d-not-enough-credits")
+        app.buttons["fixChip"].tap()
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Ready"), "one tap on the fix makes it sendable")
     }
 
     /// Edit a scene's narration, render a draft preview, then publish. Uses a real, editable video on QA (about 3 minutes).

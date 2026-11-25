@@ -24,11 +24,15 @@ public struct QueueItem: Codable, Sendable, Equatable, Identifiable {
     public var state: State
     public var libraryID: String?
     public var reason: String?
+
+    public init(id: String, file: String, size: Int, sha256: String, taken: String? = nil, lat: Double? = nil, lon: Double? = nil, state: State, libraryID: String? = nil, reason: String? = nil) {
+        self.id = id; self.file = file; self.size = size; self.sha256 = sha256; self.taken = taken; self.lat = lat; self.lon = lon; self.state = state; self.libraryID = libraryID; self.reason = reason
+    }
 }
 
 public struct QueueProgress: Sendable, Equatable {
     public var total = 0, queued = 0, uploading = 0, done = 0, duplicates = 0, noSpace = 0, failed = 0
-    public var totalBytes = 0, doneBytes = 0
+    public var totalBytes = 0, doneBytes = 0, noSpaceBytes = 0
     public var paused = false, running = false
     public var lastError: String?
     public init() {}
@@ -66,7 +70,7 @@ public actor LibraryUploadQueue {
             items = saved.map { item in
                 var i = item
                 if i.state == .uploading { i.state = .queued }
-                if i.state == .queued || i.state == .failed, !FileManager.default.fileExists(atPath: directory.appendingPathComponent(i.file).path) { i.state = .failed; i.reason = "The photo file is gone." }
+                if i.state == .queued || i.state == .failed || i.state == .noSpace, !FileManager.default.fileExists(atPath: directory.appendingPathComponent(i.file).path) { i.state = .failed; i.reason = "The photo file is gone." }
                 return i
             }
         }
@@ -84,7 +88,7 @@ public actor LibraryUploadQueue {
             case .uploading: p.uploading += 1
             case .done: p.done += 1; p.doneBytes += i.size
             case .duplicate: p.duplicates += 1; p.doneBytes += i.size
-            case .noSpace: p.noSpace += 1
+            case .noSpace: p.noSpace += 1; p.noSpaceBytes += i.size
             case .failed: p.failed += 1
             }
         }
@@ -97,16 +101,19 @@ public actor LibraryUploadQueue {
     // MARK: control
 
     /// Stores the prepared photos on disk and queues them. Starts uploading unless paused.
-    public func enqueue(_ photos: [PreparedUpload]) {
+    @discardableResult public func enqueue(_ photos: [PreparedUpload]) -> [String] {
+        var ids: [String] = []
         for photo in photos {
             let id = UUID().uuidString
             let name = id + ".jpg"
             guard (try? photo.data.write(to: directory.appendingPathComponent(name), options: .atomic)) != nil else { continue }
             items.append(QueueItem(id: id, file: name, size: photo.data.count, sha256: Self.sha256(photo.data), taken: photo.taken, lat: photo.lat, lon: photo.lon, state: .queued))
+            ids.append(id)
         }
         cancelRequested = false
         changed()
         start()
+        return ids
     }
 
     /// Resumes after a relaunch (or after a pause).
@@ -129,6 +136,22 @@ public actor LibraryUploadQueue {
         changed()
     }
 
+    /// Once storage has been freed the photos that did not fit carry on by themselves.
+    public func retryNoSpace() {
+        var any = false
+        for n in items.indices where items[n].state == .noSpace { items[n].state = .queued; any = true }
+        if any { changed(); start() }
+    }
+
+    public var directoryURL: URL { directory }
+    public func fileURL(_ item: QueueItem) -> URL { directory.appendingPathComponent(item.file) }
+
+    public func retry(_ id: String) {
+        guard let n = items.firstIndex(where: { $0.id == id }), items[n].state == .failed else { return }
+        items[n].state = .queued; items[n].reason = nil
+        changed(); start()
+    }
+
     public func retryFailed() {
         for n in items.indices where items[n].state == .failed { items[n].state = .queued; items[n].reason = nil }
         changed(); start()
@@ -147,7 +170,7 @@ public actor LibraryUploadQueue {
     private func process() async {
         defer { runner = nil; notify() }
         while !paused, !cancelRequested, !Task.isCancelled {
-            let batch = Array(items.filter { $0.state == .queued }.prefix(batchSize))
+            let batch = Array(items.filter { $0.state == .queued }.reversed().prefix(batchSize))     // newest first, like the grid shows them
             if batch.isEmpty { break }
             for b in batch { set(b.id) { $0.state = .uploading } }
             changed()
@@ -222,7 +245,7 @@ public actor LibraryUploadQueue {
     private func finish(_ id: String, _ state: QueueItem.State, libraryID: String? = nil, reason: String? = nil) {
         guard let n = items.firstIndex(where: { $0.id == id }) else { return }
         items[n].state = state; items[n].libraryID = libraryID; items[n].reason = reason
-        if state != .failed { removeFile(items[n]) }     // a failed photo keeps its file so it can be retried
+        if state != .failed && state != .noSpace { removeFile(items[n]) }     // failed and did-not-fit photos keep their file: they can carry on later
     }
 
     private func removeFile(_ i: QueueItem) { try? FileManager.default.removeItem(at: directory.appendingPathComponent(i.file)) }

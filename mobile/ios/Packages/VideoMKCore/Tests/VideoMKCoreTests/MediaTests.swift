@@ -502,3 +502,210 @@ private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
         #expect(!watcher.isRunning)
     }
 }
+
+@Suite struct ComposerPlanTests {
+    private func s(_ text: String = "A short film about my golden retriever", balance: Int? = 5, minutes: Double = 3, photos: Int = 0, dictating: Bool = false, sending: Bool = false) -> ComposerStatus {
+        ComposerPlan.status(text: text, balance: balance, options: CreateOptions(minutes: minutes), photos: photos, dictating: dictating, sending: sending)
+    }
+
+    @Test func priceBeforeAnythingIsTyped() {
+        let st = s("")
+        #expect(st.kind == .price && st.message == "A 3 minute video costs 3 credits" && !st.canSend && st.fix == nil)
+    }
+
+    @Test func readyShowsPriceAndWhatIsLeft() {
+        let st = s()
+        #expect(st.kind == .ready && st.message == "3 credits · you'll have 2 left" && st.canSend)
+        #expect(s(balance: 1, minutes: 1).message == "1 credit · you'll have 0 left" && s(balance: nil).message == "3 credits")
+    }
+
+    @Test func tooShortCountsDown() {
+        let st = s("hello")
+        #expect(st.kind == .tooShort && st.message == "Add a few more words (5 to go)" && !st.canSend && st.isProblem)
+    }
+
+    @Test func notAffordableOffersTheLongestLengthThatFits() {
+        let st = s(balance: 1)
+        #expect(st.kind == .notAffordable && st.message == "Needs 3 credits, you have 1" && !st.canSend)
+        #expect(st.fix == .useMinutes(1, credits: 1) && st.fix?.title == "Use 1 min · ⚡1")
+        #expect(s(balance: 4, minutes: 5).fix == .useMinutes(3, credits: 3))      // 3 min is the longest option within 4 credits
+        #expect(s(balance: 2, minutes: 12).fix == .useMinutes(2, credits: 2))
+    }
+
+    @Test func notAffordableShowsEvenBeforeTyping() {
+        #expect(s("", balance: 1).kind == .notAffordable)
+    }
+
+    @Test func noCreditsOffersAddCredits() {
+        let st = s(balance: 0)
+        #expect(st.kind == .noCredits && st.message == "You have no credits" && st.fix == .addCredits && !st.canSend)
+    }
+
+    @Test func tooLongBeatsEverything() {
+        let st = s(String(repeating: "a ", count: 1100), balance: 0)
+        #expect(st.kind == .tooLong && st.message.hasSuffix("Please shorten it.") && st.message.contains("2,000") && !st.canSend)
+    }
+
+    @Test func photoHintReplacesThePriceAndOffersTheLengthFix() {
+        let st = s(minutes: 1, photos: 100)
+        #expect(st.kind == .photoHint && st.message.hasPrefix("About 51 of your 100 photos fit in 1 minute") && st.canSend)
+        #expect(st.fix == .useMinutes(2, credits: 2) && st.fix?.title == "Use 2 min · ⚡2")
+        #expect(s(balance: 1, minutes: 1, photos: 100).fix == nil)               // the longer length is not affordable: no chip, the hint still shows
+        #expect(s(minutes: 2, photos: 100).kind == .ready)                       // 100 photos fit in 2 minutes
+    }
+
+    @Test func priorityIsTooLongThenCostThenShortThenPhotosThenPrice() {
+        #expect(s("hi", balance: 1, photos: 100).kind == .notAffordable)          // cost beats too short
+        #expect(s("hi", balance: 5, minutes: 1, photos: 100).kind == .tooShort)   // too short beats the photo hint
+    }
+
+    @Test func dictatingAndSendingStatesNeverSend() {
+        #expect(s(dictating: true).message == "Listening…" && !s(dictating: true).canSend)
+        #expect(s(sending: true).message == "Starting your video…" && !s(sending: true).canSend)
+    }
+
+    @Test func announcementsNameTheReasonAndTheFix() {
+        #expect(s(balance: 1).announcement.contains("Needs 3 credits, you have 1") && s(balance: 1).announcement.contains("Use 1 min"))
+        #expect(s("hello").announcement == "Add a few more words (5 to go)")
+    }
+}
+
+@Suite struct AttachSelectionTests {
+    @Test func selectionPersistsAcrossBothSourcesAndSumsUp() {
+        var sel = AttachSelection(attached: 0)
+        sel.setPhone(["p1", "p2", "p3", "p4"])
+        #expect(sel.selected == 4 && sel.buttonTitle() == "Add 4" && sel.title() == "4 selected")
+        for id in ["a", "b", "c"] { sel.toggleLibrary(id) }
+        #expect(sel.selected == 7 && sel.buttonTitle() == "Add 7")
+        #expect(sel.subline(minutes: 1) == "4 from this phone, 3 from My media. About 51 fit in 1 minute.")
+        #expect(sel.libraryOrder("b") == 2 && sel.libraryOrder("zzz") == nil)
+    }
+
+    @Test func emptyAndSingleSourceSublines() {
+        var sel = AttachSelection()
+        #expect(sel.buttonTitle() == "Add" && sel.title() == "Nothing selected" && sel.subline(minutes: 1) == "Up to 100 photos. About 51 fit in 1 minute.")
+        sel.setPhone(["p1", "p2", "p3", "p4"])
+        #expect(sel.subline(minutes: 1) == "Up to 100 photos. About 51 fit in 1 minute.")
+        sel.attached = 90
+        #expect(sel.subline(minutes: 2) == "94 of 100 photos. About 102 fit in 2 minutes.")
+    }
+
+    @Test func theLimitIsSharedAndBlocksTheRest() {
+        var sel = AttachSelection(attached: 20)
+        sel.setPhone((0..<60).map { "p\($0)" })
+        #expect(sel.phoneCap == 80 && sel.libraryCap == 20)
+        for n in 0..<20 { let ok = sel.toggleLibrary("l\(n)"); #expect(ok) }
+        #expect(sel.isFull && sel.total == 100 && sel.phoneCap == 60 && sel.libraryCap == 20)
+        let blocked = sel.toggleLibrary("one-more")
+        #expect(!blocked)                                   // blocked, the view explains why
+        let freed = sel.toggleLibrary("l0")
+        #expect(freed && !sel.isFull)                           // deselecting frees a slot
+        sel.setPhone((0..<200).map { "q\($0)" })
+        #expect(sel.phone.count == 61 && sel.total == 100)                         // the phone selection is clamped to what fits
+    }
+}
+
+@Suite struct UploadJourneyTests {
+    private func item(_ s: QueueItem.State, id: String? = nil) -> QueueItem {
+        QueueItem(id: "i", file: "f", size: 10, sha256: "x", state: s, libraryID: id)
+    }
+
+    @Test func tileStatesFollowTheQueueItem() {
+        func st(_ s: QueueItem.State, paused: Bool = false, offline: Bool = false, listed: Bool = false) -> UploadTileState { UploadTiles.state(of: item(s), paused: paused, offline: offline, listed: listed) }
+        #expect(st(.queued) == .queued && st(.uploading) == .uploading && st(.failed) == .failed && st(.duplicate) == .alreadyThere)
+        #expect(st(.done) == .processing && st(.done, listed: true) == .done)                 // done on the server, not listed yet: "Getting it ready"
+        #expect(st(.queued, paused: true) == .waiting && st(.queued, offline: true) == .waiting && st(.noSpace) == .waiting)
+        #expect(st(.uploading, paused: true) == .uploading)                                    // in-flight files finish
+    }
+
+    @Test func theBatchSettlesOnlyWhenEveryUploadedPhotoIsListed() {
+        var a = item(.done, id: "L1"), b = item(.duplicate), c = item(.failed)
+        a = QueueItem(id: "a", file: "f", size: 1, sha256: "a", state: .done, libraryID: "L1")
+        b = QueueItem(id: "b", file: "f", size: 1, sha256: "b", state: .duplicate)
+        c = QueueItem(id: "c", file: "f", size: 1, sha256: "c", state: .failed)
+        #expect(!UploadTiles.isSettled([a, b, c], listedIDs: []))
+        #expect(UploadTiles.isSettled([a, b, c], listedIDs: ["L1"]))
+        #expect(!UploadTiles.isSettled([a, QueueItem(id: "d", file: "f", size: 1, sha256: "d", state: .uploading)], listedIDs: ["L1"]))
+        #expect(!UploadTiles.isSettled([], listedIDs: []))
+        #expect(UploadTiles.showsProcessingLabel(processingCount: 12) && !UploadTiles.showsProcessingLabel(processingCount: 13))
+    }
+
+    @Test func theBarSaysWhatIsHappening() throws {
+        var p = QueueProgress(); p.total = 120; p.done = 38; p.queued = 70; p.uploading = 4; p.failed = 8; p.totalBytes = 1_200_000_000; p.doneBytes = 560_000_000
+        let up = try #require(UploadBarState.make(p, gettingReady: 6, elapsed: 60))
+        #expect(up.kind == .uploading && up.title == "Uploading 38 of 120" && up.subtitle.hasPrefix("640 MB left · about") && up.added == 38 && up.gettingReady == 6 && up.needYou == 8 && up.waiting == 74)
+        p.paused = true
+        #expect(UploadBarState.make(p)?.title == "Paused · 38 of 120" && UploadBarState.make(p)?.subtitle == "Pausing after the current photos")
+        p.paused = false; p.lastError = "No connection."
+        #expect(UploadBarState.make(p)?.kind == .offline && UploadBarState.make(p)?.title == "Waiting for a connection")
+        #expect(UploadBarState.make(QueueProgress()) == nil)
+    }
+
+    @Test func storageFullAndAttentionStates() throws {
+        var p = QueueProgress(); p.total = 100; p.done = 38; p.noSpace = 62
+        let full = try #require(UploadBarState.make(p))
+        #expect(full.kind == .storageFull && full.title == "Your storage is full" && full.subtitle.hasPrefix("62 photos are waiting."))
+        var q = QueueProgress(); q.total = 10; q.done = 5; q.failed = 5
+        #expect(UploadBarState.make(q)?.kind == .needsAttention && UploadBarState.make(q)?.title == "5 need you")
+    }
+
+    @Test func oneSummaryPerBatch() {
+        var p = QueueProgress(); p.total = 132; p.done = 120; p.duplicates = 12
+        #expect(UploadSummary.message(p) == .init(text: "120 photos added. 12 were already there.", action: "Got it"))
+        p.duplicates = 0; p.total = 120
+        #expect(UploadSummary.message(p)?.text == "120 photos added.")
+        p.done = 108; p.failed = 5; p.total = 113
+        #expect(UploadSummary.message(p) == .init(text: "108 photos added. 5 need your attention.", action: "Review"))
+        var one = QueueProgress(); one.total = 1; one.done = 1
+        #expect(UploadSummary.message(one)?.text == "1 photo added.")
+        var dup = QueueProgress(); dup.total = 3; dup.duplicates = 3
+        #expect(UploadSummary.message(dup)?.text == "3 were already there.")
+        var running = QueueProgress(); running.total = 3; running.queued = 1
+        #expect(UploadSummary.message(running) == nil)
+    }
+}
+
+@Suite struct MakingProgressTests {
+    @Test func fourStepsFillInOrderAndTheCurrentOneIsNamed() {
+        let early = MakingProgress.info(stage: .writing, secondsInStage: 4, minutes: 3)
+        #expect(early.current == 0 && early.segments[0] > 0 && early.segments[0] < 1 && early.segments[1] == 0)
+        let mid = MakingProgress.info(stage: .voiceAndVisuals, secondsInStage: 40, minutes: 3)
+        #expect(mid.segments[0] == 1 && mid.current >= 1 && mid.current <= 2 && mid.segments[3] == 0)
+        let late = MakingProgress.info(stage: .rendering, secondsInStage: 30, minutes: 3)
+        #expect(late.current == 3 && late.segments[0] == 1 && late.segments[1] == 1 && late.segments[2] == 1)
+    }
+
+    @Test func theLineIsHonestAboutWhatItKnows() {
+        let l = MakingProgress.info(stage: .voiceAndVisuals, secondsInStage: 10, minutes: 3).line
+        #expect(l.hasPrefix("Recording the voice and drawing the pictures.") && l.contains("left.") && !l.contains("scene"))
+        #expect(MakingProgress.info(stage: .rendering, secondsInStage: 1000, minutes: 1).line.hasSuffix("Less than a minute left."))
+        #expect(MakingProgress.timeLeft(stage: .starting, secondsInStage: 0, minutes: 3).hasPrefix("About "))
+    }
+}
+
+@Suite struct UploadAnnouncerTests {
+    private func progress(done: Int, total: Int = 120) -> QueueProgress { var p = QueueProgress(); p.total = total; p.done = done; p.queued = total - done; return p }
+
+    @Test func progressIsAggregatedAndRateLimited() {
+        var a = UploadAnnouncer()
+        let t0 = Date(timeIntervalSince1970: 1000)
+        #expect(a.progressMessage(progress(done: 5), now: t0) == nil)                        // under 10 %
+        #expect(a.progressMessage(progress(done: 12), now: t0) == "Uploaded 12 of 120 photos.")
+        #expect(a.progressMessage(progress(done: 30), now: t0.addingTimeInterval(5)) == nil)    // enough photos but under 15 s
+        #expect(a.progressMessage(progress(done: 30), now: t0.addingTimeInterval(16)) == "Uploaded 30 of 120 photos.")
+        #expect(a.progressMessage(progress(done: 33), now: t0.addingTimeInterval(60)) == nil)   // under another 10 %
+    }
+
+    @Test func stateChangesAreSaidOnceAndNeverForPlainProgress() {
+        var a = UploadAnnouncer()
+        var p = progress(done: 10)
+        #expect(a.stateMessage(UploadBarState.make(p)) == nil)
+        p.paused = true
+        #expect(a.stateMessage(UploadBarState.make(p)) == "Upload paused")
+        #expect(a.stateMessage(UploadBarState.make(p)) == nil)
+        p.paused = false; p.lastError = "x"
+        #expect(a.stateMessage(UploadBarState.make(p)) == "Waiting for connection")
+        var full = QueueProgress(); full.total = 5; full.noSpace = 5
+        #expect(a.stateMessage(UploadBarState.make(full)) == "Storage is full")
+    }
+}

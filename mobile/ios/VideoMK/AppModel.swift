@@ -22,6 +22,7 @@ final class AppModel {
     private var libraryIDs: [String: [String]] = [:]      // library photo ids per pending request (kept for a retry)
     private(set) var media: MediaModel?
     var selectedTab = 0                                    // 0 videos, 1 media
+    var composerDraft: String?                             // text to put in the composer (Try again on a failed video)
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var signInError: String?
     var isSigningIn = false
@@ -41,6 +42,7 @@ final class AppModel {
         #if DEBUG
         if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true) }
         selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
+        seedDebugScreens()
         #endif
     }
 
@@ -155,6 +157,13 @@ final class AppModel {
         Task { await send(id) }
     }
 
+    /// "Try again" on a video the server could not finish: ask for the same thing again when we remember it, else put its title back in the composer.
+    func tryAgain(_ video: VideoItem) {
+        if let brief = briefs[video.id], Brief.isValid(brief) {
+            submit(brief: brief, options: CreateOptions(minutes: minutes[video.id] ?? CreateOptions.defaultMinutes))
+        } else { composerDraft = video.displayTitle }
+    }
+
     func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil }
 
     private func setProgress(_ id: String, done: Int, total: Int) {
@@ -223,6 +232,24 @@ final class AppModel {
     }
 
     #if DEBUG
+    /// Screenshots with `VMK_DEBUG_FAKE_LIBRARY=1`: a wallet (`VMK_DEBUG_BALANCE`), a few videos (`VMK_DEBUG_FAKE_VIDEOS=1`) and an upload moment.
+    private func seedDebugScreens() {
+        guard media?.isFake == true else { return }
+        let env = ProcessInfo.processInfo.environment
+        if let b = env["VMK_DEBUG_BALANCE"].flatMap(Int.init) { wallet = WalletInfo(balance: b) }
+        if env["VMK_DEBUG_FAKE_VIDEOS"] == "1" {
+            videos = [
+                VideoItem(id: "v1", status: .running(.voiceAndVisuals), title: "Golden retriever's first summer", createdAt: .now),
+                VideoItem(id: "v2", status: .failed, title: "Thailand highlights", createdAt: .now.addingTimeInterval(-3600)),
+                VideoItem(id: "v3", status: .complete, title: "Sunset over Lisbon", durationSeconds: 80, createdAt: .now.addingTimeInterval(-86400)),
+            ]
+            briefs["v1"] = "Golden retriever's first summer"; minutes["v1"] = 3
+            stageSince["v1"] = (.voiceAndVisuals, Date().addingTimeInterval(-40))
+        }
+        UserDefaults.standard.set(true, forKey: "mediaPrivacyNoteSeen")
+        if let scene = env["VMK_DEBUG_UPLOAD_SCENE"] { media?.loadDebugScene(scene) }
+    }
+
     /// QA/automation only (compiled out of Release): `SIMCTL_CHILD_VMK_DEBUG_ID_TOKEN` / `_REFRESH_TOKEN` start a signed-in session; `VMK_DEBUG_RESET=1` signs out first.
     private func seedDebugSession(_ auth: AuthService) async {
         let env = ProcessInfo.processInfo.environment
