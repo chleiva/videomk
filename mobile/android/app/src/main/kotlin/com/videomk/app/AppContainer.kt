@@ -34,5 +34,13 @@ class AppContainer(
         } else null
     }
 
+    /** My media. Null when the app has no server address. The debug build can swap in fake data for screenshots (see DebugHooks). */
+    val mediaApi: com.videomk.app.core.MediaApi? by lazy {
+        val a = auth
+        if (config != null && a != null) DebugHooks.fakeMedia(appContext) ?: com.videomk.app.core.ApiMediaApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
+    }
+    private val appScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
+    val mediaUploads: com.videomk.app.data.MediaUploadController? by lazy { mediaApi?.let { com.videomk.app.data.MediaUploadController(appContext, it, http, appScope) } }
+
     fun warmUp() { Thread { runCatching { auth } }.start() }
 }

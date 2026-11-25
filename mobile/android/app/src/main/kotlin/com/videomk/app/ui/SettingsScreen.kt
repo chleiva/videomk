@@ -79,6 +79,7 @@ fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
                         "Names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves.",
                         places, "photoLocationsSwitch",
                     ) { places = it; photoSettings.useLocations = it }
+                    Text(PRIVACY_COPY, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp).testTag("mediaPrivacyCopy"))
                 }
             }
             Card {

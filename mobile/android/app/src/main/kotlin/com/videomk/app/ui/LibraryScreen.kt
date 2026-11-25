@@ -152,7 +152,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 composer = composer, balance = state.wallet?.let { if (it.unlimited) null else it.balance },
                 onSend = {
                     val out = composer.takeForSend()
-                    app.submit(out.brief, composer.options, out.photos, out.meta)
+                    app.submit(out.brief, composer.options, out.photos, out.meta, out.libraryIds)
                     focusManager.clearFocus()   // the keyboard goes away: the new row is what you look at now
                 },
             )

@@ -1,0 +1,314 @@
+package com.videomk.app.ui
+
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import com.videomk.app.core.MediaGrouping
+import com.videomk.app.core.MediaLabels
+import com.videomk.app.core.MediaPhoto
+import com.videomk.app.core.MediaSection
+import com.videomk.app.core.QueueProgress
+import com.videomk.app.core.StorageMeter
+import kotlin.math.abs
+
+/** A square thumbnail. Cached by photo id (memory and disk), never by URL: the link changes every hour, the image never does. */
+@Composable
+fun PhotoThumb(photo: MediaPhoto, modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.Crop) {
+    val context = LocalContext.current
+    val key = "media-thumb:${photo.id}"
+    // without a link (offline, from the disk copy of the list) a placeholder address lets the cached image load by its key
+    val model = remember(photo.id, photo.thumbUrl) {
+        ImageRequest.Builder(context).data(photo.thumbUrl ?: "https://media.invalid/thumb/${photo.id}").memoryCacheKey(key).diskCacheKey(key).build()
+    }
+    Box(modifier.background(Vmk.colors.surfaceRaised)) {
+        AsyncImage(model, contentDescription = null, contentScale = contentScale, modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+fun rememberColumns(): Int = if (LocalConfiguration.current.screenWidthDp >= 600) 4 else 3
+
+/** Skeleton tiles while the first page loads (still when animations are off). */
+@Composable
+fun SkeletonGrid(columns: Int, modifier: Modifier = Modifier) {
+    val still = reduceMotion(LocalContext.current)
+    val a = if (still) 0.6f else rememberInfiniteTransition(label = "skeleton").animateFloat(0.35f, 0.75f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "a").value
+    Column(modifier.semantics { contentDescription = "Loading your photos" }.testTag("mediaSkeleton"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        repeat(5) {
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                repeat(columns) { Box(Modifier.weight(1f).aspectRatio(1f).alpha(a).background(Vmk.colors.surfaceRaised)) }
+            }
+        }
+    }
+}
+
+/**
+ * The timeline: month headers that stick while their photos scroll, [columns] square thumbnails per row. Tap opens (or toggles while selecting); a long press
+ * starts selecting; a horizontal drag while selecting selects every tile it passes over (a vertical drag still scrolls).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PhotoGrid(
+    photos: List<MediaPhoto>, selected: Set<String>, selecting: Boolean, columns: Int,
+    onOpen: (Int) -> Unit, onToggle: (String) -> Unit, onLongPress: (String) -> Unit, onDragSelect: (String) -> Unit,
+    onNearEnd: () -> Unit, modifier: Modifier = Modifier, state: LazyListState = rememberLazyListState(), header: (@Composable () -> Unit)? = null,
+    footer: (@Composable () -> Unit)? = null, flat: Boolean = false,
+) {
+    val sections = remember(photos, flat) { if (flat) listOf(MediaSection("relevance", "Best matches first", photos)) else MediaGrouping.group(photos) }
+    val indexById = remember(photos) { photos.withIndex().associate { it.value.id to it.index } }
+    val bounds = remember { HashMap<String, Rect>() }
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    val slop = LocalViewConfiguration.current.touchSlop
+
+    LaunchedEffect(state, photos.size) {
+        snapshotFlow { state.layoutInfo.visibleItemsInfo.lastOrNull()?.index to state.layoutInfo.totalItemsCount }.collect { (last, total) -> if (last != null && total > 0 && last >= total - 4) onNearEnd() }
+    }
+
+    LazyColumn(
+        state = state,
+        modifier = modifier.fillMaxSize().testTag("mediaGrid")
+            .onGloballyPositioned { origin = it.positionInWindow() }
+            .pointerInput(selecting) {
+                if (!selecting) return@pointerInput
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    var total = Offset.Zero
+                    var dragging = false
+                    fun hit(p: Offset) { val w = p + origin; bounds.entries.firstOrNull { it.value.contains(w) }?.let { onDragSelect(it.key) } }
+                    while (true) {
+                        val ev = awaitPointerEvent(PointerEventPass.Initial)
+                        val ch = ev.changes.firstOrNull { it.id == down.id } ?: break
+                        if (!ch.pressed) break
+                        total += ch.positionChange()
+                        if (!dragging && abs(total.x) > slop && abs(total.x) > abs(total.y) * 1.5f) { dragging = true; hit(down.position) }
+                        if (dragging) { ch.consume(); hit(ch.position) }
+                    }
+                }
+            },
+        contentPadding = PaddingValues(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        if (header != null) item(key = "header") { header() }
+        for (section in sections) {
+            stickyHeader(key = "h-${section.key}") { SectionHeader(section) }
+            val rows = section.items.chunked(columns)
+            items(rows.size, key = { "r-${section.key}-${rows[it].first().id}" }) { r ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    for (p in rows[r]) {
+                        val isSel = p.id in selected
+                        val label = MediaLabels.photo(p)
+                        Box(
+                            Modifier.weight(1f).aspectRatio(1f)
+                                .onGloballyPositioned { bounds[p.id] = it.boundsInWindow() }
+                                .semantics { contentDescription = label; this.selected = isSel; if (selecting) stateDescription = if (isSel) "Selected" else "Not selected" }
+                                .combinedClickable(
+                                    role = Role.Button, onClickLabel = if (selecting) (if (isSel) "Deselect" else "Select") else "Open photo",
+                                    onLongClickLabel = "Select photos", onLongClick = { onLongPress(p.id) },
+                                    onClick = { if (selecting) onToggle(p.id) else onOpen(indexById[p.id] ?: 0) },
+                                )
+                                .testTag("mediaTile"),
+                        ) {
+                            PhotoThumb(p, Modifier.fillMaxSize().padding(if (isSel) 8.dp else 0.dp).clip(RoundedCornerShape(if (isSel) 8.dp else 0.dp)))
+                            if (selecting) SelectBadge(isSel, Modifier.align(Alignment.TopStart).padding(6.dp))
+                        }
+                    }
+                    repeat(columns - rows[r].size) { Box(Modifier.weight(1f)) }
+                }
+            }
+        }
+        if (footer != null) item(key = "footer") { footer() }
+    }
+}
+
+@Composable
+private fun SectionHeader(section: MediaSection) {
+    Text(
+        section.title, style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text,
+        modifier = Modifier.fillMaxWidth().background(Vmk.colors.background.copy(alpha = 0.96f)).padding(horizontal = 16.dp, vertical = 8.dp).semantics { contentDescription = "${section.title}, ${section.items.size} photos" },
+    )
+}
+
+@Composable
+private fun SelectBadge(selected: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier.size(24.dp).clip(CircleShape)
+            .background(if (selected) MaterialTheme.colorScheme.primary else Color.Black.copy(alpha = 0.35f))
+            .border(2.dp, Color.White, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) { if (selected) Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(16.dp)) }
+}
+
+/** The search field and, under it, what was understood as removable chips. */
+@Composable
+fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: String? = null) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        OutlinedTextField(
+            value = vm.search.query, onValueChange = { vm.onQuery(it) }, singleLine = true,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("mediaSearch"),
+            placeholder = { Text("Search your photos - try 'beach in Thailand 2024'", maxLines = 1) },
+            leadingIcon = { Icon(Icons.Filled.Search, null) },
+            trailingIcon = {
+                if (vm.searching) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                else if (vm.search.active) IconButton(onClick = { vm.clearSearch() }, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.Close, "Clear search") }
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            shape = RoundedCornerShape(28.dp),
+            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Vmk.colors.surface, unfocusedContainerColor = Vmk.colors.surface),
+        )
+        if (label != null || vm.understoodChips.isNotEmpty()) {
+            androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (label != null) item { Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
+                items(vm.understoodChips.size, key = { vm.understoodChips[it].label }) { i ->
+                    val chip = vm.understoodChips[i]
+                    InputChip(
+                        selected = true, onClick = { vm.dropChip(chip.label) }, label = { Text(chip.label) },
+                        trailingIcon = { Icon(Icons.Filled.Close, null, Modifier.size(16.dp)) },
+                        modifier = Modifier.semantics { contentDescription = "${chip.label}. Double tap to remove this filter" }.testTag("searchChip"),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The slim storage meter: green, amber from 85 %, red when full. Tapping it opens the Storage sheet. */
+@Composable
+fun StorageMeterRow(used: Long, limit: Long, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val state = StorageMeter.state(used, limit)
+    val color = when (state) { StorageMeter.State.Ok -> MaterialTheme.colorScheme.primary; StorageMeter.State.Warning -> Vmk.colors.warning; StorageMeter.State.Full -> Vmk.colors.danger }
+    val text = StorageMeter.label(used, limit) + when (state) { StorageMeter.State.Full -> " - full"; StorageMeter.State.Warning -> " - almost full"; else -> "" }
+    Column(
+        modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button, onClickLabel = "Open storage details", onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = "Storage: $text" }.testTag("storageMeter"),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        LinearProgressIndicator(progress = { StorageMeter.fraction(used, limit).toFloat() }, modifier = Modifier.fillMaxWidth().heightIn(min = 4.dp), color = color, trackColor = Vmk.colors.surfaceRaised)
+        Text(text, style = MaterialTheme.typography.bodySmall, color = if (state == StorageMeter.State.Ok) Vmk.colors.textSecondary else color)
+    }
+}
+
+/** One calm line while photos go up (with pause and cancel), then the result: duplicates skipped, photos that did not fit, failures. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UploadBanner(
+    progress: QueueProgress, preparing: Pair<Int, Int>?, skipped: Int, onPause: () -> Unit, onResume: () -> Unit, onCancel: () -> Unit,
+    onRetry: () -> Unit, onDismiss: () -> Unit, onOpenStorage: () -> Unit, modifier: Modifier = Modifier,
+) {
+    val prep = preparing
+    if (prep == null && progress.total == 0 && skipped == 0) return
+    val bg = Vmk.colors.surfaceRaised
+    Column(modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(RoundedCornerShape(14.dp)).background(bg).padding(12.dp).testTag("uploadBanner"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        when {
+            prep != null -> {
+                Text("Preparing ${minOf(prep.first + 1, prep.second)} of ${prep.second}", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
+                LinearProgressIndicator(progress = { prep.first.toFloat() / maxOf(prep.second, 1) }, modifier = Modifier.fillMaxWidth(), trackColor = Vmk.colors.background)
+            }
+            progress.active -> {
+                val text = if (progress.paused) "Paused · ${progress.finished} of ${progress.total} uploaded" else if (progress.offline) "Waiting for a connection · ${progress.finished} of ${progress.total}" else progress.bannerText()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { contentDescription = text })
+                    if (progress.paused || progress.offline) TextButton(onClick = onResume, modifier = Modifier.heightIn(min = 48.dp).testTag("uploadResume")) { Text("Resume") }
+                    else TextButton(onClick = onPause, modifier = Modifier.heightIn(min = 48.dp).testTag("uploadPause")) { Text("Pause") }
+                    TextButton(onClick = onCancel, modifier = Modifier.heightIn(min = 48.dp).testTag("uploadCancel")) { Text("Cancel", color = Vmk.colors.danger) }
+                }
+                LinearProgressIndicator(progress = { progress.finished.toFloat() / maxOf(progress.total, 1) }, modifier = Modifier.fillMaxWidth(), trackColor = Vmk.colors.background)
+            }
+            else -> {
+                val parts = buildList {
+                    if (progress.uploaded > 0) add("${progress.uploaded} photo${if (progress.uploaded == 1) "" else "s"} added.")
+                    if (progress.duplicates > 0) add("${progress.duplicates} ${if (progress.duplicates == 1) "was" else "were"} already in your library.")
+                    if (skipped > 0) add("$skipped couldn't be read and ${if (skipped == 1) "was" else "were"} skipped.")
+                    if (progress.failed > 0) add("${progress.failed} couldn't be uploaded.")
+                }
+                if (progress.noSpace > 0) {
+                    Text(
+                        "${progress.noSpace} photo${if (progress.noSpace == 1) "" else "s"} did not fit in your storage. ${parts.joinToString(" ")}",
+                        style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.warning, modifier = Modifier.testTag("storageFullMessage"),
+                    )
+                } else Text(parts.joinToString(" ").ifBlank { "Done." }, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
+                Row {
+                    if (progress.noSpace > 0) TextButton(onClick = onOpenStorage, modifier = Modifier.heightIn(min = 48.dp)) { Text("See storage") }
+                    if (progress.failed > 0) TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp).testTag("uploadRetry")) { Text("Try again") }
+                    TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp).testTag("uploadDismiss")) { Text("OK") }
+                }
+            }
+        }
+    }
+}

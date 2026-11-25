@@ -68,12 +68,13 @@ class ApiClient(
     }
 
     /** [clientRequestId] makes a retry of the same attempt idempotent (no double charge, no second video). */
-    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null): String {
+    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList()): String {
         val body = buildJsonObject {
             put("prompt", Brief.normalized(prompt))
             put("client_request_id", clientRequestId)
             put("target_minutes", options.minutes)
             if (media.isNotEmpty()) put("media", JsonArray(media.map { JsonPrimitive(it) }))
+            if (libraryMedia.isNotEmpty()) put("library_media", JsonArray(libraryMedia.map { JsonPrimitive(it) }))
             if (media.isNotEmpty() && mediaMeta != null) put("media_meta", mediaMeta)
             options.look?.let { put("theme", it.wire) }
             if (!options.captions) put("captions", false)   // on is the server default: only the choice to turn them off is sent
@@ -98,16 +99,20 @@ class ApiClient(
 
     // plumbing
 
-    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false): JsonObject {
+    /** A My media call: `/users/{me}/library/...`, with the library's own error mapping (402 storage_full, 404 not found, 413, 429). */
+    suspend fun library(method: String, path: List<String>, body: JsonObject? = null, query: List<Pair<String, String>> = emptyList()): JsonObject =
+        send(method, listOf("library") + path, body, query = query, library = true)
+
+    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false): JsonObject {
         val a = auth.authorization()
-        val url: HttpUrl = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(a.userId).also { b -> path.forEach { b.addPathSegment(it) } }.build()
+        val url: HttpUrl = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(a.userId).also { b -> path.forEach { b.addPathSegment(it) }; query.forEach { (k, v) -> b.addQueryParameter(k, v) } }.build()
         val rb = Request.Builder().url(url)
             .header("Authorization", "Bearer ${a.idToken}")
             .header("X-Platform", "android")
             .header("X-App-Version", appVersion)
             .header("X-Timezone", timeZone())   // where the user's day ends, for the daily free credits
         region()?.takeIf { it.length == 2 }?.let { rb.header("X-Region", it.uppercase()) }
-        val requestBody: RequestBody? = body?.let { it.toString().toRequestBody("application/json".toMediaType()) }
+        val requestBody: RequestBody? = (body ?: if (method == "POST") JsonObject(emptyMap()) else null)?.let { it.toString().toRequestBody("application/json".toMediaType()) }
         rb.method(method, requestBody)
 
         val response = try {
@@ -118,14 +123,20 @@ class ApiClient(
             when (r.code) {
                 in 200..299 -> return if (text.isBlank()) JsonObject(emptyMap()) else parseObject(text)
                 401, 403 -> throw ApiError.Unauthorized
-                400 -> throw ApiError.Invalid(message(text) ?: "That brief can't be used.")
-                409 -> if (conflictIsEdit) throw ApiError.Conflict(message(text) ?: "This video changed. Reload to continue.")
-                       else throw ApiError.NotReady(VideoStatus.fromServer(runCatching { parseObject(text).str("status") }.getOrNull() ?: ""))
-                402 -> {
+                404 -> if (library) throw ApiError.NotFound else throw ApiError.Server
+                413 -> if (library) throw ApiError.Invalid("That photo is too large.") else throw ApiError.Server
+                402 -> if (library) {
+                    val o = runCatching { parseObject(text) }.getOrNull()
+                    throw ApiError.StorageFull((o?.num("used_bytes") ?: 0.0).toLong(), (o?.num("limit_bytes") ?: 0.0).toLong())
+                } else {
                     val o = runCatching { parseObject(text) }.getOrNull()
                     throw ApiError.InsufficientCredits(o?.int("balance") ?: 0, o?.int("needed") ?: 1)
                 }
-                429 -> throw ApiError.Quota(message(text) ?: "You've reached today's limit. Try again tomorrow.")
+                400 -> throw ApiError.Invalid(message(text) ?: "That brief can't be used.")
+                409 -> if (library) throw ApiError.Conflict(message(text) ?: "That changed in the meantime. Please try again.")
+                       else if (conflictIsEdit) throw ApiError.Conflict(message(text) ?: "This video changed. Reload to continue.")
+                       else throw ApiError.NotReady(VideoStatus.fromServer(runCatching { parseObject(text).str("status") }.getOrNull() ?: ""))
+                429 -> throw ApiError.Quota(message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { "Too many requests. Try again in ${if (it >= 120) "${it / 60} minutes" else "$it seconds"}." } ?: "Too many requests. Try again in a moment.") else "You've reached today's limit. Try again tomorrow.")
                 else -> throw ApiError.Server
             }
         }

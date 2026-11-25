@@ -21,6 +21,7 @@ import com.videomk.app.core.PickedSource
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.prepareInOrder
 import com.videomk.app.data.DictationController
+import com.videomk.app.core.MediaPhoto
 import com.videomk.app.core.PhotoMeta
 import com.videomk.app.data.PhotoExif
 import com.videomk.app.data.PhotoPrep
@@ -34,7 +35,7 @@ import java.util.UUID
 class AttachedPhoto(val id: String = UUID.randomUUID().toString(), val data: ByteArray, val thumbnail: Bitmap?, val meta: PhotoMeta? = null)
 
 /** What the composer hands over when the user sends: the text, the prepared photos and (parallel to them) what was read from each original. */
-class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>)
+class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList())
 
 /**
  * Everything about the video being composed: the text, the length and look, the attached photos (up to 100) and dictation.
@@ -72,7 +73,20 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     private val prepLock = kotlinx.coroutines.sync.Mutex()   // batches queue up, so at most PREP_PARALLELISM photos are ever in flight
 
     val loading: Int get() = preparing - prepared
-    val remaining: Int get() = maxOf(0, PhotoLimits.MAX_PHOTOS - photos.size - loading)
+    /** Photos picked from My media (they count towards the same 100 as the phone's photos). */
+    val library: SnapshotStateList<MediaPhoto> = mutableStateListOf()
+    val totalPhotos: Int get() = photos.size + loading + library.size
+    val remaining: Int get() = maxOf(0, PhotoLimits.MAX_PHOTOS - totalPhotos)
+    /** The most My media photos the picker may hold right now: what is left for them, counting the ones already chosen. */
+    val libraryRoom: Int get() = maxOf(0, PhotoLimits.MAX_PHOTOS - photos.size - loading)
+
+    /** The picker's answer: exactly this selection replaces the library photos (never beyond the 100 total). */
+    fun setLibrary(list: List<MediaPhoto>) { library.clear(); library.addAll(list.distinctBy { it.id }.take(libraryRoom)) }
+
+    /** "Make a video from this": adds to the library photos already chosen. */
+    fun addLibrary(list: List<MediaPhoto>) { setLibrary(library + list) }
+
+    fun removeLibrary(id: String) { library.removeAll { it.id == id } }
 
     fun requestFocus() { focusRequests++ }
 
@@ -138,8 +152,8 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun takeForSend(): Outgoing {
         dictation.stop()
         val policy = settings.policy   // a switch turned off after the photos were prepared still wins
-        val out = Outgoing(text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } })
-        photos.clear()
+        val out = Outgoing(text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id })
+        photos.clear(); library.clear()
         cleanupIfIdle()
         notice = null
         text = ""

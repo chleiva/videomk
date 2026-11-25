@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DropdownMenu
@@ -83,6 +84,7 @@ import androidx.core.content.ContextCompat
 import com.videomk.app.core.Brief
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.DictationPlan
+import com.videomk.app.core.MediaLabels
 import com.videomk.app.core.PhotoCapacity
 import com.videomk.app.core.PhotoIntake
 import com.videomk.app.core.PhotoLimits
@@ -160,6 +162,10 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
         } catch (e: Exception) { /* no way to pick photos on this device */ }
     }
 
+    val container = LocalContainerOrNull.current
+    var myMedia by remember { mutableStateOf(false) }
+    if (myMedia && container?.mediaApi != null) MyMediaPicker(composer, container.mediaApi!!, onDone = { myMedia = false })
+
     fun onMic() {
         try {
             if (composer.dictation.isListening) { composer.dictation.stop(); return }
@@ -202,7 +208,7 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
                 )
             }
 
-            if (composer.photos.isNotEmpty() || composer.loading > 0) AttachedPhotosStrip(composer, options.minutes)
+            if (composer.photos.isNotEmpty() || composer.loading > 0 || composer.library.isNotEmpty()) AttachedPhotosStrip(composer, options.minutes)
 
             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OptionsMenu(options, onChange = { composer.options = it })
@@ -232,6 +238,9 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
                     ) {
                         Icon(Icons.Filled.PhotoLibrary, contentDescription = if (full) "Photo limit reached: ${PhotoLimits.MAX_PHOTOS} photos" else "Add photos. Choose up to ${composer.remaining} more of your photos to use in the video (${PhotoLimits.MAX_PHOTOS} at most)",
                             tint = if (full) Vmk.colors.textSecondary else MaterialTheme.colorScheme.primary)
+                    }
+                    if (container?.mediaApi != null) IconButton(onClick = { myMedia = true }, enabled = composer.libraryRoom > 0, modifier = Modifier.size(48.dp).testTag("myMediaButton")) {
+                        Icon(Icons.Filled.PhotoAlbum, contentDescription = "My media. Choose photos from your private library for this video", tint = MaterialTheme.colorScheme.primary)
                     }
                     IconButton(onClick = ::onMic, modifier = Modifier.size(48.dp).testTag("micButton")) {
                         Icon(
@@ -332,6 +341,19 @@ private fun AttachedPhotosStrip(composer: ComposerViewModel, minutes: Double) {
                     }
                 }
             }
+            itemsIndexed(composer.library, key = { _, p -> "lib-${p.id}" }) { index, photo ->
+                Box(Modifier.size(64.dp).semantics { contentDescription = "From My media: ${MediaLabels.photo(photo)}" }.testTag("attachedLibraryPhoto")) {
+                    PhotoThumb(photo, Modifier.size(56.dp).align(Alignment.BottomStart).clip(RoundedCornerShape(10.dp)))
+                    Box(
+                        Modifier.align(Alignment.TopEnd).size(48.dp).clickable(onClickLabel = "Remove from the video") { composer.removeLibrary(photo.id) },
+                        contentAlignment = Alignment.TopEnd,
+                    ) {
+                        Box(Modifier.padding(top = 2.dp, end = 2.dp).size(24.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Close, "Remove from the video", tint = Color.White, modifier = Modifier.size(16.dp))
+                        }
+                    }
+                }
+            }
             if (composer.loading > 0) item(key = "preparing") {   // one placeholder, however many are still being prepared
                 Box(Modifier.size(64.dp).padding(4.dp).clip(RoundedCornerShape(10.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
@@ -348,11 +370,11 @@ private fun AttachedPhotosStrip(composer: ComposerViewModel, minutes: Double) {
             Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.padding(horizontal = 20.dp).testTag("photosNotice"))
         }
         Text(
-            "${composer.photos.size} of ${PhotoLimits.MAX_PHOTOS} photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.",
+            "${composer.photos.size + composer.library.size} of ${PhotoLimits.MAX_PHOTOS} photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.",
             style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 20.dp).testTag("photosNote"),
         )
         // not blocking: sending is still allowed; recomputed on every length change and every removal
-        PhotoCapacity.hint(composer.photos.size + composer.loading, minutes, CreateOptions.LENGTHS.map { it.toInt() })?.let { hint ->
+        PhotoCapacity.hint(composer.totalPhotos, minutes, CreateOptions.LENGTHS.map { it.toInt() })?.let { hint ->
             Text(
                 hint, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning,
                 modifier = Modifier.padding(horizontal = 20.dp).semantics { contentDescription = "Video length tip. $hint" }.testTag("photoCapacityHint"),

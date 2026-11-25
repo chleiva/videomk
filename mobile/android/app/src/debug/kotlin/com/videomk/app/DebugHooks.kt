@@ -29,4 +29,8 @@ object DebugHooks {
 
     fun photoFiles(intent: Intent?): List<String> =
         intent?.getStringExtra("vmk_debug_photo_files")?.split(":")?.filter { it.isNotBlank() } ?: emptyList()
+
+    /** `vmk_debug_fake_media`: fake My media data (no server) for screenshots. Read from a file flag so it works without an intent at container time. */
+    fun fakeMedia(context: android.content.Context): com.videomk.app.core.MediaApi? =
+        if (java.io.File(context.filesDir, "fake_media").exists()) FakeMediaApi() else null
 }

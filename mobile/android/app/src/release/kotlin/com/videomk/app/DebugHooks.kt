@@ -9,4 +9,6 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun seed(intent: Intent?, auth: AuthService) {}
     @Suppress("UNUSED_PARAMETER") fun defaultMinutes(intent: Intent?): Double? = null
     @Suppress("UNUSED_PARAMETER") fun photoFiles(intent: Intent?): List<String> = emptyList()
+
+    @Suppress("UNUSED_PARAMETER") fun fakeMedia(context: android.content.Context): com.videomk.app.core.MediaApi? = null
 }
