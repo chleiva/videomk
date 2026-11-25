@@ -248,6 +248,7 @@ final class AppModel {
         }
         UserDefaults.standard.set(true, forKey: "mediaPrivacyNoteSeen")
         if let scene = env["VMK_DEBUG_UPLOAD_SCENE"] { media?.loadDebugScene(scene) }
+        if let scene = env["VMK_DEBUG_ORGANIZE"] { media?.loadDebugOrganize(scene) }
     }
 
     /// QA/automation only (compiled out of Release): `SIMCTL_CHILD_VMK_DEBUG_ID_TOKEN` / `_REFRESH_TOKEN` start a signed-in session; `VMK_DEBUG_RESET=1` signs out first.

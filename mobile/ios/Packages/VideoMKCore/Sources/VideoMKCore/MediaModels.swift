@@ -40,14 +40,17 @@ public struct LibraryCollection: Codable, Sendable, Equatable, Identifiable, Has
     public var count: Int
     public var coverID: String?
     public var coverThumbURL: URL?
-    enum CodingKeys: String, CodingKey { case id, name, emoji, count, coverID = "cover_id", coverThumbURL = "cover_thumb_url" }
-    public init(id: String, name: String, emoji: String? = nil, count: Int = 0, coverID: String? = nil, coverThumbURL: URL? = nil) { self.id = id; self.name = name; self.emoji = emoji; self.count = count; self.coverID = coverID; self.coverThumbURL = coverThumbURL }
+    /// Made by the organiser (place and month), not by hand.
+    public var auto: Bool
+    enum CodingKeys: String, CodingKey { case id, name, emoji, count, coverID = "cover_id", coverThumbURL = "cover_thumb_url", auto }
+    public init(id: String, name: String, emoji: String? = nil, count: Int = 0, coverID: String? = nil, coverThumbURL: URL? = nil, auto: Bool = false) { self.id = id; self.name = name; self.emoji = emoji; self.count = count; self.coverID = coverID; self.coverThumbURL = coverThumbURL; self.auto = auto }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id); name = try c.decode(String.self, forKey: .name)
         emoji = try c.decodeIfPresent(String.self, forKey: .emoji); count = try c.decodeIfPresent(Int.self, forKey: .count) ?? 0
         coverID = try c.decodeIfPresent(String.self, forKey: .coverID)
         coverThumbURL = try c.decodeIfPresent(URL.self, forKey: .coverThumbURL)
+        auto = try c.decodeIfPresent(Bool.self, forKey: .auto) ?? false
     }
 }
 
@@ -60,10 +63,11 @@ public struct LibrarySummary: Codable, Sendable, Equatable {
     public var canUpgrade: Bool
     /// True when used > limit (a lapsed plan): uploads are refused, everything else works.
     public var readOnly: Bool
+    public var prefs: LibraryPrefs
     public var years: [Year], places: [Place], collections: [LibraryCollection]
-    enum CodingKeys: String, CodingKey { case plan, limitBytes = "limit_bytes", usedBytes = "used_bytes", count, canUpgrade = "can_upgrade", readOnly = "read_only", years, places, collections }
-    public init(plan: String = "free", limitBytes: Int, usedBytes: Int, count: Int, canUpgrade: Bool = false, readOnly: Bool = false, years: [Year] = [], places: [Place] = [], collections: [LibraryCollection] = []) {
-        self.plan = plan; self.limitBytes = limitBytes; self.usedBytes = usedBytes; self.count = count; self.canUpgrade = canUpgrade; self.readOnly = readOnly; self.years = years; self.places = places; self.collections = collections
+    enum CodingKeys: String, CodingKey { case plan, limitBytes = "limit_bytes", usedBytes = "used_bytes", count, canUpgrade = "can_upgrade", readOnly = "read_only", prefs, years, places, collections }
+    public init(plan: String = "free", limitBytes: Int, usedBytes: Int, count: Int, canUpgrade: Bool = false, readOnly: Bool = false, prefs: LibraryPrefs = LibraryPrefs(), years: [Year] = [], places: [Place] = [], collections: [LibraryCollection] = []) {
+        self.plan = plan; self.limitBytes = limitBytes; self.usedBytes = usedBytes; self.count = count; self.canUpgrade = canUpgrade; self.readOnly = readOnly; self.prefs = prefs; self.years = years; self.places = places; self.collections = collections
     }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
@@ -72,6 +76,7 @@ public struct LibrarySummary: Codable, Sendable, Equatable {
         count = try c.decodeIfPresent(Int.self, forKey: .count) ?? 0
         canUpgrade = try c.decodeIfPresent(Bool.self, forKey: .canUpgrade) ?? false
         readOnly = try c.decodeIfPresent(Bool.self, forKey: .readOnly) ?? false
+        prefs = try c.decodeIfPresent(LibraryPrefs.self, forKey: .prefs) ?? LibraryPrefs()
         years = try c.decodeIfPresent([Year].self, forKey: .years) ?? []
         places = try c.decodeIfPresent([Place].self, forKey: .places) ?? []
         collections = try c.decodeIfPresent([LibraryCollection].self, forKey: .collections) ?? []
@@ -176,5 +181,66 @@ public enum LibraryAPIError: Error, Equatable, Sendable {
         case .rateLimited: "Too many requests right now. Please wait a moment and try again."
         case .storageFull: "Your storage is full. Free some space or choose a larger plan."
         }
+    }
+}
+
+/// What the apps do after an upload (account preference on the server).
+public enum OrganizePref: String, Codable, Sendable, CaseIterable, Equatable {
+    case ask, always, never
+    public var title: String { rawValue.capitalized }
+    public init(from decoder: Decoder) throws { self = OrganizePref(rawValue: (try? decoder.singleValueContainer().decode(String.self)) ?? "") ?? .ask }
+    /// The sheet's switch: on is Always, off is Ask (the switch is hidden for Never).
+    public var switchIsOn: Bool { self == .always }
+    public static func fromSwitch(_ on: Bool) -> OrganizePref { on ? .always : .ask }
+}
+
+public struct LibraryPrefs: Codable, Sendable, Equatable {
+    public var organize: OrganizePref
+    public init(organize: OrganizePref = .ask) { self.organize = organize }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        organize = (try? c.decodeIfPresent(OrganizePref.self, forKey: .organize)) ?? .ask
+    }
+}
+
+public struct OrganizeGroup: Codable, Sendable, Equatable, Identifiable {
+    public let name: String
+    public let count: Int
+    public let existing: Bool
+    public let sampleIDs: [String]
+    public var id: String { name }
+    enum CodingKeys: String, CodingKey { case name, count, existing, sampleIDs = "sample_ids" }
+    public init(name: String, count: Int, existing: Bool = false, sampleIDs: [String] = []) { self.name = name; self.count = count; self.existing = existing; self.sampleIDs = sampleIDs }
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        name = try c.decode(String.self, forKey: .name); count = try c.decodeIfPresent(Int.self, forKey: .count) ?? 0
+        existing = try c.decodeIfPresent(Bool.self, forKey: .existing) ?? false; sampleIDs = try c.decodeIfPresent([String].self, forKey: .sampleIDs) ?? []
+    }
+}
+
+public struct OrganizePreview: Codable, Sendable, Equatable {
+    public let total: Int, organized: Int, skipped: Int
+    public let home: String?
+    public let groups: [OrganizeGroup]
+    public init(total: Int, organized: Int, skipped: Int, home: String? = nil, groups: [OrganizeGroup]) { self.total = total; self.organized = organized; self.skipped = skipped; self.home = home; self.groups = groups }
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        total = try c.decodeIfPresent(Int.self, forKey: .total) ?? 0; organized = try c.decodeIfPresent(Int.self, forKey: .organized) ?? 0
+        skipped = try c.decodeIfPresent(Int.self, forKey: .skipped) ?? 0; home = try c.decodeIfPresent(String.self, forKey: .home)
+        groups = try c.decodeIfPresent([OrganizeGroup].self, forKey: .groups) ?? []
+    }
+}
+
+public struct OrganizeApplyResult: Codable, Sendable, Equatable {
+    public let applied: Int, remaining: Int
+    public let created: Int, updated: Int, skipped: Int
+    public let collectionID: String?
+    enum CodingKeys: String, CodingKey { case applied, remaining, created, updated, skipped, collectionID = "collection_id" }
+    public init(applied: Int, remaining: Int, created: Int = 0, updated: Int = 0, skipped: Int = 0, collectionID: String? = nil) { self.applied = applied; self.remaining = remaining; self.created = created; self.updated = updated; self.skipped = skipped; self.collectionID = collectionID }
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        applied = try c.decodeIfPresent(Int.self, forKey: .applied) ?? 0; remaining = try c.decodeIfPresent(Int.self, forKey: .remaining) ?? 0
+        created = try c.decodeIfPresent(Int.self, forKey: .created) ?? 0; updated = try c.decodeIfPresent(Int.self, forKey: .updated) ?? 0
+        skipped = try c.decodeIfPresent(Int.self, forKey: .skipped) ?? 0; collectionID = try c.decodeIfPresent(String.self, forKey: .collectionID)
     }
 }

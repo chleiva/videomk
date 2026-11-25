@@ -13,6 +13,10 @@ public protocol LibraryAPI: Sendable {
     func updateCollection(id: String, name: String?, emoji: String?) async throws -> LibraryCollection
     func deleteCollection(id: String) async throws
     func editCollection(id: String, add: [String], remove: [String]) async throws
+    func organizePreview(since: String?) async throws -> OrganizePreview
+    /// `mode` is "auto" or "single" (then `name`, and `collectionID` from the first answer on the following calls).
+    func organizeApply(mode: String, since: String?, name: String?, collectionID: String?) async throws -> OrganizeApplyResult
+    func setOrganizePref(_ pref: OrganizePref) async throws
 }
 
 /// Posts a file to a presigned S3 form. Separate from `LibraryAPI` because it never carries the login token.
@@ -110,6 +114,21 @@ public struct LibraryClient: LibraryAPI {
     }
 
     public func deleteCollection(id: String) async throws { _ = try await raw("POST", ["collections", id, "delete"], body: [String: String]()) }
+
+    public func organizePreview(since: String?) async throws -> OrganizePreview {
+        struct Body: Encodable { let since: String? }
+        return try await call("POST", ["organize", "preview"], body: Body(since: since))
+    }
+
+    public func organizeApply(mode: String, since: String?, name: String?, collectionID: String?) async throws -> OrganizeApplyResult {
+        struct Body: Encodable { let mode: String; let since: String?; let name: String?; let collection_id: String? }
+        return try await call("POST", ["organize", "apply"], body: Body(mode: mode, since: since, name: name, collection_id: collectionID))
+    }
+
+    public func setOrganizePref(_ pref: OrganizePref) async throws {
+        struct Body: Encodable { let organize: String }
+        _ = try await raw("POST", ["prefs"], body: Body(organize: pref.rawValue))
+    }
 
     public func editCollection(id: String, add: [String], remove: [String]) async throws {
         struct Body: Encodable { let add: [String]?; let remove: [String]? }

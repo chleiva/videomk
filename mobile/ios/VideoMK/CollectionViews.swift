@@ -9,11 +9,19 @@ struct CollectionsStrip: View {
     @State private var deleting: LibraryCollection?
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+        if !media.collections.isEmpty {
+            HStack {
+                Text("Collections").font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Spacer()
+                Button("See all") { media.showCollectionsList = true }.font(.system(size: 14.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
+            }.padding(.horizontal, 16)
+        }
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 10) {
                 Button(action: onNew) {
                     VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.surface).frame(width: 84, height: 84)
+                        RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.surface).frame(width: 104, height: 104)
                             .overlay { Image(systemName: "plus").font(.title2).foregroundStyle(Theme.primary) }
                         Text("New").font(.caption).foregroundStyle(Theme.textSecondary)
                     }
@@ -26,7 +34,7 @@ struct CollectionsStrip: View {
                             Button { renameText = c.name; renaming = c } label: { Label("Rename", systemImage: "pencil") }
                             Button(role: .destructive) { deleting = c } label: { Label("Delete collection", systemImage: "trash") }
                         }
-                        .accessibilityLabel("\(c.name), \(c.count) \(c.count == 1 ? "photo" : "photos")")
+                        .accessibilityLabel("\(c.name), \(c.count) \(c.count == 1 ? "photo" : "photos")\(c.auto ? ", automatic collection" : "")")
                         .accessibilityHint("Opens the collection. Actions: rename, delete.")
                         .accessibilityAction(named: "Rename") { renameText = c.name; renaming = c }
                         .accessibilityAction(named: "Delete collection") { deleting = c }
@@ -34,7 +42,8 @@ struct CollectionsStrip: View {
             }
             .padding(.horizontal, 16).padding(.bottom, 6)
         }
-        .frame(minHeight: 128)
+        .frame(minHeight: 148)
+        }
         .alert("Rename collection", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
             TextField("Name", text: $renameText)
             Button("Save") { if let c = renaming { let t = renameText; Task { await media.rename(c, to: t) } } }
@@ -52,13 +61,14 @@ struct CollectionCard: View {
     @State private var cover: UIImage?
     var body: some View {
         VStack(spacing: 6) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.surfaceRaised).frame(width: 84, height: 84)
+            RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.surfaceRaised).frame(width: 104, height: 104)
                 .overlay { if let cover { Image(uiImage: cover).resizable().scaledToFill() } else { Text(collection.emoji ?? "").font(.largeTitle) } }
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(alignment: .topLeading) { if collection.auto { AutoBadge().padding(6) } }
             VStack(spacing: 0) {
-                Text(collection.name).font(.caption.weight(.medium)).foregroundStyle(Theme.text).lineLimit(1)
-                Text("\(collection.count)").font(.caption2).foregroundStyle(Theme.textSecondary)
-            }.frame(width: 84)
+                Text(collection.name).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                Text("\(collection.count)").font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
+            }.frame(width: 104)
         }
         .task(id: collection.coverID) {
             guard let id = collection.coverID else { cover = nil; return }
@@ -174,4 +184,80 @@ struct AddToCollectionSheet: View {
 
     private func add(to c: LibraryCollection) { Task { working = true; await finish(c); working = false } }
     private func finish(_ c: LibraryCollection) async { if await media.edit(c, add: photoIDs) { onDone(); dismiss() } }
+}
+
+/// "See all": every collection, newest first, with the Auto chip and a menu (docs/UI_DESIGN.md n.3).
+struct CollectionsListView: View {
+    let media: MediaModel
+    @State private var renaming: LibraryCollection?
+    @State private var renameText = ""
+    @State private var deleting: LibraryCollection?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Newest first. ").foregroundStyle(Theme.textSecondary) + Text("Auto").foregroundStyle(Theme.primary).fontWeight(.semibold) + Text(" collections are made for you.").foregroundStyle(Theme.textSecondary)
+                ForEach(media.collections) { c in row(c) }
+            }
+            .font(.system(size: 14.5)).padding(.horizontal, 16).padding(.bottom, 24)
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .navigationTitle("Collections").navigationBarTitleDisplayMode(.large)
+        .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
+        .alert("Rename collection", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
+            TextField("Name", text: $renameText)
+            Button("Save") { if let c = renaming { let t = renameText; Task { await media.rename(c, to: t) } } }
+            Button("Cancel", role: .cancel) {}
+        }
+        .confirmationDialog("Delete “\(deleting?.name ?? "")”?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+            Button("Delete", role: .destructive) { if let c = deleting { withAnimation(.easeOut(duration: 0.2)) { Task { await media.deleteCollection(c) } } } }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The collection is removed. Its \(deleting?.count ?? 0) photos stay in My media.\(media.organizePref == .always && deleting?.auto == true ? " New uploads from that month may create it again." : "")")
+        }
+    }
+
+    private func row(_ c: LibraryCollection) -> some View {
+        HStack(spacing: 14) {
+            NavigationLink(value: c) {
+                HStack(spacing: 14) {
+                    CoverThumb(media: media, collection: c)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(c.name).font(.system(size: 16.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                        HStack(spacing: 8) {
+                            if c.auto { AutoChip() }
+                            Text("\(c.count.formatted()) \(c.count == 1 ? "photo" : "photos")").font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }.buttonStyle(.plain)
+            Menu {
+                Button { renameText = c.name; renaming = c } label: { Label("Rename", systemImage: "pencil") }
+                Button(role: .destructive) { deleting = c } label: { Label("Delete collection", systemImage: "xmark") }
+                Section { Button("Photos stay in My media. Only the collection is removed.") {}.disabled(true) }
+            } label: { Image(systemName: "ellipsis").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+                .accessibilityLabel("Actions for \(c.name)")
+        }
+        .frame(minHeight: 80)
+        .accessibilityElement(children: .contain)
+        .accessibilityAction(named: "Rename") { renameText = c.name; renaming = c }
+        .accessibilityAction(named: "Delete collection") { deleting = c }
+    }
+}
+
+struct CoverThumb: View {
+    let media: MediaModel
+    let collection: LibraryCollection
+    @State private var image: UIImage?
+    var body: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Theme.surfaceRaised).frame(width: 60, height: 60)
+            .overlay { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Text(collection.emoji ?? "").font(.title2) } }
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .task(id: collection.coverID) {
+                guard let id = collection.coverID else { return }
+                image = await media.thumbnail(for: LibraryPhoto(id: id, thumbURL: collection.coverThumbURL))
+            }
+    }
 }

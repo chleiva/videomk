@@ -54,6 +54,7 @@ struct LibraryView: View {
             if env["VMK_DEBUG_FOCUS"] == "1" { try? await Task.sleep(for: .milliseconds(600)); composerFocused = true }
             switch env["VMK_DEBUG_SHEET"] {
             case "options": showingOptions = true
+            case "settings": showingSettings = true
             case "addphone": showingAdd = true
             case "addmedia": addStartsOnLibrary = true; showingAdd = true
             default: break

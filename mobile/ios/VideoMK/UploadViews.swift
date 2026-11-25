@@ -356,7 +356,7 @@ struct UploadToast: View {
             Image(systemName: "checkmark.circle.fill").font(.system(size: 20)).foregroundStyle(Color(hex: 0x4ADE80))
             Text(toast.text).font(.system(size: 14.5)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 4)
-            if let action = toast.action { Button(action: action == "Review" ? onAction : onDismiss) { Text(action).font(.system(size: 14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
+            if let action = toast.action { Button(action: action == "Review" || action == "View" ? onAction : onDismiss) { Text(action).font(.system(size: 14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
         }
         .padding(.leading, 14).padding(.trailing, 8).frame(minHeight: 52)
         .background(Color(hex: 0x23263F), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -372,7 +372,17 @@ struct UploadPill: View {
     let media: MediaModel
     let onTap: () -> Void
     var body: some View {
-        if let bar = media.bar, bar.kind != .finished {
+        if let ob = media.organizeBar, media.bar == nil || media.bar?.kind == .finished {
+            Button(action: onTap) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.primary)
+                    Text(ob.kind == .running ? ob.title.replacingOccurrences(of: "Organizing…", with: "Organizing") : ob.title).font(.system(size: 14, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
+                    Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
+                }
+                .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).elevation(2).frame(minHeight: 44)
+            }
+            .buttonStyle(.plain).accessibilityLabel("\(ob.title). Opens Media.").accessibilityIdentifier("organizePill")
+        } else if let bar = media.bar, bar.kind != .finished {
             Button(action: onTap) {
                 HStack(spacing: 8) {
                     Image(systemName: "icloud.and.arrow.up").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.primary)

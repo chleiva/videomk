@@ -12,20 +12,33 @@ public actor FakeLibraryAPI: LibraryAPI {
     public var semanticMode = false
     public private(set) var lastCursorSeen: String?
     private var hashes: [String: String] = [:]
+    // Smart collections: a scripted preview, applied in chunks like the server does (about 300 photos per call).
+    public private(set) var pref: OrganizePref = .ask
+    public private(set) var organizeCalls: [(mode: String, since: String?, name: String?, collectionID: String?)] = []
+    private var script: OrganizePreview?
+    private var scriptRemaining = 0
+    private var scriptChunk = 300
+    private var scriptStarted = false
+    private var singleID: String?
+    private var organizeDelay: Duration = .zero
+    private var fixedCounts: [String: Int] = [:]
     /// Uploaded photos only appear in summary() and items() after this many list calls (the server needs seconds to prepare them).
     public var readyAfter = 0
     private var listCalls = 0
     private var visibleAt: [String: Int] = [:]
     private var serial = 0
 
-    public init(photos: [LibraryPhoto] = [], collections: [LibraryCollection] = [], limitBytes: Int = 2_000_000_000) {
-        self.photos = photos; self.collectionList = collections; self.limitBytes = limitBytes
+    public init(photos: [LibraryPhoto] = [], collections: [LibraryCollection] = [], limitBytes: Int = 2_000_000_000, fixedCounts: [String: Int] = [:]) {
+        self.photos = photos; self.collectionList = collections; self.limitBytes = limitBytes; self.fixedCounts = fixedCounts
     }
 
     /// Pretend this content is already in the library (the real server learns a hash only once the file has arrived).
     public func registerExisting(sha256: String, id: String = "existing") { hashes[sha256] = id }
     public func setReadyAfter(_ n: Int) { readyAfter = n }
     public var summaryCalls: Int { listCalls }
+    public func setOrganizeScript(_ p: OrganizePreview?, chunk: Int = 300) { script = p; scriptRemaining = p?.organized ?? 0; scriptChunk = chunk; scriptStarted = false; singleID = nil }
+    public func setOrganizeDelay(_ d: Duration) { organizeDelay = d }
+    public func setPref(_ p: OrganizePref) { pref = p }
     public func setFailNext(_ e: LibraryAPIError?) { failNext = e }
     public func setLimit(_ n: Int) { limitBytes = n }
     public func setSemantic(_ b: Bool) { semanticMode = b }
@@ -40,20 +53,23 @@ public actor FakeLibraryAPI: LibraryAPI {
                                 added: String(format: "%04d-%02d-%02dT09:00:00Z", year, month, day), place: places[n % places.count], w: 1536, h: 2048, bytes: 1_400_000,
                                 thumbURL: URL(string: "fake://thumb/p\(String(format: "%05d", n))"), collections: [])
         }
-        return FakeLibraryAPI(photos: photos, collections: [LibraryCollection(id: "c1", name: "Thailand", emoji: "🏝", count: 0), LibraryCollection(id: "c2", name: "Family", emoji: "👨‍👩‍👧", count: 0)])
+        let autos = [("London · May 2026", 71, "p00003"), ("London · Apr 2026", 214, "p00005"), ("Lisbon · 3-6 Oct 2025", 96, "p00007"), ("Jun 2025", 52, "p00011"), ("Phuket · 14-21 Jul 2024", 188, "p00013")]
+        var collections = autos.enumerated().map { LibraryCollection(id: "a\($0.offset + 1)", name: $0.element.0, count: $0.element.1, coverID: $0.element.2, auto: true) }
+        collections += [LibraryCollection(id: "c1", name: "Family", emoji: "👨‍👩‍👧", count: 40, coverID: "p00017"), LibraryCollection(id: "c2", name: "Thailand", emoji: "🏝", count: 25, coverID: "p00019")]
+        return FakeLibraryAPI(photos: photos, collections: collections, fixedCounts: Dictionary(uniqueKeysWithValues: collections.map { ($0.id, $0.count) }))
     }
 
     private func check() throws { if let e = failNext { failNext = nil; throw e } }
     private var used: Int { photos.reduce(0) { $0 + $1.bytes } }
     private func listed() -> [LibraryPhoto] { photos.filter { (visibleAt[$0.id] ?? 0) <= listCalls } }
     private func sorted() -> [LibraryPhoto] { listed().sorted { ($0.taken ?? $0.added) > ($1.taken ?? $1.added) } }
-    private func refreshCollections() { for n in collectionList.indices { let id = collectionList[n].id; let m = photos.filter { $0.collections.contains(id) }; collectionList[n].count = m.count; collectionList[n].coverID = m.first?.id; collectionList[n].coverThumbURL = m.first?.thumbURL } }
+    private func refreshCollections() { for n in collectionList.indices { let id = collectionList[n].id; let m = photos.filter { $0.collections.contains(id) }; collectionList[n].count = fixedCounts[id] ?? m.count; if fixedCounts[id] == nil { collectionList[n].coverID = m.first?.id; collectionList[n].coverThumbURL = m.first?.thumbURL } } }
 
     public func summary() async throws -> LibrarySummary {
         try check(); listCalls += 1; refreshCollections()
         let years = Dictionary(grouping: photos.compactMap { ($0.taken ?? $0.added).prefix(4) }.compactMap { Int($0) }, by: { $0 }).map { LibrarySummary.Year(year: $0.key, count: $0.value.count) }.sorted { $0.year > $1.year }
         let places = Dictionary(grouping: photos.compactMap(\.place), by: { $0 }).map { LibrarySummary.Place(name: String($0.key.split(separator: ",").first ?? ""), country: $0.key.split(separator: ",").last.map { $0.trimmingCharacters(in: .whitespaces) }, count: $0.value.count) }
-        return LibrarySummary(plan: "free", limitBytes: limitBytes, usedBytes: used, count: listed().count, canUpgrade: canUpgrade, readOnly: used > limitBytes, years: years, places: places, collections: collectionList)
+        return LibrarySummary(plan: "free", limitBytes: limitBytes, usedBytes: used, count: listed().count, canUpgrade: canUpgrade, readOnly: used > limitBytes, prefs: LibraryPrefs(organize: pref), years: years, places: places, collections: collectionList)
     }
 
     public func requestUploads(_ items: [UploadRequestItem]) async throws -> UploadsResponse {
@@ -143,6 +159,39 @@ public actor FakeLibraryAPI: LibraryAPI {
         collectionList.removeAll { $0.id == id }
         for n in photos.indices { photos[n].collections.removeAll { $0 == id } }
     }
+
+    public func organizePreview(since: String?) async throws -> OrganizePreview {
+        try check(); organizeCalls.append(("preview", since, nil, nil))
+        return script ?? OrganizePreview(total: 0, organized: 0, skipped: 0, groups: [])
+    }
+
+    public func organizeApply(mode: String, since: String?, name: String?, collectionID: String?) async throws -> OrganizeApplyResult {
+        try check(); organizeCalls.append((mode, since, name, collectionID))
+        if organizeDelay != .zero { try? await Task.sleep(for: organizeDelay) }
+        guard let script else { return OrganizeApplyResult(applied: 0, remaining: 0) }
+        let n = min(scriptChunk, scriptRemaining)
+        scriptRemaining -= n
+        var created = 0
+        if mode == "single" {
+            if singleID == nil && collectionID == nil {
+                serial += 1; singleID = "c\(500 + serial)"; created = 1
+                collectionList.append(LibraryCollection(id: singleID!, name: name ?? "Collection", count: script.organized))
+                fixedCounts[singleID!] = script.organized
+            }
+            return OrganizeApplyResult(applied: n, remaining: scriptRemaining, created: created, collectionID: collectionID ?? singleID)
+        }
+        if !scriptStarted {
+            scriptStarted = true
+            for g in script.groups where !g.existing {
+                serial += 1; created += 1
+                let id = "a\(serial)"
+                collectionList.append(LibraryCollection(id: id, name: g.name, count: g.count, auto: true)); fixedCounts[id] = g.count
+            }
+        }
+        return OrganizeApplyResult(applied: n, remaining: scriptRemaining, created: created, updated: script.groups.filter(\.existing).count, skipped: script.skipped)
+    }
+
+    public func setOrganizePref(_ p: OrganizePref) async throws { try check(); pref = p }
 
     public func editCollection(id: String, add: [String], remove: [String]) async throws {
         try check()

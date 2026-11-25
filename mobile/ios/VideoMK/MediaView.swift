@@ -16,6 +16,7 @@ struct MediaView: View {
     @State private var confirmDelete = false
     @State private var newCollection = false
     @State private var confirmCancelUploads = false
+    @State private var tabVisible = false
     @State private var newName = ""
     @AppStorage("mediaPrivacyNoteSeen") private var privacySeen = false
 
@@ -44,23 +45,27 @@ struct MediaView: View {
             .navigationTitle("Media")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
+            .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
             .toolbar { toolbar }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
-                    if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); withAnimation(.snappy) { media.barExpanded = true } }, onDismiss: { media.dismissToast() }) }
+                    if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == "View" { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
                     UploadBar(media: media, onManageStorage: { showStorage = true })
+                    if media.bar == nil || media.bar?.kind == .finished { OrganizeBar(media: media) }
                     if selection.active { SelectionBar(selection: selection, feed: feed, onCollection: { showAddToCollection = true }, onVideo: makeVideo, onDelete: { confirmDelete = true }) }
                 }
                 .animation(reduceMotion ? nil : .snappy, value: media.toast)
                 .animation(reduceMotion ? nil : .snappy, value: media.bar?.kind)
+                .animation(reduceMotion ? nil : .snappy, value: media.organizeBar?.kind)
             }
             .refreshable { await media.loadSummary(); await feed.reload() }
         }
         .overlay { expandedPanel }
         .task { await media.start() }
         .onChange(of: settleKey) { _, _ in settleBatchIfDone() }
-        .onAppear { media.setWatching("tab", true); Task { await media.refreshNow() } }      // the tab is shown again: look at the server now
-        .onDisappear { media.setWatching("tab", false) }
+        .onAppear { tabVisible = true; media.setWatching("tab", true); Task { await media.refreshNow() } }      // the tab is shown again: look at the server now
+        .onDisappear { tabVisible = false; media.setWatching("tab", false) }
+        .sheet(item: Binding(get: { tabVisible ? media.pendingOrganize : nil }, set: { if $0 == nil { media.pendingOrganize = nil } })) { OrganizeSheet(media: media, request: $0) }
         .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await media.refreshNow() } } }
         .task(id: media.version) { await feed.refreshIfNeeded() }
         .onChange(of: pickerItems) { _, items in
@@ -125,6 +130,11 @@ struct MediaView: View {
                 PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Image(systemName: "plus") }
                     .accessibilityLabel("Add photos to your library").accessibilityIdentifier("addToLibraryButton")
             }
+            Menu {
+                Button { media.organizeLibrary() } label: { Label("Organize my library", systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
+                Button { showStorage = true } label: { Label("Storage", systemImage: "externaldrive") }
+            } label: { Image(systemName: "ellipsis") }
+                .accessibilityLabel("More").accessibilityIdentifier("mediaMore")
         }
     }
 

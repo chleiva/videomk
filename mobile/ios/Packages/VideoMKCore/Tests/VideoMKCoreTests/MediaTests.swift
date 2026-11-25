@@ -436,6 +436,8 @@ extension CoreTests {
     }
 }
 
+private actor Seen { var values: [Int] = []; func add(_ n: Int) { values.append(n) } }
+
 private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
 
 @Suite struct ReadyWaitTests {
@@ -707,5 +709,172 @@ private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
         #expect(a.stateMessage(UploadBarState.make(p)) == "Waiting for connection")
         var full = QueueProgress(); full.total = 5; full.noSpace = 5
         #expect(a.stateMessage(UploadBarState.make(full)) == "Storage is full")
+    }
+}
+
+@Suite struct OrganizeTests {
+    private func group(_ name: String, _ n: Int, existing: Bool = false) -> OrganizeGroup { OrganizeGroup(name: name, count: n, existing: existing, sampleIDs: ["a", "b", "c"]) }
+
+    @Test func thePolicyFollowsThePreferenceAndTheThreshold() {
+        #expect(OrganizePolicy.decide(pref: .ask, ready: 29) == .nothing && OrganizePolicy.decide(pref: .ask, ready: 30) == .showSheet && OrganizePolicy.decide(pref: .ask, ready: 842) == .showSheet)
+        #expect(OrganizePolicy.decide(pref: .always, ready: 10) == .runSilently && OrganizePolicy.decide(pref: .always, ready: 299) == .runSilently && OrganizePolicy.decide(pref: .always, ready: 300) == .runWithProgress)
+        #expect(OrganizePolicy.decide(pref: .never, ready: 5000) == .nothing)
+    }
+
+    @Test func sinceIsUtcAndAMinuteBeforeTheBatchStarted() {
+        let start = Date(timeIntervalSince1970: 1_800_000_060)       // 2027-01-15T08:01:00Z
+        #expect(OrganizeSince.stamp(batchStart: start) == "2027-01-15T08:00:00")
+    }
+
+    @Test func thePreferenceMapsToTheSwitchBothWays() throws {
+        #expect(OrganizePref.always.switchIsOn && !OrganizePref.ask.switchIsOn && !OrganizePref.never.switchIsOn)
+        #expect(OrganizePref.fromSwitch(true) == .always && OrganizePref.fromSwitch(false) == .ask)
+        #expect(try JSONDecoder().decode(LibraryPrefs.self, from: Data(#"{"organize":"weird"}"#.utf8)).organize == .ask)
+        #expect(try JSONDecoder().decode(LibrarySummary.self, from: Data(#"{"limit_bytes":1,"used_bytes":0,"prefs":{"organize":"always"}}"#.utf8)).prefs.organize == .always)
+        #expect(try JSONDecoder().decode(LibrarySummary.self, from: Data(#"{"limit_bytes":1,"used_bytes":0}"#.utf8)).prefs.organize == .ask)
+    }
+
+    @Test func modelsDecodeThePreviewTheApplyAnswerAndTheAutoFlag() throws {
+        let p = try JSONDecoder().decode(OrganizePreview.self, from: Data(#"{"total":842,"organized":805,"skipped":37,"home":"London","groups":[{"name":"London · Apr 2026","count":214,"existing":true,"sample_ids":["a","b"]},{"name":"Jun 2025","count":52}]}"#.utf8))
+        #expect(p.total == 842 && p.skipped == 37 && p.groups[0].existing && p.groups[0].sampleIDs == ["a", "b"] && !p.groups[1].existing && p.groups[1].sampleIDs.isEmpty)
+        let r = try JSONDecoder().decode(OrganizeApplyResult.self, from: Data(#"{"collection_id":"c9","applied":300,"remaining":505,"created":1}"#.utf8))
+        #expect(r.collectionID == "c9" && r.remaining == 505 && r.updated == 0)
+        let c = try JSONDecoder().decode(LibraryCollection.self, from: Data(#"{"id":"x","name":"London · Apr 2026","count":3,"auto":true}"#.utf8))
+        #expect(c.auto)
+        #expect(try JSONDecoder().decode(LibraryCollection.self, from: Data(#"{"id":"x","name":"n"}"#.utf8)).auto == false)
+    }
+
+    @Test func suggestedNamesUseTheMainPlaceAndTheDateRange() {
+        let thailand = [group("Phuket · 14-21 Jul 2024", 188), group("Bangkok · 3-6 Aug 2024", 12)]
+        #expect(SuggestedNames.suggest(groups: thailand) == ["Phuket Aug 2024", "Jul 2024 - Aug 2024"])
+        let spread = [group("London · Apr 2026", 214), group("London · May 2026", 71), group("London · Jul 2026", 60), group("Jun 2025", 52)]
+        let s = SuggestedNames.suggest(groups: spread)
+        #expect(s.first == "London 2026" && s.last == "Jun 2025 - Jul 2026")                     // spans more than 2 months: place and year
+        #expect(SuggestedNames.suggest(groups: [group("May 2026", 80), group("Jun 2026", 70)]) == ["May 2026 - Jun 2026"])   // no place: only the range
+        #expect(SuggestedNames.suggest(groups: [group("Lisbon · 3-6 Oct 2025", 40), group("Rome · 8-10 Oct 2025", 40), group("Paris · 20-24 Oct 2025", 40)]) == ["Oct 2025"])   // no place above 60 %
+        #expect(SuggestedNames.suggest(groups: []).isEmpty)
+        #expect(SuggestedNames.isValid("Thailand") && !SuggestedNames.isValid("  ") && !SuggestedNames.isValid(String(repeating: "a", count: 61)))
+    }
+
+    @Test func theLoopCallsApplyUntilNothingRemainsWithRealProgress() async throws {
+        let api = FakeLibraryAPI()
+        await api.setOrganizeScript(OrganizePreview(total: 842, organized: 805, skipped: 37, groups: [group("London · Apr 2026", 600), group("Jun 2025", 205)]))
+        let runner = OrganizeRunner(api: api)
+        let seen = Seen()
+        await runner.setObserver { j in if let j { Task { await seen.add(j.done) } } }
+        await runner.start(mode: .auto, since: "2026-11-25T08:00:00", total: 805)
+        for _ in 0..<400 { if await runner.job?.state == .finished { break }; try? await Task.sleep(for: .milliseconds(5)) }
+        let job = try #require(await runner.job)
+        #expect(job.state == .finished && job.done == 805 && job.remaining == 0 && job.created == 2)
+        let calls = await api.organizeCalls
+        #expect(calls.count == 3 && calls.allSatisfy { $0.mode == "auto" && $0.since == "2026-11-25T08:00:00" })       // 300 + 300 + 205
+        try await Task.sleep(for: .milliseconds(30))
+        let done = await seen.values
+        #expect(done.contains(300) && done.contains(600) && done.last == 805 && done == done.sorted())
+        #expect(OrganizeSummary.message(job) == .init(text: "Organized into 2 collections", action: "View"))
+    }
+
+    @Test func singleModeKeepsFillingTheSameCollection() async throws {
+        let api = FakeLibraryAPI()
+        await api.setOrganizeScript(OrganizePreview(total: 700, organized: 700, skipped: 0, groups: [group("Jun 2025", 700)]))
+        let runner = OrganizeRunner(api: api)
+        await runner.start(mode: .single, since: nil, name: "Thailand Jul 2024", total: 700)
+        for _ in 0..<400 { if await runner.job?.state == .finished { break }; try? await Task.sleep(for: .milliseconds(5)) }
+        let calls = await api.organizeCalls
+        #expect(calls.count == 3 && calls[0].collectionID == nil && calls[1].collectionID != nil && calls[1].collectionID == calls[2].collectionID && calls.allSatisfy { $0.name == "Thailand Jul 2024" })
+        #expect(OrganizeSummary.message(try #require(await runner.job))?.text == "Organized into 1 collection")
+        let made = try await api.collections().filter { $0.name == "Thailand Jul 2024" }
+        #expect(made.count == 1)
+    }
+
+    @Test func cancelStopsAndKeepsWhatWasMade() async throws {
+        let api = FakeLibraryAPI()
+        await api.setOrganizeScript(OrganizePreview(total: 9000, organized: 9000, skipped: 0, groups: [group("Jun 2025", 9000)]), chunk: 100)
+        await api.setOrganizeDelay(.milliseconds(20))
+        let runner = OrganizeRunner(api: api)
+        await runner.start(mode: .auto, since: nil, total: 9000)
+        try await Task.sleep(for: .milliseconds(70))
+        await runner.cancel()
+        let job = try #require(await runner.job)
+        #expect(job.state == .cancelled && job.remaining > 0)
+        let before = await api.organizeCalls.count
+        try await Task.sleep(for: .milliseconds(60))
+        let after = await api.organizeCalls.count
+        #expect(before == after)                                                    // nothing is called after Stop
+        #expect(try await api.collections().contains { $0.auto })                   // the collection made so far stays
+        #expect(OrganizeBarState.make(job) == nil)
+    }
+
+    @Test func offlinePausesAndResumesByItself() async throws {
+        let api = FakeLibraryAPI()
+        await api.setOrganizeScript(OrganizePreview(total: 400, organized: 400, skipped: 0, groups: [group("Jun 2025", 400)]))
+        await api.setFailNext(.network)
+        let runner = OrganizeRunner(api: api, backoff: .milliseconds(10))
+        await runner.start(mode: .auto, since: nil, total: 400)
+        var sawWaiting = false
+        for _ in 0..<400 { let s = await runner.job?.state; if s == .waiting { sawWaiting = true }; if s == .finished { break }; try? await Task.sleep(for: .milliseconds(2)) }
+        let job = try #require(await runner.job)
+        #expect(sawWaiting && job.state == .finished && job.remaining == 0)
+    }
+
+    @Test func aServerErrorStopsWithTryAgainAndRetryContinues() async throws {
+        let api = FakeLibraryAPI()
+        await api.setOrganizeScript(OrganizePreview(total: 400, organized: 400, skipped: 0, groups: [group("Jun 2025", 400)]))
+        await api.setFailNext(.server)
+        let runner = OrganizeRunner(api: api)
+        await runner.start(mode: .auto, since: nil, total: 400)
+        for _ in 0..<200 { if await runner.job?.state == .failed { break }; try? await Task.sleep(for: .milliseconds(5)) }
+        let failed = try #require(await runner.job)
+        #expect(failed.state == .failed && OrganizeBarState.make(failed)?.title == "Couldn't finish organizing")
+        await runner.retry()
+        for _ in 0..<200 { if await runner.job?.state == .finished { break }; try? await Task.sleep(for: .milliseconds(5)) }
+        #expect(await runner.job?.state == .finished)
+    }
+
+    @Test func aKilledAppResumesTheJobFromDisk() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("org-\(UUID()).json")
+        let api = FakeLibraryAPI()
+        await api.setOrganizeScript(OrganizePreview(total: 600, organized: 600, skipped: 0, groups: [group("Jun 2025", 600)]))
+        var saved = OrganizeJob(mode: .auto, since: "2026-11-25T08:00:00", total: 600); saved.remaining = 300
+        try JSONEncoder().encode(saved).write(to: file)
+        let runner = OrganizeRunner(api: api, file: file)
+        let loaded = await runner.job
+        #expect(loaded?.done == 300 && OrganizeBarState.make(loaded)?.subtitle == "You can leave this screen.")
+        await runner.resumeIfNeeded()
+        #expect(OrganizeBarState.make(await runner.job)?.title.hasPrefix("Resuming…") == true)
+        for _ in 0..<400 { if await runner.job?.state == .finished { break }; try? await Task.sleep(for: .milliseconds(5)) }
+        #expect(await runner.job?.state == .finished && !FileManager.default.fileExists(atPath: file.path))   // done: the file is gone
+        let calls = await api.organizeCalls
+        #expect(calls.first?.since == "2026-11-25T08:00:00")
+    }
+
+    @Test func barTextsAreReal() {
+        var j = OrganizeJob(mode: .auto, since: nil, total: 9800); j.remaining = 8600
+        #expect(OrganizeBarState.make(j)?.title == "Organizing… 1,200 of 9,800" && OrganizeBarState.make(j)?.subtitle == "You can leave this screen.")
+        #expect(OrganizeBarState.make(j, uploadActive: true)?.subtitle == "Organizing after the upload")
+        j.state = .waiting
+        #expect(OrganizeBarState.make(j)?.title == "Waiting for a connection" && OrganizeBarState.make(j)?.subtitle == "1,200 of 9,800 organized")
+        var done = j; done.state = .finished; done.created = 14; done.updated = 0
+        #expect(OrganizeSummary.message(done) == .init(text: "Organized into 14 collections", action: "View"))
+        done.created = 1
+        #expect(OrganizeSummary.message(done)?.text == "Organized into 1 collection")
+        done.created = 0
+        #expect(OrganizeSummary.message(done) == .init(text: "Everything is already organized", action: nil))
+    }
+
+    @Test func announcementsAreAggregated() {
+        var a = OrganizeAnnouncer()
+        var j = OrganizeJob(mode: .auto, since: nil, total: 9800)
+        let t0 = Date(timeIntervalSince1970: 5000)
+        j.remaining = 9600
+        #expect(a.message(j, now: t0) == nil)
+        j.remaining = 8600
+        #expect(a.message(j, now: t0) == "Organized 1,200 of 9,800 photos")
+        j.remaining = 7000
+        #expect(a.message(j, now: t0.addingTimeInterval(3)) == nil)
+        #expect(a.message(j, now: t0.addingTimeInterval(20)) == "Organized 2,800 of 9,800 photos")
+        j.state = .waiting
+        #expect(a.message(j, now: t0.addingTimeInterval(40)) == "Waiting for a connection")
+        #expect(a.message(j, now: t0.addingTimeInterval(41)) == nil)
     }
 }

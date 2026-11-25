@@ -9,6 +9,7 @@ final class MediaModel {
     let api: any LibraryAPI
     let store: PhotoLibraryStore
     let queue: LibraryUploadQueue
+    let organizer: OrganizeRunner
     let isFake: Bool
     private(set) var summary: LibrarySummary?
     private(set) var collections: [LibraryCollection] = []
@@ -32,6 +33,24 @@ final class MediaModel {
     @ObservationIgnored var debugLocalImages: [String: UIImage] = [:]
     @ObservationIgnored var debugFrozen = false          // a screenshot scene: the real queue must not overwrite it
     #endif
+
+    // Smart collections (Organize)
+    private(set) var organizeJob: OrganizeJob?
+    var pendingOrganize: OrganizeRequest?                 // the sheet waits here until the Media tab is visible
+    var showCollectionsList = false
+    @ObservationIgnored private var organizeAnnouncer = OrganizeAnnouncer()
+    @ObservationIgnored private var organizeEvaluated = false
+    @ObservationIgnored private var organizeToasted = false
+    @ObservationIgnored private var organizeSilent = false      // Always with a small batch: no bar, no toast
+    var organizePref: OrganizePref { summary?.prefs.organize ?? .ask }
+    var organizeBar: OrganizeBarState? { organizeSilent ? nil : OrganizeBarState.make(organizeJob, uploadActive: bar.map { $0.kind != .finished } ?? false) }
+
+    struct OrganizeRequest: Identifiable, Equatable {
+        let id = UUID()
+        var since: String?            // nil: the whole library
+        var preview: OrganizePreview?
+        var fromBatch: Bool
+    }
 
     struct ToastMessage: Identifiable, Equatable { let id = UUID(); let text: String; let action: String? }
     var bar: UploadBarState? { UploadBarState.make(upload, gettingReady: gettingReady, elapsed: uploadStartedAt.map { Date().timeIntervalSince($0) }) }
@@ -59,12 +78,15 @@ final class MediaModel {
         images.countLimit = 500
         store = PhotoLibraryStore(directory: caches, api: api, fetch: fake ? MediaModel.fakeFetch : MediaModel.fetch)
         queue = LibraryUploadQueue(directory: support, api: api, poster: fake ? FakePoster() : S3FilePoster())
+        organizer = OrganizeRunner(api: api, file: fake ? nil : support.appendingPathComponent("organize-job.json"))
     }
 
     func start() async {
         if !started {
             started = true
             await queue.setObserver { [weak self] p in Task { @MainActor in self?.apply(p) } }
+            await organizer.setObserver { [weak self] j in Task { @MainActor in self?.applyOrganize(j) } }
+            await organizer.resumeIfNeeded()           // a job that was running when the app closed carries on
         }
         await queue.start()          // continues what a previous launch left in the queue
         await loadSummary()
@@ -86,7 +108,7 @@ final class MediaModel {
         let wasEmpty = upload.isEmpty, wasFinished = upload.isFinished
         upload = p
         Task { queueItems = await queue.snapshot() }
-        if wasEmpty, !p.isEmpty { baseline = summary?.count ?? 0; uploadStartedAt = .now; toastedBatch = false; announcer.reset(); hiddenTiles = [] }
+        if wasEmpty, !p.isEmpty { baseline = summary?.count ?? 0; uploadStartedAt = .now; toastedBatch = false; announcer.reset(); hiddenTiles = []; organizeEvaluated = false }
         if p.isEmpty { lastProcessed = 0; readyTarget = nil; baseline = nil; waiting = false; watcher.stop(); uploadStartedAt = nil; barExpanded = false; return }
         announce(p)
         if p.noSpace > 0, !p.paused { Task { await self.resumeIfSpaceWasFreed() } }
@@ -172,6 +194,58 @@ final class MediaModel {
         waiting = false
         version += 1                                   // final look at the first page
         if let t = readyTarget, (summary?.count ?? 0) >= t { readyTarget = nil }
+        Task { await evaluateOrganizeAfterBatch() }
+    }
+
+    // MARK: smart collections
+
+    /// Once per batch, after its photos are ready: ask, organise by itself, or do nothing (see `OrganizePolicy`).
+    private func evaluateOrganizeAfterBatch() async {
+        guard !organizeEvaluated, upload.done > 0, organizePref != .never, organizeJob?.isActive != true else { return }
+        organizeEvaluated = true
+        let since = OrganizeSince.stamp(batchStart: uploadStartedAt ?? Date())
+        guard let preview = try? await api.organizePreview(since: since) else { return }
+        switch OrganizePolicy.decide(pref: organizePref, ready: preview.total) {
+        case .nothing: break
+        case .showSheet: if !preview.groups.isEmpty { pendingOrganize = OrganizeRequest(since: since, preview: preview, fromBatch: true) }
+        case .runSilently, .runWithProgress:
+            if preview.organized > 0 { organizeToasted = false; organizeSilent = OrganizePolicy.decide(pref: organizePref, ready: preview.total) == .runSilently; await organizer.start(mode: .auto, since: since, total: preview.organized) }
+        }
+    }
+
+    func organizeLibrary() { pendingOrganize = OrganizeRequest(since: nil, preview: nil, fromBatch: false) }
+
+    func startOrganize(mode: OrganizeJob.Mode, since: String?, name: String? = nil, total: Int) {
+        organizeToasted = false; organizeSilent = false
+        Task { await organizer.start(mode: mode, since: since, name: name, total: total) }
+    }
+    func cancelOrganize() { Task { await organizer.cancel(); await organizer.dismiss() } }
+    func retryOrganize() { Task { await organizer.retry() } }
+
+    func setOrganizePref(_ pref: OrganizePref) {
+        guard var s = summary else { return }
+        let old = s.prefs.organize
+        s.prefs.organize = pref; summary = s
+        UISelectionFeedbackGenerator().selectionChanged()
+        Task { do { try await api.setOrganizePref(pref) } catch { if var s2 = summary { s2.prefs.organize = old; summary = s2 }; notice = (error as? LibraryAPIError)?.message ?? "Couldn't save that." } }
+    }
+
+    private func applyOrganize(_ job: OrganizeJob?) {
+        #if DEBUG
+        if debugFrozen { return }
+        #endif
+        organizeJob = job
+        if let msg = organizeAnnouncer.message(job) { UIAccessibility.post(notification: .announcement, argument: msg) }
+        guard let job, job.state == .finished, !organizeToasted else { return }
+        organizeToasted = true
+        Task { await loadSummary(); version += 1; await organizer.dismiss() }
+        if !organizeSilent, let msg = OrganizeSummary.message(job) {
+            toast = ToastMessage(text: msg.text, action: msg.action)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            UIAccessibility.post(notification: .announcement, argument: msg.text)
+            let shown = toast
+            Task { try? await Task.sleep(for: .seconds(8)); if toast == shown { toast = nil } }
+        }
     }
 
     /// Tab shown again, app active again, pull to refresh: look at the server now.
@@ -318,6 +392,29 @@ final class MediaModel {
             path.addQuadCurve(to: CGPoint(x: size.width, y: size.height * 0.72), controlPoint: CGPoint(x: size.width * 0.5, y: size.height * 0.55)); path.addLine(to: CGPoint(x: size.width, y: size.height)); path.fill()
         }
     }
+
+    #if DEBUG
+    /// Screenshots: `VMK_DEBUG_ORGANIZE=sheet|single|progress|done|collections`.
+    func loadDebugOrganize(_ name: String) {
+        debugFrozen = true
+        let groups = [OrganizeGroup(name: "London · Apr 2026", count: 214, existing: true, sampleIDs: ["p00000", "p00001", "p00002"]),
+                      OrganizeGroup(name: "Phuket · 14-21 Jul 2024", count: 188, sampleIDs: ["p00003", "p00004", "p00005"]),
+                      OrganizeGroup(name: "Lisbon · 3-6 Oct 2025", count: 96, sampleIDs: ["p00006", "p00007", "p00008"]),
+                      OrganizeGroup(name: "London · May 2026", count: 71, existing: true, sampleIDs: ["p00009", "p00010", "p00011"]),
+                      OrganizeGroup(name: "Jun 2025", count: 52, sampleIDs: ["p00012", "p00013", "p00014"])]
+            + (0..<9).map { OrganizeGroup(name: "Place \($0) · \($0 + 1)-\($0 + 4) Mar 2025", count: 20, sampleIDs: ["p0001\($0 % 10)"]) }
+        let preview = OrganizePreview(total: 842, organized: 805, skipped: 37, home: "London", groups: groups)
+        switch name {
+        case "sheet", "single": pendingOrganize = OrganizeRequest(since: "2026-11-25T08:00:00", preview: preview, fromBatch: true)
+        case "progress":
+            var j = OrganizeJob(mode: .auto, since: nil, total: 9800); j.remaining = 8600
+            organizeJob = j
+        case "done": toast = ToastMessage(text: "Organized into 14 collections", action: "View")
+        case "collections": showCollectionsList = true
+        default: break
+        }
+    }
+    #endif
 
     #if DEBUG
     /// Screenshots: `VMK_DEBUG_UPLOAD_SCENE=uploading|queue|done|error` shows that moment of the upload journey without any network.

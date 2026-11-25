@@ -68,6 +68,10 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(element(app, "storageMeter").waitForExistence(timeout: 10), "the storage meter shows")
         XCTAssertTrue(element(app, "mediaSearch").exists)
         XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "photos show in the grid")
+        app.buttons["mediaMore"].tap()
+        app.buttons["organizeLibrary"].tap()
+        XCTAssertTrue(app.staticTexts["Nothing to organize right now"].waitForExistence(timeout: 10), "Organize my library explains kindly when there is nothing to do")
+        app.buttons["OK"].tap()
         app.tabBars.buttons["Videos"].tap()
         XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 5))
     }
