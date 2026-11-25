@@ -490,8 +490,9 @@ class BackendStack(Stack):
         # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).
         # ----------------------------
         if v2 is not None:
+            model_env = {env_key: str(self.node.try_get_context(ctx_key)) for ctx_key, env_key in (("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID")) if self.node.try_get_context(ctx_key)}
             MediaLibrary(
-                self, "MediaLibrary", stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
+                self, "MediaLibrary", extra_env=model_env, stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
                 usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn, assets_bucket_name=ASSETS_BUCKET,
             )
 

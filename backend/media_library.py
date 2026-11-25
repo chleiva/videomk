@@ -13,7 +13,7 @@ from constructs import Construct
 class MediaLibrary(Construct):
     def __init__(
         self, scope: Construct, construct_id: str, *, stage: str, account: str, region: str, is_prod: bool, make_fn: Callable[..., _lambda.Function], engine_layer: _lambda.ILayerVersion,
-        flags_table: dynamodb.ITable, usage_table: dynamodb.ITable, user_id_resource: apigw.IResource, cognito_auth: Dict, launcher_fn: _lambda.Function, assets_bucket_name: str,
+        flags_table: dynamodb.ITable, usage_table: dynamodb.ITable, extra_env: Dict[str, str], user_id_resource: apigw.IResource, cognito_auth: Dict, launcher_fn: _lambda.Function, assets_bucket_name: str,
     ) -> None:
         super().__init__(scope, construct_id)
         keep = RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY
@@ -46,7 +46,7 @@ class MediaLibrary(Construct):
                           dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=6, queue=dlq))
         bucket.add_event_notification(s3.EventType.OBJECT_CREATED, s3n.SqsDestination(queue), s3.NotificationKeyFilter(prefix="o/"))   # only originals (thumbnails are under t/)
 
-        env = {"MEDIA_TABLE": table.table_name, "MEDIA_BUCKET": media_bucket_name, "VECTOR_BUCKET": vector_bucket_name, "VECTOR_INDEX": "photos", "LIBRARY_CAN_UPGRADE": "0", "INGEST_FINAL_ATTEMPT": "5"}
+        env = {"MEDIA_TABLE": table.table_name, "MEDIA_BUCKET": media_bucket_name, "VECTOR_BUCKET": vector_bucket_name, "VECTOR_INDEX": "photos", "LIBRARY_CAN_UPGRADE": "0", "INGEST_FINAL_ATTEMPT": "5", **extra_env}   # extra_env: the small-model id when the account cannot use the default (see docs/DEPLOY.md)
         api_fn = make_fn("LibraryApiFn", "library_api", "library_api.handler", timeout=Duration.seconds(30), memory=3008, env=env, layers=[engine_layer])
         ingest_fn = make_fn("LibraryIngestFn", "library_ingest", "library_ingest.handler", timeout=Duration.minutes(2), memory=3008, env=env, layers=[engine_layer])
         sweeper_fn = make_fn("LibrarySweeperFn", "library_sweeper", "library_sweeper.handler", timeout=Duration.minutes(5), memory=3008, env=env, layers=[engine_layer])

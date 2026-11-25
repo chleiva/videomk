@@ -37,3 +37,12 @@ Also enable Bedrock model access for the Claude models in eu-west-1 (console, Be
 
 ## Frontend against QA
 Set `PUBLIC_API_BASE`, `PUBLIC_AUTH_DOMAIN`, `PUBLIC_COGNITO_CLIENT_ID` from the outputs. Production's custom domain is off until a Route 53 zone exists in the prod account (`domain` in stages.json).
+
+
+## Production and the Claude models (found 2026-11-25)
+The production AWS account (us-west-2) can call Claude 4.x on Bedrock (`us.anthropic.claude-sonnet-4-6`, `us.anthropic.claude-haiku-4-5-20251001-v1:0`, Opus 4.5 and 4.6) but is denied every Claude 5.x model (`AccessDeniedException ... not available for this account`), while QA has them. The engine defaults to Claude 5.5, so until the account is granted access prod is deployed with the older models:
+```
+npx aws-cdk@latest deploy videomk-prod -c stage=prod -c engine=v2 -c "@aws-cdk/core:bootstrapQualifier=vmk" \
+  -c planModelId=us.anthropic.claude-sonnet-4-6 -c reviewModelId=us.anthropic.claude-haiku-4-5-20251001-v1:0 --require-approval never
+```
+(`planModelId` writes the script model and `reviewModelId` the small model, in the video functions and in the photo library functions.) When Claude 5.x is enabled for the account (Bedrock console, Model access / the Anthropic use-case form, in us-west-2), redeploy without the two `-c` model flags and check with the probe in this section's history (invoke `us.anthropic.claude-sonnet-5-5` and `us.anthropic.claude-haiku-5-5`).
