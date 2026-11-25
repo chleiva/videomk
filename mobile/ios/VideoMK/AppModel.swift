@@ -50,7 +50,7 @@ final class AppModel {
         media = api.map { MediaModel(api: LibraryClient(api: $0)) }
         createModel = CreateModel(api: api)
         #if DEBUG
-        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: FakeCreateAPI()); userID = "demo-user" }
+        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: FakeCreateAPI(capabilities: .success(ProcessInfo.processInfo.environment["VMK_DEBUG_CREATE"]?.hasPrefix("4k") == true ? FakeCreateAPI.fourKCapabilities : FakeCreateAPI.richCapabilities))); userID = "demo-user" }
         selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
         seedDebugScreens()
         #endif

@@ -133,14 +133,18 @@ public struct CreateOptions: Sendable, Equatable {
     public var resolution: String // 720p or 1080p
     public var language: String  // "auto" (the description's language) or a language id
 
-    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "other", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto") {
-        self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
+    /// What the chosen resolution costs relative to 1080p (2 for 4K), from the capabilities.
+    public var creditsMultiplier: Int
+
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "other", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1) {
+        self.creditsMultiplier = max(1, creditsMultiplier); self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
     }
 }
 
 public extension CreateOptions {
     /// 1 credit per started minute, at least 1 (matches the server; the server's number is the one that is charged).
-    var credits: Int { max(1, min(12, Int(minutes.rounded(.up)))) }
+    /// Times the resolution's multiplier: 3 minutes is 3 credits at 1080p and 6 at 4K.
+    var credits: Int { max(1, min(12, Int(minutes.rounded(.up)))) * creditsMultiplier }
 }
 
 public struct WalletBucket: Sendable, Equatable, Decodable {

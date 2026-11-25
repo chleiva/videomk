@@ -425,3 +425,75 @@ extension CoreTests {
         #expect(ChipFit.lines(label: "", availableWidth: 300) == 1)
     }
 }
+
+@Suite struct FourKTests {
+    private let caps = FakeCreateAPI.fourKCapabilities
+    private func chip(_ id: String) -> PlatformChip { PlatformChips.make(caps).first { $0.members.contains(id) }! }
+    private func form() -> CreateForm { var f = CreateForm(); f.normalize(caps); return f }
+
+    @Test func thePriceIsTheStartedMinutesTimesTheMultiplier() {
+        var f = form()
+        f.setMinutes(3); #expect(f.options.credits == 3)
+        f.setResolution("2160p"); #expect(f.options.credits == 6 && f.creditsMultiplier == 2)
+        f.setMinutes(0.25); #expect(f.options.credits == 2)                      // 15 seconds at 4K
+        f.setMinutes(12); #expect(f.options.credits == 24)
+        f.setResolution("720p"); #expect(f.options.credits == 12)
+        #expect(ComposerPlan.credits(forMinutes: 61.0 / 60, multiplier: 2) == 4)
+        f.setMinutes(3); f.setResolution("2160p")
+        let s = ComposerPlan.status(text: "A story about a lighthouse keeper", balance: 5, options: f.options, lengths: caps.lengthPresets)
+        #expect(!s.canSend && s.message == "Needs 6 credits, you have 5")
+        #expect(s.fix == .useMinutes(2, credits: 4))                              // the fix chip's price is doubled too
+    }
+
+    @Test func decodingWithTheNewFields() throws {
+        let json = #"{"aspects":[{"id":"16:9","ready":true},{"id":"9:16","ready":true}],"resolutions":[{"id":"720p","label":"720p","credits_multiplier":1,"aspects":["16:9","9:16"]},{"id":"2160p","label":"4K","credits_multiplier":2,"aspects":["16:9"],"note":"4K (2160p) costs twice the credits.","future":{"x":1}}],"platforms":[{"id":"youtube","label":"YouTube","aspect":"16:9","resolution":"1080p","supports_4k":true,"note_4k":null},{"id":"tiktok","label":"TikTok","aspect":"9:16","resolution":"1080p","supports_4k":false,"note_4k":"TikTok publishes at 1080p or lower."}]}"#
+        let c = try JSONDecoder().decode(CreateCapabilities.self, from: Data(json.utf8))
+        #expect(c.resolutions.map(\.id) == ["720p", "2160p"] && c.resolutionLabel("2160p") == "4K" && c.multiplier("2160p") == 2 && c.multiplier("720p") == 1)
+        #expect(c.resolution("2160p")?.note == "4K (2160p) costs twice the credits." && c.resolution("2160p")?.aspects == ["16:9"])
+        #expect(c.platforms[0].supports4K && c.platforms[0].note4K == nil && !c.platforms[1].supports4K && c.platforms[1].note4K == "TikTok publishes at 1080p or lower.")
+        #expect(c.isSupported(aspect: "16:9", resolution: "2160p") && !c.isSupported(aspect: "9:16", resolution: "2160p"))
+    }
+
+    @Test func decodingAnOlderServerWithoutThem() throws {
+        let json = #"{"aspects":[{"id":"16:9","ready":true}],"resolutions":[{"id":"720p"},{"id":"1080p","label":"1080p"}],"platforms":[{"id":"youtube","label":"YouTube","aspect":"16:9","resolution":"1080p"}]}"#
+        let c = try JSONDecoder().decode(CreateCapabilities.self, from: Data(json.utf8))
+        #expect(c.resolutions.allSatisfy { $0.creditsMultiplier == 1 && $0.aspects.isEmpty && $0.note == nil } && c.isSupported(aspect: "16:9", resolution: "1080p"))
+        #expect(!c.platforms[0].supports4K && c.platforms[0].note4K == nil)
+        var f = CreateForm(); f.normalize(c); f.select(PlatformChips.make(c).first { $0.id == "youtube" }!)
+        #expect(f.options.credits == 3 && f.fourKAdvice(c) == nil && f.resolutionChoices(c).map(\.id) == ["720p", "1080p"])      // nothing changes without 4K
+        let odd = try JSONDecoder().decode(CreateCapabilities.Resolution.self, from: Data(#"{"id":"2160p","credits_multiplier":"two","aspects":7}"#.utf8))
+        #expect(odd.creditsMultiplier == 1 && odd.aspects.isEmpty)                // wrong types never fail decoding
+    }
+
+    @Test func fourKOnAPlatformThatDoesNotDeliverItIsRecommendedAgainstButNeverBlocked() {
+        var f = form()
+        f.select(chip("youtube")); #expect(f.resolution == "1080p")               // a platform never picks 4K
+        f.setResolution("2160p")
+        #expect(f.fourKAdvice(caps) == nil && f.resolutionNote(caps)?.hasPrefix("4K (2160p) costs twice") == true)
+        #expect(f.recommendation(caps) == "YouTube · Landscape 16:9 · 4K")
+        f.select(chip("tiktok"))
+        #expect(f.resolution == "2160p")                                           // the explicit choice survives the platform change
+        let advice = f.fourKAdvice(caps)
+        #expect(advice?.text.contains("publishes at 1080p or lower") == true && advice?.useResolution == "1080p")
+        #expect(ComposerPlan.status(text: "A story about a lighthouse keeper", balance: 10, options: f.options, lengths: caps.lengthPresets).canSend)   // still allowed
+        f.setResolution("1080p"); #expect(f.fourKAdvice(caps) == nil)
+        f.setResolution("2160p"); f.select(chip("other")); #expect(f.fourKAdvice(caps) == nil)      // "Just a video" is fine
+        var fresh = form(); fresh.select(chip("linkedin")); fresh.select(chip("youtube"))
+        #expect(fresh.resolution == "1080p")
+    }
+
+    @Test func aResolutionIsOfferedOnlyForShapesItCanBeMadeIn() {
+        var c = caps
+        c.resolutions = c.resolutions.map { $0.id == "2160p" ? .init(id: "2160p", label: "4K", creditsMultiplier: 2, aspects: ["16:9"]) : $0 }
+        var f = CreateForm(); f.normalize(c); f.setResolution("2160p")
+        #expect(f.resolutionChoices(c).map(\.id) == ["720p", "1080p", "2160p"])
+        f.aspect = "9:16"; f.normalize(c)
+        #expect(f.resolutionChoices(c).map(\.id) == ["720p", "1080p"] && f.resolution == "1080p" && f.options.credits == 3)
+    }
+
+    @Test func fourKIsNeverARememberedDefault() {
+        var f = form(); f.setResolution("2160p")
+        let again = CreateDefaults(f).form(caps)
+        #expect(again.resolution == "1080p" && again.options.credits == 3 && !again.resolutionTouched)
+    }
+}

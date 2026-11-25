@@ -138,6 +138,11 @@ final class CreateModel {
         case "shorts": pick("shorts")
         case "overmax": pick("x"); form.setMinutes(3)
         case "shortphotos": form.setMinutes(0.25)
+        case "4k": pick("youtube"); form.setResolution("2160p"); showMore = true        // YouTube at 4K: the chip, its mark and the note, price doubled
+        case "4ktiktok": pick("shorts"); form.setResolution("2160p")                    // 4K where it is not delivered: the recommendation and "Use 1080p"
+        case "4klinkedin": pick("linkedin"); form.setResolution("2160p"); showMore = true
+        case "4koff": pick("youtube"); showMore = true                                 // 4K listed but not chosen
+        case "4ksummary": pick("youtube"); form.setResolution("2160p")
         default: break
         }
     }
@@ -157,7 +162,7 @@ final class CreateModel {
             stage = .summary(f, brief: nil)
         case "q1": stage = .questions(IntakeFlow(q))
         case "q2": var f = IntakeFlow(q); f.choose(q[0].options[0]); stage = .questions(f)
-        case "summary":
+        case "summary", "4ksummary":
             var f = IntakeFlow(q); f.choose(q[0].options[0]); f.choose(q[1].options[0]); f.choose(q[2].options[0])
             stage = .summary(f, brief: ["summary": "For kids · Calm · Focus: Making honey"])
         case "checking": stage = .checking(slow: true)

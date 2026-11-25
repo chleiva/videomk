@@ -245,11 +245,20 @@ public actor FakeCreateAPI: CreateServing {
 
 extension FakeCreateAPI {
     /// The capabilities the server now sends: every aspect ready (three of them beta), short lengths, and a recommendation per platform.
-    public static var richCapabilities: CreateCapabilities {
-        typealias P = CreateCapabilities.Platform
+    public static var richCapabilities: CreateCapabilities { capabilities(fourK: false) }
+    /// The same with 4K switched on: a third resolution at twice the credits, which only YouTube and "Just a video" deliver.
+    public static var fourKCapabilities: CreateCapabilities { capabilities(fourK: true) }
+
+    static func capabilities(fourK: Bool) -> CreateCapabilities {
+        typealias P0 = CreateCapabilities.Platform
+        func P(id: String, label: String, aspect: String, resolution: String, note: String, recommendedMinutes: Double, maxMinutes: Double?, otherAspects: [String]) -> P0 {
+            let ok = id == "youtube" || id == "other"
+            return P0(id: id, label: label, aspect: aspect, resolution: resolution, note: note, recommendedMinutes: recommendedMinutes, maxMinutes: maxMinutes, otherAspects: otherAspects,
+                      supports4K: ok, note4K: ok ? nil : "\(label) publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.")
+        }
         return CreateCapabilities(
             aspects: [.init(id: "16:9", label: "Landscape"), .init(id: "9:16", label: "Vertical", ready: true, beta: true), .init(id: "1:1", label: "Square", ready: true, beta: true), .init(id: "4:5", label: "Portrait", ready: true, beta: true)],
-            resolutions: [.init(id: "720p"), .init(id: "1080p")],
+            resolutions: [.init(id: "720p"), .init(id: "1080p")] + (fourK ? [.init(id: "2160p", label: "4K", creditsMultiplier: 2, aspects: ["16:9", "9:16", "1:1", "4:5"], note: "4K (2160p) costs twice the credits. Best for YouTube and large screens.")] : []),
             platforms: [
                 P(id: "youtube", label: "YouTube", aspect: "16:9", resolution: "1080p", note: "Landscape 16:9 · 1080p · about 3 min", recommendedMinutes: 3, maxMinutes: nil, otherAspects: []),
                 P(id: "shorts", label: "YouTube Shorts", aspect: "9:16", resolution: "1080p", note: "Vertical 9:16 · 1080p · about 45 s", recommendedMinutes: 0.75, maxMinutes: 3, otherAspects: []),

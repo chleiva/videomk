@@ -33,23 +33,23 @@ public struct ComposerStatus: Equatable, Sendable {
 public enum ComposerPlan {
     public static func photosTotal(phone: Int, library: Int) -> Int { phone + library }
 
-    public static func credits(forMinutes m: Double) -> Int { CreateOptions(minutes: m).credits }
+    public static func credits(forMinutes m: Double, multiplier: Int = 1) -> Int { CreateOptions(minutes: m, creditsMultiplier: multiplier).credits }
 
     public static func plural(_ n: Int, _ one: String, _ many: String? = nil) -> String { n == 1 ? "\(n) \(one)" : "\(n) \(many ?? one + "s")" }
 
     /// The longest length the balance allows (never 0 minutes); nil when the balance is 0.
-    public static func affordableFix(balance: Int, lengths: [Double] = CreateOptions.lengths) -> ComposerStatus.Fix? {
+    public static func affordableFix(balance: Int, lengths: [Double] = CreateOptions.lengths, multiplier: Int = 1) -> ComposerStatus.Fix? {
         guard balance > 0 else { return .addCredits }
-        let best = lengths.sorted().last { credits(forMinutes: $0) <= balance }
-        return best.map { .useMinutes($0, credits: credits(forMinutes: $0)) }
+        let best = lengths.sorted().last { credits(forMinutes: $0, multiplier: multiplier) <= balance }
+        return best.map { .useMinutes($0, credits: credits(forMinutes: $0, multiplier: multiplier)) }
     }
 
     /// The length that shows every photo: the smallest option that is long enough and affordable.
-    public static func photoFix(photos: Int, minutes: Double, balance: Int?, lengths: [Double] = CreateOptions.lengths) -> ComposerStatus.Fix? {
+    public static func photoFix(photos: Int, minutes: Double, balance: Int?, lengths: [Double] = CreateOptions.lengths, multiplier: Int = 1) -> ComposerStatus.Fix? {
         let need = PhotoCapacity.minimumMinutes(photos: photos)
         guard let m = lengths.sorted().first(where: { $0 >= need - 1e-9 && $0 > minutes }) else { return nil }
-        if let balance, credits(forMinutes: m) > balance { return nil }
-        return .useMinutes(m, credits: credits(forMinutes: m))
+        if let balance, credits(forMinutes: m, multiplier: multiplier) > balance { return nil }
+        return .useMinutes(m, credits: credits(forMinutes: m, multiplier: multiplier))
     }
 
     public static func status(text: String, balance: Int?, options: CreateOptions, photos: Int = 0, dictating: Bool = false, sending: Bool = false, lengths: [Double] = CreateOptions.lengths) -> ComposerStatus {
@@ -64,13 +64,13 @@ public enum ComposerPlan {
         }
         if !affordable, let balance {
             if balance <= 0 { return ComposerStatus(kind: .noCredits, message: "You have no credits", fix: .addCredits, canSend: false) }
-            return ComposerStatus(kind: .notAffordable, message: "Needs \(plural(cost, "credit")), you have \(balance)", fix: affordableFix(balance: balance, lengths: lengths), canSend: false)
+            return ComposerStatus(kind: .notAffordable, message: "Needs \(plural(cost, "credit")), you have \(balance)", fix: affordableFix(balance: balance, lengths: lengths, multiplier: options.creditsMultiplier), canSend: false)
         }
         if count > 0 && !valid {
             return ComposerStatus(kind: .tooShort, message: "Add a few more words (\(Brief.minLength - count) to go)", fix: nil, canSend: false)
         }
         if let hint = PhotoCapacity.hint(photos: photos, minutes: options.minutes, options: lengths) {
-            return ComposerStatus(kind: .photoHint, message: hint, fix: photoFix(photos: photos, minutes: options.minutes, balance: balance, lengths: lengths), canSend: valid)
+            return ComposerStatus(kind: .photoHint, message: hint, fix: photoFix(photos: photos, minutes: options.minutes, balance: balance, lengths: lengths, multiplier: options.creditsMultiplier), canSend: valid)
         }
         if valid {
             let left = balance.map { " · you'll have \($0 - cost) left" } ?? ""

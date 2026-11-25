@@ -38,6 +38,7 @@ struct CreateView: View {
                         platformChips.padding(.top, 8)
                         recommendation(proxy).padding(.top, 10)
                         alsoWorks
+                        fourKAdvice.padding(.top, 4)
                         section("Length").padding(.top, 18)
                         lengthChips.padding(.top, 8)
                         maxHint.padding(.top, 6)
@@ -247,7 +248,7 @@ struct CreateView: View {
             WrapLayout(spacing: 8) {
                 Text("Also works:").font(.system(size: 13.5)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
                 ForEach(others, id: \.id) { o in
-                    Button { create.form.aspect = o.id; UISelectionFeedbackGenerator().selectionChanged() } label: {
+                    Button { create.form.aspect = o.id; create.form.normalize(create.caps); UISelectionFeedbackGenerator().selectionChanged() } label: {
                         Text(o.name).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(Theme.primary).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 6).frame(minHeight: 30).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 15, style: .continuous)).frame(minHeight: 44)
                     }.buttonStyle(.plain).accessibilityLabel("Use \(o.name) instead").accessibilityIdentifier("also-\(o.id)")
                 }
@@ -283,7 +284,7 @@ struct CreateView: View {
     }
 
     private func lengthChip(_ m: Double, fixedWidth: CGFloat?) -> some View {
-        let selected = form.minutes == m, credits = ComposerPlan.credits(forMinutes: m), costly = balance.map { credits > $0 } ?? false
+        let selected = form.minutes == m, credits = ComposerPlan.credits(forMinutes: m, multiplier: form.creditsMultiplier), costly = balance.map { credits > $0 } ?? false
         return Button { create.form.setMinutes(m); UISelectionFeedbackGenerator().selectionChanged() } label: {
             VStack(spacing: 2) {
                 Text(LengthLabel.chip(m)).font(.system(size: 16, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.text).fixedSize(horizontal: false, vertical: true)
@@ -303,7 +304,7 @@ struct CreateView: View {
         if let hint = PhotoCapacity.hint(photos: totalPhotos, minutes: form.minutes, options: create.caps.lengthPresets) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(hint).font(.system(size: 15)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("photoCapacityHint")
-                if let fix = ComposerPlan.photoFix(photos: totalPhotos, minutes: form.minutes, balance: balance, lengths: create.caps.lengthPresets) {
+                if let fix = ComposerPlan.photoFix(photos: totalPhotos, minutes: form.minutes, balance: balance, lengths: create.caps.lengthPresets, multiplier: form.creditsMultiplier) {
                     FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.setMinutes(m); UISelectionFeedbackGenerator().selectionChanged() } }.accessibilityIdentifier("fixChip").accessibilityLabel(fix.title.replacingOccurrences(of: "⚡", with: "credits "))
                 }
             }
@@ -382,10 +383,10 @@ struct CreateView: View {
                 let ready = create.caps.readyAspects.contains { $0.id == id }
                 let selected = form.aspect == id
                 let beta = create.caps.aspect(id)?.beta == true
-                Button { if ready { create.form.aspect = id; UISelectionFeedbackGenerator().selectionChanged() } else { UINotificationFeedbackGenerator().notificationOccurred(.warning) } } label: {
+                Button { if ready { create.form.aspect = id; create.form.normalize(create.caps); UISelectionFeedbackGenerator().selectionChanged() } else { UINotificationFeedbackGenerator().notificationOccurred(.warning) } } label: {
                     VStack(spacing: 5) {
                         Image(systemName: symbol).font(.system(size: 22)).foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-                        Text("\(name)\n\(id)").font(.system(size: 13, weight: .semibold)).multilineTextAlignment(.center).foregroundStyle(selected ? Theme.primary : Theme.text).fixedSize(horizontal: false, vertical: true)
+                        Text("\(name)\n\(id)").font(.system(size: 13, weight: .semibold)).multilineTextAlignment(.center).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(2).minimumScaleFactor(0.7).fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(.horizontal, 4).padding(.vertical, 8).frame(maxWidth: .infinity, minHeight: 76)
                     .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -399,21 +400,49 @@ struct CreateView: View {
         }
     }
 
-    private var resolutionControl: some View {
-        HStack(spacing: 0) {
-            ForEach(["720p", "1080p"], id: \.self) { r in
-                let ready = create.caps.resolutions.contains { $0.id == r }
-                let selected = form.resolution == r
-                Button { if ready { create.form.resolution = r; UISelectionFeedbackGenerator().selectionChanged() } } label: {
-                    Text(r).font(.system(size: 17, weight: .semibold)).foregroundStyle(ready ? Theme.text : Theme.textTertiary).frame(maxWidth: .infinity, minHeight: 40)
-                        .background(selected ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .shadow(color: .black.opacity(selected ? 0.08 : 0), radius: 3, y: 1)
+    /// The resolutions the server lists for this shape, in its order ("4K" carries a small "2x credits" mark); its note sits underneath when chosen.
+    @ViewBuilder private var resolutionControl: some View {
+        let choices = form.resolutionChoices(create.caps)
+        if choices.count > 1 {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 0) {
+                    ForEach(choices, id: \.id) { r in
+                        let selected = form.resolution == r.id
+                        Button { create.form.setResolution(r.id); UISelectionFeedbackGenerator().selectionChanged() } label: {
+                            VStack(spacing: 1) {
+                                Text(r.label).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                                if r.creditsMultiplier > 1 { Text("\(r.creditsMultiplier)x credits").font(.system(size: 11.5, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.textSecondary).fixedSize(horizontal: false, vertical: true) }
+                            }
+                            .multilineTextAlignment(.center).padding(.vertical, 4).frame(maxWidth: .infinity, minHeight: 44)
+                            .background(selected ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .shadow(color: .black.opacity(selected ? 0.08 : 0), radius: 3, y: 1)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(r.creditsMultiplier > 1 ? "\(r.label), costs \(r.creditsMultiplier) times the credits" : r.label).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("resolution-\(r.id)")
+                    }
                 }
-                .buttonStyle(.plain).disabled(!ready).opacity(ready ? 1 : 0.6)
-                .accessibilityLabel(ready ? r : "\(r), not available yet").accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("resolution-\(r)")
+                .padding(3).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                if let note = form.resolutionNote(create.caps) {
+                    Text(note).font(.system(size: 13.5)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("resolutionNote")
+                }
             }
         }
-        .padding(3).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    /// 4K chosen for a platform that does not deliver it: the server's sentence and one tap back to 1080p. Never a block.
+    @ViewBuilder private var fourKAdvice: some View {
+        if let advice = form.fourKAdvice(create.caps) {
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "info.circle").font(.system(size: 14)).foregroundStyle(Theme.warning).padding(.top, 2).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(advice.text).font(.system(size: 14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("fourKAdvice")
+                    FixChip(title: "Use \(create.caps.resolutionLabel(advice.useResolution))") { create.form.setResolution(advice.useResolution); UISelectionFeedbackGenerator().selectionChanged() }
+                        .accessibilityIdentifier("use1080p")
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(12).background(Theme.warningContainer.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
     }
 
     // MARK: bottom bar

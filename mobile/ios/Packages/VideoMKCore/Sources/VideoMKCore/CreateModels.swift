@@ -5,17 +5,32 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     public struct Aspect: Codable, Sendable, Equatable { public let id: String, label: String; public let ready: Bool, beta: Bool
         public init(id: String, label: String, ready: Bool = true, beta: Bool = false) { self.id = id; self.label = label; self.ready = ready; self.beta = beta }
         public init(from d: Decoder) throws { let c = try d.container(keyedBy: CodingKeys.self); id = try c.decode(String.self, forKey: .id); label = (try? c.decode(String.self, forKey: .label)) ?? id; ready = (try? c.decode(Bool.self, forKey: .ready)) ?? false; beta = (try? c.decode(Bool.self, forKey: .beta)) ?? false } }
-    public struct Resolution: Codable, Sendable, Equatable { public let id: String, label: String
-        public init(id: String, label: String? = nil) { self.id = id; self.label = label ?? id }
-        public init(from d: Decoder) throws { let c = try d.container(keyedBy: CodingKeys.self); id = try c.decode(String.self, forKey: .id); label = (try? c.decode(String.self, forKey: .label)) ?? id } }
+    public struct Resolution: Codable, Sendable, Equatable {
+        public let id: String, label: String
+        public let creditsMultiplier: Int      // the price relative to 1080p: 2 for 4K (1 when an older server does not say)
+        public let aspects: [String]           // the shapes it can be made in; empty = every ready shape (older servers)
+        public let note: String?               // a line to show when it is selected ("4K costs twice the credits…")
+        enum CodingKeys: String, CodingKey { case id, label, creditsMultiplier = "credits_multiplier", aspects, note }
+        public init(id: String, label: String? = nil, creditsMultiplier: Int = 1, aspects: [String] = [], note: String? = nil) { self.id = id; self.label = label ?? id; self.creditsMultiplier = max(1, creditsMultiplier); self.aspects = aspects; self.note = note }
+        public init(from d: Decoder) throws {
+            let c = try d.container(keyedBy: CodingKeys.self)
+            id = try c.decode(String.self, forKey: .id); label = (try? c.decode(String.self, forKey: .label)) ?? id
+            creditsMultiplier = max(1, (try? c.decode(Int.self, forKey: .creditsMultiplier)) ?? (try? c.decode(Double.self, forKey: .creditsMultiplier)).map { Int($0.rounded(.up)) } ?? 1)
+            aspects = (try? c.decode([String].self, forKey: .aspects)) ?? []; note = try? c.decode(String.self, forKey: .note)
+        }
+        public func supports(aspect: String) -> Bool { aspects.isEmpty || aspects.contains(aspect) }
+    }
     public struct Platform: Codable, Sendable, Equatable {
         public let id: String, label: String, aspect: String, resolution: String
         public let note: String?
         public let recommendedMinutes: Double?     // what the platform wants (preselected, unless the person chose a length)
         public let maxMinutes: Double?             // a soft limit; nil when there is none
         public let otherAspects: [String]          // formats that also work, shown as small secondary choices
-        enum CodingKeys: String, CodingKey { case id, label, aspect, resolution, note, recommendedMinutes = "recommended_minutes", maxMinutes = "max_minutes", otherAspects = "other_aspects" }
-        public init(id: String, label: String, aspect: String, resolution: String, note: String? = nil, recommendedMinutes: Double? = nil, maxMinutes: Double? = nil, otherAspects: [String] = []) {
+        public let supports4K: Bool                // false: the platform does not deliver 4K, the app recommends against it
+        public let note4K: String?                 // the server's sentence for that recommendation
+        enum CodingKeys: String, CodingKey { case id, label, aspect, resolution, note, recommendedMinutes = "recommended_minutes", maxMinutes = "max_minutes", otherAspects = "other_aspects", supports4K = "supports_4k", note4K = "note_4k" }
+        public init(id: String, label: String, aspect: String, resolution: String, note: String? = nil, recommendedMinutes: Double? = nil, maxMinutes: Double? = nil, otherAspects: [String] = [], supports4K: Bool = false, note4K: String? = nil) {
+            self.supports4K = supports4K; self.note4K = note4K
             self.id = id; self.label = label; self.aspect = aspect; self.resolution = resolution; self.note = note; self.recommendedMinutes = recommendedMinutes; self.maxMinutes = maxMinutes; self.otherAspects = otherAspects
         }
         public init(from d: Decoder) throws {
@@ -25,6 +40,7 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
             note = try? c.decode(String.self, forKey: .note)
             recommendedMinutes = try? c.decode(Double.self, forKey: .recommendedMinutes); maxMinutes = try? c.decode(Double.self, forKey: .maxMinutes)
             otherAspects = (try? c.decode([String].self, forKey: .otherAspects)) ?? []
+            supports4K = (try? c.decode(Bool.self, forKey: .supports4K)) ?? false; note4K = try? c.decode(String.self, forKey: .note4K)
         }
     }
     public struct Lengths: Codable, Sendable, Equatable {
@@ -81,7 +97,12 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
 
     public var readyAspects: [Aspect] { aspects.filter(\.ready) }
     public func aspect(_ id: String) -> Aspect? { aspects.first { $0.id == id } }
-    public func isSupported(aspect: String, resolution: String) -> Bool { aspects.contains { $0.id == aspect && $0.ready } && resolutions.contains { $0.id == resolution } }
+    public func isSupported(aspect: String, resolution: String) -> Bool { aspects.contains { $0.id == aspect && $0.ready } && resolutions.contains { $0.id == resolution && $0.supports(aspect: aspect) } }
+    public func resolution(_ id: String) -> Resolution? { resolutions.first { $0.id == id } }
+    /// "4K" for 2160p; the id itself when the server does not list it.
+    public func resolutionLabel(_ id: String) -> String { resolution(id)?.label ?? id }
+    /// What the chosen resolution costs relative to 1080p (1 when unknown).
+    public func multiplier(_ id: String) -> Int { resolution(id)?.creditsMultiplier ?? 1 }
     /// "Landscape 16:9"
     public func aspectName(_ id: String) -> String { "\(aspect(id)?.label ?? id) \(id)" }
 }
@@ -98,6 +119,8 @@ public struct PlatformChip: Equatable, Sendable, Identifiable {
     public var recommendedMinutes: Double? = nil
     public var maxMinutes: Double? = nil
     public var otherAspects: [String] = []
+    public var supports4K = false
+    public var note4K: String? = nil
 }
 
 public enum PlatformChips {
@@ -105,12 +128,15 @@ public enum PlatformChips {
     public static func make(_ caps: CreateCapabilities) -> [PlatformChip] {
         var byID = Dictionary(uniqueKeysWithValues: CreateCapabilities.platformDefaults.map { ($0.id, $0) })
         for p in caps.platforms { byID[p.id] = p }
-        byID["other"] = CreateCapabilities.Platform(id: "other", label: "Just a video", aspect: byID["other"]?.aspect ?? "16:9", resolution: byID["other"]?.resolution ?? "1080p")
+        let o = byID["other"]
+        byID["other"] = CreateCapabilities.Platform(id: "other", label: "Just a video", aspect: o?.aspect ?? "16:9", resolution: o?.resolution ?? "1080p", note: o?.note, recommendedMinutes: o?.recommendedMinutes,
+                                                    maxMinutes: o?.maxMinutes, otherAspects: o?.otherAspects ?? [], supports4K: o?.supports4K ?? true, note4K: o?.note4K)
         func chip(_ ids: [String], _ label: String) -> PlatformChip? {
             let found = ids.compactMap { byID[$0] }
             guard let first = found.first else { return nil }
             return PlatformChip(id: first.id, label: label, aspect: first.aspect, resolution: first.resolution, supported: found.allSatisfy { caps.isSupported(aspect: $0.aspect, resolution: $0.resolution) }, members: ids,
-                                note: first.note, recommendedMinutes: first.recommendedMinutes, maxMinutes: first.maxMinutes, otherAspects: first.otherAspects.filter { id in caps.readyAspects.contains { $0.id == id } })
+                                note: first.note, recommendedMinutes: first.recommendedMinutes, maxMinutes: first.maxMinutes, otherAspects: first.otherAspects.filter { id in caps.readyAspects.contains { $0.id == id } },
+                                supports4K: found.allSatisfy(\.supports4K), note4K: found.first { !$0.supports4K }?.note4K)
         }
         let all = [chip(["youtube"], "YouTube"), chip(["linkedin"], "LinkedIn"), chip(["x"], "X"), chip(["other"], "Just a video"),
                    chip(["shorts", "reels", "tiktok"], "Shorts · Reels · TikTok"), chip(["instagram_feed"], "Instagram")].compactMap { $0 }
@@ -135,16 +161,39 @@ public struct CreateForm: Equatable, Sendable {
 
     public init() {}
 
-    public mutating func setMinutes(_ m: Double) { minutes = m; lengthTouched = true; userTouched = true }
-    public mutating func resetTouches() { lengthTouched = false; userTouched = false }
+    /// The person picked the resolution by hand: a platform pick then keeps it (4K is never chosen for them).
+    public private(set) var resolutionTouched = false
+    /// What each listed resolution costs relative to 1080p, from the capabilities (`normalize`).
+    public private(set) var multipliers: [String: Int] = [:]
 
-    public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language) }
+    public mutating func setMinutes(_ m: Double) { minutes = m; lengthTouched = true; userTouched = true }
+    public mutating func setResolution(_ id: String) { resolution = id; resolutionTouched = true; userTouched = true }
+    public mutating func resetTouches() { lengthTouched = false; userTouched = false; resolutionTouched = false }
+
+    public var creditsMultiplier: Int { multipliers[resolution] ?? 1 }
+    public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language, creditsMultiplier: creditsMultiplier) }
+
+    /// The resolutions to show for the chosen shape, in the server's order (one that cannot be made in this shape is left out).
+    public func resolutionChoices(_ caps: CreateCapabilities) -> [CreateCapabilities.Resolution] { caps.resolutions.filter { $0.supports(aspect: aspect) } }
+
+    /// The line under the resolution chips when the chosen one has a note ("4K (2160p) costs twice the credits…").
+    public func resolutionNote(_ caps: CreateCapabilities) -> String? { caps.resolution(resolution)?.note }
+
+    /// 4K is chosen for a platform that does not deliver it: the server's sentence recommending against it, and the resolution to go back to.
+    /// A recommendation only: the person may still go ahead.
+    public func fourKAdvice(_ caps: CreateCapabilities) -> (text: String, useResolution: String)? {
+        guard caps.multiplier(resolution) > 1, let c = chip(caps), !c.supports4K else { return nil }
+        let back = resolutionChoices(caps).last { $0.creditsMultiplier == 1 }?.id ?? c.resolution
+        guard back != resolution else { return nil }
+        let text = (c.note4K?.isEmpty == false ? c.note4K : nil) ?? "\(c.label) does not show \(caps.resolutionLabel(resolution)); it would cost \(caps.multiplier(resolution)) times the credits for no visible gain."
+        return (text, back)
+    }
     public var hasContent: Bool { !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     public func chip(_ caps: CreateCapabilities) -> PlatformChip? { PlatformChips.make(caps).first { $0.members.contains(platform) } }
 
     /// The person changed the format away from what the platform recommends (its own "also works" formats do not count as custom).
-    public func isCustom(_ caps: CreateCapabilities) -> Bool { guard let c = chip(caps) else { return true }; return !(c.aspect == aspect || c.otherAspects.contains(aspect)) || c.resolution != resolution }
+    public func isCustom(_ caps: CreateCapabilities) -> Bool { guard let c = chip(caps) else { return true }; return !(c.aspect == aspect || c.otherAspects.contains(aspect)) || (c.resolution != resolution && caps.multiplier(resolution) == 1) }      // 4K on top of a platform is still that platform
 
     /// "LinkedIn · Portrait 4:5 · 1080p · about 1 min": the server's own note for the platform's recommendation, else built from the choices
     /// ("YouTube · Landscape 16:9 · 1080p", or "Custom · Vertical 9:16 · 1080p").
@@ -152,7 +201,7 @@ public struct CreateForm: Equatable, Sendable {
         let c = chip(caps)
         let name = isCustom(caps) ? "Custom" : (c?.label ?? "Just a video")
         if !isCustom(caps), let c, c.aspect == aspect, c.resolution == resolution, let note = c.note, !note.isEmpty { return "\(name) · \(note)" }
-        return "\(name) · \(caps.aspectName(aspect)) · \(resolution)"
+        return "\(name) · \(caps.aspectName(aspect)) · \(caps.resolutionLabel(resolution))"
     }
 
     /// "Also works: Square, Landscape": the platform's other formats, as small secondary choices that switch only the format.
@@ -175,7 +224,8 @@ public struct CreateForm: Equatable, Sendable {
     /// Picking a platform sets its format and, unless the length was changed by hand since the screen opened, its recommended length.
     public mutating func select(_ chip: PlatformChip) {
         guard chip.supported else { return }
-        platform = chip.id; aspect = chip.aspect; resolution = chip.resolution; userTouched = true
+        platform = chip.id; aspect = chip.aspect; userTouched = true
+        if !resolutionTouched { resolution = chip.resolution }                  // an explicit resolution stays; a platform never picks 4K
         if !lengthTouched, let m = chip.recommendedMinutes { minutes = m }
     }
 
@@ -187,6 +237,8 @@ public struct CreateForm: Equatable, Sendable {
 
     /// Keeps the choices inside what the server lists (a stored format that is gone falls back to the first supported one, quietly).
     public mutating func normalize(_ caps: CreateCapabilities) {
+        multipliers = Dictionary(caps.resolutions.map { ($0.id, $0.creditsMultiplier) }, uniquingKeysWith: { a, _ in a })
+        if let r = caps.resolution(resolution), !r.supports(aspect: aspect) { resolution = resolutionChoices(caps).last { $0.creditsMultiplier == 1 }?.id ?? resolutionChoices(caps).first?.id ?? resolution }
         if !caps.isSupported(aspect: aspect, resolution: resolution) {
             let a = caps.readyAspects.first?.id ?? "16:9"
             aspect = caps.readyAspects.contains { $0.id == aspect } ? aspect : a
@@ -217,7 +269,8 @@ public struct CreateDefaults: Codable, Sendable, Equatable {
     /// A fresh form with these choices, kept inside the capabilities.
     public func form(_ caps: CreateCapabilities) -> CreateForm {
         var f = CreateForm()
-        f.platform = platform; f.aspect = aspect; f.resolution = resolution; f.minutes = caps.lengthPresets.contains(minutes) ? minutes : (caps.lengthPresets.contains(CreateOptions.defaultMinutes) ? CreateOptions.defaultMinutes : (caps.lengthPresets.first ?? CreateOptions.defaultMinutes))
+        f.platform = platform; f.aspect = aspect; f.resolution = caps.multiplier(resolution) > 1 ? "1080p" : resolution       // 4K is never a remembered default: always an explicit choice
+        f.minutes = caps.lengthPresets.contains(minutes) ? minutes : (caps.lengthPresets.contains(CreateOptions.defaultMinutes) ? CreateOptions.defaultMinutes : (caps.lengthPresets.first ?? CreateOptions.defaultMinutes))
         f.look = look.flatMap(VideoLook.init(rawValue:)); f.captions = captions; f.language = language
         f.normalize(caps)
         return f
