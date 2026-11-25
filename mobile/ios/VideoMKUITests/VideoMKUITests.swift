@@ -34,6 +34,28 @@ final class VideoMKUITests: XCTestCase {
         try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
     }
 
+    /// No backend needed: a made-up session and the in-app fake library (debug builds only). Checks the tab bar and the Media tab.
+    func testMediaTabWithFakeLibrary() throws {
+        func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
+        let token = "\(b64(["alg": "none"])).\(b64(["sub": "demo-user", "email": "demo@example.com", "exp": Int(Date().timeIntervalSince1970) + 86400])).sig"
+        let app = XCUIApplication()
+        app.launchEnvironment["VMK_DEBUG_RESET"] = "1"
+        app.launchEnvironment["VMK_DEBUG_ID_TOKEN"] = token
+        app.launchEnvironment["VMK_DEBUG_REFRESH_TOKEN"] = "fake"
+        app.launchEnvironment["VMK_DEBUG_FAKE_LIBRARY"] = "1"
+        app.launch()
+        XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 15), "signed in")
+        XCTAssertTrue(app.tabBars.buttons["Videos"].exists, "the tab bar offers Videos")
+        XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 5), "the Videos tab still has the composer")
+        XCTAssertTrue(element(app, "libraryButton").exists, "the composer has the My media button")
+        app.tabBars.buttons["Media"].tap()
+        XCTAssertTrue(element(app, "storageMeter").waitForExistence(timeout: 10), "the storage meter shows")
+        XCTAssertTrue(element(app, "mediaSearch").exists)
+        XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "photos show in the grid")
+        app.tabBars.buttons["Videos"].tap()
+        XCTAssertTrue(app.buttons["photoButton"].waitForExistence(timeout: 5))
+    }
+
     func testSignedOutUserSeesSignIn() throws {
         let app = try launch(signedIn: false)
         XCTAssertTrue(app.buttons["signInButton"].waitForExistence(timeout: 10))

@@ -21,6 +21,9 @@ struct SettingsView: View {
                 } header: { Text("Photos") } footer: {
                     Text("Use photo dates: puts your photos in the order they were taken and groups them by day.\n\nUse photo locations: names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves.")
                 }
+                Section("My media") {
+                    Text(MediaCopy.privacy).font(.footnote).foregroundStyle(Theme.textSecondary)
+                }
                 Section("About") {
                     LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
                     Link("Privacy Policy", destination: URL(string: "https://videomk.com/privacy")!)

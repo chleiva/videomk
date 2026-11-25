@@ -19,6 +19,10 @@ final class AppModel {
     private var photoData: [String: [Data]] = [:]          // photos waiting to be uploaded, kept until the video is accepted (so a retry needs no new selection)
     private var photoMeta: [String: [PhotoMeta?]] = [:]       // capture time / approximate place per photo, same order as photoData
     private var uploadedMedia: [String: [Int: String]] = [:]   // photos already uploaded per pending request, so a retry sends only the rest
+    private var libraryIDs: [String: [String]] = [:]      // library photo ids per pending request (kept for a retry)
+    private(set) var media: MediaModel?
+    var selectedTab = 0                                    // 0 videos, 1 media
+    var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var signInError: String?
     var isSigningIn = false
 
@@ -33,6 +37,11 @@ final class AppModel {
         let a = AuthService(config: config, store: store)
         auth = a
         api = APIClient(config: config, auth: a, appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0")
+        media = api.map { MediaModel(api: LibraryClient(api: $0)) }
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true) }
+        selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
+        #endif
     }
 
     var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } || pending.contains { $0.state == .sending } }
@@ -40,6 +49,9 @@ final class AppModel {
 
     func refreshWallet() async {
         guard let api else { return }
+        #if DEBUG
+        if media?.isFake == true { return }
+        #endif
         if let w = try? await api.wallet() { wallet = w }
     }
 
@@ -81,6 +93,8 @@ final class AppModel {
 
     func signOut() async {
         await auth?.signOut()
+        await media?.wipe()      // another account must never see this one's cached photos or queued uploads
+        composerLibrary = []; libraryIDs = [:]
         wallet = nil; videos = []; pending = []; photoData = [:]; photoMeta = [:]; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
         phase = .signedOut
     }
@@ -89,6 +103,9 @@ final class AppModel {
 
     func refresh() async {
         guard let api else { return }
+        #if DEBUG
+        if media?.isFake == true { loadState = .loaded; return }      // fake-library runs never call the real backend (its 401 would sign the demo session out)
+        #endif
         if videos.isEmpty { loadState = .loading }
         do {
             Task { await refreshWallet() }  // credits load alongside the list
@@ -124,9 +141,10 @@ final class AppModel {
     // MARK: ask for a video without leaving the home screen
 
     /// Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more.
-    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = []) {
+    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = []) {
         let p = PendingVideo(brief: Brief.normalized(brief), options: options, photoCount: photos.count, state: photos.isEmpty ? .sending : .uploading(done: 0, total: photos.count))
         if !photos.isEmpty { photoData[p.id] = photos; photoMeta[p.id] = meta }
+        if !libraryMedia.isEmpty { libraryIDs[p.id] = libraryMedia }
         pending.insert(p, at: 0)
         Task { await send(p.id) }
     }
@@ -137,7 +155,7 @@ final class AppModel {
         Task { await send(id) }
     }
 
-    func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil }
+    func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil }
 
     private func setProgress(_ id: String, done: Int, total: Int) {
         if let i = pending.firstIndex(where: { $0.id == id }), case .uploading = pending[i].state { pending[i].state = .uploading(done: done, total: total) }
@@ -154,8 +172,8 @@ final class AppModel {
                 }
                 if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .sending }
             }
-            let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []))
-            photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil
+            let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [])
+            photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil
             briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .accepted(videoID: videoID) }
             await refresh()  // also re-reads the credits the video just used
@@ -181,9 +199,9 @@ final class AppModel {
 
     // MARK: create / play
 
-    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:]) async throws -> String {
+    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = []) async throws -> String {
         guard let api else { throw APIError.server }
-        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta) }
+        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia) }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 

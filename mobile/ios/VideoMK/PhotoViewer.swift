@@ -1,0 +1,126 @@
+import SwiftUI
+import VideoMKCore
+
+/// Full-screen viewer: swipe between photos, pinch or double-tap to zoom, info, collections, delete, make a video.
+struct PhotoViewer: View {
+    let media: MediaModel
+    @State var photos: [LibraryPhoto]
+    @State private var index: Int
+    let onDeleted: (String) -> Void
+    let onMakeVideo: (LibraryPhoto) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var showInfo = false
+    @State private var showCollections = false
+    @State private var confirmDelete = false
+
+    init(media: MediaModel, photos: [LibraryPhoto], start: Int, onDeleted: @escaping (String) -> Void, onMakeVideo: @escaping (LibraryPhoto) -> Void) {
+        self.media = media; _photos = State(initialValue: photos); _index = State(initialValue: min(max(0, start), max(0, photos.count - 1)))
+        self.onDeleted = onDeleted; self.onMakeVideo = onMakeVideo
+    }
+
+    private var current: LibraryPhoto? { photos.indices.contains(index) ? photos[index] : nil }
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            TabView(selection: $index) {
+                ForEach(Array(photos.enumerated()), id: \.element.id) { i, photo in
+                    ZoomablePhoto(media: media, photo: photo).tag(i)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never)).ignoresSafeArea()
+        }
+        .overlay(alignment: .top) {
+            HStack {
+                Button { dismiss() } label: { Image(systemName: "xmark.circle.fill").font(.title).symbolRenderingMode(.palette).foregroundStyle(.white, Color.white.opacity(0.25)) }
+                    .accessibilityLabel("Close")
+                Spacer()
+                if photos.count > 1 { Text("\(index + 1) of \(photos.count)").font(.footnote.monospacedDigit()).foregroundStyle(.white.opacity(0.8)) }
+            }.padding()
+        }
+        .overlay(alignment: .bottom) {
+            if let p = current {
+                HStack(spacing: 28) {
+                    bar("info.circle", "Info") { showInfo = true }
+                    bar("folder.badge.plus", "Add to collection") { showCollections = true }
+                    bar("sparkles.tv", "Make a video from this") { onMakeVideo(p) }
+                    bar("trash", "Delete") { confirmDelete = true }
+                }
+                .padding(.vertical, 12).padding(.horizontal, 20).background(.ultraThinMaterial, in: Capsule()).padding(.bottom, 16)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .sheet(isPresented: $showInfo) { if let p = current { PhotoInfoSheet(media: media, photo: p) } }
+        .sheet(isPresented: $showCollections) { if let p = current { AddToCollectionSheet(media: media, photoIDs: [p.id]) {} } }
+        .confirmationDialog("Delete this photo?", isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button("Delete photo", role: .destructive) { deleteCurrent() }
+        } message: { Text("It is removed from your library and every collection. This can't be undone.") }
+    }
+
+    private func bar(_ symbol: String, _ label: String, _ run: @escaping () -> Void) -> some View {
+        Button(action: run) { Image(systemName: symbol).font(.title3).foregroundStyle(.white).frame(minWidth: 44, minHeight: 44) }.accessibilityLabel(label)
+    }
+
+    private func deleteCurrent() {
+        guard let p = current else { return }
+        Task {
+            guard await media.delete([p.id]) else { return }
+            onDeleted(p.id)
+            photos.removeAll { $0.id == p.id }
+            if photos.isEmpty { dismiss() } else { index = min(index, photos.count - 1) }
+        }
+    }
+}
+
+struct ZoomablePhoto: View {
+    let media: MediaModel
+    let photo: LibraryPhoto
+    @State private var image: UIImage?
+    @State private var scale: CGFloat = 1
+    @State private var base: CGFloat = 1
+    @State private var offset: CGSize = .zero
+    @State private var dragBase: CGSize = .zero
+
+    var body: some View {
+        GeometryReader { geo in
+            Group {
+                if let image {
+                    Image(uiImage: image).resizable().scaledToFit()
+                        .scaleEffect(scale).offset(offset)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .gesture(MagnifyGesture().onChanged { scale = max(1, min(6, base * $0.magnification)) }
+                            .onEnded { _ in base = scale; if scale == 1 { offset = .zero; dragBase = .zero } })
+                        .simultaneousGesture(DragGesture().onChanged { if scale > 1 { offset = CGSize(width: dragBase.width + $0.translation.width, height: dragBase.height + $0.translation.height) } }
+                            .onEnded { _ in dragBase = offset })
+                        .onTapGesture(count: 2) { withAnimation(.snappy) { if scale > 1 { scale = 1; base = 1; offset = .zero; dragBase = .zero } else { scale = 2.5; base = 2.5 } } }
+                } else { ProgressView().tint(.white).frame(width: geo.size.width, height: geo.size.height) }
+            }
+        }
+        .accessibilityLabel(MediaGrouping.accessibilityLabel(photo))
+        .accessibilityAddTraits(.isImage)
+        .task(id: photo.id) {
+            image = await media.thumbnail(for: photo)          // instant, then the sharp one
+            if let full = await media.fullImage(for: photo) { image = full }
+        }
+    }
+}
+
+struct PhotoInfoSheet: View {
+    let media: MediaModel
+    let photo: LibraryPhoto
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        NavigationStack {
+            List {
+                if let d = MediaGrouping.day(of: photo, calendar: .current) { LabeledContent(photo.taken == nil ? "Added" : "Taken", value: MediaGrouping.title(y: d.y, m: d.m, d: d.d, calendar: .current)) }
+                if let place = photo.place { LabeledContent("Place", value: place) }
+                if photo.w > 0 { LabeledContent("Size", value: "\(photo.w) x \(photo.h) px, \(StorageMeter.format(photo.bytes))") } else { LabeledContent("Size", value: StorageMeter.format(photo.bytes)) }
+                let names = media.collections.filter { photo.collections.contains($0.id) }.map(\.name)
+                LabeledContent("Collections", value: names.isEmpty ? "None" : names.joined(separator: ", "))
+            }
+            .navigationTitle("Info").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+        .presentationDetents([.medium])
+    }
+}

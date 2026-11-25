@@ -5,12 +5,13 @@ import Testing
 // MARK: helpers
 
 final class StubProtocol: URLProtocol, @unchecked Sendable {
+    nonisolated(unsafe) static var headers: [String: String] = [:]
     nonisolated(unsafe) static var handler: (@Sendable (URLRequest) -> (Int, Data))?
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         let (code, data) = Self.handler?(request) ?? (500, Data())
-        client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: code, httpVersion: nil, headerFields: nil)!, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: code, httpVersion: nil, headerFields: Self.headers)!, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data)
         client?.urlProtocolDidFinishLoading(self)
     }

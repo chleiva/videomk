@@ -19,12 +19,13 @@ final class PhotoAttachments {
     private(set) var items: [AttachedPhoto] = []
     private(set) var loading = 0            // selected photos not prepared yet
     private(set) var batchTotal = 0         // size of the batch being prepared, for "Preparing 37 of 100"
+    var libraryCount = 0                // photos chosen from My media: they share the limit of 100
     private(set) var notice: String?        // left out / unreadable photos, shown under the strip
     var picked: [PhotosPickerItem] = [] {
         didSet { if !picked.isEmpty { Task { await ingest() } } }
     }
 
-    var remaining: Int { max(0, PhotoLimits.maxPhotos - items.count - loading) }
+    var remaining: Int { ComposerPhotos.room(phone: items.count + loading, library: libraryCount) }
     var isEmpty: Bool { items.isEmpty && loading == 0 }
     var preparingText: String? { loading > 0 ? "Preparing \(batchTotal - loading + 1) of \(batchTotal)" : nil }
 
@@ -33,7 +34,7 @@ final class PhotoAttachments {
 
     private func ingest() async {
         guard loading == 0 else { picked = []; return }       // the picker is disabled while preparing; ignore a late selection
-        let fit = PhotoLimits.fit(selected: picked.count, attached: items.count)
+        let fit = PhotoLimits.fit(selected: picked.count, attached: items.count + libraryCount)
         let batch = Array(picked.prefix(fit.keep))
         picked = []
         notice = PhotoLimits.leftOutMessage(fit.leftOut)
@@ -86,11 +87,17 @@ final class PhotoAttachments {
 struct AttachedPhotosStrip: View {
     @Bindable var photos: PhotoAttachments
     let minutes: Double
+    var library: [LibraryPhoto] = []
+    var media: MediaModel?
+    var onRemoveLibrary: (String) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 8) {
+                    ForEach(Array(library.enumerated()), id: \.element.id) { index, photo in
+                        LibraryStripTile(photo: photo, media: media, label: "My media photo \(index + 1) of \(library.count)") { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
+                    }
                     ForEach(Array(photos.items.enumerated()), id: \.element.id) { index, photo in
                         Image(uiImage: photo.thumbnail)
                             .resizable().scaledToFill()
@@ -121,10 +128,10 @@ struct AttachedPhotosStrip: View {
                 Text(notice).font(.caption).foregroundStyle(Theme.danger).padding(.horizontal, 20)
                     .accessibilityIdentifier("photosNotice")
             }
-            Text("\(photos.items.count) of \(PhotoLimits.maxPhotos) photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.")
+            Text("\(photos.items.count + library.count) of \(PhotoLimits.maxPhotos) photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.")
                 .font(.caption).foregroundStyle(Theme.textSecondary).padding(.horizontal, 20)
                 .accessibilityIdentifier("photosNote")
-            if let hint = PhotoCapacity.hint(photos: photos.items.count + photos.loading, minutes: minutes) {
+            if let hint = PhotoCapacity.hint(photos: ComposerPhotos.total(phone: photos.items.count + photos.loading, library: library.count), minutes: minutes) {
                 Text(hint)
                     .font(.caption).foregroundStyle(Theme.warning).padding(.horizontal, 20)
                     .accessibilityLabel("Length warning. \(hint)")
@@ -132,5 +139,28 @@ struct AttachedPhotosStrip: View {
             }
         }
         .transition(.opacity.combined(with: .move(edge: .bottom)))
+    }
+}
+
+/// A photo chosen from My media, in the composer strip. Same size as a phone photo, with a small library badge.
+struct LibraryStripTile: View {
+    let photo: LibraryPhoto
+    let media: MediaModel?
+    let label: String
+    let onRemove: () -> Void
+    @State private var image: UIImage?
+    var body: some View {
+        Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
+            .frame(width: 56, height: 56)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.system(size: 10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
+            .overlay(alignment: .topTrailing) {
+                Button(action: onRemove) { Image(systemName: "xmark.circle.fill").font(.system(size: 20)).symbolRenderingMode(.palette).foregroundStyle(.white, Color.black.opacity(0.65)) }
+                    .padding(2).accessibilityLabel("Remove \(label)")
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("\(label). \(MediaGrouping.accessibilityLabel(photo))")
+            .accessibilityIdentifier("attachedLibraryPhoto")
+            .task(id: photo.id) { if image == nil { image = await media?.thumbnail(for: photo) } }
     }
 }

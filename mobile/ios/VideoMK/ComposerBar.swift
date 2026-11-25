@@ -14,6 +14,8 @@ struct ComposerBar: View {
     let balance: Int?           // nil until the wallet has loaded
     let onSend: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppModel.self) private var model
+    @State private var showingLibrary = false
 
     private var affordable: Bool { balance.map { credits <= $0 } ?? true }
     private var canSend: Bool { Brief.isValid(text) && affordable }
@@ -64,17 +66,18 @@ struct ComposerBar: View {
                     .frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 20)
             }
 
-            if !photos.isEmpty { AttachedPhotosStrip(photos: photos, minutes: options.minutes) }
+            if !photos.isEmpty || !model.composerLibrary.isEmpty { AttachedPhotosStrip(photos: photos, minutes: options.minutes, library: model.composerLibrary, media: model.media) { id in model.composerLibrary.removeAll { $0.id == id } } }
             HStack(alignment: .bottom, spacing: 8) {
                 optionsMenu
                 HStack(alignment: .bottom, spacing: 4) {
-                    TextField(photos.isEmpty ? "Describe a video…" : "What should the video be about?", text: $text, axis: .vertical)
+                    TextField(photos.isEmpty && model.composerLibrary.isEmpty ? "Describe a video…" : "What should the video be about?", text: $text, axis: .vertical)
                         .focused(focus)
                         .lineLimit(1...5)
                         .textInputAutocapitalization(.sentences)
                         .padding(.leading, 14).padding(.vertical, 10)
                         .accessibilityIdentifier("composerField")
                     photoButton
+                    libraryButton
                     micButton
                 }
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -93,6 +96,13 @@ struct ComposerBar: View {
         .background(.bar)
         .animation(.snappy, value: canSend)
         .animation(.snappy, value: photos.items.count)
+        .animation(.snappy, value: model.composerLibrary.count)
+        .onChange(of: model.composerLibrary.count, initial: true) { _, n in photos.libraryCount = n }
+        .sheet(isPresented: $showingLibrary) {
+            if let media = model.media {
+                MediaPickerSheet(media: media, prompt: text, room: ComposerPhotos.room(phone: photos.items.count + photos.loading, library: 0), initial: model.composerLibrary) { model.composerLibrary = $0 }
+            }
+        }
         .animation(.snappy, value: dictation.state)
     }
 
@@ -110,6 +120,20 @@ struct ComposerBar: View {
         .accessibilityLabel("Add photos")
         .accessibilityHint("Choose up to \(PhotoLimits.maxPhotos) of your photos to use in the video")
         .accessibilityIdentifier("photoButton")
+    }
+
+    private var libraryButton: some View {
+        Button { showingLibrary = true } label: {
+            Image(systemName: "photo.stack")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(model.media == nil ? Theme.textSecondary : Theme.primary)
+                .frame(width: 40, height: 44)
+                .contentShape(Rectangle())
+        }
+        .disabled(model.media == nil)
+        .accessibilityLabel("My media")
+        .accessibilityHint("Choose photos from your library to use in the video")
+        .accessibilityIdentifier("libraryButton")
     }
 
     private var micButton: some View {

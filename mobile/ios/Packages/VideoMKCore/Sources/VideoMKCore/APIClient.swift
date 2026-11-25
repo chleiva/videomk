@@ -69,9 +69,10 @@ public struct APIClient: Sendable {
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
-    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:]) async throws -> String {
+    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = []) async throws -> String {
         var fields: [String: Any] = ["prompt": Brief.normalized(prompt), "client_request_id": clientRequestID, "target_minutes": options.minutes]
         if !media.isEmpty { fields["media"] = media }
+        if !libraryMedia.isEmpty { fields["library_media"] = libraryMedia }
         let meta = mediaMeta.filter { media.contains($0.key) && !$0.value.isEmpty }.mapValues(\.json).filter { !$0.value.isEmpty }
         if !meta.isEmpty { fields["media_meta"] = meta }
         if let look = options.look { fields["theme"] = look.rawValue }
@@ -98,10 +99,12 @@ public struct APIClient: Sendable {
 
     // MARK: - plumbing
 
-    private func send(_ method: String, _ path: [String], body: Data? = nil, conflictIsEdit: Bool = false) async throws -> (Data, HTTPURLResponse) {
+    /// The authenticated request without any status mapping: only a missing session or a network failure throws. The library client maps statuses itself.
+    func perform(_ method: String, _ path: [String], query: [URLQueryItem] = [], body: Data? = nil) async throws -> (Data, HTTPURLResponse) {
         let (token, userID) = try await auth.authorization()
         var url = config.apiBase.appendingPathComponent("users").appendingPathComponent(userID)
         for p in path { url.appendPathComponent(p) }
+        if !query.isEmpty, var c = URLComponents(url: url, resolvingAgainstBaseURL: false) { c.queryItems = query; url = c.url ?? url }
         var req = URLRequest(url: url, timeoutInterval: 30)
         req.httpMethod = method
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -116,6 +119,11 @@ public struct APIClient: Sendable {
         catch is CancellationError { throw CancellationError() }
         catch { throw APIError.network }
         guard let http = resp as? HTTPURLResponse else { throw APIError.server }
+        return (data, http)
+    }
+
+    private func send(_ method: String, _ path: [String], body: Data? = nil, conflictIsEdit: Bool = false) async throws -> (Data, HTTPURLResponse) {
+        let (data, http) = try await perform(method, path, body: body)
 
         switch http.statusCode {
         case 200..<300: return (data, http)

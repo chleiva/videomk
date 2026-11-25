@@ -1,0 +1,164 @@
+import Foundation
+
+/// An in-memory library for unit tests, previews and screenshots. Behaves like the contract (quota, duplicates, search chips, collections).
+public actor FakeLibraryAPI: LibraryAPI {
+    public private(set) var photos: [LibraryPhoto]
+    public private(set) var collectionList: [LibraryCollection]
+    public var limitBytes: Int
+    public var canUpgrade = false
+    public var failNext: LibraryAPIError?
+    public private(set) var uploadRequests: [[UploadRequestItem]] = []
+    public private(set) var searches: [(query: String, drop: [String], cursor: String?)] = []
+    public var semanticMode = false
+    public private(set) var lastCursorSeen: String?
+    private var hashes: [String: String] = [:]
+    private var serial = 0
+
+    public init(photos: [LibraryPhoto] = [], collections: [LibraryCollection] = [], limitBytes: Int = 2_000_000_000) {
+        self.photos = photos; self.collectionList = collections; self.limitBytes = limitBytes
+    }
+
+    /// Pretend this content is already in the library (the real server learns a hash only once the file has arrived).
+    public func registerExisting(sha256: String, id: String = "existing") { hashes[sha256] = id }
+    public func setFailNext(_ e: LibraryAPIError?) { failNext = e }
+    public func setLimit(_ n: Int) { limitBytes = n }
+    public func setSemantic(_ b: Bool) { semanticMode = b }
+    public func setCanUpgrade(_ b: Bool) { canUpgrade = b }
+
+    /// A believable library: `count` photos over 2023 to 2025 in a few places, 1.4 MB each.
+    public static func demo(count: Int = 150) -> FakeLibraryAPI {
+        let places = ["Phuket, Thailand", "Palma, Spain", "Lisbon, Portugal", "Kyoto, Japan", nil]
+        let photos = (0..<count).map { n -> LibraryPhoto in
+            let year = 2025 - (n * 3 / max(count, 1)), month = 1 + (n * 7) % 12, day = 1 + (n * 5) % 27
+            return LibraryPhoto(id: String(format: "p%05d", n), taken: n % 9 == 8 ? nil : String(format: "%04d-%02d-%02dT1%d:%02d:00", year, month, day, n % 10, n % 60),
+                                added: String(format: "%04d-%02d-%02dT09:00:00Z", year, month, day), place: places[n % places.count], w: 1536, h: 2048, bytes: 1_400_000,
+                                thumbURL: URL(string: "fake://thumb/p\(String(format: "%05d", n))"), collections: [])
+        }
+        return FakeLibraryAPI(photos: photos, collections: [LibraryCollection(id: "c1", name: "Thailand", emoji: "🏝", count: 0), LibraryCollection(id: "c2", name: "Family", emoji: "👨‍👩‍👧", count: 0)])
+    }
+
+    private func check() throws { if let e = failNext { failNext = nil; throw e } }
+    private var used: Int { photos.reduce(0) { $0 + $1.bytes } }
+    private func sorted() -> [LibraryPhoto] { photos.sorted { ($0.taken ?? $0.added) > ($1.taken ?? $1.added) } }
+    private func refreshCollections() { for n in collectionList.indices { let id = collectionList[n].id; let m = photos.filter { $0.collections.contains(id) }; collectionList[n].count = m.count; collectionList[n].coverID = m.first?.id; collectionList[n].coverThumbURL = m.first?.thumbURL } }
+
+    public func summary() async throws -> LibrarySummary {
+        try check(); refreshCollections()
+        let years = Dictionary(grouping: photos.compactMap { ($0.taken ?? $0.added).prefix(4) }.compactMap { Int($0) }, by: { $0 }).map { LibrarySummary.Year(year: $0.key, count: $0.value.count) }.sorted { $0.year > $1.year }
+        let places = Dictionary(grouping: photos.compactMap(\.place), by: { $0 }).map { LibrarySummary.Place(name: String($0.key.split(separator: ",").first ?? ""), country: $0.key.split(separator: ",").last.map { $0.trimmingCharacters(in: .whitespaces) }, count: $0.value.count) }
+        return LibrarySummary(plan: "free", limitBytes: limitBytes, usedBytes: used, count: photos.count, canUpgrade: canUpgrade, readOnly: used > limitBytes, years: years, places: places, collections: collectionList)
+    }
+
+    public func requestUploads(_ items: [UploadRequestItem]) async throws -> UploadsResponse {
+        try check(); uploadRequests.append(items)
+        var reserved = used
+        if reserved >= limitBytes && !items.isEmpty { throw LibraryAPIError.storageFull(usedBytes: reserved, limitBytes: limitBytes) }
+        var out: [UploadSlotResult] = []
+        for (n, item) in items.enumerated() {
+            if let dup = hashes[item.sha256] { out.append(UploadSlotResult(index: n, status: .duplicate, duplicateOf: dup)); continue }
+            if reserved + item.size > limitBytes { out.append(UploadSlotResult(index: n, status: .noSpace)); continue }
+            serial += 1
+            let id = "u\(serial)"
+            reserved += item.size
+            photos.append(LibraryPhoto(id: id, taken: item.taken, added: "2026-11-25T10:00:00Z", w: 0, h: 0, bytes: item.size, thumbURL: URL(string: "fake://thumb/\(id)")))
+            out.append(UploadSlotResult(index: n, status: .upload, id: id, url: URL(string: "https://media.example/upload")!, fields: ["key": "u/me/o/\(id).jpg", "policy": "P"]))
+        }
+        return UploadsResponse(uploads: out, usedBytes: reserved, limitBytes: limitBytes)
+    }
+
+    public func items(limit: Int, cursor: String?, filter: ItemsFilter) async throws -> ItemsPage {
+        try check(); lastCursorSeen = cursor
+        var all = sorted()
+        if let c = filter.collection { all = all.filter { $0.collections.contains(c) } }
+        if let p = filter.place { all = all.filter { ($0.place ?? "").localizedCaseInsensitiveContains(p) } }
+        if let f = filter.from { all = all.filter { ($0.taken ?? $0.added) >= f } }
+        if let t = filter.to { all = all.filter { String(($0.taken ?? $0.added).prefix(10)) <= t } }
+        let start = cursor.flatMap { Int($0.replacingOccurrences(of: "pos:", with: "")) } ?? 0
+        let page = Array(all.dropFirst(start).prefix(limit))
+        return ItemsPage(items: page, cursor: start + page.count < all.count ? "pos:\(start + page.count)" : nil)
+    }
+
+    public func item(id: String) async throws -> LibraryPhoto {
+        try check()
+        guard var p = photos.first(where: { $0.id == id }) else { throw LibraryAPIError.notFound }
+        p.url = URL(string: "fake://full/\(id)"); return p
+    }
+
+    public func delete(ids: [String]) async throws -> DeleteResult {
+        try check()
+        let before = photos.count
+        photos.removeAll { ids.contains($0.id) }
+        hashes = hashes.filter { !ids.contains($0.value) }
+        return DeleteResult(deleted: before - photos.count, usedBytes: used)
+    }
+
+    public func search(query: String, limit: Int?, drop: [String], cursor: String?) async throws -> SearchResponse {
+        try check(); searches.append((query, drop, cursor))
+        var chips: [SearchChip] = []
+        var matched = sorted()
+        let words = query.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
+        for place in Set(photos.compactMap { $0.place?.split(separator: ",").first.map(String.init) }) where words.contains(place.lowercased()) {
+            let chip = SearchChip(kind: "place", label: place)
+            if !drop.contains(chip.label) { chips.append(chip); matched = matched.filter { ($0.place ?? "").hasPrefix(place) } }
+        }
+        for w in words where w.count == 4 && Int(w) != nil {
+            let chip = SearchChip(kind: "date", label: w)
+            if !drop.contains(chip.label) { chips.append(chip); matched = matched.filter { ($0.taken ?? $0.added).hasPrefix(w) } }
+        }
+        let understood = SearchUnderstood(places: chips.filter { $0.kind == "place" }.map(\.label), chips: chips)
+        if semanticMode { return SearchResponse(understood: understood, items: Array(matched.reversed().prefix(min(limit ?? 60, 100))), mode: "semantic") }   // relevance order (here: oldest first), no cursor
+        let start = cursor.flatMap { Int($0.replacingOccurrences(of: "pos:", with: "")) } ?? 0
+        let page = Array(matched.dropFirst(start).prefix(limit ?? 60))
+        return SearchResponse(understood: understood, items: page, mode: "timeline", cursor: start + page.count < matched.count ? "pos:\(start + page.count)" : nil)
+    }
+
+    public func collections() async throws -> [LibraryCollection] { try check(); refreshCollections(); return collectionList }
+
+    public func createCollection(name: String, emoji: String?) async throws -> LibraryCollection {
+        try check()
+        guard (1...40).contains(name.count) else { throw LibraryAPIError.invalid("Choose a name of 1 to 40 characters.") }
+        serial += 1
+        let c = LibraryCollection(id: "c\(100 + serial)", name: name, emoji: emoji, count: 0)
+        collectionList.append(c); return c
+    }
+
+    public func updateCollection(id: String, name: String?, emoji: String?) async throws -> LibraryCollection {
+        try check()
+        guard let n = collectionList.firstIndex(where: { $0.id == id }) else { throw LibraryAPIError.notFound }
+        if let name { collectionList[n].name = name }
+        if let emoji { collectionList[n].emoji = emoji }
+        return collectionList[n]
+    }
+
+    public func deleteCollection(id: String) async throws {
+        try check()
+        collectionList.removeAll { $0.id == id }
+        for n in photos.indices { photos[n].collections.removeAll { $0 == id } }
+    }
+
+    public func editCollection(id: String, add: [String], remove: [String]) async throws {
+        try check()
+        guard collectionList.contains(where: { $0.id == id }) else { throw LibraryAPIError.notFound }
+        for n in photos.indices {
+            if add.contains(photos[n].id), !photos[n].collections.contains(id) { photos[n].collections.append(id) }
+            if remove.contains(photos[n].id) { photos[n].collections.removeAll { $0 == id } }
+        }
+    }
+}
+
+/// Records posts; can be told to fail some of them. For tests.
+public actor FakeFilePoster: FilePosting {
+    public private(set) var posts: [(url: URL, fields: [String: String], bytes: Int)] = []
+    public private(set) var inFlight = 0, peak = 0
+    private var failures: [Int: Int] = [:]    // first byte of the file -> how many times it must fail
+    private var delay: Duration = .zero
+    public init(delay: Duration = .zero) { self.delay = delay }
+    public func failing(firstByte: UInt8, times: Int) { failures[Int(firstByte)] = times }
+    public func post(_ file: Data, to url: URL, fields: [String: String]) async throws {
+        inFlight += 1; peak = max(peak, inFlight)
+        if delay != .zero { try? await Task.sleep(for: delay) }
+        inFlight -= 1
+        if let b = file.first, let left = failures[Int(b)], left > 0 { failures[Int(b)] = left - 1; throw LibraryAPIError.server }
+        posts.append((url, fields, file.count))
+    }
+}
