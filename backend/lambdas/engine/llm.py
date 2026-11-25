@@ -13,7 +13,8 @@ from botocore.exceptions import ClientError
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION") or os.environ.get("AWS_REGION") or "us-west-2"
 GEO = "eu" if BEDROCK_REGION.startswith("eu-") else "apac" if BEDROCK_REGION.startswith("ap-") else "us"
 # Verify access to these in your account/region (Sonnet 4.5 is marked legacy and Claude 3 Haiku is end of life on Bedrock).
-PRIMARY_MODEL = os.environ.get("PLAN_MODEL_ID", f"{GEO}.anthropic.claude-sonnet-5-5")
+# Owner (2026-11-25): Sonnet 5.5 and Haiku 5.5 go through Amazon Bedrock's GLOBAL inference profiles (global.*), not the regional eu./us. ones. GEO remains for other models.
+PRIMARY_MODEL = os.environ.get("PLAN_MODEL_ID", "global.anthropic.claude-sonnet-5-5")
 # No fallback by default: a silent downgrade hides a broken primary (it already did once). Set PLAN_FALLBACK_MODEL_IDS to opt in.
 FALLBACK_MODELS = [m for m in os.environ.get("PLAN_FALLBACK_MODEL_IDS", "").split(",") if m]
 
@@ -49,7 +50,7 @@ def _bedrock():
     return _client
 
 
-REVIEW_MODEL = os.environ.get("REVIEW_MODEL_ID", f"{GEO}.anthropic.claude-haiku-5-5")
+REVIEW_MODEL = os.environ.get("REVIEW_MODEL_ID", "global.anthropic.claude-haiku-5-5")
 # Research decides what the video says (owner, 2026-11-25: at least Sonnet 5.5 at medium effort): it follows the script model unless RESEARCH_MODEL_ID overrides it.
 RESEARCH_MODEL = os.environ.get("RESEARCH_MODEL_ID", "") or PRIMARY_MODEL
 RESEARCH_EFFORT = os.environ.get("RESEARCH_EFFORT", "medium")

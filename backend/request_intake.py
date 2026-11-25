@@ -23,7 +23,7 @@ class RequestIntake(Construct):
         env = {"SAFETY_TABLE": table.table_name, **extra_env}   # extra_env: the small-model id when the account cannot use the default (see docs/DEPLOY.md)
         brief_fn = make_fn("VideoBriefFn", "video_brief", "video_brief.handler", timeout=Duration.seconds(20), memory=512, env=env)   # two model attempts of 4 s each fit comfortably
 
-        model = ["arn:aws:bedrock:*::foundation-model/anthropic.*", f"arn:aws:bedrock:*:{account}:inference-profile/*anthropic.*"]   # the small model (REVIEW_MODEL_ID) through its regional profile; Anthropic models only
+        model = ["arn:aws:bedrock:*::foundation-model/anthropic.*", "arn:aws:bedrock:::foundation-model/anthropic.*", f"arn:aws:bedrock:*:{account}:inference-profile/*anthropic.*"]   # the small model (REVIEW_MODEL_ID) through its regional profile; Anthropic models only
         for fn in (brief_fn, launcher_fn):
             table.grant_read_write_data(fn)
             flags_table.grant_read_data(fn)   # READ only: staff clear or hold an account with scripts/safety_admin.py; nothing at runtime can clear its own stops

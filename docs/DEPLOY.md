@@ -52,3 +52,4 @@ npx aws-cdk@latest deploy videomk-prod -c stage=prod -c engine=v2 -c "@aws-cdk/c
 * **Script / plan** (writes everything that is said and shown): `PLAN_MODEL_ID`, Sonnet 5.5, medium effort.
 * **Small jobs** (photo and clip review, clip verification, request check, whether to research): `REVIEW_MODEL_ID`, Haiku 5.5, low effort.
 * Prod cannot call Claude 5.x yet, so there research and script both run on Sonnet 4.6 until access is granted.
+* **Endpoints (owner, 2026-11-25)**: Sonnet 5.5 and Haiku 5.5 are called through Amazon Bedrock's **global** inference profiles (`global.anthropic.claude-sonnet-5-5`, `global.anthropic.claude-haiku-5-5`), not the regional `eu.`/`us.` ones; the functions' policies allow the regionless `arn:aws:bedrock:::foundation-model/*` the global route uses. Requests may be processed in any commercial region. Cohere embeddings (private photos) stay on the regional profile.

@@ -67,7 +67,7 @@ class MediaLibrary(Construct):
         allow(api_fn, ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"], [originals, thumbs])    # presigned uploads and links are signed with this role; it never reads another prefix
         allow(api_fn, ["s3:ListBucket"], [bucket.bucket_arn])    # only for 'delete everything' (prefix o/<user>/ and t/<user>/)
         allow(api_fn, ["s3vectors:QueryVectors", "s3vectors:GetVectors", "s3vectors:DeleteVectors"], [index_arn])
-        allow(api_fn, ["bedrock:InvokeModel"], embed_model + ["arn:aws:bedrock:*::foundation-model/*", f"arn:aws:bedrock:*:{account}:inference-profile/*"])
+        allow(api_fn, ["bedrock:InvokeModel"], embed_model + ["arn:aws:bedrock:*::foundation-model/*", "arn:aws:bedrock:::foundation-model/*", f"arn:aws:bedrock:*:{account}:inference-profile/*"])
         for fn in (ingest_fn, sweeper_fn):
             allow(fn, ["s3:GetObject", "s3:DeleteObject"], [originals])
             allow(fn, ["s3:PutObject", "s3:DeleteObject"], [thumbs])

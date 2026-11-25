@@ -466,6 +466,9 @@ def test_llm_request_shape_per_model_generation(monkeypatch):
     assert old["temperature"] == 0.3 and "output_config" not in old
     assert meta["cost_usd"] == pytest.approx((10 * 2.0 + 5 * 10.0) / 1_000_000)  # Sonnet 5.5: $2 / $10 per 1M
     assert llm.estimate_cost("eu.anthropic.claude-haiku-5-5", 1_000_000, 1_000_000) == pytest.approx(0.60)
+    assert llm.estimate_cost("global.anthropic.claude-haiku-5-5", 1_000_000, 1_000_000) == pytest.approx(0.60) and llm.is_claude5("global.anthropic.claude-sonnet-5-5")
+    if not (os.environ.get("PLAN_MODEL_ID") or os.environ.get("REVIEW_MODEL_ID")):   # owner: the 5.5 models go through the global inference profiles
+        assert llm.PRIMARY_MODEL == "global.anthropic.claude-sonnet-5-5" and llm.REVIEW_MODEL == "global.anthropic.claude-haiku-5-5" and llm.RESEARCH_MODEL == llm.PRIMARY_MODEL
 
 
 def test_polly_provider_requests_neural_pcm_and_resamples():
