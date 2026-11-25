@@ -102,7 +102,7 @@ def test_questions_are_validated_clipped_and_limited():
         {"id": "focus", "text": "Fourth", "options": ["a", "b"]},
     ])
     assert [q["id"] for q in qs] == ["audience", "tone", "details"] and len(qs) <= 3
-    assert len(qs[0]["text"]) == 70 and 2 <= len(qs[0]["options"]) <= 5 and all(len(o["label"]) <= 28 for o in qs[0]["options"])
+    assert len(qs[0]["text"]) == 70 and 2 <= len(qs[0]["options"]) <= 5 and all(len(o["label"]) <= 36 for o in qs[0]["options"])
     assert len({o["id"] for o in qs[0]["options"]}) == len(qs[0]["options"])
 
 
@@ -447,3 +447,14 @@ def test_the_brief_reaches_the_single_call_and_the_staged_outline_prompts(monkey
     seen.clear()
     director.direct("All about Paris", minutes=5.0, ask_small=lambda s, u, n=120: "en", ask_big=ask_big, language="en")
     assert all("audience" not in s for s in seen)                      # no brief, no block
+
+
+def test_option_labels_are_clipped_at_a_word_boundary_never_mid_word():
+    from common import intake
+
+    assert intake._clip_words("Civilizaciones antiguas hasta el neolítico", 36) == "Civilizaciones antiguas hasta el…"
+    assert intake._clip_words("Evolución biológica y primeros homínidos", 36) == "Evolución biológica y primeros…"
+    assert intake._clip_words("Kids", 36) == "Kids" and intake._clip_words("x" * 50, 36).endswith("…") and len(intake._clip_words("x" * 50, 36)) == 36
+    labels = intake.clean_questions([{"id": "focus", "text": "Que parte quieres destacar?", "options": [{"label": "Evolución biológica y primeros homínidos"}, {"label": "Civilizaciones antiguas hasta la edad media"}, {"label": "Historia completa con énfasis en cultura"}]}]) if hasattr(intake, "clean_questions") else None
+    if labels:
+        assert all(not l["label"][-1].isalpha() or len(l["label"]) <= 36 for l in labels[0]["options"]) and not any(l["label"].endswith(("primer", "hast", "énfasi")) for l in labels[0]["options"])

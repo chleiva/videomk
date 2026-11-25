@@ -39,6 +39,15 @@ def _s(value: Any, limit: int) -> str:
     return " ".join(_CTRL.sub(" ", str(value)).split())[:limit]
 
 
+def _clip_words(value: Any, limit: int) -> str:
+    """Clips at a word boundary with an ellipsis (never mid-word): option labels must stay readable in a chip."""
+    text = _s(value, 400)
+    if len(text) <= limit:
+        return text
+    cut = text[: limit - 1].rsplit(" ", 1)[0].rstrip(" ,;:-")
+    return (cut or text[: limit - 1]) + "…"
+
+
 def clean_prompt(prompt: Any) -> str:
     if not isinstance(prompt, str):
         raise Invalid("'prompt' is required")
@@ -192,6 +201,7 @@ When unsure between allowed and block, choose allowed. Requests can be in any la
 - the audience would make a completely different script and nothing in the request hints at it (e.g. only "Explain blockchain"): id "audience";
 - the video is about the person's own life, trip, business or product but gives no concrete details and no photos are attached (e.g. "a video about my trip", "promo for my bakery"): id "details", options such as "I will describe it", "Make a general one";
 - the scope is far too big for the length asked (e.g. "history of the world" in 1 minute): id "focus" with period or angle options.
+Option labels are SHORT: 1 to 4 words and at most 24 characters, never a sentence or a clause (the question text carries the detail; for example "Biological evolution", "Ancient civilizations", "The full story").
 If the request states an audience ("for kids", "for beginners"), a tone, a clear subject, or is a how-to, list, recipe, comparison, news question or opinion question, ask NOTHING. A request with photos attached never needs a "details" question. At most 3 questions; each: {{"id": "audience|tone|focus|details", "text": "<=70 chars, plain sentence in the request's language", "options": ["<=28 chars label", ... 2 to 5], "allow_other": true}}. Options describe visible outcomes. Skip questions entirely when "block" or "unsupported" is set, and when answers are already given.
 
 Return only the JSON object."""
@@ -253,7 +263,7 @@ def clean_questions(raw: Any) -> List[Dict[str, Any]]:
         used: set = set()
         options = []
         for o in opts:
-            label = _s(o.get("label") if isinstance(o, dict) else o, 28) if isinstance(o, (str, dict)) else ""
+            label = _clip_words(o.get("label") if isinstance(o, dict) else o, 36) if isinstance(o, (str, dict)) else ""
             if label and label.lower() not in {x["label"].lower() for x in options}:
                 options.append({"id": _option_id(label, used), "label": label})
         if not (MIN_OPTIONS <= len(options) <= MAX_OPTIONS):
