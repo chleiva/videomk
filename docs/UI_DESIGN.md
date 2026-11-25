@@ -510,3 +510,110 @@ In the Media toolbar pill the overflow "..." opens a menu: **Organize my library
 - **Delete with preference Always:** the dialog warns that matching uploads can recreate it; the backend may instead remember deletions. Pick one and align the copy.
 - The 30-photo threshold counts photos that are ready in the batch, not files picked.
 - The home city, place names and trip detection are shown as returned; no editing of group names before applying (kept out for simplicity).
+
+---
+
+## (o) Create video flow (supersedes the docked composer)
+
+**Decision.** The owner found the docked text area plus send button too much like a chatbot. This section replaces the composer design in (d) (docked card), (e) (composer states) and the composer items in (k). The home screen becomes the library of videos with one clear entry point; making a video is a deterministic form on its own screen with a button that is always visible. Reuse unchanged: the Add photos sheet (f), tokens (g), Making/Failed/Ready cards (d), upload (m), organize (n), accessibility rules (i). The earlier composer mockups stay in `docs/ui/` for reference (marked "superseded" in `overview.png`). Where (e) said "send never disappears", read it as "Create never disappears" here.
+
+Mockups (light and dark): `home-empty-new-video`, `home-with-new-video-entry`, `create-empty`, `create-filled`, `create-with-photos`, `create-more-options`, `create-not-affordable`, `questions-1`, `questions-2`, `questions-summary`, `request-not-supported`.
+
+### Research added for this section
+| Source | What it says | Used for |
+|---|---|---|
+| [Apple HIG, Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) (via search snippet; page text not fully retrieved) | Use the prominent style for the single most likely action; several prominent buttons add cognitive load. | One prominent "New video" and one prominent "Create video", never two on a screen. |
+| [Apple HIG, Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars), [WWDC25 284](https://developer.apple.com/videos/play/wwdc2025/284/), [Apple forums on the .prominent toolbar action](https://developer.apple.com/forums/thread/788268) | Toolbars float as glass; the primary toolbar action can be marked prominent (the forum wording is second-hand); a `.glassProminent` toolbar bug was reported on iOS 26.1 RC. | Option considered for the entry; kept a custom floating button so it does not depend on that style. |
+| [Apple HIG, Sheets](https://developer.apple.com/design/human-interface-guidelines/sheets) (snippet) | Medium detent reveals content gradually; people don't expect to resize sheets, so pick a size that fits the content. | Question sheet at a fixed content height (about 470 pt), Create as a full-height sheet. |
+| Material 3 extended FAB: [Compose collapsible FAB walkthrough](https://medium.com/@patrickmillais/collapsible-extended-floating-action-buttons-with-a-lazycolumn-in-jetpack-compose-a5909fada6a1), [Fluent 2 FAB usage](https://fluent2.microsoft.design/components/android/button/usage), [Android ExtendedFloatingActionButton reference](https://developer.android.com/reference/kotlin/androidx/compose/material3/ExtendedFloatingActionButton.composable) | Extended FAB when the action needs a label; shrink to a regular FAB while scrolling and re-extend at the bottom; avoid it on non-scrolling screens (use a filled button there). I could not retrieve the m3.material.io page itself. | Android entry = extended FAB "New video", collapses on scroll; empty home (non-scrolling) uses a filled button. |
+| Platform video specs: [Kapwing 2026 guide](https://www.kapwing.com/resources/social-media-video-aspect-ratios-and-sizes-the-2025-guide/), [Sprout Social video specs](https://sproutsocial.com/insights/social-media-video-specs/), [PostEverywhere](https://posteverywhere.ai/blog/video-aspect-ratios-for-social-media) | YouTube long-form 16:9 at 1920x1080; Shorts, Reels, TikTok 9:16 at 1080x1920; Instagram feed 4:5; LinkedIn and X sources disagree (16:9, 1:1 and 9:16 all appear). | Platform to format table below; LinkedIn and X recommend Landscape because it is the safe, supported choice and can be changed. |
+
+### 1. Entry: the "New video" button
+**Pattern chosen:** a persistent floating **"+ New video"** capsule (58 high, gradient fill, 17 bold label, plus icon) docked bottom-trailing above the bottom bar (16 from the trailing edge, 14 above the bar). On the empty home it is a full-width 58 high button at the same spot.
+**Why this one:**
+- A labelled action is clearer than an icon-only FAB or a "+" in the corner; the word "video" names the product's one job.
+- Bottom-trailing is the thumb zone on a phone; the top-bar slots are already taken by credits and Settings.
+- It is the same idea on both platforms: Android's extended FAB (collapses to a plain FAB on scroll, re-extends at the end), iPhone's floating prominent capsule (Notes puts its compose button bottom-trailing in the same way; we keep it visible while scrolling because it is the only create entry).
+- It looks like an app action, not a message box: no text input is on the home screen at all.
+Rejected: large inline card at the top of the library (scrolls away; the entry would vanish), "+" in the toolbar (too small, collides with credits and Settings, icon-only), a centre tab (a third tab for a verb, not a place).
+Accessibility label: "New video". Tapping opens the Create screen as a full-height sheet (iPhone `.sheet` large detent, Android full-screen destination with a close icon). Examples in the empty state open Create **prefilled** (text, length), never auto-send; example 3 also opens Add photos.
+The credits pill in the top bar stays; Create shows the cost too.
+
+### 2. The Create screen (`create-empty`, `create-filled`)
+Header: "Cancel" left (17 primary), "New video" centre (17 semibold). If anything was entered, Cancel asks "Discard this video?" (Discard / Keep editing). Scrolls; the bottom bar does not.
+Order and specs (393 pt; side margin 16):
+1. **Prompt:** large card, radius 22, surface 1, min height 112, 19/26 text, placeholder "Describe your video. For example: how bees make honey, explained for kids." (tertiary), dictation mic (44 circle, bottom-right inside the card) with the hint "Tap the mic to speak". Autofocus is **off** (the screen first shows all options; the keyboard opens when the card is tapped). Dictation fills the card and never auto-continues.
+2. **Photos:** one row, 64 high: "Add photos / Optional - from this phone or My media". Opens the unified sheet from (f). Once photos are chosen the row becomes a card: "100 photos" + Edit + a strip of 4 thumbs and "+96".
+3. **What is it for?** (section label 13 uppercase) and a single horizontally scrolling row of chips (44 high, radius full): YouTube, LinkedIn, X, Just a video, then the unsupported ones with a "Soon" tag: Shorts - Reels - TikTok, Instagram. Selected chip: primary container + 1.5 pt primary outline + check icon. Directly under, the **recommendation line** in plain words: "YouTube - **Landscape 16:9 - 1080p**   Change". Change opens the format override (below).
+4. **Length:** six chips (1, 2, 3, 5, 8, 12 min), 58 high, each with its credit price under the label. Prices above the balance are shown in the warning colour. Photo hint (exact copy from (e)) appears under the row with its one-tap chip "Use 2 min - bolt 2" (`create-with-photos`).
+5. **More options** (collapsed row 56 high): shows the current values in one line, "Auto look - Subtitles on - Same language as description". Expanded (`create-more-options`): **Look** (Auto, Midnight, Paper, Sunrise swatches), **Subtitles** switch, **Language** row ("Same as my description" default, opens a list of supported languages), **Format** (Landscape 16:9, Vertical 9:16, Square 1:1, Portrait 4:5 tiles) and **Resolution** segmented (720p / 1080p).
+6. **Bottom bar** (always visible, surface 1, top outline, 34 bottom safe padding): one status line, then the full-width 54 high **Create video - bolt 3** button. This is the credit price on the button itself.
+
+Everything else is the same as before: the price stays visible, the button never disappears.
+
+### Create button states
+| State | Status line | Button |
+|---|---|---|
+| Empty prompt (under 10 characters) | "Describe your video to continue" (info icon) | tonal grey, still visible; tapping scrolls to the prompt and focuses it, announces the reason |
+| Ready | "3 credits - you'll have 2 left" | filled gradient |
+| Not affordable (`create-not-affordable`) | warning: "Needs 3 credits, you have 1" + chip **"Use 1 min - bolt 1"** (longest length the balance allows) | tonal; tapping pulses the status line. Balance 0: chip becomes "Add credits" |
+| Too long (> 2,000 characters) | danger "2,140 of 2,000" | tonal |
+| Checking (after Create) | "Checking your request..." | button shows a spinner and stays; screen not blocked, Cancel works |
+| Photos still getting ready | "Waiting for 5 photos to finish" | tonal until done |
+
+### Defaults and memory
+First launch: platform **Just a video**, format Landscape 16:9, 1080p, length **3 min**, look **Auto**, subtitles **on**, language **Same as my description**, no photos. After a successful Create the app stores platform, format, resolution, length, look, subtitles and language per person (account-level, so a second device gets them) and pre-selects them next time. Prompt and photos are never remembered. If a stored format is no longer in the server list, fall back to the first supported format and show nothing special.
+
+### Platform chips and formats
+Platform chips are data, not code: the server returns the list of supported formats; the app maps each platform to its recommendation and enables the chip only if that format is supported.
+
+| Chip | Recommended format | Resolution | Enabled today |
+|---|---|---|---|
+| YouTube | Landscape 16:9 | 1080p | yes |
+| LinkedIn | Landscape 16:9 (sources differ; 1:1 is also common, user can change once available) | 1080p | yes |
+| X | Landscape 16:9 | 1080p | yes |
+| Just a video | Landscape 16:9 | 1080p | yes |
+| Shorts - Reels - TikTok | Vertical 9:16 | 1080p | no ("Soon") |
+| Instagram (feed) | Portrait 4:5 | 1080p | no ("Soon") |
+
+**Server list contract:** `formats: [{id: "16:9", resolutions: [1080]}]` today. Rules: (1) enabled platforms first, unsupported ones after, each with a "Soon" tag and 62% opacity, not selectable (tap shows a small tip "Coming soon"; VoiceOver: "Shorts, Reels, TikTok, vertical 9:16, coming soon, dimmed"). If the list ever contains none for a platform's format, hide the chip instead when the whole product wants it hidden (config flag). (2) With only 16:9 / 1080p the format override shows the other three tiles disabled and the segmented control with 720p disabled; if exactly one format and resolution are supported, the Change link on the recommendation line is hidden and "Format" in More options shows a single selected tile, so the UI never offers a choice it cannot honour. (3) Picking a platform only sets the format and resolution; overriding the format afterwards deselects the platform highlight and shows "Custom" in place of the platform name.
+
+### 3. Clarifying questions (`questions-1`, `questions-2`, `questions-summary`)
+**When:** after the person taps Create, a fast request check runs (budget 2.5 s). It returns zero to three questions. Zero: go straight to Making (section 4). The credits are charged only at the final confirm, never at the check.
+**Presentation:** a bottom sheet at fixed content height (about 470 pt) over the dimmed Create screen; one question at a time:
+- Row: back chevron (from question 2), three progress dots (current one stretched to 22 pt wide), **Make it now** (text button, top right, always visible: skips all remaining questions and goes to the summary or straight to Making).
+- Overline "QUESTION 1 OF 3", question 27/33 bold, one-line helper 15.
+- 4 to 6 chips, 50 high, 17 semibold, wrapping in the sheet: 3 to 4 answers, **Other...** (dashed chip, opens an inline single-line text field replacing the chips, "Done"), and **You decide** (sparkle). **Skip** is a text button at the bottom.
+- Tapping a chip selects it (primary container + outline, selection haptic), then the sheet advances after 250 ms; no Next button. The last answer advances to the summary.
+- Examples: "Who is this for?" Kids, Beginners, Experts, Everyone. "What tone?" Calm, Energetic, Funny, Serious. "What should it focus on?" 2 to 4 chips generated from the request (for "How bees make honey": Making honey, Life in the hive, Pollination, Fun facts). "Which period?" (history requests) e.g. Ancient, Middle Ages, Modern. Questions come from the server as `{id, title, helper, options: [..]}`; the client never invents them.
+- Animation: question content cross-fades with a 24 pt horizontal slide (forward) / reverse for back, 280 ms ease-in-out; the sheet height does not change (fixed), so no jumping. Reduced motion: instant swap.
+**Summary (`questions-summary`):** title "Ready when you are", a card with the request text, a wrapping chip row of the answers ("For kids", "Calm", "Focus: Making honey"; each chip has a pencil, tap reopens that question and returns here), "Tap an answer to change it.", a quiet line "YouTube - Landscape 16:9 - 1080p - 3 min", the status line with price, **Create video - bolt 3** (primary) and **Edit request** (text; closes the sheet back to the Create screen). Skipped questions leave no chip. If every question was skipped or "You decide", the summary is skipped and the video starts immediately (nothing to confirm).
+**Not supported or unsafe (`request-not-supported`):** same sheet (fixed height), a warning icon in a container circle, title "We can't make this one", one or two plain sentences (never accusatory, no policy text), a suggestion card with a concrete example and "Use this" (puts it in the prompt), **Edit request** (primary) and **Close**, plus "Nothing was charged." The server returns `{status: "unsupported"|"unsafe", message, suggestion}`; the app shows the server's message when present and this default otherwise.
+**Slow check:** under 2.5 s nothing visible beyond the spinner on the button. Between 2.5 s and 8 s the sheet opens with a skeleton (title line and three chip skeletons) and the line "Checking your request..." plus a **Make it now** button. After 8 s, or on any error or timeout, **just proceed**: skip questions and start the video (and log it). Never show an error for a failed check.
+
+### 4. After Create: transition into the library
+No questions or all answered: the sheet and the Create screen close together (sheet slides down 320 ms), the library is visible behind, and a new **Making** card slides in at the top (translateY 24 + fade, 320 ms, others ease down), exactly the card from (d) ("Making", steps Script, Voice, Pictures, Final cut, "Drawing scene..."). A success haptic fires once, and the credits pill updates (count animates, 200 ms). Nothing else: no toast. Reduced motion: card appears instantly. If the app is offline at Create: the button shows "Waiting for a connection" and the request is kept; the Create screen stays open (never lose the prompt).
+
+### 5. Accessibility, type, motion, haptics, platform
+- **VoiceOver / TalkBack order** on Create: Cancel, prompt, dictate, Add photos, platform chips (group "What is it for?"), recommendation line and Change, length chips (group "Length", value includes credits: "3 minutes, 3 credits, selected"), photo hint and fix chip, More options (expandable, state "collapsed"), status line (polite live region), Create video. Create keeps focus-reachable when tonal and speaks the reason. Question sheets: focus lands on the question title; chips are a radio group ("Kids, 1 of 4"); "Make it now" is reachable immediately after the title; progress "Question 2 of 3" is read, the dots are decorative.
+- **Dynamic Type to 200%:** the prompt card grows; platform chips stay one row and scroll (each chip 1 line, ellipsis in the middle for "Shorts - Reels - TikTok"); length chips become a 3x2 grid at >= 1.3x with price under the label; the bottom bar status line wraps to 3 lines; Create stays full width with the label on two lines ("Create video" / "3 credits"); question chips become full-width rows at >= 1.5x; the sheet becomes `large`, content scrolls, Skip and Make it now stay pinned.
+- **Reduced motion:** instant swaps for question transitions, card entry and sheet content; no shake on tonal Create (the status line just changes colour and is announced).
+- **Haptics:** chip select = selection tick; Create press = medium impact; Create accepted (card appears) = success; tonal Create or "Soon" chip tapped = warning notification once; question advance = selection tick (no extra on auto-advance).
+- **iPhone:** `.sheet` + `NavigationStack` with Cancel as `cancellationAction`; the bottom bar is a `safeAreaInset(.bottom)` with the system background material; segmented control for resolution; `TextEditor` with a placeholder overlay; Liquid Glass is left to the system (no custom backgrounds on the sheets).
+- **Android:** full-screen `Scaffold` with a close icon (back also closes, with the discard confirmation), bottom bar in `bottomBar` with `Surface(tonalElevation=3.dp)`, chips as `FilterChip` (enabled = false for "Soon"), resolution as `SingleChoiceSegmentedButtonRow`, question sheet as `ModalBottomSheet` with `skipPartiallyExpanded = true`, entry as `ExtendedFloatingActionButton` inside `Scaffold.floatingActionButton` using `expanded = !listState.canScrollBackward`.
+
+### Acceptance criteria
+1. The home screen has no text input. A "New video" button is visible on the empty home and over the library; tapping opens Create with the prompt empty and the last-used platform, length, look, subtitles and language selected.
+2. Create is visible at all times; with an empty prompt it is tonal with the reason; with 1 credit and a 3 min length the status line says "Needs 3 credits, you have 1" and "Use 1 min - bolt 1" fixes it in one tap, after which Create is filled.
+3. With the server list containing only 16:9 / 1080p, all enabled platform chips recommend "Landscape 16:9 - 1080p", Shorts - Reels - TikTok and Instagram are visibly disabled with "Soon", and the format and resolution controls show no choices that cannot be honoured.
+4. Adding photos uses the same unified sheet; the Photos row shows the count; the photo length hint and its fix chip work exactly as in (e).
+5. After Create the check returns within 2.5 s or is skipped silently; questions appear one at a time (max 3) with Skip, You decide, Other, Make it now and back; answers show as chips in the summary and can be edited before the final Create; unsupported requests show the kind sheet with Edit request and nothing is charged.
+6. The Making card appears at the top of the library after Create and the credits pill reflects the charge.
+
+### Unclear or assumed
+- **Check endpoint contract** (questions, `unsupported`/`unsafe`, timeout behaviour) is assumed from the brief; the 2.5 s and 8 s budgets are my proposals.
+- **When credits are charged** is assumed to be at the final confirm (or at Create when there are no questions). If the backend charges at request creation, the summary button must say so.
+- **LinkedIn and X recommendations:** public sources disagree (16:9, 1:1, 9:16). Landscape is chosen because it is what the server can produce today; revisit when more formats exist.
+- **Account-level defaults storage** (per person, synced) needs a small backend field; device-local storage is the fallback.
+- **Android "New video" as an extended FAB** may collide with the bottom NavigationBar on small phones; it sits 16 dp above the bar, so test on 360 x 640.
+- The entry button label is English only here; localisation needs short strings ("New video") for all supported languages.
