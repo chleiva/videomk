@@ -7,6 +7,7 @@ const glance = [
 	"We show no ads and use no advertising or analytics trackers in the app.",
 	"To make a video we send your text (and photos you attach) to AI and media services that work for us. Section 4 lists them.",
 	"Your photos are cleaned of all hidden data (location, camera, date) before they are stored, and the originals are deleted. If you allow it in Settings, the time each photo was taken and an approximate place (about 1 km) are used once to tell your story; the place is turned into a city name on our servers and the coordinates are not kept.",
+	"My media (optional): you can keep your photos in a private library in videomk and search them by describing them. Only you can see them; nobody at videomk browses them. You can delete any photo, or all of them, at any time in the app.",
 	"You can ask us to delete your videos or your whole account at any time.",
 ];
 const sections = [
@@ -18,6 +19,8 @@ const sections = [
 		"What you ask for: the text of your requests (typed, or dictated and turned into text), the options you choose (length, look, subtitles, language), and any edits you make to a video.",
 		"Photos you attach: up to 100 per video. Before upload, your phone removes all metadata from the photo file (location, camera and date) and resizes it.",
 		"Photo date and approximate location (optional): if the two switches in Settings are on (they are on by default), the phone also reads when each photo was taken and where, from the photo's own data, and sends the date and time and a location rounded to about 1 km with your request, never inside the photo. We use them to put your photos in order, group them by day and name the places in your story. The location is turned into a place name from public map data on our own servers (no other company receives it); the coordinates are discarded as soon as the story is planned, while the place name and the time stay with your video. Turn the switches off and none of this is read or sent.",
+		"Photos you keep in My media (optional): the photos you choose to add to your library, a small preview of each, the date it was taken and the name of the place (city and country) if you allowed those in Settings, the collections you create, and a numerical “fingerprint” of each photo that lets you find it by describing it. We do not store the exact coordinates, and your photos are cleaned of hidden data on your phone before they are uploaded.",
+		"What you search for in My media: the words you type to find your photos. They are used only to answer that search.",
 		"What we make for you: the script, narration audio, the finished video and the list of sources and credits shown with it.",
 		"Credits and purchases: your credit balance and history. Payments are handled by Apple or Google; we receive confirmation of a purchase, never your card details.",
 		"Technical data: IP address, device type and app version, time of each request, and error logs. This is used for security, abuse prevention and fixing faults.",
@@ -42,12 +45,18 @@ const sections = [
 		"Photos you attach are checked by an AI model so the video can describe them and so unsafe images are refused. To keep this cheap and private, the photos are shown to the model as small numbered thumbnails, ten to a sheet, and the story is then worked out from the descriptions alone. The location, camera and date data are removed from the photo file on your phone, and again on our servers. We delete the original upload as soon as the cleaned copy is made (any leftover is removed automatically within 2 days).",
 		"The cleaned copy stays with the video it belongs to, because editing needs it, until that video is deleted.",
 		"Videos are made by AI and may contain mistakes. They are labelled as made with AI where the app or store requires it."] },
+	{ title: "My media: your private photo library", paras: [
+		"My media is optional. If you add photos to it, we store them privately in our cloud storage under your account, encrypted, until you delete them or your account. Only you can see them: every request is checked against your signed-in account, links to your photos are short-lived and can only be created for you, and nobody at videomk browses your library.",
+		"To let you find photos by describing them (for example “my holidays in Thailand in 2024”), each photo is turned into a numerical fingerprint by an AI model of Amazon Bedrock inside our own AWS account, and your search words are turned into one the same way; a small language model also reads your search words to pick out dates and places that exist in your own library. The photos and the words are not sent to any other company and are not used to train models.",
+		"When you choose photos from My media for a video, they are copied into that video like photos you attach from your phone, and are handled as described in the section above.",
+		"Deleting a photo removes the photo, its preview, its fingerprint and its record. “Delete everything” and deleting your account remove your whole library. Free accounts have a storage limit; if a paid plan ends, nothing is deleted, but you cannot add photos until you are under the limit, and you can still view and delete them."] },
 	{ title: "Voice input", paras: [
 		"Dictation is optional. The microphone is used only while you press the microphone button. Your phone’s own speech recognition turns your voice into text: on iPhone this is done by Apple (on the device when possible, otherwise on Apple’s servers) and on Android by Google’s speech service. We receive only the text, never the audio. How Apple and Google treat audio is described in their policies."] },
 	{ title: "No training on your content", paras: [
 		"We do not use your prompts, photos, narration or videos to train or fine-tune AI models, and our providers listed above are not permitted to use them to train theirs."] },
 	{ title: "How long we keep data", bullets: [
 		"Videos, narration, photos you attached and the plan behind each video: until you delete them or your account.",
+		"Photos in My media, their previews, fingerprints and collections: until you delete them or your account.",
 		"Temporary working files used to build a video: automatically deleted after 7 days.",
 		"Upload leftovers: deleted within 2 days. Technical and error logs: deleted after 14 days.",
 		"Account, credit and purchase records: while your account exists, then only as long as the law requires (for example accounting records).",

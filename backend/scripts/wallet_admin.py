@@ -5,6 +5,7 @@
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py limited you@example.com          # back to normal
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py give you@example.com 20          # add 20 paid credits
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py show you@example.com
+  AWS_PROFILE=qa python backend/scripts/wallet_admin.py storage you@example.com --plan pro [--extra-gb 100] [--until 2027-01-31]   # photo library size (free = 2 GB, pro = 100 GB, plus extra GB)
 The unlimited flag is only honoured outside production (ALLOW_UNLIMITED_ACCOUNTS is 0 there) and lives in a table the Lambdas cannot write.
 Accounts are found by email in the stage's Cognito pool, or pass a user id (the token `sub`). Defaults to stage qa; prod asks you to type prod.
 """
@@ -16,15 +17,18 @@ import sys
 import boto3
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lambdas"))
-from common import wallet  # noqa: E402
+from common import library as lib, wallet  # noqa: E402
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("action", choices=["unlimited", "limited", "give", "show"])
+    ap.add_argument("action", choices=["unlimited", "limited", "give", "show", "storage"])
     ap.add_argument("who", help="email or user id (sub)")
     ap.add_argument("amount", nargs="?", type=int)
     ap.add_argument("--stage", default="qa")
+    ap.add_argument("--plan", choices=["free", "pro"], default="free")
+    ap.add_argument("--extra-gb", type=int, default=0)
+    ap.add_argument("--until", help="YYYY-MM-DD: the plan and add-ons lapse at the end of this day (nothing is deleted)")
     a = ap.parse_args()
     cfg = json.load(open(os.path.join(os.path.dirname(__file__), "..", "stages.json")))[a.stage]
     if a.stage == "prod" and input("This changes PRODUCTION credits. Type 'prod': ") != "prod":
@@ -51,6 +55,12 @@ def main() -> None:
         uid = next(x["Value"] for x in users[0]["Attributes"] if x["Name"] == "sub")
     if a.action in ("unlimited", "limited"):
         wallet.set_unlimited(uid, a.action == "unlimited")
+    elif a.action == "storage":
+        import calendar, time as _t
+        until = calendar.timegm(_t.strptime(a.until, "%Y-%m-%d")) + 86400 if a.until else None
+        lib.set_storage(uid, a.plan, a.extra_gb, until)
+        print(f"{a.who} ({a.stage}): library limit now {lib.limits(uid)}")
+        return
     elif a.action == "give":
         if not a.amount or a.amount < 1:
             sys.exit("give needs a positive amount")

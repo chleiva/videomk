@@ -18,8 +18,8 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import usage, wallet
-from common.photo_ids import PhotoError, upload_key, valid_media_ids, valid_media_meta
+from common import library, usage, wallet
+from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -93,6 +93,15 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
                 out["media_meta"] = meta   # capture time and approximate place of the photos, only when the person allowed it in Settings
         except PhotoError as e:
             raise BadRequest(str(e)) from e
+    if body.get("library_media") is not None:   # photos already in the person's own library: checked and copied in the handler
+        try:
+            out["library_media"] = valid_media_ids(body["library_media"])
+        except PhotoError as e:
+            raise BadRequest(str(e).replace("'media'", "'library_media'")) from e
+    if len(out.get("media", [])) + len(out.get("library_media", [])) > MAX_PHOTOS:
+        raise BadRequest(f"at most {MAX_PHOTOS} photos per video")
+    if set(out.get("media", [])) & set(out.get("library_media", [])):
+        raise BadRequest("a photo cannot be in both 'media' and 'library_media'")
     if "captions" in body and body["captions"] is not None:
         if not isinstance(body["captions"], bool):
             raise BadRequest("'captions' must be true or false")
@@ -111,6 +120,29 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
         out["theme"] = body["theme"]
     return out
+
+
+def bring_library_photos(user_id: str, options: Dict[str, Any]) -> bool:
+    """Copies the chosen library photos into the video's own uploads (so the engine reads them like any other photo) and gives them their capture time and place name
+    (the library keeps only names, never coordinates). Every id must be a ready photo of THIS user, else nothing is copied. Returns False when one is not."""
+    ids = options.pop("library_media", None) or []
+    if not ids:
+        return True
+    found = library.batch_get(user_id, ids)
+    if len(found) != len(ids):
+        return False
+    meta = dict(options.get("media_meta") or {})
+    for mid in ids:
+        _s3.copy_object(CopySource={"Bucket": os.environ["MEDIA_BUCKET"], "Key": library.orig_key(user_id, mid)}, Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid),
+                        ContentType="image/jpeg", MetadataDirective="REPLACE")
+        it = found[mid]
+        row = {k: v for k, v in (("taken", it.get("taken")), ("where", it.get("pl"))) if v}
+        if row:
+            meta[mid] = row
+    options["media"] = list(options.get("media", [])) + ids
+    if meta:
+        options["media_meta"] = meta
+    return True
 
 
 def video_id_for(user_id: str, body: Dict[str, Any]) -> Tuple[str, bool]:
@@ -184,6 +216,13 @@ def handler(event: Dict[str, Any], context: Any):
             _s3.head_object(Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid))
         except ClientError:
             return json_response(400, {"message": "One of your photos didn't finish uploading. Please try again."})
+
+    try:
+        if not bring_library_photos(user_id, options):
+            return json_response(400, {"message": "One of the photos you chose is no longer in your library."})
+    except ClientError:
+        logger.exception("could not copy library photos")
+        return json_response(500, {"message": "Could not prepare your photos. Please try again."})
 
     # The same request twice within two minutes (a double tap, text that reappeared after sending) is one video: the second returns the first, charges nothing.
     fingerprint = hashlib.sha1(json.dumps([prompt.lower(), {k: options[k] for k in sorted(options) if k not in ("region",)}], sort_keys=True).encode("utf-8")).hexdigest()

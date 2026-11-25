@@ -23,6 +23,8 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+from media_library import MediaLibrary
+
 from engine_v2 import EngineV2
 
 OPENAI_SSM_PARAM = "/videomk/openai_api_key"  # standard SSM parameter: free (Secrets Manager costs ~$0.40/mo idle)
@@ -395,8 +397,8 @@ class BackendStack(Stack):
             rest_api_name="videomk-api",
             deploy_options=apigw.StageOptions(
                 stage_name="prod",
-                throttling_rate_limit=20,   # req/s across the stage (per-user limits are the daily quota)
-                throttling_burst_limit=40,
+                throttling_rate_limit=60,   # req/s across the stage (per-user limits are the daily quota); the photo library adds many small requests
+                throttling_burst_limit=120,
             ),
         )
         cors_headers = {
@@ -484,6 +486,15 @@ class BackendStack(Stack):
         wallet_res.add_method("GET", apigw.LambdaIntegration(wallet_fn, proxy=True), **cognito_auth)
         uploads_res.add_method("POST", apigw.LambdaIntegration(uploads_fn, proxy=True), **cognito_auth)
 
+        # ----------------------------
+        # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).
+        # ----------------------------
+        if v2 is not None:
+            MediaLibrary(
+                self, "MediaLibrary", stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
+                usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn, assets_bucket_name=ASSETS_BUCKET,
+            )
+
         # Reject malformed/oversized prompts at the edge, before any Lambda runs.
         generate_model = api.add_model(
             "GenerateRequestModel",
@@ -504,6 +515,8 @@ class BackendStack(Stack):
                     "media_meta": apigw.JsonSchema(type=apigw.JsonSchemaType.OBJECT),   # {media id: {taken, lat, lon}}, checked in full by the launcher
                     "media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=100,
                                               items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),
+                    "library_media": apigw.JsonSchema(type=apigw.JsonSchemaType.ARRAY, min_items=1, max_items=100,
+                                                      items=apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$")),
                 },
             ),
         )
