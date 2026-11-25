@@ -218,3 +218,10 @@ def test_the_music_comes_up_over_the_opening_and_the_ending_of_a_photo_video(tmp
     seen.clear()
     pipeline.make_audio({**tl, "intro_s": 0.0, "outro_s": 1.4}, [np.zeros(24000, np.float32)] * 2, str(tmp_path / "p.m4a"))
     assert seen["swells"] == []                                                                          # other videos are unchanged
+
+
+def test_a_video_of_the_persons_photos_leaves_room_for_the_music_only_opening_and_ending():
+    plain, photos = plan_mod.expected_words(2.0, 0), plan_mod.expected_words(2.0, 12)
+    beats_p, beats_f = plan_mod.expected_beats(2.0, 0), plan_mod.expected_beats(2.0, 12)
+    assert photos == int((120 - plan_mod.PHOTO_FRAME_S - beats_f * plan_mod.BEAT_OVERHEAD_S) * plan_mod.SPOKEN_WORDS_PER_S)
+    assert plan_mod.PHOTO_FRAME_S == 6.0 and plain == int((120 - beats_p * plan_mod.BEAT_OVERHEAD_S) * plan_mod.SPOKEN_WORDS_PER_S)

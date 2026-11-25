@@ -220,9 +220,12 @@ def expected_beats(target_minutes: float, n_photos: int = 0) -> int:
     return max(4, round(target_minutes * 60 / 14), n_photos)
 
 
+PHOTO_FRAME_S = 6.0           # a video of the person's photos opens and ends on music alone (director.PHOTO_INTRO_S + PHOTO_OUTRO_S): that time is not narration
+
+
 def expected_words(target_minutes: float, n_photos: int = 0) -> int:
     """The narration words that make a video `target_minutes` long: the speaking time left after every beat's lead-in and tail, at the measured speaking rate."""
-    return max(60, int((target_minutes * 60 - expected_beats(target_minutes, n_photos) * BEAT_OVERHEAD_S) * SPOKEN_WORDS_PER_S))
+    return max(60, int((target_minutes * 60 - (PHOTO_FRAME_S if n_photos else 0.0) - expected_beats(target_minutes, n_photos) * BEAT_OVERHEAD_S) * SPOKEN_WORDS_PER_S))
 
 
 def spoken_words(beats: List[Dict[str, Any]]) -> int:

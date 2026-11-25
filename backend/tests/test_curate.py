@@ -117,8 +117,8 @@ def test_a_failing_story_call_degrades_to_a_mechanical_grouping_and_never_blocks
 
 # ----------------------------------------------------------------------------- the story
 def test_the_length_decides_how_many_photos_can_be_used():
-    assert curate.max_used(1) == 42 and curate.max_used(2) == 85 and curate.max_used(3) == 127 and curate.max_used(0.1) == 4 and curate.max_used(0.01) == 3
-    assert 2.3 < curate.minutes_for(100) < 2.4 and curate.max_used(curate.minutes_for(100)) >= 99        # 100 photos need a little over 2 minutes
+    assert curate.max_used(1) == 51 and curate.max_used(2) == 102 and curate.max_used(3) == 153 and curate.max_used(0.1) == 5 and curate.max_used(0.01) == 3
+    assert 1.9 < curate.minutes_for(100) < 2.0 and curate.max_used(2) >= 100 and curate.max_used(20 / 60) < 20        # 100 photos fit in 2 minutes, not in 20 seconds
 
 
 def test_reconcile_makes_a_messy_story_safe():
@@ -356,11 +356,12 @@ def test_the_mechanical_fallback_follows_the_days_with_collages():
 
 # ----------------------------------------------------------------------------- full-page photos when there is time, collages when there is not
 def test_the_pace_follows_the_seconds_available_per_photo():
-    assert curate.pace(85, 5)[0] == "sparse" and curate.pace(85, 5)[1] == 20.4        # 5 photos in 2 minutes: show them large
-    assert curate.pace(85, 12)[0] == "sparse" and curate.pace(85, 20)[0] == "balanced" and curate.pace(85, 30)[0] == "balanced" and curate.pace(85, 60)[0] == "dense"
-    assert curate.pace(85, 100)[0] == "dense" and curate.pace(42, 100)[0] == "dense"
-    assert "single full-page" in curate.pace_rules(85, 5) and "at most one moment in six" in curate.pace_rules(85, 5)
-    assert "about a third" in curate.pace_rules(85, 30) and "collages of 5 to 9 are the main device" in curate.pace_rules(85, 100)
+    cap = curate.max_used(2)
+    assert curate.pace(cap, 5)[0] == "sparse" and curate.pace(cap, 5)[1] == 20.4        # 5 photos in 2 minutes: show them large
+    assert curate.pace(cap, 12)[0] == "sparse" and curate.pace(cap, 20)[0] == "balanced" and curate.pace(cap, 30)[0] == "balanced" and curate.pace(cap, 60)[0] == "dense"
+    assert curate.pace(cap, 100)[0] == "dense" and curate.pace(curate.max_used(1), 100)[0] == "dense"
+    assert "single full-page" in curate.pace_rules(cap, 5) and "at most one moment in six" in curate.pace_rules(cap, 5)
+    assert "about a third" in curate.pace_rules(cap, 30) and "collages of 5 to 9 are the main device" in curate.pace_rules(cap, 100)
 
 
 def test_the_story_prompt_carries_the_pace_and_the_mechanical_fallback_follows_it():
@@ -368,12 +369,12 @@ def test_the_story_prompt_carries_the_pace_and_the_mechanical_fallback_follows_i
     sys_few = curate.story_system(2, curate.max_used(2), False, len(few))
     assert "PACE: about 20.4 seconds" in sys_few and "show the photos LARGE" in sys_few
     assert "PACE" not in curate.story_system(2, 85, False)
-    s = curate.reconcile({}, few, 85)
+    s = curate.reconcile({}, few, 102)
     assert all(m["layout"] == "single" and len(m["photos"]) == 1 for m in curate.moments(s))                  # plenty of time: one full-page photo each
-    mid = curate.reconcile({}, _trip(30), 85)
+    mid = curate.reconcile({}, _trip(30), 102)
     sizes = [len(m["photos"]) for m in curate.moments(mid)]
     assert max(sizes) == 3 and sizes.count(3) >= 9 and all(m["layout"] == ("single" if len(m["photos"]) == 1 else "sequence") for m in curate.moments(mid))
-    dense = curate.reconcile({}, _trip(100, per_day=34), 85)
+    dense = curate.reconcile({}, _trip(100, per_day=34), 102)
     assert max(len(m["photos"]) for m in curate.moments(dense)) == 6 and any(m["layout"] == "collage" for m in curate.moments(dense))
 
 

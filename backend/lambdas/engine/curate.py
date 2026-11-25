@@ -26,7 +26,7 @@ PER_SHEET = 10
 COLS = 5
 CELL_W, CELL_H = 300, 225
 GAP = PAD = 6
-SECONDS_PER_PHOTO = 1.2       # on average a photo needs this long on screen when several are shown at once (collages, galleries): a 2-minute video can carry about 85 photos
+SECONDS_PER_PHOTO = 1.0       # on average a photo needs this long on screen when several are shown at once (collages, galleries): a 2-minute video can carry about 85 photos
 SHARE_FOR_PHOTOS = 0.85       # the rest of the video's time is for chapter titles and narration without photos
 MAX_PER_MOMENT = 9            # a collage shows up to 9 photos together
 LAYOUTS = ("single", "sequence", "collage")   # one photo | 2-5 photos one after another (gallery) | 3-9 photos at once (photo_collage)
