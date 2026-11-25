@@ -100,3 +100,7 @@ Client rules: cache thumbnails by photo id (the links expire after 1 hour but th
 
 ## Not now
 People tagging, original-resolution storage, video storage (the library holds photos; a clip import is next), sharing albums with others, offline sync of the whole library, CloudFront, in-app purchase for Pro and add-ons (the plan fields and screens are ready; billing comes with the store work).
+
+
+## Backlog (parked by the owner, 2026-11-25)
+- **Use my media automatically**: a switch (in the composer options or in Settings) so the video prompt itself filters My media in the cloud, with no manual selection: "make a video of my previous holidays in Thailand" finds the Thailand photos (search already understands place and time) and uses them. Not built: today the person selects photos, with a "Photos from your prompt" shortcut in the picker that runs the same search on the phone side and preselects. Server side it needs a `library_query` option on generate (the launcher runs `search` for the caller, caps at 100, keeps day order) and a clear line in the app saying which photos were found.
