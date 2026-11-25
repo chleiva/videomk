@@ -225,8 +225,8 @@ class MediaTest {
     }
 
     @Test fun `the length hint counts library and phone photos together`() {
-        assertNull(PhotoCapacity.hint(60 + 20, 2.0, listOf(1, 2, 3)))
-        assertNotNull(PhotoCapacity.hint(60 + 30, 2.0, listOf(1, 2, 3)))
+        assertNull(PhotoCapacity.hint(60 + 40, 2.0, listOf(1, 2, 3)))
+        assertNotNull(PhotoCapacity.hint(60 + 50, 2.0, listOf(1, 2, 3)))
     }
 
     // ---- upload queue

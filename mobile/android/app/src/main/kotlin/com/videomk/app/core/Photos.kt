@@ -38,9 +38,9 @@ object PhotoLimits {
 
 /** How many photos a video of a given length can carry (the server shows several at once), and what to tell the person when it is too short. */
 object PhotoCapacity {
-    fun capacity(minutes: Double): Int = Math.floor(minutes * 42.5 + 1e-9).toInt()
+    fun capacity(minutes: Double): Int = Math.floor(minutes * 51 + 1e-9).toInt()
 
-    fun minimumMinutes(photos: Int): Double = photos * 1.2 / 0.85 / 60
+    fun minimumMinutes(photos: Int): Double = photos * 1.0 / 0.85 / 60
 
     private fun minutesText(m: Double): String {
         val n = if (m == Math.floor(m)) m.toInt().toString() else m.toString()

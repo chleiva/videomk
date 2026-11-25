@@ -282,32 +282,31 @@ class PhotoTest {
 
     private val lengths = listOf(1, 2, 3, 5, 8, 12)
 
-    @Test fun `capacity is floor of 42 and a half per minute`() {
-        assertEquals(42, PhotoCapacity.capacity(1.0)); assertEquals(85, PhotoCapacity.capacity(2.0)); assertEquals(127, PhotoCapacity.capacity(3.0))
-        assertEquals(212, PhotoCapacity.capacity(5.0)); assertEquals(0, PhotoCapacity.capacity(0.0))
+    @Test fun `capacity is floor of 51 per minute`() {
+        assertEquals(51, PhotoCapacity.capacity(1.0)); assertEquals(102, PhotoCapacity.capacity(2.0)); assertEquals(153, PhotoCapacity.capacity(3.0))
+        assertEquals(255, PhotoCapacity.capacity(5.0)); assertEquals(0, PhotoCapacity.capacity(0.0))
     }
 
-    @Test fun `minimum minutes for 100 photos is a little over two`() {
-        assertEquals(2.3529, PhotoCapacity.minimumMinutes(100), 0.001)
+    @Test fun `minimum minutes for 100 photos is just under two`() {
+        assertEquals(1.9608, PhotoCapacity.minimumMinutes(100), 0.001)
         assertEquals(0.0, PhotoCapacity.minimumMinutes(0), 0.0)
-        for (n in 1..127) assertTrue(PhotoCapacity.capacity(PhotoCapacity.minimumMinutes(n) + 1e-6) >= n)   // the two formulas agree
+        for (n in 1..153) assertTrue(PhotoCapacity.capacity(PhotoCapacity.minimumMinutes(n) + 1e-6) >= n)   // the two formulas agree
     }
 
     @Test fun `no hint with no photos, at capacity, and a hint one over`() {
         assertNull(PhotoCapacity.hint(0, 1.0, lengths))
-        assertNull(PhotoCapacity.hint(42, 1.0, lengths)); assertNull(PhotoCapacity.hint(85, 2.0, lengths))
-        assertEquals("About 42 of your 43 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.", PhotoCapacity.hint(43, 1.0, lengths))
-        assertEquals("About 85 of your 86 photos fit in 2 minutes (the best ones, no duplicates). Choose 3 minutes to show them all.", PhotoCapacity.hint(86, 2.0, lengths))
+        assertNull(PhotoCapacity.hint(51, 1.0, lengths)); assertNull(PhotoCapacity.hint(102, 2.0, lengths))
+        assertEquals("About 51 of your 52 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.", PhotoCapacity.hint(52, 1.0, lengths))
+        assertEquals("About 102 of your 103 photos fit in 2 minutes (the best ones, no duplicates). Choose 3 minutes to show them all.", PhotoCapacity.hint(103, 2.0, lengths))
     }
 
     @Test fun `100 photos at each length option`() {
-        assertEquals("About 42 of your 100 photos fit in 1 minute (the best ones, no duplicates). Choose 3 minutes to show them all.", PhotoCapacity.hint(100, 1.0, lengths))
-        assertEquals("About 85 of your 100 photos fit in 2 minutes (the best ones, no duplicates). Choose 3 minutes to show them all.", PhotoCapacity.hint(100, 2.0, lengths))
-        for (m in listOf(3, 5, 8, 12)) assertNull(PhotoCapacity.hint(100, m.toDouble(), lengths))
+        assertEquals("About 51 of your 100 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.", PhotoCapacity.hint(100, 1.0, lengths))
+        for (m in listOf(2, 3, 5, 8, 12)) assertNull(PhotoCapacity.hint(100, m.toDouble(), lengths))
     }
 
     @Test fun `when no option is long enough the hint says so`() {
-        assertEquals("About 85 of your 100 photos fit in the longest video.", PhotoCapacity.hint(100, 1.0, listOf(1, 2)))
-        assertEquals("About 42 of your 50 photos fit in the longest video.", PhotoCapacity.hint(50, 1.0, listOf(1)))
+        assertEquals("About 51 of your 100 photos fit in the longest video.", PhotoCapacity.hint(100, 1.0, listOf(1)))
+        assertEquals("About 51 of your 60 photos fit in the longest video.", PhotoCapacity.hint(60, 1.0, listOf(1)))
     }
 }

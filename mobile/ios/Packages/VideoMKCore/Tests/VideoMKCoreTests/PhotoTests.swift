@@ -364,36 +364,36 @@ extension CoreTests {
 
 @Suite struct PhotoCapacityTests {
     @Test func capacityFollowsTheServerRule() {
-        #expect(PhotoCapacity.capacity(minutes: 1) == 42 && PhotoCapacity.capacity(minutes: 2) == 85 && PhotoCapacity.capacity(minutes: 3) == 127)
-        #expect(PhotoCapacity.capacity(minutes: 12) == 510 && PhotoCapacity.capacity(minutes: 0) == 0)
+        #expect(PhotoCapacity.capacity(minutes: 1) == 51 && PhotoCapacity.capacity(minutes: 2) == 102 && PhotoCapacity.capacity(minutes: 3) == 153)
+        #expect(PhotoCapacity.capacity(minutes: 12) == 612 && PhotoCapacity.capacity(minutes: 0) == 0)
     }
 
     @Test func minimumMinutesIsTheInverse() {
-        #expect(abs(PhotoCapacity.minimumMinutes(photos: 100) - 2.3529) < 0.001)
+        #expect(abs(PhotoCapacity.minimumMinutes(photos: 100) - 1.9608) < 0.001)
         #expect(PhotoCapacity.minimumMinutes(photos: 0) == 0)
-        for n in [1, 10, 42, 85, 100] { #expect(PhotoCapacity.capacity(minutes: PhotoCapacity.minimumMinutes(photos: n)) >= n) }
+        for n in [1, 10, 51, 102, 100] { #expect(PhotoCapacity.capacity(minutes: PhotoCapacity.minimumMinutes(photos: n)) >= n) }
     }
 
     @Test func noHintWhenEverythingFits() {
         #expect(PhotoCapacity.hint(photos: 0, minutes: 1) == nil)
-        #expect(PhotoCapacity.hint(photos: 42, minutes: 1) == nil)      // exactly at capacity
-        #expect(PhotoCapacity.hint(photos: 85, minutes: 2) == nil)
+        #expect(PhotoCapacity.hint(photos: 51, minutes: 1) == nil)      // exactly at capacity
+        #expect(PhotoCapacity.hint(photos: 102, minutes: 2) == nil)
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 2) == nil)     // nothing is cut for 100 photos at 2 minutes
         #expect(PhotoCapacity.hint(photos: 100, minutes: 3) == nil)
     }
 
     @Test func oneOverGetsAHintWithTheNextLength() {
-        #expect(PhotoCapacity.hint(photos: 43, minutes: 1) == "About 42 of your 43 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.")
-        #expect(PhotoCapacity.hint(photos: 100, minutes: 2) == "About 85 of your 100 photos fit in 2 minutes (the best ones, no duplicates). Choose 3 minutes to show them all.")
+        #expect(PhotoCapacity.hint(photos: 52, minutes: 1) == "About 51 of your 52 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.")
+        #expect(PhotoCapacity.hint(photos: 103, minutes: 2) == "About 102 of your 103 photos fit in 2 minutes (the best ones, no duplicates). Choose 3 minutes to show them all.")
     }
 
     @Test func aHundredPhotosAtEachOption() {
-        #expect(PhotoCapacity.hint(photos: 100, minutes: 1)?.hasSuffix("Choose 3 minutes to show them all.") == true)   // 2 is not enough (2.35 needed)
-        #expect(PhotoCapacity.hint(photos: 100, minutes: 2)?.contains("Choose 3 minutes") == true)
-        for m in [3.0, 5, 8, 12] { #expect(PhotoCapacity.hint(photos: 100, minutes: m) == nil) }
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 1) == "About 51 of your 100 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.")   // 1.96 needed
+        for m in [2.0, 3, 5, 8, 12] { #expect(PhotoCapacity.hint(photos: 100, minutes: m) == nil) }
     }
 
     @Test func theLargestOptionStillTooShortSaysSoWithoutASuggestion() {
-        #expect(PhotoCapacity.hint(photos: 600, minutes: 12) == "About 510 of your 600 photos fit in 12 minutes (the best ones, no duplicates).")
+        #expect(PhotoCapacity.hint(photos: 700, minutes: 12) == "About 612 of your 700 photos fit in 12 minutes (the best ones, no duplicates).")
         #expect(PhotoCapacity.hint(photos: 20, minutes: 1, options: [1]) == nil)
     }
 

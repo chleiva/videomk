@@ -230,10 +230,10 @@ public enum PhotoMetaReader {
     }
 }
 
-/// How many photos fit in a video of a given length (the server shows several at once, about 42.5 per minute).
+/// How many photos fit in a video of a given length (the server shows several at once, 51 per minute: 100 photos fit in 2 minutes).
 public enum PhotoCapacity {
-    public static func capacity(minutes: Double) -> Int { max(0, Int((minutes * 42.5 + 1e-9).rounded(.down))) }
-    public static func minimumMinutes(photos: Int) -> Double { Double(photos) * 1.2 / 0.85 / 60 }
+    public static func capacity(minutes: Double) -> Int { max(0, Int((minutes * 51 + 1e-9).rounded(.down))) }
+    public static func minimumMinutes(photos: Int) -> Double { Double(photos) * 1.0 / 0.85 / 60 }
 
     /// A one-line warning when the chosen length is too short for the attached photos; nil when everything fits (or no photos).
     public static func hint(photos: Int, minutes: Double, options: [Double] = CreateOptions.lengths) -> String? {
