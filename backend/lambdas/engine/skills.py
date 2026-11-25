@@ -40,6 +40,7 @@ class Skill:
     pick: str
     body: str
     always: bool = False
+    auto: bool = False   # added by the engine in a known situation (photos attached); the selector never sees it
 
 
 def _parse(path: str) -> Optional[Skill]:
@@ -52,7 +53,7 @@ def _parse(path: str) -> Optional[Skill]:
     sid = head.get("id", "")
     if not re.match(r"^[a-z][a-z0-9-]{2,40}$", sid):
         return None
-    return Skill(id=sid, name=head.get("name", sid), pick=head.get("pick", ""), body=m.group(2).strip(), always=head.get("always", "").lower() == "true")
+    return Skill(id=sid, name=head.get("name", sid), pick=head.get("pick", ""), body=m.group(2).strip(), always=head.get("always", "").lower() == "true", auto=head.get("auto", "").lower() == "true")
 
 
 @lru_cache(maxsize=1)
@@ -72,7 +73,7 @@ def load() -> Dict[str, Skill]:
 
 
 def catalog_text() -> str:
-    return "\n".join(f"- {s.id}: {s.name}. Pick when: {s.pick}" for s in load().values() if not s.always)
+    return "\n".join(f"- {s.id}: {s.name}. Pick when: {s.pick}" for s in load().values() if not s.always and not s.auto)
 
 
 def _ids_from(text: str) -> List[str]:
@@ -91,7 +92,7 @@ def _ids_from(text: str) -> List[str]:
 def select(request: str, ask: Callable[[str, str], str], minutes: float = 3.0) -> List[str]:
     """Which type guides fit this request: at most MAX_PICKED ids (never the always-on ones), the default when the model fails or names nothing valid."""
     skills = load()
-    choices = [s.id for s in skills.values() if not s.always]
+    choices = [s.id for s in skills.values() if not s.always and not s.auto]
     if not choices:
         return []
     try:

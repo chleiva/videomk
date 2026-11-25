@@ -82,6 +82,11 @@ def make_audio(
             if s is not None   # a silent beat has no narration
         ]
         swells = [(float(sc["start"]) + 0.3, float(sc["start"]) + float(sc["duration"]) - 0.2) for sc in timeline["scenes"] if sc.get("silent")]
+        intro, outro = float(timeline.get("intro_s") or 0.0), float(timeline.get("outro_s") or 0.0)
+        if intro >= 1.2:   # a music-only opening: the bed is up until the voice comes in
+            swells.append((0.2, intro + 0.3))
+        if outro >= 2.4:   # and a music-only ending, up while the last picture is held
+            swells.append((duration - outro + 0.3, duration - 0.2))
         nar = os.path.join(tmp, "nar.wav")
         write_wav(nar, build_narration(beats, duration, SR), SR)
         if not music_path:

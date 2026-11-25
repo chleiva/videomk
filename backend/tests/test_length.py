@@ -170,3 +170,51 @@ def test_the_staged_prompts_carry_the_arc_hook_and_pause_rules():
     from engine import staged
     assert "never a greeting or an agenda" in staged.outline_system("en", None) and "arc" in staged.outline_system("en", None)
     assert "at most one pause in it" in staged.SECTION_ADDENDUM
+
+
+# ---------------------------------------------------------------- pauses depend on the kind of video; photo videos open and end on music
+def test_the_pause_rule_is_different_for_explanations_and_for_picture_videos():
+    s = plan_mod.system_prompt("en", None)
+    assert "usually zero in videos under 2 minutes" in s and "Videos built on pictures and mood" in s and "never talk over every picture" in s and "one beat in three" in s
+
+
+def test_photo_videos_may_spend_one_beat_in_three_on_pauses_others_one_in_four():
+    def beats(n):
+        out = []
+        for i in range(n):
+            silent = i % 2 == 1 and 0 < i < n - 1
+            out.append({"narration": "" if silent else "words " * 12, "silent": silent, "hold": 4.0 if silent else None, "scene": {"type": "image", "props": {"image_query": "x"}}})
+        return out
+    a, b = beats(13), beats(13)
+    plan_mod.enforce_silence(a, 0.25)
+    plan_mod.enforce_silence(b, 0.34)
+    assert sum(x.get("silent", False) for x in a) == 3 and sum(x.get("silent", False) for x in b) == 4
+
+
+def test_a_photo_video_starts_with_music_and_a_picture_before_the_first_word_and_ends_on_music():
+    from engine import timeline as tl_mod
+    plan = {"beats": [{"id": "aaaaaaa1", "narration": "words " * 20, "scene": {"type": "title", "props": {"title": "t"}}}, {"id": "aaaaaaa2", "narration": "words " * 20, "scene": {"type": "title", "props": {"title": "u"}}}],
+            "mood": "calm", "theme": "paper"}
+    infos = [{"duration": 6.0, "words": [["hello", 0.0, 0.4], ["there", 0.5, 0.9]]}, {"duration": 6.0}]
+    plain = tl_mod.build_timeline(plan, infos, video_id="v")
+    with_music = tl_mod.build_timeline({**plan, "intro_s": 2.5, "outro_s": 3.5}, infos, video_id="v")
+    assert plain["intro_s"] == 0.0 and plain["outro_s"] == tl_mod.END_HOLD
+    assert with_music["intro_s"] == 2.5 and with_music["outro_s"] == 3.5
+    s0, p0 = with_music["scenes"][0], plain["scenes"][0]
+    assert s0["narration_offset"] == pytest.approx(p0["narration_offset"] + 2.5) and s0["duration"] == pytest.approx(p0["duration"] + 2.5)
+    assert s0["words"][0][1] == pytest.approx(p0["words"][0][1] + 2.5)                                      # the first word waits for the intro
+    assert with_music["scenes"][1]["duration"] == pytest.approx(plain["scenes"][1]["duration"] + 3.5 - tl_mod.END_HOLD)
+    assert with_music["duration"] == pytest.approx(plain["duration"] + 2.5 + 3.5 - tl_mod.END_HOLD)
+
+
+def test_the_music_comes_up_over_the_opening_and_the_ending_of_a_photo_video(tmp_path, monkeypatch):
+    import numpy as np
+    from engine import pipeline, media
+    seen = {}
+    monkeypatch.setattr(media, "mix_audio", lambda *a, **k: seen.update(k))
+    tl = {"duration": 30.0, "intro_s": 2.5, "outro_s": 3.5, "scenes": [{"start": 0.0, "duration": 15.0, "narration_offset": 2.9, "type": "title"}, {"start": 15.0, "duration": 15.0, "narration_offset": 0.4, "type": "title"}]}
+    pipeline.make_audio(tl, [np.zeros(24000, np.float32)] * 2, str(tmp_path / "o.m4a"))
+    assert (0.2, 2.8) in seen["swells"] and (26.8, 29.8) in [(round(a, 1), round(b, 1)) for a, b in seen["swells"]]
+    seen.clear()
+    pipeline.make_audio({**tl, "intro_s": 0.0, "outro_s": 1.4}, [np.zeros(24000, np.float32)] * 2, str(tmp_path / "p.m4a"))
+    assert seen["swells"] == []                                                                          # other videos are unchanged

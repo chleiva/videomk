@@ -142,7 +142,7 @@ Rules:
   * Speak like a person to one person: short sentences, concrete nouns, numbers with a comparison people can picture. Vary the rhythm: a fast run of short beats, then a slower one at an important point.
   * The picture must show what is being said at that moment (a generic picture does not hold attention). Change what is on screen at least every beat; put on screen only the key words, numbers or labels, never the narrated sentence itself.
   * Plan the changes of pace, do not sprinkle them: a new section, a surprising number, a change of mood or a turn in the story are the moments to vary the visual type, the pace or the music.
-  * Pauses are an editing decision, not decoration. Silence is a tool for one of these reasons: (1) a striking number or fact needs a moment to land; (2) a beautiful photograph or clip is the point of the beat and talking over it would spoil it; (3) a section ends and the next changes mood; (4) just before the key line or the closing thought. Use a pause only when you can name its reason, and say it in "why". Many videos need none: usually zero in videos under 2 minutes, and about one every 2 to 3 minutes in longer ones. A pause is a beat with "narration": "" and "hold": {MIN_HOLD_S:g}-{MAX_HOLD_S:g} (3-5 s is typical) on an image, gallery, clip, title, quote or stat scene; the music carries it. Never two in a row, never first or last, never in a dialogue between speakers.
+  * Pauses are an editing decision, not decoration. Silence is a tool for one of these reasons: (1) a striking number or fact needs a moment to land; (2) a beautiful photograph or clip is the point of the beat and talking over it would spoil it; (3) a section ends and the next changes mood; (4) just before the key line or the closing thought. Use a pause only when you can name its reason, and say it in "why". How many depends on the KIND of video. Explanations, news, tutorials and lists: many need none (usually zero in videos under 2 minutes, about one every 2 to 3 minutes in longer ones), because a silent beat in an explanation feels like a mistake. Videos built on pictures and mood (the user's own photos, travel, places, nature, memories, tributes, montages) are different: pauses are part of their rhythm. In those, never talk over every picture: the narration should say less than the photos show, and after every two to four narrated beats let a striking photo or collage play for a few seconds with only the music (a pause can be up to one beat in three). A pause is a beat with "narration": "" and "hold": {MIN_HOLD_S:g}-{MAX_HOLD_S:g} (3-5 s is typical) on an image, gallery, clip, title, quote or stat scene; the music carries it. Never two in a row, never first or last, never in a dialogue between speakers.
   * A big word on screen ("word", at most {MAX_WORD_CHARS} characters, on an image, gallery or clip scene) is optional and rare: leave it out unless one word from the subject (a place, a name, a number) is the whole point of that picture. Never a word about the pause or sound ("silence", "pause", "quiet", "listen", "breathe", "music").
 - Narration and visuals must agree: every number or name on screen is also in (or clearly implied by) the narration.
 - When a scene shows several items (bullets, diagram nodes, timeline events, chart bars, gallery photographs), the narration of that beat names them one after another IN THE ORDER SHOWN, using each item's own key words ("First, ask questions. Second, teach others."). Each item appears on screen at the moment it is spoken, so an item the narrator never says appears at a random time.
@@ -481,10 +481,10 @@ def enforce_elements(beats: List[Dict[str, Any]]) -> List[str]:
     return warns
 
 
-def enforce_silence(beats: List[Dict[str, Any]]) -> List[str]:
-    """Silent beats are seasoning: never first or last, never two in a row, at most one in four. A beat that breaks a rule is dropped (it is only a picture)."""
+def enforce_silence(beats: List[Dict[str, Any]], share: float = 0.25) -> List[str]:
+    """Silent beats are seasoning: never first or last, never two in a row, at most `share` of the beats (one in four; one in three for videos of the user's photos). A beat that breaks a rule is dropped (it is only a picture)."""
     warns: List[str] = []
-    cap = max(1, len(beats) // 4)
+    cap = max(1, int(len(beats) * share + 1e-9))
     out: List[Dict[str, Any]] = []
     used = 0
     for i, b in enumerate(beats):
@@ -533,7 +533,7 @@ def _fallback_scene(narration: str) -> Dict[str, Any]:
     return {"type": "title", "props": {"title": " ".join(words[:9]).rstrip(",;:"), "subtitle": ""}}
 
 
-def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, photo_captions: Optional[Dict[str, str]] = None, max_images: Optional[int] = None, allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
+def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language: str = "en", region: Optional[str] = None, photo_ids: Optional[List[str]] = None, photo_captions: Optional[Dict[str, str]] = None, silence_share: float = 0.25, max_images: Optional[int] = None, allow_clips: bool = True) -> Tuple[Dict[str, Any], List[str]]:
     """Returns (clean_plan, warnings). Raises ValueError when nothing usable remains. `max_images` caps stock photographs (galleries count each photo)."""
     warnings: List[str] = []
     if plan.get("legit") is not True:
@@ -618,7 +618,7 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
         beats.append(beat)
     if not beats:
         raise ValueError("no usable beats in plan")
-    warnings += enforce_silence(beats)
+    warnings += enforce_silence(beats, silence_share)
     warnings += enforce_elements(beats)
     if not beats:
         raise ValueError("no usable beats in plan")
@@ -701,7 +701,7 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
     for attempt in range(retries + 1):
         text = llm(system_prompt(language, region, max_images_per_minute, allow_clips, music_tracks) + craft, user)
         try:
-            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []], photo_captions={p["id"]: p.get("caption") or "" for p in photos or []},
+            plan, warns = validate_plan(parse_plan_json(text), language=language, region=region, photo_ids=[p["id"] for p in photos or []], photo_captions={p["id"]: p.get("caption") or "" for p in photos or []}, silence_share=0.34 if photos else 0.25,
                                         max_images=image_budget(target_minutes, max_images_per_minute), allow_clips=allow_clips)
             replaced = [w for w in warns if "scene replaced" in w]
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):

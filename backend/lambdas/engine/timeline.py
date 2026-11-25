@@ -56,11 +56,14 @@ def build_timeline(
     min_seconds: float = 0.0,
 ) -> Dict[str, Any]:
     """beat_info[i] = {'duration': speech seconds, 'asset': optional key for image scenes}."""
+    intro = max(0.0, min(6.0, float(plan.get("intro_s") or 0.0)))                    # music and pictures before the first word
+    outro = max(END_HOLD, min(8.0, float(plan.get("outro_s") or END_HOLD)))          # music alone after the last word
     base = []
     for i, beat in enumerate(plan["beats"]):
         speech, silent = float(beat_info[i]["duration"]), bool(beat.get("silent"))
         base.append(max(MIN_SCENE, speech) if silent else max(MIN_SCENE, LEAD + speech + TAIL))
-    base[-1] += END_HOLD
+    base[0] += intro if not plan["beats"][0].get("silent") else 0.0
+    base[-1] += outro
     durs = stretch_to(base, [bool(b.get("silent")) for b in plan["beats"]], min_seconds) if min_seconds else base
     scenes: List[Dict[str, Any]] = []
     sync_items = sync_anchored = 0
@@ -70,6 +73,7 @@ def build_timeline(
         info = beat_info[i]
         speech = float(info["duration"])
         silent = bool(beat.get("silent"))
+        lead = LEAD + (intro if i == 0 and not silent else 0.0)   # the first beat starts speaking after the intro
         dur = durs[i]   # the narration's length (+ lead and tail), a silent beat exactly as long as it is held, stretched at the end if the video would be shorter than asked
         stype = beat["scene"]["type"]
         props = dict(beat["scene"]["props"])
@@ -109,9 +113,9 @@ def build_timeline(
         if silent:
             words = []
         elif info.get("words"):
-            words = [[w, round(LEAD + float(s), 3), round(LEAD + float(e), 3)] for w, s, e in info["words"]]
+            words = [[w, round(lead + float(s), 3), round(lead + float(e), 3)] for w, s, e in info["words"]]
         else:
-            words = [list(w) for w in estimate_words(beat["narration"], speech, lead=LEAD)]
+            words = [list(w) for w in estimate_words(beat["narration"], speech, lead=lead)]
         found = sync_mod.apply(stype, props, words, dur)   # anchor reveals to the words that name them (props.cues / props.cuts)
         if found:
             sync_items += found["items"]
@@ -128,7 +132,7 @@ def build_timeline(
                 "words": words,
                 "audio_key": info.get("audio_key"),
                 **({"silent": True} if silent else {}),
-                "narration_offset": LEAD,
+                "narration_offset": lead,
                 "cues": [round(c, 3) for c in cues[:8]],
                 "transition": "fade",
                 **({"sfx": beat["sfx"]} if beat.get("sfx") else {}),
@@ -152,6 +156,7 @@ def build_timeline(
         "captions": bool(plan.get("captions", True)),
         "sync": {"items": sync_items, "anchored": sync_anchored, "aligned_beats": sum(1 for b in beat_info if b.get("words"))},
         "duration": round(t, 4),
+        "intro_s": round(intro, 3), "outro_s": round(outro, 3),
         "scenes": scenes,
         "chapters": chapters,
         "title": plan.get("title", ""),

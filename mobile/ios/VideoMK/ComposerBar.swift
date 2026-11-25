@@ -64,7 +64,7 @@ struct ComposerBar: View {
                     .frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 20)
             }
 
-            if !photos.isEmpty { AttachedPhotosStrip(photos: photos) }
+            if !photos.isEmpty { AttachedPhotosStrip(photos: photos, minutes: options.minutes) }
             HStack(alignment: .bottom, spacing: 8) {
                 optionsMenu
                 HStack(alignment: .bottom, spacing: 4) {

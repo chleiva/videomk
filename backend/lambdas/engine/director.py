@@ -10,6 +10,9 @@ from datetime import date
 
 from . import language as lang_mod, plan as plan_mod, research, researcher, skills as skills_mod, staged as staged_mod, voices
 
+PHOTO_INTRO_S = 2.5   # seconds of music and pictures before the first word of a video made from the user's photos
+PHOTO_OUTRO_S = 3.5   # seconds of music alone after the last word
+
 Ask = Callable[..., str]  # (system, user, max_tokens=...) -> text
 
 
@@ -29,6 +32,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     today = today or date.today().isoformat()
     info: Dict[str, Any] = {"mode": "encyclopedia"}
     skill_ids = skills_mod.select(prompt, lambda s, u: ask_small(s, u, 120), minutes)   # the producer: which kind of video is this, and so which craft guides apply
+    if photos and "photo-memories" not in skill_ids:   # a video of the person's own photos always follows the photo guide (pacing, pauses, music), whatever else it is about
+        skill_ids = ["photo-memories"] + skill_ids
     craft = skills_mod.render(skill_ids)
     info["skills"] = skill_ids
     notes, sources = "", []
@@ -79,6 +84,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
+    if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
+        plan["intro_s"], plan["outro_s"] = PHOTO_INTRO_S, PHOTO_OUTRO_S
     if region:
         plan["region"] = region
     if photos:  # the beats that show these photos find them here (the clean copies live in the video's own assets)

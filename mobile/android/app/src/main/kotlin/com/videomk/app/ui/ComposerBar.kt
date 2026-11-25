@@ -83,6 +83,7 @@ import androidx.core.content.ContextCompat
 import com.videomk.app.core.Brief
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.DictationPlan
+import com.videomk.app.core.PhotoCapacity
 import com.videomk.app.core.PhotoIntake
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.VideoLook
@@ -201,7 +202,7 @@ fun ComposerBar(composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, 
                 )
             }
 
-            if (composer.photos.isNotEmpty() || composer.loading > 0) AttachedPhotosStrip(composer)
+            if (composer.photos.isNotEmpty() || composer.loading > 0) AttachedPhotosStrip(composer, options.minutes)
 
             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OptionsMenu(options, onChange = { composer.options = it })
@@ -312,7 +313,7 @@ private fun MenuChoice(label: String, detail: String?, selected: Boolean, tag: S
 
 /** The strip of attached photos above the text field: a lazy row of small previews (only the visible ones are composed), so 100 photos stay smooth. */
 @Composable
-private fun AttachedPhotosStrip(composer: ComposerViewModel) {
+private fun AttachedPhotosStrip(composer: ComposerViewModel, minutes: Double) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
@@ -350,5 +351,12 @@ private fun AttachedPhotosStrip(composer: ComposerViewModel) {
             "${composer.photos.size} of ${PhotoLimits.MAX_PHOTOS} photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.",
             style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 20.dp).testTag("photosNote"),
         )
+        // not blocking: sending is still allowed; recomputed on every length change and every removal
+        PhotoCapacity.hint(composer.photos.size + composer.loading, minutes, CreateOptions.LENGTHS.map { it.toInt() })?.let { hint ->
+            Text(
+                hint, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning,
+                modifier = Modifier.padding(horizontal = 20.dp).semantics { contentDescription = "Video length tip. $hint" }.testTag("photoCapacityHint"),
+            )
+        }
     }
 }

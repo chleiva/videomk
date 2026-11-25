@@ -16,7 +16,7 @@ def test_every_skill_file_is_well_formed_small_and_unique():
     for s in sk.values():
         assert s.name and s.body and len(s.body) <= skills.MAX_BODY_CHARS, (s.id, len(s.body))
         assert re.match(r"^[a-z][a-z0-9-]+$", s.id)
-        assert s.always or len(s.pick) >= 20, f"{s.id} needs a 'pick' line the selector can use"
+        assert s.always or s.auto or len(s.pick) >= 20, f"{s.id} needs a 'pick' line the selector can use"
         assert s.body.lstrip().startswith("- "), f"{s.id} should be imperative bullets"
         assert "TODO" not in s.body and "{" not in s.body and "}" not in s.body
     assert skills.DEFAULT_SKILL in sk
@@ -25,7 +25,7 @@ def test_every_skill_file_is_well_formed_small_and_unique():
 def test_the_catalog_for_the_selector_lists_every_type_and_never_the_always_on_guide():
     cat = skills.catalog_text()
     for s in skills.load().values():
-        assert (f"- {s.id}:" in cat) == (not s.always)
+        assert (f"- {s.id}:" in cat) == (not s.always and not s.auto)
 
 
 @pytest.mark.parametrize("answer,expected", [
@@ -90,3 +90,20 @@ def test_a_long_video_gives_the_guides_to_the_outline_and_every_section():
     assert out["plan"]["skills"] == ["history-story"]
     assert len(seen) == 4 and all("Craft guides for this video" in s and "Publish quality" in s for s in seen)
     assert all("Tell it as a story with people in it" in s for s in seen)
+
+
+def test_the_photo_guide_is_automatic_never_offered_to_the_selector_and_always_added_with_photos():
+    sk = skills.load()
+    assert sk["photo-memories"].auto and "photo-memories" not in skills.catalog_text()
+    assert skills.select("a video of my trip", lambda s, u: '{"types": ["photo-memories", "travel-places"]}') == ["travel-places"]      # the model cannot pick it
+    prompts = []
+    def one_call(system, user):
+        prompts.append(system)
+        return json.dumps({"legit": True, "title": "T", "description": "d", "voices": {"narrator": "Ruth"}, "beats": [
+            {"narration": " ".join(["w"] * 30), "scene": {"type": "image", "props": {"photo": "P1", "image_query": "a street", "alt": "a"}}} for _ in range(3)]})
+    photos = [{"id": "P1", "key": "k", "w": 600, "h": 400, "orientation": "landscape", "caption": "a street"}]
+    out = director.direct("my trip to Paris", minutes=1.0, ask_small=_ask_small(["travel-places"]), ask_big=one_call, language="en", photos=photos)
+    assert out["plan"]["skills"][0] == "photo-memories" and "Let the pictures breathe" in prompts[0] and "Say less than the pictures show" in prompts[0]
+    assert out["plan"]["intro_s"] == 2.5 and out["plan"]["outro_s"] == 3.5
+    no_photos = director.direct("how rainbows form", minutes=1.0, ask_small=_ask_small(["explainer-education"]), ask_big=one_call, language="en")
+    assert "photo-memories" not in no_photos["plan"]["skills"] and "intro_s" not in no_photos["plan"]

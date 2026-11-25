@@ -85,6 +85,7 @@ final class PhotoAttachments {
 /// The strip of attached photos above the text field.
 struct AttachedPhotosStrip: View {
     @Bindable var photos: PhotoAttachments
+    let minutes: Double
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -123,6 +124,12 @@ struct AttachedPhotosStrip: View {
             Text("\(photos.items.count) of \(PhotoLimits.maxPhotos) photos. Tell me what to do with them. Location data is removed, and the originals are deleted once your video is made.")
                 .font(.caption).foregroundStyle(Theme.textSecondary).padding(.horizontal, 20)
                 .accessibilityIdentifier("photosNote")
+            if let hint = PhotoCapacity.hint(photos: photos.items.count + photos.loading, minutes: minutes) {
+                Text(hint)
+                    .font(.caption).foregroundStyle(Theme.warning).padding(.horizontal, 20)
+                    .accessibilityLabel("Length warning. \(hint)")
+                    .accessibilityIdentifier("photosLengthHint")
+            }
         }
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }

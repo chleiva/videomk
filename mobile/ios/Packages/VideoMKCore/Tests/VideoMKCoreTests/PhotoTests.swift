@@ -361,3 +361,44 @@ extension CoreTests {
         #expect(body["media_meta"] == nil)
     }
 }
+
+@Suite struct PhotoCapacityTests {
+    @Test func capacityFollowsTheServerRule() {
+        #expect(PhotoCapacity.capacity(minutes: 1) == 42 && PhotoCapacity.capacity(minutes: 2) == 85 && PhotoCapacity.capacity(minutes: 3) == 127)
+        #expect(PhotoCapacity.capacity(minutes: 12) == 510 && PhotoCapacity.capacity(minutes: 0) == 0)
+    }
+
+    @Test func minimumMinutesIsTheInverse() {
+        #expect(abs(PhotoCapacity.minimumMinutes(photos: 100) - 2.3529) < 0.001)
+        #expect(PhotoCapacity.minimumMinutes(photos: 0) == 0)
+        for n in [1, 10, 42, 85, 100] { #expect(PhotoCapacity.capacity(minutes: PhotoCapacity.minimumMinutes(photos: n)) >= n) }
+    }
+
+    @Test func noHintWhenEverythingFits() {
+        #expect(PhotoCapacity.hint(photos: 0, minutes: 1) == nil)
+        #expect(PhotoCapacity.hint(photos: 42, minutes: 1) == nil)      // exactly at capacity
+        #expect(PhotoCapacity.hint(photos: 85, minutes: 2) == nil)
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 3) == nil)
+    }
+
+    @Test func oneOverGetsAHintWithTheNextLength() {
+        #expect(PhotoCapacity.hint(photos: 43, minutes: 1) == "About 42 of your 43 photos fit in 1 minute (the best ones, no duplicates). Choose 2 minutes to show them all.")
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 2) == "About 85 of your 100 photos fit in 2 minutes (the best ones, no duplicates). Choose 3 minutes to show them all.")
+    }
+
+    @Test func aHundredPhotosAtEachOption() {
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 1)?.hasSuffix("Choose 3 minutes to show them all.") == true)   // 2 is not enough (2.35 needed)
+        #expect(PhotoCapacity.hint(photos: 100, minutes: 2)?.contains("Choose 3 minutes") == true)
+        for m in [3.0, 5, 8, 12] { #expect(PhotoCapacity.hint(photos: 100, minutes: m) == nil) }
+    }
+
+    @Test func theLargestOptionStillTooShortSaysSoWithoutASuggestion() {
+        #expect(PhotoCapacity.hint(photos: 600, minutes: 12) == "About 510 of your 600 photos fit in 12 minutes (the best ones, no duplicates).")
+        #expect(PhotoCapacity.hint(photos: 20, minutes: 1, options: [1]) == nil)
+    }
+
+    @Test func singularGrammar() {
+        #expect(PhotoCapacity.hint(photos: 1, minutes: 0.01) == "About 0 of your 1 photo fit in 0.01 minutes (the best ones, no duplicates). Choose 1 minute to show it.")
+        #expect(PhotoCapacity.hint(photos: 2, minutes: 0.03)?.hasPrefix("About 1 of your 2 photos fits in") == true)
+    }
+}

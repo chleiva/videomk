@@ -36,6 +36,32 @@ object PhotoLimits {
     val QUALITIES = listOf(85, 70, 55)
 }
 
+/** How many photos a video of a given length can carry (the server shows several at once), and what to tell the person when it is too short. */
+object PhotoCapacity {
+    fun capacity(minutes: Double): Int = Math.floor(minutes * 42.5 + 1e-9).toInt()
+
+    fun minimumMinutes(photos: Int): Double = photos * 1.2 / 0.85 / 60
+
+    private fun minutesText(m: Double): String {
+        val n = if (m == Math.floor(m)) m.toInt().toString() else m.toString()
+        return "$n minute${if (m == 1.0) "" else "s"}"
+    }
+
+    /** One line, or null when every photo fits. [options] are the app's length choices (minutes). */
+    fun hint(photos: Int, minutes: Double, options: List<Int>): String? {
+        if (photos <= capacity(minutes)) return null
+        val photoWord = { n: Int -> if (n == 1) "photo" else "photos" }
+        val need = minimumMinutes(photos)
+        val suggestion = options.sorted().firstOrNull { it >= need - 1e-9 }
+        return if (suggestion != null) {
+            "About ${capacity(minutes)} of your $photos ${photoWord(photos)} fit in ${minutesText(minutes)} (the best ones, no duplicates). Choose ${minutesText(suggestion.toDouble())} to show them all."
+        } else {
+            val best = capacity((options.maxOrNull() ?: minutes.toInt()).toDouble())
+            "About $best of your $photos ${photoWord(photos)} fit in the longest video."
+        }
+    }
+}
+
 /** What a selection does to the room left: the first photos that fit are kept, the rest are left out (and the user is told how many). */
 data class PhotoIntake(val accepted: Int, val leftOut: Int) {
     companion object {
