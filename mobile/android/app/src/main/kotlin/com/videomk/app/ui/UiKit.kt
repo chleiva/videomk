@@ -50,13 +50,13 @@ fun Overline(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun FixChip(label: String, description: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        modifier.heightIn(min = 44.dp).clickable(role = Role.Button, onClickLabel = description, onClick = onClick).semantics { contentDescription = description },
+        modifier.heightIn(min = 48.dp).clickable(role = Role.Button, onClickLabel = description, onClick = onClick).semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
         Row(
             Modifier.heightIn(min = 32.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) { Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary, maxLines = 1) }
+        ) { Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
     }
 }
 

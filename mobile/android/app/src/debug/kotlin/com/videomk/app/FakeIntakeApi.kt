@@ -30,8 +30,16 @@ class FakeIntakeApi(private val mode: () -> String) : IntakeApi {
         Question("focus", "What should it focus on?", listOf(QuestionOption("honey", "Making honey"), QuestionOption("hive", "Life in the hive"), QuestionOption("pollination", "Pollination"), QuestionOption("facts", "Fun facts")), true, "Pick the part that matters most."),
     )
 
+    /** 36-character labels in English and Spanish, the longest the server now lets through, to check that chips never clip. */
+    private fun longQuestions(es: Boolean) = if (es) listOf(
+        Question("focus", "¿Qué periodo quieres cubrir?", listOf(QuestionOption("a", "Evolución biológica y primeros homínidos"), QuestionOption("b", "Civilizaciones antiguas hasta la edad media"), QuestionOption("c", "Hoy"), QuestionOption("d", "Futuro cercano y tecnología")), true, null),
+    ) else listOf(
+        Question("focus", "Which period should it cover?", listOf(QuestionOption("a", "Biological evolution and early hominids"), QuestionOption("b", "Ancient civilizations to the middle ages"), QuestionOption("c", "Today"), QuestionOption("d", "Near future and technology")), true, null),
+    )
+
     override suspend fun brief(request: IntakeRequest): IntakeResult {
-        return when (mode()) {
+        return when (val m = mode()) {
+            "longlabels", "longlabels_es" -> if (request.answers.isEmpty()) IntakeResult.Questions(longQuestions(m == "longlabels_es")) else IntakeResult.Ok(buildJsonObject { put("summary", if (m == "longlabels_es") "Evolución biológica y primeros homínidos" else "Biological evolution and early hominids") })
             "questions" -> if (request.answers.isEmpty()) IntakeResult.Questions(questions) else IntakeResult.Ok(buildJsonObject { put("summary", "For kids · Calm · Focus: Making honey") })
             "unsupported" -> IntakeResult.NotSupported("This request is outside what videomk can make. Try describing the topic in a different way.", "A calm story about a lighthouse keeper")
             "blocked" -> IntakeResult.Blocked("We can't make this video. Try a different idea.")

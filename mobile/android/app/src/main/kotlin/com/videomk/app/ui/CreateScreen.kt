@@ -110,6 +110,7 @@ import com.videomk.app.core.CreatePrefs
 import com.videomk.app.core.DictationPlan
 import com.videomk.app.core.PhotoCapacity
 import com.videomk.app.core.Lengths
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.width
 import com.videomk.app.core.PhotoLimits
@@ -251,7 +252,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 }
                 // other formats this platform also accepts: small secondary choices that switch only the format
                 val also = CreatePlatforms.alsoWorks(options, caps)
-                if (also.isNotEmpty()) Row(Modifier.testTag("alsoWorks"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (also.isNotEmpty()) FlowRow(Modifier.testTag("alsoWorks"), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.spacedBy(6.dp), itemVerticalAlignment = Alignment.CenterVertically) {
                     Text("Also works:", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                     for (a in also) Text(
                         a.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary,
@@ -267,11 +268,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 // the presets the server offers, scrolling sideways when there are more than fit
                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("lengthChips")) {
                     items(caps.presets) { mi ->
-                        LengthChip(mi, Lengths.credits(mi), Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, Modifier.width(78.dp)) { composer.setLength(mi) }
+                        LengthChip(mi, Lengths.credits(mi), Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, Modifier.widthIn(min = 78.dp)) { composer.setLength(mi) }
                     }
                 }
                 CreatePlatforms.overMax(options, caps)?.let { om ->
-                    Row(Modifier.fillMaxWidth().testTag("overMaxHint"), verticalAlignment = Alignment.CenterVertically) {
+                    FlowRow(Modifier.fillMaxWidth().testTag("overMaxHint"), itemVerticalAlignment = Alignment.CenterVertically) {
                         Text(om.text + (om.useMinutes?.let { " · " } ?: ""), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                         om.useMinutes?.let { u -> FixChip("Use ${Lengths.short(u)}", "Use ${Lengths.long(u)} instead", Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
                     }
@@ -397,7 +398,7 @@ private fun LengthChip(minutes: Double, credits: Int, selected: Boolean, overBal
             .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(role = Role.RadioButton, onClick = onClick)
             .semantics { this.selected = selected; contentDescription = "${Lengths.long(minutes)}, $credits credit${plural(credits)}${if (selected) ", selected" else ""}" }
-            .testTag("length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(vertical = 8.dp),
+            .testTag("length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
         Text(Lengths.short(minutes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1)
@@ -465,10 +466,11 @@ private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com
             }
             Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Overline("Format")
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val bigText = LocalDensity.current.fontScale >= 1.3f
+                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), maxItemsInEachRow = if (bigText) 2 else 4) {
                     for (id in listOf("16:9", "9:16", "1:1", "4:5")) {
                         val a = caps.aspect(id)
-                        FormatTile(id, a?.label ?: when (id) { "16:9" -> "Landscape"; "9:16" -> "Vertical"; "1:1" -> "Square"; else -> "Portrait" }, ready = a?.ready == true, beta = a?.beta == true, selected = o.aspect == id, Modifier.weight(1f)) {
+                        FormatTile(id, a?.label ?: when (id) { "16:9" -> "Landscape"; "9:16" -> "Vertical"; "1:1" -> "Square"; else -> "Portrait" }, ready = a?.ready == true, beta = a?.beta == true, selected = o.aspect == id, Modifier.weight(1f), tall = bigText) {
                             composer.updateOptions(o.copy(aspect = id))
                         }
                     }
@@ -480,18 +482,18 @@ private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com
 }
 
 @Composable
-private fun FormatTile(id: String, label: String, ready: Boolean, beta: Boolean, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun FormatTile(id: String, label: String, ready: Boolean, beta: Boolean, selected: Boolean, modifier: Modifier, tall: Boolean = false, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     Box(
-        modifier.aspectRatio(1f).alpha(if (ready) 1f else 0.6f).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
+        modifier.then(if (tall) Modifier.heightIn(min = 110.dp) else Modifier.aspectRatio(1f)).alpha(if (ready) 1f else 0.6f).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
             .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(enabled = ready, role = Role.RadioButton, onClick = onClick)
             .semantics { this.selected = selected; contentDescription = "$label $id${if (!ready) ", coming soon" else if (beta) ", beta" else ""}" }.testTag("format-$id"),
     ) {
         if (!ready || beta) Text(if (ready) "Beta" else "Soon", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
-        Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.align(Alignment.Center).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Icon(if (id == "16:9") Icons.Filled.CropLandscape else if (id == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, modifier = Modifier.size(26.dp))
-            Text("$label\n$id", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2)
+            Text("$label\n$id", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
     }
 }

@@ -171,7 +171,7 @@ fun LocalUploadTile(item: QueueItem, server: MediaPhoto?, state: TileState, show
             TileState.Failed -> {
                 Box(Modifier.fillMaxSize().background(Color(0xFFB91C1C).copy(alpha = 0.55f)))
                 Box(Modifier.align(Alignment.Center).size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.9f)), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Refresh, null, tint = Vmk.colors.danger) }
-                Text("Tap to retry", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color(0xFFB91C1C), maxLines = 1,
+                Text("Tap to retry", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color(0xFFB91C1C), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).clip(CircleShape).background(Color.White).padding(horizontal = 8.dp, vertical = 3.dp))
             }
             TileState.AlreadyThere -> GlassLabel("Already there", Modifier.align(Alignment.Center), white = true) { Icon(Icons.Filled.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(12.dp)) }

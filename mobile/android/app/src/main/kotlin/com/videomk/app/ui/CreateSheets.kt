@@ -9,6 +9,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import com.videomk.app.core.ChipFit
+import com.videomk.app.core.ChipLayout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -144,7 +151,8 @@ private fun QuestionContent(composer: ComposerViewModel, q: Question, overline: 
     var otherText by remember(q.id) { mutableStateOf("") }
     // a chip is shown selected, then the sheet moves on by itself after a beat (no Next button)
     LaunchedEffect(picked) { picked?.let { delay(250); composer.choose(it) } }
-    Column(Modifier.fillMaxWidth().padding(top = 4.dp)) {
+    // scrolls when the question and its chips are taller than the sheet (large text, a small phone): nothing is ever hidden
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 4.dp)) {
         Overline(overline)
         Text(q.text, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 27.sp, lineHeight = 33.sp), fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.padding(top = 4.dp).semantics { heading() }.testTag("questionTitle"))
         q.helper?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp)) }
@@ -171,19 +179,28 @@ private fun QuestionContent(composer: ComposerViewModel, q: Question, overline: 
     }
 }
 
+/** An answer chip: sizes to its text, wraps to two lines, or becomes a full-width row (three lines, then an ellipsis); the full text is always in its description. */
 @Composable
 private fun AnswerChip(label: String, selected: Boolean, description: String, modifier: Modifier, dashed: Boolean = false, icon: Boolean = false, onClick: () -> Unit) {
     val dash = Vmk.colors.outline
-    Row(
-        modifier.heightIn(min = 50.dp).clip(CircleShape).background(if (selected) Vmk.colors.primaryContainer else if (dashed) Color.Transparent else Vmk.colors.surfaceRaised)
-            .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, CircleShape) else Modifier)
-            .then(if (dashed) Modifier.drawBehind { drawRoundRect(dash, cornerRadius = CornerRadius(size.height / 2), style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)))) } else Modifier)
-            .clickable(role = Role.RadioButton, onClick = onClick).padding(horizontal = 20.dp)
-            .semantics { this.selected = selected; contentDescription = description },
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (icon) Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.text, modifier = Modifier.size(18.dp))
-        Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else if (dashed) Vmk.colors.textSecondary else Vmk.colors.text)
+    androidx.compose.foundation.layout.BoxWithConstraints {
+        val fit = ChipLayout.fit(label, maxWidth.value, LocalDensity.current.fontScale, extraDp = if (icon) 26f else 0f)
+        val shape = if (fit == ChipFit.SingleLine) CircleShape else RoundedCornerShape(26.dp)
+        Row(
+            modifier.then(if (fit == ChipFit.FullWidth) Modifier.fillMaxWidth() else Modifier.widthIn(max = maxWidth)).heightIn(min = 50.dp).clip(shape)
+                .background(if (selected) Vmk.colors.primaryContainer else if (dashed) Color.Transparent else Vmk.colors.surfaceRaised)
+                .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
+                .then(if (dashed) Modifier.drawBehind { drawRoundRect(dash, cornerRadius = CornerRadius(if (fit == ChipFit.SingleLine) size.height / 2 else 26.dp.toPx()), style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)))) } else Modifier)
+                .clickable(role = Role.RadioButton, onClick = onClick).padding(horizontal = 20.dp, vertical = 8.dp)
+                .semantics { this.selected = selected; contentDescription = description },
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (icon) Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.text, modifier = Modifier.size(18.dp))
+            Text(
+                label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else if (dashed) Vmk.colors.textSecondary else Vmk.colors.text,
+                maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
+            )
+        }
     }
 }
 
@@ -204,9 +221,9 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
     }
     FlowRow(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         for (c in chips) Row(
-            Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = "Change this answer") { composer.editAnswer(c.questionId) }.padding(horizontal = 16.dp).testTag("summaryChip"),
+            Modifier.widthIn(max = 600.dp).heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = "Change this answer") { composer.editAnswer(c.questionId) }.padding(horizontal = 16.dp, vertical = 6.dp).semantics { contentDescription = "${c.label}. Change this answer" }.testTag("summaryChip"),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) { Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary); Icon(Icons.Filled.Edit, null, tint = Vmk.colors.primary, modifier = Modifier.size(14.dp)) }
+        ) { Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)); Icon(Icons.Filled.Edit, null, tint = Vmk.colors.primary, modifier = Modifier.size(14.dp)) }
     }
     Text("Tap an answer to change it.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp))
     Box(Modifier.fillMaxWidth().padding(vertical = 12.dp).size(1.dp).background(Vmk.colors.outline))

@@ -399,4 +399,26 @@ class CreateTest {
         assertEquals(null, com.videomk.app.core.CreatePlatforms.overMax(b.copy(minutes = 2.0), c))
         assertEquals(null, com.videomk.app.core.CreatePlatforms.overMax(CreateOptions(12.0, platform = "youtube"), c))
     }
+
+    @Test fun `chips never get a fixed width that crops and fit by label length`() {
+        val en = "Biological evolution and early hominids"; val es = "Civilizaciones antiguas hasta la edad media"
+        assertEquals(com.videomk.app.core.ChipFit.SingleLine, com.videomk.app.core.ChipLayout.fit("Kids", 340f, 1f))
+        assertEquals(com.videomk.app.core.ChipFit.SingleLine, com.videomk.app.core.ChipLayout.fit("Making honey", 340f, 1f))
+        // 40 to 43 characters on a phone: not one line, never cut
+        for (label in listOf(en, es, "Evolución biológica y primeros homínidos")) {
+            assertTrue(label, com.videomk.app.core.ChipLayout.fit(label, 340f, 1f) != com.videomk.app.core.ChipFit.SingleLine)
+        }
+        // bigger text only ever needs more room, never less
+        val order = listOf(com.videomk.app.core.ChipFit.SingleLine, com.videomk.app.core.ChipFit.Wrapped, com.videomk.app.core.ChipFit.FullWidth)
+        for (label in listOf("Kids", "Beginners and experts alike", en, es)) {
+            var last = 0
+            for (scale in listOf(1f, 1.3f, 1.5f, 2f)) { val f = order.indexOf(com.videomk.app.core.ChipLayout.fit(label, 320f, scale)); assertTrue("$label @ $scale", f >= last); last = f }
+        }
+        // at 2x text a 36-character label gets a full-width row (three lines at most)
+        assertEquals(com.videomk.app.core.ChipFit.FullWidth, com.videomk.app.core.ChipLayout.fit(es, 320f, 2f))
+        assertEquals(3, com.videomk.app.core.ChipLayout.maxLines(com.videomk.app.core.ChipFit.FullWidth))
+        assertEquals(1, com.videomk.app.core.ChipLayout.maxLines(com.videomk.app.core.ChipFit.SingleLine))
+        // a narrow container (360 x 640 phone, small sheet) is handled the same way
+        assertTrue(com.videomk.app.core.ChipLayout.fit("Beginners", 120f, 1.5f) != com.videomk.app.core.ChipFit.SingleLine)
+    }
 }
