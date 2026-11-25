@@ -25,9 +25,22 @@ struct CreateStageSheet: View {
             }
         }
         .presentationBackground(Theme.surface)
-        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(isSummary ? 640 : 470), .large])
+        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(470), .height(640), .large], selection: $detent)
+        .onChange(of: create.stage, initial: true) { _, _ in detent = typeSize.isAccessibilitySize || hasLongLabels ? .large : .height(isSummary ? 640 : 470) }
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(isChecking)
+    }
+
+    @State private var detent: PresentationDetent = .height(470)
+    /// Long answers wrap onto two lines, so the sheet opens at full height instead of hiding the buttons below them.
+    private var hasLongLabels: Bool {
+        let longest: Int
+        switch create.stage {
+        case .questions(let f): longest = f.current?.options.map(\.label.count).max() ?? 0
+        case .summary(let f, let b): longest = f.chips(briefSummary: b?["summary"]).map(\.text.count).max() ?? 0
+        default: longest = 0
+        }
+        return longest > 24
     }
 
     private var isSummary: Bool { if case .summary = create.stage { true } else { false } }
@@ -64,8 +77,10 @@ private struct QuestionStep: View {
         return AnyView(
             VStack(alignment: .leading, spacing: 0) {
                 header
-                content(q).id(flow.index)
-                    .transition(reduceMotion ? .identity : .asymmetric(insertion: .offset(x: forward ? 24 : -24).combined(with: .opacity), removal: .opacity))
+                ScrollView {
+                    content(q).id(flow.index)
+                        .transition(reduceMotion ? .identity : .asymmetric(insertion: .offset(x: forward ? 24 : -24).combined(with: .opacity), removal: .opacity))
+                }.scrollBounceBehavior(.basedOnSize).scrollIndicators(.hidden)
                 Spacer(minLength: 0)
                 HStack { Spacer(); Button("Skip") { advance { $0.skip() } }.font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44).accessibilityIdentifier("skipQuestion"); Spacer() }
             }
@@ -87,8 +102,8 @@ private struct QuestionStep: View {
     private func content(_ q: IntakeQuestion) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(flow.progressText.uppercased()).font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 14)
-            Text(q.title).font(.system(size: 27, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 6).accessibilityAddTraits(.isHeader).accessibilityIdentifier("questionTitle")
-            if let h = q.helper { Text(h).font(.system(size: 15)).foregroundStyle(Theme.textSecondary).padding(.top, 4) }
+            Text(q.title).font(.system(size: 27, weight: .bold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 6).accessibilityAddTraits(.isHeader).accessibilityIdentifier("questionTitle")
+            if let h = q.helper { Text(h).font(.system(size: 15)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).padding(.top, 4) }
             if other {
                 HStack(spacing: 10) {
                     TextField("Type your answer", text: $otherText).focused($otherFocused).padding(.horizontal, 14).frame(height: 50).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -120,11 +135,12 @@ private struct QuestionStep: View {
         } label: {
             HStack(spacing: 8) {
                 if let s = c.symbol { Image(systemName: s).font(.system(size: 15)) }
-                Text(c.label).font(.system(size: 17, weight: .semibold))
+                Text(c.label).font(.system(size: 17, weight: .semibold)).multilineTextAlignment(.leading).lineLimit(nil).fixedSize(horizontal: false, vertical: true)
             }
-            .foregroundStyle(c.dashed ? Theme.textSecondary : selected ? Theme.primary : Theme.text).padding(.horizontal, 22).frame(maxWidth: typeSize >= .accessibility1 ? .infinity : nil, minHeight: 50)
-            .background(selected ? Theme.primaryContainer : (c.dashed ? .clear : Theme.surfaceRaised), in: Capsule())
-            .overlay(Capsule().stroke(selected ? Theme.primary : Theme.outline, style: StrokeStyle(lineWidth: selected ? 2 : 1.5, dash: c.dashed ? [4, 4] : [])))
+            .foregroundStyle(c.dashed ? Theme.textSecondary : selected ? Theme.primary : Theme.text).padding(.horizontal, 20).padding(.vertical, 12)
+            .frame(maxWidth: typeSize >= .accessibility1 ? .infinity : nil, minHeight: 50, alignment: .leading)
+            .background(selected ? Theme.primaryContainer : (c.dashed ? .clear : Theme.surfaceRaised), in: RoundedRectangle(cornerRadius: 25, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 25, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, style: StrokeStyle(lineWidth: selected ? 2 : 1.5, dash: c.dashed ? [4, 4] : [])))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(c.label).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("answer-\(c.id)")
@@ -170,8 +186,8 @@ private struct SummaryStep: View {
             WrapLayout(spacing: 10) {
                 ForEach(Array(flow.chips(briefSummary: brief?["summary"]).enumerated()), id: \.offset) { _, c in
                     Button { var f = flow; f.edit(c.questionID); create.stage = .questions(f) } label: {
-                        HStack(spacing: 6) { Text(c.text).font(.system(size: 17, weight: .semibold)); Image(systemName: "pencil").font(.system(size: 13)) }
-                            .foregroundStyle(Theme.primary).padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule())
+                        HStack(spacing: 6) { Text(c.text).font(.system(size: 17, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true); Image(systemName: "pencil").font(.system(size: 13)) }
+                            .foregroundStyle(Theme.primary).padding(.horizontal, 16).padding(.vertical, 10).frame(minHeight: 44).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                     }.buttonStyle(.plain).accessibilityLabel("\(c.text). Double tap to change.").accessibilityIdentifier("summaryChip")
                 }
             }.padding(.top, 14)
@@ -181,8 +197,8 @@ private struct SummaryStep: View {
             Spacer(minLength: 8)
             HStack(spacing: 8) {
                 Image(systemName: "bolt.fill").font(.system(size: 14)).foregroundStyle(Theme.primary)
-                Text(status.message).font(.system(size: 14, weight: .medium)).foregroundStyle(status.isProblem ? Theme.warning : Theme.textSecondary)
-                Spacer()
+                Text(status.message).font(.system(size: 14, weight: .medium)).foregroundStyle(status.isProblem ? Theme.warning : Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
                 if let fix = status.fix, status.isProblem { FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.setMinutes(m) } } }
             }
             Button { create.dismissOverlay(); onSubmit(brief) } label: {
@@ -229,13 +245,21 @@ private struct KindStep: View {
 }
 
 /// Chips that wrap onto as many lines as they need.
+/// Wraps its children into rows. A child wider than the row is measured at the container's width, so its text wraps instead of being cut;
+/// a child that needs more than half the row takes a row of its own.
 struct WrapLayout: Layout {
     var spacing: CGFloat = 8
+    private func size(_ v: LayoutSubview, in width: CGFloat) -> CGSize {
+        let natural = v.sizeThatFits(.unspecified)
+        guard natural.width > width else { return natural }
+        let fitted = v.sizeThatFits(ProposedViewSize(width: width, height: nil))
+        return CGSize(width: min(width, max(fitted.width, 1)), height: fitted.height)
+    }
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? 320
         var x: CGFloat = 0, y: CGFloat = 0, row: CGFloat = 0
         for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
+            let s = size(v, in: width)
             if x + s.width > width, x > 0 { y += row + spacing; x = 0; row = 0 }
             x += s.width + spacing; row = max(row, s.height)
         }
@@ -244,9 +268,9 @@ struct WrapLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         var x = bounds.minX, y = bounds.minY, row: CGFloat = 0
         for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
+            let s = size(v, in: bounds.width)
             if x + s.width > bounds.maxX, x > bounds.minX { y += row + spacing; x = bounds.minX; row = 0 }
-            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
+            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(width: s.width, height: s.height))
             x += s.width + spacing; row = max(row, s.height)
         }
     }

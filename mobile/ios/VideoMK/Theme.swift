@@ -87,11 +87,11 @@ struct FixChip: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            chipLabel.font(.system(size: 13, weight: .bold)).foregroundStyle(tint).lineLimit(1).padding(.horizontal, 12)
-                .frame(height: 32).background(Theme.primaryContainer, in: Capsule())
+            chipLabel.font(.system(size: 13, weight: .bold)).foregroundStyle(tint).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 7)
+                .frame(minHeight: 32).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plain).layoutPriority(1).accessibilityLabel(title.replacingOccurrences(of: " · ⚡", with: ", ").replacingOccurrences(of: "⚡", with: "credits "))
     }
 
     /// "Use 1 min · ⚡1": the bolt is the app's own symbol, not the emoji.

@@ -147,6 +147,14 @@ final class CreateModel {
                  IntakeQuestion(id: "tone", title: "What tone?", helper: "One word is enough.", options: ["Calm", "Energetic", "Funny", "Serious"].map { IntakeOption(id: $0.lowercased(), label: $0) }),
                  IntakeQuestion(id: "focus", title: "What should it focus on?", helper: "Pick the part you care about most.", options: ["Making honey", "Life in the hive", "Pollination", "Fun facts"].map { IntakeOption(id: $0.lowercased(), label: $0) })]
         switch name {
+        case "longlabels":      // the server's longest labels (36+ characters), in Spanish and English, in one question and in the summary
+            let long = [IntakeQuestion(id: "focus", title: "¿Qué parte de la historia quieres destacar?", helper: "Elige la que más te interesa.", options: ["Evolución biológica y primeros homínidos", "Civilizaciones antiguas hasta la edad media", "From the first farms to the first cities and empires", "Arte", "Guerras"].map { IntakeOption(id: $0.lowercased(), label: $0) }, allowOther: true)]
+            stage = .questions(IntakeFlow(long))
+        case "longsummary":
+            let long = [IntakeQuestion(id: "focus", title: "¿Qué parte?", helper: nil, options: ["Evolución biológica y primeros homínidos"].map { IntakeOption(id: $0.lowercased(), label: $0) }),
+                        IntakeQuestion(id: "tone", title: "¿Tono?", helper: nil, options: ["Civilizaciones antiguas hasta la edad media"].map { IntakeOption(id: $0.lowercased(), label: $0) })]
+            var f = IntakeFlow(long); f.choose(long[0].options[0]); f.choose(long[1].options[0])
+            stage = .summary(f, brief: nil)
         case "q1": stage = .questions(IntakeFlow(q))
         case "q2": var f = IntakeFlow(q); f.choose(q[0].options[0]); stage = .questions(f)
         case "summary":

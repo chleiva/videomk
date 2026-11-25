@@ -248,10 +248,10 @@ private struct LibraryChooser: View {
 
     private func chip(_ title: String, selected: Bool, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1)
-                .padding(.horizontal, 14).frame(height: 34)
-                .background(selected ? Theme.primaryContainer : .clear, in: Capsule())
-                .overlay(Capsule().stroke(Theme.outline, lineWidth: selected ? 0 : 1))
+            Text(title).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 34)
+                .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(Theme.outline, lineWidth: selected ? 0 : 1))
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
         .buttonStyle(.plain)

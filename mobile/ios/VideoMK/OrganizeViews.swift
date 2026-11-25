@@ -153,7 +153,7 @@ struct OrganizeSheet: View {
                 .padding(.top, 16).submitLabel(.done).accessibilityIdentifier("collectionName")
             Text("SUGGESTIONS").font(.system(size: 12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack { ForEach(SuggestedNames.suggest(groups: groups), id: \.self) { s in FixChip(title: s) { name = s } } }
+                WrapLayout(spacing: 8) { ForEach(SuggestedNames.suggest(groups: groups), id: \.self) { s in FixChip(title: s) { name = s } } }
             }
             Spacer()
             HStack(spacing: 10) {

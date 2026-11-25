@@ -66,7 +66,7 @@ struct CollectionCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(alignment: .topLeading) { if collection.auto { AutoBadge().padding(6) } }
             VStack(spacing: 0) {
-                Text(collection.name).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                Text(collection.name).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                 Text("\(collection.count)").font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
             }.frame(width: 104)
         }

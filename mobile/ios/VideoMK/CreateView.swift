@@ -200,12 +200,12 @@ struct CreateView: View {
                         HStack(spacing: 6) {
                             if selected { Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)) }
                             else { Image(systemName: icon(chip)).font(.system(size: 15)) }
-                            Text(chip.label).font(.system(size: 16, weight: .semibold)).lineLimit(1).truncationMode(.middle)
+                            Text(chip.label).font(.system(size: 16, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                             if !chip.supported { Text("Soon").font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.textSecondary).padding(.horizontal, 6).frame(height: 18).background(Theme.surface3, in: Capsule()) }
                         }
-                        .foregroundStyle(selected ? Theme.primary : Theme.text).padding(.horizontal, 16).frame(height: 44)
-                        .background(selected ? Theme.primaryContainer : Theme.surface, in: Capsule())
-                        .overlay(Capsule().stroke(selected ? Theme.primary : Theme.outline, lineWidth: selected ? 1.5 : 1))
+                        .foregroundStyle(selected ? Theme.primary : Theme.text).padding(.horizontal, 16).padding(.vertical, 8).frame(minHeight: 44)
+                        .background(selected ? Theme.primaryContainer : Theme.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, lineWidth: selected ? 1.5 : 1))
                         .opacity(chip.supported ? 1 : 0.62)
                     }
                     .buttonStyle(.plain)
@@ -244,14 +244,13 @@ struct CreateView: View {
     @ViewBuilder private var alsoWorks: some View {
         let others = form.alsoWorks(create.caps)
         if !others.isEmpty {
-            HStack(spacing: 8) {
-                Text("Also works:").font(.system(size: 13.5)).foregroundStyle(Theme.textSecondary)
+            WrapLayout(spacing: 8) {
+                Text("Also works:").font(.system(size: 13.5)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
                 ForEach(others, id: \.id) { o in
                     Button { create.form.aspect = o.id; UISelectionFeedbackGenerator().selectionChanged() } label: {
-                        Text(o.name).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 12).frame(height: 30).background(Theme.primaryContainer, in: Capsule()).frame(minHeight: 44)
+                        Text(o.name).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(Theme.primary).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 6).frame(minHeight: 30).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 15, style: .continuous)).frame(minHeight: 44)
                     }.buttonStyle(.plain).accessibilityLabel("Use \(o.name) instead").accessibilityIdentifier("also-\(o.id)")
                 }
-                Spacer(minLength: 0)
             }
             .accessibilityElement(children: .contain)
         }
@@ -287,11 +286,11 @@ struct CreateView: View {
         let selected = form.minutes == m, credits = ComposerPlan.credits(forMinutes: m), costly = balance.map { credits > $0 } ?? false
         return Button { create.form.setMinutes(m); UISelectionFeedbackGenerator().selectionChanged() } label: {
             VStack(spacing: 2) {
-                Text(LengthLabel.chip(m)).font(.system(size: 16, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.8)
+                Text(LengthLabel.chip(m)).font(.system(size: 16, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.text).fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.system(size: 10)); Text("\(credits)").font(.system(size: 13, weight: .semibold).monospacedDigit()) }
                     .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
             }
-            .frame(width: fixedWidth).frame(maxWidth: fixedWidth == nil ? .infinity : nil, minHeight: 58)
+            .padding(.horizontal, 6).frame(minWidth: fixedWidth).frame(maxWidth: fixedWidth == nil ? .infinity : nil, minHeight: 58)
             .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
         }
@@ -355,7 +354,7 @@ struct CreateView: View {
                 LookSwatch(look: look).aspectRatio(3 / 3.6, contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
                     .padding(selected ? 3 : 0).background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
-                Text(title).font(.system(size: 15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text)
+                Text(title).font(.system(size: 15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             }
         }
         .buttonStyle(.plain).frame(maxWidth: .infinity)
@@ -386,9 +385,9 @@ struct CreateView: View {
                 Button { if ready { create.form.aspect = id; UISelectionFeedbackGenerator().selectionChanged() } else { UINotificationFeedbackGenerator().notificationOccurred(.warning) } } label: {
                     VStack(spacing: 5) {
                         Image(systemName: symbol).font(.system(size: 22)).foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-                        Text("\(name)\n\(id)").font(.system(size: 13, weight: .semibold)).multilineTextAlignment(.center).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(2).minimumScaleFactor(0.8)
+                        Text("\(name)\n\(id)").font(.system(size: 13, weight: .semibold)).multilineTextAlignment(.center).foregroundStyle(selected ? Theme.primary : Theme.text).fixedSize(horizontal: false, vertical: true)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 76)
+                    .padding(.horizontal, 4).padding(.vertical, 8).frame(maxWidth: .infinity, minHeight: 76)
                     .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
                     .overlay(alignment: .topTrailing) { if !ready || beta { Text(ready ? "Beta" : "Soon").font(.system(size: 10.5, weight: .bold)).foregroundStyle(Theme.textSecondary).padding(.top, 5).padding(.trailing, 7) } }

@@ -399,3 +399,29 @@ extension CoreTests {
         #expect(x.recommendedMinutes == 0.75 && x.maxMinutes == nil && x.note == nil)
     }
 }
+
+@Suite struct ChipFitTests {
+    private let longEN = "Evolución biológica y primeros homínidos"       // 40 characters, the worst case from the server
+    private let longES = "Civilizaciones antiguas hasta la edad media"   // 43
+
+    @Test func shortLabelsStayOnOneLine() {
+        #expect(ChipFit.mode(label: "Kids", availableWidth: 350) == .singleLine)
+        #expect(ChipFit.mode(label: "Make a general one", availableWidth: 350) == .singleLine)
+    }
+
+    @Test func longLabelsWrapOrTakeTheWholeRowAndNeverStayOnOneLine() {
+        for label in [longEN, longES] {
+            for width in [320.0, 350, 402] {            // iPhone SE up to Pro Max
+                #expect(ChipFit.mode(label: label, availableWidth: width) != .singleLine, "\(label) at \(width)")
+            }
+        }
+        #expect(ChipFit.lines(label: longEN, availableWidth: 320) == 2)
+    }
+
+    @Test func narrowerContainersNeedMoreLines() {
+        let wide = ChipFit.lines(label: longES, availableWidth: 400), narrow = ChipFit.lines(label: longES, availableWidth: 170)
+        #expect(narrow > wide)
+        #expect(ChipFit.mode(label: longES, availableWidth: 170) == .fullWidth)
+        #expect(ChipFit.lines(label: "", availableWidth: 300) == 1)
+    }
+}

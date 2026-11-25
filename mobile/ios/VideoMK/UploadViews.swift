@@ -132,8 +132,8 @@ struct UploadTile: View {
     }
 
     private func glass(_ text: String, symbol: String) -> some View {
-        HStack(spacing: 4) { Image(systemName: symbol).font(.system(size: 10)); Text(text).font(.system(size: 11, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7) }
-            .foregroundStyle(.white).padding(.horizontal, 8).frame(height: 22).background(Color.black.opacity(0.45), in: Capsule())
+        HStack(spacing: 4) { Image(systemName: symbol).font(.system(size: 10)); Text(text).font(.system(size: 11, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
+            .foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
     }
 }
 

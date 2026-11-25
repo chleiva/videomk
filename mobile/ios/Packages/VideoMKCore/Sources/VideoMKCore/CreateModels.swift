@@ -417,3 +417,28 @@ public enum LengthLabel {
     /// "15 seconds", "2 minutes" for screen readers.
     public static func spoken(_ minutes: Double) -> String { minutes < 1 ? "\(Int((minutes * 60).rounded())) seconds" : ComposerPlan.plural(Int(minutes.rounded()), "minute") }
 }
+
+/// How a chip with a label of unknown length is laid out so its text is never cut: on one line when it fits the row, otherwise at the full
+/// width of its container on two lines, and on as many lines as it needs when even that is not enough.
+public enum ChipFit {
+    public enum Mode: Equatable, Sendable { case singleLine, wrapped, fullWidth }
+
+    /// A rough width of `label` in points: an average glyph is about 0.55 em wide, plus the chip's padding and icon.
+    public static func estimatedWidth(label: String, fontSize: Double, padding: Double = 44, extra: Double = 0) -> Double {
+        Double(label.count) * fontSize * 0.55 + padding + extra
+    }
+
+    /// `singleLine`: fits on one line in the available width. `wrapped`: a chip of its own width that needs two lines. `fullWidth`: needs
+    /// more than half a container's width of text, so it takes the whole row (and as many lines as it needs, never fewer than the text).
+    public static func mode(label: String, availableWidth: Double, fontSize: Double = 17, padding: Double = 44, extra: Double = 0) -> Mode {
+        let natural = estimatedWidth(label: label, fontSize: fontSize, padding: padding, extra: extra)
+        if natural <= availableWidth { return .singleLine }
+        return natural <= availableWidth * 1.0 + (availableWidth - padding) ? .wrapped : .fullWidth
+    }
+
+    /// Lines the text needs at that width (at least 1); a chip never allows fewer.
+    public static func lines(label: String, availableWidth: Double, fontSize: Double = 17, padding: Double = 44) -> Int {
+        let textWidth = max(1, availableWidth - padding)
+        return max(1, Int((Double(label.count) * fontSize * 0.55 / textWidth).rounded(.up)))
+    }
+}

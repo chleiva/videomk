@@ -252,11 +252,11 @@ struct ChipsRow: View {
                         Button { Task { await feed.drop(chip) } } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: chip.kind == "place" ? "mappin.and.ellipse" : chip.kind == "date" ? "calendar" : "tag").font(.caption2)
-                                Text(chip.label).font(.footnote.weight(.medium))
+                                Text(chip.label).font(.footnote.weight(.medium)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                                 Image(systemName: "xmark").font(.system(size: 9, weight: .bold))
                             }
                             .padding(.horizontal, 10).padding(.vertical, 6)
-                            .background(Theme.primary.opacity(0.15), in: Capsule()).foregroundStyle(Theme.primary)
+                            .background(Theme.primary.opacity(0.15), in: RoundedRectangle(cornerRadius: 16, style: .continuous)).foregroundStyle(Theme.primary)
                         }
                         .accessibilityLabel("\(chip.label), understood from your search")
                         .accessibilityHint("Double tap to remove this filter")
