@@ -21,6 +21,19 @@ import com.videomk.app.core.PickedSource
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.prepareInOrder
 import com.videomk.app.data.DictationController
+import com.videomk.app.core.Answer
+import com.videomk.app.core.ApiError
+import com.videomk.app.core.Capabilities
+import com.videomk.app.core.CreateDefaults
+import com.videomk.app.core.CreateErrors
+import com.videomk.app.core.CreatePrefs
+import com.videomk.app.core.CreateStop
+import com.videomk.app.core.IntakeApi
+import com.videomk.app.core.IntakeCheck
+import com.videomk.app.core.IntakeRequest
+import com.videomk.app.core.IntakeResult
+import com.videomk.app.core.QuestionFlow
+import com.videomk.app.core.SubmitOutcome
 import com.videomk.app.core.MediaPhoto
 import com.videomk.app.core.PhotoMeta
 import com.videomk.app.data.PhotoExif
@@ -163,16 +176,158 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     val canSend: Boolean get() = Brief.isValid(text)
 
     /** Hands back what to send and clears the composer, ready for the next request. */
-    fun takeForSend(): Outgoing {
+    fun takeForSend(): Outgoing { val out = peekForSend(); clearAfterSend(); return out }
+
+    /** What would be sent, leaving the draft in place (Create keeps it until generate has answered). */
+    fun peekForSend(): Outgoing {
         dictation.stop()
         val policy = settings.policy   // a switch turned off after the photos were prepared still wins
-        val out = Outgoing(text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id })
+        return Outgoing(text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id })
+    }
+
+    fun clearAfterSend() {
         photos.clear(); library.clear()
         cleanupIfIdle()
         notice = null
         text = ""
-        return out
     }
+
+    // ---- the Create flow: options, capabilities, the request check and its sheets
+
+    enum class CreateSheetKind { None, Checking, Asking, Summary, Stop }
+
+    /** What the server offers (landscape 16:9 at 1080p only until the capabilities endpoint exists). */
+    var caps by mutableStateOf(Capabilities.FALLBACK)
+        private set
+    private var touched = false
+    private var capsLoaded = false
+    var checking by mutableStateOf(false)
+        private set
+    var sheetKind by mutableStateOf(CreateSheetKind.None)
+        private set
+    var stop by mutableStateOf<CreateStop?>(null)
+        private set
+    var flow: QuestionFlow? = null
+        private set
+    var flowVersion by mutableIntStateOf(0)
+        private set
+    var summaryBrief by mutableStateOf<kotlinx.serialization.json.JsonObject?>(null)
+        private set
+    var summaryLoading by mutableStateOf(false)
+        private set
+    private var checkJob: kotlinx.coroutines.Job? = null
+    private var submitFn: (suspend (kotlinx.serialization.json.JsonObject?) -> SubmitOutcome)? = null
+    private var intakeApi: IntakeApi? = null
+    private var storedPrefs: CreatePrefs? = null
+
+    /** A choice the person made on the Create screen (a remembered default no longer overrides it when the capabilities arrive). */
+    fun updateOptions(o: CreateOptions) { options = o; touched = true }
+
+    /** The Create screen opened: start from what this person used last time (or the first-time defaults). */
+    fun openCreate(stored: CreatePrefs?) {
+        storedPrefs = stored; touched = false
+        options = CreateDefaults.resolve(stored, caps)
+        sheetKind = CreateSheetKind.None; checking = false; stop = null
+    }
+
+    fun applyCapabilities(c: Capabilities) {
+        caps = c; capsLoaded = true
+        if (!touched) options = CreateDefaults.resolve(storedPrefs, c)
+    }
+
+    /** Anything entered that Cancel should ask about. */
+    val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0
+
+    fun discardDraft() { dictation.stop(); text = ""; photos.clear(); library.clear(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; checking = false; checkJob?.cancel() }
+
+    private fun request(answers: List<Answer>) = IntakeRequest(text, options, totalPhotos, answers)
+
+    /**
+     * Create was tapped: the request check (when this server has it), then [submit] with the brief. Questions, a kind refusal or a pause open their sheets instead.
+     * A failed or slow check never blocks: it just proceeds without a brief.
+     */
+    fun create(intake: IntakeApi?, submitter: suspend (kotlinx.serialization.json.JsonObject?) -> SubmitOutcome, onAccepted: () -> Unit) {
+        if (checking || submitting) return
+        dictation.stop()
+        intakeApi = intake; submitFn = submitter; acceptedFn = onAccepted; inlineError = null
+        if (intake == null || !caps.intake) { finish(null); return }
+        checking = true
+        checkJob = viewModelScope.launch {
+            val r = IntakeCheck(intake).run(request(emptyList())) { if (checking) sheetKind = CreateSheetKind.Checking }
+            checking = false
+            handle(r)
+        }
+    }
+
+    private fun handle(r: IntakeResult) {
+        when (r) {
+            is IntakeResult.Ok -> { sheetKind = CreateSheetKind.None; finish(r.brief) }
+            is IntakeResult.Questions -> { flow = QuestionFlow(r.questions); flowVersion++; sheetKind = CreateSheetKind.Asking }
+            else -> { stop = CreateErrors.fromCheck(r); sheetKind = if (stop != null) CreateSheetKind.Stop else CreateSheetKind.None; if (stop == null) finish(null) }
+        }
+    }
+
+    var submitting by mutableStateOf(false)
+        private set
+    /** Shown inline on Create when the send failed for lack of a connection; the draft is intact. */
+    var inlineError by mutableStateOf<String?>(null)
+        private set
+    private var acceptedFn: (() -> Unit)? = null
+
+    /** Sends and waits for generate: closes (via onAccepted) only when it was accepted. */
+    private fun finish(brief: kotlinx.serialization.json.JsonObject?) {
+        val send = submitFn ?: return
+        if (submitting) return
+        submitting = true; inlineError = null
+        viewModelScope.launch {
+            val r = try { send(brief) } catch (e: kotlinx.coroutines.CancellationException) { submitting = false; throw e } catch (e: Exception) { SubmitOutcome.Offline(ApiError.Network.message) }
+            submitting = false
+            when (r) {
+                is SubmitOutcome.Accepted -> { clearAfterSend(); sheetKind = CreateSheetKind.None; stop = null; acceptedFn?.invoke() }
+                is SubmitOutcome.Stopped -> if (!showStop(r.error)) inlineError = ApiError.Server.message
+                is SubmitOutcome.Offline -> { sheetKind = CreateSheetKind.None; inlineError = r.message }
+            }
+        }
+    }
+
+    fun clearInlineError() { inlineError = null }
+
+    /** generate itself answered blocked or paused (rare: the check already ran): the same kind sheets. */
+    fun showStop(e: ApiError): Boolean { val s = CreateErrors.fromGenerate(e) ?: return false; stop = s; sheetKind = CreateSheetKind.Stop; return true }
+
+    /** The slow-check skeleton's "Make it now": stop waiting and go on without a brief. */
+    fun skipCheck() { checkJob?.cancel(); checking = false; sheetKind = CreateSheetKind.None; finish(null) }
+
+    fun dismissSheet() { checkJob?.cancel(); checking = false; sheetKind = CreateSheetKind.None; stop = null }
+
+    fun useSuggestion(s: String) { text = s; dismissSheet() }
+
+    // questions
+    fun choose(optionId: String) { flow?.choose(optionId); afterAnswer() }
+    fun answerOther(t: String) { flow?.other(t); afterAnswer() }
+    fun skipQuestion() { flow?.skip(); afterAnswer() }
+    fun youDecide() { flow?.youDecide(); afterAnswer() }
+    fun questionBack() { flow?.back(); flowVersion++ }
+    fun makeItNow() { flow?.makeItNow(); afterAnswer() }
+    fun editAnswer(questionId: String) { flow?.edit(questionId); summaryBrief = null; flowVersion++; sheetKind = CreateSheetKind.Asking }
+
+    private fun afterAnswer() {
+        flowVersion++
+        val f = flow ?: return
+        if (!f.inSummary) return
+        if (f.allSkipped()) { sheetKind = CreateSheetKind.None; finish(null); return }   // nothing to confirm: start at once
+        sheetKind = CreateSheetKind.Summary
+        summaryBrief = null; summaryLoading = true
+        checkJob?.cancel()
+        checkJob = viewModelScope.launch {
+            val r = IntakeCheck(intakeApi).run(request(f.answerList()))
+            summaryLoading = false
+            when (r) { is IntakeResult.Ok -> summaryBrief = r.brief; else -> CreateErrors.fromCheck(r)?.let { stop = it; sheetKind = CreateSheetKind.Stop } }
+        }
+    }
+
+    /** The summary's Create video. */
+    fun confirmSummary() { sheetKind = CreateSheetKind.None; finish(summaryBrief) }
 
     override fun onCleared() {
         cache.endSession()

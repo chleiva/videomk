@@ -11,6 +11,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -124,12 +126,25 @@ private val Examples = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (String) -> Unit, onOpenWallet: () -> Unit, onOpenSettings: () -> Unit, onOpenMedia: () -> Unit = {}) {
+fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (String) -> Unit, onOpenWallet: () -> Unit, onOpenSettings: () -> Unit, onOpenMedia: () -> Unit = {}, onNewVideo: () -> Unit = {}) {
     val state by app.state.collectAsState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     val container = LocalContainerOrNull.current
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    // the button's height (58 dp, growing with the font) plus its 16 dp margin and some air: the last card can always scroll clear of it
+    val fabClearance = (58 * androidx.compose.ui.platform.LocalDensity.current.fontScale.coerceIn(1f, 2f)).dp + 40.dp
+    val person = (state.phase as? Phase.SignedIn)?.email
+    /** Opens Create with what this person used last time; an example prefills the text and length (never sends). */
+    fun newVideo(e: Example?) {
+        composer.openCreate(container?.createPrefs?.load(person))
+        if (e != null) {
+            composer.text = e.text
+            if (e.minutes != null) composer.updateOptions(composer.options.copy(minutes = e.minutes))
+            if (e.photos) composer.openAddPhotos(if (container?.mediaApi != null) 1 else 0)
+        }
+        onNewVideo()
+    }
 
     LaunchedEffect(Unit) { app.refresh() }
     PollWhileRunning(app, state.hasRunningVideos)
@@ -142,12 +157,12 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         runCatching { cm?.registerDefaultNetworkCallback(cb) }
         onDispose { runCatching { cm?.unregisterNetworkCallback(cb) } }
     }
-    DisposableEffect(Unit) { onDispose { composer.dictation.stop() } }
 
     Scaffold(
         containerColor = Vmk.colors.background,
         contentWindowInsets = WindowInsets(0),
         topBar = { MainTopBar(state.wallet, onOpenWallet, onOpenSettings) },
+        floatingActionButton = { if (state.entries.isNotEmpty() && !com.videomk.app.DebugHooks.emptyHome(context)) NewVideoFab(expanded = !listState.canScrollBackward) { newVideo(null) } },
         bottomBar = {
             Column {
                 val progress = container?.mediaUploads?.queue?.progress?.collectAsState()?.value
@@ -155,33 +170,21 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 val org = container?.organize?.bar?.collectAsState()?.value
                 if (progress != null && progress.active && !imeVisible) UploadPill(progress, onOpenMedia)
                 else if (org != null && !imeVisible) OrganizePill(org, onOpenMedia)   // never two pills: uploads first
-                ComposerBar(
-                    composer = composer, balance = com.videomk.app.DebugHooks.balanceOverride(context) ?: state.wallet?.let { if (it.unlimited) null else it.balance },
-                    onSend = {
-                        val out = composer.takeForSend()
-                        app.submit(out.brief, composer.options, out.photos, out.meta, out.libraryIds)
-                        focusManager.clearFocus()   // the keyboard goes away: the new card is what you look at now
-                    },
-                    onAddCredits = onOpenWallet,
-                )
             }
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            val entries = state.entries
+            val entries = if (com.videomk.app.DebugHooks.emptyHome(context)) emptyList() else state.entries
             when {
                 entries.isEmpty() && (state.loadState is LoadState.Loading || state.loadState is LoadState.Idle) -> SkeletonFeed()
                 entries.isEmpty() && state.loadState is LoadState.Failed ->
                     MessageState("Couldn't load your videos", (state.loadState as LoadState.Failed).message, "Try again", { scope.launch { app.refresh() } })
-                entries.isEmpty() -> EmptyState(onExample = { e ->
-                    composer.useExample(e.text, e.minutes)
-                    if (e.photos) composer.openAddPhotos(if (container?.mediaApi != null) 1 else 0)
-                })
+                entries.isEmpty() -> EmptyState(onExample = { e -> newVideo(e) }, onNew = { newVideo(null) })
                 else -> {
                     var refreshing by remember { mutableStateOf(false) }
                     PullToRefreshBox(isRefreshing = refreshing, onRefresh = { scope.launch { refreshing = true; app.refresh(); refreshing = false } }) {
                         LazyColumn(
-                            Modifier.fillMaxSize().testTag("videoList"), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
+                            Modifier.fillMaxSize().testTag("videoList"), state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = fabClearance),
                             verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
                             item(key = "title") { Text("Your videos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
@@ -206,6 +209,19 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 }
             }
         }
+    }
+}
+
+/** The one entry to Create: a labelled capsule that shrinks to a round button while the list scrolls and grows back at the top. */
+@Composable
+private fun NewVideoFab(expanded: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClickLabel = "New video", onClick = onClick)
+            .padding(horizontal = if (expanded) 22.dp else 17.dp).animateContentSize().semantics { contentDescription = "New video" }.testTag("newVideoFab"),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Icon(Icons.Filled.Add, null, tint = Color.White, modifier = Modifier.size(24.dp))
+        if (expanded) Text("New video", style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
     }
 }
 
@@ -259,7 +275,7 @@ private fun SkeletonFeed() {
 
 /** First launch: one promise, three worked examples. Tapping one fills the composer (and length); none of them sends. */
 @Composable
-private fun EmptyState(onExample: (Example) -> Unit) {
+private fun EmptyState(onExample: (Example) -> Unit, onNew: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 16.dp).testTag("emptyState"),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -271,6 +287,15 @@ private fun EmptyState(onExample: (Example) -> Unit) {
         }
         Text("Describe it.\nWe'll make the video.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.8).sp, textAlign = TextAlign.Center, color = Vmk.colors.text, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
         Text("Narrated and illustrated in minutes. Add your own photos if you like.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+        Box(
+            Modifier.fillMaxWidth().padding(bottom = 18.dp).heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow)
+                .clickable(role = Role.Button, onClickLabel = "New video", onClick = onNew).semantics { contentDescription = "New video" }.testTag("newVideoButton"),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Filled.Add, null, tint = Color.White); Text("New video", style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White)
+            }
+        }
         Overline("Try one", Modifier.fillMaxWidth().padding(bottom = 8.dp))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             for (e in Examples) {

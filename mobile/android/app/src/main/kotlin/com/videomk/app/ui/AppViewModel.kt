@@ -3,6 +3,7 @@ package com.videomk.app.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.videomk.app.core.ApiError
+import com.videomk.app.core.SubmitOutcome
 import com.videomk.app.core.AppConfig
 import com.videomk.app.core.AuthException
 import com.videomk.app.core.AuthService
@@ -87,6 +88,7 @@ class AppViewModel(
 
     private val photoData = HashMap<String, List<ByteArray>>()   // photos waiting to be uploaded, kept until the video is accepted (a retry needs no new selection)
     private val libraryData = HashMap<String, List<String>>()   // My media photos of a pending request (ids only: nothing to upload)
+    private val briefData = HashMap<String, kotlinx.serialization.json.JsonObject>()   // the answers of the request check, kept for a retry
     private val photoMeta = HashMap<String, List<PhotoMeta?>>()   // what was read from each photo, same order as photoData
     private val refreshLock = Mutex()
     private var started = false
@@ -222,15 +224,30 @@ class AppViewModel(
     // ask for a video without leaving the home screen
 
     /** Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more. */
-    fun submit(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList()) {
+    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?): PendingVideo {
         val p = PendingVideo(
             brief = Brief.normalized(brief), options = options, photoCount = photos.size, createdAtMillis = clock(),
             state = if (photos.isEmpty()) PendingVideo.State.Sending else PendingVideo.State.Uploading(0, photos.size),
         )
         if (photos.isNotEmpty()) { photoData[p.id] = photos; photoMeta[p.id] = meta }
         if (libraryMedia.isNotEmpty()) libraryData[p.id] = libraryMedia
+        if (intake != null) briefData[p.id] = intake
         update { it.copy(pending = listOf(p) + it.pending) }
+        return p
+    }
+
+    fun submit(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null) {
+        val p = register(brief, options, photos, meta, libraryMedia, intake)
         viewModelScope.launch { send(p.id) }
+    }
+
+    /**
+     * The Create screen's send: waits for generate's answer. Blocked, paused and network errors leave no card behind
+     * (the caller keeps the draft and shows the sheet or a message); anything else ends on the Making card as before.
+     */
+    suspend fun submitAwait(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null): SubmitOutcome {
+        val p = register(brief, options, photos, meta, libraryMedia, intake)
+        return send(p.id, interactive = true)
     }
 
     fun retry(id: String) {
@@ -240,7 +257,7 @@ class AppViewModel(
     }
 
     fun dismissPending(id: String) {
-        photoData.remove(id); photoMeta.remove(id); libraryData.remove(id)
+        photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id)
         update { s -> s.copy(pending = s.pending.filterNot { it.id == id }) }
     }
 
@@ -250,17 +267,17 @@ class AppViewModel(
     private fun setProgress(id: String, done: Int, total: Int) =
         update { s -> s.copy(pending = s.pending.map { if (it.id == id && it.state is PendingVideo.State.Uploading) it.copy(state = PendingVideo.State.Uploading(done, total)) else it }) }
 
-    private suspend fun send(id: String) {
-        val p = _state.value.pending.firstOrNull { it.id == id } ?: return
-        val b = backend ?: return setPendingState(id, PendingVideo.State.Failed(ApiError.Server.message))
+    private suspend fun send(id: String, interactive: Boolean = false): SubmitOutcome {
+        val p = _state.value.pending.firstOrNull { it.id == id } ?: return SubmitOutcome.Accepted
+        val b = backend ?: run { setPendingState(id, PendingVideo.State.Failed(ApiError.Server.message)); return SubmitOutcome.Accepted }
         try {
             var media = emptyList<String>()
             photoData[id]?.let { photos ->
                 media = b.uploadPhotos(photos) { done, total -> setProgress(id, done, total) }
                 if (_state.value.pending.any { it.id == id }) setPendingState(id, PendingVideo.State.Sending)
             }
-            val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty())
-            photoData.remove(id); photoMeta.remove(id); libraryData.remove(id)
+            val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id])
+            photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id)
             update { s ->
                 s.copy(
                     briefs = s.briefs + (videoId to p.brief), minutes = s.minutes + (videoId to p.options.minutes),
@@ -268,14 +285,18 @@ class AppViewModel(
                 )
             }
             refresh()   // also re-reads the credits the video just used
+            return SubmitOutcome.Accepted
         } catch (e: CancellationException) {
             throw e
         } catch (e: ApiError) {
+            if (interactive && (e is ApiError.Blocked || e is ApiError.Paused)) { dismissPending(id); return SubmitOutcome.Stopped(e) }
+            if (interactive && e is ApiError.Network) { dismissPending(id); return SubmitOutcome.Offline(e.message) }
             if (e is ApiError.InsufficientCredits) refreshWallet()
             if (e !is ApiError.Unauthorized) setPendingState(id, PendingVideo.State.Failed(e.message))
         } catch (e: Exception) {
             setPendingState(id, PendingVideo.State.Failed(ApiError.Server.message))
         }
+        return SubmitOutcome.Accepted
     }
 
     // play / edit

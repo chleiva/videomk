@@ -128,6 +128,42 @@ class AppViewModelTest {
         assertTrue(a.state.value.pending.isEmpty())
     }
 
+    @Test fun `create waits for generate and a blocked answer leaves no card and nothing charged`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        backend.startError = ApiError.Blocked("We can't make this one.")
+        val r = a.submitAwait("A request the safety gate refuses", CreateOptions())
+        assertEquals(com.videomk.app.core.SubmitOutcome.Stopped(ApiError.Blocked("We can't make this one.")), r)
+        assertTrue(a.state.value.pending.isEmpty())
+        assertEquals(com.videomk.app.core.CreateStop.Blocked("We can't make this one."), com.videomk.app.core.CreateErrors.fromGenerate((r as com.videomk.app.core.SubmitOutcome.Stopped).error))
+    }
+
+    @Test fun `a paused answer from generate carries the retry time and leaves no card`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        backend.startError = ApiError.Paused("Paused for now.", 3600)
+        val r = a.submitAwait("Anything at all please", CreateOptions()) as com.videomk.app.core.SubmitOutcome.Stopped
+        assertEquals(com.videomk.app.core.CreateStop.Paused("Paused for now.", 3600), com.videomk.app.core.CreateErrors.fromGenerate(r.error))
+        assertTrue(a.state.value.pending.isEmpty())
+    }
+
+    @Test fun `offline at create keeps the draft with an offline outcome, no failed card, and tapping again works`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        backend.startError = ApiError.Network
+        val r = a.submitAwait("Explain rainbows please", CreateOptions(), listOf(byteArrayOf(1)))
+        assertEquals(com.videomk.app.core.SubmitOutcome.Offline(ApiError.Network.message), r)
+        assertTrue(a.state.value.pending.isEmpty())
+        backend.startError = null
+        assertEquals(com.videomk.app.core.SubmitOutcome.Accepted, a.submitAwait("Explain rainbows please", CreateOptions(), listOf(byteArrayOf(1))))
+        assertEquals(2, backend.startCalls.size)
+    }
+
+    @Test fun `an accepted create returns Accepted and other errors still end on a failed card`() = runBlocking {
+        val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
+        assertEquals(com.videomk.app.core.SubmitOutcome.Accepted, a.submitAwait("Explain rainbows please", CreateOptions()))
+        backend.startError = ApiError.Server
+        assertEquals(com.videomk.app.core.SubmitOutcome.Accepted, a.submitAwait("Explain clouds please", CreateOptions()))
+        assertTrue(a.state.value.pending.any { it.state is PendingVideo.State.Failed })
+    }
+
     @Test fun `photos are uploaded first and their ids go into the request`() = runBlocking {
         val a = vm(); a.start(); a.await { it.phase is Phase.SignedIn }
         a.submit("Tell the story of my trip", CreateOptions(), listOf(byteArrayOf(1), byteArrayOf(2), byteArrayOf(3)))

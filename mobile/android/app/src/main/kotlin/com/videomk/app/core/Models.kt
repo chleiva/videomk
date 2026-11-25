@@ -68,7 +68,11 @@ enum class VideoLook(val wire: String, val title: String) {
 }
 
 /** [captions]: subtitles on the video; the creator decides (on is the server default). */
-data class CreateOptions(val minutes: Double = DEFAULT_MINUTES, val look: VideoLook? = null, val captions: Boolean = true) {
+data class CreateOptions(
+    val minutes: Double = DEFAULT_MINUTES, val look: VideoLook? = null, val captions: Boolean = true,
+    /** What the video is for (wire id) and its picture: absent on the wire means today's behaviour (other, 16:9, 1080p, same language as the description). */
+    val platform: String = "other", val aspect: String = "16:9", val resolution: String = "1080p", val language: String = "auto",
+) {
     /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). */
     val credits: Int get() = maxOf(1, minOf(12, Math.ceil(minutes).toInt()))
 

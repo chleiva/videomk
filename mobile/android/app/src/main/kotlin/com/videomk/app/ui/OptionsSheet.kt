@@ -137,7 +137,7 @@ private fun LengthCard(minutes: Int, credits: Int, selected: Boolean, overBalanc
 }
 
 @Composable
-private fun LookSwatch(label: String, description: String, look: VideoLook?, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+internal fun LookSwatch(label: String, description: String, look: VideoLook?, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     Column(
         modifier.clickable(role = Role.RadioButton, onClick = onClick).semantics { this.selected = selected; contentDescription = "$description look" },

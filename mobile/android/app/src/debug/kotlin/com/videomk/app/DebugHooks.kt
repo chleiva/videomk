@@ -51,4 +51,13 @@ object DebugHooks {
 
     /** `vmk_debug_prompt` fills the composer at launch (and focuses it): typing through adb is slow. */
     fun prompt(intent: Intent?): String? = intent?.getStringExtra("vmk_debug_prompt")?.takeIf { it.isNotBlank() }
+
+    /** `files/fake_intake` holds a mode ("questions", "unsupported", "blocked", "paused", "slow", "ok"): fake capabilities (all formats ready) and a fake request check. */
+    fun fakeIntake(context: android.content.Context): com.videomk.app.core.IntakeApi? {
+        val f = java.io.File(context.filesDir, "fake_intake")
+        return if (f.exists()) FakeIntakeApi { runCatching { f.readText().trim() }.getOrDefault("ok") } else null
+    }
+
+    /** `files/fake_empty_home`: show the home as if there were no videos (the empty state cannot be reached with a QA account that has videos). */
+    fun emptyHome(context: android.content.Context): Boolean = java.io.File(context.filesDir, "fake_empty_home").exists()
 }

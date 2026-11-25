@@ -23,3 +23,11 @@ class PhotoSettings(context: Context) {
 
     private companion object { const val DATES = "photo_use_dates"; const val LOCATIONS = "photo_use_locations"; const val MEDIA_PRIVACY = "media_privacy_seen" }
 }
+
+/** What Create remembers per person (platform, format, resolution, length, look, subtitles, language), in plain preferences. Prompt and photos never. */
+class CreatePrefsStore(context: Context) {
+    private val prefs = context.applicationContext.getSharedPreferences("videomk_create", Context.MODE_PRIVATE)
+    fun load(person: String?): com.videomk.app.core.CreatePrefs? = runCatching { com.videomk.app.core.CreatePrefs.fromJson(prefs.getString(key(person), null)) }.getOrNull()
+    fun save(person: String?, p: com.videomk.app.core.CreatePrefs) { runCatching { prefs.edit().putString(key(person), p.toJson()).apply() } }
+    private fun key(person: String?) = "create_${person ?: "me"}"
+}

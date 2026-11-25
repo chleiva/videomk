@@ -17,6 +17,14 @@ longitude are rounded to 2 decimals (about 1 km) on the phone and sent only in t
 JPEG still has all metadata removed. Two switches in Settings > Photos (`PhotoSettings`, plain preferences, both default on) turn dates and locations off; when off they are not read at all. No
 `ACCESS_MEDIA_LOCATION` and no prompt: the system photo picker / MediaStore redact GPS, so photos reached through it send no location, while gallery apps reached through the chooser often hand over the original.
 
+## Creating a video (docs/UI_DESIGN.md section o, docs/CREATE_API.md)
+The home screen has no text input: a labelled "New video" button (an extended FAB that shrinks on scroll; a full-width button on the empty home) opens the **Create screen**
+(`ui/CreateScreen.kt`): prompt with dictation, one "Add photos" row (the unified sheet), "What is it for?" chips driven by `GET .../capabilities`, the plain-words recommendation,
+length chips with prices, collapsed More options (look, subtitles, language, format, resolution) and a bottom bar with the status line and "Create video · ⚡N" that is always drawn.
+On Create the app asks `POST .../videos/brief` (2.5 s before the skeleton, 8 s budget, any failure means "go on"), shows up to three questions one at a time and a summary
+(`ui/CreateSheets.kt`), or the kind "We can't make this one" sheet, then calls generate with `platform`, `aspect`, `resolution`, `language` and `brief` (only values away from the defaults are sent).
+A server without the new endpoints degrades to landscape 16:9 at 1080p and no check. Choices are remembered per person (`CreatePrefsStore`). Pure logic with tests: `core/CreateLogic.kt`, `core/CreateModels.kt`.
+
 ## The interface (docs/UI_DESIGN.md)
 Tokens (colours, radii, shadows) live in `ui/Theme.kt` and shared pieces in `ui/UiKit.kt`. Main screen: docked **composer card** (`ComposerBar.kt`: photo strip, two-line field, ONE
 status line for price / reason / fix with a one-tap fix chip, toolbar with attach + count badge, options pill "3 min · ⚡3", mic, and a send button that is always drawn, tonal until

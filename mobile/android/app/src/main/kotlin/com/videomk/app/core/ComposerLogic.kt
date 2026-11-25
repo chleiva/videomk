@@ -27,7 +27,8 @@ object ComposerLogic {
      * One message at a time. Priority: listening, sending, too long, not affordable, too short, photo hint, price.
      * [balance] is null for accounts with unlimited credits. [photos] counts phone and My media photos together.
      */
-    fun status(text: String, options: CreateOptions, balance: Int?, photos: Int, listening: Boolean, sending: Boolean, lengths: List<Int> = CreateOptions.LENGTHS.map { it.toInt() }): ComposerStatus {
+    fun status(text: String, options: CreateOptions, balance: Int?, photos: Int, listening: Boolean, sending: Boolean, lengths: List<Int> = CreateOptions.LENGTHS.map { it.toInt() }, createScreen: Boolean = false, checking: Boolean = false): ComposerStatus {
+        if (checking) return ComposerStatus(StatusKind.Sending, "Checking your request…")
         if (listening) return ComposerStatus(StatusKind.Listening, "Listening…")
         if (sending) return ComposerStatus(StatusKind.Sending, "Starting your video…")
         val count = Brief.normalized(text).length
@@ -41,6 +42,7 @@ object ComposerLogic {
             return if (fit == null) ComposerStatus(StatusKind.NoCredits, "You have no credits", StatusFix(null, addCredits = true))
             else ComposerStatus(StatusKind.NotAffordable, "Needs $credits credit${if (credits == 1) "" else "s"}, you have $balance", StatusFix(fit))
         }
+        if (createScreen && !valid) return ComposerStatus(StatusKind.TooShort, "Describe your video to continue")
         if (short) return ComposerStatus(StatusKind.TooShort, "Add a few more words (${Brief.MIN_LENGTH - count} to go)")
         if (!valid) return ComposerStatus(StatusKind.Idle, "A $mins minute video costs $credits credit${if (credits == 1) "" else "s"}")
         PhotoCapacity.hint(photos, options.minutes, lengths)?.let { hint ->

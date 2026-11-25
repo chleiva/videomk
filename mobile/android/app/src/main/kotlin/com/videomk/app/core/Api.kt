@@ -68,7 +68,7 @@ class ApiClient(
     }
 
     /** [clientRequestId] makes a retry of the same attempt idempotent (no double charge, no second video). */
-    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList()): String {
+    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null): String {
         val body = buildJsonObject {
             put("prompt", Brief.normalized(prompt))
             put("client_request_id", clientRequestId)
@@ -78,9 +78,23 @@ class ApiClient(
             if (media.isNotEmpty() && mediaMeta != null) put("media_meta", mediaMeta)
             options.look?.let { put("theme", it.wire) }
             if (!options.captions) put("captions", false)   // on is the server default: only the choice to turn them off is sent
+            // creation options: absent means today's behaviour, so only choices away from the defaults are sent
+            if (options.platform != "other") put("platform", options.platform)
+            if (options.aspect != "16:9") put("aspect", options.aspect)
+            if (options.resolution != "1080p") put("resolution", options.resolution)
+            if (options.language != "auto") put("language", options.language)
+            brief?.let { put("brief", it) }
         }
         return send("POST", listOf("videos", "generate"), body = body).requireString("video_id")
     }
+
+    // create: capabilities and the request check
+
+    /** What the app may offer. Throws [ApiError.NotFound] when the server does not have the endpoint yet (the caller falls back to 16:9 and 1080p). */
+    suspend fun capabilities(): JsonObject = send("GET", listOf("capabilities"), soft = true)
+
+    /** The request check (nothing is charged). Statuses come back in the body; a paused account is [ApiError.Paused]. */
+    suspend fun brief(body: JsonObject): JsonObject = send("POST", listOf("videos", "brief"), body = body, soft = true)
 
     // editor
 
@@ -103,7 +117,7 @@ class ApiClient(
     suspend fun library(method: String, path: List<String>, body: JsonObject? = null, query: List<Pair<String, String>> = emptyList()): JsonObject =
         send(method, listOf("library") + path, body, query = query, library = true)
 
-    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false): JsonObject {
+    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false, soft: Boolean = false): JsonObject {
         val a = auth.authorization()
         val url: HttpUrl = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(a.userId).also { b -> path.forEach { b.addPathSegment(it) }; query.forEach { (k, v) -> b.addQueryParameter(k, v) } }.build()
         val rb = Request.Builder().url(url)
@@ -122,8 +136,9 @@ class ApiClient(
             val text = try { r.body.string() } catch (e: IOException) { throw ApiError.Network }
             when (r.code) {
                 in 200..299 -> return if (text.isBlank()) JsonObject(emptyMap()) else parseObject(text)
-                401, 403 -> throw ApiError.Unauthorized
-                404 -> if (library) throw ApiError.NotFound else throw ApiError.Server
+                401 -> throw ApiError.Unauthorized
+                403 -> if (soft) throw ApiError.NotFound else throw ApiError.Unauthorized
+                404 -> if (library || soft) throw ApiError.NotFound else throw ApiError.Server
                 413 -> if (library) throw ApiError.Invalid("That photo is too large.") else throw ApiError.Server
                 402 -> if (library) {
                     val o = runCatching { parseObject(text) }.getOrNull()
@@ -132,11 +147,22 @@ class ApiClient(
                     val o = runCatching { parseObject(text) }.getOrNull()
                     throw ApiError.InsufficientCredits(o?.int("balance") ?: 0, o?.int("needed") ?: 1)
                 }
-                400 -> throw ApiError.Invalid(message(text) ?: "That brief can't be used.")
+                400 -> {
+                    val o = runCatching { parseObject(text) }.getOrNull()
+                    if (o?.str("status") == "blocked") throw ApiError.Blocked(o.str("message") ?: "We can't make this video.")
+                    throw ApiError.Invalid(message(text) ?: "That brief can't be used.")
+                }
                 409 -> if (library) throw ApiError.Conflict(message(text) ?: "That changed in the meantime. Please try again.")
                        else if (conflictIsEdit) throw ApiError.Conflict(message(text) ?: "This video changed. Reload to continue.")
                        else throw ApiError.NotReady(VideoStatus.fromServer(runCatching { parseObject(text).str("status") }.getOrNull() ?: ""))
-                429 -> throw ApiError.Quota(message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { "Too many requests. Try again in ${if (it >= 120) "${it / 60} minutes" else "$it seconds"}." } ?: "Too many requests. Try again in a moment.") else "You've reached today's limit. Try again tomorrow.")
+                429 -> {
+                    val o = runCatching { parseObject(text) }.getOrNull()
+                    if (o?.str("status") == "paused") throw ApiError.Paused(o.str("message") ?: "Creating videos is paused for now.", o.int("retry_after") ?: r.header("Retry-After")?.toIntOrNull())
+                    throw ApiError.Quota(
+                        message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { "Too many requests. Try again in ${if (it >= 120) "${it / 60} minutes" else "$it seconds"}." } ?: "Too many requests. Try again in a moment.")
+                        else "You've reached today's limit. Try again tomorrow.",
+                    )
+                }
                 else -> throw ApiError.Server
             }
         }

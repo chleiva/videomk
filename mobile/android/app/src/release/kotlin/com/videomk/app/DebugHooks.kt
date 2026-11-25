@@ -15,4 +15,6 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun mediaFiles(intent: Intent?): List<String> = emptyList()
     @Suppress("UNUSED_PARAMETER") fun fakePoster(context: android.content.Context): com.videomk.app.core.SlotPoster? = null
     @Suppress("UNUSED_PARAMETER") fun prompt(intent: Intent?): String? = null
+    @Suppress("UNUSED_PARAMETER") fun fakeIntake(context: android.content.Context): com.videomk.app.core.IntakeApi? = null
+    @Suppress("UNUSED_PARAMETER") fun emptyHome(context: android.content.Context): Boolean = false
 }

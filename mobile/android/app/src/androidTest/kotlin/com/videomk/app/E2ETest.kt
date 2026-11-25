@@ -23,6 +23,8 @@ class E2ETest {
 
     @Test fun a_makeAVideoFromFourPhotos() {
         Ui.launch(signedIn = true, minutes = "1", photoFiles = photos())
+        Ui.openCreate()
+        Ui.require("length-1").click()   // Create starts from the remembered length, so pick one minute
         Ui.require("photosNote", 30_000)
         assertEquals(4, device.findObjects(Ui.res("attachedPhoto")).size)
         Ui.require("composerField").apply { click(); text = "A short video about these four photos and what they show." }
@@ -34,7 +36,7 @@ class E2ETest {
         val appeared = Ui.find("pendingRow", 10_000) ?: Ui.find("runningRow", 30_000)
         assertFalse("the request failed", Ui.has("failedRow"))
         assertTrue("a row for the new video appears", appeared != null)
-        assertFalse("composer cleared", Ui.has("attachedPhoto"))
+        assertFalse("Create closed", Ui.has("createScreen"))
         assertFalse("photos cleared", Ui.has("attachedPhoto"))
         Ui.shot("21-uploading")
         Ui.require("runningRow", 90_000)

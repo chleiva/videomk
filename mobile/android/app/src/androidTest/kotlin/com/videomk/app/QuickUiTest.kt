@@ -25,46 +25,41 @@ class QuickUiTest {
         Ui.shot("01-signin")
     }
 
-    @Test fun signedInLibraryLoadsWithComposerAndCredits() {
+    @Test fun signedInHomeHasNoTextInputAndCreateOpensWithCreditsAndAlwaysVisibleButton() {
         Ui.launch(signedIn = true)
-        Ui.require("composerField", 30_000)
+        Ui.require("balanceChip", 30_000)
+        assertFalse("the home screen has no text input", Ui.has("composerField"))
+        Ui.openCreate()
         Ui.require("micButton"); Ui.require("photoButton"); Ui.require("optionsMenu")
-        Ui.require("balanceChip", 20_000)
-        Ui.require("sendButton")   // the send button is always drawn (tonal until there is something to send)
-        assertTrue(Ui.require("costLine").text.startsWith("A 3 minute video"))
+        Ui.require("sendButton")   // Create is always drawn (tonal until there is a description)
+        assertTrue(Ui.require("costLine").text.startsWith("Describe your video") || Ui.has("hintLine"))
         assertFalse(Ui.has("signInButton"))
-        Ui.shot("02-library")
+        Ui.shot("02-create")
     }
 
-    @Test fun composerShowsCostAndLengthMenuChangesIt() {
+    @Test fun createShowsCostAndLengthChipsChangeIt() {
         Ui.launch(signedIn = true)
-        val field = Ui.require("composerField", 30_000)
+        Ui.openCreate()
+        val field = Ui.require("composerField")
         field.click(); field.text = "Why is the sky blue? A short explanation."
         Ui.require("sendButton")
-        assertTrue(Ui.require("costLine").text.startsWith("3 credits"))   // default length is 3 minutes
-        Ui.require("optionsMenu").click()
+        assertTrue(Ui.require("costLine").text.startsWith("3 credits"))   // the first-time length is 3 minutes
         Ui.require("length-1").click()
-        Ui.require("optionsDone").click()
         assertTrue(Ui.require("costLine").text.startsWith("1 credit"))
-        Ui.require("optionsMenu").click(); Ui.shot("03-options")
+        Ui.require("optionsMenu").click(); Ui.shot("03-more-options")   // More options expands in place
         Ui.require("look-paper").click()
-        Ui.require("optionsDone").click()
-        Ui.shot("04-composer-filled")
+        Ui.shot("04-create-filled")
     }
 
     @Test fun optionsMenuHasASubtitlesSwitchThatIsOnByDefault() {
         Ui.launch(signedIn = true)
-        Ui.require("optionsMenu", 30_000).click()
-        val sw = device.wait(Until.findObject(By.text("Subtitles")), 10_000) ?: error("Subtitles item not in the options menu")
+        Ui.openCreate()
+        Ui.require("optionsMenu").click()
+        val sw = device.wait(Until.findObject(By.text("Subtitles")), 10_000) ?: error("Subtitles row not in More options")
         Ui.shot("14-options-subtitles")
-        sw.click()   // turn off: the menu stays open
+        sw.click()   // turn off
         Thread.sleep(500)
         Ui.shot("14b-options-subtitles-off")
-        device.pressBack()
-        Ui.require("optionsMenu").click()   // reopening keeps the choice
-        assertTrue(device.wait(Until.hasObject(By.text("Subtitles")), 5_000))
-        Ui.shot("14c-options-reopened")
-        device.pressBack()
         assertTrue(Ui.appIsForeground())
     }
 
@@ -152,6 +147,7 @@ class QuickUiTest {
     /** The real system photo picker (no permission needed): pick the pushed photos, they appear cleaned in the composer, and one can be removed. */
     @Test fun systemPhotoPickerAttachesPhotos() {
         Ui.launch(signedIn = true)
+        Ui.openCreate()
         Ui.require("photoButton", 30_000).click()
         Ui.require("pickFromPhone", 10_000).click()   // the Add photos sheet opens the system picker from its This phone tab
         val picker = "com.google.android.providers.media.module"
@@ -161,21 +157,24 @@ class QuickUiTest {
         device.wait(Until.findObject(By.res("$picker:id/button_add")), 5_000)!!.click()
         Ui.require("addPhotosDone", 30_000).click()   // the photos are in the strip already; Add closes the sheet
         Ui.require("photosNote", 30_000)
-        assertTrue("all four picked photos get attached", device.wait(Until.hasObject(By.res("photosNote").textStartsWith("4 of 100 photos")), 30_000))
+        assertTrue("all four picked photos get attached", device.wait(Until.hasObject(By.res("photosNote").textStartsWith("4 photos")), 30_000))
         assertEquals(4, device.findObjects(Ui.res("attachedPhoto")).size)
         Ui.shot("13-picker-attached")
-        device.findObjects(By.desc("Remove photo 1")).first().click()
+        Ui.require("photoButton").click()   // Edit: photos are removed in the Add photos sheet (tap a numbered tile)
+        Ui.require("phoneTile", 10_000).click()
         Thread.sleep(500)
+        Ui.require("addPhotosDone", 10_000).click()
         assertEquals(3, device.findObjects(Ui.res("attachedPhoto")).size)
     }
 
     @Test fun attachedPhotosShowInTheComposerAndCanBeRemoved() {
         Ui.launch(signedIn = true, photoFiles = "${Ui.context.filesDir}/p1.jpg:${Ui.context.filesDir}/p2.jpg:${Ui.context.filesDir}/p3.jpg")
+        Ui.openCreate()
         Ui.require("photosNote", 30_000)
-        assertEquals(3, device.findObjects(Ui.res("attachedPhoto")).size)
+        assertEquals(3, device.findObjects(Ui.res("attachedPhoto")).size)   // four thumbnails fit in the Photos row
         Ui.require("composerField").apply { click(); text = "Tell the story of these three photos." }
         Ui.shot("10-photos-attached")
-        assertTrue(Ui.require("photosNote").text.startsWith("3 of 100 photos"))
+        assertTrue(Ui.require("photosNote").text.startsWith("3 photo"))
         ActivityScenario.launch(MainActivity::class.java).close()   // a second launch must not duplicate anything
     }
 }

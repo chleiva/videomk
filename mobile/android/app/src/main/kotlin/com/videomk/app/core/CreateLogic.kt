@@ -1,0 +1,224 @@
+package com.videomk.app.core
+
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+/** A "What is it for?" chip. [enabled] only when the server can make its format; the others are dimmed with "Soon". */
+data class PlatformChip(val id: String, val label: String, val aspect: String, val resolution: String, val enabled: Boolean)
+
+object CreatePlatforms {
+    /** The built-in table of docs/UI_DESIGN.md section o; a server list for a platform overrides its format. */
+    private val BUILT_IN = listOf(
+        PlatformInfo("youtube", "YouTube", "16:9", "1080p"), PlatformInfo("linkedin", "LinkedIn", "16:9", "1080p"), PlatformInfo("x", "X", "16:9", "1080p"),
+        PlatformInfo("other", "Just a video", "16:9", "1080p"),
+        PlatformInfo("shorts", "Shorts · Reels · TikTok", "9:16", "1080p"), PlatformInfo("instagram_feed", "Instagram", "4:5", "1080p"),
+    )
+
+    /** Supported platforms first (in the table's order), then the ones that are "Soon". */
+    fun chips(caps: Capabilities): List<PlatformChip> {
+        val base = BUILT_IN.map { b -> caps.platforms.firstOrNull { it.id == b.id }?.let { PlatformInfo(b.id, b.label, it.aspect, it.resolution) } ?: b }
+        val all = base.map { p -> PlatformChip(p.id, p.label, p.aspect, p.resolution, caps.isReady(p.aspect) && caps.resolutions.any { it.id == p.resolution }) }
+        return all.filter { it.enabled } + all.filter { !it.enabled }
+    }
+
+    fun chip(caps: Capabilities, id: String): PlatformChip? = chips(caps).firstOrNull { it.id == id }
+
+    /** Picking a platform sets only the format and resolution. */
+    fun select(o: CreateOptions, chip: PlatformChip): CreateOptions = if (!chip.enabled) o else o.copy(platform = chip.id, aspect = chip.aspect, resolution = chip.resolution)
+
+    /** The format was changed away from the platform's recommendation: the highlight goes and "Custom" shows. */
+    fun isCustom(o: CreateOptions, caps: Capabilities): Boolean {
+        val c = chip(caps, o.platform) ?: return true
+        return !c.enabled || c.aspect != o.aspect || c.resolution != o.resolution
+    }
+
+    /** "YouTube · Landscape 16:9 · 1080p" (or "Custom · Vertical 9:16 · 720p"). */
+    fun recommendation(o: CreateOptions, caps: Capabilities): String {
+        val name = if (isCustom(o, caps)) "Custom" else chip(caps, o.platform)?.label ?: "Just a video"
+        return "$name · ${aspectText(o.aspect, caps)} · ${o.resolution}"
+    }
+
+    fun aspectText(aspect: String, caps: Capabilities): String = "${caps.aspect(aspect)?.label ?: defaultLabel(aspect)} $aspect"
+    private fun defaultLabel(a: String) = when (a) { "16:9" -> "Landscape"; "9:16" -> "Vertical"; "1:1" -> "Square"; "4:5" -> "Portrait"; else -> "Format" }
+
+    /** The "Change" link is only offered when there is a real choice. */
+    fun canChangeFormat(caps: Capabilities): Boolean = caps.readyAspects.size > 1 || caps.resolutions.size > 1
+
+    /** The one-line summary of More options: "Auto look · Subtitles on · Same language as description". */
+    fun moreSummary(o: CreateOptions, caps: Capabilities): String {
+        val look = (o.look?.title ?: "Auto") + " look"
+        val lang = if (o.language == "auto") "Same language as description" else caps.languages.firstOrNull { it.id == o.language }?.label ?: o.language
+        return "$look · Subtitles ${if (o.captions) "on" else "off"} · $lang"
+    }
+
+    fun languageLabel(o: CreateOptions, caps: Capabilities): String = if (o.language == "auto") "Same as my description" else caps.languages.firstOrNull { it.id == o.language }?.label ?: o.language
+}
+
+/** What is remembered per person after a successful Create (prompt and photos never). */
+data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Int, val look: String?, val captions: Boolean, val language: String) {
+    fun toJson(): String = buildJsonObject {
+        put("platform", platform); put("aspect", aspect); put("resolution", resolution); put("minutes", minutes); look?.let { put("look", it) }; put("captions", captions); put("language", language)
+    }.toString()
+
+    companion object {
+        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes.toInt(), o.look?.wire, o.captions, o.language)
+        fun fromJson(text: String?): CreatePrefs? = runCatching {
+            val o = parseObject(text ?: return null)
+            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.int("minutes") ?: 3, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto")
+        }.getOrNull()
+    }
+}
+
+object CreateDefaults {
+    /** First launch: Just a video, Landscape 16:9, 1080p, 3 min, Auto look, subtitles on, same language as the description. */
+    val FIRST_TIME = CreateOptions()
+
+    /**
+     * The options to start Create with: the remembered ones, but never something the server no longer offers (a stored format that is gone falls back to the
+     * first ready format, a stored resolution to the first listed, a language that is not listed to "auto", a length outside the range to the default).
+     */
+    fun resolve(stored: CreatePrefs?, caps: Capabilities): CreateOptions {
+        if (stored == null) return FIRST_TIME.copy(aspect = caps.readyAspects.first().id.takeIf { caps.isReady("16:9") } ?: caps.readyAspects.first().id, resolution = firstRes(caps, "1080p"))
+        val aspect = if (caps.isReady(stored.aspect)) stored.aspect else caps.readyAspects.first().id
+        val res = if (caps.resolutions.any { it.id == stored.resolution }) stored.resolution else firstRes(caps, "1080p")
+        val lang = if (stored.language == "auto" || caps.languages.any { it.id == stored.language }) stored.language else "auto"
+        val minutes = stored.minutes.takeIf { it in caps.minMinutes..caps.maxMinutes && it.toDouble() in CreateOptions.LENGTHS } ?: CreateOptions.DEFAULT_MINUTES.toInt()
+        val platform = if (CreatePlatforms.chip(caps, stored.platform)?.enabled == true) stored.platform else "other"
+        return CreateOptions(minutes.toDouble(), VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang)
+    }
+
+    private fun firstRes(caps: Capabilities, preferred: String) = caps.resolutions.firstOrNull { it.id == preferred }?.id ?: caps.resolutions.first().id
+}
+
+/**
+ * The request check with its budgets (docs/UI_DESIGN.md section o.3): nothing visible below [slowAfterMs]; between that and [giveUpMs] the sheet shows its skeleton
+ * ([onSlow]); after [giveUpMs], or on any error, the answer is [IntakeResult.Ok] with no brief. A failed check never shows an error and never blocks a video.
+ */
+class IntakeCheck(private val api: IntakeApi?, private val slowAfterMs: Long = 2500, private val giveUpMs: Long = 8000) {
+    suspend fun run(request: IntakeRequest, onSlow: () -> Unit = {}): IntakeResult {
+        val a = api ?: return IntakeResult.Ok(null)
+        return coroutineScope {
+            val slow = launch { delay(slowAfterMs); onSlow() }
+            try {
+                withTimeoutOrNull(giveUpMs) { a.brief(request) } ?: IntakeResult.Ok(null)
+            } catch (e: CancellationException) { throw e
+            } catch (e: ApiError.Paused) { IntakeResult.Paused(e.text, e.retryAfterSeconds)
+            } catch (e: ApiError.Blocked) { IntakeResult.Blocked(e.text)
+            } catch (e: Exception) { IntakeResult.Ok(null)
+            } finally { slow.cancel() }
+        }
+    }
+}
+
+/** The one-question-at-a-time flow: answers, back, skip, "You decide", "Make it now", progress and the final summary. */
+class QuestionFlow(val questions: List<Question>) {
+    private val answers = LinkedHashMap<String, Answer>()
+    var index: Int = 0
+        private set
+    /** Editing one answer from the summary returns straight to the summary afterwards. */
+    private var returnToSummary = false
+    var inSummary: Boolean = false
+        private set
+
+    val current: Question? get() = if (inSummary) null else questions.getOrNull(index)
+    val total: Int get() = questions.size
+    val overline: String get() = "QUESTION ${index + 1} OF $total"
+    fun answerOf(id: String): Answer? = answers[id]
+    val canGoBack: Boolean get() = !inSummary && index > 0
+
+    fun choose(optionId: String) { val q = current ?: return; val o = q.options.firstOrNull { it.id == optionId } ?: return; put(Answer.Option(q.id, o.id, o.label)) }
+    fun other(text: String) { val q = current ?: return; if (text.isNotBlank()) put(Answer.Text(q.id, text.trim().take(200))) }
+    fun skip() { val q = current ?: return; put(Answer.Skip(q.id)) }
+    fun youDecide() { val q = current ?: return; put(Answer.Skip(q.id, youDecide = true)) }
+
+    private fun put(a: Answer) {
+        answers[a.id] = a
+        if (returnToSummary) { returnToSummary = false; inSummary = true; return }
+        if (index + 1 >= questions.size) inSummary = true else index++
+    }
+
+    fun back() { if (canGoBack) index-- }
+
+    /** Stops asking: the questions not answered yet count as skipped. */
+    fun makeItNow() {
+        for (q in questions) answers.putIfAbsent(q.id, Answer.Skip(q.id))
+        inSummary = true; returnToSummary = false
+    }
+
+    /** From a summary chip: reopens that question; answering it comes back to the summary. */
+    fun edit(questionId: String) {
+        val i = questions.indexOfFirst { it.id == questionId }.takeIf { it >= 0 } ?: return
+        index = i; inSummary = false; returnToSummary = true
+    }
+
+    /** Every answer so far in question order (all of them go with each later check call). */
+    fun answerList(): List<Answer> = questions.mapNotNull { answers[it.id] }
+    fun answered(): List<Answer> = answerList().filter { it !is Answer.Skip }
+
+    /** Nothing to confirm: everything was skipped or left to the planner. */
+    fun allSkipped(): Boolean = inSummary && answered().isEmpty()
+
+    /** The chips of the summary ("For kids", "Calm", "Focus: Making honey"): the server's summary parts when they line up, else the answers' own labels. */
+    fun chips(summary: String?): List<SummaryChip> {
+        val a = answered()
+        val parts = summary?.split(" · ")?.map { it.trim() }?.filter { it.isNotEmpty() }
+        return a.mapIndexed { i, ans -> SummaryChip(ans.id, parts?.takeIf { it.size == a.size }?.get(i) ?: when (ans) { is Answer.Option -> ans.label; is Answer.Text -> ans.text; is Answer.Skip -> "" }) }
+    }
+}
+
+data class SummaryChip(val questionId: String, val label: String)
+
+/** What a sheet should say about a failure (Blocked and Paused come from the check or from generate itself). */
+sealed interface CreateStop {
+    data class NotSupported(val message: String, val suggestion: String?) : CreateStop
+    data class Blocked(val message: String) : CreateStop
+    data class Paused(val message: String, val retryAfterSeconds: Int?) : CreateStop
+}
+
+object CreateErrors {
+    const val DEFAULT_NOT_SUPPORTED = "This request is outside what videomk can make. Try describing the topic in a different way."
+    const val DEFAULT_BLOCKED = "We can't make this video."
+
+    fun fromCheck(r: IntakeResult): CreateStop? = when (r) {
+        is IntakeResult.NotSupported -> CreateStop.NotSupported(r.message?.takeIf { it.isNotBlank() } ?: DEFAULT_NOT_SUPPORTED, r.suggestion?.takeIf { it.isNotBlank() })
+        is IntakeResult.Blocked -> CreateStop.Blocked(r.message?.takeIf { it.isNotBlank() } ?: DEFAULT_BLOCKED)
+        is IntakeResult.Paused -> CreateStop.Paused(r.message, r.retryAfterSeconds)
+        else -> null
+    }
+
+    /** generate itself can answer 400 blocked or 429 paused: the same sheets. */
+    fun fromGenerate(e: ApiError): CreateStop? = when (e) {
+        is ApiError.Blocked -> CreateStop.Blocked(e.text)
+        is ApiError.Paused -> CreateStop.Paused(e.text, e.retryAfterSeconds)
+        else -> null
+    }
+
+    /** "You can try again in about 1 hour." (no retry loop: the person decides). */
+    fun retryText(seconds: Int?): String? = seconds?.takeIf { it > 0 }?.let {
+        when {
+            it >= 3600 -> "You can try again in about ${Math.round(it / 3600.0)} hour${if (Math.round(it / 3600.0) == 1L) "" else "s"}."
+            it >= 120 -> "You can try again in about ${it / 60} minutes."
+            else -> "You can try again in a minute."
+        }
+    }
+}
+
+/** How the generate call answered when Create waits for it: the screen closes only on [Accepted]. */
+sealed interface SubmitOutcome {
+    data object Accepted : SubmitOutcome
+    /** The server's safety gate (400 blocked) or a pause (429): the kind sheets, nothing charged, the draft stays. */
+    data class Stopped(val error: ApiError) : SubmitOutcome
+    /** No connection or a network error: stay on Create with a message; tapping Create again retries. */
+    data class Offline(val message: String) : SubmitOutcome
+}
+
+/** The brief object for generate: the server's own, passed back untouched. */
+fun briefForGenerate(r: IntakeResult): JsonObject? = (r as? IntakeResult.Ok)?.brief

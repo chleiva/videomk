@@ -103,139 +103,8 @@ import kotlinx.coroutines.launch
 
 private fun plural(n: Int) = if (n == 1) "" else "s"
 
-/**
- * The docked composer card (docs/UI_DESIGN.md section e): photo strip, a two-line field, ONE status line (price, reason and fix), and a toolbar with
- * attach, the options pill, the microphone and a send button that is always drawn (tonal until it can act).
- */
 @Composable
-fun ComposerBar(
-    composer: ComposerViewModel, balance: Int?, onSend: () -> Unit, modifier: Modifier = Modifier,
-    onAddCredits: () -> Unit = {},
-) {
-    val context = LocalContext.current
-    val view = LocalView.current
-    val scope = rememberCoroutineScope()
-    val dictationState by composer.dictation.state.collectAsState()
-    val listening = dictationState is DictationController.State.Listening || dictationState is DictationController.State.Starting
-    val options = composer.options
-    val status = ComposerLogic.status(composer.text, options, balance, composer.totalPhotos, listening, sending = false)
-    val focus = remember { FocusRequester() }
-    val keyboard = LocalSoftwareKeyboardController.current
-    val container = LocalContainerOrNull.current
-    var optionsOpen by remember { mutableStateOf(false) }
-    var pulse by remember { mutableIntStateOf(0) }
-    val shake = remember { Animatable(0f) }
-    val flash = remember { Animatable(0f) }
-    val still = reduceMotion(context)
-
-    LaunchedEffect(composer.focusRequests) {
-        if (composer.focusRequests > 0) { runCatching { focus.requestFocus() }; keyboard?.show() }
-    }
-    LaunchedEffect(dictationState) {
-        if (dictationState is DictationController.State.Unavailable || dictationState is DictationController.State.KeyboardHint) {
-            delay(8000); composer.dictation.clearHint()
-        }
-    }
-    LaunchedEffect(pulse) {
-        if (pulse > 0 && !still) {
-            flash.snapTo(1f)
-            launch { flash.animateTo(0f, tween(450)) }
-            for (x in listOf(4f, -4f, 3f, -3f, 0f)) shake.animateTo(x, tween(55))
-        }
-    }
-
-    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        composer.dictation.start(composer.text, if (granted) DictationPlan.Permission.Granted else DictationPlan.Permission.Denied)
-    }
-
-    fun onMic() {
-        try {
-            if (composer.dictation.isListening) { composer.dictation.stop(); return }
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                composer.dictation.start(composer.text, DictationPlan.Permission.Granted)
-            } else {
-                micPermission.launch(Manifest.permission.RECORD_AUDIO)   // answers at once (as denied) when the user chose "don't ask again"
-            }
-        } catch (e: Exception) {
-            composer.dictation.start(composer.text, DictationPlan.Permission.Denied)
-        }
-    }
-
-    fun haptic(ok: Boolean) {
-        if (Build.VERSION.SDK_INT >= 30) view.performHapticFeedback(if (ok) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.REJECT)
-        else view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-    }
-
-    fun tapSend() {
-        if (status.sendReady) { haptic(true); onSend() }
-        else {
-            // a tonal send is never dead: it pulses the reason and says it out loud
-            haptic(false); pulse++
-            view.announceForAccessibility(status.text + (status.fix?.let { ". " + it.description() } ?: ""))
-        }
-    }
-
-    fun applyFix() {
-        val fix = status.fix ?: return
-        if (fix.addCredits) onAddCredits() else composer.options = options.copy(minutes = fix.minutes!!.toDouble())
-    }
-
-    val shape = RoundedCornerShape(28.dp)
-    val dark = Vmk.colors.dark
-    val big = LocalDensity.current.fontScale >= 1.5f
-    Surface(
-        modifier = modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
-            .padding(horizontal = 12.dp).padding(bottom = 8.dp, top = 4.dp)
-            .widthIn(max = 640.dp)
-            .vmkShadow(3, shape, dark).hairline(shape, Vmk.colors.outline),
-        shape = shape, color = Vmk.colors.surface,
-    ) {
-        Column(Modifier.padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 10.dp)) {
-            if (composer.totalPhotos > 0) {
-                PhotoStrip(composer)
-                Box(Modifier.size(6.dp))
-            }
-            TextField(
-                value = composer.text, onValueChange = { composer.text = it },
-                modifier = Modifier.fillMaxWidth().focusRequester(focus).offset(x = (-16).dp).testTag("composerField"),
-                placeholder = { Text(if (composer.totalPhotos == 0) "Describe your video…" else "What should the video be about?", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textTertiary) },
-                textStyle = MaterialTheme.typography.bodyLarge,
-                minLines = 2, maxLines = 6,
-                readOnly = listening,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, disabledIndicatorColor = Color.Transparent,
-                    focusedTextColor = if (listening) Vmk.colors.textSecondary else Vmk.colors.text, unfocusedTextColor = if (listening) Vmk.colors.textSecondary else Vmk.colors.text,
-                ),
-            )
-            dictationHint(dictationState)
-            StatusLine(status, flash.value, shake.value, ::applyFix)
-            Box(Modifier.size(6.dp))
-            val attach: @Composable () -> Unit = { AttachButton(composer, enabled = !listening) { composer.openAddPhotos(null) } }
-            val pill: @Composable (Modifier) -> Unit = { m -> OptionsPill(composer, status, enabled = !listening, m) { optionsOpen = true } }
-            val mic: @Composable () -> Unit = { MicButton(listening, ::onMic) }
-            val send: @Composable () -> Unit = { SendButton(status, balance, options, ::tapSend) }
-            if (big) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { attach(); pill(Modifier.weight(1f)) }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) { mic(); send() }
-                }
-            } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) { attach(); pill(Modifier.weight(1f)); mic(); send() }
-            }
-        }
-    }
-
-    if (optionsOpen) OptionsSheet(composer, balance, onDismiss = { optionsOpen = false })
-    val request = composer.addPhotosRequest
-    if (request != null) {
-        AddPhotosSheet(composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = request.tab == 1, onDismiss = { composer.closeAddPhotos() })
-    }
-}
-
-@Composable
-private fun dictationHint(state: DictationController.State) {
+internal fun dictationHint(state: DictationController.State) {
     when (state) {
         is DictationController.State.Unavailable -> HintRow(state.message, Vmk.colors.warning, "dictationUnavailable")
         is DictationController.State.KeyboardHint -> HintRow(state.message, Vmk.colors.textSecondary, "dictationKeyboardHint")
@@ -253,7 +122,7 @@ private fun HintRow(message: String, color: Color, tag: String) {
 
 /** The single place for price, reason and fix: exactly one message at a time. */
 @Composable
-private fun StatusLine(status: ComposerStatus, flash: Float, shake: Float, onFix: () -> Unit) {
+internal fun StatusLine(status: ComposerStatus, flash: Float, shake: Float, onFix: () -> Unit) {
     val color = when (status.kind) {
         StatusKind.TooLong -> Vmk.colors.danger
         StatusKind.NotAffordable, StatusKind.NoCredits -> Vmk.colors.warning
@@ -287,84 +156,9 @@ private fun StatusLine(status: ComposerStatus, flash: Float, shake: Float, onFix
     }
 }
 
-@Composable
-private fun AttachButton(composer: ComposerViewModel, enabled: Boolean, onClick: () -> Unit) {
-    val n = composer.totalPhotos
-    val full = composer.remaining == 0
-    Box(Modifier.size(48.dp).alpha(if (enabled) 1f else 0.4f), contentAlignment = Alignment.Center) {
-        Box(
-            Modifier.size(44.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised)
-                .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Add photos", onClick = onClick)
-                .semantics { contentDescription = if (n > 0) "Add photos. $n selected" else "Add photos" }.testTag("photoButton"),
-            contentAlignment = Alignment.Center,
-        ) { Icon(Icons.Filled.AddPhotoAlternate, null, tint = if (full) Vmk.colors.textTertiary else Vmk.colors.text, modifier = Modifier.size(24.dp)) }
-        AddPhotosLogic.badge(n)?.let { b ->
-            Box(
-                Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-2).dp).heightIn(min = 20.dp).clip(CircleShape).background(Vmk.colors.primary).padding(horizontal = 6.dp)
-                    .testTag("photoBadge"),
-                contentAlignment = Alignment.Center,
-            ) { Text(b, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.onPrimary, maxLines = 1) }
-        }
-    }
-}
-
-@Composable
-private fun OptionsPill(composer: ComposerViewModel, status: ComposerStatus, enabled: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val options = composer.options
-    val warn = status.kind == StatusKind.NotAffordable || status.kind == StatusKind.NoCredits
-    val shape = RoundedCornerShape(24.dp)
-    val bg by animateColorAsState(if (warn) Vmk.colors.warningContainer else Vmk.colors.surfaceRaised, label = "pill")
-    val look = options.look?.title ?: "Producer decides the look"
-    val narrow = LocalContext.current.resources.configuration.screenWidthDp < 340
-    Row(
-        modifier.heightIn(min = 44.dp).clip(shape).background(bg).then(if (warn) Modifier.border(1.5.dp, Vmk.colors.warning, shape) else Modifier)
-            .alpha(if (enabled) 1f else 0.4f)
-            .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Open video options", onClick = onClick)
-            .padding(horizontal = 14.dp)
-            .semantics {
-                contentDescription = "Video options"
-                stateDescription = "${options.minutes.toInt()} minute${plural(options.minutes.toInt())}, ${options.credits} credit${plural(options.credits)}, $look, subtitles ${if (options.captions) "on" else "off"}"
-            }.testTag("optionsMenu"),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-    ) {
-        Icon(Icons.Filled.Tune, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(20.dp))
-        if (narrow) Text("${options.minutes.toInt()} min · ${options.credits}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1)
-        else CreditsText(options.minutes.toInt(), options.credits, if (warn) Vmk.colors.warning else Vmk.colors.primary)
-    }
-}
-
-@Composable
-private fun MicButton(listening: Boolean, onClick: () -> Unit) {
-    val still = reduceMotion(LocalContext.current)
-    Box(Modifier.size(48.dp).clickable(role = Role.Button, onClickLabel = if (listening) "Stop dictation" else "Dictate", onClick = onClick)
-        .semantics { contentDescription = if (listening) "Stop dictation" else "Dictate. Say what video you want instead of typing" }.testTag("micButton"), contentAlignment = Alignment.Center) {
-        if (listening) {
-            val ring = if (still) 1f else rememberInfiniteTransition(label = "ring").animateFloat(1f, 1.5f, infiniteRepeatable(tween(1000), RepeatMode.Restart), label = "r").value
-            Box(Modifier.size(44.dp).scale(ring).clip(CircleShape).background(Vmk.colors.danger.copy(alpha = 0.18f)))
-            Box(Modifier.size(44.dp).clip(CircleShape).background(Vmk.colors.danger), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Stop, null, tint = Color.White, modifier = Modifier.size(22.dp)) }
-        } else Icon(Icons.Filled.Mic, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(24.dp))
-    }
-}
-
-/** 52 dp, always drawn: filled with the brand gradient when it can act, tonal when it cannot. Never disabled for screen readers. */
-@Composable
-private fun SendButton(status: ComposerStatus, balance: Int?, options: CreateOptions, onClick: () -> Unit) {
-    val ready = status.sendReady
-    val desc = if (ready) "Ready, costs ${options.credits} credit${plural(options.credits)}" else "Not ready. ${status.text}${if (status.fix != null) ". Double tap for the fix." else ""}"
-    Box(
-        Modifier.size(52.dp).clip(CircleShape)
-            .then(if (ready) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))
-            .clickable(role = Role.Button, onClickLabel = if (ready) "Make video" else "Explain why this can't be sent yet", onClick = onClick)
-            .semantics { contentDescription = "Make video"; stateDescription = desc }.testTag("sendButton"),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(Icons.Filled.ArrowUpward, null, tint = if (ready) Color.White else Vmk.colors.textTertiary, modifier = Modifier.size(26.dp))
-    }
-}
-
 /** The attached photos: a count row and a horizontally scrolling strip of small previews, each removable (phone and My media in one strip). */
 @Composable
-private fun PhotoStrip(composer: ComposerViewModel) {
+internal fun PhotoStrip(composer: ComposerViewModel) {
     val phone = composer.photos.size + composer.loading
     val library = composer.library.size
     val source = when { phone > 0 && library > 0 -> "From this phone and My media"; library > 0 -> "From My media"; else -> "From this phone" }

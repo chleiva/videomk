@@ -85,7 +85,11 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
                 onOpenWallet = { nav.navigate("wallet") },
                 onOpenSettings = { nav.navigate("settings") },
                 onOpenMedia = { navigateTab(nav, "media") },
+                onNewVideo = { nav.navigate("create") },
             )
+        }
+        composable("create") {
+            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { nav.navigate("wallet") })
         }
         composable("media") { entry ->
             val vm: MediaViewModel = viewModel(entry, key = "media-home", factory = mediaFactory)

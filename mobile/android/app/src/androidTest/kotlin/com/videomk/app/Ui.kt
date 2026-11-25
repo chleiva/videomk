@@ -43,6 +43,13 @@ object Ui {
         device.wait(Until.hasObject(By.pkg(PKG).depth(0)), 15_000)
     }
 
+    /** Home has no text input: tap "New video" (the floating button, or the full-width one on an empty home) to open the Create screen. */
+    fun openCreate() {
+        val entry = device.wait(Until.findObject(res("newVideoFab")), 30_000) ?: device.wait(Until.findObject(res("newVideoButton")), 5_000) ?: error("no New video button on the home screen")
+        entry.click()
+        require("composerField", 15_000)
+    }
+
     fun refreshTokenOrSkip(): String = requireTokens().second
 
     /** An unsigned token that looks expired (the app only reads claims; the server is what validates). */
