@@ -1,0 +1,22 @@
+{"name": "test3s", "usd": 0.25, "status": "reserved", "secs": 3, "ts": "2026-11-26T22:08:39"}
+{"name": "test3s", "usd": -0.03669, "status": "actual_adjustment", "actual_usd": 0.21331, "tokens_video": 17376, "tokens_thought": 527}
+{"name": "s01", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:09:13"}
+{"name": "s01", "usd": -0.04523, "status": "actual_adjustment", "actual_usd": 0.35477, "ts": "2026-11-26T22:09:41"}
+{"name": "s02", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:09:41"}
+{"name": "s02", "usd": -0.04457, "status": "actual_adjustment", "actual_usd": 0.35543, "ts": "2026-11-26T22:10:07"}
+{"name": "s03", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:10:07"}
+{"name": "s03", "usd": -0.04817, "status": "actual_adjustment", "actual_usd": 0.35183, "ts": "2026-11-26T22:10:31"}
+{"name": "s04", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:10:31"}
+{"name": "s04", "usd": -0.04708, "status": "actual_adjustment", "actual_usd": 0.35292, "ts": "2026-11-26T22:10:56"}
+{"name": "s05", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:10:56"}
+{"name": "s05", "usd": -0.04689, "status": "actual_adjustment", "actual_usd": 0.35312, "ts": "2026-11-26T22:11:20"}
+{"name": "s06", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:11:20"}
+{"name": "s06", "usd": -0.0442, "status": "actual_adjustment", "actual_usd": 0.3558, "ts": "2026-11-26T22:11:45"}
+{"name": "s07", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:11:45"}
+{"name": "s07", "usd": -0.04637, "status": "actual_adjustment", "actual_usd": 0.35363, "ts": "2026-11-26T22:12:12"}
+{"name": "s08", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:12:12"}
+{"name": "s08", "usd": -0.04555, "status": "actual_adjustment", "actual_usd": 0.35445, "ts": "2026-11-26T22:12:40"}
+{"name": "s09", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:12:40"}
+{"name": "s09", "usd": -0.04782, "status": "actual_adjustment", "actual_usd": 0.35218, "ts": "2026-11-26T22:13:03"}
+{"name": "s10", "usd": 0.4, "status": "reserved", "secs": 5, "ts": "2026-11-26T22:13:03"}
+{"name": "s10", "usd": -0.04595, "status": "actual_adjustment", "actual_usd": 0.35405, "ts": "2026-11-26T22:13:29"}

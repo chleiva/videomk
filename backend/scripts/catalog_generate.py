@@ -174,7 +174,8 @@ def validate_plan(plan: Dict[str, Any]) -> List[str]:
         ids.add(i)
         if not it.get("subject"):
             errs.append(f"{i}: no subject")
-        if len({str(s).lower() for s in it.get("serves") or []}) < 3:
+        # one image for three or more different prompts; a demand-backed item (catalog_opportunities.py) may instead be asked by >= 3 distinct videos with fewer wordings
+        if len({str(s).lower() for s in it.get("serves") or []}) < 3 and int(it.get("distinct_videos") or 0) < 3:
             errs.append(f"{i}: must list at least 3 different prompts it serves")
     if not plan.get("items"):
         errs.append("the plan has no items")
@@ -185,7 +186,7 @@ def marker_id(plan_id: str, item_id: str) -> str:
     return f"plan#{plan_id}#{item_id}"
 
 
-def store_image(store, jpeg: bytes, item: Dict[str, Any], plan: Dict[str, Any], seed: int, cost: float, verdict: Dict[str, Any], vec: List[float], extra: Dict[str, Any]) -> str:
+def store_image(store, jpeg: bytes, item: Dict[str, Any], plan: Dict[str, Any], cost: float, verdict: Dict[str, Any], vec: List[float], extra: Dict[str, Any]) -> str:
     from common import catalog, catalog_style
 
     cid = catalog.content_hash(jpeg)
@@ -197,7 +198,7 @@ def store_image(store, jpeg: bytes, item: Dict[str, Any], plan: Dict[str, Any], 
     store.put_item({
         "id": cid, "title": item.get("title", ""), "category": item.get("category", ""), "tags": [catalog_style.STYLE_VERSION, item.get("category", "")], "serves": list(item.get("serves") or [])[:12],
         "prompt": catalog_style.full_prompt(item["subject"], bool(item.get("people"))), "negative_prompt": catalog_style.NEGATIVE, "subject": item["subject"],
-        "model": extra["model"], "method": "text-to-image", "layout": "", "seed": seed, "created": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z",
+        "model": extra["model"], "created": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z",
         "cost_usd": round(cost, 4), "licence": "videomk-owned: output assigned to videomk by the provider's terms; see docs/IMAGE_CATALOG.md", "provenance": {"provider": "OpenAI Images API", "plan": plan["plan_id"], "plan_item": item["id"]},
         "review_status": "approved", "review": {k: v for k, v in verdict.items()}, "width": extra["size"][0], "height": extra["size"][1], "style_version": catalog_style.STYLE_VERSION,
         "promoted_from": "", "sha256": cid,
@@ -225,7 +226,6 @@ def run(plan: Dict[str, Any], store, spend: Spend, *, profile: str, regen: bool,
         attempts = 2 if regen else 1
         done = False
         for attempt in range(attempts):
-            seed = 0   # the Images API has no seed; kept in the metadata as 0
             try:
                 spend.reserve("generate", PRICES["generate"] + PRICES["check_reserve"] + PRICES["embed"])
                 final0, gen_cost = generate_image(api, item)
@@ -253,7 +253,7 @@ def run(plan: Dict[str, Any], store, spend: Spend, *, profile: str, regen: bool,
                     print(f"  {iid}: duplicate of an existing image ({near[0][1]:.2f}), dropped")
                     done = True
                     break
-                cid = store_image(store, final, item, plan, seed, gen_cost + PRICES["embed"] + qcost, verdict, vec, {"model": OPENAI_MODEL + " " + IMAGE_SIZE + " " + IMAGE_QUALITY, "size": im.size})
+                cid = store_image(store, final, item, plan, gen_cost + PRICES["embed"] + qcost, verdict, vec, {"model": OPENAI_MODEL + " " + IMAGE_SIZE + " " + IMAGE_QUALITY, "size": im.size})
                 summary["made"].append({"item": iid, "id": cid, "attempts": attempt + 1})
                 print(f"  {iid}: kept {cid[:12]} ({im.size[0]}x{im.size[1]}) {verdict.get('reasons', '')}")
                 done = True

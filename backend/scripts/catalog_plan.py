@@ -8,7 +8,7 @@ cents of embeddings and one small-model call per candidate.
 Takes the demand table (generic phrases and salted video hashes, see common/catalog_privacy.py), drops the phrases the catalog already answers (best score of the phrase against the
 catalog's vectors >= --covered), clusters the rest by meaning, and keeps clusters asked by at least --min-videos DIFFERENT videos with at least --min-phrases different wordings: one image
 that serves three or more completely different prompts. A small model turns each cluster into a generic, reusable subject (or says the cluster is a specific landmark, species, person or brand,
-which is not catalog material) and the plan says what each image would cost. The owner edits, then sets `approved_by` before catalog_generate.py will run it.
+which is not catalog material) and the plan says what each image would cost (measured USD 0.044 per generation, times 1.5 for the re-run of rejected pictures). The owner edits, then sets `approved_by` before catalog_generate.py will run it.
 """
 import argparse
 import collections
@@ -25,11 +25,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "lambdas"))
 sys.path.insert(0, HERE)
 
-PER_IMAGE_USD = 0.07 + 0.03 + 0.0005 + 0.01   # structure + upscale + embed + check reserve (catalog_generate.PRICES), before any regeneration
+GENERATION_USD = 0.044     # measured: gpt-image-2.6-flare 2048x1152 high = 1413 output tokens + prompt (docs/IMAGE_CATALOG.md section 0)
+CHECK_USD, EMBED_USD = 0.0005, 0.0005
+RETRY_FACTOR = 1.5         # measured on the pilot: 10 generations for 6 kept items (rejected items are re-run once)
+PER_IMAGE_USD = (GENERATION_USD + CHECK_USD + EMBED_USD) * RETRY_FACTOR   # expected cost of one KEPT image
 
 SUBJECT_SYSTEM = """You turn a cluster of search phrases that a video director used into ONE reusable stock image for a library shared by many videos.
 Answer ONLY with JSON: {"generic": true|false, "title": "<3-6 words>", "category": "<one of: nature, sky, work, city, food, people, animals, science, money, history, travel, mood>",
-"subject": "<one sentence describing a single photograph: the scene, light and place type, no style words>", "people": true|false, "layout": "<one of: mountains, horizon, layered_ridges, forest_path, dunes, center_object>"}
+"subject": "<one sentence describing a single photograph: the scene, light and place type, no style words>", "people": true|false}
 `generic` is false when the cluster is about a specific named landmark, building, species, person, brand, event or artwork (a library image of it would be wrong or risky), or when no single photograph
 could serve all the phrases. The subject must not name a real person, brand or private place; any people are small, from behind or hands only; no text in the scene."""
 
@@ -72,7 +75,7 @@ def plan_from_rows(rows: List[Dict[str, Any]], *, embed_queries: Callable[[List[
     report["clusters_over_threshold"] = len(cands)
     items: List[Dict[str, Any]] = []
     rejected: List[Dict[str, Any]] = []
-    for n, (nv, ns, ps) in enumerate(cands, 1):
+    for nv, ns, ps in cands:
         top = sorted(ps, key=lambda p: -len(agg[p]["videos"]))
         info: Dict[str, Any] = {}
         if ask:
@@ -87,7 +90,7 @@ def plan_from_rows(rows: List[Dict[str, Any]], *, embed_queries: Callable[[List[
         if len(items) >= max_items:
             break
         items.append({"id": f"n{len(items) + 1:03d}", "title": info.get("title") or top[0], "category": info.get("category") or "", "subject": info.get("subject") or top[0], "people": bool(info.get("people")),
-                      "method": "structure", "layout": info.get("layout") or "center_object", "seed": 3000 + n, "serves": top[:8], "distinct_videos": nv, "searches": ns,
+                      "serves": top[:8], "distinct_videos": nv, "searches": ns,
                       "needs_review": not ask, "estimated_usd": round(PER_IMAGE_USD, 4)})
     report["rejected_clusters"] = rejected[:20]
     return {"plan_id": plan_id or "plan-" + datetime.date.today().isoformat(), "approved_by": "", "created": datetime.datetime.utcnow().isoformat() + "Z", "min_videos": min_videos,
@@ -108,7 +111,7 @@ def demand_rows_from_table(stage: str, since_days: int) -> List[Dict[str, Any]]:
     out, kw = [], {}
     while True:
         r = t.scan(**kw)
-        out += [{"phrase": i["phrase"], "video": i["video"], "searches": int(i.get("searches", 1)), "outcome": i.get("outcome", ""), "score": float(i.get("best_score", 0))} for i in r["Items"] if float(i.get("last_seen", 0)) >= cutoff]
+        out += [{"phrase": i["phrase"], "video": i["video"], "searches": int(i.get("searches", 1)), "outcome": i.get("outcome", ""), "score": float(i.get("best_score", 0)), "last_seen": float(i.get("last_seen", 0))} for i in r["Items"] if float(i.get("last_seen", 0)) >= cutoff]
         if not r.get("LastEvaluatedKey"):
             return out
         kw["ExclusiveStartKey"] = r["LastEvaluatedKey"]

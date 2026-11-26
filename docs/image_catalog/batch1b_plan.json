@@ -1,0 +1,282 @@
+{
+ "plan_id": "catalog-batch-1b",
+ "approved_by": "owner 2026-11-26: first 100-image batch (replacements for rejected items), hard cap USD 15",
+ "items": [
+  {
+   "id": "c001",
+   "title": "Coins with a seedling",
+   "category": "money",
+   "subject": "A small green seedling growing from a neat small stack of coins on a plain wooden table, centred, compact, soft light, no markings",
+   "people": false,
+   "serves": [
+    "money growth",
+    "investing",
+    "saving for the future"
+   ]
+  },
+  {
+   "id": "c002",
+   "title": "Calculator on a desk",
+   "category": "money",
+   "subject": "A single plain calculator with a blank display, small and centred on a clean wooden desk, soft light, nothing else in frame",
+   "people": false,
+   "serves": [
+    "budgeting",
+    "accounting",
+    "expenses and taxes"
+   ]
+  },
+  {
+   "id": "c003",
+   "title": "Three books stacked",
+   "category": "mood",
+   "subject": "A small stack of three plain closed books, compact and centred on a wooden table with generous empty space around, soft window light, no titles",
+   "people": false,
+   "serves": [
+    "studying",
+    "knowledge",
+    "reading list"
+   ]
+  },
+  {
+   "id": "c004",
+   "title": "Stethoscope coiled",
+   "category": "science",
+   "subject": "A stethoscope coiled into a compact circle in the centre of a plain light surface, soft light, blurred background, no labels",
+   "people": false,
+   "serves": [
+    "health care",
+    "doctor visit",
+    "medicine"
+   ]
+  },
+  {
+   "id": "c005",
+   "title": "Bowl of vegetables",
+   "category": "food",
+   "subject": "A single round bowl of fresh colourful vegetables centred on a wooden table, soft window light, muted natural colours, generous empty space around it",
+   "people": false,
+   "serves": [
+    "healthy eating",
+    "nutrition",
+    "vegetable cooking"
+   ]
+  },
+  {
+   "id": "c006",
+   "title": "Jar of honey",
+   "category": "food",
+   "subject": "A single small jar of golden honey with a wooden dipper, centred on a wooden table, matte soft light, blurred background, no label",
+   "people": false,
+   "serves": [
+    "honey",
+    "natural sweetness",
+    "beekeeping"
+   ]
+  },
+  {
+   "id": "c007",
+   "title": "Moon over a calm sea",
+   "category": "sky",
+   "subject": "A full moon low over a calm dark sea with a soft reflection, quiet and minimal, wide empty sky",
+   "people": false,
+   "serves": [
+    "moon at night",
+    "night sea",
+    "calm night"
+   ]
+  },
+  {
+   "id": "c008",
+   "title": "Window sunrise on a desk",
+   "category": "mood",
+   "subject": "Early sunrise light coming through a window onto an empty wooden desk, soft warm light, minimal room",
+   "people": false,
+   "serves": [
+    "new day",
+    "morning",
+    "fresh start"
+   ]
+  },
+  {
+   "id": "c009",
+   "title": "Paper plane in the sky",
+   "category": "mood",
+   "subject": "A single white paper plane flying across a soft blue sky with a few light clouds, centred",
+   "people": false,
+   "serves": [
+    "sending a message",
+    "new ideas taking off",
+    "freedom and travel"
+   ]
+  },
+  {
+   "id": "c010",
+   "title": "Ladder against a wall",
+   "category": "mood",
+   "subject": "A simple wooden ladder leaning against a plain pale wall in soft light, centred, empty room",
+   "people": false,
+   "serves": [
+    "career progress",
+    "climbing higher",
+    "next step"
+   ]
+  },
+  {
+   "id": "c011",
+   "title": "Fork in the forest path",
+   "category": "mood",
+   "subject": "A forest path splitting in two directions in soft diffused light, symmetrical, quiet",
+   "people": false,
+   "serves": [
+    "making a decision",
+    "two options",
+    "choosing a path"
+   ]
+  },
+  {
+   "id": "c012",
+   "title": "Mountain peak above clouds",
+   "category": "nature",
+   "subject": "A single mountain peak rising above a sea of soft clouds at sunrise, wide and calm",
+   "people": false,
+   "serves": [
+    "reaching the top",
+    "ambition",
+    "above the clouds"
+   ]
+  },
+  {
+   "id": "c013",
+   "title": "Brass balance scales",
+   "category": "history",
+   "subject": "Brass balance scales on a plain dark wooden table, centred, soft side light, blurred background, no markings",
+   "people": false,
+   "serves": [
+    "fairness and law",
+    "comparing options",
+    "justice and balance"
+   ]
+  },
+  {
+   "id": "c014",
+   "title": "Gears and cogs",
+   "category": "work",
+   "subject": "Close-up of interlocking brass gears on a dark surface, centred, soft side light, shallow depth of field, no markings",
+   "people": false,
+   "serves": [
+    "how it works",
+    "process and mechanics",
+    "engineering"
+   ]
+  },
+  {
+   "id": "c015",
+   "title": "Dominoes in a line",
+   "category": "mood",
+   "subject": "A short line of wooden dominoes just starting to fall, low angle, soft light, plain background, no dots readable",
+   "people": false,
+   "serves": [
+    "chain reaction",
+    "cause and effect",
+    "domino effect"
+   ]
+  },
+  {
+   "id": "c016",
+   "title": "Single sunflower",
+   "category": "nature",
+   "subject": "A single sunflower in soft evening light with a blurred field behind it, centred",
+   "people": false,
+   "serves": [
+    "summer",
+    "happiness",
+    "growing in the sun"
+   ]
+  },
+  {
+   "id": "c017",
+   "title": "Balanced pebbles",
+   "category": "mood",
+   "subject": "A small tower of smooth balanced pebbles on a flat stone beside calm water, centred, soft light",
+   "people": false,
+   "serves": [
+    "balance",
+    "calm and mindfulness",
+    "patience"
+   ]
+  },
+  {
+   "id": "c018",
+   "title": "Bicycle by a wall",
+   "category": "travel",
+   "subject": "A plain bicycle leaning against a pale plain wall in soft daylight, centred, no signs",
+   "people": false,
+   "serves": [
+    "cycling",
+    "green transport",
+    "healthy commute"
+   ]
+  },
+  {
+   "id": "c019",
+   "title": "Umbrella in the rain",
+   "category": "mood",
+   "subject": "A single open umbrella standing on a wet empty pavement in soft rain and grey light, centred, no people",
+   "people": false,
+   "serves": [
+    "insurance and protection",
+    "rainy weather",
+    "being prepared"
+   ]
+  },
+  {
+   "id": "c020",
+   "title": "Coffee beans texture",
+   "category": "food",
+   "subject": "Close-up of roasted coffee beans filling the frame, soft even light, calm texture",
+   "people": false,
+   "serves": [
+    "coffee",
+    "morning energy",
+    "cafe and farming"
+   ]
+  },
+  {
+   "id": "c021",
+   "title": "Hands holding a seedling",
+   "category": "people",
+   "subject": "Two hands gently holding a small green seedling with a clump of soil, soft light, blurred background, no faces",
+   "people": true,
+   "serves": [
+    "sustainability",
+    "caring for nature",
+    "planting trees"
+   ]
+  },
+  {
+   "id": "c022",
+   "title": "Empty bench in autumn",
+   "category": "mood",
+   "subject": "An empty wooden park bench with fallen autumn leaves in soft light, centred, blurred trees behind",
+   "people": false,
+   "serves": [
+    "waiting",
+    "loneliness",
+    "quiet autumn day"
+   ]
+  },
+  {
+   "id": "c023",
+   "title": "Hot air balloon at sunrise",
+   "category": "travel",
+   "subject": "A single hot air balloon with a plain pattern floating over a soft misty landscape at sunrise, no text",
+   "people": false,
+   "serves": [
+    "adventure",
+    "travel dream",
+    "floating above the world"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1206 @@
+{
+ "plan_id": "catalog-batch-1",
+ "approved_by": "owner 2026-11-26: first 100-image batch, hard cap USD 15",
+ "items": [
+  {
+   "id": "b001",
+   "title": "Sunrise over misty mountains",
+   "category": "nature",
+   "subject": "Sunrise over a vast mountain landscape, soft golden light behind layered misty ridges",
+   "people": false,
+   "serves": [
+    "sunrise over mountains",
+    "misty mountain valley",
+    "golden morning light landscape"
+   ]
+  },
+  {
+   "id": "b002",
+   "title": "Calm lake at dawn",
+   "category": "nature",
+   "subject": "A calm lake at dawn with a thin mist on the still water and a soft hazy treeline far away",
+   "people": false,
+   "serves": [
+    "calm lake at dawn",
+    "still water mirror",
+    "misty morning lake"
+   ]
+  },
+  {
+   "id": "b003",
+   "title": "Autumn forest path",
+   "category": "nature",
+   "subject": "A quiet forest path covered in fallen autumn leaves, warm diffused light between tall trees",
+   "people": false,
+   "serves": [
+    "autumn forest path",
+    "fall foliage walk",
+    "woodland trail in autumn"
+   ]
+  },
+  {
+   "id": "b004",
+   "title": "Sand dunes at golden hour",
+   "category": "nature",
+   "subject": "Smooth sand dunes in a desert at golden hour, long soft shadows, empty and calm",
+   "people": false,
+   "serves": [
+    "desert sand dunes",
+    "golden hour desert",
+    "arid landscape"
+   ]
+  },
+  {
+   "id": "b005",
+   "title": "Pine forest in fog",
+   "category": "nature",
+   "subject": "Tall pine trees in a thick morning fog, soft muted greens, quiet and still",
+   "people": false,
+   "serves": [
+    "foggy pine forest",
+    "misty woods",
+    "forest in morning fog"
+   ]
+  },
+  {
+   "id": "b006",
+   "title": "Rolling green hills",
+   "category": "nature",
+   "subject": "Gently rolling green countryside hills under a soft sky, no buildings",
+   "people": false,
+   "serves": [
+    "green countryside",
+    "rolling hills",
+    "rural landscape"
+   ]
+  },
+  {
+   "id": "b007",
+   "title": "Coastline at sunset",
+   "category": "nature",
+   "subject": "A rocky coastline at sunset with smooth long-exposure sea and warm light on the horizon",
+   "people": false,
+   "serves": [
+    "coast at sunset",
+    "sea at dusk",
+    "rocky shore"
+   ]
+  },
+  {
+   "id": "b008",
+   "title": "Snow-covered peaks",
+   "category": "nature",
+   "subject": "Snow-covered mountain peaks under a clear pale blue sky, wide and quiet",
+   "people": false,
+   "serves": [
+    "snowy mountains",
+    "winter peaks",
+    "high altitude landscape"
+   ]
+  },
+  {
+   "id": "b009",
+   "title": "Tropical beach",
+   "category": "nature",
+   "subject": "A tropical beach with turquoise shallow water, smooth pale sand and a gentle horizon, empty",
+   "people": false,
+   "serves": [
+    "tropical beach",
+    "turquoise sea",
+    "holiday paradise beach"
+   ]
+  },
+  {
+   "id": "b010",
+   "title": "Wildflower meadow",
+   "category": "nature",
+   "subject": "A meadow of soft wildflowers in warm evening light, shallow depth of field, blurred foreground",
+   "people": false,
+   "serves": [
+    "wildflower meadow",
+    "spring field",
+    "summer countryside flowers"
+   ]
+  },
+  {
+   "id": "b011",
+   "title": "Wheat field at harvest",
+   "category": "nature",
+   "subject": "A golden wheat field at harvest time under a soft evening sky",
+   "people": false,
+   "serves": [
+    "wheat field",
+    "farmland harvest",
+    "agriculture crops"
+   ]
+  },
+  {
+   "id": "b012",
+   "title": "Waterfall in green forest",
+   "category": "nature",
+   "subject": "A single waterfall in a lush green forest, silky long-exposure water, soft shade",
+   "people": false,
+   "serves": [
+    "waterfall in forest",
+    "flowing water",
+    "tropical rainforest"
+   ]
+  },
+  {
+   "id": "b013",
+   "title": "River through a valley",
+   "category": "nature",
+   "subject": "A river winding gently through a wide green valley seen from a high viewpoint, soft light",
+   "people": false,
+   "serves": [
+    "winding river",
+    "river valley",
+    "water flowing through landscape"
+   ]
+  },
+  {
+   "id": "b014",
+   "title": "Moss and forest floor texture",
+   "category": "nature",
+   "subject": "Close-up macro of soft green moss on a dark forest floor, even and calm, shallow depth of field",
+   "people": false,
+   "serves": [
+    "moss texture",
+    "green natural background",
+    "forest floor close-up"
+   ]
+  },
+  {
+   "id": "b015",
+   "title": "Water ripples texture",
+   "category": "nature",
+   "subject": "Smooth water surface with gentle concentric ripples, soft blue-green light, abstract and calm",
+   "people": false,
+   "serves": [
+    "water ripples",
+    "calm water texture",
+    "blue water background"
+   ]
+  },
+  {
+   "id": "b016",
+   "title": "Sandy ripple pattern",
+   "category": "nature",
+   "subject": "Wind-carved ripple patterns on smooth beige sand, soft side light, abstract natural texture",
+   "people": false,
+   "serves": [
+    "sand pattern",
+    "desert texture",
+    "beige natural background"
+   ]
+  },
+  {
+   "id": "b017",
+   "title": "Green leaf macro",
+   "category": "nature",
+   "subject": "Close-up of a single large green leaf with fine veins in soft sunlight, blurred green background",
+   "people": false,
+   "serves": [
+    "green leaf close-up",
+    "plant macro",
+    "fresh nature background"
+   ]
+  },
+  {
+   "id": "b018",
+   "title": "Large tree in summer",
+   "category": "nature",
+   "subject": "A single large leafy tree standing alone in a grass field in soft summer light",
+   "people": false,
+   "serves": [
+    "lone tree",
+    "summer tree",
+    "environment and nature"
+   ]
+  },
+  {
+   "id": "b019",
+   "title": "Blue sky with soft clouds",
+   "category": "sky",
+   "subject": "Clear blue sky with a few soft white clouds, bright and airy, no ground",
+   "people": false,
+   "serves": [
+    "blue sky clouds",
+    "sky background",
+    "fresh air weather"
+   ]
+  },
+  {
+   "id": "b020",
+   "title": "Golden hour clouds",
+   "category": "sky",
+   "subject": "Warm golden hour sky with layered soft clouds, glowing but gentle, no ground visible",
+   "people": false,
+   "serves": [
+    "sunset sky",
+    "golden clouds",
+    "evening sky background"
+   ]
+  },
+  {
+   "id": "b021",
+   "title": "Starry night sky",
+   "category": "sky",
+   "subject": "A deep night sky full of stars over a dark silhouetted horizon, quiet and vast",
+   "people": false,
+   "serves": [
+    "starry night",
+    "milky way sky",
+    "night sky stargazing"
+   ]
+  },
+  {
+   "id": "b022",
+   "title": "Storm clouds gathering",
+   "category": "sky",
+   "subject": "Dark storm clouds gathering over an open flat landscape, moody but muted",
+   "people": false,
+   "serves": [
+    "storm clouds",
+    "bad weather",
+    "dramatic sky"
+   ]
+  },
+  {
+   "id": "b023",
+   "title": "Rain on a window",
+   "category": "sky",
+   "subject": "Rain drops on a window glass with a soft blurred grey city light behind, calm and moody",
+   "people": false,
+   "serves": [
+    "rain on window",
+    "rainy day",
+    "gloomy weather mood"
+   ]
+  },
+  {
+   "id": "b024",
+   "title": "Rainbow over fields",
+   "category": "sky",
+   "subject": "A faint rainbow over green fields after rain, soft light, wide and calm",
+   "people": false,
+   "serves": [
+    "rainbow after rain",
+    "rainbow over field",
+    "hope after storm"
+   ]
+  },
+  {
+   "id": "b025",
+   "title": "Snowy winter field",
+   "category": "nature",
+   "subject": "A quiet snow-covered field at dusk with soft blue light and a few bare trees far away",
+   "people": false,
+   "serves": [
+    "winter landscape",
+    "snowy field",
+    "cold winter scene"
+   ]
+  },
+  {
+   "id": "b026",
+   "title": "Path to the horizon",
+   "category": "mood",
+   "subject": "A single dirt path through an open field leading to the horizon at soft sunset",
+   "people": false,
+   "serves": [
+    "path to the future",
+    "journey ahead",
+    "road to the horizon"
+   ]
+  },
+  {
+   "id": "b027",
+   "title": "Fog over a quiet bridge",
+   "category": "mood",
+   "subject": "A simple old bridge disappearing into soft fog over still water, muted and quiet",
+   "people": false,
+   "serves": [
+    "bridge in fog",
+    "uncertainty",
+    "crossing over"
+   ]
+  },
+  {
+   "id": "b028",
+   "title": "Empty road at sunset",
+   "category": "mood",
+   "subject": "An empty straight country road at sunset with warm soft light and wide sky",
+   "people": false,
+   "serves": [
+    "empty road",
+    "road trip",
+    "open road journey"
+   ]
+  },
+  {
+   "id": "b029",
+   "title": "Soft gradient light background",
+   "category": "mood",
+   "subject": "An abstract soft gradient of warm peach and pale blue light, smooth and out of focus, no objects",
+   "people": false,
+   "serves": [
+    "abstract soft background",
+    "calm gradient",
+    "minimal backdrop"
+   ]
+  },
+  {
+   "id": "b030",
+   "title": "Bokeh lights background",
+   "category": "mood",
+   "subject": "Out of focus warm golden bokeh lights on a dark background, soft and abstract",
+   "people": false,
+   "serves": [
+    "bokeh lights",
+    "festive blurred lights",
+    "abstract night background"
+   ]
+  },
+  {
+   "id": "b031",
+   "title": "Paper texture background",
+   "category": "mood",
+   "subject": "A plain sheet of off-white handmade paper texture, soft light, subtle fibres, abstract backdrop",
+   "people": false,
+   "serves": [
+    "paper texture",
+    "neutral background",
+    "notebook page background"
+   ]
+  },
+  {
+   "id": "b032",
+   "title": "Dark slate background",
+   "category": "mood",
+   "subject": "A dark matte slate surface with fine texture and a gentle vignette, empty, minimal backdrop",
+   "people": false,
+   "serves": [
+    "dark background",
+    "slate texture",
+    "minimal dark backdrop"
+   ]
+  },
+  {
+   "id": "b033",
+   "title": "Wood grain texture",
+   "category": "mood",
+   "subject": "Close-up of warm light oak wood grain, even soft light, abstract backdrop",
+   "people": false,
+   "serves": [
+    "wood texture",
+    "natural wood background",
+    "table surface"
+   ]
+  },
+  {
+   "id": "b034",
+   "title": "Single candle in the dark",
+   "category": "mood",
+   "subject": "A single lit candle in a dark room with soft glow and calm shadows, minimal",
+   "people": false,
+   "serves": [
+    "candle light",
+    "calm evening",
+    "remembrance or hope"
+   ]
+  },
+  {
+   "id": "b035",
+   "title": "Stepping stones in water",
+   "category": "mood",
+   "subject": "A line of flat stepping stones crossing a calm shallow stream, soft light",
+   "people": false,
+   "serves": [
+    "step by step",
+    "stepping stones",
+    "progress one step at a time"
+   ]
+  },
+  {
+   "id": "b036",
+   "title": "Door open to light",
+   "category": "mood",
+   "subject": "An old wooden door slightly open with warm light coming through, minimal wall around it, no text",
+   "people": false,
+   "serves": [
+    "opportunity",
+    "open door",
+    "new beginning"
+   ]
+  },
+  {
+   "id": "b037",
+   "title": "Padlock and key",
+   "category": "mood",
+   "subject": "A simple brass padlock and a key on a plain dark wooden surface, soft side light",
+   "people": false,
+   "serves": [
+    "security",
+    "privacy and protection",
+    "lock and key"
+   ]
+  },
+  {
+   "id": "b038",
+   "title": "Compass and old map",
+   "category": "history",
+   "subject": "An old brass compass resting on a plain aged paper map without any readable text, soft light",
+   "people": false,
+   "serves": [
+    "navigation and direction",
+    "exploration",
+    "old map and compass"
+   ]
+  },
+  {
+   "id": "b039",
+   "title": "Hourglass on a desk",
+   "category": "mood",
+   "subject": "A simple glass hourglass with sand running on a clean wooden desk, soft light, blurred background",
+   "people": false,
+   "serves": [
+    "time passing",
+    "deadline",
+    "time management"
+   ]
+  },
+  {
+   "id": "b040",
+   "title": "Chess pieces on a board",
+   "category": "mood",
+   "subject": "Chess pieces on a wooden board in soft side light, shallow depth of field, a few pieces only",
+   "people": false,
+   "serves": [
+    "strategy",
+    "planning ahead",
+    "competition"
+   ]
+  },
+  {
+   "id": "b041",
+   "title": "Puzzle pieces fitting",
+   "category": "mood",
+   "subject": "Hands fitting two wooden puzzle pieces together on a plain table, soft light",
+   "people": true,
+   "serves": [
+    "solving a problem",
+    "pieces fit together",
+    "collaboration"
+   ]
+  },
+  {
+   "id": "b042",
+   "title": "Light bulb idea",
+   "category": "mood",
+   "subject": "A glowing warm light bulb on a plain muted background, soft focus, minimal",
+   "people": false,
+   "serves": [
+    "new idea",
+    "innovation",
+    "bright thinking"
+   ]
+  },
+  {
+   "id": "b043",
+   "title": "Seedling growing",
+   "category": "nature",
+   "subject": "A small green seedling sprouting from dark soil, soft side light, blurred background",
+   "people": false,
+   "serves": [
+    "growth",
+    "new start",
+    "plant a seed"
+   ]
+  },
+  {
+   "id": "b044",
+   "title": "Laptop on a tidy desk",
+   "category": "work",
+   "subject": "A closed-edge modern laptop on a tidy light wooden desk with a notebook, no readable screen text, soft window light",
+   "people": false,
+   "serves": [
+    "working on a laptop",
+    "remote work desk",
+    "office productivity"
+   ]
+  },
+  {
+   "id": "b045",
+   "title": "Hands typing on keyboard",
+   "category": "work",
+   "subject": "Close-up of hands typing on a laptop keyboard, screen not visible, soft warm light, shallow depth of field",
+   "people": true,
+   "serves": [
+    "typing",
+    "writing code or email",
+    "working at a computer"
+   ]
+  },
+  {
+   "id": "b046",
+   "title": "Team around a table",
+   "category": "work",
+   "subject": "A small team meeting seen from behind around a wooden table with notebooks, no faces, soft daylight",
+   "people": true,
+   "serves": [
+    "team meeting",
+    "collaboration at work",
+    "business discussion"
+   ]
+  },
+  {
+   "id": "b047",
+   "title": "Handshake",
+   "category": "work",
+   "subject": "Two hands shaking in a simple neutral setting, soft background, no faces visible",
+   "people": true,
+   "serves": [
+    "handshake deal",
+    "agreement",
+    "partnership"
+   ]
+  },
+  {
+   "id": "b048",
+   "title": "Whiteboard planning",
+   "category": "work",
+   "subject": "A blank whiteboard with plain coloured sticky notes, no writing on them, in a bright room, hands placing one note",
+   "people": true,
+   "serves": [
+    "brainstorming",
+    "planning session",
+    "project management"
+   ]
+  },
+  {
+   "id": "b049",
+   "title": "Notebook and coffee flat lay",
+   "category": "work",
+   "subject": "Top-down flat lay of a plain notebook, pen and coffee cup on a light desk, no writing",
+   "people": false,
+   "serves": [
+    "planning notes",
+    "morning routine",
+    "freelance workspace"
+   ]
+  },
+  {
+   "id": "b050",
+   "title": "Person at night with laptop",
+   "category": "work",
+   "subject": "A person seen from behind working late at a desk lit by a small lamp and a screen glow, silhouette only, no readable screen",
+   "people": true,
+   "serves": [
+    "working late",
+    "overwork",
+    "deadline pressure"
+   ]
+  },
+  {
+   "id": "b051",
+   "title": "Calculator and receipts",
+   "category": "money",
+   "subject": "A simple calculator and a few blank paper slips on a desk, no readable numbers, soft light",
+   "people": false,
+   "serves": [
+    "budgeting",
+    "accounting",
+    "business expenses"
+   ]
+  },
+  {
+   "id": "b052",
+   "title": "Server racks",
+   "category": "work",
+   "subject": "Rows of server racks in a data centre corridor with soft blue light, symmetrical, no readable labels",
+   "people": false,
+   "serves": [
+    "data center",
+    "cloud computing",
+    "servers and hosting"
+   ]
+  },
+  {
+   "id": "b053",
+   "title": "Glowing fibre optic strands",
+   "category": "work",
+   "subject": "Glowing fibre optic strands in blue and violet light, abstract, shallow depth of field",
+   "people": false,
+   "serves": [
+    "fibre internet",
+    "data transmission",
+    "technology background"
+   ]
+  },
+  {
+   "id": "b054",
+   "title": "Circuit board close-up",
+   "category": "work",
+   "subject": "Macro of a green circuit board with tiny components, shallow depth of field, no readable markings",
+   "people": false,
+   "serves": [
+    "electronics",
+    "computer hardware",
+    "microchips"
+   ]
+  },
+  {
+   "id": "b055",
+   "title": "Smartphone in hand",
+   "category": "work",
+   "subject": "A hand holding a smartphone with a dark blank screen against a softly blurred background",
+   "people": true,
+   "serves": [
+    "mobile phone",
+    "scrolling on a phone",
+    "apps and mobile technology"
+   ]
+  },
+  {
+   "id": "b056",
+   "title": "Network of light points",
+   "category": "work",
+   "subject": "Abstract network of softly glowing points connected by thin lines on a dark background, minimal, no text",
+   "people": false,
+   "serves": [
+    "network connections",
+    "artificial intelligence",
+    "data and connectivity"
+   ]
+  },
+  {
+   "id": "b057",
+   "title": "Robot hand and human hand",
+   "category": "work",
+   "subject": "A white robotic hand and a human hand reaching toward each other, plain soft background, no text",
+   "people": true,
+   "serves": [
+    "robotics",
+    "human and machine",
+    "automation"
+   ]
+  },
+  {
+   "id": "b058",
+   "title": "Solar panels in a field",
+   "category": "science",
+   "subject": "Rows of solar panels in an open green field under a soft sky",
+   "people": false,
+   "serves": [
+    "solar energy",
+    "renewable energy",
+    "clean power"
+   ]
+  },
+  {
+   "id": "b059",
+   "title": "Wind turbines on hills",
+   "category": "science",
+   "subject": "Wind turbines on gentle green hills in soft evening light, distant and calm",
+   "people": false,
+   "serves": [
+    "wind power",
+    "green energy",
+    "climate solutions"
+   ]
+  },
+  {
+   "id": "b060",
+   "title": "Earth from space",
+   "category": "science",
+   "subject": "The Earth seen from space as a soft blue sphere with thin atmosphere on a dark background, no text",
+   "people": false,
+   "serves": [
+    "planet earth",
+    "globe view",
+    "space and climate"
+   ]
+  },
+  {
+   "id": "b061",
+   "title": "Telescope under night sky",
+   "category": "science",
+   "subject": "A small telescope silhouetted on a hilltop under a starry sky",
+   "people": false,
+   "serves": [
+    "astronomy",
+    "stargazing",
+    "exploring the universe"
+   ]
+  },
+  {
+   "id": "b062",
+   "title": "Water droplet macro",
+   "category": "science",
+   "subject": "Macro of a single water droplet on a green leaf with soft light, shallow depth of field",
+   "people": false,
+   "serves": [
+    "water drop",
+    "macro nature",
+    "purity and freshness"
+   ]
+  },
+  {
+   "id": "b063",
+   "title": "Laboratory glassware",
+   "category": "science",
+   "subject": "Clean empty laboratory glassware flasks and tubes on a bench with soft blue light, no labels",
+   "people": false,
+   "serves": [
+    "science experiment",
+    "chemistry",
+    "research laboratory"
+   ]
+  },
+  {
+   "id": "b064",
+   "title": "Microscope on a bench",
+   "category": "science",
+   "subject": "A plain microscope on a clean laboratory bench, soft light, blurred background, no labels",
+   "people": false,
+   "serves": [
+    "scientific research",
+    "biology",
+    "investigation"
+   ]
+  },
+  {
+   "id": "b065",
+   "title": "Molecule abstract",
+   "category": "science",
+   "subject": "Abstract soft glossy spheres connected by rods forming a molecule model on a plain background, no text",
+   "people": false,
+   "serves": [
+    "molecules",
+    "chemistry",
+    "atoms and matter"
+   ]
+  },
+  {
+   "id": "b066",
+   "title": "Open book on a desk",
+   "category": "mood",
+   "subject": "An open book with blurred non-readable pages on a wooden desk, warm lamp light, shallow depth of field",
+   "people": false,
+   "serves": [
+    "reading",
+    "studying",
+    "learning at home"
+   ]
+  },
+  {
+   "id": "b067",
+   "title": "Stack of books",
+   "category": "mood",
+   "subject": "A stack of closed plain-covered books with no titles on a table, soft window light",
+   "people": false,
+   "serves": [
+    "education",
+    "knowledge",
+    "library and study"
+   ]
+  },
+  {
+   "id": "b068",
+   "title": "Empty classroom",
+   "category": "mood",
+   "subject": "An empty bright classroom with wooden desks and chairs, soft light, no writing on the board",
+   "people": false,
+   "serves": [
+    "school",
+    "classroom learning",
+    "education system"
+   ]
+  },
+  {
+   "id": "b069",
+   "title": "Graduation caps in the air",
+   "category": "people",
+   "subject": "Graduation caps thrown in the air against a soft blue sky, seen as dark silhouettes from below, no faces",
+   "people": true,
+   "serves": [
+    "graduation",
+    "achievement",
+    "finishing studies"
+   ]
+  },
+  {
+   "id": "b070",
+   "title": "Child hands drawing",
+   "category": "people",
+   "subject": "A child's hands drawing with coloured pencils on plain paper, no faces, soft light",
+   "people": true,
+   "serves": [
+    "children learning",
+    "creativity",
+    "drawing and art"
+   ]
+  },
+  {
+   "id": "b071",
+   "title": "Hiker on a trail",
+   "category": "people",
+   "subject": "A lone hiker seen small and from behind on a mountain trail, wide landscape, soft morning light",
+   "people": true,
+   "serves": [
+    "hiking",
+    "outdoor exercise",
+    "adventure and freedom"
+   ]
+  },
+  {
+   "id": "b072",
+   "title": "Runners in a park",
+   "category": "people",
+   "subject": "Runners seen as small distant silhouettes on a park path in soft morning light, no faces",
+   "people": true,
+   "serves": [
+    "running",
+    "fitness",
+    "healthy lifestyle"
+   ]
+  },
+  {
+   "id": "b073",
+   "title": "Yoga mat in morning light",
+   "category": "people",
+   "subject": "A rolled yoga mat on a wooden floor with soft morning window light, empty room",
+   "people": false,
+   "serves": [
+    "yoga",
+    "wellbeing",
+    "morning routine"
+   ]
+  },
+  {
+   "id": "b074",
+   "title": "Glass of water",
+   "category": "science",
+   "subject": "A clear glass of water on a plain table with soft window light, minimal",
+   "people": false,
+   "serves": [
+    "hydration",
+    "health habits",
+    "water and wellness"
+   ]
+  },
+  {
+   "id": "b075",
+   "title": "Stethoscope on a table",
+   "category": "science",
+   "subject": "A stethoscope resting on a plain light surface, soft light, blurred background, no labels",
+   "people": false,
+   "serves": [
+    "health care",
+    "doctor and medicine",
+    "medical check-up"
+   ]
+  },
+  {
+   "id": "b076",
+   "title": "Person meditating at sunrise",
+   "category": "people",
+   "subject": "A person sitting in meditation seen as a small silhouette against a soft sunrise, no face",
+   "people": true,
+   "serves": [
+    "meditation",
+    "calm and mindfulness",
+    "mental health"
+   ]
+  },
+  {
+   "id": "b077",
+   "title": "Hand holding a hand",
+   "category": "people",
+   "subject": "Two hands gently holding each other, soft warm light, plain blurred background, no faces",
+   "people": true,
+   "serves": [
+    "support and care",
+    "helping hand",
+    "empathy"
+   ]
+  },
+  {
+   "id": "b078",
+   "title": "Fresh vegetables on a table",
+   "category": "food",
+   "subject": "Fresh colourful vegetables arranged on a wooden table in soft window light, natural, muted",
+   "people": false,
+   "serves": [
+    "healthy eating",
+    "vegetables",
+    "nutrition"
+   ]
+  },
+  {
+   "id": "b079",
+   "title": "Coins stacked",
+   "category": "money",
+   "subject": "Stacks of plain generic coins on a dark wooden table, soft side light, shallow depth of field, no readable markings",
+   "people": false,
+   "serves": [
+    "saving money",
+    "coins and savings",
+    "personal finance"
+   ]
+  },
+  {
+   "id": "b080",
+   "title": "Piggy bank",
+   "category": "money",
+   "subject": "A plain ceramic piggy bank on a light table, soft light, blurred background",
+   "people": false,
+   "serves": [
+    "savings",
+    "family budget",
+    "putting money aside"
+   ]
+  },
+  {
+   "id": "b081",
+   "title": "Rising bars with blocks",
+   "category": "money",
+   "subject": "A staircase of wooden blocks rising from left to right on a plain table, soft light, no numbers",
+   "people": false,
+   "serves": [
+    "growth",
+    "investing",
+    "rising profits"
+   ]
+  },
+  {
+   "id": "b082",
+   "title": "Key and small model house",
+   "category": "money",
+   "subject": "A small plain wooden model house with a key on a desk, soft light, shallow depth of field",
+   "people": false,
+   "serves": [
+    "housing",
+    "buying a home",
+    "mortgage and property"
+   ]
+  },
+  {
+   "id": "b083",
+   "title": "Airplane wing in the sky",
+   "category": "travel",
+   "subject": "The wing of an airplane seen from a window in a soft sky at sunrise, no markings",
+   "people": false,
+   "serves": [
+    "flying",
+    "air travel",
+    "journey by plane"
+   ]
+  },
+  {
+   "id": "b084",
+   "title": "Winding mountain road",
+   "category": "travel",
+   "subject": "A winding mountain road seen from above with soft light and no vehicles",
+   "people": false,
+   "serves": [
+    "road trip",
+    "driving",
+    "journey through mountains"
+   ]
+  },
+  {
+   "id": "b085",
+   "title": "Train crossing a landscape",
+   "category": "travel",
+   "subject": "A train crossing a wide green landscape seen from a distance, soft light, no readable markings",
+   "people": false,
+   "serves": [
+    "train travel",
+    "public transport",
+    "rail journey"
+   ]
+  },
+  {
+   "id": "b086",
+   "title": "Camping tent under stars",
+   "category": "travel",
+   "subject": "A small tent glowing softly under a starry sky, silhouette landscape, calm",
+   "people": false,
+   "serves": [
+    "camping",
+    "outdoor adventure",
+    "night under the stars"
+   ]
+  },
+  {
+   "id": "b087",
+   "title": "Sailboat on a calm sea",
+   "category": "travel",
+   "subject": "A small plain sailboat far on a calm sea at soft golden hour, wide empty frame",
+   "people": false,
+   "serves": [
+    "sailing",
+    "holiday at sea",
+    "calm seaside"
+   ]
+  },
+  {
+   "id": "b088",
+   "title": "Old stone ruins with columns",
+   "category": "history",
+   "subject": "Ancient stone ruins with columns on a hillside at golden hour, no tourists",
+   "people": false,
+   "serves": [
+    "ancient ruins",
+    "classical architecture",
+    "history of civilisations"
+   ]
+  },
+  {
+   "id": "b089",
+   "title": "City lights at night",
+   "category": "city",
+   "subject": "A city skyline at night seen from far away across calm water with soft glowing lights, generic buildings",
+   "people": false,
+   "serves": [
+    "city at night",
+    "urban lights",
+    "big city life"
+   ]
+  },
+  {
+   "id": "b090",
+   "title": "Rooftops from above",
+   "category": "city",
+   "subject": "Rooftops of a generic old town seen from above in soft evening light",
+   "people": false,
+   "serves": [
+    "city rooftops",
+    "urban view",
+    "european town"
+   ]
+  },
+  {
+   "id": "b091",
+   "title": "Window view over a city",
+   "category": "city",
+   "subject": "View through a large window onto a soft blurred generic city at dusk, empty room in the foreground",
+   "people": false,
+   "serves": [
+    "city view",
+    "high-rise living",
+    "urban life"
+   ]
+  },
+  {
+   "id": "b092",
+   "title": "Street with blurred crowd",
+   "category": "city",
+   "subject": "A city street with motion-blurred crowd of silhouettes, no faces, soft light",
+   "people": true,
+   "serves": [
+    "busy city",
+    "commuters",
+    "rush hour"
+   ]
+  },
+  {
+   "id": "b093",
+   "title": "Bridge over a river",
+   "category": "city",
+   "subject": "A simple modern bridge over a wide calm river seen from above in soft light",
+   "people": false,
+   "serves": [
+    "bridge",
+    "infrastructure",
+    "connection"
+   ]
+  },
+  {
+   "id": "b094",
+   "title": "Fresh bread",
+   "category": "food",
+   "subject": "Fresh golden loaves of bread on a wooden counter in soft warm light, no packaging, no text",
+   "people": false,
+   "serves": [
+    "bakery",
+    "fresh bread",
+    "home baking"
+   ]
+  },
+  {
+   "id": "b095",
+   "title": "Plate of pasta",
+   "category": "food",
+   "subject": "A plain white plate of simple pasta with tomato sauce on a wooden table, soft window light",
+   "people": false,
+   "serves": [
+    "pasta dish",
+    "italian food",
+    "cooking dinner"
+   ]
+  },
+  {
+   "id": "b096",
+   "title": "Cup of coffee",
+   "category": "food",
+   "subject": "A plain white cup of coffee on a wooden table with soft steam and blurred background, no logos",
+   "people": false,
+   "serves": [
+    "coffee break",
+    "morning coffee",
+    "cafe"
+   ]
+  },
+  {
+   "id": "b097",
+   "title": "Honeycomb with honey",
+   "category": "food",
+   "subject": "Macro of golden honeycomb with honey dripping, soft light, shallow depth of field",
+   "people": false,
+   "serves": [
+    "honey",
+    "beekeeping",
+    "natural sweetness"
+   ]
+  },
+  {
+   "id": "b098",
+   "title": "Family meal table",
+   "category": "people",
+   "subject": "A warm shared meal on a wooden table seen from above, hands reaching for dishes, no faces",
+   "people": true,
+   "serves": [
+    "sharing a meal",
+    "family dinner",
+    "togetherness"
+   ]
+  },
+  {
+   "id": "b099",
+   "title": "Bird flying in open sky",
+   "category": "animals",
+   "subject": "A single bird in flight with wings spread against a soft pale sky, no ground",
+   "people": false,
+   "serves": [
+    "bird in flight",
+    "freedom",
+    "soaring"
+   ]
+  },
+  {
+   "id": "b100",
+   "title": "Bee on a flower",
+   "category": "animals",
+   "subject": "A bee on a soft pink flower in macro with blurred green background",
+   "people": false,
+   "serves": [
+    "bees and pollination",
+    "flower close-up",
+    "spring nature"
+   ]
+  }
+ ]
+}

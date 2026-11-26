@@ -1,0 +1,70 @@
+{
+ "plan_id": "opps-2026-11-26",
+ "approved_by": "",
+ "created": "2026-11-26T22:11:28.513793Z",
+ "estimated_total_usd": 0.2,
+ "items": [
+  {
+   "id": "o001",
+   "title": "Honeycomb Cells Filled With Honey",
+   "category": "animals",
+   "subject": "Close-up macro photograph of golden honeycomb with hexagonal wax cells, some filled with glistening honey, soft natural daylight with shallow depth of field and no people or text.",
+   "people": false,
+   "serves": [
+    "bees filling honeycomb cells",
+    "honeycomb cells with honey",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "honeycomb hexagonal cells close up"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "priority": 5.097,
+   "expected_savings_usd": 0.015,
+   "best_catalog_score": 0.315,
+   "needs_review": false,
+   "estimated_usd": 0.0675,
+   "payback_in_searches": 22
+  },
+  {
+   "id": "o002",
+   "title": "Medieval Castle on Hilltop",
+   "category": "history",
+   "subject": "A weathered medieval stone castle with crenellated towers crowning a hilltop over a dry, open plain at golden hour, with soft warm light and no visible people.",
+   "people": false,
+   "serves": [
+    "medieval castle castilla spain",
+    "medieval castle europe",
+    "parador castillo histórico españa"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "priority": 4.431,
+   "expected_savings_usd": 0.009,
+   "best_catalog_score": 0.22,
+   "needs_review": false,
+   "estimated_usd": 0.0675,
+   "payback_in_searches": 22
+  },
+  {
+   "id": "o003",
+   "title": "Cargo ships at sea",
+   "category": "travel",
+   "subject": "A large cargo vessel crossing open ocean under a pale morning sky, seen from a distance in soft daylight with calm blue water.",
+   "people": false,
+   "serves": [
+    "oil tanker at sea",
+    "container ship at sea"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "priority": 4.431,
+   "expected_savings_usd": 0.009,
+   "best_catalog_score": 0.232,
+   "needs_review": false,
+   "estimated_usd": 0.0675,
+   "payback_in_searches": 22
+  }
+ ],
+ "source": "catalog_opportunities.py: review, edit, then set approved_by"
+}

@@ -1,0 +1,359 @@
+{
+ "generated": "2026-11-26T22:11:28.513793Z",
+ "window_days": 90,
+ "thresholds": {
+  "serve": 0.35,
+  "near_miss_floor": 0.25,
+  "cluster_cosine": 0.62,
+  "min_distinct_videos": 3
+ },
+ "health": {
+  "searches": 442,
+  "rows": 442,
+  "distinct_videos": 72,
+  "serve_threshold": 0.35,
+  "scores": "recomputed against the current catalog",
+  "hit_rate_logged": 0.19,
+  "hit_rate": 0.19,
+  "near_miss_rate": 0.31,
+  "miss_rate": 0.81,
+  "last_n": 200,
+  "last_n_served": 47,
+  "last_n_served_rate": 0.235
+ },
+ "top_uncovered_clusters": [
+  {
+   "phrases": [
+    "eiffel tower paris daytime",
+    "eiffel tower paris",
+    "eiffel tower paris champ de mars",
+    "eiffel tower paris golden hour",
+    "eiffel tower paris sunset",
+    "eiffel tower champ de mars",
+    "eiffel tower seventh arrondissement view",
+    "eiffel tower skyline paris"
+   ],
+   "distinct_videos": 13,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.336,
+   "priority": 27.9,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "roman forum ruins columns",
+    "roman forum ruins",
+    "pantheon rome portico columns"
+   ],
+   "distinct_videos": 7,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.304,
+   "priority": 13.322,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "colosseum rome morning",
+    "colosseum exterior rome",
+    "colosseum rome exterior",
+    "colosseum rome exterior morning",
+    "roman colosseum rome"
+   ],
+   "distinct_videos": 7,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.239,
+   "priority": 12.916,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "louvre palace courtyard paris",
+    "louvre glass pyramid courtyard",
+    "louvre museum glass pyramid",
+    "louvre museum pyramid paris",
+    "louvre pyramid museum paris",
+    "louvre pyramid paris"
+   ],
+   "distinct_videos": 7,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.241,
+   "priority": 12.916,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "trevi fountain rome",
+    "tourists at trevi fountain",
+    "trevi fountain crowd"
+   ],
+   "distinct_videos": 6,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.221,
+   "priority": 11.071,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "colosseum interior arena",
+    "pantheon rome dome interior"
+   ],
+   "distinct_videos": 5,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.259,
+   "priority": 9.225,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "pantheon dome interior oculus",
+    "pantheon dome oculus interior",
+    "pantheon rome exterior portico",
+    "pantheon rome facade",
+    "pantheon rome portico"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.272,
+   "priority": 5.334,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "bees filling honeycomb cells",
+    "honeycomb cells with honey",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "honeycomb hexagonal cells close up"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.315,
+   "priority": 5.097,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "woolly mammoth museum reconstruction",
+    "mammoth skeleton museum",
+    "neanderthal reconstruction museum",
+    "woolly rhinoceros reconstruction"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.176,
+   "priority": 5.097,
+   "qualifies": true
+  },
+  {
+   "phrases": [
+    "arc de triomphe aerial view paris avenues",
+    "arc de triomphe paris",
+    "paris seine river aerial view",
+    "seine river paris aerial view"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "best_catalog_score": 0.237,
+   "priority": 4.806,
+   "qualifies": true
+  }
+ ],
+ "opportunities": [
+  {
+   "id": "o001",
+   "title": "Honeycomb Cells Filled With Honey",
+   "category": "animals",
+   "subject": "Close-up macro photograph of golden honeycomb with hexagonal wax cells, some filled with glistening honey, soft natural daylight with shallow depth of field and no people or text.",
+   "people": false,
+   "serves": [
+    "bees filling honeycomb cells",
+    "honeycomb cells with honey",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "honeycomb hexagonal cells close up"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "priority": 5.097,
+   "expected_savings_usd": 0.015,
+   "best_catalog_score": 0.315,
+   "needs_review": false,
+   "estimated_usd": 0.0675,
+   "payback_in_searches": 22,
+   "members": [
+    "bees filling honeycomb cells",
+    "honeycomb cells with honey",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "honeycomb hexagonal cells close up"
+   ]
+  },
+  {
+   "id": "o002",
+   "title": "Medieval Castle on Hilltop",
+   "category": "history",
+   "subject": "A weathered medieval stone castle with crenellated towers crowning a hilltop over a dry, open plain at golden hour, with soft warm light and no visible people.",
+   "people": false,
+   "serves": [
+    "medieval castle castilla spain",
+    "medieval castle europe",
+    "parador castillo histórico españa"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "priority": 4.431,
+   "expected_savings_usd": 0.009,
+   "best_catalog_score": 0.22,
+   "needs_review": false,
+   "estimated_usd": 0.0675,
+   "payback_in_searches": 22,
+   "members": [
+    "medieval castle castilla spain",
+    "medieval castle europe",
+    "parador castillo histórico españa"
+   ]
+  },
+  {
+   "id": "o003",
+   "title": "Cargo ships at sea",
+   "category": "travel",
+   "subject": "A large cargo vessel crossing open ocean under a pale morning sky, seen from a distance in soft daylight with calm blue water.",
+   "people": false,
+   "serves": [
+    "oil tanker at sea",
+    "container ship at sea"
+   ],
+   "distinct_videos": 3,
+   "miss_rate": 1.0,
+   "priority": 4.431,
+   "expected_savings_usd": 0.009,
+   "best_catalog_score": 0.232,
+   "needs_review": false,
+   "estimated_usd": 0.0675,
+   "payback_in_searches": 22,
+   "members": [
+    "oil tanker at sea",
+    "container ship at sea"
+   ]
+  }
+ ],
+ "refused_clusters": [
+  {
+   "phrases": [
+    "eiffel tower paris daytime",
+    "eiffel tower paris",
+    "eiffel tower paris champ de mars",
+    "eiffel tower paris golden hour",
+    "eiffel tower paris sunset"
+   ],
+   "distinct_videos": 13,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "roman forum ruins columns",
+    "roman forum ruins",
+    "pantheon rome portico columns"
+   ],
+   "distinct_videos": 7,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "colosseum rome morning",
+    "colosseum exterior rome",
+    "colosseum rome exterior",
+    "colosseum rome exterior morning",
+    "roman colosseum rome"
+   ],
+   "distinct_videos": 7,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "louvre palace courtyard paris",
+    "louvre glass pyramid courtyard",
+    "louvre museum glass pyramid",
+    "louvre museum pyramid paris",
+    "louvre pyramid museum paris"
+   ],
+   "distinct_videos": 7,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "trevi fountain rome",
+    "tourists at trevi fountain",
+    "trevi fountain crowd"
+   ],
+   "distinct_videos": 6,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "colosseum interior arena",
+    "pantheon rome dome interior"
+   ],
+   "distinct_videos": 5,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "pantheon dome interior oculus",
+    "pantheon dome oculus interior",
+    "pantheon rome exterior portico",
+    "pantheon rome facade",
+    "pantheon rome portico"
+   ],
+   "distinct_videos": 3,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "woolly mammoth museum reconstruction",
+    "mammoth skeleton museum",
+    "neanderthal reconstruction museum",
+    "woolly rhinoceros reconstruction"
+   ],
+   "distinct_videos": 3,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "arc de triomphe aerial view paris avenues",
+    "arc de triomphe paris",
+    "paris seine river aerial view",
+    "seine river paris aerial view"
+   ],
+   "distinct_videos": 3,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "brussels european union flags",
+    "european commission building brussels",
+    "european union flags outside building"
+   ],
+   "distinct_videos": 3,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "haussmann boulevard paris buildings",
+    "paris boulevard haussmann buildings",
+    "paris haussmann boulevard buildings"
+   ],
+   "distinct_videos": 3,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  },
+  {
+   "phrases": [
+    "paris metro art nouveau entrance",
+    "paris metro station platform"
+   ],
+   "distinct_videos": 3,
+   "why": "not generic (a specific landmark, species, person or brand), or unreadable"
+  }
+ ],
+ "notes": "Savings are the stock-review cost avoided (about USD 0.0030 per search, estimated) over this window; the main value of a catalog image is a consistent, checked picture and a faster beat, so payback is also given in searches."
+}

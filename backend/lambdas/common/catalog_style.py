@@ -1,22 +1,24 @@
 """The catalog's house style and composition rules (docs/IMAGE_CATALOG.md). One place, so every image of the library is made the same way and looks like one product."""
 from typing import Dict, List
 
-STYLE_VERSION = "house-v1"
+STYLE_VERSION = "house-v2"
 
 HOUSE_STYLE = (
     "Editorial documentary photograph, natural light, shot on a full-frame camera with a 35mm lens, gentle film-like colour grade with slightly muted, warm and "
     "natural colours, fine detail, shallow to medium depth of field, clean uncluttered composition, calm and optimistic mood."
 )
 COMPOSITION = (
-    "Wide 16:9 landscape frame. The main subject sits in the middle third of the frame with generous space on both sides, so a vertical 9:16 crop or a square crop of "
-    "the centre still shows the whole subject. The bottom quarter of the frame is calm, low-detail and slightly darker (sky, water, grass, floor, soft shadow) so white "
-    "captions stay readable on top of it. Nothing important touches the left or right edge."
+    "Wide 16:9 landscape frame with ONE clear main subject and nothing else competing with it: no extra subjects, stray objects, islands, rocks, boats, birds, animals or people "
+    "unless the brief names them. The main subject sits in the middle third of the frame with generous empty space on both sides, so a vertical 9:16 crop or a square crop of "
+    "the centre still shows the whole subject. The bottom quarter of the frame is calm and quiet: smooth, low-contrast, low-detail, slightly darker and softly out of focus "
+    "(still water, soft shadow, plain ground, smooth sand, blurred foreground, mist), with no bright spots, glare, white foam, bright leaves, sharp edges or busy texture, so white "
+    "captions stay readable on top of it. Nothing important touches the left or right edge. Natural, restrained colour: not saturated."
 )
 NO_PEOPLE = "Any people are small, seen from behind, in silhouette or as hands only: no face is visible and nobody is recognisable."
 NEGATIVE = (
     "text, letters, words, numbers, captions, logos, brand names, trademarks, watermark, signature, signs with writing, screen content with readable text, "
     "recognisable person, face close-up, celebrity, deformed hands, extra fingers, distorted anatomy, warped objects, duplicated objects, cartoon, 3d render, "
-    "oversaturated, HDR halo, blurry, low quality, jpeg artefacts, frame, border"
+    "extra subjects, stray objects, floating objects, cluttered foreground, busy bottom edge, white foam, glare, bright specular highlights, bright speckles, oversaturated, vivid neon colours, HDR halo, blurry, low quality, jpeg artefacts, frame, border"
 )
 
 CATEGORIES = ("nature", "sky", "work", "city", "food", "people", "animals", "science", "money", "history", "travel", "mood")

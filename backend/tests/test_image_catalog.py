@@ -20,6 +20,7 @@ from engine import catalog_pick  # noqa: E402
 import catalog_generate as gen  # noqa: E402
 import catalog_promote as promo  # noqa: E402
 import catalog_plan as plan_mod  # noqa: E402
+import catalog_opportunities as opp  # noqa: E402
 
 
 def jpeg(color=(120, 140, 160), size=(640, 360)) -> bytes:
@@ -250,7 +251,7 @@ class FakeBedrock:
 
 
 def plan(n=2):
-    return {"plan_id": "t1", "approved_by": "owner", "items": [{"id": f"i{k}", "title": f"Image {k}", "category": "nature", "subject": f"A calm lake number {k}", "layout": "mountains", "seed": k,
+    return {"plan_id": "t1", "approved_by": "owner", "items": [{"id": f"i{k}", "title": f"Image {k}", "category": "nature", "subject": f"A calm lake number {k}", 
                                                            "serves": ["a lake", "calm water", "mountain mirror"]} for k in range(n)]}
 
 
@@ -299,7 +300,7 @@ def test_a_run_stores_original_preview_thumbnail_metadata_and_vector_and_is_idem
     cid = it["id"]
     assert catalog.content_hash(st.get(catalog.key_original(cid))) == cid
     assert st.has(catalog.key_preview(cid)) and st.has(catalog.key_thumb(cid)) and st.get_vector(cid)
-    for f in ("prompt", "negative_prompt", "model", "created", "cost_usd", "seed", "licence", "provenance", "review_status", "tags", "serves", "promoted_from"):
+    for f in ("prompt", "negative_prompt", "model", "created", "cost_usd", "licence", "provenance", "review_status", "tags", "serves", "promoted_from"):
         assert f in it, f
     assert it["review_status"] == "approved" and "no text" not in it["prompt"] and "text" in it["negative_prompt"]
     again = gen.run(plan(2), st, gen.Spend(5, str(tmp_path / "s2.jsonl"), "r2"), profile="qa", regen=False, only=None, embed_image=vecfn([]), api=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
@@ -451,7 +452,7 @@ def test_the_plan_keeps_only_uncovered_clusters_asked_by_three_different_videos(
     def asker(system, user):
         if "eiffel" in user:
             return '{"generic": false}'
-        return json.dumps({"generic": True, "title": "Sunrise" if "sunrise" in user else "Laptop", "category": "nature", "subject": "A calm scene", "people": False, "layout": "mountains"})
+        return json.dumps({"generic": True, "title": "Sunrise" if "sunrise" in user else "Laptop", "category": "nature", "subject": "A calm scene", "people": False})
     cat = np.array([emb["laptop desk"]], dtype=np.float32)    # the catalog already answers the laptop cluster
     out = plan_mod.plan_from_rows(rows, embed_queries=lambda ps: np.array([emb[p] for p in ps], dtype=np.float32), catalog_vectors=cat, ask=asker, covered=0.5, cluster_thr=0.9)
     assert [i["title"] for i in out["items"]] == ["Sunrise"]
@@ -546,3 +547,93 @@ def test_a_calm_bottom_band_flattens_the_guide_under_the_subject(tmp_path):
     band = np.array(flat.crop((0, 620, 1344, 768)).convert("L"), dtype=float)
     assert band.std() < np.array(g.crop((0, 620, 1344, 768)).convert("L"), dtype=float).std() + 1e-6 and band.std() < 6
 
+
+
+# ----------------------------------------------------------------------------- the demand loop (catalog_opportunities.py)
+TOPIC = {"lake": 0, "lake dawn": 0, "misty lake": 0, "calm water mirror": 0, "laptop": 1, "typing": 1, "desk work": 1, "eiffel": 2, "eiffel tower": 2, "eiffel paris": 2, "solo": 3, "solo a": 3,
+         "bees": 4, "bee flower": 4, "honey bee": 4, "clouds": 5, "sky": 5, "sky blue": 5}
+
+
+def _emb(ps):
+    out = []
+    for p in ps:
+        v = np.zeros(64)
+        v[TOPIC[p]] = 1
+        v[20 + len(p) % 30] = 0.05
+        out.append(v / np.linalg.norm(v))
+    return np.array(out, dtype=np.float32)
+
+
+def _row(p, v, outcome="none", score=0.1, n=1, seen=0):
+    return {"phrase": p, "video": v, "searches": n, "outcome": outcome, "score": score, "last_seen": seen}
+
+
+def _asker(system, user):
+    if "eiffel" in user:
+        return '{"generic": false}'
+    return json.dumps({"generic": True, "title": "A lake", "category": "nature", "subject": "A calm lake at dawn", "people": False})
+
+
+def test_three_different_videos_with_different_wordings_make_one_opportunity_with_a_runnable_plan():
+    rows = [_row("lake dawn", "v1"), _row("misty lake", "v2"), _row("calm water mirror", "v3", n=2), _row("laptop", "v1", "catalog", 0.5), _row("typing", "v2", "catalog", 0.5), _row("desk work", "v3", "catalog", 0.5)]
+    out = opp.analyse(rows, embed_queries=_emb, ask=_asker, cluster_thr=0.9)
+    ops = out["report"]["opportunities"]
+    assert len(ops) == 1 and ops[0]["distinct_videos"] == 3 and ops[0]["miss_rate"] == 1.0 and set(ops[0]["members"]) == {"lake dawn", "misty lake", "calm water mirror"}
+    assert ops[0]["expected_savings_usd"] == round(4 * opp.STOCK_COST_PER_SEARCH_USD, 4) and ops[0]["priority"] > 0
+    plan = out["plan"]
+    assert plan["approved_by"] == "" and gen.validate_plan(plan) and "approved_by" in " ".join(gen.validate_plan(plan))
+    plan["approved_by"] = "owner"
+    assert gen.validate_plan(plan) == []                      # the generator takes the plan as it is
+    assert "layout" not in plan["items"][0] and "seed" not in plan["items"][0]
+    h = out["report"]["health"]
+    assert h["searches"] == 7 and abs(h["hit_rate"] - 3 / 7) < 1e-3 and h["hit_rate_logged"] == h["hit_rate"]
+
+
+def test_one_video_asking_many_times_counts_once_and_two_videos_are_not_enough():
+    rows = [_row("solo", "v1", n=47), _row("solo a", "v1", n=5), _row("bees", "v1"), _row("bee flower", "v2"), _row("honey bee", "v2")]
+    out = opp.analyse(rows, embed_queries=_emb, ask=_asker, cluster_thr=0.9)
+    assert out["report"]["opportunities"] == [] and out["plan"]["items"] == []
+    top = {tuple(c["phrases"]): c["distinct_videos"] for c in [dict(phrases=c["phrases"], distinct_videos=c["distinct_videos"]) for c in out["report"]["top_uncovered_clusters"]]}
+    assert top[("solo", "solo a")] == 1 and top[("bee flower", "bees", "honey bee")] == 2
+
+
+def test_served_clusters_are_not_opportunities_but_a_cluster_the_verifier_keeps_rejecting_is():
+    served = [_row("clouds", "a", "catalog", 0.5), _row("sky", "b", "catalog", 0.5), _row("sky blue", "c", "catalog", 0.5)]
+    rejected = [_row("lake dawn", "a", "rejected", 0.5), _row("misty lake", "b", "rejected", 0.5), _row("calm water mirror", "c", "rejected", 0.5)]
+    out = opp.analyse(served + rejected, embed_queries=_emb, ask=_asker, cluster_thr=0.9)
+    ops = out["report"]["opportunities"]
+    assert len(ops) == 1 and "lake dawn" in ops[0]["members"]
+    h = out["report"]["health"]
+    assert h["hit_rate"] == 0.5 and h["near_miss_rate"] == 0.5
+
+
+def test_a_cluster_whose_best_match_reaches_the_threshold_is_not_an_opportunity():
+    rows = [_row("lake dawn", "a", "none", 0.34), _row("misty lake", "b", "none", 0.40), _row("calm water mirror", "c", "none", 0.2)]
+    out = opp.analyse(rows, embed_queries=_emb, ask=_asker, cluster_thr=0.9)
+    assert out["report"]["opportunities"] == []              # best logged score 0.40 >= 0.35: an image exists, the director just did not use it (a verifier or threshold matter, not a gap)
+
+
+def test_recomputing_against_the_current_catalog_credits_images_added_since_and_reports_the_last_n():
+    rows = [_row("lake dawn", "a", seen=1), _row("misty lake", "b", seen=2), _row("calm water mirror", "c", seen=3), _row("laptop", "d", seen=4), _row("typing", "e", seen=5)]
+    lake_image = _emb(["lake"])
+    out = opp.analyse(rows, embed_queries=_emb, catalog_vectors=lake_image, ask=_asker, cluster_thr=0.9, last_n=3)
+    h = out["report"]["health"]
+    assert h["hit_rate_logged"] == 0.0 and abs(h["hit_rate"] - 0.6) < 1e-9 and h["scores"].startswith("recomputed")
+    assert h["last_n"] == 3 and h["last_n_served"] == 1       # the newest three: typing and laptop (missed), calm water mirror (served)
+    assert out["report"]["opportunities"] == []              # the lake cluster is now served
+    empty = opp.analyse(rows, embed_queries=_emb, catalog_vectors=np.zeros((0, 1024), np.float32), ask=_asker, cluster_thr=0.9)
+    assert empty["report"]["health"]["hit_rate"] == 0.0 and len(empty["report"]["opportunities"]) == 1      # laptop was asked by only two videos
+
+
+def test_specific_landmarks_are_refused_by_the_subject_step_and_no_model_marks_items_for_review():
+    rows = [_row("eiffel", "a"), _row("eiffel tower", "b"), _row("eiffel paris", "c")]
+    out = opp.analyse(rows, embed_queries=_emb, ask=_asker, cluster_thr=0.9)
+    assert out["plan"]["items"] == [] and out["report"]["refused_clusters"]
+    out = opp.analyse(rows, embed_queries=_emb, ask=None, cluster_thr=0.9)
+    assert len(out["plan"]["items"]) == 1 and out["plan"]["items"][0]["needs_review"] is True
+
+
+def test_the_plan_estimate_uses_the_measured_openai_price_not_the_old_bedrock_one():
+    import catalog_plan
+    assert abs(catalog_plan.GENERATION_USD - 0.044) < 1e-9 and 0.05 < catalog_plan.PER_IMAGE_USD < 0.09
+    assert "layout" not in catalog_plan.SUBJECT_SYSTEM
