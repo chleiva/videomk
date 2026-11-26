@@ -162,13 +162,33 @@ def cmd_up(s, itype: str, minutes: int):
     ami = s.client("ssm").get_parameter(Name=AMI_PARAM)["Parameter"]["Value"]
     deadline = dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=minutes)
     tags = [TAG, {"Key": "Name", "Value": "videomk-gpu-lab"}, {"Key": "deadline", "Value": deadline.isoformat(timespec="seconds")}]
-    r = ec2.run_instances(
-        ImageId=ami, InstanceType=itype, MinCount=1, MaxCount=1, SecurityGroupIds=[sg], IamInstanceProfile={"Name": PROFILE_NAME},
+    vpc = ec2.describe_vpcs(Filters=[{"Name": "isDefault", "Values": ["true"]}])["Vpcs"][0]["VpcId"]
+    subnets = [x["SubnetId"] for x in sorted(ec2.describe_subnets(Filters=[{"Name": "vpc-id", "Values": [vpc]}, {"Name": "default-for-az", "Values": ["true"]}])["Subnets"], key=lambda x: x["AvailabilityZone"])]
+    r = None
+    for sn in subnets:   # a zone without free GPU capacity is skipped; other errors stop at once
+        try:
+            r = _run(ec2, ami, itype, sg, sn, minutes, tags)
+            break
+        except ec2.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] not in ("InsufficientInstanceCapacity", "Unsupported"):   # no free capacity, or the type does not exist in that zone
+                raise
+            print("not available in", sn, "- trying the next zone")
+    if r is None:
+        sys.exit(f"no {itype} capacity in any zone right now; nothing was started")
+    iid = r["Instances"][0]["InstanceId"]
+    _backstop(s, ec2, iid, deadline)
+
+
+def _run(ec2, ami, itype, sg, subnet, minutes, tags):
+    return ec2.run_instances(
+        ImageId=ami, InstanceType=itype, MinCount=1, MaxCount=1, SecurityGroupIds=[sg], SubnetId=subnet, IamInstanceProfile={"Name": PROFILE_NAME},
         InstanceInitiatedShutdownBehavior="terminate", UserData=user_data(minutes),
         MetadataOptions={"HttpTokens": "required", "HttpEndpoint": "enabled"},
         BlockDeviceMappings=[{"DeviceName": "/dev/sda1", "Ebs": {"VolumeSize": DISK_GB, "VolumeType": "gp3", "DeleteOnTermination": True, "Encrypted": True}}],
         TagSpecifications=[{"ResourceType": "instance", "Tags": tags}, {"ResourceType": "volume", "Tags": [TAG]}])
-    iid = r["Instances"][0]["InstanceId"]
+
+
+def _backstop(s, ec2, iid, deadline):
     try:   # the outside backstop: created immediately; if it cannot be created, the instance does not get to live
         fire = deadline + dt.timedelta(minutes=BACKSTOP_GRACE_MIN)
         role_arn = f"arn:aws:iam::{ACCOUNT}:role/{SCHED_ROLE}"
