@@ -71,18 +71,18 @@ export default function QuestionsStepper() {
   }
 
   if (loading) {
-    return <div className="text-neutral-500">{t("questions.loading")}</div>;
+    return <div className="text-fg2">{t("questions.loading")}</div>;
   }
 
   if (!current) {
-    return <div className="text-neutral-500">{t("questions.none")}</div>;
+    return <div className="text-fg2">{t("questions.none")}</div>;
   }
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <div className="mb-3 text-right text-sm text-neutral-500">{progress}</div>
-      <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-medium text-neutral-900">{current.question_text}</h2>
+      <div className="mb-3 text-right text-sm text-fg2">{progress}</div>
+      <div className="card p-6 ">
+        <h2 className="text-lg font-medium text-fg">{current.question_text}</h2>
         <div className="mt-5 grid grid-cols-1 gap-3">
           {current.options.map((opt) => {
             const selected = answers[current.id] === opt.id;
@@ -91,10 +91,10 @@ export default function QuestionsStepper() {
                 key={opt.id}
                 type="button"
                 onClick={() => choose(opt.id)}
-                className={`rounded-2xl border px-4 py-4 text-left transition shadow-sm focus-visible:outline-none ${
+                className={`chip w-full !rounded-2xl !py-4 ${
                   selected
-                    ? "border-black bg-black text-white"
-                    : "border-neutral-200 bg-white hover:border-neutral-300"
+                    ? "is-on"
+                    : "hover:bg-surface2"
                 }`}
               >
                 <span className="text-base">{opt.label}</span>
@@ -107,7 +107,7 @@ export default function QuestionsStepper() {
             type="button"
             onClick={next}
             disabled={!canNext() || submitting}
-            className="inline-flex items-center justify-center rounded-2xl bg-black px-6 py-3 text-sm font-semibold text-white shadow transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn btn-primary"
           >
             {currentIndex < questions.length - 1 ? t("questions.next") : submitting ? t("questions.submitting") : t("questions.finish")}
           </button>

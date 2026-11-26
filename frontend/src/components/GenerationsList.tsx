@@ -3,22 +3,12 @@ import { apiGateway } from "../lib/config";
 import { getAuthorizationHeader, handleAuthCodeIfPresent } from "../lib/auth";
 import { currentLocaleHeaders } from "../lib/i18n";
 import { useLocale } from "../lib/useLocale";
+import { formatDuration, groupByDay, isMaking, normalizeItem } from "../lib/videos";
+import type { TaskItem } from "../lib/videos";
+import { EmptyState, MakingCard, Thumb } from "./ui";
 
-interface TaskItem {
-  id: string;
-  title?: string;
-  status: "queued" | "running" | "complete" | "error" | "rejected";
-  editable?: boolean;
-  reject_reason?: string | null;
-  eta_seconds?: number | null;
-  created_at?: string | null;
-  download_url?: string | null;
-  preview_gif_url?: string | null;
-  duration_s?: number | null;
-  video_url?: string | null;
-}
 
-export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { refreshNonce?: number; view?: "grid" | "list" }) {
+export default function GenerationsList({ refreshNonce = 0, view = "grid", onCreate }: { refreshNonce?: number; view?: "grid" | "list"; onCreate?: () => void }) {
   const { t: tr } = useLocale();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,44 +66,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
       const data = (await res.json()) as { items?: any[] };
       const raw = Array.isArray(data.items) ? data.items : [];
 
-      function s3ToHttps(uri: string | null | undefined): string | null {
-        if (!uri || typeof uri !== "string") return null;
-        const m = uri.match(/^s3:\/\/([^/]+)\/(.+)$/);
-        if (!m) return uri;
-        const [, bucket, key] = m;
-        if (bucket === "videomk.com") return `https://videomk.com/${key}`;
-        return `https://${bucket}.s3.amazonaws.com/${key}`;
-      }
-
-      const normalized: TaskItem[] = raw
-        .map((it) => {
-          const id: string | undefined = it?.video_id || it?.id;
-          if (!id) return null;
-          const statusStr: string = (it?.status || "").toString().toUpperCase();
-          const statusMap: Record<string, TaskItem["status"]> = {
-            STARTED_PROCESSING: "running",
-            PLOT_CREATION: "running",
-            ASSETS_CREATION: "running",
-            STORYBOARD_CREATION: "running",
-            RENDERING: "running",
-            COMPLETE: "complete",
-            ERROR: "error",
-            FAILED: "error",
-            REJECTED: "rejected",
-          };
-          const status = statusMap[statusStr] || "queued";
-          const download_url: string | null = s3ToHttps(it?.video_uri) || it?.download_url || null;
-          const preview_gif_url: string | null = (it?.preview_gif_url as string | null) || s3ToHttps(it?.preview_gif_uri) || null;
-          const title: string | undefined = it?.title;
-          const reject_reason: string | null = typeof it?.reject_reason === "string" ? it.reject_reason : null;
-          const created_at: string | null = typeof it?.created_at === "string" ? it.created_at : null;
-          const eta_seconds = typeof it?.eta_seconds === "number" ? it.eta_seconds : null;
-          const duration_s: number | null = typeof it?.duration_s === "number" ? it.duration_s : null;
-          const video_url: string | null = typeof it?.video_url === "string" ? it.video_url : null;
-          const editable = it?.editable === true;
-          return { id, status, title, editable, reject_reason, download_url, eta_seconds, preview_gif_url, created_at, duration_s, video_url } as TaskItem;
-        })
-        .filter(Boolean) as TaskItem[];
+      const normalized: TaskItem[] = raw.map(normalizeItem).filter(Boolean) as TaskItem[];
 
       // The list endpoint returns every video for the user, so this is the source of truth for polling.
       hasActiveRef.current = normalized.some((t) => t.status === "running" || t.status === "queued");
@@ -177,21 +130,20 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
   }, [refreshNonce]);
 
   if (loading) {
-    return <div className="text-neutral-500">{tr("gen.loading")}</div>;
+    return (
+      <div className="vgrid" role="status" aria-label={tr("gen.loading")}>
+        {[0, 1, 2].map((i) => <div key={i} className="card animate-pulse p-3"><div className="thumb" /><div className="mt-3 h-4 w-3/4 rounded-full bg-surface3" /><div className="mt-2 h-3 w-1/3 rounded-full bg-surface3" /></div>)}
+      </div>
+    );
   }
 
   if (!hasTasks) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-300 bg-white/60 p-12 text-center shadow-sm">
-        <div className="mb-3 h-10 w-10 rounded-full border border-neutral-300" />
-        <p className="text-neutral-600">{tr("gen.empty")}</p>
-        <button
-          onClick={handleManualRefresh}
-          className="mt-4 inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-900 shadow-sm hover:border-neutral-300"
-        >
-          {tr("gen.refresh")}
-        </button>
-      </div>
+      <EmptyState
+        title={tr("gen.empty_title")}
+        body={tr("gen.empty_body")}
+        action={onCreate && <button type="button" onClick={onCreate} className="btn btn-primary mt-2">{tr("gen.empty_cta")}</button>}
+      />
     );
   }
 
@@ -199,9 +151,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
     if (!iso) return null;
     const then = new Date(iso).getTime();
     if (Number.isNaN(then)) return null;
-    const now = Date.now();
-    const diffMs = Math.max(0, now - then);
-    const sec = Math.floor(diffMs / 1000);
+    const sec = Math.floor(Math.max(0, Date.now() - then) / 1000);
     if (sec < 45) return tr("time.just_now");
     const min = Math.floor(sec / 60);
     if (min < 60) return tr("time.minutes", { n: min });
@@ -214,137 +164,65 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
     return tr("time.years", { n: Math.floor(mon / 12) });
   }
 
-  function formatDuration(s?: number | null): string | null {
-    if (!s || s <= 0) return null;
-    const minutes = Math.floor(s / 60);
-    const seconds = Math.floor(s % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  }
+  const making = tasks.filter(isMaking);
+  const rest = tasks.filter((t) => !isMaking(t));
+  const groups = groupByDay(rest);
+  const card = (t: TaskItem) => <VideoCard key={t.id} t={t} view={view} ago={timeAgo(t.created_at)} />;
 
   return (
     <div>
-      {/* Removed manual refresh button to reduce UI clutter */}
+      {making.length > 0 && (
+        <section aria-label={tr("gen.group_making")}>
+          <div className="vgrid">
+            {making.map((t) => <MakingCard key={t.id} title={t.title} stage={t.stage} etaSeconds={t.eta_seconds} />)}
+          </div>
+        </section>
+      )}
+      {groups.map((g) => (
+        <section key={g.group} aria-labelledby={`day-${g.group}`}>
+          <h2 id={`day-${g.group}`} className="eyebrow day-head">{tr(`gen.group_${g.group}`)}</h2>
+          {view === "grid" ? <div className="vgrid">{g.items.map(card)}</div> : <div role="list" className="space-y-3">{g.items.map(card)}</div>}
+        </section>
+      ))}
+    </div>
+  );
+}
 
-      {view === "grid" ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {tasks.map((t) => {
-            const durationLabel = formatDuration(t.duration_s);
-            return (
-              <article key={t.id} className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm">
-                <a
-                  href={`/watch/index.html?id=${encodeURIComponent(t.id)}`}
-                  onClick={() => {
-                    const playUrl = t.video_url || t.download_url;
-                    if (playUrl && playUrl.startsWith("http")) {
-                      try { sessionStorage.setItem(`vmk_play_url_${t.id}`, playUrl); } catch {}
-                    }
-                  }}
-                  aria-label={durationLabel ? tr("gen.watch_duration", { title: t.title || tr("gen.untitled"), duration: durationLabel }) : tr("gen.watch", { title: t.title || tr("gen.untitled") })}
-                  className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 rounded-2xl"
-                >
-                  <div className="ratio-16x9 relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
-                    <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 to-neutral-200" />
-                    {t.preview_gif_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={t.preview_gif_url}
-                        alt={tr("gen.preview_alt")}
-                        className="ratio-media h-full w-full object-cover opacity-100 transition-opacity duration-200 ease-out"
-                        loading="lazy"
-                        onError={(e) => {
-                          const el = e.currentTarget as HTMLImageElement;
-                          el.style.display = "none";
-                        }}
-                      />
-                    )}
-                    {durationLabel && (
-                      <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white">
-                        {durationLabel}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-3 flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-base font-medium text-neutral-900 line-clamp-2">{t.title || tr("gen.untitled")}</h3>
-                      <p className="mt-0.5 text-xs text-neutral-500">{timeAgo(t.created_at)}</p>
-                      {t.status === "rejected" && t.reject_reason && (
-                        <p className="mt-1 text-xs text-neutral-600 line-clamp-2">{t.reject_reason}</p>
-                      )}
-                    </div>
-                    <StatusBadge status={t.status} />
-                  </div>
-                </a>
-                <EditLink t={t} />
-              </article>
-            );
-          })}
+function VideoCard({ t, view, ago }: { t: TaskItem; view: "grid" | "list"; ago: string | null }) {
+  const { t: tr } = useLocale();
+  const title = t.title || tr("gen.untitled");
+  const durationLabel = formatDuration(t.duration_s);
+  const failed = t.status === "error" || t.status === "rejected";
+  const href = `/watch/index.html?id=${encodeURIComponent(t.id)}`;
+  const remember = () => {
+    const playUrl = t.video_url || t.download_url;
+    if (playUrl && playUrl.startsWith("http")) { try { sessionStorage.setItem(`vmk_play_url_${t.id}`, playUrl); } catch {} }
+  };
+  const row = view === "list";
+  const body = (
+    <>
+      {!failed && <Thumb id={t.id} src={t.preview_gif_url} duration={durationLabel} />}
+      <div className={row ? "min-w-0 flex-1" : failed ? "" : "mt-3"}>
+        <h3 className="vcard-title">{title}</h3>
+        <p className="vcard-meta mt-1">{[ago, durationLabel].filter(Boolean).join(" · ")}</p>
+        {failed && <p className="mt-2 text-[length:var(--fs-subhead)]">{t.status === "rejected" ? (t.reject_reason || tr("gen.rejected_default")) : tr("gen.error_detail")}</p>}
+      </div>
+    </>
+  );
+  return (
+    <article role={row ? "listitem" : undefined} className={`vcard ${failed ? "failed-card" : ""}`}>
+      {failed ? (
+        <div className={row ? "vrow" : ""}>
+          {body}
+          <div className="mt-3"><StatusBadge status={t.status} /></div>
         </div>
       ) : (
-        <div role="list" className="space-y-4">
-          {tasks.map((t) => {
-            const durationLabel = formatDuration(t.duration_s);
-            return (
-              <article key={t.id} role="listitem" className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm">
-                <a
-                  href={`/watch/index.html?id=${encodeURIComponent(t.id)}`}
-                  onClick={() => {
-                    const playUrl = t.video_url || t.download_url;
-                    if (playUrl && playUrl.startsWith("http")) {
-                      try { sessionStorage.setItem(`vmk_play_url_${t.id}`, playUrl); } catch {}
-                    }
-                  }}
-                  aria-label={durationLabel ? tr("gen.watch_duration", { title: t.title || tr("gen.untitled"), duration: durationLabel }) : tr("gen.watch", { title: t.title || tr("gen.untitled") })}
-                  className="group flex gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 rounded-2xl"
-                >
-                  <div className="ratio-16x9 relative w-48 shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
-                    <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 to-neutral-200" />
-                    {t.preview_gif_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={t.preview_gif_url}
-                        alt={tr("gen.preview_alt")}
-                        className="ratio-media h-full w-full object-cover opacity-100 transition-opacity duration-200 ease-out"
-                        loading="lazy"
-                        onError={(e) => {
-                          const el = e.currentTarget as HTMLImageElement;
-                          el.style.display = "none";
-                        }}
-                      />
-                    )}
-                    {durationLabel && (
-                      <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white">
-                        {durationLabel}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className="truncate text-base font-medium text-neutral-900">{t.title || tr("gen.untitled")}</h3>
-                        <p className="mt-0.5 text-xs text-neutral-500">{timeAgo(t.created_at)}</p>
-                      </div>
-                      <StatusBadge status={t.status} />
-                    </div>
-                    <div className="mt-2 text-sm text-neutral-700">
-                      {t.status === "running" && (
-                        <span>
-                          {typeof t.eta_seconds === "number" ? tr("gen.processing_eta", { seconds: Math.max(0, t.eta_seconds) }) : tr("gen.processing")}
-                        </span>
-                      )}
-                      {t.status === "queued" && <span>{tr("gen.queued")}</span>}
-                      {t.status === "complete" && <span>{tr("gen.complete")}</span>}
-                      {t.status === "error" && <span>{tr("gen.error_detail")}</span>}
-                      {t.status === "rejected" && <span>{t.reject_reason || tr("gen.rejected_default")}</span>}
-                    </div>
-                  </div>
-                </a>
-                <EditLink t={t} />
-              </article>
-            );
-          })}
-        </div>
+        <a href={href} onClick={remember} aria-label={durationLabel ? tr("gen.watch_duration", { title, duration: durationLabel }) : tr("gen.watch", { title })} className={`vlink block text-inherit no-underline ${row ? "vrow" : ""}`} style={{ color: "inherit" }}>
+          {body}
+        </a>
       )}
-    </div>
+      <EditLink t={t} />
+    </article>
   );
 }
 
@@ -352,26 +230,14 @@ function EditLink({ t }: { t: TaskItem }) {
   const { t: tr } = useLocale();
   if (t.status !== "complete" || !t.editable) return null;
   return (
-    <div className="mt-3 border-t border-neutral-100 pt-3">
-      <a
-        href={`/edit/index.html?id=${encodeURIComponent(t.id)}`}
-        className="inline-flex items-center rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
-      >
-        {tr("gen.edit")}
-      </a>
+    <div className="mt-3">
+      <a href={`/edit/index.html?id=${encodeURIComponent(t.id)}`} className="btn btn-tonal btn-sm">{tr("gen.edit")}</a>
     </div>
   );
 }
 
-function StatusBadge({ status }: { status: TaskItem["status"] }) {
+export function StatusBadge({ status }: { status: TaskItem["status"] }) {
   const { t: tr } = useLocale();
-  const styles = {
-    queued: "bg-neutral-100 text-neutral-700",
-    running: "bg-amber-100 text-amber-800",
-    complete: "bg-emerald-100 text-emerald-800",
-    error: "bg-rose-100 text-rose-800",
-    rejected: "bg-neutral-200 text-neutral-700",
-  }[status];
-  const label = tr(`status.${status}`);
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles}`}>{label}</span>;
+  const cls = { queued: "badge-neutral", running: "badge-primary", complete: "badge-ok", error: "badge-bad", rejected: "badge-warn" }[status];
+  return <span className={`badge ${cls}`}>{tr(`status.${status}`)}</span>;
 }

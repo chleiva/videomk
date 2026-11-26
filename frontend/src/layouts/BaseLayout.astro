@@ -5,7 +5,7 @@ import { pathForLocale, translate } from "../lib/i18n";
 import type { Locale } from "../lib/i18n";
 // `locale`: set by pages written in one language (the landing page and the public pages, at / and /es/); the app screens leave it out
 // and follow the saved choice or the browser (src/lib/i18nDom.ts). `alternates`: this page exists in both languages (hreflang + canonical).
-const { title, description, locale, alternates = false, titleKey, descriptionKey } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean; titleKey?: string; descriptionKey?: string };
+const { title, description, locale, alternates = false, titleKey, descriptionKey, app = false, active = "" } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean; titleKey?: string; descriptionKey?: string; app?: boolean; active?: string };
 const L: Locale = locale ?? "en";
 const tr = (k: string) => translate(k, L);
 const pageTitle = title ?? "videomk";
@@ -13,9 +13,10 @@ const pageDescription = description ?? tr("meta.description");
 const here = (Astro.url.pathname || "/").replace(/index\.html$/, "");
 const withSlash = (p: string) => (p.endsWith("/") ? p : p + "/");
 const abs = (l: Locale) => `https://${SITE}${withSlash(pathForLocale(here, l))}`;
+const navItems = [["/generations/index.html", "nav.videos", "videos"], ["/wallet/index.html", "nav.credits", "credits"]] as const;
 const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/support", "footer.support"], ["/delete-account", "footer.delete"]] as const;
 ---
-<html lang={L} class="h-full" data-i18n-title={titleKey}>
+<html lang={L} data-i18n-title={titleKey}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -27,39 +28,64 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 		{alternates && <link rel="alternate" hreflang="en" href={abs("en")} />}
 		{alternates && <link rel="alternate" hreflang="es" href={abs("es")} />}
 		{alternates && <link rel="alternate" hreflang="x-default" href={abs("en")} />}
+		<meta name="color-scheme" content="light dark" />
+		<script is:inline>try{var th=localStorage.getItem("vmk_theme");if(th==="light"||th==="dark")document.documentElement.setAttribute("data-theme",th)}catch(e){}</script>
 		<script define:vars={{ staticLocale: locale ?? "" }}>window.__vmkStaticLocale = staticLocale;</script>
 		<script>
 			// Real bundled module (the old inline template-string script never executed as code).
 			import { bootstrapAuthForPage } from "../lib/auth";
 			import { initLocale } from "../lib/i18nDom";
+			import { initThemeSwitch } from "../lib/themeDom";
 			const w = window as unknown as { __vmkStaticLocale?: "en" | "es" | "" };
 			initLocale(w.__vmkStaticLocale || undefined);
+			initThemeSwitch();
 			const p = location.pathname;
 			if (p !== "/" && !p.startsWith("/es/") && p !== "/es" && !p.startsWith("/auth/callback") && !p.startsWith("/signin") && !["/privacy", "/terms", "/support", "/delete-account"].some((x) => p.startsWith(x))) {
 				bootstrapAuthForPage().catch((e) => console.error("Auth bootstrap failed", e));
 			}
 		</script>
 	</head>
-	<body class="min-h-screen bg-neutral-50 text-neutral-900 antialiased selection:bg-black selection:text-white">
-		<a href="#content" data-i18n="common.skip" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded-md focus:shadow">{tr("common.skip")}</a>
-		<main id="content" class="min-h-screen">
+	<body>
+		<a href="#content" data-i18n="common.skip" class="skip-link">{tr("common.skip")}</a>
+		<header class="site-header">
+			<div class="site-header-in">
+				<a href={app ? "/generations/index.html" : pathForLocale("/", L)} class="brand" aria-label="videomk">
+					<span class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 5 13.5h5.5L9.5 22 19 9.5h-5.7z"/></svg></span>
+					<span>videomk</span>
+				</a>
+				{app && (
+					<nav class="nav" aria-label="videomk">
+						{navItems.map(([href, key, id]) => <a href={href} data-i18n={key} aria-current={active === id ? "page" : undefined}>{tr(key)}</a>)}
+					</nav>
+				)}
+			</div>
+		</header>
+		<main id="content" class="min-h-[70vh]">
 			<slot />
 		</main>
-		<footer class="px-6 py-10 text-center text-sm text-neutral-500">
-			<nav class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1" aria-label="videomk">
+		<footer class="site-footer">
+			<nav class="footer-row" aria-label="videomk">
 				{footer.map(([path, key], i) => (
 					<>
-						{i > 0 && <span aria-hidden="true"> · </span>}
-						<a href={pathForLocale(path, L)} data-path={path} data-i18n={key} class="underline underline-offset-4 hover:text-neutral-800">{tr(key)}</a>
+						{i > 0 && <span aria-hidden="true">·</span>}
+						<a href={pathForLocale(path, L)} data-path={path} data-i18n={key}>{tr(key)}</a>
 					</>
 				))}
 			</nav>
-			<p class="mt-3" data-lang-switch>
-				<span class="sr-only" data-i18n="footer.language">{tr("footer.language")}</span>
-				<a href={locale ? pathForLocale(here, "en") : "#"} lang="en" hreflang="en" data-lang-option="en" aria-current={L === "en" ? "true" : "false"} class="underline-offset-4 hover:text-neutral-800 hover:underline aria-[current=true]:font-semibold aria-[current=true]:text-neutral-800">English</a>
-				<span aria-hidden="true"> · </span>
-				<a href={locale ? pathForLocale(here, "es") : "#"} lang="es" hreflang="es" data-lang-option="es" aria-current={L === "es" ? "true" : "false"} class="underline-offset-4 hover:text-neutral-800 hover:underline aria-[current=true]:font-semibold aria-[current=true]:text-neutral-800">Español</a>
+			<p class="footer-row" data-lang-switch>
+				<span class="sr-only-vmk" data-i18n="footer.language">{tr("footer.language")}</span>
+				<a href={locale ? pathForLocale(here, "en") : "#"} lang="en" hreflang="en" data-lang-option="en" aria-current={L === "en" ? "true" : "false"}>English</a>
+				<span aria-hidden="true">·</span>
+				<a href={locale ? pathForLocale(here, "es") : "#"} lang="es" hreflang="es" data-lang-option="es" aria-current={L === "es" ? "true" : "false"}>Español</a>
 			</p>
+			<div class="footer-row" data-theme-switch hidden>
+				<span class="sr-only-vmk" data-i18n="theme.label">{tr("theme.label")}</span>
+				<div class="theme-switch" role="group" data-i18n-aria="theme.label" aria-label={tr("theme.label")}>
+					<button type="button" data-theme-option="auto" aria-pressed="true" data-i18n="theme.auto">{tr("theme.auto")}</button>
+					<button type="button" data-theme-option="light" aria-pressed="false" data-i18n="theme.light">{tr("theme.light")}</button>
+					<button type="button" data-theme-option="dark" aria-pressed="false" data-i18n="theme.dark">{tr("theme.dark")}</button>
+				</div>
+			</div>
 		</footer>
 	</body>
 </html>

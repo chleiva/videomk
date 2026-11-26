@@ -3,15 +3,15 @@ import { bulletsToText, chartToText, diagramToText, textToBullets, textToChart, 
 import type { Beat } from "../lib/editor";
 import { useLocale } from "../lib/useLocale";
 
-const input = "w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-pink-500";
-const label = "mb-1 block text-xs font-medium text-neutral-600";
+const input = "field";
+const label = "label";
 
 function Field({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
       <label htmlFor={id} className={label}>{title}</label>
       {children}
-      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
+      {hint && <p className="mt-1 text-sm text-fg2">{hint}</p>}
     </div>
   );
 }
@@ -77,16 +77,16 @@ export default function SceneForm({ beat, onChange, onPick }: { beat: Beat; onCh
                   const active = (beat.pick || beat.photo?.chosen) === key;
                   return (
                     <button key={key} type="button" onClick={() => onPick(key)} aria-pressed={active} title={t("scene.photo_by", { alt: c.alt || t("scene.photo_default"), creator: c.creator })}
-                      className={`group relative overflow-hidden rounded-xl border bg-neutral-100 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${active ? "border-pink-500 ring-2 ring-pink-500" : "border-neutral-200 hover:border-neutral-400"}`}>
+                      className={`group relative overflow-hidden rounded-xl border bg-surface2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "border-primary ring-2 ring-primary" : "border-line hover:border-neutral-400"}`}>
                       <img src={c.thumb_url} alt={c.alt || t("scene.candidate_alt")} loading="lazy" className="aspect-video w-full object-cover" referrerPolicy="no-referrer" />
-                      <span className="block truncate px-2 py-1 text-[11px] text-neutral-600">{c.creator} · {c.provider === "unsplash" ? "Unsplash" : c.license}</span>
+                      <span className="block truncate px-2 py-1 text-sm text-fg2">{c.creator} · {c.provider === "unsplash" ? "Unsplash" : c.license}</span>
                     </button>
                   );
                 })}
               </div>
             </fieldset>
           )}
-          {cands.length === 0 && <p className="text-xs text-neutral-500">{t("scene.no_alternatives")}</p>}
+          {cands.length === 0 && <p className="text-sm text-fg2">{t("scene.no_alternatives")}</p>}
         </div>
       );
     }

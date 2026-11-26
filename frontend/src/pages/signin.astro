@@ -7,11 +7,12 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 <BaseLayout title="Sign in · videomk" description="Sign in to videomk." titleKey="signin.page_title">
 	<div class="signin">
 		<div class="card" role="group" aria-labelledby="signin-title">
-			<h1 id="signin-title"><span class="t" data-i18n="signin.title" style="font-weight:inherit">Sign in to video</span><span>mk</span></h1>
+			<span class="mark" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 5 13.5h5.5L9.5 22 19 9.5h-5.7z"/></svg></span>
+			<h1 id="signin-title" data-i18n="signin.tagline">Describe it. We’ll make the video.</h1>
 			<p class="sub" data-i18n="signin.sub">Choose how you want to continue.</p>
 			<div class="buttons">
 				{options.map((o) => (
-					<button type="button" class={`btn btn-${o.id}`} data-provider={o.id}>
+					<button type="button" class={`pbtn pbtn-${o.id}`} data-provider={o.id} aria-label={o.label} data-i18n-aria={`signin.${o.id}`}>
 						{o.id === "google" && (
 							<svg class="ico" viewBox="0 0 48 48" width="18" height="18" aria-hidden="true" focusable="false">
 								<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -72,42 +73,27 @@ const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE });
 </BaseLayout>
 
 <style is:global>
-	.signin {
-		--bg: #fafafa; --card: #fff; --line: #e5e5e5; --fg: #171717; --muted: #525252; --link: #171717;
-		--g-bg: #fff; --g-line: #747775; --g-fg: #1f1f1f; --g-hover: rgba(48,48,48,.08);
-		--a-bg: #000; --a-fg: #fff; --a-line: #000; --a-hover: #262626;
-		--e-bg: #fff; --e-line: #d4d4d4; --e-fg: #171717; --e-hover: #f5f5f5;
-		--focus: #2563eb; --err: #b91c1c;
-		display: flex; justify-content: center; align-items: flex-start; padding: 12vh 16px 32px;
-	}
-	@media (prefers-color-scheme: dark) {
-		.signin {
-			--bg: #0a0a0a; --card: #171717; --line: #2e2e2e; --fg: #fafafa; --muted: #a3a3a3; --link: #fafafa;
-			--g-bg: #131314; --g-line: #8e918f; --g-fg: #e3e3e3; --g-hover: rgba(232,234,237,.1);
-			--a-bg: #fff; --a-fg: #000; --a-line: #fff; --a-hover: #e5e5e5;
-			--e-bg: #171717; --e-line: #404040; --e-fg: #fafafa; --e-hover: #262626;
-			--focus: #60a5fa; --err: #fca5a5;
-		}
-	}
-	html:has(.signin) body { background: #fafafa; color: #171717; }
-	@media (prefers-color-scheme: dark) { html:has(.signin) body { background: #0a0a0a; color: #fafafa; } html:has(.signin) footer { color: #a3a3a3; } html:has(.signin) footer a:hover { color: #fafafa; } }
-	.signin .card { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 28px 20px 22px; }
-	.signin h1 { margin: 0; font-size: 1.5rem; font-weight: 650; letter-spacing: -0.02em; color: var(--fg); text-align: center; }
-	.signin h1 span { font-weight: 900; }
-	.signin .sub { margin: 6px 0 22px; text-align: center; color: var(--muted); font-size: .95rem; }
-	.signin .buttons { display: flex; flex-direction: column; gap: 12px; }
-	.signin .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; padding: 0 16px; border-radius: 10px; border: 1px solid; font-size: 15px; font-weight: 500; line-height: 1; cursor: pointer; transition: background-color .15s; }
-	.signin .btn:disabled { opacity: .6; cursor: default; }
-	.signin .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-	.signin .btn-google { background: var(--g-bg); border-color: var(--g-line); color: var(--g-fg); font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
-	.signin .btn-google:hover:not(:disabled) { background-image: linear-gradient(var(--g-hover), var(--g-hover)); }
-	.signin .btn-apple { background: var(--a-bg); border-color: var(--a-line); color: var(--a-fg); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
-	.signin .btn-apple:hover:not(:disabled) { background: var(--a-hover); }
-	.signin .btn-email { background: var(--e-bg); border-color: var(--e-line); color: var(--e-fg); }
-	.signin .btn-email:hover:not(:disabled) { background: var(--e-hover); }
+	/* The chooser follows the tokens (tokens.css, light and dark). The Google and Apple buttons keep the brand colours their guidelines require. */
+	.signin { --g-bg: #fff; --g-line: #747775; --g-fg: #1f1f1f; --g-hover: rgba(48,48,48,.08); --a-bg: #000; --a-fg: #fff; --a-line: #000; --a-hover: #262626;
+		display: flex; justify-content: center; align-items: flex-start; padding: 8vh var(--screen-margin) var(--space-8); }
+	:root[data-theme="dark"] .signin { --g-bg: #131314; --g-line: #8e918f; --g-fg: #e3e3e3; --g-hover: rgba(232,234,237,.1); --a-bg: #fff; --a-fg: #000; --a-line: #fff; --a-hover: #e5e5e5; }
+	@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .signin { --g-bg: #131314; --g-line: #8e918f; --g-fg: #e3e3e3; --g-hover: rgba(232,234,237,.1); --a-bg: #fff; --a-fg: #000; --a-line: #fff; --a-hover: #e5e5e5; } }
+	.signin .card { width: 100%; max-width: 26rem; padding: var(--space-8) var(--sheet-margin) var(--space-6); border-radius: var(--radius-video); text-align: center; }
+	.signin .mark { width: 4rem; height: 4rem; border-radius: 1.25rem; display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); box-shadow: var(--elev-2); }
+	.signin h1 { margin: var(--space-5) 0 0; font-size: var(--fs-title); line-height: var(--lh-tight); font-weight: 700; letter-spacing: -0.03em; color: var(--text); text-wrap: balance; }
+	.signin .sub { margin: var(--space-2) 0 var(--space-6); color: var(--text-secondary); font-size: var(--fs-body); }
+	.signin .buttons { display: flex; flex-direction: column; gap: var(--space-3); }
+	.signin .pbtn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 3.25rem; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: 1px solid; font-size: var(--fs-body); font-weight: 600; line-height: 1.2; cursor: pointer; transition: background-color var(--dur-select) var(--ease), transform var(--dur-press) var(--ease); }
+	.signin .pbtn:active:not(:disabled) { transform: scale(.98); }
+	.signin .pbtn:disabled { opacity: .6; cursor: default; }
+	.signin .pbtn-google { background: var(--g-bg); border-color: var(--g-line); color: var(--g-fg); font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
+	.signin .pbtn-google:hover:not(:disabled) { background-image: linear-gradient(var(--g-hover), var(--g-hover)); }
+	.signin .pbtn-apple { background: var(--a-bg); border-color: var(--a-line); color: var(--a-fg); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+	.signin .pbtn-apple:hover:not(:disabled) { background: var(--a-hover); }
+	.signin .pbtn-email { border-color: transparent; color: var(--on-primary); background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); box-shadow: var(--elev-2); }
+	.signin .pbtn-email:hover:not(:disabled) { filter: brightness(1.06); }
 	.signin .ico { flex: none; }
-	.signin .err { margin: 14px 0 0; color: var(--err); font-size: .9rem; text-align: center; }
-	.signin .fine { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: .8rem; }
-	.signin .fine a { color: var(--link); text-decoration: underline; text-underline-offset: 3px; }
-	@media (prefers-reduced-motion: reduce) { .signin .btn { transition: none; } }
+	.signin .err { margin: var(--space-4) 0 0; color: var(--danger); font-size: var(--fs-subhead); }
+	.signin .fine { margin: var(--space-5) 0 0; color: var(--text-secondary); font-size: var(--fs-footnote); }
+	.signin .fine a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 </style>

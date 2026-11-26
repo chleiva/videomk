@@ -61,50 +61,31 @@ export default function PromptForm({ locale: fixedLocale }: { locale?: Locale })
     }
   }
 
+  const examples = ["create.example1", "create.example2", "create.example3"];
   return (
-<form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
-
-
-  <div className="flex items-center rounded-full border border-neutral-200 bg-white/90 px-4 py-3 shadow-sm focus-within:ring-2 focus-within:ring-pink-500 focus-within:border-transparent transition">
-    <input
-      id="prompt"
-      ref={inputRef}
-      type="text"
-      inputMode="text"
-      aria-label={t("prompt.aria")}
-      value={prompt}
-      onChange={(e) => setPrompt(e.target.value)}
-      placeholder={t("prompt.placeholder")}
-      className="w-full bg-transparent px-4 py-3 text-lg md:text-xl outline-none placeholder:text-neutral-500"
-    />
-    <button
-      type="submit"
-      disabled={isSubmitting}
-      aria-busy={isSubmitting}
-      aria-disabled={isSubmitting}
-      className="group btn-shimmer ml-2 shrink-0 relative overflow-hidden rounded-full bg-gradient-to-r from-blue-500 to-pink-500 px-6 py-3 text-white font-semibold shadow-md transition-all duration-200 ease-out hover:brightness-110 hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none disabled:pointer-events-none"
-    >
-      <span className="relative z-10 flex items-center gap-2">
-        {isSubmitting ? (
-          <>
-            <span
-              aria-hidden
-              className="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
-            />
-            <span>{t("prompt.creating")}</span>
-          </>
-        ) : (
-          <span>{t("prompt.create")}</span>
-        )}
-      </span>
-    </button>
-  </div>
-
-  {hint && (
-    <p className="mt-2 text-sm text-neutral-600" aria-live="polite">
-      {hint}
-    </p>
-  )}
-</form>
+    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-2xl text-left">
+      <div className="composer">
+        <label htmlFor="prompt" className="sr-only-vmk">{t("prompt.aria")}</label>
+        <input
+          id="prompt"
+          ref={inputRef}
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder={t("prompt.placeholder")}
+          className="composer-input"
+        />
+        <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="btn btn-primary shrink-0">
+          {isSubmitting ? (<><span aria-hidden className="spinner" /><span>{t("prompt.creating")}</span></>) : (<span>{t("prompt.create")}</span>)}
+        </button>
+      </div>
+      <p className="hint mt-2 min-h-5 text-center" aria-live="polite">{hint}</p>
+      <p className="eyebrow mt-4 text-center">{t("create.try_one")}</p>
+      <div className="chips mt-3 justify-center">
+        {examples.map((k) => <button key={k} type="button" className="chip" onClick={() => { setPrompt(t(k)); setHint(""); inputRef.current?.focus(); }}>{t(k)}</button>)}
+      </div>
+    </form>
   );
 }

@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import GenerationsPage from "../components/GenerationsPage";
 ---
-<BaseLayout title="Generations — videomk" titleKey="gen.page_title">
+<BaseLayout title="Generations — videomk" titleKey="gen.page_title" app={true} active="videos">
 	<script>
 		{`
 		  import('/src/lib/auth.ts').then(async (m) => {

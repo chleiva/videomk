@@ -1,22 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import WatchPage from "../../components/WatchPage";
 ---
-<BaseLayout title="Watch — videomk" titleKey="watch.page_title">
-	<section class="mx-auto max-w-5xl px-6 py-10 md:py-16">
-		<a href="/generations" class="inline-flex items-center text-sm text-neutral-600 hover:text-neutral-900">
-			<span aria-hidden>←</span>
-			<span class="ml-1" data-i18n="watch.back">Back to Generations</span>
-		</a>
-		<div class="mt-4">
-			<div class="ratio-16x9 relative overflow-hidden rounded-2xl border border-neutral-200 bg-black">
-				<video id="video" class="ratio-media w-full h-full object-contain" controls playsinline preload="auto">
-					<source id="source" type="video/mp4" />
-				</video>
-			</div>
-		</div>
-	</section>
-
-	<script is:inline src="/watch.js?v=2"></script>
+<BaseLayout title="Watch — videomk" titleKey="watch.page_title" app={true} active="videos">
+	<WatchPage client:only="react" />
 </BaseLayout>
-
-
