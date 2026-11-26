@@ -25,6 +25,7 @@ from constructs import Construct
 
 from account_deletion import AccountDeletion, TOKEN_VALID_SECONDS
 from catalog import ImageCatalog
+from deck import DeckToVideo
 from media_library import MediaLibrary
 from social_auth import SocialAuth, flag as social_flag
 from request_intake import RequestIntake
@@ -507,12 +508,20 @@ class BackendStack(Stack):
         ready_resolutions = str(self.node.try_get_context("readyResolutions") or "720p,1080p")
         if "2160p" in [r.strip() for r in ready_resolutions.split(",")] and MEM_CAP < 10240:
             raise ValueError(f"4K (readyResolutions with 2160p) needs 10240 MB render functions; this stage caps Lambda memory at {MEM_CAP} MB (lambdaMemoryCap). See docs/FOUR_K.md.")
-        RequestOptions(
+        req_options = RequestOptions(
             self, "RequestOptions", make_fn=make_fn, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn,
             ready_aspects=str(self.node.try_get_context("readyAspects") or "16:9"), beta_aspects=str(self.node.try_get_context("betaAspects") or ""),
             ready_languages=str(self.node.try_get_context("readyLanguages") or "en,es"), intake_enabled=str(self.node.try_get_context("intakeEnabled") or "").lower() in ("1", "true"),
             ready_resolutions=ready_resolutions,
         )
+
+        # PowerPoint to video (docs/DECK_TO_VIDEO.md): only with `-c deckToVideo=1` (default off) and the v2 engine. Needs Docker on the deploying machine (the converter image).
+        if str(self.node.try_get_context("deckToVideo") or "").lower() in ("1", "true"):
+            if v2 is None:
+                raise ValueError("deckToVideo needs the v2 engine (-c engine=v2)")
+            self.deck = DeckToVideo(self, "DeckToVideo", make_fn=make_fn, assets_bucket=ASSETS_BUCKET, usage_table=usage_table, plan_fn=v2.plan_fn, launcher_fn=launcher_fn,
+                                    capabilities_fn=req_options.fn, user_resource=user_id, auth=cognito_auth, cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"],
+                                    memory_mb=min(MEM_CAP, 3008), concurrency=int(self.node.try_get_context("deckConcurrency")) if self.node.try_get_context("deckConcurrency") else None)
 
         # ----------------------------
         # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).

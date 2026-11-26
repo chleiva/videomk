@@ -48,6 +48,7 @@ class EngineV2(Construct):
         finalize_fn = make_fn("V2FinalizeFn", "v2_finalize", f"{base}.finalize_handler.handler", timeout=Duration.minutes(10), memory=10240, env=env, layers=layers, ephemeral_mb=8192)
         edit_prep_fn = make_fn("V2EditPrepFn", "v2_edit_prep", f"{base}.edit_prep_handler.handler", timeout=Duration.seconds(30), memory=512, env=env, layers=layers)
         edit_failed_fn = make_fn("V2EditFailedFn", "v2_edit_failed", f"{base}.edit_failed_handler.handler", timeout=Duration.seconds(10), memory=256, env=env, layers=layers)
+        self.plan_fn = plan_fn   # the deck path (deck.py) switches it on
         self.beat_fn = beat_fn   # the image catalog (catalog.py) gives it read rights when `-c imageCatalog=1`
         self.editor_get_fn = make_fn("V2EditorGetFn", "v2_editor_get", f"{base}.editor_get.handler", timeout=Duration.seconds(20), memory=512, env=env, layers=layers)
         self.editor_apply_fn = make_fn("V2EditorApplyFn", "v2_editor_apply", f"{base}.editor_apply.handler", timeout=Duration.seconds(20), memory=512, env=env, layers=layers)

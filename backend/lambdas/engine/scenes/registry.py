@@ -43,6 +43,7 @@ class Element:
     fallback: Optional[Callable[[Props], Tuple[str, Props]]] = None  # (stype, props) to show instead when prepare fails; default is a title card
     max_per_video: Optional[int] = None         # budget for heavy elements; extra uses become title cards
     min_seconds: float = 0.0                    # shortest sensible scene length
+    hidden: bool = False                         # not listed in the director's scene docs (a scene only a special path writes, e.g. `slide` for decks)
     formats: Tuple[str, ...] = ("16:9",)        # the aspects `draw` lays out natively from ctx.frame (docs/RESPONSIVE_LAYOUT.md); any other aspect is shown framed (scenes/formats.py)
 
 
@@ -78,6 +79,8 @@ def docs_by_family() -> str:
     """The elements' director-facing docs, grouped under their family headings, in a stable order."""
     fams: Dict[str, List[Element]] = {}
     for el in ELEMENTS.values():
+        if el.hidden:
+            continue
         fams.setdefault(el.family, []).append(el)
     lines: List[str] = []
     for fam in sorted(fams):

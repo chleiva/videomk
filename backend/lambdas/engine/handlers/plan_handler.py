@@ -7,7 +7,7 @@ from generate_video.db import set_attributes, update_status
 
 from common.secrets import get_secret_param
 
-from .. import curate, library, awsio, costs, director, format_options, llm, plan as plan_mod, usermedia, voices, websearch
+from .. import curate, deck_plan, deckio, library, awsio, costs, director, format_options, llm, plan as plan_mod, usermedia, voices, websearch
 
 DEFAULT_MINUTES = float(os.environ.get("DEFAULT_TARGET_MINUTES", "3"))
 MAX_MINUTES = float(os.environ.get("MAX_TARGET_MINUTES", "12"))  # single-call planning limit; longer videos need chapter fan-out
@@ -61,6 +61,34 @@ def _user_photos(video_id: str, user_id: str, media_ids: Any, spent: Dict[str, f
     return photos, skipped + flagged, story
 
 
+def _deck_result(event: Dict[str, Any], video_id: str, user_id: str, prompt: str, minutes: float, spent: Dict[str, float], ask_small, ask_big, catalog) -> Dict[str, Any]:
+    """The deck path (flag DECK_TO_VIDEO, docs/DECK_TO_VIDEO.md): the prepared slides -> a plan whose beats show them. Returns what director.direct returns."""
+    from common import i18n, intake
+    from generate_video.db import set_attributes
+
+    loc = event.get("locale") or "en"
+    set_attributes(video_id, {"stage": "deck_reading"})
+    deck, images, asset_for = deckio.load(user_id, str(event["deck"]), awsio.prefix(video_id) + "assets/", get=awsio.get_bytes, put=lambda k, b, c: awsio.put_bytes(k, b, c), delete=awsio.delete)
+    text = " ".join(deck_plan.slide_text(s, "", 600) for s in deck["slides"])[:6000]   # the safety gate sees the deck's own words too (a deck can be harmful content)
+    chk = intake.check((prompt + " " + text)[:8000], options={}, attempts=1)
+    if chk.block:
+        return {"legit": False, "reason": i18n.t("deck.blocked", loc), "blocked": chk.block}
+
+    def ask_vision(system: str, user: str, images_: Any) -> str:
+        out, meta = llm.complete(system, user, images=images_, max_tokens=2500, model=llm.REVIEW_MODEL, effort="low")
+        spent["deck"] = spent.get("deck", 0.0) + meta["cost_usd"]
+        return out
+
+    set_attributes(video_id, {"stage": "deck_writing"})
+    result = deck_plan.direct_deck(deck, images, prompt=prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, ask_vision=ask_vision, asset_for=asset_for,
+                                   language=None if event.get("language") in (None, "auto") else event.get("language"), region=event.get("region"),
+                                   options={k: event.get(k) for k in ("platform", "aspect", "brief")}, music_tracks=catalog, theme=event.get("theme"))
+    if not result["legit"]:
+        result["reason"] = i18n.t("deck.unusable", loc) if result.get("reason") in ("unsuitable", "no_story", "empty") else result.get("reason", "")
+    logging.warning("deck: %s slides, %s beats, %s flagged, cost so far $%.4f", len(deck["slides"]), len((result.get("plan") or {}).get("beats", [])), len(result.get("flagged") or []), sum(spent.values()))
+    return result
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     user_id = str(event.get("user_id", ""))
@@ -91,11 +119,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {**base, "plot": {"legit": False, "reason": "None of your photos could be used" + (f" ({skipped[0]['reason']})" if skipped else "") + ". Try different photos."}}
     provider, ask_tools = _web_tools(spent)
     catalog = library.load_catalog(awsio.get_json)
-    result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
-                             options={k: event.get(k) for k in ("platform", "aspect", "brief")},
-                             region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
-                             max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
-                             music_tracks=catalog)
+    if event.get("deck") and os.environ.get("DECK_TO_VIDEO") == "1":
+        result = _deck_result(event, video_id, user_id, prompt, minutes, spent, ask_small, ask_big, catalog)
+    else:
+        result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
+                                 options={k: event.get(k) for k in ("platform", "aspect", "brief")},
+                                 region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
+                                 max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
+                                 music_tracks=catalog)
     r = result.get("research") or {}
     spent["research"] = spent.get("research", 0.0) + float(r.get("searches", 0)) * WEB_SEARCH_COST_USD  # the search provider's own price per search
     for part, usd in spent.items():

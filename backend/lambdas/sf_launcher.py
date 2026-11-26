@@ -18,13 +18,14 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import i18n, intake, library, safety, usage, wallet
+from common import deck_limits, i18n, intake, library, safety, usage, wallet
 from engine import format_options
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+DEFAULT_DECK_PROMPT = "Explain this presentation clearly for a general audience."
 MIN_PROMPT_CHARS = 10
 MAX_PROMPT_CHARS = 2000
 _NAMESPACE = uuid.UUID("6f1d2f0e-6c1b-4a53-9a57-5c1b8d7c2a11")
@@ -107,6 +108,12 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         raise BadRequest(f"at most {MAX_PHOTOS} photos per video")
     if set(out.get("media", [])) & set(out.get("library_media", [])):
         raise BadRequest("a photo cannot be in both 'media' and 'library_media'")
+    if body.get("deck") is not None:   # a prepared deck (POST .../decks, then .../process): its id; checked in the handler. A deck and photos are different stories: not both.
+        if not isinstance(body["deck"], str) or not deck_limits.ID_RE.match(body["deck"]):
+            raise BadRequest("'deck' must be a deck id")
+        if out.get("media") or out.get("library_media"):
+            raise BadRequest(i18n.Localized("deck.with_photos"))
+        out["deck"] = body["deck"]
     if "captions" in body and body["captions"] is not None:
         if not isinstance(body["captions"], bool):
             raise BadRequest("'captions' must be true or false")
@@ -160,6 +167,26 @@ def bring_library_photos(user_id: str, options: Dict[str, Any]) -> bool:
     if meta:
         options["media_meta"] = meta
     return True
+
+
+def check_deck(user_id: str, options: Dict[str, Any], loc: str) -> Optional[Dict[str, Any]]:
+    """None when the deck is ready and the length is set (the deck's suggested length unless the person chose one); else the 400 response. Only a deck under the
+    caller's own prefix can be found, so another user's id is simply 'missing'."""
+    if os.environ.get("DECKS_ENABLED") != "1":
+        return json_response(404, {"code": "unavailable", "message": i18n.t("deck.unavailable", loc)})
+    try:
+        st = json.loads(_s3.get_object(Bucket=os.environ["ASSETS_BUCKET"], Key=deck_limits.status_key(user_id, options["deck"]))["Body"].read())
+    except ClientError:
+        return json_response(400, {"code": "deck_missing", "message": i18n.t("deck.missing", loc)})
+    if st.get("status") == "failed":
+        code = st.get("code") if st.get("code") in deck_limits.ERROR_CODES else "deck_corrupt"
+        return json_response(400, {"code": code, "message": i18n.t(f"deck.err.{code}", loc, max_mb=deck_limits.MAX_MB, max_slides=deck_limits.MAX_SLIDES)})
+    if st.get("status") != "ready":
+        return json_response(409, {"code": "deck_not_ready", "message": i18n.t("deck.not_ready", loc)})
+    if not options.get("target_minutes"):
+        options["target_minutes"] = deck_limits.auto_minutes(int(st.get("slides") or 1), st.get("roles"))
+    options["locale"] = loc
+    return None
 
 
 def video_id_for(user_id: str, body: Dict[str, Any]) -> Tuple[str, bool]:
@@ -224,6 +251,8 @@ def handler(event: Dict[str, Any], context: Any):
 
     try:
         body = parse_body(event)
+        if body.get("deck") is not None and not body.get("prompt"):   # a deck needs no description: the request only steers audience and tone
+            body = {**body, "prompt": DEFAULT_DECK_PROMPT}
         prompt = validate_prompt(body)
         options = validate_options(body)
         brief = intake.clean_brief(body.get("brief"))   # the answers to the clarifying questions: known keys, short strings, at most 2 KB
@@ -254,6 +283,10 @@ def handler(event: Dict[str, Any], context: Any):
     if brief:
         options["brief"] = brief
 
+    if options.get("deck"):
+        bad = check_deck(user_id, options, loc)
+        if bad:
+            return bad
     for mid in options.get("media", []):  # every photo must really be uploaded, into this user's own folder
         try:
             _s3.head_object(Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid))

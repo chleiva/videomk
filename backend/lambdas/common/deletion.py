@@ -45,7 +45,7 @@ STEPS = ["begin", "executions", "media", "videos", "wallet", "usage", "flags", "
 DATA_STEPS = ["media", "videos", "wallet", "usage", "flags", "safety"]
 
 # every usage-table partition a person can have (code: usage.consume(f"<prefix>:{user}") and the plain `user` of the daily video quota)
-USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:")
+USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:")
 FLAG_KEYS = ("{u}", "safety:{u}")
 ASSET_USER_PREFIXES = ("videos/{u}/", "uploads/{u}/")
 ASSET_VIDEO_PREFIXES = ("generation/v2/{v}/", "generation/assets/{v}/")

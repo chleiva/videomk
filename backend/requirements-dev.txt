@@ -6,3 +6,5 @@ numpy
 Pillow
 aws-cdk-lib>=2.150
 constructs>=10
+python-pptx   # deck-to-video tests (sample decks are generated, deck_converter/ is the code that reads them)
+defusedxml

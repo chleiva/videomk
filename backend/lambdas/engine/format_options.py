@@ -158,6 +158,9 @@ def capabilities(locale: Optional[str] = None) -> Dict[str, Any]:
         "max_photos": MAX_PHOTOS,
         "intake": os.environ.get("INTAKE_ENABLED") == "1",
     }
+    if os.environ.get("DECKS_ENABLED") == "1":   # the apps show "make a video from a presentation" only when the server says so
+        from common import deck_limits
+        body["deck"] = deck_limits.limits()
     return _localized(body, locale)
 
 
