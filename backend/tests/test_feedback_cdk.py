@@ -57,7 +57,7 @@ def test_on_by_default_table_is_kept_encrypted_and_without_ttl(synth):
     assert p["BillingMode"] == "PAY_PER_REQUEST" and p["KeySchema"] == [{"AttributeName": "feedbackId", "KeyType": "HASH"}]
     assert p["PointInTimeRecoverySpecification"]["PointInTimeRecoveryEnabled"] is True
     assert "TimeToLiveSpecification" not in p and tbl["DeletionPolicy"] == "Retain"
-    assert p["SSESpecification"]["SSEEnabled"] is True
+    assert "SSESpecification" not in p   # default at-rest encryption (DynamoDB-owned key), like the other tables
     gsis = {g["IndexName"]: g for g in p["GlobalSecondaryIndexes"]}
     assert gsis["GSI_Pending"]["Projection"]["ProjectionType"] == "ALL" and gsis["GSI_User"]["Projection"]["ProjectionType"] == "KEYS_ONLY"
 
