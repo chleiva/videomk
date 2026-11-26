@@ -24,6 +24,12 @@ def setup(stage: str):
     session = boto3.Session(profile_name=cfg["profile"], region_name=cfg["region"])
     boto3.setup_default_session(profile_name=cfg["profile"], region_name=cfg["region"])
     out = {o["OutputKey"]: o["OutputValue"] for o in session.client("cloudformation").describe_stacks(StackName=f"videomk-{stage}")["Stacks"][0]["Outputs"]}
+    # outputs of a nested construct are named <Construct><Id><hash> (AccountDeletionDeletionWorkerNameB9A3FDE3): match by the id
+    for want in ("DeletionWorkerName", "DeletionTableName", "DeletionQueueUrl"):
+        if want not in out:
+            found = [v for k, v in out.items() if want in k]
+            if found:
+                out[want] = found[0]
     env = session.client("lambda").get_function_configuration(FunctionName=out["DeletionWorkerName"])["Environment"]["Variables"]
     os.environ.update(env)
     os.environ["AWS_DEFAULT_REGION"] = cfg["region"]
