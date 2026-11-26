@@ -11,6 +11,8 @@ struct LibraryView: View {
     @State private var showingSettings = false
     @State private var showingWallet = false
     @State private var showingCreate = false
+    @State private var showingRating = false
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var balance: Int? { model.wallet.flatMap { $0.unlimited ? nil : $0.balance } }
@@ -42,12 +44,26 @@ struct LibraryView: View {
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingWallet) { WalletView() }
+        .sheet(isPresented: $showingRating) { RatingPromptView() }
+        .task(id: "\(path.isEmpty)-\(scenePhase == .active)") { await considerRatingPrompt() }
         .sheet(isPresented: $showingCreate) { CreateView(create: model.createModel) }
         .sheet(item: $model.createProblem) { CreateProblemSheet(problem: $0) { model.createProblem = nil; model.createModel.open(prefill: $0.prompt); showingCreate = true } }
         .sensoryFeedback(.success, trigger: model.completions)
         .onChange(of: model.createRequested) { _, v in if v { model.createRequested = false; openCreate() } }
         .onChange(of: model.composerDraft) { _, draft in if let draft { model.composerDraft = nil; openCreate(prefill: draft) } }
         .onChange(of: model.requestCredits) { _, v in if v { model.requestCredits = false; showingCreate = false; Task { try? await Task.sleep(for: .milliseconds(400)); showingWallet = true } } }
+    }
+
+    /// Only when the person is calmly back on the home screen (not on a video, not creating), a moment after arriving.
+    private func considerRatingPrompt() async {
+        guard path.isEmpty, scenePhase == .active else { return }
+        try? await Task.sleep(for: .seconds(1.5))
+        guard !Task.isCancelled, path.isEmpty else { return }
+        let env = ProcessInfo.processInfo.environment
+        let context = RatingContext(isPlaying: model.isPlayingVideo, isCreating: showingCreate || model.pending.contains { if case .sending = $0.state { true } else if case .uploading = $0.state { true } else { false } },
+                                    sheetOpen: showingSettings || showingWallet || showingRating || model.createProblem != nil,
+                                    suppressed: RatingPrompt.isSuppressed(environment: env))
+        if model.rating.shouldPrompt(context) { model.rating.didShow(); showingRating = true }
     }
 
     private func openCreate(prefill: String? = nil, minutes: Double? = nil, photos: Bool = false) {
@@ -289,7 +305,7 @@ extension LibraryView {
     @MainActor func debugSetup() async {
         let env = ProcessInfo.processInfo.environment
         await model.createModel.photos.loadDebugFiles()      // VMK_DEBUG_PHOTO_FILES / VMK_DEBUG_FAKE_PHOTOS attach to the Create screen
-        switch env["VMK_DEBUG_SHEET"] { case "settings", "delete": showingSettings = true; case "wallet": showingWallet = true; default: break }
+        switch env["VMK_DEBUG_SHEET"] { case "settings", "delete", "feedback": showingSettings = true; case "wallet": showingWallet = true; case "rating": showingRating = true; default: break }
         if let id = env["VMK_DEBUG_OPEN"] { try? await Task.sleep(for: .milliseconds(400)); path = [id] }       // v1 making, v2 failed, v3 ready (VMK_DEBUG_FAKE_VIDEOS=1)
         guard let state = env["VMK_DEBUG_CREATE"] else { return }
         let c = model.createModel

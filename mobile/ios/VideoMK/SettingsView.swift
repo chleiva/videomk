@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var confirmSignOut = false
     @State private var showDelete = false
+    @State private var showFeedback = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage(PhotoMetaSettings.datesKey) private var useDates = true
     @AppStorage(PhotoMetaSettings.locationsKey) private var useLocations = true
@@ -16,6 +17,21 @@ struct SettingsView: View {
                 Section(tr("settings.account")) {
                     if case .signedIn(let email) = model.phase, let email { LabeledContent(tr("settings.signed_in_as"), value: email) }
                     Button(tr("settings.sign_out")) { confirmSignOut = true }.foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch).accessibilityIdentifier("signOutButton")      // not destructive: primary colour, not red
+                }
+                Section {
+                    Button { showFeedback = true } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "bubble.left").font(.vmk(18)).foregroundStyle(Theme.primary).frame(width: 28).accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(tr("feedback.title")).font(.vmk(17)).foregroundStyle(Theme.text)
+                                Text(tr("feedback.row_subtitle")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
+                            }
+                            Spacer(minLength: 4)
+                            Image(systemName: "chevron.right").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
+                        }
+                        .frame(minHeight: Theme.minTouch).contentShape(Rectangle())
+                    }
+                    .accessibilityElement(children: .combine).accessibilityIdentifier("sendFeedbackRow")
                 }
                 Section {
                     Button(role: .destructive) { showDelete = true } label: { Label { Text(tr("settings.delete_account")) } icon: { Image(systemName: "trash").foregroundStyle(.red) } }
@@ -62,8 +78,10 @@ struct SettingsView: View {
                 }
             }
             .sheet(isPresented: $showDelete) { DeleteAccountView() }
+            .sheet(isPresented: $showFeedback) { FeedbackSheet(composer: model.makeFeedback(.settings)) }
             #if DEBUG
-            .onAppear { if ProcessInfo.processInfo.environment["VMK_DEBUG_SHEET"] == "delete" { showDelete = true } }
+            .onAppear { if ProcessInfo.processInfo.environment["VMK_DEBUG_SHEET"] == "delete" { showDelete = true }
+                if ProcessInfo.processInfo.environment["VMK_DEBUG_SHEET"] == "feedback" { showFeedback = true } }
             #endif
             .task { if model.media?.summary == nil { await model.media?.loadSummary() } }
             .navigationTitle(tr("settings.title"))

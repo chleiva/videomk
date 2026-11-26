@@ -23,6 +23,8 @@ final class AppModel {
     private(set) var media: MediaModel?
     private(set) var createModel: CreateModel                                 // the Create screen's state
     private(set) var userID: String?
+    let rating = RatingPrompt(version: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0")   // on-device rating logic (docs/FEEDBACK.md)
+    var isPlayingVideo = false                             // a video is playing right now: the rating question never opens over it
     var requestCredits = false                              // "Add credits" in Create asks the home screen to show the wallet
     var createRequested = false                             // "Make a video from this" in Media opens Create on the home screen
     var createProblem: CreateProblem?                       // generate answered blocked or paused after Create closed
@@ -82,6 +84,16 @@ final class AppModel {
         seedDebugScreens()
         configureDebugDeletion()
         #endif
+    }
+
+    /// A fresh "Send feedback" form. Fake-library runs (screenshots, UI tests) never reach the real backend.
+    func makeFeedback(_ context: FeedbackContext) -> FeedbackComposer {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+        var feedbackAPI: (any FeedbackAPI)? = api
+        #if DEBUG
+        if media?.isFake == true { feedbackAPI = FakeFeedbackAPI() }
+        #endif
+        return FeedbackComposer(context: context, api: feedbackAPI, version: version)
     }
 
     var hasRunningVideos: Bool { videos.contains { $0.status.isRunning } || pending.contains { $0.state == .sending } }
@@ -443,3 +455,10 @@ final class AppModel {
     }
     #endif
 }
+
+#if DEBUG
+/// Screenshots and UI tests: sending always works, after a short wait.
+struct FakeFeedbackAPI: FeedbackAPI {
+    func sendFeedback(_ request: FeedbackRequest) async throws { try? await Task.sleep(for: .milliseconds(500)) }
+}
+#endif

@@ -18,6 +18,8 @@ struct VideoDetailView: View {
     @State private var playbackError: String?
     @State private var editing = false
     @State private var save = SaveState.idle
+    @State private var watcher: PlaybackWatcher?
+    @State private var showFeedback = false
 
     enum SaveState { case idle, saving, saved, failed }
 
@@ -42,9 +44,10 @@ struct VideoDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task(id: model.video(videoID)?.status) { await loadPlayerIfReady() }
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
-        .onDisappear { player?.pause() }
+        .onDisappear { player?.pause(); watcher?.stop(); watcher = nil }
+        .sheet(isPresented: $showFeedback) { FeedbackSheet(composer: model.makeFeedback(.afterVideo)) }
         .fullScreenCover(isPresented: $editing, onDismiss: {
-            player = nil; playbackURL = nil  // the edit may have published a new version
+            watcher?.stop(); watcher = nil; player = nil; playbackURL = nil  // the edit may have published a new version
             Task { await model.refresh(); await loadPlayerIfReady() }
         }) { EditorView(videoID: videoID) }
     }
@@ -88,6 +91,7 @@ struct VideoDetailView: View {
             Text(video.displayTitle).font(.vmk(22, weight: .bold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 4)
             actions(video)
             makeAnotherCard
+            FeedbackLink { showFeedback = true }
             if let d = videoDescription {
                 DisclosureGroup(tr("detail.description_credits")) {
                     VStack(alignment: .leading, spacing: 10) {
@@ -176,6 +180,9 @@ struct VideoDetailView: View {
             videoDescription = info.description
             let p = AVPlayer(url: url)
             player = p
+            watcher?.stop()
+            let id = videoID
+            watcher = PlaybackWatcher(player: p, onPlaying: { model.isPlayingVideo = $0 }, onComplete: { model.rating.recordCompleted(id) })
         } catch let e as APIError { playbackError = e.message } catch { playbackError = APIError.server.message }
     }
 
