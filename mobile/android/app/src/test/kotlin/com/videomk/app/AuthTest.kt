@@ -5,6 +5,10 @@ import com.videomk.app.core.AuthService
 import com.videomk.app.core.InMemoryTokenStore
 import com.videomk.app.core.Jwt
 import com.videomk.app.core.PKCE
+import com.videomk.app.core.SignInProvider
+import com.videomk.app.core.SignInResult
+import com.videomk.app.core.SocialSwitches
+import com.videomk.app.core.label
 import com.videomk.app.core.Tokens
 import com.videomk.app.core.parseQuery
 import kotlinx.coroutines.async
@@ -93,8 +97,13 @@ class AuthTest {
         val store = InMemoryTokenStore(); val auth = service(store)
         auth.beginSignIn()
         try { auth.completeSignIn("com.videomk.app://auth/callback?code=C&state=WRONG"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }
+        val url = auth.beginSignIn()
+        try { auth.completeSignIn("com.videomk.app://auth/callback?error=access_denied"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }   // no state: dropped
         auth.beginSignIn()
-        try { auth.completeSignIn("com.videomk.app://auth/callback?error=access_denied"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Cancelled, e.kind) }
+        try { auth.completeSignIn("com.videomk.app://auth/callback?error=access_denied&state=WRONG"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }
+        val url2 = auth.beginSignIn()
+        try { auth.completeSignIn("com.videomk.app://auth/callback?error=access_denied&state=${url2.queryParameter("state")}"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Cancelled, e.kind) }
+        assertNotNull(url)
         try { auth.completeSignIn("com.videomk.app://auth/callback?code=C&state=S"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }   // nothing pending
         assertNull(store.load()); assertEquals(0, server.requestCount)
     }
@@ -158,5 +167,61 @@ class AuthTest {
         try { auth.authorization(); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.SignedOut, e.kind) }
         store.save(Tokens(fakeJwt(), "a", "r", Instant.now().plusSeconds(3000)))
         assertTrue(auth.isSignedIn); auth.signOut(); assertFalse(auth.isSignedIn)
+    }
+
+    // social providers
+
+    @Test fun `email sign-in has no provider parameter and is exactly today's request`() {
+        val url = service(InMemoryTokenStore()).beginSignIn()
+        assertNull(url.queryParameter("identity_provider"))
+        assertEquals(setOf("response_type", "client_id", "redirect_uri", "scope", "state", "code_challenge_method", "code_challenge"), url.queryParameterNames)
+    }
+
+    @Test fun `Google and Apple add only identity_provider, with the exact Cognito names, and keep PKCE and state`() {
+        val auth = service(InMemoryTokenStore())
+        val g = auth.beginSignIn(SignInProvider.Google); val a = auth.beginSignIn(SignInProvider.Apple)
+        assertEquals("Google", g.queryParameter("identity_provider")); assertEquals("SignInWithApple", a.queryParameter("identity_provider"))
+        for (u in listOf(g, a)) {
+            assertEquals("code", u.queryParameter("response_type")); assertEquals("S256", u.queryParameter("code_challenge_method"))
+            assertEquals("com.videomk.app://auth/callback", u.queryParameter("redirect_uri")); assertTrue(u.queryParameter("state")!!.length >= 43)
+            assertEquals(8, u.queryParameterNames.size)
+        }
+        assertTrue(g.queryParameter("state") != a.queryParameter("state") && g.queryParameter("code_challenge") != a.queryParameter("code_challenge"))
+    }
+
+    private val quirk = "error=invalid_request&error_description=Already+found+an+entry+for+username+Google_123"
+
+    @Test fun `the already-found-entry error retries the same request once with fresh PKCE and state, then reports`() = runBlocking {
+        val store = InMemoryTokenStore(); val auth = service(store)
+        val first = auth.beginSignIn(SignInProvider.Google)
+        val r = auth.completeSignIn("com.videomk.app://auth/callback?$quirk&state=${first.queryParameter("state")}")
+        val retry = (r as SignInResult.Retry).url
+        assertEquals("Google", retry.queryParameter("identity_provider"))
+        assertTrue(retry.queryParameter("state") != first.queryParameter("state") && retry.queryParameter("code_challenge") != first.queryParameter("code_challenge"))
+        assertTrue(auth.signInInProgress)
+        try { auth.completeSignIn("com.videomk.app://auth/callback?$quirk&state=${retry.queryParameter("state")}"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.AccountLink, e.kind) }
+        assertFalse(auth.signInInProgress); assertNull(store.load()); assertEquals(0, server.requestCount)
+    }
+
+    @Test fun `the retry still completes when the second attempt succeeds, and a quirk without matching state is not retried`() = runBlocking {
+        val store = InMemoryTokenStore(); val auth = service(store)
+        val first = auth.beginSignIn(SignInProvider.Apple)
+        val retry = (auth.completeSignIn("com.videomk.app://auth/callback?$quirk&state=${first.queryParameter("state")}") as SignInResult.Retry).url
+        server.enqueue(json(body = tokenBody()))
+        assertEquals(SignInResult.Completed, auth.completeSignIn("com.videomk.app://auth/callback?code=C&state=${retry.queryParameter("state")}"))
+        assertNotNull(store.load())
+        auth.beginSignIn(SignInProvider.Apple)
+        try { auth.completeSignIn("com.videomk.app://auth/callback?$quirk"); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }
+        assertFalse(auth.signInInProgress)
+    }
+
+    @Test fun `build switches decide which buttons are drawn, in order, with email always last`() {
+        assertEquals(listOf(SignInProvider.Email), SocialSwitches().options)
+        assertEquals(listOf(SignInProvider.Google, SignInProvider.Email), SocialSwitches(google = true).options)
+        assertEquals(listOf(SignInProvider.Apple, SignInProvider.Email), SocialSwitches(apple = true).options)
+        assertEquals(listOf(SignInProvider.Google, SignInProvider.Apple, SignInProvider.Email), SocialSwitches(true, true).options)
+        assertEquals("Sign in or create account", SignInProvider.Email.label(SocialSwitches().anySocial))   // off: today's wording
+        assertEquals("Continue with email", SignInProvider.Email.label(SocialSwitches(google = true).anySocial))
+        assertEquals("Continue with Google", SignInProvider.Google.label(true)); assertEquals("Continue with Apple", SignInProvider.Apple.label(true))
     }
 }

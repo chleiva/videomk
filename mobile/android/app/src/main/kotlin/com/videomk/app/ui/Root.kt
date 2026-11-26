@@ -41,6 +41,8 @@ import androidx.navigation.navArgument
 import com.videomk.app.AppContainer
 import com.videomk.app.BuildConfig
 import com.videomk.app.VideoMkApp
+import com.videomk.app.core.SignInProvider
+import com.videomk.app.core.SocialSwitches
 
 val LocalContainer = compositionLocalOf<AppContainer> { error("no container") }
 /** Same container, but null where a screen is shown without one (previews, tests). */
@@ -49,12 +51,12 @@ val LocalContainerOrNull = compositionLocalOf<AppContainer?> { null }
 /** Everything below the activity: which screen is shown for which session phase. */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun VideoMkRoot(app: AppViewModel, composer: ComposerViewModel, container: AppContainer, onSignIn: () -> Unit) {
+fun VideoMkRoot(app: AppViewModel, composer: ComposerViewModel, container: AppContainer, onSignIn: (SignInProvider) -> Unit, social: SocialSwitches = SocialSwitches()) {
     val state by app.state.collectAsState()
     Surface(Modifier.fillMaxSize().semantics { if (BuildConfig.DEBUG) testTagsAsResourceId = true }, color = Vmk.colors.background) {
         when (val phase = state.phase) {
             Phase.Launching -> FullScreenSpinner()
-            Phase.NotConfigured, Phase.SignedOut -> SignInScreen(state, onSignIn)
+            Phase.NotConfigured, Phase.SignedOut -> SignInScreen(state, social, onSignIn)
             is Phase.SignedIn -> androidx.compose.runtime.CompositionLocalProvider(LocalContainer provides container, LocalContainerOrNull provides container) { SignedInNav(app, composer, container, phase.email) }
         }
     }

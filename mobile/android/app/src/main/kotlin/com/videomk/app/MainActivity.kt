@@ -12,6 +12,8 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.videomk.app.core.SignInProvider
+import com.videomk.app.core.SocialSwitches
 import com.videomk.app.ui.AppViewModel
 import com.videomk.app.ui.ComposerViewModel
 import com.videomk.app.ui.VideoMkRoot
@@ -47,8 +49,9 @@ class MainActivity : ComponentActivity() {
             DebugHooks.mediaFiles(intent).takeIf { it.isNotEmpty() }?.let { files -> container.mediaUploads?.add(contentResolver, files.map { android.net.Uri.fromFile(java.io.File(it)) }) }
             handleAuthIntent(intent)
         }
+        lifecycleScope.launch { app.browserRequests.collect { openBrowser(it.toString()) } }
         setContent {
-            VideoMkTheme { VideoMkRoot(app, composer, container, onSignIn = ::signIn) }
+            VideoMkTheme { VideoMkRoot(app, composer, container, onSignIn = ::signIn, social = socialSwitches()) }
         }
     }
 
@@ -82,12 +85,21 @@ class MainActivity : ComponentActivity() {
         if (app.browserOpen) wasPausedForBrowser = true
     }
 
-    private fun signIn() {
-        val url = app.beginSignIn() ?: return
+    /** The build's switches; a debug build can force both on for screenshots (DebugHooks.social). */
+    private fun socialSwitches() = DebugHooks.social(this) ?: SocialSwitches(BuildConfig.VMK_AUTH_GOOGLE, BuildConfig.VMK_AUTH_APPLE)
+
+    private fun signIn(provider: SignInProvider) {
+        // a button that is switched off never reaches here, but a stale tap must not start a provider the build does not offer
+        if (provider !in socialSwitches().options) return
+        val url = app.beginSignIn(provider) ?: return
+        openBrowser(url.toString())
+    }
+
+    private fun openBrowser(url: String) {
         try {
             wasPausedForBrowser = false
             app.browserOpen = true
-            CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(this, Uri.parse(url.toString()))
+            CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(this, Uri.parse(url))
         } catch (e: ActivityNotFoundException) {
             app.browserOpen = false
             app.signInAbandoned()
@@ -99,7 +111,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleAuthIntent(intent: Intent?) {
         val data = intent?.data ?: return
-        if (data.scheme == "com.videomk.app" && data.host == "auth") {
+        if (data.scheme == "com.videomk.app" && data.host == "auth" && data.path == "/callback") {
             abandonCheck?.cancel()
             app.browserOpen = false
             app.onAuthCallback(data.toString())

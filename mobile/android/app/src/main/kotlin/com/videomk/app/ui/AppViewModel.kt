@@ -7,6 +7,8 @@ import com.videomk.app.core.SubmitOutcome
 import com.videomk.app.core.AppConfig
 import com.videomk.app.core.AuthException
 import com.videomk.app.core.AuthService
+import com.videomk.app.core.SignInProvider
+import com.videomk.app.core.SignInResult
 import com.videomk.app.core.Backend
 import com.videomk.app.core.Brief
 import com.videomk.app.core.PhotoMeta
@@ -21,7 +23,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -58,6 +62,8 @@ data class AppState(
     val completions: Int = 0,
     val signInError: String? = null,
     val isSigningIn: Boolean = false,
+    /** Which button started the running sign-in (it shows the spinner), null when none is running. */
+    val signInProvider: SignInProvider? = null,
     /** The last refresh could not reach the server: what is on screen may be out of date. */
     val offline: Boolean = false,
     val stageSince: Map<String, StageInfo> = emptyMap(),
@@ -122,17 +128,21 @@ class AppViewModel(
     // sign in / out
 
     /** The Cognito page to show in a Custom Tab, or null when sign-in is already running or the app isn't configured. */
-    fun beginSignIn(): HttpUrl? {
+    fun beginSignIn(provider: SignInProvider = SignInProvider.Email): HttpUrl? {
         val a = auth ?: return null
         if (_state.value.isSigningIn) return null
-        update { it.copy(isSigningIn = true, signInError = null) }
-        return a.beginSignIn()
+        update { it.copy(isSigningIn = true, signInProvider = provider, signInError = null) }
+        return a.beginSignIn(provider)
     }
+
+    /** Pages the activity must open in the Custom Tab besides the first one: the automatic retry of Cognito's "Already found an entry" quirk. */
+    private val _browserRequests = MutableSharedFlow<HttpUrl>(extraBufferCapacity = 1)
+    val browserRequests: SharedFlow<HttpUrl> = _browserRequests
 
     /** The user left the browser without finishing. Nothing to report. */
     fun signInAbandoned() {
         auth?.cancelSignIn()
-        update { it.copy(isSigningIn = false) }
+        update { it.copy(isSigningIn = false, signInProvider = null) }
     }
 
     fun onAuthCallback(callback: String) {
@@ -140,13 +150,18 @@ class AppViewModel(
         if (!a.signInInProgress) return   // a stray or repeated redirect
         viewModelScope.launch {
             try {
-                a.completeSignIn(callback)
-                val email = withContext(Dispatchers.IO) { a.email }
-                update { it.copy(phase = Phase.SignedIn(email), isSigningIn = false) }
+                when (val r = a.completeSignIn(callback)) {
+                    is SignInResult.Retry -> _browserRequests.emit(r.url)   // still signing in: the spinner stays
+                    SignInResult.Completed -> {
+                        val email = withContext(Dispatchers.IO) { a.email }
+                        update { it.copy(phase = Phase.SignedIn(email), isSigningIn = false, signInProvider = null) }
+                    }
+                }
             } catch (e: AuthException) {
-                update { it.copy(isSigningIn = false, signInError = if (e.kind == AuthException.Kind.Cancelled) null else SIGN_IN_FAILED) }
+                val message = when (e.kind) { AuthException.Kind.Cancelled -> null; AuthException.Kind.AccountLink -> ACCOUNT_LINK_FAILED; else -> SIGN_IN_FAILED }
+                update { it.copy(isSigningIn = false, signInProvider = null, signInError = message) }
             } catch (e: CancellationException) { throw e } catch (e: Exception) {
-                update { it.copy(isSigningIn = false, signInError = SIGN_IN_FAILED) }
+                update { it.copy(isSigningIn = false, signInProvider = null, signInError = SIGN_IN_FAILED) }
             }
         }
     }
@@ -308,5 +323,6 @@ class AppViewModel(
     companion object {
         const val POLL_MILLIS = 4000L
         const val SIGN_IN_FAILED = "We couldn't sign you in. Please try again."
+        const val ACCOUNT_LINK_FAILED = "We linked your accounts but couldn't finish signing you in. Please tap the button once more."
     }
 }

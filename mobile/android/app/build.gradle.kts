@@ -24,6 +24,10 @@ fun backend(prop: String, qa: String, prod: String): String {
     val useQa = providers.gradleProperty("vmkReleaseBackend").orNull == "qa"
     return if (useQa) qa else providers.gradleProperty(prop).orElse(prod).get()
 }
+// Social sign-in buttons (Google, Apple) through the Cognito hosted UI. OFF unless the owner passes -PvmkAuthGoogle=true / -PvmkAuthApple=true
+// (or sets them in ~/.gradle/gradle.properties): the identity providers must exist on the Cognito app client first (docs/AUTH_SOCIAL.md).
+val authGoogle = providers.gradleProperty("vmkAuthGoogle").orElse("false").get().toBoolean()
+val authApple = providers.gradleProperty("vmkAuthApple").orElse("false").get().toBoolean()
 val qaApi = "https://rj1uhfqld0.execute-api.eu-west-1.amazonaws.com/prod"
 val qaAuth = "https://videomk-qa-225438.auth.eu-west-1.amazoncognito.com"
 val qaClient = "5j3hia3hdqa5g3gob8np0t5421"
@@ -42,6 +46,8 @@ android {
         manifestPlaceholders["authScheme"] = "com.videomk.app"
         manifestPlaceholders["authHost"] = "auth"
         manifestPlaceholders["authPath"] = "/callback"
+        buildConfigField("boolean", "VMK_AUTH_GOOGLE", authGoogle.toString())
+        buildConfigField("boolean", "VMK_AUTH_APPLE", authApple.toString())
         buildConfigField("String", "AUTH_REDIRECT_URI", "\"com.videomk.app://auth/callback\"")
     }
 

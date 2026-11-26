@@ -18,4 +18,5 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun fakeIntake(context: android.content.Context): com.videomk.app.core.IntakeApi? = null
     @Suppress("UNUSED_PARAMETER") fun manyVideos(context: android.content.Context): Int = 0
     @Suppress("UNUSED_PARAMETER") fun emptyHome(context: android.content.Context): Boolean = false
+    @Suppress("UNUSED_PARAMETER") fun social(context: android.content.Context): com.videomk.app.core.SocialSwitches? = null
 }

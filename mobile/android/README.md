@@ -56,6 +56,10 @@ production is deployed, exactly like the iOS Release configuration: it starts an
 TestFlight equivalent, what you put on the Play internal testing track first) add `-PvmkReleaseBackend=qa`. When production exists, pass or set `vmkProdApiBase`,
 `vmkProdAuthDomain`, `vmkProdClientId` (gradle properties) or edit the defaults in `app/build.gradle.kts`.
 
+Social sign-in (Google, Apple) is built but OFF: pass `-PvmkAuthGoogle=true` and/or `-PvmkAuthApple=true` (BuildConfig `VMK_AUTH_GOOGLE` / `VMK_AUTH_APPLE`) once the
+Cognito identity providers exist. It is the same hosted-UI request plus `identity_provider=Google|SignInWithApple`. Debug builds can force the buttons for screenshots with
+`adb shell "run-as com.videomk.app sh -c 'echo both > files/fake_social'"` (both, google, apple).
+
 Sign in on the emulator through the real hosted page (email + password / verification code), or start signed in with the debug hook below.
 
 ## Tests

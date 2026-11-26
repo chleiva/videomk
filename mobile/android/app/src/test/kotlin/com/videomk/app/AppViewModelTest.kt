@@ -11,6 +11,9 @@ import com.videomk.app.core.VideoItem
 import com.videomk.app.core.VideoStatus
 import com.videomk.app.ui.AppState
 import com.videomk.app.ui.AppViewModel
+import com.videomk.app.core.SignInProvider
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
 import com.videomk.app.ui.LoadState
 import com.videomk.app.ui.Phase
 import kotlinx.coroutines.Dispatchers
@@ -228,5 +231,20 @@ class AppViewModelTest {
         assertEquals(AppViewModel.SIGN_IN_FAILED, s.signInError); assertEquals(Phase.SignedOut, s.phase)
         assertTrue(url.toString().contains("code_challenge"))
         a.beginSignIn(); a.signInAbandoned(); assertFalse(a.state.value.isSigningIn); assertNull(a.state.value.signInError)
+    }
+
+    @Test fun `the already-found-entry error opens the same provider page once more, keeps the spinner and the second one shows a message`() = runBlocking {
+        val a = vm(signedIn = false); a.start(); a.await { it.phase == Phase.SignedOut }
+        val first = a.beginSignIn(SignInProvider.Google)!!
+        assertEquals(SignInProvider.Google, a.state.value.signInProvider)
+        val quirk = "error=invalid_request&error_description=Already+found+an+entry+for+username+Google_1"
+        val next = async { a.browserRequests.first() }
+        kotlinx.coroutines.yield()
+        a.onAuthCallback("com.videomk.app://auth/callback?$quirk&state=${first.queryParameter("state")}")
+        val retry = kotlinx.coroutines.withTimeout(5000) { next.await() }
+        assertEquals("Google", retry.queryParameter("identity_provider")); assertTrue(a.state.value.isSigningIn)
+        a.onAuthCallback("com.videomk.app://auth/callback?$quirk&state=${retry.queryParameter("state")}")
+        val s = a.await { !it.isSigningIn }
+        assertEquals(AppViewModel.ACCOUNT_LINK_FAILED, s.signInError); assertEquals(Phase.SignedOut, s.phase)
     }
 }

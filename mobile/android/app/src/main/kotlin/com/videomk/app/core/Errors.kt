@@ -21,5 +21,5 @@ sealed class ApiError(final override val message: String) : Exception(message) {
 }
 
 class AuthException(val kind: Kind) : Exception(kind.name) {
-    enum class Kind { SignedOut, Cancelled, Failed }
+    enum class Kind { SignedOut, Cancelled, Failed, AccountLink }
 }

@@ -85,6 +85,36 @@ fun interface AuthorizationProviding {
 data class Authorization(val idToken: String, val userId: String)
 
 /**
+ * How the hosted UI is entered. [Email] shows the hosted page; the others add `identity_provider=<idp>` (case-sensitive, exactly as the Cognito
+ * identity provider is named) so the hosted page is skipped and the provider's own page opens in the same Custom Tab.
+ */
+enum class SignInProvider(val idp: String?) { Email(null), Google("Google"), Apple("SignInWithApple") }
+
+/** The wording on the button. Google and Apple use their approved "Continue with ..." wording; email keeps today's wording when no social button is shown. */
+fun SignInProvider.label(withSocial: Boolean): String = when (this) {
+    SignInProvider.Google -> "Continue with Google"
+    SignInProvider.Apple -> "Continue with Apple"
+    SignInProvider.Email -> if (withSocial) "Continue with email" else "Sign in or create account"
+}
+
+/** Which social buttons this build shows (BuildConfig switches, all off by default). Email is always there. */
+data class SocialSwitches(val google: Boolean = false, val apple: Boolean = false) {
+    /** The buttons in the order they are drawn: Google, Apple, then email. With both switches off this is just email, i.e. today's screen. */
+    val options: List<SignInProvider> get() = buildList {
+        if (google) add(SignInProvider.Google)
+        if (apple) add(SignInProvider.Apple)
+        add(SignInProvider.Email)
+    }
+    val anySocial: Boolean get() = google || apple
+}
+
+sealed interface SignInResult {
+    data object Completed : SignInResult
+    /** Cognito's known first-federated-sign-in quirk: the same authorize request is sent once more (with fresh PKCE and state). */
+    data class Retry(val url: HttpUrl) : SignInResult
+}
+
+/**
  * Cognito hosted UI with authorization code + PKCE. The browser (Custom Tab) is driven by the UI; this type builds the URL, exchanges the code,
  * stores and refreshes tokens.
  */
@@ -94,7 +124,7 @@ class AuthService(
     private val http: OkHttpClient,
     private val now: () -> Instant = { Instant.now() },
 ) : AuthorizationProviding {
-    private data class PendingSignIn(val pkce: PKCE, val state: String)
+    private data class PendingSignIn(val pkce: PKCE, val state: String, val provider: SignInProvider, val retried: Boolean)
 
     private val lock = Mutex()
     private var refreshJob: Deferred<Tokens>? = null
@@ -106,10 +136,12 @@ class AuthService(
 
     // sign in
 
-    fun beginSignIn(): HttpUrl {
+    fun beginSignIn(provider: SignInProvider = SignInProvider.Email): HttpUrl = authorizeUrl(provider, retried = false)
+
+    private fun authorizeUrl(provider: SignInProvider, retried: Boolean): HttpUrl {
         val pkce = PKCE.generate()
         val state = PKCE.generate().verifier
-        pending = PendingSignIn(pkce, state)
+        pending = PendingSignIn(pkce, state, provider, retried)
         return config.authDomain.newBuilder().addPathSegments("oauth2/authorize")
             .addQueryParameter("response_type", "code")
             .addQueryParameter("client_id", config.clientId)
@@ -118,6 +150,7 @@ class AuthService(
             .addQueryParameter("state", state)
             .addQueryParameter("code_challenge_method", "S256")
             .addQueryParameter("code_challenge", pkce.challenge)
+            .also { b -> provider.idp?.let { b.addQueryParameter("identity_provider", it) } }
             .build()
     }
 
@@ -125,19 +158,30 @@ class AuthService(
     val signInInProgress: Boolean get() = pending != null
 
     /** [callback] is the full redirect, e.g. `com.videomk.app://auth/callback?code=...&state=...` (not an http URL, so it is parsed here). */
-    suspend fun completeSignIn(callback: String) {
+    suspend fun completeSignIn(callback: String): SignInResult {
         val p = pending ?: throw AuthException(AuthException.Kind.Failed)
         pending = null
         val query = parseQuery(callback)
-        if (query["error"] != null) throw AuthException(AuthException.Kind.Cancelled)
-        val code = query["code"]
-        if (code == null || query["state"] != p.state) throw AuthException(AuthException.Kind.Failed)
+        // the state must match for every callback, error or not: a redirect that cannot prove it belongs to this sign-in is dropped
+        val state = query["state"]
+        if (state == null || !java.security.MessageDigest.isEqual(state.toByteArray(), p.state.toByteArray())) throw AuthException(AuthException.Kind.Failed)
+        if (query["error"] != null) {
+            if (isAlreadyFoundEntry(query["error_description"])) {
+                if (!p.retried) return SignInResult.Retry(authorizeUrl(p.provider, retried = true))   // once; a second occurrence is reported
+                throw AuthException(AuthException.Kind.AccountLink)
+            }
+            throw AuthException(AuthException.Kind.Cancelled)
+        }
+        val code = query["code"] ?: throw AuthException(AuthException.Kind.Failed)
         val t = tokenRequest(
             mapOf("grant_type" to "authorization_code", "client_id" to config.clientId, "code" to code, "redirect_uri" to config.redirectUri, "code_verifier" to p.pkce.verifier),
             previous = null,
         )
         store.save(t)
+        return SignInResult.Completed
     }
+
+    private fun isAlreadyFoundEntry(description: String?) = description?.contains("Already found an entry for username", ignoreCase = true) == true
 
     fun cancelSignIn() { pending = null }
 

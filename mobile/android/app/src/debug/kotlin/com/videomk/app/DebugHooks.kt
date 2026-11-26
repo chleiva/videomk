@@ -63,4 +63,10 @@ object DebugHooks {
 
     /** `files/fake_empty_home`: show the home as if there were no videos (the empty state cannot be reached with a QA account that has videos). */
     fun emptyHome(context: android.content.Context): Boolean = java.io.File(context.filesDir, "fake_empty_home").exists()
+
+    /** `files/fake_social` holds "both", "google" or "apple": show those social buttons whatever the build switches say (screenshots; no login is possible without provider credentials). */
+    fun social(context: android.content.Context): com.videomk.app.core.SocialSwitches? =
+        runCatching { java.io.File(context.filesDir, "fake_social").readText().trim() }.getOrNull()?.let {
+            com.videomk.app.core.SocialSwitches(google = it == "both" || it == "google", apple = it == "both" || it == "apple")
+        }
 }
