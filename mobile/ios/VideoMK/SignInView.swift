@@ -15,11 +15,11 @@ struct SignInView: View {
                     Spacer(minLength: 24)
                     VStack(spacing: 20) {
                         Image(systemName: "play.rectangle.fill")
-                            .font(.system(size: 64))
+                            .font(.vmk(64))
                             .foregroundStyle(Theme.gradient)
                             .accessibilityHidden(true)
                         Text("videomk")
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
+                            .font(.vmk(40, weight: .bold, design: .rounded))
                             .foregroundStyle(Theme.text)
                         Text(tr("signin.tagline"))
                             .font(.title3)

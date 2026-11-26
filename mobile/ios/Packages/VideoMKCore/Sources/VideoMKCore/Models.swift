@@ -111,6 +111,7 @@ public struct PlaybackInfo: Sendable, Equatable {
     public let url: URL
     /// Title-less description with chapters, linked image credits and sources.
     public let description: String?
+    public init(url: URL, description: String?) { self.url = url; self.description = description }
 }
 struct MessageResponse: Decodable { let message: String? ; let status: String? }
 

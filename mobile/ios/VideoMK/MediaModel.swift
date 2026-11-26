@@ -226,7 +226,7 @@ final class MediaModel {
         guard var s = summary else { return }
         let old = s.prefs.organize
         s.prefs.organize = pref; summary = s
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptics.play(.selection)
         Task { do { try await api.setOrganizePref(pref) } catch { if var s2 = summary { s2.prefs.organize = old; summary = s2 }; notice = (error as? LibraryAPIError)?.message ?? tr("media.err.save") } }
     }
 

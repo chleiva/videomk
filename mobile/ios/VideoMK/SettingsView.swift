@@ -15,7 +15,7 @@ struct SettingsView: View {
             List {
                 Section(tr("settings.account")) {
                     if case .signedIn(let email) = model.phase, let email { LabeledContent(tr("settings.signed_in_as"), value: email) }
-                    Button(tr("settings.sign_out"), role: .destructive) { confirmSignOut = true }.accessibilityIdentifier("signOutButton")
+                    Button(tr("settings.sign_out")) { confirmSignOut = true }.foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch).accessibilityIdentifier("signOutButton")      // not destructive: primary colour, not red
                 }
                 Section {
                     Button(role: .destructive) { showDelete = true } label: { Label { Text(tr("settings.delete_account")) } icon: { Image(systemName: "trash").foregroundStyle(.red) } }
@@ -40,7 +40,7 @@ struct SettingsView: View {
                 if let media = model.media {
                     Section {
                         VStack(alignment: .leading, spacing: 10) {
-                            Label(tr("settings.organize"), systemImage: "sparkles").font(.system(size: 16, weight: .semibold))
+                            Label(tr("settings.organize"), systemImage: "sparkles").font(.vmk(16, weight: .semibold))
                             Picker(tr("settings.organize"), selection: Binding(get: { media.organizePref }, set: { media.setOrganizePref($0) })) {
                                 ForEach(OrganizePref.allCases, id: \.self) { Text($0.title).tag($0) }
                             }
@@ -56,6 +56,8 @@ struct SettingsView: View {
                 }
                 Section(tr("settings.about")) {
                     LabeledContent(tr("settings.version"), value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
+                    Link(tr("settings.support"), destination: URL(string: "mailto:support@plorer.ai")!).accessibilityIdentifier("supportLink")
+                    Link(tr("legal.terms"), destination: URL(string: tr("legal.terms_url"))!).accessibilityIdentifier("termsLink")
                     Link(tr("legal.privacy"), destination: URL(string: tr("legal.privacy_url"))!)
                 }
             }

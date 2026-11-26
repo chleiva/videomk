@@ -230,7 +230,7 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.system(size: 15))
+            TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.vmk(15))
                 .focused($focused).submitLabel(.search).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .accessibilityIdentifier("mediaSearch")
             if feed.searching { ProgressView().controlSize(.small) }
@@ -253,7 +253,7 @@ struct ChipsRow: View {
                             HStack(spacing: 4) {
                                 Image(systemName: chip.kind == "place" ? "mappin.and.ellipse" : chip.kind == "date" ? "calendar" : "tag").font(.caption2)
                                 Text(chip.label).font(.footnote.weight(.medium)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-                                Image(systemName: "xmark").font(.system(size: 9, weight: .bold))
+                                Image(systemName: "xmark").font(.vmk(9, weight: .bold))
                             }
                             .padding(.horizontal, 10).padding(.vertical, 6)
                             .background(Theme.primary.opacity(0.15), in: RoundedRectangle(cornerRadius: 16, style: .continuous)).foregroundStyle(Theme.primary)
@@ -295,7 +295,7 @@ struct MediaMessage: View {
     let action: () -> Void
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 40)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
+            Image(systemName: symbol).font(.vmk(40)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
             Text(title).font(.headline).foregroundStyle(Theme.text)
             Text(text).font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
             if let button { Button(button, action: action).buttonStyle(.borderedProminent) }
@@ -309,7 +309,7 @@ struct EmptyLibrary: View {
     var readOnly = false
     var body: some View {
         VStack(spacing: 14) {
-            Image(systemName: "photo.stack").font(.system(size: 48)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
+            Image(systemName: "photo.stack").font(.vmk(48)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
             Text(tr("media.your_photos_in_one_private")).font(.title3.bold()).foregroundStyle(Theme.text).multilineTextAlignment(.center)
             Text(tr("media.add_photos_once_find_them"))
                 .font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
@@ -336,9 +336,9 @@ struct SelectionBar: View {
                 if !feed.photos.isEmpty {
                     let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
                     Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: all)) {
-                        UISelectionFeedbackGenerator().selectionChanged()
+                        Haptics.play(.selection)
                         Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
-                    }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44)
+                    }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44)
                         .accessibilityIdentifier("selectAll")
                 }
             }

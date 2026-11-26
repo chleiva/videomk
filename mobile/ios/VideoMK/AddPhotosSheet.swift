@@ -47,7 +47,7 @@ struct AddPhotosSheet: View {
 
     private func selectAllTapped() {
         guard let feed = currentFeed else { return }
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptics.play(.selection)
         Task {
             if SelectAll.allSelected(view: feed.photos.map(\.id), selected: librarySelection.ordered) { librarySelection.set(SelectAll.clear(view: feed.photos.map(\.id), selected: librarySelection.ordered)); return }
             let cap = selection.libraryCap
@@ -96,9 +96,9 @@ struct AddPhotosSheet: View {
 
     private var header: some View {
         HStack {
-            Text(tr("create.add_photos")).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+            Text(tr("create.add_photos")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
             Spacer()
-            Button(tr("common.cancel")) { dismiss() }.font(.system(size: 17)).frame(minWidth: 44, minHeight: 44).accessibilityIdentifier("addCancel")
+            Button(tr("common.cancel")) { dismiss() }.font(.vmk(17)).frame(minWidth: 44, minHeight: 44).accessibilityIdentifier("addCancel")
         }
         .padding(.horizontal, 20).padding(.top, 14)
     }
@@ -108,24 +108,24 @@ struct AddPhotosSheet: View {
         return VStack(spacing: 0) {
             Divider()
             Text(tr("add.location_data_is_removed_from"))
-                .font(.system(size: 11.5)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.top, 8)
+                .font(.vmk(11.5)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.top, 8)
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(sel.selected == 0 ? tr("add.choose_photos") : sel.title()).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text)
+                        Text(sel.selected == 0 ? tr("add.choose_photos") : sel.title()).font(.vmk(15, weight: .bold)).foregroundStyle(Theme.text)
                         if let label = selectAllLabel {
                             Text("·").foregroundStyle(Theme.textSecondary)
-                            Button(label) { selectAllTapped() }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 32).accessibilityIdentifier("selectAll")
+                            Button(label) { selectAllTapped() }.font(.vmk(15, weight: .semibold)).frame(minHeight: 32).accessibilityIdentifier("selectAll")
                         }
                     }
-                    Text(sel.subline(minutes: minutes)).font(.system(size: 12.5)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    Text(sel.subline(minutes: minutes)).font(.vmk(12.5)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityAddTraits(.updatesFrequently)
                 .accessibilityIdentifier("selectionSummary")
                 Spacer(minLength: 8)
                 Button { commit() } label: {
-                    Text(sel.buttonTitle()).font(.system(size: 17, weight: .semibold)).foregroundStyle(sel.selected == 0 ? Theme.textTertiary : .white)
+                    Text(sel.buttonTitle()).font(.vmk(17, weight: .semibold)).foregroundStyle(sel.selected == 0 ? Theme.textTertiary : .white)
                         .padding(.horizontal, 28).frame(minWidth: 96, minHeight: 48)
                         .background(sel.selected == 0 ? AnyShapeStyle(Theme.surface3) : AnyShapeStyle(Theme.gradient), in: Capsule())
                 }
@@ -156,18 +156,18 @@ struct AddPhotosSheet: View {
             MediaMessage(symbol: "photo.stack", title: tr("add.limit_chosen_title", PhotoLimits.maxPhotos), text: tr("add.you_have_chosen_the_most"), button: tr("add.open_my_media")) { source = .library }
         } else {
             VStack(spacing: 14) {
-                Image(systemName: "iphone.gen3").font(.system(size: 44)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
+                Image(systemName: "iphone.gen3").font(.vmk(44)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
                 Text(phoneItems.isEmpty ? tr("add.pick_from_phone") : tr("add.chosen_from_phone", phoneItems.count))
-                    .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.text)
+                    .font(.vmk(18, weight: .semibold)).foregroundStyle(Theme.text)
                 Text(tr("add.videomk_only_sees_the_photos"))
-                    .font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+                    .font(.vmk(15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                 PhotosPicker(selection: $phoneItems, maxSelectionCount: max(1, selection.phoneCap), selectionBehavior: .ordered, matching: .images, photoLibrary: .shared()) {
                     Text(phoneItems.isEmpty ? tr("add.choose_photos") : tr("add.change_selection")).font(.headline).frame(maxWidth: 260, minHeight: 48)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.primary)
                 .accessibilityIdentifier("phonePicker")
                 Text(tr("add.same_selection", PhotoLimits.maxPhotos))
-                    .font(.system(size: 13)).foregroundStyle(Theme.textTertiary).multilineTextAlignment(.center)
+                    .font(.vmk(13)).foregroundStyle(Theme.textTertiary).multilineTextAlignment(.center)
             }
             .padding(32).frame(maxWidth: .infinity)
         }
@@ -182,7 +182,7 @@ struct AddPhotosSheet: View {
     }
 
     private func showToast(_ text: String) {
-        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        Haptics.play(.warning)
         withAnimation(reduceMotion ? nil : .snappy) { toast = text }
         UIAccessibility.post(notification: .announcement, argument: text)
         Task { try? await Task.sleep(for: .seconds(4)); withAnimation { if toast == text { toast = nil } } }
@@ -190,7 +190,7 @@ struct AddPhotosSheet: View {
 
     @ViewBuilder private var toastView: some View {
         if let toast {
-            Text(toast).font(.system(size: 14.5)).foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 14)
+            Text(toast).font(.vmk(14.5)).foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(hex: 0x23263F), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .padding(.horizontal, 16).padding(.bottom, 130).transition(.move(edge: .bottom).combined(with: .opacity))
@@ -248,7 +248,7 @@ private struct LibraryChooser: View {
 
     private func chip(_ title: String, selected: Bool, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+            Text(title).font(.vmk(13.5, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 34)
                 .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(Theme.outline, lineWidth: selected ? 0 : 1))
@@ -271,9 +271,9 @@ private struct LibraryChooser: View {
                     else if media.summary?.readOnly == true { MediaMessage(symbol: "lock", title: tr("add.your_library_is_read_only"), text: tr("add.free_up_storage_in_the"), button: nil) {} }
                     else {
                         VStack(spacing: 14) {
-                            Image(systemName: "icloud.and.arrow.up").font(.system(size: 44)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
-                            Text(tr("add.your_private_library_is_empty")).font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.text)
-                            Text(tr("add.photos_you_add_here_can")).font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+                            Image(systemName: "icloud.and.arrow.up").font(.vmk(44)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
+                            Text(tr("add.your_private_library_is_empty")).font(.vmk(18, weight: .semibold)).foregroundStyle(Theme.text)
+                            Text(tr("add.photos_you_add_here_can")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                             PhotosPicker(selection: $addingToLibrary, maxSelectionCount: nil, matching: .images) { Text(tr("add.add_photos_to_my_media")).font(.headline).frame(maxWidth: 260, minHeight: 48) }
                                 .buttonStyle(.borderedProminent).accessibilityIdentifier("emptyAddToLibrary")
                         }.padding(32).frame(maxWidth: .infinity)

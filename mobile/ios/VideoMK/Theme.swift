@@ -5,30 +5,46 @@ import VideoMKCore
 enum Theme {
     static func dyn(_ light: UInt32, _ dark: UInt32) -> Color { Color(light: .init(hex: light), dark: .init(hex: dark)) }
 
-    static let background = dyn(0xF6F7FC, 0x0A0D1F)
-    static let surface = dyn(0xFFFFFF, 0x11152B)          // surface1: cards, composer, sheets
-    static let surfaceRaised = dyn(0xEEF0F9, 0x1A1F3B)    // surface2: fields, pills, tonal controls
-    static let surface3 = dyn(0xE2E5F4, 0x252B4D)         // disabled send, tracks, pressed
-    static let outline = dyn(0xDADDEE, 0x2A3157)
-    static let text = dyn(0x11142B, 0xF3F4FB)
-    static let textSecondary = dyn(0x565D78, 0xA2A9C5)
-    static let textTertiary = dyn(0x6C7290, 0x7C84A3)
-    static let primary = dyn(0x4F52E0, 0x9EA0FF)
-    static let onPrimary = dyn(0xFFFFFF, 0x0A0D1F)
-    static let primaryContainer = dyn(0xE8E9FF, 0x25295A)
-    static let secondary = Color(hex: 0x22D3EE)
-    static let success = dyn(0x127035, 0x4ADE80)
-    static let successContainer = dyn(0xDDF3E4, 0x12301F)
-    static let warning = dyn(0x9A4A06, 0xFBBF24)
-    static let warningContainer = dyn(0xFDF0DA, 0x3A2B0C)
-    static let danger = dyn(0xB91C1C, 0xF87171)
-    static let dangerContainer = dyn(0xFCE4E4, 0x3B1517)
-    static let gradientStart = dyn(0x5B5EF0, 0x8F92FF)
-    static let gradientEnd = dyn(0x8452F4, 0xAE8AFF)
-    static let makingStart = Color(hex: 0x2B2F9A)
-    static let makingEnd = Color(hex: 0x6A3FC4)
+    private static func role(_ r: DesignTokens.Role) -> Color { dyn(r.light, r.dark) }
+    static let background = role(DesignTokens.background)
+    static let surface = role(DesignTokens.surface)                 // surface1: cards, composer, sheets
+    static let surfaceRaised = role(DesignTokens.surface2)          // surface2: fields, pills, tonal controls
+    static let surface3 = role(DesignTokens.surface3)               // disabled send, tracks, pressed
+    static let outline = role(DesignTokens.outline)
+    static let text = role(DesignTokens.text)
+    static let textSecondary = role(DesignTokens.textSecondary)
+    static let textTertiary = role(DesignTokens.textTertiary)       // v2: AA on background and surface2
+    static let primary = role(DesignTokens.primary)
+    static let onPrimary = role(DesignTokens.onPrimary)
+    static let primaryContainer = role(DesignTokens.primaryContainer)
+    /// The one "it is alive" accent: live progress only.
+    static let live = Color(hex: DesignTokens.live)
+    static let secondary = live
+    static let success = role(DesignTokens.success)
+    static let successContainer = role(DesignTokens.successContainer)
+    static let warning = role(DesignTokens.warning)
+    static let warningContainer = role(DesignTokens.warningContainer)
+    static let danger = role(DesignTokens.danger)
+    static let dangerContainer = role(DesignTokens.dangerContainer)
+    static let gradientStart = role(DesignTokens.gradientStart)
+    static let gradientEnd = role(DesignTokens.gradientEnd)
+    static let makingStart = Color(hex: DesignTokens.makingStart)
+    static let makingEnd = Color(hex: DesignTokens.makingEnd)
 
-    static let radius: CGFloat = 16
+    // Spacing, radii, sizes (one place: DesignTokens).
+    enum Space { static let xs = CGFloat(DesignTokens.Space.xs), s = CGFloat(DesignTokens.Space.s), m = CGFloat(DesignTokens.Space.m), l = CGFloat(DesignTokens.Space.l), xl = CGFloat(DesignTokens.Space.xl), xxl = CGFloat(DesignTokens.Space.xxl), xxxl = CGFloat(DesignTokens.Space.xxxl) }
+    enum Radii { static let field = CGFloat(DesignTokens.Radius.field), thumb = CGFloat(DesignTokens.Radius.thumb), card = CGFloat(DesignTokens.Radius.card), videoCard = CGFloat(DesignTokens.Radius.videoCard), composer = CGFloat(DesignTokens.Radius.composer), sheet = CGFloat(DesignTokens.Radius.sheet) }
+    static let minTouch = CGFloat(DesignTokens.Size.minTouch)
+    /// Motion tokens; `Motion.animation(_, reduced:)` gives nil under Reduce Motion for movement, a short fade otherwise.
+    enum Motion {
+        static let press = Animation.easeOut(duration: DesignTokens.Motion.press)
+        static let select = Animation.easeOut(duration: DesignTokens.Motion.select)
+        static let insert = Animation.easeOut(duration: DesignTokens.Motion.insert)
+        static let fade = Animation.easeOut(duration: DesignTokens.Motion.reducedFade)
+        static func animation(_ a: Animation, reduced: Bool) -> Animation { reduced ? fade : a }
+    }
+
+    static let radius: CGFloat = Radii.card
     static let gradient = LinearGradient(colors: [gradientStart, gradientEnd], startPoint: .topLeading, endPoint: .bottomTrailing)
     static let makingGradient = LinearGradient(colors: [makingStart, makingEnd], startPoint: .topLeading, endPoint: .bottomTrailing)
     /// Always dark, under white text on pictures.
@@ -49,7 +65,7 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.onPrimary)
             .frame(maxWidth: .infinity, minHeight: 50)
             .background(Theme.gradient.opacity(isEnabled ? 1 : 0.4), in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
             .opacity(configuration.isPressed ? 0.85 : 1)
@@ -88,7 +104,7 @@ struct FixChip: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            chipLabel.font(.system(size: 13, weight: .bold)).foregroundStyle(tint).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 7)
+            chipLabel.font(.vmk(13, weight: .bold)).foregroundStyle(tint).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 7)
                 .frame(minHeight: 32).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
@@ -98,7 +114,7 @@ struct FixChip: View {
     /// "Use 1 min · ⚡1": the bolt is the app's own symbol, not the emoji.
     @ViewBuilder private var chipLabel: some View {
         let parts = title.components(separatedBy: " · ⚡")
-        if parts.count == 2 { HStack(spacing: 3) { Text(parts[0] + " ·"); Image(systemName: "bolt.fill").font(.system(size: 11)); Text(parts[1]) } }
+        if parts.count == 2 { HStack(spacing: 3) { Text(parts[0] + " ·"); Image(systemName: "bolt.fill").font(.vmk(11)); Text(parts[1]) } }
         else { Text(title) }
     }
 }
@@ -114,5 +130,17 @@ struct Shake: GeometryEffect {
     func effectValue(size: CGSize) -> ProjectionTransform {
         let phase = value - value.rounded(.down)
         return ProjectionTransform(CGAffineTransform(translationX: travel * sin(phase * .pi * 4), y: 0))
+    }
+}
+
+/// The only moments that vibrate (DesignTokens.Haptic): send, selection, warning, video ready, upload done.
+enum Haptics {
+    static func play(_ h: DesignTokens.Haptic) {
+        switch h {
+        case .send: UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        case .selection: UISelectionFeedbackGenerator().selectionChanged()
+        case .warning: UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        case .videoReady, .uploadDone: UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
     }
 }

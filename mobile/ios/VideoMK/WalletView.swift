@@ -7,48 +7,55 @@ struct WalletView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            ScrollView {
                 if let w = model.wallet {
-                    Section {
-                        VStack(spacing: 4) {
-                            Text(w.unlimited ? "∞" : Localization.shared.number(w.balance)).font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Theme.text)
-                            Text(w.unlimited ? tr("wallet.unlimited") : tr("wallet.unit", w.balance)).foregroundStyle(Theme.textSecondary)
+                    VStack(alignment: .leading, spacing: 20) {
+                        WalletHero(balance: w.balance, unlimited: w.unlimited, nextFree: w.nextFreeAt.map { tr("wallet.next_free", Localization.shared.relative($0)) })
+                        VStack(alignment: .leading, spacing: 12) {
+                            heading(tr("wallet.cost_title"))
+                            CostExplainer().padding(16).frame(maxWidth: .infinity, alignment: .leading).background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
                         }
-                        .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .accessibilityElement(children: .combine)
-                    }
-                    Section(tr("wallet.what_you_have")) {
-                        ForEach(Array(w.buckets.enumerated()), id: \.offset) { _, b in
-                            LabeledContent {
-                                Text(Localization.shared.number(b.remaining)).font(.body.monospacedDigit())
-                            } label: {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(Self.title(b.kind))
-                                    if let d = Self.expiry(b) { Text(d).font(.caption).foregroundStyle(Theme.textSecondary) }
+                        VStack(alignment: .leading, spacing: 12) {
+                            heading(tr("wallet.what_you_have"))
+                            VStack(spacing: 0) {
+                                ForEach(Array(w.buckets.enumerated()), id: \.offset) { i, b in
+                                    if i > 0 { Divider().padding(.leading, 16) }
+                                    bucketRow(b)
                                 }
+                                if w.buckets.isEmpty { Text(tr("wallet.none")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).padding(16).frame(maxWidth: .infinity, alignment: .leading) }
                             }
+                            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+                            Label(tr("wallet.daily_free", w.dailyCredits), systemImage: "gift").font(.vmk(14)).foregroundStyle(Theme.textSecondary).labelStyle(.titleAndIcon)
                         }
-                        if w.buckets.isEmpty { Text(tr("wallet.none")).foregroundStyle(Theme.textSecondary) }
                     }
-                    Section {
-                        if let next = w.nextFreeAt {
-                            Label(tr("wallet.next_free", Localization.shared.relative(next)), systemImage: "clock")
-                        }
-                        Label(tr("wallet.daily_free", w.dailyCredits), systemImage: "gift")
-                    } footer: {
-                        Text(tr("wallet.rules"))
-                    }
-                    Section { Button(tr("wallet.get_more")) {}.disabled(true) } footer: { Text(tr("wallet.coming_soon")) }
+                    .padding(Theme.Space.l)
                 } else {
-                    ProgressView().frame(maxWidth: .infinity)
+                    ProgressView().frame(maxWidth: .infinity).padding(.top, 60)
                 }
             }
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle(tr("wallet.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
             .task { await model.refreshWallet() }
         }
         .presentationDetents([.medium, .large])
+    }
+
+    private func heading(_ t: String) -> some View {
+        Text(t.uppercased()).font(.vmk(12, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textTertiary).accessibilityAddTraits(.isHeader)
+    }
+
+    private func bucketRow(_ b: WalletBucket) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Self.title(b.kind)).font(.vmk(17)).foregroundStyle(Theme.text)
+                if let d = Self.expiry(b) { Text(d).font(.vmk(13)).foregroundStyle(Theme.textSecondary) }
+            }
+            Spacer(minLength: 8)
+            Text(Localization.shared.number(b.remaining)).font(.vmk(17, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
+        }
+        .padding(16).frame(minHeight: Theme.minTouch).accessibilityElement(children: .combine)
     }
 
     static func title(_ k: WalletBucket.Kind) -> String {

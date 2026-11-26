@@ -11,6 +11,7 @@ struct VideoMKApp: App {
                 .environment(model)
                 .tint(Theme.primary)
                 .modifier(LocalizedRoot())
+                .dynamicTypeSize(...DynamicTypeSize.appMax)
                 .task { await model.start() }
         }
     }

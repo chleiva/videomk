@@ -101,6 +101,12 @@ public enum MakingProgress {
         public let segments: [Double]      // fill of each step, 0...1
         public let current: Int
         public let line: String
+        /// The same sentence without the time ("Recording the voice and drawing the pictures."), and the time on its own ("About 2 min left.").
+        public let what: String
+        public let eta: String
+        public init(segments: [Double], current: Int, line: String, what: String? = nil, eta: String = "") {
+            self.segments = segments; self.current = current; self.line = line; self.what = what ?? line; self.eta = eta
+        }
     }
 
     public static func info(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double) -> Info {
@@ -116,15 +122,21 @@ public enum MakingProgress {
         case .voiceAndVisuals: what = tr("making.line.voice_visuals")
         case .rendering: what = tr("making.line.rendering")
         }
-        return Info(segments: segs, current: current, line: "\(what) \(timeLeft(stage: stage, secondsInStage: secondsInStage, minutes: minutes))")
+        let eta = timeLeft(stage: stage, secondsInStage: secondsInStage, minutes: minutes)
+        return Info(segments: segs, current: current, line: "\(what) \(eta)", what: what, eta: eta)
+    }
+
+    /// Whole minutes left (rounded up) from the typical stage times; nil when under a minute.
+    public static func minutesLeft(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double) -> Int? {
+        var left = max(0, ProgressEstimator.expectedSeconds(stage, minutes: minutes) - secondsInStage)
+        for s in VideoStatus.Stage.allCases where s > stage { left += ProgressEstimator.expectedSeconds(s, minutes: minutes) }
+        return left < 60 ? nil : Int((left / 60).rounded(.up))
     }
 
     /// Remaining of the typical stage times; rounded up to whole minutes, never "0 min".
     public static func timeLeft(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double) -> String {
-        var left = max(0, ProgressEstimator.expectedSeconds(stage, minutes: minutes) - secondsInStage)
-        for s in VideoStatus.Stage.allCases where s > stage { left += ProgressEstimator.expectedSeconds(s, minutes: minutes) }
-        if left < 60 { return tr("making.time_less_than_minute") }
-        return tr("making.time_about_minutes", Int((left / 60).rounded(.up)))
+        guard let m = minutesLeft(stage: stage, secondsInStage: secondsInStage, minutes: minutes) else { return tr("making.time_less_than_minute") }
+        return tr("making.time_about_minutes", m)
     }
 }
 

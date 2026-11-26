@@ -25,9 +25,9 @@ struct UploadBatchSection: View {
                 }
             } header: {
                 HStack {
-                    Text(tr("upload.adding_title", all.count)).font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text)
+                    Text(tr("upload.adding_title", all.count)).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text)
                     Spacer()
-                    Text(tr("upload.newest_first")).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.newest_first")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
                 }
                 .padding(.horizontal, 16).padding(.vertical, 10)
                 .accessibilityElement(children: .ignore)
@@ -114,25 +114,25 @@ struct UploadTile: View {
                 VStack { Spacer(); HStack { glass(media.waiting ? tr("upload.getting_it_ready") : tr("upload.taking_longer_than_usual"), symbol: "sparkles"); Spacer() } }.padding(8)
             }
         case .done:
-            if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(.white, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
+            if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.vmk(12, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(.white, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
         case .failed:
             Color(red: 0.72, green: 0.11, blue: 0.11).opacity(0.55)
             VStack(spacing: 6) {
-                Image(systemName: "arrow.clockwise").font(.system(size: 18, weight: .semibold)).foregroundStyle(.white).frame(width: 44, height: 44).background(.white.opacity(0.25), in: Circle())
-                Text(tr("upload.tap_to_retry")).font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
+                Image(systemName: "arrow.clockwise").font(.vmk(18, weight: .semibold)).foregroundStyle(.white).frame(width: 44, height: 44).background(.white.opacity(0.25), in: Circle())
+                Text(tr("upload.tap_to_retry")).font(.vmk(11, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
             }
         case .alreadyThere:
             Color(navy).opacity(0.38)
-            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)); Text(tr("upload.already_there")).font(.system(size: 11, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
+            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.vmk(10, weight: .bold)); Text(tr("upload.already_there")).font(.vmk(11, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
         }
     }
 
     private func badge(_ symbol: String) -> some View {
-        Image(systemName: symbol).font(.system(size: 11, weight: .bold)).foregroundStyle(.white).frame(width: 24, height: 24).background(Color.black.opacity(0.5), in: Circle())
+        Image(systemName: symbol).font(.vmk(11, weight: .bold)).foregroundStyle(.white).frame(width: 24, height: 24).background(Color.black.opacity(0.5), in: Circle())
     }
 
     private func glass(_ text: String, symbol: String) -> some View {
-        HStack(spacing: 4) { Image(systemName: symbol).font(.system(size: 10)); Text(text).font(.system(size: 11, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
+        HStack(spacing: 4) { Image(systemName: symbol).font(.vmk(10)); Text(text).font(.vmk(11, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
             .foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
     }
 }
@@ -148,7 +148,7 @@ struct ProgressRing: View {
                 Circle().fill(Color.black.opacity(0.3))
                 Circle().stroke(.white.opacity(0.35), lineWidth: 3)
                 Circle().trim(from: 0, to: 0.28).stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round)).rotationEffect(.degrees(angle - 90))
-                Image(systemName: symbol).font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
+                Image(systemName: symbol).font(.vmk(15, weight: .semibold)).foregroundStyle(.white)
             }
             .frame(width: 44, height: 44)
         }
@@ -207,20 +207,20 @@ struct UploadBar: View {
                     ZStack {
                         Circle().stroke(Theme.surface3, lineWidth: 4)
                         Circle().trim(from: 0, to: max(0.04, bar.fraction)).stroke(tint(bar), style: StrokeStyle(lineWidth: 4, lineCap: .round)).rotationEffect(.degrees(-90))
-                        Image(systemName: bar.kind == .offline ? "icloud.slash" : "icloud.and.arrow.up").font(.system(size: 15, weight: .semibold)).foregroundStyle(tint(bar))
+                        Image(systemName: bar.kind == .offline ? "icloud.slash" : "icloud.and.arrow.up").font(.vmk(15, weight: .semibold)).foregroundStyle(tint(bar))
                     }.frame(width: 40, height: 40)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(bar.title).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text).lineLimit(1)
-                        Text(bar.subtitle).font(.system(size: 13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+                        Text(bar.title).font(.vmk(15, weight: .bold)).foregroundStyle(Theme.text).lineLimit(1)
+                        Text(bar.subtitle).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
                     }
                     Spacer(minLength: 4)
                     if bar.kind == .needsAttention {
-                        Text(tr("upload.review")).font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.primary)
+                        Text(tr("upload.review")).font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.primary)
                     } else if bar.kind != .storageFull {
-                        Button { p.paused ? media.resumeUploads() : media.pauseUploads() } label: { Image(systemName: p.paused ? "play.fill" : "pause.fill").font(.system(size: 17)).foregroundStyle(Theme.text).frame(width: 44, height: 44) }
+                        Button { p.paused ? media.resumeUploads() : media.pauseUploads() } label: { Image(systemName: p.paused ? "play.fill" : "pause.fill").font(.vmk(17)).foregroundStyle(Theme.text).frame(width: 44, height: 44) }
                             .buttonStyle(.plain).accessibilityLabel(p.paused ? tr("upload.resume_uploads") : tr("upload.pause_uploads")).accessibilityIdentifier("pauseUploads")
                     }
-                    Image(systemName: media.barExpanded ? "chevron.down" : "chevron.up").font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 36, height: 44)
+                    Image(systemName: media.barExpanded ? "chevron.down" : "chevron.up").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 36, height: 44)
                 }
                 .padding(.horizontal, 14).padding(.vertical, 2)
                 .contentShape(Rectangle())
@@ -240,17 +240,17 @@ struct UploadBar: View {
     private func storageCard(_ bar: UploadBarState) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "exclamationmark.triangle").font(.system(size: 18)).foregroundStyle(Theme.warning).frame(width: 40, height: 40).background(Theme.warningContainer, in: Circle())
+                Image(systemName: "exclamationmark.triangle").font(.vmk(18)).foregroundStyle(Theme.warning).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.warningContainer, in: Circle())
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(bar.title).font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.text)
-                    Text(bar.subtitle).font(.system(size: 14)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
-                    if let m = media.meter { Text(m.label).font(.system(size: 12.5).monospacedDigit()).foregroundStyle(Theme.warning).padding(.top, 2) }
+                    Text(bar.title).font(.vmk(16, weight: .bold)).foregroundStyle(Theme.text)
+                    Text(bar.subtitle).font(.vmk(14)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    if let m = media.meter { Text(m.label).font(.vmk(12.5).monospacedDigit()).foregroundStyle(Theme.warning).padding(.top, 2) }
                 }
             }
             HStack(spacing: 10) {
-                Button(action: onManageStorage) { Text(tr("upload.manage_storage")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.onPrimary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule()) }
+                Button(action: onManageStorage) { Text(tr("upload.manage_storage")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.onPrimary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule()) }
                     .buttonStyle(.plain).accessibilityIdentifier("manageStorage")
-                Button { withAnimation(.snappy) { storageNotNow = true } } label: { Text(tr("organize.not_now")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
+                Button { withAnimation(.snappy) { storageNotNow = true } } label: { Text(tr("organize.not_now")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
                     .buttonStyle(.plain)
             }
         }
@@ -274,28 +274,28 @@ struct UploadPanel: View {
             let failed = media.queueItems.filter { $0.state == .failed }
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
-                    Image(systemName: "icloud.and.arrow.up").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.primary).frame(width: 40, height: 40).background(Circle().stroke(Theme.surface3, lineWidth: 4))
+                    Image(systemName: "icloud.and.arrow.up").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Circle().stroke(Theme.surface3, lineWidth: 4))
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(bar.title).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text)
-                        Text(bar.subtitle).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                        Text(bar.title).font(.vmk(15, weight: .bold)).foregroundStyle(Theme.text)
+                        Text(bar.subtitle).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
-                    Button(action: onClose) { Image(systemName: "chevron.down").font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }.accessibilityLabel(tr("upload.collapse"))
+                    Button(action: onClose) { Image(systemName: "chevron.down").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }.accessibilityLabel(tr("upload.collapse"))
                 }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: typeSize.isAccessibilitySize ? 2 : 4), spacing: 8) {
                     stat(bar.added, tr("upload.stat_added")); stat(bar.gettingReady, tr("upload.stat_getting_ready")); stat(bar.waiting, tr("upload.stat_waiting")); stat(bar.needYou, tr("upload.stat_need_you"), danger: bar.needYou > 0)
                 }
                 if !failed.isEmpty {
-                    Text(tr("upload.needs_attention")).font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.needs_attention")).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
                     ForEach(Array(failed.prefix(4).enumerated()), id: \.element.id) { n, item in failedRow(item, n) }
-                    if failed.count > 4 { Text(tr("upload.and_more", failed.count - 4)).font(.system(size: 13)).foregroundStyle(Theme.textSecondary) }
+                    if failed.count > 4 { Text(tr("upload.and_more", failed.count - 4)).font(.vmk(13)).foregroundStyle(Theme.textSecondary) }
                 }
-                Text(tr("upload.you_can_close_the_app")).font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
+                Text(tr("upload.you_can_close_the_app")).font(.vmk(14)).foregroundStyle(Theme.textSecondary)
                 HStack {
-                    Button(tr("media.cancel_remaining"), role: .destructive, action: cancel).font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.danger).frame(minHeight: 44)
+                    Button(tr("media.cancel_remaining"), role: .destructive, action: cancel).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.danger).frame(minHeight: 44)
                     Spacer()
                     Button { media.upload.paused ? media.resumeUploads() : media.pauseUploads() } label: {
-                        Label(media.upload.paused ? tr("upload.resume_all") : tr("upload.pause_all"), systemImage: media.upload.paused ? "play.fill" : "pause.fill").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.primary)
+                        Label(media.upload.paused ? tr("upload.resume_all") : tr("upload.pause_all"), systemImage: media.upload.paused ? "play.fill" : "pause.fill").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.primary)
                             .padding(.horizontal, 18).frame(minHeight: 48).background(Theme.primaryContainer, in: Capsule())
                     }.buttonStyle(.plain)
                 }
@@ -312,8 +312,8 @@ struct UploadPanel: View {
 
     private func stat(_ n: Int, _ label: String, danger: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("\(n)").font(.system(size: 24, weight: .bold).monospacedDigit()).foregroundStyle(danger ? Theme.danger : Theme.text)
-            Text(label).font(.system(size: 13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+            Text("\(n)").font(.vmk(24, weight: .bold).monospacedDigit()).foregroundStyle(danger ? Theme.danger : Theme.text)
+            Text(label).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
         }
         .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading).padding(.horizontal, 10)
         .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -324,11 +324,11 @@ struct UploadPanel: View {
         HStack(spacing: 12) {
             FailedThumb(item: item, media: media)
             VStack(alignment: .leading, spacing: 1) {
-                Text(item.file.hasSuffix(".jpg") && item.file.count < 24 ? item.file : tr("attach.photo_n", n + 1)).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
-                Text(item.reason ?? tr("upload.connection_dropped")).font(.system(size: 13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true)
+                Text(item.file.hasSuffix(".jpg") && item.file.count < 24 ? item.file : tr("attach.photo_n", n + 1)).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                Text(item.reason ?? tr("upload.connection_dropped")).font(.vmk(13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
-            Button { media.retryItem(item.id) } label: { Text(tr("upload.retry")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
+            Button { media.retryItem(item.id) } label: { Text(tr("upload.retry")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
                 .buttonStyle(.plain).accessibilityIdentifier("retryItem")
         }
     }
@@ -353,10 +353,10 @@ struct UploadToast: View {
     let onDismiss: () -> Void
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill").font(.system(size: 20)).foregroundStyle(Color(hex: 0x4ADE80))
-            Text(toast.text).font(.system(size: 14.5)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
+            Image(systemName: "checkmark.circle.fill").font(.vmk(20)).foregroundStyle(Color(hex: 0x4ADE80))
+            Text(toast.text).font(.vmk(14.5)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 4)
-            if let action = toast.action { Button(action: action == tr("upload.review") || action == tr("org.view") ? onAction : onDismiss) { Text(action).font(.system(size: 14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
+            if let action = toast.action { Button(action: action == tr("upload.review") || action == tr("org.view") ? onAction : onDismiss) { Text(action).font(.vmk(14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
         }
         .padding(.leading, 14).padding(.trailing, 8).frame(minHeight: 52)
         .background(Color(hex: 0x23263F), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -375,9 +375,9 @@ struct UploadPill: View {
         if let ob = media.organizeBar, media.bar == nil || media.bar?.kind == .finished {
             Button(action: onTap) {
                 HStack(spacing: 8) {
-                    Image(systemName: "sparkles").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.primary)
-                    Text(ob.kind == .running ? ob.title.replacingOccurrences(of: "…", with: "") : ob.title).font(.system(size: 14, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
-                    Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
+                    Image(systemName: "sparkles").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.primary)
+                    Text(ob.kind == .running ? ob.title.replacingOccurrences(of: "…", with: "") : ob.title).font(.vmk(14, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
+                    Image(systemName: "chevron.right").font(.vmk(11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
                 }
                 .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).elevation(2).frame(minHeight: 44)
             }
@@ -385,9 +385,9 @@ struct UploadPill: View {
         } else if let bar = media.bar, bar.kind != .finished {
             Button(action: onTap) {
                 HStack(spacing: 8) {
-                    Image(systemName: "icloud.and.arrow.up").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.primary)
-                    Text(bar.title).font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
-                    Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
+                    Image(systemName: "icloud.and.arrow.up").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.primary)
+                    Text(bar.title).font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                    Image(systemName: "chevron.right").font(.vmk(11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
                 }
                 .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).elevation(2)
                 .frame(minHeight: 44)

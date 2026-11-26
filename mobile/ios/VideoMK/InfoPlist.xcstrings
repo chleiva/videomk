@@ -51,6 +51,23 @@
           }
         }
       }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "videomk saves a finished video to your Photos only when you tap Save to Photos."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "videomk guarda un video terminado en Fotos solo cuando tocas Guardar en Fotos."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

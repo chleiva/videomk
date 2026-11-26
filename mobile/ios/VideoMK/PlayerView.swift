@@ -113,7 +113,7 @@ struct InlinePlayer: View {
                 FullScreen.present(player, landscape: landscape) { fullScreen = false }
             } label: {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
-                    .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                    .font(.vmk(15, weight: .bold)).foregroundStyle(.white)
                     .frame(width: 40, height: 40)
                     .background(.black.opacity(0.55), in: Circle())
             }

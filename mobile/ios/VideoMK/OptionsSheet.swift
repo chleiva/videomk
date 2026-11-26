@@ -13,9 +13,9 @@ struct OptionsSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(tr("options.video_options")).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("options.video_options")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button(tr("common.done")) { dismiss() }.font(.system(size: 17, weight: .semibold)).frame(minWidth: 44, minHeight: 44)
+                Button(tr("common.done")) { dismiss() }.font(.vmk(17, weight: .semibold)).frame(minWidth: 44, minHeight: 44)
             }
             .padding(.horizontal, 20).padding(.top, 12)
             ScrollView {
@@ -24,7 +24,7 @@ struct OptionsSheet: View {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 3), spacing: 10) {
                         ForEach(CreateOptions.lengths, id: \.self) { lengthCard($0) }
                     }
-                    Text(balance.map { tr("options.cost_note_balance", $0) } ?? tr("options.cost_note")).font(.system(size: 14)).foregroundStyle(Theme.textSecondary).padding(.top, 2)
+                    Text(balance.map { tr("options.cost_note_balance", $0) } ?? tr("options.cost_note")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).padding(.top, 2)
                     overline(tr("create.look")).padding(.top, 18)
                     HStack(alignment: .top, spacing: 10) {
                         swatch(nil, title: tr("create.look_auto"))
@@ -32,7 +32,7 @@ struct OptionsSheet: View {
                     }
                     Divider().padding(.top, 14)
                     Toggle(isOn: $options.captions) {
-                        Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.system(size: 17)).foregroundStyle(Theme.text)
+                        Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.vmk(17)).foregroundStyle(Theme.text)
                     }
                     .tint(Theme.primary).frame(minHeight: 56)
                     .accessibilityIdentifier("subtitlesToggle")
@@ -41,9 +41,9 @@ struct OptionsSheet: View {
             }
             Button { dismiss() } label: {
                 HStack(spacing: 6) {
-                    Text(tr("common.done") + " ·"); Image(systemName: "bolt.fill").font(.system(size: 14)); Text(tr("credits.count", options.credits))
+                    Text(tr("common.done") + " ·"); Image(systemName: "bolt.fill").font(.vmk(14)); Text(tr("credits.count", options.credits))
                 }
-                .font(.system(size: 17, weight: .semibold)).foregroundStyle(affordable ? Theme.onPrimary : Theme.warning)
+                .font(.vmk(17, weight: .semibold)).foregroundStyle(affordable ? Theme.onPrimary : Theme.warning)
                 .frame(maxWidth: .infinity, minHeight: 52)
                 .background(affordable ? AnyShapeStyle(Theme.gradient) : AnyShapeStyle(Theme.warningContainer), in: Capsule())
                 .overlay(Capsule().stroke(Theme.warning, lineWidth: affordable ? 0 : 1.5))
@@ -58,17 +58,17 @@ struct OptionsSheet: View {
     }
 
     private func overline(_ t: String) -> some View {
-        Text(t.uppercased()).font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).accessibilityAddTraits(.isHeader)
+        Text(t.uppercased()).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).accessibilityAddTraits(.isHeader)
     }
 
     private func lengthCard(_ m: Double) -> some View {
         let selected = options.minutes == m
         let credits = ComposerPlan.credits(forMinutes: m)
         let costly = balance.map { credits > $0 } ?? false
-        return Button { options.minutes = m; UISelectionFeedbackGenerator().selectionChanged() } label: {
+        return Button { options.minutes = m; Haptics.play(.selection) } label: {
             VStack(spacing: 2) {
-                Text(LengthLabel.chip(m)).font(.system(size: 17, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text)
-                HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.system(size: 10)); Text("\(credits)").font(.system(size: 12.5).monospacedDigit()) }
+                Text(LengthLabel.chip(m)).font(.vmk(17, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text)
+                HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.vmk(10)); Text("\(credits)").font(.vmk(12.5).monospacedDigit()) }
                     .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
             }
             .frame(maxWidth: .infinity, minHeight: 62)
@@ -83,14 +83,14 @@ struct OptionsSheet: View {
 
     private func swatch(_ look: VideoLook?, title: String) -> some View {
         let selected = options.look == look
-        return Button { options.look = look; UISelectionFeedbackGenerator().selectionChanged() } label: {
+        return Button { options.look = look; Haptics.play(.selection) } label: {
             VStack(spacing: 6) {
                 LookSwatch(look: look).aspectRatio(3 / 3.6, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
                     .padding(selected ? 3 : 0)
                     .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
-                Text(title).font(.system(size: 15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.7)
+                Text(title).font(.vmk(15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.7)
             }
         }
         .buttonStyle(.plain)
@@ -109,7 +109,7 @@ struct LookSwatch: View {
             switch look {
             case nil:
                 Theme.primaryContainer
-                Image(systemName: "sparkles").font(.system(size: 26)).foregroundStyle(Theme.primary)
+                Image(systemName: "sparkles").font(.vmk(26)).foregroundStyle(Theme.primary)
             case .midnight?:
                 LinearGradient(colors: [Color(hex: 0x1C2150), Color(hex: 0x0C0F28)], startPoint: .top, endPoint: .bottom)
                 lines([Color(hex: 0xB9BBFF), Color(hex: 0x7C80FF), Color(hex: 0x5F63F0)])

@@ -12,9 +12,9 @@ struct CollectionsStrip: View {
         VStack(alignment: .leading, spacing: 4) {
         if !media.collections.isEmpty {
             HStack {
-                Text(tr("viewer.collections")).font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("viewer.collections")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.system(size: 14.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
+                Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.vmk(14.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
             }.padding(.horizontal, 16)
         }
         ScrollView(.horizontal, showsIndicators: false) {
@@ -66,8 +66,8 @@ struct CollectionCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay(alignment: .topLeading) { if collection.auto { AutoBadge().padding(6) } }
             VStack(spacing: 0) {
-                Text(collection.name).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-                Text("\(collection.count)").font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
+                Text(collection.name).font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                Text("\(collection.count)").font(.vmk(12)).foregroundStyle(Theme.textSecondary)
             }.frame(width: 104)
         }
         .task(id: collection.coverID) {
@@ -127,9 +127,9 @@ struct CollectionDetailView: View {
                         Spacer()
                         if !feed.photos.isEmpty {
                             Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered))) {
-                                UISelectionFeedbackGenerator().selectionChanged()
+                                Haptics.play(.selection)
                                 Task { await SelectionActions.toggleAll(feed: feed, selection: selection, limit: PhotoLimits.maxPhotos) }
-                            }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("selectAll")
+                            }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("selectAll")
                         }
                     }.padding(.horizontal, 16).padding(.top, 6)
                 HStack {
@@ -212,7 +212,7 @@ struct CollectionsListView: View {
                 accentText(tr("collections.auto_note"), accent: Theme.primary, base: Theme.textSecondary)
                 ForEach(media.collections) { c in row(c) }
             }
-            .font(.system(size: 14.5)).padding(.horizontal, 16).padding(.bottom, 24)
+            .font(.vmk(14.5)).padding(.horizontal, 16).padding(.bottom, 24)
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(tr("viewer.collections")).navigationBarTitleDisplayMode(.large)
@@ -236,10 +236,10 @@ struct CollectionsListView: View {
                 HStack(spacing: 14) {
                     CoverThumb(media: media, collection: c)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(c.name).font(.system(size: 16.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                        Text(c.name).font(.vmk(16.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                         HStack(spacing: 8) {
                             if c.auto { AutoChip() }
-                            Text(tr("photos.count", c.count)).font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
+                            Text(tr("photos.count", c.count)).font(.vmk(14)).foregroundStyle(Theme.textSecondary)
                         }
                     }
                     Spacer(minLength: 0)
@@ -250,7 +250,7 @@ struct CollectionsListView: View {
                 Button { renameText = c.name; renaming = c } label: { Label(tr("collections.rename"), systemImage: "pencil") }
                 Button(role: .destructive) { deleting = c } label: { Label(tr("collections.delete_collection"), systemImage: "xmark") }
                 Section { Button(tr("collections.photos_stay_in_my_media")) {}.disabled(true) }
-            } label: { Image(systemName: "ellipsis").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+            } label: { Image(systemName: "ellipsis").font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
                 .accessibilityLabel(tr("collections.actions_for", c.name))
         }
         .frame(minHeight: 80)

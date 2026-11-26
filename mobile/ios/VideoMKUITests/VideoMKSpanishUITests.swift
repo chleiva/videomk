@@ -6,7 +6,7 @@ extension XCUIApplication {
     static func spanish() -> XCUIApplication { localized("es", "es_ES") }
     private static func localized(_ lang: String, _ locale: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments += ["-AppleLanguages", "(\(lang))", "-AppleLocale", locale]
+        app.launchArguments += ["-AppleLanguages", "(\(lang))", "-AppleLocale", locale, "-vmk_locale", "system"]      // an earlier test that switched the language in Settings must not leak into this launch
         return app
     }
 }
@@ -53,7 +53,7 @@ final class VideoMKSpanishUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Continuar con Google"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Continuar con Apple"].exists)
         XCTAssertEqual(app.buttons["signInButton"].label, "Continuar con correo")
-        XCTAssertTrue(app.staticTexts["Describe un video. Nosotros lo escribimos, lo narramos y lo dibujamos."].exists)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Nosotros creamos el video")).firstMatch.exists, "the sign-in tagline is the home headline")
     }
 
     func testCreateSettingsAndDeleteAccountAreSpanish() {
@@ -84,6 +84,7 @@ final class VideoMKSpanishUITests: XCTestCase {
     func testLanguageRowSwitchesWithoutRestart() {
         let app = session(["VMK_DEBUG_SHEET": "settings"])
         XCTAssertTrue(app.navigationBars["Ajustes"].waitForExistence(timeout: 15))
+        for _ in 0..<3 where !app.buttons["languagePicker"].exists { app.swipeUp() }      // the list grew taller with the new Support and Terms rows
         app.buttons["languagePicker"].tap()
         app.buttons["English"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))

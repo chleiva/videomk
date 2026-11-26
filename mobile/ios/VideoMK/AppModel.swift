@@ -328,6 +328,9 @@ final class AppModel {
     }
 
     func playback(for id: String) async throws -> PlaybackInfo {
+        #if DEBUG
+        if media?.isFake == true, let file = ProcessInfo.processInfo.environment["VMK_DEBUG_PLAYBACK_FILE"] { return PlaybackInfo(url: URL(fileURLWithPath: file), description: "Chapters\n0:00 Intro\n\nPhoto credits: Example Photographer on Unsplash") }
+        #endif
         guard let api else { throw APIError.server }
         return try await api.playback(videoID: id)
     }

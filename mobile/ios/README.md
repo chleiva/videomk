@@ -1,7 +1,7 @@
 # videomk for iPhone (SwiftUI, iOS 17+)
 
 Thin native client for the videomk backend. Product spec: `docs/mobile/SPEC.md`. Status: milestones 1 and 2 of the spec (sign-in,
-library, create, progress, player/share, settings). Sign in with Apple/Google exist behind build switches (`VMK_AUTH_APPLE`, `VMK_AUTH_GOOGLE` in `project.yml`, default NO). Not yet: editor, credits/purchases, push, Live Activity
+library, create, progress, player/share, settings). Sign in with Apple/Google exist behind build switches (`VMK_AUTH_APPLE`, `VMK_AUTH_GOOGLE` in `project.yml`, default NO). Not yet: push, Live Activity (clean seams exist, see Design system)
 (sign-in is the Cognito hosted page, which supports email + password).
 
 ## Account deletion
@@ -63,3 +63,12 @@ mobile/ios/scripts/testflight.sh           # archive the Beta build (QA backend)
 mobile/ios/scripts/testflight.sh --local   # only build a signed .ipa, no upload
 ```
 The build appears under TestFlight in App Store Connect 10-30 minutes later. Without the app record the upload stops with `missingApp`.
+
+## Design system (UX redesign, iPhone)
+Spec: `docs/UX_REVIEW.md` (section "iOS implementation status" lists what is done). Where things live:
+- **Tokens**: `Packages/VideoMKCore/Sources/VideoMKCore/DesignTokens.swift` is the one canonical place (colour roles light/dark, `live` accent, spacing, radii, sizes, elevation, motion durations, haptic list, WCAG contrast math). `VideoMK/Theme.swift` only turns them into `Color`s (`Theme.Space`, `Theme.Radii`, `Theme.Motion`, `Haptics.play(_:)`). `DesignTokensTests` checks every text/background pair for AA in light and dark. Android and web can mirror the same numbers (`docs/ux_review/tokens_v2.css` has the same values); there is no generator.
+- **Type**: `VideoMK/Typography.swift`, `Font.vmk(15, weight:)` maps a point size to a Dynamic Type text style. `scripts/check_fonts.py` fails on any `.font(.system(size:))` in a view. The app lays out up to accessibility-extra-large (`DynamicTypeSize.appMax`, set at the root); one-line chrome (top bar, the New video button, the Create bottom bar) is capped lower with `vmkOneLineCap()` and the page below it scrolls.
+- **Components**: `MakingCard.swift` (one waiting component, `.list` and `.detail`, `MakingSnapshot`; seams: `scene` for a scene counter and `thumbnails` for poster frames, both nil until the backend reports them; `AppModel.makingSnapshot` feeds both screens), `VideoCards.swift` (`VideoRow`, `FailedRow`, `GlassChip`), `Components.swift` (`CostLine`, `CostExplainer`, `WalletHero`, `EmptyState`).
+- **Seams not built (need backend / owner)**: push and Live Activity (`AppModel` bumps `completions` when a video finishes: hook the notifier there; the card already shows the "you can leave" promise), per-scene progress, vertical version of a video, a sample video on the sign-in screen (drop `sample_signin.mp4` into the app bundle and play it from `SignInView`; there is none today).
+- Debug fixtures added: `VMK_DEBUG_OPEN=v1|v2|v3` (opens that video of `VMK_DEBUG_FAKE_VIDEOS=1`), `VMK_DEBUG_SHEET=wallet`, `VMK_DEBUG_PLAYBACK_FILE=/path/video.mp4` (fake library only).
+- Gates: `python3 scripts/check_strings.py`, `check_literals.py`, `check_fonts.py`; UI tests `VideoMKDynamicTypeUITests` (XL text, EN/ES, sign-in, home, first run, cost explainer).

@@ -187,7 +187,7 @@ struct AccountDeletedView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Image(systemName: "checkmark.circle.fill").font(.system(size: 64)).foregroundStyle(Theme.success).accessibilityHidden(true).padding(.top, 32)
+                Image(systemName: "checkmark.circle.fill").font(.vmk(64)).foregroundStyle(Theme.success).accessibilityHidden(true).padding(.top, 32)
                 Text(tr("deleted.title")).font(.title.bold()).multilineTextAlignment(.center).foregroundStyle(Theme.text)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("deletedTitle")
                 Text(tr("deleted.body"))

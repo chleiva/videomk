@@ -78,18 +78,18 @@ struct OrganizeSheet: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(title).font(.system(size: 23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
-                    Text(tr("organize.well_group_them_by_place")).font(.system(size: 14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
+                    Text(title).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
+                    Text(tr("organize.well_group_them_by_place")).font(.vmk(14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
                     VStack(spacing: 0) {
                         if skeleton { ForEach(0..<3, id: \.self) { _ in SkeletonRow() } }
                         else { ForEach(showAll ? groups : Array(groups.prefix(5))) { GroupRow(media: media, group: $0) } }
                     }.padding(.top, 14)
                     if !skeleton, groups.count > 5, !showAll {
-                        Button { withAnimation(reduceMotion ? nil : .snappy) { showAll = true } } label: { Text(tr("organize.more", groups.count - 5)).font(.system(size: 14.5, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44, alignment: .leading) }
+                        Button { withAnimation(reduceMotion ? nil : .snappy) { showAll = true } } label: { Text(tr("organize.more", groups.count - 5)).font(.vmk(14.5, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44, alignment: .leading) }
                             .buttonStyle(.plain).accessibilityLabel(tr("organize.more_a11y", groups.count - 5)).accessibilityIdentifier("organizeMore")
                     }
                     if let p = preview, p.skipped > 0, !skeleton {
-                        Text(tr("organize.skipped", p.skipped)).font(.system(size: 13)).foregroundStyle(Theme.textSecondary).padding(.top, 4).accessibilityIdentifier("organizeSkipped")
+                        Text(tr("organize.skipped", p.skipped)).font(.vmk(13)).foregroundStyle(Theme.textSecondary).padding(.top, 4).accessibilityIdentifier("organizeSkipped")
                     }
                     Divider().padding(.top, 14)
                     if media.organizePref != .never { alwaysRow }
@@ -103,8 +103,8 @@ struct OrganizeSheet: View {
     private var alwaysRow: some View {
         Toggle(isOn: Binding(get: { media.organizePref.switchIsOn }, set: { media.setOrganizePref(OrganizePref.fromSwitch($0)) })) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(tr("organize.always_organize_new_uploads")).font(.system(size: 15.5, weight: .semibold)).foregroundStyle(Theme.text)
-                Text(tr("organize.photos_from_later_uploads_join")).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                Text(tr("organize.always_organize_new_uploads")).font(.vmk(15.5, weight: .semibold)).foregroundStyle(Theme.text)
+                Text(tr("organize.photos_from_later_uploads_join")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
             }
         }
         .tint(Theme.primary).padding(.vertical, 10).accessibilityIdentifier("alwaysOrganize")
@@ -113,7 +113,7 @@ struct OrganizeSheet: View {
     private func actions(skeleton: Bool) -> some View {
         VStack(spacing: 10) {
             Button { runAuto() } label: {
-                Text(tr("organize.organize")).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient.opacity(skeleton ? 0.4 : 1), in: Capsule())
+                Text(tr("organize.organize")).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient.opacity(skeleton ? 0.4 : 1), in: Capsule())
             }.buttonStyle(.plain).disabled(skeleton).accessibilityIdentifier("organizeGo")
             if typeSize.isAccessibilitySize {
                 putAllButton(skeleton); notNow
@@ -126,17 +126,17 @@ struct OrganizeSheet: View {
 
     private func putAllButton(_ skeleton: Bool) -> some View {
         Button { name = SuggestedNames.suggest(groups: groups).first ?? ""; single = true; Task { try? await Task.sleep(for: .milliseconds(300)); nameFocused = true } } label: {
-            Text(tr("organize.put_all_in_one_collection")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: 46).background(Theme.primaryContainer, in: Capsule())
+            Text(tr("organize.put_all_in_one_collection")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: 46).background(Theme.primaryContainer, in: Capsule())
         }.buttonStyle(.plain).disabled(skeleton).accessibilityIdentifier("organizeSingle")
     }
 
     private var notNow: some View {
-        Button { dismiss() } label: { Text(tr("organize.not_now")).font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 46) }
+        Button { dismiss() } label: { Text(tr("organize.not_now")).font(.vmk(15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 46) }
             .buttonStyle(.plain).accessibilityIdentifier("organizeNotNow")
     }
 
     private func runAuto() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptics.play(.send)
         media.startOrganize(mode: .auto, since: request.since, total: organized)
         dismiss()
     }
@@ -145,21 +145,21 @@ struct OrganizeSheet: View {
 
     private var singleContent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(tr("organize.put_all_title", organized)).font(.system(size: 23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
-            Text(tr("organize.give_it_a_name_you")).font(.system(size: 14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
-            TextField(tr("organize.collection_name"), text: $name).focused($nameFocused).font(.system(size: 17)).padding(.horizontal, 14).frame(height: 52)
+            Text(tr("organize.put_all_title", organized)).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
+            Text(tr("organize.give_it_a_name_you")).font(.vmk(14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
+            TextField(tr("organize.collection_name"), text: $name).focused($nameFocused).font(.vmk(17)).padding(.horizontal, 14).frame(height: 52)
                 .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.primary, lineWidth: nameFocused ? 2 : 0))
                 .padding(.top, 16).submitLabel(.done).accessibilityIdentifier("collectionName")
-            Text(tr("organize.suggestions")).font(.system(size: 12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
+            Text(tr("organize.suggestions")).font(.vmk(12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
             ScrollView(.horizontal, showsIndicators: false) {
                 WrapLayout(spacing: 8) { ForEach(SuggestedNames.suggest(groups: groups), id: \.self) { s in FixChip(title: s) { name = s } } }
             }
             Spacer()
             HStack(spacing: 10) {
-                Button { single = false } label: { Text(tr("create.back")).font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minWidth: 70, minHeight: 50) }.buttonStyle(.plain)
+                Button { single = false } label: { Text(tr("create.back")).font(.vmk(15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minWidth: 70, minHeight: 50) }.buttonStyle(.plain)
                 Button { create() } label: {
-                    Text(tr("organize.create_collection")).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 50)
+                    Text(tr("organize.create_collection")).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 50)
                         .background(Theme.gradient.opacity(SuggestedNames.isValid(name) ? 1 : 0.4), in: Capsule())
                 }.buttonStyle(.plain).disabled(!SuggestedNames.isValid(name)).accessibilityIdentifier("createCollection")
             }
@@ -169,7 +169,7 @@ struct OrganizeSheet: View {
     }
 
     private func create() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptics.play(.send)
         media.startOrganize(mode: .single, since: request.since, name: name.trimmingCharacters(in: .whitespacesAndNewlines), total: organized)
         dismiss()
     }
@@ -177,10 +177,10 @@ struct OrganizeSheet: View {
     private func message(_ symbol: String, _ title: String, _ text: String, primary: String, _ action: @escaping () -> Void) -> some View {
         VStack(spacing: 12) {
             Spacer()
-            Image(systemName: symbol).font(.system(size: 40)).foregroundStyle(Theme.primary).accessibilityHidden(true)
-            Text(title).font(.system(size: 20, weight: .bold)).foregroundStyle(Theme.text)
-            Text(text).font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
-            Button(action: action) { Text(primary).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8)
+            Image(systemName: symbol).font(.vmk(40)).foregroundStyle(Theme.primary).accessibilityHidden(true)
+            Text(title).font(.vmk(20, weight: .bold)).foregroundStyle(Theme.text)
+            Text(text).font(.vmk(15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+            Button(action: action) { Text(primary).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8)
             if primary == tr("common.try_again") { Button(tr("organize.not_now")) { dismiss() }.foregroundStyle(Theme.textSecondary).frame(minHeight: 44) }
             Spacer()
         }
@@ -198,8 +198,8 @@ private struct GroupRow: View {
                 ForEach(Array(group.sampleIDs.prefix(3).enumerated()), id: \.offset) { i, id in SampleThumb(media: media, id: id).zIndex(Double(i)) }
             }.frame(width: 70, alignment: .leading).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                Text(group.name).font(.system(size: 15.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(typeSize.isAccessibilitySize ? 3 : 1).minimumScaleFactor(0.8)
-                Text(tr("photos.count", group.count)).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                Text(group.name).font(.vmk(15.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(typeSize.isAccessibilitySize ? 3 : 1).minimumScaleFactor(0.8)
+                Text(tr("photos.count", group.count)).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
                 if typeSize.isAccessibilitySize, group.existing { existing }
             }
             Spacer(minLength: 4)
@@ -210,7 +210,7 @@ private struct GroupRow: View {
         .accessibilityLabel(tr(group.existing ? "organize.group_a11y_existing" : "organize.group_a11y", group.name, tr("photos.count", group.count)))
     }
     private var existing: some View {
-        Text(tr("organize.adds_to_existing")).font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 24).background(Theme.primaryContainer, in: Capsule()).lineLimit(1).fixedSize()
+        Text(tr("organize.adds_to_existing")).font(.vmk(12, weight: .bold)).foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 24).background(Theme.primaryContainer, in: Capsule()).lineLimit(1).fixedSize()
     }
 }
 
@@ -251,17 +251,17 @@ struct OrganizeBar: View {
                     ZStack {
                         Circle().stroke(Theme.surface3, lineWidth: 4)
                         Circle().trim(from: 0, to: max(0.04, bar.fraction)).stroke(tint(bar), style: StrokeStyle(lineWidth: 4, lineCap: .round)).rotationEffect(.degrees(-90))
-                        Image(systemName: bar.kind == .waiting ? "icloud.slash" : "sparkles").font(.system(size: 15, weight: .semibold)).foregroundStyle(tint(bar))
+                        Image(systemName: bar.kind == .waiting ? "icloud.slash" : "sparkles").font(.vmk(15, weight: .semibold)).foregroundStyle(tint(bar))
                     }.frame(width: 40, height: 40)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(bar.title).font(.system(size: 15, weight: .bold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.8)
-                        Text(bar.subtitle).font(.system(size: 13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+                        Text(bar.title).font(.vmk(15, weight: .bold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.8)
+                        Text(bar.subtitle).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
                     }
                     Spacer(minLength: 4)
                     if bar.kind == .failed {
-                        Button(tr("common.try_again")) { media.retryOrganize() }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("organizeRetry")
+                        Button(tr("common.try_again")) { media.retryOrganize() }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("organizeRetry")
                     }
-                    Button { confirmStop = true } label: { Image(systemName: "xmark").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+                    Button { confirmStop = true } label: { Image(systemName: "xmark").font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
                         .buttonStyle(.plain).accessibilityLabel(tr("organize.stop_organizing")).accessibilityIdentifier("stopOrganize")
                 }
                 .padding(.horizontal, 14).padding(.vertical, 2)
@@ -288,13 +288,13 @@ struct OrganizeBar: View {
 /// Collections made by the organiser carry a small sparkle badge on their cover.
 struct AutoBadge: View {
     var body: some View {
-        Image(systemName: "sparkles").font(.system(size: 11, weight: .semibold)).foregroundStyle(.white).frame(width: 22, height: 22).background(.black.opacity(0.5), in: Circle()).accessibilityHidden(true)
+        Image(systemName: "sparkles").font(.vmk(11, weight: .semibold)).foregroundStyle(.white).frame(width: 22, height: 22).background(.black.opacity(0.5), in: Circle()).accessibilityHidden(true)
     }
 }
 
 struct AutoChip: View {
     var body: some View {
-        HStack(spacing: 3) { Image(systemName: "sparkles").font(.system(size: 10)); Text(tr("collections.auto")).font(.system(size: 12, weight: .bold)) }
+        HStack(spacing: 3) { Image(systemName: "sparkles").font(.vmk(10)); Text(tr("collections.auto")).font(.vmk(12, weight: .bold)) }
             .foregroundStyle(Theme.primary).padding(.horizontal, 8).frame(height: 20).background(Theme.primaryContainer, in: Capsule())
             .accessibilityLabel(tr("organize.automatic_collection"))
     }

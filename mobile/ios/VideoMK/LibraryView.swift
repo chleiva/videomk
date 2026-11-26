@@ -32,7 +32,7 @@ struct LibraryView: View {
             .background(Theme.background.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
-            .overlay(alignment: .bottom) { entry }
+            .safeAreaInset(edge: .bottom, spacing: 0) { entry }       // an inset, not an overlay: the last row always scrolls clear of the button
         }
         .task { await model.refresh() }
         .task { await model.createModel.loadCapabilities(userID: model.userID) }       // ready before the sheet opens
@@ -64,18 +64,19 @@ struct LibraryView: View {
             if let media = model.media { UploadPill(media: media) { model.selectedTab = 1 } }
             Button { openCreate() } label: {
                 HStack(spacing: 10) {
-                    Image(systemName: "plus").font(.system(size: 22, weight: .semibold))
-                    Text(tr("create.new_video")).font(.system(size: 19, weight: .bold))
+                    Image(systemName: "plus").font(.vmk(22, weight: .semibold))
+                    Text(tr("create.new_video")).font(.vmk(19, weight: .bold))
                 }
-                .foregroundStyle(.white).frame(maxWidth: empty ? .infinity : nil, minHeight: 58).padding(.horizontal, empty ? 0 : 24)
+                .foregroundStyle(Theme.onPrimary).frame(maxWidth: empty ? .infinity : nil, minHeight: 58).padding(.horizontal, empty ? 0 : 24).padding(.vertical, 6)
                 .background(Theme.gradient, in: Capsule())
-                .shadow(color: Theme.gradientStart.opacity(0.4), radius: 14, y: 8)
+                .shadow(color: Theme.gradientStart.opacity(0.4), radius: 14, y: 8).padding(.bottom, 4)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(tr("create.new_video")).accessibilityHint(tr("videos.opens_the_screen_where_you")).accessibilityIdentifier("newVideo")
         }
-        .frame(maxWidth: .infinity, alignment: empty ? .center : .trailing)
-        .padding(.horizontal, 16).padding(.bottom, 14)
+        .frame(maxWidth: .infinity, alignment: empty ? .center : .trailing).vmkOneLineCap()
+        .padding(.horizontal, 16).padding(.bottom, 14).padding(.top, 10)
+        .background(LinearGradient(colors: [Theme.background.opacity(0), Theme.background.opacity(0.96)], startPoint: .top, endPoint: .center).allowsHitTesting(false))
     }
 
     // MARK: top bar
@@ -83,16 +84,16 @@ struct LibraryView: View {
     private var topBar: some View {
         HStack(spacing: 10) {
             HStack(spacing: 10) {
-                Image(systemName: "play.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(.white).frame(width: 30, height: 30)
+                Image(systemName: "play.fill").font(.vmk(13, weight: .bold)).foregroundStyle(.white).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 30, height: 30)
                     .background(Theme.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous)).accessibilityHidden(true)
-                Text(tr("videos.videomk")).font(.system(size: 21, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("videos.videomk")).font(.vmk(21, weight: .bold)).lineLimit(1).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
             }
             Spacer()
             if let wallet = model.wallet {
                 Button { showingWallet = true } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "bolt.fill").font(.system(size: 13)).foregroundStyle(Theme.primary)
-                        Text(wallet.unlimited ? "∞" : "\(wallet.balance)").font(.system(size: 17, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
+                        Image(systemName: "bolt.fill").font(.vmk(13)).foregroundStyle(Theme.primary)
+                        Text(wallet.unlimited ? "∞" : "\(wallet.balance)").font(.vmk(17, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
                     }
                     .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).frame(minHeight: 44)
                 }
@@ -101,27 +102,50 @@ struct LibraryView: View {
                 .accessibilityHint(tr("videos.shows_your_credits"))
                 .accessibilityIdentifier("balanceChip")
             }
-            Button { showingSettings = true } label: { Image(systemName: "gearshape").font(.system(size: 20)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+            Button { showingSettings = true } label: { Image(systemName: "gearshape").font(.vmk(20)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
                 .accessibilityLabel(tr("videos.settings")).accessibilityIdentifier("settingsButton")
         }
-        .padding(.leading, 16).padding(.trailing, 8).frame(minHeight: 52)
+        .padding(.leading, 16).padding(.trailing, 8).frame(minHeight: 52).vmkOneLineCap()      // wordmark, credits and gear stay on one row; the page below scrolls and wraps
     }
 
     // MARK: feed
 
+    /// In progress or still being sent: always on top, under no heading.
+    private var activeEntries: [LibraryEntry] {
+        model.entries.filter { e in
+            switch e { case .pending: true; case .video(let v): v.status.isRunning }
+        }
+    }
+
+    private var finishedGroups: [(group: DayGroup, items: [VideoItem])] {
+        let finished = model.entries.compactMap { e -> VideoItem? in if case .video(let v) = e, !v.status.isRunning { v } else { nil } }
+        return DayGroup.grouped(finished, date: \.createdAt)
+    }
+
+    private var statusKeys: [String] { model.entries.map { e in if case .video(let v) = e { "\(v.id)-\(v.status.isRunning)-\(v.status == .complete)" } else { e.id } } }
+
     private var feed: some View {
-        ScrollView {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 14, alignment: .top), count: sizeClass == .regular ? 2 : 1)
+        return ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
-                Text(tr("videos.your_videos")).font(.system(size: 30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14, alignment: .top), count: sizeClass == .regular ? 2 : 1), spacing: 14) {
-                    ForEach(model.entries) { entry in card(entry) }
+                Text(tr("videos.your_videos")).font(.vmk(30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
+                LazyVGrid(columns: columns, spacing: 14) { ForEach(activeEntries) { entry in card(entry).transition(.opacity) } }
+                ForEach(finishedGroups, id: \.group) { section in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(Self.title(section.group).uppercased()).font(.vmk(12, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textTertiary).padding(.top, 8).accessibilityAddTraits(.isHeader)
+                        LazyVGrid(columns: columns, spacing: 6) { ForEach(section.items) { v in card(.video(v)).transition(.opacity) } }
+                    }
                 }
             }
-            .padding(.horizontal, 16).padding(.bottom, 96)
-            .animation(reduceMotion ? nil : .snappy, value: model.entries.map(\.id))
+            .padding(.horizontal, Theme.Space.l).padding(.bottom, Theme.Space.l)
+            .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.insert, value: statusKeys)
         }
         .scrollDismissesKeyboard(.interactively)
         .refreshable { await model.refresh() }
+    }
+
+    static func title(_ g: DayGroup) -> String {
+        switch g { case .today: tr("videos.group_today"); case .yesterday: tr("videos.group_yesterday"); case .earlier: tr("videos.group_earlier") }
     }
 
     @ViewBuilder private func card(_ entry: LibraryEntry) -> some View {
@@ -131,18 +155,18 @@ struct LibraryView: View {
         case .video(let v):
             switch v.status {
             case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(.plain)
-            case .complete: NavigationLink(value: v.id) { ReadyCard(video: v) }.buttonStyle(.plain)
+            case .complete: NavigationLink(value: v.id) { VideoRow(video: v) }.buttonStyle(.plain)
             case .failed:
-                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: { model.tryAgain(v) })
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: { model.tryAgain(v) })
                     .accessibilityIdentifier("failedVideo")
             case .rejected:
-                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), rejected: true)
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), rejected: true)
             }
         }
     }
 
     private var loadingState: some View {
-        ScrollView { VStack(spacing: 14) { SkeletonCard(); SkeletonCard() }.padding(.horizontal, 16).padding(.top, 40) }
+        ScrollView { VStack(spacing: 18) { SkeletonCard(); SkeletonCard(); SkeletonCard() }.padding(.horizontal, 16).padding(.top, 40) }
             .accessibilityElement(children: .ignore).accessibilityLabel(tr("videos.loading_your_videos"))
     }
 
@@ -151,27 +175,45 @@ struct LibraryView: View {
     private var emptyState: some View {
         ScrollView {
             VStack(spacing: 0) {
-                FilmFrames().frame(height: 120).padding(.top, 6).accessibilityHidden(true)
-                Text(tr("videos.describe_itnwell_make_the_video")).font(.system(size: 28, weight: .bold)).tracking(-0.8).multilineTextAlignment(.center).foregroundStyle(Theme.text).padding(.top, 8)
-                    .accessibilityAddTraits(.isHeader)
-                Text(tr("videos.narrated_and_illustrated_in_minutes")).font(.system(size: 15.5)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary).padding(.top, 8).padding(.horizontal, 24)
-                Text(tr("videos.try_one")).font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20).padding(.bottom, 8)
+                EmptyState(title: tr("videos.describe_itnwell_make_the_video"), message: tr("videos.narrated_and_illustrated_in_minutes")) { FilmFrames().frame(height: 120) }
+                firstVideoCard.padding(.top, 20)
+                Text(tr("videos.try_one")).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 24).padding(.bottom, 8)
                 VStack(spacing: 10) { ForEach(ExamplePrompt.all) { example in exampleCard(example) } }
             }
-            .padding(.horizontal, 16).padding(.bottom, 96)
+            .padding(.horizontal, Theme.Space.l).padding(.bottom, Theme.Space.l)
         }
         .scrollDismissesKeyboard(.interactively)
         .refreshable { await model.refresh() }
     }
 
+    /// First run: an editable idea already written, 30 seconds, 1 credit. One tap on "Make my first video" opens Create with it (nothing is sent
+    /// until Create video is tapped), so the first result is two taps away. The bottom button stays the single gradient action.
+    private var firstVideoCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(tr("videos.first_title")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+            Text("\u{201C}\(tr("videos.first_prompt"))\u{201D}").font(.vmk(19)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+            Text(tr("videos.first_sub")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+            Button { openCreate(prefill: tr("videos.first_prompt"), minutes: 0.5) } label: {
+                Text(tr("videos.first_cta")).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.primary).multilineTextAlignment(.center).frame(maxWidth: .infinity, minHeight: 50)
+                    .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+            }.buttonStyle(.plain).accessibilityIdentifier("firstVideoButton")
+            Button { openCreate(prefill: nil, minutes: 0.5) } label: {
+                Text(tr("videos.first_edit")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: Theme.minTouch)
+            }.buttonStyle(.plain).accessibilityIdentifier("firstVideoEdit")
+        }
+        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+    }
+
     private func exampleCard(_ e: ExamplePrompt) -> some View {
         Button { use(e) } label: {
             HStack(spacing: 14) {
-                Image(systemName: e.symbol).font(.system(size: 18)).foregroundStyle(Theme.primary).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                Text(e.text).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: e.symbol).font(.vmk(18)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                Text(e.text).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: 4) {
-                    if e.usesPhotos { Image(systemName: "photo").font(.system(size: 12)) }
-                    Text(e.tag).font(.system(size: 12.5, weight: .semibold)).lineLimit(1).fixedSize()
+                    if e.usesPhotos { Image(systemName: "photo").font(.vmk(12)) }
+                    Text(e.tag).font(.vmk(12.5, weight: .semibold)).lineLimit(1).fixedSize()
                 }
                 .foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 30).background(Theme.primaryContainer, in: Capsule())
             }
@@ -236,193 +278,9 @@ struct FilmFrames: View {
     }
 }
 
-// MARK: - rows
-
-struct VideoRow: View {
-    let video: VideoItem
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Thumbnail(url: video.previewGifURL, status: video.status)
-                .frame(width: 112, height: 63)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            VStack(alignment: .leading, spacing: 4) {
-                Text(video.displayTitle).font(.headline).foregroundStyle(Theme.text).lineLimit(2)
-                HStack(spacing: 8) {
-                    StatusChip(status: video.status)
-                    if let d = video.durationSeconds, video.status == .complete { Text(Self.duration(d)).font(.caption).foregroundStyle(Theme.textSecondary) }
-                }
-                if let created = video.createdAt { Text(Localization.shared.relativeShort(created)).font(.caption).foregroundStyle(Theme.textSecondary) }
-                if video.status == .rejected, let r = video.rejectReason { Text(r).font(.caption).foregroundStyle(Theme.warning).lineLimit(2) }
-            }
-        }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .combine)
-    }
-
-    static let relative: RelativeDateTimeFormatter = {
-        let f = RelativeDateTimeFormatter(); f.unitsStyle = .short; return f
-    }()
-
-    static func duration(_ s: Double) -> String { String(format: "%d:%02d", Int(s) / 60, Int(s) % 60) }
-}
-
-/// A video being made: live stage, an honest estimate bar and elapsed time, in the list next to finished videos.
-struct RunningRow: View {
-    @Environment(AppModel.self) private var model
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    let video: VideoItem
-
-    var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            let info = model.stage(for: video.id)
-            let stage: VideoStatus.Stage = { if case .running(let s) = video.status { s } else { .starting } }()
-            let inStage = info.map { context.date.timeIntervalSince($0.since) } ?? 0
-            let fraction = ProgressEstimator.fraction(stage: stage, secondsInStage: inStage, minutes: model.requestedMinutes(for: video.id))
-            HStack(spacing: 12) {
-                ShimmerThumb(symbol: "wand.and.stars", animate: !reduceMotion)
-                    .frame(width: 112, height: 63)
-                    .clipShape(RoundRectangle(radius: 10))
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(model.brief(for: video.id) ?? (video.title.flatMap { $0.isEmpty ? nil : $0 } ?? tr("detail.making")))
-                        .font(.headline).foregroundStyle(Theme.text).lineLimit(2)
-                    ProgressView(value: fraction).tint(Theme.primary).animation(.smooth(duration: 0.8), value: fraction)
-                    HStack {
-                        Text(stage.shortTitle).font(.caption).foregroundStyle(Theme.textSecondary).lineLimit(1)
-                            .contentTransition(.opacity).animation(.snappy, value: stage)
-                        Spacer(minLength: 4)
-                        if let created = video.createdAt {
-                            Text(Self.elapsed(context.date.timeIntervalSince(created))).font(.caption.monospacedDigit()).foregroundStyle(Theme.textSecondary)
-                        }
-                    }
-                }
-            }
-            .padding(.vertical, 4)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(tr("videos.making_a11y", model.brief(for: video.id) ?? video.displayTitle))
-            .accessibilityValue(tr("videos.stage_percent_a11y", stage.title, Int(fraction * 100)))
-        }
-        .accessibilityIdentifier("runningRow")
-    }
-
-    static func elapsed(_ s: TimeInterval) -> String { let t = max(0, Int(s)); return String(format: "%d:%02d", t / 60, t % 60) }
-}
-
-/// The request is on its way (or failed before the server answered). Same shape as a running row so the list doesn't jump.
-struct PendingRow: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    let pending: PendingVideo
-    let onRetry: () -> Void
-    let onDismiss: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            ShimmerThumb(symbol: failed != nil ? "exclamationmark.triangle.fill" : pending.photoCount > 0 ? "photo.stack.fill" : "paperplane.fill", animate: failed == nil && !reduceMotion)
-                .frame(width: 112, height: 63)
-                .clipShape(RoundRectangle(radius: 10))
-            VStack(alignment: .leading, spacing: 6) {
-                Text(pending.brief).font(.headline).foregroundStyle(Theme.text).lineLimit(2)
-                if let message = failed {
-                    Text(message).font(.caption).foregroundStyle(Theme.danger).lineLimit(2)
-                    HStack(spacing: 16) {
-                        Button(tr("common.try_again"), action: onRetry).font(.caption.weight(.semibold))
-                        Button(tr("videos.remove"), role: .destructive, action: onDismiss).font(.caption)
-                    }.buttonStyle(.borderless)
-                } else if case .uploading(let done, let total) = pending.state {
-                    ProgressView(value: Double(done), total: Double(max(total, 1))).tint(Theme.primary).animation(.smooth, value: done)
-                    Text(tr("upload.uploading_title", done, total)).font(.caption).foregroundStyle(Theme.textSecondary)
-                } else {
-                    ProgressView().controlSize(.small)
-                    Text(tr("videos.sending_your_request")).font(.caption).foregroundStyle(Theme.textSecondary)
-                }
-            }
-        }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: failed == nil ? .combine : .contain)
-        .accessibilityIdentifier(failed == nil ? "pendingRow" : "failedRow")
-    }
-
-    private var failed: String? { if case .failed(let m) = pending.state { m } else { nil } }
-}
-
 struct RoundRectangle: Shape {
     let radius: CGFloat
     func path(in rect: CGRect) -> Path { RoundedRectangle(cornerRadius: radius, style: .continuous).path(in: rect) }
-}
-
-/// A calm moving highlight on a placeholder thumbnail. Static when Reduce Motion is on.
-struct ShimmerThumb: View {
-    let symbol: String
-    let animate: Bool
-
-    var body: some View {
-        ZStack {
-            Theme.surfaceRaised
-            if animate {
-                TimelineView(.animation) { ctx in
-                    let t = ctx.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.8) / 1.8
-                    GeometryReader { geo in
-                        LinearGradient(colors: [.clear, Theme.primary.opacity(0.22), .clear], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: geo.size.width * 0.6)
-                            .offset(x: -geo.size.width * 0.6 + (geo.size.width * 1.6) * t)
-                    }
-                }
-            }
-            Image(systemName: symbol).font(.title3).foregroundStyle(Theme.primary)
-        }
-        .clipped()
-    }
-}
-
-struct Thumbnail: View {
-    let url: URL?
-    let status: VideoStatus
-
-    var body: some View {
-        ZStack {
-            Theme.surfaceRaised
-            if let url {
-                AsyncImage(url: url) { phase in
-                    if let image = phase.image { image.resizable().scaledToFill() } else { placeholder }
-                }
-            } else { placeholder }
-        }
-    }
-
-    private var placeholder: some View {
-        Image(systemName: status.isRunning ? "hourglass" : status == .complete ? "play.fill" : "exclamationmark.triangle")
-            .foregroundStyle(Theme.textSecondary)
-    }
-}
-
-struct StatusChip: View {
-    let status: VideoStatus
-
-    var body: some View {
-        Text(label)
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 8).padding(.vertical, 3)
-            .foregroundStyle(color)
-            .background(color.opacity(0.15), in: Capsule())
-    }
-
-    private var label: String {
-        switch status {
-        case .running: tr("videos.making")
-        case .complete: tr("videos.ready")
-        case .failed: tr("videos.failed")
-        case .rejected: tr("videos.not_allowed")
-        }
-    }
-
-    private var color: Color {
-        switch status {
-        case .running: Theme.primary
-        case .complete: Theme.success
-        case .failed: Theme.danger
-        case .rejected: Theme.warning
-        }
-    }
 }
 
 #if DEBUG
@@ -431,7 +289,8 @@ extension LibraryView {
     @MainActor func debugSetup() async {
         let env = ProcessInfo.processInfo.environment
         await model.createModel.photos.loadDebugFiles()      // VMK_DEBUG_PHOTO_FILES / VMK_DEBUG_FAKE_PHOTOS attach to the Create screen
-        switch env["VMK_DEBUG_SHEET"] { case "settings", "delete": showingSettings = true; default: break }
+        switch env["VMK_DEBUG_SHEET"] { case "settings", "delete": showingSettings = true; case "wallet": showingWallet = true; default: break }
+        if let id = env["VMK_DEBUG_OPEN"] { try? await Task.sleep(for: .milliseconds(400)); path = [id] }       // v1 making, v2 failed, v3 ready (VMK_DEBUG_FAKE_VIDEOS=1)
         guard let state = env["VMK_DEBUG_CREATE"] else { return }
         let c = model.createModel
         await c.loadCapabilities(userID: model.userID)
@@ -457,14 +316,14 @@ struct CreateProblemSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(systemName: "exclamationmark.triangle").font(.system(size: 34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).padding(.top, 22).accessibilityHidden(true)
-            Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
-            Text(problem.message).font(.system(size: 17)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
-            if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
+            Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).padding(.top, 22).accessibilityHidden(true)
+            Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).font(.vmk(30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
+            Text(problem.message).font(.vmk(17)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
+            if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
             Spacer()
-            Text(tr("create.nothing_was_charged")).font(.system(size: 15)).foregroundStyle(Theme.textSecondary)
-            Button { onEdit(problem) } label: { Text(tr("create.edit_request")).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
-            Button(tr("common.close")) { dismiss() }.font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
+            Text(tr("create.nothing_was_charged")).font(.vmk(15)).foregroundStyle(Theme.textSecondary)
+            Button { onEdit(problem) } label: { Text(tr("create.edit_request")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
+            Button(tr("common.close")) { dismiss() }.font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
         }
         .padding(.horizontal, 20).padding(.bottom, 6)
         .presentationBackground(Theme.surface).presentationDetents([.height(470), .large]).presentationDragIndicator(.visible)

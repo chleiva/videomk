@@ -116,9 +116,9 @@ struct AttachedPhotosStrip: View {
         VStack(alignment: .leading, spacing: 8) {
             if total > 0 || photos.loading > 0 {
                 HStack {
-                    Text(tr("attach.total_of", total, PhotoLimits.maxPhotos)).font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
+                    Text(tr("attach.total_of", total, PhotoLimits.maxPhotos)).font(.vmk(12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
                     Spacer(minLength: 8)
-                    Text(sourceNote).font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                    Text(sourceNote).font(.vmk(12, weight: .semibold)).foregroundStyle(Theme.textSecondary).lineLimit(1)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(tr("attach.strip_a11y", total, PhotoLimits.maxPhotos, sourceNote))
@@ -164,7 +164,7 @@ struct RemoveX: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
+            Image(systemName: "xmark").font(.vmk(9, weight: .bold)).foregroundStyle(.white)
                 .frame(width: 18, height: 18).background(Color.black.opacity(0.62), in: Circle())
                 .frame(width: 44, height: 44).contentShape(Rectangle())
         }
@@ -187,7 +187,7 @@ struct LibraryStripTile: View {
         Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.system(size: 10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
+            .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.vmk(10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
             .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: tr("attach.remove_label", label), action: onRemove) } }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("\(label). \(MediaGrouping.accessibilityLabel(photo))")
