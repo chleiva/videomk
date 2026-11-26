@@ -1,8 +1,8 @@
 ---
 // One layout for every legal page: a title, a short "at a glance" list, then numbered sections.
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { COMPANY, CONTACT_EMAIL } from "../data/legal";
-export interface Section { title: string; paras?: string[]; bullets?: string[] }
+import { COMPANY, CONTACT_EMAIL, COMPANY_ADDRESS, COMPANY_NUMBER } from "../data/legal";
+export interface Section { title: string; paras?: string[]; bullets?: string[]; table?: { head: string[]; rows: string[][] }; after?: string[] }
 interface Props { title: string; intro: string; effective: string; glance: string[]; sections: Section[] }
 const { title, intro, effective, glance, sections } = Astro.props;
 ---
@@ -12,8 +12,9 @@ const { title, intro, effective, glance, sections } = Astro.props;
 		<h1 class="mt-6 text-3xl font-semibold tracking-tight text-neutral-900">{title}</h1>
 		<p class="mt-3 text-neutral-700 leading-7">{intro}</p>
 		<p class="mt-3 flex flex-wrap gap-2 text-xs text-neutral-600">
-			<span class="rounded-full border border-neutral-200 bg-white px-3 py-1">Effective {effective}</span>
-			<span class="rounded-full border border-neutral-200 bg-white px-3 py-1">Provider: {COMPANY}</span>
+			<span class="rounded-full border border-neutral-200 bg-white px-3 py-1">Last updated {effective}</span>
+			<span class="rounded-full border border-neutral-200 bg-white px-3 py-1">Provider: {COMPANY}{COMPANY_NUMBER ? ` (company no. ${COMPANY_NUMBER})` : ""}</span>
+			{COMPANY_ADDRESS && <span class="rounded-full border border-neutral-200 bg-white px-3 py-1">{COMPANY_ADDRESS}</span>}
 			<span class="rounded-full border border-neutral-200 bg-white px-3 py-1">Contact: {CONTACT_EMAIL}</span>
 		</p>
 		<section class="mt-8 rounded-2xl border border-neutral-200 bg-white px-6 py-5">
@@ -25,6 +26,15 @@ const { title, intro, effective, glance, sections } = Astro.props;
 				<h2 class="text-xl font-semibold text-neutral-900">{i + 1}. {s.title}</h2>
 				{(s.paras ?? []).map((p) => <p class="mt-3 text-neutral-700 leading-7">{p}</p>)}
 				{s.bullets && <ul class="mt-3 list-disc space-y-2 pl-5 text-neutral-700 leading-7">{s.bullets.map((b) => <li>{b}</li>)}</ul>}
+				{s.table && (
+					<div class="mt-3 overflow-x-auto rounded-xl border border-neutral-200 bg-white">
+						<table class="w-full min-w-[34rem] border-collapse text-left text-sm text-neutral-700">
+							<thead class="bg-neutral-100 text-neutral-900"><tr>{s.table.head.map((h) => <th scope="col" class="px-3 py-2 font-semibold">{h}</th>)}</tr></thead>
+							<tbody>{s.table.rows.map((r) => <tr class="border-t border-neutral-200 align-top">{r.map((c, ci) => ci === 0 ? <th scope="row" class="px-3 py-2 font-medium text-neutral-900">{c}</th> : <td class="px-3 py-2 leading-6">{c}</td>)}</tr>)}</tbody>
+						</table>
+					</div>
+				)}
+				{(s.after ?? []).map((p) => <p class="mt-3 text-neutral-700 leading-7">{p}</p>)}
 			</section>
 		))}
 	</article>
