@@ -1,0 +1,86 @@
+{
+ "id": "cmp-01",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A blunt comparison of React and Vue for beginners choosing a first JavaScript framework. Learn what each offers and which to pick for your goal.",
+  "beats": [
+   {
+    "id": "b09a9ac2",
+    "narration": "Stop agonizing. React or Vue, you will not pick wrong. Both teach the same core ideas: components, state, and building screens from small reusable pieces.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "React or Vue? You won't pick wrong.",
+      "emphasis": "won't pick wrong"
+     }
+    }
+   },
+   {
+    "id": "0473674d",
+    "narration": "Vue feels gentler. Its templates look like plain HTML, and its official tools guide you. Beginners often get something working fast, which keeps motivation high.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Vue: the gentle start",
+      "items": [
+       "HTML-like templates",
+       "Official tools included",
+       "Quick first wins"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "code",
+       "frame",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "a94652ea",
+    "narration": "React asks you to write more JavaScript, and you choose more tools yourself. In return, it has a huge ecosystem and many job listings.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "React: the wide road",
+      "items": [
+       "More plain JavaScript",
+       "Huge ecosystem",
+       "Many jobs"
+      ],
+      "style": "cards",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "7f706faa",
+    "narration": "So want a job soon? Learn React. Want the smoothest start? Learn Vue. Either way, the skills transfer, so just start building today.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Jobs: React. Smooth start: Vue. Skills transfer.",
+      "emphasis": "Skills transfer"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 97 words in 4 beats but a 45-second video needs about 89 (between 80 and 89). Cut about 8 words: 4 to 5 beats of about 22 words each (you averaged 24; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.07058,
+ "seconds": 10.6
+}

@@ -1,0 +1,235 @@
+{
+ "rubric": {
+  "youtube": {
+   "legacy": {
+    "n": 10,
+    "hook_ok": 0.7,
+    "beats_in_norm": 1.0,
+    "text_ok": 0.1,
+    "complex_ok": 1.0,
+    "ending_ok": 1.0,
+    "length_fit": 1.0,
+    "checks_passed": 4.8,
+    "text_words_mean": 16.01,
+    "beat_median_words": 28.95,
+    "words_vs_expected": 1.07,
+    "pause_beats": 0.0,
+    "cost": 0.1026,
+    "secs": 34.6
+   },
+   "off": {
+    "n": 10,
+    "hook_ok": 1.0,
+    "beats_in_norm": 1.0,
+    "text_ok": 0.3,
+    "complex_ok": 1.0,
+    "ending_ok": 1.0,
+    "length_fit": 0.8,
+    "checks_passed": 5.1,
+    "text_words_mean": 14.72,
+    "beat_median_words": 28.35,
+    "words_vs_expected": 1.08,
+    "pause_beats": 0.0,
+    "cost": 0.1142,
+    "secs": 34.4
+   }
+  },
+  "tiktok": {
+   "legacy": {
+    "n": 10,
+    "hook_ok": 0.7,
+    "beats_in_norm": 1.0,
+    "text_ok": 0.0,
+    "complex_ok": 0.9,
+    "ending_ok": 1.0,
+    "length_fit": 0.6,
+    "checks_passed": 4.2,
+    "text_words_mean": 8.72,
+    "beat_median_words": 21.15,
+    "words_vs_expected": 1.12,
+    "pause_beats": 0.0,
+    "cost": 0.0574,
+    "secs": 8.4
+   },
+   "off": {
+    "n": 10,
+    "hook_ok": 1.0,
+    "beats_in_norm": 0.97,
+    "text_ok": 0.0,
+    "complex_ok": 1.0,
+    "ending_ok": 1.0,
+    "length_fit": 0.8,
+    "checks_passed": 4.8,
+    "text_words_mean": 8.25,
+    "beat_median_words": 20.75,
+    "words_vs_expected": 1.1,
+    "pause_beats": 0.0,
+    "cost": 0.059,
+    "secs": 8.3
+   }
+  },
+  "reels": {
+   "legacy": {
+    "n": 0,
+    "cost": 0,
+    "secs": 0
+   },
+   "off": {
+    "n": 10,
+    "hook_ok": 0.9,
+    "beats_in_norm": 1.0,
+    "text_ok": 0.0,
+    "complex_ok": 0.9,
+    "ending_ok": 1.0,
+    "length_fit": 0.8,
+    "checks_passed": 4.6,
+    "text_words_mean": 8.76,
+    "beat_median_words": 20.1,
+    "words_vs_expected": 1.07,
+    "pause_beats": 0.0,
+    "cost": 0.0592,
+    "secs": 8.4
+   }
+  },
+  "linkedin": {
+   "legacy": {
+    "n": 10,
+    "hook_ok": 0.8,
+    "beats_in_norm": 0.78,
+    "text_ok": 0.0,
+    "complex_ok": 1.0,
+    "ending_ok": 1.0,
+    "length_fit": 0.7,
+    "checks_passed": 4.4,
+    "text_words_mean": 15.34,
+    "beat_median_words": 32.0,
+    "words_vs_expected": 1.09,
+    "pause_beats": 0.0,
+    "cost": 0.0611,
+    "secs": 14.1
+   },
+   "off": {
+    "n": 10,
+    "hook_ok": 1.0,
+    "beats_in_norm": 0.76,
+    "text_ok": 0.0,
+    "complex_ok": 1.0,
+    "ending_ok": 1.0,
+    "length_fit": 0.6,
+    "checks_passed": 4.4,
+    "text_words_mean": 17.03,
+    "beat_median_words": 31.45,
+    "words_vs_expected": 1.12,
+    "pause_beats": 0.0,
+    "cost": 0.0663,
+    "secs": 14.8
+   }
+  },
+  "x": {
+   "legacy": {
+    "n": 0,
+    "cost": 0,
+    "secs": 0
+   },
+   "off": {
+    "n": 10,
+    "hook_ok": 1.0,
+    "beats_in_norm": 0.95,
+    "text_ok": 0.3,
+    "complex_ok": 1.0,
+    "ending_ok": 1.0,
+    "length_fit": 0.9,
+    "checks_passed": 5.2,
+    "text_words_mean": 8.66,
+    "beat_median_words": 22.75,
+    "words_vs_expected": 1.04,
+    "pause_beats": 0.0,
+    "cost": 0.0542,
+    "secs": 8.6
+   }
+  }
+ },
+ "pairwise": {
+  "youtube": {
+   "winner": {
+    "on": 5,
+    "off": 5,
+    "tie": 0
+   },
+   "hook": {
+    "on": 5,
+    "off": 4,
+    "tie": 1
+   },
+   "pacing": {
+    "on": 5,
+    "off": 5,
+    "tie": 0
+   },
+   "tone": {
+    "on": 3,
+    "off": 3,
+    "tie": 4
+   },
+   "ending": {
+    "on": 6,
+    "off": 4,
+    "tie": 0
+   }
+  },
+  "linkedin": {
+   "winner": {
+    "on": 4,
+    "off": 6,
+    "tie": 0
+   },
+   "hook": {
+    "on": 3,
+    "off": 5,
+    "tie": 2
+   },
+   "pacing": {
+    "on": 4,
+    "off": 5,
+    "tie": 1
+   },
+   "tone": {
+    "on": 4,
+    "off": 6,
+    "tie": 0
+   },
+   "ending": {
+    "on": 5,
+    "off": 5,
+    "tie": 0
+   }
+  },
+  "tiktok": {
+   "winner": {
+    "on": 5,
+    "off": 5,
+    "tie": 0
+   },
+   "hook": {
+    "on": 4,
+    "off": 4,
+    "tie": 2
+   },
+   "pacing": {
+    "on": 4,
+    "off": 3,
+    "tie": 3
+   },
+   "tone": {
+    "on": 6,
+    "off": 4,
+    "tie": 0
+   },
+   "ending": {
+    "on": 5,
+    "off": 5,
+    "tie": 0
+   }
+  }
+ }
+}

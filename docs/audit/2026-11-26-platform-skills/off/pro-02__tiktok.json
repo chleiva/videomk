@@ -1,0 +1,63 @@
+{
+ "id": "pro-02",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza solo 2 minutos",
+  "description": "Un truco sencillo para dejar de procrastinar: el problema no es la pereza, es empezar. Aprende a reducir la tarea hasta que sea imposible decir que no.",
+  "beats": [
+   {
+    "id": "15ec3968",
+    "narration": "No procrastinas por pereza. Procrastinas porque empezar te da pesar. La tarea parece enorme, y tu cerebro huye de ella.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No es pereza. Es miedo a empezar.",
+      "emphasis": "miedo a empezar"
+     }
+    }
+   },
+   {
+    "id": "8f46bde2",
+    "narration": "El truco: hazla ridículamente pequeña. Solo dos minutos. Abre el documento, escribe una frase, ponte los zapatos. Nada más.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Hazla pequeña",
+      "items": [
+       "Solo 2 minutos",
+       "Una frase",
+       "Un primer paso"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "e57b3ca5",
+    "narration": "Lo difícil es arrancar. Una vez en marcha, seguir cuesta mucho menos. Empieza pequeño, y el impulso hará el resto.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Empieza pequeño. El impulso hace el resto.",
+      "emphasis": "Empieza pequeño"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03218,
+ "seconds": 4.5
+}

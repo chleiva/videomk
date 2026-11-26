@@ -1,0 +1,94 @@
+{
+ "id": "mkt-02",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A Note App That Keeps Up With Your Thoughts",
+  "description": "A 30-second launch video for a note-taking app that captures ideas fast and helps you find them later. Capture, organize and search your notes in one calm place.",
+  "beats": [
+   {
+    "id": "1d4acd3d",
+    "narration": "Your best idea just vanished. It was on a sticky note, or in a chat, or nowhere at all.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Your best idea just vanished.",
+      "emphasis": "vanished"
+     }
+    }
+   },
+   {
+    "id": "42fbdeb5",
+    "narration": "Meet our new note-taking app. Jot down your thoughts and keep them in one place.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Type"
+       },
+       {
+        "icon": "microphone",
+        "label": "Speak"
+       },
+       {
+        "icon": "camera",
+        "label": "Snap"
+       }
+      ],
+      "title": "One place for everything"
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "a73f6059",
+    "narration": "Find any note when you need it. Your ideas stay organized, so you can stop remembering and start creating.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Find it in seconds",
+      "items": [
+       "Capture fast",
+       "Search instantly",
+       "Stay organized"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "icons": [
+       "pencil",
+       "search",
+       "folder"
+      ]
+     }
+    }
+   },
+   {
+    "id": "4016a83e",
+    "narration": "Keep your thoughts within reach. Download the app and write it down.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Never lose a thought again.",
+      "emphasis": "Never lose"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 68 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 10 words: 3 to 4 beats of about 19 words each (you averaged 17; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line",
+  "grounding: 3 beats had unsupported specifics, 3 rewritten"
+ ],
+ "cost_usd": 0.06602,
+ "seconds": 13.9
+}

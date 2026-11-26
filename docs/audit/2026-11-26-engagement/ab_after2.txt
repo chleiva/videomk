@@ -1,0 +1,22 @@
+10 prompts in both
+metric | before | after
+title_first | 0.20 | 0.00
+hook_words | 30.10 | 29.50
+cliches | 0.00 | 0.00
+max_run | 1.10 | 1.10
+beat_words | 28.42 | 28.35
+generic_end | 0.00 | 0.00
+beats | 11.60 | 11.50
+types | 8.20 | 8.10
+def_open | 0.90 | 0.50
+judge.accuracy | 3.30 | 3.30
+judge.coverage | 2.80 | 2.70
+judge.structure | 3.50 | 3.80
+judge.hook_ending | 3.40 | 3.50
+judge.tone | 3.90 | 3.90
+judge.visuals | 3.40 | 3.60
+judge.originality | 2.80 | 2.70
+judge.instructions | 3.40 | 3.40
+judge.language | 4.10 | 4.20
+cost per plan | 0.133 | 0.141
+plan seconds | 44.6 | 45.7

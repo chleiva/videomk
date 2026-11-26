@@ -1,0 +1,653 @@
+{
+ "id": "his-03",
+ "category": "history",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "great": "Housing boom, subprime lending, MBS and CDOs, rating agencies, leverage, Bear Stearns, Lehman 15 Sep 2008, TARP, Fed actions, lasting effects; narrative arc; correct figures.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:25:45",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The 2008 financial crisis is a well-documented historical event; an explainer needs timeless background on the housing boom, subprime mortgages, securitization, Lehman Brothers and the government resp",
+  "queries": [],
+  "searches": 3,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 3,
+   "reads": 0,
+   "sources": 12,
+   "seconds": 8.0,
+   "cost_usd": 0.001105,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 9000,
+  "n_sources": 6,
+  "n_fetched": 12,
+  "fetched": [
+   "The Great Collapse: How Securitization Caused the Subprime Meltdown",
+   "1 Subprime Mortgage Market and Current Financial Crisis",
+   "Financial production and the subprime mortgage crisis",
+   "untitled",
+   "CONCLUSIONS OF THE FINANCIAL CRISIS INQUIRY COMMISSION",
+   "Financial Crisis Inquiry Commission - Wikipedia",
+   "Lehman Brothers' Collapse: Financial Crisis Myth or Fact?",
+   "Collapse of Lehman Brothers | Economics | Research Starters | EBSCOhost",
+   "About TARP | U.S. Department of the Treasury",
+   "Bankruptcy of Lehman Brothers - Wikipedia",
+   "Too Big to Fail: Expectations and Impact of Extraordinary Government Intervention and the Role of Systemic Risk in the Financial Crisis - FEDERAL RESERVE BANK o",
+   "The Financial Crisis | The White House"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## The Great Collapse: How Securitization Caused the Subprime Meltdown\nThis Article argues that one of the primary causes of the subprime meltdown and the resulting economic collapse was the structure of securitization as applied to subprime and other non-prime residential loans, along with the resecuritization of the resulting mortgage-backed securities. Securitization weakened underwriting by discouraging originators from gathering “soft information” about the likelihood of borrower default and instead caused loan originators and other market participants to [...] made by borrowers or the proceeds of foreclosure sales. A servicer collects the mortgage payments and may foreclose if necessary. Typically, an investment house is involved in the pooling of subprime mortgages and resulting sale of securities, and a rating agency rates the resulting securities. To provide different investors with securities featuring different sets of risk and rewards, interest \n\n## 1 Subprime Mortgage Market and Current Financial Crisis\nthe fraction of subprime refinancing, which involved equity extraction is calculated to have been anything between 51.3% to 58.6% over that period. The next question is how the subprime mortgages were financed. The short answer is securitisation, and as mentioned in footnote 1 between 2005 and 2006 the subprime mortgage origination was about $1.2 trillion, 80 percent of which was securitised (see Table on p. 20 of Gorton, 2008). Banks set up trusts or just limited liability `Subprime and Alt-A’ [...] provide risky loans without applying the three C’s to each borrower – Collateral, Credit history and Character. This was so since banks could easily sell these mortgages or other loans to an underwriter, or act as an underwriter to sell to the public exotic mortgages backed by low quality securities. This led to the unprecedented growth of the subprime market (loans to borrowers with poor cr\n\n## Financial production and the subprime mortgage crisis\nSecuritization granted both liquidity and credit enhancement (Pozsar et al. 2013). Illiquid long-term assets, such as mortgages, were transformed into more liquid securities, while priority claims allow obtaining safe assets from more senior tranches, often with the certification of a credit agency. Financial engineering added further steps to this chain of production, creating increasingly complex financial instruments, like ‘squared CDOs’ or ‘synthetic CDOs’. This structure, also thanks to [...] driven by the demand from financial firms. Their demand for inputs (financial commodities) for the financial production process was in turn driven by the demand for securities. The possibility for banks to get rid of loans through securitization removed the constraint posed by borrowers’ creditworthiness. This boosted the supply of primary financial commodities and made banks able to meet a ris\n\n## untitled\n# THE FINANCIAL CRISIS INQUIRY REPORT. # FINANCIAL CRISIS. # Final Report of the National Commission on the Causes of the Financial and Economic Crisis in the United States THE FINANCIAL CRISIS INQUIRY REPORT. This printing includes all corrections contained in the errata sheet issued by the Commission as found on the FCIC website as of February 25, 2011. # FINAL REPORT OF THE NATIONAL COMMISSION ON THE CAUSES OF THE FINANCIAL AND ECONOMIC CRISIS IN THE UNITED STATES. > PA R T I: C R I S I S O N T H E H O R I Z O N. The Financial Crisis Inquiry Commission was created to “examine the causes of the current financial and economic crisis in the United States.” In this report, the Com-mission presents to the President, the Congress, and the American people the results of its examination and its conclusions as to the causes of the crisis.\n\n## CONCLUSIONS OF THE FINANCIAL CRISIS INQUIRY COMMISSION\nCONCLUSIONS OF THE FINANCIAL CRISIS INQUIRY COMMISSION The Financial Crisis Inquiry Commission has been called upon to examine the finan-cial and economic crisis that has gripped our country and explain its causes to the American people. Our task was first to determine what happened and how it happened so that we could understand why it happened. Some on Wall Street and in Washington with a stake in the status quo may be tempted to wipe from memory the events of this crisis, or to suggest that no one could have foreseen or prevented them. The subject of this report is of no small consequence to this nation. But our mission was to ask and answer this central ques-tion: how did it come to pass that in  our nation was forced to choose between two stark and painful alternatives—either risk the total collapse of our financial system and economy or inject trillions of taxpayer dollars into\n\n## Financial Crisis Inquiry Commission - Wikipedia\nAmerican commission that investigated the causes of the 2008 financial crisis. | Purpose | Investigate the financial and economic causes of the Great Recession and global financial crisis. | Concluded that the crisis was avoidable and caused by widespread failures in financial regulation and corporate governance. The **Financial Crisis Inquiry Commission** (**FCIC**) was established in 2010 in the United States to investigate the causes of the 2008 financial crisis. The commission, led by Phil Angelides, held public hearings, gathered testimony from hundreds, and released its report in January 2011. The report concluded that \"the collapse of the housing bubble—fueled by low interest rates, easy and available credit, scant regulation, and toxic mortgages—that was the spark that ignited\" events leading to the financial crisis. * Set the purpose of the commission, i.e., \"to examine the caus\n\n## Lehman Brothers' Collapse: Financial Crisis Myth or Fact?\nto “break the buck”—that is, it could not pay its investors a full dollar for each dollar they had invested. This triggered a run on money market funds that the Fed countered by promising to guarantee money market fund assets. The day after Lehman’s bankruptcy filing, the Fed bailed out AIG, and a few weeks later, Congress passed the Troubled Asset Relief Program (“TARP”), which allocated $700 billion to stabilizing the financial system. [...] The days before Lehman’s bankruptcy filing on September 15, 2008, saw frantic efforts by Treasury Secretary Hank Paulson and other regulators to arrange a sale or rescue for Lehman.2 The regulators refused to provide a federal guarantee or other bailout. After Bank of America decided not to pursue an acquisition, the parties negotiated a potential sale of Lehman’s brokerage operations and other “good” assets to Barclays, and proposed leaving its tr\n\n## Collapse of Lehman Brothers | Economics | Research Starters | EBSCOhost\nHowever, a buyout did not come through, the government decided not to help Lehman Brothers any further, and the company folded in the largest U.S. bankruptcy in history on September 15, 2008. Lehman Brothers had $639 billion in assets and $619 billion in debt, an unprecedented debt ratio for a top firm. It had almost 26,000 employees worldwide and held at least $40 billion in direct client assets (including those of large hedge funds) when it went under. Its collapse sparked chaos in U.S. and [...] However, a buyout did not come through, the government decided not to help Lehman Brothers any further, and the company folded in the largest U.S. bankruptcy in history on September 15, 2008. Lehman Brothers had $639 billion in assets and $619 billion in debt, an unprecedented debt ratio for a top firm. It had almost 26,000 employees worldwide and held at least $40 billion in direct client ass\n\n## About TARP | U.S. Department of the Treasury\nThe crisis began in the summer of 2007 and gradually increased in intensity and momentum the following year. A series of major financial institutions, including Countrywide Financial, Bear Stearns, IndyMac, and Fannie Mae and Freddie Mac failed. Then, on September 15, 2008, Lehman Brothers filed for bankruptcy. As Lehman fell, the remaining major investment banking firms in this country teetered on the edge of collapse as their funding sources were squeezed. [...] The purpose of EESA was to promote the stability and liquidity of the financial system through the authorization of TARP and other measures. But TARP was only part of the government's response to the crisis. In 2008 and 2009, Treasury, the Federal Reserve, and the FDIC put in place a comprehensive set of emergency programs to stabilize the financial sector and the economy. These actions included purchases of mortgage-backed sec\n\n## Bankruptcy of Lehman Brothers - Wikipedia\nlate that day to prevent the bank's rapid failure. Bank of America's rumored involvement also appeared to end as federal regulators resisted its request for government involvement in Lehman's sale.\\ By Sunday, September 14, after the Barclays deal fell through, the news of impending doom swept through Lehman, and many employees arrived at the headquarters to clean out their offices. By Sunday after",
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It explains how risky lending turned into a global crash.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "c476c0e9",
+    "narration": "In September 2008, one of Wall Street's oldest banks went bankrupt in a single weekend. Within weeks, the world's financial system was close to freezing. How did a housing boom end here?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "aerial view of suburban houses",
+      "clip_queries": [
+       "aerial view of suburban houses",
+       "city skyline financial district"
+      ],
+      "alt": "suburban neighborhood from above"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "The boom"
+   },
+   {
+    "id": "a81adfb7",
+    "narration": "It began with cheap money. Interest rates were low, credit was easy, and rules were light. Homes seemed to only gain value, so more people wanted to buy, and banks wanted to lend.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "new houses under construction",
+      "clip_queries": [
+       "new houses under construction",
+       "family in front of house",
+       "real estate for sale sign"
+      ],
+      "alt": "home building site"
+     }
+    }
+   },
+   {
+    "id": "df41c35c",
+    "narration": "Then lenders went further. Subprime mortgages went to borrowers with poor credit. Many loans skipped the old checks of collateral, credit history and character, because banks could simply sell the loans on.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The old three C's, skipped",
+      "items": [
+       "Collateral",
+       "Credit history",
+       "Character"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "house",
+       "chart-column",
+       "user"
+      ]
+     }
+    },
+    "chapter": "Subprime"
+   },
+   {
+    "id": "ff5bc794",
+    "narration": "In 2005 and 2006, about $1.2 trillion of subprime mortgages were made. Roughly 80 percent of them were securitized. That one word is the heart of the story.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "$1.2T",
+      "label": "Subprime mortgages made in 2005-2006, about 80% securitized"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "9bb557e8",
+    "narration": "Here is how it worked. Borrowers paid their mortgages. Banks pooled thousands of loans together. Investors bought securities backed by those payments, and rating agencies stamped them as safe.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The securitization chain",
+      "nodes": [
+       {
+        "id": "b",
+        "label": "Borrowers",
+        "icon": "user"
+       },
+       {
+        "id": "l",
+        "label": "Lenders",
+        "icon": "landmark"
+       },
+       {
+        "id": "p",
+        "label": "Pooled securities",
+        "icon": "layers"
+       },
+       {
+        "id": "r",
+        "label": "Rating agencies",
+        "icon": "star"
+       },
+       {
+        "id": "i",
+        "label": "Investors",
+        "icon": "banknote"
+       }
+      ],
+      "edges": [
+       [
+        "b",
+        "l",
+        "mortgages"
+       ],
+       [
+        "l",
+        "p",
+        "sold in pools"
+       ],
+       [
+        "p",
+        "r",
+        "rated"
+       ],
+       [
+        "r",
+        "i",
+        "bought"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    },
+    "chapter": "Securitization"
+   },
+   {
+    "id": "75c08941",
+    "narration": "But there was a flaw. Lenders who sold loans no longer cared if borrowers could repay. Careful underwriting faded, and risk was passed along. Financial engineers then stacked complex products on top, like squared and synthetic CDOs.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "If you can sell the risk, why care who repays?",
+      "emphasis": "sell the risk"
+     }
+    }
+   },
+   {
+    "id": "db5abfda",
+    "narration": "When housing prices stopped rising, the trouble started. Borrowers could not pay or refinance. Securities once called safe lost value, and nobody knew who was holding the losses.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "foreclosure sign in front of house",
+      "clip_queries": [
+       "foreclosure sign in front of house",
+       "empty street of houses",
+       "worried man reading papers"
+      ],
+      "alt": "empty house for sale"
+     }
+    },
+    "chapter": "The crash"
+   },
+   {
+    "id": "870712e7",
+    "narration": "The crisis began in the summer of 2007. Then Countrywide, Bear Stearns, IndyMac, Fannie Mae and Freddie Mac all failed or were rescued, one after another. Pressure built on every big bank.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Dominoes before Lehman",
+      "items": [
+       "Countrywide Financial",
+       "Bear Stearns",
+       "IndyMac",
+       "Fannie Mae and Freddie Mac"
+      ],
+      "style": "rail",
+      "accent": "rose"
+     }
+    }
+   },
+   {
+    "id": "5f30a87b",
+    "narration": "On September 15, 2008, Lehman Brothers filed for bankruptcy. It held $639 billion in assets and $619 billion in debt, and had almost 26,000 employees. It was the largest bankruptcy in U.S. history.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Wall Street New York stock exchange",
+      "alt": "Wall Street in New York",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Lehman"
+   },
+   {
+    "id": "3d07c324",
+    "narration": "Regulators had scrambled all weekend to find a buyer. Bank of America walked away. Then the Barclays deal fell through. The government refused to guarantee Lehman, and it fell.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Lehman's last days",
+      "events": [
+       {
+        "date": "Sept 2008",
+        "label": "Rescue talks begin"
+       },
+       {
+        "date": "Sept 14",
+        "label": "Barclays deal falls through"
+       },
+       {
+        "date": "Sept 15",
+        "label": "Lehman files for bankruptcy"
+       },
+       {
+        "date": "Sept 16",
+        "label": "Fed bails out AIG"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f2c3fa49",
+    "narration": "Panic spread. A money market fund broke the buck, meaning it could not pay investors a full dollar per dollar invested. A run on those funds followed, and the Fed promised to guarantee their assets.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Breaking the buck",
+      "definition": "When a money market fund cannot pay investors a full dollar for each dollar they invested."
+     }
+    }
+   },
+   {
+    "id": "4f170a43",
+    "narration": "The government answered with trillions in rescue efforts. Congress passed the Troubled Asset Relief Program, called TARP, with $700 billion to stabilize the financial system. The Treasury, the Fed and the FDIC added emergency programs.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "700",
+      "prefix": "$",
+      "unit": "B",
+      "label": "Authorized for TARP to stabilize the financial system"
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "9cd46cc9",
+    "narration": "The Financial Crisis Inquiry Commission later concluded the crisis was avoidable. It blamed widespread failures in financial regulation and corporate governance, fueled by low rates, easy credit, scant regulation and toxic mortgages.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "The collapse of the housing bubble, fueled by low interest rates, easy and available credit, scant regulation, and toxic mortgages, was the spark that ignited the crisis.",
+      "attribution": "Financial Crisis Inquiry Commission, 2011"
+     }
+    }
+   },
+   {
+    "id": "58074077",
+    "narration": "So the cause was not one villain. It was easy money, loans nobody checked, risk sold on and hidden, and weak oversight. When people stop owning their risk, everyone eventually pays.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What really caused it",
+      "items": [
+       "Easy credit",
+       "Subprime loans",
+       "Securitized risk",
+       "Weak regulation"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "The Great Collapse: How Securitization Caused the Subprime Meltdown",
+    "url": "https://digitalcommons.lib.uconn.edu/cgi/viewcontent.cgi?article=1026&context=law_review",
+    "publisher": "digitalcommons.lib.uconn.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "1 Subprime Mortgage Market and Current Financial Crisis",
+    "url": "https://www.landecon.cam.ac.uk/sites/default/files/2023-03/wp08-09.pdf",
+    "publisher": "landecon.cam.ac.uk",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Financial Crisis Inquiry Commission - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Financial_Crisis_Inquiry_Commission",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Lehman Brothers' Collapse: Financial Crisis Myth or Fact?",
+    "url": "https://www.brookings.edu/articles/history-credits-lehman-brothers-collapse-for-the-2008-financial-crisis-heres-why-that-narrative-is-wrong",
+    "publisher": "brookings.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Collapse of Lehman Brothers | Economics | Research Starters | EBSCOhost",
+    "url": "https://www.ebsco.com/research-starters/economics/collapse-lehman-brothers",
+    "publisher": "ebsco.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "About TARP | U.S. Department of the Treasury",
+    "url": "https://home.treasury.gov/data/troubled-assets-relief-program/about-tarp",
+    "publisher": "home.treasury.gov",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 59.6,
+  "before_first_script_call_s": 9.7,
+  "script_s": 49.9
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "research": 0.00111,
+  "script_big": 0.1701,
+  "search_api": 0.024,
+  "total": 0.19547
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 55457,
+  "out": 8644
+ },
+ "rules": {
+  "length": {
+   "words": 449,
+   "expected_words": 402,
+   "ratio": 1.117,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 200.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In September 2008, one of Wall Street's oldest banks went bankrupt in a single weekend. Within weeks, the world's financial system was close to freezing. How did a housing boom end here?",
+   "close_text": "So the cause was not one villain. It was easy money, loans nobody checked, risk sold on and hidden, and weak oversight. When people stop owning their risk, everyone eventually pays."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "clip": 3,
+    "bullets": 3,
+    "stat": 1,
+    "diagram": 1,
+    "kinetic_text": 1,
+    "image": 1,
+    "timeline": 1,
+    "definition": 1,
+    "counter": 1,
+    "quote": 1
+   },
+   "max_run": 2,
+   "entropy": 3.13,
+   "top_type": "clip",
+   "top_share": 0.21,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 11,
+   "ungrounded_numbers": [
+    "15,2008"
+   ],
+   "entities": 14,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.04,
+   "ungrounded_number_share": 0.091,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 6,
+   "fetched": 12,
+   "notes_len": 9000,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 10 (timeline): its narration never says ['Rescue talks begin', 'Lehman files for bankruptcy', 'Fed bails out AIG']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most figures match the notes ($1.2T, 80%, $639B/$619B, $700B, 15 Sept). But \"went bankrupt in a single weekend\" is loose, and \"Fed bails out AIG\" on Sept 16 is compressed. The timeline also puts \"Rescue talks begin\" under \"Sept 2008\" with no day."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the boom, subprime, securitization, Lehman and TARP. It omits rating-agency conflicts, leverage, and the Fed's rate or QE actions. It gives no lasting effects (recession, unemployment, Dodd-Frank), and it says the 'trillions' response was in the notes' words but unspecified."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear chronological chapters (boom, subprime, securitization, crash, Lehman, response) lead to a closing synthesis. There is minor repetition of causes in beats 13 and 14."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening is a dramatic event, but the closing question \"How did a housing boom end here?\" is awkward. The ending line is decent but moralizing and slightly generic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Plain, accessible explainer voice suited to a US general audience, though it sometimes reads like a report."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well (diagram, stat, timeline, definition, quote). The stat and counter use real numbers and the queries fit. The generic Wall Street image for Lehman is weak."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Specifics such as the three C's, squared and synthetic CDOs, and breaking the buck add some interest. Overall it is a standard retelling, and the ending is cliché-ish."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is told as a story from the housing boom and includes subprime, securitization, Lehman and the government response. The length is near target at roughly 440 words."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical, with a few awkward lines such as \"How did a housing boom end here?\" and \"Homes seemed to only gain value\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "How did a housing boom end here?",
+    "issue": "The hook's closing question is clumsy and vague, and does not create real tension.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "went bankrupt in a single weekend",
+    "issue": "Lehman's troubles had built for months, and the rescue talks ran over a weekend. The phrasing oversimplifies.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Countrywide, Bear Stearns, IndyMac, Fannie Mae and Freddie Mac all failed or were rescued",
+    "issue": "Bear Stearns was sold to JPMorgan with Fed support, and Fannie and Freddie were put into conservatorship. Calling them all 'failed or rescued' is vague, and Bear is not explained.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "rating agencies stamped them as safe",
+    "issue": "The role of the rating agencies and the conflicts of interest are not explained. Leverage is entirely absent.",
+    "beat": 5
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "The government answered with trillions in rescue efforts.",
+    "issue": "The Fed's actions are vague, and the script gives no lasting effects such as the Great Recession, job losses or Dodd-Frank.",
+    "beat": 12
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "fueled by low rates, easy credit, scant regulation and toxic mortgages",
+    "issue": "The narration repeats the causes from the quote on screen and from beat 2, which is redundant.",
+    "beat": 13
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Wall Street New York stock exchange",
+    "issue": "A generic image does not show Lehman, whose collapse is the narration's subject.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Rating agency conflicts of interest",
+   "Bank leverage levels",
+   "Fed rate cuts and quantitative easing",
+   "Lasting effects: recession, job losses, foreclosures, Dodd-Frank",
+   "Why Lehman was allowed to fail while Bear Stearns was rescued"
+  ],
+  "wrong_facts": [
+   "Timeline label \"Sept 2008 Rescue talks begin\" is imprecise",
+   "\"Trillions\" in rescue efforts is not quantified in the notes, though it is broadly true"
+  ],
+  "would_publish": false,
+  "summary": "A competent, accurate chronological explainer that follows the notes closely and hits the requested points. It is thin on rating agencies, leverage, Fed actions and aftermath, and its hook and ending are only moderately strong.",
+  "mean": 3.56,
+  "cost_usd": 0.031466,
+  "tokens": [
+   7528,
+   1641
+  ]
+ }
+}

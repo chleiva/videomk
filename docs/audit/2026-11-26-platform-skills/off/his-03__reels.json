@@ -1,0 +1,69 @@
+{
+ "id": "his-03",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A fast story of the 2008 crisis, from the US housing boom and subprime mortgages to securitization, Lehman Brothers and the government response. One chain of risky bets that broke the financial system.",
+  "beats": [
+   {
+    "id": "af5a0697",
+    "narration": "Banks handed home loans to people who could not repay them. Housing boomed, and subprime mortgages spread across America.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Loans nobody could repay",
+      "emphasis": "nobody could repay"
+     }
+    }
+   },
+   {
+    "id": "23132929",
+    "narration": "Banks bundled those loans into securities and sold them worldwide. Everyone thought the risk was gone. Then house prices fell, and the losses spread.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How the risk spread",
+      "items": [
+       "Subprime mortgages",
+       "Securitization",
+       "Prices fall"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "icons": [
+       "house",
+       "landmark",
+       "chart-column"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cf524d3f",
+    "narration": "Lehman Brothers collapsed. Panic froze lending, and the government stepped in with bailouts. One lesson: hidden risk always comes due.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Lehman collapsed. Bailouts followed.",
+      "subtitle": "Hidden risk comes due"
+     }
+    },
+    "sfx": "impact"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 63 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 5 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06453,
+ "seconds": 8.4
+}

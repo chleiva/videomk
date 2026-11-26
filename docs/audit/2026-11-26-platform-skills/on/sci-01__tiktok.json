@@ -1,0 +1,66 @@
+{
+ "id": "sci-01",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Hot Coffee Always Cools Down",
+  "description": "Entropy measures how spread out energy is in a system. The second law of thermodynamics explains why isolated systems drift toward equilibrium and why some processes can't be undone.",
+  "beats": [
+   {
+    "id": "9892dff8",
+    "narration": "Ever wonder why your coffee never heats itself back up? That's entropy. It measures how spread out energy is.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup",
+      "clip_queries": [
+       "steaming coffee cup",
+       "coffee cooling on table"
+      ],
+      "alt": "hot coffee on a table"
+     }
+    }
+   },
+   {
+    "id": "4135a77f",
+    "narration": "Low entropy means energy is bunched up in one spot. High entropy means it's evenly dispersed. Nature slides toward spread out.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy",
+      "items": [
+       "Low: energy concentrated",
+       "High: energy spread out"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "bdce2eb7",
+    "narration": "That's the second law of thermodynamics. In an isolated system, entropy can't decrease. So some things, like cooling coffee, are irreversible.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy never decreases in an isolated system.",
+      "emphasis": "never decreases"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03377,
+ "seconds": 5.2
+}

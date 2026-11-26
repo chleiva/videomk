@@ -128,7 +128,7 @@ def draw_chart(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: The
     n = min(len(labels), len(values))
     fr = ctx.frame
     land = fr.landscape
-    ts = 1.0 if land else 1.15      # type scale of the small chart text
+    ts = 1.15      # type scale of the small chart text (axis, categories, values): 24 px at 1080p was the smallest text of the landscape charts in the QA review
     top = heading(cv, th, str(props.get("title", "")), lt, y=ctx.top + 20, ctx=ctx) if props.get("title") else ctx.top + 50
     if n == 0:
         return

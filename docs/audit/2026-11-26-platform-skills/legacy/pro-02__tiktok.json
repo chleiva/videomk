@@ -1,0 +1,63 @@
+{
+ "id": "pro-02",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar en 30 segundos",
+  "description": "Un truco sencillo para dejar de procrastinar: empezar con un paso diminuto. Aprende por qué funciona y cómo aplicarlo hoy.",
+  "beats": [
+   {
+    "id": "cdfc8071",
+    "narration": "¿Llevas días posponiendo esa tarea? No es pereza. Es que tu cerebro huye de lo que parece enorme y difícil.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No es pereza: es miedo a lo enorme",
+      "emphasis": "miedo"
+     }
+    }
+   },
+   {
+    "id": "25b785e1",
+    "narration": "La solución: hazla ridículamente pequeña. Solo cinco minutos. Abre el documento, escribe una línea, ponte las zapatillas. Nada más.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Hazlo pequeño",
+      "items": [
+       "Solo 5 minutos",
+       "Una línea",
+       "Un primer paso"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "26da8d59",
+    "narration": "Lo difícil es empezar, no continuar. Una vez en marcha, seguir cuesta mucho menos. Así que empieza ahora, aunque sea poquito.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Empieza pequeño. Empieza ahora.",
+      "emphasis": "ahora"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.02962,
+ "seconds": 4.3
+}

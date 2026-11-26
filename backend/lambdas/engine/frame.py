@@ -19,14 +19,14 @@ _ORIENT = {"16:9": "landscape", "9:16": "portrait", "1:1": "square", "4:5": "por
 # Burned-in captions: bottom edge of the caption box (design y), type size, widest box, reserved right strip (platform buttons), words per page
 _CAPTION = {
     "16:9": dict(bottom=1010, size=46, max_w=1480, x0=0, x1=1920, words=11),
-    "9:16": dict(bottom=1670, size=58, max_w=900, x0=48, x1=950, words=7),     # above the platform UI zone (bottom 250, right 130)
+    "9:16": dict(bottom=1600, size=58, max_w=900, x0=48, x1=950, words=7),     # above the platform UI zone (bottom 320 = the TikTok figure of published safe-zone guides, right 130)
     "1:1": dict(bottom=1020, size=50, max_w=920, x0=0, x1=1080, words=8),
     "4:5": dict(bottom=1290, size=52, max_w=920, x0=0, x1=1080, words=8),
 }
 # Safe margins (left/right, top) in design units
 _MARGIN = {"16:9": (140, 70), "9:16": (72, 150), "1:1": (80, 70), "4:5": (80, 80)}
 # Bottom of the content box when captions are ON: just above the caption box (2 lines) with a gap; None -> computed
-_CONTENT_BOTTOM_CAP = {"16:9": 800, "9:16": 1450, "1:1": 780, "4:5": 1040}
+_CONTENT_BOTTOM_CAP = {"16:9": 800, "9:16": 1385, "1:1": 780, "4:5": 1040}
 _CONTENT_BOTTOM_NOCAP = {"16:9": 1000, "9:16": 1670, "1:1": 1010, "4:5": 1280}
 _RIGHT_RESERVE = {"16:9": 0, "9:16": 130, "1:1": 0, "4:5": 0}   # platform buttons column (vertical formats): keep key text out of it near the bottom
 

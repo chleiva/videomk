@@ -1,0 +1,648 @@
+{
+ "id": "mkt-02",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "launch video for a note-taking app",
+ "great": "Reasonable positioning even with missing details: avoids inventing specific features/numbers or flags them as placeholders; problem-solution-benefit arc, call to action.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:27:30",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 8.3,
+   "cost_usd": 0.0009916,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 26.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 14,
+   "candidates": 14,
+   "checked": 14,
+   "flagged": 7,
+   "repaired": 7,
+   "unsupported": 7,
+   "common": 0,
+   "supported": 7,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 6074,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Rise of AI Note-Taking App in 2026: Adoption Trends, User Demographics and Market Growth",
+   "The second brain market in 2026: who is winning - Fabric – your self-organizing workspace and file explorer",
+   "Note-taking statistics: 40+ data points for 2026 | Goodnotes Blog",
+   "What Are the Latest Funding Trends in AI Note-Taker? – New Market Pitch",
+   "The 8 Best Note-Taking Apps in 2026 | ClickUp",
+   "Paper vs Digital Note-Taking: Research & Trade-Offs | Notsu"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 370 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works",
+  "grounding: 7 beats had unsupported specifics, 7 rewritten"
+ ],
+ "notes": "## Rise of AI Note-Taking App in 2026: Adoption Trends, User Demographics and Market Growth\nPublished: Fri, 28 Aug 2026 00:00:00 GMT\nNow, the broader note-taking market is expected to reach $38.65 billion by 2035, and it is projected to grow at a 8.4% CAGR during the forecast period. If you look at it from a user perspective, it has some varied dynamics: | | | --- | | Category | Leader | | Biggest User Segment | Business Use | | Fastest-Growing Segment | Collaborative Use | | Top Customer Acquisition Model | Freemium | | Most Reliable Revenue Model | Subscription | Source: MarkWide Research [...] 19% of employees use AI tools to take notes during their workday. 29% of employees have relied on AI-generated summaries instead of attending meetings directly. When it comes to Gen Z employees, 43% use AI note-taking tools. Whereas for the millennials, the number is somewhere around 30%. Source: Tech.co citing Software Finder’s study: AI Note Taking at Work: Benefits and Drawbacks ## How Employees Use AI Note-Taking Tools [.\n\n## The second brain market in 2026: who is winning - Fabric – your self-organizing workspace and file explorer\nPublished: Sat, 19 Sep 2026 00:00:00 GMT\nWhat about Evernote? Where does it fit? Evernote is in decline. The Bending Spoons acquisition, price increases, and minimal product development have pushed its most loyal users to alternatives. It remains usable for basic note-taking but has fallen behind on every front that defines the category in 2026: AI search, automatic organisation, self-writing docs, and agent capabilities. Most Evernote users looking to switch are choosing Fabric, Obsidian, or Notion depending on their priorities. [...] The limitation: Mem handles notes but doesn't extend to the broader knowledge management use case (connected tools, self-writing docs, file handling, team features). The market is moving toward comprehensive AI workspaces rather than AI-first notes apps, which may leave Mem positioned for a specific segment rather than the whole category. ### The emerging players [...] Reflect occupies the daily-\n\n## Note-taking statistics: 40+ data points for 2026 | Goodnotes Blog\nPublished: Wed, 23 Sep 2026 01:16:35 GMT\n09. Ease of use is the biggest factor influencing which digital note-taking tools professionals adopt, selected by 35% of respondents. Cloud synchronization followed at 25%, time savings at 20%, smart features at 12%, and collaboration support at 8%. (Source) [...] 12. AI note-taking tools reached just under 43% aggregate market penetration among financial advisors in 2026. (Source) 13. 61% of financial advisors surveyed by CoreData use AI for meeting transcription. Among practices with strong growth plans, that rises to 74%. (Source) 14. 53% of corporate legal teams are using or experimenting with AI note-takers for audio and video transcription. Another 83% use or experiment with AI for summarization. (Source) [...] 10. Task management is the most common reason Gen Z professionals use digital note-taking tools at work, cited by 32% of respondents. Meeting notes followed at 25%, documen\n\n## What Are the Latest Funding Trends in AI Note-Taker? – New Market Pitch\nPublished: Tue, 24 Nov 2026 11:32:59 GMT\nThe largest rounds explain much of the jump. Just 2 financings above $50M raised $205M, leaving at least $107M outside that group. Founders should not mistake the total for a market where every note-taking app can raise easily. The timing also tells a clear story. Q1 2026 brought 4 deals and $257M, followed by 3 deals and at least $56M in Q2 2026. Q3 2026 had no tracked deal, so the rush of money early in the year has not continued quarter after quarter. [...] | Is financial advice the only hot application? | No, investors also back tools for sales teams. Attention raised $30M in its June 2026 Series B. Completing follow-up work is the bigger common theme. | | Can standalone note-takers beat built-in meeting recaps? | Some can, provided they solve a tougher problem. Google reported more than 110 million recent note-taking attendees. A simple transcript alone is difficult to sell separate\n\n## The 8 Best Note-Taking Apps in 2026 | ClickUp\nPublished: Thu, 17 Sep 2026 16:39:01 GMT\nNote-taking apps fail between writing and retrieving. Microsoft’s telemetry shows the shape of the problem: during the workday, employees are interrupted every two minutes by meetings, emails, or pings, and 60% of meetings are ad hoc. An unscheduled meeting has no agenda doc, so the note lands in whichever app was open. Three months later, 62% of people say they spend too much time searching for information in their workday. [...] No single note-taking app is best. OneNote offers the safest free start. Apple Notes is the fastest capture on Apple hardware. Obsidian is the vault you still own in 10 years. Notion is the wiki a team can browse. Goodnotes makes handwriting searchable, Granola survives a day of calls, and Evernote still clips the web better than anything here. [...] Capture faster than a pen: The competition is paper. If opening the app takes longer than grabbing a notebook fo\n\n## Paper vs Digital Note-Taking: Research & Trade-Offs | Notsu\nThe headline finding: laptop note-takers tended to transcribe lectures nearly verbatim, while longhand note-takers — unable to write as fast as they could type — were forced to process, summarize, and reframe as they wrote. On factual recall questions the two groups performed similarly. On conceptual questions, the longhand group did better, even when laptop users were explicitly told not to transcribe verbatim, and even when both groups were allowed to review their notes before testing. [...] The short answer: The best available evidence favors handwriting on paper for learning and retention. Longhand note-takers tend to do better on conceptual questions than laptop note-takers (Mueller & Oppenheimer, 2014), and brain-imaging work shows handwriting produces more extensive neural connectivity than typing (Van der Weel & Van der Meer, 2024). But the effect isn't absolute — later replicati",
+ "plan": {
+  "title": "Meet Your Notes Again: A New Note-Taking App",
+  "description": "A launch video for a note-taking app built around the moment between writing and finding. It shows why notes get lost, what people want from their tools, and how one app fixes it.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "03263804",
+    "narration": "Think of the last great idea you wrote down. Now try to find it. Three months later, 62% of people say they spend too much time searching for information.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "62%",
+      "label": "say they spend too much time searching for information"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "The problem"
+   },
+   {
+    "id": "82f79a8a",
+    "narration": "Here is why. Every two minutes, a meeting, an email or a ping interrupts your work. So the note lands in whichever app happens to be open.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "busy office workers laptops",
+      "clip_queries": [
+       "busy office workers laptops",
+       "person checking phone notifications at desk"
+      ],
+      "alt": "people working in open plan office"
+     }
+    }
+   },
+   {
+    "id": "078448a4",
+    "narration": "Note apps fail between writing and retrieving. Capturing is easy. Finding it again later is where ideas go to disappear.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Where notes get lost",
+      "nodes": [
+       {
+        "id": "w",
+        "label": "Write",
+        "icon": "pencil"
+       },
+       {
+        "id": "l",
+        "label": "Lost in the pile",
+        "icon": "folder"
+       },
+       {
+        "id": "r",
+        "label": "Retrieve",
+        "icon": "search"
+       }
+      ],
+      "edges": [
+       [
+        "w",
+        "l",
+        "scattered"
+       ],
+       [
+        "l",
+        "r",
+        "too slow"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "a9ab7914",
+    "narration": "So what do people actually want? Professionals were asked what drives their choice of digital note tools. The answer was not fancy features. Ease of use came first.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Ease of use matters more than any feature.",
+      "emphasis": "Ease of use"
+     }
+    },
+    "chapter": "What people want"
+   },
+   {
+    "id": "1e7cf136",
+    "narration": "Ease of use was chosen by 35%. Cloud sync followed at 25%. Time savings reached 20%, smart features 12%, and collaboration 8%.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "What drives note-tool choice",
+      "labels": [
+       "Ease of use",
+       "Cloud sync",
+       "Time savings",
+       "Smart features",
+       "Collaboration"
+      ],
+      "values": [
+       35.0,
+       25.0,
+       20.0,
+       12.0,
+       8.0
+      ],
+      "unit": "%",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "a520e9f5",
+    "narration": "Our rule is simple. If opening the app takes longer than grabbing a notebook, you will reach for the notebook.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands writing in notebook",
+      "clip_queries": [
+       "hands writing in notebook",
+       "typing on laptop at coffee shop"
+      ],
+      "alt": "person taking notes at desk"
+     }
+    }
+   },
+   {
+    "id": "7fccb9df",
+    "narration": "Meet your new notes app. It is built around three things: capturing ideas, finding them again, and turning them into action.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Meet your notes, found again",
+      "subtitle": "Capture fast. Find anything. Act on it."
+     }
+    },
+    "sfx": "impact",
+    "chapter": "The app"
+   },
+   {
+    "id": "4d01def5",
+    "narration": "First, capture. Jot down your idea. Second, search. Find it again later. Third, act. Turn notes into next steps.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How it works",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Type or write by hand, instantly"
+       },
+       {
+        "label": "Search",
+        "detail": "Ask in plain words"
+       },
+       {
+        "label": "Act",
+        "detail": "Turn notes into tasks"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "9ba5cbc4",
+    "narration": "AI can help with the boring part. You are not alone in this: 19% of employees already use AI tools to take notes at work.",
+    "scene": {
+     "type": "pictogram",
+     "props": {
+      "total": 100,
+      "filled": 19,
+      "icon": "person",
+      "label": "19% of employees use AI tools to take notes",
+      "title": "AI note-taking at work"
+     }
+    }
+   },
+   {
+    "id": "77773d46",
+    "narration": "Among Gen Z employees, 43% use AI note-taking tools. For millennials, it is around 30%. The habit is growing fast, and people want it built in.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Use AI note tools at work",
+      "labels": [
+       "Gen Z",
+       "Millennials"
+      ],
+      "values": [
+       43.0,
+       30.0
+      ],
+      "unit": "%",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "db1b7e81",
+    "narration": "The whole market is growing too. Note-taking is expected to reach 38.65 billion dollars by 2035, at 8.4% growth a year. People are choosing better tools.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "38.65",
+      "prefix": "$",
+      "unit": "B",
+      "label": "expected note-taking market by 2035",
+      "delta": "8.4% yearly growth"
+     }
+    }
+   },
+   {
+    "id": "c6739f96",
+    "narration": "Writing by hand has a real edge for learning. Longhand note-takers did better on conceptual questions, because they had to process ideas.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Typing",
+       "tagline": "Fast, near verbatim"
+      },
+      "b": {
+       "name": "Handwriting",
+       "tagline": "Slower, more thinking"
+      },
+      "rows": [
+       {
+        "label": "Factual recall",
+        "a": "Similar",
+        "b": "Similar"
+       },
+       {
+        "label": "Conceptual questions",
+        "a": "Weaker",
+        "b": "Better"
+       }
+      ],
+      "verdict": "Handwriting helps ideas stick",
+      "winner": "b"
+     }
+    },
+    "chapter": "Why it works"
+   },
+   {
+    "id": "17c71b75",
+    "narration": "Whether you work in a team, study, or just collect ideas, your notes are there when you need them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "students studying together library",
+      "clip_queries": [
+       "students studying together library",
+       "team meeting around table",
+       "person writing ideas at desk"
+      ],
+      "alt": "team meeting around table"
+     }
+    }
+   },
+   {
+    "id": "7ca01630",
+    "narration": "Stop losing your best ideas. Download the app today and find your next great idea exactly when you need it.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Write it once. Find it forever.",
+      "emphasis": "Find it forever"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Rise of AI Note-Taking App in 2026: Adoption Trends, User Demographics and Market Growth",
+    "url": "https://www.humanizeai.io/blog/article/ai-note-taking-app-statistics-usage-productivity-market-trends",
+    "publisher": "humanizeai.io",
+    "license": "",
+    "date": "Fri, 28 Aug 2026 00:00:00 GMT"
+   },
+   {
+    "title": "Note-taking statistics: 40+ data points for 2026 | Goodnotes Blog",
+    "url": "https://www.goodnotes.com/blog/note-taking-statistics",
+    "publisher": "goodnotes.com",
+    "license": "",
+    "date": "Wed, 23 Sep 2026 01:16:35 GMT"
+   },
+   {
+    "title": "The 8 Best Note-Taking Apps in 2026 | ClickUp",
+    "url": "https://clickup.com/blog/note-taking-apps",
+    "publisher": "clickup.com",
+    "license": "",
+    "date": "Thu, 17 Sep 2026 16:39:01 GMT"
+   },
+   {
+    "title": "Paper vs Digital Note-Taking: Research & Trade-Offs | Notsu",
+    "url": "https://notsubrand.com/blogs/paper-trail/paper-vs-digital-note-taking-what-the-research-says",
+    "publisher": "notsubrand.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 72.3,
+  "before_first_script_call_s": 12.5,
+  "script_s": 59.8
+ },
+ "cost": {
+  "script_small": 0.0024,
+  "research": 0.00099,
+  "script_big": 0.15275,
+  "search_api": 0.016,
+  "total": 0.17214
+ },
+ "calls": {
+  "small": 5,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 53907,
+  "out": 11272
+ },
+ "rules": {
+  "length": {
+   "words": 329,
+   "expected_words": 402,
+   "ratio": 0.818,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 150.4,
+   "flag_short": true,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 20,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Think of the last great idea you wrote down. Now try to find it. Three months later, 62% of people say they spend too much time searching for information.",
+   "close_text": "Stop losing your best ideas. Download the app today and find your next great idea exactly when you need it."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "stat": 1,
+    "clip": 3,
+    "diagram": 1,
+    "kinetic_text": 2,
+    "chart": 2,
+    "title": 1,
+    "steps": 1,
+    "pictogram": 1,
+    "counter": 1,
+    "versus": 1
+   },
+   "max_run": 1,
+   "entropy": 3.18,
+   "top_type": "clip",
+   "top_share": 0.21,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 12,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1,
+   "other": 1
+  },
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 6074,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_short"
+  ],
+  "mismatch_scenes": [
+   "beat 3 (diagram): its narration never says ['Write', 'Lost in the pile', 'Retrieve']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Most stats trace to the notes, but they are misapplied: the 62% figure is framed as a note-retrieval problem, and the market figure is said to show 'people are choosing better tools'. The script also implies features (handwriting, plain-words search) as if they were real."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a problem-solution-benefit arc and a call to action, but the stat-heavy middle (beats 9-11) is filler. It names no concrete product details or placeholders, and the notes' competitor and market context goes unused."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The chapter order is clear. But the market stats in beats 9-11 interrupt the pitch, and the handwriting section (beat 12) arrives after the app is introduced and undercuts a typing-first product."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening 'Think of the last great idea you wrote down. Now try to find it.' is engaging. The ending 'Write it once. Find it forever.' lands, though the call to action is generic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational, promotional and fitting for a launch video, with only a few stiff stat-reading moments."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well, and the charts show real numbers that match the narration. The stock clip queries are generic, and the versus scene contradicts the product pitch."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The notebook-versus-app line is a good touch, but the video leans on generic stat dumps and cliches like 'ideas go to disappear'."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The length is about right and there is a CTA. But the app's features are invented without being flagged as placeholders, and the app has no name."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clean English with short sentences. A few are slightly clumsy, such as 'Our rule is simple'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Stop losing your best ideas. Download the app today",
+    "issue": "No app name, platform or availability is given, and the claimed features are invented with no placeholder flagging.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Type or write by hand, instantly",
+    "issue": "The script invents specific features (handwriting capture, plain-language search, task conversion) that nobody supplied.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "major",
+    "quote": "Writing by hand has a real edge for learning.",
+    "issue": "This undermines the product pitch and sits oddly under 'Why it works'; it is not an argument for this app.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "People are choosing better tools.",
+    "issue": "This is an unsupported inference from a market-size projection.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "The habit is growing fast, and people want it built in.",
+    "issue": "'Growing fast' and 'want it built in' are not backed by the notes, which give only a snapshot of usage.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Three months later, 62% of people say they spend too much time searching",
+    "issue": "The statistic concerns searching for information at work in general, not notes, and the 'three months later' framing misleads.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Whether you work in a team, study, or just collect ideas, your notes are there when you need them.",
+    "issue": "This is a vague benefit claim with no differentiation or concrete example.",
+    "beat": 13
+   }
+  ],
+  "missing": [
+   "App name and a concrete differentiator, or flagged placeholders",
+   "A real demo or use-case scenario",
+   "Pricing, platform or availability details, or placeholders for them",
+   "Differentiation from Evernote, Notion and Obsidian",
+   "A specific call to action such as a URL or store"
+  ],
+  "wrong_facts": [
+   "The 62% statistic is about searching for information in general, not notes",
+   "Beat 11's 'people are choosing better tools' is unsupported"
+  ],
+  "would_publish": false,
+  "summary": "A decent problem-solution skeleton with a good hook, but it pads the middle with loosely related statistics. It also invents unflagged features, and it contradicts the product with a pro-handwriting segment.",
+  "mean": 3.44,
+  "cost_usd": 0.026406,
+  "tokens": [
+   6028,
+   1435
+  ]
+ }
+}

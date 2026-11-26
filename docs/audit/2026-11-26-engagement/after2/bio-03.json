@@ -1,0 +1,544 @@
+{
+ "id": "bio-03",
+ "category": "biography",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "tell me about Alan Turing",
+ "great": "Computability, Enigma at Bletchley Park, Turing test, prosecution in 1952, pardon 2013, death 1954; accurate and respectful.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:40:41",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Alan Turing's life, work, and legacy are well-documented historical facts that do not change often, so an encyclopedia source is sufficient for an accurate explainer.",
+  "queries": [
+   "Alan Turing biography",
+   "Alan Turing contributions computing"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 3.4,
+   "cost_usd": 0.0007309,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 10,
+   "candidates": 1,
+   "checked": 1,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 1,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 5678,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Alan Turing: Biography, Code Breaking, Computer & Death | HISTORY",
+   "Alan Turing | Biography, Facts, Computer, Machine, Education, & Death | Britannica",
+   "Alan Turing - Wikipedia",
+   "Alan Turing's Contributions to Computer Science",
+   "Timeline of the life of Alan Turing - BBC Teach",
+   "Alan Turing: The legacy of a pioneer in computing and AI – School of Mathematics"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Alan Turing: Biography, Code Breaking, Computer & Death | HISTORY\nAlan Mathison Turing (1912–1954) was a talented British mathematician and logician whose work laid the foundation for modern computer science and artificial intelligence. He made significant contributions to the field of cryptography and codebreaking in World War II, and was instrumental in breaking Nazi communication encryptions. Near the end of his life, he was convicted of homosexuality and was subsequently chemically castrated. He received a royal pardon for this conviction some 60 years [...] ## Early Life Alan Turing was born on June 23, 1912, in Paddington, London, to upper-middle-class British parents, Julius Mathison and Ethel Sara Turing. An intelligent child, Turing spent much of his early life fostered in various English homes with his elder brother John—Julius and Ethel lived in India while Julius worked in the Indian Civil Service—and was often a lonely child. As biographer\n\n## Alan Turing | Biography, Facts, Computer, Machine, Education, & Death | Britannica\nAlan Turing (born June 23, 1912, London, England—died June 7, 1954, Wilmslow, Cheshire) was a British mathematician and logician who made major contributions to mathematics, cryptanalysis, logic, philosophy, and mathematical biology and also to the new areas later named computer science, cognitive science, artificial intelligence, and artificial life. ## Early life and career [...] Last updated •History Top Questions Who was Alan Turing? Alan Turing was a British mathematician and logician born in 1912. He made significant contributions to mathematics, cryptanalysis, logic, philosophy, and mathematical biology. Turing is considered a foundational figure in computer science, cognitive science, and artificial intelligence. [...] Turing's theoretical work included the concept of the universal Turing machine, which underpins modern computers. He also proposed the Turing test as a criterion f\n\n## Alan Turing - Wikipedia\nTuring, Sara Stoney (1959). Alan M Turing. W Heffer. Turing's mother, who survived him by many years, wrote this 157-page biography of her son, glorifying his life. It was published in 1959, and so could not cover his war work. Scarcely 300 copies were sold (Sara Turing to Lyn Newman, 1967, Library of St John's College, Cambridge). The six-page foreword by Lyn Irvine includes reminiscences and is more frequently quoted. It was re-published by Cambridge University Press in 2012, to honour the [...] Page semi-protected From Wikipedia, the free encyclopedia English computer scientist (1912–1954) For the Oregon artwork, see Alan Turing (sculpture) \"Alan Turing (sculpture)\"). \"Turing\" redirects here. For other uses, see Turing (disambiguation) \"Turing (disambiguation)\"). | Alan Turing OBE FRS |\n\n## Alan Turing's Contributions to Computer Science\nIn 1948, Turing followed his interested in the brain, to create the first learning artificial neural network. Unfortunately his manuscript was rejected by the director of the NPL and not published (until 1967). However, it predated both Hebbian learning (1949) and Rosenblatt's perceptrons (1957) that we typically associated with being the first neural networks. Turing foresaw the foundation of connectionism (still a huge paradigm in cognitive science) and computational neuroscience. Alan Turing [...] Turing was also apparently the first person to use a digital computer to search for counterexamples to the Riemann Hypothesis -- see here. Besides the technical results from Turing's 1939 PhD thesis (mentioned by Lev Reyzin), that thesis is extremely notable for introducing the concepts of oracles and relativization into computability theory. (Some people might wish Turing had never done tha\n\n## Timeline of the life of Alan Turing - BBC Teach\nIn 1936, Turing published a paper that is now recognised as the foundation of computer science. Turing analysed what it meant for a human to follow a definite method or procedure to perform a task. For this purpose, he invented the idea of a ‘Universal Machine’ that could decode and perform any set of instructions. Ten years later he would turn this revolutionary idea into a practical plan for an electronic computer, capable of running any program. [...] Now he focused on the use of computers. His main theme had been in investigating the power of a computer to rival human thought. In 1950, he published a philosophical paper including the idea of an ‘imitation game’ for comparing human and machine outputs, now called the Turing Test. This paper remains his best known work and was a key contribution to the field of Artificial Intelligence. A team of scientists work on the Baby – formally k\n\n## Alan Turing: The legacy of a pioneer in computing and AI – School of Mathematics\nHe studied both his undergraduate and master’s degrees in mathematics at King’s College, Cambridge, where he was elected as a Fellow at just 22 years old due to the strength of his dissertation. In 1936, he introduced the concept of the ‘universal computing machine’ or Turing Machine, which he reported could compute anything. He obtained his PhD from Princeton in 1938. [...] After the war, Turing shifted focus to mathematical biology; exploring genetic algorithms and neuron-modelled computing, predecessors to today’s deep learning and neural networks. He delivered the first public lecture on what is now known as artificial intelligence. [...] During the Second World War, Turing worked at Bletchley Park, the centre of the British government’s top-secret codebreaking efforts. He played a pivotal role in decrypting intercepted coded messages of German army intelligence, the Enigma Code. The",
+ "plan": {
+  "title": "Alan Turing: The Man Who Imagined Modern Computers",
+  "description": "Alan Turing was a British mathematician whose 1936 idea of a universal machine laid the foundation for computer science. He also helped break Enigma at Bletchley Park and posed the question behind the Turing test.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "b8a38dfc",
+    "narration": "In 1950, a British mathematician asked a question that still shapes our world: can a machine think? His name was Alan Turing, and he had already changed history once.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "vintage computer punch cards",
+      "alt": "Early computing equipment",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "A question about thinking"
+   },
+   {
+    "id": "8e72880d",
+    "narration": "Turing was born in London in 1912. He was often a lonely child, fostered in English homes while his parents lived in India. Numbers and logic became his refuge.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "route",
+      "title": "A childhood apart",
+      "caption": "London and India",
+      "stops": [
+       "London",
+       "Delhi"
+      ]
+     }
+    }
+   },
+   {
+    "id": "f443a48b",
+    "narration": "His brilliance showed early. At Cambridge he studied mathematics, and in 1936 he published the paper that is now recognised as the foundation of computer science.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "university building Cambridge students",
+      "alt": "students walking at old university"
+     }
+    }
+   },
+   {
+    "id": "70905181",
+    "narration": "Born in London in 1912. Fellow at King's College at just twenty-two. Then a PhD from Princeton in 1938.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "A brilliant start",
+      "events": [
+       {
+        "date": "1912",
+        "label": "Born in London"
+       },
+       {
+        "date": "1934",
+        "label": "Fellow at King's College"
+       },
+       {
+        "date": "1938",
+        "label": "PhD from Princeton"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "98d42e36",
+    "narration": "His big idea was a universal machine. It could follow any set of instructions you gave it. That single concept underpins every computer, phone and laptop we use today.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The universal machine",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Instructions",
+        "icon": "file-text"
+       },
+       {
+        "id": "b",
+        "label": "Universal machine",
+        "icon": "cog"
+       },
+       {
+        "id": "c",
+        "label": "Any task",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "read"
+       ],
+       [
+        "b",
+        "c",
+        "performs"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "441cc9f6",
+    "narration": "Then came the Second World War. Turing worked at Bletchley Park, Britain's top-secret codebreaking centre, and played a pivotal role in decrypting German messages protected by the Enigma code.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Bletchley Park mansion",
+      "alt": "Bletchley Park",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "War and secrecy"
+   },
+   {
+    "id": "ea65d45b",
+    "narration": "After the war, he turned his mind to building electronic computers, and to brains. In 1948 he described what may be the first learning neural network, but his manuscript was rejected.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "scientist working at computer",
+      "alt": "researcher at a computer in laboratory"
+     }
+    }
+   },
+   {
+    "id": "8b89dd95",
+    "narration": "In 1950 he proposed the imitation game, now called the Turing test. If you cannot tell machine from human by conversation, he asked, why not call it thinking?",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Can a machine's answers be told apart from a human's?",
+      "emphasis": "told apart"
+     }
+    }
+   },
+   {
+    "id": "c0514c10",
+    "narration": "Britain repaid him cruelly. Turing was convicted of homosexuality and subjected to chemical castration. He died in 1954, aged forty-one. A royal pardon came some sixty years later.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "A cruel end",
+      "items": [
+       "Convicted for being gay",
+       "Chemically castrated",
+       "Died June 7, 1954",
+       "Royal pardon, decades later"
+      ],
+      "style": "rail",
+      "accent": "rose",
+      "emphasis": 3
+     }
+    },
+    "chapter": "Cost and legacy"
+   },
+   {
+    "id": "9b7b246a",
+    "narration": "Today his ideas run through every screen and every talking machine. Turing asked whether machines could think, and the world is still answering him.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "smartphone in hand",
+       "laptop computer coding",
+       "server room data center"
+      ],
+      "alt": "Modern computing"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Alan Turing: Biography, Code Breaking, Computer & Death | HISTORY",
+    "url": "https://www.history.com/articles/alan-turing",
+    "publisher": "history.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Alan Turing | Biography, Facts, Computer, Machine, Education, & Death | Britannica",
+    "url": "https://www.britannica.com/biography/Alan-Turing",
+    "publisher": "britannica.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Timeline of the life of Alan Turing - BBC Teach",
+    "url": "https://www.bbc.co.uk/teach/articles/zhwp7nb",
+    "publisher": "bbc.co.uk",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Alan Turing: The legacy of a pioneer in computing and AI – School of Mathematics",
+    "url": "https://blogs.ed.ac.uk/mathematics/2025/03/12/alan-turing-the-legacy-of-a-pioneer-in-computing-and-ai",
+    "publisher": "blogs.ed.ac.uk",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 38.8,
+  "before_first_script_call_s": 5.9,
+  "script_s": 32.9
+ },
+ "cost": {
+  "script_small": 0.00054,
+  "research": 0.00073,
+  "script_big": 0.14082,
+  "search_api": 0.016,
+  "total": 0.15809
+ },
+ "calls": {
+  "small": 5,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 56169,
+  "out": 5393
+ },
+ "rules": {
+  "length": {
+   "words": 275,
+   "expected_words": 267,
+   "ratio": 1.03,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 124.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 24,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In 1950, a British mathematician asked a question that still shapes our world: can a machine think? His name was Alan Turing, and he had already changed history once.",
+   "close_text": "Today his ideas run through every screen and every talking machine. Turing asked whether machines could think, and the world is still answering him."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "image": 2,
+    "map": 1,
+    "clip": 2,
+    "timeline": 1,
+    "diagram": 1,
+    "kinetic_text": 1,
+    "bullets": 1,
+    "gallery": 1
+   },
+   "max_run": 1,
+   "entropy": 2.92,
+   "top_type": "image",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 6,
+   "ungrounded_numbers": [],
+   "entities": 14,
+   "ungrounded_entities": [
+    "Bletchley Park Britain's"
+   ],
+   "ungrounded_share": 0.05,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "born in london in",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 5678,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 5 (diagram): its narration never says ['Universal machine', 'Any task']",
+   "beat 10 (gallery): its narration never says ['laptop computer coding', 'server room data center']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly matches the notes, but \"Fellow at King's College at just twenty-two\" is dated 1934 on the timeline, while he was elected in 1935. The Enigma claim is vague, and the 1952 conviction and 2013 pardon are left out. The claim \"every computer, phone and laptop\" is overstated."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers the universal machine, Bletchley, the Turing test, the conviction and the pardon. Enigma gets only one sentence, and there is no mention of the bombe or of his role in shortening the war. The 1952 date and the 2013 pardon year are missing, and the early life gets too much time."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is chronological with chapters and a closing callback to the opening question. Beats 2–4 repeat the birth and the early biography."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about a machine thinking is a good hook. The ending returns to that question, though it is somewhat conventional."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Respectful and accessible. \"Britain repaid him cruelly\" is a little dramatic but fitting."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary. But the map of London and Delhi is a weak fit, the \"vintage computer punch cards\" image doesn't fit a 1950 question, and the generic stock clips of a scientist at a computer do not match the narration. The timeline repeats the narration word for word."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The neural network detail from 1948 is a non-obvious fact. The rest is the standard biography."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, roughly on length at about 270 words, and covers the main requested points. It lacks the specific dates for the prosecution and the pardon."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, clean prose."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Fellow at King's College at just twenty-two",
+    "issue": "The timeline places this in 1934, but he was elected in 1935, aged 22 or 23. The year is unsupported by the notes.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "played a pivotal role in decrypting German messages protected by the Enigma code",
+    "issue": "This is the most famous part of his career, yet it gets one generic sentence. There is no bombe, no naval Enigma, and no impact on the war.",
+    "beat": 6
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "A royal pardon came some sixty years later.",
+    "issue": "The script gives no 1952 prosecution date and no 2013 pardon year. It does not mention the cause of death or the circumstances of his death.",
+    "beat": 9
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Born in London in 1912. Fellow at King's College at just twenty-two.",
+    "issue": "Repeats the birth and early biography already narrated in beats 2–3. This wastes the limited time.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "That single concept underpins every computer, phone and laptop we use today.",
+    "issue": "Overstated, since it is a theoretical foundation rather than the design of every device.",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "vintage computer punch cards",
+    "issue": "Punch cards do not match a 1950 question about machine thinking.",
+    "beat": 1
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "London and Delhi",
+    "issue": "The notes only say India, not Delhi, so the map stop is invented.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "Enigma and the bombe's impact on the war",
+   "1952 prosecution date",
+   "2013 pardon year",
+   "Circumstances of his death"
+  ],
+  "wrong_facts": [
+   "Delhi is not in the notes (the parents were in India).",
+   "Fellowship at King's was in 1935, not 1934."
+  ],
+  "would_publish": false,
+  "summary": "A clear, respectful, well-written overview that hits the main beats. But it is thin on Enigma, omits the key dates of 1952 and 2013, and spends time on repetitive early-life material with weakly fitting visuals.",
+  "mean": 3.67,
+  "cost_usd": 0.024518,
+  "tokens": [
+   5174,
+   1417
+  ]
+ }
+}

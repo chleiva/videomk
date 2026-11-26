@@ -1,0 +1,70 @@
+{
+ "id": "fin-02",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación en 30 segundos",
+  "description": "Una explicación rápida de qué es la inflación y por qué tu dinero compra menos con el tiempo. Entiende la idea clave sin tecnicismos.",
+  "beats": [
+   {
+    "id": "014ad606",
+    "narration": "¿Por qué tu dinero compra cada año un poco menos? Eso es la inflación: la subida general de los precios.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tu dinero compra cada vez menos",
+      "emphasis": "menos"
+     }
+    }
+   },
+   {
+    "id": "b1131a8e",
+    "narration": "Imagina que con diez euros llenas una bolsa de compra. Si los precios suben, mañana esos mismos diez euros llenan solo media bolsa.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Precios que suben",
+      "items": [
+       "Hoy: bolsa llena",
+       "Mañana: media bolsa",
+       "Mismo dinero"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "van",
+       "graph-path",
+       "banknote"
+      ]
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "5703fa8a",
+    "narration": "Así que la inflación no es que todo cueste más de golpe, sino que tu dinero pierde poder de compra poco a poco.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Inflación = menos poder de compra",
+      "subtitle": "Los precios suben, tu dinero rinde menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 66 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 8 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06144,
+ "seconds": 8.9
+}

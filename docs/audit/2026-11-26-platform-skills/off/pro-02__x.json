@@ -1,0 +1,77 @@
+{
+ "id": "pro-02",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza por dos minutos",
+  "description": "Un vídeo corto sobre por qué procrastinamos y cómo dejar de hacerlo. Aprende la regla de empezar con dos minutos y a reducir la tarea hasta que sea fácil arrancar.",
+  "beats": [
+   {
+    "id": "fbc0dd5a",
+    "narration": "No procrastinas por pereza. Procrastinas porque la tarea te produce una emoción incómoda, y tu cerebro quiere escapar de ella cuanto antes.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No es pereza. Es huir de una emoción incómoda.",
+      "emphasis": "huir"
+     }
+    }
+   },
+   {
+    "id": "c806677c",
+    "narration": "Entonces, el problema no es el tiempo, es el arranque. Haz la tarea tan pequeña que sea ridículo decir que no. Escribe una frase. Abre el archivo.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Hazlo pequeño",
+      "items": [
+       "Una frase",
+       "Abre el archivo",
+       "Dos minutos"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "044ce756",
+    "narration": "Después, pon un reloj de dos minutos y empieza. Casi siempre, cuando ya estás dentro, seguir cuesta mucho menos que empezar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person working at desk laptop",
+      "clip_queries": [
+       "person working at desk laptop",
+       "hands typing on keyboard"
+      ],
+      "alt": "person typing at a desk"
+     }
+    }
+   },
+   {
+    "id": "a0f5cd5f",
+    "narration": "No esperes a tener ganas. La motivación llega después de actuar. Empieza pequeño, empieza ahora, y la acción hará el resto.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "La motivación llega después de empezar.",
+      "emphasis": "después"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03347,
+ "seconds": 5.4
+}

@@ -1,0 +1,235 @@
+{
+ "id": "sci-01",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Things Fall Apart, Never Together",
+  "description": "Entropy measures how spread out energy is, and why the second law of thermodynamics makes some processes irreversible. The same idea, in Claude Shannon's 1948 form, also measures uncertainty and information.",
+  "beats": [
+   {
+    "id": "5ea2d3ac",
+    "narration": "Drop an egg and it shatters. Nobody has ever seen the pieces leap back together. Nothing in the basic laws forbids it, so why does time seem to run one way?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "egg falling and breaking",
+      "alt": "cracked egg on a kitchen floor"
+     }
+    },
+    "chapter": "A one-way street"
+   },
+   {
+    "id": "9c8f7f6b",
+    "narration": "The answer is a quantity called entropy. Put simply, it measures how spread out energy is inside a system.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how spread out energy is, and of how many microscopic arrangements a system can have."
+     }
+    }
+   },
+   {
+    "id": "68ba2c2a",
+    "narration": "Low entropy means energy is concentrated in one place. High entropy means it is spread evenly. A hot cup of coffee holds concentrated energy. A room-temperature cup holds it spread out.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Low entropy",
+       "tagline": "Energy concentrated"
+      },
+      "b": {
+       "name": "High entropy",
+       "tagline": "Energy dispersed"
+      },
+      "rows": [
+       {
+        "label": "Energy",
+        "a": "Unevenly placed",
+        "b": "Evenly spread"
+       },
+       {
+        "label": "Example",
+        "a": "Hot coffee",
+        "b": "Lukewarm coffee"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "5d8f7d76",
+    "narration": "Zoom in and entropy is about counting. Each way the tiny particles can be arranged is a microstate. More accessible microstates means higher entropy.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Counting arrangements",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Particles",
+        "icon": "atom"
+       },
+       {
+        "id": "b",
+        "label": "Possible microstates",
+        "icon": "grid"
+       },
+       {
+        "id": "c",
+        "label": "Entropy",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "can arrange"
+       ],
+       [
+        "b",
+        "c",
+        "more means higher"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "ddba2543",
+    "narration": "That counting gives the second law of thermodynamics. In an isolated system left alone, entropy cannot decrease. Systems drift toward equilibrium, where entropy is highest.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy never decreases.",
+      "emphasis": "never decreases"
+     }
+    }
+   },
+   {
+    "id": "f6f044fe",
+    "narration": "That is why the egg stays broken. Ice melts into a puddle, cream spreads through coffee, and a hot drink cools. Each of these processes is irreversible.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "ice melting in water",
+      "clip_queries": [
+       "ice melting in water",
+       "cream swirling in coffee",
+       "steam rising from hot cup"
+      ],
+      "alt": "cream swirling into coffee"
+     }
+    }
+   },
+   {
+    "id": "ff28cafb",
+    "narration": "Entropy also turned up somewhere unexpected. In 1948, Claude Shannon used it to measure uncertainty in communication, in a paper called A Mathematical Theory of Communication.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "One idea, two fields",
+      "events": [
+       {
+        "date": "Classical",
+        "label": "Thermodynamics: energy spread"
+       },
+       {
+        "date": "Statistical",
+        "label": "Counting microstates"
+       },
+       {
+        "date": "1948",
+        "label": "Shannon: information entropy"
+       }
+      ]
+     }
+    },
+    "chapter": "Entropy as information"
+   },
+   {
+    "id": "dcb99752",
+    "narration": "Here is the intuition. A fair coin flip is unpredictable, so it carries a lot of information. A coin that always lands heads tells you nothing new.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Fair coin",
+       "tagline": "Maximum surprise"
+      },
+      "b": {
+       "name": "Rigged coin",
+       "tagline": "Always heads"
+      },
+      "rows": [
+       {
+        "label": "Uncertainty",
+        "a": "High",
+        "b": "None"
+       },
+       {
+        "label": "Information",
+        "a": "High",
+        "b": "Zero"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "e9ffb5c8",
+    "narration": "Shannon's formula adds up each outcome's probability times its logarithm. With base two, the unit is the bit. Entropy is the average information needed to describe the outcome.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "H(X) = - sum_{x} p(x) log p(x)",
+        "note": "Average uncertainty of X"
+       }
+      ],
+      "title": "Shannon entropy"
+     }
+    }
+   },
+   {
+    "id": "e5055fdd",
+    "narration": "So entropy is one idea in two costumes: how many ways things could be, and how much we do not know. Disorder is just the most likely state.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "One idea",
+      "items": [
+       "Spread-out energy",
+       "Many possible arrangements",
+       "Uncertainty in a message"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "flame",
+       "grid",
+       "message-circle"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.13661,
+ "seconds": 36.3
+}

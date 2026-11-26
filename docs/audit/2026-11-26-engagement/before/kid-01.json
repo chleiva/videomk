@@ -1,0 +1,519 @@
+{
+ "id": "kid-01",
+ "category": "education / lesson for kids",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Explain how volcanoes erupt for six-year-olds",
+ "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:27:52",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How volcanoes erupt is a timeless science explanation that does not depend on recent information, so an encyclopedia source is sufficient for an accurate kid-friendly script.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 4.7,
+   "cost_usd": 0.0007806000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6685,
+  "n_sources": 4,
+  "n_fetched": 7,
+  "fetched": [
+   "Volcano Watch — Volcanic gases provide clues to how volcanoes work | U.S. Geological Survey",
+   "How Do Volcanoes Erupt? | U.S. Geological Survey",
+   "About Volcanoes | U.S. Geological Survey",
+   "What Starts an Eruption?",
+   "Volcano facts and photos | National Geographic Kids",
+   "Volcano facts | National Geographic Kids",
+   "Volcano facts and information | National Geographic"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Volcano Watch — Volcanic gases provide clues to how volcanoes work | U.S. Geological Survey\nGases are trapped (dissolved) in magma at depth, where pressures within the Earth's crust are very great—many thousands of pounds per square inch. As the magma rises to the surface and is erupted, the pressure decreases, and some of the gas is released. The main gases dissolved in magma are water vapor, carbon dioxide, and sulfur gases, with lesser amounts of hydrogen, hydrochloric acid, and hydrofluoric acid. In our pinch-of-salt-to-a-double-handful-of-magma illustration earlier, most of the [...] In a double handful of molten magma (weighing about a pound), there is less than a tenth of an ounce, by weight, of dissolved gas—roughly the same weight as a pinch of table salt. Yet this tiny amount of gas can drive spectacular lava fountains hundreds of feet into the air. The fountaining occurs because dissolved volcanic gases expand when pressure on the magma is released. Anyone who has sh\n\n## How Do Volcanoes Erupt? | U.S. Geological Survey\nSome volcanic eruptions are explosive and others are not. The explosivity of an eruption depends on the composition of the magma. If magma is thin and runny, gases can escape easily from it. When this type of magma erupts, it flows out of the volcano. A good example is the eruptions at Hawaii’s volcanoes. Lava flows rarely kill people because they move slowly enough for people to get out of their way. If magma is thick and sticky, gases cannot escape easily. Pressure builds up until the gases [...] up until the gases escape violently and explode. A good example is the eruption of Washington’s Mount St. Helens. In this type of eruption, the magma blasts into the air and breaks apart into pieces called tephra. Tephra can range in size from tiny particles of ash to house-size boulders. [...] Deep within the Earth it is so hot that some rocks slowly melt and become a thick flowing substance \n\n## About Volcanoes | U.S. Geological Survey\nOriginating many tens of miles beneath the ground, magma is lighter than surrounding solid rock. It is driven towards Earth's surface by buoyancy, it is lighter than the surrounding rock, and by pressure from gas within it. Magma forces its way upward and may ultimately break though weak areas in the Earth's crust. If so, an eruption begins. Geologist collecting sample of molten lava from 2011 Kamoamoa erupt... [...] Magma can be erupted in a variety of ways. Sometimes molten rock simply pours from the vent as fluid lava flows. It can also shoot violently into the air as dense clouds of rock shards (tephra) and gas. Larger fragments fall back around the vent, and clouds of tephra may move down the slope of the volcano under the force of gravity. Ash, tiny pieces of tephra the thickness of a strand of hair, may be carried by the wind only to fall to the ground many miles away. The smalles\n\n## What Starts an Eruption?\nAs gas bubbles rush up the magma conduit, the pressure declines, causing the bubbles to expand rapidly. They can expand to thousands of times their original size! The rapid expansion of gas bubbles propels the magma and gas up the conduit. Within minutes, the volcano erupts, explosively spewing hot lava and tephra into the air. Lava can be jetted thousands of feet into the air. Eventually, if the magma is “runny enough,” the gas bubbles escape easily; and instead of exploding, magma pours down [...] Magma Chamber The magma chamber is a zone of molten and partially molten rock that exists beneath a volcano. The top of the magma chamber at Mount Rainier is about eight kilometers (five miles) below the Earth’s surface and is only a few kilometers wide. As gas bubbles accumulate, the upward pressure increases, forcing cracks in the rocks to widen, often in the direction of Earth’s surface. F\n\n## Volcano facts and photos | National Geographic Kids\nIn 1980 in Washington, after 123 years of hibernation, Mount St. Helens erupted. The blast destroyed and scorched 230 square miles (370 square kilometers) of forest within minutes. The eruption released an avalanche of hot ash, gas, steam, and rocks that mowed down giant trees up to 15 miles (24 kilometers) away. When magma finds a way to escape from beneath the earth's surface, it creates a volcano. [...] Volcanoes, like Mauna Loa in Hawaii, are effusive. Rather than a violent explosion, lava pours or flows out. Fatalities from effusive volcanoes are rare because people can usually outrun the lava. However, some people get too close or become trapped with no escape. The flowing lava burns, melts, and destroys everything it touches including farms, houses, and roads. [...] Volcanoes erupt in different ways. Some, like Mount St. Helens, explode. Explosive eruptions are so powerful, they c\n\n## Volcano facts | National Geographic Kids\nThese geographical wonders come in various shapes and sizes, but there are two main types – composite volcanoes, which are cone-shaped with steep slopes, and shield volcanoes, which are wide with gentle slopes. ### 8.Magma and lava are two different things! Magma is the name given to hot liquid rock inside a volcano. Once it leaves the volcano, it’s known as lava. > Psst! Make sure you download our awesome volcano facts infographic – show your friends, family, or stick it on your wall! [...] Is it just us or is it getting hot in here, gang? Prepare to delve into the depths of the earth and uncover these seriously hot volcano facts – if you dare! ## Volcano facts ### 1. Put simply, a volcano is an opening in the Earth’s surface. Usually found in a mountain, the opening allows gas, hot magma and ash to escape from beneath the Earth’s crust. ### 2. The word “volcano” comes from the Roman na\n\n## Volcano facts and information | National Geographic\nBut each volcano is different. Some burst to life in violent eruptions, like the 1980 eruption of Mount St. Helens, and others burp rivers of lava in what’s known as an effusive eruption, like the 2018 activity of Kilauea, in the Hawaiian islands. These differences are all thanks to the chemistry driving the molten activity. Effusive eruptions are more common when the magma is less viscous, or runny, which allows gas to escape and the magma to flow down the volcano’s slopes. [...] The ash forms as the gasses within rising magma expand, shattering the cooling rocks as they burst from the volcano's mouth. It’s not only dangerous to inhale, it’s heavy and builds up quickly. Volcanic ash can collapse weak structures, cause power outages, and is a challenge to shovel away post-eruption. (Volcano tourism is booming, but is it too risky?) ## Can we predict volcanic eruptions? [...] Explosive er",
+ "plan": {
+  "title": "How Do Volcanoes Erupt? A Video for Kids",
+  "description": "A gentle explainer for six-year-olds about how hot melted rock called magma rises and makes a volcano erupt. Learn why some volcanoes explode and others flow slowly.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "4b0947cb",
+    "narration": "Did you know the ground under your feet has a secret? Deep down, it is so hot that rock melts! Can you guess what happens next?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano erupting lava",
+      "clip_queries": [
+       "volcano erupting lava",
+       "lava flowing down mountain"
+      ],
+      "alt": "lava erupting from a volcano"
+     }
+    },
+    "chapter": "What is inside the Earth?"
+   },
+   {
+    "id": "4aa8c139",
+    "narration": "Deep inside the Earth, some rock gets so hot that it melts into a thick, glowing goo. This hot goo is called magma.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Magma",
+      "definition": "Hot, melted rock found deep inside the Earth.",
+      "example": "Magma is hiding under a volcano."
+     }
+    }
+   },
+   {
+    "id": "9779a2fb",
+    "narration": "A volcano is an opening in the Earth's surface. It is usually found in a mountain. Hot magma, gas, and ash can escape through it.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "volcano mountain crater",
+      "alt": "A volcano mountain with a crater",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "bb4efb17",
+    "narration": "Magma is lighter than the rock around it. So it floats upward, like a bubble rising in a bath. It pushes up through cracks toward the top.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Magma on the move",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Hot magma deep down",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Rises through cracks",
+        "icon": "log-in"
+       },
+       {
+        "id": "c",
+        "label": "Bursts out the top",
+        "icon": "mountain"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "floats up"
+       ],
+       [
+        "b",
+        "c",
+        "pushes"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "4cbf3888",
+    "narration": "Magma also has tiny gas bubbles inside it. Think of a fizzy drink. When you open the bottle, the bubbles rush up and push the drink out!",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "soda bubbles fizzing glass",
+      "clip_queries": [
+       "soda bubbles fizzing glass",
+       "pouring sparkling drink"
+      ],
+      "alt": "fizzy drink bubbles rising"
+     }
+    }
+   },
+   {
+    "id": "c21cb7c3",
+    "narration": "As the magma rises, the squeezing gets weaker, and the bubbles grow bigger and bigger. They can grow thousands of times bigger! They shove the magma out, and the volcano erupts.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How an eruption starts",
+      "steps": [
+       {
+        "label": "Magma rises",
+        "detail": "It floats up from deep down"
+       },
+       {
+        "label": "Bubbles grow",
+        "detail": "Less squeezing, bigger bubbles"
+       },
+       {
+        "label": "Eruption!",
+        "detail": "Bubbles shove the magma out"
+       }
+      ]
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "b797dcb8",
+    "narration": "But not all volcanoes erupt the same way. Some go boom, and some just ooze. It all depends on how runny the magma is.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Boom or ooze?",
+      "subtitle": "It depends on how runny the magma is"
+     }
+    },
+    "chapter": "Two kinds of eruptions"
+   },
+   {
+    "id": "bdd1bf39",
+    "narration": "If the magma is thin and runny, the bubbles escape easily. The lava just flows out slowly, like syrup. Hawaii has volcanoes like this.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "lava flowing slowly",
+      "clip_queries": [
+       "lava flowing slowly",
+       "lava flowing into ocean"
+      ],
+      "alt": "slow lava flow at a volcano"
+     }
+    }
+   },
+   {
+    "id": "89387ede",
+    "narration": "If the magma is thick and sticky, the bubbles get stuck. Pressure builds and builds, then boom! It blasts out ash and rocks. Mount St. Helens did this in 1980.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Runny magma",
+       "tagline": "Bubbles escape"
+      },
+      "b": {
+       "name": "Sticky magma",
+       "tagline": "Bubbles get stuck"
+      },
+      "rows": [
+       {
+        "label": "What happens",
+        "a": "Lava flows out",
+        "b": "Big explosion"
+       },
+       {
+        "label": "Example",
+        "a": "Hawaii",
+        "b": "Mount St. Helens"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "89476443",
+    "narration": "Inside the volcano, we call it magma. Once it comes out, it gets a new name: lava! So now you know. Hot magma rises, bubbles push, and a volcano erupts!",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hot magma rises, bubbles push, and the volcano erupts!",
+      "emphasis": "bubbles push"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Volcano Watch — Volcanic gases provide clues to how volcanoes work | U.S. Geological Survey",
+    "url": "https://www.usgs.gov/news/volcano-watch-volcanic-gases-provide-clues-how-volcanoes-work",
+    "publisher": "usgs.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How Do Volcanoes Erupt? | U.S. Geological Survey",
+    "url": "https://www.usgs.gov/faqs/how-do-volcanoes-erupt",
+    "publisher": "usgs.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What Starts an Eruption?",
+    "url": "https://www.nps.gov/common/uploads/teachers/lessonplans/Teacher%20Page%20-%20What%20Starts%20an%20Eruption.pdf",
+    "publisher": "nps.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Volcano facts | National Geographic Kids",
+    "url": "https://www.natgeokids.com/uk/discover/geography/physical-geography/volcano-facts",
+    "publisher": "natgeokids.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 19.5,
+  "before_first_script_call_s": 7.8,
+  "script_s": 11.7
+ },
+ "cost": {
+  "script_small": 0.00024,
+  "research": 0.00078,
+  "script_big": 0.0461,
+  "search_api": 0.016,
+  "total": 0.06312
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 1
+ },
+ "tokens": {
+  "in": 21993,
+  "out": 2249
+ },
+ "rules": {
+  "length": {
+   "words": 267,
+   "expected_words": 267,
+   "ratio": 1.0,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 120.8,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 26,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Did you know the ground under your feet has a secret? Deep down, it is so hot that rock melts! Can you guess what happens next?",
+   "close_text": "Inside the volcano, we call it magma. Once it comes out, it gets a new name: lava! So now you know. Hot magma rises, bubbles push, and a volcano erupts!"
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "clip": 3,
+    "definition": 1,
+    "image": 1,
+    "diagram": 1,
+    "steps": 1,
+    "title": 1,
+    "versus": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.85,
+   "top_type": "clip",
+   "top_share": 0.3,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 3,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 7,
+   "notes_len": 6685,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Matches the notes: magma buoyancy, bubbles expanding thousands of times, runny vs sticky, St. Helens 1980. Small simplifications, such as 'like a bubble rising in a bath' and 'floats up', are fine for kids."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "Covers magma, the soda analogy, runny vs sticky, and magma vs lava. It lacks layers or a vent/crater explanation and a safe fun fact such as ash size, and it is probably short of 267 words."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Builds logically from magma to rising, bubbles, two eruption types, and a recap. Magma vs lava arrives late, in the last beat, and is tacked on."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook 'the ground under your feet has a secret' is decent. The ending is a plain recap with no closing question or image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Playful and simple, with short sentences and 'boom or ooze'. Some phrasing is slightly flat."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well and match the narration (soda clip, steps, versus). The 'log-in' icon for 'Rises through cracks' is odd, and a definition card for a first term is fine."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The soda analogy and the syrup comparison are standard. The 'pinch of salt' gas fact from the notes is unused."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Fits the request: English, for kids, simple. Length is probably near or under 2 minutes, at about 230 words."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, clear, and age-appropriate. Minor awkwardness in 'Inside the volcano, we call it magma.'"
+   }
+  },
+  "defects": [
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Hot magma rises, bubbles push, and a volcano erupts!",
+    "issue": "The ending is a bare recap with no question or lasting image, though the opening posed a question.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Inside the volcano, we call it magma. Once it comes out, it gets a new name: lava!",
+    "issue": "Magma is mostly under the volcano, not inside it. This is a minor simplification.",
+    "beat": 10
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Can you guess what happens next?",
+    "issue": "The question is never answered or paid off directly, and beat 2 just defines magma.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Magma also has tiny gas bubbles inside it.",
+    "issue": "The script never explains that the bubbles are dissolved gas squeezed under pressure, and it skips the shaken-bottle detail, so the analogy is weaker.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "Layers of the Earth or the magma chamber",
+   "A fun, safe fact such as ash as tiny pieces or the pinch-of-salt gas fact",
+   "A closing question for the child"
+  ],
+  "wrong_facts": [],
+  "would_publish": true,
+  "summary": "A clear, accurate, kid-friendly explainer with a good soda analogy and a runny vs sticky contrast. It is let down by a flat recap ending, a late magma/lava distinction, and a few missed fun facts.",
+  "mean": 3.78,
+  "cost_usd": 0.023092,
+  "tokens": [
+   5876,
+   1134
+  ]
+ }
+}

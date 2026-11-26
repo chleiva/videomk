@@ -1,0 +1,79 @@
+{
+ "id": "sci-01",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Hot Coffee Never Reheats Itself",
+  "description": "Entropy measures how spread out energy is, and the second law says it never decreases in an isolated system. This explains why some processes are irreversible.",
+  "beats": [
+   {
+    "id": "c6a4a4bb",
+    "narration": "Your coffee always cools down. It never heats itself back up. The reason has a name: entropy.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Coffee cools. It never reheats itself.",
+      "emphasis": "never"
+     }
+    }
+   },
+   {
+    "id": "3561055b",
+    "narration": "Entropy measures how spread out energy is. Low entropy means energy is concentrated in one place. High entropy means it is dispersed evenly.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy",
+      "items": [
+       "Low: energy concentrated",
+       "High: energy spread out"
+      ],
+      "style": "cards",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "bb8fa2f2",
+    "narration": "The second law of thermodynamics says that in an isolated system, entropy cannot decrease. Everything drifts toward equilibrium, where entropy is highest.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy never decreases.",
+      "emphasis": "never decreases"
+     }
+    }
+   },
+   {
+    "id": "98d1babf",
+    "narration": "That is why some processes are irreversible. Heat flows out, energy spreads, and time has a direction. Entropy is the universe spreading itself out.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why it matters",
+      "items": [
+       "Energy spreads out",
+       "Some processes are irreversible",
+       "Time has a direction"
+      ],
+      "style": "spotlight",
+      "accent": "violet"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03567,
+ "seconds": 4.5
+}

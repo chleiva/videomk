@@ -10,7 +10,7 @@ from datetime import date
 
 import logging
 
-from . import language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, voices
+from . import engagement, language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, voices
 from .netsafe import quality_fixes
 
 SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S = 1.0, 1.5   # the same under a minute (15, 30, 45 s): the music-only frame is 2.5 s, not 6 (plan.SHORT_PHOTO_FRAME_S)
@@ -43,7 +43,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     skill_ids = skills_mod.select(prompt, lambda s, u: ask_small(s, u, 120), minutes)   # the producer: which kind of video is this, and so which craft guides apply
     if photos and "photo-memories" not in skill_ids:   # a video of the person's own photos always follows the photo guide (pacing, pauses, music), whatever else it is about
         skill_ids = ["photo-memories"] + skill_ids
-    craft = skills_mod.render(skill_ids) + plan_mod.frame_prompt(options, minutes)   # options: {platform, aspect, brief} from the create request
+    platform = (options or {}).get("platform") if skills_mod.platform_skills_enabled() else None   # the platform guide is loaded from the create option, never picked by the producer
+    craft = skills_mod.render(skill_ids, platform) + plan_mod.frame_prompt(options, minutes) + engagement.block(prompt, minutes, language, bool(photos))   # options: {platform, aspect, brief} from the create request
     info["skills"] = skill_ids
     notes, sources = "", []
     if web_provider is not None and ask_tools is not None:

@@ -1,0 +1,72 @@
+{
+ "id": "tec-01",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: It Predicts the Next Word",
+  "description": "Large language models like ChatGPT generate answers by predicting one word at a time. Learn how training on huge amounts of text turns that simple trick into fluent conversation.",
+  "beats": [
+   {
+    "id": "bbd9f791",
+    "narration": "ChatGPT doesn't think like you. It plays one game: guess the next word. Then it does it again, and again.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word.",
+      "emphasis": "next word"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "6720afd6",
+    "narration": "It learned by reading enormous amounts of text, adjusting itself each time it guessed wrong, until patterns of language became second nature.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it learns",
+      "items": [
+       "Read huge amounts of text",
+       "Guess the next word",
+       "Adjust when wrong"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "book",
+       "target",
+       "wrench"
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "ca0fd8d0",
+    "narration": "So every answer is built word by word from patterns. Fluent, but not always right. Treat it as a smart guesser.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Fluent is not the same as true.",
+      "emphasis": "not the same"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 63 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 5 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06513,
+ "seconds": 8.3
+}

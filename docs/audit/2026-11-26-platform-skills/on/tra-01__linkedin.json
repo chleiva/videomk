@@ -1,0 +1,94 @@
+{
+ "id": "tra-01",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A quick three-day plan for Lisbon, from hilltop viewpoints and old tram streets to riverside sights and custard tarts. Learn what to see each day and what to taste along the way.",
+  "beats": [
+   {
+    "id": "b0833184",
+    "narration": "Lisbon is a city of seven hills, and the best way to meet it is slowly. On day one, wander Alfama's narrow lanes, ride a yellow tram, and climb to a viewpoint at sunset.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram on hillside street",
+      "clip_queries": [
+       "yellow tram on hillside street",
+       "aerial view of city rooftops at sunset"
+      ],
+      "alt": "yellow tram in historic city street"
+     }
+    },
+    "chapter": "Day one: the old hills"
+   },
+   {
+    "id": "ba7c75fe",
+    "narration": "Day two follows the river. Walk to Belem to see the tower and the monastery, then stand beside the big bridge. Afterwards, queue for a warm custard tart dusted with cinnamon.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Belem Tower Lisbon",
+       "Jeronimos Monastery Lisbon",
+       "25 de Abril Bridge Lisbon",
+       "Pastel de nata custard tarts"
+      ],
+      "alt": "Lisbon riverside sights and custard tarts"
+     }
+    },
+    "chapter": "Day two: the river"
+   },
+   {
+    "id": "0c78abf2",
+    "narration": "Day three is for flavor. Eat grilled sardines and salted cod, sip a small coffee at a corner cafe, then take a short train to a fairytale palace in the hills nearby.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "grilled fish on a plate",
+      "clip_queries": [
+       "grilled fish on a plate",
+       "coffee served at a street cafe",
+       "train traveling through green hills"
+      ],
+      "alt": "fish grilling at outdoor restaurant"
+     }
+    },
+    "chapter": "Day three: flavors and day trip"
+   },
+   {
+    "id": "39572450",
+    "narration": "So the plan is simple. Day one, hills and trams. Day two, the river and the tarts. Day three, fish, coffee, and a palace. Lisbon rewards anyone who walks, tastes, and takes their time.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Your Lisbon plan",
+      "steps": [
+       {
+        "label": "Day one: hills and trams"
+       },
+       {
+        "label": "Day two: river and tarts"
+       },
+       {
+        "label": "Day three: fish, coffee, palace"
+       }
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03684,
+ "seconds": 7.6
+}

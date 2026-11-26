@@ -1,0 +1,125 @@
+{
+ "id": "bio-03",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Mind Behind Modern Computing",
+  "description": "A one-minute profile of Alan Turing, the British mathematician who helped lay the foundations of computing and break wartime codes. It asks how one thinker shaped the machines we use every day.",
+  "beats": [
+   {
+    "id": "f7829f46",
+    "narration": "Could a machine think? In the 1930s, a young British mathematician named Alan Turing asked exactly that. His answer helped invent the idea of the modern computer, long before anyone owned one.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "Could a machine think?"
+     }
+    },
+    "chapter": "A question that changed everything"
+   },
+   {
+    "id": "5ad86923",
+    "narration": "Then war came. Turing worked on breaking enemy codes. Intercepted messages went to Turing's team, who combined mathematics with machines. The result: Message decoded. That work is widely credited with helping the Allies and saving many lives.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Codebreaking",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Enemy message",
+        "icon": "mail"
+       },
+       {
+        "id": "b",
+        "label": "Turing's team",
+        "icon": "users"
+       },
+       {
+        "id": "c",
+        "label": "Message decoded",
+        "icon": "lock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "intercepted"
+       ],
+       [
+        "b",
+        "c",
+        "mathematics"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo",
+      "emphasis": 1
+     }
+    },
+    "sfx": "click",
+    "chapter": "Breaking the code"
+   },
+   {
+    "id": "c044f2a2",
+    "narration": "Turing also described a simple imagined device that could follow any set of instructions. We now call it a Turing machine. It is the theoretical blueprint for every computer, phone and laptop.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "clip_queries": [
+       "person typing on laptop",
+       "programmer working at computer"
+      ],
+      "alt": "hands using a computer keyboard"
+     }
+    }
+   },
+   {
+    "id": "fd2fe4d2",
+    "narration": "His legacy has three parts. Foundations of computing. Wartime codebreaking. And the question of machine intelligence, which we still debate today. He was also treated cruelly by the society he served, a painful part of his story.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Turing's legacy",
+      "items": [
+       "Foundations of computing",
+       "Wartime codebreaking",
+       "The question of machine intelligence"
+      ],
+      "style": "spotlight",
+      "accent": "amber"
+     }
+    },
+    "chapter": "Why he matters"
+   },
+   {
+    "id": "919b80c1",
+    "narration": "So next time you use a computer, remember Turing. One curious mind asked whether machines could think, and the world is still working out the answer.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One curious question reshaped the modern world.",
+      "emphasis": "curious question"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 164 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 30 words: write 4 to 6 beats of at most 40 words each (you averaged 32), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.06679,
+ "seconds": 15.0
+}

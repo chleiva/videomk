@@ -1,0 +1,78 @@
+{
+ "id": "fin-02",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Inflación: por qué tu dinero compra cada vez menos",
+  "description": "Explicación rápida de qué es la inflación y por qué tu dinero pierde poder de compra con el tiempo. Aprende cómo afecta a tus ahorros y a tus compras diarias.",
+  "beats": [
+   {
+    "id": "c2ba2ea7",
+    "narration": "Tu dinero vale menos cada año, aunque no lo gastes. Eso es la inflación: una subida general y sostenida de los precios.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tu dinero vale menos cada año",
+      "emphasis": "vale menos"
+     }
+    }
+   },
+   {
+    "id": "5f57bcb4",
+    "narration": "Imagina que con la misma moneda compras hoy un pan, y el año que viene solo una parte. Los precios suben, la moneda pesa menos.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "persona comprando pan panadería",
+      "alt": "mano pagando en una tienda de comida"
+     }
+    }
+   },
+   {
+    "id": "37f36800",
+    "narration": "Pasa por varias causas: más demanda que oferta, costes de producir más caros, o más dinero circulando en la economía.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Causas comunes",
+      "items": [
+       "Más demanda que oferta",
+       "Producir cuesta más",
+       "Más dinero circulando"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "van",
+       "factory",
+       "banknote"
+      ]
+     }
+    }
+   },
+   {
+    "id": "30680c82",
+    "narration": "Por eso ahorrar sin más pierde poder de compra. Entender la inflación te ayuda a decidir con cabeza, no con miedo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Los precios suben, tu poder de compra baja",
+      "emphasis": "poder de compra"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07011,
+ "seconds": 10.6
+}

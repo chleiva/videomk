@@ -1,0 +1,17 @@
+already spent in saved results: $1.357 (cap $3.2)
+[1/12] sci-01   skip       run $0.000   running total $1.357   0s
+[2/12] how-02   skip       run $0.000   running total $1.357   0s
+[3/12] fin-02   skip       run $0.000   running total $1.357   0s
+[4/12] his-03   skip       run $0.000   running total $1.357   0s
+[5/12] tec-01   skip       run $0.000   running total $1.357   0s
+[6/12] cmp-03   skip       run $0.000   running total $1.357   0s
+[7/12] bio-03   skip       run $0.000   running total $1.357   0s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+[8/12] sci-02   ok         run $0.164   running total $1.460   25s
+COST CAP: $1.46 spent, cannot start another prompt within $3.2. Stopping.
+[9/12] kid-01   ok         run $0.095   running total $1.583   41s
+WARNING:root:GROUNDING flagged=10 repaired=5 candidates=13 checked=13
+[10/12] mkt-02   ok         run $0.142   running total $1.699   84s
+
+DONE. total spent $1.699 of $3.2

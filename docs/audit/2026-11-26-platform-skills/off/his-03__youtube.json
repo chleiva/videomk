@@ -1,0 +1,234 @@
+{
+ "id": "his-03",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It shows how a chain of risky choices turned a housing problem into a global crisis.",
+  "beats": [
+   {
+    "id": "bd41e444",
+    "narration": "One broken housing market nearly broke the world economy. How did loans on ordinary homes bring down giant banks? The story starts with a boom that felt like it could never end.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "alt": "residential neighborhood from above"
+     }
+    },
+    "chapter": "The boom"
+   },
+   {
+    "id": "1b356c6e",
+    "narration": "In the early 2000s, US house prices kept rising. Buying a home looked like a sure bet. Lenders were eager to make loans, and many families wanted a piece of the dream.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "new houses under construction",
+      "clip_queries": [
+       "new houses under construction",
+       "family in front of house"
+      ],
+      "alt": "home building site"
+     }
+    }
+   },
+   {
+    "id": "14a36579",
+    "narration": "To keep loans flowing, lenders began approving subprime mortgages: loans to borrowers with weak credit. Many had low starting payments that rose later. It worked only as long as home prices kept climbing.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Subprime mortgages",
+      "items": [
+       "Weak credit borrowers",
+       "Low starting payments",
+       "Payments rise later",
+       "Needs rising prices"
+      ],
+      "style": "rail",
+      "accent": "amber"
+     }
+    },
+    "chapter": "The risky loans"
+   },
+   {
+    "id": "4a89e0a1",
+    "narration": "Then came securitization. Banks bundled thousands of mortgages together and sold slices to investors around the world. Lenders no longer held the risk, so they cared less about whether loans could be repaid.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Securitization",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Homebuyers",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Lenders",
+        "icon": "landmark"
+       },
+       {
+        "id": "c",
+        "label": "Bundled securities",
+        "icon": "package"
+       },
+       {
+        "id": "d",
+        "label": "Investors worldwide",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "mortgage"
+       ],
+       [
+        "b",
+        "c",
+        "bundled"
+       ],
+       [
+        "c",
+        "d",
+        "sold"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "c16cdf18",
+    "narration": "Then house prices stopped rising and began to fall. Borrowers could not afford their higher payments, and could not sell or refinance. Defaults rise, and securities lose value.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "for sale sign in front of house",
+      "clip_queries": [
+       "for sale sign in front of house",
+       "empty neighborhood street"
+      ],
+      "alt": "house for sale sign"
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "d0d8c424",
+    "narration": "Banks and investors held those securities everywhere, so the losses spread. Nobody knew who was safe, and banks stopped lending to each other. Fear froze the system.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How losses spread",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Defaults rise",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Securities lose value",
+        "icon": "chart-column"
+       },
+       {
+        "id": "c",
+        "label": "Banks stop lending",
+        "icon": "landmark"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "5e159980",
+    "narration": "In September 2008, Lehman Brothers, a major investment bank, collapsed. It was one of the largest bankruptcies in history. Panic hit markets worldwide, and the crisis became global.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Wall Street New York stock exchange",
+      "alt": "Wall Street financial district",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "68ff13c7",
+    "narration": "Governments and central banks stepped in. The US government rescued banks and key firms, and the Federal Reserve cut interest rates and pumped in money to keep credit moving.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "The government response",
+      "steps": [
+       {
+        "label": "Rescue banks and key firms"
+       },
+       {
+        "label": "Cut interest rates"
+       },
+       {
+        "label": "Pump in money for credit"
+       }
+      ]
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "a381d604",
+    "narration": "Even so, millions lost jobs and homes, and the economy fell into a deep recession. Recovery was slow, and many families felt the damage for years.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person looking for jobs newspaper",
+      "clip_queries": [
+       "person looking for jobs newspaper",
+       "closed shop sign window"
+      ],
+      "alt": "unemployed person searching for work"
+     }
+    }
+   },
+   {
+    "id": "a8a59c87",
+    "narration": "So what caused it? Easy credit, risky loans, and risk passed along until nobody saw it. When trust in housing broke, the system broke too.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "When trust in housing broke, the whole system broke.",
+      "emphasis": "trust"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.13,
+ "seconds": 38.2
+}

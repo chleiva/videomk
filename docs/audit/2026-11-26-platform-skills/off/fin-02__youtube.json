@@ -1,0 +1,256 @@
+{
+ "id": "fin-02",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Inflación: por qué tu dinero compra cada vez menos",
+  "description": "Explicamos qué es la inflación, por qué suben los precios y cómo afecta a tu dinero. Una explicación sencilla con ejemplos cotidianos y sin cifras inventadas.",
+  "beats": [
+   {
+    "id": "245a1193",
+    "narration": "Con el mismo billete, hoy compras menos que hace unos años. No es tu imaginación: tiene nombre. Se llama inflación, y afecta a todo lo que pagas cada día.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person paying at supermarket checkout",
+      "clip_queries": [
+       "person paying at supermarket checkout",
+       "shopping cart in grocery aisle"
+      ],
+      "alt": "shopper at grocery store counter"
+     }
+    }
+   },
+   {
+    "id": "e1a53355",
+    "narration": "La inflación es una subida general y sostenida de los precios. Fíjate en las palabras: general, no solo un producto; y sostenida, no solo un día.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Subida general y sostenida de los precios de bienes y servicios en una economía."
+     }
+    },
+    "chapter": "Qué es realmente"
+   },
+   {
+    "id": "0835ea7a",
+    "narration": "La consecuencia es simple: con la misma cantidad de dinero, puedes comprar menos cosas. Es decir, cada unidad de dinero pierde valor con el tiempo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Los precios suben, y tu dinero pierde valor.",
+      "emphasis": "pierde valor"
+     }
+    }
+   },
+   {
+    "id": "5484fe0f",
+    "narration": "Hay tres causas habituales. Primero, la demanda: si todos quieren comprar más de lo que hay disponible, los precios suben. Segundo, los costes: producir cuesta más. Tercero, el dinero en circulación.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Causas de la inflación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Demanda alta",
+        "icon": "van"
+       },
+       {
+        "id": "b",
+        "label": "Costes más altos",
+        "icon": "factory"
+       },
+       {
+        "id": "c",
+        "label": "Más dinero circulando",
+        "icon": "banknote"
+       },
+       {
+        "id": "d",
+        "label": "Suben los precios",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "d"
+       ],
+       [
+        "b",
+        "d"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 3
+     }
+    },
+    "chapter": "Por qué ocurre"
+   },
+   {
+    "id": "25149c4a",
+    "narration": "Piensa en una subasta con pocos objetos y muchos compradores. Cada uno ofrece más para no quedarse sin nada. Así sube el precio cuando sobra demanda y falta oferta.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "crowd at auction raising hands",
+      "clip_queries": [
+       "crowd at auction raising hands",
+       "busy market with many buyers"
+      ],
+      "alt": "people bidding at an auction"
+     }
+    }
+   },
+   {
+    "id": "1da378f3",
+    "narration": "Para medirla, los expertos siguen el precio de una cesta de productos habituales: comida, vivienda, transporte. Si esa cesta cuesta más de un año a otro, hay inflación.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "food",
+        "label": "Comida"
+       },
+       {
+        "icon": "house",
+        "label": "Vivienda"
+       },
+       {
+        "icon": "car",
+        "label": "Transporte"
+       }
+      ],
+      "title": "La cesta de la compra"
+     }
+    },
+    "chapter": "Cómo se mide"
+   },
+   {
+    "id": "986cadbb",
+    "narration": "Un poco de inflación se considera normal en una economía sana. El problema llega cuando los precios suben demasiado rápido y los sueldos no los alcanzan.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Inflación baja",
+       "tagline": "Subida suave"
+      },
+      "b": {
+       "name": "Inflación alta",
+       "tagline": "Subida rápida"
+      },
+      "rows": [
+       {
+        "label": "Precios",
+        "a": "Estables",
+        "b": "Se disparan"
+       },
+       {
+        "label": "Sueldos",
+        "a": "Pueden seguir",
+        "b": "Se quedan atrás"
+       }
+      ],
+      "verdict": "El problema es la velocidad."
+     }
+    }
+   },
+   {
+    "id": "6247842f",
+    "narration": "Los efectos se notan en tres cosas. Pierdes poder de compra. Los ahorros valen menos con el tiempo. Y cuesta planificar el futuro, porque no sabes cuánto costarán las cosas.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Efectos en tu bolsillo",
+      "items": [
+       "Pierdes poder de compra",
+       "Los ahorros valen menos",
+       "Cuesta planificar el futuro"
+      ],
+      "style": "rail",
+      "accent": "coral"
+     }
+    },
+    "chapter": "Qué te afecta"
+   },
+   {
+    "id": "42c86ae0",
+    "narration": "Para frenarla, los bancos centrales suelen subir los tipos de interés. El crédito se encarece, la gente gasta menos, la demanda baja y los precios se enfrían.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Suben los tipos de interés",
+        "kind": "start"
+       },
+       {
+        "id": "b",
+        "label": "El crédito se encarece",
+        "kind": "step"
+       },
+       {
+        "id": "c",
+        "label": "Se gasta menos",
+        "kind": "step"
+       },
+       {
+        "id": "d",
+        "label": "Los precios se enfrían",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "title": "Cómo se frena"
+     }
+    }
+   },
+   {
+    "id": "25338a07",
+    "narration": "Así que recuérdalo: la inflación no es que las cosas sean caras, es que suben de precio. Y mientras sube todo, tu dinero compra un poco menos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Inflación: tu dinero compra menos que ayer.",
+      "emphasis": "compra menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.09144,
+ "seconds": 27.8
+}

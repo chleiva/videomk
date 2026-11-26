@@ -1,0 +1,73 @@
+{
+ "id": "tra-01",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A fast guide to three days in Lisbon, from hilltop views and trams to custard tarts and grilled fish. Plan your sights and meals day by day.",
+  "beats": [
+   {
+    "id": "c6fb5224",
+    "narration": "Three days in Lisbon? You'll climb hills, ride yellow trams, and eat your way through the city. Here's your plan.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram city street",
+      "clip_queries": [
+       "yellow tram city street",
+       "aerial view of city rooftops"
+      ],
+      "alt": "old tram on hilly street"
+     }
+    }
+   },
+   {
+    "id": "8bc08344",
+    "narration": "Day one, wander the old neighborhoods and catch sunset from a hilltop viewpoint. Day two, head to the riverside and historic monuments.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your 3 days",
+      "items": [
+       "Day 1: Old streets",
+       "Day 2: Riverside",
+       "Day 3: Day trip"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "droplet",
+       "sun"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c9f704b7",
+    "narration": "Eat custard tarts warm, grilled fish by the water, and sip coffee slowly. Day three, take it easy. Lisbon rewards slow travelers.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Eat slow. Walk uphill. Repeat.",
+      "emphasis": "Eat slow"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 64 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 6 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06746,
+ "seconds": 10.2
+}

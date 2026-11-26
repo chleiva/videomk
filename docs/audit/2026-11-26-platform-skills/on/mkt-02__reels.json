@@ -1,0 +1,70 @@
+{
+ "id": "mkt-02",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Meet the Note App That Keeps Up With You",
+  "description": "A 30-second launch video for a new note-taking app that helps you capture ideas fast and find them again. Simple notes, quick search, and everything in one place.",
+  "beats": [
+   {
+    "id": "2e526934",
+    "narration": "You had a brilliant idea this morning. Where is it now? Lost in a scrap of paper, or buried in a messy phone.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Where did that idea go?",
+      "emphasis": "idea"
+     }
+    }
+   },
+   {
+    "id": "9f442186",
+    "narration": "Meet our new note-taking app. Capture a thought quickly, organize it, and find it again later.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Capture"
+       },
+       {
+        "icon": "tag",
+        "label": "Organize"
+       },
+       {
+        "icon": "search",
+        "label": "Find"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "97d3d1ec",
+    "narration": "Your notes stay organized and close at hand. Less hunting, more thinking. Download it today, and keep your good ideas safe.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Never lose an idea again",
+      "subtitle": "Our new note-taking app is here"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 68 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 10 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line",
+  "grounding: 2 beats had unsupported specifics, 2 rewritten"
+ ],
+ "cost_usd": 0.06381,
+ "seconds": 12.1
+}

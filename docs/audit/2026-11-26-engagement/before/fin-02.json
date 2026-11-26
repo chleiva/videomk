@@ -1,0 +1,549 @@
+{
+ "id": "fin-02",
+ "category": "personal finance",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "explícame la inflación",
+ "great": "Qué es (alza generalizada y sostenida de precios), cómo se mide (IPC), causas (demanda, costes, monetaria), efectos en poder adquisitivo, ejemplo cotidiano, qué hacen los bancos centrales; claro.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:26:28",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La inflación es un concepto económico atemporal que se explica bien con conocimiento general, sin depender de datos recientes.",
+  "queries": [
+   "inflación definición causas efectos",
+   "qué es la inflación economía"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6265,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Inflación",
+   "Inflación subyacente",
+   "Precio",
+   "Precio de los alimentos",
+   "Índice de precios al consumidor",
+   "Índice de precios al consumidor de Estados Unidos"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Inflación\nEn economía, la inflación es el aumento sostenido y generalizado de los precios de los bienes y servicios en un mercado durante un período de tiempo, expresado en una determinada unidad monetaria.​ Cuando el nivel general de precios se incrementa, el poder adquisitivo de la moneda disminuye, ya que con la misma cantidad de dinero pueden adquirirse menos bienes y servicios.  \nLa inflación implica, por tanto, una reducción del valor real de la moneda como medio de intercambio y como unidad de cuenta en una economía.​  \nExisten diversos indicadores para medir la inflación, siendo el más habitual el índice de precios al consumidor (IPC), que refleja la variación media de los precios de una canasta de bienes y servicios representativos del consumo de los hogares.​ Otros indicadores relevantes son el deflactor del PIB y el índice de precios al productor.  \nUna variación negativa del nivel general de precios se denomina deflación, mientras que una desaceleración en el ritmo de crecimiento de los precios se conoce como desinflación. Por otro lado, incrementos muy elevados y rápidos en los precios reciben el nombre de hiperinflación.  \nLa inflación puede tener diversos efectos en una economía…\n\n## Inflación subyacente\nLa inflación subyacente, inflación básica, inflación núcleo (en inglés: core inflation) o inflación de bases es la inflación reflejada por el índice de precios al consumo (IPC) cuando éste no toma en cuenta ni los productos energéticos ni los alimenticios sin elaborar. La exclusión de estos componentes del índice se debe a que son componentes cuyos precios sufren grandes fluctuaciones debido a sucesos transitorios tales como conflictos internacionales (ejemplo: guerras), condiciones climáticas que afectan las cosechas o simplemente estacionalidad de los vegetales, por ejemplo.​\nDos razones prácticas motivan la medición de la inflación subyacente. Por un lado, medir la inflación a medio plazo, ya que las perturbaciones transitorias son excluidas. La segunda razón es que esta medición de inflación es más afectada por la política monetaria. Un banco central no tiene mucha influencia sobre los precios estacionales de los vegetales pero sí puede influir con mayor vigor en los precios a mediano plazo. De ahí que los bancos centrales prestan mayor atención a la medición de inflación subyacente como forma de medir el éxito de su política monetaria.\n\n## Precio\nEl precio es el pago o recompensa que se asigna a la obtención de bienes o servicios o, más en general, a una mercancía cualquiera.\nA pesar de que tal pago no necesariamente se efectúa en dinero los precios son generalmente referidos o medidos en unidades monetarias. Desde un punto de vista general, y entendiendo el dinero como una mercancía, se puede considerar que bienes y servicios son obtenidos por el trueque, que, en economías modernas, generalmente consiste en intercambio por, o mediado a través del dinero. \nEn el desarrollo de la economía ha habido debate prolongado acerca de la relación entre el precio y el valor. Originalmente, la  escuela clásica consideraba que el precio dependía directamente del valor, entendido como la cantidad de trabajo encapsulada en la producción de una mercancía dada (ver Teoría del valor-trabajo). Posteriormente, a partir del trabajo de los marginalistas, se llegó a concebir que el precio depende de la utilidad que cada individuo asigna al bien o servicio en cuestión.  Una opinión que está llegando a ser de creciente influencia, a partir del trabajo de Piero Sraffa, es que el precio se determina en relación con un paquete de productos o mercaderías…\n\n## Precio de los alimentos\nEl precio de los alimentos se refiere al estimado de precios de los alimentos a través de países, regiones y a escala mundial.​ Los precios de los alimentos tienen un impacto en los productores y consumidores de alimentos. \nLos niveles de precios dependen del proceso de producción de alimentos, incluida la comercialización y distribución de alimentos. La fluctuación de los precios de los alimentos está determinada por una serie de factores relacionados.​ Los eventos geopolíticos, la demanda global, los tipos de cambio,​ la política gubernamental, las enfermedades y rendimiento de los cultivos, los costos de energía, la disponibilidad de recursos naturales para la agricultura,​ la especulación alimentaria,​​​ los cambios en el uso del suelo y los eventos climáticos tienen un impacto directo en el aumento o la disminución de los precios de los alimentos.​ \nLas consecuencias de la fluctuación de los precios de los alimentos son múltiples. El aumento de los precios de los alimentos pone en peligro la seguridad alimentaria, en particular para los países en desarrollo, y puede causar malestar social.​​​ El aumento de los precios de los alimentos está relacionado con las disparidades en la…\n\n## Índice de precios al consumidor\nEl índice de precios al consumidor o índice de precios de consumo​ (comúnmente llamado por su sigla IPC) es un índice económico en el que se valoran los precios de un determinado conjunto de bienes y servicios (conocido como «canasta familiar» o «Canasta básica de alimentos») determinando sobre la base de la encuesta continua de presupuestos familiares (también llamada «encuesta de gastos de los hogares»), que una cantidad de consumidores adquiere de manera regular, y la variación con respecto del precio de cada uno, respecto de una muestra anterior. Mide los cambios en el nivel de precios de una canasta de bienes y servicios de consumo adquiridos por los hogares.\nSe trata de un porcentaje que puede ser positivo (lo que indica un incremento de los precios) o negativo (que refleja una caída de los precios). \nEs un indicador muy utilizado por los gobiernos para medir la inflación.\n\n## Índice de precios al consumidor de Estados Unidos\nEl Índice de Precios al consumidor de Estados Unidos (IPC) es un conjunto de índices de precios al consumidor calculados por la Oficina de Estadísticas Laborales de los Estados Unidos (BLS). Para ser precisos, el BLS rutinariamente calcula muchos IPC diferentes que se utilizan para diferentes propósitos. Cada uno es una medida de serie temporal del precio de los bienes y servicios de consumo. El BLS publica el IPC mensualmente.​​​​​",
+ "plan": {
+  "title": "La inflación explicada: por qué tu dinero rinde menos",
+  "description": "La inflación es el aumento sostenido y generalizado de los precios, que reduce el poder adquisitivo del dinero. Descubre cómo se mide con el IPC y qué son la deflación, la desinflación y la hiperinflación.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "7628e639",
+    "narration": "¿Por qué con el mismo dinero hoy compras menos que antes? Esa sensación de que todo se encarece tiene nombre, y afecta a tu bolsillo cada día.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "shopping at supermarket",
+      "clip_queries": [
+       "shopping at supermarket",
+       "hands paying with cash"
+      ],
+      "alt": "person buying groceries"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "08feaf1d",
+    "narration": "La inflación es el aumento sostenido y generalizado de los precios de bienes y servicios durante un período de tiempo. No es que suba un producto: suben casi todos.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Aumento sostenido y generalizado de los precios de los bienes y servicios en un mercado durante un período de tiempo."
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "bbb49746",
+    "narration": "Cuando el nivel general de precios sube, el poder adquisitivo de la moneda disminuye. Con la misma cantidad de dinero puedes comprar menos bienes y servicios que antes.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo te afecta",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Suben los precios",
+        "icon": "chart-column"
+       },
+       {
+        "id": "b",
+        "label": "Menor poder adquisitivo",
+        "icon": "banknote"
+       },
+       {
+        "id": "c",
+        "label": "Compras menos",
+        "icon": "van"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "provoca"
+       ],
+       [
+        "b",
+        "c",
+        "significa"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "22899269",
+    "narration": "¿Y cómo se mide? El indicador más habitual es el índice de precios al consumidor, o IPC. Mira el consumo habitual de los hogares y calcula la variación media de precios.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "El IPC",
+      "items": [
+       "Consumo habitual de los hogares",
+       "Variación media de precios"
+      ],
+      "style": "rail",
+      "accent": "indigo"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "4b35fc35",
+    "narration": "Ese consumo se llama canasta familiar: un conjunto de bienes y servicios que las familias compran con regularidad. Si su precio total sube, el IPC es positivo; si baja, es negativo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "fruit and vegetables market",
+      "clip_queries": [
+       "fruit and vegetables market",
+       "family shopping cart"
+      ],
+      "alt": "grocery shelves with food"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "7684c740",
+    "narration": "Los gobiernos lo usan mucho para medir la inflación. En Estados Unidos, por ejemplo, la Oficina de Estadísticas Laborales publica el IPC cada mes.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El IPC se publica cada mes para seguir la evolución de los precios.",
+      "emphasis": "cada mes"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "e2c8fb5d",
+    "narration": "No todos los cambios de precios son iguales. Si bajan, hablamos de deflación. Si suben más despacio, de desinflación. Y si se disparan muy rápido, de hiperinflación.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Cuatro palabras clave",
+      "items": [
+       "Deflación: bajan los precios",
+       "Desinflación: suben más despacio",
+       "Hiperinflación: suben muy rápido"
+      ],
+      "style": "keywords",
+      "accent": "coral"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "610a4f45",
+    "narration": "Algunos precios son muy volátiles. Una guerra o una mala cosecha pueden encarecer la energía y los alimentos de golpe, aunque sea algo pasajero.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "farmer harvesting crops field",
+      "clip_queries": [
+       "farmer harvesting crops field",
+       "gas pump refueling car"
+      ],
+      "alt": "wheat field harvest"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "0fcdcdfb",
+    "narration": "Por eso existe la inflación subyacente: el IPC sin energía ni alimentos sin elaborar. Muestra la tendencia a medio plazo, y los bancos centrales la vigilan para medir su política.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "IPC general",
+       "tagline": "Todos los precios"
+      },
+      "b": {
+       "name": "Inflación subyacente",
+       "tagline": "Sin energía ni alimentos frescos"
+      },
+      "rows": [
+       {
+        "label": "Energía",
+        "a": "Incluida",
+        "b": "Excluida"
+       },
+       {
+        "label": "Alimentos sin elaborar",
+        "a": "Incluidos",
+        "b": "Excluidos"
+       },
+       {
+        "label": "Mide",
+        "a": "Cambios inmediatos",
+        "b": "Tendencia a medio plazo"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "14d53e4b",
+    "narration": "En resumen: la inflación es una subida general y sostenida de precios que le resta valor a tu dinero. Ahora sabes que el IPC la mide, y que mirar su tendencia importa.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Inflación: los precios suben y tu dinero compra menos.",
+      "emphasis": "tu dinero compra menos"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Inflación",
+    "url": "https://es.wikipedia.org/wiki/Inflaci%C3%B3n",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Inflación subyacente",
+    "url": "https://es.wikipedia.org/wiki/Inflaci%C3%B3n_subyacente",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Precio de los alimentos",
+    "url": "https://es.wikipedia.org/wiki/Precio_de_los_alimentos",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Índice de precios al consumidor",
+    "url": "https://es.wikipedia.org/wiki/%C3%8Dndice_de_precios_al_consumidor",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 43.4,
+  "before_first_script_call_s": 5.3,
+  "script_s": 38.1
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.14503,
+  "search_api": 0.0,
+  "total": 0.14527
+ },
+ "calls": {
+  "small": 4,
+  "big": 3
+ },
+ "tokens": {
+  "in": 44276,
+  "out": 6139
+ },
+ "rules": {
+  "length": {
+   "words": 283,
+   "expected_words": 267,
+   "ratio": 1.06,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 127.4,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 27,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Por qué con el mismo dinero hoy compras menos que antes? Esa sensación de que todo se encarece tiene nombre, y afecta a tu bolsillo cada día.",
+   "close_text": "En resumen: la inflación es una subida general y sostenida de precios que le resta valor a tu dinero. Ahora sabes que el IPC la mide, y que mirar su tendencia importa."
+  },
+  "variety": {
+   "distinct": 6,
+   "counts": {
+    "clip": 3,
+    "definition": 1,
+    "diagram": 1,
+    "bullets": 2,
+    "kinetic_text": 2,
+    "versus": 1
+   },
+   "max_run": 1,
+   "entropy": 2.45,
+   "top_type": "clip",
+   "top_share": 0.3,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 4,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "de bienes y servicios",
+    "count": 2
+   },
+   {
+    "phrase": "bienes y servicios que",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 6265,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core definitions match the notes. But \"Cuatro palabras clave\" lists only three items, and \"el IPC es positivo\" is a loose reading of the notes. The example of the US BLS is odd for a Spanish viewer."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It covers the definition, the IPC, the terminology and core inflation. It omits causes (demand, costs, monetary), what central banks do, and a concrete everyday example with numbers or the INE. The core-inflation section takes up too much room."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical (definition, effect, measurement, terms, core inflation). However the section on the IPC is long, the core-inflation material is over-weighted, and the ending is a flat recap."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is relatable, but the ending is a bare summary: \"En resumen: la inflación es una subida general...\"."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly and clear, addressed to the viewer with tú, and suited to beginners."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary. But the diagram's \"van\" icon for \"Compras menos\" does not fit, the bullets say \"Cuatro palabras clave\" and show three items, and the kinetic text repeats the narration."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It is mostly a paraphrase of Wikipedia, with no concrete figure, no everyday price example and no striking fact."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Roughly the right length and language. But it ignores the ES region (the example is the US) and misses the expected causes and the central-bank role."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct, with a few small calques and regionalisms such as \"canasta familiar\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "major",
+    "quote": "Cuatro palabras clave",
+    "issue": "The title promises four items but only three are shown, and the narration covers only three terms.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Algunos precios son muy volátiles.",
+    "issue": "It never explains the causes of inflation (demand, costs, money supply), which are a core requirement.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "los bancos centrales la vigilan para medir su política",
+    "issue": "The central-bank role is reduced to one vague phrase. It never explains rate rises or the ECB's roughly 2% target.",
+    "beat": 9
+   },
+   {
+    "dimension": "instructions",
+    "severity": "minor",
+    "quote": "En Estados Unidos, por ejemplo, la Oficina de Estadísticas Laborales publica el IPC cada mes.",
+    "issue": "The viewer is in Spain, so the example should be the INE and the Spanish IPC.",
+    "beat": 6
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Con la misma cantidad de dinero puedes comprar menos bienes y servicios que antes.",
+    "issue": "It gives only an abstract restatement, with no concrete example such as a coffee or a basket price.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "si baja, es negativo",
+    "issue": "It is imprecise to say the IPC is \"positive\" or \"negative\"; it is the rate of change that is positive or negative.",
+    "beat": 5
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "van",
+    "issue": "A van icon does not represent the idea of buying less.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "Causes of inflation: demand, costs and money supply",
+   "What central banks do (interest rates, the ECB's 2% target)",
+   "A concrete everyday example with numbers",
+   "Spanish context (INE, euro)",
+   "Winners and losers: savings and wages"
+  ],
+  "wrong_facts": [
+   "The slide says \"Cuatro palabras clave\" but lists only three terms."
+  ],
+  "would_publish": false,
+  "summary": "A clear but shallow paraphrase of Wikipedia that skips causes, the role of central banks and any concrete example, and wastes space on the US BLS and core inflation. The ending is a flat recap, and there is a visible mismatch (four keywords promised, three shown).",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Mira el consumo habitual de los hogares",
+     "problem": "Odd personification of the IPC, and unnatural in a Spanish context.",
+     "better": "Se basa en lo que consumen habitualmente los hogares"
+    },
+    {
+     "quote": "canasta familiar",
+     "problem": "Latin American term; in Spain it is usually \"cesta de la compra\".",
+     "better": "cesta de la compra"
+    },
+    {
+     "quote": "Y si se disparan muy rápido",
+     "problem": "\"muy rápido\" with \"se disparan\" is redundant.",
+     "better": "Y si se disparan sin control"
+    }
+   ]
+  },
+  "mean": 3.0,
+  "cost_usd": 0.02856,
+  "tokens": [
+   6115,
+   1633
+  ]
+ }
+}

@@ -1,0 +1,133 @@
+{
+ "id": "mkt-02",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A note-taking app that finds your ideas for you",
+  "description": "A launch video for a note-taking app that helps you capture ideas fast and find them again in seconds. See how capture, organize and search work together.",
+  "beats": [
+   {
+    "id": "b5fd4394",
+    "narration": "Your best idea just vanished. It was on a sticky note, or in a chat, or in your head. Notes should not be this hard to find. So we built a note-taking app that keeps them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person writing notes at desk",
+      "clip_queries": [
+       "person writing notes at desk",
+       "messy desk with sticky notes"
+      ],
+      "alt": "hands taking notes on a notebook"
+     }
+    }
+   },
+   {
+    "id": "b52715d9",
+    "narration": "It works in three simple steps. First, capture: type, speak or snap a photo in one tap. Second, organize: your notes sort themselves into folders and tags. Third, find: search brings back the right note in seconds.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three steps",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Type, speak or snap a photo"
+       },
+       {
+        "label": "Organize",
+        "detail": "Folders and tags, done for you"
+       },
+       {
+        "label": "Find",
+        "detail": "Search in seconds"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "d67c22da",
+    "narration": "You will not need to think hard about where things go. Write first, and worry about the rest later. Your thoughts stay with you, so the idea you had on the train is still there when you sit down.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "One place for every note",
+      "nodes": [
+       {
+        "id": "p",
+        "label": "Phone",
+        "icon": "phone"
+       },
+       {
+        "id": "a",
+        "label": "Your notes",
+        "icon": "notebook-dot"
+       },
+       {
+        "id": "l",
+        "label": "Laptop",
+        "icon": "laptop"
+       }
+      ],
+      "edges": [
+       [
+        "p",
+        "a",
+        "sync"
+       ],
+       [
+        "a",
+        "l",
+        "sync"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "44cf3c4a",
+    "narration": "Less hunting, more doing. Meetings, reading lists, plans and half-formed thoughts can all be kept in one place, ready when you are. Picture a calmer day.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop in cafe",
+      "clip_queries": [
+       "person typing on laptop in cafe",
+       "team in meeting taking notes"
+      ],
+      "alt": "professional working calmly with laptop"
+     }
+    }
+   },
+   {
+    "id": "6d1b94ec",
+    "narration": "Download the app and write down your next idea. Capture it once, and find it whenever you need it.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Capture it once. Find it whenever you need it.",
+      "emphasis": "Find it"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 156 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 22 words: write 4 to 6 beats of at most 40 words each (you averaged 31), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words",
+  "grounding: 3 beats had unsupported specifics, 2 rewritten"
+ ],
+ "cost_usd": 0.07378,
+ "seconds": 20.7
+}

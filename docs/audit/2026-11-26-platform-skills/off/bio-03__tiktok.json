@@ -1,0 +1,68 @@
+{
+ "id": "bio-03",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Cracked the Impossible",
+  "description": "A quick look at Alan Turing, the mathematician who helped break a wartime code and imagined thinking machines. Learn why his ideas still shape the computers we use today.",
+  "beats": [
+   {
+    "id": "d9530588",
+    "narration": "He broke a code that seemed unbreakable, and helped end a war. Then he imagined machines that could think.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "He cracked the uncrackable.",
+      "emphasis": "uncrackable"
+     }
+    }
+   },
+   {
+    "id": "edc94af0",
+    "narration": "Alan Turing was a British mathematician. In World War Two, his work helped break Germany's Enigma messages, saving countless lives.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Enigma machine",
+      "alt": "An Enigma cipher machine",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "212566cd",
+    "narration": "He also asked a bold question: can machines think? Every computer and every AI you use today carries his ideas.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Turing's legacy",
+      "items": [
+       "Codebreaker",
+       "Computer pioneer",
+       "Asked: can machines think?"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "icons": [
+       "lock",
+       "computer",
+       "brain"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06618,
+ "seconds": 9.0
+}

@@ -1,0 +1,68 @@
+{
+ "id": "pro-02",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza por cinco minutos",
+  "description": "Un truco sencillo para dejar de procrastinar: empezar con solo cinco minutos. Aprende por qué arrancar es lo más difícil y cómo lograrlo.",
+  "beats": [
+   {
+    "id": "a9571944",
+    "narration": "¿Y si procrastinar no fuera pereza? Casi siempre es miedo a empezar algo que parece demasiado grande, difícil o aburrido.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Procrastinar no es pereza: es miedo a empezar.",
+      "emphasis": "miedo a empezar"
+     }
+    }
+   },
+   {
+    "id": "5763ef8a",
+    "narration": "El truco es hacer la tarea ridículamente pequeña. Prométete solo cinco minutos. Deja el móvil lejos, abre el documento y escribe una línea.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Haz la tarea pequeña",
+      "items": [
+       "Solo cinco minutos",
+       "Móvil lejos",
+       "Una línea"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "clock",
+       "lock",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2a073eda",
+    "narration": "Lo difícil es arrancar, no continuar. Cuando empiezas, la inercia te lleva. Así que no esperes ganas: empieza hoy, solo cinco minutos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No esperes ganas: empieza cinco minutos.",
+      "emphasis": "cinco minutos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 65 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 7 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06425,
+ "seconds": 9.0
+}

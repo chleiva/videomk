@@ -1,0 +1,152 @@
+{
+ "id": "tec-01",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: Predicting the Next Word",
+  "description": "Large language models like ChatGPT generate text by predicting one word piece at a time. This video explains tokens, training on text, and why the answers can sound right and still be wrong.",
+  "beats": [
+   {
+    "id": "e0ce9e4b",
+    "narration": "ChatGPT does not look up answers. It does one thing, over and over: it guesses the next word. That single trick, repeated thousands of times, writes essays, code, and poems.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just predicts the next word. Again and again.",
+      "emphasis": "next word"
+     }
+    },
+    "chapter": "One simple trick"
+   },
+   {
+    "id": "9f0b9b3c",
+    "narration": "First, text is chopped into small pieces called tokens. Then the model reads a huge amount of writing and practices guessing what comes next. Each miss nudges its internal settings, so the next guess improves.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Learning to predict",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Text",
+        "icon": "book"
+       },
+       {
+        "id": "k",
+        "label": "Tokens",
+        "icon": "puzzle"
+       },
+       {
+        "id": "m",
+        "label": "Model guesses",
+        "icon": "brain"
+       },
+       {
+        "id": "a",
+        "label": "Adjusts settings",
+        "icon": "cog"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "k"
+       ],
+       [
+        "k",
+        "m"
+       ],
+       [
+        "m",
+        "a",
+        "miss"
+       ],
+       [
+        "a",
+        "m",
+        "better"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    },
+    "chapter": "How it learns"
+   },
+   {
+    "id": "2e06468a",
+    "narration": "When you type a prompt, the model scores every possible next token and picks one likely choice. It adds that token to the text, then repeats. Your answer is built piece by piece.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Building a reply",
+      "steps": [
+       {
+        "label": "Read your prompt"
+       },
+       {
+        "label": "Score next tokens"
+       },
+       {
+        "label": "Pick one"
+       },
+       {
+        "label": "Add it and repeat"
+       }
+      ]
+     }
+    },
+    "chapter": "Writing an answer"
+   },
+   {
+    "id": "4c2f00ea",
+    "narration": "Because it predicts what sounds likely, not what is verified, it can state something false with total confidence. Fluent does not mean correct. So treat answers as a strong draft, and check the facts that matter.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Sounds right",
+       "tagline": "What the model optimizes"
+      },
+      "b": {
+       "name": "Is right",
+       "tagline": "What you need"
+      },
+      "rows": [
+       {
+        "label": "Basis",
+        "a": "Learned patterns",
+        "b": "Checked facts"
+       },
+       {
+        "label": "Tone",
+        "a": "Always confident",
+        "b": "Honest about doubt"
+       },
+       {
+        "label": "Your move",
+        "a": "Use as a draft",
+        "b": "Verify key claims"
+       }
+      ],
+      "verdict": "Fluent is not the same as correct"
+     }
+    },
+    "chapter": "The catch"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03628,
+ "seconds": 7.3
+}

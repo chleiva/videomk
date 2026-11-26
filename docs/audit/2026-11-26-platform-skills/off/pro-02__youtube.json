@@ -1,0 +1,213 @@
+{
+ "id": "pro-02",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza en dos minutos",
+  "description": "La procrastinación no es pereza, es una forma de evitar una emoción incómoda. Descubre por qué ocurre y cómo romper el ciclo con pasos pequeños.",
+  "beats": [
+   {
+    "id": "bcc41da5",
+    "narration": "Tienes una tarea importante y, en vez de hacerla, ordenas el escritorio, miras el móvil y te preparas un café. No es pereza. Es otra cosa, y tiene solución.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person distracted at desk",
+      "clip_queries": [
+       "person distracted at desk",
+       "hands scrolling phone"
+      ],
+      "alt": "person procrastinating at computer"
+     }
+    }
+   },
+   {
+    "id": "22436e9e",
+    "narration": "Funciona así. Primero aparece una emoción incómoda: aburrimiento, miedo o duda. Después viene evitarla, cambiando de tarea. Y al final llega un alivio breve, que nos enseña a repetirlo.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la procrastinación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Emoción incómoda",
+        "icon": "heart"
+       },
+       {
+        "id": "b",
+        "label": "Evitarla",
+        "icon": "log-in"
+       },
+       {
+        "id": "c",
+        "label": "Alivio breve",
+        "icon": "cloud"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "a",
+        "se repite"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    },
+    "sfx": "click",
+    "chapter": "Por qué postergamos"
+   },
+   {
+    "id": "e118f8b4",
+    "narration": "Por eso la fuerza de voluntad sola falla. Tú no necesitas más disciplina para odiar la tarea. Necesitas que la tarea te dé menos miedo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No necesitas más disciplina: necesitas que empezar duela menos.",
+      "emphasis": "empezar duela menos"
+     }
+    }
+   },
+   {
+    "id": "edb6ff1e",
+    "narration": "Primer truco: hazla ridículamente pequeña. No escribas el informe, abre el documento y escribe una frase. Lo difícil casi siempre es arrancar, no continuar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "clip_queries": [
+       "person typing on laptop",
+       "hands writing in notebook"
+      ],
+      "alt": "hands writing on keyboard"
+     }
+    },
+    "chapter": "Cómo romper el ciclo"
+   },
+   {
+    "id": "1e7ebd8c",
+    "narration": "Segundo truco: pon un reloj de pocos minutos. Te dices que solo trabajarás ese tiempo. Cuando suena, puedes parar. Casi nunca paras, porque ya estás dentro.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "La regla de los pocos minutos",
+      "steps": [
+       {
+        "label": "Elige una tarea",
+        "detail": "Solo una"
+       },
+       {
+        "label": "Pon un reloj corto",
+        "detail": "Pocos minutos"
+       },
+       {
+        "label": "Empieza sin juzgar",
+        "detail": "Sin buscar perfección"
+       },
+       {
+        "label": "Decide al sonar",
+        "detail": "Seguir o parar"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "018624b8",
+    "narration": "Tercer truco: quita la tentación del camino. Deja el móvil en otra habitación, cierra las pestañas y prepara tu espacio. Si lo fácil está lejos, lo importante gana.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "tidy desk workspace",
+      "clip_queries": [
+       "tidy desk workspace",
+       "phone left on table"
+      ],
+      "alt": "clean desk with laptop"
+     }
+    }
+   },
+   {
+    "id": "eddf01d0",
+    "narration": "Cuarto truco: decide cuándo y dónde, antes de que llegue el momento. Por ejemplo, después del desayuno, en la mesa, abro el documento. Así no negocias contigo cada vez.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Decide antes",
+      "items": [
+       "Cuándo: después del desayuno",
+       "Dónde: en la mesa",
+       "Qué: abrir el documento"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "clock",
+       "pin",
+       "check"
+      ]
+     }
+    }
+   },
+   {
+    "id": "da84973a",
+    "narration": "Y trátate bien. Si hoy fallas, no te castigues. La culpa duele, y lo que duele se evita. Es más útil volver a empezar, con calma, enseguida.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "Trátate como tratarías a un amigo que intenta cambiar.",
+      "attribution": "Idea general de autocompasión"
+     }
+    }
+   },
+   {
+    "id": "a355ef01",
+    "narration": "Cada vez que empiezas, aunque sea poco, rompes el ciclo y le enseñas a tu cerebro que no era tan terrible. La confianza se construye con acciones pequeñas.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person working focused at home",
+      "clip_queries": [
+       "person working focused at home",
+       "sunrise through window"
+      ],
+      "alt": "woman working calmly at laptop"
+     }
+    }
+   },
+   {
+    "id": "7e44ff4f",
+    "narration": "Así que no esperes ganas. Elige la tarea, hazla pequeña y empieza ahora. Dos minutos bastan para dejar de postergar.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No esperes a tener ganas: empieza, y las ganas llegan.",
+      "emphasis": "empieza"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.1343,
+ "seconds": 41.5
+}

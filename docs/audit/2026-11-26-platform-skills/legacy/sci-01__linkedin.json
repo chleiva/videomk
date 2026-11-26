@@ -1,0 +1,124 @@
+{
+ "id": "sci-01",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Messes Happen by Themselves",
+  "description": "Entropy explains why hot coffee cools, ice melts and rooms get messy. This one-minute explainer shows that it is really about how many ways things can be arranged.",
+  "beats": [
+   {
+    "id": "551528ac",
+    "narration": "Why does a hot coffee always cool down, but never heats itself back up? Why does a tidy room get messy, but never tidies itself? The answer is a idea called entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on table",
+      "clip_queries": [
+       "steaming coffee cup on table",
+       "messy bedroom with clothes"
+      ],
+      "alt": "hot drink steam close up"
+     }
+    },
+    "chapter": "Why mess wins"
+   },
+   {
+    "id": "492284fe",
+    "narration": "Entropy is not just disorder. It counts the ways something can be arranged. Think of a deck of cards. Only one order is perfectly sorted, but countless orders look shuffled.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how many ways the parts of a system can be arranged without changing how it looks overall.",
+      "example": "A sorted deck versus a shuffled deck"
+     }
+    }
+   },
+   {
+    "id": "b886bd2b",
+    "narration": "Nature drifts toward the arrangements that are most likely. Heat spreads out. Ice melts into water. Milk mixes into tea. Each step moves from few possible arrangements to many.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From few ways to many",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Ordered",
+        "icon": "club"
+       },
+       {
+        "id": "b",
+        "label": "Heat spreads",
+        "icon": "flame"
+       },
+       {
+        "id": "c",
+        "label": "Mixed",
+        "icon": "cloud"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "time"
+       ],
+       [
+        "b",
+        "c",
+        "time"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "d33a6719",
+    "narration": "This is why time seems to have a direction. The second law of thermodynamics says that in a closed system, entropy tends to rise. Order is possible, but it costs energy.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The second law",
+      "items": [
+       "Closed systems drift toward mess",
+       "Entropy tends to rise",
+       "Order costs energy"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "294fd64a",
+    "narration": "So entropy is really a story about probability. Messy states are not forced on us. There are simply far more of them. Remember that, and you will see entropy everywhere.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Messy is not forced. It is just far more likely.",
+      "emphasis": "far more likely"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 152 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 18 words: write 4 to 6 beats of at most 40 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.06835,
+ "seconds": 17.4
+}

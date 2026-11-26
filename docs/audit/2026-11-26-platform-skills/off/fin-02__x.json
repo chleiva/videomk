@@ -1,0 +1,78 @@
+{
+ "id": "fin-02",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación explicada: por qué tu dinero compra menos",
+  "description": "Explicación breve de qué es la inflación y por qué el mismo dinero compra menos cada año. Incluye sus causas principales y qué mirar para entenderla.",
+  "beats": [
+   {
+    "id": "971d8efa",
+    "narration": "Tu dinero vale menos cada año, aunque no lo gastes. Eso es la inflación: los precios suben y con el mismo dinero compras menos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Con el mismo dinero, compras menos.",
+      "emphasis": "compras menos"
+     }
+    }
+   },
+   {
+    "id": "135ac13d",
+    "narration": "Imagina que hoy un café cuesta una cantidad y el año que viene cuesta algo más. Tu sueldo no cambió, pero tu poder de compra sí bajó.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "coffee shop counter paying",
+      "alt": "customer paying at a cafe"
+     }
+    }
+   },
+   {
+    "id": "808cc20e",
+    "narration": "¿Por qué ocurre? Casi siempre por tres motivos: hay mucha demanda, producir cuesta más, o circula demasiado dinero.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Causas habituales",
+      "items": [
+       "Más demanda",
+       "Producir cuesta más",
+       "Más dinero circulando"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "van",
+       "factory",
+       "banknote"
+      ]
+     }
+    }
+   },
+   {
+    "id": "13663f63",
+    "narration": "Un poco de inflación es normal. El problema llega cuando los precios suben más rápido que tus ingresos. Fíjate siempre en esa diferencia.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Importa si los precios suben más que tus ingresos.",
+      "emphasis": "más que tus ingresos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03357,
+ "seconds": 4.9
+}

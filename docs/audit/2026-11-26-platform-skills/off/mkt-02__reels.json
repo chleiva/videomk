@@ -1,0 +1,78 @@
+{
+ "id": "mkt-02",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A Note App That Keeps Up With Your Thoughts",
+  "description": "A 30-second launch video for a new note-taking app built to capture ideas the moment they appear. See how quick capture and simple search keep every thought easy to find.",
+  "beats": [
+   {
+    "id": "9f3a342c",
+    "narration": "Your best idea can slip away fast. Then it's gone. Meet the note app that catches thoughts before they disappear.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Catch every thought before it's gone.",
+      "emphasis": "before it's gone"
+     }
+    }
+   },
+   {
+    "id": "fe80cc97",
+    "narration": "Open it, type or speak, done. Getting started takes almost no effort.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Type"
+       },
+       {
+        "icon": "microphone",
+        "label": "Speak"
+       },
+       {
+        "icon": "check",
+        "label": "Saved"
+       }
+      ],
+      "title": "Capture fast"
+     }
+    }
+   },
+   {
+    "id": "6968dae6",
+    "narration": "Later, just search. Your ideas are easy to find again. Start writing today, and never lose a thought again.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Find it in seconds",
+      "items": [
+       "Write it",
+       "Search it",
+       "Keep it"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 64 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 6 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line",
+  "grounding: 3 beats had unsupported specifics, 3 rewritten"
+ ],
+ "cost_usd": 0.06469,
+ "seconds": 14.8
+}

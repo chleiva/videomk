@@ -1,0 +1,73 @@
+{
+ "id": "how-01",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "Learn the key steps to change a flat tire: park safely, loosen the nuts, jack up the car, and swap the wheel. A quick guide for any driver.",
+  "beats": [
+   {
+    "id": "fb416b52",
+    "narration": "A flat tire doesn't have to ruin your day. Park on flat, firm ground, turn on your hazards, and set the parking brake.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A flat tire is fixable in minutes.",
+      "emphasis": "fixable"
+     }
+    }
+   },
+   {
+    "id": "ec4ae5bf",
+    "narration": "Loosen the lug nuts first, while the wheel is on the ground. Then jack up the car and remove the nuts.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Before you lift",
+      "items": [
+       "Loosen lug nuts",
+       "Jack up the car",
+       "Remove the nuts"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "wrench",
+       "car",
+       "cog"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "88cef5d0",
+    "narration": "Swap on the spare, tighten the nuts by hand, lower the car, then tighten them again firmly. You're back on the road.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Finish up",
+      "items": [
+       "Mount the spare",
+       "Lower the car",
+       "Tighten firmly"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 66 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 8 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06401,
+ "seconds": 7.7
+}

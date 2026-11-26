@@ -1,0 +1,127 @@
+{
+ "id": "bio-03",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Taught Machines to Think",
+  "description": "A short profile of Alan Turing, the British mathematician who helped break wartime codes and asked whether machines can think. Learn why his ideas still shape every computer we use.",
+  "beats": [
+   {
+    "id": "7b3ed632",
+    "narration": "He helped end a war, invented the idea of the modern computer, and asked if machines could think. Yet Alan Turing was barely honored in his own lifetime. Who was he?",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "vintage mechanical code machine",
+      "alt": "Vintage code machine",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "90c9772e",
+    "narration": "Turing was a British mathematician. He imagined a simple abstract machine that could follow instructions to solve any problem that can be written as steps. That idea became the blueprint for computers.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Turing's big idea",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Instructions",
+        "icon": "file-text"
+       },
+       {
+        "id": "b",
+        "label": "Simple machine",
+        "icon": "cog"
+       },
+       {
+        "id": "c",
+        "label": "Any solvable problem",
+        "icon": "brain"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "read by"
+       ],
+       [
+        "b",
+        "c",
+        "solves"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "A mind built for puzzles"
+   },
+   {
+    "id": "f59ffc88",
+    "narration": "During the Second World War, he worked with a team of codebreakers in Britain. They cracked secret enemy messages, using clever mathematics and machines. Their work saved countless lives and is believed to have shortened the war.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "vintage typewriter close up",
+      "clip_queries": [
+       "vintage typewriter close up",
+       "old paper documents on desk"
+      ],
+      "alt": "old typewriter keys typing"
+     }
+    },
+    "chapter": "Breaking codes in wartime"
+   },
+   {
+    "id": "1cac707c",
+    "narration": "Later, he asked a bold question: can a machine think? He proposed a test, where a person chats with an unseen partner and tries to guess if it is human. People still debate it today.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Person",
+        "text": "Am I talking to a human or a machine?"
+       },
+       {
+        "speaker": "Unseen partner",
+        "text": "Why not ask me something and decide?"
+       }
+      ]
+     }
+    },
+    "chapter": "The question that lasts"
+   },
+   {
+    "id": "d0b53b4b",
+    "narration": "Turing's life ended too early, and he was treated unjustly by his own country. Today, we recognize him as a founder of computer science. Every phone in your pocket carries his idea.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Every computer you use carries Alan Turing's idea.",
+      "emphasis": "Alan Turing's idea"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 170 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 36 words: write 4 to 6 beats of at most 40 words each (you averaged 34), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words",
+  "grounding: 1 beats had unsupported specifics, 1 rewritten"
+ ],
+ "cost_usd": 0.07288,
+ "seconds": 15.9
+}

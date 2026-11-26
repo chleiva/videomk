@@ -1,0 +1,70 @@
+{
+ "id": "tec-01",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: Predicting the Next Word",
+  "description": "Large language models like ChatGPT are trained to predict the next word in a sentence. This short video explains how that one simple trick produces fluent answers.",
+  "beats": [
+   {
+    "id": "e0fb0cc1",
+    "narration": "ChatGPT doesn't really understand you. It just plays one game: guess the next word. Then it plays it again and again.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "60bf9000",
+    "narration": "It learned by reading huge amounts of text, noticing patterns. Given your question, it picks the most likely word, then the next.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it learns",
+      "items": [
+       "Reads huge text",
+       "Spots patterns",
+       "Picks likely words"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "book",
+       "search",
+       "star"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "403b855b",
+    "narration": "Those simple guesses, stacked together, become fluent answers. It sounds smart, but it is pattern prediction, so always check important facts.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Smart-sounding patterns still need fact-checking.",
+      "emphasis": "fact-checking"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 64 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 6 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06436,
+ "seconds": 7.6
+}

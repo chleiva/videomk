@@ -1,0 +1,197 @@
+{
+ "id": "sci-01",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Energy Always Spreads Out",
+  "description": "Entropy measures how spread out energy is and how uncertain a system's state is. Learn the second law of thermodynamics and Shannon's information entropy in two minutes.",
+  "beats": [
+   {
+    "id": "8db66a11",
+    "narration": "A hot coffee always cools down. It never heats itself back up. Why does time seem to run only one way? The answer is a idea called entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on table",
+      "alt": "hot drink steam close view"
+     }
+    },
+    "chapter": "The one-way street"
+   },
+   {
+    "id": "47eb8c83",
+    "narration": "Picture a drop of ink in water. It spreads until the whole glass is evenly tinted. It never gathers itself back into one drop.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "ink dropping in water",
+      "alt": "colored liquid spreading in glass"
+     }
+    }
+   },
+   {
+    "id": "8cc09f61",
+    "narration": "Entropy measures how spread out energy is. Low entropy means energy is concentrated in a few places. High entropy means energy is dispersed evenly.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Entropy and energy",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Concentrated energy",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Spreading out",
+        "icon": "wind"
+       },
+       {
+        "id": "c",
+        "label": "Even energy",
+        "icon": "cloud"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "time"
+       ],
+       [
+        "b",
+        "c",
+        "time"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "c021be71",
+    "narration": "This is the second law of thermodynamics. The entropy of an isolated system left alone cannot decrease with time.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The entropy of an isolated system cannot decrease.",
+      "emphasis": "cannot decrease"
+     }
+    },
+    "chapter": "The second law"
+   },
+   {
+    "id": "f5a51f57",
+    "narration": "So isolated systems drift toward equilibrium, the state where entropy is highest. A consequence is that certain processes are irreversible, like the cooling coffee.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Thermodynamic equilibrium",
+      "definition": "The state an isolated system evolves toward, where entropy is highest and energy is spread evenly."
+     }
+    }
+   },
+   {
+    "id": "ce48b176",
+    "narration": "There is a second way to see it. Count the arrangements. Many microstates look the same from far away, and spread out states have far more of them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "scattered playing cards on table",
+      "alt": "cards spread across a surface"
+     }
+    }
+   },
+   {
+    "id": "232d7c79",
+    "narration": "A tidy deck is one special arrangement. A shuffled deck could be almost any of countless others. Systems drift toward the likely, and likely means high entropy.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why disorder wins",
+      "items": [
+       "One tidy arrangement",
+       "Countless messy ones",
+       "Systems drift to likely",
+       "Likely means high entropy"
+      ],
+      "style": "spotlight",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "9b9d073e",
+    "narration": "In 1948, Claude Shannon used the same idea for communication. In his paper, entropy became the average uncertainty about a message's possible outcomes.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Entropy's two lives",
+      "events": [
+       {
+        "date": "Classical",
+        "label": "Thermodynamics: energy spreading"
+       },
+       {
+        "date": "Statistical",
+        "label": "Counting microstates"
+       },
+       {
+        "date": "1948",
+        "label": "Shannon: information entropy"
+       }
+      ]
+     }
+    },
+    "chapter": "Entropy as information"
+   },
+   {
+    "id": "441bc321",
+    "narration": "A coin flip with two equal outcomes is uncertain, so it carries one bit. A coin that always lands heads holds no surprise, so its entropy is zero.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "H(X) = - sum_{x} p(x) log p(x)",
+        "note": "Average uncertainty of X"
+       }
+      ],
+      "title": "Shannon entropy"
+     }
+    }
+   },
+   {
+    "id": "f11f8fe0",
+    "narration": "So in physics, energy spreads out. In information, outcomes are uncertain. Both describe the same drift toward the likely. Next time coffee cools, you are watching entropy rise.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "One idea, two fields",
+      "items": [
+       "Physics: energy spreads out",
+       "Information: outcomes are uncertain"
+      ],
+      "style": "cards",
+      "accent": "sky"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.14054,
+ "seconds": 35.8
+}

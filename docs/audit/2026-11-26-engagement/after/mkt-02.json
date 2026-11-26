@@ -1,0 +1,551 @@
+{
+ "id": "mkt-02",
+ "category": "marketing / product / business",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "launch video for a note-taking app",
+ "great": "Reasonable positioning even with missing details: avoids inventing specific features/numbers or flags them as placeholders; problem-solution-benefit arc, call to action.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:35:17",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "product-marketing"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 13,
+   "candidates": 13,
+   "checked": 13,
+   "flagged": 10,
+   "repaired": 2,
+   "unsupported": 10,
+   "common": 3,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 1
+  },
+  "scene_repair": null,
+  "notes_len": 5464,
+  "n_sources": 0,
+  "n_fetched": 6,
+  "fetched": [
+   "New product development",
+   "Living+",
+   "Marketing communications",
+   "Social video marketing",
+   "Tutorial",
+   "Concept video"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "grounding: 10 beats had unsupported specifics, 2 rewritten"
+ ],
+ "notes": "## New product development\nIn business and engineering, new product development (NPD) or simply product development is the complete process of bringing a new product to market. Product development also includes renewing an existing product and introducing a product into a new market. New product development is the realization of a market opportunity by making a product available for purchase. The products developed by a commercial organization provide the means to generate income. A central aspect of NPD is product design.\nMany technology-intensive organizations exploit technological innovation in a rapidly changing consumer market. A product can be a tangible asset or good or intangible services or user experiences. NPD requires an understanding of customer needs and wants, the competitive environment, and the nature of the market.\nCost, time, and quality are the main variables that drive customer needs. Aiming at these three variables, innovative companies develop continuous practices and strategies to better satisfy customer requirements and to increase their own market share by regular development of new products. There are many uncertainties and challenges which companies must face throughout the process.\n\n## Living+\n\"Living+\" is the sixth episode of the fourth season of the American satirical comedy-drama television series Succession, and the 35th episode overall. It was written by Georgia Pritchett and Will Arbery and directed by Lorene Scafaria, and originally aired on HBO on April 30, 2023.\nSuccession centers on the Roy family, the owners of global media and entertainment conglomerate Waystar RoyCo, and their fight for control of the company amidst uncertainty about the health of the family's patriarch Logan (Brian Cox), who has passed away by this point of the series. The episode sees the Roys preparing the launch of \"Living+\", Logan's unrealized initiative on Waystar's Investor Day, as the ambition of Kendall (Jeremy Strong) and the unresolved grief of Roman (Kieran Culkin) threaten to destabilize the company. The episode notably features Cox's first appearance since Logan's death three episodes prior in \"Connor's Wedding\", as Logan appears via videos he had recorded for the launch.\n“Living+\" received critical acclaim, with praise for the performances (especially from Strong, Sarah Snook and Matthew Macfadyen), direction, and satirical elements. The episode earned Primetime Emmy Award nominations...\n\n## Marketing communications\nMarketing communications (also known MC, marcom(s), marcomm(s) or just simply communications) refers to the combined use of different marketing channels and tools. Marketing communication channels focus on how businesses communicate a message to their desired market, or the greater market in general. It can also include the internal communications of the organization. Marketing communication tools include advertising, personal selling, direct marketing, sponsorship, communication, public relations, social media, customer journey, and promotion.\nMC are made up of the marketing mix which is made up of the 4 Ps (Price, Promotion, Place and Product), for a business selling goods, and made up of 7 Ps: Price, Promotion, Place, Product, People, Physical evidence and Process, for a service-based business.\n\n## Social video marketing\nSocial video marketing is a component of an integrated marketing communications plan designed to increase audience engagement through social activity around a given video. In a successful social video marketing campaign, the content, distribution strategy and consumer self-expression tools combine to allow an individual to “add their voice” or co-create value to a piece of content - then further disseminate it out to their social acquaintances. Social video typically benefits from a halo effect cast by the \"influencers” of a given social grouping. Social video marketing draws on consumer-culture theory, economic theory, and social theory around the psychology of sharing. Social video marketing differs from social marketing, which has the intent of influencing behavior for a social good.\nMedia publishers and content rights holders create social videos from TV, live video feeds and pre-recorded content in order to generate engagement on social platforms and drive media distribution. They use real-time video editing software to instantly create and share social videos in native formats such as vertical video for Snapchat and square video for Instagram. YouTube stands out as a paramount...\n\n## Tutorial\nIn education, a tutorial is a method of transferring knowledge and may be used as a part of a learning process. More interactive and specific than a book or a lecture, a tutorial seeks to teach by example and supply the information to complete a certain task.\nA tutorial can be taken in many forms, ranging from a set of instructions to complete a task to an interactive problem solving session (usually in academia).\n\n## Concept video\nA concept video, also known as an \"explainer video\", is a marketing tool used to promote, describe and explain technological services (such as consulting), or products (such as apps), to individual consumers and other businesses (i.e. business to business). They may be released as part of a social media campaign, or used exclusively between the buyer and seller of the product. Concept videos may be developed in-house by the producer of the product, or by a third-party marketing company.",
+ "plan": {
+  "title": "A Note-Taking App to Capture Fast and Find Instantly",
+  "description": "Launch video for a note-taking app built on one promise: capture a thought in seconds and find it again instantly. See how quick capture, linked notes, search and sync keep your ideas on every device.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "b7055bf5",
+    "narration": "Right now, a great idea is slipping away. It is on a sticky note, a napkin, or a half-forgotten text to yourself. Somewhere, you know you wrote it down. You just cannot find it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands writing sticky notes desk",
+      "alt": "person scribbling notes on paper"
+     }
+    },
+    "chapter": "The problem"
+   },
+   {
+    "id": "ae186ad0",
+    "narration": "Notes are easy to write. They are hard to find again. That gap is the problem we built this app to close, and it starts with one simple promise: capture fast, find instantly.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Capture fast. Find instantly.",
+      "subtitle": "The note-taking app that gives your ideas a home"
+     }
+    }
+   },
+   {
+    "id": "c9c21bf3",
+    "narration": "Think about your day. A meeting runs long. A lecture moves fast. An idea hits on the train. Every one of those moments needs a place to land, in seconds, not minutes.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "business meeting around table",
+      "clip_queries": [
+       "business meeting around table",
+       "students in lecture hall",
+       "commuter on train"
+      ],
+      "alt": "people in office meeting"
+     }
+    }
+   },
+   {
+    "id": "330ff1c9",
+    "narration": "Here is how it works. You capture a thought by typing, speaking, or snapping a photo. The app files it. Then search brings it back, on any device you own.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From thought to found",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Capture",
+        "icon": "pen"
+       },
+       {
+        "id": "b",
+        "label": "File",
+        "icon": "folder"
+       },
+       {
+        "id": "c",
+        "label": "Search",
+        "icon": "search"
+       },
+       {
+        "id": "d",
+        "label": "Any device",
+        "icon": "phone"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 0
+     }
+    },
+    "sfx": "whoosh",
+    "chapter": "How it works"
+   },
+   {
+    "id": "ba442662",
+    "narration": "First, open the app and start typing. There is no setup and no folder to pick. Second, add a tag or link to another note. Third, move on. The app remembers where everything lives.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three steps to a saved idea",
+      "steps": [
+       {
+        "label": "Start typing",
+        "detail": "No setup, no folder to pick"
+       },
+       {
+        "label": "Tag or link",
+        "detail": "Connect it to another note"
+       },
+       {
+        "label": "Move on",
+        "detail": "The app remembers where it lives"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "96711a54",
+    "narration": "Writing should feel like thinking out loud. The screen is clean, the keys respond instantly, and nothing stands between you and the next sentence. Focus stays where it belongs, on the idea.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "alt": "hands typing on keyboard in cafe"
+     }
+    }
+   },
+   {
+    "id": "44ff9c9a",
+    "narration": "Four things make it work. Quick capture gets the thought down. Linked notes connect ideas to each other. Instant search finds any word. And sync keeps every device up to date.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Four things that matter",
+      "items": [
+       "Quick capture",
+       "Linked notes",
+       "Instant search",
+       "Sync everywhere"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "pen",
+       "link",
+       "search",
+       "cloud"
+      ]
+     }
+    },
+    "chapter": "What makes it work"
+   },
+   {
+    "id": "916f6947",
+    "narration": "Compare it with paper. Finding a note means digging through pages, or typing a word. Linking ideas means rewriting, or one tap. Paper stays at home, while the app comes with you.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Paper pile",
+       "tagline": "Pages and sticky notes"
+      },
+      "b": {
+       "name": "The app",
+       "tagline": "One searchable place"
+      },
+      "rows": [
+       {
+        "label": "Finding a note",
+        "a": "Dig through pages",
+        "b": "Type a word"
+       },
+       {
+        "label": "Linking ideas",
+        "a": "Rewrite by hand",
+        "b": "One tap"
+       },
+       {
+        "label": "On the go",
+        "a": "Left at home",
+        "b": "On every device"
+       }
+      ],
+      "verdict": "Same thoughts, found in seconds",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "d58ec8c1",
+    "narration": "Your notes go where you go. On a phone in line for coffee, on a tablet in class, on a laptop at your desk. The same page, always current, never a copy you have to merge.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person using phone in cafe",
+      "clip_queries": [
+       "person using phone in cafe",
+       "student with tablet in classroom",
+       "laptop on office desk"
+      ],
+      "alt": "smartphone in hand at coffee shop"
+     }
+    }
+   },
+   {
+    "id": "63ad2a60",
+    "narration": "Who is it for? Students who need lecture notes they can actually review. Professionals who live in meetings. Creators who collect scraps of inspiration all week.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Made for people who think",
+      "items": [
+       "Students",
+       "Professionals",
+       "Creators"
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    },
+    "chapter": "Who it is for"
+   },
+   {
+    "id": "40971074",
+    "narration": "A good note app earns its place slowly. After a week, you have a few pages. After a month, a web of linked ideas. After a year, a second memory you can search in a blink.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Your notes, over time",
+      "events": [
+       {
+        "date": "1 week",
+        "label": "A few pages"
+       },
+       {
+        "date": "1 month",
+        "label": "A web of linked ideas"
+       },
+       {
+        "date": "1 year",
+        "label": "A searchable second memory"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "d6183981",
+    "narration": "Today the app is ready for you to try. Start with one thought, the one you are about to forget.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "woman using smartphone outdoors",
+      "alt": "person smiling at phone in park"
+     }
+    },
+    "chapter": "Start today"
+   },
+   {
+    "id": "d64a65c5",
+    "narration": "Your ideas deserve better than a sticky note. Start the moment you write your first line.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Your ideas deserve better than a sticky note. Capture fast. Find instantly.",
+      "emphasis": "Find instantly"
+     }
+    }
+   }
+  ],
+  "sources": [],
+  "skills": [
+   "product-marketing"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 72.5,
+  "before_first_script_call_s": 6.3,
+  "script_s": 66.3
+ },
+ "cost": {
+  "script_small": 0.00194,
+  "script_big": 0.14315,
+  "search_api": 0.0,
+  "total": 0.14509
+ },
+ "calls": {
+  "small": 5,
+  "big": 2
+ },
+ "tokens": {
+  "in": 34458,
+  "out": 11299
+ },
+ "rules": {
+  "length": {
+   "words": 393,
+   "expected_words": 402,
+   "ratio": 0.978,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 176.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 35,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 16,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Right now, a great idea is slipping away. It is on a sticky note, a napkin, or a half-forgotten text to yourself. Somewhere, you know you wrote it down. You just cannot find it.",
+   "close_text": "Your ideas deserve better than a sticky note. Start the moment you write your first line."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "clip": 5,
+    "title": 1,
+    "diagram": 1,
+    "steps": 1,
+    "bullets": 2,
+    "versus": 1,
+    "timeline": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.65,
+   "top_type": "clip",
+   "top_share": 0.38,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "other": 1
+  },
+  "sources": {
+   "cited": 0,
+   "fetched": 6,
+   "notes_len": 5464,
+   "flag_thin_notes": false,
+   "flag_no_sources": true,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "no_sources_cited"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "The script invents no specific numbers, but it implies features (voice and photo capture, linking, sync everywhere) as fact without flagging them as placeholders."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has a problem-solution-benefit arc and a CTA, but the content is generic with no named app, no differentiator, and no concrete proof or example."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chapters run problem, how it works, features, audience, CTA. Beats 4, 5 and 7 overlap, since the same capture-file-search-sync features are listed three times."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "\"Right now, a great idea is slipping away\" is a strong hook. The ending returns to the sticky note, but the CTA is vague, with no download or where-to-get-it."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is warm, confident and suited to a consumer launch video."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well (clips, diagram, steps, versus, timeline). The query for beat 6, a person typing in a cafe, is fine. The versus and timeline scenes are text-only, and the timeline looks like data but is just illustrative."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "Phrases like \"second memory\", \"Capture fast. Find instantly.\" and \"Made for people who think\" are stock marketing language. There are no surprising specifics."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is a launch video in English at a fitting length (about 370 words). It has no app name or placeholder markers, and the request said details were missing."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is fluent, but the beat 8 narration reads awkwardly: \"Finding a note means digging through pages, or typing a word.\""
+   }
+  },
+  "defects": [
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "Finding a note means digging through pages, or typing a word.",
+    "issue": "The paper-versus-app contrast is garbled when spoken, because the two sides are not labelled.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Four things make it work. Quick capture gets the thought down.",
+    "issue": "This repeats the capture, search and sync points already made in beats 4, 5 and 9.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "You capture a thought by typing, speaking, or snapping a photo.",
+    "issue": "These specific features are asserted with no source and no placeholder flag.",
+    "beat": 4
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "Today the app is ready for you to try.",
+    "issue": "The CTA is vague, with no app name, platform or download direction.",
+    "beat": 12
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "After a year, a second memory you can search in a blink.",
+    "issue": "This is a cliché, and the timeline shows invented milestones as if they were data.",
+    "beat": 11
+   }
+  ],
+  "missing": [
+   "App name and a concrete differentiator",
+   "Placeholders or flags for unconfirmed features, pricing and platforms",
+   "A specific CTA (download, free trial, platform)",
+   "A concrete user story or demo moment",
+   "Mention of privacy or offline use"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, well-paced problem-solution launch script with a good hook and varied visuals. It stays generic, repeats its feature list, has no app name, and never flags its feature claims as placeholders.",
+  "mean": 3.67,
+  "cost_usd": 0.02209,
+  "tokens": [
+   5205,
+   1168
+  ]
+ }
+}

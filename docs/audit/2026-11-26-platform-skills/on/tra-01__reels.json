@@ -1,0 +1,71 @@
+{
+ "id": "tra-01",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A quick guide to spending three days in Lisbon, from hilltop views and old trams to custard tarts and fresh seafood. Save it for your next trip.",
+  "beats": [
+   {
+    "id": "92e20585",
+    "narration": "Three days in Lisbon, and the whole city fits on seven hills. Start on day one with yellow trams and sunset views.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram in old city street",
+      "clip_queries": [
+       "yellow tram in old city street",
+       "city rooftops at sunset"
+      ],
+      "alt": "vintage tram climbing narrow street"
+     }
+    }
+   },
+   {
+    "id": "8d7378dc",
+    "narration": "Day two, wander the old riverside and historic neighborhoods. Stop for a warm custard tart with coffee. Simple, flaky, perfect.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lisbon must-eats",
+      "items": [
+       "Custard tarts",
+       "Grilled sardines",
+       "Fresh seafood"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "utensils",
+       "fish",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "45929384",
+    "narration": "Day three, eat grilled fish by the water, then walk slowly. Lisbon rewards anyone who takes their time.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lisbon rewards the slow traveler.",
+      "emphasis": "slow"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06668,
+ "seconds": 9.3
+}

@@ -1,0 +1,36 @@
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=58
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=58
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=58
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=7
+already spent in saved results: $0.000 (cap $4.5)
+[1/12] sci-01   ok         run $0.090   running total $0.225   39s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=3 sources=12
+[2/12] sci-02   ok         run $0.174   running total $0.558   71s
+[3/12] how-02   ok         run $0.183   running total $0.678   88s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=33
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=9
+[4/12] his-03   ok         run $0.206   running total $0.896   110s
+[5/12] fin-02   ok         run $0.102   running total $0.979   113s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=7
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=8
+[6/12] cmp-03   ok         run $0.100   running total $1.207   142s
+[7/12] tec-01   ok         run $0.186   running total $1.356   153s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=29
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=3 checked=3
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=7
+[8/12] bio-03   ok         run $0.165   running total $1.503   168s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=3 sources=6
+[9/12] kid-01   ok         run $0.067   running total $1.595   182s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+WARNING:root:SCENE_REPAIR rejected=1 repaired=1
+[10/12] tri-03   ok         run $0.095   running total $1.905   212s
+WARNING:root:GROUNDING flagged=10 repaired=2 candidates=13 checked=13
+[11/12] mkt-02   ok         run $0.145   running total $2.002   223s
+[12/12] opi-02   ok         run $0.176   running total $2.031   229s
+
+DONE. total spent $2.031 of $4.5

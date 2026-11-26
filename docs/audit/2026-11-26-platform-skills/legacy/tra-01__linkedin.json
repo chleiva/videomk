@@ -1,0 +1,94 @@
+{
+ "id": "tra-01",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A quick plan for three days in Lisbon, from hilltop viewpoints and old tram streets to the riverside and the city's best-loved foods. Know where to go each day and what to taste.",
+  "beats": [
+   {
+    "id": "7b69e5ce",
+    "narration": "Lisbon is a city of hills, yellow trams and the smell of grilled fish. Spend day one in the old quarters. Wander Alfama's narrow lanes, then climb to a viewpoint for red rooftops and the river.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram old town street",
+      "clip_queries": [
+       "yellow tram old town street",
+       "red rooftops city viewpoint"
+      ],
+      "alt": "historic tram in narrow city street"
+     }
+    },
+    "chapter": "Day one: the old hills"
+   },
+   {
+    "id": "0b579757",
+    "narration": "On day two, head to the riverside. Walk past the grand monasteries and the waterfront towers in Belem. Then try the famous custard tarts, still warm, with a strong coffee.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Belem Tower Lisbon",
+       "Jeronimos Monastery Lisbon",
+       "Pastel de nata custard tart"
+      ],
+      "alt": "Belem landmarks and custard tarts"
+     }
+    },
+    "chapter": "Day two: river and monuments"
+   },
+   {
+    "id": "4d75db3d",
+    "narration": "Day three is for eating slowly. Grab small plates at a lively market hall, order grilled sardines or salt cod, and finish the evening with live fado music in a tiny tavern.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "busy food market hall",
+      "clip_queries": [
+       "busy food market hall",
+       "grilled fish on a grill",
+       "musician playing guitar at night"
+      ],
+      "alt": "people eating at market stalls"
+     }
+    },
+    "chapter": "Day three: food and music"
+   },
+   {
+    "id": "5d5b9aab",
+    "narration": "Tips: wear comfortable shoes, because those hills are steep. Ride the tram or take taxis for the climbs. Keep each day simple, and leave time to simply sit and enjoy the view.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lisbon in three days",
+      "items": [
+       "Day 1: Alfama and viewpoints",
+       "Day 2: Belem and tarts",
+       "Day 3: Markets and fado"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "castle",
+       "music"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.0679,
+ "seconds": 15.6
+}

@@ -3,7 +3,7 @@ id: recap-summary
 name: Recap and summary
 pick: Summaries of a book, article, report, paper, event or topic; 'key takeaways', 'summarise', 'tl;dr', study notes.
 ---
-- Open with the single claim or purpose of the source in one sentence, then the three to five ideas that matter, ordered by importance, not by page order.
+- Open with the source's most surprising claim or its single purpose in one sentence, then the three to five ideas that matter, ordered by importance, not by page order.
 - Attribute clearly: say what the source claims, and keep your own commentary out unless asked. Separate the author's claims from the evidence offered.
 - Each idea gets: the claim, one reason or example from the source, and what it means in practice.
 - Be exact with names, dates and figures from the notes; flag where the source is unsure or contested.

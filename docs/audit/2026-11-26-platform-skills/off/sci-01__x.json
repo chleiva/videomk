@@ -1,0 +1,74 @@
+{
+ "id": "sci-01",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Hot Coffee Never Heats Itself Back Up",
+  "description": "Entropy measures how spread out energy is in a system, and the second law says it never decreases in an isolated system. This is why some processes are irreversible.",
+  "beats": [
+   {
+    "id": "62a199cf",
+    "narration": "Why does hot coffee never heat itself back up? The answer is entropy, and it explains why time only runs one way.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Why can't coffee reheat itself?",
+      "emphasis": "reheat itself"
+     }
+    }
+   },
+   {
+    "id": "016ce869",
+    "narration": "Entropy measures how spread out energy is. Low entropy means energy is concentrated in one spot. High entropy means it is dispersed evenly.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy: energy spread",
+      "items": [
+       "Low: concentrated",
+       "High: dispersed"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "0d13ab54",
+    "narration": "The second law of thermodynamics says an isolated system never loses entropy. Energy spreads out until it reaches equilibrium, where entropy is highest.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Second law",
+      "definition": "The entropy of an isolated system left alone cannot decrease with time.",
+      "example": "Systems drift toward equilibrium."
+     }
+    }
+   },
+   {
+    "id": "1cb690b6",
+    "narration": "That makes some processes irreversible. Coffee cools, but never reheats itself. So whenever energy spreads out, you are watching entropy rise.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Energy spreads out. It never gathers itself back.",
+      "emphasis": "never"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03484,
+ "seconds": 5.3
+}

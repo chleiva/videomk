@@ -1,0 +1,77 @@
+{
+ "id": "his-03",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The 2008 financial crisis began with a US housing boom, risky subprime mortgages and securitization, then peaked with Lehman Brothers' collapse. Here is the story in 30 seconds, including the government response.",
+  "beats": [
+   {
+    "id": "b204cf24",
+    "narration": "Banks handed mortgages to people who couldn't repay them, then sold those loans as safe investments. That's how the world broke.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "alt": "row of homes in a neighborhood"
+     }
+    }
+   },
+   {
+    "id": "427ddfd7",
+    "narration": "Housing boomed. Subprime loans spread, and banks bundled them into securities rated safe. When prices fell, borrowers defaulted and those securities collapsed.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The chain reaction",
+      "items": [
+       "Housing boom",
+       "Subprime loans",
+       "Bundled securities"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "4fa80c49",
+    "narration": "In September 2008, Lehman Brothers went bankrupt. Markets crashed worldwide.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "Sept 2008",
+      "label": "Lehman Brothers collapses"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "1af5e90e",
+    "narration": "Government stepped in with bailouts like TARP. Lesson: when everyone ignores the risk, everyone pays.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "When everyone ignores the risk, everyone pays.",
+      "emphasis": "everyone pays"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 68 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 10 words: 3 to 4 beats of about 19 words each (you averaged 17; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.07098,
+ "seconds": 9.9
+}

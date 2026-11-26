@@ -1,0 +1,68 @@
+{
+ "id": "how-01",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire in Three Moves",
+  "description": "A quick guide to changing a flat tire safely. Learn the key steps: park safe, loosen and lift, then swap the wheel.",
+  "beats": [
+   {
+    "id": "e682ba7c",
+    "narration": "A flat tire can strand you anywhere. Good news: you can fix it in minutes. First, park on flat, solid ground and stay safe.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Flat tire? Fix it fast",
+      "subtitle": "Park safe on flat ground"
+     }
+    },
+    "chapter": "Change a flat"
+   },
+   {
+    "id": "03456348",
+    "narration": "Loosen the lug nuts slightly, then lift the car with the jack. Remove the nuts and pull the flat wheel off.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Loosen and lift",
+      "steps": [
+       {
+        "label": "Loosen lug nuts"
+       },
+       {
+        "label": "Jack up the car"
+       },
+       {
+        "label": "Remove the wheel"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f13bfabe",
+    "narration": "Mount the spare, tighten the nuts by hand, lower the car, then tighten them fully. Remember to get the flat checked.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Spare on, nuts tight, flat repaired.",
+      "emphasis": "Spare on"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 66 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 8 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06563,
+ "seconds": 9.4
+}

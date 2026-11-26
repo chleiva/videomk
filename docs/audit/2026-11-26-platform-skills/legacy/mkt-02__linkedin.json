@@ -1,0 +1,97 @@
+{
+ "id": "mkt-02",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Meet the note app that keeps up with your thoughts",
+  "description": "A one-minute launch video for a new note-taking app, built for people whose ideas get lost across apps, paper and screenshots. It shows the problem, the idea, how it works in three steps and how to start.",
+  "beats": [
+   {
+    "id": "6dfea651",
+    "narration": "You had a great idea this morning. Where is it now? Scribbled on a sticky note, buried in a screenshot, lost in a chat with yourself. Good thoughts shouldn't be this hard to find again.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "messy desk with sticky notes",
+      "clip_queries": [
+       "messy desk with sticky notes",
+       "person scrolling phone at desk",
+       "hands writing in notebook"
+      ],
+      "alt": "cluttered workspace with papers and notes"
+     }
+    },
+    "chapter": "The problem"
+   },
+   {
+    "id": "69ce8ee6",
+    "narration": "So we built a place where every thought has a home. Write it, speak it or paste it in. It lands in one calm, clean space, ready whenever you need it.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One calm place for every thought you have.",
+      "emphasis": "every thought"
+     }
+    },
+    "chapter": "The idea"
+   },
+   {
+    "id": "03814a68",
+    "narration": "It takes three simple steps. First, capture. Jot down your thoughts as they come. Second, organize. Keep your notes in order. Third, revisit. Come back to them whenever you need them.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three steps",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Jot anything down in seconds"
+       },
+       {
+        "label": "Organize",
+        "detail": "Tags, folders and search"
+       },
+       {
+        "label": "Revisit",
+        "detail": "Synced on every device"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "ecda55c2",
+    "narration": "Imagine opening one app and finding exactly what you were thinking last week. Less hunting, more doing. That is what a good note should feel like. Download the app today, and give your ideas somewhere to stay.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your ideas, kept",
+      "items": [
+       "Capture fast",
+       "Find instantly",
+       "Download today"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    },
+    "chapter": "Start today"
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "grounding: 2 beats had unsupported specifics, 1 rewritten"
+ ],
+ "cost_usd": 0.03241,
+ "seconds": 11.6
+}

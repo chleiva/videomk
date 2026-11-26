@@ -1,0 +1,92 @@
+{
+ "id": "his-03",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The 2008 financial crisis grew out of the US housing boom, subprime mortgages and securitization. It peaked with the fall of Lehman Brothers and a sweeping government response.",
+  "beats": [
+   {
+    "id": "22641299",
+    "narration": "A bet on American homes nearly broke the world economy. Prices kept rising, so banks handed mortgages to almost anyone, even buyers who couldn't really afford them.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A bet on homes nearly broke the world.",
+      "emphasis": "nearly broke the world"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "3ba27d42",
+    "narration": "Those risky subprime loans were bundled together and sold to investors as supposedly safe securities. This was securitization. Lenders passed the risk along, so nobody cared who could repay.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How the risk spread",
+      "items": [
+       "Subprime loans",
+       "Bundled into securities",
+       "Risk sold on"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "house",
+       "package",
+       "banknote"
+      ]
+     }
+    },
+    "sfx": "whoosh",
+    "speaker": "narrator"
+   },
+   {
+    "id": "8beb4b09",
+    "narration": "Then home prices fell. Borrowers defaulted, and those securities lost value. Banks holding them panicked, and in September 2008, Lehman Brothers collapsed.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Prices fell. Lehman Brothers collapsed.",
+      "emphasis": "Lehman Brothers"
+     }
+    },
+    "sfx": "impact",
+    "speaker": "narrator"
+   },
+   {
+    "id": "93d9cbf6",
+    "narration": "Credit froze worldwide. Governments stepped in, rescuing banks, cutting interest rates and spending heavily. The lesson: when everyone ignores risk, the whole system pays.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The government response",
+      "items": [
+       "Bank rescues",
+       "Lower interest rates",
+       "Heavy spending"
+      ],
+      "style": "spotlight",
+      "accent": "sky",
+      "emphasis": 0
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 102 words in 4 beats but a 45-second video needs about 89 (between 80 and 89). Cut about 13 words: 4 to 5 beats of about 22 words each (you averaged 25; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.0699,
+ "seconds": 11.2
+}

@@ -1,0 +1,236 @@
+{
+ "id": "his-03",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The story of the 2008 financial crisis, from the US housing boom to subprime mortgages, securitization, the fall of Lehman Brothers and the government response. A clear explanation of how a housing bubble nearly broke the global financial system.",
+  "beats": [
+   {
+    "id": "0d75d07c",
+    "narration": "A bet on ordinary American homes nearly broke the world economy. How did something as safe as a house become the spark for a global crisis?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "alt": "neighborhood of homes from above"
+     }
+    },
+    "chapter": "The boom"
+   },
+   {
+    "id": "1b3ec4e1",
+    "narration": "It began with a housing boom. Interest rates were low, and prices kept climbing. Buying a home felt like a sure thing, so more and more people wanted in.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "new houses under construction",
+      "clip_queries": [
+       "new houses under construction",
+       "real estate sign in front yard"
+      ],
+      "alt": "home building construction site"
+     }
+    }
+   },
+   {
+    "id": "acc94be6",
+    "narration": "Lenders wanted to keep the boom going. So they offered subprime mortgages: loans to borrowers with weak credit, often with little checking and low starting payments.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Subprime mortgages",
+      "items": [
+       "Weak credit borrowers",
+       "Little checking",
+       "Low starting payments"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "home",
+       "search",
+       "banknote"
+      ]
+     }
+    },
+    "chapter": "The risky loans"
+   },
+   {
+    "id": "c8ff2aa5",
+    "narration": "Lenders did not worry much about repayment. Why? Because they did not plan to keep the loans. They sold them on to Wall Street.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Who holds the risk?",
+      "nodes": [
+       {
+        "id": "b",
+        "label": "Borrower",
+        "icon": "home"
+       },
+       {
+        "id": "l",
+        "label": "Lender",
+        "icon": "banknote"
+       },
+       {
+        "id": "w",
+        "label": "Wall Street",
+        "icon": "building"
+       }
+      ],
+      "edges": [
+       [
+        "b",
+        "l",
+        "pays loan"
+       ],
+       [
+        "l",
+        "w",
+        "sells loan"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "7b7791c5",
+    "narration": "There, banks bundled thousands of loans together and sliced them into securities. Investors around the world bought them. This is called securitization, and it spread the risk everywhere.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Securitization",
+      "nodes": [
+       {
+        "id": "m",
+        "label": "Mortgages",
+        "icon": "home"
+       },
+       {
+        "id": "p",
+        "label": "Bundled together",
+        "icon": "box"
+       },
+       {
+        "id": "s",
+        "label": "Securities",
+        "icon": "file-text"
+       },
+       {
+        "id": "i",
+        "label": "Global investors",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "m",
+        "p"
+       ],
+       [
+        "p",
+        "s",
+        "sliced"
+       ],
+       [
+        "s",
+        "i",
+        "sold"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    },
+    "chapter": "Securitization"
+   },
+   {
+    "id": "f43af7fe",
+    "narration": "Rating agencies called many of these securities safe. Banks borrowed heavily to buy more of them. Everyone assumed house prices would never fall.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Everyone assumed house prices would never fall.",
+      "emphasis": "never fall"
+     }
+    }
+   },
+   {
+    "id": "7372e0e5",
+    "narration": "But prices did fall. Borrowers could not pay, and defaults rose. The securities lost value, and nobody knew which banks were holding the damage.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "foreclosure sign on house",
+      "clip_queries": [
+       "foreclosure sign on house",
+       "stock market traders worried"
+      ],
+      "alt": "empty house for sale sign"
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "d96d2d3b",
+    "narration": "Then came Lehman Brothers, a major investment bank, which collapsed in September 2008. Panic spread. Banks stopped trusting each other, and lending froze.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Wall Street New York stock exchange",
+      "alt": "Wall Street financial district",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "7d7afd59",
+    "narration": "Governments stepped in. The US rescued banks and insurers with public money, and the central bank cut interest rates and pumped in cash to keep credit flowing.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "The government response",
+      "steps": [
+       {
+        "label": "Rescue banks and insurers"
+       },
+       {
+        "label": "Cut interest rates"
+       },
+       {
+        "label": "Pump in cash"
+       }
+      ]
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "518acd5d",
+    "narration": "The system survived, but millions lost jobs and homes. The lesson is simple: when risk is hidden and everyone shares the same bet, one weak spot can bring down everything.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hidden risk, shared by everyone, can break everything.",
+      "emphasis": "Hidden risk"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.08877,
+ "seconds": 23.8
+}

@@ -1,0 +1,226 @@
+{
+ "id": "his-03",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It shows how many small risks added up to a global shock.",
+  "beats": [
+   {
+    "id": "8ba55100",
+    "narration": "Imagine a world where almost anyone could buy a house, even without proof of income. For a while, it felt like free money. Then it all came crashing down.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "clip_queries": [
+       "suburban houses aerial view",
+       "for sale sign in front of house",
+       "construction workers building new homes"
+      ],
+      "alt": "neighborhood of homes from above"
+     }
+    },
+    "chapter": "The boom"
+   },
+   {
+    "id": "3842daf3",
+    "narration": "In the early two thousands, US home prices kept rising. Families believed a house was a safe bet, and banks competed to lend. Everyone assumed prices would never fall.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The housing boom",
+      "items": [
+       "Home prices rising",
+       "Banks competing to lend",
+       "Belief: prices never fall"
+      ],
+      "style": "rail",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "76f5f382",
+    "narration": "To keep lending, banks turned to subprime mortgages: loans to borrowers with weak credit. Many had low starting payments that jumped later. They worked only if home prices kept climbing.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Subprime mortgage",
+      "definition": "A home loan made to a borrower with a weak credit history, usually at higher risk and higher cost."
+     }
+    },
+    "chapter": "The risky loans"
+   },
+   {
+    "id": "502a05a1",
+    "narration": "Then came securitization. Banks bundled thousands of loans together, sliced them into securities, and sold them to investors around the world. Lenders no longer kept the risk themselves.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Securitization",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Mortgages",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Bundled securities",
+        "icon": "box"
+       },
+       {
+        "id": "c",
+        "label": "Investors worldwide",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "bundled"
+       ],
+       [
+        "b",
+        "c",
+        "sold"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "b7c3a42b",
+    "narration": "Because the risk was spread out and hidden, nobody checked the loans closely. Ratings agencies stamped many securities as safe. Banks borrowed heavily to buy more of them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "stock traders on trading floor",
+      "clip_queries": [
+       "stock traders on trading floor",
+       "bank office workers at desks"
+      ],
+      "alt": "busy trading floor with screens"
+     }
+    }
+   },
+   {
+    "id": "4f471c71",
+    "narration": "Then the bubble burst. Home prices fall, so borrowers cannot refinance. Defaults rise, and securities built on those loans lose value. Banks holding them face huge losses.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The chain reaction",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Home prices fall",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Defaults rise",
+        "icon": "triangle-alert"
+       },
+       {
+        "id": "c",
+        "label": "Bank losses",
+        "icon": "landmark"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "01a4ec65",
+    "narration": "In September 2008, Lehman Brothers, a major investment bank, collapsed. Fear spread instantly. Banks stopped trusting each other, lending froze, and the crisis became global.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Lehman Brothers headquarters building",
+      "alt": "Lehman Brothers headquarters",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "5f81e3c5",
+    "narration": "Governments stepped in. The Federal Reserve cut interest rates and lent to banks. The US Treasury rescued institutions and injected money, to stop the panic and keep credit flowing.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Federal Reserve building Washington",
+       "US Treasury building"
+      ],
+      "alt": "Federal Reserve and US Treasury buildings"
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "59424d53",
+    "narration": "The rescue prevented a deeper collapse, but the recession still cost millions of people their jobs and homes. Trust in banks took years to recover.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "closed shops on street",
+      "clip_queries": [
+       "closed shops on street",
+       "person walking past foreclosure sign"
+      ],
+      "alt": "closed storefronts in a city"
+     }
+    }
+   },
+   {
+    "id": "31902cd0",
+    "narration": "So what caused it? Subprime lending put weak loans in the system. Securitization hid risk across the world. And panic after Lehman turned losses into a global freeze.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What really caused it",
+      "items": [
+       "Subprime lending",
+       "Securitization hid risk",
+       "Panic after Lehman"
+      ],
+      "style": "spotlight",
+      "accent": "indigo"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.08368,
+ "seconds": 24.7
+}

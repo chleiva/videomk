@@ -1,0 +1,132 @@
+{
+ "id": "sci-01",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: why a hot coffee never reheats itself",
+  "description": "Entropy measures how spread out energy is, and why the second law makes some processes irreversible. The same idea, in Claude Shannon's information theory, measures uncertainty.",
+  "beats": [
+   {
+    "id": "d75e3839",
+    "narration": "Why does a hot coffee always cool down, but never heats itself back up? The answer is one idea: entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on table",
+      "alt": "hot coffee cooling in a mug"
+     }
+    }
+   },
+   {
+    "id": "40511807",
+    "narration": "Entropy measures how spread out energy is. Low entropy means energy is concentrated in one place. High entropy means it is dispersed evenly. Left alone, energy spreads out.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Low entropy",
+       "tagline": "Energy concentrated"
+      },
+      "b": {
+       "name": "High entropy",
+       "tagline": "Energy dispersed"
+      },
+      "rows": [
+       {
+        "label": "Energy",
+        "a": "Uneven",
+        "b": "Even"
+       },
+       {
+        "label": "Example",
+        "a": "Hot coffee",
+        "b": "Room-temperature coffee"
+       }
+      ]
+     }
+    },
+    "chapter": "Energy spreads out"
+   },
+   {
+    "id": "0fb28193",
+    "narration": "This is the second law of thermodynamics. The entropy of an isolated system cannot decrease with time. So systems drift toward equilibrium, where entropy is highest. That is why some processes are irreversible.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The second law",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Isolated system",
+        "icon": "box"
+       },
+       {
+        "id": "b",
+        "label": "Entropy never decreases",
+        "icon": "log-in"
+       },
+       {
+        "id": "c",
+        "label": "Equilibrium",
+        "icon": "scale"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c",
+        "highest entropy"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "5bfb4dfd",
+    "narration": "Entropy also measures uncertainty. In 1948, Claude Shannon used it to describe information. The more unpredictable a message, the more information it carries. It is measured in bits.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "H(X) = - sum_{x} p(x) log p(x)",
+        "note": "Average uncertainty, in bits with log base 2"
+       }
+      ],
+      "title": "Shannon entropy"
+     }
+    },
+    "chapter": "Entropy as information"
+   },
+   {
+    "id": "1a1349b3",
+    "narration": "Entropy is how many ways things can be arranged, and nature drifts toward the most likely arrangement. Hot coffee cools because spread-out energy is overwhelmingly more probable.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Nature drifts toward the most likely arrangement.",
+      "emphasis": "most likely"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07902,
+ "seconds": 14.0
+}

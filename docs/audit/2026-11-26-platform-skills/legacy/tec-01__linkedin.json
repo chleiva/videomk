@@ -1,0 +1,131 @@
+{
+ "id": "tec-01",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: Predicting the Next Word",
+  "description": "Large language models like ChatGPT generate answers by predicting one word piece at a time. This video explains training, prediction and why the results can sound right yet be wrong.",
+  "beats": [
+   {
+    "id": "0f839395",
+    "narration": "ChatGPT does not look up answers. It does something stranger. It guesses the next word, over and over. So how can a simple guessing game write essays, code and poems?",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word. Again and again.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "7e543b07",
+    "narration": "First comes training. The model reads a huge amount of text and practices predicting the missing next piece. Each mistake nudges millions of internal settings, called parameters, until its guesses get better.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Training",
+      "steps": [
+       {
+        "label": "Read huge amounts of text"
+       },
+       {
+        "label": "Predict the next piece"
+       },
+       {
+        "label": "Adjust parameters"
+       }
+      ]
+     }
+    },
+    "chapter": "Learning from text"
+   },
+   {
+    "id": "7a63334b",
+    "narration": "Now you type. Your prompt goes in. The model scores options for every possible next word piece, picks one, and adds it. Then the next word gets the same treatment, until the answer is complete.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Generating a reply",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Your prompt",
+        "icon": "message-circle"
+       },
+       {
+        "id": "b",
+        "label": "Model scores options",
+        "icon": "brain"
+       },
+       {
+        "id": "c",
+        "label": "Pick next word",
+        "icon": "check"
+       },
+       {
+        "id": "d",
+        "label": "Repeat",
+        "icon": "repeat"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "b",
+        "again"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    },
+    "chapter": "Writing an answer"
+   },
+   {
+    "id": "7af3fc10",
+    "narration": "This explains a catch. The model aims for what sounds likely, not what is verified. So it can sound confident and still be wrong. Treat it as a fluent assistant, and check important facts.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Using it well",
+      "items": [
+       "Sounds fluent",
+       "Not always correct",
+       "Check key facts"
+      ],
+      "checked": [
+       true,
+       false,
+       true
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06564,
+ "seconds": 13.9
+}

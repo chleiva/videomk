@@ -1,0 +1,212 @@
+{
+ "id": "bio-03",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Taught Machines to Think",
+  "description": "A short profile of Alan Turing, the British mathematician who imagined the modern computer, helped break Nazi codes, and asked whether machines can think. Learn why his ideas still shape the device in your pocket.",
+  "beats": [
+   {
+    "id": "4e94d3e6",
+    "narration": "One man helped end a war, invented the idea behind every computer, and was thanked with cruelty. His name was Alan Turing, and his story begins with a question.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "vintage mathematics blackboard equations",
+      "alt": "Chalkboard covered in mathematical equations",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "A mind ahead of its time"
+   },
+   {
+    "id": "fcfdf9b7",
+    "narration": "Turing was a British mathematician born in 1912. Even as a boy, he loved numbers and puzzles, and he saw patterns where other people saw nothing at all.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Alan Turing",
+      "items": [
+       "British mathematician",
+       "Born in 1912",
+       "Lover of puzzles",
+       "Saw hidden patterns"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "flag",
+       "calendar",
+       "puzzle",
+       "eye"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2a36f5ed",
+    "narration": "Decades ago he imagined a simple machine. It would follow simple rules, then write a new symbol, again and again. That tiny idea could, in theory, compute anything.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The idea of a universal machine",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Read a symbol",
+        "icon": "eye"
+       },
+       {
+        "id": "b",
+        "label": "Follow simple rules",
+        "icon": "list"
+       },
+       {
+        "id": "c",
+        "label": "Write a new symbol",
+        "icon": "pencil"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "a",
+        "repeat"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "ac494183",
+    "narration": "That thought of a machine that could run any program is the seed of the modern computer. Your phone, your laptop and your games all grow from it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person using laptop computer",
+      "clip_queries": [
+       "person using laptop computer",
+       "hands holding smartphone"
+      ],
+      "alt": "hands typing on a laptop keyboard"
+     }
+    }
+   },
+   {
+    "id": "42a3291e",
+    "narration": "Then came World War Two. Germany sent secret messages using a machine called Enigma. The codes changed every day, and without a way to read them, ships were at risk.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Breaking the Unbreakable",
+      "subtitle": "Codebreaking in World War Two"
+     }
+    },
+    "chapter": "The war"
+   },
+   {
+    "id": "11cb3e52",
+    "narration": "Turing joined the codebreakers at Bletchley Park in England. He helped design machines that searched for the settings of Enigma much faster than any person could.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Bletchley Park mansion",
+      "alt": "Bletchley Park house in England",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "1681021c",
+    "narration": "Historians widely agree that this work saved many lives and shortened the war. For years it stayed secret, so almost nobody knew what he had done.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "His work shortened the war, and stayed secret for years.",
+      "emphasis": "stayed secret"
+     }
+    }
+   },
+   {
+    "id": "e5054d14",
+    "narration": "After the war, Turing kept asking big questions. In 1950 he wondered whether a machine could think, and proposed a test where you chat and try to guess who is human.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Judge",
+        "text": "Are you a person or a machine?"
+       },
+       {
+        "speaker": "Unknown",
+        "text": "Why don't you guess from my answers?"
+       }
+      ]
+     }
+    },
+    "chapter": "The question that remains"
+   },
+   {
+    "id": "2afcae3d",
+    "narration": "Today we call it the Turing Test, and it echoes whenever we talk to a chatbot. His question is more alive now than it was then.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on computer at night",
+      "alt": "working at a computer screen in the dark"
+     }
+    }
+   },
+   {
+    "id": "8de35db9",
+    "narration": "Turing was treated cruelly by the law of his time for who he was, and he died young in 1954. Britain later apologized. His legacy is a world built on his thinking.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "old computer circuit board",
+      "alt": "Close view of a circuit board",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "f1c9a15d",
+    "narration": "So the next time you open a screen, remember a quiet mathematician who asked whether machines could think, and gave us the way to find out.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Every computer begins with one man's question.",
+      "emphasis": "one man's question"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 311 words in 11 beats but a 2-minute video needs about 267 (at most 280). Cut about 44 words: write 9 to 11 beats of at most 35 words each (you averaged 28), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 245 words",
+  "grounding: 1 beats had unsupported specifics, 1 rewritten"
+ ],
+ "cost_usd": 0.12719,
+ "seconds": 39.5
+}

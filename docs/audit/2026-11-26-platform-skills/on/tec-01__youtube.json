@@ -1,0 +1,252 @@
+{
+ "id": "tec-01",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT-style language models really work",
+  "description": "Large language models like ChatGPT predict the next word, over and over. This explainer covers tokens, training on text, attention, and why the answers can sound right yet be wrong.",
+  "beats": [
+   {
+    "id": "f2d462f9",
+    "narration": "ChatGPT does not look up answers. It does one simple thing, again and again: it guesses the next word. That single trick writes essays, code, and poems.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word, again and again.",
+      "emphasis": "next word"
+     }
+    },
+    "chapter": "The core trick"
+   },
+   {
+    "id": "78ae6a9c",
+    "narration": "Think of your phone's autocomplete. Type \"see you\" and it suggests \"soon\". A large language model is that idea, grown enormously and trained on a huge amount of text.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on smartphone",
+      "alt": "hands texting on a phone"
+     }
+    }
+   },
+   {
+    "id": "a9bbd116",
+    "narration": "First, text is chopped into small pieces called tokens. A token can be a whole word or just part of one. The model never sees letters the way we do.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Token",
+      "definition": "A small piece of text, a word or part of a word, that the model reads and writes."
+     }
+    }
+   },
+   {
+    "id": "e7a937f3",
+    "narration": "Next comes training. The model reads vast amounts of text and plays a game: hide the next token, guess it, check the answer, and adjust. Billions of tiny dials get nudged each time.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Training loop",
+      "steps": [
+       {
+        "label": "Hide the next token"
+       },
+       {
+        "label": "Guess it"
+       },
+       {
+        "label": "Check the answer"
+       },
+       {
+        "label": "Adjust the dials"
+       }
+      ]
+     }
+    },
+    "chapter": "How it learns"
+   },
+   {
+    "id": "dac3e4d3",
+    "narration": "After enough rounds, the model picks up grammar, facts, and styles of writing. Nobody typed in those rules. They emerged from patterns in the text.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "library shelves full of books",
+      "clip_queries": [
+       "library shelves full of books",
+       "person reading a book"
+      ],
+      "alt": "rows of books in a library"
+     }
+    }
+   },
+   {
+    "id": "42e3433a",
+    "narration": "A key ingredient is attention. When the model reads a sentence, each word looks back at the other words to decide which ones matter. In \"the dog chased its tail\", \"its\" points back to the dog, and \"tail\" belongs to it.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Attention links words",
+      "nodes": [
+       {
+        "id": "dog",
+        "label": "dog",
+        "icon": "dog"
+       },
+       {
+        "id": "chased",
+        "label": "chased"
+       },
+       {
+        "id": "its",
+        "label": "its"
+       },
+       {
+        "id": "tail",
+        "label": "tail"
+       }
+      ],
+      "edges": [
+       [
+        "its",
+        "dog",
+        "points to"
+       ],
+       [
+        "tail",
+        "its",
+        "belongs to"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "5e0e034f",
+    "narration": "When you ask a question, the model reads your words and scores every possible next token. It picks one, adds it to the text, and repeats until the answer is complete.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Read your prompt",
+        "kind": "start"
+       },
+       {
+        "id": "b",
+        "label": "Score next tokens",
+        "kind": "step"
+       },
+       {
+        "id": "c",
+        "label": "Pick one token",
+        "kind": "step"
+       },
+       {
+        "id": "d",
+        "label": "Answer finished?",
+        "kind": "decision"
+       },
+       {
+        "id": "e",
+        "label": "Reply done",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "b",
+        "no"
+       ],
+       [
+        "d",
+        "e",
+        "yes"
+       ]
+      ],
+      "title": "Writing a reply"
+     }
+    },
+    "chapter": "Answering you"
+   },
+   {
+    "id": "6f813bbc",
+    "narration": "A little randomness is added to that choice, so the same question can get different answers. More randomness feels creative. Less feels steady and predictable.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Randomness in the pick",
+      "items": [
+       "Some chance, not always the top pick",
+       "More randomness: more creative",
+       "Less randomness: more predictable"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "34a7053f",
+    "narration": "Here is the catch. The model is built to sound likely, not to be certain. So it can state something false with total confidence. Check anything that matters.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Sounds right, but check",
+      "items": [
+       "Fluent writing",
+       "Confident tone",
+       "Always correct"
+      ],
+      "checked": [
+       true,
+       true,
+       false
+      ]
+     }
+    },
+    "chapter": "Limits"
+   },
+   {
+    "id": "8864cafa",
+    "narration": "So a language model is a next-word guesser, trained on oceans of text. Remember that, and you will know when to trust it and when to double-check.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "A very well-read guesser: useful, but worth double-checking.",
+      "emphasis": "guesser"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.09165,
+ "seconds": 27.9
+}

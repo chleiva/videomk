@@ -1,0 +1,65 @@
+{
+ "id": "cmp-01",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A quick answer to the React versus Vue question for beginners. Learn how to choose your first JavaScript framework based on your goal.",
+  "beats": [
+   {
+    "id": "9d2225c7",
+    "narration": "React or Vue? Stop agonizing. Both teach you the same core idea: building screens from small, reusable pieces called components.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "React or Vue? Pick one.",
+      "emphasis": "Pick one"
+     }
+    }
+   },
+   {
+    "id": "65768977",
+    "narration": "Want the most job listings and the biggest ecosystem? Choose React. Want a gentler start with clear, friendly structure? Choose Vue.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your goal decides",
+      "items": [
+       "Jobs: React",
+       "Easy start: Vue"
+      ],
+      "style": "cards",
+      "accent": "sky",
+      "icons": [
+       "briefcase",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "9bc8ac40",
+    "narration": "Either way, the skills transfer. Learn one well, and the second takes days, not months. So just start building today.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Learn one well. The other comes fast.",
+      "emphasis": "comes fast"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06517,
+ "seconds": 8.4
+}

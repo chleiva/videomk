@@ -1,0 +1,668 @@
+{
+ "id": "his-03",
+ "category": "history",
+ "language": "en",
+ "difficulty": "detailed",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "great": "Housing boom, subprime lending, MBS and CDOs, rating agencies, leverage, Bear Stearns, Lehman 15 Sep 2008, TARP, Fed actions, lasting effects; narrative arc; correct figures.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:33:34",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "The 2008 financial crisis is a well-documented historical event; the explainer depends on timeless causal history (housing boom, subprime mortgages, securitization, Lehman collapse, government respons",
+  "queries": [],
+  "searches": 3,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 3,
+   "reads": 0,
+   "sources": 12,
+   "seconds": 6.7,
+   "cost_usd": 0.0010605,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 15,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 9000,
+  "n_sources": 5,
+  "n_fetched": 12,
+  "fetched": [
+   "What Caused the 2008 Financial Crisis? (Subprime Mortgages, CDOs & Fed Timeline) — Alcuin Research Archive | Alcuin Research Archive",
+   "Crisis and Response: An FDIC History, 2008­–2013",
+   "1 Subprime Mortgage Market and Current Financial Crisis",
+   "The 2008 Financial Crisis Explained: Housing Bubble to Bailout - Retro Report",
+   "Collapse of Lehman Brothers | Economics | Research Starters | EBSCOhost",
+   "Bankruptcy of Lehman Brothers - Wikipedia",
+   "Bankruptcy of Lehman Brothers | Description, Cause, & Facts | Britannica",
+   "Lehman Brothers declares bankruptcy | September 15, 2008 | HISTORY",
+   "This is the day Lehman Brothers collapsed in 2008",
+   "Troubled Asset Relief Program (TARP) | Economics | Research Starters | EBSCOhost",
+   "Taking Stock: What Has the Troubled Asset Relief Program Achieved?",
+   "Troubled Asset Relief Program | U.S. Department of the Treasury"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 455 words in 15 beats but a 3-minute video needs about 402 (at most 422). Cut about 53 words: write 13 to 15 beats of at most 37 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 369 words"
+ ],
+ "notes": "## What Caused the 2008 Financial Crisis? (Subprime Mortgages, CDOs & Fed Timeline) — Alcuin Research Archive | Alcuin Research Archive\nThe primary causes were: 1) Proliferation of predatory subprime mortgages with teaser interest rates; 2) Financial engineering of mortgage-backed securities into AAA-rated Collateralized Debt Obligations (CDOs); 3) Extreme bank leverage (up to 40:1); 4) Credit Default Swap (CDS) exposure from insurers like AIG; and 5) The complete freeze of interbank wholesale credit markets. ✦ Launch live research on this inquiry #### What caused the credit crisis of 2008 to spread globally? [...] > \"Mortgage lenders abandoned underwriting standards because toxic loans were immediately securitized and sold to Wall Street.\" ## Financial Engineering: MBS, CDOs & The AAA Rating Agency Conflict Wall Street investment banks packaged thousands of individual mortgages into Mortgage-Backed Securities (MBS) and re-sliced them into Collateralized Debt Obligations (CDOs) [1,4,6]. Through mathematical correlation t\n\n## Crisis and Response: An FDIC History, 2008­–2013\nAccommodating borrowers was made easier by the mortgage securitization system. Banks and other mortgage originators originated loans, then distributed them by selling them in the secondary loan market; the purchasers of the loans were mortgage securitizers, who paid the originators, or lenders, high fees for mortgages; and the high fees created incentives for lenders to fill the securitization pipeline by relaxing lending standards and in some cases by aggressively marketing mortgages. The [...] The bubble was fed not only by people taking out mortgages for homes, however. Also feeding the bubble was a system, created by financial institutions, that linked homebuyers’ demand for housing with investors’ demand for highly rated assets with high yields. Financial institutions purchased mortgages from mortgage originators, packaged the mortgages into securities, and sold the securities—whose\n\n## 1 Subprime Mortgage Market and Current Financial Crisis\nthe fraction of subprime refinancing, which involved equity extraction is calculated to have been anything between 51.3% to 58.6% over that period. The next question is how the subprime mortgages were financed. The short answer is securitisation, and as mentioned in footnote 1 between 2005 and 2006 the subprime mortgage origination was about $1.2 trillion, 80 percent of which was securitised (see Table on p. 20 of Gorton, 2008). Banks set up trusts or just limited liability `Subprime and Alt-A’ [...] provide risky loans without applying the three C’s to each borrower – Collateral, Credit history and Character. This was so since banks could easily sell these mortgages or other loans to an underwriter, or act as an underwriter to sell to the public exotic mortgages backed by low quality securities. This led to the unprecedented growth of the subprime market (loans to borrowers with poor cr\n\n## The 2008 Financial Crisis Explained: Housing Bubble to Bailout - Retro Report\nThe 2008 financial crisis grew out of a housing bubble in the early 2000s, when home buying surged and subprime mortgages became widespread. These loans, designed for borrowers with weaker credit, carried higher interest rates and were aggressively promoted by some lenders and brokers, who profited from steering buyers into riskier products. Some borrowers took on mortgages they didn’t understand or couldn’t afford, believing they could refinance as home values rose. [...] But when the bubble burst and housing prices fell, refinancing became difficult. Defaults rose, and the losses cascaded through Wall Street. Large financial institutions had not only sold bundles of loans as mortgage-backed securities to investors, but they had also invested in them, leaving firms like Lehman Brothers exposed when the market collapsed. Turmoil spread and credit froze across the economy.\n\n## Collapse of Lehman Brothers | Economics | Research Starters | EBSCOhost\nHowever, a buyout did not come through, the government decided not to help Lehman Brothers any further, and the company folded in the largest U.S. bankruptcy in history on September 15, 2008. Lehman Brothers had $639 billion in assets and $619 billion in debt, an unprecedented debt ratio for a top firm. It had almost 26,000 employees worldwide and held at least $40 billion in direct client assets (including those of large hedge funds) when it went under. Its collapse sparked chaos in U.S. and [...] However, a buyout did not come through, the government decided not to help Lehman Brothers any further, and the company folded in the largest U.S. bankruptcy in history on September 15, 2008. Lehman Brothers had $639 billion in assets and $619 billion in debt, an unprecedented debt ratio for a top firm. It had almost 26,000 employees worldwide and held at least $40 billion in direct client ass\n\n## Bankruptcy of Lehman Brothers - Wikipedia\nThe bankruptcy of Lehman Brothers, also known as the Crash of '08 and the Lehman Shock, on September 15, 2008, was the climax of the subprime mortgage crisis. After the financial services firm was notified of a pending credit downgrade due to its very heavy position in subprime mortgages, the Federal Reserve summoned several banks to negotiate financing for its reorganization. These discussions failed, and Lehman filed a Chapter 11 petition that remains the largest bankruptcy filing in U.S. [...] \\[edit] Lehman Brothers filed for Chapter 11 bankruptcy protection on Monday, September 15, 2008. According to Bloomberg, reports filed with the U.S. Bankruptcy Court, Southern District of New York (Manhattan) on September 16 indicated that JPMorgan Chase provided Lehman with a total of $138 billion in \"Federal Reserve-backed advances\". The \"Federal Reserve-backed advances\" as provided by JPMorg\n\n## Bankruptcy of Lehman Brothers | Description, Cause, & Facts | Britannica\nThe collapse of Lehman Brothers on September 15, 2008, marked the largest bankruptcy in U.S. history and a pivotal event in the 2007–08 financial crisis. Founded in 1850, the firm evolved into a global financial-services institution. By 2008, Lehman had become heavily involved in the subprime lending business, an activity that was driving unsustainable economic growth. Despite earlier losses, the company continued securitizing vast mortgage packages. As losses mounted, Lehman Brothers stock [...] Lehman Brothers' involvement in the subprime lending business significantly contributed to its downfall. Lehman securitized vast mortgage packages, retaining the riskiest assets, contrary to sound investment principles. As subprime mortgages lost value, Lehman faced substantial losses, plummeting its stock value by 93%. The federal government's refusal to intervene led to Lehman's bankruptcy in \n\n## Lehman Brothers declares bankruptcy | September 15, 2008 | HISTORY\nThen on September 10, the firm announced that it expected $5.6 billion in write-downs (reductions in the estimated or nominal value of an asset) for its “toxic” assets and a $3.93 billion loss for the third quarter. In addition, Lehman said it planned to spin off $50 billion of toxic assets into a separate publicly held corporation. ## Largest Bankruptcy in U.S. history [...] Out of options, Lehman Brothers declared bankruptcy early on the morning of September 15. The firm declared $639 billion in assets and $613 billion in debts, making it the largest bankruptcy filing in U.S. history. [...] On September 15, 2008, the venerable Wall Street brokerage firm Lehman Brothers seeks Chapter 11 bankruptcy protection, becoming the largest victim of the subprime mortgage crisis that would devastate financial markets and contribute to the biggest economic downturn since the Great Depression. ## Le\n\n## This is the day Lehman Brothers collapsed in 2008\n### Description 23,036 views Posted: 2025-09-15 On Sept. 15, 2008, Lehman Brothers, the fourth-largest U.S. investment bank, filed the biggest bankruptcy in history. The 158-year-old firm had survived railroad turmoil, the Great Depression, and the collapse of Long-Term Capital Management, but finally succumbed to crisis itself. Romaine Bostick explains how the bankruptcy reshaped Wall Street, the U.S. economy, and national politics. [...] [0:49] debt in its Chapter 11 petition, dwarfing by more than five fold what had been up to then the largest bankruptcy ever. [0:56] And that was WorldCom's 2002 insolvency. Lehman's filing the Monday morning of September 15th, 2008, came a couple of days after the Fed declined to guarantee its loans, as it had done for Bear Stearns just six months earlier. [1:09] And it came after talks for a lifeline from Bank of America broke down. [...] [1:37] Funn\n\n## Troubled Asset Relief Program (TARP) | Economics | Research Starters | EBSCOhost\nTARP was authorized by the Emergency Economic Stabilization Act of 2008 (EESA), which allotted $700 billion to the program to be administered in three installments. Th",
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The 2008 financial crisis told as a story: the US housing boom, subprime mortgages, securitization, the fall of Lehman Brothers and the government response. Learn how a chain of risky loans froze credit around the world.",
+  "language": "en",
+  "mood": "tense",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "9937b2c0",
+    "narration": "On September 15, 2008, a 158-year-old Wall Street bank filed the largest bankruptcy in American history. It had survived the Great Depression. So what broke it?",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "$639B",
+      "label": "Lehman Brothers' assets when it collapsed, September 15, 2008"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "The boom"
+   },
+   {
+    "id": "43174482",
+    "narration": "The story starts earlier, in the early 2000s. Home buying surged. Prices climbed, and people believed they only went up. Houses felt like a safe bet for everyone.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "clip_queries": [
+       "suburban houses aerial view",
+       "for sale sign in front of house",
+       "family moving into new home"
+      ],
+      "alt": "residential neighborhood from above"
+     }
+    }
+   },
+   {
+    "id": "e91b2fb8",
+    "narration": "To feed the boom, lenders pushed subprime mortgages. These were loans for borrowers with weaker credit, with higher interest rates and low teaser rates at the start.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Subprime mortgage",
+      "definition": "A home loan made to a borrower with weaker credit, carrying higher interest rates than a standard loan."
+     }
+    },
+    "chapter": "Risky loans"
+   },
+   {
+    "id": "33fe3c52",
+    "narration": "Many borrowers took loans they did not understand or could not afford. They figured they could refinance later, as their home value rose. Brokers profited from steering them into riskier products.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person signing mortgage papers",
+      "clip_queries": [
+       "person signing mortgage papers",
+       "couple reviewing bills at table"
+      ],
+      "alt": "signing loan documents at a desk"
+     }
+    }
+   },
+   {
+    "id": "a8ee2653",
+    "narration": "Why did lenders not care about risk? Because they did not keep the loans. They sold them. The three checks of collateral, credit history and character slowly disappeared.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Standards that vanished",
+      "items": [
+       "Collateral",
+       "Credit history",
+       "Character"
+      ],
+      "style": "keywords",
+      "accent": "coral",
+      "icons": [
+       "house",
+       "chart-column",
+       "user"
+      ]
+     }
+    }
+   },
+   {
+    "id": "aee5706c",
+    "narration": "Here is how the pipeline worked. Lenders sold loans to Wall Street. Banks bundled them into securities. Investors bought those securities, and the cash flowed back to lenders to make more loans.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The securitization pipeline",
+      "nodes": [
+       {
+        "id": "b",
+        "label": "Homebuyers",
+        "icon": "house"
+       },
+       {
+        "id": "l",
+        "label": "Lenders",
+        "icon": "landmark"
+       },
+       {
+        "id": "w",
+        "label": "Wall Street banks",
+        "icon": "building"
+       },
+       {
+        "id": "i",
+        "label": "Investors",
+        "icon": "banknote"
+       }
+      ],
+      "edges": [
+       [
+        "b",
+        "l",
+        "loans"
+       ],
+       [
+        "l",
+        "w",
+        "sold"
+       ],
+       [
+        "w",
+        "i",
+        "securities"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    },
+    "chapter": "Securitization"
+   },
+   {
+    "id": "af65c3a4",
+    "narration": "Between 2005 and 2006, about 1.2 trillion dollars of subprime loans were made. Roughly 80 percent of them were securitized. The more loans they sold, the more fees lenders earned.",
+    "scene": {
+     "type": "pie",
+     "props": {
+      "labels": [
+       "Securitized",
+       "Not securitized"
+      ],
+      "values": [
+       80.0,
+       20.0
+      ],
+      "unit": "%",
+      "donut": true,
+      "title": "Subprime loans, 2005 to 2006"
+     }
+    }
+   },
+   {
+    "id": "0561f2ce",
+    "narration": "Banks then re-sliced these bundles into complex products called CDOs. Rating agencies stamped many of them AAA, the safest grade. Investors trusted the label, and nobody looked closely at the loans inside.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Risky loans, repackaged, wearing a AAA label.",
+      "emphasis": "AAA"
+     }
+    }
+   },
+   {
+    "id": "6597301d",
+    "narration": "Banks also borrowed heavily to buy more of them, with leverage as high as 40 to 1. And insurers like AIG sold protection against losses. The whole system leaned on one thing: rising house prices.",
+    "scene": {
+     "type": "scale_compare",
+     "props": {
+      "items": [
+       {
+        "label": "Equity",
+        "value": 1.0
+       },
+       {
+        "label": "Bank leverage",
+        "value": 40.0,
+        "note": "up to 40 to 1"
+       }
+      ],
+      "unit": "$",
+      "title": "Borrowed money per $1 of capital"
+     }
+    }
+   },
+   {
+    "id": "0e3647c6",
+    "narration": "Then the bubble burst. Home prices fell, and refinancing became almost impossible. Defaults rose. The losses cascaded through Wall Street, because banks had kept many of these securities themselves.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "foreclosure sign on house",
+      "clip_queries": [
+       "foreclosure sign on house",
+       "stock market traders stressed",
+       "wall street street sign"
+      ],
+      "alt": "empty house for sale"
+     }
+    },
+    "chapter": "The crash"
+   },
+   {
+    "id": "22ad54fb",
+    "narration": "Lehman Brothers was deeply exposed. It had kept the riskiest pieces of its mortgage bundles. On September 10 it announced 5.6 billion dollars in write-downs, and its stock had plunged 93 percent.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Lehman Brothers headquarters New York",
+      "alt": "Lehman Brothers building in New York",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "28bd0c59",
+    "narration": "Lehman looked for a rescue. A buyout fell through. Bank of America talks broke down. The Fed refused to guarantee its loans, as it had for Bear Stearns six months earlier. Lehman filed for bankruptcy.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Lehman's final days",
+      "events": [
+       {
+        "date": "Mar 2008",
+        "label": "Fed backs Bear Stearns"
+       },
+       {
+        "date": "Sep 10",
+        "label": "$5.6B write-downs announced"
+       },
+       {
+        "date": "Sep 13",
+        "label": "Rescue talks collapse"
+       },
+       {
+        "date": "Sep 15",
+        "label": "Bankruptcy filed"
+       }
+      ]
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "6bb0c0a1",
+    "narration": "Credit froze. Banks stopped lending to each other, and the panic spread across the world. Lehman had 26,000 employees, and its collapse sparked chaos in markets everywhere.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "city financial district rush hour",
+      "clip_queries": [
+       "city financial district rush hour",
+       "stock ticker screens",
+       "empty office desks"
+      ],
+      "alt": "office workers walking downtown"
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "4e2cc6db",
+    "narration": "Washington stepped in. Congress passed the Emergency Economic Stabilization Act, creating the Troubled Asset Relief Program, called TARP. It set aside 700 billion dollars to steady the banks.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "700",
+      "prefix": "$",
+      "unit": "B",
+      "label": "Authorized for TARP under the 2008 stabilization act"
+     }
+    }
+   },
+   {
+    "id": "43c3f41c",
+    "narration": "So what really caused the crisis? Not one thing. Risky loans, repackaged as safe, bought with borrowed money. When prices fell, the whole chain broke. Safe-looking debt is only as strong as its weakest loan.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The chain that broke",
+      "items": [
+       "Subprime loans",
+       "Securitization",
+       "Heavy leverage",
+       "Lehman's fall"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 3
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "1 Subprime Mortgage Market and Current Financial Crisis",
+    "url": "https://www.landecon.cam.ac.uk/sites/default/files/2023-03/wp08-09.pdf",
+    "publisher": "landecon.cam.ac.uk",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The 2008 Financial Crisis Explained: Housing Bubble to Bailout - Retro Report",
+    "url": "https://retroreport.org/video/the-2008-financial-crisis-explained-housing-bubble-to-bailout",
+    "publisher": "retroreport.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Collapse of Lehman Brothers | Economics | Research Starters | EBSCOhost",
+    "url": "https://www.ebsco.com/research-starters/economics/collapse-lehman-brothers",
+    "publisher": "ebsco.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Lehman Brothers declares bankruptcy | September 15, 2008 | HISTORY",
+    "url": "https://www.history.com/this-day-in-history/september-15/lehman-brothers-collapses",
+    "publisher": "history.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Troubled Asset Relief Program (TARP) | Economics | Research Starters | EBSCOhost",
+    "url": "https://www.ebsco.com/research-starters/economics/troubled-asset-relief-program-tarp",
+    "publisher": "ebsco.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 59.7,
+  "before_first_script_call_s": 8.4,
+  "script_s": 51.3
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "research": 0.00106,
+  "script_big": 0.18029,
+  "search_api": 0.024,
+  "total": 0.20562
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 59611,
+  "out": 8761
+ },
+ "rules": {
+  "length": {
+   "words": 463,
+   "expected_words": 402,
+   "ratio": 1.152,
+   "beats": 15,
+   "expected_beats": 13,
+   "est_speech_s": 207.2,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 28,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 36,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "On September 15, 2008, a 158-year-old Wall Street bank filed the largest bankruptcy in American history. It had survived the Great Depression. So what broke it?",
+   "close_text": "So what really caused the crisis? Not one thing. Risky loans, repackaged as safe, bought with borrowed money. When prices fell, the whole chain broke. Safe-looking debt is only as strong as its weakes"
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "stat": 1,
+    "clip": 4,
+    "definition": 1,
+    "bullets": 2,
+    "diagram": 1,
+    "pie": 1,
+    "kinetic_text": 1,
+    "scale_compare": 1,
+    "image": 1,
+    "timeline": 1,
+    "counter": 1
+   },
+   "max_run": 1,
+   "entropy": 3.24,
+   "top_type": "clip",
+   "top_share": 0.27,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 12,
+   "ungrounded_numbers": [
+    "15,2008"
+   ],
+   "entities": 13,
+   "ungrounded_entities": [
+    "American"
+   ],
+   "ungrounded_share": 0.08,
+   "ungrounded_number_share": 0.083,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 5,
+   "fetched": 12,
+   "notes_len": 9000,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [
+   "too_long"
+  ],
+  "mismatch_scenes": [
+   "beat 12 (timeline): its narration never says ['$5.6B write-downs announced', 'Rescue talks collapse']",
+   "beat 15 (bullets): its narration never says ['Securitization', 'Heavy leverage', \"Lehman's fall\"]"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly matches the notes, but 'Fed refused to guarantee its loans, as it had for Bear Stearns' is loosely put, the timeline's 'Sep 13' is unsupported, and 'stock had plunged 93 percent' is placed as of Sep 10 although the notes give no date."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the housing boom, subprime loans, securitization, CDOs, ratings, leverage, AIG, Lehman and TARP. It omits the Fed's actions, the AIG bailout, the Bear Stearns details, and the lasting effects. The government response gets only one beat."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The chaptered arc runs from boom to loans to securitization to crash to response, with a clean closing chain. The response section is thin, and Beat 1 anticipates Lehman before the story starts."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening, 'It had survived the Great Depression. So what broke it?', creates tension. The ending recap is decent and the last line is a takeaway, though somewhat aphoristic."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is clear, conversational and suited to beginners, with a story feel, though the later beats lean on list-like statements."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary (stat, diagram, pie, timeline, counter, clips) and match the narration. The leverage scale_compare is apt. The pie chart is justified by a real figure."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "It uses specific figures (80% securitized, the three C's, 40:1), but the framing is mostly standard textbook explanation."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It covers all the requested elements in story form at about the right length. The government response is brief."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The English is fluent and clean, with short sentences and a few choppy fragments."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Sep 13",
+    "issue": "The notes do not give this date for the rescue talks collapsing. It is an invented specific, though roughly true for the weekend talks.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "On September 10 it announced 5.6 billion dollars in write-downs, and its stock had plunged 93 percent.",
+    "issue": "The 93% fall is not tied to Sep 10. It is a cumulative decline, and the sentence blurs the timing.",
+    "beat": 11
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "The Fed refused to guarantee its loans, as it had for Bear Stearns",
+    "issue": "The meaning is garbled. The Fed did guarantee Bear Stearns's loans, so 'as it had' reads as if it refused for Bear too.",
+    "beat": 12
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Washington stepped in. Congress passed the Emergency Economic Stabilization Act",
+    "issue": "The government response is thin. It says nothing about Fed rate cuts, the AIG rescue, or the lasting effects such as recession and unemployment.",
+    "beat": 14
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Lehman had 26,000 employees, and its collapse sparked chaos in markets everywhere.",
+    "issue": "The employee count is filler and adds little to explaining the freeze or contagion.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Banks also borrowed heavily to buy more of them",
+    "issue": "AIG's credit default swaps are mentioned in a single clause with no explanation of why they mattered.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Fed actions and the AIG bailout",
+   "Lasting effects such as recession, job losses and the Dodd-Frank reforms",
+   "Housing price peak and decline figures",
+   "How the Bear Stearns rescue worked",
+   "Why Lehman's failure triggered the freeze (money market funds)"
+  ],
+  "wrong_facts": [
+   "Timeline date 'Sep 13' for rescue talks collapsing is not in the notes (roughly plausible)",
+   "Wording on the Fed and Bear Stearns is ambiguous"
+  ],
+  "would_publish": false,
+  "summary": "A clear, well-ordered and visually varied explainer that closely follows its sources. The response and aftermath are thin, and a few details are loose or unsupported.",
+  "mean": 3.67,
+  "cost_usd": 0.03018,
+  "tokens": [
+   7710,
+   1476
+  ]
+ }
+}

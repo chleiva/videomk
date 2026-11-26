@@ -1,0 +1,89 @@
+{
+ "id": "mkt-02",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Never Lose a Great Idea Again",
+  "description": "A quick launch video for a note-taking app that captures ideas fast and keeps them easy to find. See how simple notes can be.",
+  "beats": [
+   {
+    "id": "9c9013df",
+    "narration": "You had a brilliant idea this morning. Where is it now? Lost in a messy pile of notes again.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Where did that idea go?",
+      "emphasis": "idea"
+     }
+    }
+   },
+   {
+    "id": "3c510f59",
+    "narration": "Meet the note-taking app that keeps up with you. Open it, type or speak, and your thought is saved.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Type"
+       },
+       {
+        "icon": "microphone",
+        "label": "Speak"
+       },
+       {
+        "icon": "cloud",
+        "label": "Saved"
+       }
+      ],
+      "title": "Capture fast"
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "da401ed9",
+    "narration": "Search helps you find your notes. Your notes stay organized and always ready when inspiration strikes.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Find it fast",
+      "items": [
+       "Instant search",
+       "Stay organized",
+       "Synced everywhere"
+      ],
+      "style": "spotlight",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "4d1ab3d0",
+    "narration": "Download the app today. Write it down, and keep every great idea.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Keep every idea",
+      "subtitle": "Your notes, always within reach"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 70 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 12 words: 3 to 4 beats of about 19 words each (you averaged 17; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line",
+  "grounding: 2 beats had unsupported specifics, 2 rewritten"
+ ],
+ "cost_usd": 0.06112,
+ "seconds": 13.1
+}

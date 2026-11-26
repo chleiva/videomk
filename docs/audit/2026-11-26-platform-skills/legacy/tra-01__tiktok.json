@@ -1,0 +1,67 @@
+{
+ "id": "tra-01",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A fast guide to spending three days in Lisbon. See the hills, the trams and the river, and taste the city's best-loved food.",
+  "beats": [
+   {
+    "id": "5c556e84",
+    "narration": "Lisbon smells of grilled sardines and sea air. Three days is enough to climb its hills and taste its best bites.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "Lisbon street with yellow tram",
+      "alt": "tram climbing a hill in a European old town"
+     }
+    }
+   },
+   {
+    "id": "d974204a",
+    "narration": "Day one, wander the old hilltop neighborhoods. Day two, walk the riverside. Day three, head out to the coast and the sea.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your 3 days",
+      "items": [
+       "Day 1: Old hills",
+       "Day 2: Riverside",
+       "Day 3: Coast"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "droplet",
+       "sun"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cb0d8987",
+    "narration": "Eat custard tarts warm from the oven, grilled fish by the water, and finish every evening with a view.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Eat warm custard tarts, grilled fish, and sunset views.",
+      "emphasis": "custard tarts"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06142,
+ "seconds": 8.8
+}

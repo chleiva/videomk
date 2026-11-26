@@ -1,0 +1,153 @@
+{
+ "id": "his-03",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What really caused the 2008 financial crisis",
+  "description": "The story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It shows how a chain of risky decisions turned a housing problem into a global crisis.",
+  "beats": [
+   {
+    "id": "a3a19017",
+    "narration": "A bet on American homes nearly broke the world economy. It began with a housing boom. Prices kept rising, banks lent freely, and subprime mortgages went to borrowers who were unlikely to repay.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "clip_queries": [
+       "suburban houses aerial view",
+       "for sale sign in front of house",
+       "family moving into new home"
+      ],
+      "alt": "residential neighborhood from above"
+     }
+    },
+    "chapter": "The boom"
+   },
+   {
+    "id": "f4ee0963",
+    "narration": "Then came securitization. Banks bundled thousands of mortgages into securities and sold them to investors around the world. Lenders no longer carried the risk, so the risk spread everywhere.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How risk spread",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Subprime mortgages",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Banks bundle them",
+        "icon": "landmark"
+       },
+       {
+        "id": "c",
+        "label": "Securities sold",
+        "icon": "banknote"
+       },
+       {
+        "id": "d",
+        "label": "Investors worldwide",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c",
+        "sold"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 1
+     }
+    },
+    "chapter": "The machine"
+   },
+   {
+    "id": "8045d93c",
+    "narration": "Then housing prices fell. Borrowers defaulted, and those securities lost value. Banks feared each other's losses and stopped lending. In September 2008, Lehman Brothers collapsed, and panic spread across global markets.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "The unraveling",
+      "events": [
+       {
+        "date": "Boom",
+        "label": "Home prices rise"
+       },
+       {
+        "date": "Turn",
+        "label": "Prices fall, defaults rise"
+       },
+       {
+        "date": "Freeze",
+        "label": "Banks stop lending"
+       },
+       {
+        "date": "Sep 2008",
+        "label": "Lehman Brothers collapses"
+       }
+      ]
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "af1f2497",
+    "narration": "Governments stepped in. They rescued banks, cut interest rates and pumped money into the system. It stopped the freefall, but millions lost jobs and homes. Easy credit, hidden risk and weak oversight caused the crisis.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The response",
+      "items": [
+       "Bank rescues",
+       "Lower interest rates",
+       "Money into the system"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "landmark",
+       "percent",
+       "banknote"
+      ]
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "a1b0ca80",
+    "narration": "The lesson is simple. When risk is hidden, everyone pays for it. Ask who really holds the risk.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "When risk is hidden, everyone eventually pays for it.",
+      "emphasis": "hidden"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07589,
+ "seconds": 14.7
+}

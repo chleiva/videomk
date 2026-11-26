@@ -1,0 +1,76 @@
+{
+ "id": "sci-01",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Everything Spreads Out",
+  "description": "Entropy measures how evenly energy is spread out in a system. The second law of thermodynamics says that in an isolated system it never decreases, which is why some processes can't be undone.",
+  "beats": [
+   {
+    "id": "b116d641",
+    "narration": "Why does a hot coffee always cool down, but never heats itself back up? The answer is one word: entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup",
+      "alt": "hot coffee steam close"
+     }
+    }
+   },
+   {
+    "id": "cf408cbd",
+    "narration": "Entropy measures how spread out energy is. Concentrated energy means low entropy. Evenly dispersed energy means high entropy.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy",
+      "items": [
+       "Low: energy concentrated",
+       "High: energy spread out"
+      ],
+      "style": "spotlight",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "f3516074",
+    "narration": "The second law says an isolated system's entropy cannot decrease. Energy spreads out, and that makes some processes irreversible.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy never decreases in an isolated system.",
+      "emphasis": "never decreases"
+     }
+    }
+   },
+   {
+    "id": "34588dd7",
+    "narration": "So time's arrow is just energy spreading out. Remember: nature drifts toward even.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Energy spreads. That's entropy.",
+      "emphasis": "spreads"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "beat 3: kinetic_text twice in a row",
+  "length: the narration totals 70 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 12 words: 3 to 4 beats of about 19 words each (you averaged 17; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06924,
+ "seconds": 10.3
+}

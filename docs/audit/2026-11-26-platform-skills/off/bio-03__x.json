@@ -1,0 +1,79 @@
+{
+ "id": "bio-03",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Taught Machines to Think",
+  "description": "A quick look at Alan Turing, the British mathematician who helped break wartime codes and asked whether machines can think. His ideas still shape every computer we use.",
+  "beats": [
+   {
+    "id": "595a7dca",
+    "narration": "He helped win a world war, and then his country punished him. Alan Turing was a British mathematician who changed history.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "He helped win a war. Then he was punished.",
+      "emphasis": "punished"
+     }
+    }
+   },
+   {
+    "id": "287ad6ba",
+    "narration": "During the Second World War, he worked to break secret enemy codes. His work helped the Allies read messages that were meant to stay hidden.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Codebreaker",
+      "items": [
+       "Secret enemy codes",
+       "Messages decoded",
+       "Allies informed"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "lock",
+       "mail",
+       "map"
+      ]
+     }
+    }
+   },
+   {
+    "id": "b46f9507",
+    "narration": "He also imagined a universal machine that could follow any set of instructions. That idea became the blueprint for the modern computer, and he asked whether machines could think.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One machine. Any instructions.",
+      "emphasis": "Any instructions"
+     }
+    }
+   },
+   {
+    "id": "184f0c10",
+    "narration": "Yet he was treated cruelly for who he was. Today we honor him, and every device you touch carries his ideas.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "person using laptop and smartphone",
+      "alt": "Modern devices that carry Turing's ideas",
+      "ken_burns": "in"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06734,
+ "seconds": 10.2
+}

@@ -3,7 +3,7 @@ id: listicle-ranking
 name: Listicle and ranking
 pick: Top 5, top 10, 'best of', 'N things', rankings, lists, countdowns.
 ---
-- Say the rule of the list in the first beat: how items are chosen or ranked, so the ranking feels earned.
+- First beat: tease the most surprising item or the stake, then say the rule of the list in one line (how items are chosen or ranked), so the ranking feels earned.
 - Use one consistent shape for every item: name, the one striking fact, why it ranks here. Keep the same length for each so the pace is steady.
 - Count down so the best comes last unless the user's wording suggests otherwise; spend a little longer on the first and the last.
 - Each item must be real and supported by the notes; ties and uncertain rankings are said out loud.

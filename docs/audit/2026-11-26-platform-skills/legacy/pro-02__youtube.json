@@ -1,0 +1,244 @@
+{
+ "id": "pro-02",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: un método simple",
+  "description": "Descubre por qué postergamos tareas y cómo romper el hábito con pasos pequeños. Aprende una técnica sencilla para empezar hoy mismo.",
+  "beats": [
+   {
+    "id": "f852a678",
+    "narration": "Tienes una tarea importante y, de repente, te pones a ordenar el escritorio. ¿Por qué hacemos eso? Y, sobre todo, ¿por qué nos pasa justo cuando más importa?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person distracted at desk",
+      "clip_queries": [
+       "person distracted at desk",
+       "hands scrolling phone on sofa"
+      ],
+      "alt": "procrastinating at a desk"
+     }
+    },
+    "chapter": "El problema real"
+   },
+   {
+    "id": "d5b24fdd",
+    "narration": "Mucha gente cree que procrastinar es pereza. Pero no suele serlo. Casi siempre es una forma de evitar una emoción incómoda: aburrimiento, miedo a fallar o simple agobio.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Procrastinar no es pereza: es evitar una emoción incómoda.",
+      "emphasis": "evitar una emoción"
+     }
+    }
+   },
+   {
+    "id": "90f543bc",
+    "narration": "Piensa en ello así: tu cerebro quiere alivio inmediato. Si la tarea te incomoda, la deja para después y siente calma. Pero ese alivio dura poco, y la culpa llega enseguida.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la procrastinación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea incómoda",
+        "icon": "rss"
+       },
+       {
+        "id": "b",
+        "label": "Evitarla",
+        "icon": "phone"
+       },
+       {
+        "id": "c",
+        "label": "Alivio breve",
+        "icon": "heart"
+       },
+       {
+        "id": "d",
+        "label": "Culpa",
+        "icon": "cloud"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "1400f027",
+    "narration": "La buena noticia es que no necesitas más fuerza de voluntad. Necesitas hacer que empezar sea tan fácil que tu cerebro no tenga nada de qué huir.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person opening laptop morning",
+      "clip_queries": [
+       "person opening laptop morning",
+       "hands writing in notebook"
+      ],
+      "alt": "starting work calmly"
+     }
+    },
+    "chapter": "Cómo romperlo"
+   },
+   {
+    "id": "f55016af",
+    "narration": "Primer paso: divide la tarea en un trozo ridículamente pequeño. No escribir el informe, sino abrir el documento y escribir una frase. Lo pequeño no asusta.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Empieza pequeño",
+      "steps": [
+       {
+        "label": "Elige la tarea",
+        "detail": "Lo que más estás evitando"
+       },
+       {
+        "label": "Redúcela al mínimo",
+        "detail": "Una frase, un correo, un minuto"
+       },
+       {
+        "label": "Empieza ya",
+        "detail": "Sin esperar a tener ganas"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "0c28718d",
+    "narration": "Segundo: usa la regla de los cinco minutos. Prométete trabajar solo cinco minutos. Después puedes parar. Lo curioso es que casi siempre seguirás, porque lo más difícil era arrancar.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "5",
+      "unit": "min",
+      "label": "Solo cinco minutos y puedes parar"
+     }
+    }
+   },
+   {
+    "id": "e7eebd6d",
+    "narration": "Tercero: quita las distracciones antes de empezar. Pon el teléfono en otra habitación, cierra las pestañas que no necesitas y deja a la vista solo lo que vas a usar.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Prepara tu entorno",
+      "items": [
+       "Teléfono lejos",
+       "Pestañas cerradas",
+       "Solo lo necesario a la vista"
+      ]
+     }
+    }
+   },
+   {
+    "id": "ee3afe45",
+    "narration": "Y cuarto: sé amable contigo. Si fallas un día, no te castigues. La culpa alimenta el ciclo. Retoma al día siguiente con un paso pequeño y sigue adelante.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Trátate con amabilidad",
+      "items": [
+       "Un fallo no es el fin",
+       "La culpa te frena",
+       "Retoma con un paso pequeño"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "heart",
+       "lock",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "abee9066",
+    "narration": "Así se forma un nuevo ciclo: terminas una tarea pequeña, sientes satisfacción, y esa satisfacción te empuja a repetir mañana. Cada vez cuesta menos empezar.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo que sí ayuda",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea hecha",
+        "icon": "check"
+       },
+       {
+        "id": "b",
+        "label": "Satisfacción",
+        "icon": "heart"
+       },
+       {
+        "id": "c",
+        "label": "Repetir mañana",
+        "icon": "clock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "a"
+       ]
+      ],
+      "style": "pills",
+      "accent": "emerald"
+     }
+    }
+   },
+   {
+    "id": "8469334e",
+    "narration": "Recuérdalo: procrastinar es huir de una emoción, y se vence empezando pequeño. Hoy elige una tarea, redúcela a cinco minutos y da el primer paso ahora mismo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Empieza pequeño, empieza ahora.",
+      "emphasis": "empieza ahora"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.08547,
+ "seconds": 28.4
+}

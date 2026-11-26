@@ -1,0 +1,84 @@
+{
+ "id": "tec-01",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: It Just Predicts the Next Word",
+  "description": "Large language models like ChatGPT generate answers by predicting one word at a time. This short video explains how training on huge amounts of text makes that simple trick so powerful.",
+  "beats": [
+   {
+    "id": "307908b3",
+    "narration": "ChatGPT doesn't think up answers. It guesses one word at a time. That's the whole trick, and it's why it can write almost anything.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just predicts the next word.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "b246d1bf",
+    "narration": "First, it reads a huge amount of text from books and websites. Over and over, it practices guessing the missing word, until the guesses get good.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Training",
+      "items": [
+       "Read huge amounts of text",
+       "Guess the missing word",
+       "Repeat, and improve"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "book",
+       "search",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "e4c2d592",
+    "narration": "Then you type a question. The model picks a likely next word, adds it, and repeats. Word by word, a full answer appears.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Answering",
+      "items": [
+       "You ask",
+       "It picks a likely word",
+       "Repeat until done"
+      ],
+      "style": "rail",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "28c2c2fc",
+    "narration": "So it's a powerful pattern machine, not a mind. It can sound sure and still be wrong, so check what matters.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Sounds sure doesn't mean it's right.",
+      "emphasis": "right"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06672,
+ "seconds": 9.4
+}

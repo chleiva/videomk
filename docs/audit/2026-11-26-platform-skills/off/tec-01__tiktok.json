@@ -1,0 +1,67 @@
+{
+ "id": "tec-01",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: Just Predicting the Next Word",
+  "description": "Large language models like ChatGPT generate answers by predicting one word at a time. Learn how training on huge amounts of text turns simple next-word prediction into fluent conversation.",
+  "beats": [
+   {
+    "id": "536fd8d5",
+    "narration": "ChatGPT doesn't know what it's about to say. It only guesses the next word, then the next, over and over.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "3e9d25ac",
+    "narration": "It learned by reading enormous amounts of text, and practicing one game: hide a word, predict it, and adjust when it's wrong.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it learns",
+      "items": [
+       "Read huge amounts of text",
+       "Hide a word and guess",
+       "Fix the mistakes"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "book",
+       "circle-help",
+       "check"
+      ]
+     }
+    }
+   },
+   {
+    "id": "324d5e3c",
+    "narration": "After billions of tiny corrections, those guesses become fluent answers. It's pattern prediction, not thinking. Impressive, but worth double-checking.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Pattern prediction, not thinking.",
+      "emphasis": "Pattern prediction"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.0323,
+ "seconds": 4.1
+}

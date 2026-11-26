@@ -1,0 +1,260 @@
+{
+ "id": "cmp-01",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A fair comparison of React and Vue for beginners, judged on learning curve, job opportunities and flexibility. Find out which front-end framework fits your goals.",
+  "beats": [
+   {
+    "id": "0bceb904",
+    "narration": "Two tools, one decision. React or Vue? Pick wrong and you lose weeks. Pick either and you can build real apps. So how do you choose?",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Flexible and widely used"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Gentle and structured"
+      },
+      "rows": [
+       {
+        "label": "Learning curve",
+        "a": "Steeper",
+        "b": "Gentler"
+       },
+       {
+        "label": "Jobs",
+        "a": "More listings",
+        "b": "Fewer listings"
+       },
+       {
+        "label": "Structure",
+        "a": "You decide",
+        "b": "Built-in guidance"
+       }
+      ]
+     }
+    },
+    "chapter": "The choice"
+   },
+   {
+    "id": "a7f79b2b",
+    "narration": "Both are JavaScript tools for building user interfaces. You make small reusable pieces called components, and the screen updates when your data changes. The core idea is the same.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "developer coding on laptop",
+      "clip_queries": [
+       "developer coding on laptop",
+       "website design on computer screen"
+      ],
+      "alt": "programmer typing code at desk"
+     }
+    }
+   },
+   {
+    "id": "df28e068",
+    "narration": "First, learning curve. Vue feels familiar if you know basic HTML, CSS and JavaScript. Its files keep template, logic and style together in a clear layout.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Learning curve",
+      "items": [
+       "Vue: familiar, clear layout",
+       "React: more concepts early",
+       "Both need JavaScript basics"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "book",
+       "code",
+       "lightbulb"
+      ]
+     }
+    },
+    "chapter": "Comparing them"
+   },
+   {
+    "id": "78a3837d",
+    "narration": "React asks more of you early. You write JSX, which mixes markup into JavaScript, and you learn hooks. It feels odd at first, but it teaches you strong JavaScript habits.",
+    "scene": {
+     "type": "code",
+     "props": {
+      "code": "function Hello() {\n  return <h1>Hello</h1>;\n}",
+      "language": "javascript",
+      "mode": "code",
+      "title": "A React component",
+      "steps": [
+       {
+        "lines": [
+         1
+        ],
+        "note": "A component is a function"
+       },
+       {
+        "lines": [
+         2
+        ],
+        "note": "JSX mixes markup into JavaScript"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "e80e1a0f",
+    "narration": "Second, jobs. React is generally used by more companies, so you will usually find more listings. Vue has a loyal community and real roles too, just fewer in many places.",
+    "scene": {
+     "type": "matrix",
+     "props": {
+      "x_axis": {
+       "low": "Harder start",
+       "high": "Easier start"
+      },
+      "y_axis": {
+       "low": "Fewer jobs",
+       "high": "More jobs"
+      },
+      "items": [
+       {
+        "label": "React",
+        "x": 0.35,
+        "y": 0.8
+       },
+       {
+        "label": "Vue",
+        "x": 0.75,
+        "y": 0.5
+       }
+      ],
+      "title": "Job demand vs ease of start"
+     }
+    }
+   },
+   {
+    "id": "85a80ef3",
+    "narration": "Third, freedom. React is a library, so you choose your own tools for routing and state. That is powerful, but it can overwhelm a beginner. Vue offers more guidance out of the box.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Who decides?",
+      "nodes": [
+       {
+        "id": "r",
+        "label": "React",
+        "icon": "code"
+       },
+       {
+        "id": "c",
+        "label": "You choose tools",
+        "icon": "wrench"
+       },
+       {
+        "id": "v",
+        "label": "Vue",
+        "icon": "code"
+       },
+       {
+        "id": "g",
+        "label": "Guided setup",
+        "icon": "map"
+       }
+      ],
+      "edges": [
+       [
+        "r",
+        "c"
+       ],
+       [
+        "v",
+        "g"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "cb29e4a6",
+    "narration": "Whichever you choose, the skills transfer. Components, state, props and data flow work almost the same way in both. Learn one well, and the other takes days, not months.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "team of developers working together",
+      "clip_queries": [
+       "team of developers working together",
+       "person studying on laptop at home"
+      ],
+      "alt": "people working at computers in office"
+     }
+    }
+   },
+   {
+    "id": "a9fa3030",
+    "narration": "So choose by goal. Want the widest job market? Start with React. Want a smooth, friendly first project? Start with Vue.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Pick by your goal",
+      "items": [
+       "Most job listings: React",
+       "Smoothest start: Vue",
+       "Skills carry over either way"
+      ]
+     }
+    },
+    "chapter": "Your pick"
+   },
+   {
+    "id": "cbeeb6f5",
+    "narration": "If you are unsure, build one small app, like a to-do list, in each. An afternoon with both tells you which one feels natural.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Test both",
+      "steps": [
+       {
+        "label": "Build a to-do list in Vue"
+       },
+       {
+        "label": "Build the same in React"
+       },
+       {
+        "label": "Keep the one that clicks"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "24fb470c",
+    "narration": "The best framework is the one you actually finish a project with. Pick one today, build something, and the other will be easy to learn later.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The best first framework is the one you actually build with.",
+      "emphasis": "actually build"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.13806,
+ "seconds": 39.4
+}

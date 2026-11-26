@@ -1,0 +1,497 @@
+{
+ "id": "kid-01",
+ "category": "education / lesson for kids",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Explain how volcanoes erupt for six-year-olds",
+ "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:41:53",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How volcanoes erupt is a timeless science explanation; an encyclopedia source covers it accurately without needing recent information.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 1.0,
+    "error": "fetch failed: HTTPError 429"
+   }
+  ],
+  "fetch_errors_n": 1,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6686,
+  "n_sources": 5,
+  "n_fetched": 6,
+  "fetched": [
+   "2022 Hunga Tonga–Hunga Haʻapai eruption and tsunami",
+   "1980 eruption of Mount St. Helens",
+   "Magma chamber",
+   "Volcanic gas",
+   "Volcanic eruption",
+   "Strombolian eruption"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## 2022 Hunga Tonga–Hunga Haʻapai eruption and tsunami\nIn December 2021, an eruption began on Hunga Tonga–Hunga Haʻapai, a submarine volcano in the Tongan archipelago in the southern Pacific Ocean. The eruption reached a very large and powerful climax nearly four weeks later, on 15 January 2022. Hunga Tonga–Hunga Haʻapai is 65 kilometres (40 mi) north of Tongatapu, the country's main island, and is part of the highly active Tonga–Kermadec Islands volcanic arc, a subduction zone extending from New Zealand to Fiji. On the Volcanic Explosivity Index scale, the eruption was rated at least a VEI-5. Described by scientists as a \"magma hammer\", the volcano at its height produced a series of four underwater thrusts, displaced 10 cubic kilometres (2.4 cu mi) of rock, ash and sediment, and generated the largest atmospheric explosion recorded by modern instrumentation.\nThe eruption produced a volcanic tsunami that affected Tonga, Fiji, American Samoa, Samoa, Vanuatu, New Zealand, Japan, the United States, the Russian Far East, Chile and Peru. At least four people were killed, some were injured, and some remain possibly missing in Tonga from tsunami waves up to 20 m (66 ft) high. Tsunami waves with run-up heights up to 45 m (148 ft) struck the uninhabited...\n\n## 1980 eruption of Mount St. Helens\nOn May 18, 1980, at 8:32 a.m., Mount St. Helens in Skamania County, Washington, United States, experienced a catastrophic explosive eruption which had a volcanic explosivity index of 5. It was the first to occur in the contiguous United States since the much smaller 1915 eruption of Lassen Peak in California. The main eruption was preceded by a series of volcanic explosions, pyroclastic flows, and phreatic blasts beginning in March 1980. It has often been considered the most disastrous volcanic event in U.S. history.\nThe eruption was preceded by a series of earthquakes and steam-venting episodes caused by an injection of magma at shallow depth below the volcano that created a large bulge and a fracture system on the mountain's north slope. An earthquake at 8:32:11 am PDT (UTC−7) on May 18, 1980, caused the entire weakened north face to slide away, a sector collapse which was the largest subaerial landslide in recorded history. This allowed the partly molten rock, rich in high-pressure gas and steam, to suddenly explode northward toward Spirit Lake in a hot mix of lava and pulverized rock, overtaking the landslide. An eruption column rose 80,000 feet (24 km; 15 mi) into the atmosphere...\n\n## Magma chamber\nA magma chamber is a large pool of liquid rock beneath the surface of the Earth. The molten rock, or magma, in such a chamber is less dense than the surrounding country rock, which produces buoyant forces on the magma that tend to drive it upwards. If the magma finds a path to the surface, then the result will be a volcanic eruption; consequently, many volcanoes are situated over magma chambers. \nThese chambers are hard to detect deep within the Earth, and therefore most of those known are close to the surface, commonly between 1 km and 10 km down.\n\n## Volcanic gas\nVolcanic gases are gases given off by active (or, at times, by dormant) volcanoes. These include gases trapped in cavities (vesicles) in volcanic rocks, dissolved or dissociated gases in magma and lava, or gases emanating from lava, from volcanic craters or vents. Volcanic gases can also be emitted through groundwater heated by volcanic action.\nThe sources of volcanic gases on Earth include:\nprimordial and recycled constituents from the Earth's mantle,\nassimilated constituents from the Earth's crust,\ngroundwater and the Earth's atmosphere.\nSubstances that may become gaseous or give off gases when heated are termed volatile substances.\nVolcanic gases are not only released during an eruption; they can also seep out slowly when a volcano is inactive through a continuous process known as passive degassing, which can persist for years. Even small emissions can affect the surrounding environment by changing soil and water chemistry and impacting plants and animals. By studying changes in gas composition and emission rates, scientists can monitor volcanic activity and assess potential hazards before an eruption occurs.\n\n## Volcanic eruption\nA volcanic eruption occurs when material is expelled from a volcanic vent or fissure. Several types of volcanic eruptions have been distinguished by volcanologists. These are often named after famous volcanoes where that type of behavior has been observed. Some volcanoes may exhibit only one characteristic type of eruption during a period of activity, while others may display an entire sequence of types all in one eruptive series.\nThere are three main types of volcanic eruptions. Magmatic eruptions involve the decompression of gas within magma that propels it forward. Phreatic eruptions are driven by the superheating of steam due to the close proximity of magma. This type exhibits no magmatic release, instead causing the granulation of existing rock. Phreatomagmatic eruptions are driven by the direct interaction of magma and water, as opposed to phreatic eruptions, where no fresh magma reaches the surface.\nWithin these broad eruptive types are several subtypes. The weakest are Hawaiian and submarine, then Strombolian, followed by Vulcanian and Surtseyan. The stronger eruptive types are Pelean eruptions, followed by Plinian eruptions; the strongest eruptions are called ultra-Plinian...\n\n## Strombolian eruption\nIn volcanology, a Strombolian eruption is a type of volcanic eruption with relatively mild blasts, typically having a Volcanic Explosivity Index of 1 or 2. Strombolian eruptions consist of ejection of incandescent scoria which can range from small  lapilli, to larger volcanic bombs, to altitudes of tens to a few hundreds of metres. The eruptions are small to medium in volume, with sporadic violence. This type of eruption is named for the Italian volcano Stromboli.\nThe tephra typically glows red when leaving the vent, but its surface cools and assumes a dark to black color and may significantly solidify before impact.  The tephra accumulates in the vicinity of the vent, forming a cinder cone. Scoria is the most common product; the amount of volcanic ash is typically rather minor or absent.\nThe lava flows are more viscous, and therefore shorter and thicker, than the corresponding Hawaiian eruptions; it may or may not be accompanied by production of pyroclastic rock and lava flows.\nInstead the gas coalesces into bubbles, called gas slugs, that grow large enough to rise through the magma column, bursting near the top due to the decrease in pressure and throwing magma into the air.  Each...",
+ "plan": {
+  "title": "How Volcanoes Erupt: A Story for Kids",
+  "description": "A friendly explanation for six-year-olds of how a volcano erupts, from hot melted rock underground to lava and ash. Learn about magma, gas bubbles and why volcanoes burst.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "3d2ae01d",
+    "narration": "Can you guess what happens when a mountain burps? Fire, smoke and glowing rock shoot into the sky! That is a volcano erupting. Let's find out why it happens.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano eruption lava",
+      "alt": "erupting volcano at night"
+     }
+    },
+    "sfx": "impact",
+    "speaker": "narrator"
+   },
+   {
+    "id": "65822a78",
+    "narration": "Deep under the ground, it is so hot that rock melts. Melted rock is called magma. It is thick and gooey, a bit like hot, runny honey.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Magma",
+      "definition": "Hot, melted rock deep under the ground."
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "What is inside"
+   },
+   {
+    "id": "236aed4b",
+    "narration": "The magma waits in a giant pool under the mountain. We call it the magma chamber. The mountain sits on top, like a lid on a pot.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Under a volcano",
+      "nodes": [
+       {
+        "id": "m",
+        "label": "Mountain",
+        "icon": "mountain"
+       },
+       {
+        "id": "c",
+        "label": "Magma chamber",
+        "icon": "flame"
+       },
+       {
+        "id": "v",
+        "label": "Eruption",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "c",
+        "m",
+        "pushes up"
+       ],
+       [
+        "m",
+        "v"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    },
+    "sfx": "click",
+    "speaker": "narrator"
+   },
+   {
+    "id": "ff3c540c",
+    "narration": "Magma is lighter than the rock around it. So it wants to float up, like a bubble rising in a bath. It pushes and pushes, looking for a way out.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "bubbles rising in water",
+      "clip_queries": [
+       "bubbles rising in water",
+       "boiling pot on stove"
+      ],
+      "alt": "bubbles in a glass of water"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "347e7142",
+    "narration": "Magma also holds gas, tiny bubbles hiding inside. Think of a fizzy drink. Shake the bottle, open the lid, and pop! The bubbles rush out and take the drink with them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "soda bottle fizzing opening",
+      "alt": "fizzy drink bubbles overflowing"
+     }
+    },
+    "sfx": "whoosh",
+    "speaker": "narrator",
+    "chapter": "Why it bursts"
+   },
+   {
+    "id": "0b9352c3",
+    "narration": "When magma rises, there is less squeezing, so the gas bubbles grow big. They burst and throw the magma into the air. That is how an eruption starts!",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How an eruption starts",
+      "steps": [
+       {
+        "label": "Magma rises",
+        "detail": "It floats up from below"
+       },
+       {
+        "label": "Bubbles grow",
+        "detail": "Less squeezing, bigger gas bubbles"
+       },
+       {
+        "label": "Burst!",
+        "detail": "Magma is thrown into the air"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "99ce91f9",
+    "narration": "Out comes lava, which is magma once it is outside. Red hot bits glow in the dark. Then they cool down and turn black and hard, building a cone-shaped hill.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "lava flowing volcano",
+      "clip_queries": [
+       "lava flowing volcano",
+       "lava fountain at night"
+      ],
+      "alt": "glowing lava flow"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "What comes out"
+   },
+   {
+    "id": "b87c1225",
+    "narration": "Some volcanoes are gentle, with little pops of fire. Others are huge. In 1980, Mount St. Helens in Washington blew ash about fifteen miles up into the sky!",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Mount St. Helens eruption ash cloud",
+      "alt": "Mount St. Helens ash column",
+      "ken_burns": "in"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "fbadfd5d",
+    "narration": "Do not worry. Scientists watch volcanoes closely. They listen for little earthquakes and check the gas coming out, so people can stay safe long before a volcano erupts.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "scientist volcano gas measuring",
+      "alt": "volcanologist working near volcano"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "e28454dd",
+    "narration": "So remember: hot magma floats up, gas bubbles grow, and the mountain goes pop! A volcano is just a mountain with a very big fizzy burp.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hot magma rises, gas bubbles grow, and the mountain goes pop!",
+      "emphasis": "pop"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [
+   {
+    "title": "1980 eruption of Mount St. Helens",
+    "url": "https://en.wikipedia.org/wiki/1980_eruption_of_Mount_St._Helens",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Magma chamber",
+    "url": "https://en.wikipedia.org/wiki/Magma_chamber",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Volcanic gas",
+    "url": "https://en.wikipedia.org/wiki/Volcanic_gas",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Volcanic eruption",
+    "url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Strombolian eruption",
+    "url": "https://en.wikipedia.org/wiki/Strombolian_eruption",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 29.8,
+  "before_first_script_call_s": 7.6,
+  "script_s": 22.2
+ },
+ "cost": {
+  "script_small": 0.00023,
+  "script_big": 0.09524,
+  "search_api": 0.0,
+  "total": 0.09548
+ },
+ "calls": {
+  "small": 3,
+  "big": 2
+ },
+ "tokens": {
+  "in": 33010,
+  "out": 3387
+ },
+ "rules": {
+  "length": {
+   "words": 285,
+   "expected_words": 267,
+   "ratio": 1.067,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 128.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Can you guess what happens when a mountain burps? Fire, smoke and glowing rock shoot into the sky! That is a volcano erupting. Let's find out why it happens.",
+   "close_text": "So remember: hot magma floats up, gas bubbles grow, and the mountain goes pop! A volcano is just a mountain with a very big fizzy burp."
+  },
+  "variety": {
+   "distinct": 6,
+   "counts": {
+    "clip": 5,
+    "definition": 1,
+    "diagram": 1,
+    "steps": 1,
+    "image": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 2,
+   "entropy": 2.16,
+   "top_type": "clip",
+   "top_share": 0.5,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 1,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 5,
+   "fetched": 6,
+   "notes_len": 6686,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "\"thick and gooey, a bit like hot, runny honey\" is contradictory; \"mountain sits on top, like a lid on a pot\" is a shaky image; the claim that people stay safe \"long before\" an eruption is overconfident."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers magma, the chamber, the soda analogy, lava and St. Helens, but it skips layers/crust, the vent and crater, and ash. It also does not explain why bubbles grow, beyond \"less squeezing\"."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "The order is clear: inside, rising, gas, what comes out, safety, recap. The ending repeats the earlier steps, as a recap should."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "\"What happens when a mountain burps?\" is playful and curious, and the closing \"fizzy burp\" line is memorable. The hook is a little cute and the recap is simple."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Playful, short sentences and a warm voice suit six-year-olds. Words like \"chamber\" and \"incandescent\" ideas are mostly avoided."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The mix of clips, definition, diagram, steps and kinetic text varies well and matches the narration. The diagram's \"rocket\" icon for eruption is odd, and its edges are muddled."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The soda bottle and bubble analogies are standard. The 15-mile St. Helens fact is concrete, but little else is surprising."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is English, kid-appropriate and about the right length (~250 words). It misses magma vs lava layers detail only slightly."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The language is fluent and simple. \"Thick and gooey... runny honey\" is a self-contradiction."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "It is thick and gooey, a bit like hot, runny honey.",
+    "issue": "\"Thick\" and \"runny\" contradict each other, which confuses the analogy.",
+    "beat": 2
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "The mountain sits on top, like a lid on a pot.",
+    "issue": "A lid image suggests the mountain is a separate cap. It also implies pressure is held by the mountain, which oversimplifies.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Magma is lighter than the rock around it. So it wants to float up, like a bubble rising in a bath.",
+    "issue": "It is fairly accurate (less dense), but the \"bath bubble\" analogy overlaps with the gas bubbles that come next and may blur two different ideas.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Out comes lava, which is magma once it is outside.",
+    "issue": "The magma vs lava point is present but brief. It never mentions the crater or vent, or ash.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "so people can stay safe long before a volcano erupts.",
+    "issue": "It overstates how reliably volcanoes are predicted, and the wording is awkward.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Earth's layers/crust and mantle",
+   "The vent or crater where it comes out",
+   "Ash and a fun fact such as lava temperature",
+   "A closing question for the child"
+  ],
+  "wrong_facts": [
+   "\"thick and gooey, a bit like hot, runny honey\" is self-contradictory",
+   "The St. Helens column height of 15 miles matches the notes (80,000 ft)"
+  ],
+  "would_publish": true,
+  "summary": "A clear, playful, well-structured explainer with a good soda analogy and varied visuals. It is held back by a contradictory honey simile, thin coverage of the layers and vent, and mostly stock analogies.",
+  "mean": 3.67,
+  "cost_usd": 0.024508,
+  "tokens": [
+   5659,
+   1319
+  ]
+ }
+}

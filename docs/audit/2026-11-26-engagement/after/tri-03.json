@@ -1,0 +1,427 @@
+{
+ "id": "tri-03",
+ "category": "trivia / listicle",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "5 weird facts about space",
+ "great": "Five correct, surprising space facts (e.g. day on Venus longer than year, neutron star density), concise.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:35:57",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Space trivia like these is timeless and well covered by encyclopedic sources, so no recent search is needed.",
+  "queries": [
+   "weird facts about space"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 2.4,
+   "cost_usd": 0.0007266000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 5,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": {
+   "rejected": 1,
+   "repaired": 1,
+   "calls": 1
+  },
+  "notes_len": 4217,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "5 facts about NASA you might not know",
+   "Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine",
+   "Extreme Space Facts - Cloudfront.net",
+   "Neutron star - Wikipedia",
+   "NASA’s Goddard Space Flight Center on Facebook: \"What is a Neutron Star?\"",
+   "What would happen if a tablespoonful of a neutron star was brought to Earth?"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 2: scene replaced (versus needs 2+ rows)",
+  "scenes corrected: 1 of 1"
+ ],
+ "notes": "## 5 facts about NASA you might not know\nMost people know that when you walk on a boat there’s a chance you might get some seasickness, generally caused by the vessel’s erratic motion. Likewise, astronauts sent to space can experience a similar kind of motion sickness known as space adaptation syndrome, or space sickness. Over half of astronauts experience some form of nausea, headaches, vomiting, and general discomfort while in space. The most notable cause inflicted former senator Jake Garn, who started to experience symptoms [...] ## 4. NASA invents kids’ toys NASA gets credited with a lot of inventions, some of which aren’t actually NASA inventions, such as Velcro. But one invention you might not know about is the Super Soaker. While working on a new idea for a heat pump that would use water instead of Freon, NASA scientist Dr. Lonnie Johnson was struck with inspiration when a jet of water shot across the room. ## 5. Space \n\n## Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine\nSpace is a vacuum and sound waves can’t travel through it in the same way they do on Earth, meaning you wouldn't be able to hear anything in space. But space isn’t entirely silent. Electromagnetic vibrations, like plasma waves or magnetic field interactions, can be translated into sound by instruments. NASA has even 'sonified' data from planets, stars, black holes and nebulae, turning invisible cosmic phenomena into eerie soundtracks. You can hear what this sounds like in the video above. [...] Image of Mercury taken by the MESSENGER spacecraft. Credit: NASA/JPL-Caltech - NASA/JHUAPL Technically, one Mercurian day lasts 59 Earth days, while a year lasts 88. However, due to Mercury’s very eccentric orbit and alignment with the Sun, the length of time from sunrise to sunrise, known as a ‘solar day’, is equal to 176 Earth days — twice as long as a Mercurian year. ## All the other planets co\n\n## Extreme Space Facts - Cloudfront.net\nNational Aeronautics and Space Administration www.nasa.gov Extreme Space Facts National Aeronautics and Space Administration JPL 400-1086 Rev. 1 8/10 Better stick with a rubber ducky Saturn is the only planet in our solar system that is less dense than water. It could float in a bathtub if anybody could build a bathtub big enough. To learn many more cool facts about the solar system, visit: solarsystem.nasa.gov 16 eXtreme space facts!\n\n## Neutron star - Wikipedia\nA neutron star is so dense that one teaspoon (4.929 milliliters) of its material would have a mass over 5.5×1012kg, about 900 times the mass of the Great Pyramid of Giza.\\[b] The entire mass of the Earth at neutron star density would fit into a sphere 305 m in diameter, about the size of the Arecibo Telescope. [...] Neutron star material is remarkably dense: a normal-sized matchbox containing neutron-star material would have a weight of approximately 3 billion tonnes, the same weight as a 0.5-cubic-kilometer chunk of the Earth (a cube with edges of about 800 meters) from Earth's surface.\\\\ [...] 2. ↑ The average density of material in a neutron star of radius 10 km is 1.1×1012 kg/cm3. Therefore, 5 ml of such material has a mass of 5.5×1012 kg, or 5.5 billion metric tons. This is about 15 times the total mass of the human world population. Alternatively, 5 ml from a neutron star of radius\n\n## NASA’s Goddard Space Flight Center on Facebook: \"What is a Neutron Star?\"\n# NASA’s Goddard Space Flight Center on Facebook: \"What is a Neutron Star?\" A teaspoon of neutron star interior won't sweeten your coffee but would weigh more than a billion tons on Earth. Learn more weird facts about neutron stars here: - Author: NASA’s Goddard Space Flight Center - Posted: 2017-05-18T17:15:36+00:00 - Links: - Reactions: 674 - Comment count: 25 - Privacy: Public ## Comments\n\n## What would happen if a tablespoonful of a neutron star was brought to Earth?\nA tablespoon of the Sun, depending on where you scoop, would weigh about 5 pounds (2 kilograms) — the weight of an old laptop. A tablespoon of neutron star weighs more than 1 billion tons (900 billion kg) — the weight of Mount Everest. So while you could lift a spoonful of Sun, you can’t lift a spoonful of neutron star.",
+ "plan": {
+  "title": "5 Weird Facts About Space",
+  "description": "Five strange space facts: silent space that can be sonified, a floating planet, a very long Mercury day, a heavy teaspoon of neutron star, and space sickness. A quick tour of how odd the universe really is.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "5401cf91",
+    "narration": "One planet in our solar system is lighter than water. Saturn is less dense than water, so it could float in a bathtub, if anybody could build a bathtub big enough.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "planet Saturn in space",
+      "alt": "ringed planet in space"
+     }
+    },
+    "chapter": "Strange but true"
+   },
+   {
+    "id": "0eba7793",
+    "narration": "On Mercury, a day is longer than a year. One year lasts 88 Earth days. But sunrise to sunrise takes 176 Earth days, twice as long.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "176 days",
+      "label": "Sunrise to sunrise on Mercury, twice its 88-day year"
+     }
+    }
+   },
+   {
+    "id": "9119057a",
+    "narration": "A teaspoon of neutron star would weigh over a billion tons on Earth. You can lift a spoonful of the Sun, about five pounds. Not this.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Spoonful of the Sun",
+       "tagline": "Liftable"
+      },
+      "b": {
+       "name": "Teaspoon of neutron star",
+       "tagline": "Not this"
+      },
+      "rows": [
+       {
+        "label": "Amount",
+        "a": "A spoonful",
+        "b": "A teaspoon"
+       },
+       {
+        "label": "Weight on Earth",
+        "a": "About 5 pounds",
+        "b": "Over 1 billion tons"
+       }
+      ],
+      "verdict": "Not this."
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "cff1bf77",
+    "narration": "Space is silent, because sound can't travel through a vacuum. But NASA turns data from planets, stars and black holes into eerie sounds we can hear.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "nebula stars in space",
+      "clip_queries": [
+       "nebula stars in space",
+       "galaxy deep space stars"
+      ],
+      "alt": "galaxy deep space stars"
+     }
+    }
+   },
+   {
+    "id": "85fcf068",
+    "narration": "And space can make you sick. Over half of astronauts get nausea, headaches or vomiting. So the universe is weird, even for those who go there.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Over half of astronauts get space sickness.",
+      "emphasis": "Over half"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "5 facts about NASA you might not know",
+    "url": "https://www.astronomy.com/astronomy-for-beginners/5-facts-about-nasa-you-might-not-know",
+    "publisher": "astronomy.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine",
+    "url": "https://www.skyatnightmagazine.com/space-science/facts-about-astronomy-space",
+    "publisher": "skyatnightmagazine.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Extreme Space Facts - Cloudfront.net",
+    "url": "https://d2pn8kiwq2w21t.cloudfront.net/documents/ss_extreme_poster.pdf",
+    "publisher": "d2pn8kiwq2w21t.cloudfront.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Neutron star - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Neutron_star",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 20.4,
+  "before_first_script_call_s": 5.1,
+  "script_s": 15.3
+ },
+ "cost": {
+  "script_small": 0.00134,
+  "research": 0.00073,
+  "script_big": 0.07698,
+  "search_api": 0.016,
+  "total": 0.09504
+ },
+ "calls": {
+  "small": 5,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 44818,
+  "out": 2864
+ },
+ "rules": {
+  "length": {
+   "words": 135,
+   "expected_words": 134,
+   "ratio": 1.007,
+   "beats": 5,
+   "expected_beats": 4,
+   "est_speech_s": 61.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "One planet in our solar system is lighter than water. Saturn is less dense than water, so it could float in a bathtub, if anybody could build a bathtub big enough.",
+   "close_text": "And space can make you sick. Over half of astronauts get nausea, headaches or vomiting. So the universe is weird, even for those who go there."
+  },
+  "variety": {
+   "distinct": 4,
+   "counts": {
+    "clip": 2,
+    "stat": 1,
+    "versus": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 1.92,
+   "top_type": "clip",
+   "top_share": 0.4,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [],
+   "entities": 4,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "scene_replaced": 1,
+   "other": 1
+  },
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 4217,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "scenes_replaced"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Facts match the notes (Saturn density, Mercury 88/176 days, neutron star over a billion tons, over half of astronauts get space sickness). Weak points: 'One planet ... is lighter than water' is loosely phrased, and the Sun/neutron star comparison mixes a tablespoon with a teaspoon."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Delivers five facts, but they are thin, with one sentence each. The Mercury fact is the only one with a number, and the neutron star fact has no vivid comparison such as Everest or a pyramid. The 'weird' angle is thin for sickness."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is simple and each fact gets one beat. There is no numbering or transitions, and the ending is a loose moral instead of a build."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening about a planet lighter than water is a decent curiosity hook. The ending 'the universe is weird, even for those who go there' is a mild, summary-style line."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Casual and punchy, suited to a US general audience and a short format."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary (clip, stat, versus, kinetic_text). The versus card compares a spoonful of the Sun with a teaspoon of neutron star, which is mismatched and cluttered. The stat label is fine. The clip queries are generic."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The Saturn bathtub and neutron star facts are standard fare, though the Mercury day and sonification facts are decent. Little fresh detail."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Five facts, English, and about 110 words, slightly under the 134-word target. The 'weird' brief is met."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and clear. 'Not this.' is a bit abrupt, and the wording 'One planet ... is lighter than water' is slightly awkward."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "You can lift a spoonful of the Sun, about five pounds.",
+    "issue": "The notes compare a tablespoon of the Sun with a tablespoon of neutron star. The script compares a teaspoon of neutron star with a spoonful of the Sun, so the units are inconsistent and the claim is vague.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "On Mercury, a day is longer than a year.",
+    "issue": "This is true only for the solar day. The sidereal day is 59 Earth days, so the line is oversimplified. Venus is the classic example, where the day really is longer than the year.",
+    "beat": 2
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Spoonful of the Sun",
+    "issue": "The versus card compares mismatched amounts (spoonful vs teaspoon), which confuses the on-screen message.",
+    "beat": 3
+   },
+   {
+    "dimension": "hook_ending",
+    "severity": "minor",
+    "quote": "So the universe is weird, even for those who go there.",
+    "issue": "A generic wrap-up that does not give a memorable image or takeaway.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Not this.",
+    "issue": "An abrupt, cryptic closing fragment that does not make clear what 'this' is.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "A vivid scale comparison for the neutron star, such as Mount Everest or the Great Pyramid",
+   "A clearer 'fact number' structure or transitions",
+   "The Venus day-longer-than-year fact or other stronger surprises",
+   "Padding to reach the ~134-word target"
+  ],
+  "wrong_facts": [
+   "Mercury's sidereal day is about 59 Earth days, so 'a day is longer than a year' holds only for the solar day (176 days)."
+  ],
+  "would_publish": false,
+  "summary": "A correct but thin and generic list of five facts with a muddled neutron-star comparison and a flat ending. It is serviceable but lacks vivid detail and polish.",
+  "mean": 3.44,
+  "cost_usd": 0.021968,
+  "tokens": [
+   4244,
+   1348
+  ]
+ }
+}

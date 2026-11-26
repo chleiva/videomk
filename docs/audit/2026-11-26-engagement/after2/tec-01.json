@@ -1,0 +1,744 @@
+{
+ "id": "tec-01",
+ "category": "technology / AI",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how do large language models like ChatGPT work",
+ "great": "Tokens, next-token prediction, transformer attention, pretraining on text, fine-tuning with human feedback (RLHF), hallucinations and why; accessible analogies, no jargon dumps, correct.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:40:10",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How large language models work is a timeless technical explanation (neural networks, transformers, training on text, next-token prediction) that an encyclopedia covers accurately without needing recen",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 9,
+   "seconds": 3.6,
+   "cost_usd": 0.0006951,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 46.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 8618,
+  "n_sources": 6,
+  "n_fetched": 9,
+  "fetched": [
+   "How Do LLMs Work? Transformers Explained (2026)",
+   "How does next-token prediction train a large language model?",
+   "LLMs Explained: Tokens, Embeddings, Transformers and More",
+   "Understanding Next Token Prediction: Concept To Code: 1st part!",
+   "A Guide to Large Language Models (LLMs)",
+   "Why is ChatGPT so good? | Scale AI",
+   "Reinforcement Learning from Human Feedback(RLHF)-ChatGPT",
+   "RLHF: Reinforcement Learning from Human Feedback",
+   "Illustrating Reinforcement Learning from Human Feedback (RLHF)"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 344 words but a 3-minute video needs about 402 words in at least 13 beats. Lengthen the beats (about 30 words each) and add beats with new, concrete material until the total is about 402 words; keep what already works"
+ ],
+ "notes": "## How Do LLMs Work? Transformers Explained (2026)\nLarge language models work by predicting the next token in a sequence, trained on trillions of examples of human text. A token is a word or sub-word unit — the word \"understanding\" might be split into \"under\" + \"stand\" + \"ing.\" The model sees a sequence of tokens, computes probability distributions over its entire vocabulary (typically 100,000-200,000 tokens), and selects the most likely continuation. This process repeats, one token at a time, until the response is complete. [...] That last row matters more than it looks. At the very end of the network, only the last vector in the sequence is multiplied by the unembedding matrix to produce the next-token distribution. Every other vector in the final layer is \"wasted\" at inference time — but during training, every position predicts its own next token in parallel, which is what makes the math tractable on trillion-token corpora. ### Embedd\n\n## How does next-token prediction train a large language model?\nThe target sequence is used by the loss function. It is not supplied to the transformer as a separate answer. The transformer receives the input sequence, and a causal attention mask prevents each position from reading later input positions. When the model predicts (t\\_3) from the position containing (t\\_2), its representation can depend on (t\\_0), (t\\_1), and (t\\_2), but it cannot use (t\\_3). [...] Backpropagation differentiates this average loss through the output layer and the transformer. The optimizer then updates the token embeddings, attention layers, feed-forward layers, normalization parameters, and output projection. Repeating this process across many batches makes continuations found in similar contexts more probable. [...] Generation uses the same learned conditional probabilities in a different loop. The model processes the current context, selects a token from the final log\n\n## LLMs Explained: Tokens, Embeddings, Transformers and More\n[45:04] Attention gathers context from all of those tokens and passes it through multiple blocks. And finally a probability score comes out the other [45:11] end which is given all possible tokens in the model's vocabulary. What's the probability that any one of those tokens will be the next token? We then do [45:19] sampling using temperature and top P to pick that next token. And then we append that token to the prompt and repeat in a loop. Now, everything we showed in this [...] [43:01] single token. To get the next token we append the token to the input and then run this entire process again. So we get new attention, new distribution, new [43:10] predicted token, append, repeat. And this whole process is known as auto reggressive generation. Essentially, the [43:17] model has no plan. It doesn't know how the sentence ends when it starts. So every coherent paragraph from an LLM emerge\n\n## Understanding Next Token Prediction: Concept To Code: 1st part!\nImage 10 As we can see above, the next token is predicted by passing a token’s output vector as input to a linear layer, which outputs a vector with the same size as our vocabulary. After a softmax transformation is applied, a probability distribution over the token vocabulary is formed, and we can either _i)_ sample the next token from this distribution during inference or _ii)_ train the model to maximize the probability of the correct next token during pretraining. [...] We add these embeddings to the token embeddings at the corresponding position. Such additive positional embeddings are necessary because the self-attention operation does not have any way of representing the position of each token. By adding positional embeddings, we allow the self-attention layers within the transformer to use the position of each token as a relevant feature during the learning process. Recent resear\n\n## A Guide to Large Language Models (LLMs)\n--- ### GPT The Generative Pre-trained Transformer (GPT) was introduced by OpenAI in 2018 as a decoder-only transformer architecture-- no encoder, and no cross-attention. In many ways, GPTs depart from the \"transforming\" of text that the vanilla transformer was made for (translation, most notably) and double-down on text generation through \\_autoregressive next-word prediction\\_, which is simply the process making predictions and sequentially feeding them back through the model at every [...] The pre-training phase is the workhorse of building a large language model. By learning to predict the next word over billions of tokens, LLMs acquire a broad understanding of grammar, syntax, word meanings and relationships, facts, and long-range dependencies. The result of a converged pretrained model is the \\_base model\\_. While they might have the full knowledge of the dataset they were trained \n\n## Why is ChatGPT so good? | Scale AI\nFigure from OpenAI’s paper “Training language models to follow instructions with human feedback” ( Proximal Policy Optimization is a reinforcement learning algorithm introduced by OpenAI (learn more). ### Preface: Unsupervised pre-training The prerequisite for doing RLHF is to have a large language model (which includes having access to the weights), that is pre-trained on a huge corpus of text, such as BLOOM. ### Step 1: Collect human demonstration data to fine-tune the language model [...] To combat these issues, OpenAI applied a particular type of instruction fine-tuning called Reinforcement Learning with Human Feedback (RLHF). The basic idea is to train an additional reward model that rates how good a model's response is from the perspective of a human to guide the model's learning process. Then use this reward model to fine-tune the original language model using reinforcement learni\n\n## Reinforcement Learning from Human Feedback(RLHF)-ChatGPT\nAfter the reward model has been trained, the next step is to use reinforcement learning (RL) to optimize the original language model with respect to the reward model. At this point in the RLHF system, we have an initial LM that can generate text and a preference model that assigns a score to the text based on how well humans perceive it. RL is used to fine-tune the original LM to improve its performance and generate text that is more in line with human preferences. [...] Reinforcement learning from human feedback (RLHF) has gained popularity with the recent release of ChatGPT. RLHF involves training multiple models at different stages, which typically include pre-training a language model, training a reward model, and fine-tuning the language model with reinforcement learning. Let’s see how these different stages work together, ### Pre-training a language model (LM): In RLHF, a pre-train\n\n## RLHF: Reinforcement Learning from Human Feedback\nBelow is a screenshot of the UI that OpenAI’s labelers used to create training data for InstructGPT’s RM. Labelers both give concrete scores from 1 to 7 and rank the responses in the order of preference, but only the ranking is used to train the RM. Their inter-labeler agreement is around 73%, which means if they ask 10 people to rank 2 responses, 7 of them will have the same ranking. 3 phases of ChatGPT development [...] 3 phases of ChatGPT development The distribution of prompts used to finetune InstructGPT To train a model to mimic the demonstration data, you can either start with the pretrained model and finetune it, or train from scratch. In fact, OpenAI showed that the outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3. However, the finetuned approach produces much superior results. ### Demonstration data [...] OpenAI also found that it’s\n\n## Illustrating Reinforcement Learning from Human Feedback (RLHF)\nAs a starting point RLHF use a language model that has already been pretrained with the classical pretraining objectives (see this blog post for more details). OpenAI used a smaller version of GPT-3 for its first popular RLHF model, InstructGPT. In their shared papers, Anthropic used transformer models from 10 million to 52 billion parameters trained for this task. DeepMind has documented using up to their 280 billion parameter model Gopher. It is likely that all these companies use much larger [...] Some RLHF systems have added additional terms to the reward function. For example, OpenAI experimented successfully on InstructGPT by mixing in additional pre-training gradients (from the human annotation set) into the update rule for PPO. It is likely as RLHF is further investigated, the formulation of this reward function will continue to evolve. [...] model to compute a penalty on the dif",
+ "plan": {
+  "title": "How ChatGPT Works: Predicting One Token at a Time",
+  "description": "Large language models like ChatGPT work by predicting the next token, learned from trillions of examples of human text. This video explains tokens, attention, training, and how human feedback turns a text predictor into an assistant.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "06d9aea9",
+    "narration": "ChatGPT does not know how its sentence will end. It has no plan. It only ever answers one question: what comes next?",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It only ever answers one question: what comes next?",
+      "emphasis": "what comes next"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "204f0a27",
+    "narration": "First, text is chopped into tokens. A token is a word or a piece of a word. The word understanding might become under, stand, and ing.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Splitting a word into tokens",
+      "nodes": [
+       {
+        "id": "w",
+        "label": "understanding",
+        "icon": "book"
+       },
+       {
+        "id": "a",
+        "label": "under"
+       },
+       {
+        "id": "b",
+        "label": "stand"
+       },
+       {
+        "id": "c",
+        "label": "ing"
+       }
+      ],
+      "edges": [
+       [
+        "w",
+        "a"
+       ],
+       [
+        "w",
+        "b"
+       ],
+       [
+        "w",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 0
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Words become numbers"
+   },
+   {
+    "id": "62a72c00",
+    "narration": "Each token becomes a list of numbers called an embedding. Since attention cannot see order by itself, position information is added too.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "From text to numbers",
+      "items": [
+       "Token",
+       "Embedding",
+       "Position added"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "book",
+       "chart-column",
+       "map"
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "08207638",
+    "narration": "Picture a researcher at a computer, reading through mountains of text. The model does something similar, but with trillions of examples of human writing.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "researcher working at computer",
+      "clip_queries": [
+       "researcher working at computer",
+       "server room with blinking lights"
+      ],
+      "alt": "person typing at a desk with screens"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "f3333e93",
+    "narration": "Next comes attention. Each token looks at the tokens before it, and gathers context. This repeats through many blocks, stacked one on top of another.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Inside the model",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Tokens",
+        "icon": "book"
+       },
+       {
+        "id": "at",
+        "label": "Attention",
+        "icon": "eye"
+       },
+       {
+        "id": "bl",
+        "label": "Many blocks",
+        "icon": "layers"
+       },
+       {
+        "id": "pr",
+        "label": "Probabilities",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "at"
+       ],
+       [
+        "at",
+        "bl"
+       ],
+       [
+        "bl",
+        "pr"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 1
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "Inside the transformer"
+   },
+   {
+    "id": "bc5dc737",
+    "narration": "At the end, the model scores every token in its vocabulary, typically 100,000 to 200,000 of them. Each gets a probability of being next.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "100,000+",
+      "label": "tokens scored for every single prediction"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "52ab9c12",
+    "narration": "Then one token is picked, using settings like temperature. It is added to the prompt, and the whole loop runs again. Predict, append, repeat.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Generating a reply",
+      "steps": [
+       {
+        "label": "Predict",
+        "detail": "Score every token"
+       },
+       {
+        "label": "Pick",
+        "detail": "Sample with temperature"
+       },
+       {
+        "label": "Append",
+        "detail": "Add it to the prompt"
+       },
+       {
+        "label": "Repeat",
+        "detail": "Until the answer is done"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "2eef409c",
+    "narration": "So how does it learn? In training, it reads real text and guesses the next token. Then it measures the error, and nudges its numbers to do better.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The training loop",
+      "nodes": [
+       {
+        "id": "g",
+        "label": "Guess next token",
+        "icon": "circle-help"
+       },
+       {
+        "id": "m",
+        "label": "Measure the error",
+        "icon": "chart-column"
+       },
+       {
+        "id": "u",
+        "label": "Update the numbers",
+        "icon": "cog"
+       }
+      ],
+      "edges": [
+       [
+        "g",
+        "m"
+       ],
+       [
+        "m",
+        "u"
+       ],
+       [
+        "u",
+        "g",
+        "repeat"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "How it learns"
+   },
+   {
+    "id": "5149089e",
+    "narration": "Billions of repeats teach it grammar, word meanings, facts, and long-range connections. The result is a base model: a powerful text predictor, but not yet a helpful assistant.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What pre-training teaches",
+      "items": [
+       "Grammar",
+       "Word meanings",
+       "Facts",
+       "Long-range connections"
+      ],
+      "style": "rail",
+      "accent": "emerald"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "405844bb",
+    "narration": "To make it helpful, OpenAI used human feedback. People wrote example answers, and the model was fine-tuned to imitate them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people working at laptops in office",
+      "clip_queries": [
+       "people working at laptops in office",
+       "person writing notes at desk"
+      ],
+      "alt": "team typing at computers"
+     }
+    },
+    "speaker": "narrator",
+    "chapter": "From predictor to assistant"
+   },
+   {
+    "id": "6d07fcc4",
+    "narration": "Then labelers ranked different answers from best to worst. Those rankings trained a reward model, which learned to score answers the way people would.",
+    "scene": {
+     "type": "sequence",
+     "props": {
+      "actors": [
+       "Model",
+       "Labelers",
+       "Reward model"
+      ],
+      "messages": [
+       {
+        "from": "Model",
+        "to": "Labelers",
+        "label": "Several answers"
+       },
+       {
+        "from": "Labelers",
+        "to": "Reward model",
+        "label": "Rankings"
+       },
+       {
+        "from": "Reward model",
+        "to": "Model",
+        "label": "Scores",
+        "reply": true
+       }
+      ],
+      "title": "Learning human preferences"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "cadb8d71",
+    "narration": "Reinforcement learning then tunes the model toward higher scores. The effect is striking: a small 1.3 billion parameter InstructGPT was preferred over the 175 billion parameter GPT-3.",
+    "scene": {
+     "type": "scale_compare",
+     "props": {
+      "items": [
+       {
+        "label": "InstructGPT",
+        "value": 1.3,
+        "note": "Preferred by labelers"
+       },
+       {
+        "label": "GPT-3",
+        "value": 175.0,
+        "note": "Much larger"
+       }
+      ],
+      "unit": "B params",
+      "title": "Preferred by people"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "0a873495",
+    "narration": "Even humans disagree. Labelers agreed on rankings only about 73 percent of the time. So the model learns a blurry average of human taste.",
+    "scene": {
+     "type": "pictogram",
+     "props": {
+      "total": 100,
+      "filled": 73,
+      "icon": "person",
+      "label": "About 73% of rankings matched between labelers",
+      "title": "Labeler agreement"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "3ab2e9b3",
+    "narration": "So a chatbot is a next-token predictor, trained on huge text, then shaped by people. Remember this: it writes by predicting, one token at a time.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It writes by predicting, one token at a time.",
+      "emphasis": "one token at a time"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [
+   {
+    "title": "How Do LLMs Work? Transformers Explained (2026)",
+    "url": "https://www.taskade.com/blog/how-do-llms-work",
+    "publisher": "taskade.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How does next-token prediction train a large language model?",
+    "url": "https://sebastianraschka.com/faq/docs/next-token-prediction.html",
+    "publisher": "sebastianraschka.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "LLMs Explained: Tokens, Embeddings, Transformers and More",
+    "url": "https://www.youtube.com/watch?v=YmLp8qe87A0",
+    "publisher": "youtube.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "A Guide to Large Language Models (LLMs)",
+    "url": "https://courses.cis.cornell.edu/courses/cs4782/2026sp/notes/rawnotes/08_LLMs/08_LLMs.md.html",
+    "publisher": "courses.cis.cornell.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Why is ChatGPT so good? | Scale AI",
+    "url": "https://scale.com/blog/chatgpt-reinforcement-learning",
+    "publisher": "scale.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "RLHF: Reinforcement Learning from Human Feedback",
+    "url": "https://huyenchip.com/2023/05/02/rlhf.html",
+    "publisher": "huyenchip.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 54.1,
+  "before_first_script_call_s": 6.9,
+  "script_s": 47.2
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "research": 0.0007,
+  "script_big": 0.16943,
+  "search_api": 0.016,
+  "total": 0.18638
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 55450,
+  "out": 7739
+ },
+ "rules": {
+  "length": {
+   "words": 351,
+   "expected_words": 402,
+   "ratio": 0.873,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 159.6,
+   "flag_short": true,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 22,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 27,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "ChatGPT does not know how its sentence will end. It has no plan. It only ever answers one question: what comes next?",
+   "close_text": "So a chatbot is a next-token predictor, trained on huge text, then shaped by people. Remember this: it writes by predicting, one token at a time."
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "kinetic_text": 2,
+    "diagram": 3,
+    "bullets": 2,
+    "clip": 2,
+    "stat": 1,
+    "steps": 1,
+    "sequence": 1,
+    "scale_compare": 1,
+    "pictogram": 1
+   },
+   "max_run": 1,
+   "entropy": 3.04,
+   "top_type": "diagram",
+   "top_share": 0.21,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 5,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 6,
+   "fetched": 9,
+   "notes_len": 8618,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [
+   "too_short"
+  ],
+  "mismatch_scenes": [
+   "beat 5 (diagram): its narration never says ['Attention', 'Probabilities']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Mostly matches the notes, but \"Each token looks at the tokens before it\" is only true of decoder-only models and is oversimplified. The claim of \"trillions of examples\" is loosely framed, and \"ChatGPT ... has no plan\" is stated flatly. The InstructGPT comparison is correct (1.3B preferred over 175B GPT-3)."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers tokens, embeddings, attention, the generation loop, pretraining and RLHF. Hallucinations, which the reviewer's note requires, are absent entirely. Attention gets only one thin sentence and there is no explanation of Q/K/V or of why attention helps."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear chapters run tokens, transformer, training, then RLHF, and the ending returns to the opening idea. Pacing is steady. Beat 4 interrupts the flow and sits oddly between embeddings and attention."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opener \"ChatGPT does not know how its sentence will end\" has some tension. The ending is a restatement (\"Remember this: it writes by predicting\") rather than a fresh image or new thought."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Plain, accessible and beginner-friendly with short sentences. A little dry, and terms like \"reward model\" and \"embedding\" get only light analogies."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well (diagram, steps, sequence, scale_compare, pictogram). Weak spots: the stock clip of a \"researcher at computer\" for \"mountains of text\" is generic, and the stat \"100,000+\" is fine but the scale_compare bars (1.3 vs 175) are a fair use of real numbers. The pictogram of 73% is acceptable."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The 73% labeler agreement and the 1.3B vs 175B comparison are concrete, but the explanation otherwise uses no memorable analogy and follows a standard tutorial path."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "Length is on target and the language is English. It misses the hallucinations point from the expected content and uses little analogy-based explanation."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical. Beat 4 (\"The model does something similar\") is vague, and the \"blurry average of human taste\" line is a slight overreach."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "So a chatbot is a next-token predictor, trained on huge text, then shaped by people.",
+    "issue": "Never addresses hallucinations or why a next-token predictor invents false facts, which is a core expected point.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Each token looks at the tokens before it, and gathers context.",
+    "issue": "Oversimplifies attention. It omits how relevance is weighted and implies only a backward-looking mechanism without explaining the causal mask.",
+    "beat": 5
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Picture a researcher at a computer, reading through mountains of text.",
+    "issue": "The filler stock-clip beat interrupts the tokens-to-attention flow and the analogy is vague and unhelpful.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "So the model learns a blurry average of human taste.",
+    "issue": "This is an inference not in the notes. The 73% agreement is presented as the cause, while the reward model actually learns from rankings.",
+    "beat": 13
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "researcher working at computer",
+    "issue": "A generic stock clip does not illustrate trillions of text examples, so it adds little.",
+    "beat": 4
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Reinforcement learning then tunes the model toward higher scores.",
+    "issue": "The RL step is glossed over, and the phrase \"OpenAI used human feedback\" skips the later-era nuance, with no mention of how current models differ.",
+    "beat": 12
+   }
+  ],
+  "missing": [
+   "Hallucinations and why they happen",
+   "A concrete analogy for attention",
+   "How scale (parameters, compute) matters",
+   "Limits: no real understanding or knowledge cutoff"
+  ],
+  "wrong_facts": [
+   "\"Each token looks at the tokens before it\" holds only for decoder-only models like GPT; simplified but not wrong for ChatGPT."
+  ],
+  "would_publish": false,
+  "summary": "A clear, accurate, well-ordered explainer that covers the pipeline from tokens to RLHF with a couple of nice concrete facts. It omits hallucinations, treats attention thinly, and ends on a restatement rather than a fresh image.",
+  "mean": 3.33,
+  "cost_usd": 0.02972,
+  "tokens": [
+   6830,
+   1606
+  ]
+ }
+}

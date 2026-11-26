@@ -1,0 +1,229 @@
+{
+ "id": "bio-03",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Taught Machines to Think",
+  "description": "Alan Turing was a British mathematician who imagined the modern computer, helped break enemy codes in wartime, and asked whether machines can think. This is the story of his ideas and why they still shape our world.",
+  "beats": [
+   {
+    "id": "22505234",
+    "narration": "Every phone in your pocket exists partly because one quiet British mathematician asked a strange question: what could a machine do, if it followed simple rules? His name was Alan Turing.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person using smartphone close up",
+      "alt": "hands holding a phone"
+     }
+    }
+   },
+   {
+    "id": "5867834e",
+    "narration": "Here is his story in four steps. He imagines a universal machine. Then comes codebreaking in wartime. Next he asks if machines can think. And sadly, he dies at 41.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "A short, brilliant life",
+      "events": [
+       {
+        "date": "1936",
+        "label": "Imagines a universal machine"
+       },
+       {
+        "date": "1940s",
+        "label": "Codebreaking in wartime"
+       },
+       {
+        "date": "1950",
+        "label": "Asks if machines can think"
+       },
+       {
+        "date": "1954",
+        "label": "Dies at 41"
+       }
+      ]
+     }
+    },
+    "chapter": "A mind ahead of its time"
+   },
+   {
+    "id": "fbf1637b",
+    "narration": "His big idea was simple. Picture a machine that can read symbols, then write symbols, following a small set of rules. Change the rules, and the same machine does a different job.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The idea of a universal machine",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Rules",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Read",
+        "icon": "eye"
+       },
+       {
+        "id": "c",
+        "label": "Write",
+        "icon": "pencil"
+       },
+       {
+        "id": "d",
+        "label": "Any task",
+        "icon": "cog"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "6e88ce33",
+    "narration": "That is exactly what your laptop does. One machine, endless programs. Turing described this on paper before anything like it had been built, which is why many call him a father of computer science.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "clip_queries": [
+       "person typing on laptop",
+       "computer code on screen"
+      ],
+      "alt": "programmer working at computer"
+     }
+    }
+   },
+   {
+    "id": "5e0676cf",
+    "narration": "Then war came. Armies sent secret messages, scrambled by machines that made them look like nonsense. Turing joined a team of British codebreakers working in secret to read them.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Bletchley Park mansion",
+       "Enigma machine",
+       "Bletchley Park codebreakers hut"
+      ],
+      "alt": "Bletchley Park and the Enigma machine"
+     }
+    },
+    "chapter": "The war of secret messages"
+   },
+   {
+    "id": "ae1d1bac",
+    "narration": "The goal was clear. Break the secret enemy messages. Get the codes read in time to matter. Speed was everything, because a message was only useful before the enemy acted on it.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What codebreaking demanded",
+      "items": [
+       "Secret enemy messages",
+       "Codes read in time"
+      ],
+      "style": "spotlight",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "5770aafd",
+    "narration": "Historians widely agree that this work helped shorten the war and saved many lives. For years, though, it stayed secret, so Turing never received public credit while he was alive.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "His greatest work stayed secret for years.",
+      "emphasis": "secret"
+     }
+    }
+   },
+   {
+    "id": "5ce0e3d8",
+    "narration": "After the war, he asked a bold question. Can a machine think? Rather than argue about definitions, he proposed a test: could a machine hold a conversation you could not tell from a person's?",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Judge",
+        "text": "Are you a person, or a machine?"
+       },
+       {
+        "speaker": "Unknown",
+        "text": "Why not guess from my answers?"
+       }
+      ]
+     }
+    },
+    "chapter": "Can machines think?"
+   },
+   {
+    "id": "6a9da2f1",
+    "narration": "We now call this the Turing test. Today, when you chat with an AI system, you are living inside the question he asked decades ago.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person chatting with computer",
+      "clip_queries": [
+       "person chatting with computer",
+       "robot hand and human hand"
+      ],
+      "alt": "typing on a chat interface"
+     }
+    }
+   },
+   {
+    "id": "7aa263d1",
+    "narration": "His life ended too soon. He was treated unjustly by the laws of his time, and he died at just 41. Today he is honoured as one of the great minds of the century.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Alan Turing statue",
+      "alt": "statue honouring Alan Turing",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "0125826e",
+    "narration": "So the next time you open an app, remember where it began: with one man, a pencil, and a question. Can a machine think?",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One man, one question, and a world of machines that follow.",
+      "emphasis": "one question"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 335 words in 11 beats but a 2-minute video needs about 267 (at most 280). Cut about 68 words: write 9 to 11 beats of at most 35 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 245 words"
+ ],
+ "cost_usd": 0.13412,
+ "seconds": 37.7
+}

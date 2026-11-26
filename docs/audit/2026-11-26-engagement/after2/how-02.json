@@ -1,0 +1,624 @@
+{
+ "id": "how-02",
+ "category": "how-to / tutorial",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo empezar a correr si nunca he hecho ejercicio",
+ "great": "Plan realista para principiante (caminar/correr alternado, 3 veces por semana, 20-30 min), calzado, ritmo conversacional, progresión gradual, descanso, lesiones comunes, consulta médica si hay condiciones; motivador y práctico.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:38:47",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Cómo empezar a correr desde cero es una explicación atemporal basada en principios de fisiología y entrenamiento progresivo que no cambian con frecuencia, así que no requiere búsqueda web.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 8,
+   "seconds": 4.9,
+   "cost_usd": 0.0008064999999999999,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 7.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 7736,
+  "n_sources": 6,
+  "n_fetched": 8,
+  "fetched": [
+   "Los mejores consejos para empezar a hacer running. Nike",
+   "Actividad física",
+   "¡A MOVERSE! - Guía de actividad física - PAHO",
+   "Programa para estar en forma: cinco pasos para comenzar - Mayo Clinic",
+   "Entrenamiento de Atletismo para Principiantes | mmB",
+   "Un plan de entrenamiento de caminar-correr para principiantes en 10 semanas",
+   "Carrera de 5 kilómetros: programa de entrenamiento de 7 semanas para principiantes - Mayo Clinic",
+   "Relación correr-caminar: ¿Cuánto deberías caminar para mejorar? Demon Lentes de sol"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Los mejores consejos para empezar a hacer running. Nike\n### ¿Qué distancia debe correr un principiante? Un error común que cometen los runners principiantes es exigirse demasiado desde el inicio, lo que puede provocar agotamiento o lesiones, según Brian Passenti, entrenador de ultrarunning certificado por USATF Nivel 1 y UESCA. Al igual que en el plan para principiantes de cuatro semanas, recomienda correr entre 20 y 30 minutos tres veces por semana durante las primeras semanas. [...] Si te sientes bien después de este periodo, puedes empezar a aumentar un 10% la duración o la distancia cada semana. Esta es la regla general para los runners. ### ¿Cuántos días a la semana deberían correr los principiantes? Una buena regla general para los principiantes es correr tres veces por semana en días no consecutivos. Esto le da al cuerpo tiempo para recuperarse, lo que puede ayudar a prevenir lesiones. ### ¿Está bien correr todos los días como principi\n\n## Actividad física\nEn las Directrices de la OMS sobre actividad física y comportamientos sedentarios se ofrecen recomendaciones para niños (a partir de 5 años), adolescentes, adultos, personas mayores, embarazadas y puérperas, y personas con afecciones crónicas y discapacidad. Se detalla la frecuencia, la intensidad y la duración de la actividad física necesarias para que esta práctica redunde significativamente en la salud y reduzca los riesgos. En el documento se recuerda que incluso un poco de actividad física [...] En esta infografía (en inglés) se resumen las directrices actuales de la OMS sobre actividad física y comportamiento sedentario para todos los grupos de edad. La OMS elabora directrices a través de un riguroso proceso que entraña consultar a expertos y revisar numerosas evidencias científicas. Ya se ha iniciado la preparación de las próximas directrices, que se prevé publicar en 2030. ## Niv\n\n## ¡A MOVERSE! - Guía de actividad física - PAHO\n• Vigilar el Juego limpio, promoviendo el cuidado del otro tanto como el suyo propio. Cuidados Recomendaciones Moverse un mínimo de 60 minutos diarios con actividades moderadas a intensas. Incluir ejercicios que ayuden a fortalecer los músculos y huesos. En esta etapa los diferentes ejercicios físicos deben ser disfrutables, incorporando el juego y la compe-tencia natural. [...] Existe inactividad física cuando una persona no alcanza las recomendaciones mínimas actuales de actividad física para la salud de la OMS: es decir, cuando un individuo adulto practica menos de 150 minutos a la semana de actividad física aeróbica moderada, o cuando una persona de 5 a 17 años no alcanza a completar una hora de actividad física moderada a intensa por día. ¿Qué es ser una persona activa? [...] • Si existe alguna enfermedad, factor de riesgo o síntoma, consulta a tu médico para adecuar el ejercicio. |\n\n## Programa para estar en forma: cinco pasos para comenzar - Mayo Clinic\nProbablemente empezará con calzado deportivo. Asegúrese de escoger el calzado hecho para la actividad que tiene en mente. Por ejemplo, las zapatillas para correr son más ligeras que las zapatillas de entrenamiento, que son más resistentes. Si está planeando invertir en equipo de ejercicio, elija algo que sea práctico, divertido y fácil de usar. Podría probar algunos tipos de equipos en un gimnasio o en un lugar de entrenamiento antes de comprar su equipo propio. [...] Comience despacio y suba la intensidad progresivamente. Dése suficiente tiempo para entrar en calor y recuperarse con una caminata fácil o un estiramiento suave. Luego acelere a un ritmo que pueda mantener durante 5 a 10 minutos sin cansarse demasiado. A medida que tenga más energía, aumente poco a poco el tiempo de ejercicio. Haga ejercicios por entre 30 y 60 minutos durante la mayoría de los días de la semana. ## 5. Revis\n\n## Entrenamiento de Atletismo para Principiantes | mmB\nEl programa de 12 semanas es una excelente forma de introducir a los principiantes al running, permitiendo un progreso gradual y seguro. Este plan está diseñado para ser seguido tres veces por semana, facilitando la adaptación del cuerpo al nuevo esfuerzo físico. ### Estructura del Programa Semanas 1-4 Objetivo: Construir resistencia. Frecuencia: Tres días a la semana. Sesiones: Alternar entre caminar y correr durante 20-30 minutos. Incluir dos sesiones de fortalecimiento muscular. [...] Semanas 5-8 Objetivo: Aumentar el tiempo de carrera. Frecuencia: Mantener tres días semanales. Sesiones: Incrementar gradualmente el tiempo corriendo y reducir los intervalos de caminata. Incluir dos sesiones de fortalecimiento muscular. Semanas 9-12 Objetivo: Correr sin interrupciones. Frecuencia: Continuar con tres sesiones semanales. Sesiones: Alcanzar carreras continuas de hasta 30 minutos. Incluir d\n\n## Un plan de entrenamiento de caminar-correr para principiantes en 10 semanas\nSi no te sientes cómodo con un minuto caminando, la entrenadora Christine Hinton propone como alternativa caminar cuatro minutos y correr sólo dos, o probar el plan de caminar-correr de 10 semanas que te dejamos más abajo. Comienza y termina cada entrenamiento con cinco minutos caminando. Luego, alterna las siguientes proporciones de correr/caminar durante 30 minutos. Hazlo tres veces por semana. [...] Ya sea que acabes de levantarte del sofá o vengas de otro deporte, correr requiere tiempo para acostumbrarse, pero llegarás a hacerlo si empiezas despacio. Una buena manera de hacerlo es con un programa de caminar-trotar-correr o caminar-correr. Con el objetivo de esos 20 minutos en mente, concéntrate en correr o trotar unos minutos, seguido de un periodo de caminar. Meyer sugiere intentar correr tres minutos y caminar un minuto, alternando hasta alcanzar el tiempo establecido. [...] Puede\n\n## Carrera de 5 kilómetros: programa de entrenamiento de 7 semanas para principiantes - Mayo Clinic\n| | | --- | | Lunes | Correr y caminar 30 minutos | | Martes | Caminar 30 minutos | | Miércoles | Correr y caminar 30 minutos | | Jueves | Caminar 30 minutos | | Viernes | Descansar | | Sábados | Correr y caminar 3,5 millas (5,6 km) | | Domingos | Descansar o caminar | ### Semana 3 En los días de correr y de caminar, los caminantes solo caminan. Los corredores corren durante 20 segundos y caminan durante 40 segundos. [...] | | | --- | | Lunes | Correr y caminar 30 minutos | | Martes | Caminar 30 minutos | | Miércoles | Correr y caminar 30 minutos | | Jueves | Caminar 30 minutos | | Viernes | Descansar | | Sábados | Correr y caminar 3 millas (4,8 km) | | Domingos | Descansar o caminar | ### Semana 2 En los días de correr y de caminar, los caminantes solo caminan. Los corredores corren durante 15 segundos y caminan durante 45 segundos. [...] | | | --- | | Lunes | Correr y caminar 30 minuto\n\n## Relación correr-caminar: ¿Cuánto deberías caminar para mejorar? Demon Lentes de sol\nUna regla práctica: Comienza con un ritmo más moderado del que te motiva. Incorporar el running más adelante es fácil; recuperarse de una primera semana demasiado intensa es mucho más difícil. ## Qué es realmente un programa de correr y caminar [...] Distinción importante: El método de alternar correr y caminar es una herramienta para controlar el ritmo y la carga de entrenamiento, no una garantía contra las lesiones al correr. El volumen total de entrenamiento, la actividad previa, la fuerza, la recuperación, el terreno, el ritmo y el historial individual siguen siendo factores importantes. ## Cómo elegir la proporción adecuada entre correr y caminar [...] Si varias respuestas son negativas, primero reduce la velocidad al correr. Muchos principiantes creen que necesitan descansos más largos para caminar, cuando el problema principal es que su trote es demasiado rápido. Si reducir la vel",
+ "plan": {
+  "title": "Cómo empezar a correr si nunca has hecho ejercicio",
+  "description": "Una guía sencilla para empezar a correr desde cero: alterna caminar y correr, entrena tres días por semana y sube la carga poco a poco. Aprende los errores que debes evitar y cómo avanzar sin lesiones.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "b0ed6935",
+    "narration": "Casi todos los principiantes cometen el mismo error el primer día: salir a correr demasiado rápido y demasiado tiempo. Terminan agotados, doloridos, y muchos no vuelven a intentarlo nunca más.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person running in park morning",
+      "alt": "beginner jogger outdoors"
+     }
+    },
+    "chapter": "El error del primer día"
+   },
+   {
+    "id": "e33c5f4b",
+    "narration": "La buena noticia es que no necesitas ser atleta. Necesitas un plan sencillo y paciencia. Empieza despacio, y correr se convertirá en algo que sí puedes hacer.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No necesitas ser atleta: necesitas empezar despacio.",
+      "emphasis": "empezar despacio"
+     }
+    }
+   },
+   {
+    "id": "fec4a64d",
+    "narration": "El equipo es mínimo. Unas zapatillas hechas para correr, que son más ligeras que las de entrenamiento, y ropa cómoda. Si dudas, pruébalas en una tienda antes de comprar.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "running shoes on pavement",
+      "alt": "zapatillas para correr",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "680fc2da",
+    "narration": "El secreto de los principiantes es alternar. Corres un rato, caminas otro, y repites. No es hacer trampa: es una herramienta para controlar el ritmo y la carga del entrenamiento.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alternar caminar y correr",
+      "subtitle": "La forma más segura de empezar desde cero"
+     }
+    },
+    "chapter": "El método caminar-correr"
+   },
+   {
+    "id": "d05d9fa3",
+    "narration": "Una propuesta clásica: corre tres minutos y camina uno, y repite hasta completar el tiempo. Si eso te resulta mucho, camina cuatro minutos y corre solo dos.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Un ciclo de entrenamiento",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Caminar 5 min"
+       },
+       {
+        "id": "b",
+        "label": "Correr 3 min"
+       },
+       {
+        "id": "c",
+        "label": "Caminar 1 min"
+       },
+       {
+        "id": "d",
+        "label": "Repetir"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "5dbce45f",
+    "narration": "Cada sesión empieza y termina con cinco minutos de caminata suave. Así el cuerpo entra en calor y se recupera con calma, sin pasar de golpe del sofá al esfuerzo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people walking in park",
+      "clip_queries": [
+       "people walking in park",
+       "person stretching outdoors"
+      ],
+      "alt": "easy walk warm up"
+     }
+    }
+   },
+   {
+    "id": "a45edf16",
+    "narration": "Lo recomendable es entrenar tres veces por semana, en días no consecutivos. Ese descanso entre sesiones le da al cuerpo tiempo para recuperarse, y ayuda a prevenir lesiones.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Tu semana tipo",
+      "items": [
+       "Lunes: entrenar",
+       "Martes: descansar",
+       "Miércoles: entrenar",
+       "Jueves: descansar",
+       "Viernes: entrenar"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "play",
+       "park",
+       "play",
+       "park",
+       "play"
+      ]
+     }
+    },
+    "chapter": "Cuánto y con qué frecuencia"
+   },
+   {
+    "id": "222cbbe7",
+    "narration": "Cada sesión dura entre veinte y treinta minutos durante las primeras semanas. Es poco, y está bien que lo sea: el objetivo ahora es crear el hábito, no batir marcas.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "20-30 min",
+      "label": "por sesión, tres veces por semana"
+     }
+    }
+   },
+   {
+    "id": "8cf04f2e",
+    "narration": "Y aquí va el consejo más útil: si te cuesta respirar, no alargues los descansos. Primero reduce la velocidad. Muchos principiantes creen que necesitan caminar más, cuando su trote es demasiado rápido.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Si te falta el aire, no camines más: corre más lento.",
+      "emphasis": "corre más lento"
+     }
+    }
+   },
+   {
+    "id": "9029de94",
+    "narration": "Un programa de doce semanas lo hace gradual. De la semana uno a la cuatro construyes resistencia. De la cinco a la ocho corres más tiempo. De la nueve a la doce, corres sin parar.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Programa de 12 semanas",
+      "events": [
+       {
+        "date": "Semanas 1-4",
+        "label": "Construir resistencia"
+       },
+       {
+        "date": "Semanas 5-8",
+        "label": "Correr más tiempo"
+       },
+       {
+        "date": "Semanas 9-12",
+        "label": "Correr sin pausas"
+       }
+      ]
+     }
+    },
+    "chapter": "Progresar sin lesionarte"
+   },
+   {
+    "id": "8d2583b6",
+    "narration": "Si después de las primeras semanas te sientes bien, puedes subir un diez por ciento la duración o la distancia cada semana. Esa es la regla general de los corredores.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "10",
+      "unit": "%",
+      "label": "como máximo más cada semana"
+     }
+    }
+   },
+   {
+    "id": "19b1042f",
+    "narration": "Completa tu entrenamiento con dos sesiones de fortalecimiento muscular por semana. Músculos más fuertes sostienen mejor tus articulaciones, y eso te ayuda a correr con menos molestias.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person doing squats at home",
+      "clip_queries": [
+       "person doing squats at home",
+       "woman exercising with weights"
+      ],
+      "alt": "woman exercising at home"
+     }
+    }
+   },
+   {
+    "id": "599337c4",
+    "narration": "Una advertencia: alternar caminar y correr no garantiza que no te lesiones. También pesan tu actividad previa, la recuperación y el terreno. Si tienes alguna enfermedad o síntoma, consulta antes a tu médico.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Antes de empezar",
+      "items": [
+       "Zapatillas adecuadas",
+       "Ritmo suave",
+       "Días de descanso",
+       "Consultar al médico si hay síntomas"
+      ]
+     }
+    }
+   },
+   {
+    "id": "7ac05c4b",
+    "narration": "Así que olvida correr rápido o lejos. Camina, trota, descansa, y repite tres veces por semana. Quien empieza despacio llega más lejos. Tu primera salida puede ser hoy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "runner at sunrise",
+      "clip_queries": [
+       "runner at sunrise",
+       "legs jogging on trail"
+      ],
+      "alt": "jogging at sunrise"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Los mejores consejos para empezar a hacer running. Nike",
+    "url": "https://www.nike.com/us/es/a/como-empezar-a-hacer-running",
+    "publisher": "nike.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Actividad física",
+    "url": "https://www.who.int/es/news-room/fact-sheets/detail/physical-activity",
+    "publisher": "who.int",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Programa para estar en forma: cinco pasos para comenzar - Mayo Clinic",
+    "url": "https://www.mayoclinic.org/es/healthy-lifestyle/fitness/in-depth/fitness/art-20048269",
+    "publisher": "mayoclinic.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Entrenamiento de Atletismo para Principiantes | mmB",
+    "url": "https://www.mediamaratonbogota.com/blog/metodos-entreno-atletismo-principiantes",
+    "publisher": "mediamaratonbogota.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Un plan de entrenamiento de caminar-correr para principiantes en 10 semanas",
+    "url": "https://www.runnersworld.com/es/training/a64754219/caminar-correr-plan-completo-principiantes",
+    "publisher": "runnersworld.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Relación correr-caminar: ¿Cuánto deberías caminar para mejorar? Demon Lentes de sol",
+    "url": "https://es.demonsunglasses.com/Blogs/corriendo-y-trail-running-blog/%C2%BFCu%C3%A1nto-deber%C3%ADa-caminar-en-un-programa-de-correr-y-caminar",
+    "publisher": "es.demonsunglasses.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 62.0,
+  "before_first_script_call_s": 11.0,
+  "script_s": 51.0
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "research": 0.00081,
+  "script_big": 0.17624,
+  "search_api": 0.016,
+  "total": 0.19336
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 56378,
+  "out": 8576
+ },
+ "rules": {
+  "length": {
+   "words": 416,
+   "expected_words": 402,
+   "ratio": 1.035,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 186.6,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Casi todos los principiantes cometen el mismo error el primer día: salir a correr demasiado rápido y demasiado tiempo. Terminan agotados, doloridos, y muchos no vuelven a intentarlo nunca más.",
+   "close_text": "Así que olvida correr rápido o lejos. Camina, trota, descansa, y repite tres veces por semana. Quien empieza despacio llega más lejos. Tu primera salida puede ser hoy."
+  },
+  "variety": {
+   "distinct": 10,
+   "counts": {
+    "clip": 4,
+    "kinetic_text": 2,
+    "image": 1,
+    "title": 1,
+    "diagram": 1,
+    "bullets": 1,
+    "stat": 1,
+    "timeline": 1,
+    "counter": 1,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 3.09,
+   "top_type": "clip",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "tres veces por semana",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 6,
+   "fetched": 8,
+   "notes_len": 7736,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 5 (diagram): its narration never says ['Caminar 5 min', 'Correr 3 min', 'Caminar 1 min', 'Repetir']",
+   "beat 7 (bullets): its narration never says ['Martes: descansar', 'Miércoles: entrenar', 'Jueves: descansar', 'Viernes: entrenar']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "It follows the notes: 20-30 min, three days a week, 10% rule, 3/1 and 4/2 ratios, 12-week plan. Small issues: the diagram's 'Caminar 5 min' mixes with 'correr 3 min', and 'como máximo' on the 10% counter adds a gloss the notes do not support."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the plan, shoes, frequency, progression, strength work and a medical warning. It lacks conversational pace/talk test, common injuries, rest signals, and surface or warm-up detail; the shoe advice is thin."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear chapters from the mistake through method, frequency and progression, with a closing recap. Beat 9 repeats the pace idea a little, and the strength advice sits late."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening names a common mistake and its consequence, which creates tension. The close 'Quien empieza despacio llega más lejos. Tu primera salida puede ser hoy' is decent but slightly proverb-like."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Warm, encouraging and practical for beginners, using informal 'tú' consistently."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Scene types vary well and match the narration (diagram, timeline, stat, checklist). The weekly bullets list only 5 days, and the stat and counter are used for plan figures, not real data."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The tip that a trot that is too fast is the problem, not the walks, is useful. Otherwise the content is fairly standard beginner advice."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, aimed at a total beginner, and about the right length (~370 words). It misses the talk-test pace and injuries from the reviewer's note."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural Spanish with correct punctuation. A few slightly stiff phrases, such as 'Lo recomendable' and 'pesan tu actividad previa'."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Ritmo suave",
+    "quote_note": "checklist item",
+    "issue": "The pace is never explained as a conversational pace or talk test, even though that is a key beginner tool.",
+    "beat": 13
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Muchos principiantes creen que necesitan caminar más",
+    "issue": "It gives no concrete rule for slowing down, and common injuries (shins, knees) are not named.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Viernes: entrenar",
+    "issue": "The weekly bullets stop at Friday and show no weekend, so the 'tipo' week looks incomplete and does not match the 3-times pattern fully.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "como máximo más cada semana",
+    "issue": "The label reads awkwardly and presents the 10% as a hard maximum, whereas the source calls it a general rule.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Completa tu entrenamiento con dos sesiones de fortalecimiento muscular por semana.",
+    "issue": "The strength work appears abruptly after the progression section, and it is not clear how it fits with the three days of running.",
+    "beat": 12
+   }
+  ],
+  "missing": [
+   "Conversational pace / talk test",
+   "Common injuries and warning signs",
+   "What to do on pain or very tired days",
+   "Concrete first-week example session",
+   "Tips on motivation and consistency"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, well-organized beginner script that follows its sources closely and has a good hook. It is held back by generic content and gaps in pace guidance, injuries and rest.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Lo recomendable es entrenar tres veces por semana",
+     "problem": "Slightly stiff register.",
+     "better": "Lo ideal es entrenar tres veces por semana"
+    },
+    {
+     "quote": "También pesan tu actividad previa, la recuperación y el terreno.",
+     "problem": "'Pesan' is a slightly odd verb here.",
+     "better": "También influyen tu actividad previa, la recuperación y el terreno."
+    },
+    {
+     "quote": "Si dudas, pruébalas en una tienda antes de comprar.",
+     "problem": "Vague 'si dudas'.",
+     "better": "Pruébatelas siempre en la tienda antes de comprarlas."
+    }
+   ]
+  },
+  "mean": 3.78,
+  "cost_usd": 0.03086,
+  "tokens": [
+   7800,
+   1526
+  ]
+ }
+}

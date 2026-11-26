@@ -1,0 +1,35 @@
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=37
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=37
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=37
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=8
+already spent in saved results: $0.000 (cap $4.5)
+[1/12] sci-01   ok         run $0.042   running total $0.117   29s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=3 sources=12
+[2/12] sci-02   ok         run $0.158   running total $0.554   73s
+[3/12] how-02   ok         run $0.189   running total $0.699   91s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=10
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=7
+[4/12] his-03   ok         run $0.195   running total $0.780   100s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=9
+[5/12] fin-02   ok         run $0.145   running total $1.056   127s
+[6/12] cmp-03   ok         run $0.097   running total $1.132   134s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=26
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+[7/12] tec-01   ok         run $0.173   running total $1.316   157s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=7
+[8/12] bio-03   ok         run $0.091   running total $1.393   167s
+[9/12] kid-01   ok         run $0.063   running total $1.572   184s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=37
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=7
+[10/12] opi-02   ok         run $0.043   running total $1.648   195s
+WARNING:root:GROUNDING flagged=7 repaired=7 candidates=14 checked=14
+[11/12] tri-03   ok         run $0.091   running total $1.779   215s
+[12/12] mkt-02   ok         run $0.172   running total $1.805   217s
+
+DONE. total spent $1.805 of $4.5

@@ -1,0 +1,79 @@
+{
+ "id": "cmp-01",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which to Learn First?",
+  "description": "A quick look at React and Vue and how to pick one as your first front-end framework. Learn which suits beginners and which opens more doors.",
+  "beats": [
+   {
+    "id": "c30d9003",
+    "narration": "React or Vue? Everyone argues about it, but for your first framework, the honest answer is simpler than you think.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "React vs Vue",
+      "subtitle": "Which should you learn first?"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "6c606e7b",
+    "narration": "Vue feels gentle. Its structure is clear, and beginners often get something working fast. React is bigger, with more jobs and more learning resources.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Vue",
+       "tagline": "Gentle start"
+      },
+      "b": {
+       "name": "React",
+       "tagline": "Big ecosystem"
+      },
+      "rows": [
+       {
+        "label": "Learning",
+        "a": "Easier start",
+        "b": "Steeper start"
+       },
+       {
+        "label": "Jobs",
+        "a": "Fewer",
+        "b": "More"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "cbda2710",
+    "narration": "Want jobs? Start with React. Want a smooth first step? Pick Vue. Either way, the concepts transfer, so just choose one and build.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Pick one. Build something. The skills transfer.",
+      "emphasis": "Build something"
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 67 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 9 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06111,
+ "seconds": 8.0
+}

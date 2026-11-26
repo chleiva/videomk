@@ -1,0 +1,78 @@
+{
+ "id": "bio-03",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Taught Machines to Think",
+  "description": "A quick look at Alan Turing, the British mathematician who helped break a wartime code and asked whether machines can think. Learn why his ideas still shape every computer today.",
+  "beats": [
+   {
+    "id": "81600c46",
+    "narration": "One man helped end a war, then imagined the computer age. His name was Alan Turing, and most people have never heard his story.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "He helped end a war, then invented the future.",
+      "emphasis": "invented the future"
+     }
+    }
+   },
+   {
+    "id": "af2ee02c",
+    "narration": "Turing was a brilliant British mathematician. In World War Two, he helped crack the secret Enigma code, giving the Allies a powerful advantage.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "vintage typewriter keys close up",
+      "clip_queries": [
+       "vintage typewriter keys close up",
+       "old machine gears turning"
+      ],
+      "alt": "vintage cipher machine close up"
+     }
+    }
+   },
+   {
+    "id": "e8913c80",
+    "narration": "He also asked a bold question: can machines think? His idea of a universal computing machine is the blueprint for every computer we use today.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Turing's big ideas",
+      "items": [
+       "Can machines think?",
+       "The universal machine",
+       "Blueprint for modern computers"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "95fe5b1d",
+    "narration": "Yet he was treated cruelly by the country he served. Today, every phone in your pocket carries his legacy. Remember his name.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Every computer carries his legacy.",
+      "emphasis": "his legacy"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06963,
+ "seconds": 10.9
+}

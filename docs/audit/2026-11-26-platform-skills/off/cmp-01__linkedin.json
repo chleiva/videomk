@@ -1,0 +1,168 @@
+{
+ "id": "cmp-01",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A quick comparison of React and Vue for beginners, judged on learning curve, job market and flexibility. Find out which JavaScript framework fits your goals.",
+  "beats": [
+   {
+    "id": "5b041da8",
+    "narration": "React or Vue? Pick wrong and you lose weeks, or so it feels. Good news: both build the same kind of apps. The real question is which one fits your goal and your learning style.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Flexible and widely used"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Gentle and guided"
+      },
+      "rows": [
+       {
+        "label": "Learning curve",
+        "a": "Steeper",
+        "b": "Gentler"
+       },
+       {
+        "label": "Jobs",
+        "a": "More listings",
+        "b": "Fewer listings"
+       },
+       {
+        "label": "Structure",
+        "a": "You choose",
+        "b": "Built-in guidance"
+       }
+      ]
+     }
+    },
+    "chapter": "The decision"
+   },
+   {
+    "id": "ea584f48",
+    "narration": "Vue is friendlier at the start. Its templates look like plain HTML, and the official tools guide you. Beginners often get something working on screen quickly, which keeps motivation high.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why Vue feels easy",
+      "items": [
+       "HTML-like templates",
+       "Official tools included",
+       "Quick first win"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "code",
+       "wrench",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "b26fb7a4",
+    "narration": "React asks more of you. You write JavaScript for almost everything, and you pick your own tools. But it has a huge community, and in most places, more job listings.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why React pays off",
+      "items": [
+       "Mostly plain JavaScript",
+       "Huge community",
+       "More job listings"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "d5a6154b",
+    "narration": "So decide by goal. Want a job soon, or to work at larger companies? Start with React. Want a calm start, or to build your own projects? Start with Vue.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Pick by your goal",
+      "nodes": [
+       {
+        "id": "g",
+        "label": "Your goal",
+        "icon": "target"
+       },
+       {
+        "id": "j",
+        "label": "Job soon",
+        "icon": "briefcase"
+       },
+       {
+        "id": "r",
+        "label": "Start with React",
+        "icon": "code"
+       },
+       {
+        "id": "p",
+        "label": "Calm start",
+        "icon": "heart"
+       },
+       {
+        "id": "v",
+        "label": "Start with Vue",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "g",
+        "j"
+       ],
+       [
+        "j",
+        "r",
+        "React"
+       ],
+       [
+        "g",
+        "p"
+       ],
+       [
+        "p",
+        "v",
+        "Vue"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "01f39fbe",
+    "narration": "Here is the secret: the core ideas, components and state, carry over. Learn either one well, and the second takes days, not months. Just start.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Learn either one well, and the second comes fast.",
+      "emphasis": "the second comes fast"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07452,
+ "seconds": 15.9
+}

@@ -1,0 +1,543 @@
+{
+ "id": "bio-03",
+ "category": "biography",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "tell me about Alan Turing",
+ "great": "Computability, Enigma at Bletchley Park, Turing test, prosecution in 1952, pardon 2013, death 1954; accurate and respectful.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:27:23",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Alan Turing's biography, contributions to computing, codebreaking, and AI are well-established historical facts that an encyclopedia covers accurately; no recent developments are needed.",
+  "queries": [
+   "Alan Turing life and work"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 11,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 4638,
+  "n_sources": 5,
+  "n_fetched": 5,
+  "fetched": [
+   "Alan Turing",
+   "Alan Turing Institute",
+   "Alan Turing Year",
+   "Turing test",
+   "Computing Machinery and Intelligence"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Alan Turing\nAlan Mathison Turing (; 23 June 1912 – 7 June 1954) was an English mathematician and logician widely regarded as the father of theoretical computer science. He formalised the concepts of algorithm and computation with the Turing machine, a model of a general-purpose computer, and his contributions to cryptanalysis helped the Allies of World War II decipher messages encrypted by the German Enigma machine. He also contributed the Turing test to philosophy of artificial intelligence and the Turing pattern concept to mathematical and theoretical biology.\nBorn in London and raised in southern England, Turing graduated from King's College, Cambridge, and earned a doctorate from Princeton University in 1938. During World War II, he worked at the Government Code and Cypher School at Bletchley Park, Britain's codebreaking centre, and focused on decrypting German naval messages as the head of Hut 8. His techniques improved on the pre-war Polish bomba method and hastened cryptanalysis of the Enigma ciphering system. The resulting intelligence, known as Ultra, proved helpful in the Battle of the Atlantic. After the war, Turing joined the National Physical Laboratory, where he designed the Automatic...\n\n## Alan Turing Institute\nThe Alan Turing Institute is the United Kingdom's national institute for data science and artificial intelligence, founded in 2015 and largely funded by the UK Government. It is named after Alan Turing, the British mathematician and computing pioneer. Since 2025, the institute focuses on defense and national security, following demands by the UK Government.\n\n## Alan Turing Year\nThe Alan Turing Year, 2012, marked the celebration of the life and scientific influence of Alan Turing during the centenary of his birth on 23 June 1912. Turing had an important influence on computing, computer science, artificial intelligence, developmental biology, and the mathematical theory of computability and made important contributions to code-breaking during the Second World War. The Alan Turing Centenary Advisory committee (TCAC) was originally set up by Professor S. Barry Cooper\nThe international impact of Turing's work is reflected in the list of countries in which Alan Turing Year was celebrated, including: Bolivia, Brazil, Canada, China, Czech Republic, France, Germany, Hong Kong, India, Israel, Italy, Netherlands, Mexico, New Zealand, Norway, Philippines, Portugal, Spain, Switzerland, the U.K., and the U.S.A. 41+ countries were involved.\n\n## Turing test\nThe Turing test was designed by Alan Turing to assess a machine's ability to exhibit intelligent behaviour equivalent to that of a human by imitating interactive dialogue. In the modern version, a human evaluator judges a text transcript of a natural-language conversation between a human and a machine. The evaluator tries to identify the machine, and the machine passes if the evaluator cannot reliably tell them apart. The results would not depend on the machine's ability to answer questions correctly, only on how closely its answers resembled those of a human. Since the Turing test is a test of indistinguishability in performance capacity, the original (verbal) version generalises naturally to all of human performance capacity, including nonverbal (robotic).\nThe test was introduced as the imitation game by Turing in his 1950 paper \"Computing Machinery and Intelligence\" while working at the University of Manchester. It opens with the words: \"I propose to consider the question, 'Can machines think?'.\" Because \"thinking\" is difficult to define, Turing chooses to \"replace the question by another, which is closely related to it and is expressed in relatively unambiguous words\". Turing describes...\n\n## Computing Machinery and Intelligence\n\"Computing Machinery and Intelligence\" is a paper written by Alan Turing on the topic of artificial intelligence. The paper, published in 1950 in Mind, was the first to introduce his concept of what is now known as the Turing test to the general public.\nTuring's paper considers the question \"Can machines think?\" Turing says that since the words \"think\" and \"machine\" cannot clearly be defined, we should \"replace the question by another, which is closely related to it and is expressed in relatively unambiguous words.\" To achieve this objective, Turing proposes a three-step approach. First, he identifies a simple and unambiguous concept to substitute for the term \"think.\" Second, he delineates the specific \"machines\" under consideration. Third, armed with these tools, he poses a new question related to the first, which he believes he can answer in the affirmative.",
+ "plan": {
+  "title": "Alan Turing: The Man Who Asked If Machines Think",
+  "description": "Alan Turing was an English mathematician who defined computation, helped break the Enigma cipher and asked whether machines can think. This video follows his life, his work and his legacy.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "5661c63c",
+    "narration": "In 1950, a British mathematician asked a simple question: can machines think? He thought the question was too vague, so he replaced it with a game. His name was Alan Turing.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "The man who asked if machines can think"
+     }
+    },
+    "chapter": "A question about thinking"
+   },
+   {
+    "id": "063ee1e3",
+    "narration": "Alan Mathison Turing was born in London on 23 June 1912. He studied at King's College, Cambridge, and earned his doctorate at Princeton University in 1938.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Early life",
+      "events": [
+       {
+        "date": "1912",
+        "label": "Born in London"
+       },
+       {
+        "date": "Cambridge",
+        "label": "Graduates from King's College"
+       },
+       {
+        "date": "1938",
+        "label": "Doctorate at Princeton"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "02b7976b",
+    "narration": "He formalised what an algorithm is. His Turing machine was a model of a general-purpose computer. That is why many call him the father of theoretical computer science.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Defining computation",
+      "items": [
+       "Algorithm",
+       "Turing machine",
+       "General-purpose computer",
+       "Father of theoretical computer science"
+      ],
+      "style": "rail",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "d671bcd2",
+    "narration": "Then came the Second World War. Turing worked at Bletchley Park, Britain's codebreaking centre, and headed Hut 8, which focused on decrypting German naval messages.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Bletchley Park mansion",
+      "alt": "Bletchley Park, Britain's wartime codebreaking centre",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Breaking Enigma"
+   },
+   {
+    "id": "fa0c4c52",
+    "narration": "His techniques improved on the earlier Polish bomba method and sped up the breaking of Enigma. The resulting intelligence, called Ultra, helped in the Battle of the Atlantic.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From Enigma to Ultra",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Enigma messages",
+        "icon": "lock"
+       },
+       {
+        "id": "b",
+        "label": "Turing's methods",
+        "icon": "brain"
+       },
+       {
+        "id": "c",
+        "label": "Ultra intelligence",
+        "icon": "eye"
+       },
+       {
+        "id": "d",
+        "label": "Battle of the Atlantic",
+        "icon": "ship"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "3766399b",
+    "narration": "After the war he joined the National Physical Laboratory to design a computer. Later, at the University of Manchester, he turned to artificial intelligence.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "vintage computer room",
+      "alt": "early mainframe computer equipment"
+     }
+    },
+    "chapter": "Can machines think?"
+   },
+   {
+    "id": "734392be",
+    "narration": "In his 1950 paper, Computing Machinery and Intelligence, he opened with the words: \"I propose to consider the question, 'Can machines think?'\"",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "I propose to consider the question, 'Can machines think?'",
+      "attribution": "Alan Turing, 1950"
+     }
+    }
+   },
+   {
+    "id": "70152d1f",
+    "narration": "Thinking is hard to define. So Turing proposed the imitation game. A judge reads a conversation between a human and a machine. If the judge cannot reliably tell them apart, the machine passes.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Judge",
+        "text": "Which of you is the machine?"
+       },
+       {
+        "speaker": "Human",
+        "text": "Ask me anything you like."
+       },
+       {
+        "speaker": "Machine",
+        "text": "Yes, ask me anything too."
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "79c845d0",
+    "narration": "He also described Turing patterns, a idea in mathematical biology. His work reached far beyond a single field: computing, cryptanalysis, philosophy and biology.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "computer",
+        "label": "Computing"
+       },
+       {
+        "icon": "lock",
+        "label": "Codebreaking"
+       },
+       {
+        "icon": "brain",
+        "label": "AI"
+       },
+       {
+        "icon": "leaf",
+        "label": "Biology"
+       }
+      ],
+      "title": "A wide legacy"
+     }
+    }
+   },
+   {
+    "id": "857a082a",
+    "narration": "He died on 7 June 1954. In 2012, the centenary of his birth, more than forty countries celebrated the Alan Turing Year, and the UK's national AI institute carries his name.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "41+",
+      "label": "countries joined the Alan Turing Year in 2012"
+     }
+    },
+    "chapter": "Why he still matters"
+   },
+   {
+    "id": "abc85e69",
+    "narration": "So next time you talk to a machine, remember the question. Turing did not just build tools. He taught us to ask what thinking really means.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Turing taught us to ask what thinking really means.",
+      "emphasis": "thinking"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Alan Turing",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Alan Turing Institute",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing_Institute",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Alan Turing Year",
+    "url": "https://en.wikipedia.org/wiki/Alan_Turing_Year",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Turing test",
+    "url": "https://en.wikipedia.org/wiki/Turing_test",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Computing Machinery and Intelligence",
+    "url": "https://en.wikipedia.org/wiki/Computing_Machinery_and_Intelligence",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 28.4,
+  "before_first_script_call_s": 5.6,
+  "script_s": 22.8
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.09072,
+  "search_api": 0.0,
+  "total": 0.09097
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 28698,
+  "out": 3841
+ },
+ "rules": {
+  "length": {
+   "words": 299,
+   "expected_words": 267,
+   "ratio": 1.12,
+   "beats": 11,
+   "expected_beats": 9,
+   "est_speech_s": 135.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "In 1950, a British mathematician asked a simple question: can machines think? He thought the question was too vague, so he replaced it with a game. His name was Alan Turing.",
+   "close_text": "So next time you talk to a machine, remember the question. Turing did not just build tools. He taught us to ask what thinking really means."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "title": 1,
+    "timeline": 1,
+    "bullets": 1,
+    "image": 1,
+    "diagram": 1,
+    "clip": 1,
+    "quote": 1,
+    "dialogue": 1,
+    "icons": 1,
+    "stat": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 3.46,
+   "top_type": "title",
+   "top_share": 0.09,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 6,
+   "ungrounded_numbers": [],
+   "entities": 25,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 5,
+   "fetched": 5,
+   "notes_len": 4638,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core facts match the notes, but the script says the 1950 paper's question was \"too vague\" and that he \"replaced it with a game\", which is a fair paraphrase. Beat 6 says he \"turned to artificial intelligence\" at Manchester, which is loose, and \"the UK's national AI institute\" is stated without noting its 2025 shift to defense. The doctorate and Enigma claims are fine."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The script omits the 1952 prosecution, the 2013 pardon and the circumstances of his death. It also leaves out the Bombe, the Manchester computer and his wartime impact. These are the key points in the reviewer's note, and the script says only \"He died on 7 June 1954\"."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The chronological order with chapters is clear. The Turing patterns line in beat 9 is tacked on, and the death in beat 10 comes with no context before the trivia about the centenary."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question about machines thinking is decent. The ending is a generic moral, \"taught us to ask what thinking really means\", and it skips his tragic end."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is neutral and suitably accessible. It is not respectful of the whole life, because it avoids his persecution, and it reads like a textbook summary."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary well. The dialogue scene is invented but illustrative, and the \"Cambridge\" entry on the timeline has no date. The stat on 41+ countries is a real figure, but it is a trivial one to feature."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "The script is mostly a paraphrase of the Wikipedia lead. It has no vivid anecdotes or specifics, such as the number of lives saved or how the Bombe worked."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The length is about right and the language is English. The script is not a full portrait of Turing, since the prosecution and pardon that the brief calls for are missing."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The prose is fluent, with one grammar slip, \"a idea\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "critical",
+    "quote": "He died on 7 June 1954.",
+    "issue": "The death is mentioned with no context. The 1952 prosecution for homosexuality, the chemical castration, the 2013 pardon and the apology are all missing, which leaves out the central human story.",
+    "beat": 10
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "a idea in mathematical biology",
+    "issue": "The article should be \"an\", not \"a\".",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "sped up the breaking of Enigma",
+    "issue": "The script gives no concrete detail, such as the Bombe machine or the scale of its impact, so it stays vague.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "the UK's national AI institute carries his name",
+    "issue": "The notes say the institute has refocused on defense and national security since 2025, so the description is outdated or incomplete.",
+    "beat": 10
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"date\": \"Cambridge\"",
+    "issue": "The timeline entry is labelled with a place, not a date.",
+    "beat": 2
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Turing did not just build tools.",
+    "issue": "This is a generic, cliched closing line.",
+    "beat": 11
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Later, at the University of Manchester, he turned to artificial intelligence.",
+    "issue": "The Manchester computing work and the ACE design are not explained, and the statement is vague.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "1952 conviction for homosexuality and chemical castration",
+   "2013 royal pardon",
+   "circumstances of his death in 1954",
+   "Bombe and the scale of Enigma's impact",
+   "1936 paper on computable numbers and the halting problem"
+  ],
+  "wrong_facts": [
+   "Unverified, but plausible: \"turned to artificial intelligence\" at Manchester, which is a loose paraphrase."
+  ],
+  "would_publish": false,
+  "summary": "The script is clean and accurate but reads as a sanitised Wikipedia lead summary. It omits the prosecution, the pardon and the context of his death, which are the most important parts of his story, and it has little that is vivid or original.",
+  "mean": 2.89,
+  "cost_usd": 0.024956,
+  "tokens": [
+   4988,
+   1498
+  ]
+ }
+}

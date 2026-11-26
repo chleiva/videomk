@@ -1,0 +1,501 @@
+{
+ "id": "sci-01",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "explain entropy",
+ "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:25:17",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Entropy is a timeless scientific concept (thermodynamics and information theory) that an encyclopedia covers accurately; no recent information is needed for an explainer.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 37.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2466,
+  "n_sources": 2,
+  "n_fetched": 2,
+  "fetched": [
+   "Second law of thermodynamics",
+   "Entropy"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Second law of thermodynamics\nThe second law of thermodynamics is a physical law based on universal empirical observation concerning heat and energy interconversions. A simple statement of the law is that heat always flows spontaneously from hotter to colder regions of matter (or 'downhill' in terms of the temperature gradient). Another statement is: \"Not all heat can be converted into work in a cyclic process.\" These are informal definitions, however; more formal definitions appear below.\nThe second law of thermodynamics establishes the concept of entropy as a physical property of a thermodynamic system. It predicts whether processes are forbidden despite obeying the requirement of conservation of energy as expressed in the first law of thermodynamics and provides necessary criteria for spontaneous processes. For example, the first law allows the process of a cup falling off a table and breaking on the floor, as well as allowing the reverse process of the cup fragments coming back together and 'jumping' back onto the table, while the second law allows the former and denies the latter. The second law may be formulated by the observation that the entropy of isolated systems left to spontaneous evolution cannot decrease...\n\n## Entropy\nEntropy is a thermodynamic state variable that quantifies the probabilistic distribution of accessible microstates in a system. The term and the concept are used in diverse fields, from classical thermodynamics (where it was first recognized), to the microscopic description of nature in statistical physics, and the principles of information theory. It has far-ranging applications in chemistry and physics, in biological systems and their relation to life, in cosmology, economics, and information systems including the transmission of information in telecommunication.\nEntropy is central to the second law of thermodynamics, which states that the entropy of an isolated system left to spontaneous evolution cannot decrease with time. As a result, isolated systems evolve toward thermodynamic equilibrium, where the entropy is highest. \"High\" entropy means that energy is more uniformly distributed or dispersed within a system, while \"low\" entropy means that energy is more unevenly distributed or concentrated at a specific point or points within a system. A consequence of the second law of thermodynamics is that certain processes are irreversible.\nThe thermodynamic concept was referred to by Scottish...",
+ "plan": {
+  "title": "Entropy: Why Time Only Runs One Way",
+  "description": "Entropy explains why a broken cup never reassembles and why heat flows from hot to cold. This explainer shows how the second law of thermodynamics turns energy spreading into the arrow of time.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "31ef635e",
+    "narration": "A cup falls off a table and shatters. Nobody is surprised. But if you saw the pieces leap back up and reassemble, you would know the film was running backwards. Why?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "glass breaking slow motion",
+      "alt": "cup shattering on floor"
+     }
+    },
+    "chapter": "A puzzle"
+   },
+   {
+    "id": "b51d77fd",
+    "narration": "Here is the strange part. Energy conservation, the first law of thermodynamics, allows both versions. Something else must forbid the reverse. That something is the second law, and its key idea is entropy.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Cup breaks",
+       "tagline": "Allowed"
+      },
+      "b": {
+       "name": "Cup reassembles",
+       "tagline": "Denied"
+      },
+      "rows": [
+       {
+        "label": "First law",
+        "a": "Allows",
+        "b": "Allows"
+       },
+       {
+        "label": "Second law",
+        "a": "Allows",
+        "b": "Denies"
+       }
+      ],
+      "verdict": "The second law picks a direction",
+      "winner": "a"
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "25f28106",
+    "narration": "Think of a hot cup of coffee on a desk. Leave it alone and it cools. Heat always flows spontaneously from hotter to colder, never the other way around.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on desk",
+      "alt": "hot coffee steam"
+     }
+    }
+   },
+   {
+    "id": "edb659e3",
+    "narration": "Entropy measures how spread out energy is. Low entropy means energy is concentrated in a few places. High entropy means energy is dispersed evenly across a system.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how evenly energy is spread out within a system. Low entropy is concentrated; high entropy is dispersed.",
+      "origin": "First recognized in classical thermodynamics"
+     }
+    },
+    "chapter": "What entropy is"
+   },
+   {
+    "id": "f5ad88b8",
+    "narration": "Picture a drop of ink in water. At first it is one tight blob, low entropy. Soon it swirls outward until the whole glass is evenly tinted, high entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "ink drop in water",
+      "alt": "ink spreading in glass of water"
+     }
+    }
+   },
+   {
+    "id": "d16d2460",
+    "narration": "Underneath, entropy counts possibilities. Many more arrangements of molecules look spread out than look neatly gathered. Systems drift toward the arrangements that are overwhelmingly more common.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Why spreading wins",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Few ordered arrangements"
+       },
+       {
+        "id": "b",
+        "label": "Many spread-out arrangemen"
+       },
+       {
+        "id": "c",
+        "label": "System drifts to spread"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "vs"
+       ],
+       [
+        "b",
+        "c",
+        "so"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "1dacba42",
+    "narration": "That is the second law. In an isolated system left alone, entropy cannot decrease. Systems move toward thermodynamic equilibrium, where entropy is highest and energy is spread evenly.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy never decreases.",
+      "emphasis": "never decreases"
+     }
+    },
+    "chapter": "The second law"
+   },
+   {
+    "id": "bd6f1a86",
+    "narration": "This makes many processes irreversible. Ice melts in a warm room. Smoke fills a kitchen. A cup shatters. Each one spreads energy out, and none runs backwards on its own.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "ice melting timelapse",
+      "clip_queries": [
+       "ice melting timelapse",
+       "smoke drifting in room",
+       "broken ceramic pieces on floor"
+      ],
+      "alt": "smoke spreading in air"
+     }
+    }
+   },
+   {
+    "id": "68bc005b",
+    "narration": "But what about life? A living cell is highly ordered. Is that a loophole? No. Living things are not isolated. They take in energy and release heat, increasing entropy around them.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Order inside, spreading outside",
+      "items": [
+       "Cells stay ordered",
+       "They take in energy",
+       "They release heat",
+       "Total entropy still rises"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "leaf",
+       "sun",
+       "flame",
+       "log-in"
+      ]
+     }
+    }
+   },
+   {
+    "id": "5d14153d",
+    "narration": "So entropy is why time seems to have a direction. Energy spreads out, and it will not gather itself back. Next time you see something break or cool, you are watching entropy at work.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Energy spreads. Time moves forward.",
+      "subtitle": "That is entropy, the arrow behind the second law"
+     }
+    },
+    "chapter": "Takeaway"
+   }
+  ],
+  "sources": [
+   {
+    "title": "Second law of thermodynamics",
+    "url": "https://en.wikipedia.org/wiki/Second_law_of_thermodynamics",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Entropy",
+    "url": "https://en.wikipedia.org/wiki/Entropy",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 18.4,
+  "before_first_script_call_s": 5.8,
+  "script_s": 12.6
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.04208,
+  "search_api": 0.0,
+  "total": 0.04233
+ },
+ "calls": {
+  "small": 4,
+  "big": 1
+ },
+ "tokens": {
+  "in": 14365,
+  "out": 1826
+ },
+ "rules": {
+  "length": {
+   "words": 298,
+   "expected_words": 267,
+   "ratio": 1.116,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 133.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 34,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "A cup falls off a table and shatters. Nobody is surprised. But if you saw the pieces leap back up and reassemble, you would know the film was running backwards. Why?",
+   "close_text": "So entropy is why time seems to have a direction. Energy spreads out, and it will not gather itself back. Next time you see something break or cool, you are watching entropy at work."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "clip": 4,
+    "versus": 1,
+    "definition": 1,
+    "diagram": 1,
+    "kinetic_text": 1,
+    "bullets": 1,
+    "title": 1
+   },
+   "max_run": 1,
+   "entropy": 2.52,
+   "top_type": "clip",
+   "top_share": 0.4,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "is the second law",
+    "count": 2
+   },
+   {
+    "phrase": "entropy means energy is",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 2,
+   "notes_len": 2466,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Matches the notes on the cup example, the first and second laws, and the spreading of energy. The claim that the second law 'denies' the reverse is slightly overstated, because it is statistical."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers the definition, the cup, the second law, life and the arrow of time. It skips the shuffled deck and names no microstate term. It never says 'disorder' is a poor word, and it gives no non-obvious fact such as Boltzmann or the probabilistic nature of the law."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Moves cleanly from puzzle to definition to second law to life to takeaway. The coffee beat 3 is a slightly loose bridge, and the cup example is not reused in the ending."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The reversed-film cup puzzle is a strong, concrete hook. The ending is decent but leans on a summary and a generic 'next time you see something break' line."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Clear, conversational explainer register suited to beginners."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene mix is varied and the clips fit the narration. The versus scene is a stretch for a law versus a non-law. The diagram has a truncated label ('arrangemen') and an odd 'vs' edge. Beat 8's clip alt text does not match its primary query."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The cup, ink and coffee examples are standard. The first-law versus second-law framing is the one sharper touch."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, about 2 minutes, and it explains entropy. Word count is near target."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, natural and grammatical."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Many spread-out arrangemen",
+    "issue": "The diagram label is truncated, so a typo shows on screen.",
+    "beat": 6
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Something else must forbid the reverse.",
+    "issue": "The second law makes the reverse overwhelmingly improbable rather than strictly forbidden. The script never says this, which is the key microstate insight.",
+    "beat": 2
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Entropy counts possibilities.",
+    "issue": "The microstate idea is given one line, with no example such as a shuffled deck or numbers to make it concrete.",
+    "beat": 6
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "The second law picks a direction",
+    "issue": "A versus comparison layout is a weak fit for one event and its reverse, and it declares a 'winner'.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Heat always flows spontaneously from hotter to colder, never the other way around.",
+    "issue": "The coffee beat is an unconnected aside that is not tied to entropy until later.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "Why 'disorder' is a misleading word for entropy",
+   "A shuffled-deck or counting-microstates example that makes the probability concrete",
+   "Boltzmann or Clausius, or any historical anchor",
+   "The point that the law is statistical, so the reverse is not impossible, just absurdly unlikely",
+   "The universe's heat death or the low-entropy past as a deeper explanation of the arrow of time"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clean, accurate and well-organised explainer with a good cup-puzzle hook. It stays generic, leaves out the statistical or microstate depth and the 'disorder' caveat, and has a truncated diagram label.",
+  "mean": 3.78,
+  "cost_usd": 0.020218,
+  "tokens": [
+   3984,
+   1225
+  ]
+ }
+}

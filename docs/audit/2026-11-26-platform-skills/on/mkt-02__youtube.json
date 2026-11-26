@@ -1,0 +1,227 @@
+{
+ "id": "mkt-02",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A Note-Taking App That Keeps Your Ideas Findable",
+  "description": "A launch video for a new note-taking app that helps you capture ideas fast, organize them without effort, and find them again in seconds. See how it works in three simple steps.",
+  "beats": [
+   {
+    "id": "92f29138",
+    "narration": "You had a great idea yesterday. Where is it now? Buried in a text to yourself, a sticky note, or a notebook you left at home.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "messy desk with sticky notes",
+      "clip_queries": [
+       "messy desk with sticky notes",
+       "person searching through notebooks"
+      ],
+      "alt": "cluttered desk papers and notebooks"
+     }
+    }
+   },
+   {
+    "id": "2fd2d78a",
+    "narration": "Scattered notes cost you time. You search several apps, scroll through old messages, and still miss the one thing you needed. Good ideas are only useful if you can find them.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Where your notes hide",
+      "items": [
+       "Text messages",
+       "Sticky notes",
+       "Old notebooks",
+       "Random apps"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "message-circle",
+       "notebook-dot",
+       "book",
+       "phone"
+      ]
+     }
+    },
+    "chapter": "The problem with scattered notes"
+   },
+   {
+    "id": "a3cf1175",
+    "narration": "So we built a note-taking app with one promise: capture an idea quickly, and find it again just as fast.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Capture in seconds. Find in seconds.",
+      "emphasis": "seconds"
+     }
+    }
+   },
+   {
+    "id": "2419e6db",
+    "narration": "It works in a few simple steps. First, capture: open the app and start typing. Second, organize: keep your notes in order. Third, find: search for the note you need.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three simple steps",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Open the app and type"
+       },
+       {
+        "label": "Organize",
+        "detail": "Notes sort with tags"
+       },
+       {
+        "label": "Find",
+        "detail": "Search and get the note"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "db92b17c",
+    "narration": "Capture is fast. There is no setup and no blank page to fear. You open the app, and the cursor is already waiting for your thought.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "clip_queries": [
+       "person typing on laptop",
+       "hands writing on a phone"
+      ],
+      "alt": "hands typing on a keyboard"
+     }
+    }
+   },
+   {
+    "id": "6d890938",
+    "narration": "Organizing should not be a chore. Add a tag to group related thoughts. Keep your focus on the work.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From idea to order",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Quick note",
+        "icon": "notebook-dot"
+       },
+       {
+        "id": "b",
+        "label": "Tags",
+        "icon": "tag"
+       },
+       {
+        "id": "c",
+        "label": "Tidy library",
+        "icon": "folder"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "add"
+       ],
+       [
+        "b",
+        "c",
+        "sorted"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "ac9cfe04",
+    "narration": "Finding is the real test. Type a word you remember, and find matching notes. No digging, no guessing, no scrolling through old lists.",
+    "scene": {
+     "type": "code",
+     "props": {
+      "code": "$ search \"trip ideas\"\n3 notes found",
+      "language": "bash",
+      "mode": "terminal",
+      "title": "Search",
+      "steps": [
+       {
+        "lines": [
+         1
+        ],
+        "note": "Type a word you remember"
+       },
+       {
+        "lines": [
+         2
+        ],
+        "note": "Matching notes appear"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "5a6e065a",
+    "narration": "Your notes are ready when you need them. Start a thought at your desk, add to it while you walk, and pick it up again later.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person using phone outdoors",
+      "clip_queries": [
+       "person using phone outdoors",
+       "working on laptop at cafe",
+       "commuters on a train with phones"
+      ],
+      "alt": "woman walking with smartphone in city"
+     }
+    }
+   },
+   {
+    "id": "6d6b695e",
+    "narration": "Built to stay out of your way.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you get",
+      "items": [
+       "Instant capture",
+       "Automatic tags",
+       "Fast search",
+       "Works on every device"
+      ]
+     }
+    }
+   },
+   {
+    "id": "9539354b",
+    "narration": "Your best ideas deserve a home. Try the app today, and the next time a thought strikes, you will know exactly where it lives and how to get it back.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Never lose an idea again",
+      "subtitle": "Capture it. Organize it. Find it."
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "grounding: 8 beats had unsupported specifics, 7 rewritten"
+ ],
+ "cost_usd": 0.13229,
+ "seconds": 47.1
+}

@@ -1,0 +1,81 @@
+{
+ "id": "how-01",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "A fast, practical guide to changing a flat tire: park safe, loosen the nuts, lift the car, swap the wheel. Learn the one mistake that makes it dangerous.",
+  "beats": [
+   {
+    "id": "fdeb59e7",
+    "narration": "A flat tire doesn't have to ruin your day. First, park on flat, solid ground, turn on your hazard lights, and pull the parking brake.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Flat tire? Park flat. Hazards on.",
+      "emphasis": "Park flat"
+     }
+    },
+    "chapter": "Change it safely"
+   },
+   {
+    "id": "fcf5cc91",
+    "narration": "Next, loosen the lug nuts a little while the wheel is still on the ground. Don't remove them yet. That's the step people skip.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Before lifting",
+      "items": [
+       "Loosen lug nuts",
+       "Wheel stays on ground",
+       "Don't remove yet"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "c95ef4fc",
+    "narration": "Then place the jack under the car's frame, near the flat, and lift until the tire clears the ground. Remove the nuts and swap the wheel.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "changing car tire roadside",
+      "alt": "man replacing wheel on car"
+     }
+    }
+   },
+   {
+    "id": "c6612838",
+    "narration": "Finally, tighten the nuts in a star pattern, lower the car, and tighten again. Never get under a car held by a jack.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Finish right",
+      "items": [
+       "Tighten in a star pattern",
+       "Lower the car",
+       "Tighten again"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 98 words in 4 beats but a 45-second video needs about 89 (between 80 and 89). Cut about 9 words: 4 to 5 beats of about 22 words each (you averaged 24; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06675,
+ "seconds": 9.7
+}

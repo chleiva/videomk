@@ -1,0 +1,491 @@
+{
+ "id": "sci-01",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "explain entropy",
+ "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:43:29",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Entropy is a timeless scientific concept (thermodynamics and information theory) that an encyclopedia covers accurately; no recent developments are needed for a short explainer.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 4.6,
+   "cost_usd": 0.0006886000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 11,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5425,
+  "n_sources": 6,
+  "n_fetched": 6,
+  "fetched": [
+   "12.3 Second Law of Thermodynamics: Entropy - Physics | OpenStax",
+   "Second Law - Entropy | Glenn Research Center | NASA",
+   "Second law of thermodynamics - Wikipedia",
+   "What is the Second Law of Thermodynamics? | Understanding Entropy Made Easy with Dr. Binocs",
+   "Introduction to entropy (video) | Entropy | Khan Academy",
+   "1.5: The Boltzmann Distribution and the Statistical Definition of Entropy - Chemistry LibreTexts"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## 12.3 Second Law of Thermodynamics: Entropy - Physics | OpenStax\nThe second law of thermodynamics states that the total entropy of a system either increases or remains constant in any spontaneous process; it never decreases. An important implication of this law is that heat transfers energy spontaneously from higher- to lower-temperature objects, but never spontaneously in the reverse direction. This is because entropy increases for heat transfer of energy from hot to cold (Figure 12.9). Because the change in entropy is Q/T, there is a larger change in at [...] Because Q is the amount of energy heat adds to the ice, its value is positive, and T is the melting temperature of ice, So the change in entropy is The change in entropy is positive, because heat transfers energy into the ice to cause the phase change. This is a significant increase in entropy, because it takes place at a relatively low temperature. It is accompanied by an increase in the disor\n\n## Second Law - Entropy | Glenn Research Center | NASA\nThe second law states that there exists a useful state variable called entropy. The change in entropy (delta S, \\\\(\\\\Delta S\\\\)) is equal to the heat transfer (delta Q, \\\\(\\\\Delta Q\\\\)) divided by the temperature (T). \\\\(\\\\LARGE \\\\Delta S=\\\\frac{\\\\Delta Q}{T}\\\\) For a given physical process, the entropy of the system and the environment will remain a constant if the process can be reversed. If we denote the initial and final states of the system by “i” and “f”, then: [...] \\\\(\\\\LARGE T\\_{h}=\\\\frac{T\\_{1}+T\\_{f}}{2}\\\\) Similarly, for the cold object, the final temperature is Tf and the average temperature during the process is Tc which is the average of Tf and T2. \\\\(\\\\LARGE T\\_{c}=\\\\frac{T\\_{2}+T\\_{f}}{2}\\\\) Th will always be greater than Tc, because T1 is greater than T2. \\\\(\\\\LARGE T\\_{h}>T\\_{c}\\\\) The entropy change for the hot object will be (-Q/Th), with the minus sign applied becau\n\n## Second law of thermodynamics - Wikipedia\nwhere {\\displaystyle \\Omega \\left(E\\right)} is the number of quantum states in a small interval between {\\displaystyle E} and {\\displaystyle E+\\delta E}. Here {\\displaystyle \\delta E} is a macroscopically small energy interval that is kept fixed. Strictly speaking this means that the entropy depends on the choice of {\\displaystyle \\delta E}. However, in the thermodynamic limit (i.e. in the limit of infinitely large system size), the specific entropy (entropy per unit volume or per unit mass) [...] fragments coming back together and 'jumping' back onto the table, while the second law allows the former and denies the latter. The second law may be formulated by the observation that the entropy of isolated systems left to spontaneous evolution cannot decrease, as they always tend toward a state of thermodynamic equilibrium where the entropy is highest at the given internal energy. An increas\n\n## What is the Second Law of Thermodynamics? | Understanding Entropy Made Easy with Dr. Binocs\n[0:50] These everyday observations are explained by a fundamental rule of physics called the second law of thermodynamics. [1:01] In simple [music] terms, the second law states that for any spontaneous process, [1:07] the total enthropy of the universe must increase. Enthropy [music] is often [1:15] described as disorder. But a clearer way to understand it is through probability. [1:22] That's because entropy measures how many microscopic ways energy can be arranged [...] [3:12] that it never happens in real life. As energy spreads out, many processes become effectively irreversible. [3:21] Once ice melts or liquids [music] mix, returning to the original state would require an extremely unlikely [3:29] rearrangement of particles. This gives natural processes a clear direction, [3:36] often called the arrow of time. The spreading of energy also limits how efficiently it can be used. [...]\n\n## Introduction to entropy (video) | Entropy | Khan Academy\nentropy to the number of microstates. According to this equation, entropy, symbolized by S, is equal to Boltzmann's constant, k, times the natural log of W, and W represents the number of microstates in a system. So if the number of microstates of a system increases, that represents an increase in entropy, and if the number of microstates decreases, that represents a decrease in the entropy of the system. Sometimes, instead of using the word microstates, people will describe an increase in\n\n## 1.5: The Boltzmann Distribution and the Statistical Definition of Entropy - Chemistry LibreTexts\nWe calculate that there are six different microstates corresponding to the macrostate with two particles in each bin ({2,2}), which agrees with the drawing in Figure I.5.B. See Practice Problems 1 and 2 The Boltzmann definition of entropy relates the entropy as the natural logarithm of the number of microstates, W: \\\\\\[S=k\\_B\\\\ln W\\\\label{EQ:BoltzmannS}\\\\] where \\\\(\\\\bf{k\\_B}\\\\) is a constant of proportionality known as Boltzmann’s constant: [...] In general, we can calculate the number of microstates in a given distribution according to the formula: \\\\\\[W = \\\\frac{N!}{n\\_1!n\\_2!,…}\\\\label{EQ:statweight}\\\\] where W is the number of ways of distributing \\\\(N\\\\) total particles into bins, and \\\\(n\\_1\\\\), \\\\(n\\_2\\\\), … is the number of particles in each bin. Example 1: Use Equation \\\\ref{EQ:statweight} to calculate the number of ways to arrange four particles into two bins such that there a",
+ "plan": {
+  "title": "Entropy Explained",
+  "description": "Entropy is one of physics' most powerful ideas, yet most people misunderstand it. This video explains what entropy really is and why it gives time its direction.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "055e7dc9",
+    "narration": "Drop a cup and it shatters. But why does it never reassemble itself? The answer is one of the deepest ideas in all of physics.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "ceramic cup falling and breaking on floor",
+      "alt": "a cup shattering on a hard floor in slow motion"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "The Puzzle"
+   },
+   {
+    "id": "9566c84a",
+    "narration": "That idea is entropy. Not just disorder, but something more precise: the number of microscopic ways a system can be arranged.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how many microscopic arrangements, called microstates, correspond to the same observable state of a system.",
+      "origin": "From Greek 'entropia', meaning transformation"
+     }
+    }
+   },
+   {
+    "id": "0cc8c4e3",
+    "narration": "Imagine four particles spread across two boxes. There is only one way to pack them all left, but six different ways to split them two and two.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Microstates: 4 Particles, 2 Boxes",
+      "items": [
+       "All 4 left: 1 microstate",
+       "3 left, 1 right: 4 microstates",
+       "2 left, 2 right: 6 microstates"
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 2,
+      "icons": [
+       "box",
+       "grid",
+       "chart-column"
+      ]
+     }
+    },
+    "chapter": "Microstates and Probability"
+   },
+   {
+    "id": "18b4b120",
+    "narration": "The spread-out arrangement wins simply because it is far more probable. Entropy measures that probability. More microstates means higher entropy.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "S = k_B * ln(W)",
+        "note": "S = entropy, W = number of microstates, k_B = Boltzmann's co"
+       }
+      ],
+      "title": "Boltzmann's Entropy Formula"
+     }
+    }
+   },
+   {
+    "id": "6c4dd2bc",
+    "narration": "The second law of thermodynamics says entropy in an isolated system never decreases. Every spontaneous process moves toward the arrangement with the most microstates.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy never decreases in an isolated system.",
+      "emphasis": "never decreases"
+     }
+    },
+    "chapter": "The Second Law"
+   },
+   {
+    "id": "cadd66f9",
+    "narration": "Heat always flows from hot to cold, never the reverse, because that direction increases entropy. The change in entropy equals heat transferred divided by temperature.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "Delta S = Delta Q / T",
+        "note": "Delta Q = heat added, T = temperature in Kelvin"
+       }
+      ],
+      "title": "Entropy Change"
+     }
+    }
+   },
+   {
+    "id": "1f57fded",
+    "narration": "This is why time feels one-directional. A shattered cup, melting ice, mixing gases: each moves toward more microstates and cannot spontaneously reverse.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Irreversible Processes",
+      "items": [
+       "Shattered cup never reassembles",
+       "Melting ice never re-freezes alone",
+       "Mixed gases never unmix"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "emphasis": 0,
+      "icons": [
+       "box",
+       "droplet",
+       "cloud"
+      ]
+     }
+    },
+    "chapter": "The Arrow of Time"
+   },
+   {
+    "id": "e3b2c110",
+    "narration": "Scientists call this the arrow of time. Entropy gives the universe a direction: from ordered, unlikely states toward disordered, probable ones.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "timelapse ice melting in a glass",
+      "alt": "ice slowly melting into water in a clear glass"
+     }
+    }
+   },
+   {
+    "id": "246128e4",
+    "narration": "Entropy also limits every engine. No machine converts heat to work perfectly, because some energy always spreads into the surroundings, raising total entropy.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Heat Engine Energy Flow",
+      "nodes": [
+       {
+        "id": "h",
+        "label": "Hot Source",
+        "icon": "flame"
+       },
+       {
+        "id": "e",
+        "label": "Engine",
+        "icon": "cog"
+       },
+       {
+        "id": "w",
+        "label": "Useful Work",
+        "icon": "bolt"
+       },
+       {
+        "id": "c",
+        "label": "Heat Lost",
+        "icon": "wind"
+       }
+      ],
+      "edges": [
+       [
+        "h",
+        "e",
+        "heat in"
+       ],
+       [
+        "e",
+        "w",
+        "work out"
+       ],
+       [
+        "e",
+        "c",
+        "waste heat"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 3
+     }
+    },
+    "chapter": "Why It Matters"
+   },
+   {
+    "id": "dec374aa",
+    "narration": "So entropy is not just disorder. It is probability made physical, the reason engines lose heat, ice melts, and time moves only forward.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Entropy is probability made physical.",
+      "emphasis": "probability made physical"
+     }
+    }
+   },
+   {
+    "id": "916cb3f2",
+    "narration": "Next time something breaks and does not fix itself, that is the second law at work. The universe always moves toward its most probable state.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The One Idea to Remember",
+      "items": [
+       "More microstates = higher entropy",
+       "Entropy never decreases spontaneously",
+       "This gives time its direction"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 1,
+      "icons": [
+       "chart-column",
+       "lock",
+       "clock"
+      ]
+     }
+    },
+    "chapter": "Takeaway"
+   }
+  ],
+  "sources": [
+   {
+    "title": "12.3 Second Law of Thermodynamics: Entropy - Physics | OpenStax",
+    "url": "https://openstax.org/books/physics/pages/12-3-second-law-of-thermodynamics-entropy",
+    "publisher": "openstax.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Second Law - Entropy | Glenn Research Center | NASA",
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/second-law-entropy",
+    "publisher": "www1.grc.nasa.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Second law of thermodynamics - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Second_law_of_thermodynamics",
+    "publisher": "en.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What is the Second Law of Thermodynamics? | Understanding Entropy Made Easy with Dr. Binocs",
+    "url": "https://www.youtube.com/watch?v=RrCJgHYJNGA",
+    "publisher": "youtube.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Introduction to entropy (video) | Entropy | Khan Academy",
+    "url": "https://www.khanacademy.org/science/ap-chemistry-beta/x2eef969c74e0d802:applications-of-thermodynamics/x2eef969c74e0d802:entropy/v/introduction-to-entropy-ap",
+    "publisher": "khanacademy.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "1.5: The Boltzmann Distribution and the Statistical Definition of Entropy - Chemistry LibreTexts",
+    "url": "https://chem.libretexts.org/Courses/Western_Washington_University/Biophysical_Chemistry_(Smirnov_and_McCarty)/01%3A_Biochemical_Thermodynamics/1.05%3A_The_Boltzmann_Distribution_and_the_Statistical_Definition_of_Entropy",
+    "publisher": "chem.libretexts.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 54.0,
+  "before_first_script_call_s": 8.7,
+  "script_s": 45.3
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "research": 0.00069,
+  "script_big": 0.16123,
+  "search_api": 0.016,
+  "total": 0.17817
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 39980,
+  "out": 4623
+ },
+ "rules": {
+  "length": {
+   "words": 258,
+   "expected_words": 267,
+   "ratio": 0.966,
+   "beats": 11,
+   "expected_beats": 9,
+   "est_speech_s": 118.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 25,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 25,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Drop a cup and it shatters. But why does it never reassemble itself? The answer is one of the deepest ideas in all of physics.",
+   "close_text": "Next time something breaks and does not fix itself, that is the second law at work. The universe always moves toward its most probable state."
+  },
+  "variety": {
+   "distinct": 6,
+   "counts": {
+    "clip": 2,
+    "definition": 1,
+    "bullets": 3,
+    "equation": 2,
+    "kinetic_text": 2,
+    "diagram": 1
+   },
+   "max_run": 1,
+   "entropy": 2.48,
+   "top_type": "bullets",
+   "top_share": 0.27,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 6,
+   "fetched": 6,
+   "notes_len": 5425,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 3 (bullets): its narration never says ['All 4 left: 1 microstate', '3 left, 1 right: 4 microstates', '2 left, 2 right: 6 microstates']",
+   "beat 7 (bullets): its narration never says ['Melting ice never re-freezes alone', 'Mixed gases never unmix']",
+   "beat 9 (diagram): its narration never says ['Hot Source', 'Heat Lost']",
+   "beat 11 (bullets): its narration never says ['More microstates = higher entropy', 'Entropy never decreases spontaneously', 'This gives time its direction']"
+  ]
+ }
+}

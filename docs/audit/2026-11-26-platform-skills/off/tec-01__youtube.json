@@ -1,0 +1,246 @@
+{
+ "id": "tec-01",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: Predicting the Next Word",
+  "description": "Large language models like ChatGPT work by predicting the next piece of text, again and again. This video explains tokens, training, attention and how a raw model becomes a helpful assistant.",
+  "beats": [
+   {
+    "id": "72106560",
+    "narration": "ChatGPT can write essays, code and poems. Yet underneath, it does one simple thing over and over: it guesses the next word. That is the whole trick.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just predicts the next word, again and again.",
+      "emphasis": "next word"
+     }
+    },
+    "chapter": "The big trick"
+   },
+   {
+    "id": "b5052ea9",
+    "narration": "Think of your phone's autocomplete. Type \"see you\" and it suggests \"soon\". A large language model is that idea, scaled up enormously and trained on huge amounts of text.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on smartphone",
+      "alt": "hands texting on phone"
+     }
+    }
+   },
+   {
+    "id": "be99736f",
+    "narration": "Computers do not read words. Text is first chopped into small pieces called tokens. Each token becomes a list of numbers, and similar meanings end up with similar numbers.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Turning text into numbers",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Text",
+        "icon": "book"
+       },
+       {
+        "id": "k",
+        "label": "Tokens",
+        "icon": "puzzle"
+       },
+       {
+        "id": "n",
+        "label": "Numbers",
+        "icon": "code"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "k",
+        "split"
+       ],
+       [
+        "k",
+        "n",
+        "convert"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    },
+    "chapter": "From text to numbers"
+   },
+   {
+    "id": "d35cc85c",
+    "narration": "Now the model needs a way to choose well. It uses a neural network, a giant web of adjustable numbers called parameters. Training is the process of tuning them.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Parameter",
+      "definition": "An adjustable number inside a neural network. Training tunes billions of them so predictions get better."
+     }
+    }
+   },
+   {
+    "id": "e1f3494a",
+    "narration": "Training is a guessing game. Show the model a sentence with the next word hidden. It guesses, checks the answer, and nudges its numbers. Repeat this an astonishing number of times.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "The training loop",
+      "steps": [
+       {
+        "label": "Hide the next word"
+       },
+       {
+        "label": "Model guesses"
+       },
+       {
+        "label": "Check the answer"
+       },
+       {
+        "label": "Nudge the numbers"
+       }
+      ]
+     }
+    },
+    "chapter": "How it learns"
+   },
+   {
+    "id": "abfba860",
+    "narration": "Along the way, it picks up grammar, facts and styles of writing. Nobody programs these in. They emerge because predicting text well requires understanding patterns in it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "server room data center",
+      "clip_queries": [
+       "server room data center",
+       "person reading books in library"
+      ],
+      "alt": "rows of computer servers"
+     }
+    }
+   },
+   {
+    "id": "14aae864",
+    "narration": "The key invention is called attention. When the model reads \"The dog chased the ball because it was fast\", attention helps it work out which earlier words matter for each new word.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Attention lets the model focus on the words that matter.",
+      "emphasis": "Attention"
+     }
+    },
+    "chapter": "Paying attention"
+   },
+   {
+    "id": "779e3737",
+    "narration": "To answer you, the model predicts one token, adds it to the text, then predicts the next. It picks from likely options, which is why the same question can get different answers.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Your prompt",
+        "kind": "start"
+       },
+       {
+        "id": "b",
+        "label": "Predict next token",
+        "kind": "step"
+       },
+       {
+        "id": "c",
+        "label": "Add it to the text",
+        "kind": "step"
+       },
+       {
+        "id": "d",
+        "label": "Reply finished?",
+        "kind": "decision"
+       },
+       {
+        "id": "e",
+        "label": "Show the answer",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "b",
+        "no"
+       ],
+       [
+        "d",
+        "e",
+        "yes"
+       ]
+      ],
+      "title": "Generating a reply"
+     }
+    }
+   },
+   {
+    "id": "9370b79c",
+    "narration": "A raw model only imitates text. So it is then refined with human feedback, teaching it to be helpful and polite. But it can still sound confident and be wrong.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Strengths and limits",
+      "items": [
+       "Fluent, helpful writing",
+       "Learned from human feedback",
+       "Can state false things confidently",
+       "Check important facts yourself"
+      ],
+      "checked": [
+       true,
+       true,
+       false,
+       false
+      ]
+     }
+    },
+    "chapter": "Why it can be wrong"
+   },
+   {
+    "id": "595d321f",
+    "narration": "So remember this. A language model does not look things up or think like you. It predicts likely words, brilliantly. Use it as a powerful draft partner, and verify what matters.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Brilliant at predicting words, not a guarantee of truth.",
+      "emphasis": "predicting words"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.08816,
+ "seconds": 28.9
+}

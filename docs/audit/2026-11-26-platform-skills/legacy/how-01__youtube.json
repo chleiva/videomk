@@ -1,0 +1,245 @@
+{
+ "id": "how-01",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "Learn how to change a flat tire step by step, from getting to safety to tightening the lug nuts. A calm, practical guide anyone can follow on the side of the road.",
+  "beats": [
+   {
+    "id": "600f71cd",
+    "narration": "A flat tire can happen anywhere, and most people never practice. The good news is that you can fix it in about twenty minutes, with just a few tools and a clear plan.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car parked on roadside",
+      "alt": "vehicle stopped on highway shoulder"
+     }
+    }
+   },
+   {
+    "id": "ccc4699e",
+    "narration": "First, find a safe place. Pull over on flat, firm ground, away from traffic. Turn on your hazard lights, put the car in park, and set the parking brake.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Make it safe",
+      "steps": [
+       {
+        "label": "Pull over on flat, firm ground"
+       },
+       {
+        "label": "Turn on hazard lights"
+       },
+       {
+        "label": "Park and set the parking brake"
+       }
+      ]
+     }
+    },
+    "chapter": "Get ready"
+   },
+   {
+    "id": "af0905af",
+    "narration": "Next, gather your tools. You need a spare tire, a jack, and a lug wrench. Your owner's manual shows where they are stored and where the jack fits.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you need",
+      "items": [
+       "Spare tire",
+       "Jack",
+       "Lug wrench",
+       "Owner's manual"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c30685c2",
+    "narration": "Before lifting anything, loosen the lug nuts. Turn the wrench counterclockwise, just a half turn each. The tire is still on the ground, so it will not spin.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Loosen the lug nuts first, while the tire is still on the ground.",
+      "emphasis": "Loosen the lug nuts first"
+     }
+    },
+    "chapter": "Lift the car"
+   },
+   {
+    "id": "d265ef99",
+    "narration": "Now place the jack at the spot your manual shows, under the frame near the flat. Raise the car until the flat tire is a few inches off the ground.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Raising the car",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Find jack point",
+        "icon": "map"
+       },
+       {
+        "id": "b",
+        "label": "Place the jack",
+        "icon": "frame"
+       },
+       {
+        "id": "c",
+        "label": "Raise the car",
+        "icon": "log-in"
+       },
+       {
+        "id": "d",
+        "label": "Tire off the ground",
+        "icon": "car"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "90653bbb",
+    "narration": "Never put any part of your body under the car while it is on the jack. A jack can slip, so keep your hands and head clear.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Safety rule",
+      "items": [
+       "Never go under the car",
+       "Keep hands and head clear",
+       "A jack can slip"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "f0e4e891",
+    "narration": "Remove the lug nuts completely and keep them together in a safe spot. Then pull the flat tire straight toward you and lay it flat on the ground.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands removing car wheel",
+      "alt": "mechanic taking off a tire"
+     }
+    },
+    "chapter": "Swap the tire"
+   },
+   {
+    "id": "e3fdc17c",
+    "narration": "Line up the spare with the wheel bolts and slide it on. Then thread the lug nuts back by hand, until they are snug.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Mount the spare",
+      "steps": [
+       {
+        "label": "Line up the spare with the bolts"
+       },
+       {
+        "label": "Slide it on"
+       },
+       {
+        "label": "Thread lug nuts by hand"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "67221194",
+    "narration": "Lower the car until the tire touches the ground, then remove the jack. Tighten the lug nuts with the wrench, working in a star pattern so the wheel sits evenly.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Finishing up",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Lower the car",
+        "icon": "log-in"
+       },
+       {
+        "id": "b",
+        "label": "Remove the jack",
+        "icon": "frame"
+       },
+       {
+        "id": "c",
+        "label": "Tighten in a star",
+        "icon": "star"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "cards",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "d4af19da",
+    "narration": "Finally, store the flat and your tools. Check the spare's pressure soon, and drive carefully, since many spares are meant for short trips. Then get the flat repaired. You did it.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "After the change",
+      "items": [
+       "Store the flat and tools",
+       "Check the spare's pressure",
+       "Drive carefully",
+       "Get the flat repaired"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "box",
+       "gauge",
+       "car",
+       "frame"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.0812,
+ "seconds": 25.0
+}

@@ -1,0 +1,628 @@
+{
+ "id": "how-02",
+ "category": "how-to / tutorial",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "cómo empezar a correr si nunca he hecho ejercicio",
+ "great": "Plan realista para principiante (caminar/correr alternado, 3 veces por semana, 20-30 min), calzado, ritmo conversacional, progresión gradual, descanso, lesiones comunes, consulta médica si hay condiciones; motivador y práctico.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:32:56",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Cómo empezar a correr siendo sedentario es una explicación atemporal basada en principios de fisiología del ejercicio y progresión de entrenamiento, que no depende de información reciente, así que no ",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 6.4,
+   "cost_usd": 0.0007595,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 58.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6041,
+  "n_sources": 3,
+  "n_fetched": 7,
+  "fetched": [
+   "Empezar a correr desde cero: plan en PDF + tabla semanal",
+   "HOW TO START RUNNING without getting tired | 7 tips for beginners",
+   "Los mejores consejos para empezar a hacer running. Nike",
+   "Cómo Empezar a Correr desde Cero: Guía Completa - CorrerJuntos",
+   "Recomendaciones mundiales sobre actividad física para la salud - OPS/OMS | Organización Panamericana de la Salud",
+   "Nuevas recomendaciones de actividad física de la OMS | vidasaludable.udec.cl",
+   "Actividad física"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Empezar a correr desde cero: plan en PDF + tabla semanal\n## Preguntas frecuentes sobre empezar a correr ### ¿Cómo empezar a correr si soy principiante? Empieza alternando caminata y carrera muy suave: 1 minuto corriendo y 2 caminando, repetido seis veces, tres días por semana en días alternos. Cada semana alarga un poco el tramo de carrera y acorta el de caminata. Con unas zapatillas adecuadas y dos sesiones de fuerza, en 8 a 12 semanas correrás 30 minutos seguidos. ### ¿Cuántos días a la semana debo correr si soy principiante? [...] En esta guía encontrarás: Qué comprobar antes de la primera salida El método CaCo: caminar y correr Tabla del plan de 12 semanas Cuántos días y cuánto tiempo correr al principio Las 8 claves para no lesionarte ni abandonar Semana tipo cuando ya corres 30 minutos Adapta el plan a tu perfil: 40, 50, 60 años, mujeres, sobrepeso Errores más comunes Preguntas frecuentes ## Antes de dar el primer paso: cuatro comprobaci\n\n## HOW TO START RUNNING without getting tired | 7 tips for beginners\nprimer día haces un minuto corriendo tres minutos andando intenta aumentarlo a 2 minutos corriendo dos minutos andando tres minutos corriendo un minuto andando así hasta que puedas correr durante 10-15 minutos de forma continua respecto a la frecuencia de entrenamiento semanal esto también es muy individualizado pero con dos a tres días si acabas de empezar es suficiente y ten en cuenta que siempre Debes Dejar un tiempo de recuperación entre sesiones sobre todo al principio porque estás [...] para empezar a correr lo único que tienes que hacer es ponerte unas zapatillas y echar a correr pero no no es tan simple como eso en este vídeo voy a enseñarte todo lo que necesitas saber sobre cómo empezar a correr la técnica de la cabeza a los pies una rutina recomendada para empezar a correr desde cero Así que bienvenido bienvenida esto es kiwi suscríbete para apoyar el contenido dale like porque\n\n## Los mejores consejos para empezar a hacer running. Nike\nEste plan está diseñado para ayudarte a empezar a correr o a retomar el running. No se trata de minutos ni de metros. El objetivo es que disfrutes corriendo y que celebres los progresos que logres a lo largo del camino. Así, seguirás volviendo a la línea de salida. El Coach Bennett te guiará, motivará e inspirará en todo momento. - 4 semanas - 3 sesiones a la semana (con una cuarta sesión opcional) - Carreras por tiempo - Ideal para: principiantes o cualquier persona que retome el running [...] # Cómo iniciarse en el running: guía para principiantes ##### Actividad Tanto si acabas de empezar a hacer running como si quieres retomar la costumbre, esta guía te ayudará a empezar a correr de forma segura con consejos para principiantes, un plan sencillo de carrera y caminata, consejos sobre la equipación y estrategias de motivación de entrenadores. [...] ### ¿Qué distancia debe correr un prin\n\n## Cómo Empezar a Correr desde Cero: Guía Completa - CorrerJuntos\nPlan de 8 Semanas para Principiantes. Este plan te lleva de cero a correr 30 minutos sin parar. La clave es la progresión gradual: alternamos caminar y correr,\n\n## Recomendaciones mundiales sobre actividad física para la salud - OPS/OMS | Organización Panamericana de la Salud\n1\\. Los adultos de 65 en adelante dediquen 150 minutos semanales a realizar actividades físicas moderadas aeróbicas, o bien algún tipo de actividad física vigorosa aeróbica durante 75 minutos, o una combinación equivalente de actividades moderadas y vigorosas. 2\\. La actividad se practicará en sesiones de 10 minutos, como mínimo. [...] 1\\. Los adultos de 18 a 64 años dediquen como mínimo 150 minutos semanales a la práctica de actividad física aeróbica, de intensidad moderada, o bien 75 minutos de actividad física aeróbica vigorosa cada semana, o bien una combinación equivalente de actividades moderadas y vigorosas. 2\\. La actividad aeróbica se practicará en sesiones de 10 minutos de duración, como mínimo. [...] 3\\. Que, a fin de obtener aún mayores beneficios para la salud, los adultos de este grupo de edades aumenten hasta 300 minutos por semana la práctica de actividad física moderada \n\n## Nuevas recomendaciones de actividad física de la OMS | vidasaludable.udec.cl\nEn los adultos se recomienda realizar, a lo largo de la semana, como mínimo 150 a 300 minutos de actividad aeróbica de intensidad moderada, o bien, un mínimo de entre 75 y 150 minutos actividad física aeróbica de intensidad vigorosa, o una combinación equivalente de actividades de intensidad moderada a vigorosa. [...] Todos los adultos y las personas mayores con las afecciones crónicas citadas deben realizar actividad física con regularidad. Se les recomienda que a lo largo de la semana deben realizar unmínimo de entre 150 y 300 minutos de actividad física aeróbica de intensidad moderada, o bien un mínimo de entre 75 y 150 minutos de actividad física aeróbica de intensidad vigorosa, o bien una combinación equivalente de actividades de intensidad moderada y vigorosa. [...] Se recomienda al menos entre 150 y 300 minutos de actividad aeróbica moderada a la semana para adultos.Una media de 6\n\n## Actividad física\nLa OMS hace un seguimiento periódico de las tendencias relativas a la inactividad física. Según un estudio reciente (1) casi un tercio (el 31 %) de la población adulta mundial –1800 millones de adultos–no practica una actividad física. Es decir, no cumplen las recomendaciones mundiales de realizar una actividad física de intensidad moderada durante al menos 150 minutos a la semana. El nivel de inactividad se ha incrementado cinco puntos porcentuales entre 2010 y 2022. De mantenerse esta [...] En las Directrices de la OMS sobre actividad física y comportamientos sedentarios se ofrecen recomendaciones para niños (a partir de 5 años), adolescentes, adultos, personas mayores, embarazadas y puérperas, y personas con afecciones crónicas y discapacidad. Se detalla la frecuencia, la intensidad y la duración de la actividad física necesarias para que esta práctica redunde significativamente en la",
+ "plan": {
+  "title": "Cómo empezar a correr si nunca has hecho ejercicio",
+  "description": "Guía para empezar a correr desde cero con el método de alternar caminata y carrera. Aprende cuántos días entrenar, cómo progresar y cómo evitar lesiones.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "4e427c46",
+    "narration": "Casi un tercio de los adultos del mundo no se mueve lo suficiente. Si tú eres uno de ellos, no necesitas ser atleta para empezar a correr. Solo necesitas un buen método.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "31 %",
+      "label": "de los adultos en el mundo no hace suficiente actividad física"
+     }
+    },
+    "chapter": "El punto de partida"
+   },
+   {
+    "id": "72e1b7f9",
+    "narration": "El error más común es salir a correr sin parar hasta el agotamiento. A los pocos minutos te falta el aire, te duelen las piernas y piensas que correr no es lo tuyo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "tired runner stopping to rest",
+      "clip_queries": [
+       "tired runner stopping to rest",
+       "person catching breath outdoors"
+      ],
+      "alt": "person catching breath outdoors"
+     }
+    }
+   },
+   {
+    "id": "52c196a2",
+    "narration": "La solución es más amable: alternar caminata y carrera suave. Se llama método caminar y correr, y funciona porque tu cuerpo se adapta poco a poco, sin sufrir.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Alterna caminar y correr, y tu cuerpo se adapta poco a poco.",
+      "emphasis": "caminar y correr"
+     }
+    }
+   },
+   {
+    "id": "45b85ce5",
+    "narration": "Antes de salir, comprueba lo básico. Unas zapatillas adecuadas, ropa cómoda y un ritmo en el que puedas hablar. Si tienes dudas de salud, consulta antes con tu médico.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "shoe",
+        "label": "Zapatillas adecuadas"
+       },
+       {
+        "icon": "heart",
+        "label": "Ritmo suave"
+       },
+       {
+        "icon": "doctor",
+        "label": "Consulta si dudas"
+       }
+      ],
+      "title": "Antes de la primera salida"
+     }
+    }
+   },
+   {
+    "id": "33589f75",
+    "narration": "Tu primera semana es sencilla. Corres un minuto y caminas dos, y lo repites seis veces. Son solo dieciocho minutos, tres días por semana, en días alternos.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Tu primera sesión",
+      "steps": [
+       {
+        "label": "Camina para calentar",
+        "detail": "Unos minutos a paso vivo"
+       },
+       {
+        "label": "Corre 1 minuto muy suave"
+       },
+       {
+        "label": "Camina 2 minutos"
+       },
+       {
+        "label": "Repite seis veces"
+       }
+      ]
+     }
+    },
+    "chapter": "El método paso a paso"
+   },
+   {
+    "id": "843cc309",
+    "narration": "Cada semana alargas la carrera y acortas la caminata. Empiezas con un minuto corriendo, luego dos minutos corriendo, después tres minutos corriendo, hasta llegar a diez o quince minutos seguidos.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Progresión",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "1 min corriendo"
+       },
+       {
+        "id": "b",
+        "label": "2 min corriendo"
+       },
+       {
+        "id": "c",
+        "label": "3 min corriendo"
+       },
+       {
+        "id": "d",
+        "label": "10-15 min seguidos"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "ladder",
+      "accent": "emerald",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "bae3f068",
+    "narration": "Mientras tanto, el parque, la calle o el camino te acompañan. Corre despacio, respira con calma y disfruta el paisaje. No se trata de ir rápido, sino de volver mañana.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "beginner jogging in park",
+      "clip_queries": [
+       "beginner jogging in park",
+       "walking on a running trail",
+       "runner at sunrise"
+      ],
+      "alt": "woman jogging slowly on trail"
+     }
+    }
+   },
+   {
+    "id": "65e6e295",
+    "narration": "¿Cuántas veces por semana? Con dos o tres días basta si estás empezando. Lo importante es dejar descanso entre sesiones, porque tus músculos y tendones se fortalecen mientras descansas.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Frecuencia al empezar",
+      "items": [
+       "Días: dos o tres por semana",
+       "Descanso: siempre entre sesiones",
+       "Ritmo: suave y constante"
+      ],
+      "style": "keywords",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "d374e0a3",
+    "narration": "Súmale dos sesiones de fuerza a la semana, con ejercicios sencillos para piernas y core. Con zapatillas adecuadas y este plan, en ocho a doce semanas correrás treinta minutos seguidos.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "30",
+      "unit": "min",
+      "label": "corriendo seguidos en 8 a 12 semanas"
+     }
+    },
+    "chapter": "Constancia sin lesiones"
+   },
+   {
+    "id": "573f7dcf",
+    "narration": "Tres errores te harán abandonar. Ir demasiado rápido, subir el esfuerzo de golpe y saltarte los días de descanso. Evítalos, y tu rodilla y tu motivación te lo agradecerán.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Lo que debes evitar",
+      "items": [
+       "Ir demasiado rápido",
+       "Subir el esfuerzo de golpe",
+       "Saltarte los descansos"
+      ],
+      "checked": [
+       false,
+       false,
+       false
+      ]
+     }
+    }
+   },
+   {
+    "id": "e07b9d7a",
+    "narration": "La Organización Mundial de la Salud recomienda entre ciento cincuenta y trescientos minutos de actividad moderada a la semana. Correr de forma suave te acerca a esa meta más rápido de lo que imaginas.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Minutos semanales recomendados por la OMS",
+      "labels": [
+       "Mínimo",
+       "Máximo"
+      ],
+      "values": [
+       150.0,
+       300.0
+      ],
+      "unit": "min",
+      "highlight": 0
+     }
+    }
+   },
+   {
+    "id": "4e79446f",
+    "narration": "Y no te compares con nadie. Una carrera lenta sigue siendo una carrera. Celebra cada pequeño avance, como correr un minuto más que la semana pasada. Eso es progreso real.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "runner tying shoelaces",
+       "friends running together outdoors",
+       "runner smiling after workout"
+      ],
+      "alt": "corredores principiantes celebrando"
+     }
+    }
+   },
+   {
+    "id": "dfcfe37d",
+    "narration": "Así que ponte las zapatillas. Camina, corre un minuto, camina de nuevo. Hoy no necesitas correr lejos. Solo necesitas empezar, y repetirlo mañana en días alternos.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person putting on running shoes",
+      "clip_queries": [
+       "person putting on running shoes",
+       "runner starting morning run"
+      ],
+      "alt": "runner starting morning run"
+     }
+    }
+   },
+   {
+    "id": "55c4c567",
+    "narration": "Recuerda la idea central: corre poco, camina mucho, y sube un poquito cada semana. No necesitas ser rápido. Solo necesitas ser constante.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No necesitas ser rápido: solo necesitas ser constante.",
+      "emphasis": "constante"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Empezar a correr desde cero: plan en PDF + tabla semanal",
+    "url": "https://www.vitalrunners.com/empezar-a-correr",
+    "publisher": "vitalrunners.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "HOW TO START RUNNING without getting tired | 7 tips for beginners",
+    "url": "https://www.youtube.com/watch?v=gImHug3sGKI",
+    "publisher": "youtube.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Actividad física",
+    "url": "https://www.who.int/es/news-room/fact-sheets/detail/physical-activity",
+    "publisher": "who.int",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 63.7,
+  "before_first_script_call_s": 13.2,
+  "script_s": 50.6
+ },
+ "cost": {
+  "script_small": 0.00031,
+  "research": 0.00076,
+  "script_big": 0.16639,
+  "search_api": 0.016,
+  "total": 0.18346
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 53747,
+  "out": 8031
+ },
+ "rules": {
+  "length": {
+   "words": 409,
+   "expected_words": 402,
+   "ratio": 1.017,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 183.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 32,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 22,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Casi un tercio de los adultos del mundo no se mueve lo suficiente. Si tú eres uno de ellos, no necesitas ser atleta para empezar a correr. Solo necesitas un buen método.",
+   "close_text": "Recuerda la idea central: corre poco, camina mucho, y sube un poquito cada semana. No necesitas ser rápido. Solo necesitas ser constante."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "stat": 1,
+    "clip": 3,
+    "kinetic_text": 2,
+    "icons": 1,
+    "steps": 1,
+    "diagram": 1,
+    "bullets": 1,
+    "counter": 1,
+    "checklist": 1,
+    "chart": 1,
+    "gallery": 1
+   },
+   "max_run": 1,
+   "entropy": 3.32,
+   "top_type": "clip",
+   "top_share": 0.21,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 3,
+   "fetched": 7,
+   "notes_len": 6041,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": [
+   "beat 6 (diagram): its narration never says ['1 min corriendo', '2 min corriendo', '3 min corriendo', '10-15 min seguidos']",
+   "beat 12 (gallery): its narration never says ['friends running together outdoors', 'runner smiling after workout']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The 1 min run / 2 min walk x6 plan and the 8-12 week goal match the notes. But the \"18 minutes\" figure ignores the warm-up, and the progression 1-2-3 min up to 10-15 min is oversimplified."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers the run-walk plan, footwear, conversational pace, rest, a doctor visit and strength work. It barely covers common injuries beyond a passing mention of the knee, and has no warm-up or pain advice. The WHO section is mostly filler."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is logical, from problem to method to progression to errors. The WHO chart in beat 11 interrupts the flow, and the ending repeats beat 13 twice."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The hook opens on a statistic (\"Casi un tercio de los adultos...\"), which is decent but generic. The ending is a punchy line, but it repeats the earlier message."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "The tone is warm, motivating and uses informal \"tú\", suitable for beginners."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "The scene types vary well (stat, steps, diagram, checklist, clips) and match the narration. The WHO chart with min/max bars is weak, and the \"31 %\" stat is only loosely tied to running."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The content is mostly standard beginner advice. There are few surprising specifics, and \"no es ser rápido, sino volver mañana\" is the only memorable line."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, addressed to a beginner, and close to the 3-minute target. It includes the requested plan elements, though injuries are only lightly covered."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and clear. There are slight calques and repetition, such as \"alternar caminata y carrera\" and the repeated \"Solo necesitas\"."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Son solo dieciocho minutos",
+    "issue": "Six repetitions of 1+2 minutes come to 18 minutes, but the warm-up shown on screen is not counted. The total is therefore inconsistent with the scene.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Correr de forma suave te acerca a esa meta más rápido de lo que imaginas.",
+    "issue": "Unsupported claim. A beginner doing 3 sessions of 18 minutes reaches only about 54 min/week, far from 150.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "La Organización Mundial de la Salud recomienda entre ciento cincuenta y trescientos minutos",
+    "issue": "This WHO digression breaks the practical flow and adds little.",
+    "beat": 11
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Recuerda la idea central: corre poco, camina mucho",
+    "issue": "The ending repeats beats 12 and 13 (\"solo necesitas empezar\"), and \"camina mucho\" contradicts the progression.",
+    "beat": 14
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Evítalos, y tu rodilla y tu motivación te lo agradecerán.",
+    "issue": "Common injuries (shins, knees), pain signals and when to stop are not explained.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "hasta llegar a diez o quince minutos seguidos",
+    "issue": "The progression jumps from 3 minutes to 10-15 minutes with no intermediate steps, and the later claim of 30 minutes is not linked to it.",
+    "beat": 6
+   }
+  ],
+  "missing": [
+   "Common injuries and warning signs of pain",
+   "The talk test explained in detail",
+   "How to choose shoes (go to a specialist shop)",
+   "A week-by-week table or explicit weekly progression",
+   "Warm-up and cool-down"
+  ],
+  "wrong_facts": [
+   "The \"18 minutes\" total excludes the warm-up that is shown on screen."
+  ],
+  "would_publish": false,
+  "summary": "A clear, motivating run-walk beginner script that follows the notes, but it is generic. It has a filler WHO section, a repetitive ending and thin coverage of injuries and shoes.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Súmale dos sesiones de fuerza a la semana",
+     "issue": "Slightly odd phrasing",
+     "problem": "\"Súmale\" is colloquial but acceptable here",
+     "better": "Añade dos sesiones de fuerza a la semana"
+    },
+    {
+     "quote": "Mientras tanto, el parque, la calle o el camino te acompañan.",
+     "problem": "Unnatural personification and a vague connector",
+     "better": "Corre por el parque, por la calle o por un camino cercano."
+    },
+    {
+     "quote": "Con zapatillas adecuadas y este plan",
+     "problem": "\"Zapatillas adecuadas\" is repeated within a few beats",
+     "better": "Con un buen calzado y este plan"
+    }
+   ]
+  },
+  "mean": 3.44,
+  "cost_usd": 0.03103,
+  "tokens": [
+   6900,
+   1723
+  ]
+ }
+}

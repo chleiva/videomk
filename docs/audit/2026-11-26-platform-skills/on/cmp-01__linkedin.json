@@ -1,0 +1,138 @@
+{
+ "id": "cmp-01",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: which should you learn first?",
+  "description": "A quick, fair comparison of React and Vue for beginners, judged on learning curve, job market and ecosystem. Find out which one fits your situation.",
+  "beats": [
+   {
+    "id": "19dd940a",
+    "narration": "React or Vue? Pick wrong and you lose weeks. The truth is, both work. Three things decide it: how fast you learn, how many jobs exist, and how much freedom you want.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Flexible and widely used"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Guided and approachable"
+      },
+      "rows": [
+       {
+        "label": "Learning curve",
+        "a": "Steeper",
+        "b": "Gentler"
+       },
+       {
+        "label": "Job market",
+        "a": "Larger",
+        "b": "Smaller"
+       },
+       {
+        "label": "Freedom",
+        "a": "You choose tools",
+        "b": "Built-in guidance"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "c337d7e4",
+    "narration": "Vue is usually easier to start. Its templates look like plain HTML, and the official tools come together in one place. You see results quickly, which keeps beginners motivated.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why Vue feels easy",
+      "items": [
+       "HTML-like templates",
+       "Official tools included",
+       "Quick first results"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "code",
+       "box",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "cea70997",
+    "narration": "React asks more of you at first. You write JavaScript to describe your pages and choose your own tools. But it is very popular, so you will find more jobs and more tutorials.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why React pays off",
+      "items": [
+       "More JavaScript upfront",
+       "Choose your own tools",
+       "More jobs and tutorials"
+      ],
+      "style": "rail",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "40762053",
+    "narration": "So which first? If you want a gentle start and quick wins, choose Vue. If your goal is a job, choose React. Either way, the skills carry over.",
+    "scene": {
+     "type": "table",
+     "props": {
+      "columns": [
+       "Your goal",
+       "Start with"
+      ],
+      "rows": [
+       [
+        "Gentle start",
+        "Vue"
+       ],
+       [
+        "Quick wins",
+        "Vue"
+       ],
+       [
+        "Get hired",
+        "React"
+       ]
+      ],
+      "title": "Pick by your goal",
+      "highlight": {
+       "row": 2
+      }
+     }
+    }
+   },
+   {
+    "id": "666356d7",
+    "narration": "Don't spend a month choosing. Pick one, build a small project, and finish it. Learning to build matters more than the framework you learned it on.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Pick one, build something, and finish it.",
+      "emphasis": "finish it"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07519,
+ "seconds": 14.3
+}

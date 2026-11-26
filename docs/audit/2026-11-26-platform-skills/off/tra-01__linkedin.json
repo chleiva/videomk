@@ -1,0 +1,98 @@
+{
+ "id": "tra-01",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A quick plan for three days in Lisbon, from hilltop viewpoints and trams to custard tarts and grilled fish. Learn how to split the city into three simple areas.",
+  "beats": [
+   {
+    "id": "5856eb12",
+    "narration": "Lisbon is a city of seven hills, and the best way to start is climbing one. Day one, wander the old quarter of Alfama. Narrow lanes, yellow trams, and views over red rooftops to the river.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram narrow street",
+      "clip_queries": [
+       "yellow tram narrow street",
+       "rooftops city view hills",
+       "river waterfront city"
+      ],
+      "alt": "old town street with tram"
+     }
+    },
+    "chapter": "Day one: the old hills"
+   },
+   {
+    "id": "a73a44ed",
+    "narration": "Day two, head west to Belem, where the river meets the sea. See the monastery and the tower beside the water. Then do what everyone does: eat a warm custard tart, still crisp, dusted with cinnamon.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Jeronimos Monastery Lisbon",
+       "Belem Tower Lisbon",
+       "Pastel de nata custard tart"
+      ],
+      "alt": "Belem landmarks and custard tarts"
+     }
+    },
+    "chapter": "Day two: Belem and the river"
+   },
+   {
+    "id": "6f77d126",
+    "narration": "Day three is for food. Browse a busy market hall, then sit down for grilled sardines or fresh seafood. Finish with a glass of local wine at a hilltop viewpoint as the sun goes down.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "food market stalls",
+      "clip_queries": [
+       "food market stalls",
+       "grilled fish on plate",
+       "sunset city viewpoint"
+      ],
+      "alt": "busy market hall fresh food"
+     }
+    },
+    "chapter": "Day three: markets and sunsets"
+   },
+   {
+    "id": "5e25cf72",
+    "narration": "So the plan is simple. Day one, the old hills. Day two, Belem and the river. Day three, markets and sunset. Walk a lot, eat well, and let the city slow you down.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Lisbon in 3 days",
+      "steps": [
+       {
+        "label": "Day 1: Old hills",
+        "detail": "Alfama, trams, views"
+       },
+       {
+        "label": "Day 2: Belem",
+        "detail": "Monastery, tower, tarts"
+       },
+       {
+        "label": "Day 3: Markets",
+        "detail": "Seafood, wine, sunset"
+       }
+      ]
+     }
+    },
+    "chapter": "The plan"
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03587,
+ "seconds": 7.8
+}

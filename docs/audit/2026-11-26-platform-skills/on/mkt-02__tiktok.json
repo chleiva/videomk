@@ -1,0 +1,82 @@
+{
+ "id": "mkt-02",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A Note App That Keeps Up With Your Thoughts",
+  "description": "A quick launch video for a new note-taking app that helps you capture ideas the moment they appear. Write it down, find it later, and never lose a good thought again.",
+  "beats": [
+   {
+    "id": "d91de4a7",
+    "narration": "You had a great idea this morning. Now it's gone. Sound familiar? Your brain is for thinking, not for remembering everything.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Great idea. Now it's gone.",
+      "emphasis": "gone"
+     }
+    }
+   },
+   {
+    "id": "c7a46592",
+    "narration": "Meet our new note-taking app. Open it and get your thoughts down quickly.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Write"
+       },
+       {
+        "icon": "microphone",
+        "label": "Speak"
+       },
+       {
+        "icon": "cloud",
+        "label": "Saved"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "783830ca",
+    "narration": "Search helps you find your notes when you need them. Capture it now, find it later. Start taking notes today.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Capture. Find. Done.",
+      "items": [
+       "Capture fast",
+       "Find in seconds",
+       "Every device"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "icons": [
+       "pencil",
+       "search",
+       "phone"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 65 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 7 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line",
+  "grounding: 2 beats had unsupported specifics, 2 rewritten"
+ ],
+ "cost_usd": 0.0654,
+ "seconds": 13.0
+}

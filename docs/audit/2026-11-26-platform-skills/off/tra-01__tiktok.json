@@ -1,0 +1,73 @@
+{
+ "id": "tra-01",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A fast guide to spending three days in Lisbon, with what to see and what to eat each day. Hills, trams, custard tarts and grilled fish in one short plan.",
+  "beats": [
+   {
+    "id": "13d2de2a",
+    "narration": "Three days in Lisbon is enough to fall for it. Day one: climb the hills, ride the yellow tram, and eat a custard tart.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "3 days. 1 city. Lisbon.",
+      "emphasis": "Lisbon"
+     }
+    }
+   },
+   {
+    "id": "2b68148f",
+    "narration": "Day two: wander the riverside and the old Belém area. Then sit down to grilled fresh fish with a cold glass of wine.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Lisbon yellow tram",
+       "Belém Tower Lisbon",
+       "Lisbon custard tarts pastel de nata"
+      ],
+      "alt": "Lisbon sights and food"
+     }
+    }
+   },
+   {
+    "id": "ac2b0728",
+    "narration": "Day three: get lost in Alfama, listen for fado at night, and watch the sunset from a viewpoint. Lisbon rewards slow walkers.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your 3 days",
+      "items": [
+       "Day 1: Tram and tarts",
+       "Day 2: River and fish",
+       "Day 3: Alfama and fado"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "train",
+       "fish",
+       "music"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 69 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 11 words: 3 to 4 beats of about 19 words each (you averaged 23; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06736,
+ "seconds": 9.0
+}

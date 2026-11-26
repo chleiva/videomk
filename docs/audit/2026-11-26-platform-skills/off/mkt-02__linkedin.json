@@ -1,0 +1,122 @@
+{
+ "id": "mkt-02",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A Note-Taking App That Finds Your Ideas Again",
+  "description": "A one-minute launch video for a note-taking app built around one problem: great ideas get lost in scattered notes. See how capture, organize and search work together so you can find any thought in seconds.",
+  "beats": [
+   {
+    "id": "19832d8f",
+    "narration": "You wrote it down. Somewhere. A great idea, a name, a number you needed today. Now it is buried in a notebook, a phone, three apps and a sticky note. Sound familiar?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "messy desk with sticky notes",
+      "clip_queries": [
+       "messy desk with sticky notes",
+       "person searching through notebooks",
+       "hands typing on phone and laptop"
+      ],
+      "alt": "cluttered desk with paper notebooks"
+     }
+    },
+    "chapter": "The problem"
+   },
+   {
+    "id": "96c59937",
+    "narration": "Notes should not be a place where ideas go to disappear. They should work for you. So we built a note-taking app around one promise: write it once, find it when you need it.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Write it once. Find it in seconds.",
+      "emphasis": "Find it in seconds"
+     }
+    },
+    "chapter": "The idea"
+   },
+   {
+    "id": "dd4e4670",
+    "narration": "It works in simple steps. First, capture a thought the moment it arrives. Second, organize it. Third, search, and your note appears.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three steps",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Phone or laptop, instantly"
+       },
+       {
+        "label": "Organize",
+        "detail": "Tags and folders"
+       },
+       {
+        "label": "Search",
+        "detail": "Your note appears"
+       }
+      ]
+     }
+    },
+    "chapter": "How it works"
+   },
+   {
+    "id": "37bda79b",
+    "narration": "What changes for you is simple. Less hunting, more doing. The idea you had on the train is there when you need it.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "clock",
+        "label": "Less hunting",
+        "sub": "Find notes fast"
+       },
+       {
+        "icon": "cloud",
+        "label": "Always in sync",
+        "sub": "Every device"
+       },
+       {
+        "icon": "heart",
+        "label": "Calm focus",
+        "sub": "One place for ideas"
+       }
+      ],
+      "title": "What you get"
+     }
+    },
+    "chapter": "What changes"
+   },
+   {
+    "id": "f1b0a8df",
+    "narration": "Meet the note-taking app that keeps up with your thinking. Download it today, write your first note, and let your ideas finally stay where you put them.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person writing notes on laptop",
+      "clip_queries": [
+       "person writing notes on laptop",
+       "hands holding smartphone typing"
+      ],
+      "alt": "woman typing on laptop in a bright cafe"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 155 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 21 words: write 4 to 6 beats of at most 40 words each (you averaged 31), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words",
+  "grounding: 3 beats had unsupported specifics, 3 rewritten"
+ ],
+ "cost_usd": 0.07124,
+ "seconds": 18.4
+}

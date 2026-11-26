@@ -1,0 +1,70 @@
+{
+ "id": "bio-03",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Cracked the Unbreakable",
+  "description": "Alan Turing was a British mathematician who helped break the Enigma code in World War Two and laid the foundations of modern computing. His story shows how one mind can change the world, and how badly the world can treat its heroes.",
+  "beats": [
+   {
+    "id": "ffbcf8df",
+    "narration": "He cracked a code the Nazis thought was unbreakable, and helped shorten a world war. His name was Alan Turing.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "The code was unbreakable. Until he broke it.",
+      "emphasis": "broke it"
+     }
+    }
+   },
+   {
+    "id": "18333a75",
+    "narration": "A British mathematician, he worked in secret during World War Two to break Enigma, and he imagined the machines that became today's computers.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "lock",
+        "label": "Broke Enigma"
+       },
+       {
+        "icon": "computer",
+        "label": "Imagined computers"
+       },
+       {
+        "icon": "brain",
+        "label": "Asked: can machines…"
+       }
+      ],
+      "title": "Alan Turing"
+     }
+    }
+   },
+   {
+    "id": "39198e25",
+    "narration": "Yet his country repaid him with cruelty. Today, every computer you touch carries his ideas. Remember his name.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Enigma machine Bletchley Park",
+      "alt": "Enigma cipher machine",
+      "ken_burns": "in"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03262,
+ "seconds": 4.6
+}

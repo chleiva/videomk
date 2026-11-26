@@ -1,0 +1,67 @@
+{
+ "id": "his-03",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A fast story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, Lehman Brothers and the government response.",
+  "beats": [
+   {
+    "id": "f8ae17b0",
+    "narration": "Banks handed home loans to people who couldn't repay them. Then they packaged those risky loans and sold them worldwide.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Risky loans, sold to the whole world",
+      "emphasis": "Risky loans"
+     }
+    }
+   },
+   {
+    "id": "55bdfdca",
+    "narration": "Subprime mortgages fed the housing boom. Securitization spread the risk everywhere. When home prices fell, borrowers defaulted, and Lehman Brothers collapsed.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it unraveled",
+      "items": [
+       "Subprime mortgages",
+       "Securitization",
+       "Lehman collapses"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "icons": [
+       "house",
+       "globe",
+       "landmark"
+      ]
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "1900e3a2",
+    "narration": "Panic froze credit, so governments bailed out banks. The lesson: when everyone shares hidden risk, one failure can shake the world.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hidden risk, shared by everyone, breaks everyone",
+      "emphasis": "Hidden risk"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06404,
+ "seconds": 8.3
+}

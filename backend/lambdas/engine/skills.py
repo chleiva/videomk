@@ -24,6 +24,8 @@ SKILL_DIR = os.path.join(os.path.dirname(__file__), "skills")
 MAX_PICKED = 2
 DEFAULT_SKILL = "explainer-education"
 MAX_BODY_CHARS = 1400
+MAX_ALWAYS_CHARS = 1600     # the always-on common guides
+MAX_PLATFORM_CHARS = 1700   # the platform guides (loaded from the `platform` create option, never picked by the producer)
 
 INTRO = ("Craft guides for this video (they refine the general rules above; follow them where they apply). "
          "A guide's visual suggestions name scene types: use one only if it appears in the scene list above.")
@@ -40,7 +42,8 @@ class Skill:
     pick: str
     body: str
     always: bool = False
-    auto: bool = False   # added by the engine in a known situation (photos attached); the selector never sees it
+    auto: bool = False   # added by the engine in a known situation (photos attached, a platform chosen); the selector never sees it
+    platform: str = ""   # a create-option platform id (youtube, shorts, tiktok, ...): the guide is loaded for that platform only
 
 
 def _parse(path: str) -> Optional[Skill]:
@@ -53,7 +56,7 @@ def _parse(path: str) -> Optional[Skill]:
     sid = head.get("id", "")
     if not re.match(r"^[a-z][a-z0-9-]{2,40}$", sid):
         return None
-    return Skill(id=sid, name=head.get("name", sid), pick=head.get("pick", ""), body=m.group(2).strip(), always=head.get("always", "").lower() == "true", auto=head.get("auto", "").lower() == "true")
+    return Skill(id=sid, name=head.get("name", sid), pick=head.get("pick", ""), body=m.group(2).strip(), always=head.get("always", "").lower() == "true", auto=head.get("auto", "").lower() == "true", platform=head.get("platform", ""))
 
 
 @lru_cache(maxsize=1)
@@ -109,10 +112,25 @@ def select(request: str, ask: Callable[[str, str], str], minutes: float = 3.0) -
     return picked[:MAX_PICKED]
 
 
-def render(ids: List[str]) -> str:
-    """The text added to the director's prompts: the always-on guides first, then the picked ones. Empty when there are none."""
+def platform_skills_enabled() -> bool:
+    """Server setting PLATFORM_SKILLS (default OFF: the A/B of 2026-11-26 showed no clear gain, docs/SKILLS.md; 1/true/on enables the platform guides)."""
+    return os.environ.get("PLATFORM_SKILLS", "0").strip().lower() in ("1", "true", "on", "yes")
+
+
+def platform_skill(platform: Optional[str]) -> Optional[Skill]:
+    """The guide for a create-option platform id, None for an unknown or absent platform."""
+    if not platform:
+        return None
+    return next((s for s in load().values() if s.platform == platform), None)
+
+
+def render(ids: List[str], platform: Optional[str] = None) -> str:
+    """The text added to the director's prompts, in this order: the always-on guides, the platform guide (when `platform` names one), then the picked content guides.
+    Empty when there are none."""
     skills = load()
-    parts = [s for s in skills.values() if s.always] + [skills[i] for i in ids if i in skills and not skills[i].always]
+    ps = platform_skill(platform)
+    parts = ([s for s in skills.values() if s.always] + ([ps] if ps else [])
+             + [skills[i] for i in ids if i in skills and not skills[i].always and not skills[i].platform])
     if not parts:
         return ""
     return "\n\n" + INTRO + "\n\n" + "\n\n".join(f"### {s.name}\n{s.body}" for s in parts)

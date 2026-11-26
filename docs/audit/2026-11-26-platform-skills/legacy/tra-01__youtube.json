@@ -1,0 +1,219 @@
+{
+ "id": "tra-01",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A three-day plan for Lisbon, from hilltop viewpoints and historic trams to custard tarts and grilled fish. Learn what to see, what to eat and how to pace each day.",
+  "beats": [
+   {
+    "id": "64bdac39",
+    "narration": "Imagine a yellow tram rattling up a steep cobbled street, the smell of fresh pastry drifting from a corner bakery. That is Lisbon, and three days is enough to fall for it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram old city street",
+      "clip_queries": [
+       "yellow tram old city street",
+       "cobblestone street with pastel buildings"
+      ],
+      "alt": "vintage tram climbing a hill"
+     }
+    },
+    "chapter": "Welcome to the hills"
+   },
+   {
+    "id": "02bea455",
+    "narration": "Lisbon is built on hills beside a wide river. Expect steep climbs, tiled facades and sweeping views. So pack comfortable shoes, and plan one neighborhood per half day.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Lisbon in a nutshell",
+      "items": [
+       "Built on hills",
+       "Wide river views",
+       "Tiled facades",
+       "Comfortable shoes"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "mountain",
+       "droplet",
+       "home",
+       "footprints"
+      ]
+     }
+    }
+   },
+   {
+    "id": "296b7132",
+    "narration": "Start with day one in the old center. Wander Alfama, the oldest district, with its narrow lanes and little squares. Climb to the castle for a view over red rooftops and the river.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Alfama Lisbon narrow street",
+       "Sao Jorge Castle Lisbon",
+       "Lisbon rooftops river view"
+      ],
+      "alt": "Alfama and castle views"
+     }
+    },
+    "chapter": "Day one: the old center"
+   },
+   {
+    "id": "9a725f50",
+    "narration": "In the evening, find a small restaurant and listen for fado, the soulful Portuguese music. Order grilled sardines or fresh fish, simple and full of flavor.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "chef grilling fish on charcoal",
+      "clip_queries": [
+       "chef grilling fish on charcoal",
+       "people dining at outdoor restaurant evening"
+      ],
+      "alt": "chef grilling fish on charcoal"
+     }
+    }
+   },
+   {
+    "id": "6e6b2f7f",
+    "narration": "Day two heads west to Belem. See the Jeronimos Monastery and the Belem Tower, both reminders of the age of exploration. Then take a break for the famous custard tarts.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Jeronimos Monastery Lisbon",
+       "Belem Tower Lisbon",
+       "Portuguese custard tarts pasteis de nata"
+      ],
+      "alt": "Belem landmarks and custard tarts"
+     }
+    },
+    "chapter": "Day two: Belem and beyond"
+   },
+   {
+    "id": "9d4f5e5e",
+    "narration": "After lunch, ride back toward the center and walk along the river. Watch boats drift by, and stop at a kiosk for coffee as the afternoon light turns golden.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "riverside promenade sunset people walking",
+      "clip_queries": [
+       "riverside promenade sunset people walking",
+       "boats on a wide river"
+      ],
+      "alt": "people strolling by a river"
+     }
+    }
+   },
+   {
+    "id": "5828beda",
+    "narration": "On day three, explore the lively streets of Baixa and Chiado. Browse the shops, ride the old elevator, and stop in a market hall to taste cheese, cured ham and fresh fruit.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Day three route",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Baixa",
+        "icon": "map"
+       },
+       {
+        "id": "b",
+        "label": "Chiado",
+        "icon": "store"
+       },
+       {
+        "id": "c",
+        "label": "Market hall",
+        "icon": "utensils"
+       },
+       {
+        "id": "d",
+        "label": "Sunset viewpoint",
+        "icon": "sun"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "walk"
+       ],
+       [
+        "b",
+        "c",
+        "stroll"
+       ],
+       [
+        "c",
+        "d",
+        "climb"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    },
+    "chapter": "Day three: markets and views"
+   },
+   {
+    "id": "6ca9d1c0",
+    "narration": "Finish at a hilltop viewpoint at sunset. Bring a drink, sit on the stone wall, and watch the city turn pink and gold. It is the best free show in town.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "city sunset viewpoint rooftops",
+      "clip_queries": [
+       "city sunset viewpoint rooftops",
+       "golden hour over red roofs"
+      ],
+      "alt": "sunset over rooftops and river"
+     }
+    }
+   },
+   {
+    "id": "2c6faffe",
+    "narration": "A few tips help. Walk early to beat the crowds, use trams and metro for the hills, and always leave time to simply wander and eat.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Quick tips",
+      "items": [
+       "Walk early, beat the crowds",
+       "Use trams and metro on hills",
+       "Leave time to wander",
+       "Eat slowly, taste everything"
+      ]
+     }
+    }
+   },
+   {
+    "id": "13f39978",
+    "narration": "So, three days: old streets, river light and custard tarts. Lisbon rewards slow, curious travelers. Pick your neighborhoods, follow your appetite, and let the hills lead the way.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lisbon rewards the slow, curious traveler.",
+      "emphasis": "slow, curious"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.12499,
+ "seconds": 39.3
+}

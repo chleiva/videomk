@@ -1,0 +1,204 @@
+{
+ "id": "tra-01",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A three-day plan for Lisbon, from the old hilltop neighborhoods to the riverside and the food worth stopping for. Learn what to see, what to eat, and how to pace your days.",
+  "beats": [
+   {
+    "id": "2231a4f5",
+    "narration": "Lisbon sounds like a yellow tram grinding up a steep street, with the smell of grilled sardines drifting from a doorway. Three days is enough to taste it properly.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "old tram on steep city street",
+      "clip_queries": [
+       "old tram on steep city street",
+       "narrow cobblestone street with buildings"
+      ],
+      "alt": "historic yellow tram in narrow street"
+     }
+    },
+    "chapter": "Day one: the old hills"
+   },
+   {
+    "id": "ea6b73b0",
+    "narration": "Start day one in Alfama, the oldest quarter. Wander its narrow lanes, climb to the castle of São Jorge for the view, and stop at the viewpoints over red rooftops and the river.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Alfama Lisbon alley",
+       "Sao Jorge Castle Lisbon",
+       "Lisbon rooftops viewpoint Miradouro",
+       "Tagus river Lisbon view"
+      ],
+      "alt": "Alfama, the castle and Lisbon rooftops"
+     }
+    }
+   },
+   {
+    "id": "8978bb6c",
+    "narration": "Lunch should be simple. Try grilled sardines or a bifana, a pork sandwich. In the evening, find a small tavern and listen to fado, the city's soulful music.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Day one eats",
+      "items": [
+       "Grilled sardines",
+       "Bifana pork sandwich",
+       "Evening fado in a tavern"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "fish",
+       "utensils",
+       "music"
+      ]
+     }
+    }
+   },
+   {
+    "id": "ebaf5677",
+    "narration": "Day two heads west to Belém. See the Jerónimos Monastery, with its carved stone arches, and the Belém Tower standing at the edge of the Tagus river.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Jeronimos Monastery Lisbon",
+       "Belem Tower Lisbon",
+       "Monument to the Discoveries Lisbon"
+      ],
+      "alt": "Jerónimos Monastery, Belém Tower and the Discoveries monument"
+     }
+    },
+    "chapter": "Day two: the river and Belém"
+   },
+   {
+    "id": "1caedbcb",
+    "narration": "Then comes the famous reward: a pastel de nata, the warm custard tart with a flaky shell and a burnt top. Sprinkle cinnamon on it and have two.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "pastel de nata custard tarts",
+      "alt": "pastéis de nata on a plate",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "c6eafadf",
+    "narration": "In the afternoon, ride the river path or sit by the water. Walk back through the center as the sun drops, and watch the light turn the city gold.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people walking along waterfront",
+      "clip_queries": [
+       "people walking along waterfront",
+       "sunset over river city"
+      ],
+      "alt": "golden hour waterfront walk"
+     }
+    }
+   },
+   {
+    "id": "fb2d95d0",
+    "narration": "On day three, explore Baixa and Chiado, the elegant center. Walk through the grand square by the river, browse old bookshops, and sip a coffee at a historic café.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Praca do Comercio Lisbon",
+       "Rua Augusta arch Lisbon",
+       "Chiado Lisbon cafe",
+       "Lisbon bookshop interior"
+      ],
+      "alt": "Lisbon's central squares, streets and cafés"
+     }
+    },
+    "chapter": "Day three: the center and beyond"
+   },
+   {
+    "id": "cb5009e3",
+    "narration": "Then choose your finish. Take a short train to Sintra, with its fairytale palaces in the hills, or stay in town and visit a market hall for fresh seafood and fruit.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Day three choices",
+      "nodes": [
+       {
+        "id": "c",
+        "label": "Lisbon center",
+        "icon": "building-2"
+       },
+       {
+        "id": "s",
+        "label": "Train to Sintra",
+        "icon": "train"
+       },
+       {
+        "id": "m",
+        "label": "Market hall",
+        "icon": "utensils"
+       }
+      ],
+      "edges": [
+       [
+        "c",
+        "s",
+        "day trip"
+       ],
+       [
+        "c",
+        "m",
+        "stay in town"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "d3a2ad83",
+    "narration": "For dinner, order seafood rice or grilled fish, a glass of Portuguese wine, and finish with a small cup of ginjinha, the sweet cherry liqueur.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "seafood dish on restaurant table",
+      "clip_queries": [
+       "seafood dish on restaurant table",
+       "pouring wine into glass"
+      ],
+      "alt": "friends dining at a restaurant"
+     }
+    }
+   },
+   {
+    "id": "725ca80b",
+    "narration": "Lisbon rewards slow walkers. Keep your shoes comfortable, your days simple, and leave room for one more tart. Three days will leave you planning the fourth.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lisbon rewards slow walkers, so leave room for one more tart.",
+      "emphasis": "slow walkers"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.0455,
+ "seconds": 13.1
+}

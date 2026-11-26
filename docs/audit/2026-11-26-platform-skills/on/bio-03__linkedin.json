@@ -1,0 +1,124 @@
+{
+ "id": "bio-03",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Mind That Shaped Modern Computing",
+  "description": "A short profile of Alan Turing, the British mathematician who helped break wartime codes and imagined the modern computer. It explains why his ideas still shape the technology we use today.",
+  "beats": [
+   {
+    "id": "40d6017e",
+    "narration": "Can a machine think? Alan Turing asked that question decades before anyone owned a computer. He was a British mathematician, and his answer changed how we live, work and talk to machines.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Can a machine think?",
+      "emphasis": "think"
+     }
+    },
+    "chapter": "A question about thinking"
+   },
+   {
+    "id": "5c1bedf5",
+    "narration": "Turing imagined a simple abstract machine that could follow written instructions. In theory, it could carry out any calculation. That idea became the blueprint for every computer, phone and laptop we use today.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The idea behind every computer",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Instructions",
+        "icon": "file-text"
+       },
+       {
+        "id": "b",
+        "label": "Universal machine",
+        "icon": "cog"
+       },
+       {
+        "id": "c",
+        "label": "Any calculation",
+        "icon": "calculator"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "read"
+       ],
+       [
+        "b",
+        "c",
+        "produces"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "418074f8",
+    "narration": "During the Second World War, Turing worked with a team in Britain to break enemy coded messages. Their work helped the Allies, and historians widely credit it with shortening the war and saving many lives.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "old typewriter keys close up",
+      "clip_queries": [
+       "old typewriter keys close up",
+       "vintage machine gears turning"
+      ],
+      "alt": "old cipher equipment close up"
+     }
+    },
+    "chapter": "War and codes"
+   },
+   {
+    "id": "9a5416e3",
+    "narration": "After the war, he proposed a test for machine intelligence. If you cannot tell a machine from a person in conversation, perhaps it is thinking. People still debate that test today.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The Turing test",
+      "items": [
+       "Talk to a machine",
+       "Talk to a person",
+       "Can you tell which is which?"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "6d5a1cb7",
+    "narration": "Turing was treated cruelly by the country he served, and he died young. Yet his ideas live in every device you touch. He taught us to ask what machines could become.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "He taught us to ask what machines could become.",
+      "emphasis": "could become"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 162 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 28 words: write 4 to 6 beats of at most 40 words each (you averaged 32), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.0752,
+ "seconds": 16.2
+}

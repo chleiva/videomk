@@ -1,0 +1,67 @@
+{
+ "id": "fin-02",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación explicada en 30 segundos",
+  "description": "Una explicación rápida de qué es la inflación y por qué tu dinero compra cada vez menos. Aprende cómo afecta a tu bolsillo en pocos segundos.",
+  "beats": [
+   {
+    "id": "db15d11b",
+    "narration": "¿Por qué el mismo dinero compra cada vez menos? Ese es el efecto de la inflación en tu bolsillo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tu dinero compra cada vez menos",
+      "emphasis": "menos"
+     }
+    }
+   },
+   {
+    "id": "5b3f4af8",
+    "narration": "La inflación es la subida general de los precios con el tiempo. Si todo cuesta más, cada moneda vale menos.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Subida general y sostenida de los precios de bienes y servicios con el tiempo."
+     }
+    }
+   },
+   {
+    "id": "15ed1d9d",
+    "narration": "Si tu sueldo no sube igual que los precios, pierdes poder de compra. Por eso importa vigilar los precios.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Qué ocurre",
+      "items": [
+       "Precios suben",
+       "Dinero rinde menos",
+       "Poder de compra baja"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "banknote",
+       "van",
+       "clock"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06616,
+ "seconds": 8.8
+}

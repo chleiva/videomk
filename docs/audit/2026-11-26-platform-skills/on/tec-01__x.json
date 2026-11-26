@@ -1,0 +1,85 @@
+{
+ "id": "tec-01",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Works: It Just Predicts the Next Word",
+  "description": "Large language models like ChatGPT generate answers by predicting one word at a time. This video explains training on text, patterns, and why the results can sound smart but still be wrong.",
+  "beats": [
+   {
+    "id": "650bb708",
+    "narration": "ChatGPT does not look up answers. It guesses the next word, over and over, so fast that it feels like thinking.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It guesses the next word. Over and over.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "d5e45eb8",
+    "narration": "First, it reads a huge amount of text. It learns which words tend to follow which, and how ideas connect across whole sentences.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Training",
+      "items": [
+       "Read huge amounts of text",
+       "Learn word patterns",
+       "Connect ideas"
+      ],
+      "style": "icons",
+      "accent": "sky",
+      "icons": [
+       "book",
+       "brain",
+       "link"
+      ]
+     }
+    }
+   },
+   {
+    "id": "91fa80f6",
+    "narration": "Then you ask a question. The model picks a likely next word, adds it, and repeats. Word by word, an answer appears.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Answering",
+      "items": [
+       "You ask",
+       "It predicts a word",
+       "It repeats"
+      ],
+      "style": "rail",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "092fcc62",
+    "narration": "That means it can sound confident and still be wrong. It predicts what sounds right. So check anything that matters.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It predicts what sounds right, not what is true.",
+      "emphasis": "sounds right"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.0341,
+ "seconds": 4.8
+}

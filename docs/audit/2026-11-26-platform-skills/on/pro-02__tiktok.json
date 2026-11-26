@@ -1,0 +1,67 @@
+{
+ "id": "pro-02",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza en dos minutos",
+  "description": "Un truco sencillo para dejar de procrastinar: empezar con un paso diminuto. Aprende por qué la motivación llega después de actuar, no antes.",
+  "beats": [
+   {
+    "id": "b7e60f7e",
+    "narration": "Llevas días postergando eso, ¿verdad? El problema no es la pereza. Es que tu cerebro ve la tarea enorme y huye.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No es pereza: es una tarea demasiado grande",
+      "emphasis": "demasiado grande"
+     }
+    }
+   },
+   {
+    "id": "ed6fb6d9",
+    "narration": "Así que hazla ridículamente pequeña. Abre el documento. Escribe una sola frase. Dos minutos, nada más. Empezar es lo difícil.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Hazla pequeña",
+      "items": [
+       "Abre el documento",
+       "Escribe una frase",
+       "Solo dos minutos"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "icons": [
+       "file",
+       "pen",
+       "clock"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "06171d3f",
+    "narration": "Luego pasa algo curioso: la motivación aparece después de actuar, no antes. Así que empieza ahora, aunque sea mal.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Primero actúas. Después llega la motivación.",
+      "emphasis": "actúas"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06445,
+ "seconds": 9.6
+}

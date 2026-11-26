@@ -1,0 +1,124 @@
+{
+ "id": "sci-01",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Hot Coffee Never Heats Itself Back Up",
+  "description": "Entropy measures how spread out energy is in a system, and the second law of thermodynamics says it never decreases in an isolated system. This explains why some processes are irreversible and how the idea carries into information theory.",
+  "beats": [
+   {
+    "id": "247fd174",
+    "narration": "Your coffee cools down, but it never heats itself back up. Why does time only run one way in the physical world? The answer is a single idea: entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on table",
+      "alt": "hot cup of coffee steam"
+     }
+    },
+    "chapter": "A one-way street"
+   },
+   {
+    "id": "bfd64e24",
+    "narration": "Entropy describes how spread out energy is. Low entropy means energy is concentrated in one spot. High entropy means it is dispersed evenly. Hot coffee holds concentrated heat, and the room slowly shares it.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Energy spreading out",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Concentrated energy",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Energy spreads",
+        "icon": "wind"
+       },
+       {
+        "id": "c",
+        "label": "Even energy",
+        "icon": "scale"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "low entropy"
+       ],
+       [
+        "b",
+        "c",
+        "high entropy"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "fb49636f",
+    "narration": "This is the second law of thermodynamics. In an isolated system, entropy cannot decrease over time. Systems drift toward equilibrium, where entropy is highest. That is why some processes are irreversible.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy never decreases.",
+      "emphasis": "never decreases"
+     }
+    }
+   },
+   {
+    "id": "bebdb657",
+    "narration": "The idea also reaches beyond heat. In 1948, Claude Shannon used it to measure uncertainty in information. The more unpredictable a message is, the more information it carries, counted in bits.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "H(X) = - sum_{x} p(x) log p(x)",
+        "note": "Average uncertainty, in bits"
+       }
+      ],
+      "title": "Shannon entropy"
+     }
+    }
+   },
+   {
+    "id": "243a3560",
+    "narration": "So entropy is a count of possibilities. Spread-out arrangements vastly outnumber concentrated ones, so nature drifts toward them. Remember this: things do not unmix, because disorder is simply the likeliest path.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Remember",
+      "items": [
+       "Entropy: how spread out energy is",
+       "Second law: it never decreases",
+       "Information: entropy measures uncertainty"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 156 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 22 words: write 4 to 6 beats of at most 40 words each (you averaged 31), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07784,
+ "seconds": 22.6
+}

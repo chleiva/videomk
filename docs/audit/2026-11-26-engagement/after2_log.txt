@@ -1,0 +1,25 @@
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=7
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=7
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=7
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=8
+already spent in saved results: $0.000 (cap $3.0)
+[1/12] sci-01   ok         run $0.137   running total $0.386   51s
+[2/12] how-02   ok         run $0.193   running total $0.628   74s
+[3/12] sci-02   ok         run $0.164   running total $0.656   84s
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=46
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=9
+[4/12] fin-02   ok         run $0.049   running total $0.788   104s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=3 sources=10
+[5/12] his-03   ok         run $0.167   running total $0.931   115s
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+[6/12] cmp-03   ok         run $0.116   running total $1.247   140s
+COST CAP: $1.25 spent, cannot start another prompt within $3.0. Stopping.
+[7/12] tec-01   ok         run $0.186   running total $1.324   149s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=1 checked=1
+[8/12] bio-03   ok         run $0.158   running total $1.411   164s
+
+DONE. total spent $1.411 of $3.0

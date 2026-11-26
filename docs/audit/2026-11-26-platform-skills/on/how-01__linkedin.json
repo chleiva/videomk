@@ -1,0 +1,143 @@
+{
+ "id": "how-01",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to change a flat tire safely, step by step",
+  "description": "A quick guide to changing a flat tire, from stopping safely to tightening the lug nuts. Learn the order that keeps you safe and gets you back on the road.",
+  "beats": [
+   {
+    "id": "03ff8bd7",
+    "narration": "A flat tire can happen to anyone, and most people can fix one in minutes. The secret is order. Pull over somewhere flat and safe, turn on your hazard lights, and set the parking brake.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car parked on roadside",
+      "clip_queries": [
+       "car parked on roadside",
+       "driver looking at car tire"
+      ],
+      "alt": "vehicle stopped on highway shoulder"
+     }
+    },
+    "chapter": "Before you touch the car"
+   },
+   {
+    "id": "834538a9",
+    "narration": "Gather your tools first. You need a spare tire, a jack, and a lug wrench. Check your owner's manual for where they are kept.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you need",
+      "items": [
+       "Spare tire",
+       "Jack",
+       "Lug wrench",
+       "Owner's manual"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2af66848",
+    "narration": "Loosen the lug nuts slightly while the wheel is still on the ground. Then place the jack at the spot your manual shows, and lift the car until the flat tire is clear.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Lift the car",
+      "steps": [
+       {
+        "label": "Loosen lug nuts"
+       },
+       {
+        "label": "Place the jack"
+       },
+       {
+        "label": "Lift the car"
+       }
+      ]
+     }
+    },
+    "chapter": "Swap the wheel"
+   },
+   {
+    "id": "29e83896",
+    "narration": "Now remove the nuts and pull off the flat. Line up the spare with the bolts, push it on, and thread the nuts back by hand.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands removing lug nuts",
+      "clip_queries": [
+       "hands removing lug nuts",
+       "man changing car tire"
+      ],
+      "alt": "hands removing wheel from car"
+     }
+    }
+   },
+   {
+    "id": "e3b9e26e",
+    "narration": "Lower the car until the tire touches the ground. Tighten the nuts in a star pattern, so the wheel sits evenly. Then lower the jack fully.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Finish the job",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Lower the car",
+        "icon": "car"
+       },
+       {
+        "id": "b",
+        "label": "Tighten in star pattern",
+        "icon": "wrench"
+       },
+       {
+        "id": "c",
+        "label": "Remove the jack",
+        "icon": "check"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "3192dbcb",
+    "narration": "Spare tires are often temporary, so drive slowly and get the flat repaired soon. Safe spot, loosen first, lift, swap, tighten in a star. That is the whole job.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Safe spot, loosen first, lift, swap, tighten in a star.",
+      "emphasis": "tighten in a star"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 173 words in 6 beats but a 1-minute video needs about 134 (at most 140). Cut about 39 words: write 4 to 6 beats of at most 40 words each (you averaged 28), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07494,
+ "seconds": 14.2
+}

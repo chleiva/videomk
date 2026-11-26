@@ -1,0 +1,758 @@
+{
+ "id": "tec-01",
+ "category": "technology / AI",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "how do large language models like ChatGPT work",
+ "great": "Tokens, next-token prediction, transformer attention, pretraining on text, fine-tuning with human feedback (RLHF), hallucinations and why; accessible analogies, no jargon dumps, correct.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:34:23",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How large language models work is a timeless technical explanation (neural networks, transformers, training on text, next-token prediction) that an encyclopedia covers accurately; no recent or fast-ch",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 9,
+   "seconds": 3.8,
+   "cost_usd": 0.000708,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 33.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 5,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 7932,
+  "n_sources": 5,
+  "n_fetched": 9,
+  "fetched": [
+   "How Do LLMs Work? Transformers Explained (2026)",
+   "How does next-token prediction train a large language model?",
+   "LLMs Explained: Tokens, Embeddings, Transformers and More",
+   "Understanding Next Token Prediction: Concept To Code: 1st part!",
+   "A Guide to Large Language Models (LLMs)",
+   "What Is RLHF & How Does It Work? | Mercor",
+   "How Does ChatGPT Work: From Pretraining to RLHF",
+   "RLHF in Generative AI: Definition & How It Works | Annotation Academy",
+   "How ChatGPT actually works | AssemblyAI"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## How Do LLMs Work? Transformers Explained (2026)\nLarge language models work by predicting the next token in a sequence, trained on trillions of examples of human text. A token is a word or sub-word unit — the word \"understanding\" might be split into \"under\" + \"stand\" + \"ing.\" The model sees a sequence of tokens, computes probability distributions over its entire vocabulary (typically 100,000-200,000 tokens), and selects the most likely continuation. This process repeats, one token at a time, until the response is complete. [...] That last row matters more than it looks. At the very end of the network, only the last vector in the sequence is multiplied by the unembedding matrix to produce the next-token distribution. Every other vector in the final layer is \"wasted\" at inference time — but during training, every position predicts its own next token in parallel, which is what makes the math tractable on trillion-token corpora. ### Embedd\n\n## How does next-token prediction train a large language model?\nThe target sequence is used by the loss function. It is not supplied to the transformer as a separate answer. The transformer receives the input sequence, and a causal attention mask prevents each position from reading later input positions. When the model predicts (t\\_3) from the position containing (t\\_2), its representation can depend on (t\\_0), (t\\_1), and (t\\_2), but it cannot use (t\\_3). [...] Backpropagation differentiates this average loss through the output layer and the transformer. The optimizer then updates the token embeddings, attention layers, feed-forward layers, normalization parameters, and output projection. Repeating this process across many batches makes continuations found in similar contexts more probable. [...] Generation uses the same learned conditional probabilities in a different loop. The model processes the current context, selects a token from the final log\n\n## LLMs Explained: Tokens, Embeddings, Transformers and More\n[45:04] Attention gathers context from all of those tokens and passes it through multiple blocks. And finally a probability score comes out the other [45:11] end which is given all possible tokens in the model's vocabulary. What's the probability that any one of those tokens will be the next token? We then do [45:19] sampling using temperature and top P to pick that next token. And then we append that token to the prompt and repeat in a loop. Now, everything we showed in this [...] [43:01] single token. To get the next token we append the token to the input and then run this entire process again. So we get new attention, new distribution, new [43:10] predicted token, append, repeat. And this whole process is known as auto reggressive generation. Essentially, the [43:17] model has no plan. It doesn't know how the sentence ends when it starts. So every coherent paragraph from an LLM emerge\n\n## Understanding Next Token Prediction: Concept To Code: 1st part!\nImage 10 As we can see above, the next token is predicted by passing a token’s output vector as input to a linear layer, which outputs a vector with the same size as our vocabulary. After a softmax transformation is applied, a probability distribution over the token vocabulary is formed, and we can either _i)_ sample the next token from this distribution during inference or _ii)_ train the model to maximize the probability of the correct next token during pretraining. [...] We add these embeddings to the token embeddings at the corresponding position. Such additive positional embeddings are necessary because the self-attention operation does not have any way of representing the position of each token. By adding positional embeddings, we allow the self-attention layers within the transformer to use the position of each token as a relevant feature during the learning process. Recent resear\n\n## A Guide to Large Language Models (LLMs)\n--- ### GPT The Generative Pre-trained Transformer (GPT) was introduced by OpenAI in 2018 as a decoder-only transformer architecture-- no encoder, and no cross-attention. In many ways, GPTs depart from the \"transforming\" of text that the vanilla transformer was made for (translation, most notably) and double-down on text generation through \\_autoregressive next-word prediction\\_, which is simply the process making predictions and sequentially feeding them back through the model at every [...] The pre-training phase is the workhorse of building a large language model. By learning to predict the next word over billions of tokens, LLMs acquire a broad understanding of grammar, syntax, word meanings and relationships, facts, and long-range dependencies. The result of a converged pretrained model is the \\_base model\\_. While they might have the full knowledge of the dataset they were trained \n\n## What Is RLHF & How Does It Work? | Mercor\nReinforcement learning from human feedback (RLHF) is a three-stage post-training method that involves supervised fine-tuning (SFT), reward model training, and reinforcement learning optimization. It's the reason ChatGPT behaves like an assistant instead of an autocomplete engine. The reward model is the most consequential piece. It turns human preference judgments into a trainable signal, and the quality of these judgments determines model quality more than pipeline architecture does. [...] The RLHF pipeline has three stages. First, supervised fine-tuning (SFT) teaches the model a task format. Second, a reward model learns to score outputs based on how humans ranked them. Third, reinforcement learning, typically using proximal policy optimization (PPO), improves the model's responses while keeping it from drifting too far from the fine-tuned version. This is the process behind ChatGPT, C\n\n## How Does ChatGPT Work: From Pretraining to RLHF\nThere are mainly 3 steps involved in building ChatGPT- 1. Pretraining LLM 2. Supervised Finetuning of LLM (SFT) 3. Reinforcement Learning from Human Feedback (RLHF) The first step is to pretrain the LLM (GPT 3.5) on the unsupervised data to predict the next word in the sentence. This makes LLM learn the representation and various nuances of the text. [...] In the next step, we finetune the LLM on the demonstration data: a dataset with the questions and answers. This optimizes the LLM for dialogue. In the final step, we use RLHF to control the responses generated by the LLM. We are prioritizing the better responses generated by the model using RLHF. Now, we will discuss each step in detail. ## Pretraining LLM\n\n## RLHF in Generative AI: Definition & How It Works | Annotation Academy\nReinforcement Learning from Human Feedback (RLHF) is the training technique that teaches AI models to generate responses humans prefer by ranking outputs and rewarding behaviors that match human judgment. RLHF transformed base language models like GPT-3 into conversational tools like ChatGPT by training models to follow instructions, refuse harmful requests, and produce helpful responses. This approach uses human evaluators to rank model outputs, trains a reward model to predict preferences, [...] Supervised fine-tuning (SFT) trains models on input-output pairs where humans provide the correct answer, while RLHF trains on ranked comparisons where humans indicate which output is better. SFT requires experts to write ideal responses for every training example; RLHF requires evaluators to compare model-generated responses, a faster and more practical task. The reward model serves as the bri\n\n## How ChatGPT actually works | AssemblyAI\nThe creators have used a combination of both Supervised Learning and Reinforcement Learning to fine-tune ChatGPT, but it is the Reinforcement Learning component specifically that makes ChatGPT unique. The creators use a particular technique called Reinforcement Learning from Human Feedback (RLHF), which uses human feedback in the training loop to minimize harmful, untruthful, and/or biased outputs.",
+ "plan": {
+  "title": "How ChatGPT Works: Predicting One Token at a Time",
+  "description": "Large language models like ChatGPT work by predicting the next token, trained on trillions of examples of text. This video explains tokens, transformers, attention and the human feedback that turns an autocomplete engine into an assistant.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "680d632b",
+    "narration": "ChatGPT has no plan for what it will say. It does not know how your answer ends when it starts. It just guesses one small piece of text, then guesses again.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It has no plan. It only predicts the next piece of text.",
+      "emphasis": "predicts the next piece"
+     }
+    },
+    "chapter": "The one trick"
+   },
+   {
+    "id": "c642b153",
+    "narration": "Those pieces are called tokens. A token is a word or part of a word. The word understanding might be split into under, stand, and ing.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "One word, three tokens",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "understanding",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "under"
+       },
+       {
+        "id": "c",
+        "label": "stand"
+       },
+       {
+        "id": "d",
+        "label": "ing"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "a",
+        "c"
+       ],
+       [
+        "a",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "0daa39a9",
+    "narration": "Picture a researcher at a computer, feeding in enormous amounts of writing. The model trains on trillions of examples of human text, always practicing one task: guess what comes next.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "server room data center",
+      "clip_queries": [
+       "server room data center",
+       "researcher working at computer"
+      ],
+      "alt": "person typing code on screen"
+     }
+    }
+   },
+   {
+    "id": "172c014f",
+    "narration": "Every guess starts as a score for each token in the vocabulary, typically one hundred thousand to two hundred thousand of them. Then the most likely continuation gets picked.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "100,000+",
+      "label": "possible tokens scored for every single guess"
+     }
+    }
+   },
+   {
+    "id": "801a5776",
+    "narration": "First, tokens become numbers plus position, so the model knows word order. Then attention blocks mix in context. Finally, next-token odds come out, one probability for every token.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "From text to a guess",
+      "nodes": [
+       {
+        "id": "t",
+        "label": "Tokens",
+        "icon": "text"
+       },
+       {
+        "id": "n",
+        "label": "Numbers plus position",
+        "icon": "numbers"
+       },
+       {
+        "id": "a",
+        "label": "Attention",
+        "icon": "eye"
+       },
+       {
+        "id": "p",
+        "label": "Next-token odds",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "t",
+        "n"
+       ],
+       [
+        "n",
+        "a"
+       ],
+       [
+        "a",
+        "p"
+       ]
+      ],
+      "style": "cards",
+      "accent": "sky",
+      "emphasis": 2
+     }
+    },
+    "chapter": "Inside the transformer"
+   },
+   {
+    "id": "d12f7b3f",
+    "narration": "Attention lets each token look back at the earlier ones and gather context. A causal mask blocks any peeking ahead, so the model can only use what came before.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Attention",
+      "items": [
+       "Looks back at earlier tokens",
+       "Gathers context",
+       "Mask blocks the future"
+      ],
+      "style": "keywords",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "821f533d",
+    "narration": "Training is a giant game of fill in the blank. The model guesses, the loss function measures the error, and backpropagation nudges millions of parameters to make better guesses next time.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How training works",
+      "steps": [
+       {
+        "label": "Guess",
+        "detail": "Predict the next token"
+       },
+       {
+        "label": "Measure",
+        "detail": "Loss function scores the error"
+       },
+       {
+        "label": "Nudge",
+        "detail": "Backpropagation updates parameters"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "c2125169",
+    "narration": "After enough rounds, something remarkable emerges. By predicting the next word over billions of tokens, the model picks up grammar, word meanings, facts, and long-range connections between ideas.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "book",
+        "label": "Grammar"
+       },
+       {
+        "icon": "brain",
+        "label": "Word meanings"
+       },
+       {
+        "icon": "globe",
+        "label": "Facts"
+       },
+       {
+        "icon": "link",
+        "label": "Long-range links"
+       }
+      ],
+      "title": "What prediction teaches"
+     }
+    }
+   },
+   {
+    "id": "027eb170",
+    "narration": "To write a reply, it picks a token, adds it to the prompt, and runs everything again. New attention, new odds, new token. Repeat until the answer is done.",
+    "scene": {
+     "type": "flowchart",
+     "props": {
+      "nodes": [
+       {
+        "id": "s",
+        "label": "Prompt",
+        "kind": "start"
+       },
+       {
+        "id": "p",
+        "label": "Predict odds",
+        "kind": "step"
+       },
+       {
+        "id": "k",
+        "label": "Pick a token",
+        "kind": "step"
+       },
+       {
+        "id": "d",
+        "label": "Answer finished?",
+        "kind": "decision"
+       },
+       {
+        "id": "e",
+        "label": "Reply",
+        "kind": "end"
+       }
+      ],
+      "edges": [
+       [
+        "s",
+        "p"
+       ],
+       [
+        "p",
+        "k"
+       ],
+       [
+        "k",
+        "d"
+       ],
+       [
+        "d",
+        "p",
+        "no"
+       ],
+       [
+        "d",
+        "e",
+        "yes"
+       ]
+      ],
+      "title": "Generating text"
+     }
+    },
+    "chapter": "Writing an answer"
+   },
+   {
+    "id": "84270231",
+    "narration": "A dial called temperature controls how adventurous the pick is. Low means safe, predictable words. High means more surprising ones. That is why the same question can get different answers.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Low temperature",
+       "tagline": "Safe picks"
+      },
+      "b": {
+       "name": "High temperature",
+       "tagline": "Bolder picks"
+      },
+      "rows": [
+       {
+        "label": "Word choice",
+        "a": "Most likely",
+        "b": "More varied"
+       },
+       {
+        "label": "Answers",
+        "a": "Predictable",
+        "b": "Surprising"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "5c007e44",
+    "narration": "But a model that only predicts text is just autocomplete. The raw version, called a base model, may ramble on instead of answering your question.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands typing on keyboard",
+      "clip_queries": [
+       "hands typing on keyboard",
+       "person reading laptop screen"
+      ],
+      "alt": "hands typing on keyboard"
+     }
+    },
+    "chapter": "From autocomplete to assistant"
+   },
+   {
+    "id": "98ee89c1",
+    "narration": "So there are three steps. First, pretraining on raw text. Second, supervised fine-tuning on questions and answers. Third, reinforcement learning from human feedback, or RLHF.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Building ChatGPT",
+      "events": [
+       {
+        "date": "Step 1",
+        "label": "Pretraining"
+       },
+       {
+        "date": "Step 2",
+        "label": "Supervised fine-tuning"
+       },
+       {
+        "date": "Step 3",
+        "label": "RLHF"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "3cb5bd6f",
+    "narration": "In RLHF, people rank the model's answers. A reward model learns those preferences and scores new replies. The chatbot is then tuned toward answers humans prefer, and away from harmful ones.",
+    "scene": {
+     "type": "sequence",
+     "props": {
+      "actors": [
+       "Model",
+       "Humans",
+       "Reward model"
+      ],
+      "messages": [
+       {
+        "from": "Model",
+        "to": "Humans",
+        "label": "Several answers"
+       },
+       {
+        "from": "Humans",
+        "to": "Reward model",
+        "label": "Rankings"
+       },
+       {
+        "from": "Reward model",
+        "to": "Model",
+        "label": "Score",
+        "reply": true
+       }
+      ],
+      "title": "Learning from human feedback"
+     }
+    }
+   },
+   {
+    "id": "7716cff4",
+    "narration": "So ChatGPT is a next-token predictor, shaped by human judgment. Every sentence it writes is one careful guess, repeated. That is all it takes to sound like it understands.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One guess at a time, shaped by human judgment.",
+      "emphasis": "One guess at a time"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "How Do LLMs Work? Transformers Explained (2026)",
+    "url": "https://www.taskade.com/blog/how-do-llms-work",
+    "publisher": "taskade.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How does next-token prediction train a large language model?",
+    "url": "https://sebastianraschka.com/faq/docs/next-token-prediction.html",
+    "publisher": "sebastianraschka.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "LLMs Explained: Tokens, Embeddings, Transformers and More",
+    "url": "https://www.youtube.com/watch?v=YmLp8qe87A0",
+    "publisher": "youtube.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "What Is RLHF & How Does It Work? | Mercor",
+    "url": "https://www.mercor.com/resources/experts/what-is-rlhf",
+    "publisher": "mercor.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How Does ChatGPT Work: From Pretraining to RLHF",
+    "url": "https://www.analyticsvidhya.com/blog/2023/05/how-does-chatgpt-work-from-pretraining-to-rlhf",
+    "publisher": "analyticsvidhya.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 55.9,
+  "before_first_script_call_s": 7.4,
+  "script_s": 48.4
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "research": 0.00071,
+  "script_big": 0.16902,
+  "search_api": 0.016,
+  "total": 0.18599
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 54584,
+  "out": 7911
+ },
+ "rules": {
+  "length": {
+   "words": 405,
+   "expected_words": 402,
+   "ratio": 1.007,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 182.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 31,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "ChatGPT has no plan for what it will say. It does not know how your answer ends when it starts. It just guesses one small piece of text, then guesses again.",
+   "close_text": "So ChatGPT is a next-token predictor, shaped by human judgment. Every sentence it writes is one careful guess, repeated. That is all it takes to sound like it understands."
+  },
+  "variety": {
+   "distinct": 11,
+   "counts": {
+    "kinetic_text": 2,
+    "diagram": 2,
+    "clip": 2,
+    "stat": 1,
+    "bullets": 1,
+    "steps": 1,
+    "icons": 1,
+    "flowchart": 1,
+    "versus": 1,
+    "timeline": 1,
+    "sequence": 1
+   },
+   "max_run": 1,
+   "entropy": 3.38,
+   "top_type": "kinetic_text",
+   "top_share": 0.14,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 5,
+   "fetched": 9,
+   "notes_len": 7932,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Content matches the notes (tokens, 100k-200k vocab, causal mask, 3-step pipeline). Minor looseness: 'millions of parameters' (really billions), and 'picks the most likely' conflicts with temperature sampling."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers tokens, attention, pretraining, RLHF and temperature, but omits hallucinations entirely (a named must-have). Attention is only shallowly explained."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear chapters from the one trick to the transformer, generation, then assistant tuning, with a tidy callback ending. Slight repetition of the 'one guess at a time' idea."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "Opens with 'ChatGPT has no plan for what it will say', a real curiosity hook. The ending is a decent image but leans on a summary."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Accessible, plain beginner register without heavy jargon, though terms like backpropagation and loss function are dropped in unexplained."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Varied scene types that fit the narration (token split diagram, generation flowchart, RLHF sequence). Weaknesses: a generic stock clip for 'researcher', and a timeline used for non-dates."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Explanation is competent but standard; few concrete surprising examples or vivid analogies beyond 'fill in the blank'."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "English, about the right length, and mostly on brief. Misses hallucinations, which the brief implies, and has little use of analogies."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, clean, natural spoken English."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Every sentence it writes is one careful guess, repeated.",
+    "issue": "Hallucinations and why they happen are never mentioned, though they follow directly from next-token prediction and are a core point.",
+    "beat": 14
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "backpropagation nudges millions of parameters",
+    "issue": "Modern LLMs have billions to hundreds of billions of parameters, so 'millions' understates the scale.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Then the most likely continuation gets picked.",
+    "issue": "Contradicts the later temperature beat, since tokens are sampled and not always the most likely one.",
+    "beat": 4
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Attention lets each token look back at the earlier ones and gather context.",
+    "issue": "Attention is described abstractly, with no example or analogy such as resolving a pronoun.",
+    "beat": 6
+   },
+   {
+    "dimension": "tone",
+    "severity": "minor",
+    "quote": "the loss function measures the error, and backpropagation nudges",
+    "issue": "Jargon terms are dropped without explanation for a beginner audience.",
+    "beat": 7
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Building ChatGPT",
+    "issue": "A timeline with 'Step 1/2/3' as dates is a loose use of the scene type.",
+    "beat": 12
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "That is all it takes to sound like it understands.",
+    "issue": "Oversimplifies; it ignores massive scale and the full multi-stage training described just before.",
+    "beat": 14
+   }
+  ],
+  "missing": [
+   "Hallucinations and why they occur",
+   "A relatable analogy for attention",
+   "Scale of parameters and compute",
+   "Limits of the model: no real-time knowledge, and confident errors"
+  ],
+  "wrong_facts": [
+   "'millions of parameters' understates the scale; LLMs have billions or more"
+  ],
+  "would_publish": false,
+  "summary": "A clear, accurate and well-structured beginner explainer with a strong hook and varied visuals. It omits hallucinations, offers few analogies, and is a bit generic.",
+  "mean": 3.78,
+  "cost_usd": 0.02693,
+  "tokens": [
+   6850,
+   1323
+  ]
+ }
+}

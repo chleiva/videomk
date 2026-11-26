@@ -1,0 +1,67 @@
+{
+ "id": "tec-01",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Really Works",
+  "description": "Large language models like ChatGPT write by predicting one word at a time. Learn how this simple trick, repeated at huge scale, produces fluent answers.",
+  "beats": [
+   {
+    "id": "063057c1",
+    "narration": "ChatGPT doesn't actually know what it's going to say. It just guesses the next word, over and over.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "740125ae",
+    "narration": "It learned by reading enormous amounts of text, spotting patterns in how words follow each other, until its guesses became remarkably good.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it learns",
+      "items": [
+       "Read huge amounts of text",
+       "Spot word patterns",
+       "Guess better and better"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "book",
+       "search",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2aab6704",
+    "narration": "Each word it picks becomes part of the question for the next. Fluent answers are just predictions, chained together.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Fluent answers are predictions, chained together.",
+      "emphasis": "predictions"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.05935,
+ "seconds": 7.8
+}

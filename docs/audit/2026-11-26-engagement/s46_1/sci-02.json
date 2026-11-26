@@ -1,0 +1,551 @@
+{
+ "id": "sci-02",
+ "category": "concept explainer (science)",
+ "language": "es",
+ "difficulty": "medium",
+ "prompt": "¿Por qué el cielo es azul y los atardeceres son rojos? Explícamelo como si tuviera 15 años.",
+ "great": "Dispersión de Rayleigh, la luz solar contiene todos los colores, azul se dispersa más, por qué no violeta, atardecer = camino más largo por la atmósfera; analogías sencillas, tono para adolescente.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:43:29",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Explicar por qué el cielo es azul y los atardeceres rojizos es un fenómeno físico estable (dispersión de Rayleigh), no depende de información reciente, así que basta con el conocimiento enciclopédico.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "science-wonder",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 5.1,
+   "cost_usd": 0.0007978000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 27.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 6,
+  "grounding": {
+   "beats": 13,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6676,
+  "n_sources": 5,
+  "n_fetched": 7,
+  "fetched": [
+   "Dispersión de Rayleigh - Wikipedia, la enciclopedia libre",
+   "Qué es la dispersión de Rayleigh y qué tiene que ver con que a veces el Sol y el cielo se vean tan rojos - BBC News Mundo",
+   "Why Are Sunsets Red?",
+   "Blue & red | Causes of Color",
+   "Global Radiation and Aerosols - NOAA Global Monitoring Laboratory",
+   "The Appearance of the Sky",
+   "Why Is The Sky Blue?"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "beat 0: clip replaced by an image (narration of 50 words is too long for stock footage)",
+  "length: the narration totals 501 words in 13 beats but a 3-minute video needs about 402 (at most 422). Cut about 99 words: write 13 to 15 beats of at most 37 words each (you averaged 38), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 369 words"
+ ],
+ "notes": "## Dispersión de Rayleigh - Wikipedia, la enciclopedia libre\nLa fuerte dependencia de la dispersión con la longitud de onda (~λ-4) supone que en la atmósfera la luz azul y violeta de longitud de onda más corta se dispersará más que las longitudes de onda más larga (luz amarilla y especialmente la luz roja). En la atmósfera, esto provoca que los fotones de luz azul se dispersen mucho más que los de longitudes de onda mayores a 490 nm; por este motivo vemos el cielo azulado en todas direcciones (que en realidad es una mezcla de todos los colores dispersos, [...] En 1869, mientras se intentaba determinar si quedaba algún contaminante en el aire purificado que usaba para los experimentos infrarrojos, John Tyndall descubrió que la luz brillante que se dispersaba de las partículas nanoscópicas tenía un ligero tinte azul. Conjeturó que una dispersión similar de la luz solar le dio al cielo su tono azul, pero no pudo explicar la preferencia por la luz azu\n\n## Qué es la dispersión de Rayleigh y qué tiene que ver con que a veces el Sol y el cielo se vean tan rojos - BBC News Mundo\nSi llueve mientras el sol brilla, cada gota de agua quiebra la luz en sus diferentes longitudes de onda y el resultado de esa refracción dispersa dentodos los colores en la atmósfera, lo que crea un arcoíris. Todo esto lo sabemos gracias a que el físico del siglo XIX John William Strutt, tercer barón de Rayleigh, también conocido como lord Rayleigh, le dedicó mucho de su tiempo a la observación de la luz solar y la atmósfera, y fue la primera persona en explicar por qué el cielo es azul. [...] De paso, el fenómeno de dispersión de Rayleigh también explica por qué el cielo suele verse más azul al mediodía. El sol está en el punto más alto del cielo, su luz atraviesa intacta la atmósfera, es absorbida tal cual y el color visible predominante es el azul. Naturalmente, las cosas pueden cambiar dependiendo del tiempo. [...] Cuando el Sol se pone o sale, sus rayos chocan con las capas superior\n\n## Why Are Sunsets Red?\nRayleigh scattering in the Earth's atmosphere happens when the light from the sun is scattered off of oxygen and nitrogen particles in the atmosphere. Violet light, followed by blue have the shortest wavelengths in the visible spectrum, and are therefore scattered the most, making the sky appear blue. [...] The type of scattering responsible for this is called Rayleigh scattering and occurs when the particle doing the scattering is much smaller than the wavelength of radiation being scattered. An incoming wave is absorbed by the particle and another wave of the same wavelength is reemited in a variety of directions, or \"scattered\". The amount of scattering that occurs is inversely proportional to the fourth power of the wavelength of the wave. For this reason, light with shorter wavelengths such [...] During a sunset, the light from the Sun must go through much more atmosphere before it \n\n## Blue & red | Causes of Color\nThe immense variation in the colors of sunsets depends on the concentration of small particles, or very small aerosols, in the atmosphere. In the absence of these small aerosols, the sky at sunset takes on yellow or orange hues, while increasing concentrations of small particles in the lower atmosphere further increase Rayleigh scattering to shift the hues towards the red end of the spectrum. Purple light can sometimes be observed in the west 15 to 30 minutes after sunset. [...] At sunset, the sun’s rays have much farther to travel through the atmosphere to reach your eye - more than 30 times the distance at midday. This increased distance amplifies the effect of the Rayleigh scattering that makes the sky blue, so that the violets and blues in sunlight are lost. The light you see is missing the violets and blues... leaving you with various shades of yellows, reds, and even purples. [...]\n\n## Global Radiation and Aerosols - NOAA Global Monitoring Laboratory\nDust or aerosols scatter the longer wavelengths (red light) more efficiently, and most of that light is scattered in the forward direction (the direction in which the light is moving). Also, at sunrise and sunset the sun's rays travel through a long path of atmosphere, so these scattering processes are very efficient at those times. Therefore, sunlight traveling through a long path of dirty atmosphere at sunrise or sunset is made up of primarily the reddish wavelengths when it reaches the [...] Light from the sun is made up of the colors in the rainbow, which correspond to different wavelengths of radiation. The blues are made up of short wavelengths and the reds of longer wavelengths. The radiative properties of a dirty atmosphere differ from those of a clean atmosphere. That is because light from the sun is scattered differently by air molecules than by aerosols (which are relatively l\n\n## The Appearance of the Sky\nThe angle of sunlight as it enters the atmosphere also affects the color of the sky. During sunrise or sunset, when the Sun is close to the horizon, the light must travel through more of the atmosphere than it does when the Sun is overhead. This results in more scattering of light, including longer wavelengths such as yellow, orange, and red, which creates colorful sunrise and sunset skies. Image 4: Red skies during sunset over Kennedy Space Center [...] Vivid sunset over NASA’s Kennedy Space Center in Florida (U.S.). The stunning colors result from particles in the atmosphere scattering light from the Sun. When there are more particles in the air, more light is scattered, and the colors are enhanced. _UCAR_ ## How Does Air Pollution Affect Sunset Colors? [...] Intense red sunsets are often visible when forest fires are burning nearby, or when volcanic eruptions happen. The most heavily \n\n## Why Is The Sky Blue?\nAt sunrise and sunset, the sunlight passes through more atmosphere than during the day when the sun is higher in the sky. More atmosphere means more molecules to scatter the violet and blue light. If the path is long enough, all the blue and violet light gets redirected out of your line of sight, while much of the pink, orange, and red colors continue along the undeviated path between your eyes and the sun. This is why sunrises and sunsets often are composed of pink, red, and orange colors. [...] When more molecules are in the atmosphere than normal, say after a major volcanic eruption, the most spectacular sunrises and sunsets can occur. Dust and water particles reflect light just like gas molecules can, therefore having more molecules in the air cause more scattering to occur, causing even less pinks and yellows to reach your eyes. More oranges and reds reach your eyes in this situatio",
+ "plan": {
+  "title": "¿Por qué el cielo es azul y los atardeceres son rojos?",
+  "description": "La luz del Sol viaja millones de kilómetros y, al chocar con nuestra atmósfera, hace algo sorprendente: se separa en colores. Descubre la física detrás del cielo azul y los atardeceres rojos, explicada de forma sencilla.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "22fb2ab5",
+    "narration": "El cielo no tiene color propio. Es la luz del Sol la que lo pinta, y lo hace de manera diferente según la hora del día. La misma estrella que a mediodía te da un cielo azul intenso, a las siete de la tarde lo tiñe de naranja y rojo.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "blue sky midday sunlight",
+      "alt": "cielo cambiando de azul a rojo durante el atardecer",
+      "ken_burns": "in"
+     }
+    },
+    "sfx": "whoosh",
+    "chapter": "El misterio de la luz"
+   },
+   {
+    "id": "7954107d",
+    "narration": "La luz solar parece blanca, pero en realidad es una mezcla de todos los colores del arcoíris. Cada color tiene una longitud de onda distinta: el violeta y el azul son los más cortos, el rojo es el más largo.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "La luz blanca contiene todos los colores",
+      "nodes": [
+       {
+        "id": "luz",
+        "label": "Luz blanca del Sol",
+        "icon": "sun"
+       },
+       {
+        "id": "azul",
+        "label": "Azul / Violeta",
+        "icon": "droplet"
+       },
+       {
+        "id": "verde",
+        "label": "Verde / Amarillo",
+        "icon": "leaf"
+       },
+       {
+        "id": "rojo",
+        "label": "Naranja / Rojo",
+        "icon": "flame"
+       }
+      ],
+      "edges": [
+       [
+        "luz",
+        "azul",
+        "onda corta"
+       ],
+       [
+        "luz",
+        "verde",
+        "onda media"
+       ],
+       [
+        "luz",
+        "rojo",
+        "onda larga"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "64d0251d",
+    "narration": "Cuando esa luz entra en la atmósfera, choca con moléculas de oxígeno y nitrógeno. Esas moléculas son muy pequeñas, y al absorber la luz la vuelven a lanzar en todas direcciones. Eso se llama dispersión.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "sunlight rays entering atmosphere",
+      "alt": "rayos de luz solar atravesando la atmósfera"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "a8b00ab8",
+    "narration": "Aquí viene la clave: los colores de onda corta, como el azul y el violeta, se dispersan mucho más que los de onda larga. Concretamente, la dispersión es inversamente proporcional a la cuarta potencia de la longitud de onda.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "Dispersion ~ 1 / lambda^4",
+        "note": "A menor longitud de onda, mucho más dispersión"
+       }
+      ],
+      "title": "Ley de dispersión de Rayleigh"
+     }
+    }
+   },
+   {
+    "id": "adf55235",
+    "narration": "Eso significa que el azul se dispersa unas diez veces más que el rojo. El azul rebota en todas direcciones y llena el cielo entero. Por eso, mires donde mires, el cielo es azul.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "~10×",
+      "label": "El azul se dispersa aproximadamente 10 veces más que el rojo en la atm"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "533bce86",
+    "narration": "Pero espera, si el violeta se dispersa aún más que el azul, ¿por qué el cielo no es violeta? Porque nuestros ojos son mucho más sensibles al azul, y además el Sol emite menos luz violeta. El resultado final que percibimos es azul.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "¿Por qué no vemos el cielo violeta?",
+      "items": [
+       "El violeta sí se dispersa más que el azul",
+       "Nuestros ojos son más sensibles al azul",
+       "El Sol emite menos luz violeta",
+       "El cerebro interpreta la mezcla como azul"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "eye",
+       "droplet",
+       "sun",
+       "brain"
+      ]
+     }
+    }
+   },
+   {
+    "id": "fcf59c6d",
+    "narration": "Este fenómeno fue explicado por primera vez en el siglo XIX por el físico lord Rayleigh, cuyo nombre completo era John William Strutt. Antes que él, John Tyndall ya había notado que las partículas pequeñas dispersaban la luz con un tinte azulado.",
+    "scene": {
+     "type": "timeline",
+     "props": {
+      "title": "Historia del cielo azul explicado",
+      "events": [
+       {
+        "date": "1869",
+        "label": "John Tyndall observa dispersión azulada en partículas"
+       },
+       {
+        "date": "1871",
+        "label": "Lord Rayleigh explica matemáticamente el color del ciel"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f36d41fc",
+    "narration": "Al mediodía, el Sol está casi encima de ti. Su luz atraviesa solo una capa fina de atmósfera para llegar a tus ojos, y el azul domina. Pero al atardecer, todo cambia.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "midday sun overhead blue sky",
+      "alt": "sol en lo alto del cielo con cielo azul intenso"
+     }
+    },
+    "chapter": "Por qué los atardeceres son rojos"
+   },
+   {
+    "id": "0bc71755",
+    "narration": "Cuando el Sol está en el horizonte, su luz tiene que recorrer más de treinta veces más atmósfera que al mediodía. Es un camino larguísimo, y durante ese trayecto el azul y el violeta se dispersan tanto que desaparecen de tu línea de visión.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Distancia que recorre la luz solar",
+      "nodes": [
+       {
+        "id": "sol",
+        "label": "Sol en horizonte",
+        "icon": "sun"
+       },
+       {
+        "id": "atm",
+        "label": "30× más atmósfera",
+        "icon": "cloud"
+       },
+       {
+        "id": "ojo",
+        "label": "Tus ojos",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "sol",
+        "atm",
+        "camino largo"
+       ],
+       [
+        "atm",
+        "ojo",
+        "solo rojo llega"
+       ]
+      ],
+      "style": "stack",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    },
+    "sfx": "whoosh"
+   },
+   {
+    "id": "cdd276b8",
+    "narration": "Sin azul ni violeta, lo que llega a tus ojos son los colores de onda larga: amarillo, naranja y rojo. Por eso los atardeceres tienen esos tonos cálidos tan espectaculares.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "dramatic red orange sunset horizon",
+      "alt": "atardecer rojo y naranja sobre el horizonte"
+     }
+    }
+   },
+   {
+    "id": "6e332f3e",
+    "narration": "Y si hay más partículas en el aire, como polvo, humo o ceniza volcánica, el efecto se amplifica. Las erupciones volcánicas y los incendios forestales producen algunos de los atardeceres más rojos e intensos que existen.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "volcanic eruption ash cloud sky",
+       "forest fire smoke sunset red sky",
+       "red sky after volcanic eruption"
+      ],
+      "alt": "atardeceres rojos intensificados por partículas en la atmósfera"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "c3282de4",
+    "narration": "El arcoíris funciona con el mismo principio: cada gota de lluvia actúa como un prisma que separa la luz en todos sus colores. La dispersión de Rayleigh está en todas partes, solo hay que saber mirar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "rainbow appearing after rain sunlight",
+      "alt": "arcoíris formándose tras la lluvia con sol"
+     }
+    }
+   },
+   {
+    "id": "bfd93e6d",
+    "narration": "Entonces, la próxima vez que veas el cielo azul o un atardecer rojo, recuerda: no es magia ni casualidad. Es la física de la luz chocando con la atmósfera, exactamente como lord Rayleigh explicó hace más de ciento cincuenta años.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El color del cielo es física pura: la atmósfera separa la luz y tú ves el resultado.",
+      "emphasis": "física pura"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Dispersión de Rayleigh - Wikipedia, la enciclopedia libre",
+    "url": "https://es.wikipedia.org/wiki/Dispersi%C3%B3n_de_Rayleigh",
+    "publisher": "es.wikipedia.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Why Are Sunsets Red?",
+    "url": "https://demos.smu.ca/demos/astronomy/35-red-sunsets",
+    "publisher": "demos.smu.ca",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Blue & red | Causes of Color",
+    "url": "https://www.webexhibits.org/causesofcolor/14B.html",
+    "publisher": "webexhibits.org",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "The Appearance of the Sky",
+    "url": "https://scied.ucar.edu/learning-zone/atmosphere/appearance-sky",
+    "publisher": "scied.ucar.edu",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Why Is The Sky Blue?",
+    "url": "https://www.weather.gov/fgz/SkyBlue",
+    "publisher": "weather.gov",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "science-wonder",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 72.9,
+  "before_first_script_call_s": 8.9,
+  "script_s": 64.1
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "research": 0.0008,
+  "script_big": 0.20186,
+  "search_api": 0.016,
+  "total": 0.21891
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 3
+ },
+ "tokens": {
+  "in": 42385,
+  "out": 7098
+ },
+ "rules": {
+  "length": {
+   "words": 501,
+   "expected_words": 402,
+   "ratio": 1.246,
+   "beats": 13,
+   "expected_beats": 13,
+   "est_speech_s": 221.1,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 50,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": true,
+   "close_words": 40,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "El cielo no tiene color propio. Es la luz del Sol la que lo pinta, y lo hace de manera diferente según la hora del día. La misma estrella que a mediodía te da un cielo azul intenso, a las siete de la ",
+   "close_text": "Entonces, la próxima vez que veas el cielo azul o un atardecer rojo, recuerda: no es magia ni casualidad. Es la física de la luz chocando con la atmósfera, exactamente como lord Rayleigh explicó hace "
+  },
+  "variety": {
+   "distinct": 9,
+   "counts": {
+    "image": 1,
+    "diagram": 2,
+    "clip": 4,
+    "equation": 1,
+    "stat": 1,
+    "bullets": 1,
+    "timeline": 1,
+    "gallery": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.93,
+   "top_type": "clip",
+   "top_share": 0.31,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 5,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "los colores de onda",
+    "count": 2
+   },
+   {
+    "phrase": "azul y el violeta",
+    "count": 2
+   },
+   {
+    "phrase": "el violeta se dispersan",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "image_budget": 1,
+   "length": 1
+  },
+  "sources": {
+   "cited": 5,
+   "fetched": 7,
+   "notes_len": 6676,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long",
+   "hook_long",
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 11 (gallery): its narration never says ['forest fire smoke sunset red sky', 'red sky after volcanic eruption']"
+  ]
+ }
+}

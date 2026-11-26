@@ -1,0 +1,242 @@
+{
+ "id": "pro-02",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza por dos minutos",
+  "description": "Descubre por qué procrastinamos y cómo romper el bloqueo con pasos pequeños. Aprende técnicas sencillas para empezar hoy mismo esa tarea que llevas días evitando.",
+  "beats": [
+   {
+    "id": "443d7af4",
+    "narration": "Llevas días evitando esa tarea. No es pereza. Tu cerebro intenta protegerte de algo que le incomoda, y por eso lo dejas para mañana. Veamos cómo romper ese bucle.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person staring at laptop desk",
+      "alt": "tired person at desk with computer"
+     }
+    },
+    "chapter": "Por qué lo evitamos"
+   },
+   {
+    "id": "71a0bf39",
+    "narration": "La procrastinación no es un problema de tiempo, es un problema de emociones. Evitamos el aburrimiento, el miedo a fallar o la duda. Posponer da alivio inmediato, pero el estrés vuelve más fuerte.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El círculo vicioso",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea incómoda",
+        "icon": "triangle-alert"
+       },
+       {
+        "id": "b",
+        "label": "Evito",
+        "icon": "clock"
+       },
+       {
+        "id": "c",
+        "label": "Alivio breve",
+        "icon": "heart"
+       },
+       {
+        "id": "d",
+        "label": "Más estrés",
+        "icon": "flame"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a",
+        "vuelve"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "a79496ee",
+    "narration": "Primero, haz la tarea ridículamente pequeña. No escribas el informe: abre el documento y escribe una frase. Lo difícil no es avanzar, es empezar.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lo difícil no es avanzar, es empezar.",
+      "emphasis": "empezar"
+     }
+    }
+   },
+   {
+    "id": "74ed8c02",
+    "narration": "Prueba la regla de los dos minutos. Dite que trabajarás solo dos minutos. Casi siempre, cuando arrancas, la resistencia baja y sigues más tiempo del que pensabas.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Regla de los dos minutos",
+      "steps": [
+       {
+        "label": "Elige la tarea",
+        "detail": "Una sola cosa"
+       },
+       {
+        "label": "Pon dos minutos",
+        "detail": "Solo eso"
+       },
+       {
+        "label": "Empieza ya",
+        "detail": "Sin esperar ganas"
+       },
+       {
+        "label": "Sigue si puedes",
+        "detail": "La inercia ayuda"
+       }
+      ]
+     }
+    },
+    "chapter": "Cómo empezar"
+   },
+   {
+    "id": "2d86a0dc",
+    "narration": "Segundo, elimina las distracciones. Deja el móvil en otra habitación, cierra las pestañas y silencia las notificaciones. Si tu entorno te tienta, la fuerza de voluntad se agota rápido.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person putting phone away",
+      "clip_queries": [
+       "person putting phone away",
+       "person typing focused at desk"
+      ],
+      "alt": "person focused working without phone"
+     }
+    }
+   },
+   {
+    "id": "496fe538",
+    "narration": "Tercero, divide el trabajo en bloques. Trabaja veinticinco minutos y descansa cinco. Es la técnica Pomodoro. Un final cercano hace que concentrarse sea mucho más fácil.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Trabaja por bloques",
+      "items": [
+       "Bloque de 25 minutos",
+       "Descanso de 5",
+       "Repite",
+       "Descanso largo al final"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "clock",
+       "coffee",
+       "refresh-cw",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c87ce830",
+    "narration": "Cuarto, decide cuándo y dónde. Es mejor fijar un momento y un lugar concretos que dejarlo para más tarde. Un plan concreto elimina la decisión del momento.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Plan vago",
+       "tagline": "«Ya lo haré»"
+      },
+      "b": {
+       "name": "Plan concreto",
+       "tagline": "«Mañana a las nueve»"
+      },
+      "rows": [
+       {
+        "label": "Cuándo",
+        "a": "Algún día",
+        "b": "Hora fija"
+       },
+       {
+        "label": "Dónde",
+        "a": "Donde sea",
+        "b": "Mi escritorio"
+       },
+       {
+        "label": "Resultado",
+        "a": "Se pospone",
+        "b": "Se empieza"
+       }
+      ],
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "bf9687f6",
+    "narration": "Quinto, sé amable contigo. Castigarte por haber postergado genera más culpa, y la culpa alimenta la evasión. Perdónate, y vuelve a empezar con un paso pequeño.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person smiling relaxed sunrise",
+      "alt": "calm person outdoors morning"
+     }
+    }
+   },
+   {
+    "id": "cf6c203e",
+    "narration": "Y celebra cada avance, por pequeño que sea. Tachar una tarea de la lista da una satisfacción real, y ese gusto te empuja hacia la siguiente.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Pequeñas victorias",
+      "items": [
+       "Abrí el documento",
+       "Escribí una frase",
+       "Trabajé un bloque",
+       "Terminé la tarea"
+      ]
+     }
+    }
+   },
+   {
+    "id": "551bf4ed",
+    "narration": "Así que no esperes a tener ganas. Las ganas llegan después de empezar. Haz hoy dos minutos de esa tarea que evitas, y el resto será más fácil.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Las ganas llegan después de empezar.",
+      "emphasis": "después de empezar"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "grounding: 1 beats had unsupported specifics, 1 rewritten"
+ ],
+ "cost_usd": 0.13967,
+ "seconds": 46.2
+}

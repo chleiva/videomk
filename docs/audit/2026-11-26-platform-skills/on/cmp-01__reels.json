@@ -1,0 +1,99 @@
+{
+ "id": "cmp-01",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A quick comparison of React and Vue for beginners choosing a first JavaScript framework. Learn what each offers and how to pick based on your goal.",
+  "beats": [
+   {
+    "id": "a17506a0",
+    "narration": "Stuck choosing between React and Vue? Here's the truth: you can't really pick wrong. But one of them might fit you better.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "React or Vue?",
+      "subtitle": "Which one to learn first"
+     }
+    }
+   },
+   {
+    "id": "7d2a5cf3",
+    "narration": "React is hugely popular, so it has more jobs and more tutorials. It gives you freedom, but also more choices to make.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Popular and flexible"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Gentle and guided"
+      },
+      "rows": [
+       {
+        "label": "Jobs",
+        "a": "More listings",
+        "b": "Fewer listings"
+       },
+       {
+        "label": "Learning",
+        "a": "More choices",
+        "b": "Clear structure"
+       }
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "9050863b",
+    "narration": "Vue is friendlier for beginners. Its structure is clear, and the docs are easy to follow, so you build something quickly.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why Vue feels easy",
+      "items": [
+       "Clear structure",
+       "Friendly docs",
+       "Fast first project"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "map",
+       "book",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "93c8ef17",
+    "narration": "Want a job fast? Start with React. Want an easy, enjoyable start? Pick Vue. Either way, the skills carry over. Just start.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Jobs? React. Easy start? Vue. Either way, just start.",
+      "emphasis": "just start"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 87 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 29 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06744,
+ "seconds": 9.8
+}

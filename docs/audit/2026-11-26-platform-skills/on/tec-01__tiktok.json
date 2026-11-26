@@ -1,0 +1,67 @@
+{
+ "id": "tec-01",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT Really Works: Guessing the Next Word",
+  "description": "Large language models like ChatGPT are trained on huge amounts of text to predict the next word. This short video explains how that simple trick produces fluent answers.",
+  "beats": [
+   {
+    "id": "36d024fc",
+    "narration": "ChatGPT doesn't actually know anything. It's just playing one game: guess the next word. Over and over, super fast.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It just guesses the next word.",
+      "emphasis": "next word"
+     }
+    }
+   },
+   {
+    "id": "b2d074ed",
+    "narration": "It learned by reading a giant pile of text, spotting patterns in how words follow each other, until its guesses got scary good.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it learned",
+      "items": [
+       "Read tons of text",
+       "Spot patterns",
+       "Guess better"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "book",
+       "search",
+       "rocket"
+      ]
+     }
+    }
+   },
+   {
+    "id": "80f53ea7",
+    "narration": "So when you ask a question, it builds an answer one word at a time. Smart-sounding, but still just predicting.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Smart-sounding, but still predicting.",
+      "emphasis": "predicting"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06469,
+ "seconds": 8.0
+}

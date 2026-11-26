@@ -1,0 +1,80 @@
+{
+ "id": "tra-01",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A fast plan for three days in Lisbon, covering the hills, the tram rides and the food worth tasting. Quick tips on what to see and eat.",
+  "beats": [
+   {
+    "id": "a8d30cc5",
+    "narration": "Three days in Lisbon, and every hill hides a view. Day one: ride the yellow trams through the old, winding streets.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Three days. Seven hills. One city.",
+      "emphasis": "Seven hills"
+     }
+    }
+   },
+   {
+    "id": "170d6284",
+    "narration": "Day two, follow the river to the old towers and monasteries. Day three, wander the neighborhoods and listen for live fado music.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your 3 days",
+      "items": [
+       "Day 1: Trams",
+       "Day 2: River",
+       "Day 3: Fado"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "droplet",
+       "music"
+      ]
+     }
+    }
+   },
+   {
+    "id": "b66a0123",
+    "narration": "Eat custard tarts warm from the oven, grilled sardines, and salted cod. Then climb one more hill for sunset.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "cake",
+        "label": "Custard tarts"
+       },
+       {
+        "icon": "fish",
+        "label": "Grilled sardines"
+       },
+       {
+        "icon": "sun",
+        "label": "Sunset views"
+       }
+      ],
+      "title": "Taste Lisbon"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06661,
+ "seconds": 9.0
+}

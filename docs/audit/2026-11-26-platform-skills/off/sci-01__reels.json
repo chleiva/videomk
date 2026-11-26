@@ -1,0 +1,74 @@
+{
+ "id": "sci-01",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: why hot coffee always cools",
+  "description": "Entropy measures how spread out energy is in a system. The second law of thermodynamics explains why isolated systems drift toward equilibrium and why some processes never run backwards.",
+  "beats": [
+   {
+    "id": "cc4eab40",
+    "narration": "Your coffee never heats itself back up. Why? The answer is a single idea: entropy.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Why can't coffee reheat itself?"
+     }
+    }
+   },
+   {
+    "id": "d38404db",
+    "narration": "Entropy measures how spread out energy is. Concentrated energy is low entropy. Energy dispersed evenly is high entropy.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy",
+      "items": [
+       "Low: energy concentrated",
+       "High: energy spread out"
+      ],
+      "style": "spotlight",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "a77e4c82",
+    "narration": "The second law says an isolated system's entropy cannot decrease. Heat spreads out, and that makes some processes irreversible.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Second law of thermodynamics",
+      "definition": "The entropy of an isolated system left to itself cannot decrease with time."
+     }
+    }
+   },
+   {
+    "id": "30735a36",
+    "narration": "So entropy is why time has a direction: energy spreads, and it never gathers itself back.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Energy spreads out, and never gathers itself back.",
+      "emphasis": "spreads out"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 68 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 10 words: 3 to 4 beats of about 19 words each (you averaged 17; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.07004,
+ "seconds": 9.5
+}

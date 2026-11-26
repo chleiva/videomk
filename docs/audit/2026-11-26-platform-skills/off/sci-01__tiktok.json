@@ -1,0 +1,63 @@
+{
+ "id": "sci-01",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Everything Spreads Out",
+  "description": "Entropy measures how evenly energy is spread out in a system. The second law of thermodynamics says isolated systems drift toward higher entropy, which is why some processes can never be reversed.",
+  "beats": [
+   {
+    "id": "aae95285",
+    "narration": "Why can't you unscramble an egg? The answer is entropy, a measure of how spread out energy is.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Why can't you unscramble an egg?"
+     }
+    }
+   },
+   {
+    "id": "b6544eac",
+    "narration": "Low entropy means energy is concentrated in one place. High entropy means it is spread out evenly. Hot coffee cools because its heat disperses.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy",
+      "items": [
+       "Low: energy concentrated",
+       "High: energy spread out"
+      ],
+      "style": "spotlight",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "e63f1e2c",
+    "narration": "The second law says an isolated system never loses entropy. That is why some processes are irreversible. Nature drifts toward spread-out.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Isolated systems drift toward higher entropy.",
+      "emphasis": "higher entropy"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 63 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 5 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06581,
+ "seconds": 8.8
+}

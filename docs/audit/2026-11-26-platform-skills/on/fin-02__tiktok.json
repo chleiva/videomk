@@ -1,0 +1,65 @@
+{
+ "id": "fin-02",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación explicada en 30 segundos",
+  "description": "Qué es la inflación y por qué tu dinero compra menos con el tiempo. Una explicación rápida y sencilla de los precios, el dinero y el poder adquisitivo.",
+  "beats": [
+   {
+    "id": "683c059f",
+    "narration": "¿Por qué el café de antes te costaba menos? Eso es la inflación: los precios suben con el tiempo y todo se encarece.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "cafetería barista sirviendo café",
+      "alt": "persona pagando en una cafetería"
+     }
+    }
+   },
+   {
+    "id": "c6f447c5",
+    "narration": "Si todo sube y tu sueldo no, tu dinero compra menos. Eso se llama perder poder adquisitivo.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Poder adquisitivo",
+      "items": [
+       "Precios suben",
+       "Sueldo igual",
+       "Compras menos"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "4e338a10",
+    "narration": "Pasa cuando hay más demanda que productos, cuando producir cuesta más, o cuando circula demasiado dinero. Entenderlo te ayuda a proteger tus ahorros.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tu dinero vale menos si los precios suben",
+      "emphasis": "vale menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 63 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 5 words: 3 to 4 beats of about 19 words each (you averaged 21; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06491,
+ "seconds": 9.7
+}

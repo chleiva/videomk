@@ -1,0 +1,106 @@
+{
+ "id": "how-01",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "A quick, practical guide to changing a flat tire, from stopping safely to tightening the lug nuts. Learn the order that keeps you safe and gets you back on the road.",
+  "beats": [
+   {
+    "id": "90d1b180",
+    "narration": "A flat tire feels like a disaster, but it is a job you can do in minutes. First, pull over on firm, flat ground, away from traffic. Turn on your hazard lights and set the parking brake.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car parked on roadside",
+      "clip_queries": [
+       "car parked on roadside",
+       "hazard lights blinking on car"
+      ],
+      "alt": "vehicle with hazard lights on roadside"
+     }
+    },
+    "chapter": "Stay safe first"
+   },
+   {
+    "id": "5787ae5f",
+    "narration": "Take out the spare, the jack and the wrench. Loosen the lug nuts a little while the wheel is still on the ground. Then place the jack at the right point and lift the car.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Loosen and lift",
+      "steps": [
+       {
+        "label": "Get the spare and tools"
+       },
+       {
+        "label": "Loosen the lug nuts"
+       },
+       {
+        "label": "Jack up the car"
+       }
+      ]
+     }
+    },
+    "chapter": "Loosen and lift"
+   },
+   {
+    "id": "96401d64",
+    "narration": "Now remove the nuts and pull the flat tire off. Slide the spare onto the bolts. Hand-tighten the nuts, then lower the car until the tire touches the ground.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "man changing car tire",
+      "clip_queries": [
+       "man changing car tire",
+       "hands tightening wheel nuts"
+      ],
+      "alt": "hands replacing a wheel on a car"
+     }
+    },
+    "chapter": "Swap the wheel"
+   },
+   {
+    "id": "9746c76e",
+    "narration": "Lower the car fully, then tighten the nuts firmly in a star pattern. Put your tools and the flat tire away. Check the spare's pressure soon, and get the flat repaired.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Before you drive off",
+      "items": [
+       "Tighten nuts in a star pattern",
+       "Stow the tools and flat tire",
+       "Check the spare's pressure",
+       "Get the flat repaired"
+      ]
+     }
+    },
+    "chapter": "Finish and check"
+   },
+   {
+    "id": "e3c94c9d",
+    "narration": "That is the whole job: stop safely, loosen, lift, swap, tighten. Do it in that order, and a flat tire becomes a small delay instead of a crisis.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Stop safely, loosen, lift, swap, tighten.",
+      "emphasis": "Stop safely"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 160 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 26 words: write 4 to 6 beats of at most 40 words each (you averaged 32), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07066,
+ "seconds": 13.0
+}

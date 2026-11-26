@@ -1,0 +1,542 @@
+{
+ "id": "kid-01",
+ "category": "education / lesson for kids",
+ "language": "en",
+ "difficulty": "medium",
+ "prompt": "Explain how volcanoes erupt for six-year-olds",
+ "great": "Simple vocabulary, analogy (shaken soda bottle), magma vs lava, layers, safe fun facts, playful tone, short sentences, a closing question or recap.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:35:28",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "How volcanoes erupt is a timeless science explanation that does not depend on recent information, so an encyclopedia source is sufficient for an accurate kid-friendly script.",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 4.5,
+   "cost_usd": 0.0007309,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 29.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 4,
+  "grounding": {
+   "beats": 11,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6738,
+  "n_sources": 4,
+  "n_fetched": 7,
+  "fetched": [
+   "What Starts an Eruption?",
+   "Volcanic Eruptions - Volcanoes, Craters & Lava Flows (U.S. National Park Service)",
+   "Volcano Watch — Volcanic gases provide clues to how volcanoes work | U.S. Geological Survey",
+   "How Do Volcanoes Erupt? | U.S. Geological Survey",
+   "About Volcanoes | U.S. Geological Survey",
+   "How Do Volcanoes Work | A fun and engaging introduction to volcanoes | Science Facts",
+   "Volcanoes: Magma Rising | AMNH"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## What Starts an Eruption?\nMagma Chamber The magma chamber is a zone of molten and partially molten rock that exists beneath a volcano. The top of the magma chamber at Mount Rainier is about eight kilometers (five miles) below the Earth’s surface and is only a few kilometers wide. As gas bubbles accumulate, the upward pressure increases, forcing cracks in the rocks to widen, often in the direction of Earth’s surface. For magma to erupt from a volcano, this upward pressure must exceed the downward pressure that is exerted [...] Magma Conduit With the accumulation and rise of bubbles through the magma chamber, the pressure increases and will eventually become great enough to break through overlying roof rocks, creating a conduit to the surface. Magma escapes through the “super highway” of the volcano, known as the magma conduit or throat. This long, narrow opening leads from the top of the magma chamber to the Earth\n\n## Volcanic Eruptions - Volcanoes, Craters & Lava Flows (U.S. National Park Service)\nUntil a magma nears the Earth’s surface, the enormous pressure of the overlying rock keeps gases dissolved. Near the surface, the pressure decreases and they can exsolve from the melt, ultimately forming gas bubbles in a process called vesiculation. This exsolution of magmatic gases as a magma ascends towards the surface is one of the forces that propels volcanic eruptions. [...] The release of pressure as a magma nears the Earth’s surface is similar to the release of pressure in a carbonated beverage when it is opened. The exsolution of carbon dioxide from soda pop due to the release of confining pressure when the can is opened is like the expansion and exsolution of gases that propels eruptions. Higher volatile contents increase the likelihood of explosive eruptions compared to eruptions of magma with lower concentrations of gases. [...] Shallow magma chambers may form in regions of ne\n\n## Volcano Watch — Volcanic gases provide clues to how volcanoes work | U.S. Geological Survey\nGases are trapped (dissolved) in magma at depth, where pressures within the Earth's crust are very great—many thousands of pounds per square inch. As the magma rises to the surface and is erupted, the pressure decreases, and some of the gas is released. The main gases dissolved in magma are water vapor, carbon dioxide, and sulfur gases, with lesser amounts of hydrogen, hydrochloric acid, and hydrofluoric acid. In our pinch-of-salt-to-a-double-handful-of-magma illustration earlier, most of the [...] In a double handful of molten magma (weighing about a pound), there is less than a tenth of an ounce, by weight, of dissolved gas—roughly the same weight as a pinch of table salt. Yet this tiny amount of gas can drive spectacular lava fountains hundreds of feet into the air. The fountaining occurs because dissolved volcanic gases expand when pressure on the magma is released. Anyone who has sh\n\n## How Do Volcanoes Erupt? | U.S. Geological Survey\nSome volcanic eruptions are explosive and others are not. The explosivity of an eruption depends on the composition of the magma. If magma is thin and runny, gases can escape easily from it. When this type of magma erupts, it flows out of the volcano. A good example is the eruptions at Hawaii’s volcanoes. Lava flows rarely kill people because they move slowly enough for people to get out of their way. If magma is thick and sticky, gases cannot escape easily. Pressure builds up until the gases [...] Deep within the Earth it is so hot that some rocks slowly melt and become a thick flowing substance called magma. Since it is lighter than the solid rock around it, magma rises and collects in magma chambers. Eventually, some of the magma pushes through vents and fissures to the Earth's surface. Magma that has erupted is called lava. [...] up until the gases escape violently and explode. A goo\n\n## About Volcanoes | U.S. Geological Survey\nOriginating many tens of miles beneath the ground, magma is lighter than surrounding solid rock. It is driven towards Earth's surface by buoyancy, it is lighter than the surrounding rock, and by pressure from gas within it. Magma forces its way upward and may ultimately break though weak areas in the Earth's crust. If so, an eruption begins. Geologist collecting sample of molten lava from 2011 Kamoamoa erupt... [...] Magma can be erupted in a variety of ways. Sometimes molten rock simply pours from the vent as fluid lava flows. It can also shoot violently into the air as dense clouds of rock shards (tephra) and gas. Larger fragments fall back around the vent, and clouds of tephra may move down the slope of the volcano under the force of gravity. Ash, tiny pieces of tephra the thickness of a strand of hair, may be carried by the wind only to fall to the ground many miles away. The smalles\n\n## How Do Volcanoes Work | A fun and engaging introduction to volcanoes | Science Facts\ngets added to the chamber. As more and more magma fills up the chamber, there's less and less room. It's like trying to stuff too many toys in a toy box. Eventually, something's got to give. All that magma and gas is pushing up, up, up. The pressure builds and builds. [music] The rock above the magma chamber starts to crack. And when the pressure gets strong enough, boom. The magma finds a way out. It rushes up through cracks in the Earth's crust, up through the volcano's opening, and explodes [...] Once the magma escapes and reaches the surface, we call it lava. It pours out along with all that ash, rocks, and gas we talked about earlier. The pressure is finally [music] released just like opening that shaken soda bottle. After an eruption, the pressure goes down. The volcano gets quiet again. But deep underground, magma is still there, slowly building up pressure again. That's why some \n\n## Volcanoes: Magma Rising | AMNH\nIt’s all a matter of chemistry. The way a volcano erupts depends on the amount of gas and silica (a molecule of silicon oxygen) in the magma below. Magma with lots of silica is thick and gooey, while magma low in silica is thin and runny. And in magma with lots of gas, bubbles form as it rises. The more bubbles that form, the more explosive the eruption! Mt. Pelée was the most explosive type of volcano: it was high in silica and high in gas. This type of volcano is called a stratovolcano. [...] 1. When an oceanic plate collides with a continental plate, it sinks into the mantle below. 2. As the oceanic plate sinks, fluid (shown in purple) is squeezed out of it. 3. The fluid flows up into the mantle rock above and changes its chemistry, causing it to melt. This forms magma (molten rock). 4. The magma rises and collects in chambers within the crust. [...] 5. As magma fills the chamber, pre",
+ "plan": {
+  "title": "How Do Volcanoes Erupt? A Video for Kids",
+  "description": "A gentle explainer for six-year-olds on how a volcano erupts, from hot melted rock deep underground to a shaken soda bottle bursting open. Learn about magma, pressure, gas bubbles and lava.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "80a05850",
+    "narration": "Can you guess why a mountain can shoot fire and melted rock into the sky? It is not magic. It works a lot like a soda bottle that got shaken!",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano erupting lava fountain",
+      "alt": "lava erupting from a volcano at night"
+     }
+    },
+    "chapter": "Why a mountain explodes"
+   },
+   {
+    "id": "9919cbf4",
+    "narration": "Deep under the ground, it is so hot that some rocks slowly melt. The melted rock is thick, like gooey syrup. We call it magma.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Magma",
+      "definition": "Hot, melted rock deep under the ground. It is thick and flowing, like gooey syrup."
+     }
+    }
+   },
+   {
+    "id": "c58c7827",
+    "narration": "Magma is lighter than the hard rock around it. So it floats up, up, up, and gathers in a big space under the volcano called the magma chamber.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Magma's journey",
+      "nodes": [
+       {
+        "id": "hot",
+        "label": "Hot rock melts",
+        "icon": "flame"
+       },
+       {
+        "id": "magma",
+        "label": "Magma floats up",
+        "icon": "log-in"
+       },
+       {
+        "id": "chamber",
+        "label": "Magma chamber",
+        "icon": "home"
+       }
+      ],
+      "edges": [
+       [
+        "hot",
+        "magma"
+       ],
+       [
+        "magma",
+        "chamber",
+        "rises"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "ae07fcf6",
+    "narration": "Magma also carries tiny bits of gas, like the fizz in soda. Deep down, the gas is squeezed tight and stays hidden inside.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "soda bubbles fizzing in glass",
+      "alt": "fizzy drink with rising bubbles"
+     }
+    }
+   },
+   {
+    "id": "f47c115b",
+    "narration": "As more magma comes in, the chamber gets crowded. It is like stuffing too many toys into a toy box. Something has to give!",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Too many toys in the toy box? Something has to give!",
+      "emphasis": "Something has to give"
+     }
+    }
+   },
+   {
+    "id": "0f1ac5bd",
+    "narration": "The magma and gas push up, up, up. The pressure builds and builds. Then the rock above starts to crack, and the magma finds a way out.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Pressure builds",
+      "steps": [
+       {
+        "label": "Magma and gas push up"
+       },
+       {
+        "label": "Pressure builds"
+       },
+       {
+        "label": "Rock cracks"
+       },
+       {
+        "label": "Magma escapes!"
+       }
+      ]
+     }
+    },
+    "chapter": "The big push"
+   },
+   {
+    "id": "5a5811da",
+    "narration": "It rushes up a long, narrow tunnel inside the volcano, like a super highway. Then, boom! It bursts out of the top.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "volcano erupting ash cloud",
+      "alt": "explosive volcano eruption smoke"
+     }
+    }
+   },
+   {
+    "id": "a3f8c6a3",
+    "narration": "Remember the shaken soda bottle? When you open it, the pressure is let go and the fizz sprays out. A volcano does the same thing, only much bigger.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Soda bottle",
+       "tagline": "Shaken up"
+      },
+      "b": {
+       "name": "Volcano",
+       "tagline": "Full of magma"
+      },
+      "rows": [
+       {
+        "label": "Hidden inside",
+        "a": "Fizzy gas",
+        "b": "Gas in magma"
+       },
+       {
+        "label": "Pressure",
+        "a": "Builds up",
+        "b": "Builds up"
+       },
+       {
+        "label": "Opening",
+        "a": "Fizz sprays out",
+        "b": "Magma bursts out"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "685fa02d",
+    "narration": "Once magma reaches the outside, we call it lava. Some lava is thin and runny, and it slowly flows down the hillside. People can walk away from it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "lava flowing down hillside",
+      "alt": "slow lava flow on volcano slope"
+     }
+    },
+    "chapter": "Lava and calm"
+   },
+   {
+    "id": "82659011",
+    "narration": "Other magma is thick and sticky, so the gas gets trapped. The pressure keeps building until the gas escapes with a giant bang, and ash flies high into the sky.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Two kinds of eruption",
+      "items": [
+       "Thin and runny: lava flows slowly",
+       "Thick and sticky: gas explodes",
+       "Ash flies into the sky"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "droplet",
+       "bomb",
+       "cloud"
+      ]
+     }
+    }
+   },
+   {
+    "id": "6bbbfc96",
+    "narration": "After the eruption, the pressure goes down and the volcano gets quiet again. A volcano is just a mountain letting out a big, fizzy burp of hot rock.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "quiet volcano mountain sunrise",
+      "alt": "calm volcano at sunrise",
+      "ken_burns": "in"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Volcanic Eruptions - Volcanoes, Craters & Lava Flows (U.S. National Park Service)",
+    "url": "https://www.nps.gov/subjects/volcanoes/volcanic-eruptions.htm",
+    "publisher": "nps.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Volcano Watch — Volcanic gases provide clues to how volcanoes work | U.S. Geological Survey",
+    "url": "https://www.usgs.gov/news/volcano-watch-volcanic-gases-provide-clues-how-volcanoes-work",
+    "publisher": "usgs.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How Do Volcanoes Erupt? | U.S. Geological Survey",
+    "url": "https://www.usgs.gov/faqs/how-do-volcanoes-erupt",
+    "publisher": "usgs.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "How Do Volcanoes Work | A fun and engaging introduction to volcanoes | Science Facts",
+    "url": "https://www.youtube.com/watch?v=mm5QHn1pPyc",
+    "publisher": "youtube.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "kids-family",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 19.4,
+  "before_first_script_call_s": 7.3,
+  "script_s": 12.1
+ },
+ "cost": {
+  "script_small": 0.00028,
+  "research": 0.00073,
+  "script_big": 0.04966,
+  "search_api": 0.016,
+  "total": 0.06667
+ },
+ "calls": {
+  "small": 3,
+  "tools": 2,
+  "big": 1
+ },
+ "tokens": {
+  "in": 23020,
+  "out": 2385
+ },
+ "rules": {
+  "length": {
+   "words": 293,
+   "expected_words": 267,
+   "ratio": 1.097,
+   "beats": 11,
+   "expected_beats": 9,
+   "est_speech_s": 132.5,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Can you guess why a mountain can shoot fire and melted rock into the sky? It is not magic. It works a lot like a soda bottle that got shaken!",
+   "close_text": "After the eruption, the pressure goes down and the volcano gets quiet again. A volcano is just a mountain letting out a big, fizzy burp of hot rock."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "clip": 4,
+    "definition": 1,
+    "diagram": 1,
+    "kinetic_text": 1,
+    "steps": 1,
+    "versus": 1,
+    "bullets": 1,
+    "image": 1
+   },
+   "max_run": 1,
+   "entropy": 2.73,
+   "top_type": "clip",
+   "top_share": 0.36,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 7,
+   "notes_len": 6738,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "Beat 2 calls magma 'thick, like gooey syrup' but beat 9 says some magma is thin and runny, which contradicts it. Also 'floats up' and 'super highway' are fine, but 'Deep down, the gas is squeezed tight' is accurate."
+   },
+   "coverage": {
+    "score": 4,
+    "reason": "Covers magma vs lava, chamber, pressure, soda analogy, and runny vs sticky eruptions. It has no layers of the Earth and no fun fact (e.g. the pinch of salt of gas), and the 'People can walk away' line is a thin safety note."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Builds logically from magma to chamber to pressure to eruption to lava to calm, with chapters. The soda bottle is introduced, returns in beat 8, and the burp image closes the loop, though the beat 8 comparison is slightly redundant."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about a mountain shooting fire plus the soda bottle teaser is a good hook. The 'big, fizzy burp' ending is playful, but there is no closing question or recap."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Playful, simple, and short sentences suit six-year-olds. 'Super highway' and 'pressure is let go' are slightly abstract."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety of clips, definition, diagram, steps, versus and bullets, and they match the narration. The diagram's 'log-in' icon is odd, and the versus table is text-heavy for six-year-olds."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Soda and toy-box analogies are good but are taken nearly straight from the source video. There are no surprising facts or specifics."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "English, kid audience, and about the right length (roughly 260 words). Simple vocabulary is mostly kept, with a few words such as 'pressure' and 'chamber'."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and natural, with child-friendly rhythm. 'The pressure is let go' is slightly awkward."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "The melted rock is thick, like gooey syrup.",
+    "issue": "Contradicts beat 9, which says some magma is thin and runny. Magma viscosity varies, so the definition card ('thick and flowing') misleads.",
+    "beat": 2
+   },
+   {
+    "dimension": "language",
+    "severity": "minor",
+    "quote": "the pressure is let go and the fizz sprays out",
+    "issue": "Awkward phrasing for kids; 'let out' or 'released' would be more natural.",
+    "beat": 8
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Thin and runny: lava flows slowly",
+    "issue": "The bullet list covers the thick/sticky narration but is placed after the thin lava narration. The third bullet, 'Ash flies into the sky', is not a kind of eruption.",
+    "beat": 10
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "People can walk away from it.",
+    "issue": "This is a thin safety note and could mislead; lava can still be dangerous. A fun fact is absent.",
+    "beat": 9
+   }
+  ],
+  "missing": [
+   "Earth's layers or why rock melts",
+   "A surprising fun fact",
+   "A closing question or recap for kids",
+   "Safety note such as never going near a volcano"
+  ],
+  "wrong_facts": [
+   "Magma described as always thick like syrup, which conflicts with the later runny magma claim."
+  ],
+  "would_publish": false,
+  "summary": "A friendly, well-structured kid explainer built on the soda and toy-box analogies, with varied scenes. It is held back by the internal contradiction about magma thickness, a lack of surprising facts, and a closing without a question or recap.",
+  "mean": 3.78,
+  "cost_usd": 0.024402,
+  "tokens": [
+   5881,
+   1264
+  ]
+ }
+}

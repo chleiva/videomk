@@ -1,0 +1,63 @@
+{
+ "id": "fin-02",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación explicada en 30 segundos",
+  "description": "La inflación es la subida general de los precios con el tiempo. Descubre por qué tu dinero compra menos cada año y qué significa eso para ti.",
+  "beats": [
+   {
+    "id": "8ef9ab69",
+    "narration": "Tu dinero vale menos cada año, aunque no gastes nada. Eso es la inflación: la subida general de los precios.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tu dinero compra menos cada año",
+      "emphasis": "menos"
+     }
+    }
+   },
+   {
+    "id": "0bcf8e37",
+    "narration": "Imagina que un café cuesta uno euro hoy. Si los precios suben, mañana necesitarás más dinero para comprar exactamente lo mismo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "barista preparing coffee at cafe",
+      "alt": "coffee shop counter customer paying"
+     }
+    }
+   },
+   {
+    "id": "d0ff9672",
+    "narration": "Por eso importa comparar lo que ganas con lo que cuestan las cosas. La inflación es perder poder de compra.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Inflación",
+      "items": [
+       "Precios suben",
+       "Dinero rinde menos",
+       "Poder de compra cae"
+      ],
+      "style": "spotlight",
+      "accent": "amber",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06574,
+ "seconds": 8.7
+}

@@ -1,0 +1,625 @@
+{
+ "id": "sci-02",
+ "category": "concept explainer (science)",
+ "language": "es",
+ "difficulty": "medium",
+ "prompt": "¿Por qué el cielo es azul y los atardeceres son rojos? Explícamelo como si tuviera 15 años.",
+ "great": "Dispersión de Rayleigh, la luz solar contiene todos los colores, azul se dispersa más, por qué no violeta, atardecer = camino más largo por la atmósfera; analogías sencillas, tono para adolescente.",
+ "minutes": 3.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 3.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:25:17",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Por qué el cielo es azul y los atardeceres rojizos es un fenómeno físico estable (dispersión de Rayleigh y luz solar atravesando más atmósfera), explicable con conocimiento general sin necesidad de in",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "science-wonder",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 37.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 4,
+  "grounding": {
+   "beats": 14,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2013,
+  "n_sources": 1,
+  "n_fetched": 2,
+  "fetched": [
+   "Dispersión de Rayleigh",
+   "Rayleigh"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Dispersión de Rayleigh\nLa dispersión de Rayleigh, también conocida como esparcimiento de tipo Rayleigh, es la dispersión de la luz visible o cualquier otra radiación electromagnética por partículas cuyo tamaño es mucho menor que la longitud de onda de los fotones dispersados. Ocurre cuando la luz viaja por sólidos y fluidos transparentes, pero se ve con mayor frecuencia en los gases. La dispersión de Rayleigh de la luz solar en la atmósfera es la principal razón de que el cielo se vea azul.\nSegún el electromagnetismo clásico, la dispersión de Rayleigh es el resultado de la polarización eléctrica de las partículas. El campo eléctrico oscilatorio de una onda luminosa actúa sobre las cargas de las partículas provocando que oscilen en la misma frecuencia. La partícula se convierte en un pequeño dipolo radiante cuya radiación visible es la luz dispersada.\nDesde un punto de vista semiclásico (cuántico) más moderno, la dispersión de Rayleigh puede considerarse la suma de una dispersión elástica pura (línea central de Cabannes) más una dispersión de Raman puramente rotacional con líneas que ocurren cerca de la línea de Cabannes.​​\nSi bien el término dispersión está muy extendido en la literatura científica (junto…\n\n## Rayleigh\nEl término Rayleigh puede referirse a:\nRayleigh (Essex), Inglaterra.\nDispersión de Rayleigh\nSylvers Rayleigh, personaje ficticio del manga One Piece.\nJohn Strutt, tercer barón Rayleigh, físico y profesor universitario británico que da nombre a:\ndistribución de Rayleigh, función de distribución de teoría de la probabilidad y la estadística.\ndispersión de Rayleigh\nley de Rayleigh-Jeans\nnúmero de Rayleigh, número adimensional utilizado en mecánica de los fluidos.\ninestabilidad Rayleigh-Taylor\ncriterio de Rayleigh\nUnidad Rayl\ndos cráteres y un asteroide:\nRayleigh (cráter), en la Luna\nRayleigh (cráter marciano), en Marte\n(22740) Rayleigh, asteroide\nInterferómetro de Rayleigh, interferómetro empleado para comparar los índices de refracción entre dos gases o líquidos.",
+ "plan": {
+  "title": "¿Por qué el cielo es azul y el atardecer rojo?",
+  "description": "Descubre cómo la dispersión de Rayleigh explica el azul del cielo y el rojo de los atardeceres. Una explicación sencilla, pensada para adolescentes.",
+  "language": "es",
+  "mood": "bright",
+  "theme": "sunrise",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "bb7e3e1c",
+    "narration": "Si el espacio es negro y el Sol es blanco, ¿por qué el cielo de día es azul? Y, además, ¿por qué al atardecer se vuelve rojo?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "blue sky with clouds timelapse",
+      "clip_queries": [
+       "blue sky with clouds timelapse",
+       "sunset over the sea"
+      ],
+      "alt": "daytime sky over landscape"
+     }
+    },
+    "chapter": "El misterio del color"
+   },
+   {
+    "id": "a27541be",
+    "narration": "La respuesta no está en el cielo como si fuera una pared pintada. Está en lo que le ocurre a la luz del Sol cuando atraviesa el aire que nos rodea.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El cielo no está pintado: es un truco de la luz.",
+      "emphasis": "truco de la luz"
+     }
+    }
+   },
+   {
+    "id": "1c45d512",
+    "narration": "Primero, una idea clave. La luz blanca del Sol en realidad mezcla todos los colores, como el arcoíris. Cada color viaja como una onda con una longitud distinta.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "La luz blanca es una mezcla",
+      "items": [
+       "Rojo",
+       "Naranja y amarillo",
+       "Verde",
+       "Azul y violeta"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    },
+    "chapter": "La luz del Sol"
+   },
+   {
+    "id": "74a63044",
+    "narration": "El rojo tiene ondas largas. El azul y el violeta tienen ondas mucho más cortas. Esa diferencia de tamaño es la que lo cambia todo cuando la luz choca con el aire.",
+    "scene": {
+     "type": "scale_compare",
+     "props": {
+      "items": [
+       {
+        "label": "Rojo",
+        "value": 7.0,
+        "note": "onda larga"
+       },
+       {
+        "label": "Azul",
+        "value": 4.0,
+        "note": "onda corta"
+       }
+      ],
+      "unit": "",
+      "title": "Ondas de luz: largas y cortas"
+     }
+    }
+   },
+   {
+    "id": "fbae68fe",
+    "narration": "El aire está lleno de moléculas diminutas de gas, mucho más pequeñas que las ondas de luz. Cuando la luz pasa cerca de ellas, no sigue recta: se desvía en todas direcciones.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "sunlight rays through atmosphere",
+      "alt": "sun rays in clear sky"
+     }
+    }
+   },
+   {
+    "id": "045678c6",
+    "narration": "Ese rebote se llama dispersión de Rayleigh. Primero está la luz del Sol, que choca con las moléculas del aire, y después el azul sale disparado hacia todos lados y llega a tus ojos.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo se dispersa la luz",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Luz del Sol",
+        "icon": "sun"
+       },
+       {
+        "id": "b",
+        "label": "Moléculas del aire",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Azul en todas direcciones",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "choca"
+       ],
+       [
+        "b",
+        "c",
+        "dispersa"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky",
+      "emphasis": 1
+     }
+    },
+    "sfx": "click",
+    "chapter": "La dispersión de Rayleigh"
+   },
+   {
+    "id": "62657288",
+    "narration": "Esta dispersión es la razón principal de que el cielo se vea azul. Las ondas cortas se desvían mucho más que las largas, así que el azul llena el cielo.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Dispersión de Rayleigh",
+      "definition": "Dispersión de la luz por partículas mucho menores que su longitud de onda; es la principal razón de que el cielo se vea azul."
+     }
+    }
+   },
+   {
+    "id": "4aabb8ab",
+    "narration": "Y entonces, ¿por qué no lo vemos violeta, si es aún más corto? Porque el Sol emite menos violeta y nuestros ojos son menos sensibles a él. El azul gana.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person looking up at the sky",
+      "alt": "woman gazing at blue sky"
+     }
+    }
+   },
+   {
+    "id": "69a2519d",
+    "narration": "Al atardecer, el Sol queda en el horizonte. Su luz cruza mucha atmósfera. Por el camino se pierde el azul, y llegan rojo y naranja hasta ti.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El camino de la luz al atardecer",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Sol en el horizonte",
+        "icon": "sun"
+       },
+       {
+        "id": "b",
+        "label": "Mucha atmósfera",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Llegan rojo y naranja",
+        "icon": "eye"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "atraviesa"
+       ],
+       [
+        "b",
+        "c",
+        "sobrevive"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    },
+    "chapter": "Por qué el atardecer es rojo"
+   },
+   {
+    "id": "c31d62a0",
+    "narration": "Piensa en una carrera de obstáculos. Con tanto aire en medio, el azul se desvía y se queda por el camino. El rojo, de onda larga, es el que consigue llegar.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Azul",
+       "tagline": "onda corta"
+      },
+      "b": {
+       "name": "Rojo",
+       "tagline": "onda larga"
+      },
+      "rows": [
+       {
+        "label": "Se dispersa",
+        "a": "mucho",
+        "b": "poco"
+       },
+       {
+        "label": "Al mediodía",
+        "a": "llena el cielo",
+        "b": "casi no se ve"
+       },
+       {
+        "label": "Al atardecer",
+        "a": "se pierde",
+        "b": "llega a ti"
+       }
+      ],
+      "verdict": "Rojo gana la carrera larga",
+      "winner": "b"
+     }
+    }
+   },
+   {
+    "id": "f9ab4c03",
+    "narration": "Por eso un atardecer despejado se tiñe de naranjas y rojos intensos. Es la misma física del mediodía, solo que con un recorrido de luz mucho más largo.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "red orange sunset sky",
+      "clip_queries": [
+       "red orange sunset sky",
+       "sun setting behind mountains",
+       "sunset over city skyline"
+      ],
+      "alt": "vivid sunset over horizon"
+     }
+    }
+   },
+   {
+    "id": "68b0b1ee",
+    "narration": "Así que el mismo Sol y el mismo aire producen dos colores. Todo depende de cuánta atmósfera tenga que atravesar la luz antes de llegar a tus ojos.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Mismo Sol, dos colores",
+      "items": [
+       "Mediodía: poco aire, cielo azul",
+       "Atardecer: mucho aire, cielo rojo"
+      ],
+      "style": "spotlight",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "1fe17e76",
+    "narration": "Este fenómeno lleva el nombre de John Strutt, tercer barón Rayleigh, el físico británico que estudió cómo las partículas pequeñas dispersan la luz.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "John Strutt, barón Rayleigh",
+      "definition": "Físico y profesor universitario británico que da nombre a la dispersión de Rayleigh."
+     }
+    }
+   },
+   {
+    "id": "1ed9a1d7",
+    "narration": "La próxima vez que veas un cielo azul o un atardecer rojo, recuerda: no es pintura, es luz que rebota. El azul se dispersa, el rojo llega lejos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "El azul se dispersa por todo el cielo; el rojo es el que llega más lejos.",
+      "emphasis": "El azul se dispersa"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Dispersión de Rayleigh",
+    "url": "https://es.wikipedia.org/wiki/Dispersi%C3%B3n_de_Rayleigh",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "science-wonder",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 57.9,
+  "before_first_script_call_s": 5.3,
+  "script_s": 52.6
+ },
+ "cost": {
+  "script_small": 0.00026,
+  "script_big": 0.15784,
+  "search_api": 0.0,
+  "total": 0.15811
+ },
+ "calls": {
+  "small": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 40263,
+  "out": 8261
+ },
+ "rules": {
+  "length": {
+   "words": 409,
+   "expected_words": 402,
+   "ratio": 1.017,
+   "beats": 14,
+   "expected_beats": 13,
+   "est_speech_s": 183.7,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 27,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 28,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Si el espacio es negro y el Sol es blanco, ¿por qué el cielo de día es azul? Y, además, ¿por qué al atardecer se vuelve rojo?",
+   "close_text": "La próxima vez que veas un cielo azul o un atardecer rojo, recuerda: no es pintura, es luz que rebota. El azul se dispersa, el rojo llega lejos."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "clip": 4,
+    "kinetic_text": 2,
+    "bullets": 2,
+    "scale_compare": 1,
+    "diagram": 2,
+    "definition": 2,
+    "versus": 1
+   },
+   "max_run": 1,
+   "entropy": 2.66,
+   "top_type": "clip",
+   "top_share": 0.29,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 3,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "la luz del sol",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 1,
+   "fetched": 2,
+   "notes_len": 2013,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.07,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 3 (bullets): its narration never says ['Rojo', 'Naranja y amarillo', 'Verde', 'Azul y violeta']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core physics is right, but \"el Sol emite menos violeta\" is only a partial explanation (the atmosphere also absorbs some of it). The line \"azul sale disparado hacia todos lados\" is loose. The scale_compare numbers (7 vs 4) are invented, though only illustrative."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It covers Rayleigh, the mixture of colours, why not violet, and the longer path at sunset. It omits the inverse fourth-power dependence on wavelength, the blue light scattered out of the direct beam at sunset, and the reason the sky is dark in space. It also spends a beat on the baron's biography."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear progression: question, light, scattering, violet, sunset, recap. Beats 7 and 6 overlap, and beat 12 repeats beat 11 and the earlier sunset explanation."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening paradox (\"Si el espacio es negro y el Sol es blanco...\") creates curiosity. The ending \"no es pintura, es luz que rebota\" is decent but partly repeats beat 2."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, direct address in the tú form, suitable for a 15-year-old, though not very playful."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary well. The bullets list in beat 3 groups colours oddly and doesn't match the narration. scale_compare is used for non-real numbers. The stock-clip queries are in English but fit the content."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The obstacle race is the only analogy, and it is generic. There are no vivid teen-level comparisons such as a ball bouncing off pegs, and no surprising facts."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "It is in Spanish, aimed at a 15-year-old, and about the right length. The explanation is somewhat simplified, and the Rayleigh biography adds little."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and correct Spanish with natural register, with minor stiffness in places."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Porque el Sol emite menos violeta y nuestros ojos son menos sensibles a él.",
+    "issue": "Incomplete explanation: the upper atmosphere also absorbs part of the violet, and the eye's sensitivity is the key factor. Presented as the whole story.",
+    "beat": 8
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Por el camino se pierde el azul, y llegan rojo y naranja hasta ti.",
+    "issue": "Does not explain that the blue is scattered out of the line of sight, which leaves the red. The race analogy suggests that blue \"gets lost\" rather than going elsewhere.",
+    "beat": 9
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"items\": [\"Rojo\", \"Naranja y amarillo\", \"Verde\", \"Azul y violeta\"]",
+    "issue": "The bullet list of colours is plain and does not show the spectrum; it adds little as a visual.",
+    "beat": 3
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Así que el mismo Sol y el mismo aire producen dos colores.",
+    "issue": "Repeats what beat 11 just said, and the sunset point is made three times.",
+    "beat": 12
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Este fenómeno lleva el nombre de John Strutt, tercer barón Rayleigh",
+    "issue": "A biographical beat taken from the notes uses time that the missing explanation of why blue scatters more would serve better.",
+    "beat": 13
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Piensa en una carrera de obstáculos.",
+    "issue": "Generic analogy; nothing concrete or surprising for a teenager.",
+    "beat": 10
+   }
+  ],
+  "missing": [
+   "Why shorter wavelengths scatter far more (the roughly 1/λ⁴ dependence), with a concrete figure",
+   "A relatable analogy, such as pinball or a ball bouncing off pegs",
+   "Why the sky is black in space, with no air to scatter the light",
+   "Pollution, dust or clouds making sunsets more intense"
+  ],
+  "wrong_facts": [
+   "\"el Sol emite menos violeta\": simplified; the atmosphere's absorption also contributes",
+   "The scale_compare values 7 and 4 are invented and only illustrative"
+  ],
+  "would_publish": false,
+  "summary": "A clear, correct and well-ordered explanation in friendly Spanish, but it is generic and thin on depth. It lacks vivid analogies, and its sunset explanation is oversimplified and repeated. It is serviceable, not standout.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "el azul sale disparado hacia todos lados",
+     "problem": "Colloquial, but \"hacia todos lados\" is slightly imprecise for the physics",
+     "better": "el azul sale rebotado en todas direcciones"
+    },
+    {
+     "quote": "Primero está la luz del Sol, que choca con las moléculas del aire, y después el azul",
+     "problem": "Reads as a description of the diagram rather than natural speech",
+     "better": "La luz del Sol choca con las moléculas del aire y el azul sale rebotado en todas direcciones hasta llegar a tus ojos"
+    },
+    {
+     "quote": "Rojo gana la carrera larga",
+     "problem": "Slightly stiff, calque-like phrasing",
+     "better": "El rojo gana en las distancias largas"
+    }
+   ]
+  },
+  "mean": 3.56,
+  "cost_usd": 0.029428,
+  "tokens": [
+   5334,
+   1876
+  ]
+ }
+}

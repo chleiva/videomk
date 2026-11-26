@@ -1,0 +1,73 @@
+{
+ "id": "bio-03",
+ "platform": "tiktok",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Taught Machines to Think",
+  "description": "A quick look at Alan Turing, the mathematician who helped break wartime codes and imagined thinking machines. His ideas still shape every computer we use today.",
+  "beats": [
+   {
+    "id": "675423a9",
+    "narration": "Your phone exists partly because one man asked a strange question: can a machine think? His name was Alan Turing.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Can a machine think?",
+      "emphasis": "think"
+     }
+    }
+   },
+   {
+    "id": "ae19bb4e",
+    "narration": "He was a brilliant British mathematician. During World War Two, he helped crack secret enemy codes, work that helped save countless lives.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "old typewriter keys closeup",
+      "clip_queries": [
+       "old typewriter keys closeup",
+       "mathematics equations on chalkboard"
+      ],
+      "alt": "old cipher machine close up"
+     }
+    }
+   },
+   {
+    "id": "41768c66",
+    "narration": "He also described the idea of a universal computer, and proposed a test for machine intelligence. Today, we still call it the Turing test.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Turing's legacy",
+      "items": [
+       "Codebreaker",
+       "Computer pioneer",
+       "Turing test"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "icons": [
+       "lock",
+       "computer",
+       "brain"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 66 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 8 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06532,
+ "seconds": 9.1
+}

@@ -1,0 +1,106 @@
+{
+ "id": "pro-02",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza pequeño",
+  "description": "Un vídeo breve que explica por qué postergamos tareas y cómo romper el bloqueo con pasos pequeños. Aprende una idea sencilla para empezar hoy mismo.",
+  "beats": [
+   {
+    "id": "ac923d4f",
+    "narration": "Sabes lo que tienes que hacer, y aun así abres el móvil. No es pereza. Procrastinar es evitar una emoción incómoda: el aburrimiento, la duda o el miedo a hacerlo mal.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person distracted with smartphone at desk",
+      "alt": "man looking at phone instead of working"
+     }
+    },
+    "chapter": "Por qué postergamos"
+   },
+   {
+    "id": "af06f903",
+    "narration": "Y aquí está el error común: esperar a tener ganas. Las ganas casi nunca llegan primero. Llegan después de empezar. La acción va antes que la motivación, no al revés.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Las ganas llegan después de empezar, no antes.",
+      "emphasis": "después de empezar"
+     }
+    }
+   },
+   {
+    "id": "930ad3b8",
+    "narration": "Entonces, ¿qué hacer? Primero, divide la tarea en un paso minúsculo. Segundo, empieza solo cinco minutos. Tercero, quita las distracciones de la vista. Cuarto, celebra haber empezado.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Cuatro pasos para empezar",
+      "steps": [
+       {
+        "label": "Paso minúsculo",
+        "detail": "Hazlo tan pequeño que sea fácil"
+       },
+       {
+        "label": "Solo cinco minutos",
+        "detail": "Empezar es lo difícil"
+       },
+       {
+        "label": "Quita distracciones",
+        "detail": "Móvil lejos de tu vista"
+       },
+       {
+        "label": "Celebra empezar",
+        "detail": "Premia el esfuerzo, no el resultado"
+       }
+      ]
+     }
+    },
+    "chapter": "Cómo romper el bloqueo"
+   },
+   {
+    "id": "60a167d1",
+    "narration": "Por ejemplo, en vez de escribir el informe, abre el documento y escribe solo el título. Casi siempre seguirás un poco más, porque lo difícil era arrancar, no continuar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop at desk",
+      "clip_queries": [
+       "person typing on laptop at desk",
+       "hands writing in notebook"
+      ],
+      "alt": "hands writing on a computer keyboard"
+     }
+    }
+   },
+   {
+    "id": "1d9af358",
+    "narration": "Recuerda la idea: no necesitas motivación, necesitas un primer paso pequeño. Elige hoy una tarea pendiente, ponle cinco minutos y empieza ahora mismo.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Tu primer paso hoy",
+      "items": [
+       "Elige una tarea",
+       "Ponle cinco minutos",
+       "Empieza ahora"
+      ],
+      "style": "spotlight",
+      "accent": "emerald"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.0338,
+ "seconds": 7.8
+}

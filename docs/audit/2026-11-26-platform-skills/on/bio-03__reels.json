@@ -1,0 +1,79 @@
+{
+ "id": "bio-03",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Imagined Thinking Machines",
+  "description": "A quick look at Alan Turing, the British mathematician who helped break wartime codes and laid the groundwork for modern computers. Learn why his ideas still shape the device in your hand.",
+  "beats": [
+   {
+    "id": "ba49d4df",
+    "narration": "He helped end a world war with mathematics, then imagined the computer in your pocket. Meet Alan Turing.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "The mind behind modern computing"
+     }
+    }
+   },
+   {
+    "id": "dbb69f88",
+    "narration": "During the Second World War, Turing worked on breaking secret enemy codes in Britain, using logic and machines to read messages once thought unreadable.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "vintage cipher machine",
+      "clip_queries": [
+       "vintage cipher machine",
+       "person writing equations on paper"
+      ],
+      "alt": "vintage cipher machine"
+     }
+    }
+   },
+   {
+    "id": "bb5fc881",
+    "narration": "He also asked a bold question: can machines think? His ideas became the foundation of computer science and artificial intelligence.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Can machines think?",
+      "emphasis": "think"
+     }
+    }
+   },
+   {
+    "id": "69072c7e",
+    "narration": "Every time you use a computer, you use his legacy. One curious mind changed how the world works.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "His legacy",
+      "items": [
+       "Codebreaking",
+       "Computer science",
+       "Artificial intelligence"
+      ],
+      "style": "spotlight",
+      "accent": "indigo"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 80 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 22 words: 3 to 4 beats of about 19 words each (you averaged 20; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06612,
+ "seconds": 10.6
+}

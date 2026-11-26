@@ -1,0 +1,86 @@
+{
+ "id": "his-03",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The 2008 financial crisis grew from the US housing boom, subprime mortgages and securitization. It peaked with the fall of Lehman Brothers and a sweeping government response.",
+  "beats": [
+   {
+    "id": "08b3c716",
+    "narration": "A housing boom nearly broke the world economy. Banks handed out subprime mortgages, loans to borrowers unlikely to repay, because house prices only seemed to rise.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Cheap loans. Rising prices. Nobody worried.",
+      "emphasis": "Rising prices"
+     }
+    }
+   },
+   {
+    "id": "0934c606",
+    "narration": "Then banks bundled those loans into securities and sold them worldwide. Risk spread everywhere, and almost nobody knew who held the bad debt.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "house",
+        "label": "Mortgages"
+       },
+       {
+        "icon": "box",
+        "label": "Bundled"
+       },
+       {
+        "icon": "globe",
+        "label": "Sold worldwide"
+       }
+      ],
+      "title": "Securitization"
+     }
+    }
+   },
+   {
+    "id": "c4ff12ba",
+    "narration": "When prices fell, borrowers defaulted and those securities collapsed. In September 2008, Lehman Brothers went bankrupt, and panic froze lending across the globe.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The collapse",
+      "items": [
+       "Prices fell",
+       "Borrowers defaulted",
+       "Lehman Brothers failed"
+      ],
+      "style": "spotlight",
+      "accent": "rose",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "a0390bdd",
+    "narration": "Governments answered with bailouts and emergency support to keep banks alive. The lesson: when everyone shares the risk, one failure can topple everything.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Shared risk means shared collapse.",
+      "emphasis": "shared collapse"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06985,
+ "seconds": 10.6
+}

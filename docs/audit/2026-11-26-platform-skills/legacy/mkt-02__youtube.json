@@ -1,0 +1,237 @@
+{
+ "id": "mkt-02",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Meet Notely: Notes That Find You Back",
+  "description": "A launch video for a note-taking app that helps you capture ideas fast and find them again. See how capture, organize and search work in three simple steps.",
+  "beats": [
+   {
+    "id": "c41bb66c",
+    "narration": "You had a great idea last week. You wrote it down somewhere. A sticky note, a random document, a message to yourself. Now where is it? Why can't you find it?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person searching through papers on desk",
+      "clip_queries": [
+       "person searching through papers on desk",
+       "messy desk with sticky notes",
+       "person frustrated at laptop"
+      ],
+      "alt": "frustrated person looking at messy desk"
+     }
+    },
+    "chapter": "The problem"
+   },
+   {
+    "id": "6ed37fb2",
+    "narration": "Notes scatter across apps, notebooks and scraps of paper. The more you write, the harder it gets to find anything. Good thinking gets buried, and then it is simply lost.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Where your notes end up",
+      "items": [
+       "Scattered across apps",
+       "Buried in notebooks",
+       "Lost on scraps of paper",
+       "Never found again"
+      ],
+      "style": "rail",
+      "accent": "coral",
+      "emphasis": 3
+     }
+    }
+   },
+   {
+    "id": "b833e4df",
+    "narration": "So we built Notely. One calm place for everything you want to remember. It opens fast, it stays out of your way, and it helps you find your words again.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Notely",
+      "subtitle": "One calm place for everything you want to remember"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "The solution"
+   },
+   {
+    "id": "efb2cca1",
+    "narration": "Using it is simple. First, capture the thought. Second, organize it. Third, search whenever you need it. That is the whole idea.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "How Notely works",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Write the thought the moment it appears"
+       },
+       {
+        "label": "Organize",
+        "detail": "Add a tag or drop it in a folder"
+       },
+       {
+        "label": "Search",
+        "detail": "Find any note in seconds"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f31f49ca",
+    "narration": "Capture is quick. Open the app and start typing. Your idea lands on the page before it has a chance to slip away.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "typing on laptop keyboard",
+      "clip_queries": [
+       "typing on laptop keyboard",
+       "person writing on phone",
+       "hands using tablet at cafe"
+      ],
+      "alt": "hands typing notes on a computer"
+     }
+    }
+   },
+   {
+    "id": "afcf99a3",
+    "narration": "Organizing stays light. Add tags to group related thoughts, or place notes in folders if you like order.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Your notes, connected",
+      "nodes": [
+       {
+        "id": "n",
+        "label": "Note",
+        "icon": "notebook-dot"
+       },
+       {
+        "id": "t",
+        "label": "Tags",
+        "icon": "tag"
+       },
+       {
+        "id": "f",
+        "label": "Folders",
+        "icon": "folder"
+       },
+       {
+        "id": "p",
+        "label": "Projects",
+        "icon": "rocket"
+       }
+      ],
+      "edges": [
+       [
+        "n",
+        "t",
+        "add"
+       ],
+       [
+        "n",
+        "f",
+        "place"
+       ],
+       [
+        "t",
+        "p",
+        "group"
+       ],
+       [
+        "f",
+        "p",
+        "group"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "7e563172",
+    "narration": "Then comes search. Type a word you remember, and Notely finds the note right away. You don't need to recall where you put it. Just remember a little of what you wrote.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Remember a word, and find the whole thought.",
+      "emphasis": "find the whole thought"
+     }
+    }
+   },
+   {
+    "id": "a9c0f341",
+    "narration": "Notely works the way you do. On your phone while you walk, on your laptop at your desk, or on a tablet on the couch. Your notes are waiting wherever you are.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "phone",
+        "label": "Phone",
+        "sub": "Capture on the go"
+       },
+       {
+        "icon": "laptop",
+        "label": "Laptop",
+        "sub": "Work at your desk"
+       },
+       {
+        "icon": "tablet",
+        "label": "Tablet",
+        "sub": "Relax and review"
+       }
+      ],
+      "title": "Everywhere you think"
+     }
+    }
+   },
+   {
+    "id": "825018f6",
+    "narration": "Imagine your next big idea. A plan for a trip, a project at work, a story you want to write. Notely gives all of it a home, and keeps it close.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person planning at desk with coffee",
+      "clip_queries": [
+       "person planning at desk with coffee",
+       "woman working on laptop at home",
+       "hands writing ideas in notebook"
+      ],
+      "alt": "creative person planning ideas"
+     }
+    }
+   },
+   {
+    "id": "172967c4",
+    "narration": "Stop losing your best thinking. Download Notely today, write your first note, and give your ideas a place where they never get lost.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Download Notely today. Give your ideas a home.",
+      "emphasis": "Give your ideas a home"
+     }
+    },
+    "chapter": "Try it"
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 300 words in 10 beats but a 2-minute video needs about 267 (at most 280). Cut about 33 words: write 9 to 11 beats of at most 35 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 245 words",
+  "grounding: 6 beats had unsupported specifics, 4 rewritten"
+ ],
+ "cost_usd": 0.1222,
+ "seconds": 48.2
+}

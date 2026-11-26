@@ -1,0 +1,153 @@
+{
+ "id": "fin-02",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación explicada en un minuto",
+  "description": "La inflación es la subida general de los precios que hace que tu dinero compre menos. Te explicamos qué es, por qué ocurre y cómo afecta a tu bolsillo.",
+  "beats": [
+   {
+    "id": "581905a7",
+    "narration": "¿Por qué el mismo café te cuesta más que hace unos años? No es tu imaginación. Es la inflación: una subida general y sostenida de los precios, que hace que tu dinero compre menos.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person paying at supermarket checkout",
+      "clip_queries": [
+       "person paying at supermarket checkout",
+       "shopping cart in grocery aisle"
+      ],
+      "alt": "shopper at a grocery store counter"
+     }
+    },
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "af81003f",
+    "narration": "Hay varias causas. Si hay mucha demanda y poca oferta, los precios suben. Si producir cuesta más, por energía o materias primas, las empresas lo trasladan al precio. Y si se espera que suban, a menudo suben.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Causas",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Mucha demanda",
+        "icon": "van"
+       },
+       {
+        "id": "b",
+        "label": "Poca oferta",
+        "icon": "box"
+       },
+       {
+        "id": "c",
+        "label": "Costes más altos",
+        "icon": "banknote"
+       },
+       {
+        "id": "d",
+        "label": "Suben los precios",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "d",
+        "presiona"
+       ],
+       [
+        "b",
+        "d",
+        "presiona"
+       ],
+       [
+        "c",
+        "d",
+        "encarece"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 3
+     }
+    },
+    "chapter": "Por qué ocurre"
+   },
+   {
+    "id": "d8b8e4aa",
+    "narration": "Con inflación, tus ahorros pierden poder de compra. Si guardas dinero y los precios suben más que tus intereses, cada euro alcanza para menos. Los salarios también tienen que subir para mantener el ritmo.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Efectos en tu bolsillo",
+      "items": [
+       "Ahorros pierden valor",
+       "Cada euro compra menos",
+       "Salarios deben seguir el ritmo"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "banknote",
+       "chart-column",
+       "users"
+      ]
+     }
+    },
+    "chapter": "Cómo te afecta"
+   },
+   {
+    "id": "e36ebeb6",
+    "narration": "Los bancos centrales intentan controlarla, sobre todo subiendo los tipos de interés. Así el crédito es más caro, la gente gasta menos y los precios se enfrían. Un poco de inflación estable es normal; descontrolada, resulta dañina.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Cómo se frena",
+      "steps": [
+       {
+        "label": "Suben los tipos de interés"
+       },
+       {
+        "label": "El crédito es más caro"
+       },
+       {
+        "label": "Se gasta menos"
+       },
+       {
+        "label": "Los precios se enfrían"
+       }
+      ]
+     }
+    },
+    "chapter": "Qué hacen los bancos centrales"
+   },
+   {
+    "id": "4a254106",
+    "narration": "En resumen: inflación es que los precios suben y tu dinero rinde menos. Entenderla te ayuda a decidir mejor cómo ahorrar y gastar.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Inflación: los precios suben y tu dinero rinde menos.",
+      "emphasis": "tu dinero rinde menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 165 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 31 words: write 4 to 6 beats of at most 40 words each (you averaged 33), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07268,
+ "seconds": 16.7
+}

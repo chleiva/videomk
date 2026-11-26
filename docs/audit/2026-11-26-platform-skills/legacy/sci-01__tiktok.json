@@ -1,0 +1,63 @@
+{
+ "id": "sci-01",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy: Why Messes Happen",
+  "description": "Entropy explained in thirty seconds: why order falls apart and disorder wins. A quick look at the idea behind melting ice, mixed coffee and the arrow of time.",
+  "beats": [
+   {
+    "id": "6a4e0410",
+    "narration": "Why does your room get messy, but never tidy itself? The answer is entropy, and it rules the universe.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Why never tidy by itself?",
+      "emphasis": "tidy"
+     }
+    }
+   },
+   {
+    "id": "70e6dd91",
+    "narration": "Entropy measures how many ways things can be arranged. A tidy room has few. A messy one has countless, so mess wins.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy",
+      "items": [
+       "Few tidy ways",
+       "Countless messy ways",
+       "Mess wins"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "0d2a4dce",
+    "narration": "That is why ice melts, coffee cools and time only moves forward. Nature drifts toward disorder, simply because it is likelier.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Nature drifts toward the likeliest arrangement: disorder.",
+      "emphasis": "disorder"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.05962,
+ "seconds": 9.2
+}

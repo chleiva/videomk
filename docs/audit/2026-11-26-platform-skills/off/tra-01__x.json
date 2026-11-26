@@ -1,0 +1,86 @@
+{
+ "id": "tra-01",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A fast guide to spending three days in Lisbon, from hilltop viewpoints and old tram streets to pastries and fresh seafood. Learn what to see and eat each day.",
+  "beats": [
+   {
+    "id": "ffb3e872",
+    "narration": "Lisbon is a city of seven hills, and three days is enough to fall for it. Start with the old streets, yellow trams and sunlit viewpoints.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram city street",
+      "clip_queries": [
+       "yellow tram city street",
+       "hilltop city viewpoint sunset"
+      ],
+      "alt": "old tram on hilly street"
+     }
+    }
+   },
+   {
+    "id": "7edd1bbd",
+    "narration": "Day one, wander the old neighborhoods on foot. Climb to a viewpoint at sunset, and stop for a custard tart with coffee.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Day 1: Old Lisbon",
+      "items": [
+       "Walk the old streets",
+       "Sunset viewpoint",
+       "Custard tart and coffee"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "sun",
+       "utensils"
+      ]
+     }
+    }
+   },
+   {
+    "id": "639300d1",
+    "narration": "Day two, head to the riverside. See the historic monuments by the water, then eat grilled fish and fresh seafood for lunch.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "river waterfront promenade",
+      "clip_queries": [
+       "river waterfront promenade",
+       "grilled fish on plate"
+      ],
+      "alt": "city riverside walkers"
+     }
+    }
+   },
+   {
+    "id": "58d9a63d",
+    "narration": "Day three, take it slow. Browse a market, hear live music in the evening, and end with a late dinner. Lisbon rewards the unhurried.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lisbon rewards the unhurried.",
+      "emphasis": "unhurried"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03427,
+ "seconds": 5.1
+}

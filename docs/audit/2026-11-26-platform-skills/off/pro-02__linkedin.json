@@ -1,0 +1,135 @@
+{
+ "id": "pro-02",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza por dos minutos",
+  "description": "Un vídeo breve sobre por qué postergamos tareas y cómo romper el bloqueo. Descubre cómo reducir la tarea, quitar distracciones y empezar hoy.",
+  "beats": [
+   {
+    "id": "787c1853",
+    "narration": "Procrastinar no es pereza. Es una forma de evitar una emoción incómoda: aburrimiento, duda o miedo a fallar. Tu cerebro prefiere alivio inmediato, aunque mañana pagues el precio.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Procrastinar no es pereza: es evitar una emoción.",
+      "emphasis": "evitar una emoción"
+     }
+    }
+   },
+   {
+    "id": "bdbcb932",
+    "narration": "Así que el problema no es el tiempo, es el arranque. Una tarea enorme y vaga abruma. Cuando no sabes por dónde empezar, cualquier distracción parece una salida muy tentadora.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la procrastinación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea abrumadora",
+        "icon": "mountain"
+       },
+       {
+        "id": "b",
+        "label": "Emoción incómoda",
+        "icon": "heart"
+       },
+       {
+        "id": "c",
+        "label": "Distracción",
+        "icon": "phone"
+       },
+       {
+        "id": "d",
+        "label": "Alivio y culpa",
+        "icon": "clock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a",
+        "vuelve"
+       ]
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    },
+    "chapter": "Por qué postergamos"
+   },
+   {
+    "id": "85874cac",
+    "narration": "Primero, haz la tarea diminuta: solo dos minutos. Segundo, define el siguiente paso concreto. Tercero, quita las distracciones de tu vista. Cuarto, empieza imperfecto. Terminar mal supera no empezar.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Cuatro pasos para arrancar",
+      "steps": [
+       {
+        "label": "Dos minutos",
+        "detail": "Hazla diminuta"
+       },
+       {
+        "label": "Siguiente paso concreto"
+       },
+       {
+        "label": "Quita distracciones"
+       },
+       {
+        "label": "Empieza imperfecto"
+       }
+      ]
+     }
+    },
+    "chapter": "Cómo romper el bloqueo"
+   },
+   {
+    "id": "9a014ac0",
+    "narration": "Mira un ejemplo. En lugar de escribir el informe, abre el documento y escribe el título. Ese pequeño gesto baja la resistencia, y muchas veces seguirás trabajando sin darte cuenta.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "alt": "working at a desk with computer"
+     }
+    }
+   },
+   {
+    "id": "c4d94319",
+    "narration": "La motivación suele llegar después de empezar, no antes. Así que no esperes a tener ganas. Elige una tarea, ponle dos minutos y empieza hoy. Lo difícil es el primer paso.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No esperes a tener ganas: empieza y la motivación llegará.",
+      "emphasis": "empieza"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07424,
+ "seconds": 16.1
+}

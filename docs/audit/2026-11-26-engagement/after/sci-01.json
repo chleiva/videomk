@@ -1,0 +1,520 @@
+{
+ "id": "sci-01",
+ "category": "concept explainer (science)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "explain entropy",
+ "great": "Intuitive definition (disorder is a poor word; microstates/energy spreading), ice melting or a shuffled deck as an example, second law, arrow of time, why it does not forbid life; one memorable takeaway; no invented numbers.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:32:56",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Entropy is a timeless scientific concept (thermodynamics and information theory) that an encyclopedia covers accurately; no recent developments are needed for a short explainer.",
+  "queries": [],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 58.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 2466,
+  "n_sources": 2,
+  "n_fetched": 2,
+  "fetched": [
+   "Second law of thermodynamics",
+   "Entropy"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Second law of thermodynamics\nThe second law of thermodynamics is a physical law based on universal empirical observation concerning heat and energy interconversions. A simple statement of the law is that heat always flows spontaneously from hotter to colder regions of matter (or 'downhill' in terms of the temperature gradient). Another statement is: \"Not all heat can be converted into work in a cyclic process.\" These are informal definitions, however; more formal definitions appear below.\nThe second law of thermodynamics establishes the concept of entropy as a physical property of a thermodynamic system. It predicts whether processes are forbidden despite obeying the requirement of conservation of energy as expressed in the first law of thermodynamics and provides necessary criteria for spontaneous processes. For example, the first law allows the process of a cup falling off a table and breaking on the floor, as well as allowing the reverse process of the cup fragments coming back together and 'jumping' back onto the table, while the second law allows the former and denies the latter. The second law may be formulated by the observation that the entropy of isolated systems left to spontaneous evolution cannot decrease...\n\n## Entropy\nEntropy is a thermodynamic state variable that quantifies the probabilistic distribution of accessible microstates in a system. The term and the concept are used in diverse fields, from classical thermodynamics (where it was first recognized), to the microscopic description of nature in statistical physics, and the principles of information theory. It has far-ranging applications in chemistry and physics, in biological systems and their relation to life, in cosmology, economics, and information systems including the transmission of information in telecommunication.\nEntropy is central to the second law of thermodynamics, which states that the entropy of an isolated system left to spontaneous evolution cannot decrease with time. As a result, isolated systems evolve toward thermodynamic equilibrium, where the entropy is highest. \"High\" entropy means that energy is more uniformly distributed or dispersed within a system, while \"low\" entropy means that energy is more unevenly distributed or concentrated at a specific point or points within a system. A consequence of the second law of thermodynamics is that certain processes are irreversible.\nThe thermodynamic concept was referred to by Scottish...",
+ "plan": {
+  "title": "Entropy: Why Broken Cups Never Un-Break",
+  "description": "Entropy measures how spread out energy is, and the second law of thermodynamics says it never decreases in an isolated system. This explains why cups break, coffee cools, and time seems to run one way.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "b3465080",
+    "narration": "A cup falls off a table and shatters. Nobody has ever seen the pieces leap back up and reassemble. Yet no law of energy forbids it. So what does?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "cup falling and breaking on floor",
+      "alt": "broken ceramic cup on floor"
+     }
+    },
+    "chapter": "A cup that will not rebuild"
+   },
+   {
+    "id": "9b04b865",
+    "narration": "The first law of thermodynamics only says energy is conserved. It allows the cup to break, and it allows the cup to jump back. Something else must pick a direction.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Cup breaks",
+       "tagline": "Allowed"
+      },
+      "b": {
+       "name": "Cup reassembles",
+       "tagline": "Never seen"
+      },
+      "rows": [
+       {
+        "label": "First law",
+        "a": "Allowed",
+        "b": "Allowed"
+       },
+       {
+        "label": "Second law",
+        "a": "Allowed",
+        "b": "Denied"
+       }
+      ],
+      "verdict": "The second law picks the direction",
+      "winner": "a"
+     }
+    }
+   },
+   {
+    "id": "939eb6c3",
+    "narration": "That something is entropy. Think of it as how spread out energy is. Low entropy means energy is concentrated in one place. High entropy means it is dispersed evenly.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how evenly energy is distributed or dispersed within a system. High entropy means spread out; low entropy means concentrated.",
+      "example": "A hot spot cooling into a room"
+     }
+    }
+   },
+   {
+    "id": "46bd1c64",
+    "narration": "Picture a steaming cup of coffee in a cool kitchen. Heat never gathers back into the coffee. It always flows from hotter to colder, spreading out.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "steaming coffee cup on table",
+      "clip_queries": [
+       "steaming coffee cup on table",
+       "steam rising from hot drink"
+      ],
+      "alt": "hot coffee steam in kitchen"
+     }
+    }
+   },
+   {
+    "id": "109386cf",
+    "narration": "Follow the flow. Hot coffee gives its heat to cooler air. The heat spreads until everything is the same temperature, which is equilibrium. There, entropy is highest.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Heat spreads out",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Hot coffee",
+        "icon": "flame"
+       },
+       {
+        "id": "b",
+        "label": "Cooler air",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Equilibrium",
+        "icon": "scale"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "heat flows"
+       ],
+       [
+        "b",
+        "c",
+        "evens out"
+       ]
+      ],
+      "style": "pills",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "0878cd23",
+    "narration": "This is the second law. In an isolated system left alone, entropy cannot decrease. Systems drift toward equilibrium, and that is why some processes are irreversible.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy never decreases.",
+      "emphasis": "never decreases"
+     }
+    }
+   },
+   {
+    "id": "2485fe5e",
+    "narration": "Why is that? Because there are vastly more ways for energy to be scattered than gathered. Entropy counts those arrangements, called microstates. Nature simply drifts toward the likeliest outcome.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why spreading wins",
+      "items": [
+       "Few ways to be concentrated",
+       "Countless ways to be spread out",
+       "Systems drift to the likeliest state"
+      ],
+      "style": "cards",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "a688a4e2",
+    "narration": "So the broken cup is one arrangement among countless ones. The reassembled cup is one arrangement among very few. Chance alone makes the shattered state overwhelmingly likely.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "shattered glass pieces on floor",
+      "clip_queries": [
+       "shattered glass pieces on floor",
+       "sweeping broken pieces"
+      ],
+      "alt": "broken pottery fragments"
+     }
+    }
+   },
+   {
+    "id": "cbb646ea",
+    "narration": "The idea reaches far beyond heat. It appears in chemistry, in living things, in cosmology, and even in information theory, where it describes how messages travel.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "flask",
+        "label": "Chemistry"
+       },
+       {
+        "icon": "leaf",
+        "label": "Life"
+       },
+       {
+        "icon": "star",
+        "label": "Cosmology"
+       },
+       {
+        "icon": "signal",
+        "label": "Information"
+       }
+      ],
+      "title": "Entropy everywhere"
+     }
+    }
+   },
+   {
+    "id": "22e8f2e5",
+    "narration": "So remember this. Energy left alone spreads out, and it does not gather itself back. That one-way drift is entropy, and it is why cups break but never un-break.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Energy spreads out, and never gathers itself back.",
+      "emphasis": "spreads out"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Second law of thermodynamics",
+    "url": "https://en.wikipedia.org/wiki/Second_law_of_thermodynamics",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Entropy",
+    "url": "https://en.wikipedia.org/wiki/Entropy",
+    "publisher": "Wikipedia",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 29.5,
+  "before_first_script_call_s": 6.1,
+  "script_s": 23.5
+ },
+ "cost": {
+  "script_small": 0.00025,
+  "script_big": 0.09005,
+  "search_api": 0.0,
+  "total": 0.0903
+ },
+ "calls": {
+  "small": 4,
+  "big": 2
+ },
+ "tokens": {
+  "in": 29666,
+  "out": 3565
+ },
+ "rules": {
+  "length": {
+   "words": 280,
+   "expected_words": 267,
+   "ratio": 1.049,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 126.2,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 31,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "A cup falls off a table and shatters. Nobody has ever seen the pieces leap back up and reassemble. Yet no law of energy forbids it. So what does?",
+   "close_text": "So remember this. Energy left alone spreads out, and it does not gather itself back. That one-way drift is entropy, and it is why cups break but never un-break."
+  },
+  "variety": {
+   "distinct": 7,
+   "counts": {
+    "clip": 3,
+    "versus": 1,
+    "definition": 1,
+    "diagram": 1,
+    "kinetic_text": 2,
+    "bullets": 1,
+    "icons": 1
+   },
+   "max_run": 1,
+   "entropy": 2.65,
+   "top_type": "clip",
+   "top_share": 0.3,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 0,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "it allows the cup",
+    "count": 2
+   },
+   {
+    "phrase": "allows the cup to",
+    "count": 2
+   },
+   {
+    "phrase": "cup is one arrangement",
+    "count": 2
+   },
+   {
+    "phrase": "is one arrangement among",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 2,
+   "notes_len": 2466,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 4,
+    "reason": "Matches the notes and standard physics; the cup/first-law example comes from the notes. Minor loose points: 'Nature simply drifts toward the likeliest outcome' and the sentence that entropy 'describes how messages travel'."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "Covers the second law, microstates, and the cup and coffee examples. It omits the arrow of time, the point that life does not violate the second law (open systems), and why 'disorder' is a poor word. Beat 9 only lists fields."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear build from puzzle to law to microstate explanation to takeaway. The cup is revisited at the end. Beat 9 is a slight detour."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "Opens with a puzzle ('So what does?'). The ending ties back to the cup, though it is mostly a restatement."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear beginner register suited to a US viewer."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety: clips, versus, definition, diagram, bullets, icons. The cup versus-table is a slightly odd fit, and the winner field is awkward."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The cup and coffee examples are standard. There are few surprising facts and no counting example such as a shuffled deck."
+   },
+   "instructions": {
+    "score": 4,
+    "reason": "Roughly on length (about 270 words), in English, and explains entropy. It misses some of the expected points, such as life and the arrow of time."
+   },
+   "language": {
+    "score": 5,
+    "reason": "Fluent, clean and natural phrasing."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "It appears in chemistry, in living things, in cosmology, and even in information theory",
+    "issue": "Names life only in a list and never explains how living things coexist with the second law, a key point for a good answer.",
+    "beat": 9
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Energy left alone spreads out, and it does not gather itself back.",
+    "issue": "No explicit link to the arrow of time, and no mention of why 'disorder' is a misleading word.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "where it describes how messages travel",
+    "issue": "Information entropy measures uncertainty or information content, not how messages travel; the phrasing is vague.",
+    "beat": 9
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Chance alone makes the shattered state overwhelmingly likely.",
+    "issue": "This oversimplifies: a broken cup is not a single energy-spread microstate comparison, and the claim is stated with no caveat.",
+    "beat": 8
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"winner\": \"a\"",
+    "issue": "A versus scene with a winner is an odd frame for allowed versus denied processes.",
+    "beat": 2
+   }
+  ],
+  "missing": [
+   "Arrow of time",
+   "Why life does not violate the second law (open systems, energy from the Sun)",
+   "Why 'disorder' is a poor word",
+   "A shuffled deck or ice melting example with counting",
+   "Boltzmann's microstate formula or a simple counting example"
+  ],
+  "wrong_facts": [],
+  "would_publish": false,
+  "summary": "A clear, accurate, well-structured explainer built on the cup example, but it stays generic. It leaves out the arrow of time and the question of life, and it has few surprising specifics.",
+  "mean": 3.89,
+  "cost_usd": 0.019618,
+  "tokens": [
+   4034,
+   1155
+  ]
+ }
+}

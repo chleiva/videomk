@@ -1,0 +1,140 @@
+{
+ "id": "how-01",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "A quick guide to changing a flat tire, from finding a safe spot to tightening the lug nuts. Learn the steps in order and the one mistake to avoid.",
+  "beats": [
+   {
+    "id": "c1698ec1",
+    "narration": "A flat tire feels like a disaster, but it is a ten-minute job. First, pull over on firm, flat ground, away from traffic. Turn on your hazard lights and set the parking brake.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car parked on roadside",
+      "clip_queries": [
+       "car parked on roadside",
+       "cars driving on highway"
+      ],
+      "alt": "vehicle with hazard lights on roadside"
+     }
+    },
+    "chapter": "Stay safe first"
+   },
+   {
+    "id": "12da122d",
+    "narration": "Next, gather your spare tire, jack, and lug wrench. Before lifting anything, loosen the lug nuts a half turn while the wheel is still on the ground. Skipping this is the common mistake.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "What you need",
+      "items": [
+       "Spare tire",
+       "Jack",
+       "Lug wrench",
+       "Loosen nuts first"
+      ]
+     }
+    },
+    "chapter": "Get ready"
+   },
+   {
+    "id": "38e4f6b2",
+    "narration": "Now place the jack at the car's marked lift point and raise the car until the flat is off the ground. Remove the nuts, pull off the flat, and mount the spare.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Swap the wheel",
+      "steps": [
+       {
+        "label": "Place jack at lift point"
+       },
+       {
+        "label": "Raise the car"
+       },
+       {
+        "label": "Remove nuts and flat"
+       },
+       {
+        "label": "Mount the spare"
+       }
+      ]
+     }
+    },
+    "chapter": "Swap the wheel"
+   },
+   {
+    "id": "bfe27681",
+    "narration": "Hand-tighten the nuts, lower the car, then tighten them firmly in a star pattern. Store the flat and your tools. Drive carefully, and get the tire checked soon.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Finish up",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Hand-tighten nuts",
+        "icon": "wrench"
+       },
+       {
+        "id": "b",
+        "label": "Lower the car",
+        "icon": "car"
+       },
+       {
+        "id": "c",
+        "label": "Tighten in star pattern",
+        "icon": "star"
+       },
+       {
+        "id": "d",
+        "label": "Get tire checked",
+        "icon": "check"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal"
+     }
+    },
+    "chapter": "Finish up"
+   },
+   {
+    "id": "b1eac9be",
+    "narration": "Remember: loosen first, lift second, tighten in a star pattern. Stay calm, work safely, and you will be back on the road quickly.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Loosen first, lift second, tighten in a star pattern.",
+      "emphasis": "Loosen first"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06749,
+ "seconds": 13.2
+}

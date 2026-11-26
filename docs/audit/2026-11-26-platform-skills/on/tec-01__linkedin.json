@@ -1,0 +1,129 @@
+{
+ "id": "tec-01",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How ChatGPT works: one word at a time",
+  "description": "Large language models like ChatGPT generate answers by predicting the next word, over and over. This video explains training, prediction and why they can sound sure and still be wrong.",
+  "beats": [
+   {
+    "id": "0db67855",
+    "narration": "ChatGPT does not look up answers. It does something stranger. It guesses the next word, then the next, then the next. Every reply you read is built from guesses, one word at a time.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "ChatGPT guesses the next word. Again and again.",
+      "emphasis": "next word"
+     }
+    },
+    "chapter": "One word at a time"
+   },
+   {
+    "id": "c2ee72b0",
+    "narration": "How does it guess well? First, it reads a huge amount of text. Then it practices predicting hidden words. Each mistake nudges its internal settings. After many rounds, patterns of language start to emerge.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How a model learns",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Huge amount of text",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Predict hidden word",
+        "icon": "circle-help"
+       },
+       {
+        "id": "c",
+        "label": "Check the mistake",
+        "icon": "check"
+       },
+       {
+        "id": "d",
+        "label": "Adjust settings",
+        "icon": "cog"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "How it learns"
+   },
+   {
+    "id": "0d3ed673",
+    "narration": "When you type a prompt, the model splits it into pieces called tokens. It weighs how they relate, picks a likely next token, adds it, and repeats until the answer is complete.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "From prompt to answer",
+      "steps": [
+       {
+        "label": "Prompt becomes tokens"
+       },
+       {
+        "label": "Weigh how tokens relate"
+       },
+       {
+        "label": "Pick a likely next token"
+       },
+       {
+        "label": "Repeat until done"
+       }
+      ]
+     }
+    },
+    "chapter": "Why it can fool you"
+   },
+   {
+    "id": "61230b37",
+    "narration": "Because it predicts what sounds likely, not what is checked, it can sound confident and still be wrong. So treat it as a fast, fluent drafter, and verify anything that matters.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Using it well",
+      "items": [
+       "Great for drafting and ideas",
+       "Fluent does not mean true",
+       "Verify facts that matter"
+      ],
+      "checked": [
+       true,
+       false,
+       true
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03617,
+ "seconds": 6.5
+}

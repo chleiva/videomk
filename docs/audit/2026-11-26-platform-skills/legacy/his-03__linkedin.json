@@ -1,0 +1,135 @@
+{
+ "id": "his-03",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A short story of the 2008 financial crisis, from the US housing boom to subprime mortgages, securitization, Lehman Brothers and the government response. It shows how many small risks added up to a global shock.",
+  "beats": [
+   {
+    "id": "4b1dddc1",
+    "narration": "Imagine a bet that everyone believed could not lose. In the 2000s, US house prices kept rising, and lenders handed out subprime mortgages, loans to borrowers who were likely to struggle to repay.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "clip_queries": [
+       "suburban houses aerial view",
+       "for sale sign in front of house"
+      ],
+      "alt": "residential neighborhood from above"
+     }
+    },
+    "chapter": "The housing boom"
+   },
+   {
+    "id": "43a0b21f",
+    "narration": "Banks did not keep those loans. They bundled them into securities and sold them to investors worldwide. This is securitization. Lenders passed on the risk, so careless lending paid off, and risk spread everywhere.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How the risk spread",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Subprime mortgages",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Bundled securities",
+        "icon": "box"
+       },
+       {
+        "id": "c",
+        "label": "Investors worldwide",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "bundled"
+       ],
+       [
+        "b",
+        "c",
+        "sold"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    },
+    "chapter": "Securitization"
+   },
+   {
+    "id": "be3ccf31",
+    "narration": "Then house prices stopped rising. Borrowers defaulted, and those securities lost value. Banks feared each other's hidden losses and stopped lending. In September, Lehman Brothers, a major investment bank, collapsed, and panic spread across the world.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The chain reaction",
+      "items": [
+       "Prices stop rising",
+       "Borrowers default",
+       "Securities lose value",
+       "Lehman Brothers collapses"
+      ],
+      "style": "spotlight",
+      "accent": "rose",
+      "icons": [
+       "house",
+       "rss",
+       "chart-column",
+       "landmark"
+      ]
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "29f4829b",
+    "narration": "Governments stepped in. They rescued banks, injected money, and central banks cut interest rates. It stopped a total meltdown, but the recession was deep, and many people lost homes and jobs.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "financial district skyscrapers",
+      "clip_queries": [
+       "financial district skyscrapers",
+       "people walking busy city street"
+      ],
+      "alt": "downtown financial district"
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "bccddc8a",
+    "narration": "The real cause was not one villain. It was easy credit, hidden risk, and shared overconfidence. When everyone assumes someone else carries the danger, the danger is still there.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Risk you cannot see is still risk.",
+      "emphasis": "still risk"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 163 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 29 words: write 4 to 6 beats of at most 40 words each (you averaged 32), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07039,
+ "seconds": 16.4
+}

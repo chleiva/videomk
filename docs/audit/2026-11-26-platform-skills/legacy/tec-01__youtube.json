@@ -1,0 +1,254 @@
+{
+ "id": "tec-01",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "how do large language models like ChatGPT work",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How Large Language Models Like ChatGPT Work",
+  "description": "A clear explanation of how large language models learn to predict the next word and turn that simple skill into conversation. Learn about tokens, training, and why these models can sound sure while being wrong.",
+  "beats": [
+   {
+    "id": "7cae9193",
+    "narration": "ChatGPT can write poems, explain physics and fix code. Yet at its core, it does one simple thing over and over: it guesses the next word.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "How ChatGPT Really Works",
+      "subtitle": "One simple trick behind a very smart-sounding machine"
+     }
+    },
+    "chapter": "The big idea"
+   },
+   {
+    "id": "1222c655",
+    "narration": "You already know this trick. Your phone suggests the next word as you type. A large language model is that idea, scaled up enormously and trained far more deeply.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on smartphone",
+      "alt": "hands texting on a phone"
+     }
+    }
+   },
+   {
+    "id": "d38651b6",
+    "narration": "First, the text is chopped into small pieces called tokens. A token may be a whole word or just part of one. The model works with these pieces, not with letters.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Token",
+      "definition": "A small piece of text, such as a word or part of a word, that a language model reads and writes."
+     }
+    },
+    "chapter": "Learning from text"
+   },
+   {
+    "id": "55c10269",
+    "narration": "Next comes training. The model reads huge amounts of text, hides the next token, and tries to guess it. Each wrong guess nudges its internal settings a little.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Training loop",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Read text",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Guess next token",
+        "icon": "circle-help"
+       },
+       {
+        "id": "c",
+        "label": "Check answer",
+        "icon": "check"
+       },
+       {
+        "id": "d",
+        "label": "Adjust settings",
+        "icon": "cog"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a",
+        "repeat"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "c65fd437",
+    "narration": "Those settings are called parameters, and there are billions of them. Together they store patterns of language: grammar, facts, styles, and how ideas tend to connect.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Billions of parameters store the patterns of language.",
+      "emphasis": "parameters"
+     }
+    }
+   },
+   {
+    "id": "d895e1e2",
+    "narration": "The key design is the transformer. It uses a method called attention, which lets the model weigh which earlier words matter most for the word it is choosing now.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Attention",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Your words",
+        "icon": "text"
+       },
+       {
+        "id": "b",
+        "label": "Attention",
+        "icon": "eye"
+       },
+       {
+        "id": "c",
+        "label": "Next token",
+        "icon": "log-in"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "weigh context"
+       ],
+       [
+        "b",
+        "c",
+        "predict"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet",
+      "emphasis": 1
+     }
+    },
+    "chapter": "How it answers"
+   },
+   {
+    "id": "05ddcafa",
+    "narration": "When you ask a question, the model predicts one token, adds it to the text, then predicts again. Sentence by sentence, an answer is built one piece at a time.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Building an answer",
+      "steps": [
+       {
+        "label": "Read your prompt"
+       },
+       {
+        "label": "Predict one token"
+       },
+       {
+        "label": "Add it to the text"
+       },
+       {
+        "label": "Repeat until done"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "a7734537",
+    "narration": "Raw prediction is not yet a helpful assistant. Developers then fine-tune the model with examples of good answers, and with human feedback, so it follows instructions and stays polite.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Making it helpful",
+      "items": [
+       "Pretrain on lots of text",
+       "Fine-tune on good answers",
+       "Learn from human feedback"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "book",
+       "target",
+       "users"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c80c9f09",
+    "narration": "This explains a famous flaw. The model aims for text that sounds likely, not text that is checked. So it can state something false with total confidence.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Sounds likely",
+       "tagline": "What the model optimizes"
+      },
+      "b": {
+       "name": "Is true",
+       "tagline": "What you need"
+      },
+      "rows": [
+       {
+        "label": "Goal",
+        "a": "Plausible next word",
+        "b": "Verified fact"
+       },
+       {
+        "label": "Risk",
+        "a": "Confident mistakes",
+        "b": "Fewer errors"
+       }
+      ],
+      "verdict": "Always double-check important claims"
+     }
+    },
+    "chapter": "Limits"
+   },
+   {
+    "id": "795417ce",
+    "narration": "So remember the one idea: a language model learns patterns from text and predicts what comes next. Use it as a powerful helper, and verify anything that matters.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "It predicts the next word, so use it well and verify what matters.",
+      "emphasis": "predicts the next word"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.12328,
+ "seconds": 37.8
+}

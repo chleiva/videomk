@@ -1,0 +1,456 @@
+{
+ "id": "cmp-03",
+ "category": "comparison (A vs B)",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "Kindle vs paper books",
+ "great": "Short fair comparison: portability, eye strain, battery, feel, price, environmental angle; takeaway by reader type.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:34:45",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Comparing Kindle e-readers and paper books is a timeless explanatory topic (reading experience, health effects, cost, durability, comprehension research) that an encyclopedia covers well. Current pric",
+  "queries": [],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "comparison-versus",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 4.1,
+   "cost_usd": 0.0008375,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 5,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 6395,
+  "n_sources": 3,
+  "n_fetched": 7,
+  "fetched": [
+   "Comparing Comprehension of a Long Text Read in Print Book and on Kindle: Where in the Text and When in the Story?",
+   "Is Your Kindle Making You Forget What You Read?",
+   "Study settles debate over best way to read — books or screens",
+   "Screen vs. Paper: Which One Boosts Reading Comprehension? - Oxford Learning",
+   "Self-Publishing Statistics 2026 | CruxOne",
+   "Publishers Weekly on Facebook: \"Strong sales of adult and children’s fiction continued to keep the print book market afloat in the f…\"",
+   "Publishing by the Numbers 2026"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 151 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 17 words: write 4 to 6 beats of at most 40 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "notes": "## Comparing Comprehension of a Long Text Read in Print Book and on Kindle: Where in the Text and When in the Story?\npaper (Kim and Kim, 2013; Mangen et al., 2013; Rasmusson, 2014), whereas others show no differences between paper and screen (Margolin et al., 2013; Rockinson-Szapkiw et al., 2013; Porion et al., 2016). However, a recent meta-analysis (Delgado et al., 2018) of 54 experiments published between 2000 and 2017 comparing the reading of comparable texts on paper and screens does find an advantage for paper both for between-participants and for within-participants studies. The meta-analysis revealed [...] comprehension: engagement, recall, capacities to locate events in the text and reconstructing the plot of the story. Results showed that on most tests subjects performed identically whatever the reading medium. However, on measures related to chronology and temporality, those who had read in the print pocket book, performed better than those who had read on a Kindle. It is concluded that, basi\n\n## Is Your Kindle Making You Forget What You Read?\nA 2018 meta-analysis reviewing 54 studies showed a clear paper-based reading advantage. More recently, a 2024 in-depth eye-tracking study, while small, observed the same pattern, finding that students not only scored lower on-screen but were largely unaware of how differently they were processing the digital text. [...] ### The \"Screen Inferiority Effect” The \"screen inferiority effect” describes the consistent finding that people often understand and remember less from digital texts compared to print. [...] ## Sources Delgado, P., Vargas, C., Ackerman, R., & Salmerón, L. (2018). Don't throw away your printed books: A meta-analysis on the effects of reading media on reading comprehension. Educational Research Review, 25, 23–38. Fitzsimmons, G., Weal, M. J., & Drieghe, D. (2019). The impact of hyperlinks on reading text. PloS one, 14(2), e0210900.\n\n## Study settles debate over best way to read — books or screens\nA new study may have settled the contentious debate over the efficacy of digital readers versus hard copy books by observing the brain processes behind reading for each format. The findings, published in the journal PLOS ONE, revealed that the brain may process and connect story details more efficiently by reading content printed on a page, whereas an e-reader presents letters and pictures on a static screen, thus providing fewer physical cues to help the reader grasp a story. [...] This indicates that device users needed more brain power to later reconstruct the story during the final test, leading to the conclusion that paper readers had built a stronger “schema” in their minds during the initial reading. A cheerful girl reads an e-book on a sofa at home. 3 A 2019 study also found that children and parents bond more readily when they read a physical book together, as opposed to a readi\n\n## Screen vs. Paper: Which One Boosts Reading Comprehension? - Oxford Learning\nSkip to content Get Started Today! that help with memory and information recall. Tendency to Skim – Readers on screens are more likely to scan text instead of engaging in careful, analytical reading. ### Who Is Most Affected? While this effect impacts all age groups, younger readers are particularly vulnerable. Studies show that children who primarily read on screens develop weaker reading comprehension skills compared to those who engage with print books. ## The Impact on Young Readers [...] The way children read has an even bigger impact. Research shows that children who grow up with access to physical books complete an average of three additional years of education compared to those who do not. In contrast, studies have found no such correlation between e-books and academic success. [...] Six weeks later, the children who watched the story on screen performed significantly worse on at\n\n## Self-Publishing Statistics 2026 | CruxOne\nSwipe the table sideways to see every column. \\- In print, romance units rose 3.9% to nearly 44 million, science fiction rose 22.1%, self-help rose 14.7% and fantasy fell 8.7% to 24.1 million (Circana BookScan via PW, January 2026). \\- AAP figures are publisher revenue and Circana covers print sales at reporting outlets, so neither fully captures self-published ebook sales on Amazon. ## AI, platforms and the Anthropic settlement [...] | Print share of trade revenue | 76.3% | — | AAP StatShot Annual (2026) | | Online retail channel | $12.3 billion | +3.1% | AAP StatShot Annual (2026) | | Audiobook sales (APA survey) | $2.43 billion | +9% | Audio Publishers Association (2026) | | Active audiobook titles | 750,000+ | +43% | Audio Publishers Association (2026) | | Print book units sold | 762.4 million | +0.3% | Circana BookScan via PW (2026) | [...] Data··8 min read # Self-publishing statist\n\n## Publishers Weekly on Facebook: \"Strong sales of adult and children’s fiction continued to keep the print book market afloat in the f…\"\n# Publishers Weekly on Facebook: \"Strong sales of adult and children’s fiction continued to keep the print book market afloat in the f…\" Strong sales of adult and children’s fiction continued to keep the print book market afloat in the first nine months of 2026 at outlets that report to Circana BookScan. - Author: Publishers Weekly - Posted: 2026-10-13T17:00:28+00:00 - Shared link: Print Sales Stay Flat Through September - Links: - Reactions: 5 - Comment count: 0 - Shares: 1 - Privacy: Public\n\n## Publishing by the Numbers 2026\nPrint still dominates by volume and revenue, but audiobooks have quietly overtaken eBooks in US market share, marking a historic shift in how Americans consume books. The Audio Publishers Association's 2026 survey (released June 2026) shows US audiobook sales hit $2.43B in 2025, up 9% over 2024. 785M Print books sold in the US in 2025 (slight increase of over 2024) $14.9B Estimated global eBook market revenue in 2025 64% [...] Amazon's dominance in book retail is profound, but physical bookstores are staging a comeback, and the online vs. in-store balance is shifting in interesting ways. Amazon has transformed the book retail landscape since its founding in 1994. Today, Amazon accounts for roughly 60–70% of all online book sales in the United States for eBooks and at least 40% of all physical print book sales in the United States. [...] | Market / Segment | 2025 Value | Projected 2030 |",
+ "plan": {
+  "title": "Kindle vs Paper: Which Helps You Remember More?",
+  "description": "A quick look at what research says about reading on a Kindle versus a printed book. Learn where paper wins on comprehension and recall, and where it makes no difference.",
+  "language": "en",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "3c3e83d9",
+    "narration": "You finish a novel on your Kindle. A week later, can you say what happened first, and what came next? Research suggests paper readers often can.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person reading on tablet couch",
+      "clip_queries": [
+       "person reading on tablet couch",
+       "hands turning book pages"
+      ],
+      "alt": "woman reading e-reader at home"
+     }
+    }
+   },
+   {
+    "id": "382669c7",
+    "narration": "A 2018 meta-analysis pulled together 54 experiments. It found an advantage for paper in comprehension. Scientists call this the screen inferiority effect: people often understand and remember less from digital text.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "54 studies",
+      "label": "2018 meta-analysis: advantage for paper"
+     }
+    },
+    "sfx": "impact",
+    "chapter": "What the research found"
+   },
+   {
+    "id": "7590ba43",
+    "narration": "In one study, a long story was read in a print pocket book or on a Kindle. On most tests, readers did the same. Engagement and recall were equal.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Paper book"
+      },
+      "b": {
+       "name": "Kindle"
+      },
+      "rows": [
+       {
+        "label": "Engagement",
+        "a": "Same",
+        "b": "Same"
+       },
+       {
+        "label": "Recall",
+        "a": "Same",
+        "b": "Same"
+       },
+       {
+        "label": "Story order",
+        "a": "Better",
+        "b": "Weaker"
+       }
+      ],
+      "verdict": "Paper wins on chronology"
+     }
+    }
+   },
+   {
+    "id": "52ee5047",
+    "narration": "The gap showed up in time. Paper readers did better at placing events in order and rebuilding the plot. A static screen gives fewer physical cues, like the thickness of pages, to anchor the story.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Why order is harder on screen",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Static screen",
+        "icon": "phone"
+       },
+       {
+        "id": "b",
+        "label": "Fewer physical cues",
+        "icon": "book"
+       },
+       {
+        "id": "c",
+        "label": "Weaker story order",
+        "icon": "clock"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "9e553fb0",
+    "narration": "So which should you pick? For a quick read, a Kindle is fine. For a story or study you need to remember, choose paper, and slow down on any screen.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "To remember the story in order, pick paper.",
+      "emphasis": "pick paper"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Comparing Comprehension of a Long Text Read in Print Book and on Kindle: Where in the Text and When in the Story?",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6384527",
+    "publisher": "pmc.ncbi.nlm.nih.gov",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Is Your Kindle Making You Forget What You Read?",
+    "url": "https://evakeiffenheim.substack.com/p/is-your-kindle-making-you-forget",
+    "publisher": "evakeiffenheim.substack.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Study settles debate over best way to read — books or screens",
+    "url": "https://nypost.com/2026/06/13/science/study-settles-debate-over-best-way-to-read-books-or-screens",
+    "publisher": "nypost.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 21.9,
+  "before_first_script_call_s": 6.9,
+  "script_s": 15.0
+ },
+ "cost": {
+  "script_small": 0.00027,
+  "research": 0.00084,
+  "script_big": 0.08263,
+  "search_api": 0.016,
+  "total": 0.09973
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 38391,
+  "out": 2794
+ },
+ "rules": {
+  "length": {
+   "words": 152,
+   "expected_words": 134,
+   "ratio": 1.134,
+   "beats": 5,
+   "expected_beats": 4,
+   "est_speech_s": 68.1,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 26,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 30,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "You finish a novel on your Kindle. A week later, can you say what happened first, and what came next? Research suggests paper readers often can.",
+   "close_text": "So which should you pick? For a quick read, a Kindle is fine. For a story or study you need to remember, choose paper, and slow down on any screen."
+  },
+  "variety": {
+   "distinct": 5,
+   "counts": {
+    "clip": 1,
+    "stat": 1,
+    "versus": 1,
+    "diagram": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.32,
+   "top_type": "clip",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [],
+   "entities": 1,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 3,
+   "fetched": 7,
+   "notes_len": 6395,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The core claims match the notes (54 experiments, 2018, chronology gap). However, \"thickness of pages\" is an embellishment, \"Paper wins on chronology\" generalizes from one small study, and \"Engagement and recall were equal\" is correct but sits awkwardly beside the meta-analysis."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "It covers only memory and comprehension. The brief asked for portability, eye strain, battery, feel, price and environment, and none of these appear."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear: hook, meta-analysis, one study, mechanism, takeaway. The beat 2 claim of a paper advantage sits oddly against beat 3 saying readers did the same, and the topic is narrower than the request."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening question about recalling what happened first is a strong hook. The ending is a clear takeaway but rather plain."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Conversational, neutral and suited to a US general audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "Scene types vary sensibly and the versus table matches the narration. The stat card is thin, the diagram icons (phone, book, clock) are loosely chosen, and the final kinetic text just repeats the narration."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The chronology finding is a specific and less common angle, but the video ignores the practical comparison the viewer likely wants."
+   },
+   "instructions": {
+    "score": 2,
+    "reason": "The request was a fair Kindle vs paper comparison, but the video turns into a one-issue memory piece. It offers no takeaway by reader type beyond a quick-read vs remember split."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Clean, fluent English with short sentences, and the length is roughly on target."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "For a quick read, a Kindle is fine.",
+    "issue": "Portability, eye strain, battery, price, feel and environmental impact are never discussed, so the comparison is one-sided and incomplete.",
+    "beat": 5
+   },
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "Which Helps You Remember More?",
+    "issue": "The title and scope narrow a broad 'Kindle vs paper' request to memory alone.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "like the thickness of pages",
+    "issue": "This specific example is not in the notes; it is an embellishment of 'fewer physical cues'.",
+    "beat": 4
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Research suggests paper readers often can.",
+    "issue": "The finding concerned chronology in one study, and the meta-analysis concerned comprehension. This overgeneralizes to a week-later recall claim.",
+    "beat": 1
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "On most tests, readers did the same.",
+    "issue": "This undercuts the headline paper advantage without reconciling it, and the effect size is never given.",
+    "beat": 3
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "To remember the story in order, pick paper.",
+    "issue": "The closing scene repeats the narration, and the diagram icons for 'static screen' (phone) and 'fewer cues' (book) are loosely matched.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "Portability and capacity (a whole library in one device)",
+   "Eye strain and e-ink vs backlit screens",
+   "Battery life",
+   "Price of devices vs books, and cheaper ebooks",
+   "Environmental footprint",
+   "Feel, smell and ownership of paper",
+   "Takeaway by reader type (travelers, commuters, collectors)"
+  ],
+  "wrong_facts": [
+   "'thickness of pages' is not in the notes (unverified, plausible)",
+   "Overgeneralizing one small study to a blanket 'pick paper'"
+  ],
+  "would_publish": false,
+  "summary": "A clean, well-hooked mini-piece on the memory research, but it ignores nearly every practical comparison point the request called for. It is accurate in its core claims but too narrow to count as a fair Kindle vs paper comparison.",
+  "mean": 3.11,
+  "cost_usd": 0.023622,
+  "tokens": [
+   4911,
+   1380
+  ]
+ }
+}

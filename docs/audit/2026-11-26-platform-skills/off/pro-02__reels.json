@@ -1,0 +1,63 @@
+{
+ "id": "pro-02",
+ "platform": "reels",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza solo 2 minutos",
+  "description": "Un truco sencillo para dejar de procrastinar: reducir la tarea hasta que empezar sea fácil. Aprende a empezar con dos minutos y dejar que el impulso haga el resto.",
+  "beats": [
+   {
+    "id": "a9281fae",
+    "narration": "No procrastinas por pereza. Procrastinas porque empezar se siente enorme. Y tu cerebro huye de lo que parece pesado.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No es pereza: empezar se siente enorme.",
+      "emphasis": "empezar"
+     }
+    }
+   },
+   {
+    "id": "686baa9e",
+    "narration": "El truco: haz la tarea ridículamente pequeña. Abre el documento. Escribe una frase. Ponte un temporizador de dos minutos y nada más.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Hazlo pequeño",
+      "items": [
+       "Abre el documento",
+       "Escribe una frase",
+       "Dos minutos"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "6afb9e55",
+    "narration": "Casi siempre, cuando arrancas, seguir es fácil. El impulso hace el trabajo. Tu única meta hoy: empezar dos minutos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Empieza dos minutos. El impulso hace el resto.",
+      "emphasis": "dos minutos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03219,
+ "seconds": 4.2
+}

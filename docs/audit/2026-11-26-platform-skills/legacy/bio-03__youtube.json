@@ -1,0 +1,205 @@
+{
+ "id": "bio-03",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Mind That Shaped Computing",
+  "description": "Alan Turing was a British mathematician who helped break wartime codes and laid the foundations of computer science. This video explains his ideas, his work, and why he still matters.",
+  "beats": [
+   {
+    "id": "0281023d",
+    "narration": "Can a machine think? Long before smartphones, one British mathematician asked that question and gave us a way to explore it. His name was Alan Turing, and his ideas still shape our world.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "The mathematician who asked if machines can think"
+     }
+    },
+    "chapter": "A question about machines"
+   },
+   {
+    "id": "35ad21ce",
+    "narration": "Turing was born in England in the early twentieth century. He was curious and brilliant from a young age, and he loved numbers, puzzles and the logic behind how things work.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "A curious mind",
+      "items": [
+       "Born in England",
+       "Loved numbers and puzzles",
+       "Fascinated by logic"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "puzzle",
+       "brain"
+      ]
+     }
+    }
+   },
+   {
+    "id": "dd658ea3",
+    "narration": "In the 1930s he imagined a simple theoretical machine. It read symbols, followed rules and could, in principle, carry out any calculation. This idea, now called the Turing machine, became a foundation of computer science.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The Turing machine",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Symbols",
+        "icon": "file-text"
+       },
+       {
+        "id": "b",
+        "label": "Rules",
+        "icon": "list"
+       },
+       {
+        "id": "c",
+        "label": "Any calculation",
+        "icon": "computer"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "read"
+       ],
+       [
+        "b",
+        "c",
+        "produce"
+       ]
+      ],
+      "style": "pills",
+      "accent": "indigo",
+      "emphasis": 2
+     }
+    },
+    "chapter": "The idea of a computer"
+   },
+   {
+    "id": "c94c5eae",
+    "narration": "Think of it as a blueprint. Every laptop and phone you use today does, at heart, what his imaginary machine described: it follows instructions step by step.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person typing on laptop",
+      "alt": "hands using a computer keyboard"
+     }
+    }
+   },
+   {
+    "id": "205c7629",
+    "narration": "During the Second World War, Turing worked with a team of codebreakers in Britain. Their task was to read secret enemy messages, protected by machines that scrambled every letter.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "focus",
+      "title": "Wartime Britain",
+      "caption": "Codebreaking in Britain",
+      "focus": [
+       "United Kingdom"
+      ]
+     }
+    },
+    "chapter": "Breaking codes in wartime"
+   },
+   {
+    "id": "03fdeb3f",
+    "narration": "Turing helped design methods and machines to speed up that work. Many historians believe the codebreakers' success shortened the war and saved a great many lives.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Codebreaking may have shortened the war and saved many lives.",
+      "emphasis": "saved many lives"
+     }
+    }
+   },
+   {
+    "id": "f4dfe37a",
+    "narration": "After the war, Turing kept thinking about intelligence. He proposed a test: if a person chatting with a hidden machine cannot tell it from a human, the machine might be called intelligent.",
+    "scene": {
+     "type": "dialogue",
+     "props": {
+      "turns": [
+       {
+        "speaker": "Judge",
+        "text": "Are you a person or a machine?"
+       },
+       {
+        "speaker": "Hidden voice",
+        "text": "Can you tell the difference from my answers?"
+       }
+      ]
+     }
+    },
+    "chapter": "Can machines think?"
+   },
+   {
+    "id": "e21be9e0",
+    "narration": "Today we call it the Turing test. It still sparks debate as artificial intelligence writes, talks and answers questions in ways that once sounded like science fiction.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person using smartphone assistant",
+      "clip_queries": [
+       "person using smartphone assistant",
+       "robot arm in laboratory"
+      ],
+      "alt": "talking to a phone"
+     }
+    }
+   },
+   {
+    "id": "7448bfc1",
+    "narration": "Yet his life was hard. Britain punished him for being gay, which was then a crime. He died in 1954, and the country later apologized for how it treated him.",
+    "scene": {
+     "type": "quote",
+     "props": {
+      "text": "We can only see a short distance ahead, but we can see plenty there that needs to be done.",
+      "attribution": "Alan Turing"
+     }
+    },
+    "chapter": "A hard ending, a lasting legacy"
+   },
+   {
+    "id": "1d8f2d17",
+    "narration": "Turing's work gave us the idea of the computer, a method for judging machine intelligence, and a reminder of what prejudice can cost. Remember his name whenever you pick up a device.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Why Turing matters",
+      "items": [
+       "The idea of the computer",
+       "A test for machine intelligence",
+       "A lesson about fairness"
+      ],
+      "style": "spotlight",
+      "accent": "violet",
+      "emphasis": 0
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 302 words in 10 beats but a 2-minute video needs about 267 (at most 280). Cut about 35 words: write 9 to 11 beats of at most 35 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 245 words"
+ ],
+ "cost_usd": 0.12404,
+ "seconds": 45.5
+}

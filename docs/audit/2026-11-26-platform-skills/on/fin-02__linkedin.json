@@ -1,0 +1,144 @@
+{
+ "id": "fin-02",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Inflación: por qué tu dinero compra cada vez menos",
+  "description": "Explicación sencilla de qué es la inflación, por qué los precios suben y cómo afecta a tu dinero. Un vistazo general a sus causas y su efecto en el poder adquisitivo.",
+  "beats": [
+   {
+    "id": "9e0f7544",
+    "narration": "Con el mismo dinero, hoy compras menos que hace unos años. No es tu imaginación. Se llama inflación, y afecta a lo que pagas por el pan, el alquiler y la gasolina.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "shopper at supermarket shelves",
+      "clip_queries": [
+       "shopper at supermarket shelves",
+       "hands paying at a cash register"
+      ],
+      "alt": "person buying groceries in a store"
+     }
+    }
+   },
+   {
+    "id": "dfdbaf59",
+    "narration": "La inflación es una subida general y sostenida de los precios. Fíjate: no es que un producto se encarezca. Es que, en conjunto, todo cuesta más, y cada moneda vale menos.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Subida general y sostenida de los precios, que reduce lo que puedes comprar con tu dinero.",
+      "example": "Con la misma cantidad compras menos que antes."
+     }
+    },
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "c7a890ed",
+    "narration": "¿Por qué ocurre? Primero, demanda alta: muchos quieren comprar y hay poco producto. Segundo, costes mayores: producir y transportar sale más caro. Tercero, hay más dinero circulando que bienes disponibles.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Causas de la inflación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Demanda alta",
+        "icon": "van"
+       },
+       {
+        "id": "b",
+        "label": "Costes mayores",
+        "icon": "factory"
+       },
+       {
+        "id": "c",
+        "label": "Más dinero circulando",
+        "icon": "banknote"
+       },
+       {
+        "id": "d",
+        "label": "Precios suben",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "d"
+       ],
+       [
+        "b",
+        "d"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 3
+     }
+    },
+    "chapter": "Por qué suben los precios"
+   },
+   {
+    "id": "775d5672",
+    "narration": "Un poco de inflación es normal en una economía sana. El problema llega cuando los precios suben más rápido que los sueldos. Entonces tu poder adquisitivo, lo que realmente puedes comprar, se hunde.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Precios",
+       "tagline": "Suben rápido"
+      },
+      "b": {
+       "name": "Sueldos",
+       "tagline": "Suben despacio"
+      },
+      "rows": [
+       {
+        "label": "Ritmo",
+        "a": "Más rápido",
+        "b": "Más lento"
+       },
+       {
+        "label": "Tu poder de compra",
+        "a": "Se reduce",
+        "b": "Se reduce"
+       }
+      ],
+      "verdict": "Si los precios corren más, pierdes poder adquisitivo"
+     }
+    }
+   },
+   {
+    "id": "43587267",
+    "narration": "Por eso los bancos centrales intentan frenarla, por ejemplo subiendo los tipos de interés. La idea clave: la inflación no es que todo cueste más, sino que tu dinero vale menos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "La inflación no es que todo cueste más: es que tu dinero vale menos.",
+      "emphasis": "tu dinero vale menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 157 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 23 words: write 4 to 6 beats of at most 40 words each (you averaged 31), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07799,
+ "seconds": 16.1
+}

@@ -1,0 +1,191 @@
+{
+ "id": "sci-01",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "explain entropy",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Entropy Explained: Why Time Only Runs One Way",
+  "description": "Entropy measures how many ways a system can be arranged, and why nature drifts toward the most likely arrangements. This explainer covers the second law, the myth that order can never appear, and why time seems to have an arrow.",
+  "beats": [
+   {
+    "id": "0fd90996",
+    "narration": "Why does milk spread into coffee but never separate again? Why does ice melt, but a puddle never freezes itself? Nature has a one-way direction, and it has a name: entropy.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "milk pouring into coffee",
+      "clip_queries": [
+       "milk pouring into coffee",
+       "ice melting in a glass",
+       "puddle on a street"
+      ],
+      "alt": "cream swirling in a cup"
+     }
+    }
+   },
+   {
+    "id": "87352bc1",
+    "narration": "Entropy is a measure of how many ways the parts of a system can be arranged without changing what you see. More arrangements means higher entropy.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Entropy",
+      "definition": "A measure of how many ways the parts of a system can be arranged without changing what you see."
+     }
+    }
+   },
+   {
+    "id": "1aea3800",
+    "narration": "Think of a deck of cards. Only one order is perfectly sorted. But there are astronomically many shuffled orders. Shuffle, and you almost surely land in a messy one.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "deck of playing cards shuffled",
+      "alt": "Shuffled deck of playing cards",
+      "ken_burns": "in"
+     }
+    }
+   },
+   {
+    "id": "dadfeb49",
+    "narration": "That is why a tidy room drifts toward mess. There are few ways to be tidy and endless ways to be messy. Disorder is simply far more likely.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "messy bedroom clothes",
+      "clip_queries": [
+       "messy bedroom clothes",
+       "person tidying a room"
+      ],
+      "alt": "untidy room with clutter"
+     }
+    }
+   },
+   {
+    "id": "9f937c0a",
+    "narration": "Heat works the same way. Hot coffee shares its energy with the cooler air, spreading it out. Energy spreads until everything is the same temperature.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Energy spreads out",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Hot coffee",
+        "icon": "coffee"
+       },
+       {
+        "id": "b",
+        "label": "Cooler air",
+        "icon": "cloud"
+       },
+       {
+        "id": "c",
+        "label": "Same temperature",
+        "icon": "thermometer"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b",
+        "shares energy"
+       ],
+       [
+        "b",
+        "c",
+        "evens out"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral",
+      "emphasis": 2
+     }
+    }
+   },
+   {
+    "id": "f1a33b2e",
+    "narration": "This is the second law of thermodynamics: in an isolated system, entropy tends to increase over time. It is a law of probability, backed by overwhelming odds.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "In an isolated system, entropy tends to increase over time.",
+      "emphasis": "entropy"
+     }
+    }
+   },
+   {
+    "id": "5de5da01",
+    "narration": "Common myth: entropy means disorder, so order can never appear. But a fridge cools food and life builds order. They do it by exporting more disorder as heat elsewhere.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Myth versus fact",
+      "items": [
+       "Myth: order can never appear",
+       "Fact: local order is possible",
+       "Cost: more disorder as heat elsewhere"
+      ],
+      "style": "keywords",
+      "accent": "teal"
+     }
+    }
+   },
+   {
+    "id": "45d173a0",
+    "narration": "Entropy also gives time its arrow. A film of shattering glass run backward looks wrong because that never happens. The past is the lower-entropy direction.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "glass shattering slow motion",
+      "alt": "breaking glass"
+     }
+    }
+   },
+   {
+    "id": "569d5f44",
+    "narration": "Even the universe follows it. Stars burn fuel and pour heat into space. That flow from concentrated to spread out is what lets engines, and living things, do work.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "starry night sky timelapse",
+      "clip_queries": [
+       "starry night sky timelapse",
+       "city traffic at night"
+      ],
+      "alt": "stars moving across night sky"
+     }
+    }
+   },
+   {
+    "id": "643af8cd",
+    "narration": "Entropy counts how many ways things can be arranged, and systems drift toward the most likely arrangements. Look around: spilled, melted, cooled, mixed. That is entropy at work.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Entropy at work",
+      "items": [
+       "Spilled",
+       "Melted",
+       "Cooled",
+       "Mixed"
+      ],
+      "style": "spotlight",
+      "accent": "violet"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education",
+   "science-wonder"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.11193,
+ "seconds": 43.7
+}

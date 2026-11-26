@@ -3,7 +3,7 @@ id: comparison-versus
 name: Comparison
 pick: A versus B, 'which is better', differences between two or more things, pros and cons, choosing between options.
 ---
-- Name the decision the viewer faces and the criteria that matter, in the first beat. Compare on the same criteria for both sides, in the same order.
+- First beat: the decision the viewer faces and a hint that the obvious answer may be wrong, then the criteria that matter. Compare on the same criteria for both sides, in the same order.
 - Be fair: give each option its real strengths first; never rig the comparison. Say who each option suits best.
 - Use numbers only from the notes, with the same units on both sides.
 - Keep the number of criteria small (three to five) and make the verdict depend on them, not on a vibe.

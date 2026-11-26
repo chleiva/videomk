@@ -12,9 +12,10 @@ def test_every_skill_file_is_well_formed_small_and_unique():
     sk = skills.load()
     assert len(sk) >= 16
     always = [s for s in sk.values() if s.always]
-    assert [s.id for s in always] == ["publish-quality"], "exactly one always-on guide"
+    assert sorted(s.id for s in always) == ["outstanding-video", "publish-quality"], "the two common guides are always on"
     for s in sk.values():
-        assert s.name and s.body and len(s.body) <= skills.MAX_BODY_CHARS, (s.id, len(s.body))
+        cap = skills.MAX_ALWAYS_CHARS if s.always else skills.MAX_PLATFORM_CHARS if s.platform else skills.MAX_BODY_CHARS
+        assert s.name and s.body and len(s.body) <= cap, (s.id, len(s.body))
         assert re.match(r"^[a-z][a-z0-9-]+$", s.id)
         assert s.always or s.auto or len(s.pick) >= 20, f"{s.id} needs a 'pick' line the selector can use"
         assert s.body.lstrip().startswith("- "), f"{s.id} should be imperative bullets"
@@ -57,8 +58,8 @@ def test_the_rendered_craft_text_has_the_always_on_guide_first_then_the_picked_o
     t = skills.render(["news-explainer", "history-story"])
     assert t.index("Publish quality") < t.index("News and current affairs") < t.index("History")
     assert "use one only if it appears in the scene list above" in t
-    assert skills.render([]).count("###") == 1 and "Publish quality" in skills.render([])
-    assert skills.render(["nope"]).count("###") == 1                         # an unknown id is ignored
+    assert skills.render([]).count("###") == 2 and "Publish quality" in skills.render([])
+    assert skills.render(["nope"]).count("###") == 2                         # an unknown id is ignored
 
 
 def _ask_small(types):
@@ -107,3 +108,62 @@ def test_the_photo_guide_is_automatic_never_offered_to_the_selector_and_always_a
     assert out["plan"]["intro_s"] == 2.5 and out["plan"]["outro_s"] == 3.5
     no_photos = director.direct("how rainbows form", minutes=1.0, ask_small=_ask_small(["explainer-education"]), ask_big=one_call, language="en")
     assert "photo-memories" not in no_photos["plan"]["skills"] and "intro_s" not in no_photos["plan"]
+
+
+# ----- platform guides (docs/SKILLS.md): loaded deterministically from the `platform` create option
+def test_every_platform_in_the_create_options_has_a_guide_file():
+    from engine import format_options
+    for pid in format_options.PLATFORM_IDS:
+        s = skills.platform_skill(pid)
+        assert s is not None and s.platform == pid and s.auto and not s.always, pid
+        assert s.id == "platform-" + pid.replace("_", "-")
+        assert s.id not in skills.catalog_text(), "the producer never sees a platform guide"
+    assert len({skills.platform_skill(p).id for p in format_options.PLATFORM_IDS}) == len(format_options.PLATFORM_IDS)
+
+
+@pytest.mark.parametrize("platform", [None, "", "myspace", "TikTok", 7])
+def test_an_unknown_platform_has_no_guide(platform):
+    assert skills.platform_skill(platform) is None
+    assert "Platform:" not in skills.render(["news-explainer"], platform)
+
+
+def test_render_order_is_common_then_platform_then_content_and_is_deterministic():
+    out = skills.render(["news-explainer", "history-story", "platform-tiktok"], "tiktok")
+    pos = [out.index(f"### {n}") for n in ("Ten principles of an outstanding video", "Publish quality", "Platform: TikTok (vertical)", "News and current affairs", "History")]
+    assert pos == sorted(pos) and "platform-tiktok" not in out and out.count("Platform: TikTok") == 1
+    assert out == skills.render(["news-explainer", "history-story", "platform-tiktok"], "tiktok")
+    for pid in ("youtube", "linkedin"):
+        assert skills.render([], pid).count("###") == 3          # two common guides and the platform guide
+    assert skills.render(["news-explainer"]) == skills.render(["news-explainer"], None)
+
+
+def test_the_common_guides_are_in_every_video_and_the_platform_guide_only_when_enabled(monkeypatch):
+    for platform in (None, "youtube", "x"):
+        out = skills.render([], platform)
+        assert "Publish quality" in out and "Ten principles" in out
+    monkeypatch.delenv("PLATFORM_SKILLS", raising=False)
+    assert skills.platform_skills_enabled() is False          # default off until the owner decides (docs/SKILLS.md)
+    monkeypatch.setenv("PLATFORM_SKILLS", "0")
+    assert skills.platform_skills_enabled() is False
+    monkeypatch.setenv("PLATFORM_SKILLS", "1")
+    assert skills.platform_skills_enabled() is True
+
+
+def test_the_director_adds_the_platform_guide_from_the_create_options(monkeypatch):
+    seen = []
+    monkeypatch.setattr(director.skills_mod, "select", lambda *a, **k: ["news-explainer"])
+    real = director.skills_mod.render
+    monkeypatch.setattr(director.skills_mod, "render", lambda ids, platform=None: (seen.append(platform), real(ids, platform))[1])
+    monkeypatch.setenv("PLATFORM_SKILLS", "1")
+    try:
+        director.direct("x", minutes=1, ask_small=lambda *a, **k: "", ask_big=lambda *a, **k: "not json", language="en", options={"platform": "reels"})
+    except Exception:
+        pass
+    assert seen and seen[0] == "reels"
+    seen.clear()
+    monkeypatch.setenv("PLATFORM_SKILLS", "0")
+    try:
+        director.direct("x", minutes=1, ask_small=lambda *a, **k: "", ask_big=lambda *a, **k: "not json", language="en", options={"platform": "reels"})
+    except Exception:
+        pass
+    assert seen and seen[0] is None

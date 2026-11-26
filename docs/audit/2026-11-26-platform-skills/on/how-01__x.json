@@ -1,0 +1,84 @@
+{
+ "id": "how-01",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "A fast guide to changing a flat tire: park safely, loosen the nuts, lift the car, swap the wheel and tighten up. Learn the one mistake that makes it harder than it should be.",
+  "beats": [
+   {
+    "id": "7adaffcb",
+    "narration": "A flat tire is not an emergency, if you do things in the right order. Start by getting safe. Park on flat, firm ground.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Flat tire? Safety first, then the wheel.",
+      "emphasis": "Safety first"
+     }
+    }
+   },
+   {
+    "id": "85a0e443",
+    "narration": "Set the parking brake and turn on your hazard lights. Then loosen the lug nuts a little, while the wheel is still on the ground.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Before you lift",
+      "items": [
+       "Flat, firm ground",
+       "Parking brake and hazards",
+       "Loosen nuts first"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "c36a590c",
+    "narration": "Now jack the car up at the lifting point. Remove the nuts, pull off the flat, and mount the spare. Hand-tighten the nuts.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "car",
+        "label": "Jack it up"
+       },
+       {
+        "icon": "wrench",
+        "label": "Remove the flat"
+       },
+       {
+        "icon": "tire",
+        "label": "Mount the spare"
+       }
+      ],
+      "title": "Swap the wheel"
+     }
+    }
+   },
+   {
+    "id": "bd33aa37",
+    "narration": "Lower the car, then tighten the nuts in a star pattern. Loosen first, lift second, tighten last. That is the whole trick.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Loosen first. Lift second. Tighten last.",
+      "emphasis": "Loosen first"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03415,
+ "seconds": 4.9
+}

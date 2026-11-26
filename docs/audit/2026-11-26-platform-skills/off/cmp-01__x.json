@@ -1,0 +1,84 @@
+{
+ "id": "cmp-01",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A quick, blunt answer to the React vs Vue question for beginners. Learn how to choose between the two popular JavaScript frameworks based on your goal.",
+  "beats": [
+   {
+    "id": "06cd4e26",
+    "narration": "Stop agonizing over React versus Vue. Both teach you the same core skills, so the wrong choice costs you far less than you fear.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "React or Vue? Both work.",
+      "emphasis": "Both work"
+     }
+    }
+   },
+   {
+    "id": "5e590033",
+    "narration": "React is everywhere in job listings and has a huge ecosystem. If your goal is getting hired, React is the safer bet.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Pick React if...",
+      "items": [
+       "You want jobs",
+       "You want a huge ecosystem"
+      ],
+      "style": "spotlight",
+      "accent": "sky",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "ff0d4ebd",
+    "narration": "Vue is gentler for beginners. Its structure is clear, its docs are friendly, and you see results fast. If you want smooth learning, start with Vue.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Pick Vue if...",
+      "items": [
+       "You want an easy start",
+       "You like clear structure",
+       "You want quick wins"
+      ],
+      "style": "icons",
+      "accent": "emerald",
+      "icons": [
+       "rocket",
+       "map-pin",
+       "clock"
+      ]
+     }
+    }
+   },
+   {
+    "id": "79ecc212",
+    "narration": "Pick one, build a real project, and stick with it. Once you know one framework, learning the other takes weeks, not months.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Learn one. Build something. The other comes easy.",
+      "emphasis": "Build something"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06815,
+ "seconds": 10.4
+}

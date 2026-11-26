@@ -1,0 +1,13 @@
+WARNING:root:RESEARCH_FETCH_FAILED url=https://en.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=27
+WARNING:root:RESEARCH_FETCH_FAILED url=https://es.wikipedia.org/w/api.php?action=query status=429 attempt=1 error=FetchError
+WARNING:root:RESEARCH_COOLDOWN seconds=27
+WARNING:root:RESEARCH_ESCALATED from_chars=0 searches=2 sources=6
+WARNING:root:RESEARCH_ESCALATED from_chars=1228 searches=2 sources=6
+already spent in saved results: $0.000 (cap $1.5)
+COST CAP: $0.00 spent, cannot start another prompt within $1.5. Stopping.
+[1/12] sci-01   ok         run $0.178   running total $0.311   56s
+WARNING:root:GROUNDING flagged=0 repaired=0 candidates=2 checked=2
+[2/12] sci-02   ok         run $0.212   running total $0.390   78s
+
+DONE. total spent $0.390 of $1.5

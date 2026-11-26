@@ -1,0 +1,140 @@
+{
+ "id": "pro-02",
+ "platform": "linkedin",
+ "arm": "on",
+ "minutes": 1.0,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza por dos minutos",
+  "description": "Procrastinar no es pereza: es evitar una emoción incómoda. Descubre cómo romper el ciclo con un primer paso diminuto.",
+  "beats": [
+   {
+    "id": "93a11a36",
+    "narration": "Procrastinar no es pereza. Es una forma de huir de algo que te incomoda. Y cada vez que huyes, la tarea pesa más. Por eso la fuerza de voluntad casi nunca basta.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Procrastinar no es pereza: es huir de una emoción.",
+      "emphasis": "huir"
+     }
+    },
+    "chapter": "El verdadero problema"
+   },
+   {
+    "id": "995933fd",
+    "narration": "Mira el ciclo. Primero aparece una emoción incómoda: miedo, aburrimiento, duda. Luego viene evitar la tarea, y sientes alivio. Después llega la culpa, y la tarea pesa más. Y vuelta a empezar.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "El ciclo de la procrastinación",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Tarea",
+        "icon": "list"
+       },
+       {
+        "id": "b",
+        "label": "Emoción incómoda",
+        "icon": "heart"
+       },
+       {
+        "id": "c",
+        "label": "Evitar",
+        "icon": "clock"
+       },
+       {
+        "id": "d",
+        "label": "Culpa",
+        "icon": "cloud"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ],
+       [
+        "d",
+        "a",
+        "vuelta a empezar"
+       ]
+      ],
+      "style": "cards",
+      "accent": "coral",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "120457d6",
+    "narration": "La salida es hacer la tarea ridículamente pequeña. No escribas el informe: abre el documento y trabaja dos minutos. Casi siempre, lo difícil es empezar, no continuar.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Empieza pequeño",
+      "steps": [
+       {
+        "label": "Elige una tarea",
+        "detail": "Solo una"
+       },
+       {
+        "label": "Hazla diminuta",
+        "detail": "Abre el documento"
+       },
+       {
+        "label": "Trabaja dos minutos",
+        "detail": "Nada más"
+       }
+      ]
+     }
+    },
+    "chapter": "Cómo romper el ciclo"
+   },
+   {
+    "id": "e90cec8b",
+    "narration": "Ayuda también quitar fricción. Deja el móvil en otra habitación, prepara lo que necesitas la noche anterior y decide cuándo y dónde empezarás. Menos decisiones, menos excusas.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person working at desk focused",
+      "clip_queries": [
+       "person working at desk focused",
+       "hand putting phone in drawer",
+       "notebook and coffee on desk"
+      ],
+      "alt": "woman studying with laptop at home"
+     }
+    }
+   },
+   {
+    "id": "17ad9567",
+    "narration": "Y sé amable contigo. Si fallas un día, no te castigues: vuelve al primer paso. Tu objetivo hoy no es terminar. Es empezar dos minutos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No hace falta ganas. Solo empezar dos minutos.",
+      "emphasis": "dos minutos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.07548,
+ "seconds": 16.0
+}

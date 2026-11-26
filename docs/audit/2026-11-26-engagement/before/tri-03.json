@@ -1,0 +1,456 @@
+{
+ "id": "tri-03",
+ "category": "trivia / listicle",
+ "language": "en",
+ "difficulty": "vague",
+ "prompt": "5 weird facts about space",
+ "great": "Five correct, surprising space facts (e.g. day on Venus longer than year, neutron star density), concise.",
+ "minutes": 1.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 1.0,
+  "language_passed": null,
+  "region": "US",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:28:19",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Space trivia like these is timeless and well documented in encyclopedic sources, so no recent search is needed.",
+  "queries": [
+   "weird facts about space"
+  ],
+  "searches": 2,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 2,
+   "reads": 0,
+   "sources": 7,
+   "seconds": 5.0,
+   "cost_usd": 0.0008286000000000001,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 1,
+    "retry_after": 37.0,
+    "error": "fetch failed: HTTPError 429"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://en.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 6,
+  "grounding": {
+   "beats": 5,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5220,
+  "n_sources": 4,
+  "n_fetched": 7,
+  "fetched": [
+   "5 facts about NASA you might not know",
+   "Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine",
+   "Extreme Space Facts - Cloudfront.net",
+   "Teaspoon of neutron star is 10 million tonnes. But how to extract it? | BBC Sky at Night Magazine",
+   "Neutron star - Wikipedia",
+   "NASA’s Goddard Space Flight Center on Facebook: \"What is a Neutron Star?\"",
+   "What would happen if a tablespoonful of a neutron star was brought to Earth?"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [
+  "length: the narration totals 154 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 20 words: write 4 to 6 beats of at most 40 words each (you averaged 30), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "notes": "## 5 facts about NASA you might not know\nMost people know that when you walk on a boat there’s a chance you might get some seasickness, generally caused by the vessel’s erratic motion. Likewise, astronauts sent to space can experience a similar kind of motion sickness known as space adaptation syndrome, or space sickness. Over half of astronauts experience some form of nausea, headaches, vomiting, and general discomfort while in space. The most notable cause inflicted former senator Jake Garn, who started to experience symptoms [...] ## 4. NASA invents kids’ toys NASA gets credited with a lot of inventions, some of which aren’t actually NASA inventions, such as Velcro. But one invention you might not know about is the Super Soaker. While working on a new idea for a heat pump that would use water instead of Freon, NASA scientist Dr. Lonnie Johnson was struck with inspiration when a jet of water shot across the room. ## 5. Space \n\n## Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine\nSpace is a vacuum and sound waves can’t travel through it in the same way they do on Earth, meaning you wouldn't be able to hear anything in space. But space isn’t entirely silent. Electromagnetic vibrations, like plasma waves or magnetic field interactions, can be translated into sound by instruments. NASA has even 'sonified' data from planets, stars, black holes and nebulae, turning invisible cosmic phenomena into eerie soundtracks. You can hear what this sounds like in the video above. [...] Image of Mercury taken by the MESSENGER spacecraft. Credit: NASA/JPL-Caltech - NASA/JHUAPL Technically, one Mercurian day lasts 59 Earth days, while a year lasts 88. However, due to Mercury’s very eccentric orbit and alignment with the Sun, the length of time from sunrise to sunrise, known as a ‘solar day’, is equal to 176 Earth days — twice as long as a Mercurian year. ## All the other planets co\n\n## Extreme Space Facts - Cloudfront.net\nNational Aeronautics and Space Administration www.nasa.gov Extreme Space Facts National Aeronautics and Space Administration JPL 400-1086 Rev. 1 8/10 Better stick with a rubber ducky Saturn is the only planet in our solar system that is less dense than water. It could float in a bathtub if anybody could build a bathtub big enough. To learn many more cool facts about the solar system, visit: solarsystem.nasa.gov 16 eXtreme space facts!\n\n## Teaspoon of neutron star is 10 million tonnes. But how to extract it? | BBC Sky at Night Magazine\nA teaspoon of neutron star weighs 10 million tonnes. But how could you extract a sample? # A teaspoon of neutron star weighs 10 million tonnes. But how could you extract a sample? Artist's impression of a pulsar, a spinning neutron star. Credit: Mark Garlick / Science Photo Library / Getty Images Paul Roche A teaspoon of neutron star would weigh about 10 million tonnes, equal to about 10,000,000,000 kilograms (10 billion kilograms). [...] Artist's impression of a pulsar, a spinning neutron star. A teaspoon of neutron star is a fun thought experiment. Credit: Mark Garlick / Science Photo Library / Getty Images ## Neutron stars in numbers A typical neutron star has 1.4 to 2.1 solar masses packed inside a radius of 10 to 15km, so a 1cm3 piece of neutronium would weigh 100 million tonnes. [...] Neutron stars are pretty incredible objects. They're so dense that even a small amount has an incr\n\n## Neutron star - Wikipedia\nA neutron star is so dense that one teaspoon (4.929 milliliters) of its material would have a mass over 5.5×1012kg, about 900 times the mass of the Great Pyramid of Giza.\\[b] The entire mass of the Earth at neutron star density would fit into a sphere 305 m in diameter, about the size of the Arecibo Telescope. [...] Neutron star material is remarkably dense: a normal-sized matchbox containing neutron-star material would have a weight of approximately 3 billion tonnes, the same weight as a 0.5-cubic-kilometer chunk of the Earth (a cube with edges of about 800 meters) from Earth's surface.\\\\ [...] 2. ↑ The average density of material in a neutron star of radius 10 km is 1.1×1012 kg/cm3. Therefore, 5 ml of such material has a mass of 5.5×1012 kg, or 5.5 billion metric tons. This is about 15 times the total mass of the human world population. Alternatively, 5 ml from a neutron star of radius\n\n## NASA’s Goddard Space Flight Center on Facebook: \"What is a Neutron Star?\"\n# NASA’s Goddard Space Flight Center on Facebook: \"What is a Neutron Star?\" A teaspoon of neutron star interior won't sweeten your coffee but would weigh more than a billion tons on Earth. Learn more weird facts about neutron stars here: - Author: NASA’s Goddard Space Flight Center - Posted: 2017-05-18T17:15:36+00:00 - Links: - Reactions: 674 - Comment count: 25 - Privacy: Public ## Comments\n\n## What would happen if a tablespoonful of a neutron star was brought to Earth?\nA tablespoon of the Sun, depending on where you scoop, would weigh about 5 pounds (2 kilograms) — the weight of an old laptop. A tablespoon of neutron star weighs more than 1 billion tons (900 billion kg) — the weight of Mount Everest. So while you could lift a spoonful of Sun, you can’t lift a spoonful of neutron star.",
+ "plan": {
+  "title": "5 Weird Facts About Space",
+  "description": "Five strange facts about space, from a floating planet to a teaspoon of neutron star. A quick tour of the universe's oddest details.",
+  "language": "en",
+  "mood": "bright",
+  "theme": "midnight",
+  "voices": {
+   "narrator": "Ruth"
+  },
+  "beats": [
+   {
+    "id": "38a16830",
+    "narration": "Could a planet float in your bathtub? One can, if the tub is big enough. Saturn is the only planet in our solar system that is less dense than water.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "Saturn planet rings",
+      "alt": "Saturn and its rings",
+      "ken_burns": "in"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "b521fd4a",
+    "narration": "Number two: a day on Mercury is strange. One year lasts 88 Earth days. But from sunrise to sunrise takes 176 Earth days, twice as long as its year.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Mercury's long day",
+      "nodes": [
+       {
+        "id": "y",
+        "label": "Year: 88 Earth days",
+        "icon": "clock"
+       },
+       {
+        "id": "d",
+        "label": "Sunrise to sunrise: 176 da",
+        "icon": "sun"
+       }
+      ],
+      "edges": [
+       [
+        "y",
+        "d",
+        "twice as long"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 1
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "b27c9311",
+    "narration": "Number three: space is not entirely silent. Sound can't travel through a vacuum, but instruments can turn plasma waves and other vibrations into sound. NASA has even turned data from black holes into eerie soundtracks.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Space has no sound, but we can turn its signals into music.",
+      "emphasis": "turn its signals into music"
+     }
+    },
+    "speaker": "narrator"
+   },
+   {
+    "id": "c63a6318",
+    "narration": "Number four: a teaspoon of neutron star weighs about ten million tonnes by one estimate, and other sources say far more. Either way, you could never lift that spoonful.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "10 million t",
+      "label": "One estimate for a teaspoon of neutron star"
+     }
+    },
+    "sfx": "impact",
+    "speaker": "narrator"
+   },
+   {
+    "id": "f04aab13",
+    "narration": "Number five: NASA gave us a toy. Scientist Lonnie Johnson was building a water-based heat pump when a jet of water shot across the room. That spark became the Super Soaker.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "From heat pump to Super Soaker",
+      "steps": [
+       {
+        "label": "Water heat pump idea"
+       },
+       {
+        "label": "Jet of water shoots across room"
+       },
+       {
+        "label": "The Super Soaker is born"
+       }
+      ]
+     }
+    },
+    "speaker": "narrator"
+   }
+  ],
+  "sources": [
+   {
+    "title": "5 facts about NASA you might not know",
+    "url": "https://www.astronomy.com/astronomy-for-beginners/5-facts-about-nasa-you-might-not-know",
+    "publisher": "astronomy.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Space facts. 34 things you never knew about our Universe | BBC Sky at Night Magazine",
+    "url": "https://www.skyatnightmagazine.com/space-science/facts-about-astronomy-space",
+    "publisher": "skyatnightmagazine.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Extreme Space Facts - Cloudfront.net",
+    "url": "https://d2pn8kiwq2w21t.cloudfront.net/documents/ss_extreme_poster.pdf",
+    "publisher": "d2pn8kiwq2w21t.cloudfront.net",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Teaspoon of neutron star is 10 million tonnes. But how to extract it? | BBC Sky at Night Magazine",
+    "url": "https://www.skyatnightmagazine.com/space-science/teaspoon-neutron-star",
+    "publisher": "skyatnightmagazine.com",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "US"
+ },
+ "timings": {
+  "total_s": 21.8,
+  "before_first_script_call_s": 9.0,
+  "script_s": 12.8
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "research": 0.00083,
+  "script_big": 0.07409,
+  "search_api": 0.016,
+  "total": 0.09121
+ },
+ "calls": {
+  "small": 4,
+  "tools": 2,
+  "big": 2
+ },
+ "tokens": {
+  "in": 35156,
+  "out": 2612
+ },
+ "rules": {
+  "length": {
+   "words": 155,
+   "expected_words": 134,
+   "ratio": 1.157,
+   "beats": 5,
+   "expected_beats": 4,
+   "est_speech_s": 69.3,
+   "flag_short": false,
+   "flag_long": true,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 32,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Could a planet float in your bathtub? One can, if the tub is big enough. Saturn is the only planet in our solar system that is less dense than water.",
+   "close_text": "Number five: NASA gave us a toy. Scientist Lonnie Johnson was building a water-based heat pump when a jet of water shot across the room. That spark became the Super Soaker."
+  },
+  "variety": {
+   "distinct": 5,
+   "counts": {
+    "image": 1,
+    "diagram": 1,
+    "kinetic_text": 1,
+    "stat": 1,
+    "steps": 1
+   },
+   "max_run": 1,
+   "entropy": 2.32,
+   "top_type": "image",
+   "top_share": 0.2,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 2,
+   "ungrounded_numbers": [],
+   "entities": 4,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {
+   "length": 1
+  },
+  "sources": {
+   "cited": 4,
+   "fetched": 7,
+   "notes_len": 5220,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "en",
+   "detected": "en",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "too_long"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The Saturn, Mercury, sound and Super Soaker claims match the notes, but the neutron-star figure is shaky: the notes give 10 million tonnes (BBC), 5.5 billion tonnes (Wikipedia) and over 1 billion tons (NASA). The script says 'other sources say far more', which is hedged, yet the 10 million figure is the outlier."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "It has five distinct facts with a few specifics (88 vs 176 days, Lonnie Johnson). It omits the Venus-day hook the reviewer suggests, and the neutron-star and sound facts are thin."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The numbered list is clear and easy to follow. Fact 1 is not numbered while 2–5 are, there are no real transitions, and the ending is abrupt."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The bathtub question is a decent hook. The video ends on the Super Soaker with no closing takeaway or image."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Casual, concise and suited to a general US audience."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary, and the Mercury diagram and Saturn image fit the narration. The 'steps' scene for the Super Soaker is fine, but the stat scene shows a disputed number. Beat 5 is not about space at all."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "Mostly the standard space-fact set. The Super Soaker and the sonification are slightly less common."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It gives five facts at about the right length. The Super Soaker is a NASA fact rather than a fact about space, which is off-brief."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent and grammatical. The label 'Sunrise to sunrise: 176 da' is truncated."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "instructions",
+    "severity": "major",
+    "quote": "Number five: NASA gave us a toy.",
+    "issue": "This is a fact about NASA, not about space, so it is off-topic for 'weird facts about space'.",
+    "beat": 5
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "weighs about ten million tonnes by one estimate, and other sources say far more",
+    "issue": "The 10 million tonne figure is the weakest estimate in the notes; Wikipedia and NASA give roughly 1–5.5 billion tonnes. The script chose the outlier as its headline stat and left the discrepancy unexplained.",
+    "beat": 4
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "Sunrise to sunrise: 176 da",
+    "issue": "The label is truncated on screen.",
+    "beat": 2
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Could a planet float in your bathtub?",
+    "issue": "The first fact is not numbered like the others, and the script closes with no wrap-up.",
+    "beat": 1
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "Number three: space is not entirely silent.",
+    "issue": "This is a weak, somewhat well-worn fact. The script also leaves out stronger options such as a Venus day.",
+    "beat": 3
+   }
+  ],
+  "missing": [
+   "A stronger closing line or image",
+   "Venus day longer than its year",
+   "A clearer, consistent neutron-star comparison such as Mount Everest",
+   "A fifth fact that is actually about space"
+  ],
+  "wrong_facts": [
+   "The 10 million tonne teaspoon figure is the low outlier; NASA and Wikipedia give about 1–5.5 billion tonnes.",
+   "Mercury's sunrise-to-sunrise day is 176 Earth days: correct per the notes."
+  ],
+  "would_publish": false,
+  "summary": "A tidy, readable list, but fact five is off-topic (NASA, not space), the neutron-star number is the weakest of the sourced estimates, and the video ends without a closing line. It is generic and needs a stronger fifth fact and an ending.",
+  "mean": 3.22,
+  "cost_usd": 0.02258,
+  "tokens": [
+   4680,
+   1322
+  ]
+ }
+}

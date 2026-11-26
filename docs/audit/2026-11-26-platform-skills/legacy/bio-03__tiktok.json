@@ -1,0 +1,65 @@
+{
+ "id": "bio-03",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "tell me about Alan Turing",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Alan Turing: The Man Who Cracked the Code",
+  "description": "Alan Turing was a British mathematician who helped break secret wartime codes and laid the groundwork for modern computers. His story is one of brilliance, and of a hard, unfair cost.",
+  "beats": [
+   {
+    "id": "317fe97d",
+    "narration": "He helped end a war, and he invented the idea behind your phone. Yet for years, almost nobody knew his name. Meet Alan Turing.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Alan Turing",
+      "subtitle": "The man who cracked the code"
+     }
+    }
+   },
+   {
+    "id": "2a1d64c3",
+    "narration": "Turing was a British mathematician. During the Second World War, he worked on breaking secret enemy messages, and his work helped save countless lives.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Turing's wartime work",
+      "items": [
+       "British mathematician",
+       "Broke secret codes",
+       "Saved countless lives"
+      ],
+      "style": "spotlight",
+      "accent": "indigo",
+      "emphasis": 1
+     }
+    }
+   },
+   {
+    "id": "6be11321",
+    "narration": "He also imagined machines that could follow any instructions. That idea became the modern computer. But he was treated cruelly by his own country. Remember him.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "He imagined the computer, and changed the world.",
+      "emphasis": "computer"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "biography-profile",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 74 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 16 words: 3 to 4 beats of about 19 words each (you averaged 24; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06068,
+ "seconds": 8.6
+}

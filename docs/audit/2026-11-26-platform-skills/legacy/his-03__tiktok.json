@@ -1,0 +1,69 @@
+{
+ "id": "his-03",
+ "platform": "tiktok",
+ "arm": "legacy",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A fast story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, Lehman Brothers and the government response. Learn how one bubble nearly broke the global financial system.",
+  "beats": [
+   {
+    "id": "c48c84c4",
+    "narration": "Banks handed home loans to people who couldn't repay them. Then they sold those loans to the world. That was the 2008 crisis.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Loans nobody could repay, sold to the whole world.",
+      "emphasis": "sold to the whole world"
+     }
+    }
+   },
+   {
+    "id": "2e32ebf7",
+    "narration": "Housing prices boomed, so subprime mortgages spread. Banks bundled them into securities and sold them on. Everyone assumed prices would keep rising.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "How it built up",
+      "items": [
+       "Housing boom",
+       "Subprime mortgages",
+       "Securitization"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "house",
+       "banknote",
+       "globe"
+      ]
+     }
+    }
+   },
+   {
+    "id": "865e2d44",
+    "narration": "Prices fell, defaults spread, and Lehman Brothers collapsed. Governments stepped in with bailouts. The lesson: hidden risk doesn't disappear. It just waits.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Lehman Brothers collapses",
+      "subtitle": "Governments step in with bailouts"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 67 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 9 words: 3 to 4 beats of about 19 words each (you averaged 22; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06084,
+ "seconds": 8.3
+}

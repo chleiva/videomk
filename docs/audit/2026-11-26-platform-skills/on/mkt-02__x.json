@@ -1,0 +1,87 @@
+{
+ "id": "mkt-02",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Capture every idea before it disappears",
+  "description": "A launch video for a note-taking app that captures ideas fast and keeps them easy to find. See how writing, organizing and searching work in one place.",
+  "beats": [
+   {
+    "id": "6475667e",
+    "narration": "Your best idea lasts a moment. Then it's gone. Buried in a sticky note, a screenshot, or a chat you will never scroll back to.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Your best idea is gone in seconds.",
+      "emphasis": "gone"
+     }
+    }
+   },
+   {
+    "id": "e3271744",
+    "narration": "Meet our new note-taking app. Open it, type, and your thought is saved. No folders to pick. No buttons to hunt for. Just write.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Just write",
+      "items": [
+       "Open",
+       "Type",
+       "Saved"
+      ],
+      "style": "spotlight",
+      "accent": "indigo"
+     }
+    }
+   },
+   {
+    "id": "f4985b20",
+    "narration": "Later, search finds it instantly. Notes link together on their own, and everything stays in sync across your phone, tablet and laptop.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "search",
+        "label": "Instant search"
+       },
+       {
+        "icon": "link",
+        "label": "Linked notes"
+       },
+       {
+        "icon": "cloud",
+        "label": "Always in sync"
+       }
+      ],
+      "title": "Find it anywhere"
+     }
+    }
+   },
+   {
+    "id": "bc9b4cd7",
+    "narration": "Stop losing ideas. Start keeping them. Our note-taking app is here. Download it today and write down your next big thing.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Keep every idea.",
+      "subtitle": "The new note-taking app is here"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "grounding: 3 beats had unsupported specifics, 1 rewritten"
+ ],
+ "cost_usd": 0.06828,
+ "seconds": 14.2
+}

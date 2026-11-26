@@ -1,0 +1,214 @@
+{
+ "id": "how-01",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely, Step by Step",
+  "description": "Learn how to change a flat tire safely, from pulling over to tightening the lug nuts. A calm, step-by-step guide for any driver.",
+  "beats": [
+   {
+    "id": "08b0d43e",
+    "narration": "A flat tire can strand you on the roadside. But you can fix it yourself in about six steps, with tools already in your trunk. Here is how.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car parked on roadside",
+      "alt": "stopped car on highway shoulder"
+     }
+    }
+   },
+   {
+    "id": "1370de6f",
+    "narration": "First, find a safe, flat spot away from traffic. Turn on your hazard lights, put the car in park, and set the parking brake firmly.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Make it safe",
+      "steps": [
+       {
+        "label": "Find a flat, safe spot"
+       },
+       {
+        "label": "Hazard lights on"
+       },
+       {
+        "label": "Park and set the brake"
+       }
+      ]
+     }
+    },
+    "chapter": "Get ready"
+   },
+   {
+    "id": "40e14b61",
+    "narration": "Next, gather what you need. That means the spare tire, the jack, and the lug wrench. Your owner's manual shows where each one is stored.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "tire",
+        "label": "Spare tire"
+       },
+       {
+        "icon": "car",
+        "label": "Jack"
+       },
+       {
+        "icon": "wrench",
+        "label": "Lug wrench"
+       },
+       {
+        "icon": "book",
+        "label": "Owner's manual"
+       }
+      ],
+      "title": "What you need"
+     }
+    }
+   },
+   {
+    "id": "05181d4b",
+    "narration": "Before lifting the car, loosen the lug nuts. Turn the wrench counterclockwise, just a half turn each. Do not remove them yet. The ground still holds the wheel steady.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "hands using lug wrench on wheel",
+      "alt": "loosening wheel nuts with a wrench"
+     }
+    },
+    "chapter": "Remove the tire"
+   },
+   {
+    "id": "77a526f7",
+    "narration": "Now place the jack at the spot the manual shows, under the car's frame. Raise the car until the flat tire is a few inches off the ground.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Lifting the car",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Find jack point",
+        "icon": "book"
+       },
+       {
+        "id": "b",
+        "label": "Place the jack",
+        "icon": "car"
+       },
+       {
+        "id": "c",
+        "label": "Raise the car",
+        "icon": "x-line-top"
+       },
+       {
+        "id": "d",
+        "label": "Tire off the ground"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "b46a09e5",
+    "narration": "Unscrew the lug nuts the rest of the way and keep them together in one safe place. Then pull the flat tire straight toward you and set it aside.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "man removing car wheel",
+      "alt": "taking a tire off a car"
+     }
+    }
+   },
+   {
+    "id": "6feecb0a",
+    "narration": "Line the spare up with the wheel bolts and push it on. Thread the lug nuts back by hand first, until they are snug.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Mount the spare",
+      "items": [
+       "Line up the bolts",
+       "Push the spare on",
+       "Thread nuts by hand"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "",
+       "hand",
+       "wrench"
+      ]
+     }
+    },
+    "chapter": "Fit the spare"
+   },
+   {
+    "id": "b669d9cb",
+    "narration": "Lower the car until the tire touches the ground. Then tighten the lug nuts with the wrench, working in a star pattern across the wheel so it seats evenly.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tighten the nuts in a star pattern, not in a circle.",
+      "emphasis": "star pattern"
+     }
+    }
+   },
+   {
+    "id": "591b1e48",
+    "narration": "Lower the car fully, remove the jack, and give each nut one last firm turn. Stow your tools and the flat tire in the trunk.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Final check",
+      "items": [
+       "Car fully lowered",
+       "Jack removed",
+       "Nuts tight",
+       "Tools and flat stowed"
+      ]
+     }
+    }
+   },
+   {
+    "id": "0005c543",
+    "narration": "A spare is only temporary. Drive gently, check its pressure soon, and get the flat repaired. Stay calm, work in order, and you can handle this.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "car driving on open road",
+      "alt": "driving down a country road"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.13071,
+ "seconds": 32.5
+}

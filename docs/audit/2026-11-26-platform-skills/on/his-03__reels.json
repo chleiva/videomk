@@ -1,0 +1,77 @@
+{
+ "id": "his-03",
+ "platform": "reels",
+ "arm": "on",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "The 2008 financial crisis grew from a US housing boom, subprime mortgages and securitization. It climaxed with Lehman Brothers' bankruptcy and a massive government response.",
+  "beats": [
+   {
+    "id": "fd0786ba",
+    "narration": "Banks handed mortgages to almost anyone. Housing prices soared, and risky subprime loans were bundled into securities that rating agencies called safe.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "alt": "residential neighborhood from above"
+     }
+    },
+    "chapter": "The boom"
+   },
+   {
+    "id": "32bc0535",
+    "narration": "Then prices fell. Borrowers stopped paying, those securities collapsed, and in September 2008 Lehman Brothers went bankrupt.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "Sept 2008",
+      "label": "Lehman Brothers collapses"
+     }
+    },
+    "sfx": "impact"
+   },
+   {
+    "id": "a0c6352f",
+    "narration": "Panic spread worldwide. Washington stepped in with the bailout program TARP to steady the banks.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The response",
+      "items": [
+       "Panic spreads",
+       "TARP bailout",
+       "Banks stabilized"
+      ],
+      "style": "spotlight",
+      "accent": "amber"
+     }
+    }
+   },
+   {
+    "id": "a5a605f9",
+    "narration": "One lesson: when everyone treats risk as safe, one fall can shake the world.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Hidden risk can shake the whole world.",
+      "emphasis": "Hidden risk"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "history-story"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 68 words in 4 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 10 words: 3 to 4 beats of about 19 words each (you averaged 17; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06996,
+ "seconds": 10.1
+}

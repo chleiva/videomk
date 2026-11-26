@@ -1,0 +1,247 @@
+{
+ "id": "cmp-01",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A fair comparison of React and Vue for beginners, judged on learning curve, ecosystem and jobs, and your own goals. Find out which one fits your situation.",
+  "beats": [
+   {
+    "id": "6a88a755",
+    "narration": "You want to build modern websites, and everyone tells you something different. Learn React. No, learn Vue. What if the popular answer is not the best answer for you?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "React or Vue?",
+      "subtitle": "Which one should you learn first?"
+     }
+    },
+    "chapter": "The decision"
+   },
+   {
+    "id": "fc7c1898",
+    "narration": "Both are JavaScript tools for building user interfaces. Both break a page into small reusable pieces called components. So the real difference is not what they do, but how they feel to use.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Same big idea",
+      "nodes": [
+       {
+        "id": "js",
+        "label": "JavaScript",
+        "icon": "code"
+       },
+       {
+        "id": "comp",
+        "label": "Components",
+        "icon": "puzzle"
+       },
+       {
+        "id": "ui",
+        "label": "User interface",
+        "icon": "cast"
+       }
+      ],
+      "edges": [
+       [
+        "js",
+        "comp",
+        "build"
+       ],
+       [
+        "comp",
+        "ui",
+        "make"
+       ]
+      ],
+      "style": "pills",
+      "accent": "sky"
+     }
+    }
+   },
+   {
+    "id": "fd436f76",
+    "narration": "Let's judge them on three things. First, the learning curve. Second, the ecosystem and jobs. Third, which one fits your goals. Keep these three in mind as we go.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Three criteria",
+      "items": [
+       "Learning curve",
+       "Ecosystem and jobs",
+       "Your goals"
+      ],
+      "style": "rail",
+      "accent": "indigo",
+      "icons": [
+       "book",
+       "briefcase",
+       "target"
+      ]
+     }
+    }
+   },
+   {
+    "id": "46b46023",
+    "narration": "Vue is often described as gentle for beginners. Its templates look like ordinary HTML, and its structure is clear. You can get something working quickly, which keeps motivation high.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person coding on laptop",
+      "clip_queries": [
+       "person coding on laptop",
+       "hands typing on keyboard"
+      ],
+      "alt": "developer typing code at desk"
+     }
+    },
+    "chapter": "Learning curve"
+   },
+   {
+    "id": "88e09766",
+    "narration": "React asks you to think more in JavaScript. You write markup inside your code, which feels strange at first. But once it clicks, many people find it flexible and very consistent.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Flexible, JavaScript-first"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Gentle, HTML-like"
+      },
+      "rows": [
+       {
+        "label": "First impression",
+        "a": "Markup inside code",
+        "b": "Familiar templates"
+       },
+       {
+        "label": "Structure",
+        "a": "You choose more",
+        "b": "More guidance"
+       },
+       {
+        "label": "Early progress",
+        "a": "Slower start",
+        "b": "Quick wins"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "f6786b86",
+    "narration": "React has a very large community, and many companies use it. That usually means more tutorials, more libraries and more job listings. Vue is smaller, but it is well loved and has solid tools.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Ecosystem and jobs",
+      "items": [
+       "React: bigger community",
+       "React: more job listings",
+       "Vue: smaller but solid"
+      ],
+      "style": "cards",
+      "accent": "amber"
+     }
+    },
+    "chapter": "Ecosystem and jobs"
+   },
+   {
+    "id": "359b56a4",
+    "narration": "Job markets differ by country and city, so check listings where you live. Look at what local employers ask for, because that is the honest way to decide.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "people working in office",
+      "clip_queries": [
+       "people working in office",
+       "person searching jobs on laptop"
+      ],
+      "alt": "team working at computers"
+     }
+    }
+   },
+   {
+    "id": "7ea6781b",
+    "narration": "Here is the good news. Skills transfer. Components, state and data flow work in both. Learn one well, and the second takes weeks, not months.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Learn one well, and the second comes much faster.",
+      "emphasis": "Learn one well"
+     }
+    },
+    "chapter": "Your goals"
+   },
+   {
+    "id": "0ebb267a",
+    "narration": "So decide by situation. If you want the most job options, pick React. If you want a smooth start or a personal project, pick Vue.",
+    "scene": {
+     "type": "matrix",
+     "props": {
+      "x_axis": {
+       "low": "Gentle start",
+       "high": "Steeper start"
+      },
+      "y_axis": {
+       "low": "Fewer jobs",
+       "high": "More jobs"
+      },
+      "items": [
+       {
+        "label": "React",
+        "x": 0.75,
+        "y": 0.8
+       },
+       {
+        "label": "Vue",
+        "x": 0.25,
+        "y": 0.35
+       }
+      ],
+      "title": "Pick by goal",
+      "quadrants": [
+       "",
+       "React",
+       "",
+       "Vue"
+      ]
+     }
+    }
+   },
+   {
+    "id": "00bf754b",
+    "narration": "The takeaway: do not agonize. Pick one today, build a small project this week, and finish it. Finishing a project teaches more than any debate ever will.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Your next step",
+      "items": [
+       "Pick one today",
+       "Build a small project",
+       "Finish it"
+      ],
+      "style": "spotlight",
+      "accent": "emerald",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.12477,
+ "seconds": 39.0
+}

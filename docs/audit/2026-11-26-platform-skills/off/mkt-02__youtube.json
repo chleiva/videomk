@@ -1,0 +1,262 @@
+{
+ "id": "mkt-02",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Meet the note app that finds your ideas for you",
+  "description": "A launch video for a new note-taking app that keeps ideas easy to capture and easy to find. See how capture, organize and search work in three simple steps.",
+  "beats": [
+   {
+    "id": "26c6262e",
+    "narration": "You had a great idea this morning. Where is it now? Maybe on a sticky note, in a text to yourself, or in a notebook buried in your bag.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "messy desk with sticky notes",
+      "clip_queries": [
+       "messy desk with sticky notes",
+       "person searching through notebooks",
+       "hands typing on phone"
+      ],
+      "alt": "cluttered desk with notebooks and papers"
+     }
+    },
+    "chapter": "The problem"
+   },
+   {
+    "id": "24b4d5aa",
+    "narration": "Ideas do not vanish because they are bad. They vanish because they are scattered. Every lost note costs you time, focus, and sometimes the best thought of your week.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "What scattered notes cost",
+      "items": [
+       "Lost ideas",
+       "Wasted time",
+       "Broken focus"
+      ],
+      "style": "spotlight",
+      "accent": "coral",
+      "icons": [
+       "lightbulb",
+       "clock",
+       "target"
+      ]
+     }
+    }
+   },
+   {
+    "id": "9f315ef6",
+    "narration": "So we built one calm place for everything you think. A note-taking app that catches your ideas fast, keeps them tidy, and brings them back the moment you need them.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "One calm place for everything you think.",
+      "emphasis": "One calm place"
+     }
+    }
+   },
+   {
+    "id": "be20254a",
+    "narration": "It works in three simple steps. First, capture. Second, organize. Third, find. Each step is built to take seconds, so your notes never slow you down.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Three steps",
+      "steps": [
+       {
+        "label": "Capture",
+        "detail": "Get the idea down fast"
+       },
+       {
+        "label": "Organize",
+        "detail": "Keep it tidy"
+       },
+       {
+        "label": "Find",
+        "detail": "Bring it back instantly"
+       }
+      ]
+     }
+    },
+    "sfx": "click",
+    "chapter": "How it works"
+   },
+   {
+    "id": "e8dd59b2",
+    "narration": "Capture is instant. Open the app, start typing, and your note is saved. Jot a quick line on your phone while walking, or write long pages at your desk.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person walking using smartphone",
+      "clip_queries": [
+       "person walking using smartphone",
+       "person typing on laptop cafe"
+      ],
+      "alt": "woman using smartphone while walking"
+     }
+    }
+   },
+   {
+    "id": "028a60cf",
+    "narration": "Organize without the chore. Group notes into folders, add simple tags, or just let them sit in order. Your notes stay neat, and you never have to think about filing.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Keep it tidy",
+      "nodes": [
+       {
+        "id": "n",
+        "label": "Notes",
+        "icon": "notebook-dot"
+       },
+       {
+        "id": "f",
+        "label": "Folders",
+        "icon": "folder"
+       },
+       {
+        "id": "t",
+        "label": "Tags",
+        "icon": "tag"
+       },
+       {
+        "id": "o",
+        "label": "Order",
+        "icon": "list"
+       }
+      ],
+      "edges": [
+       [
+        "n",
+        "f"
+       ],
+       [
+        "n",
+        "t"
+       ],
+       [
+        "f",
+        "o"
+       ],
+       [
+        "t",
+        "o"
+       ]
+      ],
+      "style": "pills",
+      "accent": "teal",
+      "emphasis": 0
+     }
+    }
+   },
+   {
+    "id": "5dc855b6",
+    "narration": "Finding is where it shines. Type a word or a few letters, and the right note appears. No digging through pages, no scrolling forever. Your idea is back in seconds.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Search that just works",
+      "items": [
+       "Type a word",
+       "See the note",
+       "Pick up where you left off"
+      ],
+      "style": "icons",
+      "accent": "indigo",
+      "icons": [
+       "search",
+       "notebook-dot",
+       "play"
+      ]
+     }
+    }
+   },
+   {
+    "id": "123e3410",
+    "narration": "Your notes also go where you go. Write on your phone, then continue on your laptop. Everything stays in sync, so the latest version is always the one in front of you.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "laptop and phone on desk",
+      "clip_queries": [
+       "laptop and phone on desk",
+       "person working on tablet at home"
+      ],
+      "alt": "person switching between phone and laptop"
+     }
+    }
+   },
+   {
+    "id": "761ab819",
+    "narration": "Think of the people who need this. Students gathering lessons, writers chasing a sentence, teams planning a project, anyone with a head full of thoughts and no place to put them.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "book",
+        "label": "Students"
+       },
+       {
+        "icon": "pen",
+        "label": "Writers"
+       },
+       {
+        "icon": "people",
+        "label": "Teams"
+       },
+       {
+        "icon": "lightbulb",
+        "label": "Thinkers"
+       }
+      ],
+      "title": "Made for anyone with ideas"
+     }
+    },
+    "chapter": "Why it matters"
+   },
+   {
+    "id": "f93ea523",
+    "narration": "A good note-taking app should disappear. It should feel like thinking out loud, then quietly remember everything for you. That is the promise we built this around.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person writing in notebook by window",
+      "clip_queries": [
+       "person writing in notebook by window",
+       "calm morning workspace coffee"
+      ],
+      "alt": "calm morning workspace with coffee"
+     }
+    }
+   },
+   {
+    "id": "3c2126a5",
+    "narration": "So stop chasing lost ideas. Capture them, keep them, find them. Start your first note today, and let your best thoughts finally stay put.",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "Capture it. Keep it. Find it.",
+      "subtitle": "Your ideas, finally in one place"
+     }
+    },
+    "sfx": "impact"
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 317 words in 11 beats but a 2-minute video needs about 267 (at most 280). Cut about 50 words: write 9 to 11 beats of at most 35 words each (you averaged 28), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 245 words",
+  "grounding: 6 beats had unsupported specifics, 0 rewritten"
+ ],
+ "cost_usd": 0.12891,
+ "seconds": 45.2
+}

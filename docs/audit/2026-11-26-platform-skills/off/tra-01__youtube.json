@@ -1,0 +1,173 @@
+{
+ "id": "tra-01",
+ "platform": "youtube",
+ "arm": "off",
+ "minutes": 2.0,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A three-day plan for Lisbon, from its hilltop viewpoints and old trams to custard tarts and grilled fish. Learn which areas to explore each day and what to taste along the way.",
+  "beats": [
+   {
+    "id": "5b1495fb",
+    "narration": "Lisbon is a city built on hills, where yellow trams rattle past tiled walls and the smell of fresh pastry drifts down every street. Three days is enough to fall for it.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram narrow street",
+      "clip_queries": [
+       "yellow tram narrow street",
+       "hilltop city rooftops sunset"
+      ],
+      "alt": "yellow tram in narrow street"
+     }
+    },
+    "chapter": "Day one: the old heart"
+   },
+   {
+    "id": "2069da70",
+    "narration": "Start in Alfama, the oldest neighborhood. Wander its narrow lanes, climb to a viewpoint over the red rooftops and the river, and stop wherever you hear music drifting from a doorway.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Alfama Lisbon narrow street",
+       "Lisbon viewpoint red rooftops",
+       "Lisbon Castle Sao Jorge"
+      ],
+      "alt": "Alfama streets and viewpoints"
+     }
+    }
+   },
+   {
+    "id": "a5138e73",
+    "narration": "For lunch, order grilled sardines or a simple bowl of fish stew. Finish the evening with a small glass of cherry liqueur, sipped standing outside a tiny bar.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "grilled fish on grill",
+      "clip_queries": [
+       "grilled fish on grill",
+       "friends drinking outside bar evening"
+      ],
+      "alt": "cooking sardines outdoors"
+     }
+    }
+   },
+   {
+    "id": "8de99acb",
+    "narration": "On day two, head west to Belem. Here you will find the Jeronimos Monastery, the Belem Tower on the water, and the monument to the explorers who sailed from this river.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Jeronimos Monastery Lisbon",
+       "Belem Tower Lisbon",
+       "Monument to the Discoveries Lisbon"
+      ],
+      "alt": "Belem landmarks"
+     }
+    },
+    "chapter": "Day two: Belem and the river"
+   },
+   {
+    "id": "99c27e61",
+    "narration": "Then comes the famous reward: the custard tart. Warm, crisp, creamy, dusted with cinnamon. Eat one fresh from the oven, then probably a second one.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "custard tarts bakery",
+      "clip_queries": [
+       "custard tarts bakery",
+       "baker pulling pastries from oven"
+      ],
+      "alt": "pastries fresh from oven"
+     }
+    }
+   },
+   {
+    "id": "e69cbe55",
+    "narration": "Spend the afternoon along the riverfront. Walk, rent a bike, or sit on the steps by the water and watch the light turn gold over the bridge.",
+    "scene": {
+     "type": "map",
+     "props": {
+      "mode": "route",
+      "title": "Day two route",
+      "caption": "From Belem along the river",
+      "stops": [
+       "Belem",
+       "Lisbon"
+      ]
+     }
+    }
+   },
+   {
+    "id": "41d6963a",
+    "narration": "Day three belongs to the center. Browse a covered food market, where stalls sell fruit, cheese, cured ham and fresh seafood, and eat your lunch right there.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "food market stalls people",
+      "clip_queries": [
+       "food market stalls people",
+       "fresh seafood on ice market"
+      ],
+      "alt": "busy covered market"
+     }
+    },
+    "chapter": "Day three: markets and nightlife"
+   },
+   {
+    "id": "0b685b50",
+    "narration": "Ride a vintage tram up through the hills, then wander the shopping streets of Baixa and Chiado, with their cafes, bookshops and street musicians.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Lisbon tram 28",
+       "Rua Augusta arch Lisbon",
+       "Chiado Lisbon cafe"
+      ],
+      "alt": "Central Lisbon sights"
+     }
+    }
+   },
+   {
+    "id": "a8058738",
+    "narration": "As night falls, find a small restaurant for salt cod, a classic Portuguese favorite, and end with live fado, the soulful music that is the voice of Lisbon.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "restaurant dinner evening candles",
+      "clip_queries": [
+       "restaurant dinner evening candles",
+       "guitar player performing at night"
+      ],
+      "alt": "people dining at night"
+     }
+    }
+   },
+   {
+    "id": "704afe2b",
+    "narration": "So in three days you can climb, eat, wander and listen. Lisbon rewards slow walking. Leave room for one more tart, and you will already be planning your return.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Lisbon rewards slow walking and one more tart.",
+      "emphasis": "slow walking"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.04293,
+ "seconds": 13.9
+}

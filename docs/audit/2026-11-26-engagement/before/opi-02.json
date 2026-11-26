@@ -1,0 +1,485 @@
+{
+ "id": "opi-02",
+ "category": "opinion / essay",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "por qué deberíamos leer más",
+ "great": "Tesis clara y personal, argumentos concretos (empatía, concentración, vocabulario) con alguna evidencia verificable, ejemplos, cierre memorable; voz de ensayo, no lista genérica.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:28:02",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "Explicar por qué leer más es una cuestión atemporal basada en investigación establecida sobre beneficios cognitivos, emocionales y educativos de la lectura; no depende de información reciente.",
+  "queries": [
+   "beneficios de la lectura",
+   "por qué leer más"
+  ],
+  "searches": null,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": null,
+  "fetch_errors": null,
+  "fetch_errors_n": null,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 3185,
+  "n_sources": 2,
+  "n_fetched": 4,
+  "fetched": [
+   "Lectura",
+   "Dirección de Bibliotecas y Promoción de la Lectura",
+   "Concepción de salud en Psicología social",
+   "Desarrollo cognitivo"
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Lectura\nLa lectura es la interpetación (por parte de una persona, el lector/la lectora) del significado de algún tipo de información o ideas almacenadas en un soporte (véase palabra y texto) y transmitidas mediante algún tipo de código (usualmente un lenguaje, que puede ser visual o táctil; por ejemplo, el sistema braille) o de otros que pueden no estar basados en el lenguaje, tales como la notación o los pictogramas. Se usa generalmente para fines informativos, de enseñanza-aprendizaje, de análisis y de comprensión. Se trata de una de las habilidades humanas para descifrar letras o cualquier otro idioma.\n \nMax Weber ha planteado tres definiciones para la lectura:\nSaber pronunciar las palabras escritas.\nSaber identificar las palabras y el significado de cada una de ellas.\nSaber extraer y comprender el significado de un texto.​\n\n## Dirección de Bibliotecas y Promoción de la Lectura\nLa Dirección de Bibliotecas y Promoción de la Lectura es un organismo oficial dependiente del Instituto Cultural de la provincia de Buenos Aires, República Argentina, cuyo objetivo es la administración del denominado Sistema de Bibliotecas, creado a partir del Decreto Ley N.º 9319 de 1979, a través de la cual las bibliotecas que lo integren tienen la posibilidad de recibir un subsidio mensual, asistencia técnica, asesoramiento bibliográfico, cursos, talleres y bibliografía, entre otros beneficios por parte del Estado Provincial.\n\n## Concepción de salud en Psicología social\nLa psicología social, fundada por Kurt lewin,​ es definida como una ciencia que estudia las relaciones entre lo interpersonal y la relación con la sociedad. La psicología social de Enrique Pichon-Rivière comparte este amplio campo de problematizaciones, aunque particularmente para este autor la psicología social es la \"ciencia de las interacciones orientadas hacia un cambio social planificado. La psicología social que postulamos tiene como objeto de estudio el desarrollo y transformación de una relación dialéctica, la que se da entre estructura social y fantasía inconsciente del sujeto, asentada sobre sus relaciones de necesidad. Dicho de otra manera, la relación entre estructura social y configuración del mundo interno del sujeto, relación que es abordada a través de la noción de vínculo\".​ Esto hace que la perspectiva pichoniana sobre la concepción de salud y enfermedad incluya algunas categorías particulares, principalmente vinculadas a la determinación de la salud o enfermedad en virtud de capacidad para participar activamente (con capacidad de transformación) en el mundo.\nDesde la Teoría del Vínculo, no puede entenderse la emergencia de la enfermedad mental como un hecho aislado…\n\n## Desarrollo cognitivo\nEl desarrollo cognitivo es un campo de la neurociencia y de la psicología que estudia el desarrollo de capacidades cognitivas tales como la memoria, la atención, el lenguaje, la percepción, la solución de problemas o la inteligencia y la planificación. Estas capacidades involucran funciones cerebrales sofisticadas y únicas e implican los procesos de control, como por ejemplo los que se utilizan cuando se persigue una meta y se requiere impedir las diferencias del ser Humano.",
+ "plan": {
+  "title": "Por qué deberíamos leer más",
+  "description": "Un recorrido breve por lo que es leer y por lo que ocurre en tu mente cuando lo haces. Descubre por qué leer más entrena la memoria, la atención y el lenguaje.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "796a477b",
+    "narration": "¿Cuándo fue la última vez que te perdiste en un libro? Leer parece algo tranquilo, casi pasivo. Pero por dentro, tu mente trabaja mucho más de lo que imaginas.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person reading book on sofa",
+      "alt": "reader with open book at home"
+     }
+    },
+    "chapter": "Un hábito silencioso"
+   },
+   {
+    "id": "5c4bd3af",
+    "narration": "Empecemos por lo básico. Leer es interpretar el significado de información guardada en un soporte y transmitida mediante un código, normalmente un idioma. Puede ser visual, o táctil, como el braille.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Lectura",
+      "definition": "Interpretación, por parte del lector, del significado de ideas almacenadas en un soporte y transmitidas mediante un código, como un idioma."
+     }
+    }
+   },
+   {
+    "id": "1cb589ca",
+    "narration": "Max Weber planteó tres definiciones. Primero, saber pronunciar las palabras escritas. Segundo, identificar las palabras y su significado. Tercero, extraer y comprender el significado de un texto.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Tres formas de entender leer",
+      "steps": [
+       {
+        "label": "Pronunciar las palabras"
+       },
+       {
+        "label": "Identificar su significado"
+       },
+       {
+        "label": "Comprender el texto"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "71c2e9e1",
+    "narration": "Y aquí viene lo importante: la tercera es la que de verdad cuenta. Leer no es pasar los ojos por las letras. Es entender, y entender exige pensar.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Leer no es mirar letras: es entender, y entender exige pensar.",
+      "emphasis": "entender"
+     }
+    }
+   },
+   {
+    "id": "132d2885",
+    "narration": "Ese esfuerzo tiene premio. El desarrollo cognitivo estudia cómo crecen capacidades como la memoria, la atención, el lenguaje, la percepción, la solución de problemas y la planificación.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "brain",
+        "label": "Memoria"
+       },
+       {
+        "icon": "eye",
+        "label": "Atención"
+       },
+       {
+        "icon": "chat",
+        "label": "Lenguaje"
+       },
+       {
+        "icon": "puzzle",
+        "label": "Resolver problemas"
+       }
+      ],
+      "title": "Capacidades cognitivas"
+     }
+    },
+    "chapter": "Qué gana tu cerebro"
+   },
+   {
+    "id": "baacb15b",
+    "narration": "Cuando lees, recuerdas personajes e ideas, mantienes la atención durante páginas enteras y encuentras palabras nuevas. Es un gimnasio para funciones cerebrales sofisticadas, y cada capítulo es una sesión de entrenamiento.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "student studying in library",
+      "clip_queries": [
+       "student studying in library",
+       "hands turning book pages",
+       "bookshelves in library"
+      ],
+      "alt": "person concentrating while reading"
+     }
+    }
+   },
+   {
+    "id": "73a356b1",
+    "narration": "Además, leer sirve para informarse, aprender, analizar y comprender. Cada texto es una ventana a otra forma de pensar, y comprender a otros nos ayuda a vivir mejor con ellos.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Para qué sirve leer",
+      "items": [
+       "Informarse",
+       "Aprender",
+       "Analizar",
+       "Comprender"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "book",
+       "",
+       "search",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "e41e89d2",
+    "narration": "Muchas bibliotecas apoyan este hábito. En Buenos Aires, por ejemplo, un sistema oficial de bibliotecas ofrece asistencia técnica, cursos y talleres. Leer no tiene por qué ser un camino solitario.",
+    "scene": {
+     "type": "image",
+     "props": {
+      "image_query": "public library reading room",
+      "alt": "sala de lectura de una biblioteca",
+      "ken_burns": "in"
+     }
+    },
+    "chapter": "Cómo empezar"
+   },
+   {
+    "id": "7e5a8901",
+    "narration": "No necesitas empezar con una novela enorme. Elige algo que te guste, lee unos minutos al día y deja el móvil lejos. La constancia pesa más que la cantidad.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Un hábito sencillo",
+      "items": [
+       "Elige un tema que te guste",
+       "Lee unos minutos cada día",
+       "Deja el móvil lejos"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c17cfca9",
+    "narration": "Así que recuerda: leer es entender, y entender entrena tu mente. Abre hoy un libro, aunque sea por diez minutos, y empieza a notar la diferencia.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "open book on wooden table",
+      "alt": "book beside coffee cup morning light"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Lectura",
+    "url": "https://es.wikipedia.org/wiki/Lectura",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   },
+   {
+    "title": "Desarrollo cognitivo",
+    "url": "https://es.wikipedia.org/wiki/Desarrollo_cognitivo",
+    "publisher": "Wikipedia (es)",
+    "license": "CC BY-SA 4.0"
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 16.8,
+  "before_first_script_call_s": 4.7,
+  "script_s": 12.2
+ },
+ "cost": {
+  "script_small": 0.0003,
+  "script_big": 0.04268,
+  "search_api": 0.0,
+  "total": 0.04298
+ },
+ "calls": {
+  "small": 3,
+  "big": 1
+ },
+ "tokens": {
+  "in": 14416,
+  "out": 1994
+ },
+ "rules": {
+  "length": {
+   "words": 288,
+   "expected_words": 267,
+   "ratio": 1.079,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 129.5,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 29,
+   "hook_greeting": false,
+   "hook_question": true,
+   "hook_long": false,
+   "close_words": 26,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "¿Cuándo fue la última vez que te perdiste en un libro? Leer parece algo tranquilo, casi pasivo. Pero por dentro, tu mente trabaja mucho más de lo que imaginas.",
+   "close_text": "Así que recuerda: leer es entender, y entender entrena tu mente. Abre hoy un libro, aunque sea por diez minutos, y empieza a notar la diferencia."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "clip": 3,
+    "definition": 1,
+    "steps": 1,
+    "kinetic_text": 1,
+    "icons": 1,
+    "bullets": 1,
+    "image": 1,
+    "checklist": 1
+   },
+   "max_run": 1,
+   "entropy": 2.85,
+   "top_type": "clip",
+   "top_share": 0.3,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 0,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "es entender y entender",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 2,
+   "fetched": 4,
+   "notes_len": 3185,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.0,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": []
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The notes are thin and the script uses them correctly, but it presents the cognitive-development definition as if reading trains those abilities, and it attributes a reading definition to Max Weber without context. 'Es un gimnasio' is stated as fact without evidence."
+   },
+   "coverage": {
+    "score": 2,
+    "reason": "The core arguments (empathy, concentration, vocabulary) get only a passing mention and have no verifiable evidence. Much of the time goes to dictionary definitions and the Buenos Aires library system."
+   },
+   "structure": {
+    "score": 3,
+    "reason": "The order is clear and has chapters, but the first third is spent on definitions before the argument starts. The 'Para qué sirve leer' beat repeats ideas from earlier beats."
+   },
+   "hook_ending": {
+    "score": 3,
+    "reason": "The opening question is decent, though generic. The ending is a standard call to action, with a bare summary and 'abre hoy un libro'."
+   },
+   "tone": {
+    "score": 3,
+    "reason": "The tone is friendly and uses 'tú', but it reads like a school explainer rather than a personal essay voice."
+   },
+   "visuals": {
+    "score": 3,
+    "reason": "The scene types vary and match the narration. The stock clips are generic, and the definition and steps scenes are text-heavy."
+   },
+   "originality": {
+    "score": 2,
+    "reason": "It leans on generic claims ('gimnasio', 'ventana a otra forma de pensar') and has no surprising fact, study or example."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "It is Spanish and about the right length, but it lacks the clear personal thesis and the concrete arguments the brief calls for. Most of the arguments are not developed."
+   },
+   "language": {
+    "score": 4,
+    "reason": "The Spanish is fluent and correct, with a few slightly stiff phrases."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Max Weber planteó tres definiciones.",
+    "issue": "The dictionary definitions take up two beats and add little to the case for reading more. The video never gets to empathy or vocabulary backed by evidence.",
+    "beat": 3
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Es un gimnasio para funciones cerebrales sofisticadas, y cada capítulo es una sesión de entrenamiento.",
+    "issue": "A causal claim about brain training with no supporting evidence. The notes only define cognitive development.",
+    "beat": 6
+   },
+   {
+    "dimension": "originality",
+    "severity": "minor",
+    "quote": "Cada texto es una ventana a otra forma de pensar",
+    "issue": "A cliché. The empathy argument is asserted rather than shown with an example.",
+    "beat": 7
+   },
+   {
+    "dimension": "coverage",
+    "severity": "minor",
+    "quote": "En Buenos Aires, por ejemplo, un sistema oficial de bibliotecas",
+    "issue": "Irrelevant to a viewer in Spain and off the topic of why we should read.",
+    "beat": 8
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Además, leer sirve para informarse, aprender, analizar y comprender.",
+    "issue": "Repeats the definition and 'comprender' from earlier beats.",
+    "beat": 7
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Ese esfuerzo tiene premio.",
+    "issue": "It links reading to cognitive development, but the notes do not establish that connection.",
+    "beat": 5
+   }
+  ],
+  "missing": [
+   "Evidence such as studies on empathy, vocabulary or reduced stress",
+   "A personal thesis and an anecdote",
+   "Concentration versus screens, with a concrete figure",
+   "A memorable closing image"
+  ],
+  "wrong_facts": [
+   "Unsupported: reading is described as training memory and attention, which the notes do not state."
+  ],
+  "would_publish": false,
+  "summary": "A tidy but generic script that spends its time on definitions and an irrelevant Buenos Aires example, with no real evidence for why we should read. The Spanish is fluent, but the argument is thin and has no personal voice.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "Y aquí viene lo importante: la tercera es la que de verdad cuenta.",
+     "problem": "A bit stiff and formulaic.",
+     "better": "Y la que de verdad importa es la tercera."
+    },
+    {
+     "quote": "Leer no tiene por qué ser un camino solitario.",
+     "problem": "Slightly forced figure of speech.",
+     "better": "Leer no tiene por qué ser algo que hagas solo."
+    }
+   ]
+  },
+  "mean": 2.89,
+  "cost_usd": 0.02432,
+  "tokens": [
+   4810,
+   1470
+  ]
+ }
+}

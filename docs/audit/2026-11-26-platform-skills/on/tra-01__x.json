@@ -1,0 +1,103 @@
+{
+ "id": "tra-01",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "3 days in Lisbon: what to see and eat",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "3 Days in Lisbon: What to See and Eat",
+  "description": "A fast plan for three days in Lisbon, Portugal, covering the old hills, the riverside and the food worth trying. Perfect for a first visit.",
+  "beats": [
+   {
+    "id": "1ffca6be",
+    "narration": "Lisbon is built on hills, and three days is enough to fall for it. Start high, with tiled streets, yellow trams and wide river views.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "yellow tram city street",
+      "clip_queries": [
+       "yellow tram city street",
+       "hilly old town rooftops"
+      ],
+      "alt": "old tram on hilly street"
+     }
+    }
+   },
+   {
+    "id": "e2a07d7c",
+    "narration": "Day one: wander the old neighborhoods. Climb to a viewpoint, get lost in narrow lanes, and stop for a strong coffee.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Day 1: Old Lisbon",
+      "items": [
+       "Hilltop views",
+       "Narrow lanes",
+       "Strong coffee"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "map",
+       "park",
+       "coffee"
+      ]
+     }
+    }
+   },
+   {
+    "id": "2bad1ff9",
+    "narration": "Day two: head to the riverside. Walk the waterfront, visit the historic sights, then eat grilled fish and a custard tart still warm.",
+    "scene": {
+     "type": "gallery",
+     "props": {
+      "image_queries": [
+       "Lisbon waterfront river",
+       "Belem Tower Lisbon",
+       "Portuguese custard tarts"
+      ],
+      "alt": "Lisbon riverside and pastries"
+     }
+    }
+   },
+   {
+    "id": "07d1dfcf",
+    "narration": "Day three: slow down. Browse a market, share small plates, and watch the sunset from a terrace. Lisbon rewards slow walkers.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "food market stalls",
+      "clip_queries": [
+       "food market stalls",
+       "sunset over city rooftops"
+      ],
+      "alt": "sunset over rooftops"
+     }
+    }
+   },
+   {
+    "id": "128ef928",
+    "narration": "Three days, three moods. Climb, wander, eat, repeat.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Climb. Wander. Eat. Repeat.",
+      "emphasis": "Eat"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "travel-places",
+   "listicle-ranking"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 98 words in 5 beats but a 45-second video needs about 89 (between 80 and 89). Cut about 9 words: 4 to 5 beats of about 22 words each (you averaged 19; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.07171,
+ "seconds": 11.2
+}

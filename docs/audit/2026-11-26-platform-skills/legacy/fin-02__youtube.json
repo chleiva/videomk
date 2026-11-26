@@ -1,0 +1,237 @@
+{
+ "id": "fin-02",
+ "platform": "youtube",
+ "arm": "legacy",
+ "minutes": 2.0,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Inflación: por qué tu dinero compra cada vez menos",
+  "description": "Una explicación sencilla de qué es la inflación, por qué suben los precios y cómo afecta a tu bolsillo. Descubre sus causas principales y qué hacen los bancos centrales para controlarla.",
+  "beats": [
+   {
+    "id": "461b3185",
+    "narration": "¿Por qué el mismo carrito de la compra te cuesta hoy más que hace unos años? No es tu imaginación. Tiene un nombre: inflación.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person shopping supermarket groceries",
+      "clip_queries": [
+       "person shopping supermarket groceries",
+       "hands holding coins and bills"
+      ],
+      "alt": "shopper pushing cart in supermarket"
+     }
+    },
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "47cf8f31",
+    "narration": "La inflación es la subida general y sostenida de los precios. Fíjate en las palabras clave: general, porque afecta a muchas cosas, y sostenida, porque dura en el tiempo.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Subida general y sostenida de los precios de bienes y servicios durante un período de tiempo."
+     }
+    }
+   },
+   {
+    "id": "164d9086",
+    "narration": "Esto significa algo muy concreto: con el mismo dinero compras menos cosas. Se dice que el dinero pierde poder adquisitivo. Tus billetes son iguales, pero valen menos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Con el mismo dinero, compras menos: pierde poder adquisitivo.",
+      "emphasis": "poder adquisitivo"
+     }
+    }
+   },
+   {
+    "id": "f0c440f3",
+    "narration": "Pero ¿por qué suben los precios? Hay tres causas habituales. Primero, la demanda: cuando todos quieren comprar más de lo que hay. Segundo, los costes. Tercero, el dinero circulando.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Causas de la inflación",
+      "nodes": [
+       {
+        "id": "d",
+        "label": "Demanda alta",
+        "icon": "van"
+       },
+       {
+        "id": "c",
+        "label": "Costes más altos",
+        "icon": "factory"
+       },
+       {
+        "id": "m",
+        "label": "Más dinero",
+        "icon": "banknote"
+       },
+       {
+        "id": "p",
+        "label": "Suben los precios",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "d",
+        "p"
+       ],
+       [
+        "c",
+        "p"
+       ],
+       [
+        "m",
+        "p"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 3
+     }
+    },
+    "chapter": "Por qué suben los precios"
+   },
+   {
+    "id": "425af9ea",
+    "narration": "Veámoslas una a una. Si mucha gente quiere comprar y hay pocos productos, los vendedores pueden pedir más. Es como una subasta: cuando hay más ofertas, el precio sube.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "crowded market busy shoppers",
+      "clip_queries": [
+       "crowded market busy shoppers",
+       "empty shelves in store"
+      ],
+      "alt": "busy crowd buying in a market"
+     }
+    }
+   },
+   {
+    "id": "a57d7f25",
+    "narration": "Si producir se encarece, por ejemplo por la energía, las materias primas o los salarios, las empresas lo trasladan al precio final. Y si circula demasiado dinero, cada unidad vale menos.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Cuando producir cuesta más",
+      "items": [
+       "Energía más cara",
+       "Materias primas más caras",
+       "Salarios más altos",
+       "Más dinero en circulación"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "bolt",
+       "box",
+       "users",
+       "banknote"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c0932d45",
+    "narration": "Veamos un ejemplo sencillo, inventado para entenderlo. Si un pan cuesta una moneda y los precios suben el diez por ciento, ahora necesitas más dinero para llevarte el mismo pan.",
+    "scene": {
+     "type": "equation",
+     "props": {
+      "steps": [
+       {
+        "formula": "precio nuevo = precio * (1 + 0.10)",
+        "note": "Subida del 10 %"
+       },
+       {
+        "formula": "1 * 1.10 = 1.10",
+        "note": "El pan ya cuesta 1,10"
+       }
+      ],
+      "title": "Ejemplo imaginario"
+     }
+    },
+    "chapter": "Cómo nos afecta"
+   },
+   {
+    "id": "712fbbe0",
+    "narration": "Afecta más a quien ahorra en efectivo, porque su dinero compra menos con el tiempo. También a quienes cobran un sueldo fijo, si su salario no sube al mismo ritmo que los precios.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Precios",
+       "tagline": "Suben con el tiempo"
+      },
+      "b": {
+       "name": "Tu sueldo",
+       "tagline": "Si no sube igual"
+      },
+      "rows": [
+       {
+        "label": "Qué ocurre",
+        "a": "Todo cuesta más",
+        "b": "Se queda igual"
+       },
+       {
+        "label": "Resultado",
+        "a": "Compras menos",
+        "b": "Pierdes poder de compra"
+       }
+      ],
+      "verdict": "Si los precios corren más que el sueldo, pierdes."
+     }
+    }
+   },
+   {
+    "id": "0831e6bc",
+    "narration": "Para frenarla, los bancos centrales suelen subir los tipos de interés. El crédito se encarece, la gente gasta y pide prestado menos, y la demanda se enfría. Así los precios suben más despacio.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Cómo se frena la inflación",
+      "steps": [
+       {
+        "label": "Suben los tipos de interés"
+       },
+       {
+        "label": "El crédito se encarece"
+       },
+       {
+        "label": "Se gasta menos"
+       },
+       {
+        "label": "Los precios suben más despacio"
+       }
+      ]
+     }
+    },
+    "chapter": "Cómo se controla"
+   },
+   {
+    "id": "56a35575",
+    "narration": "Entonces, la inflación es que los precios suban en general y tu dinero valga menos. Entender sus causas te ayuda a leer las noticias y a planificar mejor tus decisiones.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Inflación: los precios suben y tu dinero compra menos.",
+      "emphasis": "tu dinero compra menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.04416,
+ "seconds": 14.0
+}

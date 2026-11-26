@@ -1,0 +1,75 @@
+{
+ "id": "how-01",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "en",
+ "prompt": "how to change a flat tire",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "How to Change a Flat Tire Safely",
+  "description": "Learn the key steps to change a flat tire on the side of the road. Park safely, loosen the lug nuts, lift the car, and swap the wheel.",
+  "beats": [
+   {
+    "id": "9de966f9",
+    "narration": "A flat tire doesn't have to ruin your day. You can fix it yourself. First, get safe: park on flat ground, hazards on, parking brake set.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Flat tire? You can fix it.",
+      "emphasis": "fix it"
+     }
+    }
+   },
+   {
+    "id": "d6350479",
+    "narration": "Loosen the lug nuts a little while the wheel is still on the ground. Then jack up the car and remove the nuts.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Loosen, then lift",
+      "items": [
+       "Loosen lug nuts",
+       "Jack up the car",
+       "Remove the nuts"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "frame",
+       "car",
+       "wrench"
+      ]
+     }
+    }
+   },
+   {
+    "id": "0d12f6f3",
+    "narration": "Pull off the flat, mount the spare, and hand-tighten the nuts. Lower the car, then tighten them in a star pattern. Drive carefully to a repair shop.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Swap and tighten",
+      "items": [
+       "Mount the spare",
+       "Lower the car",
+       "Tighten in a star pattern"
+      ],
+      "style": "spotlight",
+      "accent": "teal",
+      "emphasis": 2
+     }
+    }
+   }
+  ],
+  "skills": [
+   "tutorial-howto"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 76 words in 3 beats but a 30-second video needs about 58 (between 52 and 58). Cut about 18 words: 3 to 4 beats of about 19 words each (you averaged 25; count the words of every beat), one idea, no preamble and no recap; keep the hook and the last line"
+ ],
+ "cost_usd": 0.06493,
+ "seconds": 8.1
+}

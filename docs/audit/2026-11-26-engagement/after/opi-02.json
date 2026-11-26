@@ -1,0 +1,584 @@
+{
+ "id": "opi-02",
+ "category": "opinion / essay",
+ "language": "es",
+ "difficulty": "vague",
+ "prompt": "por qué deberíamos leer más",
+ "great": "Tesis clara y personal, argumentos concretos (empatía, concentración, vocabulario) con alguna evidencia verificable, ejemplos, cierre memorable; voz de ensayo, no lista genérica.",
+ "minutes": 2.0,
+ "time_sensitive": false,
+ "options": {
+  "target_minutes": 2.0,
+  "language_passed": null,
+  "region": "ES",
+  "theme": null,
+  "max_images_per_minute": 10.0,
+  "web_research": true
+ },
+ "started": "2026-11-26T12:35:43",
+ "legit": true,
+ "reason": null,
+ "research": {
+  "mode": "encyclopedia",
+  "decided": "encyclopedia",
+  "reason": "La pregunta es sobre beneficios generales de la lectura, un tema atemporal que una enciclopedia cubre bien; no depende de información reciente.",
+  "queries": [
+   "beneficios de la lectura",
+   "por qué leer más"
+  ],
+  "searches": 3,
+  "reads": null,
+  "iterations": null,
+  "seconds": null,
+  "error": null,
+  "fallback": null,
+  "section_searches": null,
+  "skills": [
+   "inspiration-motivation",
+   "explainer-education"
+  ],
+  "staged": null,
+  "escalated": {
+   "from_chars": 0,
+   "searches": 3,
+   "reads": 0,
+   "sources": 6,
+   "seconds": 8.9,
+   "cost_usd": 0.001966,
+   "error": ""
+  },
+  "fetch_errors": [
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   },
+   {
+    "url": "https://es.wikipedia.org/w/api.php?action=query",
+    "status": 429,
+    "attempt": 0,
+    "error": "skipped: Wikimedia asked us to wait"
+   }
+  ],
+  "fetch_errors_n": 3,
+  "grounding": {
+   "beats": 10,
+   "candidates": 0,
+   "checked": 0,
+   "flagged": 0,
+   "repaired": 0,
+   "unsupported": 0,
+   "common": 0,
+   "supported": 0,
+   "skipped_on_screen": 0,
+   "leaks": 0,
+   "calls": 0
+  },
+  "scene_repair": null,
+  "notes_len": 5830,
+  "n_sources": 4,
+  "n_fetched": 6,
+  "fetched": [
+   "Los beneficios de la lectura probados por la ciencia | Lo que dice la investigación",
+   "Cómo afecta a nuestro cerebro el hábito de la lectura | National Geographic | National Geographic",
+   "Por qué leer es tan bueno para la salud",
+   "5 Beneficios importantes de leer un libro al mes - Life Seguros",
+   "Bookworms live longer | Findings | Yale Alumni Magazine",
+   "A chapter a day: Association of book reading with longevity."
+  ],
+  "research_agent_cost_usd": null
+ },
+ "warnings": [],
+ "notes": "## Los beneficios de la lectura probados por la ciencia | Lo que dice la investigación\nUn estudio realizado en Taiwán durante 14 años mostró que las personas que leían al menos una vez por semana tenían un 46% menos de riesgo de deterioro cognitivo, independientemente de su nivel educativo. Investigadores de la Universidad de Milán-Bicocca confirmaron en 2024 que los adultos de entre 65 y 75 años que mantienen el hábito de la lectura conservan mejor memoria y mayor atención. [...] La razón: la lectura moviliza simultáneamente la memoria de trabajo, la atención, la comprensión y la velocidad de procesamiento. Es un ejercicio cognitivo completo que mantiene el cerebro activo. Trabajos publicados en los Proceedings of the National Academy of Sciences indican que la lectura regular reduce en un 2,5% el riesgo de desarrollar la enfermedad de Alzheimer. ## La lectura mejora el sueño (con una condición) [...] La pregunta que todos se hacen. La buena noticia: no necesitas leer 50 \n\n## Cómo afecta a nuestro cerebro el hábito de la lectura | National Geographic | National Geographic\nEl artículo científico Reading activity prevents long-term decline in cognitive function in the elderly: evidence from a longitudinal study (La lectura previene el deterioro a largo plazo de la función cognitiva en las personas mayores: datos de un estudio longitudinal, en español) publicado en 2020 en la revista International Psychogeriatrics, de la Universidad de Cambridge (Reino Unido), afirma que la lectura protege la función cognitiva del cerebro durante la vejez. El estudio siguió a más [...] ## La lectura favorece un envejecimiento saludable Los estudios demuestran que la lectura puede ser una forma de proteger la mente contra la aparición de enfermedades neurodegenerativas. Esto se debe a que, según el texto de la Pucrs, la lectura mejora la función cerebral, lo que retrasa la aparición de los síntomas de enfermedades como la demenciay el Alzheimer. [...] Ciencia Animales Medio A\n\n## Por qué leer es tan bueno para la salud\nOtro beneficio puede verse en las mejoras cognitivas y la prevención de ciertas enfermedades. Esto se debe a que recordar variedad de personajes, antecedentes, historias, matices y relaciones desafía el funcionamiento del cerebro. La evidencia científica señala que cada nueva memoria que creamos, a su vez forja nuevas sinapsis (vías cerebrales) y fortalece las existentes, lo que ayuda a recordar a corto plazo, así como a estabilizar los estados de ánimo. [...] Esta estadística no incluye material para el trabajo, escuela o universidad. Entre las principales causas de esta reducción se encuentra la falta de interés, tiempo, o dinero. Los investigadores advierten que esta situación no debe naturalizarse, ya que la lectura cotidiana ofrece distintas bondades para la salud. Por ejemplo, al entrar en contacto con nuevas y variadas dosis de información, se estimula al cerebro para que mejore s\n\n## 5 Beneficios importantes de leer un libro al mes - Life Seguros\n## 1. La lectura fortalece nuestro cerebro y emociones: La neurociencia ha demostrado que cuando leemos nuestro cerebromejora y se activa. Cambia su estructura y se fortalecen las conexiones neuronales. La lectura activa muchas áreas del cerebro casi al mismo tiempo, lo que supone un beneficio a largo plazo, mejorando la cantidad y la calidad de las conexiones neuronales. [...] Como decíamos antes, nuestro cerebro se pone muy activo cuando leemos y eso ayuda mucho al ejercicio de nuestra mente. Está comprobado que la lectura nos ayuda a reducir el estrés, combate el insomnioy puede prevenir enfermedades neurodegenerativas. #### Reducción del estrés a través de la lectura: un escape efectivo Cuando leemos nos relajamos y tranquilizamos disminuyendo mucho nuestro ritmo cardíaco. Leer un libro puede ser un gran escape cuando estamos ansiosos o nerviosos por algo. [...] Al leer se activa nue\n\n## Bookworms live longer | Findings | Yale Alumni Magazine\nAlthough sedentary activities are not usually regarded as promoting health, a recent study by Yale researchers showed a significant link between book reading and longevity. (The work was published in the journal Social Science and Medicine.) Researchers examined data from 3,635 individuals who have been involved over several years in a nationwide health study of people over age 50. Based on their answers to the question “How many hours did you spend last week reading books?” respondents were [...] The study showed a marked advantage for book readers. Over 12 years of follow-up, those who read books for up to three and a half hours per week were 17 percent less likely to die than those who did not read books, while those who read most were 23 percent less likely. Book readers averaged a two-year longer life span than those who did not read at all. [...] Ico comments 1 comment | | Ico prin\n\n## A chapter a day: Association of book reading with longevity.\n# A chapter a day: Association of book reading with longevity. Avni Bavishi, Martin D Slade, Becca R Levy Social science & medicine (1982) · 2016-07-18 · 164:44-48 · DOI: 10.1016/j.socscimed.2016.07.014 · PMID: 27471129 · PMCID: PMC5105607 Publication type: Journal Article ## Abstract [...] Although books can expose people to new people and places, whether books also have health benefits beyond other types of reading materials is not known. This study examined whether those who read books have a survival advantage over those who do not read books and over those who read other types of materials, and if so, whether cognition mediates this book reading effect. The cohort consisted of 3635 participants in the nationally representative Health and Retirement Study who provided [...] advantage that was significantly greater than that observed for reading newspapers or magazines (tT2 = 90.6, p",
+ "plan": {
+  "title": "Por qué leer más puede alargarte la vida",
+  "description": "La ciencia muestra que leer protege la memoria, reduce el estrés y puede añadir años de vida. Descubre qué dicen los estudios sobre el hábito de la lectura.",
+  "language": "es",
+  "mood": "calm",
+  "theme": "paper",
+  "voices": {
+   "narrator": "Lucia"
+  },
+  "beats": [
+   {
+    "id": "a9d4c096",
+    "narration": "Los lectores de libros viven, de media, dos años más que quienes no leen. No es una exageración: lo midió un estudio de Yale con más de tres mil personas.",
+    "scene": {
+     "type": "counter",
+     "props": {
+      "value": "2",
+      "unit": "años",
+      "label": "más de vida de media para quienes leen libros"
+     }
+    },
+    "chapter": "Un hábito que alarga la vida"
+   },
+   {
+    "id": "ae7335c6",
+    "narration": "Ese estudio siguió a 3.635 personas mayores de cincuenta años durante doce años. Y se preguntó algo simple: ¿cuántas horas leíste libros la semana pasada?",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "elderly person reading book",
+      "clip_queries": [
+       "elderly person reading book",
+       "hands turning book pages"
+      ],
+      "alt": "senior reading at home"
+     }
+    }
+   },
+   {
+    "id": "f3cf1ece",
+    "narration": "El resultado: quienes leían hasta tres horas y media por semana tenían un 17% menos de riesgo de morir. Y los que más leían, un 23% menos, frente a quienes no leen.",
+    "scene": {
+     "type": "chart",
+     "props": {
+      "kind": "bar",
+      "title": "Menos riesgo de morir en 12 años",
+      "labels": [
+       "Sin leer",
+       "Hasta 3,5 h",
+       "Los que más leen"
+      ],
+      "values": [
+       0.0,
+       17.0,
+       23.0
+      ],
+      "unit": "%",
+      "highlight": 2
+     }
+    }
+   },
+   {
+    "id": "f46f3df4",
+    "narration": "¿Por qué ocurre? Porque leer no es pasivo. Mientras lees, tu cerebro trabaja la memoria, la atención, la comprensión y la velocidad de procesamiento, todo a la vez.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Qué activa leer",
+      "nodes": [
+       {
+        "id": "l",
+        "label": "Leer",
+        "icon": "book"
+       },
+       {
+        "id": "m",
+        "label": "Memoria",
+        "icon": "brain"
+       },
+       {
+        "id": "a",
+        "label": "Atención",
+        "icon": "eye"
+       },
+       {
+        "id": "c",
+        "label": "Comprensión",
+        "icon": "lightbulb"
+       },
+       {
+        "id": "v",
+        "label": "Velocidad",
+        "icon": "clock"
+       }
+      ],
+      "edges": [
+       [
+        "l",
+        "m"
+       ],
+       [
+        "m",
+        "a"
+       ],
+       [
+        "a",
+        "c"
+       ],
+       [
+        "c",
+        "v"
+       ]
+      ],
+      "style": "pills",
+      "accent": "violet"
+     }
+    }
+   },
+   {
+    "id": "f61b46ae",
+    "narration": "Cada historia que recuerdas forja nuevas conexiones entre neuronas y refuerza las que ya tenías. Seguir personajes, tramas y matices es un gimnasio para la mente.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person reading in library",
+      "clip_queries": [
+       "person reading in library",
+       "woman reading on sofa"
+      ],
+      "alt": "reader in quiet library"
+     }
+    },
+    "chapter": "Lo que ocurre en tu cerebro"
+   },
+   {
+    "id": "2a4d065d",
+    "narration": "Un estudio en Taiwán, durante catorce años, encontró que leer al menos una vez por semana se asocia con un 46% menos de riesgo de deterioro cognitivo.",
+    "scene": {
+     "type": "stat",
+     "props": {
+      "value": "46%",
+      "label": "menos riesgo de deterioro cognitivo leyendo cada semana"
+     }
+    }
+   },
+   {
+    "id": "6ee28365",
+    "narration": "Y no depende de cuánto estudiaste. La protección aparecía igual, con independencia del nivel educativo. Leer es un ejercicio al alcance de cualquiera.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Protege tu mente",
+      "items": [
+       "Más memoria",
+       "Más atención",
+       "Sin importar tu educación"
+      ],
+      "style": "icons",
+      "accent": "teal",
+      "icons": [
+       "brain",
+       "eye",
+       "book"
+      ]
+     }
+    }
+   },
+   {
+    "id": "c69da6f5",
+    "narration": "Además, leer calma. Al sumergirte en un libro baja tu ritmo cardíaco, se reduce el estrés y es más fácil conciliar el sueño cuando estás nervioso o ansioso.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "reading book in bed evening",
+      "clip_queries": [
+       "reading book in bed evening",
+       "cup of tea and book"
+      ],
+      "alt": "person reading before sleep"
+     }
+    },
+    "chapter": "Más calma, mejor descanso"
+   },
+   {
+    "id": "20422d7c",
+    "narration": "No necesitas devorar cincuenta libros al año. Basta con empezar poco a poco: un capítulo al día, en el momento más tranquilo de tu jornada.",
+    "scene": {
+     "type": "steps",
+     "props": {
+      "title": "Cómo empezar",
+      "steps": [
+       {
+        "label": "Elige un libro que te guste"
+       },
+       {
+        "label": "Un capítulo al día"
+       },
+       {
+        "label": "Hazlo siempre a la misma hora"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "id": "3d3444a5",
+    "narration": "Así que abre un libro esta noche. Unas pocas páginas hoy pueden darte mejor memoria, más calma y, quizá, dos años más para seguir leyendo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Un capítulo al día puede regalarte años de vida.",
+      "emphasis": "años de vida"
+     }
+    }
+   }
+  ],
+  "sources": [
+   {
+    "title": "Los beneficios de la lectura probados por la ciencia | Lo que dice la investigación",
+    "url": "https://bukku.app/es/blog/los-beneficios-de-la-lectura-probados-por-la-ciencia-lo-que-dice-la-investigacion",
+    "publisher": "bukku.app",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Por qué leer es tan bueno para la salud",
+    "url": "https://www.palig.com/es/us/wellness-hub/p/cuales-son-los-beneficios-de-la-lectura",
+    "publisher": "palig.com",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "5 Beneficios importantes de leer un libro al mes - Life Seguros",
+    "url": "https://www.lifeseguros.com.ar/estilo-de-vida-y-bienestar/5-beneficios-importantes-de-leer-un-libro-al-mes",
+    "publisher": "lifeseguros.com.ar",
+    "license": "",
+    "date": ""
+   },
+   {
+    "title": "Bookworms live longer | Findings | Yale Alumni Magazine",
+    "url": "https://yalealumnimagazine.org/articles/4377-bookworms-live-longer",
+    "publisher": "yalealumnimagazine.org",
+    "license": "",
+    "date": ""
+   }
+  ],
+  "skills": [
+   "inspiration-motivation",
+   "explainer-education"
+  ],
+  "region": "ES"
+ },
+ "timings": {
+  "total_s": 48.8,
+  "before_first_script_call_s": 11.1,
+  "script_s": 37.7
+ },
+ "cost": {
+  "script_small": 0.00029,
+  "research": 0.00197,
+  "script_big": 0.14939,
+  "search_api": 0.024,
+  "total": 0.17564
+ },
+ "calls": {
+  "small": 3,
+  "tools": 3,
+  "big": 3
+ },
+ "tokens": {
+  "in": 62971,
+  "out": 6852
+ },
+ "rules": {
+  "length": {
+   "words": 270,
+   "expected_words": 267,
+   "ratio": 1.011,
+   "beats": 10,
+   "expected_beats": 9,
+   "est_speech_s": 122.0,
+   "flag_short": false,
+   "flag_long": false,
+   "flag_few_beats": false
+  },
+  "hook_close": {
+   "hook_words": 30,
+   "hook_greeting": false,
+   "hook_question": false,
+   "hook_long": false,
+   "close_words": 25,
+   "close_generic": false,
+   "close_short": false,
+   "hook_text": "Los lectores de libros viven, de media, dos años más que quienes no leen. No es una exageración: lo midió un estudio de Yale con más de tres mil personas.",
+   "close_text": "Así que abre un libro esta noche. Unas pocas páginas hoy pueden darte mejor memoria, más calma y, quizá, dos años más para seguir leyendo."
+  },
+  "variety": {
+   "distinct": 8,
+   "counts": {
+    "counter": 1,
+    "clip": 3,
+    "chart": 1,
+    "diagram": 1,
+    "stat": 1,
+    "bullets": 1,
+    "steps": 1,
+    "kinetic_text": 1
+   },
+   "max_run": 1,
+   "entropy": 2.85,
+   "top_type": "clip",
+   "top_share": 0.3,
+   "flag_low_variety": false,
+   "flag_run": false
+  },
+  "grounding": {
+   "numbers": 4,
+   "ungrounded_numbers": [],
+   "entities": 2,
+   "ungrounded_entities": [],
+   "ungrounded_share": 0.0,
+   "ungrounded_number_share": 0.0,
+   "no_notes": false
+  },
+  "repeats": [
+   {
+    "phrase": "menos de riesgo de",
+    "count": 2
+   }
+  ],
+  "silent": {
+   "silent": 0,
+   "silent_share": 0.0
+  },
+  "warnings": {},
+  "sources": {
+   "cited": 4,
+   "fetched": 6,
+   "notes_len": 5830,
+   "flag_thin_notes": false,
+   "flag_no_sources": false,
+   "flag_web_no_sources": false
+  },
+  "time": {
+   "tagged": false,
+   "cue": false,
+   "needs_web": false,
+   "flag_no_web": false
+  },
+  "language": {
+   "expected": "es",
+   "detected": "es",
+   "flag_wrong": false
+  },
+  "question_beats": 0.1,
+  "flags": [
+   "repeated_phrase"
+  ],
+  "mismatch_scenes": [
+   "beat 7 (bullets): its narration never says ['Más memoria', 'Más atención', 'Sin importar tu educación']"
+  ]
+ },
+ "judge": {
+  "scores": {
+   "accuracy": {
+    "score": 3,
+    "reason": "The Yale figures (3,635 people, 12 years, 17% and 23%) and the Taiwan study (46%) match the notes. But 'viven dos años más' and the 'alarga la vida' framing treat a correlation as causation, and the Yale '17% less likely to die' is turned into a 'riesgo' without noting it is observational."
+   },
+   "coverage": {
+    "score": 3,
+    "reason": "The script is heavy on longevity and cognitive protection. The brief's expected arguments of empathy, concentration and vocabulary are missing, and so is a personal thesis."
+   },
+   "structure": {
+    "score": 4,
+    "reason": "Clear progression from hook to study, brain, calm and practical steps, ending on a call to action. Beats 6 and 7 slightly repeat the cognitive point."
+   },
+   "hook_ending": {
+    "score": 4,
+    "reason": "The opening claim 'dos años más' creates curiosity. The closing line 'abre un libro esta noche' lands, though 'dos años más para seguir leyendo' is a little cute."
+   },
+   "tone": {
+    "score": 4,
+    "reason": "Friendly, clear second-person ('tú') address that suits a general audience. It reads more like health advice than a personal essay."
+   },
+   "visuals": {
+    "score": 4,
+    "reason": "Good variety: counter, chart, diagram, stat and steps, all with real numbers. The diagram's chain Memoria→Atención→Comprensión→Velocidad wrongly implies a sequence, and the chart shows 0 for non-readers as if it were data."
+   },
+   "originality": {
+    "score": 3,
+    "reason": "The concrete Yale and Taiwan data are good. The rest is a generic list of benefits, with no human example and no essayistic voice."
+   },
+   "instructions": {
+    "score": 3,
+    "reason": "The length is right and it is in Spanish. It ignores the expected reasons (empathy, vocabulary, concentration) and the personal thesis; the request was about reading in general, not health."
+   },
+   "language": {
+    "score": 4,
+    "reason": "Fluent, natural Spanish with few errors. 'Con independencia del nivel educativo' is slightly formal."
+   }
+  },
+  "defects": [
+   {
+    "dimension": "accuracy",
+    "severity": "major",
+    "quote": "Los lectores de libros viven, de media, dos años más que quienes no leen.",
+    "issue": "Presents an observational correlation as a causal effect and as a settled average. The title 'puede alargarte la vida' and 'regalarte años de vida' reinforce the causal reading.",
+    "beat": 1
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "Un capítulo al día puede regalarte años de vida.",
+    "issue": "Overclaims. The study does not show that a chapter a day yields extra years.",
+    "beat": 10
+   },
+   {
+    "dimension": "accuracy",
+    "severity": "minor",
+    "quote": "se reduce el estrés y es más fácil conciliar el sueño cuando estás nervioso o ansioso",
+    "issue": "Stated flatly from a weak insurance-blog source, with no caveat. The heart-rate claim is also unsupported.",
+    "beat": 8
+   },
+   {
+    "dimension": "coverage",
+    "severity": "major",
+    "quote": "Mientras lees, tu cerebro trabaja la memoria, la atención, la comprensión y la velocidad de procesamiento",
+    "issue": "No mention of empathy, vocabulary or deep focus, which are the core arguments for reading more. Cognition is covered only through health data.",
+    "beat": 4
+   },
+   {
+    "dimension": "visuals",
+    "severity": "minor",
+    "quote": "\"edges\": [[\"l\", \"m\"], [\"m\", \"a\"], [\"a\", \"c\"], [\"c\", \"v\"]]",
+    "issue": "The diagram draws a linear chain, but the narration says these functions work 'todo a la vez'.",
+    "beat": 4
+   },
+   {
+    "dimension": "structure",
+    "severity": "minor",
+    "quote": "Y no depende de cuánto estudiaste.",
+    "issue": "Beat 7 adds little and repeats the cognitive-protection idea from beat 6.",
+    "beat": 7
+   }
+  ],
+  "missing": [
+   "Empathy and fiction (understanding other people)",
+   "Vocabulary and expression",
+   "Concentration and attention in the age of screens",
+   "A personal thesis or anecdote",
+   "Caveats on correlation versus causation"
+  ],
+  "wrong_facts": [
+   "The Yale study shows an association, not proof that reading adds two years of life; the script presents it as causal."
+  ],
+  "would_publish": false,
+  "summary": "A clean, well-paced script built on real Yale and Taiwan figures, but it reduces 'why read' to health and longevity and overstates causation. It lacks the empathy, vocabulary and concentration arguments and the personal essay voice the brief expects.",
+  "spanish": {
+   "naturalness": 4,
+   "issues": [
+    {
+     "quote": "con independencia del nivel educativo",
+     "problem": "Slightly bureaucratic register for narration.",
+     "better": "sin importar el nivel de estudios"
+    },
+    {
+     "quote": "No necesitas devorar cincuenta libros al año.",
+     "problem": "Fine, but the 'tú' form with 'necesitas' repeats the address pattern; acceptable.",
+     "better": "No hace falta devorar cincuenta libros al año."
+    },
+    {
+     "quote": "se asocia con un 46% menos de riesgo",
+     "problem": "Mildly stiff; the percentage form is also usually written with a space in Spanish ('46 %').",
+     "better": "se asocia con un 46 % menos de riesgo"
+    }
+   ]
+  },
+  "mean": 3.56,
+  "cost_usd": 0.029912,
+  "tokens": [
+   6061,
+   1779
+  ]
+ }
+}

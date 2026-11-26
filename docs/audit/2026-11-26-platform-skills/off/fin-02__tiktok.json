@@ -1,0 +1,67 @@
+{
+ "id": "fin-02",
+ "platform": "tiktok",
+ "arm": "off",
+ "minutes": 0.5,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "La inflación explicada en 30 segundos",
+  "description": "Una explicación rápida de qué es la inflación y por qué tu dinero compra menos con el tiempo. Aprende qué significa que los precios suban y cómo afecta a tu bolsillo.",
+  "beats": [
+   {
+    "id": "afe65f44",
+    "narration": "¿Por qué el mismo dinero te compra cada año menos cosas? Eso es la inflación: los precios suben.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Tu dinero compra menos cada año",
+      "emphasis": "menos"
+     }
+    }
+   },
+   {
+    "id": "e2b8b72b",
+    "narration": "Si los precios suben, cada euro vale menos. Con el mismo sueldo llenas menos la cesta de la compra que antes.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Cuando suben los precios",
+      "items": [
+       "Precios suben",
+       "El dinero vale menos",
+       "Cesta más pequeña"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "icons": [
+       "banknote",
+       "van",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "6c3994d2",
+    "narration": "Un poco de inflación es normal. El problema llega cuando los precios suben más rápido que los sueldos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Precios más rápido que sueldos: ese es el problema",
+      "emphasis": "más rápido"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06612,
+ "seconds": 8.5
+}

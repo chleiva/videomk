@@ -1,0 +1,93 @@
+{
+ "id": "mkt-02",
+ "platform": "x",
+ "arm": "off",
+ "minutes": 0.75,
+ "language": "en",
+ "prompt": "launch video for a note-taking app",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "A Note-Taking App That Finds Your Ideas For You",
+  "description": "A launch video for a note-taking app that keeps every idea in one place and helps you find it fast. See how capture, search and sync remove the lost-note problem.",
+  "beats": [
+   {
+    "id": "27825bf8",
+    "narration": "You had a great idea yesterday. Where is it now? Buried in a text, a sticky note, or a notebook you left at home.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Where did that great idea go?",
+      "emphasis": "great idea"
+     }
+    }
+   },
+   {
+    "id": "378a3216",
+    "narration": "Meet our new note-taking app. Capture your thought in whatever way suits you, and keep it safe.",
+    "scene": {
+     "type": "icons",
+     "props": {
+      "items": [
+       {
+        "icon": "pencil",
+        "label": "Type"
+       },
+       {
+        "icon": "microphone",
+        "label": "Speak"
+       },
+       {
+        "icon": "camera",
+        "label": "Snap"
+       }
+      ],
+      "title": "Capture anything"
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "0e03a6dc",
+    "narration": "Search helps you find your notes quickly. Your notes are always close at hand, wherever you go.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Find it. Anywhere.",
+      "items": [
+       "Instant search",
+       "Syncs on every device",
+       "Always with you"
+      ],
+      "style": "icons",
+      "accent": "violet",
+      "icons": [
+       "search",
+       "cloud",
+       "heart"
+      ]
+     }
+    }
+   },
+   {
+    "id": "b2e4b48d",
+    "narration": "Stop losing ideas. Start keeping them. Download the app today and give every thought a home.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Give every thought a home.",
+      "emphasis": "a home"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "product-marketing"
+  ]
+ },
+ "warnings": [
+  "grounding: 2 beats had unsupported specifics, 2 rewritten"
+ ],
+ "cost_usd": 0.06693,
+ "seconds": 14.4
+}

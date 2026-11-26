@@ -1,0 +1,258 @@
+{
+ "id": "fin-02",
+ "platform": "youtube",
+ "arm": "on",
+ "minutes": 2.0,
+ "language": "es",
+ "prompt": "explícame la inflación",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Inflación: por qué tu dinero compra cada vez menos",
+  "description": "Explicación sencilla de la inflación: qué es, por qué sube los precios y cómo afecta a tu bolsillo. Conceptos clave como poder adquisitivo, demanda, costes y tasas de interés.",
+  "beats": [
+   {
+    "id": "c09756e6",
+    "narration": "Tu dinero no ha cambiado, pero hoy compra menos que antes. El mismo billete, menos comida en la bolsa. Ese pequeño robo silencioso tiene nombre: inflación.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "shopping at supermarket grocery",
+      "clip_queries": [
+       "shopping at supermarket grocery",
+       "hands paying with cash at checkout"
+      ],
+      "alt": "person buying groceries in a store"
+     }
+    },
+    "chapter": "Qué es la inflación"
+   },
+   {
+    "id": "86f69e05",
+    "narration": "La inflación es una subida general y sostenida de los precios. No se trata de un producto que se encarece, sino de casi todos a la vez, durante meses.",
+    "scene": {
+     "type": "definition",
+     "props": {
+      "term": "Inflación",
+      "definition": "Subida general y sostenida de los precios de bienes y servicios durante un tiempo.",
+      "example": "Con el mismo dinero, hoy compras menos que antes."
+     }
+    }
+   },
+   {
+    "id": "eab6cf65",
+    "narration": "Y aquí está lo importante: si los precios suben, cada unidad de dinero vale menos. A esa capacidad de comprar cosas se le llama poder adquisitivo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Si los precios suben, tu dinero pierde poder adquisitivo.",
+      "emphasis": "poder adquisitivo"
+     }
+    }
+   },
+   {
+    "id": "d762563e",
+    "narration": "¿Por qué ocurre? Hay tres causas principales. Primero, demasiada demanda: todos quieren comprar y hay poco que vender. Segundo, costes más altos para producir. Tercero, más dinero circulando en la economía.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Tres causas habituales",
+      "items": [
+       "Demanda que supera a la oferta",
+       "Costes de producción más altos",
+       "Más dinero en circulación"
+      ],
+      "style": "icons",
+      "accent": "amber",
+      "icons": [
+       "van",
+       "factory",
+       "banknote"
+      ]
+     }
+    },
+    "chapter": "Por qué suben los precios"
+   },
+   {
+    "id": "ee9f4ed5",
+    "narration": "Piensa en una subasta. Si mucha gente quiere el mismo objeto y hay pocos, el precio sube. Con la demanda alta pasa lo mismo en toda la economía.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "crowded market shoppers",
+      "clip_queries": [
+       "crowded market shoppers",
+       "people raising hands at auction"
+      ],
+      "alt": "busy crowd buying at a market"
+     }
+    }
+   },
+   {
+    "id": "de6e0122",
+    "narration": "Cuando producir cuesta más, por ejemplo por la energía o las materias primas, las empresas suelen trasladar ese aumento al precio final que pagas tú.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Del coste al precio",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Energía más cara",
+        "icon": "bolt"
+       },
+       {
+        "id": "b",
+        "label": "Producir cuesta más",
+        "icon": "factory"
+       },
+       {
+        "id": "c",
+        "label": "Empresas suben precios",
+        "icon": "tag"
+       },
+       {
+        "id": "d",
+        "label": "Pagas más tú",
+        "icon": "banknote"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "pills",
+      "accent": "coral"
+     }
+    }
+   },
+   {
+    "id": "f9d34767",
+    "narration": "Los bancos centrales intentan frenarla subiendo los tipos de interés. El crédito se encarece, la gente gasta menos, y la presión sobre los precios baja poco a poco.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "Cómo frena el banco central",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Suben los intereses",
+        "icon": "landmark"
+       },
+       {
+        "id": "b",
+        "label": "El crédito se encarece",
+        "icon": "banknote"
+       },
+       {
+        "id": "c",
+        "label": "Se gasta menos",
+        "icon": "van"
+       },
+       {
+        "id": "d",
+        "label": "Los precios se calman",
+        "icon": "chart-column"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "indigo"
+     }
+    },
+    "chapter": "Quién la controla y cómo te afecta"
+   },
+   {
+    "id": "10ede706",
+    "narration": "Un poco de inflación estable es normal en una economía sana. El problema llega cuando es muy alta o impredecible: los salarios no alcanzan y los ahorros se desgastan.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "Inflación moderada",
+       "tagline": "Estable y previsible"
+      },
+      "b": {
+       "name": "Inflación alta",
+       "tagline": "Rápida e impredecible"
+      },
+      "rows": [
+       {
+        "label": "Precios",
+        "a": "Suben despacio",
+        "b": "Suben deprisa"
+       },
+       {
+        "label": "Salarios",
+        "a": "Se ajustan",
+        "b": "Se quedan atrás"
+       },
+       {
+        "label": "Ahorros",
+        "a": "Pierden poco",
+        "b": "Se desgastan"
+       }
+      ],
+      "verdict": "El riesgo está en la inflación alta e imprevisible"
+     }
+    }
+   },
+   {
+    "id": "07c96c98",
+    "narration": "Entonces, ¿qué puedes hacer? Revisar tus gastos, no dejar todo el dinero parado y estar atento a cómo evolucionan tus ingresos frente a los precios.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Qué puedes vigilar",
+      "items": [
+       "Tus gastos del día a día",
+       "Dinero parado sin rendir",
+       "Tus ingresos frente a los precios"
+      ]
+     }
+    }
+   },
+   {
+    "id": "5ed95b98",
+    "narration": "La inflación no es que las cosas cuesten más: es que tu dinero vale menos. Si lo entiendes, puedes mirar tu bolsillo con otros ojos.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "La inflación no es que todo cueste más: es que tu dinero vale menos.",
+      "emphasis": "tu dinero vale menos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "finance-business",
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.04798,
+ "seconds": 13.5
+}

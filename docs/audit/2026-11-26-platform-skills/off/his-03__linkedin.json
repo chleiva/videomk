@@ -1,0 +1,177 @@
+{
+ "id": "his-03",
+ "platform": "linkedin",
+ "arm": "off",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "What really caused the 2008 financial crisis? Tell it as a story starting from the US housing boom, include subprime mortgages, securitization, Lehman Brothers and the government response.",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "What Really Caused the 2008 Financial Crisis",
+  "description": "A short story of the 2008 financial crisis, from the US housing boom and subprime mortgages to securitization, the fall of Lehman Brothers and the government response. It shows how a chain of risky bets turned a housing bubble into a global crash.",
+  "beats": [
+   {
+    "id": "4c3e5039",
+    "narration": "In 2008, a crisis in American home loans nearly brought down the world's banks. It began with a boom. House prices kept climbing, and everyone believed they always would. Lenders grew careless.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "suburban houses aerial view",
+      "clip_queries": [
+       "suburban houses aerial view",
+       "new homes under construction",
+       "for sale sign in front of house"
+      ],
+      "alt": "residential neighborhood from above"
+     }
+    },
+    "chapter": "The housing boom"
+   },
+   {
+    "id": "13fff867",
+    "narration": "Banks handed subprime mortgages to buyers with weak credit. Then they bundled those loans into securities and sold them to investors worldwide. Risk spread everywhere, and few understood who actually held it.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "How the risk spread",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Subprime mortgages",
+        "icon": "house"
+       },
+       {
+        "id": "b",
+        "label": "Banks bundle loans",
+        "icon": "landmark"
+       },
+       {
+        "id": "c",
+        "label": "Securities sold",
+        "icon": "banknote"
+       },
+       {
+        "id": "d",
+        "label": "Global investors",
+        "icon": "globe"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c",
+        "securitization"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "cards",
+      "accent": "amber",
+      "emphasis": 0
+     }
+    },
+    "chapter": "Subprime and securitization"
+   },
+   {
+    "id": "193382e5",
+    "narration": "Then prices stopped rising. Borrowers defaulted, and those securities lost value. Banks that held them were suddenly in danger. Lehman Brothers, a huge investment bank, collapsed, and panic swept through the financial system.",
+    "scene": {
+     "type": "diagram",
+     "props": {
+      "title": "The chain reaction",
+      "nodes": [
+       {
+        "id": "a",
+        "label": "Prices stop rising",
+        "icon": "chart-column"
+       },
+       {
+        "id": "b",
+        "label": "Borrowers default",
+        "icon": "house"
+       },
+       {
+        "id": "c",
+        "label": "Securities lose value",
+        "icon": "banknote"
+       },
+       {
+        "id": "d",
+        "label": "Lehman Brothers falls",
+        "icon": "landmark"
+       }
+      ],
+      "edges": [
+       [
+        "a",
+        "b"
+       ],
+       [
+        "b",
+        "c"
+       ],
+       [
+        "c",
+        "d"
+       ]
+      ],
+      "style": "ladder",
+      "accent": "rose",
+      "emphasis": 3
+     }
+    },
+    "chapter": "The collapse"
+   },
+   {
+    "id": "c21ed6a6",
+    "narration": "Governments stepped in. The US government rescued banks with public money, and the central bank flooded the system with cash. It stopped the freefall, but millions still lost jobs and homes.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "The government response",
+      "items": [
+       "Rescue banks with public money",
+       "Central bank floods system with cash",
+       "Freefall stops, but pain remains"
+      ],
+      "style": "icons",
+      "accent": "sky",
+      "emphasis": 0,
+      "icons": [
+       "landmark",
+       "banknote",
+       "shield"
+      ]
+     }
+    },
+    "chapter": "The response"
+   },
+   {
+    "id": "931b4d8e",
+    "narration": "So what caused it? Easy credit, bundled risk, and a belief that prices could only rise. When trust broke, everything fell. Cheap risk is never really free.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "Cheap risk is never really free.",
+      "emphasis": "never really free"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [
+  "length: the narration totals 155 words in 5 beats but a 1-minute video needs about 134 (at most 140). Cut about 21 words: write 4 to 6 beats of at most 40 words each (you averaged 31), shorter sentences, drop the least important details; keep the hook, the key points and the ending, and do not go under 123 words"
+ ],
+ "cost_usd": 0.07429,
+ "seconds": 15.5
+}

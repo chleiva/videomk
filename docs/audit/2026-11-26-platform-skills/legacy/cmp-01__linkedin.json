@@ -1,0 +1,107 @@
+{
+ "id": "cmp-01",
+ "platform": "linkedin",
+ "arm": "legacy",
+ "minutes": 1.0,
+ "language": "en",
+ "prompt": "React vs Vue: which should I learn first?",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "React vs Vue: Which Should You Learn First?",
+  "description": "A fair comparison of React and Vue for beginners, judged on learning curve, job market and ecosystem. Ends with a clear recommendation by situation.",
+  "beats": [
+   {
+    "id": "ec6a6624",
+    "narration": "React or Vue? Everyone has an opinion, and most of them are loud. The truth is, both will get you building real apps. So the better question is: which fits your situation?",
+    "scene": {
+     "type": "title",
+     "props": {
+      "title": "React or Vue?",
+      "subtitle": "Which should you learn first?"
+     }
+    },
+    "chapter": "The choice"
+   },
+   {
+    "id": "30567220",
+    "narration": "Vue is often called gentler. Its templates look like regular HTML, and its official tools come bundled together. React asks you to think in JavaScript first, and you pick more pieces yourself.",
+    "scene": {
+     "type": "versus",
+     "props": {
+      "a": {
+       "name": "React",
+       "tagline": "Flexible, JavaScript-first"
+      },
+      "b": {
+       "name": "Vue",
+       "tagline": "Guided, HTML-like templates"
+      },
+      "rows": [
+       {
+        "label": "Learning curve",
+        "a": "Steeper start",
+        "b": "Gentler start"
+       },
+       {
+        "label": "Structure",
+        "a": "You choose tools",
+        "b": "Official tools included"
+       },
+       {
+        "label": "Style",
+        "a": "JavaScript-heavy",
+        "b": "Familiar templates"
+       }
+      ],
+      "verdict": "Both are capable and widely used"
+     }
+    }
+   },
+   {
+    "id": "bdaf5fda",
+    "narration": "React, though, has a very large ecosystem and, in most places, more job listings. Check your local market, because that varies. Skills in one also transfer well to the other.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Where React shines",
+      "items": [
+       "Large ecosystem",
+       "Many job listings",
+       "Skills transfer"
+      ],
+      "style": "icons",
+      "accent": "sky",
+      "icons": [
+       "rocket",
+       "banknote",
+       "map"
+      ]
+     }
+    }
+   },
+   {
+    "id": "4597fca1",
+    "narration": "So decide by goal. If you want a job soon, or work at a company that uses React, start with React. If you want a smooth first experience, start with Vue. Then build something real.",
+    "scene": {
+     "type": "checklist",
+     "props": {
+      "heading": "Pick by your goal",
+      "items": [
+       "Job soon: React",
+       "Smooth start: Vue",
+       "Build a real project"
+      ]
+     }
+    }
+   }
+  ],
+  "skills": [
+   "comparison-versus",
+   "coding-tutorial"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.06584,
+ "seconds": 13.2
+}

@@ -1,0 +1,79 @@
+{
+ "id": "pro-02",
+ "platform": "x",
+ "arm": "on",
+ "minutes": 0.75,
+ "language": "es",
+ "prompt": "cómo dejar de procrastinar",
+ "error": null,
+ "legit": true,
+ "plan": {
+  "title": "Cómo dejar de procrastinar: empieza por dos minutos",
+  "description": "Un truco sencillo para dejar de procrastinar: reducir la tarea hasta que empezar sea fácil. Aprende por qué el problema no es la pereza y qué hacer hoy.",
+  "beats": [
+   {
+    "id": "f0d3319e",
+    "narration": "No procrastinas por pereza. Procrastinas porque empezar se siente pesado. Y tu cerebro huye de lo que pesa, aunque sea importante para ti.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No es pereza. Es miedo a empezar.",
+      "emphasis": "miedo a empezar"
+     }
+    }
+   },
+   {
+    "id": "4615ed38",
+    "narration": "La solución es hacer la tarea tan pequeña que no dé miedo. No escribas el informe: abre el documento. No limpies la casa: recoge un objeto.",
+    "scene": {
+     "type": "bullets",
+     "props": {
+      "heading": "Hazlo diminuto",
+      "items": [
+       "Abre el documento",
+       "Recoge un objeto",
+       "Trabaja dos minutos"
+      ],
+      "style": "icons",
+      "accent": "coral",
+      "emphasis": 0,
+      "icons": [
+       "file",
+       "home",
+       "clock"
+      ]
+     }
+    },
+    "sfx": "click"
+   },
+   {
+    "id": "9bd95c2b",
+    "narration": "Después, prométete solo dos minutos. Casi siempre, cuando ya has arrancado, seguir cuesta mucho menos que empezar. El primer paso es lo difícil.",
+    "scene": {
+     "type": "clip",
+     "props": {
+      "clip_query": "person working at desk laptop",
+      "alt": "focused person typing at a desk"
+     }
+    }
+   },
+   {
+    "id": "ca2efb09",
+    "narration": "Así que hoy no esperes ganas ni motivación. Elige una tarea, hazla diminuta y empieza ahora. Dos minutos bastan para romper el bloqueo.",
+    "scene": {
+     "type": "kinetic_text",
+     "props": {
+      "text": "No esperes ganas. Empieza dos minutos.",
+      "emphasis": "Empieza dos minutos"
+     }
+    }
+   }
+  ],
+  "skills": [
+   "explainer-education"
+  ]
+ },
+ "warnings": [],
+ "cost_usd": 0.03456,
+ "seconds": 5.6
+}

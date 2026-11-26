@@ -1,0 +1,13 @@
+2 prompts in both
+metric | before | after
+title_first | 0.00 | 0.00
+hook_words | 26.50 | 39.50
+cliches | 0.00 | 0.00
+max_run | 1.50 | 1.00
+beat_words | 24.87 | 32.22
+generic_end | 0.00 | 0.00
+beats | 13.00 | 11.50
+types | 6.00 | 8.00
+def_open | 1.00 | 0.50
+cost per plan | 0.195 | 0.200
+plan seconds | 65.4 | 63.3
