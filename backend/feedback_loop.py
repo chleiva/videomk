@@ -36,7 +36,7 @@ class FeedbackLoop(Construct):
 
         table = dynamodb.Table(
             self, "FeedbackTable", partition_key=dynamodb.Attribute(name="feedbackId", type=dynamodb.AttributeType.STRING), billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            encryption=dynamodb.TableEncryption.AWS_MANAGED, point_in_time_recovery_specification=dynamodb.PointInTimeRecoverySpecification(point_in_time_recovery_enabled=True),
+            point_in_time_recovery_specification=dynamodb.PointInTimeRecoverySpecification(point_in_time_recovery_enabled=True),
             removal_policy=RemovalPolicy.RETAIN,   # the owner keeps feedback: never deleted with the stack; no TTL
         )
         # Sparse: only items not yet mailed carry `pending`, so the daily run reads exactly the new ones (a scan would read the whole table every day).
