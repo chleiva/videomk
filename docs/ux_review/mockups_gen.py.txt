@@ -1,0 +1,166 @@
+import os
+S="/private/tmp/claude-501/-Users-chleiva-code-videomk/1c20d537-4a97-40b0-81a8-700c1738b8ff/scratchpad/ux_review"
+SH=S+"/shots/"
+BOLT='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>'
+def phone(theme,inner,tab=True,tabsel=0,pins=""):
+    t=""
+    if tab:
+        t=f'''<div class="tabbar"><div class="tab {'on' if tabsel==0 else ''}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>Videos</div><div class="plus" aria-label="New video">+</div><div class="tab {'on' if tabsel==1 else ''}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>Media</div></div>'''
+    return f'<div class="phone" data-theme="{theme}"><div class="island"></div><div class="sb"><span>9:41</span><span>5G ▮</span></div>{inner}{t}{pins}</div>'
+def page(name,title,sub,before,screens,legend,extra=""):
+    cols=""
+    if before: cols+=f'<div class="col"><h6>Before (real capture)</h6>{before}</div>'
+    for lab,html in screens: cols+=f'<div class="col"><h6>{lab}</h6>{html}</div>'
+    leg="".join(f'<p><b class="n">{i+1}</b>{t}</p>' for i,t in enumerate(legend))
+    h=f'''<!doctype html><meta charset=utf-8><link rel=stylesheet href=tokens.css><body><div class=title><span class=tag>MOCKUP, not implemented. Colours/spacing are the proposed tokens; thumbnails are placeholders.</span><br>{title}</div><div class=sub>{sub}</div><div class=board>{cols}<div class="col legend"><h6>Annotations</h6>{leg}{extra}</div></div>'''
+    open(f"{name}.html","w").write(h)
+def img(f): return f'<img class=before src="file://{SH}{f}">'
+def pin(n,x,y): return f'<div class=pin style="left:{x}px;top:{y}px">{n}</div>'
+
+# ---------- 1 HOME
+def home(th):
+    making=f'''<div class="card" style="margin:0 16px 14px;overflow:hidden;background:linear-gradient(135deg,var(--making1),var(--making2));color:#fff;padding:16px">
+ <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 12px system-ui;background:rgba(255,255,255,.18);padding:5px 10px;border-radius:12px">● Making</span><span style="font:600 13px system-ui;opacity:.9">about 2 min left</span></div>
+ <div style="font:700 19px/24px system-ui;margin:12px 0 4px">How bees make honey, explained for kids</div>
+ <div style="font:500 14px system-ui;opacity:.85;margin-bottom:12px">Finding visuals · scene 3 of 7</div>
+ <div style="display:flex;gap:6px;margin-bottom:12px"><div class="thumb t1" style="width:64px;height:38px;border-radius:8px"></div><div class="thumb t4" style="width:64px;height:38px;border-radius:8px"></div><div class="thumb t2" style="width:64px;height:38px;border-radius:8px;outline:2px solid #22D3EE"></div><div style="width:64px;height:38px;border-radius:8px;background:rgba(255,255,255,.14)"></div><div style="width:64px;height:38px;border-radius:8px;background:rgba(255,255,255,.14)"></div></div>
+ <div class=seg><i class=on></i><i class=on></i><i class=cur></i><i></i></div></div>'''
+    def row(c,t,m,badge=""):
+        return f'<div style="display:flex;gap:12px;padding:0 16px;margin-bottom:14px;align-items:center"><div class="thumb {c}" style="width:128px;height:72px;flex:none"><span style="position:absolute;right:6px;bottom:5px;font:700 11px system-ui;color:#fff;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:6px">{m[0]}</span></div><div><div style="font:700 16px/21px system-ui">{t}</div><div class=cap>{m[1]}</div>{badge}</div></div>'
+    fail='<div style="display:flex;gap:12px;padding:0 16px;margin-bottom:14px;align-items:center"><div class="thumb" style="width:128px;height:72px;flex:none;background:var(--danger-c);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:26px">!</div><div><div style="font:700 16px/21px system-ui">Thailand highlights</div><div class=cap style="color:var(--danger)">Didn\'t finish · no credits used</div><div style="font:700 14px system-ui;color:var(--primary);margin-top:4px">Try again</div></div></div>'
+    inner=f'''<div class=pad style="display:flex;justify-content:space-between;align-items:center;height:48px"><div style="display:flex;gap:8px;align-items:center;font:700 19px system-ui"><span style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--g1),var(--g2))"></span>videomk</div><div class=credit>{BOLT}42</div></div>
+<div class=pad><div class=h1 style="margin:8px 0 14px">Your videos</div></div>{making}
+<div class="pad over" style="margin:6px 0 10px">Yesterday</div>{row("t2","Sunset over Lisbon",("1:20","1 min · landscape"))}{fail}
+<div class="pad over" style="margin:6px 0 10px">Earlier</div>{row("t3","The history of the bicycle",("2:22","2 min · 9:16"))}'''
+    pins=pin(1,-8,250)+pin(2,-8,425)+pin(3,-8,520)+pin(4,176,722)+pin(5,356,28)
+    return phone(th,inner,True,0,pins)
+page("01_home","Home / list of videos","Thumbnails first, one live card for the video being made, the create action docked in the tab bar (no floating button over content).",img("ios_home_videos_light.png"),[("After, light",home("light")),("After, dark",home("dark"))],[
+ "<b>Live card</b>: real stage + scene counter + ETA; scene thumbnails appear as they are found (progressive preview). Same component on web and Android.",
+ "<b>Thumbnail rows</b> (128x72, 16:9 crop) replace the 22 pt full-width cards: 2.5x more videos per screen; duration chip on the picture; day grouping (Today / Yesterday / Earlier) using the overline style.",
+ "<b>Failed row</b> keeps the card shape but uses dangerContainer, not a near-black card; one clear action (Try again) and the reassurance 'no credits used'.",
+ "<b>Create in the tab bar</b> (centre +). Fixes the floating 'New video' button covering the third card (see ios_home_videos_light.png, ios_se_home_videos.png, ios_home_many_light.png). Tab bar can minimise on scroll.",
+ "<b>Credits chip</b> stays top right, tappable, tabular numerals; becomes warning-tinted at 0 with 'Get credits'."])
+
+# ---------- 2 CREATE
+def create(th):
+    inner=f'''<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 16px 10px"><span style="color:var(--primary);font:600 17px system-ui">Cancel</span><span style="font:700 17px system-ui">New video</span><span style="width:50px"></span></div>
+<div class=pad><div class="card" style="padding:16px;height:196px;position:relative"><div style="font:400 20px/28px system-ui">How bees make honey, explained for kids<span style="color:var(--primary)">|</span></div>
+ <div style="position:absolute;left:12px;right:12px;bottom:12px;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:8px"><span class="chip" style="height:40px">Photos</span></div><div style="width:44px;height:44px;border-radius:22px;background:var(--surface2);display:flex;align-items:center;justify-content:center">🎙</div></div></div></div>
+<div class="pad" style="margin-top:14px"><div class=over style="margin-bottom:8px">Try one</div><div style="display:flex;gap:8px;flex-wrap:wrap"><span class=chip>Lighthouse keeper story</span><span class=chip>Why the sky is blue</span><span class=chip>My trip, from photos</span></div></div>
+<div class=pad style="margin-top:22px"><div class="card" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center"><div><div class=over>Style</div><div style="font:600 16px/22px system-ui;margin-top:2px">Landscape · 3 min · Auto look</div><div class=cap>Subtitles on · English</div></div><span style="color:var(--primary);font:600 16px system-ui">Change</span></div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 30px;background:var(--bg);box-shadow:0 -1px 0 var(--outline)">
+ <div style="display:flex;justify-content:space-between;margin-bottom:10px;font:600 14px system-ui"><span style="color:var(--text2)">{BOLT} 3 credits · 39 left</span><span style="color:var(--primary)">What does this cost?</span></div>
+ <div class=btn>Create video · {BOLT}3</div></div>'''
+    pins=pin(1,-8,160)+pin(2,-8,330)+pin(3,-8,440)+pin(4,-8,748)
+    return phone(th,inner,False,0,pins)
+def create_style(th):
+    inner=f'''<div style="padding:10px 16px"><div style="width:36px;height:5px;border-radius:3px;background:var(--outline);margin:0 auto 14px"></div><div class=h2 style="margin-bottom:14px">Style</div>
+<div class=over style="margin-bottom:8px">Where will it play?</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"><span class="chip sel">Landscape 16:9</span><span class=chip>Vertical 9:16</span><span class=chip>Square 1:1</span><span class=chip>Portrait 4:5</span></div>
+<div class=over style="margin-bottom:8px">Length</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px"><span class=chip style="justify-content:center">30 s</span><span class=chip style="justify-content:center">1 min</span><span class="chip sel" style="justify-content:center">3 min</span><span class=chip style="justify-content:center">5 min</span></div>
+<div class=over style="margin-bottom:8px">Look</div><div style="display:flex;gap:10px;margin-bottom:16px"><div class="thumb t3" style="width:70px;height:70px;outline:3px solid var(--primary)"></div><div class="thumb t1" style="width:70px;height:70px"></div><div class="thumb t4" style="width:70px;height:70px"></div><div class="thumb t2" style="width:70px;height:70px"></div></div>
+<div class="card" style="padding:4px 16px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--outline)"><span>Subtitles</span><b style="color:var(--primary)">On</b></div><div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--outline)"><span>Language</span><span class=cap>Same as my prompt</span></div><div style="display:flex;justify-content:space-between;padding:12px 0"><span>Quality</span><span class=cap>1080p · 4K costs double</span></div></div>
+<div class=btn>Done · {BOLT}3</div></div>'''
+    return phone(th,inner,False)
+page("02_create","Create video","Prompt first. Everything else folds into one Style row that opens a sheet; platform shortcuts (LinkedIn / X / Shorts) become presets inside the sheet, not a scrolling chip row.",img("ios_create_filled_light.png"),[("After, light",create("light")),("Style sheet, dark",create_style("dark"))],[
+ "<b>Prompt field is the page</b>: 196 pt tall, 20/28 type, caret and mic inside it; photos are an attach button inside the field (the 'Add photos' card is removed from the main path; photo count shows as a thumbnail row when attached).",
+ "<b>Example chips under the field</b> (tap = fills the field), replacing the empty-home list so the first-run and every-run share one place.",
+ "<b>One Style row</b> replaces: What is it for + format summary + Also works + Length + More options (about 480 pt of controls in ios_create_filled_light.png, none of which fit in 'Shorts - Re...' at 393 pt or Spanish). Sheet holds format, length, look, subtitles, language, quality.",
+ "<b>Cost line is always visible and explains itself</b>: '3 credits - 39 left' plus a 'What does this cost?' link to a 3-line sheet (1 credit = up to 1 min; 4K x2). CTA keeps the number so the button is the receipt."])
+
+# ---------- 3 WAITING
+def waiting(th):
+    inner=f'''<div class=pad style="display:flex;justify-content:space-between;align-items:center;height:44px"><span style="color:var(--primary);font:600 17px system-ui">‹ Videos</span><span style="width:40px"></span></div>
+<div class=pad><div class=over>Making your video</div><div class=h1 style="margin:4px 0 6px;font-size:26px;line-height:32px">How bees make honey, explained for kids</div><div class=cap>About 2 minutes left. You can leave: we'll tell you when it's ready.</div></div>
+<div class=pad style="margin-top:16px"><div class="thumb" style="height:210px;border-radius:22px;background:linear-gradient(135deg,var(--making1),var(--making2));display:flex;align-items:center;justify-content:center;color:#fff"><div style="text-align:center"><div style="font:700 13px system-ui;opacity:.8;letter-spacing:.08em">SCENE 3 · THE WAGGLE DANCE</div><div style="font:600 20px/26px system-ui;margin-top:8px;padding:0 20px">"Bees tell each other where flowers are by dancing."</div></div></div></div>
+<div class=pad style="margin-top:14px;display:flex;gap:8px"><div class="thumb t1" style="width:70px;height:44px;border-radius:10px"></div><div class="thumb t4" style="width:70px;height:44px;border-radius:10px"></div><div class="thumb t2" style="width:70px;height:44px;border-radius:10px;outline:2px solid var(--live)"></div><div style="width:70px;height:44px;border-radius:10px;background:var(--surface3)"></div><div style="width:70px;height:44px;border-radius:10px;background:var(--surface3)"></div></div>
+<div class=pad style="margin-top:20px">
+ <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center"><span style="color:var(--success);font-size:20px">✓</span><div><b>Script written</b> <span class=cap>7 scenes</span></div></div>
+ <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center"><span style="color:var(--success);font-size:20px">✓</span><div><b>Voice recorded</b> <span class=cap>1:48</span></div></div>
+ <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center"><span style="color:var(--live);font-size:20px">◐</span><div><b>Finding visuals</b> <span class=cap>3 of 7</span></div></div>
+ <div style="display:flex;gap:12px;align-items:center;color:var(--text3)"><span style="font-size:20px">○</span><div><b>Final cut</b></div></div></div>
+<div class=pad style="position:absolute;left:0;right:0;bottom:30px"><div class="btn tonal" style="height:48px;font-size:16px">Notify me when it's ready  ✓</div><div class=cap style="text-align:center;margin-top:8px">Cancel video (credits are returned)</div></div>'''
+    pins=pin(1,-8,120)+pin(2,-8,300)+pin(3,-8,420)+pin(4,-8,765)
+    return phone(th,inner,False,0,pins)
+def lock(th):
+    bg="linear-gradient(160deg,#1b1650,#0c2e4a)" if th=="dark" else "linear-gradient(160deg,#9aa0ff,#f5b7d0)"
+    inner=f'''<div style="position:absolute;inset:0;background:{bg}"></div>
+<div style="position:relative;text-align:center;color:#fff;padding-top:20px"><div style="font:600 18px system-ui;opacity:.9">Thursday 26 November</div><div style="font:300 96px/100px system-ui">9:41</div></div>
+<div style="position:absolute;left:14px;right:14px;top:300px;color:#fff">
+ <div style="background:rgba(20,20,40,.55);backdrop-filter:blur(20px);border-radius:24px;padding:14px 16px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;font:600 13px system-ui;opacity:.85"><span>videomk · Live Activity</span><span>now</span></div><div style="font:700 16px system-ui;margin:6px 0 2px">Bees and honey</div><div style="font:500 14px system-ui;opacity:.85;margin-bottom:10px">Finding visuals · scene 3 of 7 · ~2 min</div><div class=seg><i class=on></i><i class=on></i><i class=cur></i><i></i></div></div>
+ <div style="background:rgba(20,20,40,.55);backdrop-filter:blur(20px);border-radius:24px;padding:14px 16px;display:flex;gap:12px"><div class="thumb t3" style="width:44px;height:44px;border-radius:10px;flex:none"></div><div><div style="font:700 15px system-ui">Your video is ready</div><div style="font:500 14px/19px system-ui;opacity:.85">"How bees make honey" · 3:02 · tap to watch. Nothing to do but press play.</div></div></div></div>'''
+    return phone(th,inner,False)
+page("03_waiting","Waiting experience (1 to 10 minutes)","The wait becomes the first draft: script, then scenes appear as they are found. Leaving is safe and announced. Done = a notification with the poster frame.",img("ios_home_videos_light.png"),[("Detail while making, light",waiting("light")),("Lock screen: Live Activity + done push",lock("dark"))],[
+ "<b>Promise first</b>: ETA and 'you can leave' in the opening lines (today: a generic 'usually takes a few minutes' on the detail screen only).",
+ "<b>Preview stage</b>: the current scene's narration line over the making gradient; later the real frame. Gives the person something to read (and a sanity check on the script) instead of a spinner.",
+ "<b>Scene strip</b>: scenes fill with real thumbnails as they are found; the one in progress has a cyan ring (the only use of --live). Not gimmicky: it shows true work, one tap shows the frame.",
+ "<b>Notify opt-in at this moment</b> (the right moment to ask for push permission), not on launch. Cancel keeps the credits promise visible.",
+ "<b>iOS Live Activity / Android ongoing notification / web title+favicon progress</b>: same copy ('Finding visuals · scene 3 of 7'). Needs push (not built today: README says 'Not yet: push, Live Activity'). Done push uses the poster frame as attachment."])
+
+# ---------- 4 PLAYER
+def player(th):
+    inner=f'''<div class=pad style="display:flex;justify-content:space-between;align-items:center;height:44px"><span style="color:var(--primary);font:600 17px system-ui">‹ Videos</span><span style="color:var(--primary);font:600 17px system-ui">Edit</span></div>
+<div style="margin:0 0 0;height:220px;background:#000;position:relative"><div class="thumb t3" style="position:absolute;inset:0;border-radius:0;opacity:.9"></div><div style="position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;border-radius:32px;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px">▶</div><div style="position:absolute;left:12px;right:12px;bottom:10px;height:4px;border-radius:2px;background:rgba(255,255,255,.3)"><div style="width:30%;height:4px;border-radius:2px;background:#fff"></div></div></div>
+<div class=pad style="margin-top:16px"><div class=h1 style="font-size:24px;line-height:30px">How bees make honey, explained for kids</div><div class=cap style="margin-top:4px">3:02 · 16:9 · 1080p · made today</div></div>
+<div class=pad style="margin-top:18px;display:flex;flex-direction:column;gap:10px"><div class=btn>Share video</div><div style="display:flex;gap:10px"><div class="btn tonal" style="flex:1;height:48px;font-size:15px">Save to Photos</div><div class="btn tonal" style="flex:1;height:48px;font-size:15px">Edit scenes</div></div></div>
+<div class=pad style="margin-top:20px"><div class="card" style="padding:14px 16px"><div class=over>Next</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><div style="font:600 16px system-ui">Make a vertical version</div><span class="chip sel" style="height:30px">{BOLT}3</span></div><div style="border-top:1px solid var(--outline);margin:12px 0"></div><div style="display:flex;justify-content:space-between;align-items:center"><div style="font:600 16px system-ui">Make another like this</div><span style="color:var(--text3)">›</span></div></div></div>
+<div class=pad style="margin-top:14px;color:var(--primary);font:600 15px system-ui">Description and photo credits ›</div>'''
+    pins=pin(1,-8,150)+pin(2,-8,320)+pin(3,-8,385)+pin(4,-8,460)
+    return phone(th,inner,False,0,pins)
+page("04_player","Video detail and player","Player edge to edge, one dominant Share action, the secondary actions people actually use, and a 'next' card that turns finish into a second video.",None,[("After, light",player("light")),("After, dark",player("dark"))],[
+ "<b>Edge-to-edge 16:9 player</b> (today: inset 20 pt with a 16 pt radius, ios: VideoDetailView.playerSection). Portrait videos max 62% of screen height and centred on black.",
+ "<b>Share is the one primary</b>; today there are three equal bordered buttons including 'Copy title' (low value: remove) and 'Copy description with credits' (move into the credits disclosure).",
+ "<b>Save to Photos</b> and <b>Edit scenes</b> as tonal pair (Edit is today a nav-bar text button, easy to miss; it is the product's best retention feature).",
+ "<b>Next card</b>: a one-tap vertical/square version (same script, new format) and 'Make another like this'. Costs shown as credit chips. This is the retention loop at the exact moment of delight."])
+
+# ---------- 5 WALLET
+def wallet(th):
+    inner=f'''<div class=pad style="display:flex;justify-content:space-between;align-items:center;height:44px"><span style="font:700 17px system-ui">Credits</span><span style="color:var(--primary);font:600 17px system-ui">Done</span></div>
+<div class=pad><div class="card" style="padding:22px;text-align:center;background:linear-gradient(135deg,var(--making1),var(--making2));color:#fff"><div style="font:700 64px/66px system-ui;font-variant-numeric:tabular-nums">42</div><div style="font:600 15px system-ui;opacity:.9">credits</div><div style="font:500 13px system-ui;opacity:.8;margin-top:10px">3 expire tonight · 39 never expire</div></div></div>
+<div class=pad style="margin-top:18px"><div class=over style="margin-bottom:8px">What a credit buys</div><div class=card style="padding:6px 16px"><div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--outline)"><span>Up to 1 minute of video</span><b>{BOLT}1</b></div><div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--outline)"><span>3-minute video</span><b>{BOLT}3</b></div><div style="display:flex;justify-content:space-between;padding:11px 0"><span>4K</span><b>x2</b></div></div></div>
+<div class=pad style="margin-top:18px"><div class=over style="margin-bottom:8px">Get more <span class=tag style="margin:0 0 0 6px;background:#9a4a06">future: illustrative prices</span></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><div class=card style="padding:12px;text-align:center"><b style="font-size:22px">20</b><div class=cap>$X</div></div><div class=card style="padding:12px;text-align:center;box-shadow:inset 0 0 0 2px var(--primary)"><b style="font-size:22px">60</b><div class=cap>$X · best</div></div><div class=card style="padding:12px;text-align:center"><b style="font-size:22px">150</b><div class=cap>$X</div></div></div></div>
+<div class=pad style="margin-top:18px"><div class="card" style="padding:14px 16px;display:flex;gap:12px;align-items:center"><span style="color:var(--primary)">🎁</span><div><b>1 free credit every day</b><div class=cap>Next one in 6 h. Free credits expire that night; bought credits never do.</div></div></div></div>
+<div class=pad style="position:absolute;left:0;right:0;bottom:30px"><div class=btn>Get credits</div></div>'''
+    pins=pin(1,-8,150)+pin(2,-8,300)+pin(3,-8,445)+pin(4,-8,560)
+    return phone(th,inner,False)
+page("05_wallet","Credits and wallet","Replace the stock grouped List with a branded balance hero; teach the cost model in three rows; be paywall-ready without a dark pattern.",None,[("After, light",wallet("light")),("After, dark",wallet("dark"))],[
+ "<b>Hero balance</b> in the 'making' gradient (the brand's one rich surface), with the expiry split in one sentence (today: separate 'What you have' rows 'Free today / Welcome credits / Purchased').",
+ "<b>'What a credit buys'</b>: the same sentence as the Create sheet (1 credit = up to 1 minute, 4K x2). Today it hides in a List footer at 13 pt.",
+ "<b>Packs row</b> (disabled until payments exist; the current 'Get more credits' is a permanently disabled button). Prices are placeholders: no price decision made here.",
+ "<b>Free daily credit</b> explained once, kindly, with the next-credit timer. Pairs with a streak-free, no-guilt tone."])
+
+# ---------- 6 SIGNIN
+def signin(th):
+    inner=f'''<div style="height:80px"></div><div style="text-align:center;padding:0 24px"><div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--g1),var(--g2));margin:0 auto 18px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px">▶</div>
+<div class=h1 style="font-size:32px">Describe it.<br>We'll make the video.</div><div style="font:400 17px/24px system-ui;color:var(--text2);margin-top:12px">Your first video is free.<br>No card needed.</div></div>
+<div style="margin:26px 24px 0;height:150px;border-radius:20px;background:linear-gradient(135deg,var(--making1),var(--making2));position:relative;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px"><span style="position:absolute;left:14px;top:12px;font:700 12px system-ui;letter-spacing:.08em;opacity:.85">20 S SAMPLE · MADE FROM ONE SENTENCE</span>▶</div>
+<div style="position:absolute;left:24px;right:24px;bottom:26px;display:flex;flex-direction:column;gap:10px"><div class=btn style="background:#000;color:#fff;box-shadow:none;border-radius:14px;height:52px"> Continue with Apple</div><div class="btn line" style="border-radius:14px;background:var(--surface)">G&nbsp; Continue with Google</div><div class="btn tonal" style="border-radius:14px;height:48px;font-size:16px">Continue with email</div><div class=cap style="text-align:center;font-size:12.5px">By continuing you agree to the Terms and Privacy Policy.</div></div>'''
+    pins=pin(1,-8,130)+pin(2,-8,420)+pin(3,-8,700)
+    return phone(th,inner,False)
+page("06_signin","Sign-in","Same three actions (Apple, Google, email; Apple first and equal weight per HIG), but the screen sells the product in one sample video and says the first video is free.",img("ios_signin_light.png"),[("After, light",signin("light")),("After, dark",signin("dark"))],[
+ "<b>Headline = the home empty headline</b> ('Describe it. We'll make the video.'), one idea per screen; today the sign-in says 'Describe a video. We write it, voice it and draw it.' and the home says something different.",
+ "<b>Sample video (loop, muted, poster frame while loading)</b>: 20 s real output. The strongest onboarding asset the product has, and it is not shown anywhere before sign-in today. Reduced motion = poster only.",
+ "<b>Buttons</b>: Apple black (white in dark), Google outlined, email tonal; 52/48 pt, 14 pt radius per Apple/Google brand rules; labels 'Continue with ...' (already right). Text must wrap, never clip, at XXL (ios_xxl_signin.png overflows horizontally today). 'Your first video is free' only if the free-credit rule is confirmed by the owner."])
+
+# ---------- 7 ONBOARDING
+def onb1(th):
+    inner=f'''<div style="height:70px"></div><div class=pad style="text-align:center"><div class=over>Step 1 of 2</div><div class=h1 style="font-size:28px;margin:6px 0 8px">What should your first video be about?</div><div class=cap>A 30-second video is the fastest way to see the magic. It's free.</div></div>
+<div class=pad style="margin-top:20px"><div class="card" style="padding:16px;height:150px"><div style="font:400 20px/28px system-ui">Why the sky is blue<span style="color:var(--primary)">|</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><span class=chip>A lighthouse keeper's story</span><span class=chip>How bees make honey</span><span class=chip>Why we dream</span></div></div>
+<div style="position:absolute;left:16px;right:16px;bottom:30px"><div class=cap style="text-align:center;margin-bottom:10px">30 s · landscape · about 2 minutes to make · free</div><div class=btn>Make my first video</div><div style="text-align:center;color:var(--text2);margin-top:14px;font:600 15px system-ui">Customise length and look</div></div>'''
+    return phone(th,inner,False,0,pin(1,-8,110)+pin(2,-8,300)+pin(3,-8,700))
+def onb2(th):
+    inner=f'''<div style="height:60px"></div><div class=pad style="text-align:center"><div class=over>Step 2 of 2</div><div class=h1 style="font-size:28px;margin:6px 0 8px">Making it now</div><div class=cap>About 2 minutes. You can close the app.</div></div>
+<div class=pad style="margin-top:18px"><div class="thumb" style="height:200px;border-radius:22px;background:linear-gradient(135deg,var(--making1),var(--making2));color:#fff;display:flex;align-items:center;justify-content:center;font:600 19px/26px system-ui;padding:20px;text-align:center">"The sky is blue because sunlight is made of many colours..."</div></div>
+<div class="pad" style="margin-top:20px"><div class=card style="padding:16px"><b>Want a ping when it's ready?</b><div class=cap style="margin:4px 0 12px">One notification, only when your video is done.</div><div style="display:flex;gap:10px"><div class="btn" style="flex:1;height:46px;font-size:15px">Notify me</div><div class="btn tonal" style="flex:1;height:46px;font-size:15px">Not now</div></div></div></div>'''
+    return phone(th,inner,False,0,pin(1,-8,90)+pin(2,-8,290))
+def onb3(th):
+    inner=f'''<div style="height:46px"></div><div style="height:260px;background:linear-gradient(135deg,#8b8cff,#2b1f6a);position:relative;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px">▶<span style="position:absolute;left:14px;bottom:10px;font:700 12px system-ui;opacity:.85">YOUR FIRST VIDEO · 0:30</span></div>
+<div class=pad style="margin-top:16px;text-align:center"><div class=h1 style="font-size:26px">That's it. It's yours.</div><div class=cap style="margin-top:4px">Share it, tweak a scene, or make another.</div></div>
+<div class=pad style="margin-top:18px;display:flex;flex-direction:column;gap:10px"><div class=btn>Share video</div><div class="btn tonal">Make the 3-minute version · {BOLT}3</div><div style="text-align:center;color:var(--text2);margin-top:6px;font:600 15px system-ui">Go to my videos</div></div>
+<div class=pad style="margin-top:20px"><div class=cap style="text-align:center">You have 41 credits left. A free one arrives every day.</div></div>'''
+    return phone(th,inner,False,0,pin(1,-8,250)+pin(2,-8,430))
+page("07_onboarding","First-run flow: three screens to a result","Sign-in, then one question, then the wait, then the payoff. Target: first playable video in 60 to 120 s from install (a 30 s video renders far faster than the 3 min default).",img("ios_home_empty_light.png"),[("1 First prompt",onb1("light")),("2 First wait",onb2("light")),("3 First result",onb3("dark"))],[
+ "<b>Prefilled, editable prompt</b> with an example already typed (today: the person lands on a list of three examples and a 3 min default, ios_home_empty_light.png). The example chips fill the field.",
+ "<b>Defaults chosen for speed</b>: 30 s, landscape, auto look, subtitles on, no question sheet for the first video ('Customise' stays one tap away). The cost is shown as free, not as a number.",
+ "<b>Push permission is asked here</b>, with a reason, after the person has an actual video in progress. Never at launch.",
+ "<b>Result screen = the player</b> with a celebration kept to one haptic (success) and one line; the next actions are the retention loop (3-minute version, share). Free daily credit mentioned once."])
+print("ok")
