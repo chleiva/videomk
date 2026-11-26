@@ -2,7 +2,10 @@
 
 Thin native client for the videomk backend. Product spec: `docs/mobile/SPEC.md`. Status: milestones 1 and 2 of the spec (sign-in,
 library, create, progress, player/share, settings). Sign in with Apple/Google exist behind build switches (`VMK_AUTH_APPLE`, `VMK_AUTH_GOOGLE` in `project.yml`, default NO). Not yet: editor, credits/purchases, push, Live Activity
-(sign-in is the Cognito hosted page, which supports email + password), account deletion.
+(sign-in is the Cognito hosted page, which supports email + password).
+
+## Account deletion
+Settings > Delete account (App Store 5.1.1(v)). Contract: `docs/ACCOUNT_DELETION.md`. Flow in `Packages/VideoMKCore/Sources/VideoMKCore/AccountDeletion.swift` (`AccountDeletionFlow`), screens in `VideoMK/DeleteAccountView.swift`, local clearing in `AppModel.finishDeletion`. Debug fixtures (never the real endpoint; fake-library runs always get the fake): `VMK_DEBUG_FAKE_DELETE=notlinked|available|off|unknown[,stale][,offline|forbidden|server|stuck|cancel][,slow]`, `VMK_DEBUG_SHEET=delete`, `VMK_DEBUG_DELETE_STATE=typed|working|signingin|error_<network|uncertain|server|forbidden|cancelled|stuck|wrong|reauthfailed|rejected>`, `VMK_DEBUG_DELETE_DONE=notlinked|available|off|unknown|assumed`, `VMK_DEBUG_REVOKE=ok|cancelled|mismatch|failed`. Do not run the real deletion on a shared QA account.
 
 ## What the app does
 Home is one screen: the list of videos and, pinned at the bottom, a composer where you type or dictate (microphone button, on-device speech recognition when the iPhone supports it) what you want. Sending adds a placeholder row at once; it becomes a live row with stage and an estimated progress bar, then a finished video, while you keep browsing or ask for more. Length and look are in the options button next to the composer. The photo button next to the microphone attaches up to 100 of your photos (see `docs/PHOTOS.md`): they are cleaned on the phone, uploaded, and the video is built around them. Before the photo files are cleaned, their capture time and approximate place (rounded to about 1 km) are read and sent only in the generate request; two switches in Settings (Photos, default on) turn dates and locations off.

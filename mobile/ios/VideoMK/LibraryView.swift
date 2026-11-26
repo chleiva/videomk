@@ -431,7 +431,7 @@ extension LibraryView {
     @MainActor func debugSetup() async {
         let env = ProcessInfo.processInfo.environment
         await model.createModel.photos.loadDebugFiles()      // VMK_DEBUG_PHOTO_FILES / VMK_DEBUG_FAKE_PHOTOS attach to the Create screen
-        switch env["VMK_DEBUG_SHEET"] { case "settings": showingSettings = true; default: break }
+        switch env["VMK_DEBUG_SHEET"] { case "settings", "delete": showingSettings = true; default: break }
         guard let state = env["VMK_DEBUG_CREATE"] else { return }
         let c = model.createModel
         await c.loadCapabilities(userID: model.userID)

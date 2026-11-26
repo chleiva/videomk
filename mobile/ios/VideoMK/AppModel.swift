@@ -37,9 +37,20 @@ final class AppModel {
     var isSigningIn = false
     var signingInWith: SignInChoice?                        // which button shows the spinner
     let authOptions: AuthOptions
+    /// Set once a deletion was accepted: the signed-out app shows "Your account is being deleted" first. Never persisted.
+    private(set) var deletionNotice: DeletionNotice?
+
+    struct DeletionNotice: Equatable {
+        var apple: AppleLink
+        var assumed: Bool
+        fileprivate(set) var revokeToken: String?     // memory only, for the Apple step; dropped when the screen is dismissed
+    }
 
     private let auth: AuthService?
     private let api: APIClient?
+    private var account: (any AccountAPI)?
+    private var deletionAuth: (any DeletionAuth)?
+    private var fakeRevokeStatus: AppleRevoke.Status?  // debug fixtures only
     private let web = WebAuthenticator()
     let config: AppConfig?
 
@@ -55,6 +66,9 @@ final class AppModel {
         guard let config else { auth = nil; api = nil; createModel = CreateModel(api: nil); return }
         let a = AuthService(config: config, store: store)
         auth = a
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+        account = AccountClient(config: config, appVersion: version)
+        deletionAuth = LiveDeletionAuth(auth: a, web: web, config: config)
         api = APIClient(config: config, auth: a, appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0")
         media = api.map { MediaModel(api: LibraryClient(api: $0)) }
         createModel = CreateModel(api: api)
@@ -62,6 +76,7 @@ final class AppModel {
         if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: FakeCreateAPI(capabilities: .success(ProcessInfo.processInfo.environment["VMK_DEBUG_CREATE"]?.hasPrefix("4k") == true ? FakeCreateAPI.fourKCapabilities : FakeCreateAPI.richCapabilities))); userID = "demo-user" }
         selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
         seedDebugScreens()
+        configureDebugDeletion()
         #endif
     }
 
@@ -128,6 +143,47 @@ final class AppModel {
         composerLibrary = []; libraryIDs = [:]
         wallet = nil; videos = []; pending = []; photoData = [:]; photoMeta = [:]; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
         phase = .signedOut
+    }
+
+    // MARK: account deletion (docs/ACCOUNT_DELETION.md)
+
+    func makeDeletionFlow() -> AccountDeletionFlow? {
+        guard let account, let deletionAuth else { return nil }
+        return AccountDeletionFlow(auth: deletionAuth, api: account)
+    }
+
+    /// The deletion was accepted (202). Clears everything on this device, signs out through the normal path (so the next web sign-in is private, never silent)
+    /// and shows the confirmation. Nothing here can fail the deletion: it is already under way on the server.
+    func finishDeletion(_ accepted: DeletionAccepted) async {
+        await signOut()                                   // tokens, explicit-sign-out flag, Media caches and queue, in-memory lists
+        let fm = FileManager.default
+        let caches = fm.urls(for: .cachesDirectory, in: .userDomainMask)[0], support = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        LocalWipe.clearContents(of: [caches.appendingPathComponent("VideoMKMedia"), caches.appendingPathComponent("VideoMKVideoImages"),
+                                     support.appendingPathComponent("VideoMKUploadQueue"), fm.temporaryDirectory])
+        await media?.wipe()                               // again: recreates the empty folders its stores expect
+        StableImageStore.shared.removeAll()
+        URLCache.shared.removeAllCachedResponses()
+        HTTPCookieStorage.shared.removeCookies(since: .distantPast)
+        LocalWipe.resetDefaults(.standard, domain: Bundle.main.bundleIdentifier ?? "com.videomk.app", then: [Self.signedOutKey: true])
+        createModel = CreateModel(api: api)               // drafts and remembered choices
+        composerDraft = nil; createProblem = nil; requestCredits = false; createRequested = false; selectedTab = 0; userID = nil; signInError = nil
+        deletionNotice = DeletionNotice(apple: accepted.apple, assumed: accepted.assumed, revokeToken: accepted.idToken)
+    }
+
+    func dismissDeletionNotice() { deletionNotice = nil }
+
+    /// The optional Apple step, only offered when the server said `revoke_available`. Never blocks anything; every failure ends in the manual steps.
+    func revokeApple() async -> AppleRevoke.Status {
+        guard let config, let account, let token = deletionNotice?.revokeToken else { return .failed }
+        #if DEBUG
+        if let fake = fakeRevokeStatus { try? await Task.sleep(for: .seconds(1)); return fake }
+        #endif
+        do {
+            let url = try await account.appleRevokeURL(idToken: token)
+            let back = try await web.authenticate(url: url, callbackScheme: config.callbackScheme, ephemeral: false)
+            return AppleRevoke.status(of: back, scheme: config.callbackScheme)
+        } catch AuthError.cancelled { return .cancelled }
+        catch { return .failed }
     }
 
     // MARK: library
@@ -298,6 +354,32 @@ final class AppModel {
         UserDefaults.standard.set(true, forKey: "mediaPrivacyNoteSeen")
         if let scene = env["VMK_DEBUG_UPLOAD_SCENE"] { media?.loadDebugScene(scene) }
         if let scene = env["VMK_DEBUG_ORGANIZE"] { media?.loadDebugOrganize(scene) }
+    }
+
+    /// Fake deletion backend. `VMK_DEBUG_FAKE_DELETE` is a comma list: `notlinked|available|off|unknown` (the answer's `apple`), `stale` (sign-in older than 10 minutes),
+    /// `offline` (first request lost, retry works), `forbidden`, `server`, `stuck` (server always says sign-in too old), `cancel` (re-auth cancelled), `slow` (3 s pauses).
+    /// Fake-library runs always get the fake: a test on the shared QA accounts must never reach the real endpoint.
+    /// `VMK_DEBUG_DELETE_DONE=notlinked|available|off|unknown|assumed` opens the confirmation screen directly; `VMK_DEBUG_REVOKE=ok|cancelled|mismatch|failed` is the Apple step's result.
+    private func configureDebugDeletion() {
+        let env = ProcessInfo.processInfo.environment
+        let spec = env["VMK_DEBUG_FAKE_DELETE"] ?? (media?.isFake == true ? "notlinked" : nil)
+        if let spec {
+            let f = Set(spec.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
+            let apple: AppleLink = f.contains("available") ? .revokeAvailable : f.contains("off") ? .revokeOff : f.contains("unknown") ? .unknown : .notLinked
+            let delay: Duration? = f.contains("slow") ? .seconds(3) : nil
+            let script: [Result<AppleLink, AccountError>] =
+                f.contains("offline") ? [.failure(.uncertain), .success(apple)] : f.contains("forbidden") ? [.failure(.forbidden)] :
+                f.contains("server") ? [.failure(.server)] : f.contains("stuck") ? [.failure(.reauthRequired)] : [.success(apple)]
+            let fakeAuth = FakeDeletionAuth(sub: userID ?? "demo-user", authAge: f.contains("stale") || f.contains("cancel") ? 3600 : 30,
+                                            reauthError: f.contains("cancel") ? AuthError.cancelled : nil, delay: delay)
+            account = FakeAccountAPI(script, delay: delay); deletionAuth = fakeAuth
+            fakeRevokeStatus = AppleRevoke.Status(rawValue: env["VMK_DEBUG_REVOKE"] ?? "ok") ?? .ok
+        }
+        if let d = env["VMK_DEBUG_DELETE_DONE"] {
+            let apple: AppleLink = d == "available" ? .revokeAvailable : d == "off" ? .revokeOff : d == "unknown" || d == "assumed" ? .unknown : .notLinked
+            deletionNotice = DeletionNotice(apple: apple, assumed: d == "assumed", revokeToken: d == "available" ? "fake" : nil)
+            fakeRevokeStatus = AppleRevoke.Status(rawValue: env["VMK_DEBUG_REVOKE"] ?? "ok") ?? .ok
+        }
     }
 
     /// QA/automation only (compiled out of Release): `SIMCTL_CHILD_VMK_DEBUG_ID_TOKEN` / `_REFRESH_TOKEN` start a signed-in session; `VMK_DEBUG_RESET=1` signs out first.

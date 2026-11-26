@@ -7,6 +7,8 @@ public struct AppConfig: Sendable, Equatable {
     public let clientID: String
     public let redirectURI: String
     public let callbackScheme: String
+    /// The registered logout URL of the mobile client (hosted-UI `/logout` returns here).
+    public let signOutURI: String
 
     public init(apiBase: URL, authDomain: URL, clientID: String, redirectURI: String = "com.videomk.app://auth/callback") {
         self.apiBase = apiBase
@@ -14,6 +16,7 @@ public struct AppConfig: Sendable, Equatable {
         self.clientID = clientID
         self.redirectURI = redirectURI
         self.callbackScheme = URL(string: redirectURI)?.scheme ?? "com.videomk.app"
+        self.signOutURI = "\(callbackScheme)://auth/signout"
     }
 
     public static func fromBundle(_ bundle: Bundle = .main) -> AppConfig? {

@@ -5,6 +5,7 @@ public enum AuthError: Error, Equatable, Sendable {
     case cancelled
     case failed
     case accountLinkRetry   // Cognito's one-off "Already found an entry for username" after an account link
+    case wrongAccount       // a re-authentication ended in a different account than the one signed in
 }
 
 /// Cognito hosted UI with authorization code + PKCE. The system browser sheet is driven by the app (it needs a window);
@@ -39,7 +40,34 @@ public actor AuthService: AuthorizationProviding {
         return c.url!
     }
 
+    // MARK: re-authentication (account deletion)
+
+    /// Hosted-UI sign-out (ends the browser session only: the tokens held by the app are untouched). `docs/ACCOUNT_DELETION.md` section 2, step 1.
+    public func logoutURL() -> URL {
+        var c = URLComponents(url: config.authDomain.appendingPathComponent("logout"), resolvingAgainstBaseURL: false)!
+        c.queryItems = [.init(name: "client_id", value: config.clientID), .init(name: "logout_uri", value: config.signOutURI)]
+        return c.url!
+    }
+
+    /// A normal authorize request plus `prompt=login&max_age=0` (ignored by the classic hosted UI, correct under managed login). Section 2, step 3.
+    public func beginReauth() -> URL {
+        var c = URLComponents(url: beginSignIn(), resolvingAgainstBaseURL: false)!
+        c.queryItems = (c.queryItems ?? []) + [.init(name: "prompt", value: "login"), .init(name: "max_age", value: "0")]
+        return c.url!
+    }
+
+    /// Exchanges the code like a sign-in, but saves the new tokens ONLY when they belong to `expectedSub`: signing in as somebody else must not replace this session.
+    public func completeReauth(callback: URL, expectedSub: String) async throws {
+        let t = try await exchange(callback: callback)
+        guard JWT.subject(t.idToken) == expectedSub else { throw AuthError.wrongAccount }
+        store.save(t)
+    }
+
     public func completeSignIn(callback: URL) async throws {
+        store.save(try await exchange(callback: callback))
+    }
+
+    private func exchange(callback: URL) async throws -> Tokens {
         guard let pending else { throw AuthError.failed }
         self.pending = nil
         let items = URLComponents(url: callback, resolvingAgainstBaseURL: false)?.queryItems ?? []
@@ -52,9 +80,8 @@ public actor AuthService: AuthorizationProviding {
             throw AuthError.failed
         }
         guard let code = item("code") else { throw AuthError.failed }
-        let t = try await tokenRequest(["grant_type": "authorization_code", "client_id": config.clientID, "code": code,
-                                        "redirect_uri": config.redirectURI, "code_verifier": pending.pkce.verifier], previous: nil)
-        store.save(t)
+        return try await tokenRequest(["grant_type": "authorization_code", "client_id": config.clientID, "code": code,
+                                       "redirect_uri": config.redirectURI, "code_verifier": pending.pkce.verifier], previous: nil)
     }
 
     public func signOut() { pending = nil; store.clear() }

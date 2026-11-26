@@ -38,4 +38,9 @@ public enum JWT {
     }
     public static func subject(_ token: String) -> String? { claims(token)?["sub"] as? String }
     public static func email(_ token: String) -> String? { claims(token)?["email"] as? String }
+    /// When the person last completed a sign-in (Cognito's `auth_time`, seconds since 1970). Nil when absent.
+    public static func authTime(_ token: String) -> Date? {
+        guard let v = claims(token)?["auth_time"] as? NSNumber else { return nil }
+        return Date(timeIntervalSince1970: v.doubleValue)
+    }
 }

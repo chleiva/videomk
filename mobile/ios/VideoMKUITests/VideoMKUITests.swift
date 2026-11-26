@@ -65,6 +65,103 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(on.buttons["Continue with Apple"].exists && on.buttons["signInButton"].exists)
     }
 
+    // MARK: account deletion (never the real endpoint: fake library runs always get the fake deletion backend)
+
+    private func fakeSession(_ env: [String: String]) -> XCUIApplication {
+        func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
+        let token = "\(b64(["alg": "none"])).\(b64(["sub": "demo-user", "email": "demo@example.com", "exp": Int(Date().timeIntervalSince1970) + 86400])).sig"
+        let app = XCUIApplication()
+        app.launchEnvironment["VMK_DEBUG_RESET"] = "1"
+        app.launchEnvironment["VMK_DEBUG_ID_TOKEN"] = token
+        app.launchEnvironment["VMK_DEBUG_REFRESH_TOKEN"] = "fake"
+        app.launchEnvironment["VMK_DEBUG_FAKE_LIBRARY"] = "1"
+        for (k, v) in env { app.launchEnvironment[k] = v }
+        app.launch()
+        return app
+    }
+
+    private func openDeleteSheet(_ app: XCUIApplication) {
+        XCTAssertTrue(app.buttons["settingsButton"].waitForExistence(timeout: 15))
+        app.buttons["settingsButton"].tap()
+        XCTAssertTrue(app.buttons["deleteAccountButton"].waitForExistence(timeout: 5), "Settings has a clear Delete account row")
+        app.buttons["deleteAccountButton"].tap()
+        revealConfirmField(app)
+    }
+
+    /// The page is a lazy list: the field exists once it has been scrolled near.
+    private func revealConfirmField(_ app: XCUIApplication) {
+        XCTAssertTrue(app.buttons["deleteKeepButton"].waitForExistence(timeout: 1) || app.navigationBars["Delete account"].waitForExistence(timeout: 10))
+        for _ in 0..<6 where !app.textFields["deleteConfirmField"].exists { app.swipeUp() }
+        XCTAssertTrue(app.textFields["deleteConfirmField"].waitForExistence(timeout: 5))
+    }
+
+    /// Typed word required, then the fake backend accepts: everything local is cleared and the confirmation shows; Done returns to sign-in.
+    func testDeleteAccountWithFakeBackend() throws {
+        let app = fakeSession(["VMK_DEBUG_FAKE_DELETE": "notlinked"])
+        openDeleteSheet(app)
+        XCTAssertFalse(app.buttons["deleteConfirmButton"].isEnabled, "nothing happens until DELETE is typed")
+        let field = app.textFields["deleteConfirmField"]
+        field.tap(); field.typeText("delete me")
+        XCTAssertFalse(app.buttons["deleteConfirmButton"].isEnabled, "a near miss does not count")
+        field.clearAndType("DELETE")
+        app.buttons["deleteConfirmButton"].tap()
+        XCTAssertTrue(element(app, "deletedTitle").waitForExistence(timeout: 15), "Your account is being deleted")
+        app.buttons["deletedDone"].tap()
+        XCTAssertTrue(app.buttons["signInButton"].waitForExistence(timeout: 10), "back at the signed-out screen")
+    }
+
+    /// A sign-in older than 10 minutes, the person cancels the sign-in again: nothing is sent, still signed in, can keep the account.
+    func testDeleteAccountCancelledReauthKeepsTheSession() throws {
+        let app = fakeSession(["VMK_DEBUG_FAKE_DELETE": "cancel"])
+        openDeleteSheet(app)
+        let field = app.textFields["deleteConfirmField"]
+        field.tap(); field.typeText("DELETE")
+        app.buttons["deleteConfirmButton"].tap()
+        XCTAssertTrue(element(app, "deleteError").waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["deleteKeepButton"].exists)
+        app.buttons["deleteKeepButton"].tap()
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10), "still signed in")
+    }
+
+    /// Screenshots of every state (VMK_SHOTS_DIR, optional PREFIX in the name). No assertions beyond "it renders".
+    func testDeleteAccountScreens() throws {
+        let prefix = ProcessInfo.processInfo.environment["VMK_SHOTS_PREFIX"] ?? ""
+        func snap(_ app: XCUIApplication, _ name: String) { shot(app, prefix + name) }
+        func scrollDown(_ app: XCUIApplication) { for _ in 0..<3 { app.swipeUp() } }
+
+        var app = fakeSession(["VMK_DEBUG_SHEET": "settings"])
+        XCTAssertTrue(app.buttons["deleteAccountButton"].waitForExistence(timeout: 15)); sleep(1)
+        snap(app, "1-settings"); app.terminate()
+
+        app = fakeSession(["VMK_DEBUG_SHEET": "delete"])
+        XCTAssertTrue(app.navigationBars["Delete account"].waitForExistence(timeout: 15)); sleep(1)
+        snap(app, "2-sheet-top"); scrollDown(app); sleep(1); snap(app, "3-sheet-bottom"); app.terminate()
+
+        app = fakeSession(["VMK_DEBUG_SHEET": "delete", "VMK_DEBUG_DELETE_STATE": "typed"])
+        XCTAssertTrue(app.navigationBars["Delete account"].waitForExistence(timeout: 15)); scrollDown(app); sleep(1)
+        snap(app, "4-sheet-typed"); app.terminate()
+
+        for (state, name) in [("signingin", "5a-signing-in"), ("working", "5b-deleting")] {
+            app = fakeSession(["VMK_DEBUG_SHEET": "delete", "VMK_DEBUG_DELETE_STATE": state])
+            XCTAssertTrue(element(app, "deleteProgress").waitForExistence(timeout: 15)); snap(app, name); app.terminate()
+        }
+        for (state, name) in [("error_uncertain", "6a-error-lost"), ("error_cancelled", "6b-error-cancelled"), ("error_stuck", "6c-error-stuck"), ("error_forbidden", "6d-error-forbidden"), ("error_server", "6e-error-server")] {
+            app = fakeSession(["VMK_DEBUG_SHEET": "delete", "VMK_DEBUG_DELETE_STATE": state])
+            XCTAssertTrue(app.navigationBars["Delete account"].waitForExistence(timeout: 15)); scrollDown(app); sleep(1); snap(app, name); app.terminate()
+        }
+        for (done, name) in [("notlinked", "7a-done"), ("available", "7b-done-apple"), ("off", "7c-done-apple-off"), ("assumed", "7d-done-assumed")] {
+            app = fakeSession(["VMK_DEBUG_DELETE_DONE": done])
+            XCTAssertTrue(element(app, "deletedTitle").waitForExistence(timeout: 15)); sleep(1); snap(app, name)
+            if done == "available" {
+                app.buttons["appleRevokeButton"].tap(); sleep(3); snap(app, "7e-apple-removed")
+            }
+            app.terminate()
+        }
+        app = fakeSession(["VMK_DEBUG_DELETE_DONE": "available", "VMK_DEBUG_REVOKE": "cancelled"])
+        XCTAssertTrue(app.buttons["appleRevokeButton"].waitForExistence(timeout: 15)); app.buttons["appleRevokeButton"].tap(); sleep(3)
+        snap(app, "7f-apple-cancelled")
+    }
+
     /// No backend needed: a made-up session and the in-app fake library (debug builds only). Checks the tab bar and the Media tab.
     func testMediaTabWithFakeLibrary() throws {
         func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
@@ -585,5 +682,14 @@ final class VideoMKUITests: XCTestCase {
         app.buttons["publishButton"].tap()
         XCTAssertTrue(app.staticTexts["doneTitle"].waitForExistence(timeout: 600), "publishing did not finish")
         XCTAssertEqual(app.staticTexts["doneTitle"].label, "Published")
+    }
+}
+
+private extension XCUIElement {
+    /// Replaces the text of a text field.
+    func clearAndType(_ text: String) {
+        guard let current = value as? String, !current.isEmpty else { typeText(text); return }
+        tap()
+        typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count) + text)
     }
 }

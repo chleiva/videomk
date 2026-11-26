@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var confirmSignOut = false
+    @State private var showDelete = false
     @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage(PhotoMetaSettings.datesKey) private var useDates = true
     @AppStorage(PhotoMetaSettings.locationsKey) private var useLocations = true
@@ -15,6 +16,12 @@ struct SettingsView: View {
                 Section("Account") {
                     if case .signedIn(let email) = model.phase, let email { LabeledContent("Signed in as", value: email) }
                     Button("Sign out", role: .destructive) { confirmSignOut = true }.accessibilityIdentifier("signOutButton")
+                }
+                Section {
+                    Button(role: .destructive) { showDelete = true } label: { Label { Text("Delete account") } icon: { Image(systemName: "trash").foregroundStyle(.red) } }
+                        .accessibilityIdentifier("deleteAccountButton")
+                } footer: {
+                    Text("Permanently deletes your account, your videos, your photos in My media and your credits.")
                 }
                 Section {
                     Toggle("Use photo dates", isOn: $useDates).accessibilityIdentifier("usePhotoDates")
@@ -44,6 +51,10 @@ struct SettingsView: View {
                     Link("Privacy Policy", destination: URL(string: "https://videomk.com/privacy")!)
                 }
             }
+            .sheet(isPresented: $showDelete) { DeleteAccountView() }
+            #if DEBUG
+            .onAppear { if ProcessInfo.processInfo.environment["VMK_DEBUG_SHEET"] == "delete" { showDelete = true } }
+            #endif
             .task { if model.media?.summary == nil { await model.media?.loadSummary() } }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)

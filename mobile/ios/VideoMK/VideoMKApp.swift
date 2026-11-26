@@ -18,6 +18,9 @@ struct RootView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
+        if let notice = model.deletionNotice {
+            AccountDeletedView(notice: notice)
+        } else {
         switch model.phase {
         case .launching: Theme.background.ignoresSafeArea()
         case .notConfigured:
@@ -25,6 +28,7 @@ struct RootView: View {
                                    description: Text("This build has no server address. Use the Debug build, or fill in the Release settings."))
         case .signedOut: SignInView()
         case .signedIn: MainTabs()
+        }
         }
     }
 }
