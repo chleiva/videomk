@@ -496,7 +496,14 @@ class BackendStack(Stack):
             access_token_validity=Duration.hours(1), id_token_validity=Duration.hours(1), refresh_token_validity=Duration.days(60),
             prevent_user_existence_errors=True,
         )
-        hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
+        # Sign-in runs on our own host (`-c authDomain=auth.videomk.com -c authCertArn=<ACM cert in us-east-1>`): Google and Apple show it on their consent screens.
+        auth_host, auth_cert = self.node.try_get_context("authDomain"), self.node.try_get_context("authCertArn")
+        if auth_host and auth_cert:
+            hosted_ui = user_pool.add_domain("HostedUi", custom_domain=cognito.CustomDomainOptions(domain_name=auth_host, certificate=acm.Certificate.from_certificate_arn(self, "AuthCert", auth_cert)))
+            zone = route53.HostedZone.from_hosted_zone_attributes(self, "AuthZone", hosted_zone_id=self.node.try_get_context("authZoneId"), zone_name=auth_host.split(".", 1)[1])
+            route53.ARecord(self, "AuthAlias", zone=zone, record_name=auth_host, target=route53.RecordTarget.from_alias(targets.UserPoolDomainTarget(hosted_ui)))
+        else:
+            hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
         social = SocialAuth(self, "SocialAuth", user_pool=user_pool, hosted_ui=hosted_ui, google=social_google, apple=social_apple, make_fn=make_fn)
         social.attach_clients(user_pool_client, mobile_client)
         if unconfirmed_cleanup_enabled(self.node):   # on by default; `-c unconfirmedCleanup=0` removes it
