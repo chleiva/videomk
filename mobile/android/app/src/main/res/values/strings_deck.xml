@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Presentations (PowerPoint and PDF) to video. Shown only where the server lists the feature (capabilities.deck). -->
+<resources>
+    <string name="deck_add_title">Add a presentation</string>
+    <string name="deck_add_subtitle">PowerPoint or PDF · we explain every slide</string>
+    <string name="deck_add_desc">Add a presentation. PowerPoint or PDF, we explain every slide</string>
+    <string name="deck_replace_photos_title">Use a presentation instead?</string>
+    <string name="deck_replace_photos_text">Your photos will be removed from this video. A video is made from photos or from a presentation, not both.</string>
+    <string name="deck_replace_photos_confirm">Use presentation</string>
+    <string name="deck_replace_photos_keep">Keep photos</string>
+    <string name="deck_card_label">Presentation</string>
+    <string name="deck_copying">Getting your file ready…</string>
+    <string name="deck_uploading">Uploading… %1$d%%</string>
+    <string name="deck_processing">Preparing your slides…</string>
+    <string name="deck_processing_hint">This usually takes up to half a minute. You can wait here.</string>
+    <string name="deck_cancel_upload">Cancel</string>
+    <string name="deck_remove_desc">Remove the presentation</string>
+    <string name="deck_ready_line">%1$s · about %2$s</string>
+    <string name="deck_promise">We\'ll explain every slide in the narration.</string>
+    <string name="deck_choose_again">Choose the file again</string>
+    <string name="deck_choose_another">Choose another file</string>
+    <string name="deck_keep_waiting">Keep waiting</string>
+    <string name="deck_vertical_warning">Slides are wide. In a vertical video they look small, with empty space above and below. Landscape 16:9 shows them best.</string>
+    <string name="deck_use_landscape">Use landscape</string>
+    <string name="deck_use_landscape_desc">Use landscape 16:9, the best shape for slides</string>
+    <string name="deck_prompt_hint">Optional: who is it for? For example: for executives, or for students.</string>
+    <string name="deck_suggested">Suggested</string>
+    <string name="deck_status_waiting">Your presentation is getting ready</string>
+    <string name="deck_status_failed">Fix your presentation to continue</string>
+    <string name="deck_status_short">Add a few more words, or leave the description empty</string>
+    <string name="deck_title_fallback">Narrated presentation</string>
+    <string name="lib_sentence_deck_reading">Reading your slides.</string>
+    <string name="lib_sentence_deck_writing">Writing the narration.</string>
+
+    <string name="deck_err_too_large_title">That file is too big</string>
+    <string name="deck_err_too_large_body">Presentations can be up to %1$d MB. Try making the pictures smaller, or export it as a PDF.</string>
+    <string name="deck_err_too_many_slides_title">That\'s a lot of slides</string>
+    <string name="deck_err_too_many_slides_body">We can narrate up to %1$d slides. Split it into two files, or choose a shorter one.</string>
+    <string name="deck_err_encrypted_title">That file is password protected</string>
+    <string name="deck_err_encrypted_body">Save a copy without a password and choose it again. Old .ppt files also need saving as .pptx or PDF.</string>
+    <string name="deck_err_macro_title">That file contains macros</string>
+    <string name="deck_err_macro_body">For your safety we can\'t open files with macros or embedded programs. Save it as .pptx without macros, or export it as a PDF.</string>
+    <string name="deck_err_corrupt_title">We couldn\'t open that file</string>
+    <string name="deck_err_corrupt_body">It may be damaged. Open it on your computer, export it as a PDF, and choose that one.</string>
+    <string name="deck_err_unsupported_title">We can\'t use that kind of file</string>
+    <string name="deck_err_unsupported_body">Choose a PowerPoint (.pptx) or a PDF. From Keynote, Google Slides or an older PowerPoint, use Export as .pptx or PDF.</string>
+    <string name="deck_err_empty_title">That presentation is empty</string>
+    <string name="deck_err_empty_body">We didn\'t find any slides in it. Choose a file with at least one slide.</string>
+    <string name="deck_err_unsafe_title">We couldn\'t use that file</string>
+    <string name="deck_err_unsafe_body">It didn\'t pass our safety check. Choose a different presentation.</string>
+    <string name="deck_err_timeout_title">That took too long</string>
+    <string name="deck_err_timeout_body">This presentation was too heavy to prepare. Choose it again, or export it as a PDF to make it lighter.</string>
+    <string name="deck_err_convert_title">We couldn\'t prepare that file</string>
+    <string name="deck_err_convert_body">Something in it didn\'t convert. Export it as a PDF and choose that one, or try the same file again.</string>
+    <string name="deck_err_network_title">No connection</string>
+    <string name="deck_err_network_body">Your presentation didn\'t finish uploading. Check your connection and try again.</string>
+    <string name="deck_err_upload_title">The upload didn\'t finish</string>
+    <string name="deck_err_upload_body">Nothing was lost. Try again in a moment.</string>
+    <string name="deck_err_daily_title">That\'s enough presentations for today</string>
+    <string name="deck_err_daily_body">You can add up to 10 a day. Try again tomorrow.</string>
+    <string name="deck_err_unavailable_title">Presentations aren\'t available right now</string>
+    <string name="deck_err_unavailable_body">Please try again later. Your photos and ideas still work.</string>
+    <string name="deck_err_stalled_title">This is taking longer than usual</string>
+    <string name="deck_err_stalled_body">Your presentation is still being prepared. You can keep waiting, or choose another file.</string>
+    <string name="deck_err_other_title">Something went wrong</string>
+    <string name="deck_err_other_body">We couldn\'t prepare your presentation. Choose the file again.</string>
+
+    <plurals name="deck_slides">
+        <item quantity="one">%1$d slide</item>
+        <item quantity="other">%1$d slides</item>
+    </plurals>
+    <plurals name="deck_cost">
+        <item quantity="one">%1$d credit for the suggested length</item>
+        <item quantity="other">%1$d credits for the suggested length</item>
+    </plurals>
+    <plurals name="deck_suggested_desc">
+        <item quantity="one">Suggested length, %2$s, %1$d credit</item>
+        <item quantity="other">Suggested length, %2$s, %1$d credits</item>
+    </plurals>
+</resources>

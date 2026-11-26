@@ -25,12 +25,15 @@ class FakeBackend : Backend {
     var newVideoId = "new-video"
     val startBriefs = mutableListOf<kotlinx.serialization.json.JsonObject?>()
     val startLibrary = mutableListOf<List<String>>()
+    val startDecks = mutableListOf<String?>()
+    val startOptions = mutableListOf<CreateOptions>()
     val startMeta = mutableListOf<kotlinx.serialization.json.JsonObject?>()
 
     override suspend fun listVideos(): List<VideoItem> { listCalls++; listError?.let { throw it }; return videos }
     override suspend fun wallet(): WalletInfo = wallet
-    override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?): String {
+    override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?): String {
         startBriefs += brief
+        startDecks += deck; startOptions += options
         startLibrary += libraryMedia
         startCalls += Triple(prompt, clientRequestId, media)
         startMeta += mediaMeta

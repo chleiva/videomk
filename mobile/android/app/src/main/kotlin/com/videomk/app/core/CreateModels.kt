@@ -20,6 +20,8 @@ data class LanguageInfo(val id: String, val label: String)
 data class Capabilities(
     val aspects: List<AspectInfo>, val resolutions: List<ResolutionInfo>, val platforms: List<PlatformInfo>, val languages: List<LanguageInfo>,
     val minMinutes: Double = 1.0, val maxMinutes: Double = 12.0, val presets: List<Double> = Lengths.OLD_PRESETS, val maxPhotos: Int = 100, val intake: Boolean = false,
+    /** Present only when the server has presentations switched on: the whole feature stays hidden otherwise. */
+    val deck: DeckCaps? = null,
 ) {
     val readyAspects: List<AspectInfo> get() = aspects.filter { it.ready }
     fun aspect(id: String) = aspects.firstOrNull { it.id == id }
@@ -40,6 +42,7 @@ data class Capabilities(
             minMinutes = o.obj("lengths")?.num("min_minutes") ?: 1.0, maxMinutes = o.obj("lengths")?.num("max_minutes") ?: 12.0,
             presets = o.obj("lengths")?.arr("presets")?.mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content?.toDoubleOrNull() }?.filter { it > 0 }?.distinct()?.sorted()?.takeIf { it.isNotEmpty() } ?: Lengths.OLD_PRESETS,
             maxPhotos = o.int("max_photos") ?: 100, intake = o.bool("intake") ?: false,
+            deck = o.obj("deck")?.let { DeckCaps.fromJson(it) },
         ).let { c -> if (c.readyAspects.isEmpty() || c.resolutions.isEmpty()) FALLBACK else c }
     }
 }

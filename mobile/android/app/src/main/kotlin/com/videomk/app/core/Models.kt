@@ -7,7 +7,8 @@ import java.time.Instant
 
 /** What the user needs to know about a video's state. The server has finer statuses; we only distinguish what changes the UI. */
 sealed interface VideoStatus {
-    data class Running(val stage: Stage) : VideoStatus
+    /** [deck] is set while a presentation is read and its narration written (the server's `stage` on a PLOT_CREATION video made from a deck). */
+    data class Running(val stage: Stage, val deck: DeckStage? = null) : VideoStatus
     data object Complete : VideoStatus
     data object Failed : VideoStatus
     data object Rejected : VideoStatus
@@ -24,12 +25,15 @@ sealed interface VideoStatus {
 
     val isRunning: Boolean get() = this is Running
 
+    enum class DeckStage { Reading, Writing }
+
     companion object {
-        fun fromServer(raw: String): VideoStatus = when (raw.uppercase()) {
+        /** [stage] is the item's `stage` field (`deck_reading`, `deck_writing`); it only matters while the status is PLOT_CREATION and is ignored afterwards. */
+        fun fromServer(raw: String, stage: String? = null): VideoStatus = when (raw.uppercase()) {
             "COMPLETE", "PREVIEW_READY" -> Complete
             "FAILED", "EDIT_FAILED", "CANCELLED" -> Failed
             "REJECTED" -> Rejected
-            "PLOT_CREATION" -> Running(Stage.Writing)
+            "PLOT_CREATION" -> when (stage) { "deck_reading" -> Running(Stage.Writing, DeckStage.Reading); "deck_writing" -> Running(Stage.Writing, DeckStage.Writing); else -> Running(Stage.Writing) }
             "ASSETS_CREATION", "STORYBOARD_CREATION" -> Running(Stage.VoiceAndVisuals)
             "RENDERING" -> Running(Stage.Rendering)
             else -> Running(Stage.Starting)
@@ -58,7 +62,7 @@ data class VideoItem(
     companion object {
         fun fromJson(o: JsonObject): VideoItem = VideoItem(
             id = o.requireString("video_id"),
-            status = VideoStatus.fromServer(o.str("status") ?: ""),
+            status = VideoStatus.fromServer(o.str("status") ?: "", o.str("stage")),
             title = o.str("title"),
             durationSeconds = o.num("duration_s"),
             createdAt = parseInstant(o.str("created_at")),
@@ -91,9 +95,12 @@ data class CreateOptions(
     val minutes: Double = DEFAULT_MINUTES, val look: VideoLook? = null, val captions: Boolean = true,
     /** What the video is for (wire id) and its picture: absent on the wire means today's behaviour (other, 16:9, 1080p, same language as the description). */
     val platform: String = "other", val aspect: String = "16:9", val resolution: String = "1080p", val language: String = "auto",
+    /** A ready presentation made at the length the server suggested: its price (the server's own number) and no `target_minutes` on the wire. Null for everything else. */
+    val suggestedCredits: Int? = null,
 ) {
-    /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). */
-    val credits: Int get() = Lengths.credits(minutes)
+    /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). A presentation at its suggested length shows the server's price. */
+    val credits: Int get() = suggestedCredits ?: Lengths.credits(minutes)
+    val useSuggestedLength: Boolean get() = suggestedCredits != null
     /** True when a server-offered 4K resolution is chosen (the app offers 720p and 1080p today); only then the cost line states that 4K costs double. */
     val isFourK: Boolean get() = resolution.lowercase().let { it == "4k" || it == "2160p" }
 

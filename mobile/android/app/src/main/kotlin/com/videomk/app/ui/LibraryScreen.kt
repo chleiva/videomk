@@ -222,7 +222,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                                                     else -> FailedRow(
                                                         title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
                                                         thumb = v.previewGifUrl, tag = "videoRow",
-                                                        onRetry = state.briefs[v.id]?.let { brief -> { app.submit(brief, CreateOptions(state.minutes[v.id] ?: CreateOptions.DEFAULT_MINUTES)) } },
+                                                        onRetry = state.briefs[v.id]?.takeIf { v.id !in state.deckVideos }?.let { brief -> { app.submit(brief, CreateOptions(state.minutes[v.id] ?: CreateOptions.DEFAULT_MINUTES)) } },
                                                         onDismiss = null,
                                                     )
                                                 }
@@ -387,20 +387,21 @@ fun rememberMakingSnapshot(video: VideoItem, state: AppState): MakingSnapshot {
     val inStage = since?.let { (now - it) / 1000.0 } ?: 0.0
     val minutes = state.minutes[video.id] ?: CreateOptions.DEFAULT_MINUTES
     val title = state.briefs[video.id] ?: video.title?.takeIf { it.isNotEmpty() } ?: stringResource(R.string.lib_making_title)
-    return MakingSnapshot.of(title, stage, inStage, minutes)
+    val deck = (video.status as? VideoStatus.Running)?.deck
+    return if (deck != null) MakingSnapshot.ofDeck(title, deck, inStage, minutes) else MakingSnapshot.of(title, stage, inStage, minutes)
 }
 
 /** The request is on its way (or failed before the server answered): the same card as a running one, so the list never jumps. */
 @Composable
 private fun PendingCard(pending: PendingVideo, onRetry: () -> Unit, onDismiss: () -> Unit) {
     val failed = (pending.state as? PendingVideo.State.Failed)?.message
-    if (failed != null) { FailedRow(pending.brief, false, failed, null, "failedRow", onRetry, onDismiss); return }
+    if (failed != null) { FailedRow(pending.shownTitle, false, failed, null, "failedRow", onRetry, onDismiss); return }
     val st = pending.state
     val line = when (st) {
         is PendingVideo.State.Uploading -> stringResource(R.string.lib_pending_uploading, minOf(st.done + 1, st.total), st.total)
         else -> stringResource(R.string.lib_pending_sending)
     }
-    MakingCard(MakingSnapshot.pending(pending.brief, line, if (st is PendingVideo.State.Uploading) 0.2 * st.done / maxOf(st.total, 1) else 0.0), Modifier.testTag("pendingRow"))
+    MakingCard(MakingSnapshot.pending(pending.shownTitle, line, if (st is PendingVideo.State.Uploading) 0.2 * st.done / maxOf(st.total, 1) else 0.0), Modifier.testTag("pendingRow"))
 }
 
 /** The slim pill on the Videos tab while photos upload: opens Media. */

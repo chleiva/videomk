@@ -25,6 +25,30 @@ On Create the app asks `POST .../videos/brief` (2.5 s before the skeleton, 8 s b
 (`ui/CreateSheets.kt`), or the kind "We can't make this one" sheet, then calls generate with `platform`, `aspect`, `resolution`, `language` and `brief` (only values away from the defaults are sent).
 A server without the new endpoints degrades to landscape 16:9 at 1080p and no check. Choices are remembered per person (`CreatePrefsStore`). Pure logic with tests: `core/CreateLogic.kt`, `core/CreateModels.kt`.
 
+## Presentations to video (PowerPoint or PDF; docs/CREATE_API.md, docs/DECK_TO_VIDEO.md)
+Only where the server lists it: `capabilities.deck {max_mb, max_slides, formats}` is absent while the feature is off, and then nothing about it is drawn.
+- **Entry**: "Add a presentation" is a row at the top of the Add photos sheet (`DeckEntryRow`); it closes the sheet and opens the system document picker (`ActivityResultContracts.OpenDocument`, MIME types from
+  `formats`). Photos and a presentation exclude each other: with photos chosen the row first asks ("Use a presentation instead?"); choosing photos (phone or My media) later drops the presentation and deletes its copy.
+- **Journey** (`core/Deck.kt`, one `DeckJourney` in the composer's ViewModel, so a rotation keeps it): format and size are checked from the picker's own name, type and size before anything is copied;
+  the file is streamed into a private copy under `cacheDir/deck` (random name, never the file name; hard stop at `max_mb`; first bytes checked: `%PDF` or `PK`); `POST /decks`; a streaming multipart upload with
+  progress and Cancel (`DeckFormBody`, 64 KB at a time, no login token sent to storage; the photo uploader holds whole files in memory, so it was not reused); the copy is deleted the moment the upload ends;
+  `POST /decks/{id}/process`; `GET /decks/{id}` every 2 s (slowing to 5 s), giving up after 3 minutes (or 5 failed calls in a row) with "Keep waiting".
+  The read grant of the picker is used once and never made persistable. Nothing about the file is logged.
+- **Ready card** (`ui/DeckUi.kt`, `DeckCard`): file name, slides, suggested length, credits (`CostLine`) and the promise "We'll explain every slide in the narration." Failures map the server's `code` to the app's own
+  localized, specific messages with one next step (`DeckProblem`: choose another file, choose it again, try again, keep waiting, or nothing for the daily limit and "not available"); an unknown code shows the
+  server's message.
+- **Create form**: the description is optional (a deck-aware hint; the server wants 10 characters or none), 16:9 is chosen when a deck is picked, a vertical or portrait format shows a gentle warning with a one-tap
+  "Use landscape", and a "Suggested" length chip comes first. At the suggested length the request sends **no** `target_minutes` and the price is the server's `suggested_credits`; picking another length sends it
+  and the usual started-minutes price applies. The request check (`/videos/brief`) is skipped for decks.
+- **Waiting**: the video item's `stage` (`deck_reading`, `deck_writing`, only while `PLOT_CREATION`) becomes `VideoStatus.Running(stage, deck)`; `MakingCard` shows "Reading your slides." then "Writing the narration."
+  inside the first step before the usual ones. A failed deck video has no Retry (the deck is gone once planning starts): make it again from Create.
+- **Privacy and deletion**: the temporary copy lives only under `cacheDir/deck`; it is deleted after the upload, on Cancel/Remove, on sign-out (`VideoMkRoot`), at the next app start, and by `LocalDataWiper` (explicit
+  `deck-cache` step; account deletion also cancels a running upload before wiping).
+- **Try it without the server** (debug build): create `files/fake_deck` (a mode: `ok`, `uploading`, `processing`, `slowready`, `stalled`, `offline`, `offline_upload`, `upload_failed`, `too_many_decks`, `unavailable` or any
+  server code such as `deck_encrypted`), plus `fake_backend` and `fake_intake`; `--es vmk_debug_deck_file /data/data/com.videomk.app/files/x.pptx` picks that file when Create opens (the system picker is not driven in
+  screenshots). `FakeDeckApi` (debug) answers the three calls; `FakeDebugBackend` adds two videos at `deck_reading` and `deck_writing`. Needs the real server flag (`-c deckToVideo=1`) to verify the true upload to
+  storage, the real status codes and messages, and a real `generate`.
+
 ## The interface (docs/UI_DESIGN.md)
 Tokens (colours, radii, shadows) live in `ui/Theme.kt` and shared pieces in `ui/UiKit.kt`. Main screen: docked **composer card** (`ComposerBar.kt`: photo strip, two-line field, ONE
 status line for price / reason / fix with a one-tap fix chip, toolbar with attach + count badge, options pill "3 min · ⚡3", mic, and a send button that is always drawn, tonal until
@@ -94,7 +118,7 @@ English is the base (`res/values`), Spanish is `res/values-es`; the contract (po
 
 ## Tests
 ```
-./gradlew testDebugUnitTest              # 102 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
+./gradlew testDebugUnitTest              # 332 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
                                          # library merge + progress estimator, photo geometry + multipart + uploader, editor diff/snapshot/view model, app view model
 ./scripts/run-ui-tests.sh                # instrumented tests on the running emulator, against QA (see below)
 ./scripts/run-ui-tests.sh com.videomk.app.E2ETest   # makes ONE real 1-minute video from 4 photos on QA (a few cents), plays it, full screen, edits it

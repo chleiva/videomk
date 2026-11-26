@@ -3,7 +3,7 @@ package com.videomk.app.core
 import com.videomk.app.R
 
 /** What the composer's one status line says (docs/UI_DESIGN.md section e). */
-enum class StatusKind { Listening, Sending, TooLong, NotAffordable, NoCredits, TooShort, PhotoHint, Ready, Idle }
+enum class StatusKind { Listening, Sending, TooLong, NotAffordable, NoCredits, TooShort, PhotoHint, Ready, Idle, DeckWaiting }
 
 /** The one-tap fix that comes with a problem: switch to a length ([minutes]), or open the credits screen. */
 data class StatusFix(val minutes: Double?, val addCredits: Boolean = false) {
@@ -33,13 +33,14 @@ object ComposerLogic {
      * One message at a time. Priority: listening, sending, too long, not affordable, too short, photo hint, price.
      * [balance] is null for accounts with unlimited credits. [photos] counts phone and My media photos together.
      */
-    fun status(text: String, options: CreateOptions, balance: Int?, photos: Int, listening: Boolean, sending: Boolean, lengths: List<Double> = Lengths.OLD_PRESETS, createScreen: Boolean = false, checking: Boolean = false): ComposerStatus {
+    fun status(text: String, options: CreateOptions, balance: Int?, photos: Int, listening: Boolean, sending: Boolean, lengths: List<Double> = Lengths.OLD_PRESETS, createScreen: Boolean = false, checking: Boolean = false, deck: DeckState? = null): ComposerStatus {
         if (checking) return ComposerStatus(StatusKind.Sending, Txt.s(R.string.composer_checking))
         if (listening) return ComposerStatus(StatusKind.Listening, Txt.s(R.string.composer_listening))
         if (sending) return ComposerStatus(StatusKind.Sending, Txt.s(R.string.composer_starting))
         val count = Brief.normalized(text).length
         val credits = options.credits
         if (count > Brief.MAX_LENGTH) return ComposerStatus(StatusKind.TooLong, Txt.s(R.string.composer_too_long, count, Brief.MAX_LENGTH))
+        if (deck != null) return deckStatus(count, options, balance, lengths, deck)
         val short = text.isNotEmpty() && !Brief.isValid(text)
         val valid = Brief.isValid(text)
         if (valid && balance != null && credits > balance) {
@@ -56,6 +57,22 @@ object ComposerLogic {
         }
         return ComposerStatus(StatusKind.Ready, if (balance == null) Txt.n(R.plurals.composer_ready_credits, credits) else Txt.n(R.plurals.composer_ready_credits_left, credits, balance - credits))
     }
+}
+
+/**
+ * With a presentation the description is optional (it only steers audience and tone): empty is fine, a few characters are not (the server wants 10 or none),
+ * and Create waits until the presentation is ready.
+ */
+private fun deckStatus(count: Int, options: CreateOptions, balance: Int?, lengths: List<Double>, deck: DeckState): ComposerStatus {
+    if (deck !is DeckState.Ready) return ComposerStatus(StatusKind.DeckWaiting, Txt.s(if (deck is DeckState.Failed) R.string.deck_status_failed else R.string.deck_status_waiting))
+    if (count in 1 until Brief.MIN_LENGTH) return ComposerStatus(StatusKind.TooShort, Txt.s(R.string.deck_status_short))
+    val credits = options.credits
+    if (balance != null && credits > balance) {
+        val fit = ComposerLogic.affordableLength(balance, lengths)
+        return if (fit == null) ComposerStatus(StatusKind.NoCredits, Txt.s(R.string.composer_no_credits), StatusFix(null, addCredits = true))
+        else ComposerStatus(StatusKind.NotAffordable, Txt.n(R.plurals.composer_needs_credits, credits, balance), StatusFix(fit))
+    }
+    return ComposerStatus(StatusKind.Ready, if (balance == null) Txt.n(R.plurals.composer_ready_credits, credits) else Txt.n(R.plurals.composer_ready_credits_left, credits, balance - credits))
 }
 
 /** Where a chosen photo comes from. */

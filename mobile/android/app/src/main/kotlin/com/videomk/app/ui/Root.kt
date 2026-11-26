@@ -57,6 +57,8 @@ val LocalContainerOrNull = compositionLocalOf<AppContainer?> { null }
 @Composable
 fun VideoMkRoot(app: AppViewModel, composer: ComposerViewModel, container: AppContainer, onSignIn: (SignInProvider) -> Unit, social: SocialSwitches = SocialSwitches()) {
     val state by app.state.collectAsState()
+    // a presentation belongs to the account that uploaded it: signing out (or a revoked session) drops it and deletes its temporary copy
+    androidx.compose.runtime.LaunchedEffect(state.phase is Phase.SignedOut) { if (state.phase is Phase.SignedOut) composer.removeDeck() }
     Surface(Modifier.fillMaxSize().semantics { if (BuildConfig.DEBUG) testTagsAsResourceId = true }, color = Vmk.colors.background) {
         val deletionState = app.deletion?.state?.collectAsState()?.value
         if (deletionState is DeletionState.Accepted) {

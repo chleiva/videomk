@@ -71,11 +71,14 @@ class ApiClient(
     }
 
     /** [clientRequestId] makes a retry of the same attempt idempotent (no double charge, no second video). */
-    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null): String {
+    suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null): String {
         val body = buildJsonObject {
-            put("prompt", Brief.normalized(prompt))
+            // a presentation needs no description: an empty one is simply not sent (the server then uses its short default)
+            if (deck == null || Brief.normalized(prompt).isNotEmpty()) put("prompt", Brief.normalized(prompt))
+            deck?.let { put("deck", it) }
             put("client_request_id", clientRequestId)
-            put("target_minutes", options.minutes)
+            // a presentation made at its suggested length sends no length: the server charges exactly the suggestion it showed
+            if (deck == null || !options.useSuggestedLength) put("target_minutes", options.minutes)
             if (media.isNotEmpty()) put("media", JsonArray(media.map { JsonPrimitive(it) }))
             if (libraryMedia.isNotEmpty()) put("library_media", JsonArray(libraryMedia.map { JsonPrimitive(it) }))
             if (media.isNotEmpty() && mediaMeta != null) put("media_meta", mediaMeta)
@@ -88,8 +91,14 @@ class ApiClient(
             if (options.language != "auto") put("language", options.language)
             brief?.let { put("brief", it) }
         }
-        return send("POST", listOf("videos", "generate"), body = body).requireString("video_id")
+        return send("POST", listOf("videos", "generate"), body = body, deck = deck != null).requireString("video_id")
     }
+
+    // presentations (docs/CREATE_API.md, "Making a video from a presentation deck")
+
+    /** A call under `/users/{me}/decks`. Server refusals come as [ApiError.Deck] with their stable code. */
+    suspend fun deck(method: String, path: List<String> = emptyList(), body: JsonObject? = null): JsonObject =
+        send(method, listOf("decks") + path, body, deck = true)
 
     // create: capabilities and the request check
 
@@ -153,7 +162,7 @@ class ApiClient(
     suspend fun library(method: String, path: List<String>, body: JsonObject? = null, query: List<Pair<String, String>> = emptyList()): JsonObject =
         send(method, listOf("library") + path, body, query = query, library = true)
 
-    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false, soft: Boolean = false): JsonObject {
+    private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false, soft: Boolean = false, deck: Boolean = false): JsonObject {
         val a = auth.authorization()
         val url: HttpUrl = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(a.userId).also { b -> path.forEach { b.addPathSegment(it) }; query.forEach { (k, v) -> b.addQueryParameter(k, v) } }.build()
         val rb = Request.Builder().url(url)
@@ -175,7 +184,7 @@ class ApiClient(
                 in 200..299 -> return if (text.isBlank()) JsonObject(emptyMap()) else parseObject(text)
                 401 -> throw ApiError.Unauthorized
                 403 -> if (soft) throw ApiError.NotFound else throw ApiError.Unauthorized
-                404 -> if (library || soft) throw ApiError.NotFound else throw ApiError.Server
+                404 -> if (deck) throw ApiError.Deck(codeOf(text) ?: "unavailable", message(text) ?: "") else if (library || soft) throw ApiError.NotFound else throw ApiError.Server
                 413 -> if (library) throw ApiError.Invalid(Txt.s(R.string.err_photo_too_large)) else throw ApiError.Server
                 402 -> if (library) {
                     val o = runCatching { parseObject(text) }.getOrNull()
@@ -187,14 +196,17 @@ class ApiClient(
                 400 -> {
                     val o = runCatching { parseObject(text) }.getOrNull()
                     if (o?.str("status") == "blocked") throw ApiError.Blocked(o.str("message") ?: Txt.s(R.string.err_blocked_default))
+                    if (deck && o?.str("code") != null) throw ApiError.Deck(o.str("code")!!, o.str("message") ?: "")
                     throw ApiError.Invalid(message(text) ?: Txt.s(R.string.err_brief_unusable))
                 }
-                409 -> if (library) throw ApiError.Conflict(message(text) ?: Txt.s(R.string.err_changed_meanwhile))
+                409 -> if (deck) throw ApiError.Deck(codeOf(text) ?: "deck_not_ready", message(text) ?: "")
+                       else if (library) throw ApiError.Conflict(message(text) ?: Txt.s(R.string.err_changed_meanwhile))
                        else if (conflictIsEdit) throw ApiError.Conflict(message(text) ?: Txt.s(R.string.err_video_changed))
                        else throw ApiError.NotReady(VideoStatus.fromServer(runCatching { parseObject(text).str("status") }.getOrNull() ?: ""))
                 429 -> {
                     val o = runCatching { parseObject(text) }.getOrNull()
                     if (o?.str("status") == "paused") throw ApiError.Paused(o.str("message") ?: Txt.s(R.string.err_paused_default), o.int("retry_after") ?: r.header("Retry-After")?.toIntOrNull())
+                    if (deck && o?.str("code") != null) throw ApiError.Deck(o.str("code")!!, o.str("message") ?: "")
                     throw ApiError.Quota(
                         message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { if (it >= 120) Txt.n(R.plurals.err_rate_limited_minutes, it / 60) else Txt.n(R.plurals.err_rate_limited_seconds, it) } ?: Txt.s(R.string.err_rate_limited))
                         else Txt.s(R.string.err_daily_limit),
@@ -204,6 +216,8 @@ class ApiClient(
             }
         }
     }
+
+    private fun codeOf(text: String): String? = runCatching { parseObject(text).str("code") }.getOrNull()
 
     private fun message(text: String): String? = runCatching { parseObject(text).str("message") }.getOrNull()
 }

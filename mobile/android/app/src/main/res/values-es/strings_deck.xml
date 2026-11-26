@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="deck_add_title">Agregar una presentación</string>
+    <string name="deck_add_subtitle">PowerPoint o PDF · explicamos cada diapositiva</string>
+    <string name="deck_add_desc">Agregar una presentación. PowerPoint o PDF, explicamos cada diapositiva</string>
+    <string name="deck_replace_photos_title">¿Usar una presentación?</string>
+    <string name="deck_replace_photos_text">Se quitarán tus fotos de este video. Un video se hace con fotos o con una presentación, no con ambas.</string>
+    <string name="deck_replace_photos_confirm">Usar presentación</string>
+    <string name="deck_replace_photos_keep">Conservar fotos</string>
+    <string name="deck_card_label">Presentación</string>
+    <string name="deck_copying">Preparando tu archivo…</string>
+    <string name="deck_uploading">Subiendo… %1$d%%</string>
+    <string name="deck_processing">Preparando tus diapositivas…</string>
+    <string name="deck_processing_hint">Suele tardar hasta medio minuto. Puedes esperar aquí.</string>
+    <string name="deck_cancel_upload">Cancelar</string>
+    <string name="deck_remove_desc">Quitar la presentación</string>
+    <string name="deck_ready_line">%1$s · aprox. %2$s</string>
+    <string name="deck_promise">Explicaremos cada diapositiva en la narración.</string>
+    <string name="deck_choose_again">Elegir el archivo otra vez</string>
+    <string name="deck_choose_another">Elegir otro archivo</string>
+    <string name="deck_keep_waiting">Seguir esperando</string>
+    <string name="deck_vertical_warning">Las diapositivas son anchas. En un video vertical se ven pequeñas, con espacio vacío arriba y abajo. El formato horizontal 16:9 las muestra mejor.</string>
+    <string name="deck_use_landscape">Usar horizontal</string>
+    <string name="deck_use_landscape_desc">Usar horizontal 16:9, la mejor forma para diapositivas</string>
+    <string name="deck_prompt_hint">Opcional: ¿para quién es? Por ejemplo: para directivos, o para estudiantes.</string>
+    <string name="deck_suggested">Sugerida</string>
+    <string name="deck_status_waiting">Tu presentación se está preparando</string>
+    <string name="deck_status_failed">Corrige tu presentación para continuar</string>
+    <string name="deck_status_short">Agrega algunas palabras más, o deja la descripción vacía</string>
+    <string name="deck_title_fallback">Presentación narrada</string>
+    <string name="lib_sentence_deck_reading">Leyendo tus diapositivas.</string>
+    <string name="lib_sentence_deck_writing">Escribiendo la narración.</string>
+
+    <string name="deck_err_too_large_title">Ese archivo es demasiado grande</string>
+    <string name="deck_err_too_large_body">Las presentaciones pueden pesar hasta %1$d MB. Prueba a reducir las imágenes o expórtala como PDF.</string>
+    <string name="deck_err_too_many_slides_title">Son muchas diapositivas</string>
+    <string name="deck_err_too_many_slides_body">Podemos narrar hasta %1$d diapositivas. Divídela en dos archivos o elige una más corta.</string>
+    <string name="deck_err_encrypted_title">Ese archivo tiene contraseña</string>
+    <string name="deck_err_encrypted_body">Guarda una copia sin contraseña y elígela de nuevo. Los archivos .ppt antiguos también deben guardarse como .pptx o PDF.</string>
+    <string name="deck_err_macro_title">Ese archivo contiene macros</string>
+    <string name="deck_err_macro_body">Por tu seguridad no abrimos archivos con macros o programas incrustados. Guárdalo como .pptx sin macros o expórtalo como PDF.</string>
+    <string name="deck_err_corrupt_title">No pudimos abrir ese archivo</string>
+    <string name="deck_err_corrupt_body">Puede estar dañado. Ábrelo en tu computadora, expórtalo como PDF y elige ese.</string>
+    <string name="deck_err_unsupported_title">No podemos usar ese tipo de archivo</string>
+    <string name="deck_err_unsupported_body">Elige una presentación de PowerPoint (.pptx) o un PDF. Desde Keynote, Google Slides o un PowerPoint antiguo, usa Exportar como .pptx o PDF.</string>
+    <string name="deck_err_empty_title">Esa presentación está vacía</string>
+    <string name="deck_err_empty_body">No encontramos diapositivas en ella. Elige un archivo con al menos una diapositiva.</string>
+    <string name="deck_err_unsafe_title">No pudimos usar ese archivo</string>
+    <string name="deck_err_unsafe_body">No pasó nuestra revisión de seguridad. Elige otra presentación.</string>
+    <string name="deck_err_timeout_title">Tardó demasiado</string>
+    <string name="deck_err_timeout_body">Esta presentación era demasiado pesada para prepararla. Elígela de nuevo o expórtala como PDF para que pese menos.</string>
+    <string name="deck_err_convert_title">No pudimos preparar ese archivo</string>
+    <string name="deck_err_convert_body">Algo en él no se pudo convertir. Expórtalo como PDF y elige ese, o inténtalo de nuevo con el mismo archivo.</string>
+    <string name="deck_err_network_title">Sin conexión</string>
+    <string name="deck_err_network_body">Tu presentación no terminó de subirse. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="deck_err_upload_title">La subida no terminó</string>
+    <string name="deck_err_upload_body">No se perdió nada. Inténtalo de nuevo en un momento.</string>
+    <string name="deck_err_daily_title">Ya son suficientes presentaciones por hoy</string>
+    <string name="deck_err_daily_body">Puedes agregar hasta 10 al día. Inténtalo de nuevo mañana.</string>
+    <string name="deck_err_unavailable_title">Las presentaciones no están disponibles ahora</string>
+    <string name="deck_err_unavailable_body">Inténtalo de nuevo más tarde. Tus fotos y tus ideas siguen funcionando.</string>
+    <string name="deck_err_stalled_title">Está tardando más de lo normal</string>
+    <string name="deck_err_stalled_body">Tu presentación todavía se está preparando. Puedes seguir esperando o elegir otro archivo.</string>
+    <string name="deck_err_other_title">Algo salió mal</string>
+    <string name="deck_err_other_body">No pudimos preparar tu presentación. Elige el archivo de nuevo.</string>
+
+    <plurals name="deck_slides">
+        <item quantity="one">%1$d diapositiva</item>
+        <item quantity="other">%1$d diapositivas</item>
+    </plurals>
+    <plurals name="deck_cost">
+        <item quantity="one">%1$d crédito por la duración sugerida</item>
+        <item quantity="other">%1$d créditos por la duración sugerida</item>
+    </plurals>
+    <plurals name="deck_suggested_desc">
+        <item quantity="one">Duración sugerida, %2$s, %1$d crédito</item>
+        <item quantity="other">Duración sugerida, %2$s, %1$d créditos</item>
+    </plurals>
+</resources>

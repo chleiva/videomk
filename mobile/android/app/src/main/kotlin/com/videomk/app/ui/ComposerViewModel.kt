@@ -14,6 +14,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.videomk.app.DebugHooks
 import com.videomk.app.core.Brief
+import com.videomk.app.core.DeckApi
+import com.videomk.app.core.DeckAttachment
+import com.videomk.app.core.DeckJourney
+import com.videomk.app.core.DeckOptions
+import com.videomk.app.core.DeckPick
+import com.videomk.app.core.DeckState
+import com.videomk.app.core.DeckUploader
+import com.videomk.app.core.Txt
+import com.videomk.app.R
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.PhotoIntake
 import com.videomk.app.core.PlatformChip
@@ -50,7 +59,7 @@ import java.util.UUID
 class AttachedPhoto(val id: String = UUID.randomUUID().toString(), val data: ByteArray, val thumbnail: Bitmap?, val meta: PhotoMeta? = null)
 
 /** What the composer hands over when the user sends: the text, the prepared photos and (parallel to them) what was read from each original. */
-class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList())
+class Outgoing(val brief: String, val photos: List<ByteArray>, val meta: List<PhotoMeta?>, val libraryIds: List<String> = emptyList(), val deckId: String? = null, val deckTitle: String? = null)
 
 /**
  * Everything about the video being composed: the text, the length and look, the attached photos (up to 100) and dictation.
@@ -96,7 +105,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     val libraryRoom: Int get() = maxOf(0, PhotoLimits.MAX_PHOTOS - photos.size - loading)
 
     /** The picker's answer: exactly this selection replaces the library photos (never beyond the 100 total). */
-    fun setLibrary(list: List<MediaPhoto>) { library.clear(); library.addAll(list.distinctBy { it.id }.take(libraryRoom)) }
+    fun setLibrary(list: List<MediaPhoto>) { if (list.isNotEmpty()) attachment.photosChosen(); library.clear(); library.addAll(list.distinctBy { it.id }.take(libraryRoom)) }
 
     /** "Make a video from this": adds to the library photos already chosen. */
     fun addLibrary(list: List<MediaPhoto>) { setLibrary(library + list) }
@@ -133,6 +142,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
      * time off the main thread, each source file deleted as soon as its photo is prepared. Only the prepared JPEG and a small preview are kept.
      */
     private fun <T> enqueue(items: List<T>, source: PickedSource<T>) {
+        if (items.isNotEmpty()) attachment.photosChosen()   // photos and a presentation are different stories: the last choice wins
         val plan = PhotoIntake.plan(items.size, remaining)
         if (items.isEmpty()) return
         notice = if (plan.leftOut > 0) PhotoIntake.leftOutMessage(plan.leftOut) else null
@@ -175,7 +185,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
 
     fun removePhoto(id: String) { photos.removeAll { it.id == id }; cleanupIfIdle() }
 
-    val canSend: Boolean get() = Brief.isValid(text)
+    val canSend: Boolean get() = Brief.isValid(text) || deckState is DeckState.Ready
 
     /** Hands back what to send and clears the composer, ready for the next request. */
     fun takeForSend(): Outgoing { val out = peekForSend(); clearAfterSend(); return out }
@@ -184,11 +194,15 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun peekForSend(): Outgoing {
         dictation.stop()
         val policy = settings.policy   // a switch turned off after the photos were prepared still wins
-        return Outgoing(text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id })
+        val ready = deck.ready
+        return Outgoing(
+            text, photos.map { it.data }, photos.map { it.meta?.limitedTo(policy)?.takeIf { m -> !m.isEmpty } }, library.map { it.id },
+            deckId = ready?.id, deckTitle = ready?.let { DeckOptions.title((deckState as? DeckState.Ready)?.name) ?: Txt.s(R.string.deck_title_fallback) },
+        )
     }
 
     fun clearAfterSend() {
-        photos.clear(); library.clear()
+        photos.clear(); library.clear(); deck.cancel()
         cleanupIfIdle()
         notice = null
         text = ""
@@ -226,29 +240,31 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun updateOptions(o: CreateOptions) { options = o; touched = true }
 
     /** The length chip (or a one-tap fix): from now on a platform pick keeps this length and only shows its recommendation. */
-    fun setLength(minutes: Double) { options = options.copy(minutes = minutes); touched = true; lengthChosen = true }
+    fun setLength(minutes: Double) { options = DeckOptions.chooseLength(options, minutes); touched = true; lengthChosen = true }
     var lengthChosen = false
         private set
 
     /** A platform chip: its format and resolution, and its recommended length unless a length was chosen since this screen opened. */
-    fun selectPlatform(chip: PlatformChip) { options = CreatePlatforms.select(options, chip, lengthChosen, caps.presets); touched = true }
+    fun selectPlatform(chip: PlatformChip) { options = CreatePlatforms.select(options, chip, lengthChosen || deckState is DeckState.Ready, caps.presets); touched = true }
 
     /** The Create screen opened: start from what this person used last time (or the first-time defaults). */
     fun openCreate(stored: CreatePrefs?) {
         storedPrefs = stored; touched = false; lengthChosen = false
         options = CreateDefaults.resolve(stored, caps)
+        deck.ready?.let { options = DeckOptions.onReady(options, it) }   // reopened with a presentation still attached
         sheetKind = CreateSheetKind.None; checking = false; stop = null
     }
 
     fun applyCapabilities(c: Capabilities) {
         caps = c; capsLoaded = true
         if (!touched) options = CreateDefaults.resolve(storedPrefs, c)
+        waitingDeck?.let { if (c.deck != null) { waitingDeck = null; addDeck(it, true) } }
     }
 
     /** Anything entered that Cancel should ask about. */
-    val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0
+    val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0 || deckState.attached
 
-    fun discardDraft() { dictation.stop(); text = ""; photos.clear(); library.clear(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; checking = false; checkJob?.cancel() }
+    fun discardDraft() { dictation.stop(); text = ""; photos.clear(); library.clear(); deck.cancel(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; checking = false; checkJob?.cancel() }
 
     private fun request(answers: List<Answer>) = IntakeRequest(text, options, totalPhotos, answers)
 
@@ -260,7 +276,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         if (checking || submitting) return
         dictation.stop()
         intakeApi = intake; submitFn = submitter; acceptedFn = onAccepted; inlineError = null
-        if (intake == null || !caps.intake) { finish(null); return }
+        if (intake == null || !caps.intake || deckState.attached) { finish(null); return }   // the request check is about a description and photos: a presentation brings its own story
         checking = true
         checkJob = viewModelScope.launch {
             val r = IntakeCheck(intake).run(request(emptyList())) { if (checking) sheetKind = CreateSheetKind.Checking }
@@ -339,7 +355,51 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     /** The summary's Create video. */
     fun confirmSummary() { sheetKind = CreateSheetKind.None; finish(summaryBrief) }
 
+    // ---- a presentation (PowerPoint or PDF): only where the server lists it; a video is made from photos or from a presentation, never both
+
+    var deckState by mutableStateOf<DeckState>(DeckState.Idle)
+        private set
+    private var minutesBeforeDeck: Double? = null
+    private val deckRoot = java.io.File(app.cacheDir, "deck").also { DeckJourney.cleanLeftovers(it) }   // an app start removes what a killed process left
+    val deck = DeckJourney(viewModelScope, deckRoot, onState = { onDeckState(it) })
+    private val attachment = DeckAttachment(deck, { totalPhotos }, { photos.clear(); library.clear(); cleanupIfIdle(); notice = null })
+
+    /** The real calls (or the debug fakes); the Create screen hands them over when it opens. */
+    fun attachDeckApi(api: DeckApi?, uploader: DeckUploader?) = deck.attach(api, uploader)
+
+    val deckVerticalWarning: Boolean get() = DeckOptions.verticalWarning(options, deckState.attached)
+
+    /** A picked file. False when photos exist and [replacePhotos] is not set (nothing changed: the caller asks first). */
+    fun addDeck(pick: DeckPick, replacePhotos: Boolean): Boolean {
+        val c = caps.deck ?: return false
+        dictation.stop()
+        val ok = attachment.add(pick, c, replacePhotos)
+        if (ok) { options = DeckOptions.landscape(options, caps); touched = true }   // slides are wide: 16:9 unless the person picks another shape later
+        return ok
+    }
+
+    fun removeDeck() { deck.cancel() }
+
+    /** Debug launches only: the pick waits for the capabilities (the feature exists only where the server lists it) and for the Create screen's api. */
+    private var waitingDeck: DeckPick? = null
+    fun addDeckWhenReady(pick: DeckPick) { if (caps.deck != null) addDeck(pick, true) else waitingDeck = pick }
+
+    fun useSuggestedLength() { deck.ready?.let { options = DeckOptions.useSuggestion(options, it); touched = true } }
+
+    fun useLandscape() { options = DeckOptions.landscape(options, caps); touched = true }
+
+    private fun onDeckState(s: DeckState) {
+        val before = deckState
+        deckState = s
+        if (s is DeckState.Ready) {
+            if (before !is DeckState.Ready) { minutesBeforeDeck = options.minutes; options = DeckOptions.onReady(options, s.info) }
+        } else if (before is DeckState.Ready || options.useSuggestedLength) {
+            options = DeckOptions.onGone(options, minutesBeforeDeck); minutesBeforeDeck = null
+        }
+    }
+
     override fun onCleared() {
+        deck.release()
         cache.endSession()
         dictation.release()
     }

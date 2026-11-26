@@ -33,7 +33,7 @@ object LocalDataWiper {
     /** The preference files the app writes (see PhotoSettings, CreatePrefsStore, SecureTokenStore). Anything else the app may add must be listed here (the wiper test checks the sources for getSharedPreferences). */
     val PREFERENCE_FILES = listOf("videomk_settings", "videomk_create", "vmk_session", "app_language")
 
-    suspend fun wipe(context: Context, stopWork: () -> Unit, clearTokens: () -> Unit) = withContext(Dispatchers.IO) {
+    suspend fun wipe(context: Context, stopWork: () -> Unit, clearTokens: () -> Unit, deckCache: File? = null) = withContext(Dispatchers.IO) {
         val app = context.applicationContext
         val s = WipeSteps()
         s.step("stop-work", stopWork)               // uploads and organize jobs must not write files after the wipe
@@ -46,6 +46,7 @@ object LocalDataWiper {
                 app.deleteSharedPreferences(name)
             }
         }
+        s.step("deck-cache") { deckCache?.let { check(it.deleteRecursively() || !it.exists()) } }   // the temporary copy of a presentation being uploaded (also inside the cache folder below)
         s.step("cache") { check(deleteChildren(app.cacheDir)) }
         s.step("external-cache") { app.externalCacheDirs.forEach { deleteChildren(it) } }
         s.step("files") { check(deleteChildren(app.filesDir)) }

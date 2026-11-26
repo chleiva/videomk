@@ -16,7 +16,10 @@ data class PendingVideo(
     val photoCount: Int = 0,
     val state: State = State.Sending,
     val createdAtMillis: Long = System.currentTimeMillis(),
+    /** What the card calls it when the request has no description (a presentation: its file name). The [brief] is what is sent; this is only shown. */
+    val title: String? = null,
 ) {
+    val shownTitle: String get() = title?.takeIf { it.isNotBlank() } ?: brief
     sealed interface State {
         data object Sending : State
         /** Photos going up before the video is requested. */
@@ -88,6 +91,24 @@ object ProgressEstimator {
         return maxOf(0.0, expectedSeconds(stage, minutes) - secondsInStage) + rest
     }
 
+    /**
+     * A presentation being read (0 to 8 percent of the bar) and its narration written (8 to 22: the same share the story gets); the usual steps follow.
+     * Same easing and the same guarantee: never reaches the next slice before the server says so.
+     */
+    fun deckSlice(d: VideoStatus.DeckStage): Pair<Double, Double> = if (d == VideoStatus.DeckStage.Reading) 0.00 to 0.08 else 0.08 to 0.22
+    private fun deckExpected(d: VideoStatus.DeckStage): Double = if (d == VideoStatus.DeckStage.Reading) 15.0 else 30.0
+
+    fun deckFraction(d: VideoStatus.DeckStage, secondsInStage: Double): Double {
+        val (lo, hi) = deckSlice(d)
+        val eased = 1 - exp(-1.6 * maxOf(0.0, secondsInStage) / deckExpected(d))
+        return lo + (hi - lo) * minOf(eased, 0.96)
+    }
+
+    fun deckSecondsLeft(d: VideoStatus.DeckStage, secondsInStage: Double, minutes: Double = CreateOptions.DEFAULT_MINUTES): Double {
+        val here = maxOf(0.0, deckExpected(d) - secondsInStage) + (if (d == VideoStatus.DeckStage.Reading) deckExpected(VideoStatus.DeckStage.Writing) else 0.0)
+        return here + expectedSeconds(VideoStatus.Stage.VoiceAndVisuals, minutes) + expectedSeconds(VideoStatus.Stage.Rendering, minutes)
+    }
+
     /** "About 2 min left." / "Less than a minute left." */
     fun leftText(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double = CreateOptions.DEFAULT_MINUTES): String {
         val s = secondsLeft(stage, secondsInStage, minutes)
@@ -105,6 +126,8 @@ object MakingSteps {
 
     /** The step being worked on (the first one not full). */
     fun current(fraction: Double): Int = fills(fraction).indexOfFirst { it < 1f }.let { if (it < 0) 3 else it }
+
+    fun deckSentence(d: VideoStatus.DeckStage): String = Txt.s(if (d == VideoStatus.DeckStage.Reading) R.string.lib_sentence_deck_reading else R.string.lib_sentence_deck_writing)
 
     /** What is happening, in words (no invented scene numbers: the server does not report them). */
     fun sentence(stage: VideoStatus.Stage): String = when (stage) {

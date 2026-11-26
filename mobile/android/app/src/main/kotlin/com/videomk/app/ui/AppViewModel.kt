@@ -52,7 +52,7 @@ sealed interface LoadState {
     data class Failed(val message: String) : LoadState
 }
 
-data class StageInfo(val stage: VideoStatus.Stage, val sinceMillis: Long)
+data class StageInfo(val stage: VideoStatus.Stage, val sinceMillis: Long, val deck: VideoStatus.DeckStage? = null)
 
 data class AppState(
     val phase: Phase = Phase.Launching,
@@ -71,6 +71,8 @@ data class AppState(
     val stageSince: Map<String, StageInfo> = emptyMap(),
     val briefs: Map<String, String> = emptyMap(),
     val minutes: Map<String, Double> = emptyMap(),
+    /** Videos made from a presentation (their deck is gone once planning starts, so a failed one is made again from Create, not retried from its text). */
+    val deckVideos: Set<String> = emptySet(),
 ) {
     val entries: List<LibraryEntry> get() = LibraryMerge.entries(pending, videos)
     val hasRunningVideos: Boolean get() = videos.any { it.status.isRunning } || pending.any { it.state == PendingVideo.State.Sending }
@@ -99,6 +101,7 @@ class AppViewModel(
     private val photoData = HashMap<String, List<ByteArray>>()   // photos waiting to be uploaded, kept until the video is accepted (a retry needs no new selection)
     private val libraryData = HashMap<String, List<String>>()   // My media photos of a pending request (ids only: nothing to upload)
     private val briefData = HashMap<String, kotlinx.serialization.json.JsonObject>()   // the answers of the request check, kept for a retry
+    private val deckData = HashMap<String, String>()   // the ready presentation's id of a pending request (the file is already on the server)
     private val photoMeta = HashMap<String, List<PhotoMeta?>>()   // what was read from each photo, same order as photoData
     private val refreshLock = Mutex()
     private var started = false
@@ -180,7 +183,7 @@ class AppViewModel(
 
     fun signOut() {
         auth?.signOut()
-        photoData.clear(); photoMeta.clear(); libraryData.clear(); briefData.clear()
+        photoData.clear(); photoMeta.clear(); libraryData.clear(); briefData.clear(); deckData.clear()
         update { AppState(phase = Phase.SignedOut) }
     }
 
@@ -241,7 +244,7 @@ class AppViewModel(
         for (v in fresh) {
             val st = v.status
             if (st is VideoStatus.Running) {
-                if (stages[v.id]?.stage != st.stage) stages[v.id] = StageInfo(st.stage, now)
+                if (stages[v.id]?.stage != st.stage || stages[v.id]?.deck != st.deck) stages[v.id] = StageInfo(st.stage, now, st.deck)
             } else {
                 stages.remove(v.id)
                 if (before[v.id]?.isRunning == true && st == VideoStatus.Complete) completions++
@@ -264,14 +267,15 @@ class AppViewModel(
     // ask for a video without leaving the home screen
 
     /** Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more. */
-    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?): PendingVideo {
+    private fun register(brief: String, options: CreateOptions, photos: List<ByteArray>, meta: List<PhotoMeta?>, libraryMedia: List<String>, intake: kotlinx.serialization.json.JsonObject?, deck: String? = null, title: String? = null): PendingVideo {
         val p = PendingVideo(
-            brief = Brief.normalized(brief), options = options, photoCount = photos.size, createdAtMillis = clock(),
+            brief = Brief.normalized(brief), options = options, photoCount = photos.size, createdAtMillis = clock(), title = title,
             state = if (photos.isEmpty()) PendingVideo.State.Sending else PendingVideo.State.Uploading(0, photos.size),
         )
         if (photos.isNotEmpty()) { photoData[p.id] = photos; photoMeta[p.id] = meta }
         if (libraryMedia.isNotEmpty()) libraryData[p.id] = libraryMedia
         if (intake != null) briefData[p.id] = intake
+        if (deck != null) deckData[p.id] = deck
         update { it.copy(pending = listOf(p) + it.pending) }
         return p
     }
@@ -285,8 +289,8 @@ class AppViewModel(
      * The Create screen's send: waits for generate's answer. Blocked, paused and network errors leave no card behind
      * (the caller keeps the draft and shows the sheet or a message); anything else ends on the Making card as before.
      */
-    suspend fun submitAwait(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null): SubmitOutcome {
-        val p = register(brief, options, photos, meta, libraryMedia, intake)
+    suspend fun submitAwait(brief: String, options: CreateOptions, photos: List<ByteArray> = emptyList(), meta: List<PhotoMeta?> = emptyList(), libraryMedia: List<String> = emptyList(), intake: kotlinx.serialization.json.JsonObject? = null, deck: String? = null, deckTitle: String? = null): SubmitOutcome {
+        val p = register(brief, options, photos, meta, libraryMedia, intake, deck, deckTitle)
         return send(p.id, interactive = true)
     }
 
@@ -297,7 +301,7 @@ class AppViewModel(
     }
 
     fun dismissPending(id: String) {
-        photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id)
+        photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id)
         update { s -> s.copy(pending = s.pending.filterNot { it.id == id }) }
     }
 
@@ -316,11 +320,13 @@ class AppViewModel(
                 media = b.uploadPhotos(photos) { done, total -> setProgress(id, done, total) }
                 if (_state.value.pending.any { it.id == id }) setPendingState(id, PendingVideo.State.Sending)
             }
-            val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id])
-            photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id)
+            val videoId = b.startGeneration(p.brief, p.id, p.options, media, PhotoMeta.requestJson(media, photoMeta[id].orEmpty()), libraryData[id].orEmpty(), briefData[id], deckData[id])
+            val wasDeck = deckData[id] != null
+            photoData.remove(id); photoMeta.remove(id); libraryData.remove(id); briefData.remove(id); deckData.remove(id)
             update { s ->
                 s.copy(
-                    briefs = s.briefs + (videoId to p.brief), minutes = s.minutes + (videoId to p.options.minutes),
+                    briefs = s.briefs + (videoId to p.shownTitle), minutes = s.minutes + (videoId to p.options.minutes),
+                    deckVideos = if (wasDeck) s.deckVideos + videoId else s.deckVideos,
                     pending = s.pending.map { if (it.id == id) it.copy(state = PendingVideo.State.Accepted(videoId)) else it },
                 )
             }

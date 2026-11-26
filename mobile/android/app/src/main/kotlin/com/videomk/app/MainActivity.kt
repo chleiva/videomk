@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                AppViewModel(container.backend, container.auth, container.config, container.signedOut, accountApi = container.accountApi, wiper = { container.wipeLocalData(); withContext(Dispatchers.Main) { composer.clearAfterSend() } }) as T
+                AppViewModel(container.backend, container.auth, container.config, container.signedOut, accountApi = container.accountApi, wiper = { withContext(Dispatchers.Main) { composer.clearAfterSend() }; container.wipeLocalData(); withContext(Dispatchers.Main) { composer.clearAfterSend() } }) as T
         }
     }
     private val composer: ComposerViewModel by viewModels()
@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
             composer.applyDebugDefaults(DebugHooks.defaultMinutes(intent))
             composer.addPhotoFiles(DebugHooks.photoFiles(intent))
             DebugHooks.prompt(intent)?.let { composer.text = it }
+            DebugHooks.deckFile(intent)?.let { f -> composer.addDeckWhenReady(com.videomk.app.core.DeckPick(java.io.File(f).name, null, java.io.File(f).length()) { DebugHooks.deckOpenDelayMillis(this).takeIf { it > 0 }?.let { Thread.sleep(it) }; java.io.FileInputStream(f) }) }
             DebugHooks.mediaFiles(intent).takeIf { it.isNotEmpty() }?.let { files -> container.mediaUploads?.add(contentResolver, files.map { android.net.Uri.fromFile(java.io.File(it)) }) }
             handleAuthIntent(intent)
         }

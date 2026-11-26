@@ -70,9 +70,9 @@ object CreatePlatforms {
     }
 
     /** "YouTube · Landscape 16:9 · 1080p" (or "Custom · Vertical 9:16 · 720p"). */
-    fun recommendation(o: CreateOptions, caps: Capabilities): String {
+    fun recommendation(o: CreateOptions, caps: Capabilities, withNote: Boolean = true): String {
         val c = chip(caps, o.platform)
-        if (!isCustom(o, caps) && c?.note != null) return "${c.label} · ${c.note}"   // the server's own words, e.g. "Portrait 4:5 · 1080p · about 1 min"
+        if (withNote && !isCustom(o, caps) && c?.note != null) return "${c.label} · ${c.note}"   // the server's own words, e.g. "Portrait 4:5 · 1080p · about 1 min"
         val name = if (isCustom(o, caps)) Txt.s(R.string.create_custom) else c?.label ?: Txt.s(R.string.create_platform_other)
         return "$name · ${aspectText(o.aspect, caps)} · ${o.resolution}"
     }

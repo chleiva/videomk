@@ -90,7 +90,7 @@ import com.videomk.app.core.PromptSearch
  */
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
-fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: ArrivalTracker?, startOnMyMedia: Boolean, onDismiss: () -> Unit) {
+fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: ArrivalTracker?, startOnMyMedia: Boolean, onDismiss: () -> Unit, onAddDeck: (() -> Unit)? = null) {
     val context = LocalContext.current
     var tab by rememberSaveable { mutableIntStateOf(if (startOnMyMedia && api != null) 1 else 0) }
     val vm: MediaViewModel? = if (api != null) viewModel(key = "media-picker", factory = viewModelFactory { initializer { MediaViewModel(api, null, null, PhotoLimits.MAX_PHOTOS, tracker ?: ArrivalTracker()) } }) else null
@@ -135,6 +135,8 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
                 Text(stringResource(R.string.media_add_photos), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
                 TextButton(onClick = { composer.setLibrary(initialLibrary); onDismiss() }, modifier = Modifier.heightIn(min = 44.dp).testTag("addPhotosCancel")) { Text(stringResource(R.string.common_cancel), fontWeight = FontWeight.SemiBold) }
             }
+            // only where the server offers presentations; it closes this sheet and opens the system document picker
+            if (onAddDeck != null) DeckEntryRow(onClick = { onDismiss(); onAddDeck() }, modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
             if (api != null) Segmented(tab, onTab = { tab = it }, Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when {

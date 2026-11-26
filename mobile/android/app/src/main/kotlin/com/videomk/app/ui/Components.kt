@@ -311,14 +311,14 @@ fun <T> SettleCrossfade(state: T, modifier: Modifier = Modifier, content: @Compo
  * applies and "What does this cost?" ([text] null: only the last two, used on Create where the status bar already shows the receipt). [onWhy] opens the "How credits work" sheet (the same text the wallet shows).
  */
 @Composable
-fun CostLine(text: String?, fourK: Boolean, onWhy: () -> Unit, modifier: Modifier = Modifier) {
+fun CostLine(text: String?, fourK: Boolean, onWhy: () -> Unit, modifier: Modifier = Modifier, showWhy: Boolean = true) {
     Column(modifier.fillMaxWidth().testTag("costHelp"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (text != null) Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Icon(Icons.Filled.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp).padding(top = 2.dp))
             Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
         }
         if (fourK) Text(stringResource(R.string.create_cost_4k_double), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-        TextButton(onClick = onWhy, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("costWhy")) {
+        if (showWhy) TextButton(onClick = onWhy, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("costWhy")) {
             Text(stringResource(R.string.create_cost_why), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.primary)
         }
     }

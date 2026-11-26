@@ -6,7 +6,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /** Debug only: capabilities with every format ready and a request check whose answer is picked by a mode, so each sheet can be looked at without a server. */
-class FakeIntakeApi(private val mode: () -> String) : IntakeApi {
+class FakeIntakeApi(private val deck: Boolean = false, private val mode: () -> String) : IntakeApi {
     override suspend fun capabilities() = Capabilities(
         aspects = listOf(AspectInfo("16:9", "Landscape", true, false), AspectInfo("9:16", "Vertical", true, true), AspectInfo("1:1", "Square", true, true), AspectInfo("4:5", "Portrait", true, true)),
         resolutions = listOf(ResolutionInfo("720p", "720p"), ResolutionInfo("1080p", "1080p")),
@@ -22,6 +22,7 @@ class FakeIntakeApi(private val mode: () -> String) : IntakeApi {
         ),
         languages = listOf(LanguageInfo("en", "English"), LanguageInfo("es", "Español")), minMinutes = 0.25, maxMinutes = 12.0,
         presets = listOf(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 5.0, 8.0, 12.0), intake = true,
+        deck = if (deck) DeckCaps(50, 60, listOf("pptx", "pdf")) else null,
     )
 
     private val questions = listOf(

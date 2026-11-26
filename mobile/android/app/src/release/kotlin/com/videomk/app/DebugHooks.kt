@@ -17,6 +17,10 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun prompt(intent: Intent?): String? = null
     @Suppress("UNUSED_PARAMETER") fun fakeIntake(context: android.content.Context): com.videomk.app.core.IntakeApi? = null
     @Suppress("UNUSED_PARAMETER") fun fakeBackend(context: android.content.Context): com.videomk.app.core.Backend? = null
+    @Suppress("UNUSED_PARAMETER") fun fakeDeck(context: android.content.Context): com.videomk.app.core.DeckApi? = null
+    @Suppress("UNUSED_PARAMETER") fun fakeDeckUploader(context: android.content.Context): com.videomk.app.core.DeckUploader? = null
+    @Suppress("UNUSED_PARAMETER") fun deckOpenDelayMillis(context: android.content.Context): Long = 0L
+    @Suppress("UNUSED_PARAMETER") fun deckFile(intent: Intent?): String? = null
     @Suppress("UNUSED_PARAMETER") fun manyVideos(context: android.content.Context): Int = 0
     @Suppress("UNUSED_PARAMETER") fun emptyHome(context: android.content.Context): Boolean = false
     @Suppress("UNUSED_PARAMETER") fun social(context: android.content.Context): com.videomk.app.core.SocialSwitches? = null

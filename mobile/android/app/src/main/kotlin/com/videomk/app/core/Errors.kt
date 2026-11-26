@@ -19,6 +19,8 @@ sealed class ApiError : Exception() {
     data class Blocked(val text: String) : ApiError() { override val message: String get() = text }
     /** The account is paused after repeated safety stops (HTTP 429 `{status: "paused"}`); [retryAfterSeconds] says when it can try again. */
     data class Paused(val text: String, val retryAfterSeconds: Int?) : ApiError() { override val message: String get() = text }
+    /** A presentation call the server refused with one of its stable `code`s (`deck_encrypted`, `too_many_decks`, `missing`...). [text] is the server's localized message. */
+    data class Deck(val code: String, val text: String) : ApiError() { override val message: String get() = text }
     data object Network : ApiError() { override val message: String get() = Txt.s(R.string.err_network) }
     data object Server : ApiError() { override val message: String get() = Txt.s(R.string.err_server) }
     data class InsufficientCredits(val balance: Int, val needed: Int) : ApiError() {

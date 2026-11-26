@@ -111,6 +111,7 @@ import com.videomk.app.core.ComposerLogic
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.CreatePlatforms
 import com.videomk.app.core.CreatePrefs
+import com.videomk.app.core.DeckState
 import com.videomk.app.core.DictationPlan
 import com.videomk.app.core.PhotoCapacity
 import com.videomk.app.core.Lengths
@@ -155,6 +156,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     var costInfo by remember { mutableStateOf(false) }
     var tip by remember { mutableStateOf<String?>(null) }
     var pulse by remember { mutableIntStateOf(0) }
+    var confirmDeck by rememberSaveable { mutableStateOf(false) }   // photos exist: ask before a presentation replaces them
+    val deckState = composer.deckState
     val shake = remember { Animatable(0f) }
     val flash = remember { Animatable(0f) }
     val still = reduceMotion(context)
@@ -165,6 +168,13 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         val api = container?.intake ?: return@LaunchedEffect
         composer.applyCapabilities(runCatching { api.capabilities() }.getOrDefault(com.videomk.app.core.Capabilities.FALLBACK))
     }
+    composer.attachDeckApi(container?.deckApi, container?.deckUploader)
+    // the system document picker: its one-time read grant is used at once and never kept (no persistable permission)
+    val docPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) composer.addDeck(com.videomk.app.data.DeckPicker.pickOf(context.contentResolver, uri), replacePhotos = true)
+    }
+    fun launchDeckPicker() { val types = caps.deck?.mimeTypes ?: return; if (types.isNotEmpty()) docPicker.launch(types) }
+    fun addDeck() { if (composer.totalPhotos > 0) confirmDeck = true else launchDeckPicker() }
     LaunchedEffect(composer.focusRequests) { if (composer.focusRequests > 0) { runCatching { focus.requestFocus() }; keyboard?.show() } }
     LaunchedEffect(tip) { if (tip != null) { delay(2500); tip = null } }
     LaunchedEffect(pulse) {
@@ -176,7 +186,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     }
 
     val lengths = caps.presets
-    val status = ComposerLogic.status(composer.text, options, balance, 0, listening, sending = false, lengths = lengths, createScreen = true, checking = composer.checking)
+    val status = ComposerLogic.status(composer.text, options, balance, 0, listening, sending = false, lengths = lengths, createScreen = true, checking = composer.checking, deck = deckState.takeIf { it.attached })
     val announcement = statusAnnouncement(status)
     val photoTotal = composer.totalPhotos
     val comingSoonText = stringResource(R.string.create_coming_soon)
@@ -202,7 +212,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     suspend fun send(brief: kotlinx.serialization.json.JsonObject?): com.videomk.app.core.SubmitOutcome {
         val o = composer.options
         val out = composer.peekForSend()
-        return app.submitAwait(out.brief, o, out.photos, out.meta, out.libraryIds, brief)
+        return app.submitAwait(out.brief, o, out.photos, out.meta, out.libraryIds, brief, out.deckId, out.deckTitle)
     }
     /** Accepted: the library shows the Making card, Create closes. */
     fun accepted() {
@@ -247,9 +257,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         Box(Modifier.fillMaxWidth().size(1.dp).background(if (scroll.value > 0) Vmk.colors.outline else Color.Transparent))
 
         Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            PromptCard(composer, listening, focus, ::onMic)
+            PromptCard(composer, listening, focus, ::onMic, deck = deckState.attached)
             dictationHint(dictationState)
-            PhotosRow(composer) { composer.openAddPhotos(null) }
+            if (deckState.attached) DeckCard(
+                deckState, caps.deck, onRemove = { composer.removeDeck() }, onPickAgain = { composer.removeDeck(); launchDeckPicker() }, onRetry = { composer.deck.retry() }, onKeepWaiting = { composer.deck.keepWaiting() },
+            ) else PhotosRow(composer) { composer.openAddPhotos(null) }
 
             // what is it for
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -264,9 +276,17 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 }
                 tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = it }) }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val rec = CreatePlatforms.recommendation(options, caps)
+                    val rec = CreatePlatforms.recommendation(options, caps, withNote = !deckState.attached)   // a presentation brings its own length: no "about 3 min" advice beside it
                     Text(rec, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f).testTag("recommendation"))
                     if (CreatePlatforms.canChangeFormat(caps)) TextButton(onClick = { moreOpen = true }, modifier = Modifier.heightIn(min = 44.dp).testTag("changeFormat")) { Text(stringResource(R.string.create_change), fontWeight = FontWeight.Bold) }
+                }
+                // slides are wide: a gentle word when a vertical or portrait picture is chosen, with the one-tap fix
+                if (composer.deckVerticalWarning) Column(Modifier.fillMaxWidth().testTag("deckVerticalWarning")) {
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(18.dp).padding(top = 2.dp))
+                        Text(stringResource(R.string.deck_vertical_warning), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text)
+                    }
+                    FixChip(stringResource(R.string.deck_use_landscape), stringResource(R.string.deck_use_landscape_desc), Modifier.testTag("deckUseLandscape")) { composer.useLandscape() }
                 }
                 // other formats this platform also accepts: small secondary choices that switch only the format
                 val also = CreatePlatforms.alsoWorks(options, caps)
@@ -285,8 +305,14 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 Overline(stringResource(R.string.create_length), Modifier.semantics { heading() })
                 // the presets the server offers, scrolling sideways when there are more than fit
                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("lengthChips")) {
+                    // a ready presentation: its own suggested length first (the server's price), then the usual lengths
+                    (deckState as? DeckState.Ready)?.let { ready ->
+                        item(key = "suggested") {
+                            LengthChip(ready.info.suggestedMinutes, ready.info.suggestedCredits, options.useSuggestedLength, balance != null && ready.info.suggestedCredits > balance, Modifier.widthIn(min = 78.dp), caption = stringResource(R.string.deck_suggested), tag = "length-suggested") { composer.useSuggestedLength() }
+                        }
+                    }
                     items(caps.presets) { mi ->
-                        LengthChip(mi, Lengths.credits(mi), Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, Modifier.widthIn(min = 78.dp)) { composer.setLength(mi) }
+                        LengthChip(mi, Lengths.credits(mi), !options.useSuggestedLength && Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, Modifier.widthIn(min = 78.dp)) { composer.setLength(mi) }
                     }
                 }
                 CreatePlatforms.overMax(options, caps)?.let { om ->
@@ -319,7 +345,15 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         }
     }
 
-    if (composer.addPhotosRequest != null) AddPhotosSheet(composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = composer.addPhotosRequest?.tab == 1, onDismiss = { composer.closeAddPhotos() })
+    if (composer.addPhotosRequest != null) AddPhotosSheet(
+        composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = composer.addPhotosRequest?.tab == 1, onDismiss = { composer.closeAddPhotos() },
+        onAddDeck = if (caps.deck != null) ({ addDeck() }) else null,
+    )
+    if (confirmDeck) AlertDialog(
+        onDismissRequest = { confirmDeck = false }, title = { Text(stringResource(R.string.deck_replace_photos_title)) }, text = { Text(stringResource(R.string.deck_replace_photos_text)) },
+        confirmButton = { TextButton(onClick = { confirmDeck = false; launchDeckPicker() }, modifier = Modifier.heightIn(min = 48.dp).testTag("deckReplaceConfirm")) { Text(stringResource(R.string.deck_replace_photos_confirm)) } },
+        dismissButton = { TextButton(onClick = { confirmDeck = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.deck_replace_photos_keep)) } },
+    )
     CreateSheetsHost(composer, balance, options, onSubmitEdit = {}, onWallet = onOpenWallet)
     if (costInfo) CostSheet(fourK = caps.resolutions.any { it.id.lowercase() == "4k" || it.id.lowercase() == "2160p" }) { costInfo = false }
     if (languageOpen) LanguageDialog(composer, options, caps) { languageOpen = false }
@@ -331,7 +365,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 }
 
 @Composable
-private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, onMic: () -> Unit) {
+private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, onMic: () -> Unit, deck: Boolean = false) {
     val shape = RoundedCornerShape(22.dp)
     val micDescription = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate_desc)
     // text on top, the mic row under it: the height follows the text (large text and Spanish just make the card taller, nothing overlaps)
@@ -342,7 +376,7 @@ private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: F
             cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             modifier = Modifier.fillMaxWidth().focusRequester(focus).padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 4.dp).testTag("composerField"),
             decorationBox = { inner ->
-                Box { if (composer.text.isEmpty()) Text(stringResource(R.string.create_prompt_hint), style = VmkType.prompt, color = Vmk.colors.textTertiary); inner() }
+                Box { if (composer.text.isEmpty()) Text(stringResource(if (deck) R.string.deck_prompt_hint else R.string.create_prompt_hint), style = VmkType.prompt, color = Vmk.colors.textTertiary); inner() }
             },
         )
         Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 10.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -415,18 +449,19 @@ private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> 
 }
 
 @Composable
-private fun LengthChip(minutes: Double, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun LengthChip(minutes: Double, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, caption: String? = null, tag: String? = null, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     val tint = if (overBalance) Vmk.colors.warning else if (selected) Vmk.colors.primary else Vmk.colors.textSecondary
-    val lengthDescription = pluralStringResource(if (selected) R.plurals.create_length_desc_selected else R.plurals.create_length_desc, credits, credits, Lengths.long(minutes))
+    val lengthDescription = if (caption != null) pluralStringResource(R.plurals.deck_suggested_desc, credits, credits, Lengths.long(minutes)) else pluralStringResource(if (selected) R.plurals.create_length_desc_selected else R.plurals.create_length_desc, credits, credits, Lengths.long(minutes))
     Column(
         modifier.heightIn(min = 58.dp).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
             .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(role = Role.RadioButton, onClick = onClick)
             .semantics { this.selected = selected; contentDescription = lengthDescription }
-            .testTag("length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(horizontal = 12.dp, vertical = 8.dp),
+            .testTag(tag ?: "length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
+        if (caption != null) Text(caption, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, maxLines = 1)
         Text(Lengths.short(minutes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(13.dp))

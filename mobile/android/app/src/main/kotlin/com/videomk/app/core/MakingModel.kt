@@ -32,6 +32,14 @@ data class MakingSnapshot(
             return MakingSnapshot(title, MakingSteps.sentence(stage), ProgressEstimator.leftText(stage, secondsInStage, minutes), MakingSteps.fills(fraction), MakingSteps.current(fraction))
         }
 
+        /** The presentation stages: the stage line says what is being read or written, and the bar stays in the first step (Script) until the usual steps begin. */
+        fun ofDeck(title: String, deck: VideoStatus.DeckStage, secondsInStage: Double, minutes: Double): MakingSnapshot {
+            val fraction = ProgressEstimator.deckFraction(deck, secondsInStage)
+            val left = ProgressEstimator.deckSecondsLeft(deck, secondsInStage, minutes)
+            val eta = if (left < 60) Txt.s(R.string.lib_left_less_than_minute) else Txt.s(R.string.lib_left_about_minutes, Math.ceil(left / 60).toInt())
+            return MakingSnapshot(title, MakingSteps.deckSentence(deck), eta, MakingSteps.fills(fraction), MakingSteps.current(fraction))
+        }
+
         /** A request still going to the server (or its photos still going up): no estimate yet, the bar shows the upload share. */
         fun pending(title: String, line: String, fraction: Double): MakingSnapshot =
             MakingSnapshot(title, line, null, MakingSteps.fills(fraction), MakingSteps.current(fraction))

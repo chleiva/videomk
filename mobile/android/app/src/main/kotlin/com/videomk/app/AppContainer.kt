@@ -47,6 +47,12 @@ class AppContainer(
         val a = auth
         if (config != null && a != null) DebugHooks.fakeIntake(appContext) ?: com.videomk.app.core.ApiIntake(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
     }
+    /** Presentations (PowerPoint and PDF): the three calls and the streaming upload. The debug build can swap in fakes (see DebugHooks). */
+    val deckApi: com.videomk.app.core.DeckApi? by lazy {
+        val a = auth
+        if (config != null && a != null) DebugHooks.fakeDeck(appContext) ?: com.videomk.app.core.ApiDeckApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
+    }
+    val deckUploader: com.videomk.app.core.DeckUploader? by lazy { DebugHooks.fakeDeckUploader(appContext) ?: com.videomk.app.core.HttpDeckUploader(http) }
     val createPrefs: com.videomk.app.data.CreatePrefsStore by lazy { com.videomk.app.data.CreatePrefsStore(appContext) }
 
     val organize: com.videomk.app.data.OrganizeController? by lazy { mediaApi?.let { com.videomk.app.data.OrganizeController(appContext, it, appScope) } }
@@ -61,6 +67,7 @@ class AppContainer(
     suspend fun wipeLocalData() = com.videomk.app.data.LocalDataWiper.wipe(
         appContext,
         stopWork = { mediaUploads?.cancel(); organize?.cancelJob() },
+        deckCache = java.io.File(appContext.cacheDir, "deck"),
         clearTokens = { auth?.signOut() },
     )
 
