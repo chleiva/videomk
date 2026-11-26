@@ -20,6 +20,7 @@ const ICONS: Record<string, ReactNode> = {
   chevron: <path {...P} d="m9 6 6 6-6 6" />,
   dots: <path {...P} d="M5 12h.01M12 12h.01M19 12h.01" />,
   back: <path {...P} d="M15 6l-6 6 6 6" />,
+  slides: <path {...P} d="M3 5h18v11H3zM12 16v4M8 20h8M7 9h6M7 12h4" />,
   mic: <path {...P} d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM6 11a6 6 0 0 0 12 0M12 17v4" />,
 };
 export function Icon({ name, size = 20, className }: { name: keyof typeof ICONS | string; size?: number; className?: string }) {
@@ -60,6 +61,18 @@ export function Sheet({ title, onClose, children, labelledBy = "sheet-title" }: 
         </div>
         {children}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------- the price line: bolt and credits, an optional note about the balance, optional trailing controls (the "why" link)
+export function CostLine({ credits, note, noteBad, children }: { credits: number; note?: ReactNode; noteBad?: boolean; children?: ReactNode }) {
+  const { t } = useLocale();
+  return (
+    <div className="cost" aria-live="polite">
+      <span className="cost-main"><Icon name="bolt" size={18} />{t("create.credits", { n: credits })}</span>
+      {note != null && <span className={noteBad ? "hint-bad font-semibold" : "muted"}>{note}</span>}
+      {children}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { currentLocaleHeaders, t } from "./i18n";
 
 export type StartResult =
   | { ok: true; videoId: string }
-  | { ok: false; kind: "invalid" | "quota" | "auth" | "error" | "credits" | "blocked" | "paused"; message: string; balance?: number; needed?: number };
+  | { ok: false; kind: "invalid" | "quota" | "auth" | "error" | "credits" | "blocked" | "paused"; message: string; balance?: number; needed?: number; code?: string };
 
 /** Start a generation. Returns a typed result so the UI can say what actually went wrong. */
 export async function startGeneration(prompt: string, clientRequestId: string, extra: Record<string, unknown> = {}): Promise<StartResult> {
@@ -15,7 +15,7 @@ export async function startGeneration(prompt: string, clientRequestId: string, e
     res = await fetch(apiGateway.generateVideo(userId), {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization, ...currentLocaleHeaders() },
-      body: JSON.stringify({ ...extra, prompt, client_request_id: clientRequestId }),
+      body: JSON.stringify({ ...extra, ...(prompt || !extra.deck ? { prompt } : {}), client_request_id: clientRequestId }), // a deck video may have no prompt: it is optional there
     });
   } catch {
     return { ok: false, kind: "error", message: t("api.network") };
@@ -28,7 +28,7 @@ export async function startGeneration(prompt: string, clientRequestId: string, e
   if (res.status === 402) return { ok: false, kind: "credits", message: body.message || t("api.no_credits"), balance: typeof body.balance === "number" ? body.balance : undefined, needed: typeof body.needed === "number" ? body.needed : undefined };
   if (res.status === 400 && body.status === "blocked") return { ok: false, kind: "blocked", message: body.message || t("create.blocked_fallback") };
   if (res.status === 429 && body.status === "paused") return { ok: false, kind: "paused", message: body.message || t("create.paused_fallback") };
-  if (res.status === 400) return { ok: false, kind: "invalid", message: body.message || t("api.invalid") };
+  if (res.status === 400 || res.status === 409) return { ok: false, kind: "invalid", message: body.message || t("api.invalid"), code: typeof body.code === "string" ? body.code : typeof body.error === "string" ? body.error : undefined };
   if (res.status === 429)
     return { ok: false, kind: "quota", message: body.message || t("api.quota") };
   if (res.status === 401 || res.status === 403)

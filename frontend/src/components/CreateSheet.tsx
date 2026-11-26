@@ -1,11 +1,13 @@
 // The Create experience (same flow as the apps, docs/CREATE_API.md): describe it, pick what it is for and how long, see the price, then the request check
 // (questions one at a time, or a kind "we can't make this"), then generate. Prompt first; every option has a default; the price is always visible.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sheet, Icon, Spinner } from "./ui";
+import { Sheet, Icon, Spinner, CostLine } from "./ui";
+import DeckPicker, { useDeck } from "./DeckPicker";
 import { newRequestId, startGeneration, getWallet } from "../lib/api";
 import type { Wallet } from "../lib/api";
 import { FALLBACK_CAPS, buildOptions, checkRequest, creditsFor, defaultForm, fourKAdvice, getCapabilities, lengthLabel, loadSaved, normalize, overPlatformLimit, platformOf, resolutionOf, resolutionsFor, saveChoices, selectPlatform } from "../lib/create";
 import type { Answer, Capabilities, Form, Question } from "../lib/create";
+import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMinutes } from "../lib/deck";
 import { useLocale } from "../lib/useLocale";
 
 const EXAMPLES = ["create.example1", "create.example2", "create.example3"];
@@ -40,9 +42,16 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
   const c = caps ?? FALLBACK_CAPS;
   const f = form;
   const set = (patch: Partial<Form>) => setForm((x) => (x ? normalize({ ...x, ...patch }, c) : x));
-  const credits = f ? creditsFor(f.minutes, f.resolution, c) : 1;
+  const deck = useDeck(c.deck);
+  const [picked, setPicked] = useState<number | null>(null);   // the length the person chose for a deck video (null: the deck's suggestion)
+  const ready = deck.state.k === "ready" ? deck.state : null;
+  const deckId = ready?.id;
+  useEffect(() => { setPicked(null); if (deckId) setForm((x) => (x ? normalize({ ...x, aspect: DECK_ASPECT }, c) : x)); }, [deckId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const minutes = f ? (ready ? deckMinutes(ready, picked) : f.minutes) : 1;
+  const busyDeck = deck.state.k === "uploading" || deck.state.k === "processing";
+  const credits = f ? (ready ? deckCredits(ready, picked, f.resolution, c) : creditsFor(f.minutes, f.resolution, c)) : 1;
   const advice = f ? fourKAdvice(f, c) : null;
-  const limit = f ? overPlatformLimit(f, c) : null;
+  const limit = f ? overPlatformLimit({ ...f, minutes }, c) : null;
   const res = f ? resolutionOf(c, f.resolution) : undefined;
   const platform = f ? platformOf(c, f.platform) : undefined;
   const short = f ? f.text.trim().length > 0 && f.text.trim().length < 15 : false;
@@ -52,17 +61,21 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
     if (!f) return;
     setSending(true); setHint(null); setStage({ k: "form" });
     const text = f.text.trim();
-    const key = JSON.stringify([text, buildOptions(f, c, live), brief ?? null]);
+    // A deck video: the deck id, and a length only when the person chose one (absent: the deck's suggestion, charged exactly that).
+    const { target_minutes: _len, ...rest } = buildOptions(f, c, live);
+    const options = ready ? { ...rest, ...deckGenerateExtras(ready.id, picked) } : buildOptions(f, c, live);
+    const key = JSON.stringify([text, options, brief ?? null]);
     if (req.current.key !== key) req.current = { key, id: newRequestId() }; // same request, same id: a retry cannot bill twice
     try {
-      const r = await startGeneration(text, req.current.id, { ...buildOptions(f, c, live), ...(brief ? { brief } : {}) });
+      const r = await startGeneration(text, req.current.id, { ...options, ...(brief ? { brief } : {}) });
       if (!r.ok) {
         setSending(false);
+        if (ready && r.kind === "invalid" && r.code?.startsWith("deck_") && r.code !== "deck_not_ready") { deck.reportError(r.code, ready.name); return; }
         if (r.kind === "blocked" || r.kind === "paused") setStage({ k: "stop", kind: r.kind, message: r.message });
         else setHint({ text: r.message, credits: r.kind === "credits" });
         return;
       }
-      saveChoices(f);
+      if (!ready) saveChoices(f);   // a deck video forces 16:9: that must not become the default for the next video
       onCreated();
     } catch (e) {
       console.error(e);
@@ -74,6 +87,12 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
     e.preventDefault();
     if (!f || sending || stage.k !== "form") return;
     const text = f.text.trim();
+    if (busyDeck) return;
+    if (ready) {
+      if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
+      await generate();   // the prompt is optional with a deck, and the deck is checked on the server (no request check)
+      return;
+    }
     if (!text) { set({ text: t("gen.inspire_text") }); area.current?.focus(); return; }
     if (text.length < 15) { setHint({ text: t("gen.more_detail") }); area.current?.focus(); return; }
     if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
@@ -148,14 +167,20 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
   } else {
     body = (
       <form onSubmit={submit} className="mt-4">
-        <label htmlFor="create-text" className="sr-only-vmk">{t("create.title")}</label>
-        <textarea id="create-text" ref={area} data-autofocus rows={4} className="field" value={f.text} maxLength={1500} onChange={(e) => { setHint(null); set({ text: e.target.value }); }} placeholder={t("create.placeholder")} aria-describedby="create-hint" />
+        <label htmlFor="create-text" className="sr-only-vmk">{ready ? t("deck.prompt_label") : t("create.title")}</label>
+        <textarea id="create-text" ref={area} data-autofocus rows={4} className="field" value={f.text} maxLength={1500} onChange={(e) => { setHint(null); set({ text: e.target.value }); }} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint" />
         <p id="create-hint" className={`hint ${short ? "" : ""}`} aria-live="polite">{hint ? <>{hint.text}{hint.credits && <> <a href="/wallet/index.html">{t("create.see_credits")}</a></>}</> : short ? t("gen.more_detail") : ""}</p>
 
-        <p className="eyebrow mt-4">{t("create.try_one")}</p>
-        <div className="chips mt-2">
-          {EXAMPLES.map((k) => <button key={k} type="button" className="chip" onClick={() => { setHint(null); set({ text: t(k) }); area.current?.focus(); }}>{t(k)}</button>)}
-        </div>
+        {c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
+
+        {deck.state.k === "idle" && (
+          <>
+            <p className="eyebrow mt-4">{t("create.try_one")}</p>
+            <div className="chips mt-2">
+              {EXAMPLES.map((k) => <button key={k} type="button" className="chip" onClick={() => { setHint(null); set({ text: t(k) }); area.current?.focus(); }}>{t(k)}</button>)}
+            </div>
+          </>
+        )}
 
         {c.platforms.length > 0 && (
           <>
@@ -169,8 +194,10 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
 
         <p className="eyebrow mt-6" id="create-len">{t("create.length")}</p>
         <div className="chips mt-2" role="group" aria-labelledby="create-len">
-          {c.lengths.presets.map((m) => <button key={m} type="button" className="chip" aria-pressed={f.minutes === m} onClick={() => set({ minutes: m })}>{lengthLabel(m)}</button>)}
+          {ready && <button type="button" className="chip" aria-pressed={picked === null} onClick={() => setPicked(null)}>{t("deck.suggested_chip", { length: lengthLabel(ready.suggested_minutes) })}</button>}
+          {c.lengths.presets.filter((m) => !ready || m !== ready.suggested_minutes).map((m) => <button key={m} type="button" className="chip" aria-pressed={ready ? picked === m : f.minutes === m} onClick={() => (ready ? setPicked(m) : set({ minutes: m }))}>{lengthLabel(m)}</button>)}
         </div>
+        {ready && <p className="hint">{t("deck.length_hint")}</p>}
         {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
 
         {live && (
@@ -212,11 +239,15 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
         )}
 
         <div className="mt-5 border-t border-line pt-4">
-          <div className="cost" aria-live="polite">
-            <span className="cost-main"><Icon name="bolt" size={18} />{t("create.credits", { n: credits })}</span>
-            {wallet && <span className={enough ? "muted" : "hint-bad font-semibold"}>{wallet.unlimited ? t("wallet.unlimited_short") : enough ? t("create.left", { n: wallet.balance - credits }) : t("create.you_have", { n: wallet.balance })}</span>}
+          <CostLine credits={credits} noteBad={!enough}
+            note={wallet ? (wallet.unlimited ? t("wallet.unlimited_short") : enough ? t("create.left", { n: wallet.balance - credits }) : t("create.you_have", { n: wallet.balance })) : undefined}>
             <button type="button" className="cost-link" aria-expanded={why} aria-controls="create-why" onClick={() => setWhy((v) => !v)}>{t("create.cost_why")}</button>
-          </div>
+          </CostLine>
+          {ready && deckAspectWarning(f.aspect) && (
+            <p className="notice notice-warn mt-2" role="status">
+              <span>{t("deck.vertical_warn")}{" "}<button type="button" className="cost-link" onClick={() => set({ aspect: DECK_ASPECT })}>{t("deck.use_landscape")}</button></span>
+            </p>
+          )}
           {res && res.credits_multiplier > 1 && <p className="hint">{t("create.cost_4k_double")} {t("create.fourk_slower")}</p>}
           {advice && (
             <p className="notice notice-warn mt-2" role="status">
@@ -233,7 +264,7 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
           )}
         </div>
 
-        <button type="submit" className="btn btn-primary btn-block mt-4" disabled={sending} aria-busy={sending}>
+        <button type="submit" className="btn btn-primary btn-block mt-4" disabled={sending || busyDeck} aria-busy={sending || busyDeck}>
           {sending ? <><Spinner /><span>{t("gen.starting")}</span></> : <><Icon name="bolt" size={18} /><span>{t("create.submit", { credits: t("create.credits", { n: credits }) })}</span></>}
         </button>
       </form>

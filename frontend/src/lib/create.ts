@@ -9,7 +9,17 @@ export interface Resolution { id: string; label: string; credits_multiplier: num
 export interface Platform { id: string; label: string; aspect: string; resolution: string; recommended_minutes: number; max_minutes: number | null; other_aspects?: string[]; note?: string; supports_4k?: boolean; note_4k?: string | null }
 export interface Capabilities {
   aspects: Aspect[]; resolutions: Resolution[]; platforms: Platform[]; languages: { id: string; label: string }[];
-  lengths: { min_minutes: number; max_minutes: number; presets: number[] }; max_photos?: number; intake?: boolean;
+  lengths: { min_minutes: number; max_minutes: number; presets: number[] }; max_photos?: number; intake?: boolean; deck?: DeckCaps;
+}
+
+/** `capabilities.deck`: present only when the server enables decks (docs/CREATE_API.md). */
+export interface DeckCaps { max_mb: number; max_slides: number; formats: string[] }
+export function parseDeckCaps(raw: any): DeckCaps | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const formats = Array.isArray(raw.formats) ? raw.formats.filter((f: unknown) => f === "pptx" || f === "pdf") : [];
+  const max_mb = Number(raw.max_mb), max_slides = Number(raw.max_slides);
+  if (!formats.length || !Number.isFinite(max_mb) || max_mb <= 0 || !Number.isFinite(max_slides) || max_slides <= 0) return undefined;
+  return { max_mb, max_slides, formats };
 }
 
 /** What the form offers when the server cannot say (not deployed yet, offline): 16:9, 1080p, a few lengths, no request check. */
@@ -133,7 +143,7 @@ export async function getCapabilities(): Promise<Capabilities | null> {
     if (!res.ok) return null;
     const b = await res.json();
     if (!Array.isArray(b?.aspects) || !Array.isArray(b?.resolutions) || !b?.lengths?.presets?.length) return null;
-    return { aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths, max_photos: b.max_photos, intake: b.intake !== false };
+    return { aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths, max_photos: b.max_photos, intake: b.intake !== false, deck: parseDeckCaps(b.deck) };
   } catch {
     return null;
   }

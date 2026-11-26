@@ -233,3 +233,20 @@ textarea.field { resize: vertical; line-height: var(--lh-body); }
   .vlink > div:not(.thumb) { margin-top: 0 !important; min-width: 0; }
 }
 @media (max-width: 30rem) { .composer-input { flex-basis: 100%; font-size: var(--fs-body); } .composer .btn { width: 100%; } }
+
+/* ---------------------------------------------------------------- add a presentation (deck): drop zone, progress, ready card */
+.deck { margin-top: var(--space-4); }
+.deck-drop { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-5) var(--space-4); text-align: center; border-radius: var(--radius-card); border: 2px dashed var(--text-tertiary); background: var(--surface); transition: background-color var(--dur-select) var(--ease), border-color var(--dur-select) var(--ease); }
+.deck-drop.is-over { border-style: solid; border-color: var(--primary); background: var(--surface-2); box-shadow: 0 0 0 4px var(--primary-container); }
+.deck-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; color: var(--primary); background: var(--primary-container); }
+.deck-title { font-weight: 700; font-size: var(--fs-body); }
+.deck-card { padding: var(--space-4); border-radius: var(--radius-card); background: var(--surface-2); display: flex; flex-direction: column; gap: var(--space-3); }
+.deck-card:focus-visible, .deck-drop:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.deck-file { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.deck-file strong { min-width: 0; overflow-wrap: anywhere; font-size: var(--fs-body); }
+.deck-bar { height: 0.5rem; border-radius: var(--radius-pill); background: var(--surface-3); overflow: hidden; }
+.deck-bar > i { display: block; height: 100%; width: var(--p, 0%); background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end)); border-radius: inherit; transition: width var(--dur-select) var(--ease); }
+.deck-bar.is-wait > i { width: 40%; animation: vmk-slide 1.4s ease-in-out infinite alternate; }
+@keyframes vmk-slide { from { transform: translateX(0); } to { transform: translateX(150%); } }
+.deck-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+@media (prefers-reduced-motion: reduce) { .deck-bar.is-wait > i { animation: none; width: 100%; opacity: 0.5; } }

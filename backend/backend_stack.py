@@ -43,6 +43,16 @@ TRANSIENT_LAMBDA_ERRORS = [
 ]
 
 
+
+def _web_origins(stage_cfg) -> list:
+    """Origins of the web app and public site that may POST an upload straight to S3 (derived from the sign-in callback URLs, plus the public domain and the local dev server)."""
+    from urllib.parse import urlsplit
+    urls = list((stage_cfg or {}).get("callbackUrls") or ["http://localhost:4321/auth/callback"])
+    origins = {f"{u.scheme}://{u.netloc}" for u in map(urlsplit, urls) if u.scheme in ("http", "https") and u.netloc}
+    origins |= {"https://videomk.com", "https://www.videomk.com", "http://localhost:4321"}
+    return sorted(origins)
+
+
 class BackendStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, *, stage: str, stage_cfg: Dict[str, Any], **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -86,7 +96,9 @@ class BackendStack(Stack):
                 s3.LifecycleRule(id="expire-orphan-uploads", prefix="uploads/", expiration=Duration.days(2)),
                 s3.LifecycleRule(id="tier-finished-videos", prefix="videos/", transitions=[s3.Transition(storage_class=s3.StorageClass.INTELLIGENT_TIERING, transition_after=Duration.days(0))]),
             ],
-            cors=[s3.CorsRule(allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD], allowed_origins=["*"], allowed_headers=["*"], max_age=3600)],
+            # A browser upload (presigned POST: the web 'Add a presentation') needs POST from the web origins only; the signed policy still decides what may be written.
+            cors=[s3.CorsRule(allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD], allowed_origins=["*"], allowed_headers=["*"], max_age=3600),
+                  s3.CorsRule(allowed_methods=[s3.HttpMethods.POST], allowed_origins=_web_origins(stage_cfg), allowed_headers=["*"], max_age=3600)],
         )
 
         # Per-user daily quota counters. On-demand + TTL => zero idle cost.

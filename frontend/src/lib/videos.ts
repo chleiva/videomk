@@ -1,6 +1,6 @@
 // The video list: item shape, normalisation of the API payload, day groups (Today / Yesterday / Earlier, as in the apps' DayGroup) and the making progress.
 export type Status = "queued" | "running" | "complete" | "error" | "rejected";
-export type Stage = "starting" | "writing" | "assets" | "storyboard" | "rendering";
+export type Stage = "starting" | "writing" | "deck_reading" | "deck_writing" | "assets" | "storyboard" | "rendering";
 
 export interface TaskItem {
   id: string;
@@ -41,7 +41,9 @@ export function s3ToHttps(uri: string | null | undefined): string | null {
 export function normalizeItem(it: any): TaskItem | null {
   const id: string | undefined = it?.video_id || it?.id;
   if (!id) return null;
-  const [status, stage] = STATUS[(it?.status || "").toString().toUpperCase()] ?? ["queued", "starting"];
+  let [status, stage] = STATUS[(it?.status || "").toString().toUpperCase()] ?? ["queued", "starting"];
+  // A video made from a presentation reports `stage` while the deck is read and the story written (docs/CREATE_API.md); it is ignored afterwards.
+  if (stage === "writing" && (it?.stage === "deck_reading" || it?.stage === "deck_writing")) stage = it.stage;
   return {
     id, status, stage: status === "queued" || status === "running" ? stage : undefined,
     title: it?.title,
@@ -85,12 +87,14 @@ export function groupByDay<T extends { created_at?: string | null }>(items: T[],
 }
 
 // ---------------------------------------------------------------- making progress (four steps: script, voice, pictures, final cut)
-export interface MakingInfo { segments: number[]; current: number; line: "starting" | "writing" | "voice_visuals" | "rendering" }
+export interface MakingInfo { segments: number[]; current: number; line: "starting" | "writing" | "deck_reading" | "deck_writing" | "voice_visuals" | "rendering" }
 
 /** The server reports stages, not scenes (so there is no scene counter yet); the bar is an honest estimate of the four steps. */
 export function makingInfo(stage: Stage | undefined): MakingInfo {
   switch (stage) {
     case "writing": return { segments: [0.6, 0, 0, 0], current: 0, line: "writing" };
+    case "deck_reading": return { segments: [0.2, 0, 0, 0], current: 0, line: "deck_reading" };
+    case "deck_writing": return { segments: [0.65, 0, 0, 0], current: 0, line: "deck_writing" };
     case "assets": return { segments: [1, 0.5, 0.3, 0], current: 1, line: "voice_visuals" };
     case "storyboard": return { segments: [1, 1, 0.6, 0], current: 2, line: "voice_visuals" };
     case "rendering": return { segments: [1, 1, 1, 0.5], current: 3, line: "rendering" };
