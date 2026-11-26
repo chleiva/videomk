@@ -15,6 +15,16 @@ if app.node.try_get_context("site"):  # the public website (videomk.com): script
               site_dir=os.path.join(os.path.dirname(__file__), "build", "site"), env=cdk.Environment(account="464863885161", region="us-east-1"))
     app.synth()
     raise SystemExit(0)
+if app.node.try_get_context("mail"):  # email forwarding for videomk.com (docs/EMAIL_FORWARDING.md): prod account, us-east-1, like the site
+    from mail_forward import MailForwardStack, PROD_ACCOUNT, REGION, DEFAULT_FROM, DEFAULT_TO, ZONE_ID, _ctx_email
+    _cli = os.getenv("CDK_DEFAULT_ACCOUNT")
+    if _cli and _cli != PROD_ACCOUNT:
+        raise SystemExit(f"Refusing: the mail stack belongs to account {PROD_ACCOUNT} but credentials are for {_cli}.")
+    _res = app.node.try_get_context("mailReservedConcurrency")
+    MailForwardStack(app, "videomk-mail", forward_to=_ctx_email(app.node, "forwardTo", DEFAULT_TO), forward_from=_ctx_email(app.node, "forwardFrom", DEFAULT_FROM),
+                     zone_id=str(app.node.try_get_context("mailZoneId") or ZONE_ID), reserved=int(_res) if _res else None, env=cdk.Environment(account=PROD_ACCOUNT, region=REGION))
+    app.synth()
+    raise SystemExit(0)
 stage = app.node.try_get_context("stage")
 with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
     stages = json.load(f)
