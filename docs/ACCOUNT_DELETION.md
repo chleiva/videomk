@@ -74,6 +74,7 @@ Design notes (section 8 for what is proven): the code is issued to the **Service
 | 6 | usage | Usage partitions `<sub>`, `upload:<sub>`, `libup:<sub>`, `libsearch:<sub>`, `brief:<sub>`, `unlimited:<sub>`, `dup:<sub>`, `edit:<sub>` |
 | 7 | flags | Flags table keys `<sub>` (entitlements, unlimited) and `safety:<sub>` (hold, cleared-at) |
 | 8 | safety | Safety table records of the person are **re-keyed** (section 6) |
+| 8b | feedback | Feedback table (`-c feedback`, default on): the person's rows (found through `GSI_User`) are **kept** with `userId` replaced by `deleted:<keyed hash>`; text stays, link goes (docs/FEEDBACK.md). Runs right after `safety`, and again in `recheck` |
 | 9 | tombstone | Only with `-c accountTombstone=1` (section 7) |
 | 10 | settle | Wait until every token issued before step 1 has expired: 65 minutes (3600 s token life + 300 s). Without it a token still valid for an hour could recreate a row after the deletion. |
 | 11 | recheck | All data steps again (a late request, a late upload, a workflow that ended after being stopped) |

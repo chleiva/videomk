@@ -104,12 +104,12 @@ def test_every_table_bucket_and_index_of_the_stack_is_either_cleaned_or_explicit
 def test_the_worker_can_delete_from_every_covered_table_and_knows_its_name(synth):
     t = synth()
     e = env(t, "account_deleter")
-    names = {"VideosTable": "VIDEOS_TABLE", "UsageTable": "USAGE_TABLE", "WalletTable": "WALLET_TABLE", "AccountFlagsTable": "FLAGS_TABLE", "MediaTable": "MEDIA_TABLE", "SafetyTable": "SAFETY_TABLE"}
+    names = {"FeedbackTable": "FEEDBACK_TABLE", "VideosTable": "VIDEOS_TABLE", "UsageTable": "USAGE_TABLE", "WalletTable": "WALLET_TABLE", "AccountFlagsTable": "FLAGS_TABLE", "MediaTable": "MEDIA_TABLE", "SafetyTable": "SAFETY_TABLE"}
     assert set(names) == set(ad.COVERED_TABLES)
     for pattern, var in names.items():
         lid = ids_matching(t, "AWS::DynamoDB::Table", pattern)[0]
         assert json.dumps(e[var]) .find(lid) >= 0, f"{var} does not point at {lid}"
-        assert any(mentions(s["resources"], lid) and ("dynamodb:DeleteItem" in s["actions"]) for s in statements(t, "account_deleter")), f"the worker cannot delete from {lid}"
+        assert any(mentions(s["resources"], lid) and ("dynamodb:DeleteItem" in s["actions"] or (pattern == "FeedbackTable" and "dynamodb:UpdateItem" in s["actions"])) for s in statements(t, "account_deleter")), f"the worker cannot delete from {lid}"
     for bucket in ("AssetsBucket", "MediaBucket"):
         lid = ids_matching(t, "AWS::S3::Bucket", bucket)[0]
         name = json.dumps(t["Resources"][lid]["Properties"]["BucketName"])   # some policies name the bucket by its fixed name, others by reference

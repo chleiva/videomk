@@ -83,6 +83,7 @@ export default function WatchPage() {
           <div><p className="font-semibold">{t("watch.make_another")}</p><p className="caption">{t("watch.make_another_sub")}</p></div>
           <a href="/generations/index.html" className="btn btn-line btn-sm">{t("gen.create")}</a>
         </div>
+        <p className="caption mt-6"><a href="/feedback/index.html?from=after_video" className="inline-flex min-h-11 items-center">{t("feedback.after_video")}</a></p>
       </section>
       {toast.node}
     </div>

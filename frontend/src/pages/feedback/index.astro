@@ -1,0 +1,7 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FeedbackPage from "../../components/FeedbackPage";
+---
+<BaseLayout title="Feedback — videomk" titleKey="feedback.page_title" app={true} active="feedback">
+	<FeedbackPage client:only="react" />
+</BaseLayout>

@@ -31,6 +31,7 @@ from social_auth import SocialAuth, flag as social_flag
 from auth_cleanup import UnconfirmedCleanup, enabled as unconfirmed_cleanup_enabled, max_age_hours as unconfirmed_max_age_hours
 from request_intake import RequestIntake
 from request_options import RequestOptions
+from feedback_loop import FeedbackLoop, enabled as feedback_enabled
 
 from engine_v2 import EngineV2
 
@@ -567,6 +568,11 @@ class BackendStack(Stack):
         # `-c appleRevoke=1` adds Sign in with Apple token revocation; `-c accountTombstone=1` keeps a salted hash of the verified email for `-c tombstoneDays` (default 90) so a deleted account
         # cannot collect a second welcome credit (an owner decision: privacy versus abuse; default OFF).
         # ----------------------------------------------------------------------------
+        # User feedback (docs/FEEDBACK.md): on by default, `-c feedback=0` removes it.
+        feedback_loop = None
+        if feedback_enabled(self.node):
+            feedback_loop = FeedbackLoop(self, "Feedback", is_prod=is_prod, make_fn=make_fn, usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth,
+                                         cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"])
         apple_revoke, tombstone = social_flag(self.node, "appleRevoke"), social_flag(self.node, "accountTombstone")
         apple_layer = None
         if apple_revoke:
@@ -578,7 +584,7 @@ class BackendStack(Stack):
         deletion = AccountDeletion(
             self, "AccountDeletion", stage=stage, is_prod=is_prod, make_fn=make_fn, user_pool=user_pool, api=api, user_id_resource=user_id, cognito_auth=cognito_auth,
             cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"], common_env=common_env, videos_table=videos_table, usage_table=usage_table, wallet_table=wallet_table,
-            flags_table=flags_table, safety_table=intake.table, assets_bucket_name=ASSETS_BUCKET, generate_machines=[active_machine], edit_machine=v2.edit_state_machine if v2 is not None else None,
+            flags_table=flags_table, safety_table=intake.table, feedback_table=feedback_loop.table if feedback_loop else None, assets_bucket_name=ASSETS_BUCKET, generate_machines=[active_machine], edit_machine=v2.edit_state_machine if v2 is not None else None,
             media=media, tombstone=tombstone, tombstone_days=int(self.node.try_get_context("tombstoneDays") or 90), domain=domain,
             web_return_url=callback_urls[0].rsplit("/auth/callback", 1)[0].rstrip("/") + "/delete-account", apple=apple_revoke, apple_layer=apple_layer,
         )

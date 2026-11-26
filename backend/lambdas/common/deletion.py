@@ -41,11 +41,11 @@ logger = logging.getLogger()
 USER_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 VIDEO_RE = re.compile(r"^[A-Za-z0-9_-]{8,80}$")
 
-STEPS = ["begin", "executions", "media", "videos", "wallet", "usage", "flags", "safety", "tombstone", "settle", "recheck", "cognito", "finish"]
-DATA_STEPS = ["media", "videos", "wallet", "usage", "flags", "safety"]
+STEPS = ["begin", "executions", "media", "videos", "wallet", "usage", "flags", "safety", "feedback", "tombstone", "settle", "recheck", "cognito", "finish"]
+DATA_STEPS = ["media", "videos", "wallet", "usage", "flags", "safety", "feedback"]
 
 # every usage-table partition a person can have (code: usage.consume(f"<prefix>:{user}") and the plain `user` of the daily video quota)
-USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:")
+USAGE_PREFIXES = ("", "upload:", "libup:", "libsearch:", "brief:", "unlimited:", "dup:", "edit:", "deck:", "deckproc:", "feedback:", "feedbackh:")
 FLAG_KEYS = ("{u}", "safety:{u}")
 ASSET_USER_PREFIXES = ("videos/{u}/", "uploads/{u}/")
 ASSET_VIDEO_PREFIXES = ("generation/v2/{v}/", "generation/assets/{v}/")
@@ -477,6 +477,19 @@ def step_safety(user: str, budget: Budget, now: Optional[float] = None) -> Dict[
     return {"records": n}
 
 
+def step_feedback(user: str, budget: Budget) -> Dict[str, int]:
+    """Keep the person's feedback text (owner value, privacy page) but cut the link: userId becomes a one-way keyed hash. Idempotent; skipped where the feature is off."""
+    if not os.environ.get("FEEDBACK_TABLE"):
+        return {"skipped": 1}
+    table = ddb().Table(_env("FEEDBACK_TABLE"))
+    ref = f"deleted:{account_ref(user)}"
+    n = 0
+    for r in list(_query_all(table, budget, IndexName="GSI_User", KeyConditionExpression=Key("userId").eq(user))):
+        table.update_item(Key={"feedbackId": r["feedbackId"]}, UpdateExpression="SET userId = :r", ExpressionAttributeValues={":r": ref})
+        n += 1
+    return {"rows": n}
+
+
 def step_tombstone(user: str, username: Optional[str], now: Optional[float] = None) -> Dict[str, int]:
     if not tombstone_enabled():
         return {"skipped": 1}
@@ -537,7 +550,7 @@ def _step_fn(name: str, user: str, username: Optional[str], budget: Budget, now:
     if name == "executions":
         return step_executions(user, budget)
     if name in DATA_STEPS:
-        return {"media": step_media, "videos": step_videos, "wallet": step_wallet, "usage": step_usage, "flags": step_flags, "safety": lambda u, b: step_safety(u, b, now)}[name](user, budget)
+        return {"media": step_media, "videos": step_videos, "wallet": step_wallet, "usage": step_usage, "flags": step_flags, "safety": lambda u, b: step_safety(u, b, now), "feedback": step_feedback}[name](user, budget)
     if name == "tombstone":
         return step_tombstone(user, username, now)
     if name == "recheck":

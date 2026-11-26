@@ -19,7 +19,7 @@ SETTLE_SECONDS = TOKEN_VALID_SECONDS + 300
 
 # What the worker cleans, by CDK logical id of the table (regex on the logical id). The test in tests/test_account_deletion.py fails when the stack has a table or bucket that is
 # neither listed here nor in EXEMPT, so a future per-user table cannot be forgotten silently.
-COVERED_TABLES = {"VideosTable": "videos", "UsageTable": "usage", "WalletTable": "wallet", "AccountFlagsTable": "flags", "MediaTable": "media", "SafetyTable": "safety"}
+COVERED_TABLES = {"VideosTable": "videos", "UsageTable": "usage", "WalletTable": "wallet", "AccountFlagsTable": "flags", "MediaTable": "media", "SafetyTable": "safety", "FeedbackTable": "feedback (userId replaced by a one-way hash, the text is kept)"}
 EXEMPT_TABLES = {"AccountDeletionTable": "the deletion jobs and tombstones themselves"}
 COVERED_BUCKETS = {"AssetsBucket": ["videos/<user>/", "uploads/<user>/", "generation/v2/<video>/", "generation/assets/<video>/"], "MediaBucket": ["o/<user>/", "t/<user>/"]}
 COVERED_VECTOR_INDEXES = ["PhotoIndex"]
@@ -33,7 +33,7 @@ OPTIONAL_EXEMPT_VECTOR_INDEXES = ["CatalogIndex"]
 class AccountDeletion(Construct):
     def __init__(
         self, scope: Construct, construct_id: str, *, stage: str, is_prod: bool, make_fn: Callable[..., _lambda.Function], user_pool: Any, api: apigw.RestApi, user_id_resource: apigw.IResource,
-        cognito_auth: Dict, cors_headers: List[str], common_env: Dict[str, str], videos_table: Any, usage_table: Any, wallet_table: Any, flags_table: Any, safety_table: Any,
+        cognito_auth: Dict, cors_headers: List[str], common_env: Dict[str, str], videos_table: Any, usage_table: Any, wallet_table: Any, flags_table: Any, safety_table: Any, feedback_table: Optional[Any] = None,
         assets_bucket_name: str, generate_machines: List[Any], edit_machine: Optional[Any], media: Optional[Any], tombstone: bool, tombstone_days: int, domain: Optional[str],
         web_return_url: str, apple: bool, apple_layer: Optional[_lambda.ILayerVersion] = None,
     ) -> None:
@@ -62,6 +62,8 @@ class AccountDeletion(Construct):
         }
         worker_env = {**base_env, "SAFETY_TABLE": safety_table.table_name,
                       "GENERATE_STATE_MACHINE_ARNS": ",".join(m.state_machine_arn for m in generate_machines), "EDIT_STATE_MACHINE_ARN": edit_machine.state_machine_arn if edit_machine else ""}
+        if feedback_table is not None:
+            worker_env["FEEDBACK_TABLE"] = feedback_table.table_name
         if media is not None:
             worker_env.update({"MEDIA_TABLE": media.table.table_name, "MEDIA_BUCKET": media.media_bucket_name, "VECTOR_BUCKET": media.vector_bucket_name, "VECTOR_INDEX": "photos"})
 
@@ -89,6 +91,9 @@ class AccountDeletion(Construct):
             tbl(t, ["dynamodb:Query", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"])
         tbl(flags_table, ["dynamodb:DeleteItem"])   # delete only: nothing at runtime can write a flag
         tbl(safety_table, ["dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem"])
+        if feedback_table is not None:   # update only: the text stays, the userId link goes (no read of the text, no delete)
+            worker.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:Query"], resources=[f"{feedback_table.table_arn}/index/GSI_User"]))
+            worker.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:UpdateItem"], resources=[feedback_table.table_arn]))
         if media is not None:
             tbl(media.table, ["dynamodb:Query", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"])
         assets_arn = f"arn:aws:s3:::{assets_bucket_name}"
