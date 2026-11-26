@@ -181,3 +181,16 @@ Google needs no revocation call for Cognito federation (we keep no Google token)
 | Apple Team ID | `39ANXJNUTL` | `39ANXJNUTL` |
 | Apple Key ID / .p8 | owner provides (one key may serve both) | same or its own |
 | Redirect URI / Apple Domain | from `SocialRedirectUri` / `SocialAppleDomain` of qa | same, from prod |
+
+## 7. Unconfirmed sign-ups (abandoned email registrations)
+
+Problem: a person who starts the hosted sign-up and does not enter the emailed code in time stays `UNCONFIRMED` with no password. They cannot sign in or reset the password (Cognito needs a verified email for `ForgotPassword`), and signing up again says "User already exists".
+
+Fix (on by default): `backend/auth_cleanup.py` adds a scheduled Lambda (`lambdas/unconfirmed_cleanup.py`, EventBridge `rate(6 hours)`) that deletes pool users whose status is `UNCONFIRMED` and that were created more than 24 hours ago.
+- Context: `-c unconfirmedMaxAgeHours=N` (default 24, minimum 1); `-c unconfirmedCleanup=0` removes the function and the rule.
+- Safe by construction: an unconfirmed user has never signed in, so owns no data. Each user is re-read with `AdminGetUser` right before deletion and skipped unless still `UNCONFIRMED`; federated users (`EXTERNAL_PROVIDER` status, or any user with an `identities` attribute) are never touched; at most 200 deletions per run (a log line says when the cap is hit, the next run continues); throttling is retried with backoff.
+- IAM: `cognito-idp:ListUsers`, `AdminGetUser`, `AdminDeleteUser` on this user pool only.
+- Logs: counts and a short hash of the pool id only, never an email or username. Alarm on the line `UNCONFIRMED_CLEANUP deleted=N skipped=M` (a metric filter on `skipped` > 0 or a sudden large `deleted`).
+- Manual fix before the cleanup runs: `aws cognito-idp admin-delete-user --user-pool-id <pool> --username <name>`.
+
+App follow-up (not built): the apps' own sign-up UI should offer "Resend code" (`ResendConfirmationCode`) and a way back to the code screen when sign-up reports "User already exists" for an unconfirmed account, so people rarely wait for the cleanup.

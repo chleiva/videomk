@@ -28,6 +28,7 @@ from catalog import ImageCatalog
 from deck import DeckToVideo
 from media_library import MediaLibrary
 from social_auth import SocialAuth, flag as social_flag
+from auth_cleanup import UnconfirmedCleanup, enabled as unconfirmed_cleanup_enabled, max_age_hours as unconfirmed_max_age_hours
 from request_intake import RequestIntake
 from request_options import RequestOptions
 
@@ -486,6 +487,8 @@ class BackendStack(Stack):
         hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
         social = SocialAuth(self, "SocialAuth", user_pool=user_pool, hosted_ui=hosted_ui, google=social_google, apple=social_apple, make_fn=make_fn)
         social.attach_clients(user_pool_client, mobile_client)
+        if unconfirmed_cleanup_enabled(self.node):   # on by default; `-c unconfirmedCleanup=0` removes it
+            UnconfirmedCleanup(self, "UnconfirmedCleanup", user_pool=user_pool, make_fn=make_fn, max_age_hours=unconfirmed_max_age_hours(self.node))
         CfnOutput(self, "ApiUrl", value=api.url)
         CfnOutput(self, "UserPoolId", value=user_pool.user_pool_id)
         CfnOutput(self, "UserPoolClientId", value=user_pool_client.user_pool_client_id)

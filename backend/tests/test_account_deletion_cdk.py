@@ -194,7 +194,8 @@ def test_cognito_deletion_rights_belong_to_the_worker_alone_and_are_scoped_to_th
         except (AssertionError, KeyError):
             continue
         dangerous = [s for s in sts if set(s["actions"]) & {"cognito-idp:AdminDeleteUser", "cognito-idp:AdminDisableUser", "cognito-idp:AdminUserGlobalSignOut"}]
-        assert (n == "account_deleter") == bool(dangerous), n
+        # the only other holder is the unconfirmed sign-up cleanup (tests/test_unconfirmed_cleanup.py pins its exact rights): users who never signed in, so no data
+        assert (n in ("account_deleter", "unconfirmed_cleanup")) == bool(dangerous), n
     for s in grants(t, "account_deleter", "cognito-idp:AdminDeleteUser"):
         assert s["resources"] == [{"Fn::GetAtt": [ids_matching(t, "AWS::Cognito::UserPool", "UserPool")[0], "Arn"]}]
 
