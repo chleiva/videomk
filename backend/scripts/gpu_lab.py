@@ -2,16 +2,16 @@
 """GPU lab: ONE short-lived GPU instance for model experiments (avatars / lip sync), with hard cost guardrails. docs/AVATARS.md.
 
 Every guardrail is independent of the others, so one failing does not leave a machine running:
-  1. Account quota: 8 G-family vCPUs on QA = at most one g5.xlarge/g5.2xlarge can exist.
+  1. Account quota: 8 G-family vCPUs on QA in eu-north-1 = at most one single-GPU instance can exist.
   2. This script refuses to start a second lab instance, refuses any type not in ALLOWED, and refuses a lifetime above MAX_MINUTES_CAP.
   3. Inside the instance, the FIRST line of user data schedules `shutdown` at the deadline; shutdown behaviour is TERMINATE (not stop), so nothing keeps billing.
   4. Inside the instance, an idle watchdog shuts down when the GPU has been idle for IDLE_MINUTES.
   5. Outside the instance, a one-time EventBridge Scheduler rule terminates it shortly after the deadline even if the instance's own timers never ran.
   6. `sweep` terminates any lab instance older than its deadline tag (run it any time; `up` runs it first).
   7. The disk is deleted on termination; there is no public port (access is SSM only), no Elastic IP, no spot, no auto scaling, no restart.
-Only on-demand, only the QA account, only eu-west-1.
+Only on-demand, only the QA account, only eu-north-1.
 
-  gpu_lab.py up [--type g5.2xlarge] [--minutes 120]     start (prints the worst-case cost first)
+  gpu_lab.py up [--type g6.xlarge] [--minutes 120]     start (prints the worst-case cost first)
   gpu_lab.py status                                      what is running, age, time left, cost so far
   gpu_lab.py run 'shell command' [--timeout 3600]        run on the instance through SSM and print the output
   gpu_lab.py down                                        terminate now and remove the backstop
@@ -26,9 +26,21 @@ import time
 
 import boto3
 
-PROFILE, REGION, ACCOUNT = "qa", "eu-west-1", "552357225438"
+# Region: eu-north-1 (Stockholm). eu-west-1, where the rest of QA lives, only offers the 2019 and 2022 GPU generations (g4dn, g5); Stockholm has every current
+# family and the lowest European prices (15-20% under Frankfurt). The lab only exchanges small files with the QA bucket, so the distance does not matter.
+PROFILE, REGION, ACCOUNT = "qa", "eu-north-1", "552357225438"
 TAG = {"Key": "project", "Value": "videomk-gpu-lab"}
-ALLOWED = {"g5.xlarge": 1.13, "g5.2xlarge": 1.36}   # on-demand USD per hour in eu-west-1 (approximate; the bill is the truth). Nothing bigger may be started.
+# On-demand USD per hour in eu-north-1, read from the AWS price list on 2026-11-26 (the bill is the truth). All are single-GPU and at most 8 vCPUs, so the quota
+# (8 vCPUs) allows exactly one. Which is cheapest PER PRESENTER MINUTE depends on measured speed: the prototype measures it, docs/AVATARS.md records it.
+ALLOWED = {
+    "g4dn.xlarge": 0.558,    # T4 16 GB (2019): cheapest hour, slowest
+    "g6.xlarge": 0.8536,     # L4 24 GB (2024): the efficient default for a light model such as MuseTalk
+    "g6.2xlarge": 1.0368,    # L4 24 GB, more CPU and memory for video encode/decode
+    "g5.xlarge": 1.067,      # A10G 24 GB (2022): faster than L4, older
+    "g6e.xlarge": 1.974,     # L40S 48 GB (2024): for heavy models (InfiniteTalk) that need the memory
+    "g6e.2xlarge": 2.3782,
+    "g7.2xlarge": 2.6728,    # RTX PRO 4500 Blackwell 32 GB (newest generation)
+}
 MAX_MINUTES_CAP = 240           # no session may be longer than 4 hours
 DEFAULT_MINUTES = 120
 IDLE_MINUTES = 25               # GPU below 5% for this long: shut down
@@ -233,7 +245,7 @@ def cmd_run(s, command: str, timeout: int):
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
-    up = sub.add_parser("up"); up.add_argument("--type", default="g5.2xlarge"); up.add_argument("--minutes", type=int, default=DEFAULT_MINUTES)
+    up = sub.add_parser("up"); up.add_argument("--type", default="g6.xlarge"); up.add_argument("--minutes", type=int, default=DEFAULT_MINUTES)
     run = sub.add_parser("run"); run.add_argument("command"); run.add_argument("--timeout", type=int, default=3600)
     for n in ("status", "down", "sweep"):
         sub.add_parser(n)
