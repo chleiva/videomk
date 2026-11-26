@@ -4,6 +4,7 @@ public enum AuthError: Error, Equatable, Sendable {
     case signedOut
     case cancelled
     case failed
+    case accountLinkRetry   // Cognito's one-off "Already found an entry for username" after an account link
 }
 
 /// Cognito hosted UI with authorization code + PKCE. The system browser sheet is driven by the app (it needs a window);
@@ -24,7 +25,7 @@ public actor AuthService: AuthorizationProviding {
 
     // MARK: sign in
 
-    public func beginSignIn() -> URL {
+    public func beginSignIn(provider: SocialProvider? = nil) -> URL {
         let pkce = PKCE.generate()
         let state = PKCE.generate().verifier
         pending = (pkce, state)
@@ -34,6 +35,7 @@ public actor AuthService: AuthorizationProviding {
             .init(name: "redirect_uri", value: config.redirectURI), .init(name: "scope", value: "openid email profile"),
             .init(name: "state", value: state), .init(name: "code_challenge_method", value: "S256"), .init(name: "code_challenge", value: pkce.challenge),
         ]
+        if let provider { c.queryItems?.append(.init(name: "identity_provider", value: provider.rawValue)) }
         return c.url!
     }
 
@@ -42,8 +44,14 @@ public actor AuthService: AuthorizationProviding {
         self.pending = nil
         let items = URLComponents(url: callback, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func item(_ n: String) -> String? { items.first { $0.name == n }?.value }
-        if item("error") != nil { throw AuthError.cancelled }
-        guard let code = item("code"), item("state") == pending.state else { throw AuthError.failed }
+        guard item("state") == pending.state else { throw AuthError.failed }   // every callback needs our state, errors included
+        if let error = item("error") {
+            let description = item("error_description") ?? ""
+            if description.contains(SignInFlow.linkQuirk) { throw AuthError.accountLinkRetry }
+            if error == "access_denied" || description.lowercased().contains("cancel") { throw AuthError.cancelled }
+            throw AuthError.failed
+        }
+        guard let code = item("code") else { throw AuthError.failed }
         let t = try await tokenRequest(["grant_type": "authorization_code", "client_id": config.clientID, "code": code,
                                         "redirect_uri": config.redirectURI, "code_verifier": pending.pkce.verifier], previous: nil)
         store.save(t)

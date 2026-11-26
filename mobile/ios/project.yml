@@ -42,6 +42,8 @@ targets:
         VMKApiBase: $(VMK_API_BASE)
         VMKAuthDomain: $(VMK_AUTH_DOMAIN)
         VMKClientID: $(VMK_CLIENT_ID)
+        VMKAuthApple: $(VMK_AUTH_APPLE)    # "Continue with Apple" button; YES only after the backend federation is live
+        VMKAuthGoogle: $(VMK_AUTH_GOOGLE)  # "Continue with Google" button
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.videomk.app
@@ -49,6 +51,10 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: NO
+        # Social sign-in switches, OFF in every configuration. Turn one on per configuration below, or per build:
+        #   xcodebuild ... VMK_AUTH_GOOGLE=YES VMK_AUTH_APPLE=YES
+        VMK_AUTH_APPLE: "NO"
+        VMK_AUTH_GOOGLE: "NO"
       configs:
         Debug:  # QA backend (account 552357225438, eu-west-1)
           VMK_API_BASE: https://rj1uhfqld0.execute-api.eu-west-1.amazonaws.com/prod

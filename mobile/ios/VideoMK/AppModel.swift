@@ -35,6 +35,8 @@ final class AppModel {
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var signInError: String?
     var isSigningIn = false
+    var signingInWith: SignInChoice?                        // which button shows the spinner
+    let authOptions: AuthOptions
 
     private let auth: AuthService?
     private let api: APIClient?
@@ -43,6 +45,13 @@ final class AppModel {
 
     init(config: AppConfig? = AppConfig.fromBundle(), store: any TokenStore = KeychainTokenStore()) {
         self.config = config
+        var options = AuthOptions.fromBundle()
+        #if DEBUG
+        let env = ProcessInfo.processInfo.environment   // screenshots and UI tests: show the buttons without changing the build settings
+        if env["VMK_DEBUG_AUTH_APPLE"] == "1" { options.apple = true }
+        if env["VMK_DEBUG_AUTH_GOOGLE"] == "1" { options.google = true }
+        #endif
+        authOptions = options
         guard let config else { auth = nil; api = nil; createModel = CreateModel(api: nil); return }
         let a = AuthService(config: config, store: store)
         auth = a
@@ -89,23 +98,31 @@ final class AppModel {
         if userID == nil { userID = (try? await auth.authorization())?.userID }
     }
 
-    func signIn() async {
+    private static let signedOutKey = "vmk.explicitSignOut"
+
+    /// `provider` nil is the hosted page with email and password. Social providers go straight to Apple or Google through the same
+    /// authorize request (code + PKCE + state); the one-off Cognito account-link error is retried once, see `SignInFlow`.
+    func signIn(_ provider: SocialProvider? = nil) async {
         guard let auth, let config, !isSigningIn else { return }
         isSigningIn = true; signInError = nil
-        defer { isSigningIn = false }
+        signingInWith = provider.map { $0 == .apple ? .apple : .google } ?? .email
+        defer { isSigningIn = false; signingInWith = nil }
+        let ephemeral = SignInFlow.useEphemeralSession(afterExplicitSignOut: UserDefaults.standard.bool(forKey: Self.signedOutKey))
         do {
-            let callback = try await web.authenticate(url: await auth.beginSignIn(), callbackScheme: config.callbackScheme)
-            try await auth.completeSignIn(callback: callback)
+            try await SignInFlow.run {
+                let callback = try await web.authenticate(url: await auth.beginSignIn(provider: provider), callbackScheme: config.callbackScheme, ephemeral: ephemeral)
+                try await auth.completeSignIn(callback: callback)
+            }
+            UserDefaults.standard.removeObject(forKey: Self.signedOutKey)
             phase = .signedIn(email: await auth.email)
             userID = (try? await auth.authorization())?.userID
-        } catch AuthError.cancelled {
-            // the user closed the sheet: nothing to report
         } catch {
-            signInError = "We couldn't sign you in. Please try again."
+            signInError = SignInFlow.message(for: error)   // nil when the person just closed the sheet
         }
     }
 
     func signOut() async {
+        UserDefaults.standard.set(true, forKey: Self.signedOutKey)
         await auth?.signOut()
         await media?.wipe()      // another account must never see this one's cached photos or queued uploads
         composerLibrary = []; libraryIDs = [:]

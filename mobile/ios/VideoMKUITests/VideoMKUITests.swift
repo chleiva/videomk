@@ -48,6 +48,23 @@ final class VideoMKUITests: XCTestCase {
         try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
     }
 
+    /// No backend needed: signed out, the social buttons exist only when their (debug) switch is on.
+    func testSocialSignInButtonsFollowTheSwitches() {
+        let off = XCUIApplication()
+        off.launchEnvironment["VMK_DEBUG_RESET"] = "1"
+        off.launch()
+        XCTAssertTrue(off.buttons["signInButton"].waitForExistence(timeout: 15))
+        XCTAssertFalse(element(off, "signInApple").exists || element(off, "signInGoogle").exists, "default: no social buttons")
+        off.terminate()
+        let on = XCUIApplication()
+        on.launchEnvironment["VMK_DEBUG_RESET"] = "1"
+        on.launchEnvironment["VMK_DEBUG_AUTH_APPLE"] = "1"
+        on.launchEnvironment["VMK_DEBUG_AUTH_GOOGLE"] = "1"
+        on.launch()
+        XCTAssertTrue(on.buttons["Continue with Google"].waitForExistence(timeout: 15))
+        XCTAssertTrue(on.buttons["Continue with Apple"].exists && on.buttons["signInButton"].exists)
+    }
+
     /// No backend needed: a made-up session and the in-app fake library (debug builds only). Checks the tab bar and the Media tab.
     func testMediaTabWithFakeLibrary() throws {
         func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }

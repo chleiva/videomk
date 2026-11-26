@@ -1,7 +1,7 @@
 # videomk for iPhone (SwiftUI, iOS 17+)
 
 Thin native client for the videomk backend. Product spec: `docs/mobile/SPEC.md`. Status: milestones 1 and 2 of the spec (sign-in,
-library, create, progress, player/share, settings). Not yet: editor, credits/purchases, push, Live Activity, Sign in with Apple/Google
+library, create, progress, player/share, settings). Sign in with Apple/Google exist behind build switches (`VMK_AUTH_APPLE`, `VMK_AUTH_GOOGLE` in `project.yml`, default NO). Not yet: editor, credits/purchases, push, Live Activity
 (sign-in is the Cognito hosted page, which supports email + password), account deletion.
 
 ## What the app does

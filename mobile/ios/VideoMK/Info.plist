@@ -57,8 +57,12 @@
 	</array>
 	<key>VMKApiBase</key>
 	<string>$(VMK_API_BASE)</string>
+	<key>VMKAuthApple</key>
+	<string>$(VMK_AUTH_APPLE)</string>
 	<key>VMKAuthDomain</key>
 	<string>$(VMK_AUTH_DOMAIN)</string>
+	<key>VMKAuthGoogle</key>
+	<string>$(VMK_AUTH_GOOGLE)</string>
 	<key>VMKClientID</key>
 	<string>$(VMK_CLIENT_ID)</string>
 </dict>
