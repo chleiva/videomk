@@ -29,7 +29,7 @@ def _beat_view(plan: Dict[str, Any], beat: Dict[str, Any], pfx: str) -> Dict[str
                                       for g in m.get("gallery") or []], "no_photo": bool(m.get("no_photo"))}
     if beat["scene"]["type"] == "clip":
         clip_key = m.get("clip_asset")
-        view["clip"] = {"credit": m.get("credit"), "chosen": m.get("chosen"), "has_clip": bool(clip_key), "fallback_photo": bool(not clip_key and asset), "no_media": bool(m.get("no_photo"))}
+        view["clip"] = {"credit": m.get("credit"), "chosen": m.get("chosen"), "has_clip": bool(clip_key), "segments": m.get("segments") or (1 if clip_key else 0), "queries": plan_mod.clip_queries(beat["scene"]["props"]), "fallback_photo": bool(not clip_key and asset), "no_media": bool(m.get("no_photo"))}
     if beat["scene"]["type"] == "image":
         view["photo"] = {"url": awsio.presign(asset) if isinstance(asset, str) and asset.startswith(pfx + "assets/") else None, "credit": m.get("credit"), "chosen": m.get("chosen"), "no_photo": bool(m.get("no_photo"))}
         try:

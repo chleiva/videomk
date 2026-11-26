@@ -250,7 +250,7 @@ def test_the_review_uses_the_clip_prompt_and_says_clips(monkeypatch):
 
 # ---------------------------------------------------------------- planning and the timeline
 def test_clip_scenes_are_documented_sanitised_and_remade_only_when_their_query_changes(monkeypatch):
-    assert "- clip:" in plan_mod.scene_docs() and "specific named person, place, brand" in plan_mod.system_prompt("en")
+    assert "- clip:" in plan_mod.scene_docs() and "specific named person, place, landmark, brand" in plan_mod.system_prompt("en")
     monkeypatch.setenv("CLIPS_ENABLED", "0")
     assert "- clip:" not in plan_mod.scene_docs()
     monkeypatch.delenv("CLIPS_ENABLED")
@@ -460,7 +460,7 @@ def test_current_events_get_photographs_not_stock_footage():
     assert plan["beats"][0]["scene"] == {"type": "image", "props": {"image_query": "warship at sea", "alt": "navy ship", "ken_burns": "in"}} and any("no stock footage" in w for w in warns)
     assert plan_mod.validate_plan(raw("clip", {"clip_query": "waves", "alt": "waves"}))[0]["beats"][0]["scene"]["type"] == "clip"        # everything else keeps clips
     assert "- clip:" in plan_mod.system_prompt("en") and "- clip:" not in plan_mod.system_prompt("en", None, 10, allow_clips=False)
-    assert "specific named person, place, brand, event" in plan_mod.system_prompt("en")
+    assert "specific named person, place, landmark, brand, event" in plan_mod.system_prompt("en")
 
 
 def test_a_brief_that_asks_for_footage_is_told_to_use_clips_freely_with_generic_wording():
@@ -471,11 +471,11 @@ def test_a_brief_that_asks_for_footage_is_told_to_use_clips_freely_with_generic_
 
 def test_visual_topics_are_told_to_use_clips_for_a_third_to_almost_half_of_the_beats_each_one_short():
     p = plan_mod.system_prompt("en")
-    assert "about 30 to 45 percent of the beats" in p and "10 to 18 words" in p and "never looped" in p and "never a brand" in p
+    assert "ONE BEAT IN THREE" in p and "10 to 18 words" in p and "clip_queries" in p and "MONTAGE" in p and "never looped" in p and "never a brand" in p
     assert "never a clip" in p                                                   # numbers, comparisons, lists, abstract ideas keep charts and text
-    assert "about 30 to 45 percent of the beats of a visual video are clips" in p   # the photograph rule no longer says every beat is a photograph
-    assert "about 30 to 45 percent" not in plan_mod.system_prompt("en", None, 10, allow_clips=False)
-    assert "short video clip" not in plan_mod.images_rule(10) and "short video clip" in plan_mod.images_rule(10, clips=True)
+    assert "about 30 to 45 percent of the beats of a visual video are clips or montages" in p   # the photograph rule no longer says every beat is a photograph
+    assert "30 to 45 percent" not in plan_mod.system_prompt("en", None, 10, allow_clips=False)
+    assert "short video clip" not in plan_mod.images_rule(10) and "short video clip or montage" in plan_mod.images_rule(10, clips=True)
 
 
 def test_a_clip_with_long_narration_becomes_a_photograph():
@@ -501,3 +501,166 @@ def test_playback_holds_the_last_frame_past_the_end_and_never_loops(tmp_path):
     cf = clips.ClipFrames(str(p))
     last = cf.frame(len(cf) - 1).tobytes()
     assert cf.frame(len(cf)).tobytes() == last and cf.frame(len(cf) * 3).tobytes() == last           # past the end: the last frame, not frame 0 again
+
+
+# ---------------------------------------------------------------- montage: 2-4 short clips in sequence inside one beat
+def montage_props(*qs, alt="x"):
+    return {"clip_query": qs[0], "clip_queries": list(qs), "alt": alt}
+
+
+def test_a_montage_scene_is_sanitised_deduplicated_capped_and_a_single_query_is_a_plain_clip():
+    sp = plan_mod.sanitize_props
+    got = sp("clip", {"clip_queries": ["waves on rocks", "Waves on rocks", "seagulls flying", "fishing boat", "harbour at dusk", "a fifth one"], "alt": "sea"})
+    assert got["clip_query"] == "waves on rocks" and got["clip_queries"] == ["waves on rocks", "seagulls flying", "fishing boat", "harbour at dusk"]   # at most 4, duplicates gone
+    one = sp("clip", {"clip_queries": ["waves on rocks", "WAVES ON ROCKS"], "alt": "sea"})
+    assert "clip_queries" not in one and one["clip_query"] == "waves on rocks"                       # one distinct query is the same thing as a single clip
+    assert sp("clip", {"clip_query": "bees"})["clip_query"] == "bees" and plan_mod.clip_queries({"clip_query": "bees"}) == ["bees"]
+    assert plan_mod.clip_signature(montage_props("a b", "c d")) == "a b|c d" and plan_mod.clip_signature({"clip_query": "a b"}) == "a b"
+    with pytest.raises(ValueError):
+        sp("clip", {"clip_queries": ["", "  "]})
+
+
+def test_montage_validation_limits_narration_and_the_number_of_clips_and_allow_clips_false_removes_it():
+    def raw(words, qs):
+        return {"legit": True, "title": "T", "beats": [{"narration": " ".join(["word"] * words), "scene": {"type": "clip", "props": {"clip_queries": qs, "alt": "sea"}}}]}
+    qs = ["waves on rocks", "seagulls flying", "fishing boat", "harbour at dusk"]
+    ok, _ = plan_mod.validate_plan(raw(44, qs))
+    assert ok["beats"][0]["scene"]["props"]["clip_queries"] == qs                                       # 44 words: a montage may be up to 45
+    few, warns = plan_mod.validate_plan(raw(20, qs))
+    assert few["beats"][0]["scene"]["props"]["clip_queries"] == qs[:3] and any("reduced to 3 clips" in w for w in warns)   # about 6 spoken words behind each clip
+    one, warns = plan_mod.validate_plan(raw(8, qs))
+    assert "clip_queries" not in one["beats"][0]["scene"]["props"] and any("reduced to one clip" in w for w in warns)
+    long, warns = plan_mod.validate_plan(raw(46, qs))
+    assert long["beats"][0]["scene"] == {"type": "image", "props": {"image_query": "waves on rocks", "alt": "sea", "ken_burns": "in"}} and any("too long" in w for w in warns)
+    off, _ = plan_mod.validate_plan(raw(30, qs), allow_clips=False)
+    assert off["beats"][0]["scene"]["type"] == "image"
+
+
+def test_a_montage_is_remade_when_any_of_its_queries_change():
+    beat = {"id": "b1", "narration": "n", "silent": True, "hold": 3.0, "scene": {"type": "clip", "props": montage_props("a b", "c d")}}
+    plan = {"tts": {}}
+    beat["media"] = {"tts_hash": plan_mod.tts_hash(plan, beat), "duration": 3.0, "query": "a b|c d", "clip_asset": "k.mp4"}
+    assert plan_mod.needs_media(plan, beat) is False
+    beat["scene"]["props"] = montage_props("a b", "c e")
+    assert plan_mod.needs_media(plan, beat) is True
+
+
+def test_the_slot_planner_splits_evenly_stretches_neighbours_and_refuses_a_long_freeze():
+    assert clips.plan_slots(12.0, [6, 6, 6]) == [4.0, 4.0, 4.0]
+    s = clips.plan_slots(12.0, [3.0, 9.0, 9.0])                      # the first clip has only 3 s (+0.5 hold, - 0.2 dissolve): its neighbours take the rest
+    assert s[0] == pytest.approx(3.3) and sum(s) == pytest.approx(12.0) and s[1] > 4.0
+    assert clips.plan_slots(12.0, [2.0, 2.0]) is None                 # 4 s of footage cannot cover 12 s: never a long freeze
+    assert clips.plan_slots(6.0, [6.5]) == [6.0] and clips.plan_slots(6.0, []) is None
+
+
+def fake_scout(results, asked=None):
+    def scout(q, narration, alt="", **kw):
+        if asked is not None:
+            asked.append((q, narration, kw["need_seconds"]))
+        r = results[q]
+        return r if r is None else {"mp4": b"MP4:" + q.encode(), "entry": {"source": "pixabay", "id": q}, "credit": f"Video: {q} / Pixabay", "chosen": f"pixabay:{q}", "loops_after": r, "review": {"cost_usd": 0.001}}
+    return scout
+
+
+def assembled(parts, slots, avail, hd=False):
+    assembled.seen = (parts, slots, avail)
+    return b"ASSEMBLED"
+
+
+def test_a_montage_finds_and_verifies_each_clip_on_its_own_and_credits_every_clip():
+    asked = []
+    out = clips.scout_montage(["a", "b", "c"], "one two three four five six seven eight nine", "alt", need_seconds=12.6, scout=fake_scout({"a": 7, "b": 7, "c": 7}, asked), assemble_fn=assembled, workers=1)
+    assert out["mp4"] == b"ASSEMBLED" and out["segments"] == 3 and out["requested"] == 3 and out["slots"] == [4.0, 4.0, 4.0]
+    assert [q for q, _, _ in asked] == ["a", "b", "c"] and [n for _, n, _ in asked] == ["one two three", "four five six", "seven eight nine"]   # each clip is judged against its own part of the narration
+    assert all(need == pytest.approx(12.0 / 2 + clips.MONTAGE_FADE_S) for _, _, need in asked)   # long enough that the survivors cover the beat if half fail
+    assert out["credit"] == "Video: a / Pixabay, b / Pixabay, c / Pixabay" and [e["id"] for e in out["entries"]] == ["a", "b", "c"] and out["chosen"] == "pixabay:a,pixabay:b,pixabay:c"
+    assert out["review"]["cost_usd"] == pytest.approx(0.003)
+
+
+def test_a_failed_segment_is_dropped_neighbours_stretch_and_fewer_than_half_means_the_photo():
+    out = clips.scout_montage(["a", "b", "c"], "x " * 30, need_seconds=12.6, scout=fake_scout({"a": 7, "b": None, "c": 7}), assemble_fn=assembled, workers=1)
+    assert out["segments"] == 2 and out["requested"] == 3 and out["slots"] == [6.0, 6.0] and out["credit"] == "Video: a / Pixabay, c / Pixabay"   # a dropped, the others take its time
+    assert assembled.seen[1] == [6.0, 6.0]
+    assert clips.scout_montage(["a", "b", "c"], "x " * 30, need_seconds=12.6, scout=fake_scout({"a": 7, "b": None, "c": None}), assemble_fn=assembled, workers=1) is None
+    assert clips.scout_montage(["a", "b"], "x " * 30, need_seconds=12.6, scout=fake_scout({"a": 3, "b": None}), assemble_fn=assembled, workers=1) is None   # 3 s of footage under 12 s: a freeze, so the photo
+    def boom(parts, slots, avail, hd=False):
+        raise RuntimeError("ffmpeg")
+    assert clips.scout_montage(["a", "b"], "x " * 30, need_seconds=12.6, scout=fake_scout({"a": 7, "b": 7}), assemble_fn=boom, workers=1) is None
+
+
+def test_a_beat_too_short_for_the_queries_uses_fewer_clips_and_one_is_a_plain_scout():
+    seen = []
+    plain = lambda q, n, a="", **kw: (seen.append((q, a, kw["need_seconds"])), {"mp4": b"M", "entry": {}, "credit": "Video: z / Pixabay", "chosen": "pixabay:1", "review": {"cost_usd": 0.0}})[1]
+    out = clips.scout_montage(["a", "b", "c", "d"], "words", "alt", need_seconds=5.6, scout=plain, assemble_fn=assembled)   # 5 s of scene: 2 clips at 2.5 s at most
+    assert out is not None and len(seen) == 2
+    seen.clear()
+    clips.scout_montage(["a", "b"], "words", "alt", need_seconds=3.6, scout=plain, assemble_fn=assembled)
+    assert seen == [("a", "alt", 3.6)]                                   # 3 s: a single clip, searched exactly like before
+
+
+def test_the_montage_is_one_real_file_of_the_beat_length_played_once_with_a_dissolve(tmp_path):
+    parts = [clips.normalise(make_source(seconds=6, tmp_path=tmp_path), need_seconds=6, source_seconds=7, suffix=".mp4") for _ in range(3)]
+    slots = clips.plan_slots(12.0, [p[1] for p in parts])
+    mp4 = clips.assemble_montage([p[0] for p in parts], slots, [p[1] for p in parts])
+    f = tmp_path / "m.mp4"
+    f.write_bytes(mp4)
+    frames = clips.ClipFrames(str(f))
+    assert len(frames) == pytest.approx(12 * clips.CLIP_FPS, abs=3) and frames.frame(0).size == (1280, 720)
+    hd = clips.normalise(make_source(seconds=4, size="1920x1080", tmp_path=tmp_path), need_seconds=4, source_seconds=5, suffix=".mp4", hd=True)
+    one = clips.assemble_montage([hd[0], hd[0]], [3.0, 3.0], [hd[1], hd[1]], hd=True)
+    (tmp_path / "h.mp4").write_bytes(one)
+    assert clips.ClipFrames(str(tmp_path / "h.mp4")).frame(0).size == (1920, 1080)       # 4K videos: 1080p footage stays 1080p
+    vertical = clips.normalise(make_source(seconds=4, tmp_path=tmp_path), need_seconds=4, source_seconds=5, suffix=".mp4", orientation="portrait")
+    v = clips.assemble_montage([vertical[0], vertical[0]], [3.0, 3.0], [vertical[1], vertical[1]])
+    (tmp_path / "v.mp4").write_bytes(v)
+    assert clips.ClipFrames(str(tmp_path / "v.mp4")).frame(0).size == (720, 1280)
+
+
+def test_the_hard_cut_fallback_works_when_ffmpeg_has_no_xfade(tmp_path, monkeypatch):
+    real = clips._montage_cmd
+    monkeypatch.setattr(clips, "_montage_cmd", lambda *a, dissolve, hd: real(*a, dissolve=dissolve, hd=hd) if not dissolve else [media.ffmpeg_bin(), "-hide_banner", "-loglevel", "error", "-i", "/nonexistent.mp4", "x.mp4"])
+    parts = [clips.normalise(make_source(seconds=4, tmp_path=tmp_path), need_seconds=4, source_seconds=5, suffix=".mp4") for _ in range(2)]
+    assert len(clips.assemble_montage([p[0] for p in parts], [3.0, 3.0], [p[1] for p in parts])) > 1000
+
+
+def test_the_beat_step_stores_a_montage_with_one_ledger_line_per_clip_and_falls_back_to_the_photo(monkeypatch):
+    from engine.handlers import beat_handler, timeline_handler
+
+    puts = []
+    monkeypatch.setattr(beat_handler.awsio, "put_bytes", lambda key, data, ct="", bkt=None, working=False: puts.append((key, working)))
+    monkeypatch.setattr(beat_handler, "get_secret_param", lambda *a, **k: "K")
+    monkeypatch.setattr(beat_handler.costs, "add_cost", lambda *a, **k: None)
+    seen = {}
+    montage = {"mp4": b"MONTAGE", "entry": {"source": "pixabay", "id": "1"}, "entries": [{"source": "pixabay", "id": "1"}, {"source": "nasa", "id": "N"}], "credit": "Video: A / Pixabay, NASA",
+               "chosen": "pixabay:1,nasa:N", "segments": 2, "requested": 3, "review": {"cost_usd": 0.002}}
+    monkeypatch.setattr(beat_handler.clips, "scout_montage", lambda qs, n, a, **kw: (seen.update(qs=qs, need=kw["need_seconds"]), montage)[1])
+    monkeypatch.setattr(beat_handler.clips, "scout_clip", lambda *a, **k: pytest.fail("a montage is not searched as a single clip"))
+    beat = {"id": "b9", "narration": "Waves, gulls and boats.", "scene": {"type": "clip", "props": montage_props("waves", "gulls", "boats", alt="sea")}}
+    out = beat_handler.make_clip({"beats": []}, beat, "vid", "cost_usd", 10.0)
+    assert seen["qs"] == ["waves", "gulls", "boats"] and out["query"] == "waves|gulls|boats" and out["clip_asset"].endswith(".mp4") and puts[0][1] is True
+    assert out["ledger"]["id"] == "1" and [e["id"] for e in out["ledgers"]] == ["1", "N"] and out["segments"] == 2 and out["credit"] == "Video: A / Pixabay, NASA"
+    plan = {"beats": [{"id": "b9", "scene": beat["scene"], "media": out}]}
+    assert [e["id"] for e in timeline_handler.credits_ledger(plan)] == ["1", "N"]                      # one credit line per clip in the description
+    single = {"beats": [{"id": "c", "scene": {"type": "clip", "props": {"clip_query": "x"}}, "media": {"ledger": {"id": "S"}}}]}
+    assert timeline_handler.credits_ledger(single) == [{"id": "S"}]
+    monkeypatch.setattr(beat_handler.clips, "scout_montage", lambda *a, **k: None)
+    monkeypatch.setattr(beat_handler, "make_photo", lambda plan, b, v, c: {"query": "x", "pick": None, "asset": "generation/v2/vid/assets/img.jpg", "credit": "Photo: Q"})
+    out = beat_handler.make_clip({"beats": []}, beat, "vid", "cost_usd", 10.0)
+    assert "clip_asset" not in out and out["asset"].endswith("img.jpg") and out["query"] == "waves|gulls|boats"
+
+
+def test_the_timeline_plays_a_montage_like_any_clip_and_the_editor_can_replace_or_remove_it():
+    from engine import edits
+    from engine.handlers import editor_get
+
+    plan = {"language": "en", "voices": {"narrator": "Ruth"}, "tts": {}, "beats": [
+        {"id": "b1", "narration": "One two three four five six seven eight nine ten eleven twelve.", "scene": {"type": "clip", "props": montage_props("a b", "c d", alt="x")}},
+        {"id": "b2", "narration": "Another line that is long enough to count here.", "scene": {"type": "title", "props": {"title": "T", "subtitle": ""}}}]}
+    new, _ = edits.apply_ops(plan, [{"op": "set_scene", "id": "b1", "type": "clip", "props": {"clip_query": "storm clouds"}}])
+    assert new["beats"][0]["scene"]["props"]["clip_query"] == "storm clouds" and "clip_queries" not in new["beats"][0]["scene"]["props"]
+    new, _ = edits.apply_ops(plan, [{"op": "set_scene", "id": "b1", "type": "clip", "props": {"clip_queries": ["x y", "z w", "v u"]}}])
+    assert new["beats"][0]["scene"]["props"]["clip_queries"] == ["x y", "z w", "v u"]
+    new, _ = edits.apply_ops(plan, [{"op": "delete", "id": "b1"}])
+    assert [b["id"] for b in new["beats"]] == ["b2"]
+    view = editor_get._beat_view(plan, {**plan["beats"][0], "media": {"clip_asset": "g/c.mp4", "credit": "Video: A / Pixabay, B / NASA", "segments": 2, "query": "a b|c d", "duration": 9.0}}, "g/")
+    assert view["clip"]["segments"] == 2 and view["clip"]["queries"] == ["a b", "c d"] and view["clip"]["has_clip"] is True

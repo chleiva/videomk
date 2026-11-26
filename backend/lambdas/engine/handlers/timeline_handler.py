@@ -18,7 +18,8 @@ CHUNK_MAX_FRAMES_4K = int(os.environ.get("CHUNK_MAX_FRAMES_4K", "180"))
 def credits_ledger(plan: Dict[str, Any]) -> list:
     """Every licensed photograph or clip the video shows, for the credits in its description: image and clip scenes, each photo of a gallery, and the photo
     of any element that fetches one (its `prepare` patch carries a `ledger`, e.g. annotated_image)."""
-    out = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] in ("image", "clip") and (b.get("media") or {}).get("ledger")]
+    out = [b["media"]["ledger"] for b in plan["beats"] if b["scene"]["type"] in ("image", "clip") and (b.get("media") or {}).get("ledger") and not (b.get("media") or {}).get("ledgers")]
+    out += [e for b in plan["beats"] if b["scene"]["type"] == "clip" for e in (b.get("media") or {}).get("ledgers") or [] if e]   # a montage: one line per clip
     out += [g["ledger"] for b in plan["beats"] if b["scene"]["type"] == "gallery" for g in (b.get("media") or {}).get("gallery") or [] if g.get("ledger")]
     out += [b["media"]["element"]["ledger"] for b in plan["beats"]
             if isinstance((b.get("media") or {}).get("element"), dict) and b["media"]["element"].get("ledger") and not (b.get("media") or {}).get("element_failed")]

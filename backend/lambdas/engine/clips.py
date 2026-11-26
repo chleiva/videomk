@@ -530,6 +530,164 @@ def scout_clip(
     return None
 
 
+# ----------------------------------------------------------------------------- montage: 2-4 short clips in sequence inside one beat
+MONTAGE_FADE_S = 0.2               # the dissolve between two segments
+MONTAGE_MIN_SLOT_S = 2.5           # a segment is on screen at least this long, so a beat of N seconds carries at most N / 2.5 segments
+MONTAGE_MAX_HOLD_S = 0.5           # a segment shorter than its slot holds its last frame at most this long (never loops)
+MONTAGE_MAX_SEGMENTS = 4
+MONTAGE_MAX_SECONDS = MAX_CLIP_SECONDS   # the assembled file is never longer than a single clip may be: the renderer decodes its frames into memory exactly as for one clip
+
+
+def plan_slots(cover: float, avail: Sequence[float], fade: float = MONTAGE_FADE_S, max_hold: float = MONTAGE_MAX_HOLD_S) -> Optional[List[float]]:
+    """How long each surviving segment is on screen (its slot; slots add up to `cover`): an even split, where a segment whose footage is shorter than its share
+    (it may hold its last frame `max_hold` s at most, and every segment but the last also gives `fade` s to the dissolve) is capped and its neighbours stretch to
+    take the rest. None when the footage cannot cover the beat without a longer freeze: the beat then falls back to the photo path."""
+    k = len(avail)
+    if k == 0:
+        return None
+    caps = [max(0.0, a + max_hold - (fade if i < k - 1 else 0.0)) for i, a in enumerate(avail)]
+    if sum(caps) < cover - 1e-6:
+        return None
+    slots = [0.0] * k
+    free, left = set(range(k)), cover
+    while free:
+        share = left / len(free)
+        over = [i for i in free if caps[i] <= share + 1e-9]
+        if not over:
+            for i in free:
+                slots[i] = share
+            break
+        for i in over:
+            slots[i] = caps[i]
+            left -= caps[i]
+            free.discard(i)
+    return [round(x, 3) for x in slots]
+
+
+def _montage_cmd(paths: Sequence[str], slots: Sequence[float], avail: Sequence[float], out: str, *, dissolve: bool, hd: bool) -> List[str]:
+    k = len(paths)
+    cmd = [media.ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error"]
+    for pth in paths:
+        cmd += ["-i", pth]
+    lens = [slots[i] + (MONTAGE_FADE_S if dissolve and i < k - 1 else 0.0) for i in range(k)]   # a dissolve overlaps two segments: each one but the last runs a little longer
+    parts = []
+    for i in range(k):
+        hold = max(0.0, lens[i] - avail[i])   # at most MONTAGE_MAX_HOLD_S by construction (plan_slots)
+        parts.append(f"[{i}:v]tpad=stop_mode=clone:stop_duration={hold + 0.05:.3f},trim=duration={lens[i]:.3f},setpts=PTS-STARTPTS[v{i}]")
+    if k == 1:
+        chain, last = "", "v0"
+    elif dissolve:
+        links, last, acc = [], "v0", 0.0
+        for i in range(1, k):
+            acc += lens[i - 1]
+            nxt = f"x{i}"
+            links.append(f"[{last}][v{i}]xfade=transition=fade:duration={MONTAGE_FADE_S}:offset={acc - i * MONTAGE_FADE_S:.3f}[{nxt}]")
+            last = nxt
+        chain = ";" + ";".join(links)
+    else:
+        chain, last = f";{''.join(f'[v{i}]' for i in range(k))}concat=n={k}:v=1:a=0[cc]", "cc"
+    cmd += ["-filter_complex", ";".join(parts) + chain, "-map", f"[{last}]", "-an", "-t", f"{sum(slots):.3f}", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23" if hd else "26",
+            "-pix_fmt", "yuv420p", "-movflags", "+faststart", out]
+    return cmd
+
+
+def assemble_montage(parts: Sequence[bytes], slots: Sequence[float], avail: Sequence[float], *, hd: bool = False) -> bytes:
+    """One normalised MP4 from the segments (already normalised to the video's shape and 30 fps): each trimmed to its slot, played once, a 0.2 s dissolve between them
+    (a hard cut when this ffmpeg has no xfade). The result is an ordinary clip file: the timeline, the renderer, the editor and the memory use are those of a single clip."""
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = []
+        for i, raw in enumerate(parts):
+            pth = os.path.join(tmp, f"s{i}.mp4")
+            with open(pth, "wb") as fh:
+                fh.write(raw)
+            paths.append(pth)
+        out = os.path.join(tmp, "montage.mp4")
+        err = ""
+        for dissolve in ((True, False) if len(parts) > 1 else (False,)):
+            proc = subprocess.run(_montage_cmd(paths, slots, avail, out, dissolve=dissolve, hd=hd), capture_output=True, text=True, timeout=120)
+            if proc.returncode == 0 and os.path.exists(out) and os.path.getsize(out) > 1000:
+                with open(out, "rb") as fh:
+                    return fh.read()
+            err = proc.stderr[-300:]
+        raise RuntimeError(f"montage assembly failed: {err}")
+
+
+def combine_credits(credits: Sequence[str]) -> str:
+    """'Video: A / Pixabay' + 'Video: B / NASA' -> 'Video: A / Pixabay, B / NASA' (distinct, in order)."""
+    seen: List[str] = []
+    for c in credits:
+        c = re.sub(r"^Video:\s*", "", str(c or "").strip())
+        if c and c not in seen:
+            seen.append(c)
+    return ("Video: " + ", ".join(seen)) if seen else ""
+
+
+def _narration_slices(narration: str, n: int) -> List[str]:
+    """The narration cut into n consecutive parts of about the same number of words: what each segment's footage is about (cheap; no word timings needed)."""
+    w = narration.split()
+    if n <= 1 or len(w) < n:
+        return [narration] * n
+    cut = [round(i * len(w) / n) for i in range(n + 1)]
+    return [" ".join(w[cut[i]:cut[i + 1]]) for i in range(n)]
+
+
+def scout_montage(
+    queries: Sequence[str],
+    narration: str,
+    alt: str = "",
+    *,
+    need_seconds: float = 8.0,
+    scout: Optional[Callable[..., Optional[Dict[str, Any]]]] = None,
+    assemble_fn: Optional[Callable[..., bytes]] = None,
+    workers: int = 2,
+    hd: bool = False,
+    **scout_kwargs: Any,
+) -> Optional[Dict[str, Any]]:
+    """Several short clips across ONE beat. Each query is found, reviewed and VERIFIED on its own (`scout_clip`: the same strict 3-frame check, score >= 7, fail closed, never
+    looped), asking for footage of the length the beat needs when only half the clips survive. A failed segment is dropped and its neighbours stretch (up to their footage plus
+    a 0.5 s held last frame); fewer than half surviving, or footage too short to cover the beat, returns None (the beat falls back to the photo path). Never raises.
+    Returns {mp4, entry, entries, credit, chosen, chosen_all, segments, requested, loops_after, review} like `scout_clip`."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    scout = scout or scout_clip
+    assemble_fn = assemble_fn or assemble_montage
+    cover = min(MONTAGE_MAX_SECONDS, max(2.0, need_seconds - 0.6))   # the scene itself (`need_seconds` carries 0.6 s of margin for the crossfade)
+    n = min(len(queries), MONTAGE_MAX_SEGMENTS, max(1, int(cover // MONTAGE_MIN_SLOT_S)))
+    qs = [q for q in queries][:n]
+    if n == 1:
+        return scout(qs[0], narration, alt or qs[0], need_seconds=need_seconds, hd=hd, **scout_kwargs)
+    ask = min(MAX_CLIP_SECONDS, cover / math.ceil(n / 2) + MONTAGE_FADE_S)   # long enough that the clips that survive can cover the beat even if half fail
+    slices = _narration_slices(narration, n)
+
+    def one(i: int) -> Optional[Dict[str, Any]]:
+        try:
+            return scout(qs[i], slices[i], qs[i], need_seconds=ask, hd=hd, **scout_kwargs)
+        except Exception:
+            logging.exception("montage segment %d (%r) crashed", i, qs[i])
+            return None
+
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, n))) as ex:
+        results = list(ex.map(one, range(n)))
+    cost = sum(float((r or {}).get("review", {}).get("cost_usd", 0.0)) for r in results)
+    alive = [r for r in results if r and r.get("mp4")]
+    if len(alive) * 2 < n:
+        logging.warning("montage for %r: only %d of %d segments passed the checks; the beat gets a photo", qs, len(alive), n)
+        return None
+    avail = [float(r.get("loops_after") or ask) for r in alive]
+    slots = plan_slots(cover, avail)
+    if slots is None:
+        logging.warning("montage for %r: the %d surviving clips (%.1f s of footage) cannot cover %.1f s without a long freeze; the beat gets a photo", qs, len(alive), sum(avail), cover)
+        return None
+    try:
+        mp4 = assemble_fn([r["mp4"] for r in alive], slots, avail, hd=hd)
+    except Exception as e:
+        logging.warning("montage assembly failed for %r: %s: %s", qs, type(e).__name__, e)
+        return None
+    return {"mp4": mp4, "entry": alive[0]["entry"], "entries": [r["entry"] for r in alive], "credit": combine_credits([r["credit"] for r in alive]),
+            "chosen": ",".join(r["chosen"] for r in alive), "chosen_all": [r["chosen"] for r in alive], "segments": len(alive), "requested": n, "loops_after": round(sum(slots), 2),
+            "slots": slots, "review": {"cost_usd": cost, "source": "montage"}}
+
+
 # ----------------------------------------------------------------------------- decode for the renderer
 class ClipFrames:
     """All frames of a normalised clip as JPEGs in memory (a 10 s clip is about 10 MB at 720p; a 1080p clip of a 4K video about 2.5x that, measured in docs/FOUR_K.md),

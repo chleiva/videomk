@@ -113,3 +113,31 @@ Compare with $0.005 per video for stock clips. AI video also needs a visual-accu
 
 ### Switches
 `CLIPS_ENABLED=0` (no clips in the planner), `CLIPS_NASA=0`, `CLIPS_COMMONS=0|1`, `CLIP_VERIFY=0` (tests only).
+
+
+## Clip montage (2026-11-26, second step)
+Owner: get much closer to 30-45% of beats as video, with many SHORT clips, without converting named-place/person/landmark photo beats.
+
+### What it is
+A `clip` scene may carry `clip_queries: [2 to 4 generic wordings]` (the single `clip_query` stays and is the first one; a montage with one query is a plain clip). The beat step (`beat_handler.make_clip` -> `clips.scout_montage`):
+1. each query is searched, reviewed (poster frames) and VERIFIED (the same strict 3-frame check, score >= 7, fails closed) on its own through `scout_clip`, against its own slice of the narration (words split evenly; word timings are not used); at most 2 run in parallel;
+2. every segment is asked for footage long enough that the survivors cover the beat even if half fail (`cover / ceil(n/2) + 0.2 s`); a beat too short for the queries uses fewer clips (at least 2.5 s each: `MONTAGE_MIN_SLOT_S`);
+3. a failed segment is dropped and its neighbours stretch (`plan_slots`): each can use its footage plus at most 0.5 s of held last frame, never a loop; fewer than half surviving, or footage that cannot cover the beat, returns None and the beat takes the existing photo path;
+4. the survivors are assembled by ffmpeg into ONE normalised MP4 of the beat length (each trimmed to its slot, a 0.2 s dissolve between, hard cut when this ffmpeg has no `xfade`), stored as the beat's single `clip_asset`.
+
+Because the result is an ordinary clip file, nothing downstream changed: timeline, renderer (`draw_clip`), `ClipFrames` memory (frames of one file of the beat's length, capped at 20 s like a single clip), 16:9 / 9:16 / 1:1 / 4:5, 720p/1080p (720p footage) and 4K (1080p footage, `hd`), captions and sync cues. Credits: the on-screen line joins the creators ("Video: A / Pixabay, B / NASA", cut at 90 characters); the ledger (description credits) gets ONE entry per clip (`media.ledgers`, `timeline_handler.credits_ledger`); `media.ledger` keeps the first for old readers.
+Planner: `plan.sanitize_props` (2-4 distinct queries), `validate_plan` (a montage beat may carry up to 45 words, 36 for a single clip; about 6 words per clip, so 20 words keep at most 3 queries and under 12 words one clip; `allow_clips=false` still turns it into a photo), prompt (`CLIP_DOC`): beat by beat, filmable and not needing one exact named thing means clip or montage; queries must be stock-library staples, no metaphors or animations.
+Editor: `set_scene` with `clip_queries` replaces a montage (the beat is remade because `needs_media` compares the whole query list), `delete` removes it, `editor_get` shows `segments` and `queries`; nothing new to refuse.
+
+### Measured (12 audit prompts, real Sonnet plans, QA; supply is Pixabay + NASA + Commons search)
+* Clip or montage share of beats: 12% (single clips only, original prompt) -> 24-27% across three runs of the final prompt (47 of 174 in the best run; 30-34 of those were montages). The prompt alone does not reach 30-45%: the director keeps photographs for beats that name things. Clip narration still averages 27-30 words.
+* Survival through the strict check (real review + verify, sample of 42-47 clip/montage beats per run, two runs): singles 8 of 13 and 6 of 21; montages 13 of 34 and 11 of 21 end as a montage; only 18 of 49 planned segments survived in the second run (many beats keep one clip). About 40-45% of clip beats therefore end as video, so roughly 10-12% of ALL beats are video (before the montage work about 7%). Failures are verify rejections of creative queries (23 verify failures and 4 poster rejections in a 8-beat diagnostic); the planner is now told to ask only for stock staples.
+* Cost: 186-220 vision calls for 42-47 beats = $0.050-0.062, i.e. **$0.0012-0.0013 per clip/montage beat** (a single clip was $0.0007), about 8,000-9,000 input tokens per beat for montages. A 3-minute video with 7-8 such beats adds about $0.01. Search APIs are free.
+* Time: a montage beat takes a median 22-24 s in the beat step (searches, 2 workers, downloads, ffmpeg) against a few seconds for a single clip; the beat step runs beats in parallel, so a video's wall time grows by about one montage beat, not their sum. Assembly alone (3 segments, 12 s, 720p): 1.2 s.
+* Render: a montage is a normal clip file, so per-frame cost is that of a clip scene: 57 ms per frame measured (1080p output, no encode), 12.0 s for an 8 s chunk including H.264 encode on this laptop, 26 MB of JPEG frames in memory for 8 s (about 3.3 MB per second; a 20 s clip about 65 MB at 720p footage; 4K videos use 1080p footage, about 2.5x). Peak RSS of the whole demo 405 MB. No change versus a single clip of the same length.
+* Portrait: Pixabay returned no portrait footage for the three montage queries I tried (the provider filter keeps only tall footage for 9:16), so a vertical video's montages usually fall back to photos. Whether to accept landscape footage cropped to portrait (the renderer already crops it) is an owner decision; I did not change it.
+
+### Not verified
+* `xfade` on the Lambda's ffmpeg build (the hard-cut fallback exists and is tested); run the selftest/a QA montage after deploy.
+* Per-segment credits switching on screen with each clip (the on-screen line is the joined list).
+* Montage in the 4:5 and 1:1 frames beyond the shared `draw_clip` code path (portrait frame rendered and looked at; the others use the same code).

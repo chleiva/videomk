@@ -162,17 +162,21 @@ def make_gallery(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost
 
 
 def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str, speech: float) -> Dict[str, Any]:
-    """A short licensed stock clip for the beat. If none is found or usable, a still photo of the same subject, so the video never has a hole."""
+    """A short licensed stock clip (or a montage of 2-4 short clips in sequence, `clip_queries`) for the beat. If none is found or usable, a still photo of the same subject, so the video never has a hole."""
     pfx = awsio.prefix(video_id)
     props = beat["scene"]["props"]
-    query = props["clip_query"]
-    out: Dict[str, Any] = {"query": query, "pick": None}
+    queries = plan_mod.clip_queries(props)
+    query = queries[0]
+    out: Dict[str, Any] = {"query": plan_mod.clip_signature(props), "pick": None}
     need = timeline_mod.LEAD + speech + timeline_mod.TAIL + 0.6  # the scene's length, with a little margin for the crossfade
     keys = {"pexels_key": get_secret_param("/videomk/pexels_api_key", quiet=True), "pixabay_key": get_secret_param("/videomk/pixabay_api_key", quiet=True)}
     fr = plan.get("frame") or {}   # vertical and square videos ask the stock libraries for portrait or square footage; landscape calls are exactly as before
     orient = "portrait" if fr.get("aspect") in ("9:16", "4:5") else "square" if fr.get("aspect") == "1:1" else str(fr.get("orientation") or "landscape")
     keys = {**keys, **({"orientation": orient} if orient in ("portrait", "square") else {}), **({"hd": True} if format_options.is_4k(fr.get("resolution")) else {})}   # 4K: 1080p footage instead of 720p
-    result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)   # searches the clip_query, the alt wording and shortened forms in one pool
+    if len(queries) > 1:   # a montage: every clip found, reviewed and verified on its own; failed ones dropped, fewer than half left -> the photo
+        result = clips.scout_montage(queries, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
+    else:
+        result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)   # searches the clip_query, the alt wording and shortened forms in one pool
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
     if result and result.get("mp4"):
@@ -180,10 +184,13 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
         try:
             awsio.put_bytes(key, result["mp4"], "video/mp4", working=True)
             out.update({"clip_asset": key, "credit": result["credit"], "ledger": result["entry"], "chosen": result["chosen"]})
+            if result.get("entries"):   # a montage: one ledger line per clip (the first stays in `ledger` for readers that know one)
+                out.update({"ledgers": result["entries"], "segments": result["segments"], "segments_requested": result["requested"]})
             return out
         except Exception:  # storing the clip failed: a still photo keeps the beat visual, the video is not lost
             logging.exception("could not store clip %s", key)
-    still = {"id": beat["id"], "narration": _context(beat), "scene": {"type": "image", "props": {"image_query": query, "alt": props.get("alt", query), **({"word": props["word"]} if props.get("word") else {})}}}
+    subject = str(props.get("alt") or query)
+    still = {"id": beat["id"], "narration": _context(beat), "scene": {"type": "image", "props": {"image_query": query, "alt": subject, **({"word": props["word"]} if props.get("word") else {})}}}
     out.update({k: v for k, v in make_photo(plan, still, video_id, cost_field).items() if k not in ("query", "pick")})
     return out
 
