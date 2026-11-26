@@ -9,14 +9,20 @@
   <body>
     <p id="msg">Signing you in…</p>
     <script>
-      import { completeLogin } from "../../lib/auth";
+      import { AuthDisplayError, SIGNIN_PATH, completeLogin } from "../../lib/auth";
 
       completeLogin()
         .then((next) => location.replace(next))
         .catch((e) => {
           console.error("[auth] login failed", e);
           const msg = document.getElementById("msg");
-          if (msg) msg.innerHTML = 'Sign-in failed. <a href="/">Back to home</a>';
+          if (!msg) return;
+          // textContent only: the text can derive from provider-supplied error_description.
+          msg.textContent = (e instanceof AuthDisplayError ? e.message : "Sign-in failed.") + " ";
+          const a = document.createElement("a");
+          a.href = SIGNIN_PATH;
+          a.textContent = "Try again";
+          msg.appendChild(a);
         });
     </script>
   </body>

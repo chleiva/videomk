@@ -15,7 +15,7 @@ const sections = [
 		`This policy explains how ${COMPANY} (“videomk”, “we”, “us”) processes personal data when you use the videomk apps for iPhone and Android, and the videomk website. ${COMPANY} is the controller of that data.`,
 		"It covers what we collect, why, who receives it, how long we keep it and your rights, including under the UK GDPR and the EU GDPR where they apply."] },
 	{ title: "What we collect", paras: ["Depending on how you use videomk:"], bullets: [
-		"Account data: your email address and an account identifier. You sign in with email and a password, handled by Amazon Cognito. We never see your password in readable form.",
+		"Account data: your email address and an account identifier. You sign in with email and a password, handled by Amazon Cognito (we never see your password in readable form), or, where offered, with your Google or Apple account. If you use Google or Apple, they tell us your name and email address (Apple may give us a private relay address instead of your real one) and an identifier for your account with them; we do not receive your Google or Apple password.",
 		"What you ask for: the text of your requests (typed, or dictated and turned into text), the options you choose (length, look, subtitles, language), and any edits you make to a video.",
 		"Photos you attach: up to 100 per video. Before upload, your phone removes all metadata from the photo file (location, camera and date) and resizes it.",
 		"Photo date and approximate location (optional): if the two switches in Settings are on (they are on by default), the phone also reads when each photo was taken and where, from the photo's own data, and sends the date and time and a location rounded to about 1 km with your request, never inside the photo. We use them to put your photos in order, group them by day and name the places in your story. The location is turned into a place name from public map data on our own servers (no other company receives it); the coordinates are discarded as soon as the story is planned, while the place name and the time stay with your video. Turn the switches off and none of this is read or sent.",
@@ -38,7 +38,7 @@ const sections = [
 		"Anthropic’s Claude models (through Amazon Bedrock): write the script and review photos and clips.",
 		"Tavily: for topics that need current information, short search queries about your topic (not your name, email or photos) are sent to a web search service, and the pages found are read to write an accurate script.",
 		"Stock photo and video libraries (Unsplash, Openverse, Pixabay, Pexels, Wikimedia Commons): our servers send search words for the pictures and clips a scene needs. They do not receive your account details or your own photos.",
-		"Apple and Google: sign-in is by email, but app distribution, in-app purchases and (optionally) speech recognition are provided by Apple’s and Google’s own services under their policies.",
+		"Apple and Google: where offered, you can sign in with your Apple or Google account, and app distribution, in-app purchases and (optionally) speech recognition are provided by Apple’s and Google’s own services. Their use of your data is covered by their own policies.",
 		"Professional advisers, and authorities where the law requires, or a buyer if our business is sold, under confidentiality.",
 		"We do not sell personal data and do not share it for advertising."] },
 	{ title: "Photos and AI processing", paras: [

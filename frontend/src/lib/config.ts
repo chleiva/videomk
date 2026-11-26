@@ -22,3 +22,9 @@ export const endpoints = {
   questions: (taskId?: string) =>
     `${(env.PUBLIC_QUESTIONS_API as string) || API_BASE}/questions${taskId ? `/${u(taskId)}` : ""}`,
 };
+
+// Social sign-in switches (build-time, default OFF). Set PUBLIC_AUTH_GOOGLE=1 / PUBLIC_AUTH_APPLE=1
+// when the Cognito identity provider is configured for this environment.
+const flag = (v: unknown) => ["1", "true", "on", "yes"].includes(String(v ?? "").trim().toLowerCase());
+export const AUTH_GOOGLE: boolean = flag(env.PUBLIC_AUTH_GOOGLE);
+export const AUTH_APPLE: boolean = flag(env.PUBLIC_AUTH_APPLE);

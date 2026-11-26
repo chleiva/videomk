@@ -1,14 +1,23 @@
 // Cognito Hosted UI, Authorization Code + PKCE. Tokens live in localStorage (static site, no
 // server to hold them). That makes XSS the main risk: keep third-party scripts out of the pages
 // and consider moving to a BFF/HttpOnly-cookie flow later.
-import { AUTH_DOMAIN, COGNITO_CLIENT_ID } from "./config";
+import { AUTH_APPLE, AUTH_DOMAIN, AUTH_GOOGLE, COGNITO_CLIENT_ID } from "./config";
+import { buildAuthorizeUrl, parseProvider, safeReturnPath, sanitizeAuthError, shouldRetry, socialEnabled } from "./authUrl";
+import type { Provider } from "./authUrl";
 
 const K = {
   tokens: "vmk_auth_tokens",
   verifier: "vmk_pkce_verifier",
   state: "vmk_auth_state",
   redirect: "vmk_post_login_redirect",
+  provider: "vmk_auth_provider", // not secret: lets the one automatic retry repeat the same request
+  retry: "vmk_auth_retried", // sessionStorage: loop guard for the one automatic retry
 } as const;
+
+/** An error whose message is already sanitised and safe to show to the user. */
+export class AuthDisplayError extends Error {}
+
+export const SIGNIN_PATH = "/signin/index.html";
 
 export interface Tokens {
   access_token: string;
@@ -77,26 +86,54 @@ function toTokens(json: any, previous?: Tokens | null): Tokens {
   };
 }
 
-/** Redirect to the hosted UI. Resolves never (the page is navigating away). */
+/**
+ * Send a signed-out user to log in. With no social provider switched on this goes straight to the
+ * hosted UI exactly as before; otherwise it shows the chooser first. Resolves never.
+ */
 export async function startLogin(returnTo: string = location.pathname + location.search): Promise<never> {
-  try {
-    localStorage.setItem(K.redirect, returnTo);
-  } catch {}
+  if (socialEnabled({ google: AUTH_GOOGLE, apple: AUTH_APPLE })) {
+    try {
+      localStorage.setItem(K.redirect, returnTo);
+    } catch {}
+    location.assign(SIGNIN_PATH);
+    return new Promise<never>(() => {});
+  }
+  return beginAuthorize(returnTo);
+}
+
+/** Redirect to the hosted UI authorize endpoint, optionally straight to a provider. */
+export async function beginAuthorize(returnTo?: string, provider?: Provider): Promise<never> {
+  if (returnTo !== undefined) {
+    try {
+      localStorage.setItem(K.redirect, returnTo);
+    } catch {}
+  }
   const verifier = randomString(48);
   const state = randomString(16);
   localStorage.setItem(K.verifier, verifier);
   localStorage.setItem(K.state, state);
-  const q = new URLSearchParams({
-    response_type: "code",
-    client_id: COGNITO_CLIENT_ID,
-    redirect_uri: redirectUri(),
-    scope: "openid email profile",
-    state,
-    code_challenge_method: "S256",
-    code_challenge: await challengeFor(verifier),
-  });
-  location.assign(`${AUTH_DOMAIN}/oauth2/authorize?${q.toString()}`);
+  if (provider) localStorage.setItem(K.provider, provider);
+  else localStorage.removeItem(K.provider);
+  location.assign(
+    buildAuthorizeUrl({
+      authDomain: AUTH_DOMAIN,
+      clientId: COGNITO_CLIENT_ID,
+      redirectUri: redirectUri(),
+      state,
+      challenge: await challengeFor(verifier),
+      provider,
+    }),
+  );
   return new Promise<never>(() => {});
+}
+
+/** Where the chooser sends the user after login (set by startLogin; same-origin paths only). */
+export function pendingReturnPath(): string {
+  try {
+    return safeReturnPath(localStorage.getItem(K.redirect), "/generations/index.html");
+  } catch {
+    return "/generations/index.html";
+  }
 }
 
 /**
@@ -111,13 +148,35 @@ export async function completeLogin(): Promise<string> {
   const stored = localStorage.getItem(K.state);
   const verifier = localStorage.getItem(K.verifier);
   const fallback = "/generations/index.html";
+  const error = url.searchParams.get("error");
   const target = () => {
     const t = localStorage.getItem(K.redirect);
     localStorage.removeItem(K.redirect);
     // only same-origin relative paths: never an open redirect
-    return t && t.startsWith("/") && !t.startsWith("//") ? t : fallback;
+    return safeReturnPath(t, fallback);
   };
 
+  if (error) {
+    const description = url.searchParams.get("error_description");
+    // The state must match for errors too: an attacker must not be able to steer the retry.
+    if (!stored || !incoming || stored !== incoming) throw new Error("Invalid login state");
+    const provider = parseProvider(localStorage.getItem(K.provider));
+    let retried = false;
+    try {
+      retried = sessionStorage.getItem(K.retry) === "1";
+    } catch {}
+    if (shouldRetry(description, retried)) {
+      try {
+        sessionStorage.setItem(K.retry, "1");
+      } catch {
+        throw new AuthDisplayError(sanitizeAuthError(error, description));
+      }
+      return beginAuthorize(undefined, provider);
+    }
+    localStorage.removeItem(K.verifier);
+    localStorage.removeItem(K.state);
+    throw new AuthDisplayError(sanitizeAuthError(error, description));
+  }
   if (!code) return target();
   if (!stored || !incoming || stored !== incoming || !verifier) {
     throw new Error("Invalid login state");
@@ -131,6 +190,9 @@ export async function completeLogin(): Promise<string> {
   writeTokens(toTokens(json));
   localStorage.removeItem(K.verifier);
   localStorage.removeItem(K.state);
+  try {
+    sessionStorage.removeItem(K.retry);
+  } catch {}
   return target();
 }
 
