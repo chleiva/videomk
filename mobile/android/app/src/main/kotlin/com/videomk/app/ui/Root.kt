@@ -45,6 +45,7 @@ import com.videomk.app.AppContainer
 import com.videomk.app.BuildConfig
 import com.videomk.app.VideoMkApp
 import com.videomk.app.core.DeletionState
+import com.videomk.app.core.FeedbackContext
 import com.videomk.app.core.SignInProvider
 import com.videomk.app.core.SocialSwitches
 
@@ -82,6 +83,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     val haptics = rememberHaptics()
     var seenCompletions by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(completions) }
     androidx.compose.runtime.LaunchedEffect(completions) { if (completions > seenCompletions) haptics.play(com.videomk.app.core.DesignTokens.Haptic.VideoReady); seenCompletions = completions }
+    var feedbackFrom by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<FeedbackContext?>(null) }
     val showTabs = route == "library" || route == "media"
     val mediaFactory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, null, MediaCache(FilePageDisk(java.io.File(application.cacheDir, "media-pages"))), Int.MAX_VALUE, container.mediaUploads?.arrivals ?: com.videomk.app.core.ArrivalTracker()) } }
     Scaffold(
@@ -124,8 +126,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         }
         composable("video/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
-            val detail: VideoDetailViewModel = viewModel(entry, key = "video-$id", factory = viewModelFactory { initializer { VideoDetailViewModel(application, container.backend, id) } })
-            VideoDetailScreen(app, detail, container.http, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("editor/$id") }, onMakeAnother = {
+            val detail: VideoDetailViewModel = viewModel(entry, key = "video-$id", factory = viewModelFactory { initializer { VideoDetailViewModel(application, container.backend, id) { container.ratingPrompt.recordCompletion(it) } } })
+            VideoDetailScreen(app, detail, container.http, onFeedback = { feedbackFrom = FeedbackContext.AfterVideo }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("editor/$id") }, onMakeAnother = {
                 composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create")
             })
         }
@@ -140,11 +142,15 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             val ds = d?.state?.collectAsState()?.value ?: DeletionState.Idle
             SettingsScreen(
                 email, onBack = { nav.popBackStack() }, onSignOut = { app.signOut() },
+                onFeedback = { feedbackFrom = FeedbackContext.Settings },
                 deletion = ds, onDeleteAccount = d?.let { f -> { typed: String -> f.start(typed) } }, onCancelDeletion = { d?.cancel() }, onDeletionClosed = { d?.reset() },
             )
         }
     }
     }
+    feedbackFrom?.let { FeedbackSheet(container.feedbackApi, container.feedbackDraft, it, onClose = { feedbackFrom = null }) }
+    val appState = app.state.collectAsState().value
+    RatingHost(container, onLibrary = route == "library", creating = route == "create" || appState.pending.any { it.state == com.videomk.app.core.PendingVideo.State.Sending })
     androidx.compose.runtime.LaunchedEffect(Unit) { container.mediaUploads?.resumeIfAny(); container.organize?.resumeIfAny() }   // an interrupted upload queue continues on the next launch
 }
 

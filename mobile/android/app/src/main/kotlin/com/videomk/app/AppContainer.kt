@@ -12,6 +12,7 @@ import com.videomk.app.core.defaultHttpClient
 import com.videomk.app.data.SecureTokenStore
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 
 /** Manual dependency injection: one place that builds the app-wide objects. */
 class AppContainer(
@@ -70,6 +71,23 @@ class AppContainer(
         deckCache = java.io.File(appContext.cacheDir, "deck"),
         clearTokens = { auth?.signOut() },
     )
+
+    /** Feedback (docs/FEEDBACK.md). Null when the app has no server address. */
+    val feedbackApi: com.videomk.app.core.FeedbackApi? by lazy { accountApi as? com.videomk.app.core.FeedbackApi }
+    /** What the person typed in the feedback sheet, kept until it was sent. */
+    val feedbackDraft = com.videomk.app.core.FeedbackDraft()
+
+    /** The rating prompt (docs/FEEDBACK.md, "Rating prompt (Android)"): counters on this device. */
+    val launchedAt: Long = System.currentTimeMillis()
+    val ratingPrompt: com.videomk.app.core.RatingPrompt by lazy { com.videomk.app.core.RatingPrompt(com.videomk.app.data.RatingStore(appContext), { System.currentTimeMillis() }, launchedAt) }
+    /** Never in instrumented or fake-data (screenshot) runs. The debug build can force it (see DebugHooks.forceRating). */
+    val ratingSuppressed: Boolean by lazy { isInstrumented() || DebugHooks.fakeBackend(appContext) != null }
+    private fun isInstrumented(): Boolean = runCatching { Class.forName("androidx.test.platform.app.InstrumentationRegistry"); true }.getOrDefault(false)
+
+    /** Opens the Play review flow (or the store listing); runs in the app scope because the sheet that asked closes at once. */
+    fun launchReview(activity: android.app.Activity) {
+        appScope.launch(kotlinx.coroutines.Dispatchers.Main) { com.videomk.app.data.StoreReview.rate(activity, BuildConfig.APPLICATION_ID) }
+    }
 
     fun warmUp() { Thread { runCatching { auth } }.start() }
 }

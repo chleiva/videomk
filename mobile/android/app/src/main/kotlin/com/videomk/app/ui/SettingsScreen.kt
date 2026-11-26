@@ -50,7 +50,7 @@ import com.videomk.app.core.DeletionState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    email: String?, onBack: () -> Unit, onSignOut: () -> Unit,
+    email: String?, onBack: () -> Unit, onSignOut: () -> Unit, onFeedback: (() -> Unit)? = null,
     deletion: DeletionState = DeletionState.Idle, onDeleteAccount: ((String) -> Unit)? = null, onCancelDeletion: () -> Unit = {}, onDeletionClosed: () -> Unit = {},
     initialSheetOpen: Boolean = false, initialTyped: String = "",
 ) {
@@ -83,6 +83,7 @@ fun SettingsScreen(
                 }
             }
             Card { LanguageSetting() }
+            if (onFeedback != null) Card { FeedbackRow(onFeedback) }
             val context = androidx.compose.ui.platform.LocalContext.current
             val photoSettings = remember { com.videomk.app.data.PhotoSettings(context) }
             var dates by remember { mutableStateOf(photoSettings.useDates) }

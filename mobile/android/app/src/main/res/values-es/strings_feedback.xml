@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comentarios y la petición de valoración (docs/FEEDBACK.md). -->
+<resources>
+    <string name="feedback_title">Enviar comentarios</string>
+    <string name="feedback_subtitle">Leemos todos los mensajes</string>
+    <string name="feedback_open">Escribir un mensaje al equipo de videomk</string>
+    <string name="feedback_intro">Cuéntanos lo que quieras: una idea, algo que falta, algo que te molestó. Leemos todos los mensajes.</string>
+    <string name="feedback_intro_unhappy">Lamentamos oír eso. ¿Qué lo mejoraría?</string>
+    <string name="feedback_field_label">Tu mensaje</string>
+    <string name="feedback_field_hint">Escribe aquí…</string>
+    <string name="feedback_counter">%1$d / %2$d</string>
+    <string name="feedback_counter_a11y">%1$d de %2$d caracteres</string>
+    <string name="feedback_min_hint">Unas palabras más, por favor (mínimo %1$d caracteres).</string>
+    <string name="feedback_kind_label">¿Qué tipo de mensaje es? (opcional)</string>
+    <string name="feedback_kind_idea">Idea</string>
+    <string name="feedback_kind_problem">Problema</string>
+    <string name="feedback_kind_other">Otro</string>
+    <string name="feedback_send">Enviar</string>
+    <string name="feedback_sending">Enviando…</string>
+    <string name="feedback_thanks_title">Gracias</string>
+    <string name="feedback_thanks_body">Una persona lee cada mensaje, y actuamos según lo que nos cuentas.</string>
+    <string name="feedback_sent_a11y">Mensaje enviado</string>
+    <string name="feedback_err_offline">Sin conexión por ahora. Tu mensaje está guardado aquí. Inténtalo de nuevo cuando vuelvas a tener conexión.</string>
+    <string name="feedback_err_failed">No pudimos enviarlo. Tu mensaje está guardado aquí. Inténtalo de nuevo.</string>
+    <string name="feedback_err_rate_limited">Has enviado muchos mensajes. Tu mensaje está guardado aquí; inténtalo de nuevo más tarde.</string>
+    <string name="feedback_err_invalid">No se pudo enviar ese mensaje. Revisa el texto e inténtalo de nuevo.</string>
+    <string name="feedback_after_video">¿Algo que podamos mejorar? Cuéntanos</string>
+
+    <string name="rating_ask_title">¿Te está gustando videomk?</string>
+    <string name="rating_yes">Sí</string>
+    <string name="rating_not_really">No mucho</string>
+    <string name="rating_love_title">Qué bueno oírlo</string>
+    <string name="rating_love_body">Una valoración rápida ayuda a que más gente conozca videomk. Solo toma un momento.</string>
+    <string name="rating_rate">Valorar videomk</string>
+    <string name="rating_later">Quizá más tarde</string>
+    <string name="rating_already">Ya lo valoré</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Feedback and the rating prompt (docs/FEEDBACK.md). -->
+<resources>
+    <string name="feedback_title">Send feedback</string>
+    <string name="feedback_subtitle">We read every message</string>
+    <string name="feedback_open">Write a message to the videomk team</string>
+    <string name="feedback_intro">Tell us anything: an idea, something missing, something that annoyed you. We read every message.</string>
+    <string name="feedback_intro_unhappy">Sorry about that. What would make it better?</string>
+    <string name="feedback_field_label">Your message</string>
+    <string name="feedback_field_hint">Write here…</string>
+    <string name="feedback_counter">%1$d / %2$d</string>
+    <string name="feedback_counter_a11y">%1$d of %2$d characters</string>
+    <string name="feedback_min_hint">A few more words, please (at least %1$d characters).</string>
+    <string name="feedback_kind_label">What kind of message is it? (optional)</string>
+    <string name="feedback_kind_idea">Idea</string>
+    <string name="feedback_kind_problem">Problem</string>
+    <string name="feedback_kind_other">Other</string>
+    <string name="feedback_send">Send</string>
+    <string name="feedback_sending">Sending…</string>
+    <string name="feedback_thanks_title">Thank you</string>
+    <string name="feedback_thanks_body">A person reads every message, and we act on what you tell us.</string>
+    <string name="feedback_sent_a11y">Message sent</string>
+    <string name="feedback_err_offline">No connection right now. Your message is saved here. Try again when you are back online.</string>
+    <string name="feedback_err_failed">We could not send it. Your message is saved here. Try again.</string>
+    <string name="feedback_err_rate_limited">You have sent a lot of messages. Your message is saved here; please try again later.</string>
+    <string name="feedback_err_invalid">That message could not be sent. Please check the text and try again.</string>
+    <string name="feedback_after_video">Anything we could do better? Tell us</string>
+
+    <string name="rating_ask_title">Enjoying videomk?</string>
+    <string name="rating_yes">Yes</string>
+    <string name="rating_not_really">Not really</string>
+    <string name="rating_love_title">That is great to hear</string>
+    <string name="rating_love_body">A quick rating helps other people find videomk. It only takes a moment.</string>
+    <string name="rating_rate">Rate videomk</string>
+    <string name="rating_later">Maybe later</string>
+    <string name="rating_already">I already rated it</string>
+</resources>

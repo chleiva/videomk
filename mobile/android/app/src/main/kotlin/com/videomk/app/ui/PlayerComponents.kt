@@ -42,7 +42,7 @@ class FullScreenContract : ActivityResultContract<FullScreenArgs, FullScreenArgs
 
     override fun parseResult(resultCode: Int, intent: Intent?): FullScreenArgs? {
         val url = intent?.getStringExtra(FullScreenPlayerActivity.EXTRA_URL) ?: return null
-        return FullScreenArgs(url, intent.getLongExtra(FullScreenPlayerActivity.EXTRA_POSITION, 0), intent.getBooleanExtra(FullScreenPlayerActivity.EXTRA_PLAYING, false))
+        return FullScreenArgs(url, intent.getLongExtra(FullScreenPlayerActivity.EXTRA_POSITION, 0), intent.getBooleanExtra(FullScreenPlayerActivity.EXTRA_PLAYING, false), completed = intent.getBooleanExtra(FullScreenPlayerActivity.EXTRA_COMPLETED, false))
     }
 }
 

@@ -18,7 +18,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.videomk.app.core.WatchTracker
 
 sealed interface PlaybackState {
     data object Idle : PlaybackState
@@ -27,19 +29,28 @@ sealed interface PlaybackState {
     data class Error(val message: String) : PlaybackState
 }
 
-data class FullScreenArgs(val url: String, val positionMs: Long, val playWhenReady: Boolean, val vertical: Boolean = false)
+/** [completed]: the full screen player saw the video played to its end (see WatchTracker); only set on the way back. */
+data class FullScreenArgs(val url: String, val positionMs: Long, val playWhenReady: Boolean, val vertical: Boolean = false, val completed: Boolean = false)
 
 /**
  * One video's player. Lives with the video page (not the composition), so a rotation keeps the picture and the position, and releases the
  * player when the page is left. Narration plays whatever the ringer mode is: the player uses the media audio stream (USAGE_MEDIA), which the
  * ringer/silent switch does not mute, and it takes audio focus so other audio gives way.
  */
-class VideoDetailViewModel(app: Application, private val backend: Backend?, val videoId: String) : AndroidViewModel(app) {
+class VideoDetailViewModel(app: Application, private val backend: Backend?, val videoId: String, private val onFullyWatched: (String) -> Unit = {}) : AndroidViewModel(app) {
     private val _playback = MutableStateFlow<PlaybackState>(PlaybackState.Idle)
     val playback: StateFlow<PlaybackState> = _playback.asStateFlow()
     var player: ExoPlayer? = null
         private set
     private var loadJob: Job? = null
+    // the rating prompt counts a video only when it was played from start to end (WatchTracker has the rule)
+    private var tracker: WatchTracker? = null
+    private var tickJob: Job? = null
+    private var reported = false
+
+    private fun checkWatched() {
+        if (!reported && tracker?.completed == true) { reported = true; onFullyWatched(videoId) }
+    }
 
     fun load() {
         if (_playback.value is PlaybackState.Ready || loadJob?.isActive == true) return
@@ -74,6 +85,13 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
             .setHandleAudioBecomingNoisy(true)
             .build()
         p.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_READY && tracker == null && p.duration > 0) tracker = WatchTracker(p.duration).also { it.seek(p.currentPosition) }
+                if (state == Player.STATE_ENDED) { tracker?.ended(); checkWatched() }
+            }
+            override fun onPositionDiscontinuity(oldPosition: Player.PositionInfo, newPosition: Player.PositionInfo, reason: Int) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT) tracker?.seek(newPosition.positionMs)
+            }
             override fun onPlayerError(error: PlaybackException) {
                 // most often an expired link: show "try again", which fetches a new one
                 _playback.value = PlaybackState.Error(Txt.s(R.string.video_play_failed))
@@ -83,9 +101,12 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
         p.setMediaItem(MediaItem.fromUri(url))
         p.prepare()
         player = p
+        tracker = null; reported = false
+        tickJob = viewModelScope.launch { while (true) { delay(500); tracker?.sample(p.currentPosition, p.isPlaying); checkWatched() } }
     }
 
     private fun releasePlayer() {
+        tickJob?.cancel(); tickJob = null
         player?.release()
         player = null
     }
@@ -99,7 +120,8 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
         return args
     }
 
-    fun returnFromFullScreen(positionMs: Long, playing: Boolean) {
+    fun returnFromFullScreen(positionMs: Long, playing: Boolean, completed: Boolean = false) {
+        if (completed && !reported) { reported = true; onFullyWatched(videoId) }
         val p = player ?: return
         p.seekTo(positionMs)
         p.playWhenReady = playing

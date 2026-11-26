@@ -76,6 +76,9 @@ object DebugHooks {
     fun deckFile(intent: Intent?): String? = intent?.getStringExtra("vmk_debug_deck_file")?.takeIf { it.isNotBlank() }
 
     /** `files/fake_many` holds a number N: every video is repeated N times (distinct ids) so the home list is long enough to fling to its bottom. */
+    /** Debug only: a file `rating_force` in the app's files folder shows the rating prompt on the next visit to the library, whatever the counters say. */
+    fun forceRating(context: android.content.Context): Boolean = java.io.File(context.filesDir, "rating_force").exists()
+
     fun manyVideos(context: android.content.Context): Int = runCatching { java.io.File(context.filesDir, "fake_many").readText().trim().toInt() }.getOrDefault(0)
 
     /** `files/fake_backend`: canned videos, wallet and editor data (no server, no account), for screenshots. */

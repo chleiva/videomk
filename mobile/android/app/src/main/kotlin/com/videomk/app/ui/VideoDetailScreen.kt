@@ -90,7 +90,7 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkHttpClient, onBack: () -> Unit, onEdit: () -> Unit, onMakeAnother: () -> Unit = {}) {
+fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkHttpClient, onBack: () -> Unit, onEdit: () -> Unit, onMakeAnother: () -> Unit = {}, onFeedback: () -> Unit = {}) {
     val state by app.state.collectAsState()
     val video = state.video(detail.videoId)
     val playback by detail.playback.collectAsState()
@@ -120,7 +120,7 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
             SettleCrossfade(kind, Modifier.fillMaxSize()) { k ->
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     when (k) {
-                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = onMakeAnother)
+                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = onMakeAnother, onFeedback = onFeedback)
                         0 -> Column(Modifier.padding(20.dp)) { MakingCard(rememberMakingSnapshot(video, state), Modifier.testTag("progressCard"), MakingLayout.Detail) }
                         2 -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Icons.Filled.Warning, Vmk.colors.danger) }
                         else -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Icons.Filled.PanTool, Vmk.colors.warning) }
@@ -133,10 +133,10 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playback: PlaybackState, http: OkHttpClient, onEdit: () -> Unit, onMakeAnother: () -> Unit) {
+private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playback: PlaybackState, http: OkHttpClient, onEdit: () -> Unit, onMakeAnother: () -> Unit, onFeedback: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val fullScreen = rememberLauncherForActivityResult(FullScreenContract()) { r -> r?.let { detail.returnFromFullScreen(it.positionMs, it.playWhenReady) } }
+    val fullScreen = rememberLauncherForActivityResult(FullScreenContract()) { r -> r?.let { detail.returnFromFullScreen(it.positionMs, it.playWhenReady, it.completed) } }
 
     // edge to edge: the picture uses the whole width (black bars for tall videos), everything else keeps the 20 dp margin
     when (playback) {
@@ -248,6 +248,7 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
             }
             Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
         }
+        FeedbackLink(onFeedback)   // quiet, below the next-video card
     }
 }
 

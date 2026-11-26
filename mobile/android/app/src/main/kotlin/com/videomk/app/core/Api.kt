@@ -50,7 +50,7 @@ class ApiClient(
     private val timeZone: () -> String = { java.util.TimeZone.getDefault().id },
     /** `en` or `es`, the effective app language (docs/I18N.md): the server answers its messages, capability labels and notes in it. */
     private val locale: () -> String = { Txt.localeTag },
-) : AccountApi {
+) : AccountApi, FeedbackApi {
     suspend fun requestUploads(count: Int): List<UploadSlot> {
         val body = buildJsonObject { put("count", count) }
         val o = send("POST", listOf("uploads"), body = body)
@@ -121,6 +121,20 @@ class ApiClient(
             put("mode", mode.wire)
         }
         return send("POST", listOf("videos", videoId, "edits"), body = body, conflictIsEdit = true).requireInt("rev")
+    }
+
+    /** `POST /users/{me}/feedback` (docs/FEEDBACK.md): 202 `{"ok":true}`, 400 invalid, 429 rate limited. Never throws: every outcome is a [FeedbackResult]. */
+    override suspend fun sendFeedback(text: String, kind: FeedbackKind?, context: FeedbackContext): FeedbackResult {
+        val body = buildJsonObject {
+            put("text", FeedbackRules.clean(text))
+            if (kind != null) put("kind", kind.wire)
+            put("app", "android"); put("version", appVersion); put("locale", locale()); put("context", context.wire)
+        }
+        return try { send("POST", listOf("feedback"), body = body); FeedbackResult.Sent }
+        catch (e: CancellationException) { throw e }
+        catch (e: ApiError) { when (e) { ApiError.Network -> FeedbackResult.Offline; is ApiError.Quota, is ApiError.Paused -> FeedbackResult.RateLimited; is ApiError.Invalid, is ApiError.Blocked -> FeedbackResult.Invalid; else -> FeedbackResult.Failed } }
+        catch (e: AuthException) { FeedbackResult.Failed }
+        catch (e: Exception) { FeedbackResult.Failed }
     }
 
     // account deletion (docs/ACCOUNT_DELETION.md): both calls take the token and its own `sub` from the caller, so a re-authenticated token is used as it is

@@ -46,6 +46,12 @@ import androidx.media3.ui.PlayerView
 class FullScreenPlayerActivity : ComponentActivity() {
     private var player: ExoPlayer? = null
     private var closing = false
+    // the rating prompt counts a full screen watch too (WatchTracker has the rule); the result goes back to the video page
+    private var tracker: com.videomk.app.core.WatchTracker? = null
+    private val ticker = android.os.Handler(android.os.Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() { player?.let { tracker?.sample(it.currentPosition, it.isPlaying) }; ticker.postDelayed(this, 500) }
+    }
 
     override fun attachBaseContext(newBase: android.content.Context) { super.attachBaseContext(com.videomk.app.data.AppLanguage(newBase).wrap(newBase)) }
 
@@ -63,8 +69,18 @@ class FullScreenPlayerActivity : ComponentActivity() {
             .build()
         p.setMediaItem(MediaItem.fromUri(url), start)
         p.playWhenReady = true   // full screen is opened to watch: always starts playing (iOS does the same)
+        p.addListener(object : androidx.media3.common.Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == androidx.media3.common.Player.STATE_READY && tracker == null && p.duration > 0) tracker = com.videomk.app.core.WatchTracker(p.duration).also { it.seek(p.currentPosition) }
+                if (state == androidx.media3.common.Player.STATE_ENDED) tracker?.ended()
+            }
+            override fun onPositionDiscontinuity(o: androidx.media3.common.Player.PositionInfo, n: androidx.media3.common.Player.PositionInfo, reason: Int) {
+                if (reason == androidx.media3.common.Player.DISCONTINUITY_REASON_SEEK || reason == androidx.media3.common.Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT) tracker?.seek(n.positionMs)
+            }
+        })
         p.prepare()
         player = p
+        ticker.post(tick)
 
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -107,6 +123,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
             .putExtra(EXTRA_URL, intent.getStringExtra(EXTRA_URL))
             .putExtra(EXTRA_POSITION, p?.currentPosition ?: 0L)
             .putExtra(EXTRA_PLAYING, p?.playWhenReady ?: false)
+            .putExtra(EXTRA_COMPLETED, tracker?.completed == true)
         setResult(RESULT_OK, data)
         finish()
     }
@@ -123,6 +140,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        ticker.removeCallbacks(tick)
         player?.release()
         player = null
         super.onDestroy()
@@ -133,5 +151,6 @@ class FullScreenPlayerActivity : ComponentActivity() {
         const val EXTRA_POSITION = "position"
         const val EXTRA_PLAYING = "playing"
         const val EXTRA_VERTICAL = "vertical"
+        const val EXTRA_COMPLETED = "completed"
     }
 }

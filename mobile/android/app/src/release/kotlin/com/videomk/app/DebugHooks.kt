@@ -16,6 +16,7 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun fakePoster(context: android.content.Context): com.videomk.app.core.SlotPoster? = null
     @Suppress("UNUSED_PARAMETER") fun prompt(intent: Intent?): String? = null
     @Suppress("UNUSED_PARAMETER") fun fakeIntake(context: android.content.Context): com.videomk.app.core.IntakeApi? = null
+    @Suppress("UNUSED_PARAMETER") fun forceRating(context: android.content.Context): Boolean = false
     @Suppress("UNUSED_PARAMETER") fun fakeBackend(context: android.content.Context): com.videomk.app.core.Backend? = null
     @Suppress("UNUSED_PARAMETER") fun fakeDeck(context: android.content.Context): com.videomk.app.core.DeckApi? = null
     @Suppress("UNUSED_PARAMETER") fun fakeDeckUploader(context: android.content.Context): com.videomk.app.core.DeckUploader? = null
