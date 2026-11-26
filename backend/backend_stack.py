@@ -24,6 +24,7 @@ from aws_cdk import (
 from constructs import Construct
 
 from media_library import MediaLibrary
+from social_auth import SocialAuth, flag as social_flag
 from request_intake import RequestIntake
 from request_options import RequestOptions
 
@@ -444,6 +445,8 @@ class BackendStack(Stack):
             account_recovery=cognito.AccountRecovery.EMAIL_ONLY,
             removal_policy=keep,
         )
+        social_google, social_apple = social_flag(self.node, "socialGoogle"), social_flag(self.node, "socialApple")   # default OFF: docs/AUTH_SOCIAL.md
+        client_idps = [cognito.UserPoolClientIdentityProvider.COGNITO] + ([cognito.UserPoolClientIdentityProvider.GOOGLE] if social_google else []) + ([cognito.UserPoolClientIdentityProvider.APPLE] if social_apple else [])
         callback_urls = list(stage_cfg.get("callbackUrls") or ["http://localhost:4321/auth/callback"])
         logout_urls = list(stage_cfg.get("logoutUrls") or ["http://localhost:4321/"])
         user_pool_client = user_pool.add_client(
@@ -454,6 +457,7 @@ class BackendStack(Stack):
                 scopes=[cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
                 callback_urls=callback_urls, logout_urls=logout_urls,
             ),
+            supported_identity_providers=client_idps,
             prevent_user_existence_errors=True,
         )
         # Native iOS/Android apps: public client, authorization code + PKCE through the hosted UI, custom-scheme redirect.
@@ -467,10 +471,13 @@ class BackendStack(Stack):
             ),
             # Admin password auth needs IAM credentials, so it is not reachable by app users; QA scripts use it to get test tokens.
             auth_flows=cognito.AuthFlow(admin_user_password=(stage != "prod")),
+            supported_identity_providers=client_idps,
             access_token_validity=Duration.hours(1), id_token_validity=Duration.hours(1), refresh_token_validity=Duration.days(60),
             prevent_user_existence_errors=True,
         )
         hosted_ui = user_pool.add_domain("HostedUi", cognito_domain=cognito.CognitoDomainOptions(domain_prefix=f"videomk-{stage}-{self.account[-6:]}"))
+        social = SocialAuth(self, "SocialAuth", user_pool=user_pool, hosted_ui=hosted_ui, google=social_google, apple=social_apple, make_fn=make_fn)
+        social.attach_clients(user_pool_client, mobile_client)
         CfnOutput(self, "ApiUrl", value=api.url)
         CfnOutput(self, "UserPoolId", value=user_pool.user_pool_id)
         CfnOutput(self, "UserPoolClientId", value=user_pool_client.user_pool_client_id)
