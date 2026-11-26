@@ -176,7 +176,7 @@ class OrganizeTest {
         }
         r = OrganizeRunner(spy, MemoryJobStore())
         r.start(false, 9800, null)
-        assertEquals("Organizing... 0 of 9,800", texts[0]); assertEquals("Organizing... 1,200 of 9,800", texts[4])
+        assertEquals("Organizing… 0 of 9,800", texts[0]); assertEquals("Organizing… 1,200 of 9,800", texts[4])
     }
 
     // the real client

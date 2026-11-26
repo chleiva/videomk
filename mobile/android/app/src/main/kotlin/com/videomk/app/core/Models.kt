@@ -1,5 +1,7 @@
 package com.videomk.app.core
 
+import androidx.annotation.StringRes
+import com.videomk.app.R
 import kotlinx.serialization.json.JsonObject
 import java.time.Instant
 
@@ -10,11 +12,14 @@ sealed interface VideoStatus {
     data object Failed : VideoStatus
     data object Rejected : VideoStatus
 
-    enum class Stage(val shortTitle: String, val title: String) {
-        Starting("Starting", "Getting started"),
-        Writing("Writing the story", "Writing the story"),
-        VoiceAndVisuals("Voice and visuals", "Recording the voice and finding visuals"),
-        Rendering("Rendering", "Rendering"),
+    enum class Stage(@StringRes private val shortRes: Int, @StringRes private val titleRes: Int) {
+        Starting(R.string.stage_starting_short, R.string.stage_starting),
+        Writing(R.string.stage_writing_short, R.string.stage_writing),
+        VoiceAndVisuals(R.string.stage_voice_short, R.string.stage_voice),
+        Rendering(R.string.stage_rendering_short, R.string.stage_rendering);
+
+        val shortTitle: String get() = Txt.s(shortRes)
+        val title: String get() = Txt.s(titleRes)
     }
 
     val isRunning: Boolean get() = this is Running
@@ -48,7 +53,7 @@ data class VideoItem(
     /** Width over height of the frame, from the server's `aspect` ("16:9", "9:16", "1:1", "4:5"); landscape 16:9 when it is absent (older videos). */
     val frameRatio: Float get() = VideoItem.ratioOf(aspect)
     val isTall: Boolean get() = frameRatio < 0.99f
-    val displayTitle: String get() = title?.takeIf { it.isNotEmpty() } ?: "Untitled video"
+    val displayTitle: String get() = title?.takeIf { it.isNotEmpty() } ?: Txt.s(R.string.video_untitled)
 
     companion object {
         fun fromJson(o: JsonObject): VideoItem = VideoItem(
@@ -75,8 +80,10 @@ data class VideoItem(
 data class PlaybackInfo(val url: String, val description: String?)
 
 /** The three looks the video engine offers. */
-enum class VideoLook(val wire: String, val title: String) {
-    Midnight("midnight", "Midnight"), Paper("paper", "Paper"), Sunrise("sunrise", "Sunrise")
+enum class VideoLook(val wire: String, @StringRes private val titleRes: Int) {
+    Midnight("midnight", R.string.look_midnight), Paper("paper", R.string.look_paper), Sunrise("sunrise", R.string.look_sunrise);
+
+    val title: String get() = Txt.s(titleRes)
 }
 
 /** [captions]: subtitles on the video; the creator decides (on is the server default). */

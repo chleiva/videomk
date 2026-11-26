@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="media_title">Mi biblioteca</string>
+    <string name="media_privacy_copy">Tus fotos son privadas. Solo tú puedes verlas y nadie en videomk las revisa. Se usan para encontrarlas y para crear los videos que pidas. Elimina una foto o todo cuando quieras.</string>
+    <string name="media_add_photos">Agregar fotos</string>
+    <string name="media_add_to_library">Agregar fotos a Mi biblioteca</string>
+    <string name="media_select">Seleccionar</string>
+    <string name="media_more">Más</string>
+    <string name="media_organize_library">Organizar mi biblioteca</string>
+    <string name="media_storage">Almacenamiento</string>
+    <string name="media_read_only">Solo lectura hasta que vuelvas a estar por debajo de tu límite de almacenamiento. Aún puedes ver y eliminar fotos.</string>
+    <string name="media_close_upload_details">Cerrar detalles de la subida</string>
+    <string name="media_got_it">Entendido</string>
+    <string name="media_view">Ver</string>
+    <string name="media_announce_storage_full">El almacenamiento está lleno</string>
+    <string name="media_announce_offline">Esperando conexión</string>
+    <string name="media_announce_paused">Subida en pausa</string>
+    <string name="media_collection_default">Colección</string>
+    <string name="media_edit">Editar</string>
+    <string name="media_rename">Cambiar nombre</string>
+    <string name="media_delete_collection">Eliminar colección</string>
+    <string name="media_rename_collection">Cambiar nombre de la colección</string>
+    <string name="media_delete_collection_title">¿Eliminar “%1$s”?</string>
+    <string name="media_delete_collection_text">Las fotos se quedan en tu biblioteca. Solo se elimina la colección.</string>
+    <string name="media_load_failed">No pudimos cargar tus fotos</string>
+    <string name="media_no_match_title">Ninguna foto coincide</string>
+    <string name="media_no_match_text">Prueba con menos palabras o quita un filtro de arriba.</string>
+    <string name="media_clear_search">Borrar búsqueda</string>
+    <string name="media_empty_title">Tus fotos, en un lugar privado</string>
+    <string name="media_empty_text">Agrega fotos una vez, encuéntralas describiéndolas y crea videos con ellas.</string>
+    <string name="media_empty_text_pick">Aún no hay fotos. Agrégalas en Mi biblioteca.</string>
+    <string name="media_offline">Sin conexión. Se muestran las fotos guardadas en este teléfono.</string>
+    <string name="media_select_all_in_view">Seleccionar todo aquí</string>
+    <string name="media_private_title">Privado por diseño</string>
+    <string name="media_collections">Colecciones</string>
+    <string name="media_see_all">Ver todo</string>
+    <string name="media_create_collection">Crear una colección</string>
+    <string name="media_new">Nueva</string>
+    <string name="media_open_collection">Abrir colección</string>
+    <string name="media_rename_or_delete">Cambiar nombre o eliminar</string>
+    <string name="media_new_collection">Nueva colección</string>
+    <string name="media_create">Crear</string>
+    <string name="media_collection_menu_note">Las fotos se quedan en Mi biblioteca. Solo se elimina la colección.</string>
+    <string name="media_name">Nombre</string>
+    <string name="media_cancel_selection">Cancelar selección</string>
+    <string name="media_collection">Colección</string>
+    <string name="media_video">Video</string>
+    <string name="media_delete_selected">Eliminar fotos seleccionadas</string>
+    <string name="media_create_and_add">Crear y agregar</string>
+    <string name="media_add_to_collection">Agregar a una colección</string>
+    <string name="media_new_collection_row">+ Nueva colección</string>
+    <string name="media_plan">Plan</string>
+    <string name="media_plan_pro">Pro</string>
+    <string name="media_plan_free">Gratis</string>
+    <string name="media_photos_label">Fotos</string>
+    <string name="media_used">Usado</string>
+    <string name="media_storage_full_text">Cuando tu almacenamiento está lleno, aún puedes ver, descargar y eliminar tus fotos, pero no podrás agregar nuevas hasta que elimines algunas o consigas más espacio. Nunca eliminamos nada por ti.</string>
+    <string name="media_get_more_storage">Conseguir más almacenamiento</string>
+    <string name="media_storage_of">%1$s de %2$s</string>
+    <string name="media_undated">Sin fecha</string>
+    <string name="media_month_year">%1$s de %2$d</string>
+    <string name="media_day_header">%1$s %2$d de %3$s de %4$d</string>
+    <string name="media_date_full">%1$d de %2$s de %3$d</string>
+    <string name="media_photo">Foto</string>
+    <string name="media_photo_date">Foto del %1$s</string>
+    <string name="media_photo_place">Foto en %1$s</string>
+    <string name="media_photo_date_place">Foto del %1$s en %2$s</string>
+    <string name="media_select_limit">Seleccionaste las primeras %1$d: es el límite de un video.</string>
+    <string name="media_select_limit_phone">Seleccionaste las primeras %1$d: el límite de un video es %2$d, y %3$d vienen de tu teléfono.</string>
+    <string name="media_select_clear">Quitar selección</string>
+    <string name="media_select_all_count">Seleccionar todo (%1$d)</string>
+    <string name="media_select_all">Seleccionar todo</string>
+    <string name="media_err_unavailable">Mi biblioteca no está disponible en esta versión.</string>
+    <string name="media_added_to">Se agregó a %1$s.</string>
+    <string name="upload_banner">Subiendo %1$d de %2$d · %3$s</string>
+    <string name="upload_err_post">No se pudo subir una foto.</string>
+    <string name="upload_err_no_space">Espacio insuficiente</string>
+    <string name="upload_err_no_address">El servidor no dio una dirección de subida.</string>
+    <string name="upload_err_rejected">No se aceptó la foto.</string>
+    <string name="upload_err_file_gone">El archivo de la foto ya no existe.</string>
+    <string name="organize_pref_ask">Preguntar</string>
+    <string name="organize_pref_always">Siempre</string>
+    <string name="organize_pref_never">Nunca</string>
+    <string name="organize_done_nothing">Todo ya está organizado</string>
+    <string name="organize_err_unfinished">No pudimos terminar de organizar.</string>
+    <string name="organize_progress">Organizando… %1$,d de %2$,d</string>
+    <string name="organize_waiting">Esperando conexión</string>
+    <string name="media_best_first">Mejores resultados primero</string>
+    <string name="media_state_selected">Seleccionada</string>
+    <string name="media_state_not_selected">No seleccionada</string>
+    <string name="media_deselect">Quitar de la selección</string>
+    <string name="media_open_photo">Abrir foto</string>
+    <string name="media_select_photos">Seleccionar fotos</string>
+    <string name="media_search_hint">Busca tus fotos, prueba “playa en Tailandia”</string>
+    <string name="media_meter_full">%1$s - lleno</string>
+    <string name="media_meter_almost_full">%1$s - casi lleno</string>
+    <string name="media_storage_desc">Almacenamiento: %1$s</string>
+    <string name="media_open_storage">Abrir detalles de almacenamiento</string>
+    <string name="media_close_viewer">Cerrar visor</string>
+    <string name="media_viewer_position">%1$d de %2$d</string>
+    <string name="media_photo_details">Detalles de la foto</string>
+    <string name="media_make_video">Crear un video</string>
+    <string name="media_delete_this_photo">Eliminar esta foto</string>
+    <string name="media_date_unknown">Fecha desconocida</string>
+    <string name="media_no_collection">No está en ninguna colección</string>
+    <string name="media_in_collections">En: %1$s</string>
+    <string name="collections_subtitle">Las más recientes primero. Las colecciones automáticas se crean por ti.</string>
+    <string name="collections_more_for">Más opciones para %1$s</string>
+    <string name="organize_check_failed">No pudimos revisar tus fotos</string>
+    <string name="organize_check_failed_text">Inténtalo de nuevo en un momento.</string>
+    <string name="organize_not_now">Ahora no</string>
+    <string name="organize_nothing_title">Nada que organizar por ahora</string>
+    <string name="organize_nothing_text">Tus fotos ya están en colecciones, o todavía no hay al menos 5 del mismo lugar y mes.</string>
+    <string name="organize_loading_title">Organizando tus fotos</string>
+    <string name="organize_checking">Revisando tus fotos</string>
+    <string name="organize_explain">Las agruparemos por lugar y mes en colecciones. No se mueve ni se elimina nada.</string>
+    <string name="organize_state_on">activado</string>
+    <string name="organize_state_off">desactivado</string>
+    <string name="organize_always_title">Organizar siempre las fotos nuevas</string>
+    <string name="organize_always_text">Las fotos que subas después se unen solas a las colecciones que coincidan.</string>
+    <string name="organize_go">Organizar</string>
+    <string name="organize_one_collection">Todas en una colección</string>
+    <string name="organize_adds_existing">+ A una existente</string>
+    <string name="organize_single_text">Ponle un nombre. Puedes cambiarlo cuando quieras.</string>
+    <string name="organize_suggestions">Sugerencias</string>
+    <string name="organize_use_name">Usar el nombre %1$s</string>
+    <string name="organize_create">Crear colección</string>
+    <string name="organize_resuming">Retomando…</string>
+    <string name="organize_resuming_progress">Retomando… %1$,d de %2$,d</string>
+    <string name="organize_offline_sub">%1$,d de %2$,d organizadas</string>
+    <string name="organize_leave_screen">Puedes salir de esta pantalla.</string>
+    <string name="organize_percent">%1$d por ciento</string>
+    <string name="organize_stop">Dejar de organizar</string>
+    <string name="organize_stop_title">¿Dejar de organizar?</string>
+    <string name="organize_stop_text">Las colecciones ya creadas se quedan como están.</string>
+    <string name="organize_keep_going">Seguir</string>
+    <string name="organize_stop_button">Detener</string>
+    <string name="organize_paused">Organización en pausa</string>
+    <string name="organize_pill_progress">Organizando %1$,d de %2$,d</string>
+    <string name="organize_open_media">Abrir Mi biblioteca</string>
+    <string name="organize_auto">Auto</string>
+    <string name="organize_auto_desc">Colección automática</string>
+    <string name="upload_newest_first">Más recientes primero</string>
+    <string name="upload_tile_failed_desc">No se pudo subir la foto. Toca dos veces para reintentar.</string>
+    <string name="upload_retry_photo">Reintentar esta foto</string>
+    <string name="upload_tap_retry">Toca para reintentar</string>
+    <string name="upload_already_there">Ya estaba</string>
+    <string name="upload_preparing">Preparando %1$d de %2$d</string>
+    <string name="upload_storage_full">Tu almacenamiento está lleno</string>
+    <string name="upload_manage_storage">Administrar almacenamiento</string>
+    <string name="upload_paused_progress">En pausa · %1$d de %2$d</string>
+    <string name="upload_progress">Subiendo %1$d de %2$d</string>
+    <string name="upload_left">Faltan %1$s</string>
+    <string name="upload_tap_review">Toca para revisar</string>
+    <string name="upload_collapse">Contraer</string>
+    <string name="upload_expand">Expandir</string>
+    <string name="upload_collapse_details">Contraer detalles de la subida</string>
+    <string name="upload_expand_details">Expandir detalles de la subida</string>
+    <string name="upload_bar_desc">%1$s. %2$s. %3$s</string>
+    <string name="upload_resume_uploads">Reanudar subidas</string>
+    <string name="upload_pause_uploads">Pausar subidas</string>
+    <string name="upload_cancel_text">Las fotos ya agregadas se quedan.</string>
+    <string name="upload_cancel_remaining">Cancelar las restantes</string>
+    <string name="upload_keep">Seguir subiendo</string>
+    <string name="upload_stat_added">Agregadas</string>
+    <string name="upload_stat_getting_ready">Preparando</string>
+    <string name="upload_stat_waiting">En espera</string>
+    <string name="upload_stat_need_you">Requieren acción</string>
+    <string name="upload_needs_attention">Requieren atención</string>
+    <string name="upload_photo_n">Foto %1$d</string>
+    <string name="upload_failed_default">No se pudo subir. Toca para reintentar.</string>
+    <string name="upload_retry">Reintentar</string>
+    <string name="upload_close_app_note">Puedes cerrar la app. Las subidas continúan y retoman donde se quedaron cuando vuelvas.</string>
+    <string name="upload_retry_all">Reintentar todas</string>
+    <string name="upload_resume">Reanudar</string>
+    <string name="upload_pause_all">Pausar todas</string>
+    <string name="photos_tab_phone">Este teléfono</string>
+    <string name="photos_tab_media">Mi biblioteca</string>
+    <string name="photos_tab_desc">%1$s, pestaña %2$d de 2</string>
+    <string name="photos_choose_title">Elige fotos de tu teléfono</string>
+    <string name="photos_picker_explain">El selector de fotos del sistema muestra tu galería. videomk solo recibe las fotos que elijas y nunca necesita acceso al resto.</string>
+    <string name="photos_open_picker">Abrir selector de fotos</string>
+    <string name="photos_picker_note">Elige fotos de tu teléfono con el selector del sistema. videomk solo recibe las fotos que elijas y nunca necesita acceso a toda tu galería.</string>
+    <string name="photos_open_picker_label">Abrir el selector de fotos</string>
+    <string name="photos_choose_desc">Elegir fotos de este teléfono</string>
+    <string name="photos_choose">Elegir fotos</string>
+    <string name="photos_tile_desc">Foto %1$d, seleccionada</string>
+    <string name="photos_from_prompt">Fotos de tu descripción</string>
+    <string name="photos_all">Todas las fotos</string>
+    <plurals name="media_announce_uploaded">
+        <item quantity="one">Se subió %2$d de %1$d foto.</item>
+        <item quantity="other">Se subieron %2$d de %1$d fotos.</item>
+    </plurals>
+    <plurals name="media_getting_ready">
+        <item quantity="one">Preparando %1$d foto…</item>
+        <item quantity="other">Preparando %1$d fotos…</item>
+    </plurals>
+    <plurals name="media_collection_desc">
+        <item quantity="one">%2$s, %1$d foto</item>
+        <item quantity="other">%2$s, %1$d fotos</item>
+    </plurals>
+    <plurals name="media_collection_desc_auto">
+        <item quantity="one">%2$s, colección automática, %1$d foto</item>
+        <item quantity="other">%2$s, colección automática, %1$d fotos</item>
+    </plurals>
+    <plurals name="media_photos">
+        <item quantity="one">%1$d foto</item>
+        <item quantity="other">%1$d fotos</item>
+    </plurals>
+    <plurals name="media_delete_collection_body">
+        <item quantity="one">Se elimina la colección. Su %1$d foto se queda en Mi biblioteca.</item>
+        <item quantity="other">Se elimina la colección. Sus %1$d fotos se quedan en Mi biblioteca.</item>
+    </plurals>
+    <plurals name="media_delete_collection_body_auto">
+        <item quantity="one">Se elimina la colección. Su %1$d foto se queda en Mi biblioteca. Las fotos nuevas de ese mes podrían crearla de nuevo.</item>
+        <item quantity="other">Se elimina la colección. Sus %1$d fotos se quedan en Mi biblioteca. Las fotos nuevas de ese mes podrían crearla de nuevo.</item>
+    </plurals>
+    <plurals name="media_selected">
+        <item quantity="one">%1$d seleccionada</item>
+        <item quantity="other">%1$d seleccionadas</item>
+    </plurals>
+    <plurals name="media_selected_desc">
+        <item quantity="one">%1$d foto seleccionada</item>
+        <item quantity="other">%1$d fotos seleccionadas</item>
+    </plurals>
+    <plurals name="media_delete_title">
+        <item quantity="one">¿Eliminar esta foto?</item>
+        <item quantity="other">¿Eliminar %1$d fotos?</item>
+    </plurals>
+    <plurals name="media_delete_text">
+        <item quantity="one">Se eliminará de tu biblioteca para siempre. No se puede deshacer.</item>
+        <item quantity="other">Se eliminarán de tu biblioteca para siempre. No se puede deshacer.</item>
+    </plurals>
+    <plurals name="media_deleted">
+        <item quantity="one">Foto eliminada.</item>
+        <item quantity="other">%1$d fotos eliminadas.</item>
+    </plurals>
+    <plurals name="organize_title_add">
+        <item quantity="one">¿Agregar %1$,d foto a tus colecciones?</item>
+        <item quantity="other">¿Agregar %1$,d fotos a tus colecciones?</item>
+    </plurals>
+    <plurals name="organize_title_library">
+        <item quantity="one">¿Organizar %1$,d foto?</item>
+        <item quantity="other">¿Organizar %1$,d fotos?</item>
+    </plurals>
+    <plurals name="organize_title_new">
+        <item quantity="one">¿Organizar %1$,d foto nueva?</item>
+        <item quantity="other">¿Organizar %1$,d fotos nuevas?</item>
+    </plurals>
+    <plurals name="organize_more_collections">
+        <item quantity="one">+ %1$d colección más</item>
+        <item quantity="other">+ %1$d colecciones más</item>
+    </plurals>
+    <plurals name="organize_skipped">
+        <item quantity="one">%1$,d foto no tenía un grupo claro y se queda como está.</item>
+        <item quantity="other">%1$,d fotos no tenían un grupo claro y se quedan como están.</item>
+    </plurals>
+    <plurals name="organize_done_created">
+        <item quantity="one">Organizado en %1$d colección</item>
+        <item quantity="other">Organizado en %1$d colecciones</item>
+    </plurals>
+    <plurals name="organize_done_updated">
+        <item quantity="one">Agregado a %1$d colección</item>
+        <item quantity="other">Agregado a %1$d colecciones</item>
+    </plurals>
+    <plurals name="media_section_desc">
+        <item quantity="one">%2$s, %1$d foto</item>
+        <item quantity="other">%2$s, %1$d fotos</item>
+    </plurals>
+    <plurals name="organize_group_desc">
+        <item quantity="one">%2$s. %1$d foto.</item>
+        <item quantity="other">%2$s. %1$d fotos.</item>
+    </plurals>
+    <plurals name="organize_group_desc_existing">
+        <item quantity="one">%2$s. %1$d foto. Se agrega a una colección existente.</item>
+        <item quantity="other">%2$s. %1$d fotos. Se agregan a una colección existente.</item>
+    </plurals>
+    <plurals name="organize_group_count">
+        <item quantity="one">%1$,d foto</item>
+        <item quantity="other">%1$,d fotos</item>
+    </plurals>
+    <plurals name="organize_single_title">
+        <item quantity="one">Poner %1$,d foto en una colección</item>
+        <item quantity="other">Poner las %1$,d fotos en una colección</item>
+    </plurals>
+    <plurals name="organize_announce">
+        <item quantity="one">Se organizó %2$d de %1$d foto</item>
+        <item quantity="other">Se organizaron %2$d de %1$d fotos</item>
+    </plurals>
+    <plurals name="upload_adding">
+        <item quantity="one">Agregando %1$d foto</item>
+        <item quantity="other">Agregando %1$d fotos</item>
+    </plurals>
+    <plurals name="upload_adding_desc">
+        <item quantity="one">Agregando %1$d foto, %2$d lista</item>
+        <item quantity="other">Agregando %1$d fotos, %2$d listas</item>
+    </plurals>
+    <plurals name="upload_no_space_waiting">
+        <item quantity="one">%1$d foto está esperando. Libera espacio y continuará sola.</item>
+        <item quantity="other">%1$d fotos están esperando. Libera espacio y continuarán solas.</item>
+    </plurals>
+    <plurals name="upload_need_you">
+        <item quantity="one">%1$d necesita tu atención</item>
+        <item quantity="other">%1$d necesitan tu atención</item>
+    </plurals>
+    <plurals name="upload_auto_resume">
+        <item quantity="one">%1$d foto se subirá automáticamente</item>
+        <item quantity="other">%1$d fotos se subirán automáticamente</item>
+    </plurals>
+    <plurals name="upload_cancel_title">
+        <item quantity="one">¿Cancelar %1$d subida?</item>
+        <item quantity="other">¿Cancelar %1$d subidas?</item>
+    </plurals>
+    <string name="media_loading_photos">Cargando tus fotos</string>
+</resources>

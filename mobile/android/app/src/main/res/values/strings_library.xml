@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- library (home list) -->
+    <string name="lib_title">Your videos</string>
+    <string name="lib_new_video">New video</string>
+    <string name="lib_show_credits">Show your credits</string>
+    <string name="lib_settings">Settings</string>
+    <string name="lib_unlimited_credits">Unlimited credits</string>
+    <plurals name="lib_credits_desc">
+        <item quantity="one">%1$d credit</item>
+        <item quantity="other">%1$d credits</item>
+    </plurals>
+    <string name="lib_offline_banner">You\'re offline. Showing what was loaded last.</string>
+    <string name="lib_retry">Retry</string>
+    <string name="lib_loading_desc">Loading your videos</string>
+    <string name="lib_load_failed_title">Couldn\'t load your videos</string>
+    <string name="lib_empty_title">Describe it.\nWe\'ll make the video.</string>
+    <string name="lib_empty_body">Narrated and illustrated in minutes. Add your own photos if you like.</string>
+    <string name="lib_try_one">Try one</string>
+    <string name="lib_use_idea">Use this idea</string>
+    <string name="lib_example_lighthouse">A calm one-minute story about a lighthouse keeper</string>
+    <string name="lib_example_bees">How bees make honey, explained for kids</string>
+    <string name="lib_example_holiday">My holiday in Thailand, told from my photos</string>
+    <string name="lib_example_tag_1min">1 min</string>
+    <string name="lib_example_tag_3min">3 min</string>
+    <string name="lib_example_tag_photos">Your photos</string>
+
+    <!-- library cards -->
+    <string name="lib_status_ready">Ready</string>
+    <string name="lib_status_making">Making</string>
+    <string name="lib_status_failed">Failed</string>
+    <string name="lib_status_not_allowed">Not allowed</string>
+    <string name="lib_status_didnt_finish">Didn\'t finish</string>
+    <string name="lib_ready_desc">%1$s. Ready.</string>
+    <string name="lib_making_title">Making your video</string>
+    <string name="lib_making_line">%1$s %2$s</string>
+    <string name="lib_making_desc">%1$s. Making. %2$s</string>
+    <string name="lib_failed_desc">%1$s. %2$s.</string>
+    <string name="lib_no_credits_used">No credits were used.</string>
+    <string name="lib_pending_uploading">Uploading photos %1$d of %2$d</string>
+    <string name="lib_pending_sending">Sending your request…</string>
+    <string name="lib_upload_pill">Uploading %1$d of %2$d</string>
+    <string name="lib_open_media">Open My media</string>
+
+    <!-- progress estimate and steps -->
+    <string name="lib_left_less_than_minute">Less than a minute left.</string>
+    <string name="lib_left_about_minutes">About %1$d min left.</string>
+    <string name="lib_step_script">Script</string>
+    <string name="lib_step_voice">Voice</string>
+    <string name="lib_step_pictures">Pictures</string>
+    <string name="lib_step_final_cut">Final cut</string>
+    <string name="lib_sentence_starting">Getting started.</string>
+    <string name="lib_sentence_writing">Writing the story.</string>
+    <string name="lib_sentence_voice">Voice and pictures.</string>
+    <string name="lib_sentence_rendering">Putting it all together.</string>
+
+    <!-- relative times -->
+    <string name="lib_ago_now">Just now</string>
+    <string name="lib_ago_minutes">%1$d min ago</string>
+    <string name="lib_ago_hours">%1$d h ago</string>
+    <string name="lib_ago_days">%1$d d ago</string>
+
+    <!-- lengths -->
+    <string name="len_short_seconds">%1$d s</string>
+    <string name="len_short_minutes">%1$s min</string>
+    <plurals name="len_long_seconds">
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d seconds</item>
+    </plurals>
+    <plurals name="len_long_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <string name="len_long_minutes_fraction">%1$s minutes</string>
+    <plurals name="len_adj_seconds">
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d second</item>
+    </plurals>
+    <plurals name="len_adj_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minute</item>
+    </plurals>
+    <string name="len_adj_minutes_fraction">%1$s minute</string>
+
+    <!-- video detail -->
+    <string name="video_title_fallback">Video</string>
+    <string name="video_edit">Edit</string>
+    <string name="video_failed_title">Something went wrong</string>
+    <string name="video_failed_body">We couldn\'t finish this video. You haven\'t been charged for it.</string>
+    <string name="video_rejected_title">This request can\'t be turned into a video</string>
+    <string name="video_rejected_body">Try describing something different.</string>
+    <string name="video_hide_description">Hide description</string>
+    <string name="video_show_description">Show description</string>
+    <string name="video_description_toggle">Description and photo credits</string>
+    <string name="video_progress_body">This usually takes a few minutes. You can leave this screen; it keeps going.</string>
+    <string name="video_step_done">done</string>
+    <string name="video_step_active">in progress</string>
+    <string name="video_step_waiting">waiting</string>
+    <string name="video_play_failed">This video couldn\'t be played. Check your connection and try again.</string>
+
+    <!-- share -->
+    <string name="share_action">Share</string>
+    <string name="share_preparing">Preparing…</string>
+    <string name="share_copy_title">Copy title</string>
+    <string name="share_copy_description">Copy description with credits</string>
+    <string name="share_copied">Copied</string>
+    <string name="share_failed">Couldn\'t prepare the video to share. Check your connection and try again.</string>
+    <string name="share_chooser_title">Share video</string>
+    <string name="share_clip_label_title">videomk title</string>
+    <string name="share_clip_label_description">videomk description</string>
+
+    <!-- editor -->
+    <string name="editor_title">Edit video</string>
+    <string name="editor_reorder">Reorder</string>
+    <string name="editor_failed_title">Can\'t edit right now</string>
+    <string name="editor_reload">Reload</string>
+    <string name="editor_discard_title">Discard your changes?</string>
+    <string name="editor_discard_confirm">Discard changes</string>
+    <string name="editor_keep_editing">Keep editing</string>
+    <string name="editor_reload_discard">Reload and discard my changes</string>
+    <string name="editor_field_title">Title</string>
+    <string name="editor_scenes_count">Scenes (%1$d)</string>
+    <string name="editor_footer_reorder">Use the arrows to reorder scenes, or the bin to delete one.</string>
+    <string name="editor_footer_tap">Tap a scene to change its narration or photo. Use Reorder to move or delete scenes.</string>
+    <string name="editor_subtitles">Subtitles</string>
+    <string name="editor_preview">Preview</string>
+    <string name="editor_publish">Publish</string>
+    <string name="editor_action_hint_dirty">Preview is a quick draft. Publish makes the full-quality video and replaces the current one.</string>
+    <string name="editor_action_hint_clean">Make a change to enable Preview and Publish.</string>
+    <string name="editor_edit_scene">Edit scene</string>
+    <string name="editor_edited">Edited</string>
+    <string name="editor_will_remake">Will be re-made</string>
+    <string name="editor_move_up">Move scene up</string>
+    <string name="editor_move_down">Move scene down</string>
+    <string name="editor_delete_scene">Delete scene</string>
+    <string name="editor_rendering_final">Publishing your video</string>
+    <string name="editor_rendering_preview">Making your preview</string>
+    <string name="editor_rendering_body">Only the scenes you changed are re-made, so this is usually quick. You can\'t edit while it renders.</string>
+    <string name="editor_done_published">Published</string>
+    <string name="editor_done_preview">Preview ready</string>
+    <string name="editor_done_draft_note">This is a draft. Publish from the editor to make the full-quality video.</string>
+    <string name="editor_back_to_editing">Back to editing</string>
+    <string name="editor_scene_missing_title">Scene not found</string>
+    <string name="editor_scene_missing_body">It may have been deleted.</string>
+    <string name="editor_field_narration">Narration</string>
+    <string name="editor_visual">Visual</string>
+    <string name="editor_visual_note">Charts, diagrams and other scenes are drawn from the narration. Edit the narration and the visual is re-made.</string>
+    <plurals name="editor_silent_note">
+        <item quantity="one">A silent pause: nothing is spoken for %1$d second and the music carries it. Type words here to give it a voice.</item>
+        <item quantity="other">A silent pause: nothing is spoken for %1$d seconds and the music carries it. Type words here to give it a voice.</item>
+    </plurals>
+    <plurals name="editor_words_spoken">
+        <item quantity="one">%1$d word, about %2$d s spoken.</item>
+        <item quantity="other">%1$d words, about %2$d s spoken.</item>
+    </plurals>
+    <string name="editor_words_range">%1$d–%2$d words per scene.</string>
+    <string name="editor_photo">Photo</string>
+    <string name="editor_current_photo">Current photo</string>
+    <string name="editor_no_photo">No suitable photo was found. Pick one below, or the scene becomes a title card.</string>
+    <string name="editor_will_use_photo">Will use the photo by %1$s</string>
+    <string name="editor_undo_photo">Undo photo change</string>
+    <string name="editor_other_photos">Other photos</string>
+    <string name="editor_credit_note">Credit for the chosen photo is added to the video and its description automatically.</string>
+    <string name="editor_photo_by">Photo by %1$s</string>
+    <string name="editor_photo_by_selected">Photo by %1$s, selected</string>
+    <string name="editor_use_photo">Use this photo</string>
+    <string name="editor_unknown_creator">Unknown</string>
+
+    <!-- editor: scenes and messages -->
+    <string name="editor_scene_title">Title</string>
+    <string name="editor_scene_list">List</string>
+    <string name="editor_scene_diagram">Diagram</string>
+    <string name="editor_scene_chart">Chart</string>
+    <string name="editor_scene_timeline">Timeline</string>
+    <string name="editor_scene_stat">Big number</string>
+    <string name="editor_scene_quote">Quote</string>
+    <string name="editor_scene_photo">Photo</string>
+    <string name="editor_scene_clip">Video clip</string>
+    <string name="editor_scene_gallery">Photo gallery</string>
+    <string name="editor_scene_generic">Scene</string>
+    <string name="editor_silent_pause">Silent pause</string>
+    <string name="editor_silent_pause_hold">Silent pause, %1$d s</string>
+    <plurals name="editor_err_min_words">
+        <item quantity="one">Needs at least %1$d word (now %2$d).</item>
+        <item quantity="other">Needs at least %1$d words (now %2$d).</item>
+    </plurals>
+    <plurals name="editor_err_max_words">
+        <item quantity="one">Limited to %1$d word per scene (now %2$d). Split it into two scenes.</item>
+        <item quantity="other">Limited to %1$d words per scene (now %2$d). Split it into two scenes.</item>
+    </plurals>
+    <string name="editor_err_one_scene">A video needs at least one scene.</string>
+    <string name="editor_conflict_kept">%1$s Your edits on this screen are kept until you reload.</string>
+    <string name="editor_render_failed">The render didn\'t finish. Your changes are saved; try again.</string>
+    <string name="editor_render_slow">This is taking longer than usual. Close the editor and check back in a few minutes.</string>
+</resources>

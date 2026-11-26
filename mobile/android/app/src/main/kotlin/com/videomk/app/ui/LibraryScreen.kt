@@ -3,7 +3,11 @@ package com.videomk.app.ui
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.text.format.DateUtils
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
+import com.videomk.app.core.RelativeTime
+import com.videomk.app.core.Txt
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -117,12 +121,12 @@ import com.videomk.app.core.VideoStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private class Example(val text: String, val tag: String, val minutes: Double?, val photos: Boolean, val icon: ImageVector)
+private class Example(@androidx.annotation.StringRes val text: Int, @androidx.annotation.StringRes val tag: Int, val minutes: Double?, val photos: Boolean, val icon: ImageVector)
 
 private val Examples = listOf(
-    Example("A calm one-minute story about a lighthouse keeper", "1 min", 1.0, false, Icons.Filled.Movie),
-    Example("How bees make honey, explained for kids", "3 min", 3.0, false, Icons.Filled.AutoAwesome),
-    Example("My holiday in Thailand, told from my photos", "Your photos", null, true, Icons.Filled.Image),
+    Example(R.string.lib_example_lighthouse, R.string.lib_example_tag_1min, 1.0, false, Icons.Filled.Movie),
+    Example(R.string.lib_example_bees, R.string.lib_example_tag_3min, 3.0, false, Icons.Filled.AutoAwesome),
+    Example(R.string.lib_example_holiday, R.string.lib_example_tag_photos, null, true, Icons.Filled.Image),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,7 +150,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     fun newVideo(e: Example?) {
         composer.openCreate(container?.createPrefs?.load(person))
         if (e != null) {
-            composer.text = e.text
+            composer.text = Txt.s(e.text)
             if (e.minutes != null) composer.updateOptions(composer.options.copy(minutes = e.minutes))
             if (e.photos) composer.openAddPhotos(if (container?.mediaApi != null) 1 else 0)
         }
@@ -189,7 +193,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
             when {
                 entries.isEmpty() && (state.loadState is LoadState.Loading || state.loadState is LoadState.Idle) -> SkeletonFeed()
                 entries.isEmpty() && state.loadState is LoadState.Failed ->
-                    MessageState("Couldn't load your videos", (state.loadState as LoadState.Failed).message, "Try again", { scope.launch { app.refresh() } })
+                    MessageState(stringResource(R.string.lib_load_failed_title), (state.loadState as LoadState.Failed).message, stringResource(R.string.common_try_again), { scope.launch { app.refresh() } })
                 entries.isEmpty() -> EmptyState(onExample = { e -> newVideo(e) }, onNew = { newVideo(null) })
                 else -> {
                     var refreshing by remember { mutableStateOf(false) }
@@ -198,7 +202,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                             Modifier.fillMaxSize().testTag("videoList"), state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = fabClearance),
                             verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
-                            item(key = "title") { Text("Your videos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
+                            item(key = "title") { Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
                             if (state.offline) item(key = "offline") { OfflineBanner(onRetry = { scope.launch { app.refresh() } }) }
                             items(entries, key = { it.id }, contentType = { if (it is LibraryEntry.Pending) "pending" else (it as LibraryEntry.Video).video.status.let { s -> if (s.isRunning) "making" else if (s == VideoStatus.Complete) "ready" else "failed" } }) { entry ->
                                 when (entry) {
@@ -227,12 +231,12 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
 @Composable
 private fun NewVideoFab(expanded: Boolean, onClick: () -> Unit) {
     Row(
-        Modifier.heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClickLabel = "New video", onClick = onClick)
-            .padding(horizontal = if (expanded) 22.dp else 17.dp).animateContentSize().semantics { contentDescription = "New video" }.testTag("newVideoFab"),
+        Modifier.heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_new_video), onClick = onClick)
+            .padding(horizontal = if (expanded) 22.dp else 17.dp).animateContentSize().semantics { contentDescription = Txt.s(R.string.lib_new_video) }.testTag("newVideoFab"),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(Icons.Filled.Add, null, tint = Color.White, modifier = Modifier.size(24.dp))
-        if (expanded) Text("New video", style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
+        if (expanded) Text(stringResource(R.string.lib_new_video), style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
     }
 }
 
@@ -245,10 +249,12 @@ private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: (
         }
         wallet?.let { w ->
             val shape = CircleShape
+            val unlimitedDesc = stringResource(R.string.lib_unlimited_credits)
+            val creditsDesc = pluralStringResource(R.plurals.lib_credits_desc, w.balance, w.balance)
             Row(
                 Modifier.heightIn(min = 44.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
-                    .clickable(role = Role.Button, onClickLabel = "Show your credits", onClick = onOpenWallet).padding(horizontal = 14.dp)
-                    .semantics(mergeDescendants = true) { contentDescription = if (w.unlimited) "Unlimited credits" else "${w.balance} credit${if (w.balance == 1) "" else "s"}" }
+                    .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_show_credits), onClick = onOpenWallet).padding(horizontal = 14.dp)
+                    .semantics(mergeDescendants = true) { contentDescription = if (w.unlimited) unlimitedDesc else creditsDesc }
                     .testTag("balanceChip"),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
@@ -257,7 +263,7 @@ private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: (
             }
         }
         IconButton(onClick = onOpenSettings, modifier = Modifier.size(48.dp).testTag("settingsButton")) {
-            Icon(Icons.Filled.Settings, "Settings", tint = Vmk.colors.textSecondary)
+            Icon(Icons.Filled.Settings, stringResource(R.string.lib_settings), tint = Vmk.colors.textSecondary)
         }
     }
 }
@@ -267,8 +273,8 @@ private fun OfflineBanner(onRetry: () -> Unit) {
     Surface(shape = RoundedCornerShape(16.dp), color = Vmk.colors.warningContainer, modifier = Modifier.fillMaxWidth().testTag("offlineBanner")) {
         Row(Modifier.padding(start = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(Icons.Filled.CloudOff, null, tint = Vmk.colors.warning)
-            Text("You're offline. Showing what was loaded last.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-            TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text("Retry") }
+            Text(stringResource(R.string.lib_offline_banner), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+            TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.lib_retry)) }
         }
     }
 }
@@ -277,9 +283,10 @@ private fun OfflineBanner(onRetry: () -> Unit) {
 @Composable
 private fun SkeletonFeed() {
     val still = reduceMotion(LocalContext.current)
+    val loadingDesc = stringResource(R.string.lib_loading_desc)
     val a = if (still) 0.7f else rememberInfiniteTransition(label = "sk").animateFloat(0.45f, 0.9f, infiniteRepeatable(tween(1000), RepeatMode.Reverse), label = "a").value
-    Column(Modifier.fillMaxSize().padding(16.dp).semantics { contentDescription = "Loading your videos" }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("Your videos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+    Column(Modifier.fillMaxSize().padding(16.dp).semantics { contentDescription = loadingDesc }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
         repeat(2) { Box(Modifier.fillMaxWidth().height(CardHeight).alpha(a).clip(RoundedCornerShape(22.dp)).background(Vmk.colors.surfaceRaised)) }
     }
 }
@@ -287,6 +294,7 @@ private fun SkeletonFeed() {
 /** First launch: one promise, three worked examples. Tapping one fills the composer (and length); none of them sends. */
 @Composable
 private fun EmptyState(onExample: (Example) -> Unit, onNew: () -> Unit) {
+    val newVideoDesc = stringResource(R.string.lib_new_video)
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 16.dp).testTag("emptyState"),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -296,29 +304,29 @@ private fun EmptyState(onExample: (Example) -> Unit, onNew: () -> Unit) {
             Frame(7f, 34.dp, listOf(Color(0xFF2A2A66), Color(0xFF6C4BC1)))
             Frame(0f, 0.dp, listOf(Color(0xFFFFC27A), Color(0xFFB9556F)), front = true)
         }
-        Text("Describe it.\nWe'll make the video.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.8).sp, textAlign = TextAlign.Center, color = Vmk.colors.text, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
-        Text("Narrated and illustrated in minutes. Add your own photos if you like.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+        Text(stringResource(R.string.lib_empty_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.8).sp, textAlign = TextAlign.Center, color = Vmk.colors.text, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
+        Text(stringResource(R.string.lib_empty_body), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
         Box(
             Modifier.fillMaxWidth().padding(bottom = 18.dp).heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow)
-                .clickable(role = Role.Button, onClickLabel = "New video", onClick = onNew).semantics { contentDescription = "New video" }.testTag("newVideoButton"),
+                .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_new_video), onClick = onNew).semantics { contentDescription = newVideoDesc }.testTag("newVideoButton"),
             contentAlignment = Alignment.Center,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Filled.Add, null, tint = Color.White); Text("New video", style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White)
+                Icon(Icons.Filled.Add, null, tint = Color.White); Text(stringResource(R.string.lib_new_video), style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
-        Overline("Try one", Modifier.fillMaxWidth().padding(bottom = 8.dp))
+        Overline(stringResource(R.string.lib_try_one), Modifier.fillMaxWidth().padding(bottom = 8.dp))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             for (e in Examples) {
                 val shape = RoundedCornerShape(18.dp)
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 64.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
-                        .clickable(role = Role.Button, onClickLabel = "Use this idea") { onExample(e) }.padding(horizontal = 12.dp, vertical = 8.dp).testTag("exampleCard"),
+                        .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_use_idea)) { onExample(e) }.padding(horizontal = 12.dp, vertical = 8.dp).testTag("exampleCard"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(e.icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(22.dp)) }
-                    Text(e.text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.weight(1f), maxLines = 3)
-                    Text(e.tag, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 1, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 10.dp, vertical = 5.dp))
+                    Text(stringResource(e.text), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.weight(1f), maxLines = 3)
+                    Text(stringResource(e.tag), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 1, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 10.dp, vertical = 5.dp))
                 }
             }
         }
@@ -341,8 +349,10 @@ private val TallCardMax = 420.dp
 @Composable
 private fun CardFrame(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, height: Dp = CardHeight, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit) {
     val shape = RoundedCornerShape(22.dp)
+    val fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+    val h = if (fontScale > 1f) height * (1f + (fontScale - 1f) * 0.7f) else height   // larger text (and longer Spanish) needs a taller card, never clipped text
     Box(
-        modifier.fillMaxWidth().height(height).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
+        modifier.fillMaxWidth().height(h).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
             .then(if (Vmk.colors.dark) Modifier.border(1.dp, Color.White.copy(alpha = 0.05f), shape) else Modifier)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) { content() }
@@ -353,14 +363,15 @@ private val Scrim = Brush.verticalGradient(0f to Color.Transparent, 0.46f to Col
 @Composable
 private fun ReadyCard(video: VideoItem, onClick: () -> Unit) {
     val now = remember { System.currentTimeMillis() }
-    val meta = video.createdAt?.let { DateUtils.getRelativeTimeSpanString(it.toEpochMilli(), now, DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString() }
+    val meta = video.createdAt?.let { RelativeTime.text(it.toEpochMilli(), now) }
+    val readyDesc = stringResource(R.string.lib_ready_desc, video.displayTitle) + (meta?.let { " $it." } ?: "")
     // a tall video (9:16, 4:5) gets a taller card at its own shape (capped), so the thumbnail is not cropped to a landscape strip
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
     val h = if (video.isTall) minOf(maxWidth / video.frameRatio, TallCardMax).coerceAtLeast(CardHeight) else CardHeight
-    CardFrame(Modifier.semantics(mergeDescendants = true) { contentDescription = "${video.displayTitle}. Ready.${meta?.let { " $it." } ?: ""}" }.testTag("videoRow"), onClick, h) {
+    CardFrame(Modifier.semantics(mergeDescendants = true) { contentDescription = readyDesc }.testTag("videoRow"), onClick, h) {
         Thumbnail(video.previewGifUrl, video.status, Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFF3A3F7A), Color(0xFF7A5BC4)))))
         Box(Modifier.fillMaxSize().background(Scrim))
-        GlassChip("Ready", Modifier.align(Alignment.TopStart).padding(14.dp), dot = Color(0xFF4ADE80))
+        GlassChip(stringResource(R.string.lib_status_ready), Modifier.align(Alignment.TopStart).padding(14.dp), dot = Color(0xFF4ADE80))
         Box(Modifier.align(Alignment.Center).size(52.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
             Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(32.dp))
         }
@@ -386,10 +397,11 @@ private fun MakingCard(video: VideoItem, state: AppState, onClick: () -> Unit) {
     val inStage = since?.let { (now - it) / 1000.0 } ?: 0.0
     val minutes = state.minutes[video.id] ?: CreateOptions.DEFAULT_MINUTES
     val fraction = ProgressEstimator.fraction(stage, inStage, minutes)
-    val title = state.briefs[video.id] ?: video.title?.takeIf { it.isNotEmpty() } ?: "Making your video"
-    val line = MakingSteps.sentence(stage) + " " + ProgressEstimator.leftText(stage, inStage, minutes)
+    val title = state.briefs[video.id] ?: video.title?.takeIf { it.isNotEmpty() } ?: stringResource(R.string.lib_making_title)
+    val line = stringResource(R.string.lib_making_line, MakingSteps.sentence(stage), ProgressEstimator.leftText(stage, inStage, minutes))
+    val makingDesc = stringResource(R.string.lib_making_desc, title, line)
     MakingBody(title, line, fraction, Modifier.semantics(mergeDescendants = true) {
-        contentDescription = "$title. Making. $line"
+        contentDescription = makingDesc
     }.testTag("runningRow"), onClick)
 }
 
@@ -399,10 +411,10 @@ private fun MakingBody(title: String, line: String, fraction: Double, modifier: 
         Box(Modifier.fillMaxSize().background(Vmk.makingGradient))
         Shimmer(Modifier.fillMaxSize())
         Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            GlassChip("Making", dot = Color(0xFFC4C6FF))
+            GlassChip(stringResource(R.string.lib_status_making), dot = Color(0xFFC4C6FF))
             Spacer(Modifier.height(4.dp))
             Text(title, style = MaterialTheme.typography.titleMedium, fontSize = 19.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(line, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(line, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f), maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.weight(1f))
             Steps(fraction)
         }
@@ -451,11 +463,13 @@ private fun Shimmer(modifier: Modifier) {
 @Composable
 private fun FailedCard(title: String, rejected: Boolean, reason: String?, thumb: String?, tag: String, onRetry: (() -> Unit)?, onDismiss: (() -> Unit)?, message: String? = null) {
     val grey = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
-    CardFrame(Modifier.semantics { contentDescription = "$title. ${if (rejected) "Not allowed" else "Didn't finish"}." }.testTag(tag)) {
+    val statusLabel = stringResource(if (rejected) R.string.lib_status_not_allowed else R.string.lib_status_didnt_finish)
+    val failedDesc = stringResource(R.string.lib_failed_desc, title, statusLabel)
+    CardFrame(Modifier.semantics { contentDescription = failedDesc }.testTag(tag)) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF5A5252), Color(0xFF2B2425)))))
         if (thumb != null) StableImage(thumb, ContentScale.Crop, Modifier.fillMaxSize().alpha(0.55f), grey)
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color(0x33200808), 1f to Color(0xE6180A0C))))
-        GlassChip(if (rejected) "Not allowed" else "Didn't finish", Modifier.align(Alignment.TopStart).padding(14.dp), container = (if (rejected) Vmk.colors.warning else Color(0xFFB91C1C)).copy(alpha = 0.85f),
+        GlassChip(statusLabel, Modifier.align(Alignment.TopStart).padding(14.dp), container = (if (rejected) Vmk.colors.warning else Color(0xFFB91C1C)).copy(alpha = 0.85f),
             leading = { Icon(Icons.Filled.Warning, null, tint = Color.White, modifier = Modifier.size(14.dp)) })
         Column(Modifier.align(Alignment.BottomStart).padding(start = 16.dp, end = 16.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             val detail = message ?: reason
@@ -465,9 +479,9 @@ private fun FailedCard(title: String, rejected: Boolean, reason: String?, thumb:
                 if (onRetry != null) Row(
                     Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Color.White).clickable(role = Role.Button, onClick = onRetry).padding(horizontal = 16.dp).testTag("retryButton"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) { Icon(Icons.Filled.Refresh, null, tint = Color(0xFF11142B), modifier = Modifier.size(18.dp)); Text("Try again", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Color(0xFF11142B)) }
-                if (!rejected) Text("No credits were used.", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.weight(1f))
-                if (onDismiss != null) TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 44.dp).testTag("removeButton")) { Text("Remove", color = Color.White) }
+                ) { Icon(Icons.Filled.Refresh, null, tint = Color(0xFF11142B), modifier = Modifier.size(18.dp)); Text(stringResource(R.string.common_try_again), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Color(0xFF11142B)) }
+                if (!rejected) Text(stringResource(R.string.lib_no_credits_used), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.weight(1f))
+                if (onDismiss != null) TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 44.dp).testTag("removeButton")) { Text(stringResource(R.string.common_remove), color = Color.White) }
             }
         }
     }
@@ -480,8 +494,8 @@ private fun PendingCard(pending: PendingVideo, onRetry: () -> Unit, onDismiss: (
     if (failed != null) { FailedCard(pending.brief, false, null, null, "failedRow", onRetry, onDismiss, message = failed); return }
     val st = pending.state
     val line = when (st) {
-        is PendingVideo.State.Uploading -> "Uploading photos ${minOf(st.done + 1, st.total)} of ${st.total}"
-        else -> "Sending your request…"
+        is PendingVideo.State.Uploading -> stringResource(R.string.lib_pending_uploading, minOf(st.done + 1, st.total), st.total)
+        else -> stringResource(R.string.lib_pending_sending)
     }
     MakingBody(pending.brief, line, if (st is PendingVideo.State.Uploading) 0.2 * st.done / maxOf(st.total, 1) else 0.0, Modifier.semantics(mergeDescendants = true) { contentDescription = "${pending.brief}. $line" }.testTag("pendingRow"), null)
 }
@@ -489,9 +503,9 @@ private fun PendingCard(pending: PendingVideo, onRetry: () -> Unit, onDismiss: (
 /** The slim pill on the Videos tab while photos upload: opens Media. */
 @Composable
 private fun UploadPill(progress: com.videomk.app.core.QueueProgress, onClick: () -> Unit) {
-    val text = "Uploading ${minOf(progress.finished + 1, progress.total)} of ${progress.total}"
+    val text = stringResource(R.string.lib_upload_pill, minOf(progress.finished + 1, progress.total), progress.total)
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 12.dp).heightIn(min = 44.dp).clickable(role = Role.Button, onClickLabel = "Open My media", onClick = onClick),
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp).heightIn(min = 44.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_open_media), onClick = onClick),
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(Modifier.heightIn(min = 36.dp).clip(CircleShape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, CircleShape).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { contentDescription = text }.testTag("uploadPill"),
@@ -540,10 +554,10 @@ fun Thumbnail(url: String?, status: VideoStatus, modifier: Modifier = Modifier) 
 @Composable
 fun StatusChip(status: VideoStatus) {
     val (label, color) = when (status) {
-        is VideoStatus.Running -> "Making" to MaterialTheme.colorScheme.primary
-        VideoStatus.Complete -> "Ready" to Vmk.colors.success
-        VideoStatus.Failed -> "Failed" to Vmk.colors.danger
-        VideoStatus.Rejected -> "Not allowed" to Vmk.colors.warning
+        is VideoStatus.Running -> stringResource(R.string.lib_status_making) to MaterialTheme.colorScheme.primary
+        VideoStatus.Complete -> stringResource(R.string.lib_status_ready) to Vmk.colors.success
+        VideoStatus.Failed -> stringResource(R.string.lib_status_failed) to Vmk.colors.danger
+        VideoStatus.Rejected -> stringResource(R.string.lib_status_not_allowed) to Vmk.colors.warning
     }
     Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = color,
         modifier = Modifier.clip(CircleShape).background(color.copy(alpha = 0.15f)).padding(horizontal = 8.dp, vertical = 3.dp))

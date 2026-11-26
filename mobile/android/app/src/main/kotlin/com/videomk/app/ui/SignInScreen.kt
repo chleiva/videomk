@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onSignIn: (SignInProvider) -> Unit) {
+    val signingInText = stringResource(R.string.auth_signing_in)
     val busy = state.isSigningIn || state.phase == Phase.NotConfigured
     BoxWithConstraints(Modifier.fillMaxSize().background(Vmk.colors.background).statusBarsPadding().navigationBarsPadding()) {
     // at least the screen high so the buttons sit at the bottom, and taller (scrolling) when large text needs it: nothing overlaps or clips
@@ -75,13 +77,13 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
             }
             Text("videomk", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
             Text(
-                "Describe a video. We write it, voice it and draw it.", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center,
+                stringResource(R.string.auth_tagline), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center,
                 color = Vmk.colors.textSecondary,
             )
         }
         Column(Modifier.widthIn(max = 480.dp).padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             if (state.phase == Phase.NotConfigured) {
-                Text("Not configured. This build has no server address yet.", color = Vmk.colors.warning, textAlign = TextAlign.Center, modifier = Modifier.testTag("notConfigured"))
+                Text(stringResource(R.string.auth_not_configured), color = Vmk.colors.warning, textAlign = TextAlign.Center, modifier = Modifier.testTag("notConfigured"))
             }
             state.signInError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, textAlign = TextAlign.Center, modifier = Modifier.testTag("signInError")) }
             for (option in social.options) {
@@ -94,7 +96,7 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
                         label, onClick = { onSignIn(option) }, enabled = !busy,
                         modifier = Modifier.fillMaxWidth().testTag("signInButton"),
                     ) {
-                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = "Signing in" }, color = Color.White, strokeWidth = 2.dp)
+                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = signingInText }, color = Color.White, strokeWidth = 2.dp)
                         else Text(label, style = MaterialTheme.typography.titleMedium, color = Color.White, textAlign = TextAlign.Center)
                     }
                 }
@@ -116,13 +118,14 @@ data class SocialStyle(val fill: Color, val outline: Color?, val text: Color, va
 /** A provider button: logo then wording, 52 dp minimum, grows with the font size and wraps instead of clipping. The logo is decoration; the wording is what TalkBack reads. */
 @Composable
 fun SocialButton(label: String, @DrawableRes logo: Int, style: SocialStyle, enabled: Boolean, spinning: Boolean, tag: String, onClick: () -> Unit) {
+    val signingInText = stringResource(R.string.auth_signing_in)
     val shape = RoundedCornerShape(Vmk.radius)
     Row(
         Modifier.fillMaxWidth().heightIn(min = 52.dp).alpha(if (enabled || spinning) 1f else 0.4f)
             .clip(shape).background(style.fill, shape).let { m -> style.outline?.let { m.border(1.dp, it, shape) } ?: m }
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp)
-            .semantics(mergeDescendants = true) { if (spinning) stateDescription = "Signing in" }
+            .semantics(mergeDescendants = true) { if (spinning) stateDescription = signingInText }
             .testTag(tag),
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -136,12 +139,20 @@ fun SocialButton(label: String, @DrawableRes logo: Int, style: SocialStyle, enab
 @Composable
 fun LegalLine() {
     val link = TextLinkStyles(SpanStyle(color = MaterialTheme.colorScheme.primary))
+    val template = stringResource(R.string.auth_legal_line, "\u0001", "\u0002")
+    val termsLabel = stringResource(R.string.auth_terms)
+    val privacyLabel = stringResource(R.string.auth_privacy_policy)
     val text = buildAnnotatedString {
-        append("By continuing you agree to the ")
-        withLink(LinkAnnotation.Url("https://videomk.com/terms", link)) { append("Terms") }
-        append(" and ")
-        withLink(LinkAnnotation.Url("https://videomk.com/privacy", link)) { append("Privacy Policy") }
-        append(".")
+        // the sentence is one resource; the two links are put in where its placeholders are
+        var rest = template
+        while (rest.isNotEmpty()) {
+            val i = rest.indexOfFirst { it == '\u0001' || it == '\u0002' }
+            if (i < 0) { append(rest); break }
+            append(rest.substring(0, i))
+            if (rest[i] == '\u0001') withLink(LinkAnnotation.Url("https://videomk.com/terms", link)) { append(termsLabel) }
+            else withLink(LinkAnnotation.Url("https://videomk.com/privacy", link)) { append(privacyLabel) }
+            rest = rest.substring(i + 1)
+        }
     }
     Text(text, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
 }

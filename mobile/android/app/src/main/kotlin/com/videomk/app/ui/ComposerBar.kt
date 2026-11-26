@@ -88,6 +88,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
 import androidx.core.content.ContextCompat
 import com.videomk.app.core.AddPhotosLogic
 import com.videomk.app.core.ComposerLogic
@@ -100,8 +103,6 @@ import com.videomk.app.core.StatusKind
 import com.videomk.app.data.DictationController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-private fun plural(n: Int) = if (n == 1) "" else "s"
 
 @Composable
 internal fun dictationHint(state: DictationController.State) {
@@ -161,11 +162,12 @@ internal fun StatusLine(status: ComposerStatus, flash: Float, shake: Float, onFi
 internal fun PhotoStrip(composer: ComposerViewModel) {
     val phone = composer.photos.size + composer.loading
     val library = composer.library.size
-    val source = when { phone > 0 && library > 0 -> "From this phone and My media"; library > 0 -> "From My media"; else -> "From this phone" }
+    val source = stringResource(when { phone > 0 && library > 0 -> R.string.composer_source_both; library > 0 -> R.string.composer_source_library; else -> R.string.composer_source_phone })
+    val total = composer.photos.size + composer.library.size
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "${composer.photos.size + composer.library.size} of ${PhotoLimits.MAX_PHOTOS} photos", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
+                stringResource(R.string.composer_photos_of_max, total, PhotoLimits.MAX_PHOTOS), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
                 color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f).testTag("photosNote"),
             )
             Text(source, style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary)
@@ -174,12 +176,14 @@ internal fun PhotoStrip(composer: ComposerViewModel) {
         composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 4.dp)) {
             itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
-                StripTile(Modifier.semantics { contentDescription = "Photo ${index + 1} of ${composer.photos.size + composer.library.size}" }.testTag("attachedPhoto"), "Remove photo ${index + 1}", { composer.removePhoto(photo.id) }) {
+                val photoDescription = stringResource(R.string.composer_photo_n_of, index + 1, total)
+                StripTile(Modifier.semantics { contentDescription = photoDescription }.testTag("attachedPhoto"), stringResource(R.string.composer_remove_photo_n, index + 1), { composer.removePhoto(photo.id) }) {
                     photo.thumbnail?.let { Image(it, it.hashCode()) }
                 }
             }
             itemsIndexed(composer.library, key = { _, p -> "lib-${p.id}" }) { _, photo ->
-                StripTile(Modifier.semantics { contentDescription = "From My media: ${MediaLabels.photo(photo)}" }.testTag("attachedLibraryPhoto"), "Remove from the video", { composer.removeLibrary(photo.id) }) {
+                val libraryDescription = stringResource(R.string.composer_from_library_photo, MediaLabels.photo(photo))
+                StripTile(Modifier.semantics { contentDescription = libraryDescription }.testTag("attachedLibraryPhoto"), stringResource(R.string.composer_remove_from_video), { composer.removeLibrary(photo.id) }) {
                     PhotoThumb(photo, Modifier.size(56.dp))
                 }
             }

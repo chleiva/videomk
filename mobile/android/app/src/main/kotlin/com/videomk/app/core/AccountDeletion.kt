@@ -1,5 +1,6 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
@@ -106,30 +107,30 @@ sealed interface DeletionState {
 }
 
 object DeletionText {
-    const val CONFIRM_WORD = "DELETE"
-
-    val deletes = listOf("Your videos", "Your photos and everything in My media", "Your credits, including any you have left", "Your sign-in")
-    const val IRREVERSIBLE = "This can't be undone."
-    const val NEXT = "Your data is removed within minutes and your sign-in within about an hour or two. If you want to sign up again with the same email, please wait until then."
-    const val REAUTH_NOTE = "To make sure it's you, you may be asked to sign in again first."
-    const val DONE_TITLE = "Your account is being deleted"
-    const val DONE_BODY = NEXT
-    const val SETTINGS_BODY = "Permanently deletes your account, your videos, your photos and My media, your credits and your sign-in. This can't be undone."
-    const val APPLE_AVAILABLE = "You signed in with Apple. To finish, confirm with Apple so videomk stops being connected to your Apple ID. This is optional and your account is deleted either way."
-    const val APPLE_MANUAL = "To finish, go to appleid.apple.com, sign in, open Sign-In and Security, then Sign in with Apple, choose videomk and select Stop using Apple ID."
-    const val APPLE_DONE = "Done: videomk no longer has access through your Apple ID."
+    const val CONFIRM_WORD = "DELETE"   // the server's wire value (`confirm`), the same in every language
     const val WEB_URL = "https://videomk.com/delete-account"
 
-    fun message(f: DeletionFailure): String = when (f) {
-        DeletionFailure.Offline -> "We couldn't reach videomk, so we can't tell if the deletion started. Check your connection and try again. Trying again is safe."
-        DeletionFailure.Server -> "Something went wrong on our side and nothing was deleted. Please try again."
-        DeletionFailure.Forbidden -> "This request doesn't match the account you are signed in to, so nothing was deleted. Sign out, sign in again and retry."
-        DeletionFailure.Rejected -> "The confirmation wasn't accepted, so nothing was deleted. Check the word and try again."
-        DeletionFailure.ReauthCancelled -> "You didn't finish signing in again, so nothing was deleted. You are still signed in."
-        DeletionFailure.ReauthFailed -> "We couldn't confirm it's you, so nothing was deleted. You are still signed in. Please try again."
-        DeletionFailure.WrongAccount -> "You signed in with a different account, so nothing was deleted. Use the account you are deleting."
-        DeletionFailure.StillStale -> "We still couldn't confirm a fresh sign-in, so nothing was deleted. Please try again. If it keeps failing, use the steps at videomk.com/delete-account."
-    }
+    val deletes: List<String> get() = listOf(Txt.s(R.string.deletion_item_videos), Txt.s(R.string.deletion_item_photos), Txt.s(R.string.deletion_item_credits), Txt.s(R.string.deletion_item_signin))
+    val IRREVERSIBLE: String get() = Txt.s(R.string.deletion_irreversible)
+    val NEXT: String get() = Txt.s(R.string.deletion_next)
+    val REAUTH_NOTE: String get() = Txt.s(R.string.deletion_reauth_note)
+    val DONE_TITLE: String get() = Txt.s(R.string.deletion_done_title)
+    val DONE_BODY: String get() = NEXT
+    val SETTINGS_BODY: String get() = Txt.s(R.string.deletion_settings_body)
+    val APPLE_AVAILABLE: String get() = Txt.s(R.string.deletion_apple_available)
+    val APPLE_MANUAL: String get() = Txt.s(R.string.deletion_apple_manual)
+    val APPLE_DONE: String get() = Txt.s(R.string.deletion_apple_done)
+
+    fun message(f: DeletionFailure): String = Txt.s(when (f) {
+        DeletionFailure.Offline -> R.string.deletion_fail_offline
+        DeletionFailure.Server -> R.string.deletion_fail_server
+        DeletionFailure.Forbidden -> R.string.deletion_fail_forbidden
+        DeletionFailure.Rejected -> R.string.deletion_fail_rejected
+        DeletionFailure.ReauthCancelled -> R.string.deletion_fail_reauth_cancelled
+        DeletionFailure.ReauthFailed -> R.string.deletion_fail_reauth_failed
+        DeletionFailure.WrongAccount -> R.string.deletion_fail_wrong_account
+        DeletionFailure.StillStale -> R.string.deletion_fail_still_stale
+    })
 }
 
 /**

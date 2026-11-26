@@ -1,5 +1,9 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import com.videomk.app.R
+import com.videomk.app.core.Txt
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -107,7 +111,7 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
 
     // the system Photo Picker: no READ_MEDIA_IMAGES, no storage permission. Opened from inside the sheet; its result goes straight into the strip.
     val platformMax = remember {
-        if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) runCatching { MediaStore.getPickImagesMaxLimit() }.getOrDefault(PhotoLimits.MAX_PHOTOS) else PhotoLimits.MAX_PHOTOS
+        if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) runCatching { pickImagesMaxLimit() }.getOrDefault(PhotoLimits.MAX_PHOTOS) else PhotoLimits.MAX_PHOTOS
     }
     val room = AddPhotosLogic.room(phoneCount, libraryCount)
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(PhotoIntake.pickerMax(platformMax, room))) { uris ->
@@ -128,8 +132,8 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
     ) {
         Column(Modifier.fillMaxHeight(0.94f).fillMaxWidth().semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("addPhotosSheet")) {
             Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp).heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Add photos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                TextButton(onClick = { composer.setLibrary(initialLibrary); onDismiss() }, modifier = Modifier.heightIn(min = 44.dp).testTag("addPhotosCancel")) { Text("Cancel", fontWeight = FontWeight.SemiBold) }
+                Text(stringResource(R.string.media_add_photos), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                TextButton(onClick = { composer.setLibrary(initialLibrary); onDismiss() }, modifier = Modifier.heightIn(min = 44.dp).testTag("addPhotosCancel")) { Text(stringResource(R.string.common_cancel), fontWeight = FontWeight.SemiBold) }
             }
             if (api != null) Segmented(tab, onTab = { tab = it }, Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
             Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -150,12 +154,14 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
 private fun Segmented(selected: Int, onTab: (Int) -> Unit, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(12.dp)
     Row(modifier.fillMaxWidth().heightIn(min = 40.dp).clip(shape).background(Vmk.colors.surfaceRaised).padding(3.dp)) {
-        listOf("This phone" to Icons.Filled.PhoneAndroid, "My media" to Icons.Filled.Shield).forEachIndexed { i, (label, icon) ->
+        listOf(stringResource(R.string.photos_tab_phone) to Icons.Filled.PhoneAndroid, stringResource(R.string.photos_tab_media) to Icons.Filled.Shield).forEachIndexed { i, (label, icon) ->
             val sel = i == selected
+            val tabDesc = stringResource(R.string.photos_tab_desc, label, i + 1)
+            val selectedText = stringResource(R.string.media_state_selected)
             Row(
                 Modifier.weight(1f).heightIn(min = 40.dp).clip(RoundedCornerShape(10.dp)).then(if (sel) Modifier.background(if (Vmk.colors.dark) Vmk.colors.surface3 else Vmk.colors.surface) else Modifier)
                     .clickable(role = Role.Tab, onClickLabel = label) { onTab(i) }
-                    .semantics { this.selected = sel; contentDescription = "$label, tab ${i + 1} of 2"; stateDescription = if (sel) "selected" else "" }
+                    .semantics { this.selected = sel; contentDescription = tabDesc; stateDescription = if (sel) selectedText else "" }
                     .testTag(if (i == 0) "tabThisPhone" else "tabMyMedia"),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             ) {
@@ -172,17 +178,17 @@ private fun PhoneTab(composer: ComposerViewModel, onPick: () -> Unit) {
         // nothing chosen yet: one clear way in
         Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.size(72.dp).clip(CircleShape).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(36.dp)) }
-            Text("Choose photos from your phone", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
-            Text("The system photo picker shows your gallery. videomk only gets the photos you pick, and never needs access to the rest.", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Text(stringResource(R.string.photos_choose_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
+            Text(stringResource(R.string.photos_picker_explain), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             Box(Modifier.padding(top = 6.dp).heightIn(min = 48.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClick = onPick).padding(horizontal = 26.dp).testTag("pickFromPhone"), contentAlignment = Alignment.Center) {
-                Text("Open photo picker", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(stringResource(R.string.photos_open_picker), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
         return
     }
     Column(Modifier.fillMaxSize()) {
         Text(
-            "Choose photos from your phone with the system picker. videomk only gets the photos you pick, and never needs access to your whole gallery.",
+            stringResource(R.string.photos_picker_note),
             style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
         )
         LazyVerticalGrid(
@@ -190,19 +196,21 @@ private fun PhoneTab(composer: ComposerViewModel, onPick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(2.dp), verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             item(key = "pick") {
+                val chooseDesc = stringResource(R.string.photos_choose_desc)
                 Column(
-                    Modifier.aspectRatio(1f).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = "Open the photo picker", onClick = onPick)
-                        .semantics { contentDescription = "Choose photos from this phone" }.testTag("pickFromPhone"),
+                    Modifier.aspectRatio(1f).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = stringResource(R.string.photos_open_picker_label), onClick = onPick)
+                        .semantics { contentDescription = chooseDesc }.testTag("pickFromPhone"),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
                 ) {
                     Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(32.dp))
-                    Text("Choose photos", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, modifier = Modifier.padding(top = 6.dp))
+                    Text(stringResource(R.string.photos_choose), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, modifier = Modifier.padding(top = 6.dp))
                 }
             }
             itemsIndexed(composer.photos, key = { _, p -> p.id }) { index, photo ->
+                val tileDesc = stringResource(R.string.photos_tile_desc, index + 1)
                 Box(
-                    Modifier.aspectRatio(1f).clickable(role = Role.Checkbox, onClickLabel = "Remove") { composer.removePhoto(photo.id) }
-                        .semantics { contentDescription = "Photo ${index + 1}, selected, number ${index + 1}"; selected = true }.testTag("phoneTile"),
+                    Modifier.aspectRatio(1f).clickable(role = Role.Checkbox, onClickLabel = stringResource(R.string.common_remove)) { composer.removePhoto(photo.id) }
+                        .semantics { contentDescription = tileDesc; selected = true }.testTag("phoneTile"),
                 ) {
                     photo.thumbnail?.let { androidx.compose.foundation.Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().padding(8.dp).clip(RoundedCornerShape(10.dp))) }
                     Box(Modifier.fillMaxSize().border(3.dp, MaterialTheme.colorScheme.primary).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)))
@@ -222,13 +230,13 @@ private fun MyMediaTab(vm: MediaViewModel, composer: ComposerViewModel, phoneCou
     val atLimit = AddPhotosLogic.limitReached(phoneCount, vm.selection.size)
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            MediaSearchBar(vm, label = if (vm.fromPrompt) "Photos from your prompt" else null)
+            MediaSearchBar(vm, label = if (vm.fromPrompt) stringResource(R.string.photos_from_prompt) else null)
             if (!vm.fromPrompt && PromptSearch.looksLikePhotoRequest(prompt)) {
-                TextButton(onClick = { vm.promptSearch(prompt) }, modifier = Modifier.heightIn(min = 44.dp).testTag("photosFromPrompt")) { Text("Photos from your prompt") }
+                TextButton(onClick = { vm.promptSearch(prompt) }, modifier = Modifier.heightIn(min = 44.dp).testTag("photosFromPrompt")) { Text(stringResource(R.string.photos_from_prompt)) }
             }
             // album chips: All, then each collection
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item { AlbumChip("All photos", vm.activeCollection == null) { vm.setCollectionFilter(null) } }
+                item { AlbumChip(stringResource(R.string.photos_all), vm.activeCollection == null) { vm.setCollectionFilter(null) } }
                 items(vm.collections, key = { it.id }) { c -> AlbumChip(c.name, vm.activeCollection == c.id) { vm.setCollectionFilter(c.id) } }
             }
         }

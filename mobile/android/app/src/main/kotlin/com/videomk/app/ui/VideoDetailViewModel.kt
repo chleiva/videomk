@@ -9,7 +9,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.videomk.app.R
 import com.videomk.app.core.ApiError
+import com.videomk.app.core.Txt
 import com.videomk.app.core.Backend
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -74,7 +76,7 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
         p.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 // most often an expired link: show "try again", which fetches a new one
-                _playback.value = PlaybackState.Error("This video couldn't be played. Check your connection and try again.")
+                _playback.value = PlaybackState.Error(Txt.s(R.string.video_play_failed))
                 releasePlayer()
             }
         })

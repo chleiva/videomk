@@ -2,7 +2,9 @@ package com.videomk.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.videomk.app.R
 import com.videomk.app.core.ApiError
+import com.videomk.app.core.Txt
 import com.videomk.app.core.Backend
 import com.videomk.app.core.EditOp
 import com.videomk.app.core.EditState
@@ -105,7 +107,7 @@ class EditorViewModel(private val videoId: String, private val backend: Backend?
     }
 
     fun delete(id: String) = _state.update { st ->
-        if (st.beats.size - 1 < 1) st.copy(banner = "A video needs at least one scene.")
+        if (st.beats.size - 1 < 1) st.copy(banner = Txt.s(R.string.editor_err_one_scene))
         else st.copy(beats = st.beats.filterNot { it.id == id }, picks = st.picks - id)
     }
 
@@ -129,7 +131,7 @@ class EditorViewModel(private val videoId: String, private val backend: Backend?
                 _state.update { it.copy(phase = EditorPhase.Rendering(mode)) }
                 waitForRender(mode)
             } catch (e: CancellationException) { throw e }
-            catch (e: ApiError.Conflict) { _state.update { it.copy(banner = e.message + " Your edits on this screen are kept until you reload.") } }
+            catch (e: ApiError.Conflict) { _state.update { it.copy(banner = Txt.s(R.string.editor_conflict_kept, e.message)) } }
             catch (e: ApiError) { _state.update { it.copy(banner = e.message) } }
             catch (e: Exception) { _state.update { it.copy(banner = ApiError.Server.message) } }
         }
@@ -143,14 +145,14 @@ class EditorViewModel(private val videoId: String, private val backend: Backend?
             if (s == null || s.editState == EditState.Rendering) return@repeat
             adopt(s)
             if (s.editState == EditState.Failed) {
-                _state.update { it.copy(phase = EditorPhase.Failed("The render didn't finish. Your changes are saved; try again.")) }
+                _state.update { it.copy(phase = EditorPhase.Failed(Txt.s(R.string.editor_render_failed))) }
                 return
             }
             _state.update { it.copy(resultUrl = if (mode == RenderMode.Final) s.finalUrl else s.previewUrl, phase = EditorPhase.Done(mode)) }
             onChanged()
             return
         }
-        _state.update { it.copy(phase = EditorPhase.Failed("This is taking longer than usual. Close the editor and check back in a few minutes.")) }
+        _state.update { it.copy(phase = EditorPhase.Failed(Txt.s(R.string.editor_render_slow))) }
     }
 
     private suspend fun currentCoroutineContextActive() = kotlin.coroutines.coroutineContext.isActive

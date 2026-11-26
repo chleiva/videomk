@@ -1,5 +1,7 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
+
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +56,7 @@ data class QueueProgress(
     val active: Boolean get() = total > finished
     val storageFullMessageNeeded: Boolean get() = noSpace > 0
     /** "Uploading 37 of 120 · 640 MB" */
-    fun bannerText(): String = "Uploading ${minOf(finished + 1, total)} of $total · ${StorageMeter.format(bytesDone)}"
+    fun bannerText(): String = Txt.s(R.string.upload_banner, minOf(finished + 1, total), total, StorageMeter.format(bytesDone))
 }
 
 interface QueueStorage { fun load(): String?; fun save(text: String) }
@@ -74,7 +76,7 @@ class HttpSlotPoster(private val http: okhttp3.OkHttpClient = defaultHttpClient(
         val req = okhttp3.Request.Builder().url(u).post(okhttp3.RequestBody.Companion.run { form.body.toRequestBody(okhttp3.MediaType.Companion.run { form.contentType.toMediaType() }) }).build()
         try {
             http.newBuilder().callTimeout(120, java.util.concurrent.TimeUnit.SECONDS).build().newCall(req).await().use { r ->
-                if (r.code !in 200..299) throw ApiError.Invalid("A photo couldn't be uploaded.")
+                if (r.code !in 200..299) throw ApiError.Invalid(Txt.s(R.string.upload_err_post))
             }
         } catch (e: CancellationException) { throw e } catch (e: ApiError) { throw e } catch (e: java.io.IOException) { throw ApiError.Network }
     }
@@ -195,7 +197,7 @@ class MediaUploadQueue(
             } catch (e: CancellationException) { throw e
             } catch (e: ApiError.StorageFull) {
                 _usage.value = e.usedBytes to e.limitBytes
-                setStates(needSlots.map { it.id }) { it.copy(state = UploadState.NoSpace, error = "Not enough storage") }
+                setStates(needSlots.map { it.id }) { it.copy(state = UploadState.NoSpace, error = Txt.s(R.string.upload_err_no_space)) }
                 return true
             } catch (e: ApiError.Network) { offline = true; return false
             } catch (e: ApiError.Unauthorized) { return false
@@ -211,10 +213,10 @@ class MediaUploadQueue(
                     if (i < 0) item else {
                         val r = byIndex[i]
                         when (r?.status) {
-                            SlotStatus.Upload -> if (r.url != null && r.id != null) item.copy(slotUrl = r.url, slotFields = r.fields, mediaId = r.id) else item.copy(state = UploadState.Failed, error = "The server didn't give an upload address.")
+                            SlotStatus.Upload -> if (r.url != null && r.id != null) item.copy(slotUrl = r.url, slotFields = r.fields, mediaId = r.id) else item.copy(state = UploadState.Failed, error = Txt.s(R.string.upload_err_no_address))
                             SlotStatus.Duplicate -> item.copy(state = UploadState.Duplicate, mediaId = r.duplicateOf)
-                            SlotStatus.NoSpace -> item.copy(state = UploadState.NoSpace, error = "Not enough storage")
-                            else -> item.copy(state = UploadState.Failed, error = r?.reason ?: "The photo was not accepted.")
+                            SlotStatus.NoSpace -> item.copy(state = UploadState.NoSpace, error = Txt.s(R.string.upload_err_no_space))
+                            else -> item.copy(state = UploadState.Failed, error = r?.reason ?: Txt.s(R.string.upload_err_rejected))
                         }
                     }
                 }
@@ -228,7 +230,7 @@ class MediaUploadQueue(
     private suspend fun uploadOne(item: QueueItem) {
         setStates(listOf(item.id)) { it.copy(state = UploadState.Uploading) }
         val bytes = blobs.read(item.path)
-        if (bytes == null) { setStates(listOf(item.id)) { it.copy(state = UploadState.Failed, error = "The photo file is gone.") }; return }
+        if (bytes == null) { setStates(listOf(item.id)) { it.copy(state = UploadState.Failed, error = Txt.s(R.string.upload_err_file_gone)) }; return }
         var last: ApiError = ApiError.Server
         for (attempt in 1..tries) {
             try {

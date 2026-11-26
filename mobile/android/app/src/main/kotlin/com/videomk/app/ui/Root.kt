@@ -1,5 +1,7 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
 import android.app.Application
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -78,8 +80,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         containerColor = Vmk.colors.background, contentWindowInsets = WindowInsets(0),
         bottomBar = {
             if (showTabs && container.mediaApi != null) NavigationBar(containerColor = Vmk.colors.surface) {
-                NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text("Videos") }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
-                NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text("Media") }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
+                NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text(stringResource(R.string.nav_tab_videos)) }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
+                NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text(stringResource(R.string.nav_tab_media)) }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
             }
         },
     ) { inner ->

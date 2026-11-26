@@ -1,5 +1,9 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import com.videomk.app.R
+import com.videomk.app.core.Txt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,21 +61,21 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
         containerColor = Vmk.colors.background, contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         topBar = {
             Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Vmk.colors.primary) }
+                IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back), tint = Vmk.colors.primary) }
                 Box(Modifier.weight(1f))
-                IconButton(onClick = { create = true }, modifier = Modifier.size(48.dp).testTag("newCollection")) { Icon(Icons.Filled.Add, "New collection", tint = Vmk.colors.primary) }
+                IconButton(onClick = { create = true }, modifier = Modifier.size(48.dp).testTag("newCollection")) { Icon(Icons.Filled.Add, stringResource(R.string.media_new_collection), tint = Vmk.colors.primary) }
             }
         },
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("collectionsList"), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
             item {
-                Text("Collections", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
-                Text("Newest first. Auto collections are made for you.", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
+                Text(stringResource(R.string.media_collections), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.collections_subtitle), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
             }
             items(vm.collections.sortedByDescending { it.auto }, key = { it.id }) { c ->
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 80.dp).clickable(role = Role.Button, onClickLabel = "Open collection") { onOpen(c.id) }.padding(vertical = 8.dp)
-                        .semantics(mergeDescendants = true) { contentDescription = "${c.name}${if (c.auto) ", automatic collection" else ""}, ${c.count} photos" }.testTag("collectionRow"),
+                    Modifier.fillMaxWidth().heightIn(min = 80.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.media_open_collection)) { onOpen(c.id) }.padding(vertical = 8.dp)
+                        .semantics(mergeDescendants = true) { contentDescription = Txt.n(if (c.auto) R.plurals.media_collection_desc_auto else R.plurals.media_collection_desc, c.count, c.name) }.testTag("collectionRow"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     Box(Modifier.size(60.dp).clip(RoundedCornerShape(16.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
@@ -81,18 +85,18 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
                         Text(c.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (c.auto) AutoChip(Modifier.testTag("autoChip"))
-                            Text("${c.count} photo${if (c.count == 1) "" else "s"}", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                            Text(pluralStringResource(R.plurals.media_photos, c.count, c.count), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                         }
                     }
                     Box {
-                        IconButton(onClick = { menuFor = c }, modifier = Modifier.size(48.dp).testTag("collectionMore")) { Icon(Icons.Filled.MoreHoriz, "More for ${c.name}", tint = Vmk.colors.textSecondary) }
+                        IconButton(onClick = { menuFor = c }, modifier = Modifier.size(48.dp).testTag("collectionMore")) { Icon(Icons.Filled.MoreHoriz, stringResource(R.string.collections_more_for, c.name), tint = Vmk.colors.textSecondary) }
                         CollectionMenu(menuFor?.id == c.id, { menuFor = null }, onRename = { rename = c; menuFor = null }, onDelete = { delete = c; menuFor = null })
                     }
                 }
             }
         }
     }
-    if (create) NameDialog("New collection", "", "Create", onDismiss = { create = false }) { vm.createCollection(it); create = false }
-    rename?.let { c -> NameDialog("Rename collection", c.name, "Save", onDismiss = { rename = null }) { vm.renameCollection(c.id, it); rename = null } }   // the Auto chip stays
+    if (create) NameDialog(stringResource(R.string.media_new_collection), "", stringResource(R.string.media_create), onDismiss = { create = false }) { vm.createCollection(it); create = false }
+    rename?.let { c -> NameDialog(stringResource(R.string.media_rename_collection), c.name, stringResource(R.string.common_save), onDismiss = { rename = null }) { vm.renameCollection(c.id, it); rename = null } }   // the Auto chip stays
     delete?.let { c -> DeleteCollectionDialog(c, pref, onDismiss = { delete = null }) { vm.deleteCollection(c.id); delete = null } }
 }

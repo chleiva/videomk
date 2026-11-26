@@ -1,5 +1,6 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Deferred
@@ -95,9 +96,9 @@ enum class SignInProvider(val idp: String?) { Email(null), Google("Google"), App
 
 /** The wording on the button. Google and Apple use their approved "Continue with ..." wording; email keeps today's wording when no social button is shown. */
 fun SignInProvider.label(withSocial: Boolean): String = when (this) {
-    SignInProvider.Google -> "Continue with Google"
-    SignInProvider.Apple -> "Continue with Apple"
-    SignInProvider.Email -> if (withSocial) "Continue with email" else "Sign in or create account"
+    SignInProvider.Google -> Txt.s(R.string.auth_continue_google)
+    SignInProvider.Apple -> Txt.s(R.string.auth_continue_apple)
+    SignInProvider.Email -> Txt.s(if (withSocial) R.string.auth_continue_email else R.string.auth_sign_in_or_create)
 }
 
 /** Which social buttons this build shows (BuildConfig switches, all off by default). Email is always there. */

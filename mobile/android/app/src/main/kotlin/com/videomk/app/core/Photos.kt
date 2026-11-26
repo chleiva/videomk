@@ -1,5 +1,7 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
+
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -56,14 +58,13 @@ object PhotoCapacity {
     /** One line, or null when every photo fits. [options] are the app's length choices (minutes). */
     fun hint(photos: Int, minutes: Double, options: List<Number>): String? {
         if (photos <= capacity(minutes)) return null
-        val photoWord = { n: Int -> if (n == 1) "photo" else "photos" }
         val need = minimumMinutes(photos)
         val suggestion = options.map { it.toDouble() }.sorted().firstOrNull { it >= need - 1e-9 }
         return if (suggestion != null) {
-            "About ${capacity(minutes)} of your $photos ${photoWord(photos)} fit in ${minutesText(minutes)} (the best ones, no duplicates). Choose ${minutesText(suggestion)} to show them all."
+            Txt.n(R.plurals.photos_hint_suggest, photos, capacity(minutes), minutesText(minutes), minutesText(suggestion))
         } else {
             val best = capacity(options.maxOfOrNull { it.toDouble() } ?: minutes)
-            "About $best of your $photos ${photoWord(photos)} fit in the longest video."
+            Txt.n(R.plurals.photos_hint_longest, photos, best)
         }
     }
 }
@@ -83,11 +84,11 @@ data class PhotoIntake(val accepted: Int, val leftOut: Int) {
         fun <T> extract(single: T?, clip: List<T>): List<T> = (if (clip.isNotEmpty()) clip else listOfNotNull(single)).distinct()
 
         fun leftOutMessage(leftOut: Int): String =
-            "$leftOut photo${if (leftOut == 1) " was" else "s were"} left out: a video can use up to ${PhotoLimits.MAX_PHOTOS}."
+            Txt.n(R.plurals.photos_left_out, leftOut, PhotoLimits.MAX_PHOTOS)
 
-        fun unreadableMessage(n: Int): String = "$n photo${if (n == 1) " couldn't" else "s couldn't"} be read and ${if (n == 1) "was" else "were"} skipped."
+        fun unreadableMessage(n: Int): String = Txt.n(R.plurals.photos_unreadable, n)
 
-        fun preparingText(done: Int, total: Int): String = "Preparing ${minOf(done + 1, total)} of $total"
+        fun preparingText(done: Int, total: Int): String = Txt.s(R.string.photos_preparing, minOf(done + 1, total), total)
     }
 }
 
@@ -230,7 +231,7 @@ class PhotoUploader(
     private val backoffMillis: (failedAttempts: Int) -> Long = { 500L * it },
 ) {
     suspend fun upload(photos: List<ByteArray>, progress: (done: Int, total: Int) -> Unit = { _, _ -> }): List<String> {
-        if (photos.isEmpty() || photos.size > PhotoLimits.MAX_PHOTOS) throw ApiError.Invalid("Choose between 1 and ${PhotoLimits.MAX_PHOTOS} photos.")
+        if (photos.isEmpty() || photos.size > PhotoLimits.MAX_PHOTOS) throw ApiError.Invalid(Txt.s(R.string.photos_choose_between, PhotoLimits.MAX_PHOTOS))
         val slots = api.requestUploads(photos.size)
         if (slots.size != photos.size) throw ApiError.Server
         val done = AtomicInteger(0)
@@ -243,8 +244,8 @@ class PhotoUploader(
         if (failures.isNotEmpty()) {
             if (failures.all { it is ApiError.Network }) throw ApiError.Network   // offline: say so
             throw ApiError.Invalid(
-                if (photos.size == 1) "A photo couldn't be uploaded. Please try again."
-                else "${failures.size} of ${photos.size} photos couldn't be uploaded. Tap Try again: your photos are still here.",
+                if (photos.size == 1) Txt.s(R.string.photos_upload_failed_one)
+                else Txt.s(R.string.photos_upload_failed_some, failures.size, photos.size),
             )
         }
         return slots.map { it.id }
@@ -268,7 +269,7 @@ class PhotoUploader(
         val req = Request.Builder().url(url).post(form.body.toRequestBody(form.contentType.toMediaType())).build()
         try {
             http.newBuilder().callTimeout(120, TimeUnit.SECONDS).build().newCall(req).await().use { r ->
-                if (r.code !in 200..299) throw ApiError.Invalid("A photo couldn't be uploaded. Please try again.")
+                if (r.code !in 200..299) throw ApiError.Invalid(Txt.s(R.string.photos_upload_failed_one))
             }
         } catch (e: CancellationException) { throw e } catch (e: ApiError) { throw e } catch (e: IOException) { throw ApiError.Network }
     }

@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
     /** Debug screenshots only: the intent whose `vmk_debug_fixture` extra picks a screen to draw (replaced by a newer intent, no restart needed). */
     private var fixtureIntent by androidx.compose.runtime.mutableStateOf<Intent?>(null)
 
+    /** Android 12 and older apply the explicit app language here; 13+ is handled by the system (AppLanguage). */
+    override fun attachBaseContext(newBase: android.content.Context) { super.attachBaseContext(com.videomk.app.data.AppLanguage(newBase).wrap(newBase)) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

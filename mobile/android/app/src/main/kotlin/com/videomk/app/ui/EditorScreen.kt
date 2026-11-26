@@ -84,6 +84,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
+import com.videomk.app.R
+import com.videomk.app.core.Txt
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import com.videomk.app.core.EditorBeat
 import com.videomk.app.core.EditorDiff
 import com.videomk.app.core.PhotoCandidate
@@ -91,7 +95,7 @@ import com.videomk.app.core.RenderMode
 import com.videomk.app.core.SceneKind
 
 /** The row text of a pause, e.g. Silent pause, 4 s. */
-internal fun silentLabel(hold: Double?): String = "Silent pause" + (hold?.let { ", ${Math.round(it)} s" } ?: "")
+internal fun silentLabel(hold: Double?): String = if (hold == null) Txt.s(R.string.editor_silent_pause) else Txt.s(R.string.editor_silent_pause_hold, Math.round(hold).toInt())
 
 fun SceneKind?.icon(): ImageVector = when (this) {
     SceneKind.Title -> Icons.Filled.TextFields
@@ -129,13 +133,13 @@ fun EditorScreen(vm: EditorViewModel, onClose: () -> Unit) {
         containerColor = Vmk.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Edit video") },
+                title = { Text(stringResource(R.string.editor_title)) },
                 navigationIcon = {
-                    TextButton(onClick = ::requestClose, enabled = !state.isLocked, modifier = Modifier.heightIn(min = 48.dp).testTag("closeEditor")) { Text("Close") }
+                    TextButton(onClick = ::requestClose, enabled = !state.isLocked, modifier = Modifier.heightIn(min = 48.dp).testTag("closeEditor")) { Text(stringResource(R.string.common_close)) }
                 },
                 actions = {
                     if (state.phase == EditorPhase.Editing) {
-                        TextButton(onClick = { reorder = !reorder }, modifier = Modifier.heightIn(min = 48.dp).testTag("reorderToggle")) { Text(if (reorder) "Done" else "Reorder") }
+                        TextButton(onClick = { reorder = !reorder }, modifier = Modifier.heightIn(min = 48.dp).testTag("reorderToggle")) { Text(stringResource(if (reorder) R.string.common_done else R.string.editor_reorder)) }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
@@ -146,7 +150,7 @@ fun EditorScreen(vm: EditorViewModel, onClose: () -> Unit) {
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (val phase = state.phase) {
                 EditorPhase.Loading -> FullScreenSpinner()
-                is EditorPhase.Failed -> MessageState("Can't edit right now", phase.message, "Reload", { vm.load() })
+                is EditorPhase.Failed -> MessageState(stringResource(R.string.editor_failed_title), phase.message, stringResource(R.string.editor_reload), { vm.load() })
                 is EditorPhase.Rendering -> RenderingView(phase.mode)
                 is EditorPhase.Done -> DoneView(phase.mode, state.resultUrl, onKeepEditing = { vm.keepEditing() }, onClose = onClose)
                 EditorPhase.Editing -> BeatList(vm, state, reorder, onSelect = { selected = it })
@@ -157,9 +161,9 @@ fun EditorScreen(vm: EditorViewModel, onClose: () -> Unit) {
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
-            title = { Text("Discard your changes?") },
-            confirmButton = { TextButton(onClick = { confirmDiscard = false; onClose() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Discard changes", color = Vmk.colors.danger) } },
-            dismissButton = { TextButton(onClick = { confirmDiscard = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Keep editing") } },
+            title = { Text(stringResource(R.string.editor_discard_title)) },
+            confirmButton = { TextButton(onClick = { confirmDiscard = false; onClose() }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.editor_discard_confirm), color = Vmk.colors.danger) } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.editor_keep_editing)) } },
         )
     }
 }
@@ -172,7 +176,7 @@ private fun BeatList(vm: EditorViewModel, state: EditorState, reorder: Boolean, 
                 Card {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(banner, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger, modifier = Modifier.testTag("editorBanner"))
-                        TextButton(onClick = { vm.load() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Reload and discard my changes") }
+                        TextButton(onClick = { vm.load() }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.editor_reload_discard)) }
                     }
                 }
             }
@@ -180,11 +184,11 @@ private fun BeatList(vm: EditorViewModel, state: EditorState, reorder: Boolean, 
         item(key = "title") {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
-                    value = state.title, onValueChange = vm::setTitle, label = { Text("Title") }, singleLine = true,
+                    value = state.title, onValueChange = vm::setTitle, label = { Text(stringResource(R.string.editor_field_title)) }, singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("titleField"),
                 )
                 SubtitlesRow(state.captions, vm::setCaptions, Modifier.testTag("captionsToggle"))
-                Text("Scenes (${state.beats.size})", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 12.dp))
+                Text(stringResource(R.string.editor_scenes_count, state.beats.size), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 12.dp))
             }
         }
         items(state.beats, key = { it.id }) { beat ->
@@ -194,7 +198,7 @@ private fun BeatList(vm: EditorViewModel, state: EditorState, reorder: Boolean, 
         }
         item(key = "footer") {
             Text(
-                if (reorder) "Use the arrows to reorder scenes, or the bin to delete one." else "Tap a scene to change its narration or photo. Use Reorder to move or delete scenes.",
+                stringResource(if (reorder) R.string.editor_footer_reorder else R.string.editor_footer_tap),
                 style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
             )
         }
@@ -207,7 +211,7 @@ private fun SubtitlesRow(on: Boolean, onChange: (Boolean) -> Unit, modifier: Mod
         modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(value = on, role = Role.Switch, onValueChange = onChange),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("Subtitles", color = Vmk.colors.text, modifier = Modifier.weight(1f))
+        Text(stringResource(R.string.editor_subtitles), color = Vmk.colors.text, modifier = Modifier.weight(1f))
         Switch(checked = on, onCheckedChange = null)
     }
 }
@@ -220,14 +224,14 @@ private fun ActionBar(vm: EditorViewModel, state: EditorState) {
                 OutlinedButton(
                     onClick = { vm.submit(RenderMode.Preview) }, enabled = state.isDirty,
                     modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("previewButton"),
-                ) { Text("Preview") }
+                ) { Text(stringResource(R.string.editor_preview)) }
                 PrimaryButton(
-                    "Publish", onClick = { vm.submit(RenderMode.Final) }, enabled = state.isDirty || state.canPublishWithoutChanges,
+                    stringResource(R.string.editor_publish), onClick = { vm.submit(RenderMode.Final) }, enabled = state.isDirty || state.canPublishWithoutChanges,
                     modifier = Modifier.weight(1f).testTag("publishButton"),
                 )
             }
             Text(
-                if (state.isDirty) "Preview is a quick draft. Publish makes the full-quality video and replaces the current one." else "Make a change to enable Preview and Publish.",
+                stringResource(if (state.isDirty) R.string.editor_action_hint_dirty else R.string.editor_action_hint_clean),
                 style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -242,7 +246,7 @@ internal fun BeatRow(
     Surface(shape = RoundedCornerShape(Vmk.radius), color = Vmk.colors.surface, modifier = Modifier.fillMaxWidth().testTag("beatRow")) {
         Row(Modifier.padding(vertical = 4.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Row(
-                Modifier.weight(1f).heightIn(min = 56.dp).clickable(onClickLabel = "Edit scene", onClick = onClick).padding(8.dp),
+                Modifier.weight(1f).heightIn(min = 56.dp).clickable(onClickLabel = stringResource(R.string.editor_edit_scene), onClick = onClick).padding(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Box(Modifier.size(64.dp, 44.dp).clip(RoundedCornerShape(8.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
@@ -254,9 +258,9 @@ internal fun BeatRow(
                 Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(beat.label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                        beat.duration?.let { Text("${Math.round(it)} s", style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary) }
-                        if (edited) Text("Edited", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.warning)
-                        else if (beat.stale) Text("Will be re-made", style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary)
+                        beat.duration?.let { Text(stringResource(R.string.len_short_seconds, Math.round(it).toInt()), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary) }
+                        if (edited) Text(stringResource(R.string.editor_edited), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.warning)
+                        else if (beat.stale) Text(stringResource(R.string.editor_will_remake), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.textSecondary)
                     }
                     if (beat.silent && beat.narration.isEmpty()) {
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("silentBeatLabel")) {
@@ -269,10 +273,10 @@ internal fun BeatRow(
             }
             if (reorder) {
                 Column {
-                    IconButton(onClick = onUp, enabled = canUp, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.ArrowUpward, "Move scene up") }
-                    IconButton(onClick = onDown, enabled = canDown, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.ArrowDownward, "Move scene down") }
+                    IconButton(onClick = onUp, enabled = canUp, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.ArrowUpward, stringResource(R.string.editor_move_up)) }
+                    IconButton(onClick = onDown, enabled = canDown, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.ArrowDownward, stringResource(R.string.editor_move_down)) }
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.Delete, "Delete scene", tint = Vmk.colors.danger) }
+                IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.Delete, stringResource(R.string.editor_delete_scene), tint = Vmk.colors.danger) }
             }
         }
     }
@@ -285,9 +289,9 @@ private fun RenderingView(mode: RenderMode) {
         verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CircularProgressIndicator(Modifier.size(48.dp))
-        Text(if (mode == RenderMode.Final) "Publishing your video" else "Making your preview", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+        Text(stringResource(if (mode == RenderMode.Final) R.string.editor_rendering_final else R.string.editor_rendering_preview), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
         Text(
-            "Only the scenes you changed are re-made, so this is usually quick. You can't edit while it renders.",
+            stringResource(R.string.editor_rendering_body),
             textAlign = TextAlign.Center, color = Vmk.colors.textSecondary,
         )
     }
@@ -306,12 +310,12 @@ private fun DoneView(mode: RenderMode, url: String?, onKeepEditing: () -> Unit, 
     DisposableEffect(player) { onDispose { player?.release() } }
     val fullScreen = rememberLauncherForActivityResult(FullScreenContract()) { r -> r?.let { player?.seekTo(it.positionMs); player?.playWhenReady = it.playWhenReady } }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(if (mode == RenderMode.Final) "Published" else "Preview ready", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("doneTitle"))
+        Text(stringResource(if (mode == RenderMode.Final) R.string.editor_done_published else R.string.editor_done_preview), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("doneTitle"))
         if (player != null && url != null) {
             InlinePlayer(player, onFullScreen = { player.pause(); fullScreen.launch(FullScreenArgs(url, player.currentPosition, true)) })
         }
-        if (mode == RenderMode.Preview) Text("This is a draft. Publish from the editor to make the full-quality video.", color = Vmk.colors.textSecondary)
-        PrimaryButton(if (mode == RenderMode.Final) "Done" else "Back to editing", onClick = { if (mode == RenderMode.Final) onClose() else onKeepEditing() }, modifier = Modifier.testTag("doneButton"))
+        if (mode == RenderMode.Preview) Text(stringResource(R.string.editor_done_draft_note), color = Vmk.colors.textSecondary)
+        PrimaryButton(stringResource(if (mode == RenderMode.Final) R.string.common_done else R.string.editor_back_to_editing), onClick = { if (mode == RenderMode.Final) onClose() else onKeepEditing() }, modifier = Modifier.testTag("doneButton"))
     }
 }
 
@@ -328,25 +332,25 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
         containerColor = Vmk.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Scene") },
-                actions = { TextButton(onClick = onDone, enabled = error == null, modifier = Modifier.heightIn(min = 48.dp).testTag("beatDone")) { Text("Done") } },
+                title = { Text(stringResource(R.string.editor_scene_generic)) },
+                actions = { TextButton(onClick = onDone, enabled = error == null, modifier = Modifier.heightIn(min = 48.dp).testTag("beatDone")) { Text(stringResource(R.string.common_done)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
             )
         },
     ) { padding ->
-        if (beat == null) { MessageState("Scene not found", "It may have been deleted.", "Back", onDone, Modifier.padding(padding)); return@Scaffold }
+        if (beat == null) { MessageState(stringResource(R.string.editor_scene_missing_title), stringResource(R.string.editor_scene_missing_body), stringResource(R.string.common_back), onDone, Modifier.padding(padding)); return@Scaffold }
         Column(Modifier.fillMaxSize().padding(padding).imePadding().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             val words = EditorDiff.wordCount(beat.narration)
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedTextField(
-                    value = beat.narration, onValueChange = { vm.setNarration(beatId, it) }, label = { Text("Narration") },
+                    value = beat.narration, onValueChange = { vm.setNarration(beatId, it) }, label = { Text(stringResource(R.string.editor_field_narration)) },
                     isError = error != null, minLines = 5, modifier = Modifier.fillMaxWidth().testTag("narrationField"),
                     supportingText = { NarrationSupport(beat, words, state.limits.minWords, state.limits.maxWords, error) },
                 )
             }
             Card {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Visual", style = MaterialTheme.typography.labelLarge, color = Vmk.colors.textSecondary)
+                    Text(stringResource(R.string.editor_visual), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.textSecondary)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(beat.kind.icon(), null, tint = MaterialTheme.colorScheme.primary)
                         Column {
@@ -356,7 +360,7 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
                     }
                     if (beat.kind != SceneKind.Image) {
                         Text(
-                            "Charts, diagrams and other scenes are drawn from the narration. Edit the narration and the visual is re-made.",
+                            stringResource(R.string.editor_visual_note),
                             style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
                         )
                     }
@@ -372,9 +376,10 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
 internal fun NarrationSupport(beat: EditorBeat, words: Int, minWords: Int, maxWords: Int, error: String?) {
     Column(Modifier.testTag("narrationSupport")) {
         if (beat.silent && words == 0) {
-            Text("A silent pause: nothing is spoken for ${Math.round(beat.hold ?: 0.0)} seconds and the music carries it. Type words here to give it a voice.")
+            Text(pluralStringResource(R.plurals.editor_silent_note, Math.round(beat.hold ?: 0.0).toInt(), Math.round(beat.hold ?: 0.0).toInt()))
         } else {
-            Text("$words words, about ${Math.round(EditorDiff.spokenSeconds(beat.narration))} seconds spoken. $minWords–$maxWords words per scene.")
+            Text(pluralStringResource(R.plurals.editor_words_spoken, words, words, Math.round(EditorDiff.spokenSeconds(beat.narration)).toInt()))
+            Text(stringResource(R.string.editor_words_range, minWords, maxWords))
         }
         if (error != null) Text(error, color = Vmk.colors.danger)
     }
@@ -385,32 +390,32 @@ private fun PhotoSection(vm: EditorViewModel, state: EditorState, beat: EditorBe
     val pick = state.picks[beat.id]
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Photo", style = MaterialTheme.typography.labelLarge, color = Vmk.colors.textSecondary)
+            Text(stringResource(R.string.editor_photo), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.textSecondary)
             val photo = beat.photo
             if (photo?.url != null && pick == null) {
-                AsyncImage(photo.url, contentDescription = "Current photo", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)))
+                AsyncImage(photo.url, contentDescription = stringResource(R.string.editor_current_photo), contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)))
                 photo.credit?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary) }
             } else if (photo?.noPhoto == true && pick == null) {
-                Text("No suitable photo was found. Pick one below, or the scene becomes a title card.", color = Vmk.colors.warning)
+                Text(stringResource(R.string.editor_no_photo), color = Vmk.colors.warning)
             }
             val chosen = pick?.let { p -> beat.candidates.firstOrNull { it.key == p } }
             if (chosen != null) {
-                Text("Will use the photo by ${chosen.creator}", color = Vmk.colors.success, fontWeight = FontWeight.Medium, modifier = Modifier.testTag("pickedNote"))
-                TextButton(onClick = { vm.clearPick(beat.id) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Undo photo change") }
+                Text(stringResource(R.string.editor_will_use_photo, chosen.creator), color = Vmk.colors.success, fontWeight = FontWeight.Medium, modifier = Modifier.testTag("pickedNote"))
+                TextButton(onClick = { vm.clearPick(beat.id) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.editor_undo_photo)) }
             }
         }
     }
     if (beat.candidates.isNotEmpty()) {
         Card {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Other photos", style = MaterialTheme.typography.labelLarge, color = Vmk.colors.textSecondary)
+                Text(stringResource(R.string.editor_other_photos), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.textSecondary)
                 beat.candidates.chunked(2).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                         for (c in row) CandidateTile(c, chosen = pick == c.key || (pick == null && beat.photo?.chosen == c.key), modifier = Modifier.weight(1f)) { vm.pick(c, beat.id) }
                         if (row.size == 1) Box(Modifier.weight(1f))
                     }
                 }
-                Text("Credit for the chosen photo is added to the video and its description automatically.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                Text(stringResource(R.string.editor_credit_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
             }
         }
     }
@@ -418,8 +423,9 @@ private fun PhotoSection(vm: EditorViewModel, state: EditorState, beat: EditorBe
 
 @Composable
 private fun CandidateTile(c: PhotoCandidate, chosen: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val tileDesc = stringResource(if (chosen) R.string.editor_photo_by_selected else R.string.editor_photo_by, c.creator)
     Column(
-        modifier.clickable(onClickLabel = "Use this photo", onClick = onClick).semantics(mergeDescendants = true) { contentDescription = "Photo by ${c.creator}${if (chosen) ", selected" else ""}" },
+        modifier.clickable(onClickLabel = stringResource(R.string.editor_use_photo), onClick = onClick).semantics(mergeDescendants = true) { contentDescription = tileDesc },
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Box(Modifier.fillMaxWidth().height(90.dp).clip(RoundedCornerShape(10.dp)).background(Vmk.colors.surfaceRaised)) {

@@ -62,6 +62,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.videomk.app.R
+import com.videomk.app.core.Txt
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.width
 import com.videomk.app.core.VideoItem
 import com.videomk.app.core.VideoStatus
 import kotlinx.coroutines.Dispatchers
@@ -91,12 +96,12 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
         containerColor = Vmk.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text(video?.displayTitle ?: "Video", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp).testTag("backButton")) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } },
+                title = { Text(video?.displayTitle ?: stringResource(R.string.video_title_fallback), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp).testTag("backButton")) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
                 actions = {
                     if (video != null && video.editable && video.status == VideoStatus.Complete) {
-                        TextButton(onClick = { detail.pause(); onEdit() }, modifier = Modifier.heightIn(min = 48.dp).testTag("editButton")) { Text("Edit") }
+                        TextButton(onClick = { detail.pause(); onEdit() }, modifier = Modifier.heightIn(min = 48.dp).testTag("editButton")) { Text(stringResource(R.string.video_edit)) }
                     }
                 },
             )
@@ -108,8 +113,8 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
                 when (val st = video.status) {
                     VideoStatus.Complete -> PlayerSection(video, detail, playback, http)
                     is VideoStatus.Running -> ProgressCard(st.stage)
-                    VideoStatus.Failed -> MessageCard("Something went wrong", "We couldn't finish this video. You haven't been charged for it.", Icons.Filled.Warning, Vmk.colors.danger)
-                    VideoStatus.Rejected -> MessageCard("This request can't be turned into a video", video.rejectReason ?: "Try describing something different.", Icons.Filled.PanTool, Vmk.colors.warning)
+                    VideoStatus.Failed -> MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Icons.Filled.Warning, Vmk.colors.danger)
+                    VideoStatus.Rejected -> MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Icons.Filled.PanTool, Vmk.colors.warning)
                 }
             }
         }
@@ -129,7 +134,7 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(playback.message, color = Vmk.colors.textSecondary)
-            OutlinedButton(onClick = { detail.reload() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Try again") }
+            OutlinedButton(onClick = { detail.reload() }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_try_again)) }
         }
         else -> Box(Modifier.fillMaxWidth().androidAspect(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
     }
@@ -141,10 +146,10 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
         var open by rememberSaveable { mutableStateOf(false) }
         Column(Modifier.testTag("descriptionGroup")) {
             Row(
-                Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = if (open) "Hide description" else "Show description") { open = !open },
+                Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(if (open) R.string.video_hide_description else R.string.video_show_description)) { open = !open },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("Description and photo credits", color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.video_description_toggle), color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
                 Icon(if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, null, tint = MaterialTheme.colorScheme.primary)
             }
             if (open) {
@@ -160,6 +165,7 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
     var copied by remember { mutableStateOf(false) }
     var copiedDescription by remember { mutableStateOf(false) }
     val url = (playback as? PlaybackState.Ready)?.url
+    val shareFailedText = stringResource(R.string.share_failed)
 
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
         if (url != null) {
@@ -168,32 +174,35 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
                     if (sharing) return@OutlinedButton
                     sharing = true; shareError = null
                     scope.launch {
-                        try { shareVideo(context, http, url, video.displayTitle) } catch (e: Exception) { shareError = "Couldn't prepare the video to share. Check your connection and try again." }
+                        try { shareVideo(context, http, url, video.displayTitle) } catch (e: Exception) { shareError = shareFailedText }
                         sharing = false
                     }
                 },
                 modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("shareButton"),
             ) {
                 if (sharing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Icon(Icons.Filled.Share, null, Modifier.size(18.dp))
-                Text(if (sharing) "  Preparing…" else "  Share", maxLines = 1)
+                androidx.compose.foundation.layout.Spacer(Modifier.width(8.dp))
+                Text(stringResource(if (sharing) R.string.share_preparing else R.string.share_action), textAlign = TextAlign.Center)
             }
         }
         OutlinedButton(
-            onClick = { copyText(context, "videomk title", video.displayTitle); copied = true; scope.launch { delay(2000); copied = false } },
+            onClick = { copyText(context, Txt.s(R.string.share_clip_label_title), video.displayTitle); copied = true; scope.launch { delay(2000); copied = false } },
             modifier = Modifier.weight(1f).heightIn(min = 48.dp),
         ) {
             Icon(if (copied) Icons.Filled.Check else Icons.Filled.ContentCopy, null, Modifier.size(18.dp))
-            Text(if (copied) "  Copied" else "  Copy title", maxLines = 1)
+            androidx.compose.foundation.layout.Spacer(Modifier.width(8.dp))
+            Text(stringResource(if (copied) R.string.share_copied else R.string.share_copy_title), textAlign = TextAlign.Center)
         }
     }
     shareError?.let { Text(it, color = Vmk.colors.danger, style = MaterialTheme.typography.bodySmall) }
     if (description != null) {
         OutlinedButton(
-            onClick = { copyText(context, "videomk description", description); copiedDescription = true; scope.launch { delay(2000); copiedDescription = false } },
+            onClick = { copyText(context, Txt.s(R.string.share_clip_label_description), description); copiedDescription = true; scope.launch { delay(2000); copiedDescription = false } },
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("copyDescription"),
         ) {
             Icon(if (copiedDescription) Icons.Filled.Check else Icons.AutoMirrored.Filled.TextSnippet, null, Modifier.size(18.dp))
-            Text(if (copiedDescription) "  Copied" else "  Copy description with credits", maxLines = 1)
+            androidx.compose.foundation.layout.Spacer(Modifier.width(8.dp))
+            Text(stringResource(if (copiedDescription) R.string.share_copied else R.string.share_copy_description), textAlign = TextAlign.Center)
         }
     }
 }
@@ -223,7 +232,7 @@ private suspend fun shareVideo(context: Context, http: OkHttpClient, url: String
         putExtra(Intent.EXTRA_TITLE, name)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    context.startActivity(Intent.createChooser(send, "Share video").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    context.startActivity(Intent.createChooser(send, Txt.s(R.string.share_chooser_title)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
 @Composable
@@ -241,13 +250,14 @@ private fun MessageCard(title: String, body: String, icon: androidx.compose.ui.g
 
 @Composable
 fun ProgressCard(stage: VideoStatus.Stage) {
+    val doneText = stringResource(R.string.video_step_done); val activeText = stringResource(R.string.video_step_active); val waitingText = stringResource(R.string.video_step_waiting)
     Card(Modifier.testTag("progressCard")) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text("Making your video", style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text)
-            Text("This usually takes a few minutes. You can leave this screen; it keeps going.", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+            Text(stringResource(R.string.lib_making_title), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text)
+            Text(stringResource(R.string.video_progress_body), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             for (s in VideoStatus.Stage.entries) {
                 Row(
-                    Modifier.semantics(mergeDescendants = true) { stateDescription = if (s < stage) "done" else if (s == stage) "in progress" else "waiting" },
+                    Modifier.semantics(mergeDescendants = true) { stateDescription = if (s < stage) doneText else if (s == stage) activeText else waitingText },
                     horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically,
                 ) {
                     when {

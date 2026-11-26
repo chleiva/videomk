@@ -6,7 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.videomk.app.R
 import com.videomk.app.core.ApiError
+import com.videomk.app.core.Txt
 import com.videomk.app.core.ArrivalPoller
 import com.videomk.app.core.ArrivalTracker
 import com.videomk.app.core.MediaApi
@@ -113,7 +115,7 @@ class MediaViewModel(
     fun start() { if (!started) { started = true; refresh() } }
 
     fun refresh() {
-        val a = api ?: run { loading = false; error = "My media isn't available in this build."; return }
+        val a = api ?: run { loading = false; error = Txt.s(R.string.media_err_unavailable); return }
         viewModelScope.launch {
             loading = photos.isEmpty(); error = null
             try {
@@ -250,7 +252,7 @@ class MediaViewModel(
                 for (chunk in ids.chunked(100)) a.delete(chunk)
                 listing.remove(ids); photos = photos.filter { it.id !in ids }
                 searchResult = searchResult?.let { r -> SearchResult(r.understood, r.items.filter { it.id !in ids }, r.mode) }
-                notice = if (ids.size == 1) "Photo deleted." else "${ids.size} photos deleted."
+                notice = Txt.n(R.plurals.media_deleted, ids.size)
                 runCatching { summary = a.summary(); collections = a.collections() }
             } catch (e: CancellationException) { throw e } catch (e: ApiError) { notice = e.message } catch (e: Exception) { notice = ApiError.Server.message }
         }
@@ -261,7 +263,7 @@ class MediaViewModel(
         viewModelScope.launch {
             try {
                 for (chunk in ids.chunked(100)) a.editCollection(collection.id, add = chunk)
-                notice = "Added to ${collection.name}."
+                notice = Txt.s(R.string.media_added_to, collection.name)
                 runCatching { collections = a.collections() }
                 photos = photos.map { if (it.id in ids) it.copy(collections = (it.collections + collection.id).distinct()) else it }
                 photos.filter { it.id in ids }.forEach { listing.update(it) }

@@ -128,8 +128,9 @@ data class MediaFilter(val from: String? = null, val to: String? = null, val col
 fun jsonIds(ids: List<String>) = JsonArray(ids.map { JsonPrimitive(it) })
 
 /** Smart collections: what the app does after an upload (docs/MEDIA_LIBRARY.md "Smart collections"). */
-enum class OrganizePref(val wire: String, val label: String) {
-    Ask("ask", "Ask"), Always("always", "Always"), Never("never", "Never");
+enum class OrganizePref(val wire: String, @androidx.annotation.StringRes private val labelRes: Int) {
+    Ask("ask", com.videomk.app.R.string.organize_pref_ask), Always("always", com.videomk.app.R.string.organize_pref_always), Never("never", com.videomk.app.R.string.organize_pref_never);
+    val label: String get() = Txt.s(labelRes)
     companion object { fun fromWire(s: String?) = entries.firstOrNull { it.wire == s } ?: Ask }
 }
 

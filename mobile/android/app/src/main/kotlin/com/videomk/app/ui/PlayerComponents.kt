@@ -1,5 +1,7 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
@@ -74,7 +76,7 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
                 modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(48.dp).testTag("fullScreenButton"),
             ) {
                 Box(Modifier.size(40.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Fullscreen, contentDescription = "Full screen", tint = Color.White)
+                    Icon(Icons.Filled.Fullscreen, contentDescription = stringResource(R.string.player_full_screen), tint = Color.White)
                 }
             }
         }

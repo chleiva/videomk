@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import com.videomk.app.core.AppleStep
 import com.videomk.app.core.DeletionState
 import com.videomk.app.core.DeletionText
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
 import com.videomk.app.core.ReauthStep
 
 /** The Settings card that leads to the confirmation sheet. */
@@ -61,10 +63,10 @@ import com.videomk.app.core.ReauthStep
 internal fun DeleteAccountCard(onOpen: () -> Unit) {
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Delete account", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { heading() })
+            Text(stringResource(R.string.deletion_card_title), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { heading() })
             Text(DeletionText.SETTINGS_BODY, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text)
             TextButton(onClick = onOpen, modifier = Modifier.heightIn(min = 48.dp).testTag("deleteAccountButton")) {
-                Text("Delete my account…", color = Vmk.colors.danger, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.deletion_card_button), color = Vmk.colors.danger, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -106,12 +108,11 @@ internal fun DeleteAccountSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             when (state) {
-                is DeletionState.Working -> Progress("Deleting your account", "Please wait. This takes a few seconds.", null, onCancelReauth)
+                is DeletionState.Working -> Progress(stringResource(R.string.deletion_working_title), stringResource(R.string.deletion_working_body), null, onCancelReauth)
                 is DeletionState.Reauth -> Progress(
-                    "Confirm it's you",
-                    if (state.step == ReauthStep.LoggingOut) "Opening the sign-in page in your browser. Sign in again there to confirm. Nothing is deleted until you do."
-                    else "Sign in again in your browser to confirm it's you. Nothing is deleted until you do.",
-                    "Cancel", onCancelReauth,
+                    stringResource(R.string.deletion_reauth_title),
+                    stringResource(if (state.step == ReauthStep.LoggingOut) R.string.deletion_reauth_opening else R.string.deletion_reauth_body),
+                    stringResource(R.string.common_cancel), onCancelReauth,
                 )
                 is DeletionState.Failed -> {
                     Header()
@@ -119,8 +120,8 @@ internal fun DeleteAccountSheet(
                         DeletionText.message(state.reason), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text,
                         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Vmk.colors.dangerContainer).padding(12.dp).testTag("deleteAccountError"),
                     )
-                    DestructiveButton("Try again", enabled = true, onClick = { onStart(typed) }, modifier = Modifier.testTag("deleteAccountRetry"))
-                    TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("deleteAccountClose")) { Text("Close", color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
+                    DestructiveButton(stringResource(R.string.common_try_again), enabled = true, onClick = { onStart(typed) }, modifier = Modifier.testTag("deleteAccountRetry"))
+                    TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("deleteAccountClose")) { Text(stringResource(R.string.common_close), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
                 }
                 else -> Form(typed, onTyped, onStart, onClose)
             }
@@ -134,14 +135,14 @@ private fun Header() {
         Box(Modifier.size(44.dp).clip(CircleShape).background(Vmk.colors.dangerContainer), contentAlignment = Alignment.Center) {
             Icon(Icons.Filled.DeleteForever, null, tint = Vmk.colors.danger, modifier = Modifier.size(26.dp))
         }
-        Text("Delete your account?", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
+        Text(stringResource(R.string.deletion_header), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
     }
 }
 
 @Composable
 private fun Form(typed: String, onTyped: (String) -> Unit, onStart: (String) -> Unit, onClose: () -> Unit) {
     Header()
-    Text("This permanently deletes:", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
+    Text(stringResource(R.string.deletion_deletes_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         DeletionText.deletes.forEach { item ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -151,17 +152,18 @@ private fun Form(typed: String, onTyped: (String) -> Unit, onStart: (String) -> 
         }
     }
     Text(DeletionText.IRREVERSIBLE, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger, fontWeight = FontWeight.Bold)
-    Text("What happens next", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
+    Text(stringResource(R.string.deletion_next_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
     Text(DeletionText.NEXT, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
     Text(DeletionText.REAUTH_NOTE, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
-    Text("Type ${DeletionText.CONFIRM_WORD} to confirm", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
+    Text(stringResource(R.string.deletion_type_to_confirm, DeletionText.CONFIRM_WORD), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
+    val typeToConfirm = stringResource(R.string.deletion_type_to_confirm, DeletionText.CONFIRM_WORD)
     OutlinedTextField(
         value = typed, onValueChange = onTyped, singleLine = true,
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, autoCorrectEnabled = false),
-        modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Type ${DeletionText.CONFIRM_WORD} to confirm" }.testTag("deleteConfirmField"),
+        modifier = Modifier.fillMaxWidth().semantics { contentDescription = typeToConfirm }.testTag("deleteConfirmField"),
     )
-    DestructiveButton("Delete my account", enabled = typed.trim() == DeletionText.CONFIRM_WORD, onClick = { onStart(typed) }, modifier = Modifier.testTag("deleteAccountConfirm"))
-    TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("deleteAccountCancel")) { Text("Cancel", color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
+    DestructiveButton(stringResource(R.string.deletion_confirm_button), enabled = typed.trim() == DeletionText.CONFIRM_WORD, onClick = { onStart(typed) }, modifier = Modifier.testTag("deleteAccountConfirm"))
+    TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("deleteAccountCancel")) { Text(stringResource(R.string.common_cancel), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
 }
 
 @Composable
@@ -191,14 +193,14 @@ internal fun DeletionDoneScreen(apple: AppleStep, onOpenApple: () -> Unit, onDon
                 when (apple) {
                     is AppleStep.Available -> {
                         Text(DeletionText.APPLE_AVAILABLE, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, textAlign = TextAlign.Center)
-                        PrimaryButton("Finish with Apple", onOpenApple, Modifier.testTag("deleteAppleButton"))
+                        PrimaryButton(stringResource(R.string.deletion_apple_button), onOpenApple, Modifier.testTag("deleteAppleButton"))
                     }
                     AppleStep.Manual -> Text(DeletionText.APPLE_MANUAL, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, textAlign = TextAlign.Center, modifier = Modifier.testTag("deleteAppleManual"))
                     AppleStep.Done -> Text(DeletionText.APPLE_DONE, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.success, textAlign = TextAlign.Center, modifier = Modifier.testTag("deleteAppleDone"))
                     AppleStep.None -> Unit
                 }
-                if (apple is AppleStep.Available) TextButton(onClick = onDone, modifier = Modifier.heightIn(min = 48.dp).testTag("deletionDoneButton")) { Text("Skip and close", color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
-                else PrimaryButton("Done", onDone, Modifier.testTag("deletionDoneButton"))
+                if (apple is AppleStep.Available) TextButton(onClick = onDone, modifier = Modifier.heightIn(min = 48.dp).testTag("deletionDoneButton")) { Text(stringResource(R.string.deletion_skip_close), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
+                else PrimaryButton(stringResource(R.string.common_done), onDone, Modifier.testTag("deletionDoneButton"))
             }
         }
     }

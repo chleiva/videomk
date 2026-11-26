@@ -1,5 +1,6 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
 import java.util.UUID
 import kotlin.math.exp
 
@@ -90,13 +91,13 @@ object ProgressEstimator {
     /** "About 2 min left." / "Less than a minute left." */
     fun leftText(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double = CreateOptions.DEFAULT_MINUTES): String {
         val s = secondsLeft(stage, secondsInStage, minutes)
-        return if (s < 60) "Less than a minute left." else "About ${Math.ceil(s / 60).toInt()} min left."
+        return if (s < 60) Txt.s(R.string.lib_left_less_than_minute) else Txt.s(R.string.lib_left_about_minutes, Math.ceil(s / 60).toInt())
     }
 }
 
 /** The four named steps of the in-progress card: Script, Voice, Pictures, Final cut, each filled by the overall estimate. */
 object MakingSteps {
-    val names = listOf("Script", "Voice", "Pictures", "Final cut")
+    val names: List<String> get() = listOf(Txt.s(R.string.lib_step_script), Txt.s(R.string.lib_step_voice), Txt.s(R.string.lib_step_pictures), Txt.s(R.string.lib_step_final_cut))
     private val edges = listOf(0.0, 0.22, 0.42, 0.62, 1.0)
 
     /** Fill (0..1) of each step for an overall progress [fraction]. */
@@ -107,9 +108,24 @@ object MakingSteps {
 
     /** What is happening, in words (no invented scene numbers: the server does not report them). */
     fun sentence(stage: VideoStatus.Stage): String = when (stage) {
-        VideoStatus.Stage.Starting -> "Getting started."
-        VideoStatus.Stage.Writing -> "Writing the story."
-        VideoStatus.Stage.VoiceAndVisuals -> "Voice and pictures."
-        VideoStatus.Stage.Rendering -> "Putting it all together."
+        VideoStatus.Stage.Starting -> Txt.s(R.string.lib_sentence_starting)
+        VideoStatus.Stage.Writing -> Txt.s(R.string.lib_sentence_writing)
+        VideoStatus.Stage.VoiceAndVisuals -> Txt.s(R.string.lib_sentence_voice)
+        VideoStatus.Stage.Rendering -> Txt.s(R.string.lib_sentence_rendering)
+    }
+}
+
+/** "Just now", "5 min ago", "3 h ago", "2 d ago", then a short date in the app language (the system formatter would follow the phone language instead). */
+object RelativeTime {
+    fun text(thenMillis: Long, nowMillis: Long): String {
+        val mins = maxOf(0L, (nowMillis - thenMillis) / 60_000)
+        return when {
+            mins < 1 -> Txt.s(R.string.lib_ago_now)
+            mins < 60 -> Txt.s(R.string.lib_ago_minutes, mins.toInt())
+            mins < 60 * 24 -> Txt.s(R.string.lib_ago_hours, (mins / 60).toInt())
+            mins < 60 * 24 * 7 -> Txt.s(R.string.lib_ago_days, (mins / (60 * 24)).toInt())
+            else -> java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(Txt.locale)
+                .format(java.time.Instant.ofEpochMilli(thenMillis).atZone(java.time.ZoneId.systemDefault()))
+        }
     }
 }

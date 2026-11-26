@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- shared -->
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_close">Cerrar</string>
+    <string name="common_back">Atrás</string>
+    <string name="common_next">Siguiente</string>
+    <string name="common_done">Listo</string>
+    <string name="common_try_again">Inténtalo de nuevo</string>
+    <string name="common_loading">Cargando…</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="common_remove">Quitar</string>
+    <string name="common_save">Guardar</string>
+    <string name="common_ok">Aceptar</string>
+
+    <!-- settings: language -->
+    <string name="settings_language_title">Idioma</string>
+    <string name="settings_language_hint">El idioma de la app. No cambia el idioma de tus videos.</string>
+    <string name="settings_language_system">Igual que mi teléfono</string>
+</resources>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- navigation, tabs, player -->
+    <string name="nav_tab_videos">Videos</string>
+    <string name="nav_tab_media">Mi biblioteca</string>
+    <string name="nav_load_videos_failed">No pudimos cargar tus videos.</string>
+    <string name="nav_minutes_short">%1$d min</string>
+    <string name="player_full_screen">Pantalla completa</string>
+    <string name="player_close_full_screen">Salir de pantalla completa</string>
+
+    <!-- video status stages and looks -->
+    <string name="stage_starting_short">Iniciando</string>
+    <string name="stage_starting">Empezando</string>
+    <string name="stage_writing_short">Escribiendo la historia</string>
+    <string name="stage_writing">Escribiendo la historia</string>
+    <string name="stage_voice_short">Voz e imágenes</string>
+    <string name="stage_voice">Grabando la voz y buscando imágenes</string>
+    <string name="stage_rendering_short">Procesando</string>
+    <string name="stage_rendering">Procesando</string>
+    <string name="video_untitled">Video sin título</string>
+    <string name="look_midnight">Medianoche</string>
+    <string name="look_paper">Papel</string>
+    <string name="look_sunrise">Amanecer</string>
+
+    <!-- API errors -->
+    <string name="err_session_expired">Tu sesión caducó. Inicia sesión de nuevo.</string>
+    <string name="err_video_not_ready">Este video aún no está listo.</string>
+    <string name="err_storage_full">Tu espacio de biblioteca está lleno. Elimina algunas fotos o consulta tus opciones de almacenamiento.</string>
+    <string name="err_not_found">Esa foto o colección ya no existe.</string>
+    <string name="err_network">Problema de conexión. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="err_server">Algo salió mal por nuestra parte. Inténtalo de nuevo.</string>
+    <string name="err_photo_too_large">Esa foto es demasiado grande.</string>
+    <string name="err_brief_unusable">No se puede usar esa idea.</string>
+    <string name="err_changed_meanwhile">Eso cambió mientras tanto. Inténtalo de nuevo.</string>
+    <string name="err_video_changed">Este video cambió. Vuelve a cargarlo para continuar.</string>
+    <string name="err_blocked_default">No podemos crear este video.</string>
+    <string name="err_paused_default">La creación de videos está en pausa por ahora.</string>
+    <string name="err_rate_limited">Demasiadas solicitudes. Inténtalo de nuevo en un momento.</string>
+    <string name="err_daily_limit">Alcanzaste el límite de hoy. Inténtalo de nuevo mañana.</string>
+    <plurals name="err_insufficient_credits">
+        <item quantity="one">Este video necesita %1$d crédito y tienes %2$d.</item>
+        <item quantity="other">Este video necesita %1$d créditos y tienes %2$d.</item>
+    </plurals>
+    <plurals name="err_rate_limited_minutes">
+        <item quantity="one">Demasiadas solicitudes. Inténtalo de nuevo en %1$d minuto.</item>
+        <item quantity="other">Demasiadas solicitudes. Inténtalo de nuevo en %1$d minutos.</item>
+    </plurals>
+    <plurals name="err_rate_limited_seconds">
+        <item quantity="one">Demasiadas solicitudes. Inténtalo de nuevo en %1$d segundo.</item>
+        <item quantity="other">Demasiadas solicitudes. Inténtalo de nuevo en %1$d segundos.</item>
+    </plurals>
+
+    <!-- sign in -->
+    <string name="auth_tagline">Describe un video. Nosotros lo escribimos, lo narramos y lo dibujamos.</string>
+    <string name="auth_not_configured">Sin configurar. Esta versión aún no tiene dirección de servidor.</string>
+    <string name="auth_signing_in">Iniciando sesión</string>
+    <string name="auth_continue_google">Continuar con Google</string>
+    <string name="auth_continue_apple">Continuar con Apple</string>
+    <string name="auth_continue_email">Continuar con correo</string>
+    <string name="auth_sign_in_or_create">Iniciar sesión o crear cuenta</string>
+    <string name="auth_sign_in_failed">No pudimos iniciar sesión. Inténtalo de nuevo.</string>
+    <string name="auth_account_link_failed">Vinculamos tus cuentas, pero no pudimos terminar de iniciar sesión. Toca el botón una vez más.</string>
+    <string name="auth_legal_line">Al continuar, aceptas los %1$s y la %2$s.</string>
+    <string name="auth_terms">Términos y condiciones</string>
+    <string name="auth_privacy_policy">Política de privacidad</string>
+
+    <!-- settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_account">Cuenta</string>
+    <string name="settings_signed_in_as">Sesión iniciada como</string>
+    <string name="settings_sign_out">Cerrar sesión</string>
+    <string name="settings_sign_out_confirm">¿Cerrar sesión en videomk?</string>
+    <string name="settings_photos">Fotos</string>
+    <string name="settings_photo_dates">Usar fechas de las fotos</string>
+    <string name="settings_photo_dates_hint">Ordena tus fotos según cuándo se tomaron y las agrupa por día</string>
+    <string name="settings_photo_locations">Usar ubicaciones de las fotos</string>
+    <string name="settings_photo_locations_hint">Nombra los lugares en tu historia. Se envía una ubicación aproximada (a ~1 km), nunca el punto exacto, y no se guarda cuando tu video ya está planificado. La ubicación siempre se quita de los archivos de las fotos.</string>
+    <string name="settings_media_privacy">Tus fotos son privadas. Solo tú puedes verlas. Nadie en videomk las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina una foto o todo cuando quieras.</string>
+    <string name="settings_organize_title">Organizar nuevas subidas</string>
+    <string name="settings_organize_hint">Preguntar te ofrece organizar tras una subida grande. Siempre agrupa las fotos por lugar y mes, y añade las subidas posteriores a las colecciones que coincidan. Nunca deja todo como está.</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
+    <string name="settings_privacy_open">Abrir la política de privacidad</string>
+
+    <!-- account deletion -->
+    <string name="deletion_card_title">Eliminar cuenta</string>
+    <string name="deletion_card_button">Eliminar mi cuenta…</string>
+    <string name="deletion_settings_body">Elimina de forma permanente tu cuenta, tus videos, tus fotos y Mi biblioteca, tus créditos y tu inicio de sesión. No se puede deshacer.</string>
+    <string name="deletion_header">¿Eliminar tu cuenta?</string>
+    <string name="deletion_deletes_title">Se eliminará para siempre:</string>
+    <string name="deletion_item_videos">Tus videos</string>
+    <string name="deletion_item_photos">Tus fotos y todo lo de Mi biblioteca</string>
+    <string name="deletion_item_credits">Tus créditos, incluidos los que te queden</string>
+    <string name="deletion_item_signin">Tu inicio de sesión</string>
+    <string name="deletion_irreversible">No se puede deshacer.</string>
+    <string name="deletion_next_title">Qué pasa después</string>
+    <string name="deletion_next">Tus datos se eliminan en unos minutos y tu inicio de sesión en una o dos horas. Si quieres registrarte de nuevo con el mismo correo, espera hasta entonces.</string>
+    <string name="deletion_reauth_note">Para confirmar que eres tú, puede que primero te pidamos iniciar sesión de nuevo.</string>
+    <string name="deletion_type_to_confirm">Escribe %1$s para confirmar</string>
+    <string name="deletion_confirm_button">Eliminar mi cuenta</string>
+    <string name="deletion_working_title">Eliminando tu cuenta</string>
+    <string name="deletion_working_body">Espera un momento. Tarda unos segundos.</string>
+    <string name="deletion_reauth_title">Confirma que eres tú</string>
+    <string name="deletion_reauth_opening">Abriendo la página de inicio de sesión en tu navegador. Inicia sesión allí de nuevo para confirmar. No se elimina nada hasta que lo hagas.</string>
+    <string name="deletion_reauth_body">Inicia sesión de nuevo en tu navegador para confirmar que eres tú. No se elimina nada hasta que lo hagas.</string>
+    <string name="deletion_done_title">Tu cuenta se está eliminando</string>
+    <string name="deletion_apple_available">Iniciaste sesión con Apple. Para terminar, confirma con Apple para que videomk deje de estar conectado a tu Apple ID. Es opcional y tu cuenta se elimina de todos modos.</string>
+    <string name="deletion_apple_manual">Para terminar, ve a appleid.apple.com, inicia sesión, abre Inicio de sesión y seguridad, luego Iniciar sesión con Apple, elige videomk y selecciona Dejar de usar el Apple ID.</string>
+    <string name="deletion_apple_done">Listo: videomk ya no tiene acceso a través de tu Apple ID.</string>
+    <string name="deletion_apple_button">Terminar con Apple</string>
+    <string name="deletion_skip_close">Omitir y cerrar</string>
+    <string name="deletion_fail_offline">No pudimos conectar con videomk, así que no sabemos si la eliminación empezó. Revisa tu conexión e inténtalo de nuevo. Es seguro volver a intentarlo.</string>
+    <string name="deletion_fail_server">Algo salió mal por nuestra parte y no se eliminó nada. Inténtalo de nuevo.</string>
+    <string name="deletion_fail_forbidden">Esta solicitud no coincide con la cuenta en la que tienes la sesión iniciada, así que no se eliminó nada. Cierra sesión, inicia sesión de nuevo y vuelve a intentarlo.</string>
+    <string name="deletion_fail_rejected">No se aceptó la confirmación, así que no se eliminó nada. Revisa la palabra e inténtalo de nuevo.</string>
+    <string name="deletion_fail_reauth_cancelled">No terminaste de iniciar sesión de nuevo, así que no se eliminó nada. Tu sesión sigue iniciada.</string>
+    <string name="deletion_fail_reauth_failed">No pudimos confirmar que eres tú, así que no se eliminó nada. Tu sesión sigue iniciada. Inténtalo de nuevo.</string>
+    <string name="deletion_fail_wrong_account">Iniciaste sesión con otra cuenta, así que no se eliminó nada. Usa la cuenta que quieres eliminar.</string>
+    <string name="deletion_fail_still_stale">Seguimos sin poder confirmar un inicio de sesión reciente, así que no se eliminó nada. Inténtalo de nuevo. Si sigue fallando, sigue los pasos en videomk.com/delete-account.</string>
+
+    <!-- wallet / credits -->
+    <string name="wallet_title">Créditos</string>
+    <string name="wallet_unlimited">ilimitados (cuenta de prueba)</string>
+    <plurals name="wallet_credit_word">
+        <item quantity="one">crédito</item>
+        <item quantity="other">créditos</item>
+    </plurals>
+    <string name="wallet_what_you_have">Lo que tienes</string>
+    <string name="wallet_none">No tienes créditos ahora mismo.</string>
+    <string name="wallet_next_free">Próximos créditos gratis: %1$s</string>
+    <plurals name="wallet_daily_rule">
+        <item quantity="one">%1$d crédito gratis cada día. Caduca esa noche.</item>
+        <item quantity="other">%1$d créditos gratis cada día. Caducan esa noche.</item>
+    </plurals>
+    <string name="wallet_pricing_note">1 crédito crea hasta 1 minuto de video, redondeado hacia arriba: un video de 10 segundos y uno de 60 cuestan 1 crédito, y uno de 61 segundos cuesta 2. Los créditos gratis caducan; los que compras, nunca.</string>
+    <string name="wallet_get_more">Obtener más créditos</string>
+    <string name="wallet_buying_soon">Pronto podrás comprar créditos.</string>
+    <string name="wallet_bucket_daily">Gratis de hoy</string>
+    <string name="wallet_bucket_signup">Créditos de bienvenida</string>
+    <string name="wallet_bucket_paid">Comprados</string>
+    <string name="wallet_bucket_refund">Créditos devueltos</string>
+    <string name="wallet_bucket_other">Créditos</string>
+    <string name="wallet_never_expire">No caducan</string>
+    <string name="wallet_expire_tonight">Caducan esta noche</string>
+    <string name="wallet_expire_on">Caducan el %1$s</string>
+    <string name="wallet_in_a_moment">en un momento</string>
+    <plurals name="wallet_in_minutes">
+        <item quantity="one">en %1$d minuto</item>
+        <item quantity="other">en %1$d minutos</item>
+    </plurals>
+    <plurals name="wallet_in_hours">
+        <item quantity="one">en %1$d hora</item>
+        <item quantity="other">en %1$d horas</item>
+    </plurals>
+    <plurals name="wallet_in_days">
+        <item quantity="one">en %1$d día</item>
+        <item quantity="other">en %1$d días</item>
+    </plurals>
+</resources>

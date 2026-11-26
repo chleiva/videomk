@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_title">New video</string>
+    <string name="create_what_for">What is it for?</string>
+    <string name="create_coming_soon">Coming soon</string>
+    <string name="create_change">Change</string>
+    <string name="create_also_works">Also works:</string>
+    <string name="create_use_format">Use %1$s format</string>
+    <string name="create_length">Length</string>
+    <string name="create_over_max">%1$s allows up to %2$s</string>
+    <string name="create_over_max_use">Use %1$s</string>
+    <string name="create_over_max_use_desc">Use %1$s instead</string>
+    <string name="create_error_retry">%1$s Tap Create video to try again.</string>
+    <string name="create_discard_title">Discard this video?</string>
+    <string name="create_discard_text">What you entered will be lost.</string>
+    <string name="create_discard">Discard</string>
+    <string name="create_keep_editing">Keep editing</string>
+    <string name="create_prompt_hint">Describe your video. For example: how bees make honey, explained for kids.</string>
+    <string name="create_tap_mic">Tap the mic to speak</string>
+    <string name="create_stop_dictation">Stop dictation</string>
+    <string name="create_dictate">Dictate</string>
+    <string name="create_dictate_desc">Dictate. Say what video you want instead of typing</string>
+    <string name="create_add_photos">Add photos</string>
+    <string name="create_add_photos_optional">Optional · from this phone or My media</string>
+    <string name="create_add_photos_desc_empty">Add photos. Optional, from this phone or My media</string>
+    <string name="create_edit">Edit</string>
+    <string name="create_chip_soon_desc">%1$s, coming soon, dimmed</string>
+    <string name="create_soon">Soon</string>
+    <string name="create_beta">Beta</string>
+    <string name="create_more_options">More options</string>
+    <string name="create_expand_more">Expand more options</string>
+    <string name="create_collapse_more">Collapse more options</string>
+    <string name="create_state_expanded">expanded</string>
+    <string name="create_state_collapsed">collapsed</string>
+    <string name="create_state_on">on</string>
+    <string name="create_state_off">off</string>
+    <string name="create_look">Look</string>
+    <string name="create_look_auto">Auto</string>
+    <string name="create_look_auto_desc">Producer decides</string>
+    <string name="create_look_desc">%1$s look</string>
+    <string name="create_look_midnight">Midnight</string>
+    <string name="create_look_paper">Paper</string>
+    <string name="create_look_sunrise">Sunrise</string>
+    <string name="create_subtitles">Subtitles</string>
+    <string name="create_language">Language</string>
+    <string name="create_language_desc">Choose the narration language</string>
+    <string name="create_narration_language">Narration language</string>
+    <string name="create_same_as_description">Same as my description</string>
+    <string name="create_format">Format</string>
+    <string name="create_aspect_landscape">Landscape</string>
+    <string name="create_aspect_vertical">Vertical</string>
+    <string name="create_aspect_square">Square</string>
+    <string name="create_aspect_portrait">Portrait</string>
+    <string name="create_aspect_other">Format</string>
+    <string name="create_format_desc">%1$s %2$s</string>
+    <string name="create_format_desc_soon">%1$s %2$s, coming soon</string>
+    <string name="create_format_desc_beta">%1$s %2$s, beta</string>
+    <string name="create_create_video">Create video</string>
+    <string name="create_explain_not_ready">Explain why this can\'t be created yet</string>
+    <string name="create_state_checking">Checking your request</string>
+    <string name="create_state_not_ready">Not ready. %1$s</string>
+    <string name="create_state_not_ready_fix">Not ready. %1$s. Double tap for the fix.</string>
+    <string name="create_platform_other">Just a video</string>
+    <string name="create_custom">Custom</string>
+    <string name="create_summary_look">%1$s look</string>
+    <string name="create_summary_look_auto">Auto look</string>
+    <string name="create_summary_subtitles_on">Subtitles on</string>
+    <string name="create_summary_subtitles_off">Subtitles off</string>
+    <string name="create_summary_same_language">Same language as description</string>
+    <string name="create_default_not_supported">This request is outside what videomk can make. Try describing the topic in a different way.</string>
+    <string name="create_default_blocked">We can\'t make this video.</string>
+    <string name="create_retry_minute">You can try again in a minute.</string>
+    <string name="question_overline">Question %1$d of %2$d</string>
+    <string name="question_make_it_now">Make it now</string>
+    <string name="question_previous">Previous question</string>
+    <string name="question_skip">Skip</string>
+    <string name="question_announce">Question %1$d of %2$d. %3$s</string>
+    <string name="question_type_answer">Type your answer</string>
+    <string name="question_chip_desc">%1$s, %2$d of %3$d</string>
+    <string name="question_other">Other…</string>
+    <string name="question_other_desc">Other, type your own answer</string>
+    <string name="question_you_decide">You decide</string>
+    <string name="summary_title">Ready when you are</string>
+    <string name="summary_your_request">Your request</string>
+    <string name="summary_change_answer">Change this answer</string>
+    <string name="summary_tap_hint">Tap an answer to change it.</string>
+    <string name="summary_edit_request">Edit request</string>
+    <string name="stop_title">We can\'t make this one</string>
+    <string name="stop_paused_title">Creating videos is paused</string>
+    <string name="stop_example">For example</string>
+    <string name="stop_use_this">Use this</string>
+    <string name="stop_nothing_charged">Nothing was charged.</string>
+    <string name="options_title">Video options</string>
+    <string name="options_cost_note">Each started minute costs 1 credit.</string>
+    <string name="options_cost_note_balance">Each started minute costs 1 credit. You have %1$d.</string>
+    <string name="options_done_dot">Done ·</string>
+    <string name="options_minutes_short">%1$d min</string>
+    <string name="composer_add_credits">Add credits</string>
+    <string name="composer_fix_use">Use %1$s · ⚡%2$d</string>
+    <string name="composer_checking">Checking your request…</string>
+    <string name="composer_listening">Listening…</string>
+    <string name="composer_starting">Starting your video…</string>
+    <string name="composer_too_long">%1$,d of %2$,d. Please shorten it.</string>
+    <string name="composer_no_credits">You have no credits</string>
+    <string name="composer_describe">Describe your video to continue</string>
+    <string name="composer_add_words">Add a few more words (%1$d to go)</string>
+    <string name="composer_limit_message">You can add up to %1$d photos. Remove one to choose another.</string>
+    <string name="composer_choose_photos">Choose photos</string>
+    <string name="composer_choose_up_to">Choose up to %1$d photos</string>
+    <string name="composer_from_phone">%1$d from this phone</string>
+    <string name="composer_from_library">%1$d from My media</string>
+    <string name="composer_n_of_max">%1$d of %2$d.</string>
+    <string name="composer_about_fit">About %1$d fit in %2$s.</string>
+    <string name="composer_add">Add</string>
+    <string name="composer_add_n">Add %1$d</string>
+    <string name="composer_processing_long">Taking longer than usual</string>
+    <string name="composer_processing_still">Still getting it ready</string>
+    <string name="composer_processing">Getting it ready</string>
+    <string name="composer_summary_none_added">No new photos were added.</string>
+    <string name="composer_eta_under_minute">less than a minute</string>
+    <string name="composer_eta_minutes">about %1$d min</string>
+    <string name="composer_source_both">From this phone and My media</string>
+    <string name="composer_source_library">From My media</string>
+    <string name="composer_source_phone">From this phone</string>
+    <string name="composer_photos_of_max">%1$d of %2$d photos</string>
+    <string name="composer_photo_n_of">Photo %1$d of %2$d</string>
+    <string name="composer_remove_photo_n">Remove photo %1$d</string>
+    <string name="composer_from_library_photo">From My media: %1$s</string>
+    <string name="composer_remove_from_video">Remove from the video</string>
+    <string name="photos_preparing">Preparing %1$d of %2$d</string>
+    <string name="photos_choose_between">Choose between 1 and %1$d photos.</string>
+    <string name="photos_upload_failed_one">A photo couldn\'t be uploaded. Please try again.</string>
+    <string name="photos_upload_failed_some">%1$d of %2$d photos couldn\'t be uploaded. Tap Try again: your photos are still here.</string>
+    <string name="dictation_mic_off_keyboard">Microphone access is off for videomk, so use the microphone key on your keyboard instead.</string>
+    <string name="dictation_speech_off_keyboard">Speech recognition is off for videomk, so use the microphone key on your keyboard instead.</string>
+    <string name="dictation_unavailable_keyboard">Speech recognition isn\'t available on this phone, so use the microphone key on your keyboard instead.</string>
+    <string name="dictation_tap_keyboard">Tap the microphone key on your keyboard to dictate.</string>
+    <string name="dictation_allow_mic">Allow microphone access for videomk in Settings, or turn on voice typing in your keyboard settings.</string>
+    <string name="dictation_allow_speech">Allow speech recognition for videomk in Settings, or turn on voice typing in your keyboard settings.</string>
+    <string name="dictation_unavailable">Dictation isn\'t available right now. You can turn on voice typing in your keyboard settings, or type your idea.</string>
+    <string name="dictation_start_failed_keyboard">The microphone isn\'t available for dictation right now, so use the microphone key on your keyboard.</string>
+    <string name="dictation_start_failed">Couldn\'t start dictation. Is another app or a call using the microphone?</string>
+    <string name="dictation_network_keyboard">Speech recognition needs a connection right now, so use the microphone key on your keyboard.</string>
+    <string name="dictation_network">Dictation needs an internet connection right now. You can type your idea instead.</string>
+    <string name="dictation_error_keyboard">Dictation isn\'t working right now, so use the microphone key on your keyboard.</string>
+    <string name="dictation_error">Dictation isn\'t available right now. You can type your idea instead.</string>
+    <plurals name="create_add_photos_selected_desc">
+        <item quantity="one">Add photos. %1$d selected</item>
+        <item quantity="other">Add photos. %1$d selected</item>
+    </plurals>
+    <plurals name="create_photos_count">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <plurals name="create_length_desc">
+        <item quantity="one">%2$s, %1$d credit</item>
+        <item quantity="other">%2$s, %1$d credits</item>
+    </plurals>
+    <plurals name="create_length_desc_selected">
+        <item quantity="one">%2$s, %1$d credit, selected</item>
+        <item quantity="other">%2$s, %1$d credits, selected</item>
+    </plurals>
+    <plurals name="create_state_ready">
+        <item quantity="one">Ready, costs %1$d credit</item>
+        <item quantity="other">Ready, costs %1$d credits</item>
+    </plurals>
+    <plurals name="create_retry_hours">
+        <item quantity="one">You can try again in about %1$d hour.</item>
+        <item quantity="other">You can try again in about %1$d hours.</item>
+    </plurals>
+    <plurals name="create_retry_minutes">
+        <item quantity="one">You can try again in about %1$d minute.</item>
+        <item quantity="other">You can try again in about %1$d minutes.</item>
+    </plurals>
+    <plurals name="options_credits">
+        <item quantity="one">%1$d credit</item>
+        <item quantity="other">%1$d credits</item>
+    </plurals>
+    <plurals name="options_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="options_length_desc">
+        <item quantity="one">%2$s, %1$d credit</item>
+        <item quantity="other">%2$s, %1$d credits</item>
+    </plurals>
+    <plurals name="composer_fix_description">
+        <item quantity="one">Use %2$s instead, %1$d credit</item>
+        <item quantity="other">Use %2$s instead, %1$d credits</item>
+    </plurals>
+    <plurals name="composer_needs_credits">
+        <item quantity="one">Needs %1$d credit, you have %2$d</item>
+        <item quantity="other">Needs %1$d credits, you have %2$d</item>
+    </plurals>
+    <plurals name="composer_idle_cost">
+        <item quantity="one">%2$s costs %1$d credit</item>
+        <item quantity="other">%2$s costs %1$d credits</item>
+    </plurals>
+    <plurals name="composer_video_minutes">
+        <item quantity="one">A %1$d minute video</item>
+        <item quantity="other">A %1$d minute video</item>
+    </plurals>
+    <plurals name="composer_video_seconds">
+        <item quantity="one">A %1$d second video</item>
+        <item quantity="other">A %1$d second video</item>
+    </plurals>
+    <plurals name="composer_ready_credits">
+        <item quantity="one">%1$d credit</item>
+        <item quantity="other">%1$d credits</item>
+    </plurals>
+    <plurals name="composer_ready_credits_left">
+        <item quantity="one">%1$d credit · you\'ll have %2$d left</item>
+        <item quantity="other">%1$d credits · you\'ll have %2$d left</item>
+    </plurals>
+    <plurals name="composer_selected">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+    <plurals name="composer_summary_added">
+        <item quantity="one">%1$d photo added.</item>
+        <item quantity="other">%1$d photos added.</item>
+    </plurals>
+    <plurals name="composer_summary_duplicates">
+        <item quantity="one">%1$d was already there.</item>
+        <item quantity="other">%1$d were already there.</item>
+    </plurals>
+    <plurals name="composer_summary_failed">
+        <item quantity="one">%1$d needs your attention.</item>
+        <item quantity="other">%1$d need your attention.</item>
+    </plurals>
+    <plurals name="composer_summary_no_space">
+        <item quantity="one">%1$d did not fit in your storage.</item>
+        <item quantity="other">%1$d did not fit in your storage.</item>
+    </plurals>
+    <plurals name="photos_hint_suggest">
+        <item quantity="one">About %2$d of your %1$d photo fit in %3$s (the best ones, no duplicates). Choose %4$s to show them all.</item>
+        <item quantity="other">About %2$d of your %1$d photos fit in %3$s (the best ones, no duplicates). Choose %4$s to show them all.</item>
+    </plurals>
+    <plurals name="photos_hint_longest">
+        <item quantity="one">About %2$d of your %1$d photo fit in the longest video.</item>
+        <item quantity="other">About %2$d of your %1$d photos fit in the longest video.</item>
+    </plurals>
+    <plurals name="photos_left_out">
+        <item quantity="one">%1$d photo was left out: a video can use up to %2$d.</item>
+        <item quantity="other">%1$d photos were left out: a video can use up to %2$d.</item>
+    </plurals>
+    <plurals name="photos_unreadable">
+        <item quantity="one">%1$d photo couldn\'t be read and was skipped.</item>
+        <item quantity="other">%1$d photos couldn\'t be read and were skipped.</item>
+    </plurals>
+</resources>

@@ -73,3 +73,7 @@ fun linkified(text: String, linkColor: androidx.compose.ui.graphics.Color): Anno
     }
     append(text.substring(last))
 }
+
+/** The system photo picker's own limit (Android 13+ / R extensions 2); callers wrap it in runCatching and fall back to the app's limit. */
+@android.annotation.SuppressLint("NewApi")
+internal fun pickImagesMaxLimit(): Int = android.provider.MediaStore.getPickImagesMaxLimit()

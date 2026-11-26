@@ -12,6 +12,8 @@ import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import com.videomk.app.core.DictationLanguage
 import com.videomk.app.core.DictationPlan
+import com.videomk.app.core.Txt
+import com.videomk.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -78,8 +80,7 @@ class DictationController(context: Context) {
         } catch (e: Throwable) {
             Log.w(TAG, "dictation start failed", e)
             teardown()
-            failOver("The microphone isn't available for dictation right now, so use the microphone key on your keyboard.",
-                "Couldn't start dictation. Is another app or a call using the microphone?")
+            failOver(Txt.s(R.string.dictation_start_failed_keyboard), Txt.s(R.string.dictation_start_failed))
         }
     }
 
@@ -161,14 +162,11 @@ class DictationController(context: Context) {
                 SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> _state.value = State.Idle   // the user said nothing: not an error
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY, SpeechRecognizer.ERROR_CLIENT -> _state.value = State.Idle
                 SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ->
-                    failOver("Microphone access is off for videomk, so use the microphone key on your keyboard instead.",
-                        "Allow microphone access for videomk in Settings, or turn on voice typing in your keyboard settings.")
+                    failOver(Txt.s(R.string.dictation_mic_off_keyboard), Txt.s(R.string.dictation_allow_mic))
                 SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT, SpeechRecognizer.ERROR_SERVER ->
                     if (wasListening && gotText) _state.value = State.Idle
-                    else failOver("Speech recognition needs a connection right now, so use the microphone key on your keyboard.",
-                        "Dictation needs an internet connection right now. You can type your idea instead.")
-                else -> failOver("Dictation isn't working right now, so use the microphone key on your keyboard.",
-                    "Dictation isn't available right now. You can type your idea instead.")
+                    else failOver(Txt.s(R.string.dictation_network_keyboard), Txt.s(R.string.dictation_network))
+                else -> failOver(Txt.s(R.string.dictation_error_keyboard), Txt.s(R.string.dictation_error))
             }
         }
     }

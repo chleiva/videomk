@@ -95,6 +95,7 @@ android {
     lint {
         abortOnError = true
         checkReleaseBuilds = true
+        error += setOf("MissingTranslation", "ExtraTranslation")   // docs/I18N.md: a missing Spanish string is a bug
         disable += "ObsoleteSdkInt"   // the adaptive icon must stay in mipmap-anydpi-v26 (aapt2 does not accept it in an unqualified anydpi folder)
     }
 }

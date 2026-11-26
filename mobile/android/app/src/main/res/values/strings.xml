@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">videomk</string>
+    <string name="app_name" translatable="false">videomk</string>
+
+    <!-- shared -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_close">Close</string>
+    <string name="common_back">Back</string>
+    <string name="common_next">Next</string>
+    <string name="common_done">Done</string>
+    <string name="common_try_again">Try again</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_remove">Remove</string>
+    <string name="common_save">Save</string>
+    <string name="common_ok">OK</string>
+
+    <!-- settings: language (docs/I18N.md: explicit choice, then device language, then English) -->
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_hint">The language of the app. It does not change the language of your videos.</string>
+    <string name="settings_language_system">Same as my phone</string>
+    <string name="settings_language_en" translatable="false">English</string>
+    <string name="settings_language_es" translatable="false">Español</string>
 </resources>

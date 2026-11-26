@@ -61,6 +61,10 @@ object DebugHooks {
     /** `files/fake_many` holds a number N: every video is repeated N times (distinct ids) so the home list is long enough to fling to its bottom. */
     fun manyVideos(context: android.content.Context): Int = runCatching { java.io.File(context.filesDir, "fake_many").readText().trim().toInt() }.getOrDefault(0)
 
+    /** `files/fake_backend`: canned videos, wallet and editor data (no server, no account), for screenshots. */
+    fun fakeBackend(context: android.content.Context): com.videomk.app.core.Backend? =
+        if (java.io.File(context.filesDir, "fake_backend").exists()) FakeDebugBackend() else null
+
     /** `files/fake_empty_home`: show the home as if there were no videos (the empty state cannot be reached with a QA account that has videos). */
     fun emptyHome(context: android.content.Context): Boolean = java.io.File(context.filesDir, "fake_empty_home").exists()
 

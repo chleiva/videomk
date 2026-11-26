@@ -1,5 +1,9 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import com.videomk.app.R
+import com.videomk.app.core.Txt
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -112,7 +116,7 @@ fun rememberColumns(): Int = if (LocalConfiguration.current.screenWidthDp >= 600
 fun SkeletonGrid(columns: Int, modifier: Modifier = Modifier) {
     val still = reduceMotion(LocalContext.current)
     val a = if (still) 0.6f else rememberInfiniteTransition(label = "skeleton").animateFloat(0.35f, 0.75f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "a").value
-    Column(modifier.semantics { contentDescription = "Loading your photos" }.testTag("mediaSkeleton"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(modifier.semantics { contentDescription = Txt.s(R.string.media_loading_photos) }.testTag("mediaSkeleton"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         repeat(5) {
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 repeat(columns) { Box(Modifier.weight(1f).aspectRatio(1f).alpha(a).background(Vmk.colors.surfaceRaised)) }
@@ -134,8 +138,9 @@ fun PhotoGrid(
     footer: (@Composable () -> Unit)? = null, flat: Boolean = false,
     order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(),
 ) {
+    val bestFirst = stringResource(R.string.media_best_first)
     val shown = remember(photos, hiddenIds) { if (hiddenIds.isEmpty()) photos else photos.filter { it.id !in hiddenIds } }
-    val sections = remember(shown, flat) { if (flat) listOf(MediaSection("relevance", "Best matches first", shown)) else MediaGrouping.group(shown) }
+    val sections = remember(shown, flat) { if (flat) listOf(MediaSection("relevance", bestFirst, shown)) else MediaGrouping.group(shown) }
     val indexById = remember(photos) { photos.withIndex().associate { it.value.id to it.index } }
     val bounds = remember { HashMap<String, Rect>() }
     var origin by remember { mutableStateOf(Offset.Zero) }
@@ -179,13 +184,14 @@ fun PhotoGrid(
                     for (p in rows[r]) {
                         val isSel = p.id in selected
                         val label = MediaLabels.photo(p)
+                        val selectedText = stringResource(R.string.media_state_selected); val notSelectedText = stringResource(R.string.media_state_not_selected)
                         Box(
                             Modifier.weight(1f).aspectRatio(1f)
                                 .onGloballyPositioned { bounds[p.id] = it.boundsInWindow() }
-                                .semantics { contentDescription = label; this.selected = isSel; if (selecting) stateDescription = if (isSel) "Selected" else "Not selected" }
+                                .semantics { contentDescription = label; this.selected = isSel; if (selecting) stateDescription = if (isSel) selectedText else notSelectedText }
                                 .combinedClickable(
-                                    role = Role.Button, onClickLabel = if (selecting) (if (isSel) "Deselect" else "Select") else "Open photo",
-                                    onLongClickLabel = "Select photos", onLongClick = { onLongPress(p.id) },
+                                    role = Role.Button, onClickLabel = if (selecting) (if (isSel) stringResource(R.string.media_deselect) else stringResource(R.string.media_select)) else stringResource(R.string.media_open_photo),
+                                    onLongClickLabel = stringResource(R.string.media_select_photos), onLongClick = { onLongPress(p.id) },
                                     onClick = { if (selecting) onToggle(p.id) else onOpen(indexById[p.id] ?: 0) },
                                 )
                                 .testTag("mediaTile"),
@@ -207,7 +213,7 @@ fun PhotoGrid(
 private fun SectionHeader(section: MediaSection) {
     Text(
         section.title, style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text,
-        modifier = Modifier.fillMaxWidth().background(Vmk.colors.background.copy(alpha = 0.96f)).padding(horizontal = 16.dp, vertical = 8.dp).semantics { contentDescription = "${section.title}, ${section.items.size} photos" },
+        modifier = Modifier.fillMaxWidth().background(Vmk.colors.background.copy(alpha = 0.96f)).padding(horizontal = 16.dp, vertical = 8.dp).semantics { contentDescription = Txt.n(R.plurals.media_section_desc, section.items.size, section.title) },
     )
 }
 
@@ -240,11 +246,11 @@ fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: Str
                 ) {
                     Icon(Icons.Filled.Search, null, tint = Vmk.colors.textTertiary, modifier = Modifier.size(20.dp))
                     Box(Modifier.weight(1f)) {
-                        if (vm.search.query.isEmpty()) Text("Search your photos, try 'beach in Thailand'", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (vm.search.query.isEmpty()) Text(stringResource(R.string.media_search_hint), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textTertiary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         inner()
                     }
                     if (vm.searching) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    else if (vm.search.active) IconButton(onClick = { vm.clearSearch() }, modifier = Modifier.size(44.dp)) { Icon(Icons.Filled.Close, "Clear search") }
+                    else if (vm.search.active) IconButton(onClick = { vm.clearSearch() }, modifier = Modifier.size(44.dp)) { Icon(Icons.Filled.Close, stringResource(R.string.media_clear_search)) }
                     else Box(Modifier.size(12.dp))
                 }
             },
@@ -270,10 +276,12 @@ fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: Str
 fun StorageMeterRow(used: Long, limit: Long, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val state = StorageMeter.state(used, limit)
     val color = when (state) { StorageMeter.State.Ok -> MaterialTheme.colorScheme.primary; StorageMeter.State.Warning -> Vmk.colors.warning; StorageMeter.State.Full -> Vmk.colors.danger }
-    val text = StorageMeter.label(used, limit) + when (state) { StorageMeter.State.Full -> " - full"; StorageMeter.State.Warning -> " - almost full"; else -> "" }
+    val label = StorageMeter.label(used, limit)
+    val text = when (state) { StorageMeter.State.Full -> stringResource(R.string.media_meter_full, label); StorageMeter.State.Warning -> stringResource(R.string.media_meter_almost_full, label); else -> label }
+    val description = stringResource(R.string.media_storage_desc, text)
     Column(
-        modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button, onClickLabel = "Open storage details", onClick = onClick)
-            .semantics(mergeDescendants = true) { contentDescription = "Storage: $text" }.testTag("storageMeter"),
+        modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.media_open_storage), onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = description }.testTag("storageMeter"),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         LinearProgressIndicator(progress = { StorageMeter.fraction(used, limit).toFloat() }, modifier = Modifier.fillMaxWidth().heightIn(min = 4.dp), color = color, trackColor = Vmk.colors.surfaceRaised)

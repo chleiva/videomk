@@ -1,5 +1,7 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
+
 /**
  * Which speech-recognition language to use. The recognizer must match the language being spoken: a Spanish speaker on an English
  * phone would otherwise get a garbled English transcript, which the server then can't recognise as Spanish.
@@ -56,16 +58,16 @@ sealed interface DictationPlan {
             if (appCanWork) return UseApp
             if (keyboardDictationEnabled) {
                 val why = when {
-                    microphone == Permission.Denied -> "Microphone access is off for videomk, so use the microphone key on your keyboard instead."
-                    speech == Permission.Denied -> "Speech recognition is off for videomk, so use the microphone key on your keyboard instead."
-                    !recognizerAvailable -> "Speech recognition isn't available on this phone, so use the microphone key on your keyboard instead."
-                    else -> "Tap the microphone key on your keyboard to dictate."
+                    microphone == Permission.Denied -> Txt.s(R.string.dictation_mic_off_keyboard)
+                    speech == Permission.Denied -> Txt.s(R.string.dictation_speech_off_keyboard)
+                    !recognizerAvailable -> Txt.s(R.string.dictation_unavailable_keyboard)
+                    else -> Txt.s(R.string.dictation_tap_keyboard)
                 }
                 return UseKeyboard(why)
             }
-            if (microphone == Permission.Denied) return Blocked("Allow microphone access for videomk in Settings, or turn on voice typing in your keyboard settings.")
-            if (speech == Permission.Denied) return Blocked("Allow speech recognition for videomk in Settings, or turn on voice typing in your keyboard settings.")
-            return Blocked("Dictation isn't available right now. You can turn on voice typing in your keyboard settings, or type your idea.")
+            if (microphone == Permission.Denied) return Blocked(Txt.s(R.string.dictation_allow_mic))
+            if (speech == Permission.Denied) return Blocked(Txt.s(R.string.dictation_allow_speech))
+            return Blocked(Txt.s(R.string.dictation_unavailable))
         }
     }
 }

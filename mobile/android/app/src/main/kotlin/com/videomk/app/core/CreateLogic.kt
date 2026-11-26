@@ -10,6 +10,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import com.videomk.app.R
 
 /** A "What is it for?" chip. [enabled] only when the server can make its format; the others are dimmed with "Soon". */
 data class PlatformChip(
@@ -19,16 +20,16 @@ data class PlatformChip(
 
 object CreatePlatforms {
     /** The built-in table of docs/UI_DESIGN.md section o; a server list for a platform overrides its format. */
-    private val BUILT_IN = listOf(
+    private fun builtIn() = listOf(
         PlatformInfo("youtube", "YouTube", "16:9", "1080p"), PlatformInfo("linkedin", "LinkedIn", "16:9", "1080p"), PlatformInfo("x", "X", "16:9", "1080p"),
-        PlatformInfo("other", "Just a video", "16:9", "1080p"),
+        PlatformInfo("other", Txt.s(R.string.create_platform_other), "16:9", "1080p"),
         PlatformInfo("shorts", "Shorts · Reels · TikTok", "9:16", "1080p"), PlatformInfo("instagram_feed", "Instagram", "4:5", "1080p"),
     )
 
     /** Supported platforms first (in the table's order), then the ones that are "Soon". */
     fun chips(caps: Capabilities): List<PlatformChip> {
         // the server's entry decides the format, length advice and note; the built-in table only supplies the label and the order
-        val base = BUILT_IN.map { b -> caps.platforms.firstOrNull { it.id == b.id }?.let { it.copy(label = b.label) } ?: b }
+        val base = builtIn().map { b -> caps.platforms.firstOrNull { it.id == b.id }?.let { it.copy(label = b.label) } ?: b }
         val all = base.map { p -> PlatformChip(p.id, p.label, p.aspect, p.resolution, caps.isReady(p.aspect) && caps.resolutions.any { it.id == p.resolution }, p.recommendedMinutes, p.maxMinutes, p.otherAspects.filter { caps.isReady(it) && it != p.aspect }, p.note) }
         return all.filter { it.enabled } + all.filter { !it.enabled }
     }
@@ -53,7 +54,7 @@ object CreatePlatforms {
         val c = chip(caps, o.platform)?.takeIf { it.enabled } ?: return null
         val max = c.maxMinutes ?: return null
         if (o.minutes <= max + 1e-9) return null
-        return OverMax("${c.label} allows up to ${Lengths.clock(max)}", caps.presets.filter { it <= max + 1e-9 }.maxOrNull())
+        return OverMax(Txt.s(R.string.create_over_max, c.label, Lengths.clock(max)), caps.presets.filter { it <= max + 1e-9 }.maxOrNull())
     }
 
     /** "Also works: Square, Landscape": other formats the platform accepts, each switches only the format. */
@@ -72,24 +73,30 @@ object CreatePlatforms {
     fun recommendation(o: CreateOptions, caps: Capabilities): String {
         val c = chip(caps, o.platform)
         if (!isCustom(o, caps) && c?.note != null) return "${c.label} · ${c.note}"   // the server's own words, e.g. "Portrait 4:5 · 1080p · about 1 min"
-        val name = if (isCustom(o, caps)) "Custom" else c?.label ?: "Just a video"
+        val name = if (isCustom(o, caps)) Txt.s(R.string.create_custom) else c?.label ?: Txt.s(R.string.create_platform_other)
         return "$name · ${aspectText(o.aspect, caps)} · ${o.resolution}"
     }
 
-    fun aspectText(aspect: String, caps: Capabilities): String = "${caps.aspect(aspect)?.label ?: defaultLabel(aspect)} $aspect"
-    private fun defaultLabel(a: String) = when (a) { "16:9" -> "Landscape"; "9:16" -> "Vertical"; "1:1" -> "Square"; "4:5" -> "Portrait"; else -> "Format" }
+    fun aspectText(aspect: String, caps: Capabilities): String = "${aspectName(aspect, caps)} $aspect"
+
+    /** The server's (localized) label for a format, else the app's own name for it. */
+    fun aspectName(aspect: String, caps: Capabilities): String = caps.aspect(aspect)?.label?.takeIf { it.isNotBlank() } ?: defaultLabel(aspect)
+    fun defaultLabel(a: String): String = Txt.s(when (a) { "16:9" -> R.string.create_aspect_landscape; "9:16" -> R.string.create_aspect_vertical; "1:1" -> R.string.create_aspect_square; "4:5" -> R.string.create_aspect_portrait; else -> R.string.create_aspect_other })
 
     /** The "Change" link is only offered when there is a real choice. */
     fun canChangeFormat(caps: Capabilities): Boolean = caps.readyAspects.size > 1 || caps.resolutions.size > 1
 
     /** The one-line summary of More options: "Auto look · Subtitles on · Same language as description". */
     fun moreSummary(o: CreateOptions, caps: Capabilities): String {
-        val look = (o.look?.title ?: "Auto") + " look"
-        val lang = if (o.language == "auto") "Same language as description" else caps.languages.firstOrNull { it.id == o.language }?.label ?: o.language
-        return "$look · Subtitles ${if (o.captions) "on" else "off"} · $lang"
+        val look = o.look?.let { Txt.s(R.string.create_summary_look, it.displayName()) } ?: Txt.s(R.string.create_summary_look_auto)
+        val lang = if (o.language == "auto") Txt.s(R.string.create_summary_same_language) else caps.languages.firstOrNull { it.id == o.language }?.label ?: languageName(o.language)
+        return "$look · ${Txt.s(if (o.captions) R.string.create_summary_subtitles_on else R.string.create_summary_subtitles_off)} · $lang"
     }
 
-    fun languageLabel(o: CreateOptions, caps: Capabilities): String = if (o.language == "auto") "Same as my description" else caps.languages.firstOrNull { it.id == o.language }?.label ?: o.language
+    fun languageLabel(o: CreateOptions, caps: Capabilities): String = if (o.language == "auto") Txt.s(R.string.create_same_as_description) else caps.languages.firstOrNull { it.id == o.language }?.label ?: languageName(o.language)
+
+    /** A language written in its own language; an id the app does not know is shown as it is. */
+    fun languageName(id: String): String = when (id) { "en" -> "English"; "es" -> "Español"; else -> id }
 }
 
 /** What is remembered per person after a successful Create (prompt and photos never). */
@@ -160,7 +167,8 @@ class QuestionFlow(val questions: List<Question>) {
 
     val current: Question? get() = if (inSummary) null else questions.getOrNull(index)
     val total: Int get() = questions.size
-    val overline: String get() = "QUESTION ${index + 1} OF $total"
+    val overline: String get() = overline(index)
+    fun overline(i: Int): String = Txt.s(R.string.question_overline, i + 1, total).uppercase(Txt.locale)
     fun answerOf(id: String): Answer? = answers[id]
     val canGoBack: Boolean get() = !inSummary && index > 0
 
@@ -214,8 +222,8 @@ sealed interface CreateStop {
 }
 
 object CreateErrors {
-    const val DEFAULT_NOT_SUPPORTED = "This request is outside what videomk can make. Try describing the topic in a different way."
-    const val DEFAULT_BLOCKED = "We can't make this video."
+    val DEFAULT_NOT_SUPPORTED: String get() = Txt.s(R.string.create_default_not_supported)
+    val DEFAULT_BLOCKED: String get() = Txt.s(R.string.create_default_blocked)
 
     fun fromCheck(r: IntakeResult): CreateStop? = when (r) {
         is IntakeResult.NotSupported -> CreateStop.NotSupported(r.message?.takeIf { it.isNotBlank() } ?: DEFAULT_NOT_SUPPORTED, r.suggestion?.takeIf { it.isNotBlank() })
@@ -234,9 +242,9 @@ object CreateErrors {
     /** "You can try again in about 1 hour." (no retry loop: the person decides). */
     fun retryText(seconds: Int?): String? = seconds?.takeIf { it > 0 }?.let {
         when {
-            it >= 3600 -> "You can try again in about ${Math.round(it / 3600.0)} hour${if (Math.round(it / 3600.0) == 1L) "" else "s"}."
-            it >= 120 -> "You can try again in about ${it / 60} minutes."
-            else -> "You can try again in a minute."
+            it >= 3600 -> Math.round(it / 3600.0).toInt().let { h -> Txt.n(R.plurals.create_retry_hours, h) }
+            it >= 120 -> Txt.n(R.plurals.create_retry_minutes, it / 60)
+            else -> Txt.s(R.string.create_retry_minute)
         }
     }
 }

@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import com.videomk.app.R
 
 /** `GET /users/{id}/capabilities` (docs/CREATE_API.md): what the app may offer. Absent endpoint means [FALLBACK]. */
 data class AspectInfo(val id: String, val label: String, val ready: Boolean, val beta: Boolean)
@@ -27,7 +28,7 @@ data class Capabilities(
     companion object {
         /** The server has no capabilities endpoint yet: only landscape 16:9 at 1080p, the built-in platform table, no extra languages, no request check. */
         val FALLBACK = Capabilities(
-            aspects = listOf(AspectInfo("16:9", "Landscape", true, false)), resolutions = listOf(ResolutionInfo("1080p", "1080p")),
+            aspects = listOf(AspectInfo("16:9", "", true, false)), resolutions = listOf(ResolutionInfo("1080p", "1080p")),
             platforms = emptyList(), languages = emptyList(),
         )
 
@@ -109,3 +110,6 @@ class ApiIntake(private val api: ApiClient) : IntakeApi {
         IntakeResult.fromJson(api.brief(request.toJson()))
     } catch (e: ApiError.Paused) { IntakeResult.Paused(e.text, e.retryAfterSeconds) }
 }
+
+/** The look's name in the app language (Midnight, Paper, Sunrise); the wire value never changes. */
+fun VideoLook.displayName(): String = Txt.s(when (this) { VideoLook.Midnight -> R.string.create_look_midnight; VideoLook.Paper -> R.string.create_look_paper; VideoLook.Sunrise -> R.string.create_look_sunrise })

@@ -62,6 +62,25 @@ Cognito identity providers exist. It is the same hosted-UI request plus `identit
 
 Sign in on the emulator through the real hosted page (email + password / verification code), or start signed in with the debug hook below.
 
+## Languages: English and Spanish (docs/I18N.md)
+English is the base (`res/values`), Spanish is `res/values-es`; the contract (policy, glossary, tone, key names) is `docs/I18N.md`.
+- **Selection order**: the person's explicit choice in Settings > Language (Same as my phone / English / Español) > the device language > English. Any `es-*` is Spanish, any other language is English
+  (`core/Txt.kt` `AppLocale`, tested). Android 13+ stores the choice in the system (`LocaleManager`, so Settings > System > App languages agrees, `res/xml/locales_config.xml`); Android 12 and older store it
+  in preferences and each activity wraps its context in `attachBaseContext` (`data/AppLanguage.kt`). The narration language of a video (`auto|en|es`) is a separate option and is unchanged.
+- **`X-Locale: en|es`** goes on every API call (`ApiClient`, from the effective app language). Server messages, capability labels/notes and the intake model's text come back localized or in the request language
+  and are shown as received: never translate them in the app.
+- **Add a string**: add it to `res/values/strings_<area>.xml` AND `res/values-es/strings_<area>.xml` (key `area_name`, lower snake case; `%1$s`/`%1$d` placeholders, same order and types in both; counts use `<plurals>` with
+  `one` and `other`; never build a sentence from pieces). In Compose use `stringResource` / `pluralStringResource`. Outside Compose (logic objects, view models, error mappers) use `Txt.s(R.string.x, args)` and
+  `Txt.n(R.plurals.x, count, extra...)` at the moment the text is needed (never in a field initialised once: the language can change). `contentDescription`, `onClickLabel` and `stateDescription` are strings too.
+  Dates, numbers, durations and sizes use `Txt.locale` formatters. Brand names, codes, `testTag`s, log lines and debug-only fixtures (`src/debug`) stay literal.
+- **Gates** (all in `./gradlew testDebugUnitTest lintDebug`): `LocalizationTest` checks key parity, placeholder parity (type and order), plural completeness, the locale policy, the `X-Locale` header and scans
+  `ui/*.kt` for new user-visible English literals; lint treats `MissingTranslation` and `ExtraTranslation` as errors. Plain JVM tests read the real `strings*.xml` through `JvmStringProvider` (English by default;
+  `Txt.provider = JvmStringProvider("es")` for a Spanish assertion).
+- **Try Spanish**: `adb shell cmd locale set-app-locales com.videomk.app --locales es` (reset with `--locales ""`), or pick Español in Settings. For screenshots without an account, create the file flag
+  `files/fake_backend` (plus `fake_media`, `fake_intake`, `fake_social`; see `DebugHooks`) and start with a locally made, unsigned token in `vmk_debug_id_token`: `FakeDebugBackend` serves canned videos, wallet and editor data.
+  Check at 360x640 dp, font scale 1.0 and 2.0, light and dark: Spanish is about 25 to 35 percent longer.
+- State held in a view model (for example an error banner) keeps the language it was created in until it is replaced; screens re-render in the new language on the activity recreation a language change causes.
+
 ## Tests
 ```
 ./gradlew testDebugUnitTest              # 102 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,

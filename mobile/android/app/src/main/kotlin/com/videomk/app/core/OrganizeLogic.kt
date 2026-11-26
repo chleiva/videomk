@@ -1,5 +1,7 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
+
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,22 +35,21 @@ object OrganizePrompt {
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(ZoneOffset.UTC).format(Instant.ofEpochMilli(batchStartMillis - 60_000))
 
     fun title(p: OrganizePreview, wholeLibrary: Boolean): String {
-        val n = "%,d".format(p.total)
-        return if (p.groups.isNotEmpty() && p.groups.all { it.existing }) "Add $n ${if (p.total == 1) "photo" else "photos"} to your collections?"
-        else if (wholeLibrary) "Organize $n photos?" else "Organize $n new photos?"
+        return if (p.groups.isNotEmpty() && p.groups.all { it.existing }) Txt.n(R.plurals.organize_title_add, p.total)
+        else if (wholeLibrary) Txt.n(R.plurals.organize_title_library, p.total) else Txt.n(R.plurals.organize_title_new, p.total)
     }
 
     /** The sheet shows the top five groups; the rest is "+ N more collections". */
     fun visibleGroups(p: OrganizePreview, expanded: Boolean): List<OrganizeGroup> = if (expanded) p.groups else p.groups.take(5)
     fun moreCount(p: OrganizePreview): Int = maxOf(0, p.groups.size - 5)
-    fun moreLabel(p: OrganizePreview): String = "+ ${moreCount(p)} more collection${if (moreCount(p) == 1) "" else "s"}"
-    fun skippedLine(p: OrganizePreview): String? = p.skipped.takeIf { it > 0 }?.let { "${"%,d".format(it)} photo${if (it == 1) "" else "s"} had no clear group and stay${if (it == 1) "s" else ""} as they are." }
+    fun moreLabel(p: OrganizePreview): String = Txt.n(R.plurals.organize_more_collections, moreCount(p))
+    fun skippedLine(p: OrganizePreview): String? = p.skipped.takeIf { it > 0 }?.let { Txt.n(R.plurals.organize_skipped, it) }
 
     /** The done toast: "Organized into 14 collections" / "...1 collection" / "Everything is already organized". */
     fun doneMessage(created: Int, updated: Int): String = when {
-        created > 0 -> "Organized into $created collection${if (created == 1) "" else "s"}"
-        updated > 0 -> "Added to $updated collection${if (updated == 1) "" else "s"}"
-        else -> "Everything is already organized"
+        created > 0 -> Txt.n(R.plurals.organize_done_created, created)
+        updated > 0 -> Txt.n(R.plurals.organize_done_updated, updated)
+        else -> Txt.s(R.string.organize_done_nothing)
     }
 
     fun nameValid(name: String) = name.trim().isNotEmpty() && name.trim().length <= 60
@@ -56,14 +57,25 @@ object OrganizePrompt {
 
 /** Suggested names for "Put all in one collection", read from the preview's group names ("London · Apr 2026", "Phuket · 14-21 Jul 2024", "Jun 2025"). */
 object OrganizeNames {
-    private val DATE = Regex("""(?:\d{1,2}(?:-\d{1,2})?\s+)?([A-Z][a-z]{2})\s+(\d{4})""")
-    private val MONTHS = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    // The server names groups in the request's language ("Apr 2026" or "abr 2026"): read both languages' month abbreviations.
+    private val DATE = Regex("""(?:\d{1,2}(?:-\d{1,2})?\s+)?(\p{L}{3,4})\.?\s+(\d{4})""")
+    private val EN = listOf("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    private val ES = listOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
 
-    private fun monthKey(m: String, y: Int): Int? = MONTHS.indexOf(m).takeIf { it >= 0 }?.let { y * 12 + it }
-    private fun label(key: Int) = "${MONTHS[key % 12]} ${key / 12}"
+    private fun monthKey(m: String, y: Int): Int? {
+        val k = m.lowercase().take(3)
+        val i = EN.indexOf(k).takeIf { it >= 0 } ?: ES.indexOf(k).takeIf { it >= 0 } ?: return null
+        return y * 12 + i
+    }
+    /** "Jul 2024" / "jul 2024": the month abbreviation of the app language (generated names are the person's to keep or rename). */
+    private fun label(key: Int): String {
+        val locale = Txt.locale
+        val abbr = java.time.Month.of(key % 12 + 1).getDisplayName(java.time.format.TextStyle.SHORT, locale).trimEnd('.')
+        return "$abbr ${key / 12}"
+    }
 
     fun suggest(p: OrganizePreview): List<String> {
-        val keys = p.groups.mapNotNull { g -> DATE.findAll(g.name).lastOrNull()?.let { m -> monthKey(m.groupValues[1], m.groupValues[2].toInt()) } }
+        val keys = p.groups.mapNotNull { g -> DATE.findAll(g.name).mapNotNull { m -> monthKey(m.groupValues[1], m.groupValues[2].toInt()) }.lastOrNull() }
         if (keys.isEmpty()) return emptyList()
         val lo = keys.min(); val hi = keys.max()
         val range = if (lo == hi) label(lo) else "${label(lo)} - ${label(hi)}"
@@ -167,7 +179,7 @@ class OrganizeRunner(
                 )
                 if (cancelled) return
                 if (r.remaining <= 0) { store.save(null); _state.value = OrganizeState.Done(job.created, job.updated); return }
-                if (r.applied == 0) { _state.value = OrganizeState.Failed(job.total, job.done, "Couldn't finish organizing."); return }   // no progress: do not spin
+                if (r.applied == 0) { _state.value = OrganizeState.Failed(job.total, job.done, Txt.s(R.string.organize_err_unfinished)); return }   // no progress: do not spin
                 store.save(job.toJson())
                 _state.value = OrganizeState.Running(job.total, job.done)
             }
@@ -175,8 +187,8 @@ class OrganizeRunner(
     }
 
     fun progressText(): String? = when (val s = _state.value) {
-        is OrganizeState.Running -> "Organizing... ${"%,d".format(s.done)} of ${"%,d".format(s.total)}"
-        is OrganizeState.Offline -> "Waiting for a connection"
+        is OrganizeState.Running -> Txt.s(R.string.organize_progress, s.done, s.total)
+        is OrganizeState.Offline -> Txt.s(R.string.organize_waiting)
         else -> null
     }
 }

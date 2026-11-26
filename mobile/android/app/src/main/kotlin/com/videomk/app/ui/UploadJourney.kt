@@ -1,5 +1,9 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import com.videomk.app.R
+import com.videomk.app.core.Txt
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -96,13 +100,15 @@ fun UploadBatchSection(
     val shown = remember(items) { items.reversed() }
     val done = items.count { it.state == UploadState.Done && byId.containsKey(it.mediaId) }
     val processing = items.count { it.state == UploadState.Done && !byId.containsKey(it.mediaId) }
+    val addingText = pluralStringResource(R.plurals.upload_adding, items.size, items.size)
+    val addingDesc = pluralStringResource(R.plurals.upload_adding_desc, items.size, items.size, done)
     Column(Modifier.fillMaxWidth().testTag("uploadBatch")) {
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).semantics(mergeDescendants = true) { heading(); contentDescription = "Adding ${items.size} photo${if (items.size == 1) "" else "s"}, $done done" },
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).semantics(mergeDescendants = true) { heading(); contentDescription = addingDesc },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Adding ${items.size} photo${if (items.size == 1) "" else "s"}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-            Text("Newest first", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+            Text(addingText, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.upload_newest_first), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             for (row in shown.chunked(columns)) {
@@ -135,10 +141,10 @@ fun LocalUploadTile(item: QueueItem, server: MediaPhoto?, state: TileState, show
     val dim = when (state) { TileState.Queued -> 0.28f; TileState.Uploading -> 0.38f; TileState.Waiting -> 0.34f; TileState.AlreadyThere -> 0.38f; else -> 0f }
     var tick by remember(item.id) { mutableStateOf(false) }
     LaunchedEffect(state) { if (state == TileState.Done) { tick = true; kotlinx.coroutines.delay(900); tick = false } }
-    val desc = if (state == TileState.Failed) "Photo failed to upload. Double tap to retry." else null
+    val desc = if (state == TileState.Failed) stringResource(R.string.upload_tile_failed_desc) else null
     Box(
         Modifier.fillMaxWidth().aspectRatio(1f).background(Vmk.colors.surfaceRaised)
-            .then(if (state == TileState.Failed) Modifier.clickable(role = Role.Button, onClickLabel = "Retry this photo", onClick = onRetry) else Modifier)
+            .then(if (state == TileState.Failed) Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.upload_retry_photo), onClick = onRetry) else Modifier)
             .then(if (desc != null) Modifier.semantics { contentDescription = desc } else Modifier.clearAndSetSemantics { })
             .testTag("uploadTile"),
     ) {
@@ -171,10 +177,10 @@ fun LocalUploadTile(item: QueueItem, server: MediaPhoto?, state: TileState, show
             TileState.Failed -> {
                 Box(Modifier.fillMaxSize().background(Color(0xFFB91C1C).copy(alpha = 0.55f)))
                 Box(Modifier.align(Alignment.Center).size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.9f)), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Refresh, null, tint = Vmk.colors.danger) }
-                Text("Tap to retry", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color(0xFFB91C1C), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                Text(stringResource(R.string.upload_tap_retry), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color(0xFFB91C1C), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).clip(CircleShape).background(Color.White).padding(horizontal = 8.dp, vertical = 3.dp))
             }
-            TileState.AlreadyThere -> GlassLabel("Already there", Modifier.align(Alignment.Center), white = true) { Icon(Icons.Filled.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(12.dp)) }
+            TileState.AlreadyThere -> GlassLabel(stringResource(R.string.upload_already_there), Modifier.align(Alignment.Center), white = true) { Icon(Icons.Filled.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(12.dp)) }
         }
     }
 }
@@ -232,7 +238,7 @@ fun UploadBar(
         when {
             preparing != null -> {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Preparing ${minOf(preparing.first + 1, preparing.second)} of ${preparing.second}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+                    Text(stringResource(R.string.upload_preparing, minOf(preparing.first + 1, preparing.second), preparing.second), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
                     LinearProgressIndicator(progress = { preparing.first.toFloat() / maxOf(preparing.second, 1) }, modifier = Modifier.fillMaxWidth(), trackColor = Vmk.colors.surface3)
                 }
             }
@@ -240,38 +246,39 @@ fun UploadBar(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
                     Box(Modifier.size(36.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning) }
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text("Your storage is full", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("storageFullMessage"))
-                        Text("${progress.noSpace} photo${if (progress.noSpace == 1) " is" else "s are"} waiting. Free up space and they will carry on by themselves.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                        Text(stringResource(R.string.upload_storage_full), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("storageFullMessage"))
+                        Text(pluralStringResource(R.plurals.upload_no_space_waiting, progress.noSpace, progress.noSpace), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClick = onManageStorage).padding(horizontal = 18.dp).testTag("manageStorage"), contentAlignment = Alignment.Center) {
-                        Text("Manage storage", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Color.White)
+                        Text(stringResource(R.string.upload_manage_storage), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Color.White)
                     }
                     Box(Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClick = onNotNow).padding(horizontal = 18.dp), contentAlignment = Alignment.Center) {
-                        Text("Not now", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary)
+                        Text(stringResource(R.string.organize_not_now), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary)
                     }
                 }
             }
             else -> {
                 val total = maxOf(progress.total, 1)
                 val title = when {
-                    progress.offline -> "Waiting for a connection"
-                    progress.paused -> "Paused · ${progress.finished} of ${progress.total}"
-                    progress.active -> "Uploading ${minOf(progress.finished + 1, progress.total)} of ${progress.total}"
-                    progress.failed > 0 -> "${progress.failed} need${if (progress.failed == 1) "s" else ""} you"
+                    progress.offline -> stringResource(R.string.organize_waiting)
+                    progress.paused -> stringResource(R.string.upload_paused_progress, progress.finished, progress.total)
+                    progress.active -> stringResource(R.string.upload_progress, minOf(progress.finished + 1, progress.total), progress.total)
+                    progress.failed > 0 -> pluralStringResource(R.plurals.upload_need_you, progress.failed, progress.failed)
                     else -> UploadTiles.summary(progress.uploaded, progress.duplicates, progress.failed)
                 }
                 val left = (progress.bytesTotal - progress.bytesDone).coerceAtLeast(0)
+                val toggleText = stringResource(if (expanded) R.string.upload_collapse else R.string.upload_expand)
                 val sub = when {
-                    progress.offline -> "$waitingCount photo${if (waitingCount == 1) "" else "s"} will upload automatically"
-                    progress.active -> listOfNotNull("${StorageMeter.format(left)} left", UploadTiles.etaText(left, progress.bytesDone, elapsedMillis)).joinToString(" · ")
-                    else -> "Tap to review"
+                    progress.offline -> pluralStringResource(R.plurals.upload_auto_resume, waitingCount, waitingCount)
+                    progress.active -> listOfNotNull(stringResource(R.string.upload_left, StorageMeter.format(left)), UploadTiles.etaText(left, progress.bytesDone, elapsedMillis)).joinToString(" · ")
+                    else -> stringResource(R.string.upload_tap_review)
                 }
                 Row(
-                    Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = if (expanded) "Collapse upload details" else "Expand upload details") { onExpanded(!expanded) }
+                    Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = stringResource(if (expanded) R.string.upload_collapse_details else R.string.upload_expand_details)) { onExpanded(!expanded) }
                         .padding(start = 14.dp, end = 4.dp, top = 12.dp, bottom = 12.dp).heightIn(min = 68.dp)
-                        .semantics(mergeDescendants = true) { contentDescription = "$title. $sub. ${if (expanded) "Collapse" else "Expand"}" },
+                        .semantics(mergeDescendants = true) { contentDescription = Txt.s(R.string.upload_bar_desc, title, sub, toggleText) },
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
@@ -286,9 +293,9 @@ fun UploadBar(
                         Text(sub, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 2)
                     }
                     if (progress.active && !progress.offline) IconButton(onClick = { if (progress.paused) onResume() else onPause() }, modifier = Modifier.size(48.dp).testTag(if (progress.paused) "uploadResume" else "uploadPause")) {
-                        Icon(if (progress.paused) Icons.Filled.PlayArrow else Icons.Filled.Pause, if (progress.paused) "Resume uploads" else "Pause uploads", tint = Vmk.colors.text)
+                        Icon(if (progress.paused) Icons.Filled.PlayArrow else Icons.Filled.Pause, stringResource(if (progress.paused) R.string.upload_resume_uploads else R.string.upload_pause_uploads), tint = Vmk.colors.text)
                     }
-                    IconButton(onClick = { onExpanded(!expanded) }, modifier = Modifier.size(48.dp)) { Icon(if (expanded) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess, if (expanded) "Collapse" else "Expand", tint = Vmk.colors.textSecondary) }
+                    IconButton(onClick = { onExpanded(!expanded) }, modifier = Modifier.size(48.dp)) { Icon(if (expanded) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess, toggleText, tint = Vmk.colors.textSecondary) }
                 }
                 if (progress.active) LinearProgressIndicator(progress = { progress.finished.toFloat() / total }, modifier = Modifier.fillMaxWidth().heightIn(min = 3.dp), color = Vmk.colors.primary, trackColor = Vmk.colors.surface3, drawStopIndicator = {})
                 if (expanded) Expanded(progress, items, stats, onRetry, onRetryAll, onPause, onResume, onCancelAsk = { confirmCancel = true })
@@ -297,9 +304,9 @@ fun UploadBar(
     }
     if (confirmCancel) AlertDialog(
         onDismissRequest = { confirmCancel = false },
-        title = { Text("Cancel $waitingCount upload${if (waitingCount == 1) "" else "s"}?") }, text = { Text("Photos already added stay.") },
-        confirmButton = { TextButton(onClick = { confirmCancel = false; onCancel() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmCancelUploads")) { Text("Cancel remaining", color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { confirmCancel = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Keep uploading") } },
+        title = { Text(pluralStringResource(R.plurals.upload_cancel_title, waitingCount, waitingCount)) }, text = { Text(stringResource(R.string.upload_cancel_text)) },
+        confirmButton = { TextButton(onClick = { confirmCancel = false; onCancel() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmCancelUploads")) { Text(stringResource(R.string.upload_cancel_remaining), color = Vmk.colors.danger) } },
+        dismissButton = { TextButton(onClick = { confirmCancel = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.upload_keep)) } },
     )
 }
 
@@ -310,33 +317,33 @@ private fun Expanded(
 ) {
     Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 14.dp, top = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Stat("${stats.added}", "Added", Modifier.weight(1f)); Stat("${stats.gettingReady}", "Getting ready", Modifier.weight(1f))
-            Stat("${stats.waiting}", "Waiting", Modifier.weight(1f)); Stat("${stats.needYou}", "Need you", Modifier.weight(1f), danger = stats.needYou > 0)
+            Stat("${stats.added}", stringResource(R.string.upload_stat_added), Modifier.weight(1f)); Stat("${stats.gettingReady}", stringResource(R.string.upload_stat_getting_ready), Modifier.weight(1f))
+            Stat("${stats.waiting}", stringResource(R.string.upload_stat_waiting), Modifier.weight(1f)); Stat("${stats.needYou}", stringResource(R.string.upload_stat_need_you), Modifier.weight(1f), danger = stats.needYou > 0)
         }
         val failed = items.filter { it.state == UploadState.Failed }
         if (failed.isNotEmpty()) {
-            Overline("Needs attention")
+            Overline(stringResource(R.string.upload_needs_attention))
             failed.forEachIndexed { i, it ->
                 Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     AsyncImage(remember(it.path) { File(it.path) }, null, contentScale = ContentScale.Crop, modifier = Modifier.size(44.dp).clip(RoundedCornerShape(8.dp)).background(Vmk.colors.surfaceRaised))
                     Column(Modifier.weight(1f)) {
-                        Text("Photo ${i + 1}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
-                        Text(it.error ?: "Couldn't upload. Tap to try again.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, maxLines = 2)
+                        Text(stringResource(R.string.upload_photo_n, i + 1), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
+                        Text(it.error ?: stringResource(R.string.upload_failed_default), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, maxLines = 2)
                     }
-                    Text("Retry", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary,
+                    Text(stringResource(R.string.upload_retry), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary,
                         modifier = Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button) { onRetry(it) }.padding(horizontal = 14.dp, vertical = 10.dp).testTag("retryOne"))
                 }
             }
         }
-        Text("You can close the app. Uploads carry on, and pick up where they stopped when you come back.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+        Text(stringResource(R.string.upload_close_app_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (progress.active || progress.paused) TextButton(onClick = onCancelAsk, modifier = Modifier.heightIn(min = 44.dp).testTag("uploadCancel")) { Text("Cancel remaining", color = Vmk.colors.danger, fontWeight = FontWeight.SemiBold) }
+            if (progress.active || progress.paused) TextButton(onClick = onCancelAsk, modifier = Modifier.heightIn(min = 44.dp).testTag("uploadCancel")) { Text(stringResource(R.string.upload_cancel_remaining), color = Vmk.colors.danger, fontWeight = FontWeight.SemiBold) }
             Box(Modifier.weight(1f))
-            if (failed.isNotEmpty() && !progress.active) TextButton(onClick = onRetryAll, modifier = Modifier.heightIn(min = 44.dp).testTag("uploadRetry")) { Text("Retry all", fontWeight = FontWeight.SemiBold) }
+            if (failed.isNotEmpty() && !progress.active) TextButton(onClick = onRetryAll, modifier = Modifier.heightIn(min = 44.dp).testTag("uploadRetry")) { Text(stringResource(R.string.upload_retry_all), fontWeight = FontWeight.SemiBold) }
             if (progress.active) Box(
                 Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button) { if (progress.paused) onResume() else onPause() }.padding(horizontal = 18.dp),
                 contentAlignment = Alignment.Center,
-            ) { Text(if (progress.paused) "Resume" else "Pause all", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary) }
+            ) { Text(stringResource(if (progress.paused) R.string.upload_resume else R.string.upload_pause_all), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary) }
         }
     }
 }

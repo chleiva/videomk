@@ -1,5 +1,6 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonArray
@@ -47,6 +48,8 @@ class ApiClient(
     private val appVersion: String = "0",
     private val region: () -> String? = { java.util.Locale.getDefault().country.takeIf { it.isNotEmpty() } },
     private val timeZone: () -> String = { java.util.TimeZone.getDefault().id },
+    /** `en` or `es`, the effective app language (docs/I18N.md): the server answers its messages, capability labels and notes in it. */
+    private val locale: () -> String = { Txt.localeTag },
 ) : AccountApi {
     suspend fun requestUploads(count: Int): List<UploadSlot> {
         val body = buildJsonObject { put("count", count) }
@@ -138,6 +141,7 @@ class ApiClient(
             .header("Authorization", "Bearer $idToken")
             .header("X-Platform", "android")
             .header("X-App-Version", appVersion)
+            .header("X-Locale", locale())
             .method(method, body.toString().toRequestBody("application/json".toMediaType()))
         val response = try { http.newBuilder().callTimeout(30, TimeUnit.SECONDS).build().newCall(rb.build()).await() } catch (e: CancellationException) { throw e }
         return response.use { r -> r.code to r.body.string() }
@@ -156,6 +160,7 @@ class ApiClient(
             .header("Authorization", "Bearer ${a.idToken}")
             .header("X-Platform", "android")
             .header("X-App-Version", appVersion)
+            .header("X-Locale", locale())
             .header("X-Timezone", timeZone())   // where the user's day ends, for the daily free credits
         region()?.takeIf { it.length == 2 }?.let { rb.header("X-Region", it.uppercase()) }
         val requestBody: RequestBody? = (body ?: if (method == "POST") JsonObject(emptyMap()) else null)?.let { it.toString().toRequestBody("application/json".toMediaType()) }
@@ -171,7 +176,7 @@ class ApiClient(
                 401 -> throw ApiError.Unauthorized
                 403 -> if (soft) throw ApiError.NotFound else throw ApiError.Unauthorized
                 404 -> if (library || soft) throw ApiError.NotFound else throw ApiError.Server
-                413 -> if (library) throw ApiError.Invalid("That photo is too large.") else throw ApiError.Server
+                413 -> if (library) throw ApiError.Invalid(Txt.s(R.string.err_photo_too_large)) else throw ApiError.Server
                 402 -> if (library) {
                     val o = runCatching { parseObject(text) }.getOrNull()
                     throw ApiError.StorageFull((o?.num("used_bytes") ?: 0.0).toLong(), (o?.num("limit_bytes") ?: 0.0).toLong())
@@ -181,18 +186,18 @@ class ApiClient(
                 }
                 400 -> {
                     val o = runCatching { parseObject(text) }.getOrNull()
-                    if (o?.str("status") == "blocked") throw ApiError.Blocked(o.str("message") ?: "We can't make this video.")
-                    throw ApiError.Invalid(message(text) ?: "That brief can't be used.")
+                    if (o?.str("status") == "blocked") throw ApiError.Blocked(o.str("message") ?: Txt.s(R.string.err_blocked_default))
+                    throw ApiError.Invalid(message(text) ?: Txt.s(R.string.err_brief_unusable))
                 }
-                409 -> if (library) throw ApiError.Conflict(message(text) ?: "That changed in the meantime. Please try again.")
-                       else if (conflictIsEdit) throw ApiError.Conflict(message(text) ?: "This video changed. Reload to continue.")
+                409 -> if (library) throw ApiError.Conflict(message(text) ?: Txt.s(R.string.err_changed_meanwhile))
+                       else if (conflictIsEdit) throw ApiError.Conflict(message(text) ?: Txt.s(R.string.err_video_changed))
                        else throw ApiError.NotReady(VideoStatus.fromServer(runCatching { parseObject(text).str("status") }.getOrNull() ?: ""))
                 429 -> {
                     val o = runCatching { parseObject(text) }.getOrNull()
-                    if (o?.str("status") == "paused") throw ApiError.Paused(o.str("message") ?: "Creating videos is paused for now.", o.int("retry_after") ?: r.header("Retry-After")?.toIntOrNull())
+                    if (o?.str("status") == "paused") throw ApiError.Paused(o.str("message") ?: Txt.s(R.string.err_paused_default), o.int("retry_after") ?: r.header("Retry-After")?.toIntOrNull())
                     throw ApiError.Quota(
-                        message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { "Too many requests. Try again in ${if (it >= 120) "${it / 60} minutes" else "$it seconds"}." } ?: "Too many requests. Try again in a moment.")
-                        else "You've reached today's limit. Try again tomorrow.",
+                        message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { if (it >= 120) Txt.n(R.plurals.err_rate_limited_minutes, it / 60) else Txt.n(R.plurals.err_rate_limited_seconds, it) } ?: Txt.s(R.string.err_rate_limited))
+                        else Txt.s(R.string.err_daily_limit),
                     )
                 }
                 else -> throw ApiError.Server

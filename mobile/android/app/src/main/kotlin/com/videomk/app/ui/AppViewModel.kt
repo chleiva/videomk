@@ -2,7 +2,9 @@ package com.videomk.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.videomk.app.R
 import com.videomk.app.core.ApiError
+import com.videomk.app.core.Txt
 import com.videomk.app.core.SubmitOutcome
 import com.videomk.app.core.AppConfig
 import com.videomk.app.core.AuthException
@@ -206,7 +208,7 @@ class AppViewModel(
                 val offline = e is ApiError.Network
                 // keep what we have on screen; only a first load shows a full-screen error
                 update { s ->
-                    s.copy(offline = offline, loadState = if (s.videos.isEmpty() && s.loadState !is LoadState.Loaded) LoadState.Failed((e as? ApiError)?.message ?: "Couldn't load your videos.") else LoadState.Loaded)
+                    s.copy(offline = offline, loadState = if (s.videos.isEmpty() && s.loadState !is LoadState.Loaded) LoadState.Failed((e as? ApiError)?.message ?: Txt.s(R.string.nav_load_videos_failed)) else LoadState.Loaded)
                 }
             }
         }
@@ -332,7 +334,7 @@ class AppViewModel(
 
     companion object {
         const val POLL_MILLIS = 4000L
-        const val SIGN_IN_FAILED = "We couldn't sign you in. Please try again."
-        const val ACCOUNT_LINK_FAILED = "We linked your accounts but couldn't finish signing you in. Please tap the button once more."
+        val SIGN_IN_FAILED: String get() = Txt.s(R.string.auth_sign_in_failed)
+        val ACCOUNT_LINK_FAILED: String get() = Txt.s(R.string.auth_account_link_failed)
     }
 }

@@ -102,6 +102,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.videomk.app.R
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.core.displayName
 import com.videomk.app.core.Brief
 import com.videomk.app.core.ComposerLogic
 import com.videomk.app.core.CreateOptions
@@ -121,7 +125,7 @@ import com.videomk.app.data.DictationController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private fun plural(n: Int) = if (n == 1) "" else "s"
+@Composable private fun statusAnnouncement(status: com.videomk.app.core.ComposerStatus): String = status.text + (status.fix?.let { ". " + it.description() } ?: "")
 
 /**
  * The Create screen (docs/UI_DESIGN.md section o): a deterministic form with a Create button that is always visible. Prompt with dictation, Add photos (the unified
@@ -154,7 +158,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val still = reduceMotion(context)
 
     // capabilities: the real ones when the server has the endpoint, else landscape 16:9 at 1080p only
-    LaunchedEffect(container) {
+    val localeTag = com.videomk.app.core.Txt.localeTag   // a language change refetches: the server's labels and notes come back in the new language
+    LaunchedEffect(container, localeTag) {
         val api = container?.intake ?: return@LaunchedEffect
         composer.applyCapabilities(runCatching { api.capabilities() }.getOrDefault(com.videomk.app.core.Capabilities.FALLBACK))
     }
@@ -170,7 +175,9 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
     val lengths = caps.presets
     val status = ComposerLogic.status(composer.text, options, balance, 0, listening, sending = false, lengths = lengths, createScreen = true, checking = composer.checking)
+    val announcement = statusAnnouncement(status)
     val photoTotal = composer.totalPhotos
+    val comingSoonText = stringResource(R.string.create_coming_soon)
     val photoHint = PhotoCapacity.hint(photoTotal, options.minutes, lengths).takeIf { status.sendReady }
     val hintFix = PhotoCapacity.suggestion(photoTotal, options.minutes, lengths)
 
@@ -208,7 +215,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         if (status.sendReady) { haptic(true); composer.create(container?.intake, ::send, ::accepted) }
         else {
             haptic(false); pulse++
-            view.announceForAccessibility(status.text + (status.fix?.let { ". " + it.description() } ?: ""))
+            view.announceForAccessibility(announcement)
             if (status.kind == StatusKind.TooShort) scope.launch { scroll.animateScrollTo(0); runCatching { focus.requestFocus() }; keyboard?.show() }
         }
     }
@@ -223,9 +230,17 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
     Column(Modifier.fillMaxWidth().background(Vmk.colors.background).statusBarsPadding().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)).testTag("createScreen")) {
         // header
-        Box(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp)) {
-            TextButton(onClick = ::close, modifier = Modifier.align(Alignment.CenterStart).heightIn(min = 48.dp).testTag("createCancel")) { Text("Cancel", style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary) }
-            Text("New video", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.align(Alignment.Center).semantics { heading() })
+        val bigHeader = androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f   // large text: Cancel and the title stack instead of overlapping
+        val cancelBtn: @Composable (Modifier) -> Unit = { m ->
+            TextButton(onClick = ::close, modifier = m.heightIn(min = 48.dp).testTag("createCancel")) { Text(stringResource(R.string.common_cancel), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary) }
+        }
+        val titleTxt: @Composable (Modifier) -> Unit = { m ->
+            Text(stringResource(R.string.create_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = m.semantics { heading() })
+        }
+        if (bigHeader) Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) { cancelBtn(Modifier); Box(Modifier.padding(start = 12.dp, bottom = 8.dp)) { titleTxt(Modifier) } }
+        else Box(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 4.dp)) {
+            cancelBtn(Modifier.align(Alignment.CenterStart))
+            titleTxt(Modifier.align(Alignment.Center))
         }
         Box(Modifier.fillMaxWidth().size(1.dp).background(if (scroll.value > 0) Vmk.colors.outline else Color.Transparent))
 
@@ -236,11 +251,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
             // what is it for
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Overline("What is it for?", Modifier.semantics { heading() })
+                Overline(stringResource(R.string.create_what_for), Modifier.semantics { heading() })
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("platformChips")) {
                     items(CreatePlatforms.chips(caps), key = { it.id }) { c ->
                         PlatformChipView(c, selected = c.enabled && c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) {
-                            if (c.enabled) composer.selectPlatform(c) else { tip = "Coming soon"; haptic(false) }
+                            if (c.enabled) composer.selectPlatform(c) else { tip = comingSoonText; haptic(false) }
                         }
                     }
                 }
@@ -248,15 +263,15 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val rec = CreatePlatforms.recommendation(options, caps)
                     Text(rec, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f).testTag("recommendation"))
-                    if (CreatePlatforms.canChangeFormat(caps)) TextButton(onClick = { moreOpen = true }, modifier = Modifier.heightIn(min = 44.dp).testTag("changeFormat")) { Text("Change", fontWeight = FontWeight.Bold) }
+                    if (CreatePlatforms.canChangeFormat(caps)) TextButton(onClick = { moreOpen = true }, modifier = Modifier.heightIn(min = 44.dp).testTag("changeFormat")) { Text(stringResource(R.string.create_change), fontWeight = FontWeight.Bold) }
                 }
                 // other formats this platform also accepts: small secondary choices that switch only the format
                 val also = CreatePlatforms.alsoWorks(options, caps)
                 if (also.isNotEmpty()) FlowRow(Modifier.testTag("alsoWorks"), verticalArrangement = Arrangement.Center, horizontalArrangement = Arrangement.spacedBy(6.dp), itemVerticalAlignment = Alignment.CenterVertically) {
-                    Text("Also works:", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                    Text(stringResource(R.string.create_also_works), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
                     for (a in also) Text(
                         a.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary,
-                        modifier = Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button, onClickLabel = "Use ${a.label} format") { composer.updateOptions(options.copy(aspect = a.id)) }
+                        modifier = Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_use_format, a.label)) { composer.updateOptions(options.copy(aspect = a.id)) }
                             .padding(horizontal = 8.dp).wrapContentHeight(Alignment.CenterVertically).testTag("alsoWorks-${a.id}"),
                     )
                 }
@@ -264,7 +279,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
             // length
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Overline("Length", Modifier.semantics { heading() })
+                Overline(stringResource(R.string.create_length), Modifier.semantics { heading() })
                 // the presets the server offers, scrolling sideways when there are more than fit
                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("lengthChips")) {
                     items(caps.presets) { mi ->
@@ -274,7 +289,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 CreatePlatforms.overMax(options, caps)?.let { om ->
                     FlowRow(Modifier.fillMaxWidth().testTag("overMaxHint"), itemVerticalAlignment = Alignment.CenterVertically) {
                         Text(om.text + (om.useMinutes?.let { " · " } ?: ""), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-                        om.useMinutes?.let { u -> FixChip("Use ${Lengths.short(u)}", "Use ${Lengths.long(u)} instead", Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
+                        om.useMinutes?.let { u -> FixChip(stringResource(R.string.create_over_max_use, Lengths.short(u)), stringResource(R.string.create_over_max_use_desc, Lengths.long(u)), Modifier.testTag("overMaxChip")) { composer.setLength(u) } }
                     }
                 }
                 if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
@@ -291,7 +306,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 composer.inlineError?.let { m ->
                     Row(Modifier.fillMaxWidth().testTag("createError").semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Filled.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
-                        Text("$m Tap Create video to try again.", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger)
+                        Text(stringResource(R.string.create_error_retry, m), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger)
                     }
                 }
                 StatusLine(status, flash.value, shake.value, ::applyFix)
@@ -304,15 +319,16 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     CreateSheetsHost(composer, balance, options, onSubmitEdit = {}, onWallet = onOpenWallet)
     if (languageOpen) LanguageDialog(composer, options, caps) { languageOpen = false }
     if (discard) AlertDialog(
-        onDismissRequest = { discard = false }, title = { Text("Discard this video?") }, text = { Text("What you entered will be lost.") },
-        confirmButton = { TextButton(onClick = { discard = false; composer.discardDraft(); onClose() }, modifier = Modifier.heightIn(min = 48.dp).testTag("discardConfirm")) { Text("Discard", color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { discard = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Keep editing") } },
+        onDismissRequest = { discard = false }, title = { Text(stringResource(R.string.create_discard_title)) }, text = { Text(stringResource(R.string.create_discard_text)) },
+        confirmButton = { TextButton(onClick = { discard = false; composer.discardDraft(); onClose() }, modifier = Modifier.heightIn(min = 48.dp).testTag("discardConfirm")) { Text(stringResource(R.string.create_discard), color = Vmk.colors.danger) } },
+        dismissButton = { TextButton(onClick = { discard = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.create_keep_editing)) } },
     )
 }
 
 @Composable
 private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, onMic: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
+    val micDescription = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate_desc)
     Box(Modifier.fillMaxWidth().heightIn(min = 112.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)) {
         BasicTextField(
             value = composer.text, onValueChange = { composer.text = it }, readOnly = listening,
@@ -320,16 +336,16 @@ private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: F
             cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             modifier = Modifier.fillMaxWidth().focusRequester(focus).padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 64.dp).testTag("composerField"),
             decorationBox = { inner ->
-                Box { if (composer.text.isEmpty()) Text("Describe your video. For example: how bees make honey, explained for kids.", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp, lineHeight = 26.sp), color = Vmk.colors.textTertiary); inner() }
+                Box { if (composer.text.isEmpty()) Text(stringResource(R.string.create_prompt_hint), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp, lineHeight = 26.sp), color = Vmk.colors.textTertiary); inner() }
             },
         )
         Row(Modifier.align(Alignment.BottomEnd).padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (composer.text.isEmpty() && !listening) Text("Tap the mic to speak", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textTertiary)
-            if (listening) Text("Listening…", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger)
+            if (composer.text.isEmpty() && !listening) Text(stringResource(R.string.create_tap_mic), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textTertiary)
+            if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger)
             Box(
                 Modifier.size(44.dp).clip(CircleShape).background(if (listening) Vmk.colors.danger else Vmk.colors.surfaceRaised)
-                    .clickable(role = Role.Button, onClickLabel = if (listening) "Stop dictation" else "Dictate", onClick = onMic)
-                    .semantics { contentDescription = if (listening) "Stop dictation" else "Dictate. Say what video you want instead of typing" }.testTag("micButton"),
+                    .clickable(role = Role.Button, onClickLabel = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate), onClick = onMic)
+                    .semantics { contentDescription = micDescription }.testTag("micButton"),
                 contentAlignment = Alignment.Center,
             ) { Icon(if (listening) Icons.Filled.Stop else Icons.Filled.Mic, null, tint = if (listening) Color.White else Vmk.colors.text, modifier = Modifier.size(22.dp)) }
         }
@@ -341,22 +357,23 @@ private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: F
 private fun PhotosRow(composer: ComposerViewModel, onOpen: () -> Unit) {
     val shape = RoundedCornerShape(20.dp)
     val total = composer.totalPhotos
+    val rowDescription = if (total > 0) pluralStringResource(R.plurals.create_add_photos_selected_desc, total, total) else stringResource(R.string.create_add_photos_desc_empty)
     Row(
         Modifier.fillMaxWidth().heightIn(min = 64.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)
-            .clickable(role = Role.Button, onClickLabel = "Add photos", onClick = onOpen).padding(horizontal = 12.dp, vertical = 8.dp)
-            .semantics(mergeDescendants = true) { contentDescription = if (total > 0) "Add photos. $total selected" else "Add photos. Optional, from this phone or My media" }.testTag("photoButton"),
+            .clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_add_photos), onClick = onOpen).padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) { contentDescription = rowDescription }.testTag("photoButton"),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (total == 0) {
             Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary) }
             Column(Modifier.weight(1f)) {
-                Text("Add photos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
-                Text("Optional · from this phone or My media", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+                Text(stringResource(R.string.create_add_photos), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+                Text(stringResource(R.string.create_add_photos_optional), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
             }
             Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
         } else {
             Column(Modifier.weight(1f)) {
-                Text("$total photo${plural(total)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("photosNote"))
+                Text(pluralStringResource(R.plurals.create_photos_count, total, total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("photosNote"))
                 if (composer.loading > 0) Text(composer.preparingText, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("photosPreparing"))
                 composer.notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.warning, modifier = Modifier.testTag("photosNotice")) }
             }
@@ -366,7 +383,7 @@ private fun PhotosRow(composer: ComposerViewModel, onOpen: () -> Unit) {
                 if (composer.photos.size < 4) composer.library.take(4 - composer.photos.size).forEach { PhotoThumb(it, Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).testTag("attachedLibraryPhoto")) }
                 if (total > 4) Text("+${total - 4}", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 4.dp))
             }
-            Text("Edit", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary)
+            Text(stringResource(R.string.create_edit), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary)
         }
     }
 }
@@ -374,18 +391,19 @@ private fun PhotosRow(composer: ComposerViewModel, onOpen: () -> Unit) {
 @Composable
 private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> Unit) {
     val shape = CircleShape
+    val chipDescription = if (c.enabled) c.label else stringResource(R.string.create_chip_soon_desc, c.label)
     Row(
         Modifier.heightIn(min = 44.dp).alpha(if (c.enabled) 1f else 0.62f).clip(shape)
             .background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surface)
             .border(if (selected) 1.5.dp else 1.dp, if (selected) Vmk.colors.primary else Vmk.colors.outline, shape)
             .clickable(role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = 14.dp)
-            .semantics { this.selected = selected; contentDescription = if (c.enabled) c.label else "${c.label}, coming soon, dimmed" }.testTag("platform-${c.id}"),
+            .semantics { this.selected = selected; contentDescription = chipDescription }.testTag("platform-${c.id}"),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(if (selected) Icons.Filled.Check else if (c.id == "other") Icons.Filled.AutoAwesome else if (c.aspect == "16:9") Icons.Filled.CropLandscape else if (c.aspect == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.text, modifier = Modifier.size(18.dp))
         Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.MiddleEllipsis)
-        if (!c.enabled) Text("Soon", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(horizontal = 6.dp, vertical = 2.dp))
+        if (!c.enabled) Text(stringResource(R.string.create_soon), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(horizontal = 6.dp, vertical = 2.dp))
     }
 }
 
@@ -393,11 +411,12 @@ private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> 
 private fun LengthChip(minutes: Double, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     val tint = if (overBalance) Vmk.colors.warning else if (selected) Vmk.colors.primary else Vmk.colors.textSecondary
+    val lengthDescription = pluralStringResource(if (selected) R.plurals.create_length_desc_selected else R.plurals.create_length_desc, credits, credits, Lengths.long(minutes))
     Column(
         modifier.heightIn(min = 58.dp).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
             .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = "${Lengths.long(minutes)}, $credits credit${plural(credits)}${if (selected) ", selected" else ""}" }
+            .semantics { this.selected = selected; contentDescription = lengthDescription }
             .testTag("length-${if (minutes == Math.floor(minutes)) minutes.toInt().toString() else minutes.toString()}").padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
@@ -414,8 +433,8 @@ private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewMod
     Column(Modifier.fillMaxWidth().padding(top = 2.dp)) {
         Text(hint, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = Vmk.colors.text, modifier = Modifier.testTag("photoCapacityHint"))
         if (fix != null) {
-            val label = "Use ${Lengths.short(fix)} · ⚡${Lengths.credits(fix)}"
-            FixChip(label, "Use ${Lengths.long(fix)} instead, ${Lengths.credits(fix)} credits", Modifier.testTag("photoFixChip")) { composer.setLength(fix) }
+            val f = com.videomk.app.core.StatusFix(fix)
+            FixChip(f.label(), f.description(), Modifier.testTag("photoFixChip")) { composer.setLength(fix) }
         }
     }
 }
@@ -423,14 +442,16 @@ private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewMod
 @Composable
 private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com.videomk.app.core.Capabilities, open: Boolean, onOpen: (Boolean) -> Unit, onLanguage: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
+    val openState = stringResource(if (open) R.string.create_state_expanded else R.string.create_state_collapsed)
+    val captionsState = stringResource(if (o.captions) R.string.create_state_on else R.string.create_state_off)
     Column(Modifier.fillMaxWidth().clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)) {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = if (open) "Collapse more options" else "Expand more options") { onOpen(!open) }
-                .padding(horizontal = 16.dp, vertical = 8.dp).semantics(mergeDescendants = true) { stateDescription = if (open) "expanded" else "collapsed" }.testTag("optionsMenu"),
+            Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = stringResource(if (open) R.string.create_collapse_more else R.string.create_expand_more)) { onOpen(!open) }
+                .padding(horizontal = 16.dp, vertical = 8.dp).semantics(mergeDescendants = true) { stateDescription = openState }.testTag("optionsMenu"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("More options", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+                Text(stringResource(R.string.create_more_options), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
                 if (!open) Text(CreatePlatforms.moreSummary(o, caps), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             Icon(if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, null, tint = Vmk.colors.text)
@@ -438,39 +459,39 @@ private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com
         if (open) Column(Modifier.fillMaxWidth()) {
             Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
             Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Overline("Look")
+                Overline(stringResource(R.string.create_look))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LookSwatch("Auto", "Producer decides", null, o.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.updateOptions(o.copy(look = null)) }
-                    for (l in VideoLook.entries) LookSwatch(l.title, l.title, l, o.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.updateOptions(o.copy(look = l)) }
+                    LookSwatch(stringResource(R.string.create_look_auto), stringResource(R.string.create_look_auto_desc), null, o.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.updateOptions(o.copy(look = null)) }
+                    for (l in VideoLook.entries) LookSwatch(l.displayName(), l.displayName(), l, o.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.updateOptions(o.copy(look = l)) }
                 }
             }
             Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
             Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = "Subtitles") { composer.updateOptions(o.copy(captions = !o.captions)) }.padding(horizontal = 16.dp)
-                    .semantics(mergeDescendants = true) { stateDescription = if (o.captions) "on" else "off" }.testTag("subtitlesRow"),
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = stringResource(R.string.create_subtitles)) { composer.updateOptions(o.copy(captions = !o.captions)) }.padding(horizontal = 16.dp)
+                    .semantics(mergeDescendants = true) { stateDescription = captionsState }.testTag("subtitlesRow"),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
-                Text("Subtitles", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
                 Switch(checked = o.captions, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Color.White, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
             }
             Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).size(1.dp).background(Vmk.colors.outline))
             Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = "Choose the narration language", onClick = onLanguage).padding(horizontal = 16.dp).testTag("languageRow"),
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_language_desc), onClick = onLanguage).padding(horizontal = 16.dp).testTag("languageRow"),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Icon(Icons.Filled.Language, null, tint = Vmk.colors.text)
-                Text("Language", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text)
+                Text(stringResource(R.string.create_language), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text)
                 Text(CreatePlatforms.languageLabel(o, caps), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f), maxLines = 1, textAlign = androidx.compose.ui.text.style.TextAlign.End, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
             }
             Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Overline("Format")
+                Overline(stringResource(R.string.create_format))
                 val bigText = LocalDensity.current.fontScale >= 1.3f
                 FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), maxItemsInEachRow = if (bigText) 2 else 4) {
                     for (id in listOf("16:9", "9:16", "1:1", "4:5")) {
                         val a = caps.aspect(id)
-                        FormatTile(id, a?.label ?: when (id) { "16:9" -> "Landscape"; "9:16" -> "Vertical"; "1:1" -> "Square"; else -> "Portrait" }, ready = a?.ready == true, beta = a?.beta == true, selected = o.aspect == id, Modifier.weight(1f), tall = bigText) {
+                        FormatTile(id, CreatePlatforms.aspectName(id, caps), ready = a?.ready == true, beta = a?.beta == true, selected = o.aspect == id, Modifier.weight(1f), tall = bigText) {
                             composer.updateOptions(o.copy(aspect = id))
                         }
                     }
@@ -484,13 +505,14 @@ private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com
 @Composable
 private fun FormatTile(id: String, label: String, ready: Boolean, beta: Boolean, selected: Boolean, modifier: Modifier, tall: Boolean = false, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
+    val tileDescription = stringResource(if (!ready) R.string.create_format_desc_soon else if (beta) R.string.create_format_desc_beta else R.string.create_format_desc, label, id)
     Box(
         modifier.then(if (tall) Modifier.heightIn(min = 110.dp) else Modifier.aspectRatio(1f)).alpha(if (ready) 1f else 0.6f).clip(shape).background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surfaceRaised)
             .then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(enabled = ready, role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = "$label $id${if (!ready) ", coming soon" else if (beta) ", beta" else ""}" }.testTag("format-$id"),
+            .semantics { this.selected = selected; contentDescription = tileDescription }.testTag("format-$id"),
     ) {
-        if (!ready || beta) Text(if (ready) "Beta" else "Soon", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
+        if (!ready || beta) Text(stringResource(if (ready) R.string.create_beta else R.string.create_soon), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
         Column(Modifier.align(Alignment.Center).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Icon(if (id == "16:9") Icons.Filled.CropLandscape else if (id == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, modifier = Modifier.size(26.dp))
             Text("$label\n$id", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
@@ -516,16 +538,20 @@ private fun Segmented(ids: List<String>, selected: String, enabled: (String) -> 
 @Composable
 private fun CreateButton(ready: Boolean, checking: Boolean, credits: Int, reason: String, hasFix: Boolean, onClick: () -> Unit) {
     val shape = CircleShape
+    val createLabel = stringResource(R.string.create_create_video)
+    val boxState = if (checking) stringResource(R.string.create_state_checking)
+        else if (ready) pluralStringResource(R.plurals.create_state_ready, credits, credits)
+        else stringResource(if (hasFix) R.string.create_state_not_ready_fix else R.string.create_state_not_ready, reason)
     Box(
         Modifier.fillMaxWidth().heightIn(min = 54.dp).clip(shape).then(if (ready || checking) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))
-            .clickable(role = Role.Button, onClickLabel = if (ready) "Create video" else "Explain why this can't be created yet", onClick = onClick)
-            .semantics { contentDescription = "Create video"; stateDescription = if (checking) "Checking your request" else if (ready) "Ready, costs $credits credit${plural(credits)}" else "Not ready. $reason${if (hasFix) ". Double tap for the fix." else ""}" }.testTag("sendButton"),
+            .clickable(role = Role.Button, onClickLabel = if (ready) createLabel else stringResource(R.string.create_explain_not_ready), onClick = onClick)
+            .semantics { contentDescription = createLabel; stateDescription = boxState }.testTag("sendButton"),
         contentAlignment = Alignment.Center,
     ) {
         val c = if (ready || checking) Color.White else Vmk.colors.textTertiary
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (checking) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-            Text("Create video", style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c)
+            Text(createLabel, style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c)
             Text("·", color = c)
             Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
             Text("$credits", style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c)
@@ -536,10 +562,10 @@ private fun CreateButton(ready: Boolean, checking: Boolean, credits: Int, reason
 @Composable
 private fun LanguageDialog(composer: ComposerViewModel, o: CreateOptions, caps: com.videomk.app.core.Capabilities, onDismiss: () -> Unit) {
     AlertDialog(
-        onDismissRequest = onDismiss, title = { Text("Narration language") },
+        onDismissRequest = onDismiss, title = { Text(stringResource(R.string.create_narration_language)) },
         text = {
             Column {
-                val rows = listOf("auto" to "Same as my description") + caps.languages.map { it.id to it.label }
+                val rows = listOf("auto" to stringResource(R.string.create_same_as_description)) + caps.languages.map { it.id to it.label }
                 for ((id, label) in rows) {
                     Row(
                         Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.RadioButton) { composer.updateOptions(o.copy(language = id)); onDismiss() }.padding(vertical = 4.dp).testTag("language-$id"),
@@ -551,6 +577,6 @@ private fun LanguageDialog(composer: ComposerViewModel, o: CreateOptions, caps: 
                 }
             }
         },
-        confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text("Cancel") } },
+        confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

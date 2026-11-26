@@ -1,5 +1,6 @@
 package com.videomk.app
 
+import androidx.compose.ui.res.stringResource
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -46,6 +47,8 @@ class FullScreenPlayerActivity : ComponentActivity() {
     private var player: ExoPlayer? = null
     private var closing = false
 
+    override fun attachBaseContext(newBase: android.content.Context) { super.attachBaseContext(com.videomk.app.data.AppLanguage(newBase).wrap(newBase)) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -89,7 +92,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     modifier = Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp).size(48.dp).testTag("closeFullScreenButton"),
                 ) {
                     Box(Modifier.size(40.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close full screen", tint = Color.White)
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.player_close_full_screen), tint = Color.White)
                     }
                 }
             }

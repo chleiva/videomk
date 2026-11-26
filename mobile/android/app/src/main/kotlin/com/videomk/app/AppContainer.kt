@@ -28,7 +28,7 @@ class AppContainer(
     val auth: AuthService? by lazy { config?.let { AuthService(it, store ?: SecureTokenStore.create(appContext), http) } }
     val backend: Backend? by lazy {
         val a = auth
-        if (config != null && a != null) {
+        DebugHooks.fakeBackend(appContext) ?: if (config != null && a != null) {
             val api = ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)
             ApiBackend(api, PhotoUploader(api, http)) { signedOutEvents.tryEmit(Unit) }
         } else null

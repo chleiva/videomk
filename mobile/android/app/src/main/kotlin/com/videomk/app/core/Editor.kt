@@ -1,5 +1,6 @@
 package com.videomk.app.core
 
+import com.videomk.app.R
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -12,7 +13,7 @@ data class PhotoCandidate(
     val provider: String,
     val candidateId: String,
     val thumbUrl: String? = null,
-    val creator: String = "Unknown",
+    val creator: String = Txt.s(R.string.editor_unknown_creator),
     val license: String = "",
     val alt: String = "",
     val landingUrl: String? = null,
@@ -23,7 +24,7 @@ data class PhotoCandidate(
     companion object {
         fun fromJson(o: JsonObject) = PhotoCandidate(
             provider = o.requireString("provider"), candidateId = o.requireString("id"), thumbUrl = o.str("thumb_url"),
-            creator = o.str("creator") ?: "Unknown", license = o.str("license") ?: "", alt = o.str("alt") ?: "", landingUrl = o.str("landing_url"),
+            creator = o.str("creator") ?: Txt.s(R.string.editor_unknown_creator), license = o.str("license") ?: "", alt = o.str("alt") ?: "", landingUrl = o.str("landing_url"),
         )
     }
 }
@@ -35,9 +36,11 @@ data class BeatPhoto(val url: String? = null, val credit: String? = null, val ch
 }
 
 /** The scene types this app knows how to label. The server may send others (it recently added `clip` and `gallery`); those show as a generic "Scene". */
-enum class SceneKind(val wire: String, val label: String) {
-    Title("title", "Title"), Bullets("bullets", "List"), Diagram("diagram", "Diagram"), Chart("chart", "Chart"), Timeline("timeline", "Timeline"),
-    Stat("stat", "Big number"), Quote("quote", "Quote"), Image("image", "Photo"), Clip("clip", "Video clip"), Gallery("gallery", "Photo gallery");
+enum class SceneKind(val wire: String, @androidx.annotation.StringRes private val labelRes: Int) {
+    Title("title", R.string.editor_scene_title), Bullets("bullets", R.string.editor_scene_list), Diagram("diagram", R.string.editor_scene_diagram), Chart("chart", R.string.editor_scene_chart), Timeline("timeline", R.string.editor_scene_timeline),
+    Stat("stat", R.string.editor_scene_stat), Quote("quote", R.string.editor_scene_quote), Image("image", R.string.editor_scene_photo), Clip("clip", R.string.editor_scene_clip), Gallery("gallery", R.string.editor_scene_gallery);
+
+    val label: String get() = Txt.s(labelRes)
 
     companion object {
         fun fromWire(type: String?): SceneKind? = entries.firstOrNull { it.wire == type }
@@ -60,7 +63,7 @@ data class EditorBeat(
     val photo: BeatPhoto? = null,
     val candidates: List<PhotoCandidate> = emptyList(),
 ) {
-    val label: String get() = kind?.label ?: "Scene"
+    val label: String get() = kind?.label ?: Txt.s(R.string.editor_scene_generic)
 
     companion object {
         fun fromJson(o: JsonObject): EditorBeat {
@@ -193,8 +196,8 @@ object EditorDiff {
     fun narrationError(text: String, limits: EditorLimits, silent: Boolean = false): String? {
         val n = wordCount(text)
         if (silent && n == 0) return null   // a pause has no narration; typing words into it gives it a voice, and then the usual limits apply
-        if (n < limits.minWords) return "Needs at least ${limits.minWords} words (now $n)."
-        if (n > limits.maxWords) return "Limited to ${limits.maxWords} words per scene (now $n). Split it into two scenes."
+        if (n < limits.minWords) return Txt.n(R.plurals.editor_err_min_words, limits.minWords, n)
+        if (n > limits.maxWords) return Txt.n(R.plurals.editor_err_max_words, limits.maxWords, n)
         return null
     }
 

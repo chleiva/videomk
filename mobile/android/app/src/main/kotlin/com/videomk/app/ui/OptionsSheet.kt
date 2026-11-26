@@ -44,6 +44,10 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.videomk.app.R
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.core.displayName
 import com.videomk.app.core.CreateOptions
 import com.videomk.app.core.VideoLook
 
@@ -54,13 +58,14 @@ fun OptionsSheet(composer: ComposerViewModel, balance: Int?, onDismiss: () -> Un
     val options = composer.options
     val shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
     val affordable = balance == null || options.credits <= balance
+    val captionsState = stringResource(if (options.captions) R.string.create_state_on else R.string.create_state_off)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), shape = shape, containerColor = Vmk.colors.surface) {
         Column(Modifier.padding(horizontal = 20.dp).verticalScroll(rememberScrollState()).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("optionsSheet"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Video options", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 44.dp)) { Text("Done", fontWeight = FontWeight.SemiBold) }
+                Text(stringResource(R.string.options_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 44.dp)) { Text(stringResource(R.string.common_done), fontWeight = FontWeight.SemiBold) }
             }
-            Overline("Length")
+            Overline(stringResource(R.string.create_length))
             val cols = if (LocalDensity.current.fontScale >= 1.5f) 1 else 3
             for (row in CreateOptions.LENGTHS.chunked(cols)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -74,22 +79,22 @@ fun OptionsSheet(composer: ComposerViewModel, balance: Int?, onDismiss: () -> Un
                 }
             }
             Text(
-                "Each started minute costs 1 credit.${balance?.let { " You have $it." } ?: ""}", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
+                if (balance != null) stringResource(R.string.options_cost_note_balance, balance) else stringResource(R.string.options_cost_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
-            Overline("Look")
+            Overline(stringResource(R.string.create_look))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                LookSwatch("Auto", "Producer decides", null, options.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.options = options.copy(look = null) }
-                for (l in VideoLook.entries) LookSwatch(l.title, l.title, l, options.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.options = options.copy(look = l) }
+                LookSwatch(stringResource(R.string.create_look_auto), stringResource(R.string.create_look_auto_desc), null, options.look == null, Modifier.weight(1f).testTag("look-auto")) { composer.options = options.copy(look = null) }
+                for (l in VideoLook.entries) LookSwatch(l.displayName(), l.displayName(), l, options.look == l, Modifier.weight(1f).testTag("look-${l.wire}")) { composer.options = options.copy(look = l) }
             }
             Box(Modifier.fillMaxWidth().padding(top = 8.dp).size(1.dp).background(Vmk.colors.outline))
             Row(
-                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = "Subtitles") { composer.options = options.copy(captions = !options.captions) }
-                    .semantics(mergeDescendants = true) { stateDescription = if (options.captions) "on" else "off" }.testTag("subtitlesRow"),
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Switch, onClickLabel = stringResource(R.string.create_subtitles)) { composer.options = options.copy(captions = !options.captions) }
+                    .semantics(mergeDescendants = true) { stateDescription = captionsState }.testTag("subtitlesRow"),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
-                Text("Subtitles", style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
                 Switch(
                     checked = options.captions, onCheckedChange = null,
                     colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Color.White, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline),
@@ -106,9 +111,9 @@ fun OptionsSheet(composer: ComposerViewModel, balance: Int?, onDismiss: () -> Un
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     val c = if (warn) Vmk.colors.surface else Color.White
-                    Text("Done ·", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = c)
+                    Text(stringResource(R.string.options_done_dot), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = c)
                     Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(18.dp))
-                    Text("${options.credits} credit${if (options.credits == 1) "" else "s"}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = c)
+                    Text(pluralStringResource(R.plurals.options_credits, options.credits, options.credits), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = c)
                 }
             }
             Box(Modifier.size(24.dp))
@@ -119,16 +124,17 @@ fun OptionsSheet(composer: ComposerViewModel, balance: Int?, onDismiss: () -> Un
 @Composable
 private fun LengthCard(minutes: Int, credits: Int, selected: Boolean, overBalance: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
+    val lengthDescription = pluralStringResource(R.plurals.options_length_desc, credits, credits, pluralStringResource(R.plurals.options_minutes, minutes, minutes))
     val bg = when { selected -> Vmk.colors.primaryContainer; overBalance -> Vmk.colors.warningContainer.copy(alpha = 0.55f); else -> Vmk.colors.surfaceRaised }
     val tint = if (selected) Vmk.colors.primary else if (overBalance) Vmk.colors.warning else Vmk.colors.textSecondary
     Column(
         modifier.heightIn(min = 62.dp).clip(shape).background(bg).then(if (selected) Modifier.border(1.5.dp, Vmk.colors.primary, shape) else Modifier)
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected; contentDescription = "$minutes minute${if (minutes == 1) "" else "s"}, $credits credit${if (credits == 1) "" else "s"}" }
+            .semantics { this.selected = selected; contentDescription = lengthDescription }
             .testTag("length-$minutes").padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
-        Text("$minutes min", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text)
+        Text(stringResource(R.string.options_minutes_short, minutes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(13.dp))
             Text("$credits", style = MaterialTheme.typography.labelMedium, color = tint)
@@ -139,8 +145,9 @@ private fun LengthCard(minutes: Int, credits: Int, selected: Boolean, overBalanc
 @Composable
 internal fun LookSwatch(label: String, description: String, look: VideoLook?, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
+    val lookDescription = stringResource(R.string.create_look_desc, description)
     Column(
-        modifier.clickable(role = Role.RadioButton, onClick = onClick).semantics { this.selected = selected; contentDescription = "$description look" },
+        modifier.clickable(role = Role.RadioButton, onClick = onClick).semantics { this.selected = selected; contentDescription = lookDescription },
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Box(

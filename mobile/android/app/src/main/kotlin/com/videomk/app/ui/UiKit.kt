@@ -24,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -64,7 +66,7 @@ fun FixChip(label: String, description: String, modifier: Modifier = Modifier, o
 @Composable
 fun CreditsText(minutes: Int, credits: Int, color: Color, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("$minutes min", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1)
+        Text(stringResource(R.string.nav_minutes_short, minutes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1)
         Text("·", color = Vmk.colors.textTertiary)
         Icon(Icons.Filled.Bolt, null, tint = color, modifier = Modifier.size(15.dp))
         Text("$credits", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = color, maxLines = 1)

@@ -38,7 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.videomk.app.core.WalletBucket
 import java.text.DateFormat
+import java.time.Duration
 import java.time.Instant
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.videomk.app.R
+import com.videomk.app.core.Txt
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,8 +55,8 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
         containerColor = Vmk.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Credits") },
-                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } },
+                title = { Text(stringResource(R.string.wallet_title)) },
+                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
             )
         },
@@ -62,13 +67,13 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
             Card(Modifier.testTag("balanceCard")) {
                 Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(if (w.unlimited) "∞" else "${w.balance}", fontSize = 56.sp, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("balanceValue"))
-                    Text(if (w.unlimited) "unlimited (test account)" else if (w.balance == 1) "credit" else "credits", color = Vmk.colors.textSecondary)
+                    Text(if (w.unlimited) stringResource(R.string.wallet_unlimited) else pluralStringResource(R.plurals.wallet_credit_word, w.balance), color = Vmk.colors.textSecondary)
                 }
             }
             Card {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("What you have", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
-                    if (w.buckets.isEmpty()) Text("No credits right now.", color = Vmk.colors.textSecondary)
+                    Text(stringResource(R.string.wallet_what_you_have), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
+                    if (w.buckets.isEmpty()) Text(stringResource(R.string.wallet_none), color = Vmk.colors.textSecondary)
                     w.buckets.forEachIndexed { i, b ->
                         if (i > 0) HorizontalDivider(color = Vmk.colors.textSecondary.copy(alpha = 0.15f))
                         Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics(mergeDescendants = true) {}.testTag("bucketRow"), verticalAlignment = Alignment.CenterVertically) {
@@ -86,43 +91,51 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
                     w.nextFreeAt?.let {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary)
-                            Text("Next free credits: ${relative(it)}", color = Vmk.colors.text)
+                            Text(stringResource(R.string.wallet_next_free, relative(it)), color = Vmk.colors.text)
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.CardGiftcard, null, tint = MaterialTheme.colorScheme.primary)
                         Text(
-                            if (w.dailyCredits == 1) "1 free credit every day. It expires that night." else "${w.dailyCredits} free credits every day. They expire that night.",
+                            pluralStringResource(R.plurals.wallet_daily_rule, w.dailyCredits, w.dailyCredits),
                             color = Vmk.colors.text,
                         )
                     }
                     Text(
-                        "1 credit makes up to 1 minute of video, rounded up: a 10-second video and a 60-second video cost 1 credit, a 61-second video costs 2. Free credits expire; credits you buy never do.",
+                        stringResource(R.string.wallet_pricing_note),
                         style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
                     )
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Button(onClick = {}, enabled = false, modifier = Modifier.heightIn(min = 48.dp)) { Text("Get more credits") }
-                Text("Buying credits is coming soon.", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
+                Button(onClick = {}, enabled = false, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.wallet_get_more)) }
+                Text(stringResource(R.string.wallet_buying_soon), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
             }
         }
     }
 }
 
-fun bucketTitle(k: WalletBucket.Kind) = when (k) {
-    WalletBucket.Kind.Daily -> "Free today"
-    WalletBucket.Kind.Signup -> "Welcome credits"
-    WalletBucket.Kind.Paid -> "Purchased"
-    WalletBucket.Kind.Refund -> "Returned credits"
-    WalletBucket.Kind.Other -> "Credits"
-}
+fun bucketTitle(k: WalletBucket.Kind): String = Txt.s(when (k) {
+    WalletBucket.Kind.Daily -> R.string.wallet_bucket_daily
+    WalletBucket.Kind.Signup -> R.string.wallet_bucket_signup
+    WalletBucket.Kind.Paid -> R.string.wallet_bucket_paid
+    WalletBucket.Kind.Refund -> R.string.wallet_bucket_refund
+    WalletBucket.Kind.Other -> R.string.wallet_bucket_other
+})
 
 fun expiry(b: WalletBucket): String? {
-    val d = b.expiresAt ?: return "Never expire"
-    if (b.kind == WalletBucket.Kind.Daily) return "Expire tonight"
-    return "Expire " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date.from(d))
+    val d = b.expiresAt ?: return Txt.s(R.string.wallet_never_expire)
+    if (b.kind == WalletBucket.Kind.Daily) return Txt.s(R.string.wallet_expire_tonight)
+    return Txt.s(R.string.wallet_expire_on, DateFormat.getDateInstance(DateFormat.MEDIUM, Txt.locale).format(Date.from(d)))
 }
 
-private fun relative(t: Instant): String =
-    android.text.format.DateUtils.getRelativeTimeSpanString(t.toEpochMilli(), System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS).toString()
+/** "in 3 hours", from the locale's plurals (the system relative-time helper follows the device language, not the app's). */
+private fun relative(t: Instant): String {
+    val minutes = Duration.between(Instant.now(), t).toMinutes()
+    return when {
+        minutes < 1 -> Txt.s(R.string.wallet_in_a_moment)
+        minutes < 60 -> Txt.n(R.plurals.wallet_in_minutes, minutes.toInt())
+        minutes < 60 * 24 -> Txt.n(R.plurals.wallet_in_hours, ((minutes + 30) / 60).toInt())
+        else -> Txt.n(R.plurals.wallet_in_days, ((minutes + 720) / 1440).toInt())
+    }
+}

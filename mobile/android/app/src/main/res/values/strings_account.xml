@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- navigation, tabs, player -->
+    <string name="nav_tab_videos">Videos</string>
+    <string name="nav_tab_media">My media</string>
+    <string name="nav_load_videos_failed">Couldn\'t load your videos.</string>
+    <string name="nav_minutes_short">%1$d min</string>
+    <string name="player_full_screen">Full screen</string>
+    <string name="player_close_full_screen">Close full screen</string>
+
+    <!-- video status stages and looks -->
+    <string name="stage_starting_short">Starting</string>
+    <string name="stage_starting">Getting started</string>
+    <string name="stage_writing_short">Writing the story</string>
+    <string name="stage_writing">Writing the story</string>
+    <string name="stage_voice_short">Voice and visuals</string>
+    <string name="stage_voice">Recording the voice and finding visuals</string>
+    <string name="stage_rendering_short">Rendering</string>
+    <string name="stage_rendering">Rendering</string>
+    <string name="video_untitled">Untitled video</string>
+    <string name="look_midnight">Midnight</string>
+    <string name="look_paper">Paper</string>
+    <string name="look_sunrise">Sunrise</string>
+
+    <!-- API errors (client-owned fallbacks; server messages are shown as received) -->
+    <string name="err_session_expired">Your session expired. Please sign in again.</string>
+    <string name="err_video_not_ready">This video isn\'t ready yet.</string>
+    <string name="err_storage_full">Your media storage is full. Delete some photos or see your storage options.</string>
+    <string name="err_not_found">That photo or collection isn\'t there any more.</string>
+    <string name="err_network">Network problem. Check your connection and try again.</string>
+    <string name="err_server">Something went wrong on our side. Please try again.</string>
+    <string name="err_photo_too_large">That photo is too large.</string>
+    <string name="err_brief_unusable">That brief can\'t be used.</string>
+    <string name="err_changed_meanwhile">That changed in the meantime. Please try again.</string>
+    <string name="err_video_changed">This video changed. Reload to continue.</string>
+    <string name="err_blocked_default">We can\'t make this video.</string>
+    <string name="err_paused_default">Creating videos is paused for now.</string>
+    <string name="err_rate_limited">Too many requests. Try again in a moment.</string>
+    <string name="err_daily_limit">You\'ve reached today\'s limit. Try again tomorrow.</string>
+    <plurals name="err_insufficient_credits">
+        <item quantity="one">This video needs %1$d credit and you have %2$d.</item>
+        <item quantity="other">This video needs %1$d credits and you have %2$d.</item>
+    </plurals>
+    <plurals name="err_rate_limited_minutes">
+        <item quantity="one">Too many requests. Try again in %1$d minute.</item>
+        <item quantity="other">Too many requests. Try again in %1$d minutes.</item>
+    </plurals>
+    <plurals name="err_rate_limited_seconds">
+        <item quantity="one">Too many requests. Try again in %1$d second.</item>
+        <item quantity="other">Too many requests. Try again in %1$d seconds.</item>
+    </plurals>
+
+    <!-- sign in -->
+    <string name="auth_tagline">Describe a video. We write it, voice it and draw it.</string>
+    <string name="auth_not_configured">Not configured. This build has no server address yet.</string>
+    <string name="auth_signing_in">Signing in</string>
+    <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_continue_apple">Continue with Apple</string>
+    <string name="auth_continue_email">Continue with email</string>
+    <string name="auth_sign_in_or_create">Sign in or create account</string>
+    <string name="auth_sign_in_failed">We couldn\'t sign you in. Please try again.</string>
+    <string name="auth_account_link_failed">We linked your accounts but couldn\'t finish signing you in. Please tap the button once more.</string>
+    <string name="auth_legal_line">By continuing you agree to the %1$s and %2$s.</string>
+    <string name="auth_terms">Terms</string>
+    <string name="auth_privacy_policy">Privacy Policy</string>
+
+    <!-- settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_signed_in_as">Signed in as</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_out_confirm">Sign out of videomk?</string>
+    <string name="settings_photos">Photos</string>
+    <string name="settings_photo_dates">Use photo dates</string>
+    <string name="settings_photo_dates_hint">Puts your photos in the order they were taken and groups them by day</string>
+    <string name="settings_photo_locations">Use photo locations</string>
+    <string name="settings_photo_locations_hint">Names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves.</string>
+    <string name="settings_media_privacy">Your photos are private to you. Only you can see them. Nobody at videomk browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.</string>
+    <string name="settings_organize_title">Organize new uploads</string>
+    <string name="settings_organize_hint">Ask offers after a big upload. Always groups photos by place and month, and adds later uploads to matching collections. Never leaves everything as it is.</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_privacy_open">Open the privacy policy</string>
+
+    <!-- account deletion -->
+    <string name="deletion_card_title">Delete account</string>
+    <string name="deletion_card_button">Delete my account…</string>
+    <string name="deletion_settings_body">Permanently deletes your account, your videos, your photos and My media, your credits and your sign-in. This can\'t be undone.</string>
+    <string name="deletion_header">Delete your account?</string>
+    <string name="deletion_deletes_title">This permanently deletes:</string>
+    <string name="deletion_item_videos">Your videos</string>
+    <string name="deletion_item_photos">Your photos and everything in My media</string>
+    <string name="deletion_item_credits">Your credits, including any you have left</string>
+    <string name="deletion_item_signin">Your sign-in</string>
+    <string name="deletion_irreversible">This can\'t be undone.</string>
+    <string name="deletion_next_title">What happens next</string>
+    <string name="deletion_next">Your data is removed within minutes and your sign-in within about an hour or two. If you want to sign up again with the same email, please wait until then.</string>
+    <string name="deletion_reauth_note">To make sure it\'s you, you may be asked to sign in again first.</string>
+    <string name="deletion_type_to_confirm">Type %1$s to confirm</string>
+    <string name="deletion_confirm_button">Delete my account</string>
+    <string name="deletion_working_title">Deleting your account</string>
+    <string name="deletion_working_body">Please wait. This takes a few seconds.</string>
+    <string name="deletion_reauth_title">Confirm it\'s you</string>
+    <string name="deletion_reauth_opening">Opening the sign-in page in your browser. Sign in again there to confirm. Nothing is deleted until you do.</string>
+    <string name="deletion_reauth_body">Sign in again in your browser to confirm it\'s you. Nothing is deleted until you do.</string>
+    <string name="deletion_done_title">Your account is being deleted</string>
+    <string name="deletion_apple_available">You signed in with Apple. To finish, confirm with Apple so videomk stops being connected to your Apple ID. This is optional and your account is deleted either way.</string>
+    <string name="deletion_apple_manual">To finish, go to appleid.apple.com, sign in, open Sign-In and Security, then Sign in with Apple, choose videomk and select Stop using Apple ID.</string>
+    <string name="deletion_apple_done">Done: videomk no longer has access through your Apple ID.</string>
+    <string name="deletion_apple_button">Finish with Apple</string>
+    <string name="deletion_skip_close">Skip and close</string>
+    <string name="deletion_fail_offline">We couldn\'t reach videomk, so we can\'t tell if the deletion started. Check your connection and try again. Trying again is safe.</string>
+    <string name="deletion_fail_server">Something went wrong on our side and nothing was deleted. Please try again.</string>
+    <string name="deletion_fail_forbidden">This request doesn\'t match the account you are signed in to, so nothing was deleted. Sign out, sign in again and retry.</string>
+    <string name="deletion_fail_rejected">The confirmation wasn\'t accepted, so nothing was deleted. Check the word and try again.</string>
+    <string name="deletion_fail_reauth_cancelled">You didn\'t finish signing in again, so nothing was deleted. You are still signed in.</string>
+    <string name="deletion_fail_reauth_failed">We couldn\'t confirm it\'s you, so nothing was deleted. You are still signed in. Please try again.</string>
+    <string name="deletion_fail_wrong_account">You signed in with a different account, so nothing was deleted. Use the account you are deleting.</string>
+    <string name="deletion_fail_still_stale">We still couldn\'t confirm a fresh sign-in, so nothing was deleted. Please try again. If it keeps failing, use the steps at videomk.com/delete-account.</string>
+
+    <!-- wallet / credits -->
+    <string name="wallet_title">Credits</string>
+    <string name="wallet_unlimited">unlimited (test account)</string>
+    <plurals name="wallet_credit_word">
+        <item quantity="one">credit</item>
+        <item quantity="other">credits</item>
+    </plurals>
+    <string name="wallet_what_you_have">What you have</string>
+    <string name="wallet_none">No credits right now.</string>
+    <string name="wallet_next_free">Next free credits: %1$s</string>
+    <plurals name="wallet_daily_rule">
+        <item quantity="one">%1$d free credit every day. It expires that night.</item>
+        <item quantity="other">%1$d free credits every day. They expire that night.</item>
+    </plurals>
+    <string name="wallet_pricing_note">1 credit makes up to 1 minute of video, rounded up: a 10-second video and a 60-second video cost 1 credit, a 61-second video costs 2. Free credits expire; credits you buy never do.</string>
+    <string name="wallet_get_more">Get more credits</string>
+    <string name="wallet_buying_soon">Buying credits is coming soon.</string>
+    <string name="wallet_bucket_daily">Free today</string>
+    <string name="wallet_bucket_signup">Welcome credits</string>
+    <string name="wallet_bucket_paid">Purchased</string>
+    <string name="wallet_bucket_refund">Returned credits</string>
+    <string name="wallet_bucket_other">Credits</string>
+    <string name="wallet_never_expire">Never expire</string>
+    <string name="wallet_expire_tonight">Expire tonight</string>
+    <string name="wallet_expire_on">Expire %1$s</string>
+    <string name="wallet_in_a_moment">in a moment</string>
+    <plurals name="wallet_in_minutes">
+        <item quantity="one">in %1$d minute</item>
+        <item quantity="other">in %1$d minutes</item>
+    </plurals>
+    <plurals name="wallet_in_hours">
+        <item quantity="one">in %1$d hour</item>
+        <item quantity="other">in %1$d hours</item>
+    </plurals>
+    <plurals name="wallet_in_days">
+        <item quantity="one">in %1$d day</item>
+        <item quantity="other">in %1$d days</item>
+    </plurals>
+</resources>
