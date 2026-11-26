@@ -235,15 +235,18 @@ FAIL = json.dumps({**json.loads(PASS), "text_visible": True, "reasons": "a sign 
 
 
 class FakeBedrock:
-    def __init__(self):
+    """Fake of the OpenAI Images API call (a callable body -> response); the name is kept for the many call sites."""
+
+    def __init__(self, out_tokens=1413):
         self.calls = []
         self.n = 0
+        self.out_tokens = out_tokens
 
-    def invoke_model(self, modelId, body):   # noqa: N803
-        self.calls.append((modelId, json.loads(body)))
+    def __call__(self, body):
+        self.calls.append(body)
         self.n += 1
         c = (40 + self.n * 7 % 200, 90, 140 - self.n * 3 % 100)
-        return {"body": io.BytesIO(json.dumps({"images": [base64.b64encode(jpeg(c, (1344 // 4, 768 // 4))).decode()], "finish_reasons": [None]}).encode())}
+        return {"data": [{"b64_json": base64.b64encode(jpeg(c, (1344 // 4, 768 // 4))).decode()}], "usage": {"input_tokens": 19, "output_tokens": self.out_tokens}}
 
 
 def plan(n=2):
@@ -273,12 +276,13 @@ def test_a_plan_needs_approval_a_name_and_three_different_prompts_per_image():
 
 def test_the_cap_stops_a_run_before_the_call_that_would_pass_it(tmp_path):
     br = FakeBedrock()
-    sp = gen.Spend(0.15, str(tmp_path / "s.jsonl"), "r")
+    sp = gen.Spend(0.10, str(tmp_path / "s.jsonl"), "r")
     st = catalog_store.LocalStore(str(tmp_path / "c"))
-    out = gen.run(plan(3), st, sp, profile="qa", regen=False, only=None, anchor_path="", embed_image=vecfn([basis(1), basis(2), basis(3)]), br=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0.0004}))
-    assert out["stopped"] and sp.total <= 0.15 + 1e-9
-    assert len(out["made"]) == 1                       # 0.07 + 0.03 + embed fit; the second item's call would pass the cap
-    assert all(c[0] != gen.MODELS["structure"] for c in br.calls[3:])   # nothing was called after the stop
+    out = gen.run(plan(3), st, sp, profile="qa", regen=False, only=None, embed_image=vecfn([basis(1), basis(2), basis(3)]), api=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0.0004}))
+    assert out["stopped"] and sp.total <= 0.10 + 1e-9
+    assert len(out["made"]) == 1                       # one image (0.0424 real + check + embed) fits; the second item's reserve (0.0655) would pass the cap
+    assert len(br.calls) == 1                          # nothing was called after the stop
+    assert abs(sp.total - (1413 * 30 / 1e6 + 19 * 5 / 1e6 + 0.0004 + 0.0005)) < 1e-6   # the REAL token cost is charged, not the reserve
     lines = [json.loads(l) for l in open(tmp_path / "s.jsonl")]
     assert abs(sum(l["usd"] for l in lines) - sp.total) < 1e-6
 
@@ -287,7 +291,7 @@ def test_a_run_stores_original_preview_thumbnail_metadata_and_vector_and_is_idem
     br = FakeBedrock()
     st = catalog_store.LocalStore(str(tmp_path / "c"))
     sp = gen.Spend(5, str(tmp_path / "s.jsonl"), "r")
-    out = gen.run(plan(2), st, sp, profile="qa", regen=False, only=None, anchor_path="", embed_image=vecfn([basis(1), basis(2)]), br=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0.0004}))
+    out = gen.run(plan(2), st, sp, profile="qa", regen=False, only=None, embed_image=vecfn([basis(1), basis(2)]), api=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0.0004}))
     assert len(out["made"]) == 2
     imgs = st.images()
     assert len(imgs) == 2
@@ -298,7 +302,7 @@ def test_a_run_stores_original_preview_thumbnail_metadata_and_vector_and_is_idem
     for f in ("prompt", "negative_prompt", "model", "created", "cost_usd", "seed", "licence", "provenance", "review_status", "tags", "serves", "promoted_from"):
         assert f in it, f
     assert it["review_status"] == "approved" and "no text" not in it["prompt"] and "text" in it["negative_prompt"]
-    again = gen.run(plan(2), st, gen.Spend(5, str(tmp_path / "s2.jsonl"), "r2"), profile="qa", regen=False, only=None, anchor_path="", embed_image=vecfn([]), br=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
+    again = gen.run(plan(2), st, gen.Spend(5, str(tmp_path / "s2.jsonl"), "r2"), profile="qa", regen=False, only=None, embed_image=vecfn([]), api=br, complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
     assert again["skipped"] == ["i0", "i1"] and not again["made"] and not os.path.exists(tmp_path / "s2.jsonl")
 
 
@@ -306,19 +310,19 @@ def test_a_picture_the_check_rejects_is_never_stored_and_regenerates_once_within
     answers = iter([FAIL, PASS])
     st = catalog_store.LocalStore(str(tmp_path / "c"))
     sp = gen.Spend(5, str(tmp_path / "s.jsonl"), "r")
-    out = gen.run(plan(1), st, sp, profile="qa", regen=True, only=None, anchor_path="", embed_image=vecfn([basis(5)]), br=FakeBedrock(), complete=lambda *a, **k: (next(answers), {"cost_usd": 0.0004}))
+    out = gen.run(plan(1), st, sp, profile="qa", regen=True, only=None, embed_image=vecfn([basis(5)]), api=FakeBedrock(), complete=lambda *a, **k: (next(answers), {"cost_usd": 0.0004}))
     assert len(out["rejected"]) == 1 and out["made"][0]["attempts"] == 2 and len(st.images()) == 1
     st2 = catalog_store.LocalStore(str(tmp_path / "c2"))
-    out2 = gen.run(plan(1), st2, gen.Spend(5, str(tmp_path / "s3.jsonl"), "r"), profile="qa", regen=False, only=None, anchor_path="", embed_image=vecfn([]), br=FakeBedrock(), complete=lambda *a, **k: (FAIL, {"cost_usd": 0}))
+    out2 = gen.run(plan(1), st2, gen.Spend(5, str(tmp_path / "s3.jsonl"), "r"), profile="qa", regen=False, only=None, embed_image=vecfn([]), api=FakeBedrock(), complete=lambda *a, **k: (FAIL, {"cost_usd": 0}))
     assert out2["rejected"] and not st2.images()
 
 
 def test_a_near_duplicate_of_a_stored_image_is_dropped(tmp_path):
     st = catalog_store.LocalStore(str(tmp_path / "c"))
-    gen.run(plan(1), st, gen.Spend(5, str(tmp_path / "s.jsonl"), "r"), profile="qa", regen=False, only=None, anchor_path="", embed_image=vecfn([basis(7)]), br=FakeBedrock(), complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
+    gen.run(plan(1), st, gen.Spend(5, str(tmp_path / "s.jsonl"), "r"), profile="qa", regen=False, only=None, embed_image=vecfn([basis(7)]), api=FakeBedrock(), complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
     p2 = plan(1)
     p2["plan_id"] = "t2"
-    out = gen.run(p2, st, gen.Spend(5, str(tmp_path / "s.jsonl"), "r"), profile="qa", regen=False, only=None, anchor_path="", embed_image=vecfn([basis(7)]), br=FakeBedrock(), complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
+    out = gen.run(p2, st, gen.Spend(5, str(tmp_path / "s.jsonl"), "r"), profile="qa", regen=False, only=None, embed_image=vecfn([basis(7)]), api=FakeBedrock(), complete=lambda *a, **k: (PASS, {"cost_usd": 0}))
     assert out["duplicates"] and len(st.images()) == 1
 
 
@@ -343,16 +347,21 @@ def test_the_generator_refuses_prod_the_default_profile_and_a_missing_yes(tmp_pa
     assert not os.path.exists(tmp_path / "items.json")
 
 
-def test_the_layouts_are_wide_and_the_generator_sends_the_house_prompt_and_negative(tmp_path):
-    import catalog_layouts
-    for name, fn in catalog_layouts.LAYOUTS.items():
-        assert fn(1).size == (1344, 768), name
-    br = FakeBedrock()
-    gen.generate_image(br, plan(1)["items"][0], 5, None)
-    body = br.calls[0][1]
-    assert catalog_style.HOUSE_STYLE in body["prompt"] and "bottom quarter" in body["prompt"] and body["negative_prompt"] == catalog_style.NEGATIVE and body["image"]
+def test_the_generator_sends_the_openai_request_with_the_house_prompt_and_prices_it_from_usage():
+    br = FakeBedrock(out_tokens=1000)
+    jpg, cost = gen.generate_image(br, plan(1)["items"][0])
+    body = br.calls[0]
+    assert body["model"] == "gpt-image-2.6-flare" and body["size"] == "2048x1152" and body["quality"] == "high" and body["output_format"] == "jpeg" and "seed" not in body
+    assert catalog_style.HOUSE_STYLE in body["prompt"] and "bottom quarter" in body["prompt"] and "logos" in body["prompt"]
+    assert jpg[:2] == b"\xff\xd8" and abs(cost - (1000 * 30 / 1e6 + 19 * 5 / 1e6)) < 1e-9
+    assert gen.PRICES["generate"] > 1500 * 30 / 1e6   # the reserve covers a high-quality image with margin
     with pytest.raises(RuntimeError):
-        gen.generate_image(br, {**plan(1)["items"][0], "method": "style"}, 5, None)
+        gen.generate_image(lambda b: {"data": []}, plan(1)["items"][0])
+
+
+def test_no_stability_or_bedrock_generation_path_is_left():
+    src = open(gen.__file__).read()
+    assert "invoke_model" not in src and "us.stability" not in src and "boto3.Session(profile_name=profile, region_name=GEN_REGION)" not in src
 
 
 # ----------------------------------------------------------------------------- promotion
@@ -536,6 +545,4 @@ def test_a_calm_bottom_band_flattens_the_guide_under_the_subject(tmp_path):
     assert flat.size == g.size
     band = np.array(flat.crop((0, 620, 1344, 768)).convert("L"), dtype=float)
     assert band.std() < np.array(g.crop((0, 620, 1344, 768)).convert("L"), dtype=float).std() + 1e-6 and band.std() < 6
-    br = FakeBedrock()
-    gen.generate_image(br, {**plan(1)["items"][0], "calm_bottom": 0.3, "control_strength": 0.8}, 5, None)
-    assert br.calls[0][1]["control_strength"] == 0.8
+

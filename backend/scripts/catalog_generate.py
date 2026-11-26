@@ -4,10 +4,11 @@
   catalog_generate.py plan.json --store local:/path/to/catalog --max-usd 5 --yes [--regen] [--only p01,p02] [--profile qa]
 
 * The plan comes from catalog_plan.py (or by hand) and must carry `approved_by`; every item must say which >= 3 different prompts it serves.
-* Hard cost cap: before EVERY paid call the provider's real price per call (PRICES below, from the AWS Bedrock price page) is added to what the run has spent and the
-  call is refused if the total would pass --max-usd. Every dollar goes to the spend log (JSON lines) whether the picture is kept or not.
+* Generator: OpenAI Images API, model gpt-image-2.6-flare, 2048x1152 (16:9), quality high, JPEG. (Bedrock/Stability generation was removed: see docs/IMAGE_CATALOG.md.)
+* Hard cost cap: before EVERY paid call a conservative price per call (PRICES below) is added to what the run has spent and the
+  call is refused if the total would pass --max-usd; after the call the REAL cost from the response's token usage is charged. Every dollar goes to the spend log (JSON lines) whether the picture is kept or not.
 * Each result is checked by a vision model (Claude): prompt adherence and artefacts (bad hands or faces, warped objects, text, logos, a recognisable real person, anything unsafe,
-  captions area, crop safety). A rejected picture is dropped (never stored) and, with --regen, generated once more with another seed if the cap allows.
+  captions area, crop safety). A rejected picture is dropped (never stored) and, with --regen, generated once more if the cap allows (the API has no seed).
 * Duplicate check against the catalog: the Cohere embedding of the thumbnail is compared with the stored vectors (>= DUP_SIMILARITY: dropped).
 * Kept pictures are stored immutably by content hash (original, 1280 preview, 384 thumbnail), with metadata and the vector. Idempotent by plan item id: an item with a marker row is skipped.
 * Never writes to prod (promote with catalog_promote.py: copying, no second payment).
@@ -27,11 +28,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "lambdas"))
 sys.path.insert(0, HERE)
 
-# Bedrock price per call, USD. Source: https://aws.amazon.com/bedrock/pricing/ ("Stability AI", previous-generation models: Control Structure $0.07, Style Guide $0.07,
-# Fast Upscale $0.03; read 2026-11-26). The Anthropic check is measured from the real token usage instead. Cohere embedding of one thumbnail is a fraction of a cent.
-PRICES = {"structure": 0.07, "style": 0.07, "upscale": 0.03, "embed": 0.0005, "check_reserve": 0.01}
-MODELS = {"structure": "us.stability.stable-image-control-structure-v1:0", "style": "us.stability.stable-image-style-guide-v1:0", "upscale": "us.stability.stable-fast-upscale-v1:0"}
-GEN_REGION = "us-west-2"
+# OpenAI gpt-image-2.6-flare, image output USD 30 per 1M tokens, text input USD 5 per 1M tokens (https://developers.openai.com/api/docs/pricing, read 2026-11-26).
+# Measured 2026-11-26 at 2048x1152: high = 1413 output tokens (USD 0.0424), medium 1212 (0.0364); 1792x1008 medium 1056 (0.0317). The reserve is above the high-quality figure; the real cost
+# from the response's `usage` is what is charged. The Anthropic check is measured from the real token usage. Cohere embedding of one thumbnail is a fraction of a cent.
+OPENAI_MODEL = "gpt-image-2.6-flare"
+IMAGE_SIZE = "2048x1152"
+IMAGE_QUALITY = "high"
+OUT_USD_PER_TOKEN = 30 / 1e6
+IN_USD_PER_TOKEN = 5 / 1e6
+PRICES = {"generate": 0.055, "embed": 0.0005, "check_reserve": 0.01}
+MODELS = {"generate": OPENAI_MODEL}
+SSM_KEY_NAME = "/videomk/openai_api_key"
 DUP_SIMILARITY = 0.92
 MIN_QA_SCORE = 7
 ORIGINAL_MAX_SIDE = 3840
@@ -67,40 +74,48 @@ class Spend:
 
 
 # ----------------------------------------------------------------------------- the model calls
-def _bedrock(profile: str):
+def _openai_key(profile: str) -> str:
+    """The key is read from SSM (never printed, logged or stored). OPENAI_API_KEY in the environment wins (for a laptop)."""
+    if os.environ.get("OPENAI_API_KEY"):
+        return os.environ["OPENAI_API_KEY"]
     import boto3
 
-    return boto3.Session(profile_name=profile, region_name=GEN_REGION).client("bedrock-runtime")
+    return boto3.Session(profile_name=profile, region_name="eu-west-1").client("ssm").get_parameter(Name=SSM_KEY_NAME, WithDecryption=True)["Parameter"]["Value"]
 
 
-def _invoke(br, model: str, body: Dict[str, Any]) -> bytes:
-    res = json.loads(br.invoke_model(modelId=model, body=json.dumps(body))["body"].read())
-    reasons = res.get("finish_reasons") or [None]
-    if reasons[0] or not res.get("images"):
-        raise RuntimeError(f"the model refused or returned nothing: {reasons[0]}")
-    return base64.b64decode(res["images"][0])
+def openai_api(profile: str):
+    """-> a function body -> response dict for POST /v1/images/generations (plain HTTPS, no extra dependency). Errors never include the key."""
+    import urllib.error
+    import urllib.request
+
+    key = _openai_key(profile)
+
+    def call(body: Dict[str, Any]) -> Dict[str, Any]:
+        req = urllib.request.Request("https://api.openai.com/v1/images/generations", json.dumps(body).encode(), {"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+        try:
+            return json.load(urllib.request.urlopen(req, timeout=300))
+        except urllib.error.HTTPError as e:
+            raise RuntimeError(f"OpenAI HTTP {e.code}: {e.read()[:300].decode('utf-8', 'replace')}") from None
+    return call
 
 
-def generate_image(br, item: Dict[str, Any], seed: int, anchor: Optional[bytes]) -> bytes:
+def real_cost(usage: Dict[str, Any]) -> float:
+    tokens_in = int((usage or {}).get("input_tokens", 0))
+    tokens_out = int((usage or {}).get("output_tokens", 0))
+    return tokens_in * IN_USD_PER_TOKEN + tokens_out * OUT_USD_PER_TOKEN
+
+
+def generate_image(api, item: Dict[str, Any]) -> Tuple[bytes, float]:
+    """-> (jpeg, real cost USD). Free composition from the house prompt; the API has no seed, so a re-run gives a different picture."""
     from common import catalog_style
-    import catalog_layouts
 
     prompt = catalog_style.full_prompt(item["subject"], bool(item.get("people")))
-    neg = catalog_style.NEGATIVE
-    if item.get("method", "structure") == "style":
-        if not anchor:
-            raise RuntimeError("method 'style' needs a style anchor (the first approved picture of the catalog, or --anchor)")
-        return _invoke(br, MODELS["style"], {"prompt": prompt[:10000], "negative_prompt": neg, "image": base64.b64encode(anchor).decode(), "aspect_ratio": "16:9", "fidelity": item.get("fidelity", 0.5), "seed": seed, "output_format": "jpeg"})
-    guide = catalog_layouts.LAYOUTS[item.get("layout", "mountains")](seed)
-    if item.get("calm_bottom"):   # a flat mid-tone band under the subject: the model keeps it smooth, so captions stay readable (learned in the pilot: busy foam, grass and bright leaves failed the check)
-        guide = catalog_layouts.calm_band(guide, float(item["calm_bottom"]) if not isinstance(item["calm_bottom"], bool) else 0.28)
-    buf = io.BytesIO()
-    guide.save(buf, "PNG")
-    return _invoke(br, MODELS["structure"], {"prompt": prompt[:10000], "negative_prompt": neg, "image": base64.b64encode(buf.getvalue()).decode(), "control_strength": item.get("control_strength", 0.6), "seed": seed, "output_format": "jpeg"})
-
-
-def upscale(br, jpeg: bytes) -> bytes:
-    return _invoke(br, MODELS["upscale"], {"image": base64.b64encode(jpeg).decode(), "output_format": "jpeg"})
+    prompt += " Avoid: " + catalog_style.NEGATIVE
+    res = api({"model": OPENAI_MODEL, "prompt": prompt[:30000], "size": IMAGE_SIZE, "quality": IMAGE_QUALITY, "output_format": "jpeg", "n": 1})
+    data = res.get("data") or []
+    if not data or not data[0].get("b64_json"):
+        raise RuntimeError("the model returned no image")
+    return base64.b64decode(data[0]["b64_json"]), real_cost(res.get("usage") or {})
 
 
 def _thumb(jpeg: bytes, px: int) -> bytes:
@@ -182,23 +197,22 @@ def store_image(store, jpeg: bytes, item: Dict[str, Any], plan: Dict[str, Any], 
     store.put_item({
         "id": cid, "title": item.get("title", ""), "category": item.get("category", ""), "tags": [catalog_style.STYLE_VERSION, item.get("category", "")], "serves": list(item.get("serves") or [])[:12],
         "prompt": catalog_style.full_prompt(item["subject"], bool(item.get("people"))), "negative_prompt": catalog_style.NEGATIVE, "subject": item["subject"],
-        "model": extra["model"], "method": item.get("method", "structure"), "layout": item.get("layout", ""), "seed": seed, "created": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z",
-        "cost_usd": round(cost, 4), "licence": "videomk-owned: output assigned to videomk by the provider's terms; see docs/IMAGE_CATALOG.md", "provenance": {"provider": "Amazon Bedrock / Stability AI", "plan": plan["plan_id"], "plan_item": item["id"]},
+        "model": extra["model"], "method": "text-to-image", "layout": "", "seed": seed, "created": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat() + "Z",
+        "cost_usd": round(cost, 4), "licence": "videomk-owned: output assigned to videomk by the provider's terms; see docs/IMAGE_CATALOG.md", "provenance": {"provider": "OpenAI Images API", "plan": plan["plan_id"], "plan_item": item["id"]},
         "review_status": "approved", "review": {k: v for k, v in verdict.items()}, "width": extra["size"][0], "height": extra["size"][1], "style_version": catalog_style.STYLE_VERSION,
         "promoted_from": "", "sha256": cid,
     })
     return cid
 
 
-def run(plan: Dict[str, Any], store, spend: Spend, *, profile: str, regen: bool, only: Optional[List[str]], anchor_path: str, embed_image=None, br=None, complete=None, sleep=0.0) -> Dict[str, Any]:
+def run(plan: Dict[str, Any], store, spend: Spend, *, profile: str, regen: bool, only: Optional[List[str]], embed_image=None, api=None, complete=None, sleep=0.0) -> Dict[str, Any]:
     from PIL import Image
     from common import catalog
 
     if embed_image is None:
         from common import library_search
         embed_image = lambda j: library_search.embed_image(_thumb(j, catalog.THUMB_PX))   # noqa: E731
-    br = br or _bedrock(profile)
-    anchor = open(anchor_path, "rb").read() if anchor_path else None
+    api = api or openai_api(profile)
     summary: Dict[str, Any] = {"made": [], "skipped": [], "rejected": [], "duplicates": [], "stopped": ""}
     for item in plan["items"]:
         iid = item["id"]
@@ -211,25 +225,19 @@ def run(plan: Dict[str, Any], store, spend: Spend, *, profile: str, regen: bool,
         attempts = 2 if regen else 1
         done = False
         for attempt in range(attempts):
-            seed = int(item.get("seed", 1)) + attempt * 7919
+            seed = 0   # the Images API has no seed; kept in the metadata as 0
             try:
-                method = item.get("method", "structure")
-                spend.reserve(method, PRICES[method] + PRICES["check_reserve"])
-                if method == "style" and anchor is None:   # the first approved picture of this catalog is the house-style anchor
-                    firsts = [i for i in store.images() if i.get("method") != "style"]
-                    if firsts:
-                        anchor = store.get(catalog.key_original(sorted(firsts, key=lambda i: i["created"])[0]["id"]))
-                jpeg = generate_image(br, item, seed, anchor)
-                spend.charge(method, PRICES[method], iid)
+                spend.reserve("generate", PRICES["generate"] + PRICES["check_reserve"] + PRICES["embed"])
+                final0, gen_cost = generate_image(api, item)
+                spend.charge("generate", gen_cost, iid)
+                jpeg = final0
                 passed, verdict, qcost = qa_check(jpeg, item, complete)
                 spend.charge("vision-check", qcost, iid)
                 if not passed:
                     summary["rejected"].append({"item": iid, "attempt": attempt + 1, "verdict": verdict})
                     print(f"  {iid}: rejected ({verdict.get('reasons') or verdict.get('unreadable', 'unreadable verdict')})")
                     continue
-                spend.reserve("upscale", PRICES["upscale"] + PRICES["embed"])
-                big = upscale(br, jpeg)
-                spend.charge("upscale", PRICES["upscale"], iid)
+                big = jpeg
                 im = Image.open(io.BytesIO(big)).convert("RGB")
                 if max(im.size) > ORIGINAL_MAX_SIDE:
                     s = ORIGINAL_MAX_SIDE / max(im.size)
@@ -245,7 +253,7 @@ def run(plan: Dict[str, Any], store, spend: Spend, *, profile: str, regen: bool,
                     print(f"  {iid}: duplicate of an existing image ({near[0][1]:.2f}), dropped")
                     done = True
                     break
-                cid = store_image(store, final, item, plan, seed, PRICES[method] + PRICES["upscale"] + PRICES["embed"] + qcost, verdict, vec, {"model": MODELS[method] + " + " + MODELS["upscale"], "size": im.size})
+                cid = store_image(store, final, item, plan, seed, gen_cost + PRICES["embed"] + qcost, verdict, vec, {"model": OPENAI_MODEL + " " + IMAGE_SIZE + " " + IMAGE_QUALITY, "size": im.size})
                 summary["made"].append({"item": iid, "id": cid, "attempts": attempt + 1})
                 print(f"  {iid}: kept {cid[:12]} ({im.size[0]}x{im.size[1]}) {verdict.get('reasons', '')}")
                 done = True
@@ -273,7 +281,6 @@ def main() -> None:
     ap.add_argument("--regen", action="store_true", help="regenerate a rejected picture once")
     ap.add_argument("--only", default="")
     ap.add_argument("--profile", default="qa")
-    ap.add_argument("--anchor", default="", help="style anchor image for method 'style' (default: the catalog's first approved picture)")
     ap.add_argument("--spend-log", default=os.path.join(HERE, "..", "..", "docs", "image_catalog", "spend_log.jsonl"))
     args = ap.parse_args()
     if args.store.strip() == "prod":
@@ -282,7 +289,7 @@ def main() -> None:
     errs = validate_plan(plan)
     if errs:
         sys.exit("Plan refused:\n  - " + "\n  - ".join(errs))
-    est = sum(PRICES[i.get("method", "structure")] + PRICES["upscale"] + PRICES["embed"] + PRICES["check_reserve"] for i in plan["items"])
+    est = sum(PRICES["generate"] + PRICES["embed"] + PRICES["check_reserve"] for _ in plan["items"])
     print(f"{len(plan['items'])} items, about ${est:.2f} without regeneration (cap ${args.max_usd:.2f})")
     if not args.yes:
         sys.exit("Dry run: nothing was generated. Add --yes to spend.")
@@ -295,7 +302,7 @@ def main() -> None:
     store = open_store(args.store)
     os.makedirs(os.path.dirname(os.path.abspath(args.spend_log)), exist_ok=True)
     spend = Spend(args.max_usd, args.spend_log, f"{plan['plan_id']}-{int(time.time())}")
-    summary = run(plan, store, spend, profile=args.profile, regen=args.regen, only=[x for x in args.only.split(",") if x] or None, anchor_path=args.anchor)
+    summary = run(plan, store, spend, profile=args.profile, regen=args.regen, only=[x for x in args.only.split(",") if x] or None)
     print(json.dumps({k: (v if k == "stopped" else len(v)) for k, v in summary.items()}), f"spent this run: ${spend.total:.4f} of ${args.max_usd:.2f}")
 
 

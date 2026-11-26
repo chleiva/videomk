@@ -1,0 +1,102 @@
+{
+ "plan_id": "pilot-openai-1",
+ "approved_by": "owner decision 2026-11-26 (OpenAI model pilot, max USD 1.50; 100-image batch NOT approved)",
+ "items": [
+  {
+   "id": "o01",
+   "title": "Sunrise over misty mountains",
+   "category": "nature",
+   "subject": "Sunrise over a vast mountain landscape, soft golden light behind layered misty ridges",
+   "people": false,
+   "serves": [
+    "sunrise over mountains",
+    "misty mountain valley sunrise",
+    "golden morning light landscape"
+   ]
+  },
+  {
+   "id": "o02",
+   "title": "Calm alpine lake at dawn",
+   "category": "nature",
+   "subject": "A calm alpine lake at dawn with mist on the water and mountain reflections",
+   "people": false,
+   "serves": [
+    "calm alpine lake",
+    "still water mirror reflection mountains",
+    "mist over mountain lake"
+   ]
+  },
+  {
+   "id": "o03",
+   "title": "Autumn forest path",
+   "category": "nature",
+   "subject": "A quiet forest path covered in autumn leaves, warm diffused light between the trees",
+   "people": false,
+   "serves": [
+    "forest path autumn leaves",
+    "autumn woods walk",
+    "fall foliage trail"
+   ]
+  },
+  {
+   "id": "o04",
+   "title": "Desert dunes at golden hour",
+   "category": "nature",
+   "subject": "Smooth sand dunes in a desert at golden hour, long soft shadows, empty and calm",
+   "people": false,
+   "serves": [
+    "desert sand dunes",
+    "sahara landscape",
+    "golden hour desert"
+   ]
+  },
+  {
+   "id": "o05",
+   "title": "Coffee cup on a wooden table",
+   "category": "mood",
+   "subject": "A ceramic coffee cup with steam on a wooden table by a window, soft morning light, plain unbranded cup",
+   "people": false,
+   "serves": [
+    "cup of coffee on a table",
+    "morning coffee",
+    "coffee break"
+   ]
+  },
+  {
+   "id": "o06",
+   "title": "Honeycomb macro",
+   "category": "nature",
+   "subject": "Macro photograph of golden honeycomb with glistening honey, shallow depth of field",
+   "people": false,
+   "serves": [
+    "honeycomb macro",
+    "honey bees honeycomb",
+    "golden honey close up"
+   ]
+  },
+  {
+   "id": "o07",
+   "title": "Tidy desk with laptop",
+   "category": "work",
+   "subject": "A tidy wooden desk with a closed laptop, a notebook with blank pages, a plant and a lamp, soft daylight",
+   "people": false,
+   "serves": [
+    "home office desk",
+    "laptop workspace",
+    "clean desk setup"
+   ]
+  },
+  {
+   "id": "o08",
+   "title": "City skyline at dusk",
+   "category": "city",
+   "subject": "A modern city skyline at dusk seen across a calm river, glowing windows, deep blue sky, no readable signs",
+   "people": false,
+   "serves": [
+    "city skyline at dusk",
+    "urban evening view",
+    "downtown skyline river"
+   ]
+  }
+ ]
+}
