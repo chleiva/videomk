@@ -21,6 +21,7 @@ from .usermedia import PHOTO_ID_RE
 
 MAX_BEATS = 90
 MIN_BEAT_WORDS, MAX_BEAT_WORDS = 6, 70
+MAX_CLIP_NARRATION_WORDS = 36   # about 15 s spoken: stock footage of that length is rare (and is never looped); longer narration gets a photograph
 # A silent beat has no narration: it holds a picture for a few seconds while the music carries it (the breath between two spoken ideas).
 SILENT_SCENES = ("image", "gallery", "clip", "title", "quote", "stat")
 MIN_HOLD_S, MAX_HOLD_S, DEFAULT_HOLD_S = 2.5, 8.0, 4.0
@@ -42,7 +43,7 @@ IMAGE_DOC = """
 - gallery: {image_queries: 2-6 different photographs (2-6 words each), alt (<=70)}. The photographs follow each other during ONE beat, each shown for about 2.5-5 seconds (all of them are fetched together, so a bigger gallery costs no extra time). Use it whenever the narration names or compares several places, objects or moments, or for a montage that sets a mood: name each one in the order shown. Every query must describe a different, specific subject (a named landmark, not 'beautiful building')."""
 
 CLIP_DOC = """
-- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70, a second, different wording of the same footage)}. A 5-20 second stock video clip plays full screen behind the narration. The narration of a clip beat must itself be general or atmospheric (a mood, a process, nature, everyday life): never about a specific event, news item, person, place or company, because stock footage cannot show it and the clip is rejected. Use it for atmosphere and motion that stock footage really has: waves, traffic, clouds, a city street, hands typing, a crowd walking, wildlife, machines at work, weather. Never for a specific named person, place, brand, event or product (stock footage will not show it: use an image for named places and a diagram or chart for facts). Use at most 1 beat in 4, never two clips in a row, and prefer a clip over an image only when motion helps the idea. When the user's brief asks for video, footage or clips, use clip scenes freely (up to 1 beat in 3) for the generic atmosphere that stock footage does have (crowds, lights, food, weather, nature, streets, people at work), worded generically even when the topic is about named places ("festive market lights at night", not the name of the market). For videos about places, food, nature or everyday life, a clip of the generic atmosphere (a street, the sea, a market, a kitchen, a crowd) is usually better than a still: prefer clips for atmosphere between the photograph beats."""
+- clip: {clip_query (2-5 words describing generic real footage that moves), alt (<=70, a second, different wording of the same footage)}. A short stock video clip plays full screen behind the narration. Real motion holds the viewer far better than a still, so for VISUAL topics (places, cities, nature, animals, weather, science processes, history, food and cooking, travel, how things work, people and work) use clips GENEROUSLY: about 30 to 45 percent of the beats of such a video should be clip scenes (count them: a 14-beat video has 5 or 6 clips, a 20-beat video 7 to 9; never every beat), alternating with photographs and diagrams. Keep every clip scene SHORT: its narration 10 to 18 words, 20 at the very most (4 to 8 seconds spoken), so write the visual moments of the script as short beats and put the heavier explanation into diagram, chart, text and photograph beats; when an idea needs longer narration, split it into two beats, the first a clip and the second a photograph, diagram or another clip with different footage, so a clip never has to freeze or repeat (footage is never looped; a clip that is too short for its scene is thrown away and replaced by a photograph). Never two clips in a row with the same kind of footage. Write the clip_query the way a stock library titles its footage: 2-5 common, generic words for what the camera sees and does, never a brand, a person's name or a proper noun that a stock library will not have ("waves crashing on rocks", "chef chopping vegetables", "aerial view of a city at night", "bees on a flower", "scientist with a microscope", "storm clouds timelapse"); put a second, different wording in alt ("surf on a rocky coast"). The narration of a clip beat must be general, descriptive or atmospheric for what the footage shows (a mood, a process, nature, everyday life); a clip is only good if stock footage really shows the thing, so for a specific named person, place, brand, event, news item or product use an image instead (or word the clip generically: a market scene, not the name of the market), and for facts, numbers, comparisons, lists or abstract ideas use a chart, diagram, stat or text scene, never a clip. Not for topics that are about current events. If the user's brief asks for video, footage or clips, use them even more freely (up to 1 beat in 2)."""
 
 
 ELEMENT_INTRO = """
@@ -70,12 +71,14 @@ def image_budget(minutes: float, per_minute: float) -> int:
     return budget
 
 
-def images_rule(per_minute: float) -> str:
+def images_rule(per_minute: float, clips: bool = False) -> str:
     if per_minute <= 0:
         return "- Do NOT use image or gallery scenes: the viewer wants no stock photographs. (The user's own photos, if any, are used as instructed.)"
     return (f"- Stock photographs: at most {per_minute:g} per minute of video in total (every photograph in a gallery counts; the user's own photos never count). "
             "That is a ceiling, but for VISUAL topics (places, cities, landmarks, nature, food, culture, travel, history of places, people, animals, products) use most of it: real pictures are what "
-            "hold the viewer, so nearly every beat of such a video carries a photograph or a gallery of the things the narration names (a gallery of 3-6 photographs for several places, one photograph for one), "
+            "hold the viewer, so nearly every beat of such a video carries a photograph, a gallery of the things the narration names (a gallery of 3-6 photographs for several places, one photograph for one)"
+            + (" or a short video clip (see the clip scene: about 30 to 45 percent of the beats of a visual video are clips, the rest photographs and galleries; photographs carry named people, places and things, clips carry motion), " if clips else ", ")
+            + 
             "and charts, counters, icons and cards are only for the few moments that are really about a number or an idea. For numbers, processes and abstract ideas use few or none. "
             "A photograph illustrates what is named in the narration; never use one just to fill time. "
             f"A video shorter than a minute may still carry up to {int(per_minute)} photographs in total (fast cuts, galleries of 3-6). When the person asks for photos, for many photos, for a number "
@@ -162,7 +165,7 @@ Rules:
 - Open with a hook in the first beat (a surprising fact or question), not "Welcome to...". End with a takeaway.
 - Narration is written for the ear: short sentences, concrete words, no markdown, no emoji, no stage directions.
 - Vary the visuals: never use the same scene type more than twice in a row; prefer diagrams, charts and timelines over bullets when the content is structured.
-{images_rule(max_images_per_minute)}
+{images_rule(max_images_per_minute, clips=allow_clips and os.environ.get('CLIPS_ENABLED', '1') != '0')}
 {music_rules(music_tracks)}
 - Be accurate. Use the grounding notes for facts and numbers. If something is uncertain, say so or leave it out.
 {quality_rules()}- Craft (how engaging explainers are made; apply judgement, none of this is a quota):
@@ -754,6 +757,10 @@ def validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language:
             q = scene["props"]["clip_query"]
             scene = {"type": "image", "props": {"image_query": q, "alt": scene["props"].get("alt") or q, "ken_burns": "in"}}
             warnings.append(f"beat {i}: clip replaced by an image (no stock footage for current events)")
+        if scene["type"] == "clip" and not silent and nwords > MAX_CLIP_NARRATION_WORDS:   # footage is never looped and a long scene would freeze on its last frame: long narration gets a photograph
+            q = scene["props"]["clip_query"]
+            scene = {"type": "image", "props": {"image_query": q, "alt": scene["props"].get("alt") or q, "ken_burns": "in"}}
+            warnings.append(f"beat {i}: clip replaced by an image (narration of {nwords} words is too long for stock footage)")
         if scene["type"] == "image" and scene["props"].get("photo") and scene["props"]["photo"] not in (photo_ids or []):
             scene["props"].pop("photo")  # the model named a photo that doesn't exist: it becomes an ordinary stock-photo scene
         if scene["type"] == "gallery" and scene["props"].get("photos"):

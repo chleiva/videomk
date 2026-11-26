@@ -14,6 +14,7 @@ from tests.test_engine import small_timeline
 def _no_real_llm_or_cache(monkeypatch):
     monkeypatch.setenv("CLIP_VERIFY", "0")   # tests that exercise verification turn it on and pass their own model stub
     monkeypatch.setenv("CLIPS_COMMONS", "1")  # the interleaving tests include Commons; the test of its contact rule sets this itself
+    monkeypatch.setenv("CLIPS_NASA", "0")    # no network in tests; the NASA tests switch it on with their own stubs
     clips._CACHE.clear()
 
 
@@ -172,11 +173,66 @@ def test_scout_rejects_all_falls_back_on_review_errors_and_tries_the_next_file(m
     assert clips.scout_clip("a b c d", "n") is None
 
 
-def test_a_long_query_is_retried_shorter(monkeypatch):
+def test_every_wording_is_searched_and_their_results_are_pooled(monkeypatch):
     asked = []
-    monkeypatch.setattr(clips, "gather", lambda q, **kw: (asked.append(q), [cand("commons", 1)] if q == "dark storm" else [])[1])
-    out = clips.scout_clip("dark storm clouds rolling over fields", "n", fetch_bytes_fn=lambda *a, **k: b"x", review=None, normalise_fn=lambda raw, **kw: (b"m", 5.0))
-    assert asked == ["dark storm clouds rolling over fields", "dark storm"] and out["chosen"] == "commons:1"
+    monkeypatch.setattr(clips, "gather", lambda q, **kw: (asked.append(q), [cand("commons", 1)] if q == "dark storm" else [cand("commons", 7)] if q == "stormy sky" else [])[1])
+    out = clips.scout_clip("dark storm clouds rolling over fields", "n", "stormy sky", fetch_bytes_fn=lambda *a, **k: b"x", review=None, normalise_fn=lambda raw, **kw: (b"m", 5.0))
+    assert asked == ["dark storm clouds rolling over fields", "stormy sky", "dark storm"] and {c["id"] for c in out["candidates"]} == {"1", "7"}
+
+
+def test_query_variants_are_distinct_short_and_at_most_three():
+    assert clips.query_variants("waves crashing on rocks", "surf on a rocky coast") == ["waves crashing on rocks", "surf on a rocky coast", "waves crashing"]
+    assert clips.query_variants("waves", "Waves") == ["waves"] and clips.query_variants("a b", "") == ["a b"] and clips.query_variants("", "") == []
+
+
+def test_the_pool_is_round_robin_deduplicated_capped_and_too_short_files_do_not_use_up_slots(monkeypatch):
+    got = clips.merge_pools([[cand("pixabay", i) for i in (1, 2, 3)], [cand("pixabay", i) for i in (2, 9)]], limit=4)
+    assert [clips.candidate_key(c) for c in got] == ["pixabay:1", "pixabay:2", "pixabay:9", "pixabay:3"]
+    monkeypatch.setattr(clips, "gather", lambda q, **kw: [cand("pixabay", i, dur=2.0 if i < 20 else 9.0) for i in (list(range(1, 15)) + [21, 22])])
+    out = clips.scout_clip("a", "n", need_seconds=8.0, fetch_bytes_fn=lambda *a, **k: b"x", review=None, normalise_fn=lambda raw, **kw: (b"m", 5.0))
+    assert [c["id"] for c in out["candidates"]] == ["21", "22"]     # fourteen 2 s files (under 75% of 8 s) were filtered out before the cap, not after
+
+
+NASA_SEARCH = {"collection": {"items": [
+    {"data": [{"nasa_id": "GSFC_1_Tides", "title": "How Tides Work", "media_type": "video", "center": "GSFC", "secondary_creator": "Jane Doe"}],
+     "links": [{"href": "http://images-assets.nasa.gov/video/GSFC_1_Tides/GSFC_1_Tides~large.jpg", "rel": "alternate", "render": "image", "width": 800},
+               {"href": "http://images-assets.nasa.gov/video/GSFC_1_Tides/GSFC_1_Tides~small.jpg", "rel": "alternate", "render": "image", "width": 200}]},
+    {"data": [{"nasa_id": "HQ_2_Briefing", "title": "Administrator news conference", "media_type": "video"}], "links": [{"href": "https://x/t.jpg", "rel": "alternate", "render": "image", "width": 800}]},
+    {"data": [{"nasa_id": "KSC_3_Low", "title": "Old SD footage", "media_type": "video"}], "links": [{"href": "https://x/t.jpg", "rel": "alternate", "render": "image", "width": 800}]},
+    {"data": [{"nasa_id": "bad id/../x", "title": "Evil", "media_type": "video"}], "links": []},
+]}}
+NASA_META = {"GSFC_1_Tides": {"QuickTime:Duration": "0:01:05", "QuickTime:ImageWidth": 1920, "QuickTime:ImageHeight": 1080},
+             "KSC_3_Low": {"QuickTime:Duration": "12.5 s", "QuickTime:ImageWidth": 640, "QuickTime:ImageHeight": 480}}
+
+
+def nasa_fetch(url, **kw):
+    if "images-api.nasa.gov/search" in url:
+        return NASA_SEARCH
+    for nid, meta in NASA_META.items():
+        if f"/video/{nid}/metadata.json" in url:
+            return meta
+    raise FetchError("404", status=404)
+
+
+def test_nasa_candidates_use_the_720p_rendition_credit_nasa_and_skip_interviews_and_small_files():
+    got = clips.nasa_search("tides", fetch=nasa_fetch)
+    assert len(got) == 1
+    c = got[0]
+    assert c["video_url"] == "https://images-assets.nasa.gov/video/GSFC_1_Tides/GSFC_1_Tides~medium.mp4" and (c["width"], c["height"], c["duration"]) == (1280, 720, 65.0)
+    assert c["thumb_url"] == "https://images-assets.nasa.gov/video/GSFC_1_Tides/GSFC_1_Tides~large.jpg"    # https, the 800 px poster
+    assert clips.credit_line(c) == "Video: NASA" and c["attribution"].startswith("Video: NASA (Jane Doe), https://images.nasa.gov/details/GSFC_1_Tides")
+    assert clips.stock.ledger_entry(c)["source"] == "nasa" and "public domain" in c["license"]
+    assert clips.nasa_search("tides", fetch=nasa_fetch, hd=True)[0]["video_url"].endswith("~large.mp4")
+    assert clips.nasa_search("tides", fetch=nasa_fetch, orientation="portrait") == []
+
+
+def test_nasa_joins_the_gather_and_can_be_switched_off(monkeypatch):
+    monkeypatch.setenv("CLIPS_NASA", "1")
+    monkeypatch.setattr(clips, "commons_usable", lambda: False)
+    got = clips.gather("tides", fetch=nasa_fetch)
+    assert [c["provider"] for c in got] == ["nasa"]
+    monkeypatch.setenv("CLIPS_NASA", "0")
+    assert clips.gather("tides", fetch=lambda *a, **k: pytest.fail("NASA is off")) == []
 
 
 # ---------------------------------------------------------------- the reviewer sees clips as clips
@@ -194,7 +250,7 @@ def test_the_review_uses_the_clip_prompt_and_says_clips(monkeypatch):
 
 # ---------------------------------------------------------------- planning and the timeline
 def test_clip_scenes_are_documented_sanitised_and_remade_only_when_their_query_changes(monkeypatch):
-    assert "- clip:" in plan_mod.scene_docs() and "Never for a specific named person" in plan_mod.system_prompt("en")
+    assert "- clip:" in plan_mod.scene_docs() and "specific named person, place, brand" in plan_mod.system_prompt("en")
     monkeypatch.setenv("CLIPS_ENABLED", "0")
     assert "- clip:" not in plan_mod.scene_docs()
     monkeypatch.delenv("CLIPS_ENABLED")
@@ -379,26 +435,20 @@ def test_commons_is_only_searched_when_the_client_identifies_itself(monkeypatch)
     assert len(clips.gather("q", pixabay_key="k")) == 3
 
 
-def test_a_second_wording_is_tried_when_the_first_finds_no_usable_clip(monkeypatch):
+def test_the_alt_wording_is_searched_inside_the_one_scout_call_not_by_a_second_review(monkeypatch):
     from engine.handlers import beat_handler
 
-    asked = []
+    seen = []
     def scout(q, n, a, **kw):
-        asked.append(q)
-        return None if q == "dark clouds over desert road" else {"mp4": b"MP4", "credit": "Video: Z / Pixabay", "entry": {}, "chosen": "pixabay:9", "review": {"cost_usd": 0.001}}
+        seen.append((q, a))
+        return {"mp4": b"MP4", "credit": "Video: Z / Pixabay", "entry": {}, "chosen": "pixabay:9", "review": {"cost_usd": 0.001}}
     monkeypatch.setattr(beat_handler.clips, "scout_clip", scout)
     monkeypatch.setattr(beat_handler.awsio, "put_bytes", lambda *a, **k: None)
     monkeypatch.setattr(beat_handler, "get_secret_param", lambda *a, **k: "K")
     monkeypatch.setattr(beat_handler.costs, "add_cost", lambda *a, **k: None)
     beat = {"id": "b7", "narration": "Storm clouds gather over the empty road.", "scene": {"type": "clip", "props": {"clip_query": "dark clouds over desert road", "alt": "storm clouds gathering over empty highway"}}}
     out = beat_handler.make_clip({"beats": []}, beat, "vid", "cost_usd", 4.0)
-    assert asked == ["dark clouds over desert road", "storm clouds gathering over empty highway"] and out["clip_asset"].endswith(".mp4")
-    asked.clear()
-    same = {**beat, "scene": {"type": "clip", "props": {"clip_query": "waves", "alt": "WAVES"}}}                     # the same wording again would be pointless
-    monkeypatch.setattr(beat_handler.clips, "scout_clip", lambda q, n, a, **kw: (asked.append(q), None)[1])
-    monkeypatch.setattr(beat_handler, "make_photo", lambda *a, **k: {"asset": "generation/v2/vid/assets/img.jpg"})
-    beat_handler.make_clip({"beats": []}, same, "vid", "cost_usd", 4.0)
-    assert asked == ["waves"]
+    assert seen == [("dark clouds over desert road", "storm clouds gathering over empty highway")] and out["clip_asset"].endswith(".mp4")
 
 
 def test_current_events_get_photographs_not_stock_footage():
@@ -410,13 +460,31 @@ def test_current_events_get_photographs_not_stock_footage():
     assert plan["beats"][0]["scene"] == {"type": "image", "props": {"image_query": "warship at sea", "alt": "navy ship", "ken_burns": "in"}} and any("no stock footage" in w for w in warns)
     assert plan_mod.validate_plan(raw("clip", {"clip_query": "waves", "alt": "waves"}))[0]["beats"][0]["scene"]["type"] == "clip"        # everything else keeps clips
     assert "- clip:" in plan_mod.system_prompt("en") and "- clip:" not in plan_mod.system_prompt("en", None, 10, allow_clips=False)
-    assert "never about a specific event" in plan_mod.system_prompt("en")
+    assert "specific named person, place, brand, event" in plan_mod.system_prompt("en")
 
 
 def test_a_brief_that_asks_for_footage_is_told_to_use_clips_freely_with_generic_wording():
     from engine import plan as plan_mod
     p = plan_mod.system_prompt("en")
-    assert "asks for video, footage or clips" in p and "up to 1 beat in 3" in p and "worded generically" in p
+    assert "asks for video, footage or clips" in p and "use them even more freely" in p and "generic" in p
+
+
+def test_visual_topics_are_told_to_use_clips_for_a_third_to_almost_half_of_the_beats_each_one_short():
+    p = plan_mod.system_prompt("en")
+    assert "about 30 to 45 percent of the beats" in p and "10 to 18 words" in p and "never looped" in p and "never a brand" in p
+    assert "never a clip" in p                                                   # numbers, comparisons, lists, abstract ideas keep charts and text
+    assert "about 30 to 45 percent of the beats of a visual video are clips" in p   # the photograph rule no longer says every beat is a photograph
+    assert "about 30 to 45 percent" not in plan_mod.system_prompt("en", None, 10, allow_clips=False)
+    assert "short video clip" not in plan_mod.images_rule(10) and "short video clip" in plan_mod.images_rule(10, clips=True)
+
+
+def test_a_clip_with_long_narration_becomes_a_photograph():
+    def raw(words):
+        return {"legit": True, "title": "T", "beats": [{"narration": " ".join(["word"] * words), "scene": {"type": "clip", "props": {"clip_query": "waves", "alt": "surf"}}}]}
+    ok, _ = plan_mod.validate_plan(raw(plan_mod.MAX_CLIP_NARRATION_WORDS))
+    assert ok["beats"][0]["scene"]["type"] == "clip"
+    long, warns = plan_mod.validate_plan(raw(plan_mod.MAX_CLIP_NARRATION_WORDS + 1))
+    assert long["beats"][0]["scene"] == {"type": "image", "props": {"image_query": "waves", "alt": "surf", "ken_burns": "in"}} and any("too long for stock footage" in w for w in warns)
 
 
 def test_the_reviewers_reject_contradictions_and_loose_matches_accuracy_over_having_a_clip():
@@ -424,7 +492,7 @@ def test_the_reviewers_reject_contradictions_and_loose_matches_accuracy_over_hav
         low = " ".join(prompt.lower().split())   # the prompts wrap lines
         assert "contradict" in low and "intended subject" in low and "another city" in low
         assert "no clip is better than a wrong one" in low or "a wrong or odd clip is worse than none" in low
-    assert clips.MAX_CANDIDATES == 8
+    assert clips.MAX_CANDIDATES == 12
 
 
 def test_playback_holds_the_last_frame_past_the_end_and_never_loops(tmp_path):

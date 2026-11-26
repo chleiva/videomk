@@ -172,16 +172,9 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     fr = plan.get("frame") or {}   # vertical and square videos ask the stock libraries for portrait or square footage; landscape calls are exactly as before
     orient = "portrait" if fr.get("aspect") in ("9:16", "4:5") else "square" if fr.get("aspect") == "1:1" else str(fr.get("orientation") or "landscape")
     keys = {**keys, **({"orientation": orient} if orient in ("portrait", "square") else {}), **({"hd": True} if format_options.is_4k(fr.get("resolution")) else {})}   # 4K: 1080p footage instead of 720p
-    result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
+    result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)   # searches the clip_query, the alt wording and shortened forms in one pool
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
-    alt = str(props.get("alt") or "").strip()
-    if (not result or not result.get("mp4")) and alt and alt.lower() != query.lower():  # the planner's second wording often finds what the first did not
-        second = clips.scout_clip(alt, _context(beat), alt, need_seconds=need, **keys)
-        if second:
-            costs.add_cost(video_id, float(second.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
-        if second and second.get("mp4"):
-            result = second
     if result and result.get("mp4"):
         key = f"{pfx}assets/clip_{beat['id']}_{hashlib.sha1(result['mp4']).hexdigest()[:8]}.mp4"
         try:

@@ -1,4 +1,4 @@
-"""Stock video clips: Pexels (when a key is configured) + Wikimedia Commons (keyless) -> vision review of the poster frame -> one
+"""Stock video clips: Pexels (when a key is configured) + Pixabay + NASA Image and Video Library and Wikimedia Commons (keyless) -> vision review of the poster frame -> one
 licensed clip, trimmed and normalised to a small silent 720p MP4 that the renderer decodes frame by frame.
 
 Licensing (docs/CLIPS.md, docs/RESEARCH.md): only clips whose terms allow commercial use inside a derived video:
@@ -6,6 +6,7 @@ Licensing (docs/CLIPS.md, docs/RESEARCH.md): only clips whose terms allow commer
     and in the description). Search results are cached for 24 hours as the API terms require; videos are downloaded to our storage as a short-lived working copy.
   * Pexels: the Pexels License ("free to use", commercial use allowed; attribution not required but the API asks for credit and a link to Pexels, which
     we give on screen and in the description). Not used for anything but showing the clip in the video: no resale of the clips as such, no ML training.
+  * NASA Image and Video Library: NASA media "generally are not subject to copyright in the United States" (nasa.gov/nasa-brand-center/images-and-media); credited "Video: NASA"; no endorsement is implied.
   * Wikimedia Commons: only per-file CC0, public domain and plain CC BY (no -SA, -ND, -NC), the same bar as Openverse photos in `assets.py`.
     The license and author are read from the file's own metadata and credited.
 Clips are downloaded for rendering and kept only as short-lived working files (`retention=working` lifecycle rule).
@@ -29,6 +30,8 @@ from .netsafe import FetchError, fetch_bytes, fetch_json
 PEXELS_API = "https://api.pexels.com/v1/videos/search"
 PIXABAY_API = "https://pixabay.com/api/videos/"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+NASA_API = "https://images-api.nasa.gov/search"
+NASA_ASSETS = "https://images-assets.nasa.gov/video"
 CACHE_TTL_S = 24 * 3600            # Pixabay: "requests must be cached for 24 hours"
 VERIFY_FRAMES = 3                  # frames of the footage we will really show (start, middle, end) go to the checker: a clip that only starts right is rejected
 VERIFY_MIN_SCORE = 7               # the checker scores how clearly the footage shows the subject, 0-10; below this the clip is discarded (the beat gets a photo instead)
@@ -49,7 +52,7 @@ def clip_size(orientation: str = "landscape", hd: bool = False) -> Tuple[int, in
 
 def _orient(o: str) -> str:
     return o if o in ORIENTATIONS else "landscape"
-MAX_CANDIDATES = 8
+MAX_CANDIDATES = 12                # the pool one review call sees (was 8): the strict verify behind it throws many away, so it needs more to choose from
 
 Candidate = Dict[str, Any]
 
@@ -141,6 +144,68 @@ def pixabay_search(query: str, key: str, fetch: Callable[..., Any] = fetch_json,
     return [c for c in out if c["thumb_url"].startswith("https://")]
 
 
+_NASA_SKIP = re.compile(r"\b(interview|press conference|news conference|briefing|town hall|hearing|ceremony|panel|q&a|live ?stream|webcast|podcast|trailer|promo|nasa tv)\b", re.I)
+
+
+def _duration_s(text: Any) -> float:
+    """'0:00:53', '1:02:03.5' or '12.3 s' -> seconds (0 when unreadable)."""
+    t = str(text or "").strip()
+    try:
+        if ":" in t:
+            sec = 0.0
+            for part in t.split(":"):
+                sec = sec * 60 + float(part)
+            return sec
+        return float(t.removesuffix("s").strip())
+    except ValueError:
+        return 0.0
+
+
+def nasa_search(query: str, fetch: Callable[..., Any] = fetch_json, limit: int = 6, orientation: str = "landscape", hd: bool = False) -> List[Candidate]:
+    """NASA Image and Video Library (keyless). NASA media "generally are not subject to copyright in the United States"; commercial use is fine as long as NASA's endorsement is not
+    implied, so we credit "NASA" as the source. Duration and size come from each item's metadata.json (one small request per item, so `limit` bounds the calls);
+    the 720p (`~medium.mp4`) or, for 4K videos, the 1080p (`~large.mp4`) rendition is downloaded. Interviews, briefings and ceremonies are dropped (people, not footage)."""
+    q = urllib.parse.urlencode({"q": query[:100], "media_type": "video", "page_size": max(limit * 2, 10)})
+    data = fetch(f"{NASA_API}?{q}")
+    out: List[Candidate] = []
+    for it in ((data.get("collection") or {}).get("items") or []):
+        if len(out) >= limit:
+            break
+        try:
+            d = (it.get("data") or [{}])[0]
+            nid = str(d["nasa_id"])
+            if not re.fullmatch(r"[A-Za-z0-9_.-]{3,120}", nid) or d.get("media_type") != "video":
+                continue
+            title = str(d.get("title") or "")
+            if _NASA_SKIP.search(title):
+                continue
+            thumb = next((str(l["href"]) for l in it.get("links") or [] if l.get("render") == "image" and l.get("rel") == "alternate" and int(l.get("width") or 0) >= 400), "")
+            thumb = thumb.replace("http://", "https://", 1)
+            try:
+                meta = fetch(f"{NASA_ASSETS}/{nid}/metadata.json")
+            except FetchError:
+                continue
+            dur = _duration_s(meta.get("QuickTime:Duration") or meta.get("QuickTime:MediaDuration"))
+            w, h = int(meta.get("QuickTime:ImageWidth") or 0), int(meta.get("QuickTime:ImageHeight") or 0)
+            if not thumb.startswith("https://") or h <= 0 or w < 1280 or dur <= 0:
+                continue
+            ratio = w / h
+            if (_orient(orientation) == "landscape" and ratio < 1.3) or (orientation == "portrait" and ratio > 0.85) or (orientation == "square" and not 0.8 <= ratio <= 1.25):
+                continue
+            rendition = "large" if hd and w >= 1920 else "medium"
+            cw, ch = (w, h) if rendition == "large" else (1280, round(1280 / ratio))
+            creator = str(d.get("secondary_creator") or d.get("center") or "NASA")[:80]
+            page = f"https://images.nasa.gov/details/{urllib.parse.quote(nid)}"
+            out.append({
+                "provider": "nasa", "id": nid, "thumb_url": thumb, "video_url": f"{NASA_ASSETS}/{nid}/{nid}~{rendition}.mp4", "width": cw, "height": ch, "duration": dur, "bytes": 0,
+                "creator": "NASA", "creator_url": "https://www.nasa.gov", "landing_url": page, "license": "NASA media (public domain, no endorsement implied)",
+                "alt": (title or str(d.get("description_508") or ""))[:120], "attribution": f"Video: NASA ({creator}), {page}",
+            })
+        except (KeyError, TypeError, ValueError, IndexError):
+            continue
+    return out
+
+
 _LICENSE_OK = re.compile(r"^(cc0|public domain|pd\b|cc[ -]by[ -]\d)", re.I)
 _LICENSE_NO = re.compile(r"(-sa|\bsa\b|-nd|\bnd\b|-nc|\bnc\b|share ?alike|noderiv|noncommercial)", re.I)
 
@@ -203,13 +268,46 @@ def commons_usable() -> bool:
     return any(c in netsafe.USER_AGENT for c in ("@", "http", "("))
 
 
+NASA_PER_QUERY = 4                 # NASA's full-text search answers any query: a few candidates per query, so it never crowds the stock libraries out of the review
+
+
+def nasa_usable() -> bool:
+    """`CLIPS_NASA=0` switches the NASA Image and Video Library off (on by default: keyless, public-domain-style terms, credited as NASA)."""
+    return os.environ.get("CLIPS_NASA", "1") != "0"
+
+
+def query_variants(query: str, alt: str = "") -> List[str]:
+    """The planner's `clip_query`, its `alt` wording and a shortened form of each (first two words), distinct, at most 3: stock libraries index footage by very different words,
+    and one variant often finds nothing (or only unusable files) that another finds."""
+    out: List[str] = []
+    for q in (query, alt, " ".join(query.split()[:2]) if len(query.split()) > 2 else "", " ".join(alt.split()[:2]) if len(alt.split()) > 2 else ""):
+        q = " ".join(str(q or "").split())[:100]
+        if q and q.lower() not in [x.lower() for x in out]:
+            out.append(q)
+    return out[:3]
+
+
+def merge_pools(pools: Sequence[Sequence[Candidate]], limit: int = MAX_CANDIDATES) -> List[Candidate]:
+    """Round-robin over the variants' results, each one's best first, without duplicates (the same file found by two wordings)."""
+    seen: set = set()
+    out: List[Candidate] = []
+    for i in range(max(map(len, pools), default=0)):
+        for p in pools:
+            if i < len(p) and len(out) < limit and candidate_key(p[i]) not in seen:
+                seen.add(candidate_key(p[i]))
+                out.append(p[i])
+    return out
+
+
 def gather(query: str, *, pexels_key: str = "", pixabay_key: str = "", fetch: Callable[..., Any] = fetch_json, limit: int = MAX_CANDIDATES, orientation: str = "landscape", hd: bool = False) -> List[Candidate]:
-    """Pexels and Pixabay first (better footage), Commons to fill; one provider failing never blocks the others. Only usable footage survives."""
+    """Pexels and Pixabay first (better footage), then NASA and Commons to fill; one provider failing never blocks the others. Only usable footage survives."""
     pools: List[List[Candidate]] = []
     o = {} if orientation == "landscape" else {"orientation": orientation}   # landscape keeps the exact old calls
     if hd:
         o["hd"] = True
     providers = [lambda: pexels_search(query, pexels_key, fetch, **o), lambda: pixabay_search(query, pixabay_key, fetch, **o)]
+    if nasa_usable():
+        providers.append(lambda: nasa_search(query, fetch, limit=NASA_PER_QUERY, **o))
     if commons_usable():
         providers.append(lambda: commons_search(query, fetch))
     for fn in providers:
@@ -240,6 +338,8 @@ def credit_line(c: Candidate) -> str:
         return f"Video: {c.get('creator', 'Unknown')} / Pexels"
     if c.get("provider") == "pixabay":
         return f"Video: {c.get('creator', 'Unknown')} / Pixabay"
+    if c.get("provider") == "nasa":
+        return "Video: NASA"
     return f"Video: {c.get('creator', 'Unknown')} ({c.get('license', '')})"
 
 
@@ -380,24 +480,22 @@ def scout_clip(
     """Find, review, download and normalise one clip. `orientation` ('landscape' | 'portrait' | 'square', the video's `Frame.orientation`; 4:5 is portrait) asks
     the stock providers for footage of that shape and normalises it to it. `hd` (4K videos) prefers a 1080p source file and normalises to 1080p instead of 720p. Never raises. Returns
     {mp4, entry, credit, chosen, candidates, review, loops_after} | {mp4: None, rejected_all: True, ...} | None when nothing usable exists."""
-    cands: List[Candidate] = []
-    for q in (query, " ".join(query.split()[:2])) if len(query.split()) > 2 else (query,):  # long queries often match nothing: retry shorter
+    pools: List[List[Candidate]] = []
+    for q in query_variants(query, alt):   # every wording is searched (free API calls); the pool the reviewer sees mixes their best results
         try:
-            cands = gather(q, pexels_key=pexels_key, pixabay_key=pixabay_key, fetch=fetch_json_fn, orientation=orientation, **({"hd": True} if hd else {}))
+            pools.append(gather(q, pexels_key=pexels_key, pixabay_key=pixabay_key, fetch=fetch_json_fn, orientation=orientation, **({"hd": True} if hd else {})))
         except Exception:
             logging.exception("clip gather crashed for %r", q)
-            cands = []
-        if cands:
-            break
+    min_len = MIN_FILL * min(need_seconds, MAX_CLIP_SECONDS)   # footage plays once, never looped: a clip shorter than 75% of the scene would freeze for too long
+    found = merge_pools(pools)
+    cands = merge_pools([[c for c in p if float(c.get("duration") or 0) >= min_len] for p in pools])   # filtered BEFORE the pool is capped, so too-short files never use up review slots
+    if found and not cands:
+        logging.warning("all %d clips for %r are too short for a %.1f s scene", len(found), query, need_seconds)
+        return None
     if not cands:
         logging.warning("no clip candidates for %r", query)
         return None
-    # footage plays once, never looped: a clip shorter than 75% of the scene would freeze for too long, so it is not used (the beat gets a photo); longest-enough first
-    long_enough = [c for c in cands if float(c.get("duration") or 0) >= MIN_FILL * min(need_seconds, MAX_CLIP_SECONDS)]
-    if not long_enough:
-        logging.warning("all %d clips for %r are too short for a %.1f s scene", len(cands), query, need_seconds)
-        return None
-    cands = sorted(long_enough, key=lambda c: 0 if c.get("duration", 0) >= need_seconds else 1)
+    cands = sorted(cands, key=lambda c: 0 if c.get("duration", 0) >= need_seconds else 1)
     info: Dict[str, Any] = {"source": "first-result", "reason": "", "cost_usd": 0.0}
     order = list(range(len(cands)))
     if review and len(cands) > 1:
