@@ -45,7 +45,7 @@ fun Modifier.vmkShadow(level: Int, shape: Shape, dark: Boolean): Modifier {
 
 @Composable
 fun Overline(text: String, modifier: Modifier = Modifier) {
-    Text(text.uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = Vmk.colors.textSecondary, modifier = modifier)
+    Text(text.uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = modifier)
 }
 
 /** The fix that comes with a problem ("Use 1 min · ⚡1"): 32 dp to look at, 44 dp to hit. */
@@ -77,7 +77,7 @@ fun CreditsText(minutes: Int, credits: Int, color: Color, modifier: Modifier = M
 @Composable
 fun LogoMark(modifier: Modifier = Modifier, size: Dp = 30.dp) {
     Box(modifier.size(size).clip(RoundedCornerShape(size * 0.3f)).background(Vmk.gradientNow), contentAlignment = Alignment.Center) {
-        Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(size * 0.62f))
+        Icon(Icons.Filled.PlayArrow, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(size * 0.62f))
     }
 }
 

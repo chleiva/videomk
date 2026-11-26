@@ -193,6 +193,7 @@ class AppViewModel(
             try {
                 viewModelScope.launch { refreshWallet() }   // credits load alongside the list
                 val fresh = b.listVideos()
+                announceFinished(_state.value, fresh)
                 update { s ->
                     val (stages, completions) = track(s, fresh)
                     s.copy(
@@ -217,6 +218,18 @@ class AppViewModel(
     suspend fun refreshWallet() {
         val b = backend ?: return
         try { b.wallet().let { w -> update { it.copy(wallet = w) } } } catch (e: CancellationException) { throw e } catch (e: Exception) { /* keep the last balance */ }
+    }
+
+    /** Seam for notifications (needs backend registration and the owner's decision, so nothing subscribes today): told once when a video that was being made finishes or fails. */
+    @Volatile var makingEvents: com.videomk.app.core.MakingEvents? = null
+
+    private fun announceFinished(s: AppState, fresh: List<VideoItem>) {
+        val listener = makingEvents ?: return
+        val before = s.videos.associate { it.id to it.status }
+        for (v in fresh) {
+            if (before[v.id]?.isRunning != true || v.status.isRunning) continue
+            listener.onFinished(v.id, s.briefs[v.id] ?: v.displayTitle, v.status == VideoStatus.Complete)
+        }
     }
 
     /** Remembers when each running video entered its current stage (for the progress estimate) and notices completions. */

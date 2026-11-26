@@ -115,15 +115,17 @@ data class CreatePrefs(val platform: String, val aspect: String, val resolution:
 }
 
 object CreateDefaults {
-    /** First launch: Just a video, Landscape 16:9, 1080p, 3 min, Auto look, subtitles on, same language as the description. */
-    val FIRST_TIME = CreateOptions()
+    /** First launch: Just a video, Landscape 16:9, 1080p, 30 s (1 credit; owner decision, docs/UX_REVIEW.md), Auto look, subtitles on, same language as the description. */
+    const val FIRST_TIME_MINUTES = 0.5
+    val FIRST_TIME = CreateOptions(minutes = FIRST_TIME_MINUTES)
 
     /**
      * The options to start Create with: the remembered ones, but never something the server no longer offers (a stored format that is gone falls back to the
      * first ready format, a stored resolution to the first listed, a language that is not listed to "auto", a length outside the range to the default).
      */
     fun resolve(stored: CreatePrefs?, caps: Capabilities): CreateOptions {
-        if (stored == null) return FIRST_TIME.copy(aspect = caps.readyAspects.first().id.takeIf { caps.isReady("16:9") } ?: caps.readyAspects.first().id, resolution = firstRes(caps, "1080p"))
+        // an older server may not offer 30 s: the shortest of 30 s, 1 min and the old default that it does offer
+        if (stored == null) return FIRST_TIME.copy(minutes = listOf(FIRST_TIME_MINUTES, 1.0, CreateOptions.DEFAULT_MINUTES).firstOrNull { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: caps.presets.first(), aspect = caps.readyAspects.first().id.takeIf { caps.isReady("16:9") } ?: caps.readyAspects.first().id, resolution = firstRes(caps, "1080p"))
         val aspect = if (caps.isReady(stored.aspect)) stored.aspect else caps.readyAspects.first().id
         val res = if (caps.resolutions.any { it.id == stored.resolution }) stored.resolution else firstRes(caps, "1080p")
         val lang = if (stored.language == "auto" || caps.languages.any { it.id == stored.language }) stored.language else "auto"

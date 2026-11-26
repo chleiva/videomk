@@ -82,7 +82,8 @@ class CreateTest {
 
     @Test fun `first launch defaults and what is remembered`() {
         val d = CreateDefaults.resolve(null, Capabilities.FALLBACK)
-        assertEquals(CreateOptions(minutes = 3.0, look = null, captions = true, platform = "other", aspect = "16:9", resolution = "1080p", language = "auto"), d)
+        assertEquals(CreateOptions(minutes = 1.0, look = null, captions = true, platform = "other", aspect = "16:9", resolution = "1080p", language = "auto"), d)   // the old six lengths have no 30 s: 1 min, 1 credit
+        assertEquals(0.5, CreateDefaults.resolve(null, FULL.copy(presets = listOf(0.25, 0.5, 1.0, 3.0))).minutes, 0.0)   // a server with the short presets: the first video is 30 s
         val stored = CreatePrefs.of(CreateOptions(minutes = 5.0, look = VideoLook.Paper, captions = false, platform = "shorts", aspect = "9:16", resolution = "720p", language = "es"))
         val back = CreatePrefs.fromJson(stored.toJson())!!
         assertEquals(stored, back)

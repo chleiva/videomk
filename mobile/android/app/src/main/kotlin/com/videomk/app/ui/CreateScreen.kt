@@ -117,6 +117,7 @@ import com.videomk.app.core.Lengths
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
 import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.PlatformChip
 import com.videomk.app.core.StatusKind
@@ -151,6 +152,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     var discard by remember { mutableStateOf(false) }
     var moreOpen by rememberSaveable { mutableStateOf(false) }
     var languageOpen by remember { mutableStateOf(false) }
+    var costInfo by remember { mutableStateOf(false) }
     var tip by remember { mutableStateOf<String?>(null) }
     var pulse by remember { mutableIntStateOf(0) }
     val shake = remember { Animatable(0f) }
@@ -252,8 +254,9 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
             // what is it for
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Overline(stringResource(R.string.create_what_for), Modifier.semantics { heading() })
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("platformChips")) {
-                    items(CreatePlatforms.chips(caps), key = { it.id }) { c ->
+                // a wrapping grid, never a row that scrolls or crops: Spanish and large text just make a second line
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().testTag("platformChips")) {
+                    for (c in CreatePlatforms.chips(caps)) {
                         PlatformChipView(c, selected = c.enabled && c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) {
                             if (c.enabled) composer.selectPlatform(c) else { tip = comingSoonText; haptic(false) }
                         }
@@ -293,6 +296,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                     }
                 }
                 if (photoHint != null) PhotoHintBlock(photoHint, hintFix, composer, options)
+                CostLine(null, options.isFourK, onWhy = { costInfo = true })
             }
 
             // more options
@@ -317,6 +321,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 
     if (composer.addPhotosRequest != null) AddPhotosSheet(composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = composer.addPhotosRequest?.tab == 1, onDismiss = { composer.closeAddPhotos() })
     CreateSheetsHost(composer, balance, options, onSubmitEdit = {}, onWallet = onOpenWallet)
+    if (costInfo) CostSheet(fourK = caps.resolutions.any { it.id.lowercase() == "4k" || it.id.lowercase() == "2160p" }) { costInfo = false }
     if (languageOpen) LanguageDialog(composer, options, caps) { languageOpen = false }
     if (discard) AlertDialog(
         onDismissRequest = { discard = false }, title = { Text(stringResource(R.string.create_discard_title)) }, text = { Text(stringResource(R.string.create_discard_text)) },
@@ -329,25 +334,27 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
 private fun PromptCard(composer: ComposerViewModel, listening: Boolean, focus: FocusRequester, onMic: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     val micDescription = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate_desc)
-    Box(Modifier.fillMaxWidth().heightIn(min = 112.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)) {
+    // text on top, the mic row under it: the height follows the text (large text and Spanish just make the card taller, nothing overlaps)
+    Column(Modifier.fillMaxWidth().heightIn(min = 112.dp).clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape)) {
         BasicTextField(
             value = composer.text, onValueChange = { composer.text = it }, readOnly = listening,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp, lineHeight = 26.sp, color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
+            textStyle = VmkType.prompt.copy(color = if (listening) Vmk.colors.textSecondary else Vmk.colors.text),
             cursorBrush = SolidColor(Vmk.colors.primary), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-            modifier = Modifier.fillMaxWidth().focusRequester(focus).padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 64.dp).testTag("composerField"),
+            modifier = Modifier.fillMaxWidth().focusRequester(focus).padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 4.dp).testTag("composerField"),
             decorationBox = { inner ->
-                Box { if (composer.text.isEmpty()) Text(stringResource(R.string.create_prompt_hint), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp, lineHeight = 26.sp), color = Vmk.colors.textTertiary); inner() }
+                Box { if (composer.text.isEmpty()) Text(stringResource(R.string.create_prompt_hint), style = VmkType.prompt, color = Vmk.colors.textTertiary); inner() }
             },
         )
-        Row(Modifier.align(Alignment.BottomEnd).padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (composer.text.isEmpty() && !listening) Text(stringResource(R.string.create_tap_mic), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textTertiary)
-            if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger)
+        Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 10.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Spacer(Modifier.weight(1f).heightIn(min = 1.dp))
+            if (composer.text.isEmpty() && !listening) Text(stringResource(R.string.create_tap_mic), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textTertiary, textAlign = androidx.compose.ui.text.style.TextAlign.End, modifier = Modifier.weight(2f, fill = false))
+            if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, modifier = Modifier.weight(2f, fill = false))
             Box(
-                Modifier.size(44.dp).clip(CircleShape).background(if (listening) Vmk.colors.danger else Vmk.colors.surfaceRaised)
+                Modifier.size(48.dp).clip(CircleShape).background(if (listening) Vmk.colors.danger else Vmk.colors.surfaceRaised)
                     .clickable(role = Role.Button, onClickLabel = if (listening) stringResource(R.string.create_stop_dictation) else stringResource(R.string.create_dictate), onClick = onMic)
                     .semantics { contentDescription = micDescription }.testTag("micButton"),
                 contentAlignment = Alignment.Center,
-            ) { Icon(if (listening) Icons.Filled.Stop else Icons.Filled.Mic, null, tint = if (listening) Color.White else Vmk.colors.text, modifier = Modifier.size(22.dp)) }
+            ) { Icon(if (listening) Icons.Filled.Stop else Icons.Filled.Mic, null, tint = if (listening) Vmk.colors.onPrimary else Vmk.colors.text, modifier = Modifier.size(22.dp)) }
         }
     }
 }
@@ -393,16 +400,16 @@ private fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () -> 
     val shape = CircleShape
     val chipDescription = if (c.enabled) c.label else stringResource(R.string.create_chip_soon_desc, c.label)
     Row(
-        Modifier.heightIn(min = 44.dp).alpha(if (c.enabled) 1f else 0.62f).clip(shape)
+        Modifier.heightIn(min = Vmk.minTouch).alpha(if (c.enabled) 1f else 0.62f).clip(shape)
             .background(if (selected) Vmk.colors.primaryContainer else Vmk.colors.surface)
             .border(if (selected) 1.5.dp else 1.dp, if (selected) Vmk.colors.primary else Vmk.colors.outline, shape)
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 14.dp)
+            .padding(horizontal = 14.dp, vertical = 6.dp)
             .semantics { this.selected = selected; contentDescription = chipDescription }.testTag("platform-${c.id}"),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(if (selected) Icons.Filled.Check else if (c.id == "other") Icons.Filled.AutoAwesome else if (c.aspect == "16:9") Icons.Filled.CropLandscape else if (c.aspect == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.text, modifier = Modifier.size(18.dp))
-        Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.MiddleEllipsis)
+        Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
         if (!c.enabled) Text(stringResource(R.string.create_soon), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(horizontal = 6.dp, vertical = 2.dp))
     }
 }
@@ -473,7 +480,7 @@ private fun MoreOptions(composer: ComposerViewModel, o: CreateOptions, caps: com
             ) {
                 Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
                 Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                Switch(checked = o.captions, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Color.White, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
+                Switch(checked = o.captions, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Vmk.colors.onPrimary, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
             }
             Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).size(1.dp).background(Vmk.colors.outline))
             Row(
@@ -548,13 +555,16 @@ private fun CreateButton(ready: Boolean, checking: Boolean, credits: Int, reason
             .semantics { contentDescription = createLabel; stateDescription = boxState }.testTag("sendButton"),
         contentAlignment = Alignment.Center,
     ) {
-        val c = if (ready || checking) Color.White else Vmk.colors.textTertiary
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (checking) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-            Text(createLabel, style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c)
-            Text("·", color = c)
-            Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
-            Text("$credits", style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c)
+        val c = if (ready || checking) Vmk.colors.onPrimary else Vmk.colors.textSecondary
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (checking) CircularProgressIndicator(Modifier.size(20.dp), color = c, strokeWidth = 2.dp)
+            // the label may wrap (Spanish, large text); the price stays together
+            Text(createLabel, style = VmkType.cta, color = c, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f, fill = false))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("·", style = VmkType.cta, color = c, modifier = Modifier.padding(end = 8.dp))
+                Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
+                Text("$credits", style = VmkType.cta, color = c)
+            }
         }
     }
 }

@@ -94,6 +94,8 @@ data class CreateOptions(
 ) {
     /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). */
     val credits: Int get() = Lengths.credits(minutes)
+    /** True when a server-offered 4K resolution is chosen (the app offers 720p and 1080p today); only then the cost line states that 4K costs double. */
+    val isFourK: Boolean get() = resolution.lowercase().let { it == "4k" || it == "2160p" }
 
     companion object {
         val LENGTHS = Lengths.OLD_PRESETS

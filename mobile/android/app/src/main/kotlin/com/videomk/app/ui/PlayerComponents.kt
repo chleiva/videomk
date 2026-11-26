@@ -51,12 +51,12 @@ const val MAX_TALL_DP = 460
 /** An inline player (16:9 unless the video says otherwise) with a full screen button. */
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier = Modifier, ratio: Float = 16f / 9f) {
+fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier = Modifier, ratio: Float = 16f / 9f, edgeToEdge: Boolean = false) {
     // a tall video (9:16, 4:5) is shown at its own shape, at most MAX_TALL dp high and centred; nothing is stretched
-    androidx.compose.foundation.layout.BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier.fillMaxWidth().then(if (edgeToEdge) Modifier.background(Color.Black) else Modifier), contentAlignment = Alignment.Center) {
     val frame = if (ratio >= 1f) Modifier.fillMaxWidth().aspectRatio(ratio)
         else Modifier.height(minOf(maxWidth / ratio, MAX_TALL_DP.dp)).aspectRatio(ratio)
-    Box(frame.clip(RoundedCornerShape(Vmk.radius)).background(Color.Black).testTag("player")) {
+    Box(frame.clip(if (edgeToEdge) androidx.compose.ui.graphics.RectangleShape else RoundedCornerShape(Vmk.radius)).background(Color.Black).testTag("player")) {
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {

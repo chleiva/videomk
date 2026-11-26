@@ -51,7 +51,7 @@
     </plurals>
 
     <!-- sign in -->
-    <string name="auth_tagline">Describe un video. Nosotros lo escribimos, lo narramos y lo dibujamos.</string>
+    <string name="auth_tagline">Descríbelo.\nNosotros hacemos el video.</string>
     <string name="auth_not_configured">Sin configurar. Esta versión aún no tiene dirección de servidor.</string>
     <string name="auth_signing_in">Iniciando sesión</string>
     <string name="auth_continue_google">Continuar con Google</string>

@@ -158,7 +158,7 @@ private fun QuestionContent(composer: ComposerViewModel, q: Question, overline: 
     // scrolls when the question and its chips are taller than the sheet (large text, a small phone): nothing is ever hidden
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(top = 4.dp)) {
         Overline(overline)
-        Text(q.text, style = MaterialTheme.typography.headlineSmall.copy(fontSize = 27.sp, lineHeight = 33.sp), fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.padding(top = 4.dp).semantics { heading() }.testTag("questionTitle"))
+        Text(q.text, style = VmkType.question, color = Vmk.colors.text, modifier = Modifier.padding(top = 4.dp).semantics { heading() }.testTag("questionTitle"))
         q.helper?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp)) }
         Box(Modifier.size(14.dp))
         if (other) {
@@ -232,7 +232,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
     }
     Text(stringResource(R.string.summary_tap_hint), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp))
     Box(Modifier.fillMaxWidth().padding(vertical = 12.dp).size(1.dp).background(Vmk.colors.outline))
-    Text("${CreatePlatforms.recommendation(options, composer.caps)} · ${com.videomk.app.core.Lengths.short(options.minutes)}", style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+    Text(stringResource(R.string.create_summary_line, CreatePlatforms.recommendation(options, composer.caps), com.videomk.app.core.Lengths.short(options.minutes)), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
     Box(Modifier.weight(1f, fill = false).heightIn(min = 16.dp))
     StatusLine(status, 0f, 0f) { if (status.fix?.addCredits == true) onWallet() else status.fix?.minutes?.let { composer.setLength(it) } }
     val ready = status.sendReady
@@ -241,10 +241,10 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
             .clickable(enabled = ready, role = Role.Button) { composer.confirmSummary() }.testTag("summaryCreate"),
         contentAlignment = Alignment.Center,
     ) {
-        val c = if (ready) Color.White else Vmk.colors.textTertiary
+        val c = if (ready) Vmk.colors.onPrimary else Vmk.colors.textSecondary
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.create_create_video), style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c); Text("·", color = c)
-            Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp)); Text("${options.credits}", style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp), fontWeight = FontWeight.Bold, color = c)
+            Text(stringResource(R.string.create_create_video), style = VmkType.cta, color = c, modifier = Modifier.weight(1f, fill = false)); Text("·", style = VmkType.cta, color = c)
+            Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp)); Text("${options.credits}", style = VmkType.cta, color = c)
         }
     }
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -262,7 +262,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.StopBody(composer: Co
     }
     Column(Modifier.fillMaxWidth().padding(top = 12.dp)) {
         Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(28.dp)) }
-        Text(title, style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp), fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.padding(top = 14.dp).semantics { heading() }.testTag("stopTitle"))
+        Text(title, style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.padding(top = 14.dp).semantics { heading() }.testTag("stopTitle"))
         Text(message, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite }.testTag("stopMessage"))
         retry?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp)) }
         if (suggestion != null) Row(Modifier.fillMaxWidth().padding(top = 14.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.primaryContainer).padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -74,6 +75,11 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     val application = LocalContext.current.applicationContext as Application
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
+    // one success haptic when a video that was being made becomes ready while the app is open
+    val completions = app.state.collectAsState().value.completions
+    val haptics = rememberHaptics()
+    var seenCompletions by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(completions) }
+    androidx.compose.runtime.LaunchedEffect(completions) { if (completions > seenCompletions) haptics.play(com.videomk.app.core.DesignTokens.Haptic.VideoReady); seenCompletions = completions }
     val showTabs = route == "library" || route == "media"
     val mediaFactory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, null, MediaCache(FilePageDisk(java.io.File(application.cacheDir, "media-pages"))), Int.MAX_VALUE, container.mediaUploads?.arrivals ?: com.videomk.app.core.ArrivalTracker()) } }
     Scaffold(
@@ -117,7 +123,9 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         composable("video/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
             val detail: VideoDetailViewModel = viewModel(entry, key = "video-$id", factory = viewModelFactory { initializer { VideoDetailViewModel(application, container.backend, id) } })
-            VideoDetailScreen(app, detail, container.http, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("editor/$id") })
+            VideoDetailScreen(app, detail, container.http, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("editor/$id") }, onMakeAnother = {
+                composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create")
+            })
         }
         composable("editor/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rediseño UX (docs/UX_REVIEW.md): grupos por día, el componente compartido "creando", primer uso, acciones del video, explicación del costo. -->
+<resources>
+    <string name="lib_group_today">Hoy</string>
+    <string name="lib_group_yesterday">Ayer</string>
+    <string name="lib_group_earlier">Antes</string>
+    <string name="lib_row_meta">%1$s · %2$s</string>
+    <string name="lib_row_desc">%1$s. %2$s</string>
+    <string name="lib_more">Más opciones</string>
+    <string name="making_leave_promise">Puedes salir. Sigue en marcha y estará aquí cuando esté listo.</string>
+    <string name="making_scene_counter">Escena %1$d de %2$d</string>
+    <string name="making_ready_announce">%1$s está listo.</string>
+    <string name="making_stage_desc">%1$s, %2$s</string>
+    <string name="making_step_done">%1$s, listo</string>
+    <string name="making_step_active">%1$s, en curso</string>
+    <string name="making_step_waiting">%1$s, en espera</string>
+    <string name="lib_first_title">Haz tu primer video</string>
+    <string name="lib_first_sub">Cambia la idea o hazlo tal cual. Unos 30 segundos, 1 crédito.</string>
+    <string name="lib_first_prompt">Cómo hacen miel las abejas, explicado en 30 segundos</string>
+    <string name="lib_first_cta">Hacer mi primer video</string>
+    <string name="lib_first_edit">Cambiar la idea</string>
+    <string name="video_save">Guardar en la galería</string>
+    <string name="video_saving">Guardando</string>
+    <string name="video_saved">Guardado en la galería</string>
+    <string name="video_save_failed">No se pudo guardar el video. Inténtalo de nuevo.</string>
+    <string name="video_make_another">Hacer otro video</string>
+    <string name="video_make_another_sub">Describe tu próxima idea.</string>
+    <string name="video_edit_desc">Editar este video</string>
+    <string name="create_cost_why">¿Cuánto cuesta?</string>
+    <string name="create_cost_4k_double">4K cuesta el doble de créditos.</string>
+    <string name="create_cost_line">%1$s · %2$s</string>
+    <string name="wallet_cost_title">Cómo funcionan los créditos</string>
+    <string name="wallet_cost_minute">1 crédito crea hasta 1 minuto de video, redondeado hacia arriba.</string>
+    <string name="wallet_cost_example">Un video de 10 segundos y uno de 60 cuestan 1 crédito. Uno de 61 segundos cuesta 2.</string>
+    <string name="wallet_cost_4k">4K cuesta el doble: un video de 1 minuto en 4K son 2 créditos.</string>
+    <string name="wallet_cost_expiry">Los créditos gratis caducan. Los que compras nunca caducan.</string>
+    <string name="wallet_hero_desc">Tienes %1$s</string>
+    <string name="settings_support">Soporte</string>
+    <string name="settings_support_open">Escribir a soporte</string>
+    <string name="settings_support_mailto">mailto:support@plorer.ai</string>
+    <string name="settings_terms">Términos y condiciones</string>
+    <string name="settings_terms_open">Abrir los términos y condiciones</string>
+    <string name="settings_terms_url">https://videomk.com/es/terms</string>
+    <string name="create_summary_line">%1$s · %2$s</string>
+    <string name="quoted">“%1$s”</string>
+</resources>

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,15 +65,12 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
         val w = state.wallet
         if (w == null) { FullScreenSpinner(Modifier.padding(padding)); return@Scaffold }
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Card(Modifier.testTag("balanceCard")) {
-                Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(if (w.unlimited) "∞" else "${w.balance}", fontSize = 56.sp, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("balanceValue"))
-                    Text(if (w.unlimited) stringResource(R.string.wallet_unlimited) else pluralStringResource(R.plurals.wallet_credit_word, w.balance), color = Vmk.colors.textSecondary)
-                }
-            }
+            // the unlimited test account is a debug-build thing only: a release build shows the plain number
+            val unlimited = w.unlimited && com.videomk.app.BuildConfig.DEBUG
+            WalletHero(if (unlimited) "∞" else "${w.balance}", if (unlimited) stringResource(R.string.wallet_unlimited) else pluralStringResource(R.plurals.wallet_credit_word, w.balance))
             Card {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.wallet_what_you_have), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
+                    Text(stringResource(R.string.wallet_what_you_have), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { heading() })
                     if (w.buckets.isEmpty()) Text(stringResource(R.string.wallet_none), color = Vmk.colors.textSecondary)
                     w.buckets.forEachIndexed { i, b ->
                         if (i > 0) HorizontalDivider(color = Vmk.colors.textSecondary.copy(alpha = 0.15f))
@@ -101,16 +99,9 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
                             color = Vmk.colors.text,
                         )
                     }
-                    Text(
-                        stringResource(R.string.wallet_pricing_note),
-                        style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary,
-                    )
                 }
             }
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Button(onClick = {}, enabled = false, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.wallet_get_more)) }
-                Text(stringResource(R.string.wallet_buying_soon), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
-            }
+            Card { CreditsExplainer() }
         }
     }
 }

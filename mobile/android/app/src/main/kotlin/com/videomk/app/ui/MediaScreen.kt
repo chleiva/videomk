@@ -202,7 +202,7 @@ fun MediaScreen(
                     }
                 }
                 val titleLine: @Composable (Modifier) -> Unit = { m ->
-                    Text(stringResource(R.string.media_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = m.semantics { heading() })
+                    Text(stringResource(R.string.media_title), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = m.semantics { heading() })
                 }
                 if (bigText) Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 6.dp), horizontalAlignment = Alignment.End) { titleLine(Modifier.fillMaxWidth()); actions() }
                 else Row(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) { titleLine(Modifier.weight(1f)); actions() }

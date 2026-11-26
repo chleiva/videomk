@@ -114,6 +114,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.videomk.app.core.LibraryEntry
+import com.videomk.app.core.LibraryRow
+import com.videomk.app.core.DayGroups
+import com.videomk.app.core.MakingSnapshot
 import com.videomk.app.core.PendingVideo
 import com.videomk.app.core.ProgressEstimator
 import com.videomk.app.core.VideoItem
@@ -137,14 +140,6 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     val context = LocalContext.current
     val container = LocalContainerOrNull.current
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-    // the button's height (58 dp, growing with the font) plus its 16 dp margin and some air: the last card can always scroll clear of it
-    val fabClearance = (58 * androidx.compose.ui.platform.LocalDensity.current.fontScale.coerceIn(1f, 2f)).dp + 40.dp
-    // the label collapses by distance from the top only, with a gap (see FabCollapse); it never changes the list's layout or padding
-    var fabExpanded by remember { mutableStateOf(true) }
-    LaunchedEffect(listState) {
-        val machine = com.videomk.app.core.FabCollapse()
-        androidx.compose.runtime.snapshotFlow { if (listState.firstVisibleItemIndex > 0) Int.MAX_VALUE else listState.firstVisibleItemScrollOffset }.collect { fabExpanded = machine.update(it) }
-    }
     val person = (state.phase as? Phase.SignedIn)?.email
     /** Opens Create with what this person used last time; an example prefills the text and length (never sends). */
     fun newVideo(e: Example?) {
@@ -173,9 +168,10 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         containerColor = Vmk.colors.background,
         contentWindowInsets = WindowInsets(0),
         topBar = { MainTopBar(state.wallet, onOpenWallet, onOpenSettings) },
-        floatingActionButton = { if (state.entries.isNotEmpty() && !com.videomk.app.DebugHooks.emptyHome(context)) NewVideoFab(expanded = fabExpanded) { newVideo(null) } },
         bottomBar = {
             Column {
+                // Create is docked above the tab bar, not floating: the list ends above it, so it can never cover a row
+                if (state.entries.isNotEmpty() && !com.videomk.app.DebugHooks.emptyHome(context)) NewVideoBar { newVideo(null) }
                 val progress = container?.mediaUploads?.queue?.progress?.collectAsState()?.value
                 val imeVisible = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
                 val org = container?.organize?.bar?.collectAsState()?.value
@@ -194,28 +190,44 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 entries.isEmpty() && (state.loadState is LoadState.Loading || state.loadState is LoadState.Idle) -> SkeletonFeed()
                 entries.isEmpty() && state.loadState is LoadState.Failed ->
                     MessageState(stringResource(R.string.lib_load_failed_title), (state.loadState as LoadState.Failed).message, stringResource(R.string.common_try_again), { scope.launch { app.refresh() } })
-                entries.isEmpty() -> EmptyState(onExample = { e -> newVideo(e) }, onNew = { newVideo(null) })
+                entries.isEmpty() -> EmptyState(
+                    onExample = { e -> newVideo(e) },
+                    onFirst = { app.submit(Txt.s(R.string.lib_first_prompt), CreateOptions(minutes = com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES)) },
+                    onChange = { newVideo(Example(R.string.lib_first_prompt, R.string.lib_example_tag_1min, com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES, false, Icons.Filled.Movie)) },
+                )
                 else -> {
                     var refreshing by remember { mutableStateOf(false) }
                     PullToRefreshBox(isRefreshing = refreshing, onRefresh = { scope.launch { refreshing = true; app.refresh(); refreshing = false } }) {
+                        val rows = remember(entries) { DayGroups.rows(entries, java.time.Instant.now(), java.time.ZoneId.systemDefault()) }
+                        val now = remember(entries) { System.currentTimeMillis() }
                         LazyColumn(
-                            Modifier.fillMaxSize().testTag("videoList"), state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = fabClearance),
-                            verticalArrangement = Arrangement.spacedBy(14.dp),
+                            Modifier.fillMaxSize().testTag("videoList"), state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            item(key = "title") { Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.9).sp, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
+                            item(key = "title") { Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.padding(bottom = 2.dp).semantics { heading() }) }
                             if (state.offline) item(key = "offline") { OfflineBanner(onRetry = { scope.launch { app.refresh() } }) }
-                            items(entries, key = { it.id }, contentType = { if (it is LibraryEntry.Pending) "pending" else (it as LibraryEntry.Video).video.status.let { s -> if (s.isRunning) "making" else if (s == VideoStatus.Complete) "ready" else "failed" } }) { entry ->
-                                when (entry) {
-                                    is LibraryEntry.Pending -> PendingCard(entry.pending, onRetry = { app.retry(entry.pending.id) }, onDismiss = { app.dismissPending(entry.pending.id) })
-                                    is LibraryEntry.Video -> when {
-                                        entry.video.status.isRunning -> { val v = entry.video; MakingCard(v, state) { onOpenVideo(v.id) } }
-                                        entry.video.status == VideoStatus.Complete -> { val v = entry.video; ReadyCard(v, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } }) }
-                                        else -> FailedCard(
-                                            title = state.briefs[entry.video.id] ?: entry.video.displayTitle, rejected = entry.video.status == VideoStatus.Rejected, reason = entry.video.rejectReason,
-                                            thumb = entry.video.previewGifUrl, tag = "videoRow",
-                                            onRetry = state.briefs[entry.video.id]?.let { brief -> { app.submit(brief, CreateOptions(state.minutes[entry.video.id] ?: CreateOptions.DEFAULT_MINUTES)) } },
-                                            onDismiss = null,
-                                        )
+                            items(rows, key = { it.key }, contentType = { if (it is LibraryRow.Header) "header" else if ((it as LibraryRow.Item).entry is LibraryEntry.Pending) "pending" else "video" }) { row ->
+                                when (row) {
+                                    is LibraryRow.Header -> DayHeader(row.bucket)
+                                    is LibraryRow.Item -> when (val entry = row.entry) {
+                                        is LibraryEntry.Pending -> PendingCard(entry.pending, onRetry = { app.retry(entry.pending.id) }, onDismiss = { app.dismissPending(entry.pending.id) })
+                                        is LibraryEntry.Video -> {
+                                            val v = entry.video
+                                            val kind = if (v.status.isRunning) 0 else if (v.status == VideoStatus.Complete) 1 else 2
+                                            // one item per video: Making settles into Ready with a cross-fade instead of a pop
+                                            SettleCrossfade(kind, Modifier.animateItem()) { k ->
+                                                when (k) {
+                                                    0 -> MakingCard(rememberMakingSnapshot(v, state), Modifier.testTag("runningRow"), onClick = { onOpenVideo(v.id) })
+                                                    1 -> VideoRow(v, v.createdAt?.let { RelativeTime.text(it.toEpochMilli(), now) }, remember(v.id, onOpenVideo) { { onOpenVideo(v.id) } })
+                                                    else -> FailedRow(
+                                                        title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
+                                                        thumb = v.previewGifUrl, tag = "videoRow",
+                                                        onRetry = state.briefs[v.id]?.let { brief -> { app.submit(brief, CreateOptions(state.minutes[v.id] ?: CreateOptions.DEFAULT_MINUTES)) } },
+                                                        onDismiss = null,
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -227,16 +239,15 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
     }
 }
 
-/** The one entry to Create: a labelled capsule that shrinks to a round button while the list scrolls and grows back at the top. */
+/** The one entry to Create on a list that has videos: one full-width primary button docked above the tab bar (never over a row), text-driven height, 48 dp at least. */
 @Composable
-private fun NewVideoFab(expanded: Boolean, onClick: () -> Unit) {
-    Row(
-        Modifier.heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_new_video), onClick = onClick)
-            .padding(horizontal = if (expanded) 22.dp else 17.dp).animateContentSize().semantics { contentDescription = Txt.s(R.string.lib_new_video) }.testTag("newVideoFab"),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Icon(Icons.Filled.Add, null, tint = Color.White, modifier = Modifier.size(24.dp))
-        if (expanded) Text(stringResource(R.string.lib_new_video), style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
+private fun NewVideoBar(onClick: () -> Unit) {
+    val label = stringResource(R.string.lib_new_video)
+    Box(Modifier.fillMaxWidth().background(Vmk.colors.background).padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s)) {
+        PrimaryButton(label, onClick, Modifier.testTag("newVideoFab").semantics { contentDescription = label }) {
+            Icon(Icons.Filled.Add, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(24.dp)); Spacer(Modifier.width(8.dp))
+            Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+        }
     }
 }
 
@@ -245,7 +256,7 @@ private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: (
     Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 52.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
         Row(Modifier.weight(1f).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             LogoMark()
-            Text("videomk", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
+            Text("videomk", style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, maxLines = 1)
         }
         wallet?.let { w ->
             val shape = CircleShape
@@ -279,22 +290,29 @@ private fun OfflineBanner(onRetry: () -> Unit) {
     }
 }
 
-/** Two skeleton cards at the final height while the list loads. */
+/** Skeleton rows with the final shape of a video row while the list loads (the title is real: the screen never looks empty). */
 @Composable
 private fun SkeletonFeed() {
     val still = reduceMotion(LocalContext.current)
     val loadingDesc = stringResource(R.string.lib_loading_desc)
     val a = if (still) 0.7f else rememberInfiniteTransition(label = "sk").animateFloat(0.45f, 0.9f, infiniteRepeatable(tween(1000), RepeatMode.Reverse), label = "a").value
-    Column(Modifier.fillMaxSize().padding(16.dp).semantics { contentDescription = loadingDesc }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
-        repeat(2) { Box(Modifier.fillMaxWidth().height(CardHeight).alpha(a).clip(RoundedCornerShape(22.dp)).background(Vmk.colors.surfaceRaised)) }
+    Column(Modifier.fillMaxSize().padding(16.dp).semantics { contentDescription = loadingDesc }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(stringResource(R.string.lib_title), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text)
+        repeat(4) {
+            Row(Modifier.fillMaxWidth().alpha(a).clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surface).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(Modifier.width(128.dp).height(72.dp).clip(RoundedCornerShape(Vmk.radii.thumb)).background(Vmk.colors.surfaceRaised))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.fillMaxWidth().height(14.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised))
+                    Box(Modifier.fillMaxWidth(0.6f).height(12.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised))
+                }
+            }
+        }
     }
 }
 
-/** First launch: one promise, three worked examples. Tapping one fills the composer (and length); none of them sends. */
+/** First launch: one promise, a first video that is already written (30 s, 1 credit), and three worked examples. Examples fill Create; none of them sends. */
 @Composable
-private fun EmptyState(onExample: (Example) -> Unit, onNew: () -> Unit) {
-    val newVideoDesc = stringResource(R.string.lib_new_video)
+private fun EmptyState(onExample: (Example) -> Unit, onFirst: () -> Unit, onChange: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 16.dp).testTag("emptyState"),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -304,18 +322,10 @@ private fun EmptyState(onExample: (Example) -> Unit, onNew: () -> Unit) {
             Frame(7f, 34.dp, listOf(Color(0xFF2A2A66), Color(0xFF6C4BC1)))
             Frame(0f, 0.dp, listOf(Color(0xFFFFC27A), Color(0xFFB9556F)), front = true)
         }
-        Text(stringResource(R.string.lib_empty_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, letterSpacing = (-0.8).sp, textAlign = TextAlign.Center, color = Vmk.colors.text, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
+        Text(stringResource(R.string.lib_empty_title), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center, color = Vmk.colors.text, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
         Text(stringResource(R.string.lib_empty_body), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-        Box(
-            Modifier.fillMaxWidth().padding(bottom = 18.dp).heightIn(min = 58.dp).clip(CircleShape).background(Vmk.gradientNow)
-                .clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_new_video), onClick = onNew).semantics { contentDescription = newVideoDesc }.testTag("newVideoButton"),
-            contentAlignment = Alignment.Center,
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Filled.Add, null, tint = Color.White); Text(stringResource(R.string.lib_new_video), style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), fontWeight = FontWeight.Bold, color = Color.White)
-            }
-        }
-        Overline(stringResource(R.string.lib_try_one), Modifier.fillMaxWidth().padding(bottom = 8.dp))
+        FirstVideoCard(onFirst, onChange)
+        Overline(stringResource(R.string.lib_try_one), Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 8.dp))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             for (e in Examples) {
                 val shape = RoundedCornerShape(18.dp)
@@ -325,10 +335,31 @@ private fun EmptyState(onExample: (Example) -> Unit, onNew: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(e.icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(22.dp)) }
-                    Text(stringResource(e.text), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.weight(1f), maxLines = 3)
-                    Text(stringResource(e.tag), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 1, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 10.dp, vertical = 5.dp))
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(e.text), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text)
+                        Text(stringResource(e.tag), style = MaterialTheme.typography.labelMedium, color = Vmk.colors.primary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 10.dp, vertical = 3.dp))
+                    }
                 }
             }
+        }
+    }
+}
+
+/** "Make your first video": the prompt is already there, 30 s and 1 credit. The button makes it as it is (no question sheet); "Change the idea" opens Create with it filled in. */
+@Composable
+private fun FirstVideoCard(onMake: () -> Unit, onChange: () -> Unit) {
+    val shape = RoundedCornerShape(Vmk.radii.videoCard)
+    Column(
+        Modifier.fillMaxWidth().clip(shape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, shape).padding(Vmk.space.l).testTag("firstVideoCard"),
+        verticalArrangement = Arrangement.spacedBy(Vmk.space.m),
+    ) {
+        Text(stringResource(R.string.lib_first_title), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
+        Text(stringResource(R.string.quoted, stringResource(R.string.lib_first_prompt)), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text,
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.field)).background(Vmk.colors.primaryContainer).padding(Vmk.space.m))
+        Text(stringResource(R.string.lib_first_sub), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+        PrimaryButton(stringResource(R.string.lib_first_cta), onMake, Modifier.testTag("firstVideoMake"))
+        TextButton(onClick = onChange, modifier = Modifier.fillMaxWidth().heightIn(min = Vmk.minTouch).testTag("newVideoButton")) {   // opens Create with the idea filled in (UI tests use it as "New video")
+            Text(stringResource(R.string.lib_first_edit), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.primary)
         }
     }
 }
@@ -341,163 +372,35 @@ private fun Frame(rotate: Float, dx: androidx.compose.ui.unit.Dp, colors: List<C
     )
 }
 
-// cards
-
-private val CardHeight = 190.dp
-private val TallCardMax = 420.dp
-
-@Composable
-private fun CardFrame(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, height: Dp = CardHeight, content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit) {
-    val shape = RoundedCornerShape(22.dp)
-    val fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
-    val h = if (fontScale > 1f) height * (1f + (fontScale - 1f) * 0.7f) else height   // larger text (and longer Spanish) needs a taller card, never clipped text
-    Box(
-        modifier.fillMaxWidth().height(h).vmkShadow(2, shape, Vmk.colors.dark).clip(shape)
-            .then(if (Vmk.colors.dark) Modifier.border(1.dp, Color.White.copy(alpha = 0.05f), shape) else Modifier)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-    ) { content() }
-}
-
-private val Scrim = Brush.verticalGradient(0f to Color.Transparent, 0.46f to Color.Transparent, 1f to Color(0xC7080A1C))
-
-@Composable
-private fun ReadyCard(video: VideoItem, onClick: () -> Unit) {
-    val now = remember { System.currentTimeMillis() }
-    val meta = video.createdAt?.let { RelativeTime.text(it.toEpochMilli(), now) }
-    val readyDesc = stringResource(R.string.lib_ready_desc, video.displayTitle) + (meta?.let { " $it." } ?: "")
-    // a tall video (9:16, 4:5) gets a taller card at its own shape (capped), so the thumbnail is not cropped to a landscape strip
-    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
-    val h = if (video.isTall) minOf(maxWidth / video.frameRatio, TallCardMax).coerceAtLeast(CardHeight) else CardHeight
-    CardFrame(Modifier.semantics(mergeDescendants = true) { contentDescription = readyDesc }.testTag("videoRow"), onClick, h) {
-        Thumbnail(video.previewGifUrl, video.status, Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFF3A3F7A), Color(0xFF7A5BC4)))))
-        Box(Modifier.fillMaxSize().background(Scrim))
-        GlassChip(stringResource(R.string.lib_status_ready), Modifier.align(Alignment.TopStart).padding(14.dp), dot = Color(0xFF4ADE80))
-        Box(Modifier.align(Alignment.Center).size(52.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(32.dp))
-        }
-        Column(Modifier.align(Alignment.BottomStart).padding(start = 16.dp, end = 76.dp, bottom = 14.dp)) {
-            Text(video.displayTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            meta?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f)) }
-        }
-        video.durationSeconds?.let { Text(duration(it), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).padding(14.dp).clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).padding(horizontal = 8.dp, vertical = 3.dp)) }
-    }
-    }
-}
+// rows and cards: the shared components live in Components.kt
 
 fun duration(s: Double): String = "%d:%02d".format(s.toInt() / 60, s.toInt() % 60)
 fun elapsed(s: Long): String { val t = maxOf(0L, s); return "%d:%02d".format(t / 60, t % 60) }
 
-/** A video being made: named steps and honest words, no percent and no spinner. */
+/** What the one waiting component shows for a running video: the same value is used by the home card and the detail screen. */
 @Composable
-private fun MakingCard(video: VideoItem, state: AppState, onClick: () -> Unit) {
+fun rememberMakingSnapshot(video: VideoItem, state: AppState): MakingSnapshot {
     val stage = (video.status as? VideoStatus.Running)?.stage ?: VideoStatus.Stage.Starting
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { delay(1000); now = System.currentTimeMillis() } }
     val since = state.stageSince[video.id]?.sinceMillis
     val inStage = since?.let { (now - it) / 1000.0 } ?: 0.0
     val minutes = state.minutes[video.id] ?: CreateOptions.DEFAULT_MINUTES
-    val fraction = ProgressEstimator.fraction(stage, inStage, minutes)
     val title = state.briefs[video.id] ?: video.title?.takeIf { it.isNotEmpty() } ?: stringResource(R.string.lib_making_title)
-    val line = stringResource(R.string.lib_making_line, MakingSteps.sentence(stage), ProgressEstimator.leftText(stage, inStage, minutes))
-    val makingDesc = stringResource(R.string.lib_making_desc, title, line)
-    MakingBody(title, line, fraction, Modifier.semantics(mergeDescendants = true) {
-        contentDescription = makingDesc
-    }.testTag("runningRow"), onClick)
+    return MakingSnapshot.of(title, stage, inStage, minutes)
 }
 
-@Composable
-private fun MakingBody(title: String, line: String, fraction: Double, modifier: Modifier, onClick: (() -> Unit)?) {
-    CardFrame(modifier, onClick) {
-        Box(Modifier.fillMaxSize().background(Vmk.makingGradient))
-        Shimmer(Modifier.fillMaxSize())
-        Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            GlassChip(stringResource(R.string.lib_status_making), dot = Color(0xFFC4C6FF))
-            Spacer(Modifier.height(4.dp))
-            Text(title, style = MaterialTheme.typography.titleMedium, fontSize = 19.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(line, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f), maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.weight(1f))
-            Steps(fraction)
-        }
-    }
-}
-
-@Composable
-private fun Steps(target: Double) {
-    // eases to each new estimate over the poll interval instead of jumping
-    val fraction by androidx.compose.animation.core.animateFloatAsState(target.toFloat(), androidx.compose.animation.core.tween(3500, easing = LinearEasing), label = "progress")
-    val fills = MakingSteps.fills(fraction.toDouble())
-    val current = MakingSteps.current(fraction.toDouble())
-    Column(Modifier.fillMaxWidth().clearAndSetSemantics { }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            fills.forEach { f ->
-                Box(Modifier.weight(1f).height(5.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f))) {
-                    Box(Modifier.fillMaxWidth(f).fillMaxHeight().background(Color(0xFFC4C6FF), CircleShape))
-                }
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MakingSteps.names.forEachIndexed { i, n ->
-                Text(n, Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, fontWeight = if (i == current) FontWeight.Bold else FontWeight.Normal,
-                    color = if (i == current) Color.White else Color.White.copy(alpha = 0.7f), maxLines = 1, textAlign = when (i) { 0 -> TextAlign.Start; 3 -> TextAlign.End; else -> TextAlign.Center })
-            }
-        }
-    }
-}
-
-/** A slow diagonal shimmer (a static lighter wash when animations are off). */
-@Composable
-private fun Shimmer(modifier: Modifier) {
-    val still = reduceMotion(LocalContext.current)
-    if (still) { Box(modifier.background(Color.White.copy(alpha = 0.05f))); return }
-    val t by rememberInfiniteTransition(label = "shimmer").animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = LinearEasing), RepeatMode.Restart), label = "x")
-    Box(
-        modifier.drawBehind {
-            val w = size.width * 0.5f
-            val x = -w + (size.width + w) * t
-            drawRect(Brush.linearGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.14f), Color.Transparent), start = Offset(x, 0f), end = Offset(x + w, size.height)))
-        },
-    )
-}
-
-/** "Didn't finish": the picture goes grey, and the card says what happens to credits and how to try again. */
-@Composable
-private fun FailedCard(title: String, rejected: Boolean, reason: String?, thumb: String?, tag: String, onRetry: (() -> Unit)?, onDismiss: (() -> Unit)?, message: String? = null) {
-    val grey = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
-    val statusLabel = stringResource(if (rejected) R.string.lib_status_not_allowed else R.string.lib_status_didnt_finish)
-    val failedDesc = stringResource(R.string.lib_failed_desc, title, statusLabel)
-    CardFrame(Modifier.semantics { contentDescription = failedDesc }.testTag(tag)) {
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF5A5252), Color(0xFF2B2425)))))
-        if (thumb != null) StableImage(thumb, ContentScale.Crop, Modifier.fillMaxSize().alpha(0.55f), grey)
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color(0x33200808), 1f to Color(0xE6180A0C))))
-        GlassChip(statusLabel, Modifier.align(Alignment.TopStart).padding(14.dp), container = (if (rejected) Vmk.colors.warning else Color(0xFFB91C1C)).copy(alpha = 0.85f),
-            leading = { Icon(Icons.Filled.Warning, null, tint = Color.White, modifier = Modifier.size(14.dp)) })
-        Column(Modifier.align(Alignment.BottomStart).padding(start = 16.dp, end = 16.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            val detail = message ?: reason
-            Text(title, style = MaterialTheme.typography.titleMedium, fontSize = 19.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = if (detail != null) 1 else 2, overflow = TextOverflow.Ellipsis)
-            detail?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.9f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (onRetry != null) Row(
-                    Modifier.heightIn(min = 44.dp).clip(CircleShape).background(Color.White).clickable(role = Role.Button, onClick = onRetry).padding(horizontal = 16.dp).testTag("retryButton"),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) { Icon(Icons.Filled.Refresh, null, tint = Color(0xFF11142B), modifier = Modifier.size(18.dp)); Text(stringResource(R.string.common_try_again), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Color(0xFF11142B)) }
-                if (!rejected) Text(stringResource(R.string.lib_no_credits_used), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.weight(1f))
-                if (onDismiss != null) TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 44.dp).testTag("removeButton")) { Text(stringResource(R.string.common_remove), color = Color.White) }
-            }
-        }
-    }
-}
-
-/** The request is on its way (or failed before the server answered): the same card shape as a running one, so the list never jumps. */
+/** The request is on its way (or failed before the server answered): the same card as a running one, so the list never jumps. */
 @Composable
 private fun PendingCard(pending: PendingVideo, onRetry: () -> Unit, onDismiss: () -> Unit) {
     val failed = (pending.state as? PendingVideo.State.Failed)?.message
-    if (failed != null) { FailedCard(pending.brief, false, null, null, "failedRow", onRetry, onDismiss, message = failed); return }
+    if (failed != null) { FailedRow(pending.brief, false, failed, null, "failedRow", onRetry, onDismiss); return }
     val st = pending.state
     val line = when (st) {
         is PendingVideo.State.Uploading -> stringResource(R.string.lib_pending_uploading, minOf(st.done + 1, st.total), st.total)
         else -> stringResource(R.string.lib_pending_sending)
     }
-    MakingBody(pending.brief, line, if (st is PendingVideo.State.Uploading) 0.2 * st.done / maxOf(st.total, 1) else 0.0, Modifier.semantics(mergeDescendants = true) { contentDescription = "${pending.brief}. $line" }.testTag("pendingRow"), null)
+    MakingCard(MakingSnapshot.pending(pending.brief, line, if (st is PendingVideo.State.Uploading) 0.2 * st.done / maxOf(st.total, 1) else 0.0), Modifier.testTag("pendingRow"))
 }
 
 /** The slim pill on the Videos tab while photos upload: opens Media. */

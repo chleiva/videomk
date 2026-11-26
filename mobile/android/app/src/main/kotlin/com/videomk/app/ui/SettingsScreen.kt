@@ -79,7 +79,7 @@ fun SettingsScreen(
                         Text(stringResource(R.string.settings_signed_in_as), color = Vmk.colors.text, modifier = Modifier.padding(end = 12.dp))
                         Text(email, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("accountEmail"))
                     }
-                    TextButton(onClick = { confirm = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("signOutButton")) { Text(stringResource(R.string.settings_sign_out), color = Vmk.colors.danger) }
+                    TextButton(onClick = { confirm = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("signOutButton")) { Text(stringResource(R.string.settings_sign_out), color = Vmk.colors.primary) }   // signing out is not destructive: no danger red
                 }
             }
             Card { LanguageSetting() }
@@ -111,6 +111,14 @@ fun SettingsScreen(
                     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(R.string.settings_privacy_open)) { runCatching { uri.openUri("https://videomk.com/privacy") } }, verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.settings_privacy_policy), color = MaterialTheme.colorScheme.primary)
                     }
+                    val termsUrl = stringResource(R.string.settings_terms_url)
+                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(R.string.settings_terms_open)) { runCatching { uri.openUri(termsUrl) } }, verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.settings_terms), color = MaterialTheme.colorScheme.primary)
+                    }
+                    val mailto = stringResource(R.string.settings_support_mailto)
+                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClickLabel = stringResource(R.string.settings_support_open)) { runCatching { uri.openUri(mailto) } }.testTag("supportLink"), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.settings_support), color = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
         }
@@ -125,7 +133,7 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { confirm = false },
             title = { Text(stringResource(R.string.settings_sign_out_confirm)) },
-            confirmButton = { TextButton(onClick = { confirm = false; onSignOut() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmSignOut")) { Text(stringResource(R.string.settings_sign_out), color = Vmk.colors.danger) } },
+            confirmButton = { TextButton(onClick = { confirm = false; onSignOut() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmSignOut")) { Text(stringResource(R.string.settings_sign_out), color = Vmk.colors.primary) } },
             dismissButton = { TextButton(onClick = { confirm = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
         )
     }

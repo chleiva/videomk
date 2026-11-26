@@ -51,7 +51,7 @@
     </plurals>
 
     <!-- sign in -->
-    <string name="auth_tagline">Describe a video. We write it, voice it and draw it.</string>
+    <string name="auth_tagline">Describe it.\nWe\'ll make the video.</string>
     <string name="auth_not_configured">Not configured. This build has no server address yet.</string>
     <string name="auth_signing_in">Signing in</string>
     <string name="auth_continue_google">Continue with Google</string>

@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -75,10 +77,12 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
             Box(Modifier.size(96.dp).clip(RoundedCornerShape(24.dp)).background(Vmk.gradient).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(56.dp))
             }
-            Text("videomk", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
+            Text("videomk", style = VmkType.wordmark, color = Vmk.colors.text, maxLines = 1)
+            // seam for the sample video (docs/UX_REVIEW.md section 5): drop an MP4 at res/raw/sample_intro.mp4 and it plays muted and looped here (a still frame with Reduce Motion)
+            sampleVideoRes(androidx.compose.ui.platform.LocalContext.current)?.let { SignInSample(it) }
             Text(
-                stringResource(R.string.auth_tagline), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center,
-                color = Vmk.colors.textSecondary,
+                stringResource(R.string.auth_tagline), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center,
+                color = Vmk.colors.text,
             )
         }
         Column(Modifier.widthIn(max = 480.dp).padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -96,8 +100,8 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
                         label, onClick = { onSignIn(option) }, enabled = !busy,
                         modifier = Modifier.fillMaxWidth().testTag("signInButton"),
                     ) {
-                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = signingInText }, color = Color.White, strokeWidth = 2.dp)
-                        else Text(label, style = MaterialTheme.typography.titleMedium, color = Color.White, textAlign = TextAlign.Center)
+                        if (spinning || (state.isSigningIn && state.signInProvider == null)) CircularProgressIndicator(Modifier.size(24.dp).semantics { contentDescription = signingInText }, color = Vmk.colors.onPrimary, strokeWidth = 2.dp)
+                        else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
                     }
                 }
             }
@@ -155,4 +159,27 @@ fun LegalLine() {
         }
     }
     Text(text, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
+}
+
+/** The id of `res/raw/sample_intro`, or null while that asset does not exist (none ships today: the owner has not supplied one). */
+fun sampleVideoRes(context: android.content.Context): Int? =
+    context.resources.getIdentifier("sample_intro", "raw", context.packageName).takeIf { it != 0 }
+
+/** A muted, looped sample clip above the sign-in buttons. It never makes a sound and stands still when animations are off. */
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@Composable
+fun SignInSample(res: Int, modifier: Modifier = Modifier) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val still = reduceMotion(context)
+    val player = remember {
+        androidx.media3.exoplayer.ExoPlayer.Builder(context).build().apply {
+            volume = 0f; repeatMode = androidx.media3.common.Player.REPEAT_MODE_ALL
+            setMediaItem(androidx.media3.common.MediaItem.fromUri("android.resource://${context.packageName}/$res")); prepare(); playWhenReady = !still
+        }
+    }
+    androidx.compose.runtime.DisposableEffect(player) { onDispose { player.release() } }
+    androidx.compose.ui.viewinterop.AndroidView(
+        factory = { c -> androidx.media3.ui.PlayerView(c).apply { useController = false; resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM; this.player = player } },
+        modifier = modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radii.videoCard)).clearAndSetSemantics { },
+    )
 }
