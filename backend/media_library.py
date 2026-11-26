@@ -108,3 +108,4 @@ class MediaLibrary(Construct):
         CfnOutput(self, "MediaBucketName", value=media_bucket_name)
         CfnOutput(self, "VectorBucketName", value=vector_bucket_name)
         self.table, self.bucket, self.api_fn, self.ingest_fn = table, bucket, api_fn, ingest_fn
+        self.vector_bucket_name, self.index_arn, self.media_bucket_name = vector_bucket_name, index_arn, media_bucket_name   # for the account deletion worker (account_deletion.py)

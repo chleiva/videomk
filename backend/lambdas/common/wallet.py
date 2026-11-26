@@ -83,6 +83,14 @@ def _bucket(user_id: str, kind: str, amount: int, expires: int, now: float, name
             "expires_at": expires, "created_at": int(now), **({"ttl": expires + 7 * 86400} if expires < NEVER else {})}
 
 
+def _signup_block(user_id: str, now: float) -> Optional[str]:
+    if not os.environ.get("DELETION_TABLE"):
+        return None
+    from common import deletion
+
+    return deletion.signup_block(user_id, now=now)
+
+
 def ensure_grants(user_id: str, *, now: Optional[float] = None, tz: Optional[str] = None) -> None:
     """Welcome credits the first time we see a user; then the day's free credits once per local day. Race-safe (conditional writes)."""
     now = time.time() if now is None else now
@@ -91,9 +99,12 @@ def ensure_grants(user_id: str, *, now: Optional[float] = None, tz: Optional[str
     meta = t.get_item(Key={"user_id": user_id, "sk": "META"}, ConsistentRead=True).get("Item")
     tn = t.name
     if meta is None:  # first sight: welcome credits now; the daily credits start with the next local day
-        items: List[Dict[str, Any]] = [{"Put": {"TableName": tn, "Item": {"user_id": user_id, "sk": "META", "signup_at": int(now), "last_daily_key": day, "last_daily_utc_day": int(now // 86400)},
-                                                "ConditionExpression": "attribute_not_exists(user_id)"}}]
-        if r["signup"] > 0:
+        block = _signup_block(user_id, now)
+        if block == "deleting":
+            return  # this account is being deleted (docs/ACCOUNT_DELETION.md): no row, no grant
+        meta_item = {"user_id": user_id, "sk": "META", "signup_at": int(now), "last_daily_key": day, "last_daily_utc_day": int(now // 86400), **({"signup_denied": block} if block else {})}
+        items: List[Dict[str, Any]] = [{"Put": {"TableName": tn, "Item": meta_item, "ConditionExpression": "attribute_not_exists(user_id)"}}]
+        if r["signup"] > 0 and not block:   # 'returning': the verified email or federated name of an account deleted recently (owner's switch, docs/ACCOUNT_DELETION.md): no second welcome credit
             items.append({"Put": {"TableName": tn, "Item": _bucket(user_id, "signup", r["signup"], int(now + r["signup_valid_days"] * 86400), now)}})
         try:
             _tx(items)

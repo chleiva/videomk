@@ -142,27 +142,18 @@ Least privilege: the function can call only `cognito-idp:ListUsers` and `cognito
 
 ## 5. Account deletion (Apple and Google require it)
 
-Current state: **the backend has no deletion endpoint**. `frontend/src/pages/delete-account.astro` asks the person to email support and the deletion is done by hand within 30 days.
-Nothing in this work changes that, so before the iOS release the in-app deletion route still has to be built (Apple guideline 5.1.1(v) requires in-app initiation for apps with account creation;
-a web link to a request page is not enough for Apple review). What a complete deletion must remove for **any** user, federated or not (keyed by `sub`):
-- Cognito: `AdminDeleteUser` on the user. Deleting the native user also removes its linked Google/Apple identities (the link lives on the user). A federated-only user (`Google_...`) is one pool user and is deleted the same way.
-  Afterwards the same Google/Apple account signing in creates a fresh account (new `sub`, new welcome credit): wallet rows must not be kept keyed to the old `sub` for reuse, which they cannot be.
-- DynamoDB rows with `user_id = sub`: videos table (GSI `GSI_UserVideos`), wallet table (all `B#` buckets, `META`), usage table, safety table, media table; S3 prefixes for the user in the assets and media buckets, and the vector index entries.
-- Keep only what law requires (purchase records).
+Built: see **docs/ACCOUNT_DELETION.md** (endpoint `POST /users/{user}/account/delete`, the SQS worker that removes every store and then the Cognito user, the staff script, the app contract).
+Federated users are covered: the worker finds the pool user by `sub` (a federated user's Cognito username is `Google_...`/`SignInWithApple_...`, not the `sub`), and `AdminDeleteUser` drops the linked identities.
+Afterwards the same Google/Apple account signing in creates a fresh account (new `sub`); an optional hashed tombstone (default off) withholds a second welcome credit.
 
-**Apple token revocation** (required by Apple for apps with Sign in with Apple; guideline 5.1.1(v)): Cognito does **not** hand the app or the backend Apple's refresh token, so nothing in
-the pool can revoke it. What is needed, in order:
+**Apple token revocation** (required by Apple for apps with Sign in with Apple; guideline 5.1.1(v)): implemented behind the deploy flag `-c appleRevoke=1` (default off), exactly the design below, as a public callback `POST /account/apple-callback`
+plus `POST /users/{user}/account/apple-revoke` (returns Apple's authorize URL with a signed state). Proven with a fake Apple server only; it has never run against Apple (docs/ACCOUNT_DELETION.md sections 4 and 9). The design, for reference:
 1. Revoke call: `POST https://appleid.apple.com/auth/revoke` form fields `client_id`, `client_secret`, `token`, `token_type_hint=refresh_token`.
-2. `client_secret` is an ES256 JWT signed with the `.p8` key: header `kid` = Key ID; claims `iss` = Team ID, `iat`, `exp` (at most 6 months ahead; mint one per call, 5 minutes is enough), `aud` = `https://appleid.apple.com`, `sub` = the `client_id` used in step 3.
-3. The refresh token comes from `POST https://appleid.apple.com/auth/token` (`grant_type=authorization_code`, `code`, `client_id`, `client_secret`, `redirect_uri` for web flows). An authorization code is single use and must have been
-   issued to **the same client_id** that exchanges it.
-4. Because Cognito used the Services ID for the person's sign-in, the only way for us to get a code for that same grant is to ask Apple again at deletion time: the app/web opens
-   `https://appleid.apple.com/auth/authorize?client_id=<Services ID>&redirect_uri=<return URL>&response_type=code&response_mode=form_post&scope=name email&state=...` and sends the returned `code` to the backend, which does steps 3 then 1.
-   That return URL is not Cognito's: register a **second Return URL** on the Services ID pointing at a small backend endpoint (for example `https://api.../auth/apple-delete-callback`).
-   Alternative on iOS: `ASAuthorizationAppleIDProvider` returns an `authorizationCode` for the **bundle id** client; the backend exchanges and revokes with `client_id` = bundle id and `sub` = bundle id. That revokes the app grant, not the Services ID grant
-   the hosted-UI sign-in created, so it is only complete if the iOS app signs in with the native Apple dialog; ours does not, so use the Services ID route above (it works from the iOS app too, in the same browser sheet).
-5. Backend needs `cryptography` (or PyJWT[crypto]) in a Lambda layer (not in any layer today), the `.p8` already in Secrets Manager (`/videomk/apple_private_key`) plus Key ID and Team ID (SSM), and IAM read of them for the deletion function only.
-**Not built**: it needs the deletion endpoint and the in-app flow above. It cannot be implemented honestly without an Apple Services ID to test against. Order of work: deletion endpoint (Cognito + data), then the Apple revoke callback.
+2. `client_secret` is an ES256 JWT signed with the `.p8` key: header `kid` = Key ID; claims `iss` = Team ID, `iat`, `exp` (at most 6 months ahead; one is minted per call, valid 5 minutes), `aud` = `https://appleid.apple.com`, `sub` = the `client_id` used in step 3.
+3. The refresh token comes from `POST https://appleid.apple.com/auth/token` (`grant_type=authorization_code`, `code`, `client_id`, `client_secret`, `redirect_uri`). An authorization code is single use and must have been issued to **the same client_id** that exchanges it.
+4. Cognito used the Services ID for the person's sign-in, so the only way to get a code for that same grant is to ask Apple again at deletion time (`https://appleid.apple.com/auth/authorize?client_id=<Services ID>&redirect_uri=<return URL>&response_type=code&response_mode=form_post&state=...`).
+   The return URL is not Cognito's: add the stack output `AppleRevokeReturnUrl` as a **second Return URL** on the Services ID. (The native iOS dialog returns a code for the bundle id, which would revoke the app grant, not the hosted-UI Services ID grant; so it is not used.)
+5. `cryptography` is in its own small layer `layers/apple_deps` (built with `layers/build_layer.sh apple_deps`, 12 MB); the `.p8` stays in Secrets Manager (`/videomk/apple_private_key`), Key ID and Team ID in SSM, readable only by the callback function.
 Google needs no revocation call for Cognito federation (we keep no Google token).
 
 ## 6. Owner steps, in order

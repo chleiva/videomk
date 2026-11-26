@@ -23,6 +23,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+from account_deletion import AccountDeletion, TOKEN_VALID_SECONDS
 from media_library import MediaLibrary
 from social_auth import SocialAuth, flag as social_flag
 from request_intake import RequestIntake
@@ -510,18 +511,47 @@ class BackendStack(Stack):
         # ----------------------------
         # The private photo library: storage, search and its routes (docs/MEDIA_LIBRARY.md). Needs the engine layer (Pillow, numpy).
         # ----------------------------
+        media = None
         if v2 is not None:
             model_env = {env_key: str(self.node.try_get_context(ctx_key)) for ctx_key, env_key in (("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID")) if self.node.try_get_context(ctx_key)}
-            MediaLibrary(
+            media = MediaLibrary(
                 self, "MediaLibrary", extra_env=model_env, stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
                 usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn, assets_bucket_name=ASSETS_BUCKET,
             )
 
         # The request check (safety, clarity) and the per-account record of safety stops: docs/INTAKE_AND_SAFETY.md. Same small-model override as above.
-        RequestIntake(
+        intake = RequestIntake(
             self, "RequestIntake", account=self.account, is_prod=is_prod, make_fn=make_fn, flags_table=flags_table, usage_table=usage_table, videos_resource=videos, cognito_auth=cognito_auth,
             launcher_fn=launcher_fn, extra_env={"REVIEW_MODEL_ID": str(self.node.try_get_context("reviewModelId"))} if self.node.try_get_context("reviewModelId") else {},
         )
+
+        # ----------------------------------------------------------------------------
+        # Account deletion (docs/ACCOUNT_DELETION.md): POST /users/{user}/account/delete, an SQS worker that removes everything and then the Cognito user.
+        # `-c appleRevoke=1` adds Sign in with Apple token revocation; `-c accountTombstone=1` keeps a salted hash of the verified email for `-c tombstoneDays` (default 90) so a deleted account
+        # cannot collect a second welcome credit (an owner decision: privacy versus abuse; default OFF).
+        # ----------------------------------------------------------------------------
+        apple_revoke, tombstone = social_flag(self.node, "appleRevoke"), social_flag(self.node, "accountTombstone")
+        apple_layer = None
+        if apple_revoke:
+            apple_dir = os.path.join(os.path.dirname(__file__), "layers", "apple_deps")
+            if not os.path.isdir(os.path.join(apple_dir, "python")) and not os.environ.get("CDK_SKIP_LAYER_CHECK"):
+                raise ValueError("Apple layer not built. Run `backend/layers/build_layer.sh apple_deps` first.")
+            apple_layer = _lambda.LayerVersion(self, "AppleDepsLayer", code=_lambda.Code.from_asset("layers/apple_deps"), compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+                                               compatible_architectures=[_lambda.Architecture.X86_64], description="cryptography (ES256 client secret for Sign in with Apple revocation)")
+        deletion = AccountDeletion(
+            self, "AccountDeletion", stage=stage, is_prod=is_prod, make_fn=make_fn, user_pool=user_pool, api=api, user_id_resource=user_id, cognito_auth=cognito_auth,
+            cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone"], common_env=common_env, videos_table=videos_table, usage_table=usage_table, wallet_table=wallet_table,
+            flags_table=flags_table, safety_table=intake.table, assets_bucket_name=ASSETS_BUCKET, generate_machines=[active_machine], edit_machine=v2.edit_state_machine if v2 is not None else None,
+            media=media, tombstone=tombstone, tombstone_days=int(self.node.try_get_context("tombstoneDays") or 90), domain=domain,
+            web_return_url=callback_urls[0].rsplit("/auth/callback", 1)[0].rstrip("/") + "/delete-account", apple=apple_revoke, apple_layer=apple_layer,
+        )
+        for fn in (wallet_fn, launcher_fn):   # the wallet refuses a welcome credit to an account that is being deleted (and, with the tombstone on, to a returning one)
+            deletion.table.grant_read_data(fn)
+            for k in ("DELETION_TABLE", "USER_POOL_ID", "DELETION_KEY_SECRET", "TOMBSTONE_ENABLED", "TOMBSTONE_DAYS"):
+                fn.add_environment(k, deletion.base_env[k])
+            if tombstone:
+                deletion.key_secret.grant_read(fn)
+                fn.add_to_role_policy(iam.PolicyStatement(actions=["cognito-idp:ListUsers"], resources=[user_pool.user_pool_arn]))
 
         # Reject malformed/oversized prompts at the edge, before any Lambda runs.
         generate_model = api.add_model(

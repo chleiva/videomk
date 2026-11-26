@@ -2,7 +2,7 @@
 # Build a Lambda layer for linux/x86_64 + Python 3.12 from <layer>/requirements.txt.
 # No Docker needed: pip is told to fetch manylinux wheels, so it works from macOS/Linux/CI alike.
 #
-#   backend/layers/build_layer.sh [video_deps|engine_deps ...]    (default: all layers)
+#   backend/layers/build_layer.sh [video_deps|engine_deps|apple_deps ...]    (default: video_deps and engine_deps; apple_deps is only needed with `cdk deploy -c appleRevoke=1`)
 set -euo pipefail
 cd "$(dirname "$0")"
 

@@ -8,7 +8,7 @@ const glance = [
 	"To make a video we send your text (and photos you attach) to AI and media services that work for us. Section 4 lists them.",
 	"Your photos are cleaned of all hidden data (location, camera, date) before they are stored, and the originals are deleted. If you allow it in Settings, the time each photo was taken and an approximate place (about 1 km) are used once to tell your story; the place is turned into a city name on our servers and the coordinates are not kept.",
 	"My media (optional): you can keep your photos in a private library in videomk and search them by describing them. Only you can see them; nobody at videomk browses them. You can delete any photo, or all of them, at any time in the app.",
-	"You can ask us to delete your videos or your whole account at any time.",
+	"You can delete your whole account yourself in the app (Settings, Delete account), or ask us by email, at any time.",
 ];
 const sections = [
 	{ title: "Who we are", paras: [
@@ -58,7 +58,7 @@ const sections = [
 		"Videos, narration, photos you attached and the plan behind each video: until you delete them or your account.",
 		"Photos in My media, their previews, fingerprints and collections: until you delete them or your account.",
 		"Temporary working files used to build a video: automatically deleted after 7 days.",
-		"Safety checks: your description is checked by an AI model for safety before a video is made. If a request is stopped, we keep the type of reason, the time, a short excerpt (up to 160 characters) and a fingerprint of the request for 90 days, to review mistakes and spot repeated misuse; requests that pass leave no record.",
+		"Safety checks: your description is checked by an AI model for safety before a video is made. If a request is stopped, we keep the type of reason, the time, a short excerpt (up to 160 characters) and a fingerprint of the request for 90 days, to review mistakes and spot repeated misuse; requests that pass leave no record. If you delete your account, these records are kept for the rest of the 90 days under a scrambled reference instead of your account details.",
 		"Upload leftovers: deleted within 2 days. Technical and error logs: deleted after 14 days.",
 		"Account, credit and purchase records: while your account exists, then only as long as the law requires (for example accounting records).",
 		"Backups and provider caches are overwritten on their normal cycles."] },
@@ -66,7 +66,8 @@ const sections = [
 		"If you share a video link, anyone with the link can watch it without signing in, and we cannot control where the link travels or whether it is copied. Share only what you are happy to be public."] },
 	{ title: "Your rights and deleting your data", paras: [
 		"Depending on where you live, you may have the right to access, correct, delete, restrict or object to our use of your data, to receive a copy of it, and to withdraw consent. You may also complain to your data protection authority (in the UK, the Information Commissioner’s Office).",
-		`To use these rights, or to delete your videos or your whole account and everything linked to it, email ${CONTACT_EMAIL} from the address on your account. See also videomk.com/delete-account. We answer within 30 days, and we may need to confirm it is you.`] },
+		// OWNER REVIEW (legal wording): the in-app route and the timings below describe how docs/ACCOUNT_DELETION.md behaves; confirm them before publishing.
+		`To delete your whole account and everything linked to it, open Settings, then Delete account, in the app. We remove your videos, narration, photos, My media, credit balance and sign-in; your data is gone within minutes and the sign-in itself within about an hour or two. If you cannot sign in, or want to use another right, email ${CONTACT_EMAIL} from the address on your account (if you signed in with Apple and hid your email, write from the account email shown in the app). See also videomk.com/delete-account. We answer within 30 days, and we may need to confirm it is you.`] },
 	{ title: "Where data is processed", paras: [
 		"Data may be processed in the United Kingdom, the European Economic Area, the United States and other countries where our providers operate. Where required we rely on adequacy decisions, standard contractual clauses or equivalent safeguards."] },
 	{ title: "Security", paras: [
