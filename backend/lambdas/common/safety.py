@@ -21,6 +21,8 @@ from typing import Any, Dict, List, Optional
 import boto3
 from boto3.dynamodb.conditions import Key
 
+from common import i18n
+
 logger = logging.getLogger()
 
 ZERO, STANDARD = "zero_tolerance", "standard"
@@ -59,12 +61,10 @@ def normalise_category(value: Any) -> Optional[str]:
 
 
 # ----------------------------------------------------------------------------- what the person reads (short, neutral, kind; never names the rule)
-_BLOCKED = {"en": "We can't make this video. If you had something else in mind, try describing a different idea.",
-            "es": "No podemos crear este video. Si tenías otra idea en mente, prueba a describir una distinta."}
-_PAUSED = {"en": "Video creation is paused on your account for now. Please try again later.",
-           "es": "La creación de videos está en pausa en tu cuenta por ahora. Inténtalo de nuevo más tarde."}
-_HOLD = {"en": "Video creation is on hold while we take a look at your account. If you think this is a mistake, please contact support.",
-         "es": "La creación de videos está detenida mientras revisamos tu cuenta. Si crees que es un error, escribe a soporte."}
+# The wording lives in the shared catalog (common/i18n.py, keys safety.*) so the Spanish text is reviewed in one place.
+_BLOCKED = {l: i18n.t("safety.blocked", l) for l in i18n.LOCALES}
+_PAUSED = {l: i18n.t("safety.paused", l) for l in i18n.LOCALES}
+_HOLD = {l: i18n.t("safety.hold", l) for l in i18n.LOCALES}
 
 
 def _lang(lang: Optional[str]) -> str:

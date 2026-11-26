@@ -1,0 +1,479 @@
+{
+ "images": 12,
+ "phrases": 393,
+ "searches": 442,
+ "best_score_percentiles": {
+  "10": 0.096,
+  "25": 0.117,
+  "50": 0.149,
+  "75": 0.21,
+  "90": 0.295,
+  "99": 0.529
+ },
+ "coverage_by_threshold": {
+  "0.15": 48.9,
+  "0.20": 28.3,
+  "0.25": 13.8,
+  "0.30": 9.0,
+  "0.35": 7.0,
+  "0.40": 5.7
+ },
+ "per_image": [
+  {
+   "id": "0065e4cf0ce6",
+   "title": "Desert dunes at sunset",
+   "top": [
+    [
+     "desert sand dunes sunset",
+     0.44
+    ],
+    [
+     "desert sand dunes sunrise",
+     0.423
+    ],
+    [
+     "camel in desert dunes",
+     0.357
+    ],
+    [
+     "golden sunrise ocean waves",
+     0.294
+    ],
+    [
+     "jebel irhoud morocco cave",
+     0.29
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.239
+    ],
+    [
+     "african elephant herd",
+     0.239
+    ],
+    [
+     "pyramids of giza egypt",
+     0.236
+    ]
+   ]
+  },
+  {
+   "id": "08c0b7c29597",
+   "title": "Misty mountain valley",
+   "top": [
+    [
+     "misty mountain valley sunrise",
+     0.474
+    ],
+    [
+     "pine forest in morning fog",
+     0.409
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.407
+    ],
+    [
+     "misty mountain lake sunrise",
+     0.384
+    ],
+    [
+     "mist over mountain lake",
+     0.383
+    ],
+    [
+     "galilee hills sunrise landscape",
+     0.333
+    ],
+    [
+     "machu picchu in morning mist",
+     0.304
+    ],
+    [
+     "sunrise over calm sea horizon",
+     0.3
+    ]
+   ]
+  },
+  {
+   "id": "0b2e895e0b5b",
+   "title": "Rolling green countryside hills",
+   "top": [
+    [
+     "english countryside rolling hills",
+     0.562
+    ],
+    [
+     "stone wall farmland valley",
+     0.46
+    ],
+    [
+     "coastal cliff path england",
+     0.318
+    ],
+    [
+     "clear blue sky over landscape",
+     0.3
+    ],
+    [
+     "vermont valley farm mountains",
+     0.283
+    ],
+    [
+     "rainbow over green field after rain",
+     0.274
+    ],
+    [
+     "sea of galilee hillside",
+     0.271
+    ],
+    [
+     "greenwich park hilltop thames view",
+     0.25
+    ]
+   ]
+  },
+  {
+   "id": "3f3ecfbc85a1",
+   "title": "Calm alpine lake at dawn",
+   "top": [
+    [
+     "calm alpine lake at dawn",
+     0.531
+    ],
+    [
+     "misty mountain lake sunrise",
+     0.461
+    ],
+    [
+     "still water mirror reflection mountains",
+     0.447
+    ],
+    [
+     "alpine mountain lake",
+     0.422
+    ],
+    [
+     "mist over mountain lake",
+     0.401
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.385
+    ],
+    [
+     "misty mountain valley sunrise",
+     0.372
+    ],
+    [
+     "person silhouette watching sunrise lake",
+     0.344
+    ]
+   ]
+  },
+  {
+   "id": "51ba8f5e07d4",
+   "title": "Autumn forest colours",
+   "top": [
+    [
+     "forest path autumn leaves",
+     0.555
+    ],
+    [
+     "autumn forest colors",
+     0.46
+    ],
+    [
+     "green forest path sunlight",
+     0.445
+    ],
+    [
+     "greenwich park autumn path",
+     0.444
+    ],
+    [
+     "sunlight through autumn trees",
+     0.443
+    ],
+    [
+     "rain drops on window autumn",
+     0.308
+    ],
+    [
+     "coastal cliff path england",
+     0.26
+    ],
+    [
+     "english countryside rolling hills",
+     0.252
+    ]
+   ]
+  },
+  {
+   "id": "5ec96b883cf0",
+   "title": "Starry night sky over a calm sea",
+   "top": [
+    [
+     "starry sky over calm sea",
+     0.527
+    ],
+    [
+     "lighthouse beam over night sea",
+     0.43
+    ],
+    [
+     "bioluminescent waves glowing at night beach",
+     0.4
+    ],
+    [
+     "sunrise over calm sea horizon",
+     0.388
+    ],
+    [
+     "aurora borealis night sky",
+     0.36
+    ],
+    [
+     "high tide waves coastline moonlight",
+     0.335
+    ],
+    [
+     "calm alpine lake at dawn",
+     0.335
+    ],
+    [
+     "galilee hills sunrise landscape",
+     0.317
+    ]
+   ]
+  },
+  {
+   "id": "97c6f959d8ec",
+   "title": "Rainbow over green fields",
+   "top": [
+    [
+     "rainbow over green field after rain",
+     0.558
+    ],
+    [
+     "double rainbow over city sky",
+     0.453
+    ],
+    [
+     "full circle rainbow from airplane",
+     0.359
+    ],
+    [
+     "english countryside rolling hills",
+     0.299
+    ],
+    [
+     "northern lights green sky",
+     0.274
+    ],
+    [
+     "wheat field harvest",
+     0.264
+    ],
+    [
+     "stone wall farmland valley",
+     0.242
+    ],
+    [
+     "aurora borealis night sky",
+     0.229
+    ]
+   ]
+  },
+  {
+   "id": "a117dca4e9b3",
+   "title": "Pine forest in morning fog",
+   "top": [
+    [
+     "pine forest in morning fog",
+     0.49
+    ],
+    [
+     "green forest path sunlight",
+     0.385
+    ],
+    [
+     "sunlight through autumn trees",
+     0.374
+    ],
+    [
+     "misty mountain valley sunrise",
+     0.362
+    ],
+    [
+     "misty mountain lake sunrise",
+     0.314
+    ],
+    [
+     "autumn forest colors",
+     0.292
+    ],
+    [
+     "ancient rainforest canopy",
+     0.284
+    ],
+    [
+     "mist over mountain lake",
+     0.278
+    ]
+   ]
+  },
+  {
+   "id": "d3ab162246af",
+   "title": "Calm alpine lake at dawn (style-guide comparison)",
+   "top": [
+    [
+     "calm alpine lake at dawn",
+     0.551
+    ],
+    [
+     "misty mountain lake sunrise",
+     0.526
+    ],
+    [
+     "mist over mountain lake",
+     0.465
+    ],
+    [
+     "misty mountain valley sunrise",
+     0.448
+    ],
+    [
+     "alpine mountain lake",
+     0.431
+    ],
+    [
+     "still water mirror reflection mountains",
+     0.404
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.385
+    ],
+    [
+     "person silhouette watching sunrise lake",
+     0.353
+    ]
+   ]
+  },
+  {
+   "id": "e353c229c1cb",
+   "title": "Sunrise over a mountain landscape",
+   "top": [
+    [
+     "misty mountain valley sunrise",
+     0.452
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.424
+    ],
+    [
+     "misty mountain lake sunrise",
+     0.371
+    ],
+    [
+     "pine forest in morning fog",
+     0.359
+    ],
+    [
+     "mist over mountain lake",
+     0.332
+    ],
+    [
+     "snow capped mountain peaks",
+     0.304
+    ],
+    [
+     "machu picchu in morning mist",
+     0.3
+    ],
+    [
+     "sunrise over calm sea horizon",
+     0.294
+    ]
+   ]
+  },
+  {
+   "id": "f12c88f32d39",
+   "title": "Snow capped mountain peaks",
+   "top": [
+    [
+     "snow capped mountain peaks",
+     0.444
+    ],
+    [
+     "mount everest himalaya peak",
+     0.363
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.336
+    ],
+    [
+     "mount everest summit view",
+     0.317
+    ],
+    [
+     "misty mountain valley sunrise",
+     0.292
+    ],
+    [
+     "calm alpine lake at dawn",
+     0.283
+    ],
+    [
+     "vermont valley farm mountains",
+     0.278
+    ],
+    [
+     "alpine mountain lake",
+     0.274
+    ]
+   ]
+  },
+  {
+   "id": "f8dd948479bf",
+   "title": "Misty mountain valley (style-guide comparison)",
+   "top": [
+    [
+     "misty mountain valley sunrise",
+     0.47
+    ],
+    [
+     "sunrise over vast mountain landscape",
+     0.461
+    ],
+    [
+     "misty mountain lake sunrise",
+     0.356
+    ],
+    [
+     "galilee hills sunrise landscape",
+     0.322
+    ],
+    [
+     "pine forest in morning fog",
+     0.322
+    ],
+    [
+     "mist over mountain lake",
+     0.321
+    ],
+    [
+     "calm alpine lake at dawn",
+     0.315
+    ],
+    [
+     "sunrise over calm sea horizon",
+     0.308
+    ]
+   ]
+  }
+ ]
+}

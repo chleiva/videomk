@@ -10,6 +10,13 @@
     <p id="msg">Signing you in…</p>
     <script>
       import { AuthDisplayError, SIGNIN_PATH, completeLogin } from "../../lib/auth";
+      import { getLocale, translate } from "../../lib/i18n";
+
+      const locale = getLocale();
+      document.documentElement.lang = locale;
+      document.title = translate("callback.page_title", locale);
+      const first = document.getElementById("msg");
+      if (first) first.textContent = translate("callback.signing_in", locale);
 
       completeLogin()
         .then((next) => location.replace(next))
@@ -18,10 +25,10 @@
           const msg = document.getElementById("msg");
           if (!msg) return;
           // textContent only: the text can derive from provider-supplied error_description.
-          msg.textContent = (e instanceof AuthDisplayError ? e.message : "Sign-in failed.") + " ";
+          msg.textContent = (e instanceof AuthDisplayError ? e.message : translate("callback.failed", locale)) + " ";
           const a = document.createElement("a");
           a.href = SIGNIN_PATH;
-          a.textContent = "Try again";
+          a.textContent = translate("callback.try_again", locale);
           msg.appendChild(a);
         });
     </script>

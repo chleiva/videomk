@@ -1,0 +1,7 @@
+---
+import LegalDoc from "../../components/LegalDoc.astro";
+import { getPrivacy } from "../../data/legal/privacy";
+import { effective } from "../../data/legal";
+const c = getPrivacy("es");
+---
+<LegalDoc locale="es" title={c.title} intro={c.intro} effective={effective("es")} glance={c.glance} sections={c.sections} />

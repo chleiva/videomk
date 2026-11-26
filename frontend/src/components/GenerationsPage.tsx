@@ -1,8 +1,10 @@
 import { useMemo, useRef, useState } from "react";
 import GenerationsList from "./GenerationsList";
 import { startGeneration, newRequestId } from "../lib/api";
+import { useLocale } from "../lib/useLocale";
 
 export default function GenerationsPage() {
+  const { t } = useLocale();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -29,12 +31,12 @@ export default function GenerationsPage() {
     if (!canSubmit) return;
     const trimmed = prompt.trim();
     if (trimmed.length === 0) {
-      setPrompt("Just inspire me…");
+      setPrompt(t("gen.inspire"));
       inputRef.current?.focus();
       return;
     }
     if (trimmed.length > 0 && trimmed.length < 15) {
-      setHint("Add a bit more detail so we can create something great.");
+      setHint(t("gen.more_detail"));
       inputRef.current?.focus();
       return;
     }
@@ -55,7 +57,7 @@ export default function GenerationsPage() {
     } catch (err) {
       console.error(err);
       setSubmitting(false);
-      setHint("There was a problem starting your generation. Please try again.");
+      setHint(t("gen.start_error"));
     }
   }
 
@@ -63,11 +65,11 @@ export default function GenerationsPage() {
     <section className="mx-auto max-w-6xl px-6 py-10 md:py-16">
       <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Generations</h1>
-          <p className="mt-2 text-neutral-600">Monitor your renders and pick up where you left off.</p>
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">{t("gen.title")}</h1>
+          <p className="mt-2 text-neutral-600">{t("gen.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div role="group" aria-label="Toggle view" className="hidden md:inline-flex rounded-xl border border-neutral-200 bg-white p-1 shadow-sm">
+          <div role="group" aria-label={t("gen.toggle_view")} className="hidden md:inline-flex rounded-xl border border-neutral-200 bg-white p-1 shadow-sm">
             <button
               type="button"
               onClick={() => setView("grid")}
@@ -76,7 +78,7 @@ export default function GenerationsPage() {
                 view === "grid" ? "bg-neutral-900 text-white" : "text-neutral-800 hover:bg-neutral-100"
               }`}
             >
-              Grid
+              {t("gen.grid")}
             </button>
             <button
               type="button"
@@ -86,7 +88,7 @@ export default function GenerationsPage() {
                 view === "list" ? "bg-neutral-900 text-white" : "text-neutral-800 hover:bg-neutral-100"
               }`}
             >
-              List
+              {t("gen.list")}
             </button>
           </div>
           <button
@@ -97,7 +99,7 @@ export default function GenerationsPage() {
               <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                 <path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              Create video
+              {t("gen.create")}
             </span>
           </button>
         </div>
@@ -117,12 +119,12 @@ export default function GenerationsPage() {
           <div className="relative w-full md:max-w-lg rounded-t-3xl md:rounded-2xl bg-white shadow-xl">
             <form onSubmit={handleCreate} className="p-6">
               <div className="flex items-start justify-between gap-4">
-                <h2 className="text-lg font-semibold">Describe your video</h2>
+                <h2 className="text-lg font-semibold">{t("gen.describe")}</h2>
                 <button
                   type="button"
                   onClick={closeModal}
                   className="rounded-full p-2 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100"
-                  aria-label="Close"
+                  aria-label={t("gen.close")}
                 >
                   <svg aria-hidden viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                     <path d="M6.225 4.811 4.811 6.225 10.586 12l-5.775 5.775 1.414 1.414L12 13.414l5.775 5.775 1.414-1.414L13.414 12l5.775-5.775-1.414-1.414L12 10.586 6.225 4.811z"/>
@@ -135,7 +137,7 @@ export default function GenerationsPage() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-sm outline-none focus:ring-2 focus:ring-pink-500"
-                  placeholder="A cinematic explainer about quantum computing for beginners"
+                  placeholder={t("gen.placeholder")}
                 />
                 {hint && <p className="mt-2 text-sm text-neutral-600" aria-live="polite">{hint}</p>}
               </div>
@@ -145,7 +147,7 @@ export default function GenerationsPage() {
                   onClick={closeModal}
                   className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-900 shadow-sm hover:border-neutral-300"
                 >
-                  Cancel
+                  {t("gen.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -157,14 +159,14 @@ export default function GenerationsPage() {
                     {submitting ? (
                       <>
                         <span aria-hidden className="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        <span>Starting…</span>
+                        <span>{t("gen.starting")}</span>
                       </>
                     ) : (
                       <>
                         <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                           <path d="M8 5v14l11-7z" />
                         </svg>
-                        <span>Create</span>
+                        <span>{t("gen.submit")}</span>
                       </>
                     )}
                   </span>

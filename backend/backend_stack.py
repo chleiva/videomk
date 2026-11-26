@@ -24,6 +24,7 @@ from aws_cdk import (
 from constructs import Construct
 
 from account_deletion import AccountDeletion, TOKEN_VALID_SECONDS
+from catalog import ImageCatalog
 from media_library import MediaLibrary
 from social_auth import SocialAuth, flag as social_flag
 from request_intake import RequestIntake
@@ -389,6 +390,11 @@ class BackendStack(Stack):
             )
             active_machine = v2.state_machine
 
+        # videomk's own image catalog (docs/IMAGE_CATALOG.md): only with `-c imageCatalog=1` (default off) and the v2 engine, whose beat Lambda is the only reader.
+        if v2 is not None and str(self.node.try_get_context("imageCatalog") or "").lower() in ("1", "true"):
+            self.catalog = ImageCatalog(self, "ImageCatalog", stage=stage, account=self.account, region=self.region, is_prod=is_prod, beat_fn=v2.beat_fn,
+                                        min_score=str(self.node.try_get_context("catalogMinScore") or ""))
+
         active_machine.grant_start_execution(launcher_fn)
         launcher_fn.add_environment("STATE_MACHINE_ARN", active_machine.state_machine_arn)
 
@@ -488,7 +494,7 @@ class BackendStack(Stack):
         authorizer = apigw.CognitoUserPoolsAuthorizer(self, "ApiAuthorizer", cognito_user_pools=[user_pool])
 
         for resource, methods in ((users, ["GET", "POST", "OPTIONS"]), (user_id, ["GET", "POST", "OPTIONS"]), (videos, ["GET", "POST", "OPTIONS"]), (generate, ["POST", "OPTIONS"]), (video_item, ["GET", "OPTIONS"]), (wallet_res, ["GET", "OPTIONS"]), (uploads_res, ["POST", "OPTIONS"])):
-            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone"])
+            resource.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=methods, allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"])
 
         cognito_auth = dict(authorization_type=apigw.AuthorizationType.COGNITO, authorizer=authorizer)
         videos.add_method("GET", apigw.LambdaIntegration(list_videos_fn, proxy=True), **cognito_auth)
@@ -540,7 +546,7 @@ class BackendStack(Stack):
                                                compatible_architectures=[_lambda.Architecture.X86_64], description="cryptography (ES256 client secret for Sign in with Apple revocation)")
         deletion = AccountDeletion(
             self, "AccountDeletion", stage=stage, is_prod=is_prod, make_fn=make_fn, user_pool=user_pool, api=api, user_id_resource=user_id, cognito_auth=cognito_auth,
-            cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone"], common_env=common_env, videos_table=videos_table, usage_table=usage_table, wallet_table=wallet_table,
+            cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"], common_env=common_env, videos_table=videos_table, usage_table=usage_table, wallet_table=wallet_table,
             flags_table=flags_table, safety_table=intake.table, assets_bucket_name=ASSETS_BUCKET, generate_machines=[active_machine], edit_machine=v2.edit_state_machine if v2 is not None else None,
             media=media, tombstone=tombstone, tombstone_days=int(self.node.try_get_context("tombstoneDays") or 90), domain=domain,
             web_return_url=callback_urls[0].rsplit("/auth/callback", 1)[0].rstrip("/") + "/delete-account", apple=apple_revoke, apple_layer=apple_layer,
@@ -597,8 +603,8 @@ class BackendStack(Stack):
         if v2 is not None:
             plan_res = video_item.add_resource("plan")
             edits_res = video_item.add_resource("edits")
-            plan_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["GET", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
-            edits_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+            plan_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["GET", "OPTIONS"], allow_headers=["Content-Type", "Authorization", "X-Locale"])
+            edits_res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization", "X-Locale"])
             plan_res.add_method("GET", apigw.LambdaIntegration(v2.editor_get_fn, proxy=True), **cognito_auth)
             edits_model = api.add_model(
                 "EditRequestModel", content_type="application/json", model_name="EditRequest",

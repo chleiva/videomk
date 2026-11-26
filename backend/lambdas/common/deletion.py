@@ -34,6 +34,8 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 
+from common import i18n
+
 logger = logging.getLogger()
 
 USER_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
@@ -59,9 +61,14 @@ RECENT_AUTH_SECONDS = 600  # the sign-in must be at most this old
 class DeletionError(Exception):
     """A request problem with the HTTP status to answer with (API) or a bad input (worker)."""
 
-    def __init__(self, status: int, message: str, **extra: Any):
-        super().__init__(message)
-        self.status, self.message, self.extra = status, message, extra
+    def __init__(self, status: int, message: Any, **extra: Any):
+        """`message` is the English text, or an `i18n.Localized` (then `text(locale)` gives the person's language; `message` stays English)."""
+        self.localized = message if isinstance(message, i18n.Localized) else None
+        super().__init__(str(message))
+        self.status, self.message, self.extra = status, str(message), extra
+
+    def text(self, locale: Any = None) -> str:
+        return self.localized.message(locale) if self.localized else self.message
 
 
 class TimeUp(Exception):
@@ -128,7 +135,7 @@ def _env(name: str) -> str:
 
 def check_user(user: Any) -> str:
     if not isinstance(user, str) or not USER_RE.match(user):
-        raise DeletionError(403, "Forbidden")
+        raise DeletionError(403, i18n.Localized("err.forbidden"))
     return user
 
 

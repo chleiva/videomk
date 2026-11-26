@@ -12,6 +12,7 @@ import os
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from common import i18n
 from common import library as lib
 
 logger = logging.getLogger()
@@ -187,9 +188,9 @@ def vector_metadata(user: str, item: Dict[str, Any]) -> Dict[str, Any]:
 def search(user: str, query: Any, *, limit: int = 60, cursor: Any = None, drop: Optional[List[str]] = None, ask: Optional[AskFn] = None, today: Optional[str] = None) -> Dict[str, Any]:
     lib.check_user(user)
     if not isinstance(query, str) or not query.strip():
-        raise lib.LibraryError(400, "'query' must be a non-empty text")
+        raise lib.LibraryError(400, i18n.Localized("library.query_empty"))
     if len(query) > MAX_QUERY:
-        raise lib.LibraryError(400, f"'query' is too long (at most {MAX_QUERY} characters)")
+        raise lib.LibraryError(400, i18n.Localized("library.query_long", max=MAX_QUERY))
     limit = max(1, min(int(limit), 100))
     today = today or datetime.date.today().isoformat()
     vocab = vocabulary(user)

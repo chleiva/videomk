@@ -4,6 +4,7 @@
 import { AUTH_APPLE, AUTH_DOMAIN, AUTH_GOOGLE, COGNITO_CLIENT_ID } from "./config";
 import { buildAuthorizeUrl, parseProvider, safeReturnPath, sanitizeAuthError, shouldRetry, socialEnabled } from "./authUrl";
 import type { Provider } from "./authUrl";
+import { getLocale } from "./i18n";
 
 const K = {
   tokens: "vmk_auth_tokens",
@@ -122,6 +123,7 @@ export async function beginAuthorize(returnTo?: string, provider?: Provider): Pr
       state,
       challenge: await challengeFor(verifier),
       provider,
+      locale: getLocale(),
     }),
   );
   return new Promise<never>(() => {});
@@ -169,13 +171,13 @@ export async function completeLogin(): Promise<string> {
       try {
         sessionStorage.setItem(K.retry, "1");
       } catch {
-        throw new AuthDisplayError(sanitizeAuthError(error, description));
+        throw new AuthDisplayError(sanitizeAuthError(error, description, getLocale()));
       }
       return beginAuthorize(undefined, provider);
     }
     localStorage.removeItem(K.verifier);
     localStorage.removeItem(K.state);
-    throw new AuthDisplayError(sanitizeAuthError(error, description));
+    throw new AuthDisplayError(sanitizeAuthError(error, description, getLocale()));
   }
   if (!code) return target();
   if (!stored || !incoming || stored !== incoming || !verifier) {

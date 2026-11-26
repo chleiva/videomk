@@ -2,6 +2,8 @@
 // operations the server validates and applies. The UI edits a LOCAL WORKING COPY; submit = diff(server, local).
 import { getAuthorizationHeader } from "./auth";
 import { apiGateway } from "./config";
+import { currentLocaleHeaders, t, translate } from "./i18n";
+import type { Locale } from "./i18n";
 
 export type SceneType = "title" | "bullets" | "diagram" | "chart" | "timeline" | "stat" | "quote" | "image";
 export const SCENE_TYPES: SceneType[] = ["title", "bullets", "diagram", "chart", "timeline", "stat", "quote", "image"];
@@ -66,10 +68,10 @@ export class ApiError extends Error {
 
 async function call(method: "GET" | "POST", url: (userId: string) => string, body?: unknown): Promise<any> {
   const { Authorization, userId } = await getAuthorizationHeader();
-  if (!userId) throw new ApiError(401, "You must be signed in.");
+  if (!userId) throw new ApiError(401, t("api.signed_in_required"));
   const res = await fetch(url(userId), {
     method,
-    headers: { Authorization, ...(body ? { "Content-Type": "application/json" } : {}) },
+    headers: { Authorization, ...currentLocaleHeaders(), ...(body ? { "Content-Type": "application/json" } : {}) },
     body: body ? JSON.stringify(body) : undefined,
     cache: "no-store",
   });
@@ -77,7 +79,7 @@ async function call(method: "GET" | "POST", url: (userId: string) => string, bod
   try {
     data = await res.json();
   } catch {}
-  if (!res.ok) throw new ApiError(res.status, data.message || `Request failed (${res.status})`, data.rev);
+  if (!res.ok) throw new ApiError(res.status, data.message || t("api.request_failed", { status: res.status }), data.rev);
   return data;
 }
 
@@ -112,22 +114,23 @@ export function emptyScene(type: SceneType, narration = ""): Beat["scene"] {
 }
 
 /** Mirrors the server's rules so problems show up next to the field, before anything is sent. */
-export function validateBeat(b: Beat, limits: { min_words: number; max_words: number }): string[] {
+export function validateBeat(b: Beat, limits: { min_words: number; max_words: number }, locale: Locale = "en"): string[] {
   const errs: string[] = [];
+  const tr = (key: string, params?: Record<string, string | number>) => translate(key, locale, params);
   const n = wordCount(b.narration);
-  if (n < limits.min_words) errs.push(`Narration needs at least ${limits.min_words} words.`);
-  if (n > limits.max_words) errs.push(`Narration is limited to ${limits.max_words} words per beat: split it into two beats.`);
+  if (n < limits.min_words) errs.push(tr("val.narr_min", { min: limits.min_words }));
+  if (n > limits.max_words) errs.push(tr("val.narr_max", { max: limits.max_words }));
   const p = b.scene.props;
   const filled = (a: any) => (Array.isArray(a) ? a.filter((x) => String(x).trim()).length : 0);
   switch (b.scene.type) {
-    case "title": if (!String(p.title || "").trim()) errs.push("Add a title."); break;
-    case "bullets": if (filled(p.items) < 2) errs.push("Add at least two bullet points."); break;
-    case "diagram": if ((p.nodes || []).length < 2) errs.push("Add at least two steps (e.g. “Sunlight -> Raindrop”)."); break;
-    case "chart": if ((p.labels || []).length < 2 || (p.values || []).length < 2) errs.push("Add at least two data points (e.g. “Red: 42”)."); break;
-    case "timeline": if ((p.events || []).length < 2) errs.push("Add at least two events (e.g. “1915 | Einstein publishes…”)."); break;
-    case "stat": if (!String(p.value || "").trim()) errs.push("Add the number to show."); break;
-    case "quote": if (!String(p.text || "").trim()) errs.push("Add the quote."); break;
-    case "image": if (!String(p.image_query || "").trim()) errs.push("Describe the photo you want (2-6 words)."); break;
+    case "title": if (!String(p.title || "").trim()) errs.push(tr("val.title")); break;
+    case "bullets": if (filled(p.items) < 2) errs.push(tr("val.bullets")); break;
+    case "diagram": if ((p.nodes || []).length < 2) errs.push(tr("val.diagram")); break;
+    case "chart": if ((p.labels || []).length < 2 || (p.values || []).length < 2) errs.push(tr("val.chart")); break;
+    case "timeline": if ((p.events || []).length < 2) errs.push(tr("val.timeline")); break;
+    case "stat": if (!String(p.value || "").trim()) errs.push(tr("val.stat")); break;
+    case "quote": if (!String(p.text || "").trim()) errs.push(tr("val.quote")); break;
+    case "image": if (!String(p.image_query || "").trim()) errs.push(tr("val.image")); break;
   }
   return errs;
 }

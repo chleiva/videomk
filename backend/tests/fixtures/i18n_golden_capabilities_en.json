@@ -1,0 +1,410 @@
+{
+ "all": {
+  "aspects": [
+   {
+    "beta": false,
+    "id": "16:9",
+    "label": "Landscape",
+    "ready": true
+   },
+   {
+    "beta": true,
+    "id": "9:16",
+    "label": "Vertical",
+    "ready": true
+   },
+   {
+    "beta": false,
+    "id": "1:1",
+    "label": "Square",
+    "ready": true
+   },
+   {
+    "beta": false,
+    "id": "4:5",
+    "label": "Portrait",
+    "ready": true
+   }
+  ],
+  "intake": true,
+  "languages": [
+   {
+    "id": "en",
+    "label": "English"
+   },
+   {
+    "id": "es",
+    "label": "Español"
+   }
+  ],
+  "lengths": {
+   "max_minutes": 12,
+   "min_minutes": 0.25,
+   "presets": [
+    0.25,
+    0.5,
+    0.75,
+    1,
+    2,
+    3,
+    5,
+    8,
+    12
+   ]
+  },
+  "max_photos": 100,
+  "platforms": [
+   {
+    "aspect": "16:9",
+    "id": "youtube",
+    "label": "YouTube",
+    "max_minutes": null,
+    "note": "Landscape 16:9 · 1080p · about 3 min",
+    "note_4k": null,
+    "other_aspects": [
+     "1:1",
+     "4:5"
+    ],
+    "recommended_minutes": 3,
+    "resolution": "1080p",
+    "supports_4k": true
+   },
+   {
+    "aspect": "9:16",
+    "id": "shorts",
+    "label": "YouTube Shorts",
+    "max_minutes": 3,
+    "note": "Vertical 9:16 · 1080p · about 45 s",
+    "note_4k": "YouTube Shorts publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1"
+    ],
+    "recommended_minutes": 0.75,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "9:16",
+    "id": "tiktok",
+    "label": "TikTok",
+    "max_minutes": 30,
+    "note": "Vertical 9:16 · 1080p · about 30 s",
+    "note_4k": "TikTok publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1"
+    ],
+    "recommended_minutes": 0.5,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "9:16",
+    "id": "reels",
+    "label": "Instagram Reels",
+    "max_minutes": 3,
+    "note": "Vertical 9:16 · 1080p · about 30 s",
+    "note_4k": "Instagram Reels publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "4:5",
+     "1:1"
+    ],
+    "recommended_minutes": 0.5,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "4:5",
+    "id": "instagram_feed",
+    "label": "Instagram feed",
+    "max_minutes": null,
+    "note": "Portrait 4:5 · 1080p · about 30 s",
+    "note_4k": "Instagram feed publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1",
+     "9:16",
+     "16:9"
+    ],
+    "recommended_minutes": 0.5,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "4:5",
+    "id": "linkedin",
+    "label": "LinkedIn",
+    "max_minutes": 10,
+    "note": "Portrait 4:5 · 1080p · about 1 min",
+    "note_4k": "LinkedIn publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1",
+     "16:9"
+    ],
+    "recommended_minutes": 1,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "16:9",
+    "id": "x",
+    "label": "X",
+    "max_minutes": 2.33,
+    "note": "Landscape 16:9 · 1080p · about 45 s",
+    "note_4k": "X publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1",
+     "9:16"
+    ],
+    "recommended_minutes": 0.75,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "16:9",
+    "id": "other",
+    "label": "Just a video",
+    "max_minutes": null,
+    "note": "Landscape 16:9 · 1080p · about 3 min",
+    "note_4k": null,
+    "other_aspects": [
+     "9:16",
+     "1:1",
+     "4:5"
+    ],
+    "recommended_minutes": 3,
+    "resolution": "1080p",
+    "supports_4k": true
+   }
+  ],
+  "resolutions": [
+   {
+    "aspects": [
+     "16:9",
+     "9:16",
+     "1:1",
+     "4:5"
+    ],
+    "credits_multiplier": 1,
+    "id": "720p",
+    "label": "720p"
+   },
+   {
+    "aspects": [
+     "16:9",
+     "9:16",
+     "1:1",
+     "4:5"
+    ],
+    "credits_multiplier": 1,
+    "id": "1080p",
+    "label": "1080p"
+   },
+   {
+    "aspects": [
+     "16:9",
+     "9:16",
+     "1:1",
+     "4:5"
+    ],
+    "credits_multiplier": 2,
+    "id": "2160p",
+    "label": "4K",
+    "note": "4K (2160p) costs twice the credits. Best for YouTube and large screens."
+   }
+  ]
+ },
+ "default": {
+  "aspects": [
+   {
+    "beta": false,
+    "id": "16:9",
+    "label": "Landscape",
+    "ready": true
+   },
+   {
+    "beta": false,
+    "id": "9:16",
+    "label": "Vertical",
+    "ready": false
+   },
+   {
+    "beta": false,
+    "id": "1:1",
+    "label": "Square",
+    "ready": false
+   },
+   {
+    "beta": false,
+    "id": "4:5",
+    "label": "Portrait",
+    "ready": false
+   }
+  ],
+  "intake": false,
+  "languages": [
+   {
+    "id": "en",
+    "label": "English"
+   },
+   {
+    "id": "es",
+    "label": "Español"
+   }
+  ],
+  "lengths": {
+   "max_minutes": 12,
+   "min_minutes": 0.25,
+   "presets": [
+    0.25,
+    0.5,
+    0.75,
+    1,
+    2,
+    3,
+    5,
+    8,
+    12
+   ]
+  },
+  "max_photos": 100,
+  "platforms": [
+   {
+    "aspect": "16:9",
+    "id": "youtube",
+    "label": "YouTube",
+    "max_minutes": null,
+    "note": "Landscape 16:9 · 1080p · about 3 min",
+    "note_4k": null,
+    "other_aspects": [
+     "1:1",
+     "4:5"
+    ],
+    "recommended_minutes": 3,
+    "resolution": "1080p",
+    "supports_4k": true
+   },
+   {
+    "aspect": "9:16",
+    "id": "shorts",
+    "label": "YouTube Shorts",
+    "max_minutes": 3,
+    "note": "Vertical 9:16 · 1080p · about 45 s",
+    "note_4k": "YouTube Shorts publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1"
+    ],
+    "recommended_minutes": 0.75,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "9:16",
+    "id": "tiktok",
+    "label": "TikTok",
+    "max_minutes": 30,
+    "note": "Vertical 9:16 · 1080p · about 30 s",
+    "note_4k": "TikTok publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1"
+    ],
+    "recommended_minutes": 0.5,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "9:16",
+    "id": "reels",
+    "label": "Instagram Reels",
+    "max_minutes": 3,
+    "note": "Vertical 9:16 · 1080p · about 30 s",
+    "note_4k": "Instagram Reels publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "4:5",
+     "1:1"
+    ],
+    "recommended_minutes": 0.5,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "4:5",
+    "id": "instagram_feed",
+    "label": "Instagram feed",
+    "max_minutes": null,
+    "note": "Portrait 4:5 · 1080p · about 30 s",
+    "note_4k": "Instagram feed publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1",
+     "9:16",
+     "16:9"
+    ],
+    "recommended_minutes": 0.5,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "4:5",
+    "id": "linkedin",
+    "label": "LinkedIn",
+    "max_minutes": 10,
+    "note": "Portrait 4:5 · 1080p · about 1 min",
+    "note_4k": "LinkedIn publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1",
+     "16:9"
+    ],
+    "recommended_minutes": 1,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "16:9",
+    "id": "x",
+    "label": "X",
+    "max_minutes": 2.33,
+    "note": "Landscape 16:9 · 1080p · about 45 s",
+    "note_4k": "X publishes at 1080p or lower; 4K would cost twice the credits for no visible gain.",
+    "other_aspects": [
+     "1:1",
+     "9:16"
+    ],
+    "recommended_minutes": 0.75,
+    "resolution": "1080p",
+    "supports_4k": false
+   },
+   {
+    "aspect": "16:9",
+    "id": "other",
+    "label": "Just a video",
+    "max_minutes": null,
+    "note": "Landscape 16:9 · 1080p · about 3 min",
+    "note_4k": null,
+    "other_aspects": [
+     "9:16",
+     "1:1",
+     "4:5"
+    ],
+    "recommended_minutes": 3,
+    "resolution": "1080p",
+    "supports_4k": true
+   }
+  ],
+  "resolutions": [
+   {
+    "aspects": [
+     "16:9"
+    ],
+    "credits_multiplier": 1,
+    "id": "720p",
+    "label": "720p"
+   },
+   {
+    "aspects": [
+     "16:9"
+    ],
+    "credits_multiplier": 1,
+    "id": "1080p",
+    "label": "1080p"
+   }
+  ]
+ }
+}

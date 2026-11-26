@@ -11,7 +11,7 @@ from typing import Any, Dict
 import boto3
 from botocore.config import Config
 
-from common import usage
+from common import i18n, usage
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from common.photo_ids import MAX_PHOTOS, MAX_UPLOAD_BYTES, upload_key
@@ -26,12 +26,13 @@ def _s3():
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    loc = i18n.pick_locale(event)
     path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
     user = extract_cognito_sub(event)
     if not user:
-        return json_response(401, {"message": "Unauthorized"})
+        return json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     if not path_user or path_user != user:
-        return json_response(403, {"message": "Forbidden"})
+        return json_response(403, {"message": i18n.t("err.forbidden", loc)})
     import json
 
     try:
@@ -45,7 +46,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         for _ in range(count):
             usage.consume(f"upload:{user}", limit=DAILY_PHOTOS)
     except usage.QuotaExceeded:
-        return json_response(429, {"message": "Too many photos uploaded today. Try again tomorrow."}, {"Retry-After": "3600"})
+        return json_response(429, {"message": i18n.t("uploads.too_many", loc)}, {"Retry-After": "3600"})
     bucket, s3, slots = os.environ["ASSETS_BUCKET"], _s3(), []
     for _ in range(count):
         mid = uuid.uuid4().hex[:16]

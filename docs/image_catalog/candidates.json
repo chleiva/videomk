@@ -1,0 +1,1306 @@
+{
+ "style": "house-v1",
+ "note": "The 100 proposed catalog subjects, ranked by measured demand (distinct QA videos whose image searches fall within the 0.40 text similarity of the description; see docs/IMAGE_CATALOG.md section 2). Only the first ones are backed by measured demand from 3+ videos; the rest are expected (common stock staples), listed so the owner can see the difference. The generation prompt is common/catalog_style.full_prompt(description).",
+ "images": [
+  {
+   "id": "c101",
+   "category": "history",
+   "title": "Ancient ruins with columns",
+   "description": "Ancient stone ruins with columns on a Mediterranean hillside at golden hour, no tourists",
+   "people": false,
+   "rank": 1,
+   "measured": {
+    "videos": 5,
+    "phrases": 2,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c001",
+   "category": "nature",
+   "title": "Sunrise over a mountain landscape",
+   "description": "Sunrise over a vast mountain landscape, soft golden light rising behind layered misty ridges",
+   "people": false,
+   "rank": 2,
+   "measured": {
+    "videos": 4,
+    "phrases": 7,
+    "searches": 7
+   }
+  },
+  {
+   "id": "c005",
+   "category": "nature",
+   "title": "Forest path in sunlight",
+   "description": "A quiet green forest path with sunbeams filtering through tall trees and fresh leaves",
+   "people": false,
+   "rank": 3,
+   "measured": {
+    "videos": 4,
+    "phrases": 5,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c014",
+   "category": "nature",
+   "title": "Pine forest in morning fog",
+   "description": "A pine forest wrapped in morning fog with sun rays between the trees",
+   "people": false,
+   "rank": 4,
+   "measured": {
+    "videos": 4,
+    "phrases": 5,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c051",
+   "category": "city",
+   "title": "Container ship at sea",
+   "description": "A large container cargo ship crossing a calm blue sea at golden hour seen from the side",
+   "people": false,
+   "rank": 5,
+   "measured": {
+    "videos": 4,
+    "phrases": 3,
+    "searches": 4
+   }
+  },
+  {
+   "id": "c002",
+   "category": "nature",
+   "title": "Calm alpine lake at dawn",
+   "description": "A calm alpine lake at dawn with mist on the water and mountain reflections, a single rock in the foreground",
+   "people": false,
+   "rank": 6,
+   "measured": {
+    "videos": 3,
+    "phrases": 6,
+    "searches": 6
+   }
+  },
+  {
+   "id": "c003",
+   "category": "nature",
+   "title": "Misty mountain valley",
+   "description": "A misty green mountain valley at sunrise seen from a high viewpoint, layers of blue haze",
+   "people": false,
+   "rank": 7,
+   "measured": {
+    "videos": 3,
+    "phrases": 5,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c006",
+   "category": "nature",
+   "title": "Autumn forest colours",
+   "description": "An autumn forest with orange and golden leaves covering a path, soft diffused light",
+   "people": false,
+   "rank": 8,
+   "measured": {
+    "videos": 3,
+    "phrases": 5,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c064",
+   "category": "food",
+   "title": "Honeycomb with honey",
+   "description": "A honeycomb with golden honey dripping, macro, warm light",
+   "people": false,
+   "rank": 9,
+   "measured": {
+    "videos": 3,
+    "phrases": 5,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c078",
+   "category": "animals",
+   "title": "Eagle in flight",
+   "description": "A bald eagle flying with wings spread against a soft blue sky",
+   "people": false,
+   "rank": 10,
+   "measured": {
+    "videos": 3,
+    "phrases": 4,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c026",
+   "category": "sky",
+   "title": "Rainbow over green fields",
+   "description": "A rainbow arching over green fields after rain with dramatic soft clouds",
+   "people": false,
+   "rank": 11,
+   "measured": {
+    "videos": 3,
+    "phrases": 2,
+    "searches": 4
+   }
+  },
+  {
+   "id": "c008",
+   "category": "nature",
+   "title": "Rocky coastline at sunset",
+   "description": "A rocky coastline at sunset with waves breaking on dark rocks and warm light on the water",
+   "people": false,
+   "rank": 12,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c011",
+   "category": "nature",
+   "title": "Snow capped mountain peaks",
+   "description": "Snow capped mountain peaks under a clear blue sky with a deep valley below",
+   "people": false,
+   "rank": 13,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c017",
+   "category": "nature",
+   "title": "Rice terraces green",
+   "description": "Green terraced rice fields on a hillside with morning mist",
+   "people": false,
+   "rank": 14,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c019",
+   "category": "nature",
+   "title": "Erupting volcano at night",
+   "description": "A volcano erupting at night with glowing lava fountain and stars, seen from a safe distance",
+   "people": false,
+   "rank": 15,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c024",
+   "category": "sky",
+   "title": "Starry night sky over a calm sea",
+   "description": "A starry night sky with the milky way over a calm sea, a faint horizon glow",
+   "people": false,
+   "rank": 16,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c096",
+   "category": "science",
+   "title": "Water droplet macro",
+   "description": "A water droplet on a leaf, macro with a refracted green world inside",
+   "people": false,
+   "rank": 17,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c103",
+   "category": "history",
+   "title": "Medieval castle on a hill",
+   "description": "A medieval stone castle on a green hill in soft evening light",
+   "people": false,
+   "rank": 18,
+   "measured": {
+    "videos": 3,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c109",
+   "category": "travel",
+   "title": "Sailboat on a calm lake",
+   "description": "A small sailboat on a calm lake at dawn with mist, mountains behind",
+   "people": false,
+   "rank": 19,
+   "measured": {
+    "videos": 2,
+    "phrases": 5,
+    "searches": 5
+   }
+  },
+  {
+   "id": "c009",
+   "category": "nature",
+   "title": "Golden sunrise over ocean waves",
+   "description": "Golden sunrise over gentle ocean waves with a low sun on the horizon",
+   "people": false,
+   "rank": 20,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c018",
+   "category": "nature",
+   "title": "Lighthouse on a rocky coast at dusk",
+   "description": "A lighthouse on a rocky coast at dusk with a calm sea and a pink sky",
+   "people": false,
+   "rank": 21,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c080",
+   "category": "animals",
+   "title": "Penguin colony on ice",
+   "description": "A colony of emperor penguins huddled on white ice under a soft sky",
+   "people": false,
+   "rank": 22,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c083",
+   "category": "animals",
+   "title": "Coral reef with fish",
+   "description": "A colourful coral reef with small fish in clear blue water, natural light",
+   "people": false,
+   "rank": 23,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c087",
+   "category": "animals",
+   "title": "Deer in a misty forest",
+   "description": "A deer standing in a misty forest clearing at dawn",
+   "people": false,
+   "rank": 24,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c104",
+   "category": "history",
+   "title": "Old sailing ship on the ocean",
+   "description": "An old wooden sailing ship on a calm ocean at sunrise",
+   "people": false,
+   "rank": 25,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c113",
+   "category": "travel",
+   "title": "Hot air balloons at sunrise",
+   "description": "Hot air balloons floating over a valley at sunrise, no logos or patterns with text",
+   "people": false,
+   "rank": 26,
+   "measured": {
+    "videos": 2,
+    "phrases": 3,
+    "searches": 3
+   }
+  },
+  {
+   "id": "c020",
+   "category": "nature",
+   "title": "Close-up of a green leaf in sunlight",
+   "description": "Macro of a green leaf with water droplets and sunlight, soft blurred green background",
+   "people": false,
+   "rank": 27,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c023",
+   "category": "sky",
+   "title": "Blue sky with soft clouds",
+   "description": "A wide blue sky with soft white cumulus clouds over a calm green landscape",
+   "people": false,
+   "rank": 28,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c030",
+   "category": "work",
+   "title": "Person working at a laptop in a bright office",
+   "description": "A person seen from behind working at a laptop at a desk in a bright modern office with large windows",
+   "people": true,
+   "rank": 29,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c032",
+   "category": "work",
+   "title": "Developer coding at night",
+   "description": "A developer seen from behind at a desk with two monitors at night, a warm desk lamp, the screens glowing with abstract unreadable colours",
+   "people": true,
+   "rank": 30,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c033",
+   "category": "work",
+   "title": "Two people shaking hands",
+   "description": "Two people shaking hands over a table in a bright meeting room, seen from the side and cropped at the chest, no faces",
+   "people": true,
+   "rank": 31,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c037",
+   "category": "work",
+   "title": "Tired office worker at night",
+   "description": "A person alone at a desk in a dim office at night with a lamp, seen from behind through a glass partition",
+   "people": true,
+   "rank": 32,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c041",
+   "category": "work",
+   "title": "Data center server racks",
+   "description": "A long data center corridor with server racks and blue indicator lights, symmetrical, calm",
+   "people": false,
+   "rank": 33,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c054",
+   "category": "city",
+   "title": "Rooftops of a city from above",
+   "description": "City rooftops from above at sunset with chimneys and warm tones, soft haze",
+   "people": false,
+   "rank": 34,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c056",
+   "category": "city",
+   "title": "Christmas market with warm lights",
+   "description": "A winter Christmas market with wooden stalls and warm string lights, snowflakes, people tiny and distant",
+   "people": true,
+   "rank": 35,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c057",
+   "category": "food",
+   "title": "Plate of pasta",
+   "description": "A plate of spaghetti with tomato sauce and basil on a rustic table, soft window light, seen from a 45 degree angle",
+   "people": false,
+   "rank": 36,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c069",
+   "category": "people",
+   "title": "A helping hand",
+   "description": "A hand reaching out to help another hand up, close-up, warm soft background",
+   "people": true,
+   "rank": 37,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c071",
+   "category": "people",
+   "title": "Friends picnic in a park",
+   "description": "A group of friends having a picnic on grass seen from afar and behind, warm afternoon light",
+   "people": true,
+   "rank": 38,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c072",
+   "category": "people",
+   "title": "Hiker on a mountain trail",
+   "description": "A hiker seen from behind on a mountain trail looking at a wide valley, small in the frame",
+   "people": true,
+   "rank": 39,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c081",
+   "category": "animals",
+   "title": "Bee on a flower",
+   "description": "A honey bee on a flower collecting nectar, macro, soft background",
+   "people": false,
+   "rank": 40,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c108",
+   "category": "travel",
+   "title": "Winding mountain road",
+   "description": "A winding mountain road seen from above in autumn colours, no cars",
+   "people": false,
+   "rank": 41,
+   "measured": {
+    "videos": 2,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c015",
+   "category": "nature",
+   "title": "Canyon at golden hour",
+   "description": "A wide red rock canyon at golden hour with layered cliffs and a far river",
+   "people": false,
+   "rank": 42,
+   "measured": {
+    "videos": 2,
+    "phrases": 1,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c082",
+   "category": "animals",
+   "title": "Butterfly on a flower",
+   "description": "A monarch butterfly on a wildflower, macro, soft green background",
+   "people": false,
+   "rank": 43,
+   "measured": {
+    "videos": 2,
+    "phrases": 1,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c074",
+   "category": "people",
+   "title": "Person watching a sunrise by a lake",
+   "description": "A person in silhouette watching the sunrise by a calm lake",
+   "people": true,
+   "rank": 44,
+   "measured": {
+    "videos": 1,
+    "phrases": 4,
+    "searches": 4
+   }
+  },
+  {
+   "id": "c004",
+   "category": "nature",
+   "title": "Desert dunes at sunset",
+   "description": "Rolling sand dunes at sunset with rippled wind patterns and long soft shadows",
+   "people": false,
+   "rank": 45,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c012",
+   "category": "nature",
+   "title": "Rolling green countryside hills",
+   "description": "Rolling green hills of a countryside landscape with hedges and a stone wall, soft afternoon light",
+   "people": false,
+   "rank": 46,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c021",
+   "category": "nature",
+   "title": "Large tree in summer light",
+   "description": "A large old oak tree in a green field in summer with dappled sunlight",
+   "people": false,
+   "rank": 47,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c025",
+   "category": "sky",
+   "title": "Aurora borealis over snowy land",
+   "description": "Green northern lights over a snowy landscape and a frozen lake at night",
+   "people": false,
+   "rank": 48,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c079",
+   "category": "animals",
+   "title": "Whale tail in the ocean",
+   "description": "A whale tail rising out of a calm blue ocean at sunrise",
+   "people": false,
+   "rank": 49,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c106",
+   "category": "history",
+   "title": "Stone tools close-up",
+   "description": "Prehistoric stone tools laid on a dark cloth, macro, museum-style soft light",
+   "people": false,
+   "rank": 50,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c110",
+   "category": "travel",
+   "title": "Remote tropical island",
+   "description": "A remote tropical island with a green hill surrounded by turquoise water, aerial",
+   "people": false,
+   "rank": 51,
+   "measured": {
+    "videos": 1,
+    "phrases": 2,
+    "searches": 2
+   }
+  },
+  {
+   "id": "c007",
+   "category": "nature",
+   "title": "Tropical beach turquoise water",
+   "description": "A tropical beach with turquoise shallow water, white sand and a few palm trees, no buildings",
+   "people": false,
+   "rank": 52,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c013",
+   "category": "nature",
+   "title": "Wildflower meadow",
+   "description": "A meadow full of wildflowers in soft morning light with blurred hills behind",
+   "people": false,
+   "rank": 53,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c016",
+   "category": "nature",
+   "title": "Wheat field at harvest",
+   "description": "A golden wheat field at harvest time under a wide sky with a distant tractor path",
+   "people": false,
+   "rank": 54,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c028",
+   "category": "sky",
+   "title": "Golden hour sky with clouds",
+   "description": "A golden hour sky with glowing clouds over a quiet silhouette horizon",
+   "people": false,
+   "rank": 55,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c029",
+   "category": "sky",
+   "title": "Rain drops on a window",
+   "description": "Raindrops running down a window with a blurred soft city and autumn tones behind",
+   "people": false,
+   "rank": 56,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c031",
+   "category": "work",
+   "title": "Hands typing on a keyboard",
+   "description": "Close-up of hands typing on a laptop keyboard on a clean wooden desk, soft window light, the screen not visible",
+   "people": true,
+   "rank": 57,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c035",
+   "category": "work",
+   "title": "Open plan office",
+   "description": "A bright open plan office with desks and plants, a few people small and distant, soft daylight",
+   "people": true,
+   "rank": 58,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c040",
+   "category": "work",
+   "title": "Person scrolling a smartphone",
+   "description": "A person holding a smartphone seen over the shoulder, the screen showing abstract unreadable colours, soft indoor light",
+   "people": true,
+   "rank": 59,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c042",
+   "category": "work",
+   "title": "Fiber optic cables glowing",
+   "description": "Close-up of glowing fiber optic cables with soft colours and shallow depth of field",
+   "people": false,
+   "rank": 60,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c043",
+   "category": "work",
+   "title": "Smartphone and city at dusk",
+   "description": "A person walking in a city at dusk using a phone, seen from far behind, soft street lights",
+   "people": true,
+   "rank": 61,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c045",
+   "category": "city",
+   "title": "City lights at night",
+   "description": "A city seen from a hill at night with glowing streets and traffic trails, calm sky",
+   "people": false,
+   "rank": 62,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c046",
+   "category": "city",
+   "title": "View from a high-rise window",
+   "description": "A view of a city skyline from inside a high-rise window at dusk with a soft reflection, empty room",
+   "people": false,
+   "rank": 63,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c049",
+   "category": "city",
+   "title": "Airplane taking off",
+   "description": "An airplane taking off from a runway at sunrise seen from the side with warm sky",
+   "people": false,
+   "rank": 64,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c052",
+   "category": "city",
+   "title": "Bridge over a river aerial",
+   "description": "An aerial view of a long bridge over a river at sunrise with soft fog",
+   "people": false,
+   "rank": 65,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c058",
+   "category": "food",
+   "title": "Fresh bread at a bakery",
+   "description": "Fresh baguettes and loaves of bread in a basket at a bakery, warm tones, no labels",
+   "people": false,
+   "rank": 66,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c066",
+   "category": "people",
+   "title": "Children playing in a park",
+   "description": "Children playing in a park seen from far, in silhouette against warm afternoon light",
+   "people": true,
+   "rank": 67,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c067",
+   "category": "people",
+   "title": "Child building a blanket fort",
+   "description": "A child's hands arranging cushions and blankets into a fort in a living room, warm light, no face",
+   "people": true,
+   "rank": 68,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c068",
+   "category": "people",
+   "title": "Parent reading to a child",
+   "description": "A parent reading a picture book to a small child seen from behind on a sofa, warm lamp light",
+   "people": true,
+   "rank": 69,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c070",
+   "category": "people",
+   "title": "Person grieving by a window",
+   "description": "A person sitting alone by a window in soft grey light seen from behind, calm and quiet",
+   "people": true,
+   "rank": 70,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c073",
+   "category": "people",
+   "title": "Runners in a park",
+   "description": "Runners in a park at morning seen from behind and far away, long shadows, mist",
+   "people": true,
+   "rank": 71,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c075",
+   "category": "people",
+   "title": "Sharing a meal together",
+   "description": "A group of hands sharing dishes at a long outdoor table, warm evening light, no faces",
+   "people": true,
+   "rank": 72,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c076",
+   "category": "people",
+   "title": "Child's hands painting",
+   "description": "A child's hands covered in colourful paint on paper, close-up, soft light",
+   "people": true,
+   "rank": 73,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c077",
+   "category": "people",
+   "title": "Graduation caps thrown in the air",
+   "description": "Graduation caps thrown into a blue sky seen from below, no faces",
+   "people": true,
+   "rank": 74,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c084",
+   "category": "animals",
+   "title": "Sea turtle swimming",
+   "description": "A sea turtle gliding through clear blue water over a reef",
+   "people": false,
+   "rank": 75,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c085",
+   "category": "animals",
+   "title": "Elephant herd on the savanna",
+   "description": "A herd of African elephants walking on the savanna at golden hour",
+   "people": false,
+   "rank": 76,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c086",
+   "category": "animals",
+   "title": "Grey wolf portrait",
+   "description": "A grey wolf standing in a snowy forest, looking away from camera",
+   "people": false,
+   "rank": 77,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c090",
+   "category": "science",
+   "title": "Earth from space",
+   "description": "Planet Earth from space with the thin atmosphere glowing and a sunrise on the edge, black sky",
+   "people": false,
+   "rank": 78,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c092",
+   "category": "science",
+   "title": "Telescope under the night sky",
+   "description": "A telescope silhouetted under a starry sky on a hill at dusk",
+   "people": false,
+   "rank": 79,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c102",
+   "category": "history",
+   "title": "Old map and compass",
+   "description": "An old paper map with a brass compass on a wooden table, warm light, no readable text",
+   "people": false,
+   "rank": 80,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c105",
+   "category": "history",
+   "title": "Ancient scroll and quill",
+   "description": "A blank ancient parchment scroll with a quill and candle on a wooden table, warm light",
+   "people": false,
+   "rank": 81,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c107",
+   "category": "travel",
+   "title": "Empty road at sunset",
+   "description": "An empty straight road through open land at sunset with warm light",
+   "people": false,
+   "rank": 82,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c111",
+   "category": "travel",
+   "title": "Camping tent under the stars",
+   "description": "A small glowing tent under a starry sky on a mountain meadow",
+   "people": false,
+   "rank": 83,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c112",
+   "category": "travel",
+   "title": "Train crossing a landscape",
+   "description": "A train crossing a green landscape on a viaduct, aerial, soft haze",
+   "people": false,
+   "rank": 84,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c115",
+   "category": "mood",
+   "title": "Padlock and key",
+   "description": "An old brass padlock on a wooden door with a key beside it, macro, warm light",
+   "people": false,
+   "rank": 85,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c118",
+   "category": "mood",
+   "title": "Fireworks over a river",
+   "description": "Fireworks bursting over a calm river with city lights reflecting, no text",
+   "people": false,
+   "rank": 86,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c119",
+   "category": "mood",
+   "title": "Snowy village at dusk",
+   "description": "A snow-covered village at dusk with warm lit windows and a calm sky",
+   "people": false,
+   "rank": 87,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c120",
+   "category": "mood",
+   "title": "Path through a field to the horizon",
+   "description": "A narrow footpath through a green field leading to the horizon under a wide sky",
+   "people": false,
+   "rank": 88,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c121",
+   "category": "mood",
+   "title": "Fog over a quiet bridge",
+   "description": "A footbridge in morning fog over a calm river, empty",
+   "people": false,
+   "rank": 89,
+   "measured": {
+    "videos": 1,
+    "phrases": 1,
+    "searches": 1
+   }
+  },
+  {
+   "id": "c010",
+   "category": "nature",
+   "title": "Waterfall in a green forest",
+   "description": "A tall waterfall falling into a green forest pool, silky water, mossy rocks",
+   "people": false,
+   "rank": 90,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c022",
+   "category": "nature",
+   "title": "River winding through a valley",
+   "description": "A river winding through a green valley seen from above in soft light",
+   "people": false,
+   "rank": 91,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c027",
+   "category": "sky",
+   "title": "Dramatic storm clouds",
+   "description": "Dramatic dark storm clouds over an open plain with a thin band of light on the horizon",
+   "people": false,
+   "rank": 92,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c034",
+   "category": "work",
+   "title": "Team meeting around a table",
+   "description": "A team of people seen from behind and from afar around a meeting table with laptops in a bright room",
+   "people": true,
+   "rank": 93,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c036",
+   "category": "work",
+   "title": "Video call on a laptop at home",
+   "description": "A laptop on a home desk showing a blurred abstract video call grid, a cup of coffee beside it, window light",
+   "people": true,
+   "rank": 94,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c038",
+   "category": "work",
+   "title": "Whiteboard planning session",
+   "description": "A whiteboard covered with abstract coloured sticky notes and arrows and no readable text, a person's hand placing one note",
+   "people": true,
+   "rank": 95,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c039",
+   "category": "work",
+   "title": "Desk flat lay with notebook and coffee",
+   "description": "A tidy desk seen from above with a blank notebook, pen, coffee cup and a plant, soft daylight",
+   "people": false,
+   "rank": 96,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c044",
+   "category": "city",
+   "title": "City skyline at golden hour",
+   "description": "A modern city skyline at golden hour seen across a calm river, warm light on glass towers",
+   "people": false,
+   "rank": 97,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c047",
+   "category": "city",
+   "title": "Busy street with blurred crowd",
+   "description": "A busy city crosswalk with a blurred motion crowd of walking people seen from above, no faces visible",
+   "people": true,
+   "rank": 98,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c048",
+   "category": "city",
+   "title": "Subway platform with a train",
+   "description": "An empty clean subway platform as a train arrives, motion blur, warm tiles, no signage text",
+   "people": false,
+   "rank": 99,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  },
+  {
+   "id": "c050",
+   "category": "city",
+   "title": "Airport terminal interior",
+   "description": "A bright airport terminal with large windows and a few small distant travellers, no signs or text",
+   "people": true,
+   "rank": 100,
+   "measured": {
+    "videos": 0,
+    "phrases": 0,
+    "searches": 0
+   }
+  }
+ ]
+}

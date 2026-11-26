@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiGateway } from "../lib/config";
 import { getAuthorizationHeader, handleAuthCodeIfPresent } from "../lib/auth";
+import { currentLocaleHeaders } from "../lib/i18n";
+import { useLocale } from "../lib/useLocale";
 
 interface TaskItem {
   id: string;
@@ -17,6 +19,7 @@ interface TaskItem {
 }
 
 export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { refreshNonce?: number; view?: "grid" | "list" }) {
+  const { t: tr } = useLocale();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -68,7 +71,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
       const { Authorization, userId } = await getAuthorizationHeader();
       setUserId(userId);
       const endpoint = apiGateway.listVideos(userId || "");
-      const res = await fetch(endpoint, { headers: { Authorization } });
+      const res = await fetch(endpoint, { headers: { Authorization, ...currentLocaleHeaders() } });
       if (!res.ok) throw new Error("Failed to fetch tasks");
       const data = (await res.json()) as { items?: any[] };
       const raw = Array.isArray(data.items) ? data.items : [];
@@ -174,19 +177,19 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
   }, [refreshNonce]);
 
   if (loading) {
-    return <div className="text-neutral-500">Loading…</div>;
+    return <div className="text-neutral-500">{tr("gen.loading")}</div>;
   }
 
   if (!hasTasks) {
     return (
       <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-300 bg-white/60 p-12 text-center shadow-sm">
         <div className="mb-3 h-10 w-10 rounded-full border border-neutral-300" />
-        <p className="text-neutral-600">No generations yet</p>
+        <p className="text-neutral-600">{tr("gen.empty")}</p>
         <button
           onClick={handleManualRefresh}
           className="mt-4 inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-900 shadow-sm hover:border-neutral-300"
         >
-          Refresh now
+          {tr("gen.refresh")}
         </button>
       </div>
     );
@@ -199,17 +202,16 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
     const now = Date.now();
     const diffMs = Math.max(0, now - then);
     const sec = Math.floor(diffMs / 1000);
-    if (sec < 45) return "just now";
+    if (sec < 45) return tr("time.just_now");
     const min = Math.floor(sec / 60);
-    if (min < 60) return min === 1 ? "1 min ago" : `${min} mins ago`;
+    if (min < 60) return tr("time.minutes", { n: min });
     const hr = Math.floor(min / 60);
-    if (hr < 24) return hr === 1 ? "1 h ago" : `${hr} h ago`;
+    if (hr < 24) return tr("time.hours", { n: hr });
     const day = Math.floor(hr / 24);
-    if (day < 30) return day === 1 ? "1 day ago" : `${day} days ago`;
+    if (day < 30) return tr("time.days", { n: day });
     const mon = Math.floor(day / 30);
-    if (mon < 12) return mon === 1 ? "1 month ago" : `${mon} months ago`;
-    const yr = Math.floor(mon / 12);
-    return yr === 1 ? "1 year ago" : `${yr} years ago`;
+    if (mon < 12) return tr("time.months", { n: mon });
+    return tr("time.years", { n: Math.floor(mon / 12) });
   }
 
   function formatDuration(s?: number | null): string | null {
@@ -237,7 +239,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                       try { sessionStorage.setItem(`vmk_play_url_${t.id}`, playUrl); } catch {}
                     }
                   }}
-                  aria-label={`Watch ${t.title || "Untitled"}${durationLabel ? `, duration ${durationLabel}` : ""}`}
+                  aria-label={durationLabel ? tr("gen.watch_duration", { title: t.title || tr("gen.untitled"), duration: durationLabel }) : tr("gen.watch", { title: t.title || tr("gen.untitled") })}
                   className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 rounded-2xl"
                 >
                   <div className="ratio-16x9 relative overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
@@ -246,7 +248,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={t.preview_gif_url}
-                        alt="Preview"
+                        alt={tr("gen.preview_alt")}
                         className="ratio-media h-full w-full object-cover opacity-100 transition-opacity duration-200 ease-out"
                         loading="lazy"
                         onError={(e) => {
@@ -263,7 +265,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                   </div>
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-base font-medium text-neutral-900 line-clamp-2">{t.title || "Untitled"}</h3>
+                      <h3 className="text-base font-medium text-neutral-900 line-clamp-2">{t.title || tr("gen.untitled")}</h3>
                       <p className="mt-0.5 text-xs text-neutral-500">{timeAgo(t.created_at)}</p>
                       {t.status === "rejected" && t.reject_reason && (
                         <p className="mt-1 text-xs text-neutral-600 line-clamp-2">{t.reject_reason}</p>
@@ -291,7 +293,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                       try { sessionStorage.setItem(`vmk_play_url_${t.id}`, playUrl); } catch {}
                     }
                   }}
-                  aria-label={`Watch ${t.title || "Untitled"}${durationLabel ? `, duration ${durationLabel}` : ""}`}
+                  aria-label={durationLabel ? tr("gen.watch_duration", { title: t.title || tr("gen.untitled"), duration: durationLabel }) : tr("gen.watch", { title: t.title || tr("gen.untitled") })}
                   className="group flex gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 rounded-2xl"
                 >
                   <div className="ratio-16x9 relative w-48 shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
@@ -300,7 +302,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={t.preview_gif_url}
-                        alt="Preview"
+                        alt={tr("gen.preview_alt")}
                         className="ratio-media h-full w-full object-cover opacity-100 transition-opacity duration-200 ease-out"
                         loading="lazy"
                         onError={(e) => {
@@ -318,7 +320,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="truncate text-base font-medium text-neutral-900">{t.title || "Untitled"}</h3>
+                        <h3 className="truncate text-base font-medium text-neutral-900">{t.title || tr("gen.untitled")}</h3>
                         <p className="mt-0.5 text-xs text-neutral-500">{timeAgo(t.created_at)}</p>
                       </div>
                       <StatusBadge status={t.status} />
@@ -326,13 +328,13 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
                     <div className="mt-2 text-sm text-neutral-700">
                       {t.status === "running" && (
                         <span>
-                          Processing{typeof t.eta_seconds === "number" ? ` · ETA ${Math.max(0, t.eta_seconds)}s` : ""}
+                          {typeof t.eta_seconds === "number" ? tr("gen.processing_eta", { seconds: Math.max(0, t.eta_seconds) }) : tr("gen.processing")}
                         </span>
                       )}
-                      {t.status === "queued" && <span>Queued</span>}
-                      {t.status === "complete" && <span>Complete</span>}
-                      {t.status === "error" && <span>Something went wrong. You haven't been charged for this one.</span>}
-                      {t.status === "rejected" && <span>{t.reject_reason || "This request can't be turned into a video."}</span>}
+                      {t.status === "queued" && <span>{tr("gen.queued")}</span>}
+                      {t.status === "complete" && <span>{tr("gen.complete")}</span>}
+                      {t.status === "error" && <span>{tr("gen.error_detail")}</span>}
+                      {t.status === "rejected" && <span>{t.reject_reason || tr("gen.rejected_default")}</span>}
                     </div>
                   </div>
                 </a>
@@ -347,6 +349,7 @@ export default function GenerationsList({ refreshNonce = 0, view = "grid" }: { r
 }
 
 function EditLink({ t }: { t: TaskItem }) {
+  const { t: tr } = useLocale();
   if (t.status !== "complete" || !t.editable) return null;
   return (
     <div className="mt-3 border-t border-neutral-100 pt-3">
@@ -354,13 +357,14 @@ function EditLink({ t }: { t: TaskItem }) {
         href={`/edit/index.html?id=${encodeURIComponent(t.id)}`}
         className="inline-flex items-center rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
       >
-        Edit video
+        {tr("gen.edit")}
       </a>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: TaskItem["status"] }) {
+  const { t: tr } = useLocale();
   const styles = {
     queued: "bg-neutral-100 text-neutral-700",
     running: "bg-amber-100 text-amber-800",
@@ -368,12 +372,6 @@ function StatusBadge({ status }: { status: TaskItem["status"] }) {
     error: "bg-rose-100 text-rose-800",
     rejected: "bg-neutral-200 text-neutral-700",
   }[status];
-  const label = {
-    queued: "Queued",
-    running: "Running",
-    complete: "Complete",
-    error: "Error",
-    rejected: "Not allowed",
-  }[status];
+  const label = tr(`status.${status}`);
   return <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles}`}>{label}</span>;
 }

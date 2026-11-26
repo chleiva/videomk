@@ -75,6 +75,15 @@ describe("text formats", () => {
   });
 });
 
+describe("validateBeat in Spanish", () => {
+  it("returns Spanish messages for the same rules", () => {
+    const limits = { min_words: 6, max_words: 70 };
+    const b = { id: "a", narration: "corto", scene: emptyScene("title") } as any;
+    expect(validateBeat(b, limits, "es")[0]).toBe("La narración necesita al menos 6 palabras.");
+    expect(validateBeat({ ...b, narration: "palabra ".repeat(80), scene: emptyScene("bullets") }, limits, "es")).toContain("Agrega al menos dos puntos.");
+  });
+});
+
 describe("validateBeat", () => {
   const limits = { min_words: 6, max_words: 70 };
   it("mirrors the server's rules", () => {

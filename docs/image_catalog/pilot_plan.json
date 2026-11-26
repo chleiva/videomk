@@ -1,0 +1,421 @@
+{
+ "plan_id": "pilot-1",
+ "approved_by": "pilot authorised by the owner brief (USD 20 QA allowance), reviewed by the builder; the 100-image bulk is NOT approved",
+ "items": [
+  {
+   "id": "p01",
+   "candidate": "c001",
+   "title": "Sunrise over a mountain landscape",
+   "category": "nature",
+   "subject": "Sunrise over a vast mountain landscape, soft golden light rising behind layered misty ridges",
+   "people": false,
+   "method": "structure",
+   "layout": "mountains",
+   "seed": 1017,
+   "serves": [
+    "sunrise over vast mountain landscape",
+    "misty mountain valley sunrise",
+    "sunrise over calm sea horizon",
+    "misty mountain lake sunrise",
+    "golden sunrise ocean waves",
+    "galilee hills sunrise landscape"
+   ],
+   "serves_measured": 6
+  },
+  {
+   "id": "p02",
+   "candidate": "c002",
+   "title": "Calm alpine lake at dawn",
+   "category": "nature",
+   "subject": "A calm alpine lake at dawn with mist on the water and mountain reflections, a single rock in the foreground",
+   "people": false,
+   "method": "structure",
+   "layout": "mountains",
+   "seed": 1034,
+   "serves": [
+    "calm alpine lake at dawn",
+    "misty mountain lake sunrise",
+    "mist over mountain lake",
+    "misty mountain valley sunrise",
+    "alpine mountain lake",
+    "still water mirror reflection mountains"
+   ],
+   "serves_measured": 6
+  },
+  {
+   "id": "p03",
+   "candidate": "c003",
+   "title": "Misty mountain valley",
+   "category": "nature",
+   "subject": "A misty green mountain valley at sunrise seen from a high viewpoint, layers of blue haze",
+   "people": false,
+   "method": "structure",
+   "layout": "layered_ridges",
+   "seed": 1051,
+   "serves": [
+    "misty mountain valley sunrise",
+    "sunrise over vast mountain landscape",
+    "misty mountain lake sunrise",
+    "machu picchu in morning mist",
+    "pine forest in morning fog"
+   ],
+   "serves_measured": 5
+  },
+  {
+   "id": "p04",
+   "candidate": "c005",
+   "title": "Forest path in sunlight",
+   "category": "nature",
+   "subject": "A quiet green forest path with sunbeams filtering through tall trees and fresh leaves",
+   "people": false,
+   "method": "structure",
+   "layout": "forest_path",
+   "seed": 1068,
+   "serves": [
+    "green forest path sunlight",
+    "forest path autumn leaves",
+    "sunlight through autumn trees",
+    "large tree sunlight green leaves",
+    "green leaf sunlight close up"
+   ],
+   "serves_measured": 5,
+   "calm_bottom": 0.28,
+   "control_strength": 0.8
+  },
+  {
+   "id": "p05",
+   "candidate": "c006",
+   "title": "Autumn forest colours",
+   "category": "nature",
+   "subject": "An autumn forest with orange and golden leaves covering a path, soft diffused light",
+   "people": false,
+   "method": "structure",
+   "layout": "forest_path",
+   "seed": 1085,
+   "serves": [
+    "forest path autumn leaves",
+    "sunlight through autumn trees",
+    "autumn forest colors",
+    "green forest path sunlight",
+    "greenwich park autumn path"
+   ],
+   "serves_measured": 5,
+   "calm_bottom": 0.28,
+   "control_strength": 0.8
+  },
+  {
+   "id": "p06",
+   "candidate": "c008",
+   "title": "Rocky coastline at sunset",
+   "category": "nature",
+   "subject": "A rocky coastline at sunset with waves breaking on dark rocks and warm light on the water",
+   "people": false,
+   "method": "structure",
+   "layout": "horizon",
+   "seed": 1102,
+   "serves": [
+    "rocky coastline at sunset",
+    "lighthouse at dusk on rocky coast",
+    "golden sunrise ocean waves"
+   ],
+   "serves_measured": 3,
+   "calm_bottom": 0.28,
+   "control_strength": 0.8
+  },
+  {
+   "id": "p07",
+   "candidate": "c009",
+   "title": "Golden sunrise over ocean waves",
+   "category": "nature",
+   "subject": "Golden sunrise over gentle ocean waves with a low sun on the horizon",
+   "people": false,
+   "method": "structure",
+   "layout": "horizon",
+   "seed": 1119,
+   "serves": [
+    "golden sunrise ocean waves",
+    "sunrise over calm sea horizon",
+    "oc\u00e9ano al amanecer con nubes"
+   ],
+   "serves_measured": 3,
+   "calm_bottom": 0.28,
+   "control_strength": 0.8
+  },
+  {
+   "id": "p08",
+   "candidate": "c024",
+   "title": "Starry night sky over a calm sea",
+   "category": "sky",
+   "subject": "A starry night sky with the milky way over a calm sea, a faint horizon glow",
+   "people": false,
+   "method": "structure",
+   "layout": "horizon",
+   "seed": 1136,
+   "serves": [
+    "starry sky over calm sea",
+    "sunrise over calm sea horizon",
+    "lighthouse beam over night sea"
+   ],
+   "serves_measured": 3
+  },
+  {
+   "id": "p09",
+   "candidate": "c011",
+   "title": "Snow capped mountain peaks",
+   "category": "nature",
+   "subject": "Snow capped mountain peaks under a clear blue sky with a deep valley below",
+   "people": false,
+   "method": "structure",
+   "layout": "mountains",
+   "seed": 1153,
+   "serves": [
+    "snow capped mountain peaks",
+    "clear blue sky over landscape",
+    "sunrise over vast mountain landscape"
+   ],
+   "serves_measured": 3
+  },
+  {
+   "id": "p10",
+   "candidate": "c004",
+   "title": "Desert dunes at sunset",
+   "category": "nature",
+   "subject": "Rolling sand dunes at sunset with rippled wind patterns and long soft shadows",
+   "people": false,
+   "method": "structure",
+   "layout": "dunes",
+   "seed": 1170,
+   "serves": [
+    "desert sand dunes sunset",
+    "desert sand dunes sunrise",
+    "camel in desert dunes"
+   ],
+   "serves_measured": 2,
+   "serves_unmeasured": [
+    "camel in desert dunes"
+   ]
+  },
+  {
+   "id": "p11",
+   "candidate": "c014",
+   "title": "Pine forest in morning fog",
+   "category": "nature",
+   "subject": "A pine forest wrapped in morning fog with sun rays between the trees",
+   "people": false,
+   "method": "structure",
+   "layout": "forest_path",
+   "seed": 1187,
+   "serves": [
+    "pine forest in morning fog",
+    "misty mountain valley sunrise",
+    "misty mountain lake sunrise",
+    "green forest path sunlight",
+    "sunlight through autumn trees"
+   ],
+   "serves_measured": 5
+  },
+  {
+   "id": "p12",
+   "candidate": "c026",
+   "title": "Rainbow over green fields",
+   "category": "sky",
+   "subject": "A rainbow arching over green fields after rain with dramatic soft clouds",
+   "people": false,
+   "method": "structure",
+   "layout": "layered_ridges",
+   "seed": 1204,
+   "serves": [
+    "rainbow over green field after rain",
+    "double rainbow over city sky",
+    "rainbow after the storm"
+   ],
+   "serves_measured": 2,
+   "serves_unmeasured": [
+    "rainbow after the storm"
+   ]
+  },
+  {
+   "id": "p13",
+   "candidate": "c031",
+   "title": "Hands typing on a keyboard (tried twice, failed the check: screen text and brand mark)",
+   "category": "work",
+   "subject": "Close-up of hands typing on a laptop keyboard on a clean wooden desk, soft window light, the screen not visible",
+   "people": true,
+   "method": "structure",
+   "layout": "center_object",
+   "seed": 1221,
+   "serves": [
+    "person typing code laptop",
+    "hands typing on a keyboard",
+    "working on a laptop close up"
+   ],
+   "serves_measured": 1,
+   "serves_unmeasured": [
+    "hands typing on a keyboard",
+    "working on a laptop close up"
+   ]
+  },
+  {
+   "id": "p14",
+   "candidate": "c064",
+   "title": "Honeycomb with honey",
+   "category": "food",
+   "subject": "A honeycomb with golden honey dripping, macro, warm light",
+   "people": false,
+   "method": "structure",
+   "layout": "center_object",
+   "seed": 1238,
+   "serves": [
+    "honeycomb cells with honey",
+    "honeycomb hexagonal cells close up",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "bees filling honeycomb cells"
+   ],
+   "serves_measured": 5,
+   "calm_bottom": 0.28,
+   "control_strength": 0.8
+  },
+  {
+   "id": "p15",
+   "candidate": "c002",
+   "title": "Calm alpine lake at dawn (style-guide comparison)",
+   "category": "nature",
+   "subject": "A calm alpine lake at dawn with mist on the water and mountain reflections, a single rock in the foreground",
+   "people": false,
+   "method": "style",
+   "seed": 2015,
+   "serves": [
+    "calm alpine lake at dawn",
+    "misty mountain lake sunrise",
+    "mist over mountain lake",
+    "misty mountain valley sunrise",
+    "alpine mountain lake",
+    "still water mirror reflection mountains"
+   ],
+   "serves_measured": 6
+  },
+  {
+   "id": "p16",
+   "candidate": "c006",
+   "title": "Autumn forest colours (style-guide comparison)",
+   "category": "nature",
+   "subject": "An autumn forest with orange and golden leaves covering a path, soft diffused light",
+   "people": false,
+   "method": "style",
+   "seed": 2016,
+   "serves": [
+    "forest path autumn leaves",
+    "sunlight through autumn trees",
+    "autumn forest colors",
+    "green forest path sunlight",
+    "greenwich park autumn path"
+   ],
+   "serves_measured": 5
+  },
+  {
+   "id": "p17",
+   "candidate": "c031",
+   "title": "Hands typing on a keyboard (style-guide comparison)",
+   "category": "work",
+   "subject": "Close-up of hands typing on a laptop keyboard on a clean wooden desk, soft window light, the screen not visible",
+   "people": true,
+   "method": "style",
+   "seed": 2017,
+   "serves": [
+    "person typing code laptop",
+    "hands typing on a keyboard",
+    "working on a laptop close up"
+   ],
+   "serves_measured": 1,
+   "serves_unmeasured": [
+    "hands typing on a keyboard",
+    "working on a laptop close up"
+   ]
+  },
+  {
+   "id": "p18",
+   "candidate": "c0xx",
+   "title": "Rolling green countryside hills",
+   "category": "nature",
+   "subject": "Rolling green hills of a countryside landscape with hedges and a stone wall, soft afternoon light",
+   "people": false,
+   "method": "structure",
+   "layout": "layered_ridges",
+   "calm_bottom": 0.28,
+   "control_strength": 0.75,
+   "seed": 1303,
+   "serves": [
+    "english countryside rolling hills",
+    "stone wall farmland valley",
+    "vermont valley farm mountains",
+    "green hills in soft light"
+   ],
+   "serves_measured": 3,
+   "serves_unmeasured": [
+    "green hills in soft light"
+   ]
+  },
+  {
+   "id": "p19",
+   "candidate": "c0xx",
+   "title": "Coffee cup on a table by a window",
+   "category": "food",
+   "subject": "A cup of coffee with soft steam on a wooden table beside a window, warm light, blurred background",
+   "people": false,
+   "method": "structure",
+   "layout": "center_object",
+   "calm_bottom": 0.28,
+   "control_strength": 0.5,
+   "seed": 1311,
+   "serves": [
+    "coffee break at a desk",
+    "morning coffee by the window",
+    "cozy cafe table"
+   ],
+   "serves_measured": 0,
+   "serves_unmeasured": [
+    "coffee break at a desk",
+    "morning coffee by the window",
+    "cozy cafe table"
+   ]
+  },
+  {
+   "id": "p20",
+   "candidate": "c003",
+   "title": "Misty mountain valley (style-guide comparison)",
+   "category": "nature",
+   "subject": "A misty green mountain valley at sunrise seen from a high viewpoint, layers of blue haze",
+   "people": false,
+   "method": "style",
+   "seed": 2101,
+   "serves": [
+    "misty mountain valley sunrise",
+    "sunrise over vast mountain landscape",
+    "misty mountain lake sunrise",
+    "machu picchu in morning mist",
+    "pine forest in morning fog"
+   ],
+   "serves_measured": 5
+  },
+  {
+   "id": "p21",
+   "candidate": "c004",
+   "title": "Desert dunes at sunset (style-guide comparison)",
+   "category": "nature",
+   "subject": "Rolling sand dunes at sunset with rippled wind patterns and long soft shadows",
+   "people": false,
+   "method": "style",
+   "seed": 2102,
+   "serves": [
+    "desert sand dunes sunset",
+    "desert sand dunes sunrise",
+    "camel in desert dunes"
+   ],
+   "serves_measured": 2,
+   "serves_unmeasured": [
+    "camel in desert dunes"
+   ]
+  }
+ ]
+}

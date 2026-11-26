@@ -1,4 +1,6 @@
 // Pure helpers for the sign-in flow (no DOM access, so they are unit-tested directly).
+import { translate } from "./i18n";
+import type { Locale } from "./i18n";
 
 /** Cognito identity_provider values. Case-sensitive. */
 export type Provider = "Google" | "SignInWithApple";
@@ -22,6 +24,8 @@ export interface AuthorizeInput {
   state: string;
   challenge: string;
   provider?: Provider;
+  /** Spanish only: the hosted sign-in page then speaks Spanish too (Cognito's `lang`). English adds nothing, so its URL is exactly what it was. */
+  locale?: Locale;
 }
 
 export function buildAuthorizeUrl(i: AuthorizeInput): string {
@@ -35,6 +39,7 @@ export function buildAuthorizeUrl(i: AuthorizeInput): string {
     code_challenge: i.challenge,
   });
   if (i.provider) q.set("identity_provider", i.provider);
+  if (i.locale === "es") q.set("lang", "es");
   return `${i.authDomain}/oauth2/authorize?${q.toString()}`;
 }
 
@@ -55,15 +60,16 @@ export const shouldRetry = (description: string | null | undefined, alreadyRetri
  * Text that is safe and useful to show for a callback error. Never echoes provider-supplied text
  * beyond a stripped, truncated snippet, and callers must render it with textContent.
  */
-export function sanitizeAuthError(error: string | null | undefined, description: string | null | undefined): string {
-  if (error === "access_denied" && !isLinkRaceError(description)) return "Sign-in was cancelled.";
-  if (isLinkRaceError(description)) return "We could not finish linking your accounts. Please try signing in again.";
+export function sanitizeAuthError(error: string | null | undefined, description: string | null | undefined, locale: Locale = "en"): string {
+  const tr = (key: string, params?: Record<string, string | number>) => translate(key, locale, params);
+  if (error === "access_denied" && !isLinkRaceError(description)) return tr("authErr.cancelled");
+  if (isLinkRaceError(description)) return tr("authErr.link");
   const clean = (description || "")
     .replace(/[^\p{L}\p{N} .,'’:;()\-_/]/gu, " ")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 160);
-  return clean ? `Sign-in failed: ${clean}` : "Sign-in failed. Please try again.";
+  return clean ? tr("authErr.failed_with", { detail: clean }) : tr("authErr.failed");
 }
 
 /** Same-origin relative paths only (never an open redirect). */
@@ -76,10 +82,10 @@ export interface ChooserOption {
 }
 
 /** What the chooser renders: switched-on providers first, email always. */
-export function chooserOptions(s: Switches): ChooserOption[] {
+export function chooserOptions(s: Switches, locale: Locale = "en"): ChooserOption[] {
   const out: ChooserOption[] = [];
-  if (s.google) out.push({ id: "google", label: "Continue with Google" });
-  if (s.apple) out.push({ id: "apple", label: "Continue with Apple" });
-  out.push({ id: "email", label: "Continue with email" });
+  if (s.google) out.push({ id: "google", label: translate("signin.google", locale) });
+  if (s.apple) out.push({ id: "apple", label: translate("signin.apple", locale) });
+  out.push({ id: "email", label: translate("signin.email", locale) });
   return out;
 }

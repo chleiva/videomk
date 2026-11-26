@@ -26,6 +26,9 @@ The default provider is **Amazon Polly**, **generative** engine, voice Ruth, cal
 - List prices (verify): neural $16, generative $30, long-form $100 per 1M characters (about 900 characters per spoken minute).
 - `-c ttsProvider=gemini|openai|mock` selects another provider; those need the keys below (mock needs none).
 
+## Image catalog (optional, default off)
+`-c imageCatalog=1` adds videomk's own generated-image library to a stage (private bucket, items table, S3 Vectors index `catalog-images`, demand table) and lets the director try it before stock photos; `-c catalogMinScore=0.35` overrides the match threshold. Needs the v2 engine. Before switching on: create the salt `aws ssm put-parameter --name /videomk/catalog_demand_salt --type SecureString --value "$(openssl rand -hex 32)"`, then fill the catalog (generate in QA or on a laptop, copy to prod with `catalog_promote.py`). Everything is in docs/IMAGE_CATALOG.md.
+
 ## Secrets (never in chat or git)
 Only for photos and optional providers:
 ```

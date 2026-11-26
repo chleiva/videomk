@@ -10,6 +10,8 @@ from decimal import Decimal
 from botocore.config import Config
 from boto3.dynamodb.types import TypeDeserializer
 
+from common import i18n
+
 
 def _extract_cognito_sub(event: Dict[str, Any]) -> Optional[str]:
     try:
@@ -39,6 +41,7 @@ def _json_default(obj: Any):
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    loc = i18n.pick_locale(event)
     user_id = None
     path_params = {}
     if isinstance(event, dict):
@@ -75,7 +78,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     "Access-Control-Allow-Headers": "Content-Type",
                     "Access-Control-Allow-Methods": "GET,OPTIONS",
                 },
-                "body": json.dumps({"message": "Unauthorized"}),
+                "body": json.dumps({"message": i18n.t("err.unauthorized", loc)}),
             }
         if auth_user_id != path_user_id:
             return {
@@ -86,7 +89,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     "Access-Control-Allow-Headers": "Content-Type",
                     "Access-Control-Allow-Methods": "GET,OPTIONS",
                 },
-                "body": json.dumps({"message": "Forbidden"}),
+                "body": json.dumps({"message": i18n.t("err.forbidden", loc)}),
             }
 
         user_id = path_user_id
@@ -290,7 +293,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Methods": "GET,OPTIONS",
             },
-            "body": json.dumps({"message": "Failed to query videos"}),
+            "body": json.dumps({"message": i18n.t("video.list_failed", loc)}),
         }
 
 

@@ -86,17 +86,17 @@ def test_every_table_bucket_and_index_of_the_stack_is_either_cleaned_or_explicit
     tables = list(of(t, "AWS::DynamoDB::Table"))
     for k in tables:
         covered = [n for n in ad.COVERED_TABLES if re.search(n, k)]
-        exempt = [n for n in ad.EXEMPT_TABLES if re.search(n, k)]
+        exempt = [n for n in list(ad.EXEMPT_TABLES) + list(ad.OPTIONAL_EXEMPT_TABLES) if re.search(n, k)]
         assert len(covered) + len(exempt) == 1, f"table {k} is not covered by the account deletion (account_deletion.py COVERED_TABLES / EXEMPT_TABLES): decide whether it holds personal data"
     assert not [n for n in list(ad.COVERED_TABLES) + list(ad.EXEMPT_TABLES) if not any(re.search(n, k) for k in tables)], "a listed table no longer exists in the stack"
     buckets = list(of(t, "AWS::S3::Bucket"))
     for k in buckets:
-        assert sum(1 for n in ad.COVERED_BUCKETS if re.search(n, k)) == 1, f"bucket {k} is not covered by the account deletion"
-    assert len(buckets) == len(ad.COVERED_BUCKETS)
+        assert sum(1 for n in list(ad.COVERED_BUCKETS) + list(ad.OPTIONAL_EXEMPT_BUCKETS) if re.search(n, k)) == 1, f"bucket {k} is not covered by the account deletion"
+    assert len([k for k in buckets if not any(re.search(n, k) for n in ad.OPTIONAL_EXEMPT_BUCKETS)]) == len(ad.COVERED_BUCKETS)
     indexes = list(of(t, "AWS::S3Vectors::Index"))
     for k in indexes:
-        assert any(re.search(n, k) for n in ad.COVERED_VECTOR_INDEXES), f"vector index {k} is not covered by the account deletion"
-    assert len(indexes) == len(ad.COVERED_VECTOR_INDEXES)
+        assert any(re.search(n, k) for n in list(ad.COVERED_VECTOR_INDEXES) + list(ad.OPTIONAL_EXEMPT_VECTOR_INDEXES)), f"vector index {k} is not covered by the account deletion"
+    assert len([k for k in indexes if not any(re.search(n, k) for n in ad.OPTIONAL_EXEMPT_VECTOR_INDEXES)]) == len(ad.COVERED_VECTOR_INDEXES)
     queues = of(t, "AWS::SQS::Queue")
     assert queues, "sanity"
 

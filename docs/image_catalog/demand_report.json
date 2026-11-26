@@ -1,0 +1,1630 @@
+{
+ "searches": 442,
+ "distinct_phrases": 393,
+ "videos": 72,
+ "cluster_threshold": 0.62,
+ "clusters": 268,
+ "top_clusters": [
+  {
+   "example": "eiffel tower paris daytime",
+   "phrases": 8,
+   "searches": 14,
+   "videos": 13,
+   "sample": [
+    "eiffel tower champ de mars",
+    "eiffel tower paris",
+    "eiffel tower paris champ de mars",
+    "eiffel tower paris daytime",
+    "eiffel tower paris golden hour",
+    "eiffel tower paris sunset"
+   ]
+  },
+  {
+   "example": "colosseum interior arena",
+   "phrases": 7,
+   "searches": 12,
+   "videos": 7,
+   "sample": [
+    "colosseum exterior rome",
+    "colosseum interior arena",
+    "colosseum rome exterior",
+    "colosseum rome exterior morning",
+    "colosseum rome morning",
+    "pantheon rome exterior portico"
+   ]
+  },
+  {
+   "example": "louvre palace courtyard paris",
+   "phrases": 6,
+   "searches": 7,
+   "videos": 7,
+   "sample": [
+    "louvre glass pyramid courtyard",
+    "louvre museum glass pyramid",
+    "louvre museum pyramid paris",
+    "louvre palace courtyard paris",
+    "louvre pyramid museum paris",
+    "louvre pyramid paris"
+   ]
+  },
+  {
+   "example": "pantheon rome dome interior",
+   "phrases": 5,
+   "searches": 8,
+   "videos": 6,
+   "sample": [
+    "pantheon dome interior oculus",
+    "pantheon dome oculus interior",
+    "pantheon rome dome interior",
+    "pantheon rome facade",
+    "pantheon rome portico"
+   ]
+  },
+  {
+   "example": "trevi fountain rome",
+   "phrases": 4,
+   "searches": 8,
+   "videos": 6,
+   "sample": [
+    "tourists at trevi fountain",
+    "tourists tossing coin fountain",
+    "trevi fountain crowd",
+    "trevi fountain rome"
+   ]
+  },
+  {
+   "example": "roman forum ruins columns",
+   "phrases": 2,
+   "searches": 5,
+   "videos": 5,
+   "sample": [
+    "pantheon rome portico columns",
+    "roman forum ruins columns"
+   ]
+  },
+  {
+   "example": "tiber river rome sunset",
+   "phrases": 1,
+   "searches": 5,
+   "videos": 5,
+   "sample": [
+    "tiber river rome sunset"
+   ]
+  },
+  {
+   "example": "roman forum ruins",
+   "phrases": 2,
+   "searches": 4,
+   "videos": 4,
+   "sample": [
+    "roman forum palatine hill view",
+    "roman forum ruins"
+   ]
+  },
+  {
+   "example": "bees filling honeycomb cells",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 3,
+   "sample": [
+    "bees filling honeycomb cells",
+    "honeycomb cells with honey",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "honeycomb hexagonal cells close up"
+   ]
+  },
+  {
+   "example": "arc de triomphe aerial view paris avenues",
+   "phrases": 4,
+   "searches": 4,
+   "videos": 3,
+   "sample": [
+    "arc de triomphe aerial view paris avenues",
+    "arc de triomphe paris",
+    "paris seine river aerial view",
+    "seine river paris aerial view"
+   ]
+  },
+  {
+   "example": "woolly mammoth museum reconstruction",
+   "phrases": 3,
+   "searches": 4,
+   "videos": 3,
+   "sample": [
+    "neanderthal reconstruction museum",
+    "neanderthal skull museum",
+    "woolly mammoth museum reconstruction"
+   ]
+  },
+  {
+   "example": "brussels european union flags",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "brussels european union flags",
+    "european commission building brussels",
+    "european union flags outside building"
+   ]
+  },
+  {
+   "example": "oil tanker at sea",
+   "phrases": 2,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "container ship at sea",
+    "oil tanker at sea"
+   ]
+  },
+  {
+   "example": "haussmann boulevard paris buildings",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "haussmann boulevard paris buildings",
+    "paris boulevard haussmann buildings",
+    "paris haussmann boulevard buildings"
+   ]
+  },
+  {
+   "example": "medieval castle castilla spain",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "medieval castle castilla spain",
+    "medieval castle europe",
+    "parador castillo histórico españa"
+   ]
+  },
+  {
+   "example": "paris metro art nouveau entrance",
+   "phrases": 2,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "paris metro art nouveau entrance",
+    "paris metro station platform"
+   ]
+  },
+  {
+   "example": "pasta lunch italian restaurant",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "pasta lunch italian restaurant",
+    "plate of italian pasta",
+    "trastevere pasta lunch"
+   ]
+  },
+  {
+   "example": "rainbow over green field after rain",
+   "phrases": 1,
+   "searches": 3,
+   "videos": 3,
+   "sample": [
+    "rainbow over green field after rain"
+   ]
+  },
+  {
+   "example": "tyrannosaurus rex skeleton museum",
+   "phrases": 8,
+   "searches": 10,
+   "videos": 2,
+   "sample": [
+    "dinosaur skeleton museum",
+    "dunkleosteus fossil skull museum",
+    "lystrosaurus fossil skeleton",
+    "mammoth skeleton museum",
+    "sauropod skeleton museum hall",
+    "stegosaurus fossil museum"
+   ]
+  },
+  {
+   "example": "greenwich park view london",
+   "phrases": 4,
+   "searches": 6,
+   "videos": 2,
+   "sample": [
+    "greenwich park hilltop thames view",
+    "greenwich park london view",
+    "greenwich park thames view",
+    "greenwich park view london"
+   ]
+  },
+  {
+   "example": "greenwich park view london skyline",
+   "phrases": 4,
+   "searches": 5,
+   "videos": 2,
+   "sample": [
+    "greenwich london skyline",
+    "greenwich london skyline view",
+    "greenwich park view london skyline",
+    "greenwich riverside thames"
+   ]
+  },
+  {
+   "example": "bald eagle in flight",
+   "phrases": 3,
+   "searches": 4,
+   "videos": 2,
+   "sample": [
+    "bald eagle in flight",
+    "golden eagle flying",
+    "white-tailed eagle flying"
+   ]
+  },
+  {
+   "example": "ichthyosaur fossil",
+   "phrases": 3,
+   "searches": 4,
+   "videos": 2,
+   "sample": [
+    "devonian fish fossil",
+    "ichthyosaur fossil",
+    "placoderm fossil armored fish"
+   ]
+  },
+  {
+   "example": "royal observatory greenwich",
+   "phrases": 3,
+   "searches": 4,
+   "videos": 2,
+   "sample": [
+    "old royal naval college greenwich",
+    "queen's house greenwich",
+    "royal observatory greenwich"
+   ]
+  },
+  {
+   "example": "trilobite fossil",
+   "phrases": 2,
+   "searches": 4,
+   "videos": 2,
+   "sample": [
+    "trilobite fossil",
+    "trilobite fossil slab cambrian"
+   ]
+  },
+  {
+   "example": "alpine mountain lake",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "alpine mountain lake",
+    "calm alpine lake at dawn",
+    "mist over mountain lake"
+   ]
+  },
+  {
+   "example": "altamira cave bison painting",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "altamira cave bison painting",
+    "ice age cave painting",
+    "lascaux cave paintings"
+   ]
+  },
+  {
+   "example": "blue whale",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "blue whale",
+    "blue whale aerial view",
+    "blue whale underwater"
+   ]
+  },
+  {
+   "example": "emperor penguins colony",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "emperor penguins colony",
+    "emperor penguins huddle antarctica",
+    "emperor penguins on ice"
+   ]
+  },
+  {
+   "example": "grand canyon at sunset",
+   "phrases": 2,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "grand canyon at sunset",
+    "grand canyon sunset panorama"
+   ]
+  },
+  {
+   "example": "great barrier reef aerial",
+   "phrases": 2,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "great barrier reef aerial",
+    "great barrier reef aerial view"
+   ]
+  },
+  {
+   "example": "greenwich park lawn picnic",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "greenwich park lawn picnic",
+    "greenwich park rose garden",
+    "picnic greenwich park grass"
+   ]
+  },
+  {
+   "example": "jubilee line train",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "jubilee line train",
+    "jubilee line train london underground",
+    "jubilee line train platform"
+   ]
+  },
+  {
+   "example": "maze hill railway station",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "sample": [
+    "maze hill railway station",
+    "maze hill station",
+    "maze hill station platform"
+   ]
+  },
+  {
+   "example": "autumn forest colors",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "sample": [
+    "autumn forest colors",
+    "forest path autumn leaves"
+   ]
+  },
+  {
+   "example": "bee on flower collecting nectar",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "sample": [
+    "bee on flower collecting nectar",
+    "honey bee on flower close up"
+   ]
+  },
+  {
+   "example": "children playing with ball",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "sample": [
+    "children playing with ball",
+    "niños jugando en el parque"
+   ]
+  },
+  {
+   "example": "coconut flesh white inside",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "sample": [
+    "coconut flesh white inside",
+    "cracked open coconut white flesh water"
+   ]
+  },
+  {
+   "example": "colosseum arches close up",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "sample": [
+    "colosseum arches close up",
+    "colosseum interior arches"
+   ]
+  },
+  {
+   "example": "colourful beetle macro",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "sample": [
+    "colourful beetle macro",
+    "rainbow scarab beetle"
+   ]
+  }
+ ],
+ "clusters_serving_3plus_videos": 18,
+ "candidates": [
+  {
+   "id": "c101",
+   "title": "Ancient ruins with columns",
+   "phrases": 2,
+   "searches": 5,
+   "videos": 5,
+   "examples": [
+    "mediterranean coast ancient ruins",
+    "roman forum ruins columns"
+   ]
+  },
+  {
+   "id": "c001",
+   "title": "Sunrise over a mountain landscape",
+   "phrases": 7,
+   "searches": 7,
+   "videos": 4,
+   "examples": [
+    "sunrise over vast mountain landscape",
+    "misty mountain valley sunrise",
+    "sunrise over calm sea horizon",
+    "misty mountain lake sunrise",
+    "golden sunrise ocean waves",
+    "galilee hills sunrise landscape"
+   ]
+  },
+  {
+   "id": "c005",
+   "title": "Forest path in sunlight",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 4,
+   "examples": [
+    "green forest path sunlight",
+    "forest path autumn leaves",
+    "sunlight through autumn trees",
+    "large tree sunlight green leaves",
+    "green leaf sunlight close up"
+   ]
+  },
+  {
+   "id": "c014",
+   "title": "Pine forest in morning fog",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 4,
+   "examples": [
+    "pine forest in morning fog",
+    "misty mountain valley sunrise",
+    "misty mountain lake sunrise",
+    "green forest path sunlight",
+    "sunlight through autumn trees"
+   ]
+  },
+  {
+   "id": "c051",
+   "title": "Container ship at sea",
+   "phrases": 3,
+   "searches": 4,
+   "videos": 4,
+   "examples": [
+    "container ship at sea",
+    "oil tanker at sea",
+    "sunrise over calm sea horizon"
+   ]
+  },
+  {
+   "id": "c002",
+   "title": "Calm alpine lake at dawn",
+   "phrases": 6,
+   "searches": 6,
+   "videos": 3,
+   "examples": [
+    "calm alpine lake at dawn",
+    "misty mountain lake sunrise",
+    "mist over mountain lake",
+    "misty mountain valley sunrise",
+    "alpine mountain lake",
+    "still water mirror reflection mountains"
+   ]
+  },
+  {
+   "id": "c003",
+   "title": "Misty mountain valley",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 3,
+   "examples": [
+    "misty mountain valley sunrise",
+    "sunrise over vast mountain landscape",
+    "misty mountain lake sunrise",
+    "machu picchu in morning mist",
+    "pine forest in morning fog"
+   ]
+  },
+  {
+   "id": "c006",
+   "title": "Autumn forest colours",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 3,
+   "examples": [
+    "forest path autumn leaves",
+    "sunlight through autumn trees",
+    "autumn forest colors",
+    "green forest path sunlight",
+    "greenwich park autumn path"
+   ]
+  },
+  {
+   "id": "c064",
+   "title": "Honeycomb with honey",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 3,
+   "examples": [
+    "honeycomb cells with honey",
+    "honeycomb hexagonal cells close up",
+    "honeycomb full of honey",
+    "honeycomb hexagon cells close up",
+    "bees filling honeycomb cells"
+   ]
+  },
+  {
+   "id": "c078",
+   "title": "Eagle in flight",
+   "phrases": 4,
+   "searches": 5,
+   "videos": 3,
+   "examples": [
+    "bald eagle in flight",
+    "white-tailed eagle flying",
+    "golden eagle flying",
+    "sparrows flying in blue sky"
+   ]
+  },
+  {
+   "id": "c026",
+   "title": "Rainbow over green fields",
+   "phrases": 2,
+   "searches": 4,
+   "videos": 3,
+   "examples": [
+    "rainbow over green field after rain",
+    "double rainbow over city sky"
+   ]
+  },
+  {
+   "id": "c008",
+   "title": "Rocky coastline at sunset",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "rocky coastline at sunset",
+    "lighthouse at dusk on rocky coast",
+    "golden sunrise ocean waves"
+   ]
+  },
+  {
+   "id": "c011",
+   "title": "Snow capped mountain peaks",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "snow capped mountain peaks",
+    "clear blue sky over landscape",
+    "sunrise over vast mountain landscape"
+   ]
+  },
+  {
+   "id": "c017",
+   "title": "Rice terraces green",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "misty mountain valley sunrise",
+    "machu picchu in morning mist",
+    "pine forest in morning fog"
+   ]
+  },
+  {
+   "id": "c019",
+   "title": "Erupting volcano at night",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "volcano erupting lava fountain night",
+    "starry sky over calm sea",
+    "lighthouse beam over night sea"
+   ]
+  },
+  {
+   "id": "c024",
+   "title": "Starry night sky over a calm sea",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "starry sky over calm sea",
+    "sunrise over calm sea horizon",
+    "lighthouse beam over night sea"
+   ]
+  },
+  {
+   "id": "c096",
+   "title": "Water droplet macro",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "water droplet macro on leaf",
+    "green leaf sunlight close up",
+    "tiny insect on leaf"
+   ]
+  },
+  {
+   "id": "c103",
+   "title": "Medieval castle on a hill",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 3,
+   "examples": [
+    "castel sant'angelo at sunset",
+    "medieval castle europe",
+    "medieval castle castilla spain"
+   ]
+  },
+  {
+   "id": "c109",
+   "title": "Sailboat on a calm lake",
+   "phrases": 5,
+   "searches": 5,
+   "videos": 2,
+   "examples": [
+    "misty mountain lake sunrise",
+    "mist over mountain lake",
+    "calm alpine lake at dawn",
+    "misty mountain valley sunrise",
+    "still water mirror reflection mountains"
+   ]
+  },
+  {
+   "id": "c009",
+   "title": "Golden sunrise over ocean waves",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "golden sunrise ocean waves",
+    "sunrise over calm sea horizon",
+    "océano al amanecer con nubes"
+   ]
+  },
+  {
+   "id": "c018",
+   "title": "Lighthouse on a rocky coast at dusk",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "lighthouse at dusk on rocky coast",
+    "rocky coastline at sunset",
+    "lighthouse beam over night sea"
+   ]
+  },
+  {
+   "id": "c080",
+   "title": "Penguin colony on ice",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "emperor penguins huddle antarctica",
+    "emperor penguins on ice",
+    "emperor penguins colony"
+   ]
+  },
+  {
+   "id": "c083",
+   "title": "Coral reef with fish",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "coral reef colorful fish",
+    "coral reef fish",
+    "bleached coral reef underwater"
+   ]
+  },
+  {
+   "id": "c087",
+   "title": "Deer in a misty forest",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "pine forest in morning fog",
+    "misty mountain valley sunrise",
+    "misty mountain lake sunrise"
+   ]
+  },
+  {
+   "id": "c104",
+   "title": "Old sailing ship on the ocean",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "old sailing ship ocean",
+    "sunrise over calm sea horizon",
+    "golden sunrise ocean waves"
+   ]
+  },
+  {
+   "id": "c113",
+   "title": "Hot air balloons at sunrise",
+   "phrases": 3,
+   "searches": 3,
+   "videos": 2,
+   "examples": [
+    "misty mountain valley sunrise",
+    "sunrise over vast mountain landscape",
+    "sunrise over calm sea horizon"
+   ]
+  },
+  {
+   "id": "c020",
+   "title": "Close-up of a green leaf in sunlight",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "water droplet macro on leaf",
+    "green leaf sunlight close up"
+   ]
+  },
+  {
+   "id": "c023",
+   "title": "Blue sky with soft clouds",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "clear blue sky over landscape",
+    "nubes cúmulos cielo azul"
+   ]
+  },
+  {
+   "id": "c030",
+   "title": "Person working at a laptop in a bright office",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "young graduate office desk laptop",
+    "person typing code laptop"
+   ]
+  },
+  {
+   "id": "c032",
+   "title": "Developer coding at night",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "tired office worker at desk night",
+    "developer laptop code screen night"
+   ]
+  },
+  {
+   "id": "c033",
+   "title": "Two people shaking hands",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "two people shaking hands",
+    "two people shaking hands smiling"
+   ]
+  },
+  {
+   "id": "c037",
+   "title": "Tired office worker at night",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "tired office worker at desk night",
+    "developer laptop code screen night"
+   ]
+  },
+  {
+   "id": "c041",
+   "title": "Data center server racks",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "large data center server racks",
+    "server room data center"
+   ]
+  },
+  {
+   "id": "c054",
+   "title": "Rooftops of a city from above",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "london rooftops from above",
+    "florence skyline duomo sunset"
+   ]
+  },
+  {
+   "id": "c056",
+   "title": "Christmas market with warm lights",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "wooden chalets christmas market snow",
+    "nuremberg christmas market stalls"
+   ]
+  },
+  {
+   "id": "c057",
+   "title": "Plate of pasta",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "plate of italian pasta",
+    "plate of spaghetti carbonara"
+   ]
+  },
+  {
+   "id": "c069",
+   "title": "A helping hand",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "person offering helping hand",
+    "two people shaking hands"
+   ]
+  },
+  {
+   "id": "c071",
+   "title": "Friends picnic in a park",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "picnic greenwich park grass",
+    "greenwich park lawn picnic"
+   ]
+  },
+  {
+   "id": "c072",
+   "title": "Hiker on a mountain trail",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "person standing overlooking vast mountain valley",
+    "hiker on marked mountain trail"
+   ]
+  },
+  {
+   "id": "c081",
+   "title": "Bee on a flower",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "honey bee on flower close up",
+    "bee on flower collecting nectar"
+   ]
+  },
+  {
+   "id": "c108",
+   "title": "Winding mountain road",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "forest path autumn leaves",
+    "autumn forest colors"
+   ]
+  },
+  {
+   "id": "c015",
+   "title": "Canyon at golden hour",
+   "phrases": 1,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "grand canyon at sunset"
+   ]
+  },
+  {
+   "id": "c082",
+   "title": "Butterfly on a flower",
+   "phrases": 1,
+   "searches": 2,
+   "videos": 2,
+   "examples": [
+    "monarch butterfly"
+   ]
+  },
+  {
+   "id": "c074",
+   "title": "Person watching a sunrise by a lake",
+   "phrases": 4,
+   "searches": 4,
+   "videos": 1,
+   "examples": [
+    "person silhouette watching sunrise lake",
+    "misty mountain lake sunrise",
+    "calm alpine lake at dawn",
+    "sunrise over calm sea horizon"
+   ]
+  },
+  {
+   "id": "c004",
+   "title": "Desert dunes at sunset",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "desert sand dunes sunset",
+    "desert sand dunes sunrise"
+   ]
+  },
+  {
+   "id": "c012",
+   "title": "Rolling green countryside hills",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "stone wall farmland valley",
+    "english countryside rolling hills"
+   ]
+  },
+  {
+   "id": "c021",
+   "title": "Large tree in summer light",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "oak tree in summer",
+    "large tree sunlight green leaves"
+   ]
+  },
+  {
+   "id": "c025",
+   "title": "Aurora borealis over snowy land",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "northern lights green sky",
+    "aurora borealis night sky"
+   ]
+  },
+  {
+   "id": "c079",
+   "title": "Whale tail in the ocean",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "sunrise over calm sea horizon",
+    "golden sunrise ocean waves"
+   ]
+  },
+  {
+   "id": "c106",
+   "title": "Stone tools close-up",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "stone tools paleolithic",
+    "stone flake tool close up"
+   ]
+  },
+  {
+   "id": "c110",
+   "title": "Remote tropical island",
+   "phrases": 2,
+   "searches": 2,
+   "videos": 1,
+   "examples": [
+    "tropical beach turquoise water",
+    "remote tropical island"
+   ]
+  },
+  {
+   "id": "c007",
+   "title": "Tropical beach turquoise water",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "tropical beach turquoise water"
+   ]
+  },
+  {
+   "id": "c013",
+   "title": "Wildflower meadow",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "wildflowers in meadow field"
+   ]
+  },
+  {
+   "id": "c016",
+   "title": "Wheat field at harvest",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "wheat field harvest"
+   ]
+  },
+  {
+   "id": "c028",
+   "title": "Golden hour sky with clouds",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "sunrise over calm sea horizon"
+   ]
+  },
+  {
+   "id": "c029",
+   "title": "Rain drops on a window",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "rain drops on window autumn"
+   ]
+  },
+  {
+   "id": "c031",
+   "title": "Hands typing on a keyboard",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "person typing code laptop"
+   ]
+  },
+  {
+   "id": "c035",
+   "title": "Open plan office",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "crowded office open plan"
+   ]
+  },
+  {
+   "id": "c040",
+   "title": "Person scrolling a smartphone",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "person scrolling smartphone in bed"
+   ]
+  },
+  {
+   "id": "c042",
+   "title": "Fiber optic cables glowing",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "fiber optic cables"
+   ]
+  },
+  {
+   "id": "c043",
+   "title": "Smartphone and city at dusk",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "person using smartphone city"
+   ]
+  },
+  {
+   "id": "c045",
+   "title": "City lights at night",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "paris city lights at night"
+   ]
+  },
+  {
+   "id": "c046",
+   "title": "View from a high-rise window",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "city skyline view from high-rise window"
+   ]
+  },
+  {
+   "id": "c049",
+   "title": "Airplane taking off",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "airplane taking off airport"
+   ]
+  },
+  {
+   "id": "c052",
+   "title": "Bridge over a river aerial",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "bridge spanning river aerial"
+   ]
+  },
+  {
+   "id": "c058",
+   "title": "Fresh bread at a bakery",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "fresh baguettes bakery"
+   ]
+  },
+  {
+   "id": "c066",
+   "title": "Children playing in a park",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "niños jugando en el parque"
+   ]
+  },
+  {
+   "id": "c067",
+   "title": "Child building a blanket fort",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "child building cushion fort"
+   ]
+  },
+  {
+   "id": "c068",
+   "title": "Parent reading to a child",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "parent reading picture book toddler"
+   ]
+  },
+  {
+   "id": "c070",
+   "title": "Person grieving by a window",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "person grieving alone by window"
+   ]
+  },
+  {
+   "id": "c073",
+   "title": "Runners in a park",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "runners in greenwich park"
+   ]
+  },
+  {
+   "id": "c075",
+   "title": "Sharing a meal together",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "people sharing meal together community"
+   ]
+  },
+  {
+   "id": "c076",
+   "title": "Child's hands painting",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "niño pintando con las manos"
+   ]
+  },
+  {
+   "id": "c077",
+   "title": "Graduation caps thrown in the air",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "sparrows flying in blue sky"
+   ]
+  },
+  {
+   "id": "c084",
+   "title": "Sea turtle swimming",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "sea turtle swimming reef"
+   ]
+  },
+  {
+   "id": "c085",
+   "title": "Elephant herd on the savanna",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "african elephant herd"
+   ]
+  },
+  {
+   "id": "c086",
+   "title": "Grey wolf portrait",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "grey wolf portrait"
+   ]
+  },
+  {
+   "id": "c090",
+   "title": "Earth from space",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "sunrise over calm sea horizon"
+   ]
+  },
+  {
+   "id": "c092",
+   "title": "Telescope under the night sky",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "starry sky over calm sea"
+   ]
+  },
+  {
+   "id": "c102",
+   "title": "Old map and compass",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "compass needle on map"
+   ]
+  },
+  {
+   "id": "c105",
+   "title": "Ancient scroll and quill",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "ancient scroll hebrew scriptures"
+   ]
+  },
+  {
+   "id": "c107",
+   "title": "Empty road at sunset",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "sunrise over calm sea horizon"
+   ]
+  },
+  {
+   "id": "c111",
+   "title": "Camping tent under the stars",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "starry sky over calm sea"
+   ]
+  },
+  {
+   "id": "c112",
+   "title": "Train crossing a landscape",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "bridge spanning river aerial"
+   ]
+  },
+  {
+   "id": "c115",
+   "title": "Padlock and key",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "old rusty padlock on door"
+   ]
+  },
+  {
+   "id": "c118",
+   "title": "Fireworks over a river",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "starry sky over calm sea"
+   ]
+  },
+  {
+   "id": "c119",
+   "title": "Snowy village at dusk",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "wooden chalets christmas market snow"
+   ]
+  },
+  {
+   "id": "c120",
+   "title": "Path through a field to the horizon",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "green forest path sunlight"
+   ]
+  },
+  {
+   "id": "c121",
+   "title": "Fog over a quiet bridge",
+   "phrases": 1,
+   "searches": 1,
+   "videos": 1,
+   "examples": [
+    "pine forest in morning fog"
+   ]
+  },
+  {
+   "id": "c010",
+   "title": "Waterfall in a green forest",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c022",
+   "title": "River winding through a valley",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c027",
+   "title": "Dramatic storm clouds",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c034",
+   "title": "Team meeting around a table",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c036",
+   "title": "Video call on a laptop at home",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c038",
+   "title": "Whiteboard planning session",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c039",
+   "title": "Desk flat lay with notebook and coffee",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c044",
+   "title": "City skyline at golden hour",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c047",
+   "title": "Busy street with blurred crowd",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c048",
+   "title": "Subway platform with a train",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  },
+  {
+   "id": "c050",
+   "title": "Airport terminal interior",
+   "phrases": 0,
+   "searches": 0,
+   "videos": 0,
+   "examples": []
+  }
+ ],
+ "coverage": {
+  "0.30": {
+   "searches_satisfied": 208,
+   "percent": 47.1,
+   "phrases_satisfied": 188
+  },
+  "0.35": {
+   "searches_satisfied": 164,
+   "percent": 37.1,
+   "phrases_satisfied": 148
+  },
+  "0.40": {
+   "searches_satisfied": 124,
+   "percent": 28.1,
+   "phrases_satisfied": 115
+  },
+  "0.45": {
+   "searches_satisfied": 97,
+   "percent": 21.9,
+   "phrases_satisfied": 92
+  },
+  "0.50": {
+   "searches_satisfied": 69,
+   "percent": 15.6,
+   "phrases_satisfied": 66
+  },
+  "0.55": {
+   "searches_satisfied": 51,
+   "percent": 11.5,
+   "phrases_satisfied": 48
+  }
+ },
+ "best_score_percentiles": {
+  "10": 0.168,
+  "25": 0.214,
+  "50": 0.292,
+  "75": 0.434,
+  "90": 0.584
+ },
+ "images_ranked_by_videos": [
+  "c101",
+  "c001",
+  "c005",
+  "c014",
+  "c051",
+  "c002",
+  "c003",
+  "c006",
+  "c064",
+  "c078",
+  "c026",
+  "c008",
+  "c011",
+  "c017",
+  "c019",
+  "c024",
+  "c096",
+  "c103",
+  "c109",
+  "c009"
+ ],
+ "unserved_examples": [
+  "tiber river rome sunset",
+  "trevi fountain rome",
+  "colosseum interior arena",
+  "colosseum rome morning",
+  "eiffel tower paris daytime",
+  "pantheon rome dome interior",
+  "roman forum ruins",
+  "deep sea anglerfish",
+  "eiffel tower paris",
+  "eiffel tower paris champ de mars",
+  "eiffel tower paris golden hour",
+  "eiffel tower paris sunset",
+  "great barrier reef aerial",
+  "greenwich park view london",
+  "greenwich park view london skyline",
+  "humpback whale breaching",
+  "hydrothermal vent tube worms",
+  "ichthyosaur fossil",
+  "louvre palace courtyard paris",
+  "pantheon dome interior oculus",
+  "paris metro art nouveau entrance",
+  "royal observatory greenwich",
+  "trilobite fossil",
+  "tyrannosaurus rex skeleton museum",
+  "woolly mammoth museum reconstruction",
+  "alhambra granada",
+  "alsatian gingerbread stall",
+  "altamira cave bison painting",
+  "ammonite fossil",
+  "ancient rainforest canopy",
+  "anomalocaris reconstruction",
+  "arc de triomphe aerial view paris avenues",
+  "arc de triomphe paris",
+  "arctic tern in flight",
+  "ardipithecus ramidus ardi reconstruction",
+  "aula infantil colorida",
+  "australopithecus afarensis lucy skeleton",
+  "barley ears closeup",
+  "basilosaurus whale fossil",
+  "bat feeding on flower"
+ ]
+}

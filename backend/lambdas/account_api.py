@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 from botocore.exceptions import ClientError
 
-from common import deletion
+from common import deletion, i18n
 from common.http import json_response
 from common.identity import extract_cognito_sub
 
@@ -48,7 +48,7 @@ def _apple_state(user: str, username: Optional[str]) -> str:
     return "revoke_available" if apple_flag() else "revoke_off"
 
 
-def delete_account(event: Dict[str, Any], user: str) -> Dict[str, Any]:
+def delete_account(event: Dict[str, Any], user: str, loc: str = "en") -> Dict[str, Any]:
     if _body(event).get("confirm") != "DELETE":
         raise deletion.DeletionError(400, "send {\"confirm\": \"DELETE\"} to delete your account", code="confirmation_required")
     claims = _claims(event)
@@ -56,7 +56,7 @@ def delete_account(event: Dict[str, Any], user: str) -> Dict[str, Any]:
     job = deletion.get_job(user)
     if job is None:
         if not deletion.recent_auth(claims.get("auth_time")):   # a stale or borrowed session must not be able to start a deletion; a repeat of one already started is harmless
-            raise deletion.DeletionError(401, "Please sign in again to confirm.", code="reauth_required", max_age_seconds=deletion.RECENT_AUTH_SECONDS)
+            raise deletion.DeletionError(401, i18n.t("account.reauth", loc), code="reauth_required", max_age_seconds=deletion.RECENT_AUTH_SECONDS)
         deletion.create_job(user, username)
         deletion.enqueue(user)
     elif job.get("status") == "stuck":
@@ -68,7 +68,7 @@ def delete_account(event: Dict[str, Any], user: str) -> Dict[str, Any]:
     return {"status": "deleting", "apple": _apple_state(user, username)}
 
 
-def apple_revoke_start(event: Dict[str, Any], user: str) -> Dict[str, Any]:
+def apple_revoke_start(event: Dict[str, Any], user: str, loc: str = "en") -> Dict[str, Any]:
     from common import apple
 
     if not apple_flag():
@@ -79,42 +79,43 @@ def apple_revoke_start(event: Dict[str, Any], user: str) -> Dict[str, Any]:
         raise deletion.DeletionError(400, "'return' must be app or web")
     job = deletion.get_job(user)
     if job is None:
-        raise deletion.DeletionError(409, "Delete the account first.", code="not_deleting")
+        raise deletion.DeletionError(409, i18n.t("account.delete_first", loc), code="not_deleting")
     if job.get("status") == "done":
-        raise deletion.DeletionError(410, "The account is already deleted.", code="account_deleted")
+        raise deletion.DeletionError(410, i18n.t("account.already_deleted", loc), code="account_deleted")
     pu = deletion.find_pool_user(user, job.get("username") or str(_claims(event).get("cognito:username") or "") or None)
     asub = deletion.apple_identity(pu["attrs"]) if pu else None
     if not asub:
-        raise deletion.DeletionError(409, "This account has no Sign in with Apple identity.", code="no_apple_identity")
+        raise deletion.DeletionError(409, i18n.t("account.no_apple", loc), code="no_apple_identity")
     url = apple.authorize_url(apple.services_id(), os.environ["APPLE_RETURN_URL"], apple.sign_state(user, asub, back))
     return {"authorize_url": url, "expires_in": apple.STATE_SECONDS}
 
 
-def route(event: Dict[str, Any], user: str) -> Dict[str, Any]:
+def route(event: Dict[str, Any], user: str, loc: str = "en") -> Dict[str, Any]:
     res, method = event.get("resource") or "", event.get("httpMethod") or ""
     if method == "POST" and res == "/users/{user_id}/account/delete":
-        return delete_account(event, user)
+        return delete_account(event, user, loc)
     if method == "POST" and res == "/users/{user_id}/account/apple-revoke":
-        return apple_revoke_start(event, user)
+        return apple_revoke_start(event, user, loc)
     raise deletion.DeletionError(404, "not found")
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    loc = i18n.pick_locale(event)
     user = extract_cognito_sub(event)
     if not user:
-        return json_response(401, {"message": "Unauthorized"})
+        return json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
     if not path_user or path_user != user:
-        return json_response(403, {"message": "Forbidden"})   # nobody can delete (or even ask about) another person's account
+        return json_response(403, {"message": i18n.t("err.forbidden", loc)})   # nobody can delete (or even ask about) another person's account
     try:
         deletion.check_user(user)
-        out = route(event, user)
+        out = route(event, user, loc)
         return json_response(202 if "status" in out else 200, out)
     except deletion.DeletionError as e:
-        return json_response(e.status, {"message": e.message, **e.extra})
+        return json_response(e.status, {"message": e.text(loc), **e.extra})
     except ClientError:
         logger.exception("account request failed (AWS)")
-        return json_response(500, {"message": "Something went wrong. Please try again."})
+        return json_response(500, {"message": i18n.t("err.generic", loc)})
     except Exception:
         logger.exception("account request failed")   # no tokens, keys or addresses in the log line
-        return json_response(500, {"message": "Something went wrong. Please try again."})
+        return json_response(500, {"message": i18n.t("err.generic", loc)})

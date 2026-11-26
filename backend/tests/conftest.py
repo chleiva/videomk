@@ -11,6 +11,8 @@ sys.path.insert(0, os.path.abspath(ROOT))
 os.environ.setdefault("AWS_DEFAULT_REGION", "us-west-2")
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "test")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "test")
+os.environ.setdefault("CLIP_RETRY", "0")   # the clip retry pass calls a model: tests that exercise it switch it on with their own stubs
+os.environ.setdefault("CLIPS_NASA", "0")   # no network in tests
 os.environ["VIDEOS_TABLE"] = "Videos"
 os.environ["USAGE_TABLE"] = "Usage"
 os.environ["WALLET_TABLE"] = "Wallet"

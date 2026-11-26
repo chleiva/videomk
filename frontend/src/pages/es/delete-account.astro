@@ -1,0 +1,7 @@
+---
+import LegalDoc from "../../components/LegalDoc.astro";
+import { getDelete } from "../../data/legal/delete";
+import { effective } from "../../data/legal";
+const c = getDelete("es");
+---
+<LegalDoc locale="es" title={c.title} intro={c.intro} effective={effective("es")} glance={c.glance} sections={c.sections} />

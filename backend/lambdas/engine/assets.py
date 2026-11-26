@@ -99,6 +99,7 @@ LABELS = {"en": {"credits": "Image credits:", "sources": "Sources:", "intro": "I
 def credits_block(ledger: List[Dict[str, str]], sources: List[Dict[str, str]], language: str = "en") -> str:
     """The Unsplash attribution lines themselves keep Unsplash's recommended wording ("Photo by ... on Unsplash") in every language."""
     labels = LABELS.get(language, LABELS["en"])
+    ledger = [e for e in ledger if e.get("source") != "videomk-library"]   # our own images need no credit line (they stay in the ledger itself)
     lines: List[str] = []
     if ledger:
         lines.append(labels["credits"])

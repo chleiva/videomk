@@ -11,7 +11,7 @@ from typing import Any, Dict
 import boto3
 from botocore.exceptions import ClientError
 
-from common import usage
+from common import i18n, usage
 from common.http import json_response
 
 from .. import awsio, edits
@@ -38,6 +38,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if err:
         return err
     video_id, user_id = item["video_id"], item["user_id"]
+    loc = i18n.pick_locale(event)
     try:
         body = _body(event)
         mode = body.get("mode", "preview")
@@ -51,7 +52,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
     cur_rev = int(item.get("rev", 1))
     if base_rev != cur_rev:
-        return json_response(409, {"message": "This video changed since you loaded it. Reload to continue.", "rev": cur_rev})
+        return json_response(409, {"message": i18n.t("edit.stale", loc), "rev": cur_rev})
 
     ops = body.get("ops") or []
     new_rev, plan_key = cur_rev, item["plan_key"]
@@ -64,12 +65,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         plan_key = f"{awsio.prefix(video_id)}plan_r{new_rev}.json"
         awsio.put_json(plan_key, new_plan)
     elif mode == "final" and item.get("final_rev") == cur_rev:
-        return json_response(409, {"message": "This revision is already rendered.", "rev": cur_rev})
+        return json_response(409, {"message": i18n.t("edit.already_rendered", loc), "rev": cur_rev})
 
     try:
         usage.consume(f"edit:{user_id}", limit=EDIT_DAILY_LIMIT)
     except usage.QuotaExceeded:
-        return json_response(429, {"message": "Daily edit limit reached.", "rev": cur_rev}, {"Retry-After": "3600"})
+        return json_response(429, {"message": i18n.t("edit.daily_limit", loc), "rev": cur_rev}, {"Retry-After": "3600"})
 
     now = int(time.time())
     try:  # optimistic lock: same rev, and no live render in progress
@@ -82,7 +83,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         )
     except ClientError as e:
         if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
-            return json_response(409, {"message": "An edit is already rendering. Wait for it to finish.", "rev": cur_rev})
+            return json_response(409, {"message": i18n.t("edit.busy", loc), "rev": cur_rev})
         raise
     try:
         _sfn.start_execution(
@@ -94,5 +95,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         from generate_video.db import set_attributes
 
         set_attributes(video_id, {"edit_state": "FAILED", "edit_error": "START_FAILED"})
-        return json_response(500, {"message": "Couldn't start the render. Please try again."})
+        return json_response(500, {"message": i18n.t("edit.render_failed", loc)})
     return json_response(202, {"rev": new_rev, "mode": mode, "message": "render started"})

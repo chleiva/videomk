@@ -12,3 +12,8 @@ export const GOVERNING_LAW = "England and Wales";
 export const REGULATOR = "the Information Commissioner’s Office (ICO) in the UK, or your local data protection authority";
 export const MIN_AGE = 13;
 export const RETENTION_DAYS = { safety: 90, logs: 14, working: 7, uploads: 2, workflowHistory: 90, backups: 35 };
+// Spanish versions of the values above (the Spanish legal pages; English prevails in case of conflict).
+export const EFFECTIVE_ES = "26 de noviembre de 2026";
+export const REGULATOR_ES = "la Information Commissioner’s Office (ICO) del Reino Unido, o tu autoridad local de protección de datos";
+export const GOVERNING_LAW_ES = "Inglaterra y Gales";
+export const effective = (l: "en" | "es") => (l === "es" ? EFFECTIVE_ES : EFFECTIVE);

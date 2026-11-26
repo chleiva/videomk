@@ -22,6 +22,8 @@ from boto3.dynamodb.conditions import Attr, Key
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
+from common import i18n
+
 logger = logging.getLogger()
 
 GB = 1_000_000_000
@@ -52,9 +54,14 @@ ORIG_RE = re.compile(r"^o/([A-Za-z0-9-]{8,64})/([0-9a-f]{16})\.jpg$")
 class LibraryError(Exception):
     """A request problem with the HTTP status to answer with."""
 
-    def __init__(self, status: int, message: str, **extra: Any):
-        super().__init__(message)
-        self.status, self.message, self.extra = status, message, extra
+    def __init__(self, status: int, message: Any, **extra: Any):
+        """`message` is the English text, or an `i18n.Localized` (then `text(locale)` gives the person's language; `message` stays English)."""
+        self.localized = message if isinstance(message, i18n.Localized) else None
+        super().__init__(str(message))
+        self.status, self.message, self.extra = status, str(message), extra
+
+    def text(self, locale: Any = None) -> str:
+        return self.localized.message(locale) if self.localized else self.message
 
 
 # ----------------------------------------------------------------------------- clients (lazy, so tests can mock AWS)
@@ -103,7 +110,7 @@ def vector_target() -> Dict[str, str]:
 # ----------------------------------------------------------------------------- identity and keys
 def check_user(user: Any) -> str:
     if not isinstance(user, str) or not USER_RE.match(user):
-        raise LibraryError(403, "Forbidden")
+        raise LibraryError(403, i18n.Localized("err.forbidden"))
     return user
 
 
@@ -284,7 +291,7 @@ def create_slots(user: str, items: Any, *, consume: Callable[[str], None], now: 
             ])
         except Busy:
             release(user, s["size"])
-            raise LibraryError(503, "Busy, please try again.") from None
+            raise LibraryError(503, i18n.Localized("err.busy")) from None
         except Exception:
             release(user, s["size"])
             raise
@@ -526,7 +533,7 @@ def list_items(user: str, *, limit: int = 60, cursor: Any = None, date_from: Opt
 def _name(raw: Any) -> str:
     name = re.sub(r"\s+", " ", str(raw or "")).strip()
     if not 1 <= len(name) <= 40 or any(ord(c) < 32 for c in name):
-        raise LibraryError(400, "the name must be 1 to 40 characters")
+        raise LibraryError(400, i18n.Localized("library.name_length"))
     return name
 
 
@@ -568,7 +575,7 @@ def create_collection(user: str, name: Any, emoji: Any = None, auto: Optional[Di
     """`auto` marks a collection made by the organiser: {"k": "m"|"t", "pk": place key or "", "ym": "YYYY-MM"} (a month) or {"k": "t", "pk": ..., "from": day, "to": day} (a trip)."""
     check_user(user)
     if (count_hint if count_hint is not None else len(collections(user))) >= MAX_COLLECTIONS:
-        raise LibraryError(409, "too many collections")
+        raise LibraryError(409, i18n.Localized("library.too_many_collections"))
     cid = uuid.uuid4().hex[:16]
     item = {"user_id": user, "sk": f"c#{cid}", "nm": _name(name), "n": 0, "created": now_iso()}
     if _emoji(emoji):
@@ -582,7 +589,7 @@ def create_collection(user: str, name: Any, emoji: Any = None, auto: Optional[Di
 def _collection(user: str, cid: str) -> Dict[str, Any]:
     c = table().get_item(Key={"user_id": check_user(user), "sk": f"c#{check_id(cid)}"}).get("Item")
     if not c:
-        raise LibraryError(404, "not found")
+        raise LibraryError(404, i18n.Localized("err.not_found"))
     return c
 
 
@@ -645,7 +652,7 @@ def change_collection(user: str, cid: str, add: Iterable[str] = (), remove: Iter
             ]):
                 added += 1
         except Busy:
-            raise LibraryError(503, "Busy, please try again.") from None
+            raise LibraryError(503, i18n.Localized("err.busy")) from None
     for mid in remove:
         it = have.get(mid)
         if not it or cid not in (it.get("cols") or []):
@@ -658,7 +665,7 @@ def change_collection(user: str, cid: str, add: Iterable[str] = (), remove: Iter
                 {"Update": {"TableName": table().name, "Key": _ser({"user_id": user, "sk": f"c#{cid}"}), "UpdateExpression": "ADD n :neg", "ExpressionAttributeValues": _ser({":neg": -1})}},
             ])
         except Busy:
-            raise LibraryError(503, "Busy, please try again.") from None
+            raise LibraryError(503, i18n.Localized("err.busy")) from None
         removed += 1
     if removed and c.get("cover") in remove:
         table().update_item(Key={"user_id": user, "sk": f"c#{cid}"}, UpdateExpression="REMOVE cover")
@@ -717,7 +724,7 @@ def delete_items(user: str, ids: Any) -> Dict[str, int]:
                                 "ConditionExpression": "attribute_exists(sk)"}},
                 ])
             except Busy:
-                raise LibraryError(503, "Busy, please try again.") from None
+                raise LibraryError(503, i18n.Localized("err.busy")) from None
         if it.get("hash"):
             try:
                 table().delete_item(Key={"user_id": user, "sk": f"h#{it['hash']}"}, ConditionExpression="mid = :m", ExpressionAttributeValues={":m": mid})

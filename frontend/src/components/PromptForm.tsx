@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { startGeneration, newRequestId } from "../lib/api";
+import { useLocale } from "../lib/useLocale";
+import type { Locale } from "../lib/i18n";
 
 const STORAGE_KEYS = {
   prompt: "videomk_prompt",
   taskId: "videomk_task_id",
 };
 
-export default function PromptForm() {
+export default function PromptForm({ locale: fixedLocale }: { locale?: Locale }) {
+  const { t } = useLocale(fixedLocale);
   const [prompt, setPrompt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [firstAutofillDone, setFirstAutofillDone] = useState(false);
@@ -29,7 +32,7 @@ export default function PromptForm() {
 
 
     if (trimmed.length > 0 && trimmed.length < 15) {
-      setHint("A bit more detail helps us create something great — add a few more words.");
+      setHint(t("prompt.more_detail"));
       inputRef.current?.focus();
       return;
     }
@@ -53,7 +56,7 @@ export default function PromptForm() {
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
-      setHint("There was a problem starting your generation. Please try again.");
+      setHint(t("prompt.start_error"));
       inputRef.current?.focus();
     }
   }
@@ -68,10 +71,10 @@ export default function PromptForm() {
       ref={inputRef}
       type="text"
       inputMode="text"
-      aria-label="Prompt"
+      aria-label={t("prompt.aria")}
       value={prompt}
       onChange={(e) => setPrompt(e.target.value)}
-      placeholder="Describe your idea, we’ll make the video."
+      placeholder={t("prompt.placeholder")}
       className="w-full bg-transparent px-4 py-3 text-lg md:text-xl outline-none placeholder:text-neutral-500"
     />
     <button
@@ -88,10 +91,10 @@ export default function PromptForm() {
               aria-hidden
               className="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"
             />
-            <span>Creating…</span>
+            <span>{t("prompt.creating")}</span>
           </>
         ) : (
-          <span>Create</span>
+          <span>{t("prompt.create")}</span>
         )}
       </span>
     </button>

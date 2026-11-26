@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Callable, Dict, List, Optional
 
-from common import safety
+from common import i18n, safety
 
 logger = logging.getLogger()
 
@@ -32,7 +32,11 @@ _CTRL = re.compile(r"[\x00-\x1f\x7f]")
 
 
 class Invalid(ValueError):
-    """A request field that is malformed (the handler answers 400 with the message)."""
+    """A request field that is malformed (the handler answers 400 with the message). A `Localized` message keeps its English `str()` and can be shown in the person's language."""
+
+    def __init__(self, message: Any = ""):
+        self.localized = message if isinstance(message, i18n.Localized) else None
+        super().__init__(str(message))
 
 
 def _s(value: Any, limit: int) -> str:
@@ -50,12 +54,12 @@ def _clip_words(value: Any, limit: int) -> str:
 
 def clean_prompt(prompt: Any) -> str:
     if not isinstance(prompt, str):
-        raise Invalid("'prompt' is required")
+        raise Invalid(i18n.Localized("create.prompt_required"))
     prompt = " ".join(prompt.split())
     if len(prompt) < MIN_PROMPT_CHARS:
-        raise Invalid(f"'prompt' must be at least {MIN_PROMPT_CHARS} characters")
+        raise Invalid(i18n.Localized("create.prompt_min", min=MIN_PROMPT_CHARS))
     if len(prompt) > MAX_PROMPT_CHARS:
-        raise Invalid(f"'prompt' must be at most {MAX_PROMPT_CHARS} characters")
+        raise Invalid(i18n.Localized("create.prompt_max", max=MAX_PROMPT_CHARS))
     return prompt
 
 

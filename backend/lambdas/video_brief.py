@@ -8,7 +8,7 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-from common import intake, safety, usage
+from common import i18n, intake, safety, usage
 from common.http import json_response
 from common.identity import extract_cognito_sub
 
@@ -37,10 +37,11 @@ def _ok(brief: Dict[str, Any]) -> Dict[str, Any]:
 def handler(event: Dict[str, Any], context: Any, *, ask: Optional[intake.Ask] = None):
     path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
     user_id = extract_cognito_sub(event)
+    loc = i18n.pick_locale(event)
     if not user_id:
-        return json_response(401, {"message": "Unauthorized"})
+        return json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     if not path_user or path_user != user_id:
-        return json_response(403, {"message": "Forbidden"})
+        return json_response(403, {"message": i18n.t("err.forbidden", loc)})
     try:
         body = _body(event)
         prompt = intake.clean_prompt(body.get("prompt"))
@@ -48,9 +49,9 @@ def handler(event: Dict[str, Any], context: Any, *, ask: Optional[intake.Ask] = 
         answers = intake.clean_answers(body.get("answers"))
         media_count = intake.clean_media_count(body.get("media_count"))
     except intake.Invalid as e:
-        return json_response(400, {"message": str(e)})
+        return json_response(400, {"message": i18n.error_text(e, loc)})
 
-    lang = safety.guess_language(prompt, options.get("language") if options.get("language") in ("en", "es") else None)
+    lang = i18n.explicit_locale(event) or safety.guess_language(prompt, options.get("language") if options.get("language") in ("en", "es") else None)
     stopped = intake.paused(user_id, lang)
     if stopped:
         return json_response(429, stopped, {"Retry-After": str(stopped["retry_after"])})

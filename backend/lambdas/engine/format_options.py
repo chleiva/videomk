@@ -40,9 +40,13 @@ MIN_MINUTES, MAX_MINUTES = 0.25, 12
 
 
 def _p(id: str, label: str, aspect: str, other: List[str], minutes: float, max_minutes: Optional[float], dur: str) -> Dict[str, Any]:
+    _PLATFORM_DUR[id] = dur
     shape = {"16:9": "Landscape", "9:16": "Vertical", "1:1": "Square", "4:5": "Portrait"}[aspect]
     return {"id": id, "label": label, "aspect": aspect, "resolution": "1080p", "recommended_minutes": minutes, "max_minutes": max_minutes, "other_aspects": other,
             "note": f"{shape} {aspect} · 1080p · about {dur}"}
+
+
+_PLATFORM_DUR: Dict[str, str] = {}   # platform id -> the length text of its note ("3 min"), so the note can be rebuilt in another language
 
 
 def note_4k(platform: Dict[str, Any]) -> Optional[str]:
@@ -140,11 +144,11 @@ def frame_of(doc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     return frame_dict()
 
 
-def capabilities() -> Dict[str, Any]:
-    """The body of GET /users/{user}/capabilities."""
+def capabilities(locale: Optional[str] = None) -> Dict[str, Any]:
+    """The body of GET /users/{user}/capabilities. `locale` ('es') translates the labels and notes only: ids, numbers and flags never change; English is byte-identical to before."""
     ready, beta = set(ready_aspects()), set(beta_aspects())
     langs = ready_languages()
-    return {
+    body = {
         "aspects": [{"id": a["id"], "label": a["label"], "ready": a["id"] in ready, "beta": a["id"] in ready and a["id"] in beta} for a in ASPECTS],
         # only the resolutions on offer are listed (an older app shows every listed one); each says what it costs and the formats it can be made in
         "resolutions": [{**r, "aspects": [a["id"] for a in ASPECTS if a["id"] in ready]} for r in RESOLUTIONS if r["id"] in ready_resolutions()],
@@ -154,3 +158,23 @@ def capabilities() -> Dict[str, Any]:
         "max_photos": MAX_PHOTOS,
         "intake": os.environ.get("INTAKE_ENABLED") == "1",
     }
+    return _localized(body, locale)
+
+
+def _localized(body: Dict[str, Any], locale: Optional[str]) -> Dict[str, Any]:
+    from common import i18n
+    loc = i18n.normalize(locale) or i18n.DEFAULT
+    if loc == "en":
+        return body
+    for a in body["aspects"]:
+        a["label"] = i18n.t(f"cap.aspect.{a['id']}", loc)
+    for r in body["resolutions"]:
+        if r.get("note"):
+            r["note"] = i18n.t(f"cap.resolution.{r['id']}.note", loc)
+    for p in body["platforms"]:
+        if p["id"] == "other":
+            p["label"] = i18n.t("cap.platform.other", loc)
+        p["note"] = i18n.t("cap.platform_note", loc, shape=i18n.t(f"cap.aspect.{p['aspect']}", loc), aspect=p["aspect"], dur=_PLATFORM_DUR[p["id"]])
+        if p.get("note_4k"):
+            p["note_4k"] = i18n.t("cap.note_4k", loc, platform=p["label"])
+    return body

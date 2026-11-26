@@ -4,6 +4,21 @@ import { buildAuthorizeUrl, chooserOptions, isLinkRaceError, parseProvider, safe
 const base = { authDomain: "https://auth.example.com", clientId: "cid", redirectUri: "https://x.test/auth/callback/index.html", state: "st4te", challenge: "chal" };
 const params = (u: string) => new URL(u).searchParams;
 
+describe("locale in the authorize URL and the chooser", () => {
+  it("English adds nothing; Spanish adds lang=es", () => {
+    expect(params(buildAuthorizeUrl({ ...base, locale: "en" })).has("lang")).toBe(false);
+    expect(buildAuthorizeUrl({ ...base, locale: "en" })).toBe(buildAuthorizeUrl(base));
+    expect(params(buildAuthorizeUrl({ ...base, locale: "es" })).get("lang")).toBe("es");
+  });
+  it("speaks the person's language in labels and errors", () => {
+    expect(chooserOptions({ google: true, apple: true }, "es").map((o) => o.label)).toEqual(["Continuar con Google", "Continuar con Apple", "Continuar con correo"]);
+    expect(chooserOptions({ google: true, apple: false }).map((o) => o.label)).toEqual(["Continue with Google", "Continue with email"]);
+    expect(sanitizeAuthError("access_denied", null, "es")).toBe("Se canceló el inicio de sesión.");
+    expect(sanitizeAuthError("server_error", "boom", "es")).toBe("No se pudo iniciar sesión: boom");
+    expect(sanitizeAuthError("x", null, "es")).toBe("No se pudo iniciar sesión. Inténtalo de nuevo.");
+  });
+});
+
 describe("buildAuthorizeUrl", () => {
   it("is unchanged when no provider (email path)", () => {
     const u = buildAuthorizeUrl(base);

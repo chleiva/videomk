@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
+from common import i18n
 from common import library as lib
 from common import library_organize as organize
 from common import library_search as search
@@ -71,7 +72,7 @@ def route(event: Dict[str, Any], user: str) -> Dict[str, Any]:
     if res == f"{base}/items/{{item_id}}" and method == "GET":
         it = lib.get_item(user, params.get("item_id"))
         if not it:
-            raise lib.LibraryError(404, "not found")
+            raise lib.LibraryError(404, i18n.Localized("err.not_found"))
         return lib.photo_json(user, it, full=True)
     if res == f"{base}/items/delete" and method == "POST":
         return lib.delete_items(user, _body(event).get("ids"))
@@ -116,22 +117,23 @@ def route(event: Dict[str, Any], user: str) -> Dict[str, Any]:
         if _body(event).get("confirm") != "DELETE":
             raise lib.LibraryError(400, "send {\"confirm\": \"DELETE\"} to delete everything")
         return lib.purge_user(user)
-    raise lib.LibraryError(404, "not found")
+    raise lib.LibraryError(404, i18n.Localized("err.not_found"))
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    loc = i18n.pick_locale(event)
     user = extract_cognito_sub(event)
     if not user:
-        return json_response(401, {"message": "Unauthorized"})
+        return json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
     if not path_user or path_user != user:
-        return json_response(403, {"message": "Forbidden"})
+        return json_response(403, {"message": i18n.t("err.forbidden", loc)})
     try:
         lib.check_user(user)
         return json_response(200, route(event, user))
     except lib.LibraryError as e:
         headers = {"Retry-After": "3600"} if e.status == 429 else None
-        return json_response(e.status, {"message": e.message, **e.extra}, headers)
+        return json_response(e.status, {"message": e.text(loc), **e.extra}, headers)
     except Exception:
         logger.exception("library request failed")   # no keys, names or queries in the log line
-        return json_response(500, {"message": "Something went wrong. Please try again."})
+        return json_response(500, {"message": i18n.t("err.generic", loc)})

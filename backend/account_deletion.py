@@ -23,6 +23,11 @@ COVERED_TABLES = {"VideosTable": "videos", "UsageTable": "usage", "WalletTable":
 EXEMPT_TABLES = {"AccountDeletionTable": "the deletion jobs and tombstones themselves"}
 COVERED_BUCKETS = {"AssetsBucket": ["videos/<user>/", "uploads/<user>/", "generation/v2/<video>/", "generation/assets/<video>/"], "MediaBucket": ["o/<user>/", "t/<user>/"]}
 COVERED_VECTOR_INDEXES = ["PhotoIndex"]
+# Resources that exist only behind a flag and hold NO personal data: the image catalog (docs/IMAGE_CATALOG.md) is videomk's own generated pictures; its demand table keeps generic search
+# phrases and a salted hash of a video (no user id, no prompt) and expires after 12 months. They are not cleaned per user because nothing in them belongs to a user.
+OPTIONAL_EXEMPT_TABLES = {"CatalogTable": "generated pictures' metadata", "DemandTable": "generic phrases and salted video hashes, no user id, 12-month expiry"}
+OPTIONAL_EXEMPT_BUCKETS = {"CatalogBucket": "generated pictures"}
+OPTIONAL_EXEMPT_VECTOR_INDEXES = ["CatalogIndex"]
 
 
 class AccountDeletion(Construct):

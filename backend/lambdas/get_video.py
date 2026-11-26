@@ -8,6 +8,8 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
+from common import i18n
+
 try:
     # Reuse validation semantics from generation flow
     from generate_video.auth import validate_user_id
@@ -77,10 +79,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
     if not path_user_id:
         return _json_response(400, {"message": "Missing required path parameter 'user_id'"})
+    loc = i18n.pick_locale(event)
     if not auth_user_id:
-        return _json_response(401, {"message": "Unauthorized"})
+        return _json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     if auth_user_id != path_user_id:
-        return _json_response(403, {"message": "Forbidden"})
+        return _json_response(403, {"message": i18n.t("err.forbidden", loc)})
 
     user_id = path_user_id
     try:
@@ -102,21 +105,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         resp = table.get_item(Key={"video_id": video_id})
         item = resp.get("Item") or {}
     except ClientError:
-        return _json_response(500, {"message": "Failed to get video"})
+        return _json_response(500, {"message": i18n.t("video.get_failed", loc)})
 
     if not item:
-        return _json_response(404, {"message": "Video not found"})
+        return _json_response(404, {"message": i18n.t("video.not_found", loc)})
 
     # Ownership check
     owner = item.get("user_id")
     if owner and owner != user_id:
-        return _json_response(403, {"message": "Forbidden"})
+        return _json_response(403, {"message": i18n.t("err.forbidden", loc)})
 
     status = (item.get("status") or "").upper()
     video_uri = item.get("video_uri")
     if not video_uri:
         # If not complete yet, signal progress
-        return _json_response(409, {"message": "Video not ready", "status": status})
+        return _json_response(409, {"message": i18n.t("video.not_ready", loc), "status": status})
 
     try:
         bucket, key = _parse_s3_uri(video_uri)
@@ -151,7 +154,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "get_object", Params=params, ExpiresIn=3600
         )
     except ClientError:
-        return _json_response(500, {"message": "Failed to sign url"})
+        return _json_response(500, {"message": i18n.t("video.sign_failed", loc)})
 
     if redirect_flag:
         return {

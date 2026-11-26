@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict
 
-from common import wallet
+from common import i18n, wallet
 from common.http import json_response
 from common.identity import extract_cognito_sub
 
@@ -10,16 +10,17 @@ logger = logging.getLogger()
 
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    loc = i18n.pick_locale(event)
     path_user = ((event or {}).get("pathParameters") or {}).get("user_id")
     user = extract_cognito_sub(event)
     if not user:
-        return json_response(401, {"message": "Unauthorized"})
+        return json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     if not path_user or path_user != user:
-        return json_response(403, {"message": "Forbidden"})
+        return json_response(403, {"message": i18n.t("err.forbidden", loc)})
     headers = {str(k).lower(): v for k, v in ((event or {}).get("headers") or {}).items()}
     tz = str(headers.get("x-timezone") or "").strip() or None
     try:
         return json_response(200, wallet.balance(user, tz=tz))
     except Exception:
         logger.exception("wallet read failed")
-        return json_response(500, {"message": "Couldn't read your credits. Please try again."})
+        return json_response(500, {"message": i18n.t("wallet.read_failed", loc)})

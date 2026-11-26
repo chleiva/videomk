@@ -2,6 +2,7 @@
 import time
 from typing import Any, Dict, List
 
+from common import i18n
 from common.http import json_response
 
 from ..scenes import SCENE_TYPES
@@ -47,7 +48,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     pfx = awsio.prefix(video_id)
     plan = awsio.get_json(item["plan_key"])
     if plan.get("legit") is not True:
-        return json_response(409, {"message": "Nothing to edit"})
+        return json_response(409, {"message": i18n.t("edit.nothing", i18n.pick_locale(event))})
 
     state = item.get("edit_state")
     if state == "RENDERING" and time.time() - float(item.get("edit_started_at") or 0) > STALE_EDIT_S:

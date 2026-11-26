@@ -21,5 +21,5 @@ class RequestOptions(Construct):
         for k, v in settings.items():
             launcher_fn.add_environment(k, v)   # the launcher refuses what capabilities does not list as ready
         res = user_id_resource.add_resource("capabilities")
-        res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["GET", "OPTIONS"], allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone"])
+        res.add_cors_preflight(allow_origins=apigw.Cors.ALL_ORIGINS, allow_methods=["GET", "OPTIONS"], allow_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"])
         res.add_method("GET", apigw.LambdaIntegration(self.fn, proxy=True), **cognito_auth)

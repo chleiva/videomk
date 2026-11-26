@@ -18,7 +18,7 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import intake, library, safety, usage, wallet
+from common import i18n, intake, library, safety, usage, wallet
 from engine import format_options
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
@@ -35,7 +35,11 @@ _dynamodb = boto3.resource("dynamodb")
 
 
 class BadRequest(Exception):
-    pass
+    """A 400. A protocol problem keeps its English text; a `Localized` message (something a person can cause) is shown in their language."""
+
+    def __init__(self, message: Any = ""):
+        self.localized = message if isinstance(message, i18n.Localized) else None
+        super().__init__(str(message))
 
 
 def parse_body(event: Dict[str, Any]) -> Dict[str, Any]:
@@ -56,9 +60,9 @@ def validate_prompt(body: Dict[str, Any]) -> str:
         raise BadRequest("'prompt' is required")
     prompt = " ".join(prompt.split())  # collapse whitespace/control chars
     if len(prompt) < MIN_PROMPT_CHARS:
-        raise BadRequest(f"'prompt' must be at least {MIN_PROMPT_CHARS} characters")
+        raise BadRequest(i18n.Localized("create.prompt_min", min=MIN_PROMPT_CHARS))
     if len(prompt) > MAX_PROMPT_CHARS:
-        raise BadRequest(f"'prompt' must be at most {MAX_PROMPT_CHARS} characters")
+        raise BadRequest(i18n.Localized("create.prompt_max", max=MAX_PROMPT_CHARS))
     return prompt
 
 
@@ -117,7 +121,7 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if not isinstance(lang, str) or (lang != "auto" and lang not in format_options.LANGUAGE_LABELS):
             raise BadRequest("'language' must be 'auto' or one of: " + ", ".join(format_options.LANGUAGE_LABELS))
         if lang != "auto" and lang not in format_options.ready_languages():
-            raise BadRequest("This language is not available yet")
+            raise BadRequest(i18n.Localized("create.language_unavailable"))
         out["language"] = lang
     for field, allowed in (("platform", format_options.PLATFORM_IDS), ("aspect", format_options.ASPECT_IDS), ("resolution", format_options.RESOLUTION_IDS)):
         if field in body and body[field] is not None:
@@ -125,9 +129,9 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
                 raise BadRequest(f"'{field}' must be one of: " + ", ".join(allowed))
             out[field] = body[field]
     if out.get("aspect", format_options.DEFAULT_ASPECT) not in format_options.ready_aspects():
-        raise BadRequest("This format is not available yet")
+        raise BadRequest(i18n.Localized("create.format_unavailable"))
     if out.get("resolution", format_options.DEFAULT_RESOLUTION) not in format_options.ready_resolutions():   # 4K is on only where the server says so (READY_RESOLUTIONS)
-        raise BadRequest("This resolution is not available yet")
+        raise BadRequest(i18n.Localized("create.resolution_unavailable"))
     if "theme" in body and body["theme"] is not None:
         if body["theme"] not in THEMES:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
@@ -192,12 +196,12 @@ def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *
     _dynamodb.Table(os.environ.get("VIDEOS_TABLE", "Videos")).put_item(**kwargs)
 
 
-def safety_gate(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def safety_gate(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[str, Any], locale: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """None to go on; else the response: 429 `paused` for a paused or held account, 400 `blocked` (recorded) for a request that must be stopped.
     One attempt with a 4 s timeout, then the deterministic screen (no retry here: the function has a 10 s budget and a clear prompt must never wait on this)."""
     if not safety.enabled():
         return None
-    lang = safety.guess_language(prompt, options.get("language"))
+    lang = locale or safety.guess_language(prompt, options.get("language"))   # the app's language (X-Locale) when it sends one, else the language of the request
     stopped = intake.paused(user_id, lang)
     if stopped:
         return json_response(429, stopped, {"Retry-After": str(stopped["retry_after"])})
@@ -210,11 +214,12 @@ def safety_gate(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[
 def handler(event: Dict[str, Any], context: Any):
     path_user_id = ((event or {}).get("pathParameters") or {}).get("user_id")
     auth_user_id = extract_cognito_sub(event)
+    loc = i18n.pick_locale(event)
 
     if not auth_user_id:
-        return json_response(401, {"message": "Unauthorized"})
+        return json_response(401, {"message": i18n.t("err.unauthorized", loc)})
     if not path_user_id or path_user_id != auth_user_id:
-        return json_response(403, {"message": "Forbidden"})
+        return json_response(403, {"message": i18n.t("err.forbidden", loc)})
     user_id = auth_user_id
 
     try:
@@ -222,15 +227,13 @@ def handler(event: Dict[str, Any], context: Any):
         prompt = validate_prompt(body)
         options = validate_options(body)
         brief = intake.clean_brief(body.get("brief"))   # the answers to the clarifying questions: known keys, short strings, at most 2 KB
-    except BadRequest as e:
-        return json_response(400, {"message": str(e)})
-    except intake.Invalid as e:
-        return json_response(400, {"message": str(e)})
+    except (BadRequest, intake.Invalid) as e:
+        return json_response(400, {"message": i18n.error_text(e, loc)})
 
     sm_arn = os.environ.get("STATE_MACHINE_ARN")
     if not sm_arn:
         logger.error("STATE_MACHINE_ARN is not configured")
-        return json_response(500, {"message": "Server configuration error"})
+        return json_response(500, {"message": i18n.t("err.server_config", loc)})
 
     region = request_region(event)
     if region:
@@ -245,7 +248,7 @@ def handler(event: Dict[str, Any], context: Any):
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
 
     # Safety gate: before any charge, copy or duplicate claim. The same check as POST .../videos/brief, so skipping `brief` skips nothing.
-    gated = safety_gate(user_id, prompt, brief, options)
+    gated = safety_gate(user_id, prompt, brief, options, i18n.explicit_locale(event))
     if gated:
         return gated
     if brief:
@@ -255,14 +258,14 @@ def handler(event: Dict[str, Any], context: Any):
         try:
             _s3.head_object(Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid))
         except ClientError:
-            return json_response(400, {"message": "One of your photos didn't finish uploading. Please try again."})
+            return json_response(400, {"message": i18n.t("create.photo_unfinished", loc)})
 
     try:
         if not bring_library_photos(user_id, options):
-            return json_response(400, {"message": "One of the photos you chose is no longer in your library."})
+            return json_response(400, {"message": i18n.t("create.photo_missing", loc)})
     except ClientError:
         logger.exception("could not copy library photos")
-        return json_response(500, {"message": "Could not prepare your photos. Please try again."})
+        return json_response(500, {"message": i18n.t("create.photo_prepare", loc)})
 
     # The same request twice within two minutes (a double tap, text that reappeared after sending) is one video: the second returns the first, charges nothing.
     fingerprint = hashlib.sha1(json.dumps([prompt.lower(), {k: options[k] for k in sorted(options) if k not in ("region",)}], sort_keys=True).encode("utf-8")).hexdigest()
@@ -284,10 +287,10 @@ def handler(event: Dict[str, Any], context: Any):
             usage.consume(f"unlimited:{user_id}", limit=int(os.environ.get("UNLIMITED_DAILY_VIDEOS", "50")))
     except usage.QuotaExceeded:
         usage.release_recent(user_id, fingerprint)
-        return json_response(429, {"message": "Daily limit for this test account reached."}, {"Retry-After": "3600"})
+        return json_response(429, {"message": i18n.t("create.test_limit", loc)}, {"Retry-After": "3600"})
     except wallet.InsufficientCredits as e:
         usage.release_recent(user_id, fingerprint)
-        return json_response(402, {"message": f"This video needs {e.needed} credit{'s' if e.needed != 1 else ''} and you have {e.balance}.",
+        return json_response(402, {"message": i18n.t("create.credits_needed", loc, needed=e.needed, balance=e.balance),
                                    "code": "insufficient_credits", "balance": e.balance, "needed": e.needed,
                                    **({"resolution": resolution, "credits_multiplier": multiplier} if multiplier != 1 else {})})
 
@@ -306,12 +309,12 @@ def handler(event: Dict[str, Any], context: Any):
         logger.exception("Failed to start workflow")
         wallet.refund(user_id, charged)
         usage.release_recent(user_id, fingerprint)
-        return json_response(500, {"message": "Failed to start workflow"})
+        return json_response(500, {"message": i18n.t("create.start_failed", loc)})
     except Exception:
         logger.exception("Failed to start workflow")
         wallet.refund(user_id, charged)
         usage.release_recent(user_id, fingerprint)
-        return json_response(500, {"message": "Failed to start workflow"})
+        return json_response(500, {"message": i18n.t("create.start_failed", loc)})
 
     start_date = resp.get("startDate")
     return json_response(

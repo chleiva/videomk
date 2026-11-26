@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { endpoints } from "../lib/config";
 import { getTaskId } from "../lib/storage";
+import { useLocale } from "../lib/useLocale";
 
 type QuestionOption = { id: string; label: string };
 interface Question {
@@ -10,6 +11,7 @@ interface Question {
 }
 
 export default function QuestionsStepper() {
+  const { t } = useLocale();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -19,8 +21,8 @@ export default function QuestionsStepper() {
   const current = questions[currentIndex];
   const progress = useMemo(() => {
     if (questions.length === 0) return "";
-    return `Step ${currentIndex + 1} of ${questions.length}`;
-  }, [currentIndex, questions.length]);
+    return t("questions.step", { current: currentIndex + 1, total: questions.length });
+  }, [currentIndex, questions.length, t]);
 
   useEffect(() => {
     const taskId = getTaskId();
@@ -62,18 +64,18 @@ export default function QuestionsStepper() {
       window.location.href = "/generations/index.html";
     } catch (e) {
       console.error(e);
-      alert("Could not submit your answers. Please try again.");
+      alert(t("questions.submit_error"));
     } finally {
       setSubmitting(false);
     }
   }
 
   if (loading) {
-    return <div className="text-neutral-500">Loading questions…</div>;
+    return <div className="text-neutral-500">{t("questions.loading")}</div>;
   }
 
   if (!current) {
-    return <div className="text-neutral-500">No questions available.</div>;
+    return <div className="text-neutral-500">{t("questions.none")}</div>;
   }
 
   return (
@@ -107,7 +109,7 @@ export default function QuestionsStepper() {
             disabled={!canNext() || submitting}
             className="inline-flex items-center justify-center rounded-2xl bg-black px-6 py-3 text-sm font-semibold text-white shadow transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {currentIndex < questions.length - 1 ? "Next" : submitting ? "Submitting…" : "Finish"}
+            {currentIndex < questions.length - 1 ? t("questions.next") : submitting ? t("questions.submitting") : t("questions.finish")}
           </button>
         </div>
       </div>

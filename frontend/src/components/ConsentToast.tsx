@@ -1,12 +1,16 @@
 // src/react/ConsentToast.tsx
 import React, { useEffect, useState } from "react";
+import { pathForLocale } from "../lib/i18n";
+import type { Locale } from "../lib/i18n";
+import { useLocale } from "../lib/useLocale";
 
 type Choice = "accepted_all" | "necessary_only";
 
 const STORAGE_KEY = "consent.choice";
 const STORAGE_TS = "consent.timestamp";
 
-export default function ConsentToast() {
+export default function ConsentToast({ locale: fixedLocale }: { locale?: Locale }) {
+  const { t, locale } = useLocale(fixedLocale);
   const [open, setOpen] = useState(false);
   const [animOK, setAnimOK] = useState(true);
 
@@ -30,7 +34,7 @@ export default function ConsentToast() {
   return (
     <div
       role="dialog"
-      aria-label="Cookie notice"
+      aria-label={t("consent.label")}
       aria-live="polite"
       className={[
         "fixed z-50 bottom-4 right-4 w-[min(92vw,360px)]",
@@ -43,24 +47,24 @@ export default function ConsentToast() {
         <div className="mt-0.5 h-2.5 w-2.5 rounded-full bg-neutral-900 shrink-0" aria-hidden="true" />
         <div className="min-w-0">
           <p className="text-sm font-medium text-neutral-900">
-            This site stores only what keeps you signed in.
+            {t("consent.title")}
           </p>
           <p className="mt-1 text-xs text-neutral-600">
-            No advertising or analytics cookies, and no trackers.{" "}
-            <a href="/privacy" className="underline underline-offset-2">Privacy</a>
+            {t("consent.body")}{" "}
+            <a href={pathForLocale("/privacy", locale)} className="underline underline-offset-2">{t("consent.privacy")}</a>
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               onClick={() => decide("necessary_only")}
               className="rounded-xl bg-black px-3 py-1.5 text-sm font-medium text-white"
             >
-              OK
+              {t("consent.ok")}
             </button>
           </div>
         </div>
         <button
           onClick={() => decide("necessary_only")}
-          aria-label="Close"
+          aria-label={t("consent.close")}
           className="ml-auto rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100"
         >
           ✕

@@ -7,6 +7,15 @@
     try { console.log('[watch]', msg, obj || ''); } catch {}
   }
 
+  // the person's language for the API (the same rule as src/lib/i18n.ts: saved choice, then the browser, then English)
+  function locale() {
+    try {
+      const tags = [localStorage.getItem('vmk_locale')].concat(navigator.languages && navigator.languages.length ? Array.from(navigator.languages) : [navigator.language]);
+      for (const t of tags) { const p = String(t || '').toLowerCase().replace('_', '-').split('-')[0]; if (p === 'en' || p === 'es') return p; }
+    } catch (e) {}
+    return 'en';
+  }
+
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
   if (!id) { log('missing id'); return; }
@@ -14,7 +23,7 @@
   async function fetchPresignedUrl(sub, idToken) {
     const endpoint = 'https://api.videomk.com/users/' + encodeURIComponent(sub) + '/videos/' + encodeURIComponent(id);
     log('fetching presigned URL', { endpoint });
-    const r = await fetch(endpoint, { headers: { Authorization: 'Bearer ' + idToken } });
+    const r = await fetch(endpoint, { headers: { Authorization: 'Bearer ' + idToken, 'X-Locale': locale() } });
     if (!r.ok) { log('presign failed', { status: r.status }); return null; }
     const j = await r.json();
     if (!j || !j.url) { log('no url in response'); return null; }
