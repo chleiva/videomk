@@ -9,7 +9,7 @@ Files: `frontend/src/pages/privacy.astro`, `terms.astro`, `delete-account.astro`
 | Registered address, company number | empty (`COMPANY_ADDRESS`, `COMPANY_NUMBER`); pages show them only when filled | fill with the registered office and Companies House number: UK law expects a company website to show them, and Apple/Google may ask |
 | Governing law | `England and Wales` (it was in the old terms) | keep if the company is English; change the constant otherwise |
 | Regulator named | ICO or local authority (`REGULATOR`) | keep; if you serve many EU users, consider naming an EU representative (UK GDPR/EU GDPR Art. 27) |
-| Minimum age | 13, or the higher local age (`MIN_AGE`) | keep 13 (matches the old text and the Android target-audience answer); set 16 if you prefer simple EU compliance |
+| Minimum age | 13, or the higher local age (`MIN_AGE`) | **Owner decided 16 on 2026-11-26** (simple EU compliance). Store age-rating / target-audience answers must say 16+ |
 | Liability floor | greater of 12 months paid and GBP 100 (old text kept) | keep |
 | Notice of term changes | 14 days | keep or lengthen to 30 |
 | Response times | 30 days for privacy requests, "two working days" for support (old text kept) | keep |
