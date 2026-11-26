@@ -97,3 +97,12 @@ def test_the_deck_quota_counters_are_removed_with_the_account():
     from common import deletion
 
     assert {"deck:", "deckproc:"} <= set(deletion.USAGE_PREFIXES)
+
+
+def test_the_generate_request_model_accepts_a_deck_without_a_prompt(synth):
+    """The API edge rejected {'deck': id} with 'Invalid request body' on QA: the model required a prompt and did not know 'deck'."""
+    t = synth(deckToVideo="1")
+    models = [v for v in of(t, "AWS::ApiGateway::Model").values() if v["Properties"].get("Name") == "GenerateRequest"]
+    assert models, "GenerateRequest model missing"
+    schema = models[0]["Properties"]["Schema"]
+    assert "deck" in schema["properties"] and not schema.get("required")   # the launcher still refuses a request with neither prompt nor deck

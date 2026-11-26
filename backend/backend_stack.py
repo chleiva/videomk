@@ -591,9 +591,10 @@ class BackendStack(Stack):
             schema=apigw.JsonSchema(
                 schema=apigw.JsonSchemaVersion.DRAFT4,
                 type=apigw.JsonSchemaType.OBJECT,
-                required=["prompt"],
+                required=[],   # a prompt is required unless a deck is given: the launcher decides (a deck needs no description)
                 properties={
                     "prompt": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=10, max_length=2000),
+                    "deck": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$"),   # a prepared presentation (docs/DECK_TO_VIDEO.md); ownership and readiness: the launcher
                     "client_request_id": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=8, max_length=64),
                     "target_minutes": apigw.JsonSchema(type=apigw.JsonSchemaType.NUMBER, minimum=0.25, maximum=12),
                     "theme": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, enum=["midnight", "paper", "sunrise"]),

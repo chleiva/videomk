@@ -5,7 +5,7 @@ Files: `frontend/src/pages/privacy.astro`, `terms.astro`, `delete-account.astro`
 ## 1. Blanks to fill (all in `frontend/src/data/legal.ts`; nothing is invented)
 | Item | Today | Proposed default |
 |---|---|---|
-| Company name, contact email | `Agilegency Ltd`, `support@plorer.ai` (already in the file) | keep; consider a `privacy@videomk.com` alias later |
+| Company name, contact email | `Agilegency Ltd`, `hello@videomk.com` (already in the file) | keep; consider a `privacy@videomk.com` alias later |
 | Registered address, company number | empty (`COMPANY_ADDRESS`, `COMPANY_NUMBER`); pages show them only when filled | fill with the registered office and Companies House number: UK law expects a company website to show them, and Apple/Google may ask |
 | Governing law | `England and Wales` (it was in the old terms) | keep if the company is English; change the constant otherwise |
 | Regulator named | ICO or local authority (`REGULATOR`) | keep; if you serve many EU users, consider naming an EU representative (UK GDPR/EU GDPR Art. 27) |
@@ -103,7 +103,7 @@ Other Play items: privacy policy URL `https://videomk.com/privacy`; target audie
 Tracking: none ("Data Not Used to Track You"): no advertising identifier, no third-party advertising or analytics SDK. Privacy policy URL `https://videomk.com/privacy`. Support URL `https://videomk.com/support`. Account deletion in app exists (5.1.1(v)). AI-generated content: the age-rating questionnaire asks about user-generated and AI content; answer as the product behaves and expect 12+ to 13+ (confirm in the result).
 
 ### Google OAuth consent screen
-App name `videomk`; user support email `support@plorer.ai`; developer contact email: the same; app home page `https://videomk.com` (must link to the privacy policy: the footer does); privacy policy `https://videomk.com/privacy`; terms `https://videomk.com/terms`; authorised domain `videomk.com` (verify in Search Console); scopes `openid`, `email`, `profile` only (non-sensitive: no verification review beyond branding). The Privacy section 8 states exactly what is received and that no other Google data is accessed (Limited Use is not triggered, but the statement is there).
+App name `videomk`; user support email `hello@videomk.com`; developer contact email: the same; app home page `https://videomk.com` (must link to the privacy policy: the footer does); privacy policy `https://videomk.com/privacy`; terms `https://videomk.com/terms`; authorised domain `videomk.com` (verify in Search Console); scopes `openid`, `email`, `profile` only (non-sensitive: no verification review beyond branding). The Privacy section 8 states exactly what is received and that no other Google data is accessed (Limited Use is not triggered, but the statement is there).
 
 ### Sign in with Apple
 Services ID with domain and return URLs from `docs/AUTH_SOCIAL.md`; privacy policy URL in App Store Connect; in-app account deletion with token revocation (flag `appleRevoke`, off by default: switch it on before submission); handle Hide My Email addresses (`@privaterelay.appleid.com`): if you ever email users, register your sending domain and addresses with Apple's private email relay service in the developer account; the policy says relay addresses are separate accounts.

@@ -1,6 +1,6 @@
 // The only place the legal identity and contact live: change it here and every page follows.
 export const COMPANY = "Agilegency Ltd";
-export const CONTACT_EMAIL = "support@plorer.ai";
+export const CONTACT_EMAIL = "hello@videomk.com";
 export const EFFECTIVE = "26 November 2026";
 export const SITE = "videomk.com";
 // Optional: when set, shown next to the company name in the Privacy Policy and Terms. Leave "" until you have them.
