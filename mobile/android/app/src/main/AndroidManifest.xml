@@ -43,6 +43,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="${authScheme}" android:host="${authHost}" android:path="${authPath}" />
             </intent-filter>
+            <!-- The hosted-UI sign-out and the Apple revoke returns (account deletion). They only move a running deletion one step on; with none running they are ignored. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${authScheme}" android:host="${authHost}" android:path="/signout" />
+                <data android:scheme="${authScheme}" android:host="${authHost}" android:path="/apple-revoked" />
+            </intent-filter>
         </activity>
 
         <activity

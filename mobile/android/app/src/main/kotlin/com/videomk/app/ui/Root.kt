@@ -41,6 +41,7 @@ import androidx.navigation.navArgument
 import com.videomk.app.AppContainer
 import com.videomk.app.BuildConfig
 import com.videomk.app.VideoMkApp
+import com.videomk.app.core.DeletionState
 import com.videomk.app.core.SignInProvider
 import com.videomk.app.core.SocialSwitches
 
@@ -54,7 +55,10 @@ val LocalContainerOrNull = compositionLocalOf<AppContainer?> { null }
 fun VideoMkRoot(app: AppViewModel, composer: ComposerViewModel, container: AppContainer, onSignIn: (SignInProvider) -> Unit, social: SocialSwitches = SocialSwitches()) {
     val state by app.state.collectAsState()
     Surface(Modifier.fillMaxSize().semantics { if (BuildConfig.DEBUG) testTagsAsResourceId = true }, color = Vmk.colors.background) {
-        when (val phase = state.phase) {
+        val deletionState = app.deletion?.state?.collectAsState()?.value
+        if (deletionState is DeletionState.Accepted) {
+            DeletionDoneScreen(deletionState.apple, onOpenApple = { app.deletion?.openApple() }, onDone = { app.deletion?.dismissDone() })
+        } else when (val phase = state.phase) {
             Phase.Launching -> FullScreenSpinner()
             Phase.NotConfigured, Phase.SignedOut -> SignInScreen(state, social, onSignIn)
             is Phase.SignedIn -> androidx.compose.runtime.CompositionLocalProvider(LocalContainer provides container, LocalContainerOrNull provides container) { SignedInNav(app, composer, container, phase.email) }
@@ -119,7 +123,14 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             EditorScreen(vm, onClose = { nav.popBackStack() })
         }
         composable("wallet") { WalletScreen(app, onBack = { nav.popBackStack() }) }
-        composable("settings") { SettingsScreen(email, onBack = { nav.popBackStack() }, onSignOut = { app.signOut() }) }
+        composable("settings") {
+            val d = app.deletion
+            val ds = d?.state?.collectAsState()?.value ?: DeletionState.Idle
+            SettingsScreen(
+                email, onBack = { nav.popBackStack() }, onSignOut = { app.signOut() },
+                deletion = ds, onDeleteAccount = d?.let { f -> { typed: String -> f.start(typed) } }, onCancelDeletion = { d?.cancel() }, onDeletionClosed = { d?.reset() },
+            )
+        }
     }
     }
     androidx.compose.runtime.LaunchedEffect(Unit) { container.mediaUploads?.resumeIfAny(); container.organize?.resumeIfAny() }   // an interrupted upload queue continues on the next launch

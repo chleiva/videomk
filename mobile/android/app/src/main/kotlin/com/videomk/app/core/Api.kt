@@ -47,7 +47,7 @@ class ApiClient(
     private val appVersion: String = "0",
     private val region: () -> String? = { java.util.Locale.getDefault().country.takeIf { it.isNotEmpty() } },
     private val timeZone: () -> String = { java.util.TimeZone.getDefault().id },
-) {
+) : AccountApi {
     suspend fun requestUploads(count: Int): List<UploadSlot> {
         val body = buildJsonObject { put("count", count) }
         val o = send("POST", listOf("uploads"), body = body)
@@ -109,6 +109,38 @@ class ApiClient(
             put("mode", mode.wire)
         }
         return send("POST", listOf("videos", videoId, "edits"), body = body, conflictIsEdit = true).requireInt("rev")
+    }
+
+    // account deletion (docs/ACCOUNT_DELETION.md): both calls take the token and its own `sub` from the caller, so a re-authenticated token is used as it is
+
+    override suspend fun deleteAccount(idToken: String, sub: String): AccountDeleteResult {
+        val (code, text) = try { raw("POST", listOf("account", "delete"), idToken, sub, buildJsonObject { put("confirm", "DELETE") }) } catch (e: IOException) { return AccountDeleteResult.Offline }
+        val o = runCatching { parseObject(text) }.getOrNull()
+        return when (code) {
+            in 200..299 -> AccountDeleteResult.Accepted(AppleRevoke.fromWire(o?.str("apple")))
+            401 -> if (o?.str("code") == "reauth_required") AccountDeleteResult.ReauthRequired else AccountDeleteResult.Unauthorized
+            403 -> AccountDeleteResult.Forbidden
+            400 -> AccountDeleteResult.Rejected
+            else -> AccountDeleteResult.ServerError
+        }
+    }
+
+    override suspend fun appleRevokeUrl(idToken: String, sub: String): String? {
+        val (code, text) = try { raw("POST", listOf("account", "apple-revoke"), idToken, sub, buildJsonObject { put("return", "app") }) } catch (e: IOException) { return null }
+        if (code !in 200..299) return null
+        return runCatching { parseObject(text).str("authorize_url") }.getOrNull()?.takeIf { AppleRevokeLink.isAcceptable(it) }
+    }
+
+    /** One request with the caller's token. Never logs; throws [IOException] for any network problem (including a timeout). */
+    private suspend fun raw(method: String, path: List<String>, idToken: String, sub: String, body: JsonObject): Pair<Int, String> {
+        val url = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(sub).also { b -> path.forEach { b.addPathSegment(it) } }.build()
+        val rb = Request.Builder().url(url)
+            .header("Authorization", "Bearer $idToken")
+            .header("X-Platform", "android")
+            .header("X-App-Version", appVersion)
+            .method(method, body.toString().toRequestBody("application/json".toMediaType()))
+        val response = try { http.newBuilder().callTimeout(30, TimeUnit.SECONDS).build().newCall(rb.build()).await() } catch (e: CancellationException) { throw e }
+        return response.use { r -> r.code to r.body.string() }
     }
 
     // plumbing

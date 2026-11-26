@@ -89,7 +89,8 @@ deleted; the microphone/speech is used only for dictation; what account data is 
 | Device or other IDs, analytics, crash logs, diagnostics | No | | | No analytics or crash SDK. (If you add Play Integrity later, declare device integrity data.) |
 | Financial info | No | | | Update when Play Billing is added. |
 - Data is encrypted in transit (HTTPS): **Yes**.
-- Users can request deletion: **Yes** only once account deletion exists (see blockers below). Until then answer honestly.
+- Users can request deletion: **Yes** (in-app deletion exists: Settings > Delete account, contract in `docs/ACCOUNT_DELETION.md`). Answer Yes only for the build and stage that talk to a deployed backend with the deletion routes (qa first, then prod).
+- **Web deletion URL** (Play Console > App content > Data safety > "Data deletion" > "Add a link that users can use to request deletion"): enter `https://videomk.com/delete-account`. The page exists (frontend `delete-account.astro`) and describes the in-app route, the email route for people who cannot sign in, what is deleted and how long it takes. Both Play's "delete account" link and the "delete some data without deleting the account" answer can use it (partial deletion: single videos and My media photos are deletable in the app, the page says so).
 - No ads, no data sold, no data shared with third parties for advertising.
 
 **Content rating** (IARC questionnaire): category *Utility/Productivity/Other*; no violence, sexual content, drugs, gambling in the app itself; **the app generates content from user input
@@ -106,7 +107,7 @@ reviewed build points to) in *App access > Add instructions*. Create it with `aw
 report button. Decide before production (suggested: a "Report a problem" item in Settings and on the video page that opens a pre-filled email or a backend call).
 
 **Account deletion**: Play requires apps that let people create an account to offer deletion **inside the app** and a **web URL** for deletion requests (entered in the Data safety form).
-The backend/app do not have account deletion yet (it is on the backlog in `mobile/ios/README.md`). This blocks production on both stores; internal and closed testing do not need it.
+The Android app now has it (Settings > Delete account: confirmation sheet with the typed word DELETE, a recent sign-in check with re-authentication in a Custom Tab, then local data is cleared and the app signs out; contract in `docs/ACCOUNT_DELETION.md`). It works only against a backend deployed with the account routes, so test it on qa with a throwaway user (never a shared QA account: the deletion is real) before production. In the Play Console enter the web URL `https://videomk.com/delete-account` in the Data safety form (Data deletion section).
 
 **Permissions declarations**: only `RECORD_AUDIO` (a normal runtime permission): no special declaration form. No foreground services, no photo/video permission declaration (the system photo
 picker is used). **Advertising ID**: declare *No* (the app does not use it).

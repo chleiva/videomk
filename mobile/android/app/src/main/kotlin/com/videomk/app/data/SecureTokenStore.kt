@@ -43,7 +43,8 @@ class SecureTokenStore private constructor(private val prefs: SharedPreferences?
 
     override fun clear() {
         fallback.clear()
-        try { prefs?.edit()?.clear()?.apply() } catch (e: Exception) { Log.w(TAG, "token clear failed", e) }
+        // commit, not apply: a wipe must be on disk before the app says it is done
+        try { prefs?.edit()?.clear()?.commit() } catch (e: Exception) { Log.w(TAG, "token clear failed", e) }
     }
 
     companion object {

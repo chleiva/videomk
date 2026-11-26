@@ -69,4 +69,7 @@ object DebugHooks {
         runCatching { java.io.File(context.filesDir, "fake_social").readText().trim() }.getOrNull()?.let {
             com.videomk.app.core.SocialSwitches(google = it == "both" || it == "google", apple = it == "both" || it == "apple")
         }
+
+    /** `vmk_debug_fixture=<name>`: draw a screen with fake data instead of the app (see DeletionFixture). */
+    fun fixture(intent: Intent?): (@androidx.compose.runtime.Composable () -> Unit)? = DeletionFixture.content(intent?.getStringExtra("vmk_debug_fixture"))
 }

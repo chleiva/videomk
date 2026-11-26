@@ -85,6 +85,8 @@ class AppViewModel(
     val config: AppConfig?,
     signedOutEvents: Flow<Unit>,
     private val clock: () -> Long = System::currentTimeMillis,
+    accountApi: com.videomk.app.core.AccountApi? = null,
+    private val wiper: com.videomk.app.core.LocalWiper = com.videomk.app.core.LocalWiper { },
 ) : ViewModel() {
     private val _state = MutableStateFlow(AppState())
     val state: StateFlow<AppState> = _state.asStateFlow()
@@ -102,6 +104,11 @@ class AppViewModel(
     var browserOpen = false
     var startCount = 0
         private set
+
+    /** Account deletion (Settings > Delete account). Null when the app has no server or sign-in configured. */
+    val deletion: com.videomk.app.core.AccountDeletionFlow? = if (auth != null && accountApi != null) {
+        com.videomk.app.core.AccountDeletionFlow(auth, accountApi, wiper, viewModelScope, onWiped = { signOut() }, onSessionEnded = { signOut() })
+    } else null
 
     init {
         viewModelScope.launch { signedOutEvents.collect { signOut() } }
@@ -141,12 +148,15 @@ class AppViewModel(
 
     /** The user left the browser without finishing. Nothing to report. */
     fun signInAbandoned() {
+        deletion?.onBrowserAbandoned()   // only acts while the deletion's sign-in step is open
         auth?.cancelSignIn()
         update { it.copy(isSigningIn = false, signInProvider = null) }
     }
 
     fun onAuthCallback(callback: String) {
         val a = auth ?: return
+        val d = deletion
+        if (d != null && d.reauthPending) { d.onReauthCallback(callback); return }   // the redirect of the "sign in again" step of an account deletion
         if (!a.signInInProgress) return   // a stray or repeated redirect
         viewModelScope.launch {
             try {
@@ -168,7 +178,7 @@ class AppViewModel(
 
     fun signOut() {
         auth?.signOut()
-        photoData.clear()
+        photoData.clear(); photoMeta.clear(); libraryData.clear(); briefData.clear()
         update { AppState(phase = Phase.SignedOut) }
     }
 

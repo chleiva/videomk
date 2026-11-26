@@ -51,5 +51,18 @@ class AppContainer(
 
     val organize: com.videomk.app.data.OrganizeController? by lazy { mediaApi?.let { com.videomk.app.data.OrganizeController(appContext, it, appScope) } }
 
+    /** The account deletion calls (the API client itself). Null when the app has no server address. */
+    val accountApi: com.videomk.app.core.AccountApi? by lazy {
+        val a = auth
+        if (config != null && a != null) ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME) else null
+    }
+
+    /** Everything this device keeps for the person: used once the server accepted an account deletion. Never throws; a failing step does not stop the others. */
+    suspend fun wipeLocalData() = com.videomk.app.data.LocalDataWiper.wipe(
+        appContext,
+        stopWork = { mediaUploads?.cancel(); organize?.cancelJob() },
+        clearTokens = { auth?.signOut() },
+    )
+
     fun warmUp() { Thread { runCatching { auth } }.start() }
 }

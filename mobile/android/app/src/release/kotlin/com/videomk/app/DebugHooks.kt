@@ -19,4 +19,5 @@ object DebugHooks {
     @Suppress("UNUSED_PARAMETER") fun manyVideos(context: android.content.Context): Int = 0
     @Suppress("UNUSED_PARAMETER") fun emptyHome(context: android.content.Context): Boolean = false
     @Suppress("UNUSED_PARAMETER") fun social(context: android.content.Context): com.videomk.app.core.SocialSwitches? = null
+    @Suppress("UNUSED_PARAMETER") fun fixture(intent: Intent?): (@androidx.compose.runtime.Composable () -> Unit)? = null
 }

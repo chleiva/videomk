@@ -60,6 +60,9 @@ object Jwt {
     fun subject(token: String): String? = claims(token)?.str("sub")
     fun email(token: String): String? = claims(token)?.str("email")
     fun expiry(token: String): Instant? = epochSeconds(claims(token)?.num("exp"))
+
+    /** When the person last signed in interactively (`auth_time`); null when the token does not say. */
+    fun authTime(token: String): Instant? = epochSeconds(claims(token)?.num("auth_time"))
 }
 
 data class Tokens(val idToken: String, val accessToken: String, val refreshToken: String?, val expiresAt: Instant)
@@ -108,6 +111,15 @@ data class SocialSwitches(val google: Boolean = false, val apple: Boolean = fals
     val anySocial: Boolean get() = google || apple
 }
 
+sealed interface ReauthResult {
+    data class Completed(val authorization: Authorization) : ReauthResult
+    data class Retry(val url: HttpUrl) : ReauthResult
+    /** The person signed in as somebody else: nothing was stored. */
+    data object WrongAccount : ReauthResult
+    data object Cancelled : ReauthResult
+    data object Failed : ReauthResult
+}
+
 sealed interface SignInResult {
     data object Completed : SignInResult
     /** Cognito's known first-federated-sign-in quirk: the same authorize request is sent once more (with fresh PKCE and state). */
@@ -123,13 +135,15 @@ class AuthService(
     private val store: TokenStore,
     private val http: OkHttpClient,
     private val now: () -> Instant = { Instant.now() },
-) : AuthorizationProviding {
+) : DeletionSession {
     private data class PendingSignIn(val pkce: PKCE, val state: String, val provider: SignInProvider, val retried: Boolean)
 
     private val lock = Mutex()
     private var refreshJob: Deferred<Tokens>? = null
     private val scope = CoroutineScope(Dispatchers.IO)
     @Volatile private var pending: PendingSignIn? = null
+    private data class PendingReauth(val pkce: PKCE, val state: String, val expectedSub: String, val retried: Boolean)
+    @Volatile private var reauth: PendingReauth? = null
 
     val isSignedIn: Boolean get() = store.load() != null
     val email: String? get() = store.load()?.let { Jwt.email(it.idToken) }
@@ -142,7 +156,11 @@ class AuthService(
         val pkce = PKCE.generate()
         val state = PKCE.generate().verifier
         pending = PendingSignIn(pkce, state, provider, retried)
-        return config.authDomain.newBuilder().addPathSegments("oauth2/authorize")
+        return buildAuthorizeUrl(pkce, state, provider.idp, forceLogin = false)
+    }
+
+    private fun buildAuthorizeUrl(pkce: PKCE, state: String, idp: String?, forceLogin: Boolean): HttpUrl =
+        config.authDomain.newBuilder().addPathSegments("oauth2/authorize")
             .addQueryParameter("response_type", "code")
             .addQueryParameter("client_id", config.clientId)
             .addQueryParameter("redirect_uri", config.redirectUri)
@@ -150,8 +168,59 @@ class AuthService(
             .addQueryParameter("state", state)
             .addQueryParameter("code_challenge_method", "S256")
             .addQueryParameter("code_challenge", pkce.challenge)
-            .also { b -> provider.idp?.let { b.addQueryParameter("identity_provider", it) } }
+            .also { b ->
+                idp?.let { b.addQueryParameter("identity_provider", it) }
+                // The classic hosted UI ignores both (docs/ACCOUNT_DELETION.md section 2); they make a later move to managed login correct without an app change.
+                if (forceLogin) { b.addQueryParameter("prompt", "login"); b.addQueryParameter("max_age", "0") }
+            }
             .build()
+
+    // re-authentication (account deletion): the stored session is left untouched until the new sign-in is proven to be the same account
+
+    /** The hosted-UI sign-out page (ends the browser session only; the app's own tokens are not touched). Returns to `com.videomk.app://auth/signout`. */
+    override fun logoutUrl(): HttpUrl = config.authDomain.newBuilder().addPathSegments("logout")
+        .addQueryParameter("client_id", config.clientId)
+        .addQueryParameter("logout_uri", config.signOutUri)
+        .build()
+
+    /** A normal authorize (code + PKCE, hosted page: no identity provider, so any way of signing in is offered) with `prompt=login&max_age=0`. */
+    override fun beginReauth(expectedSub: String): HttpUrl = reauthUrl(expectedSub, retried = false)
+
+    private fun reauthUrl(expectedSub: String, retried: Boolean): HttpUrl {
+        val pkce = PKCE.generate()
+        val state = PKCE.generate().verifier
+        reauth = PendingReauth(pkce, state, expectedSub, retried)
+        return buildAuthorizeUrl(pkce, state, null, forceLogin = true)
+    }
+
+    override val reauthInProgress: Boolean get() = reauth != null
+    override fun cancelReauth() { reauth = null }
+
+    /**
+     * Finishes the re-authentication. The new tokens replace the stored ones only when their `sub` is the one that asked to delete; a
+     * different account is refused and nothing is stored. The state is checked first, for every callback.
+     */
+    override suspend fun completeReauth(callback: String): ReauthResult {
+        val p = reauth ?: return ReauthResult.Failed
+        reauth = null
+        val query = parseQuery(callback)
+        val state = query["state"]
+        if (state == null || !MessageDigest.isEqual(state.toByteArray(), p.state.toByteArray())) return ReauthResult.Failed
+        if (query["error"] != null) {
+            if (isAlreadyFoundEntry(query["error_description"]) && !p.retried) return ReauthResult.Retry(reauthUrl(p.expectedSub, retried = true))
+            return if (query["error"] == "access_denied") ReauthResult.Cancelled else ReauthResult.Failed
+        }
+        val code = query["code"] ?: return ReauthResult.Failed
+        val t = try {
+            tokenRequest(
+                mapOf("grant_type" to "authorization_code", "client_id" to config.clientId, "code" to code, "redirect_uri" to config.redirectUri, "code_verifier" to p.pkce.verifier),
+                previous = null,
+            )
+        } catch (e: AuthException) { return ReauthResult.Failed }
+        val sub = Jwt.subject(t.idToken) ?: return ReauthResult.Failed
+        if (sub != p.expectedSub) return ReauthResult.WrongAccount
+        store.save(t)
+        return ReauthResult.Completed(Authorization(t.idToken, sub))
     }
 
     /** True while a sign-in has been started and its redirect has not arrived yet. */
@@ -185,7 +254,7 @@ class AuthService(
 
     fun cancelSignIn() { pending = null }
 
-    fun signOut() { pending = null; store.clear() }
+    fun signOut() { pending = null; reauth = null; store.clear() }
 
     /** For automated tests and QA builds only: seed a session from tokens obtained out of band. */
     fun seed(tokens: Tokens) = store.save(tokens)

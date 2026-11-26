@@ -7,10 +7,10 @@ import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import java.util.Base64
 
-fun fakeJwt(sub: String = "user-1", email: String? = "me@example.com", exp: Long = System.currentTimeMillis() / 1000 + 3600): String {
+fun fakeJwt(sub: String = "user-1", email: String? = "me@example.com", exp: Long = System.currentTimeMillis() / 1000 + 3600, authTime: Long? = null): String {
     val enc = Base64.getUrlEncoder().withoutPadding()
     val header = enc.encodeToString("""{"alg":"none"}""".toByteArray())
-    val payload = enc.encodeToString("""{"sub":"$sub"${if (email != null) ""","email":"$email"""" else ""},"exp":$exp}""".toByteArray())
+    val payload = enc.encodeToString("""{"sub":"$sub"${if (email != null) ""","email":"$email"""" else ""},"exp":$exp${if (authTime != null) ""","auth_time":$authTime""" else ""}}""".toByteArray())
     return "$header.$payload.sig"
 }
 

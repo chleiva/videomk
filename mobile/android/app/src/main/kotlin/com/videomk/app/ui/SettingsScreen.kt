@@ -43,11 +43,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.videomk.app.BuildConfig
+import com.videomk.app.core.DeletionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
+fun SettingsScreen(
+    email: String?, onBack: () -> Unit, onSignOut: () -> Unit,
+    deletion: DeletionState = DeletionState.Idle, onDeleteAccount: ((String) -> Unit)? = null, onCancelDeletion: () -> Unit = {}, onDeletionClosed: () -> Unit = {},
+    initialSheetOpen: Boolean = false, initialTyped: String = "",
+) {
     var confirm by rememberSaveable { mutableStateOf(false) }
+    var deleteSheet by rememberSaveable { mutableStateOf(initialSheetOpen) }
+    var typed by rememberSaveable { mutableStateOf(initialTyped) }
     val uri = LocalUriHandler.current
     Scaffold(
         containerColor = Vmk.colors.background,
@@ -87,6 +94,7 @@ fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
                     com.videomk.app.ui.LocalContainerOrNull.current?.organize?.let { OrganizeSetting(it) }
                 }
             }
+            if (onDeleteAccount != null) DeleteAccountCard { deleteSheet = true }
             Card {
                 Column {
                     Text("About", style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
@@ -100,6 +108,12 @@ fun SettingsScreen(email: String?, onBack: () -> Unit, onSignOut: () -> Unit) {
                 }
             }
         }
+    }
+    if (deleteSheet && onDeleteAccount != null) {
+        DeleteAccountSheet(
+            state = deletion, typed = typed, onTyped = { typed = it }, onStart = onDeleteAccount, onCancelReauth = onCancelDeletion,
+            onClose = { deleteSheet = false; typed = ""; onDeletionClosed() },
+        )
     }
     if (confirm) {
         AlertDialog(
