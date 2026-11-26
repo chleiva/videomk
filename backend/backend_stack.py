@@ -496,7 +496,7 @@ class BackendStack(Stack):
             access_token_validity=Duration.hours(1), id_token_validity=Duration.hours(1), refresh_token_validity=Duration.days(60),
             prevent_user_existence_errors=True,
         )
-        # Sign-in runs on our own host (`-c authDomain=auth.videomk.com -c authCertArn=<ACM cert in us-east-1>`): Google and Apple show it on their consent screens.
+        # Sign-in runs on our own host (`-c authDomain=login.videomk.com -c authCertArn=<ACM cert in us-east-1>`): Google and Apple show it on their consent screens.
         auth_host, auth_cert = self.node.try_get_context("authDomain"), self.node.try_get_context("authCertArn")
         if auth_host and auth_cert:
             hosted_ui = user_pool.add_domain("HostedUi", custom_domain=cognito.CustomDomainOptions(domain_name=auth_host, certificate=acm.Certificate.from_certificate_arn(self, "AuthCert", auth_cert)))

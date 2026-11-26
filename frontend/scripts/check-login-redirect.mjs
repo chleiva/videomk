@@ -13,7 +13,7 @@ const social = process.argv.includes("--social");
 const shotsAt = process.argv.indexOf("--shots");
 const shots = shotsAt > 0 ? process.argv[shotsAt + 1] : null;
 const CHROME = process.env.CHROME || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const AUTH_HOST = "auth.videomk.com";
+const AUTH_HOST = "login.videomk.com";
 const PORT = 4321;
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" };
 
