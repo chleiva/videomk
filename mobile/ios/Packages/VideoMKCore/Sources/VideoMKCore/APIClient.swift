@@ -76,8 +76,12 @@ public struct APIClient: Sendable {
     }
 
     /// `clientRequestID` makes a retry of the same attempt idempotent (no double charge, no second video).
-    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil) async throws -> String {
-        var fields: [String: Any] = ["prompt": Brief.normalized(prompt), "client_request_id": clientRequestID, "target_minutes": options.minutes]
+    public func startGeneration(prompt: String, clientRequestID: String, options: CreateOptions = CreateOptions(), media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], brief: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> String {
+        var fields: [String: Any] = ["client_request_id": clientRequestID]
+        // a presentation: the prompt is optional (who it is for) and the length is only sent when the person chose one (absent: the deck's own, charged exactly that)
+        if deck == nil || Brief.isValid(prompt) { fields["prompt"] = Brief.normalized(prompt) }
+        if sendMinutes { fields["target_minutes"] = options.minutes }
+        if let deck { fields["deck"] = deck }
         if !media.isEmpty { fields["media"] = media }
         if !libraryMedia.isEmpty { fields["library_media"] = libraryMedia }
         let meta = mediaMeta.filter { media.contains($0.key) && !$0.value.isEmpty }.mapValues(\.json).filter { !$0.value.isEmpty }

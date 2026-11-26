@@ -302,6 +302,7 @@ extension LibraryView {
             for i in 0..<100 { let img = MediaModel.fakeImage(seed: "attached\(i)", size: CGSize(width: 112, height: 112)); c.photos.debugAppend(AttachedPhoto(data: img.jpegData(compressionQuality: 0.7) ?? Data(), thumbnail: img)) }
         }
         if state == "options" { c.showMore = true }
+        if let spec = env["VMK_DEBUG_DECK_FILE"] { c.debugPickDeck(spec) }       // before the platform pick: a vertical pick after a deck shows the warning
         c.debugPick(state)
         c.debugStage(state)
         showingCreate = true

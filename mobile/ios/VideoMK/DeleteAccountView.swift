@@ -153,7 +153,7 @@ struct DeleteAccountView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label { Text(e.message).fixedSize(horizontal: false, vertical: true) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
                 .font(.subheadline).foregroundStyle(Theme.danger)
-            if e.offersEmail { Link(tr("delete.email_support"), destination: URL(string: "mailto:support@plorer.ai?subject=Delete%20my%20videomk%20account")!).font(.subheadline.weight(.semibold)) }
+            if e.offersEmail { Link(tr("delete.email_support"), destination: URL(string: "mailto:hello@videomk.com?subject=Delete%20my%20videomk%20account")!).font(.subheadline.weight(.semibold)) }
             if e == .uncertain || e == .network || e == .server || e == .reauthFailed || e == .reauthNotAccepted {
                 Text(tr("delete.still_signed_in")).font(.footnote).foregroundStyle(Theme.textSecondary)
             }

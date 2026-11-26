@@ -140,6 +140,9 @@ extension AppModel {
         let minutes = requestedMinutes(for: video.id)
         let progress = MakingProgress.info(stage: stage, secondsInStage: inStage, minutes: minutes)
         let title = brief(for: video.id) ?? (video.title.flatMap { $0.isEmpty ? nil : $0 } ?? tr("detail.making"))
-        return .make(title: title, info: progress, minutesLeft: MakingProgress.minutesLeft(stage: stage, secondsInStage: inStage, minutes: minutes))
+        var snapshot = MakingSnapshot.make(title: title, info: progress, minutesLeft: MakingProgress.minutesLeft(stage: stage, secondsInStage: inStage, minutes: minutes))
+        // a video made from a presentation: the deck's own two stages come first, in the same stage line
+        if case .running(.writing) = video.status, let deck = video.deckStage { snapshot.stageLine = tr(deck == .reading ? "making.line.deck_reading" : "making.line.deck_writing") }
+        return snapshot
     }
 }

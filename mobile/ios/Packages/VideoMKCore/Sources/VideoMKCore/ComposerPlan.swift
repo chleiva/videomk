@@ -3,7 +3,7 @@ import Foundation
 /// What the composer's single status line says, and what it offers to fix. One message at a time, in this priority:
 /// too long, not affordable, too short, photo length hint, price. Pure logic: the views only draw it.
 public struct ComposerStatus: Equatable, Sendable {
-    public enum Kind: Sendable, Equatable { case tooLong, notAffordable, noCredits, tooShort, photoHint, ready, price, dictating, sending }
+    public enum Kind: Sendable, Equatable { case tooLong, notAffordable, noCredits, tooShort, photoHint, ready, price, dictating, sending, deckWorking, deckProblem, deckShortPrompt }
     public enum Fix: Sendable, Equatable {
         case useMinutes(Double, credits: Int)    // "Use 1 min · ⚡1"
         case addCredits
@@ -19,7 +19,7 @@ public struct ComposerStatus: Equatable, Sendable {
     public let fix: Fix?
     public let canSend: Bool
     /// Not-ready sends read this out and pulse the line.
-    public var isProblem: Bool { [.tooLong, .notAffordable, .noCredits, .tooShort].contains(kind) }
+    public var isProblem: Bool { [.tooLong, .notAffordable, .noCredits, .tooShort, .deckProblem, .deckShortPrompt].contains(kind) }
     /// Spoken when a tonal send is tapped.
     public var announcement: String {
         switch kind {
@@ -29,6 +29,9 @@ public struct ComposerStatus: Equatable, Sendable {
         }
     }
 }
+
+/// Where the attached presentation is, as far as the status line cares.
+public enum DeckComposer: Sendable, Equatable { case none, working, problem, ready }
 
 public enum ComposerPlan {
     public static func photosTotal(phone: Int, library: Int) -> Int { phone + library }
@@ -52,19 +55,28 @@ public enum ComposerPlan {
         return .useMinutes(m, credits: credits(forMinutes: m, multiplier: multiplier))
     }
 
-    public static func status(text: String, balance: Int?, options: CreateOptions, photos: Int = 0, dictating: Bool = false, sending: Bool = false, lengths: [Double] = CreateOptions.lengths) -> ComposerStatus {
+    public static func status(text: String, balance: Int?, options: CreateOptions, photos: Int = 0, dictating: Bool = false, sending: Bool = false, lengths: [Double] = CreateOptions.lengths, deck: DeckComposer = .none) -> ComposerStatus {
         let cost = options.credits
         let count = Brief.normalized(text).count
         let affordable = balance.map { cost <= $0 } ?? true
         let valid = Brief.isValid(text)
         if sending { return ComposerStatus(kind: .sending, message: tr("composer.sending"), fix: nil, canSend: false) }
         if dictating { return ComposerStatus(kind: .dictating, message: tr("composer.listening"), fix: nil, canSend: false) }
+        if deck == .working { return ComposerStatus(kind: .deckWorking, message: tr("deck.status.preparing"), fix: nil, canSend: false) }
+        if deck == .problem { return ComposerStatus(kind: .deckProblem, message: tr("deck.status.problem"), fix: nil, canSend: false) }
         if count > Brief.maxLength {
             return ComposerStatus(kind: .tooLong, message: tr("composer.too_long", count.formatted(), Brief.maxLength.formatted()), fix: nil, canSend: false)
         }
         if !affordable, let balance {
             if balance <= 0 { return ComposerStatus(kind: .noCredits, message: tr("composer.no_credits"), fix: .addCredits, canSend: false) }
             return ComposerStatus(kind: .notAffordable, message: tr("composer.not_affordable", cost, balance), fix: affordableFix(balance: balance, lengths: lengths, multiplier: options.creditsMultiplier), canSend: false)
+        }
+        if deck == .ready, count > 0, count < Brief.minLength {      // the server takes no description or one of 10+ characters, never 1 to 9
+            return ComposerStatus(kind: .deckShortPrompt, message: tr("deck.prompt_short"), fix: nil, canSend: false)
+        }
+        if deck == .ready {         // the description is optional (who it is for): empty, or 10 characters or more
+            let text = balance.map { tr("composer.ready_left", cost, $0 - cost) } ?? tr("credits.count", cost)
+            return ComposerStatus(kind: .ready, message: text, fix: nil, canSend: true)
         }
         if count > 0 && !valid {
             return ComposerStatus(kind: .tooShort, message: tr("composer.too_short", Brief.minLength - count), fix: nil, canSend: false)

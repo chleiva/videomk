@@ -23,12 +23,29 @@ final class CreateModel {
     var autoOpenPhotos: AutoOpen?
     struct AutoOpen: Equatable { var library: Bool }
     let photos = PhotoAttachments()
+    /// "Add a presentation": the deck being uploaded and read. A video is made from a deck or from photos, never both.
+    let deck: DeckJourney
     private let api: (any CreateServing)?
     private(set) var userID: String?
     private var loaded = false
     private var openedMinutes: Double?     // a length chosen when the screen opened (an example's) survives the capabilities arriving
 
-    init(api: (any CreateServing)?) { self.api = api }
+    init(api: (any CreateServing)?, deckUploader: (any DeckUploading)? = nil, deckStore: DeckTempStore = DeckTempStore()) {
+        self.api = api
+        let fake = api is FakeCreateAPI
+        var timing = DeckTiming()
+        if fake { timing.intervals = [(.infinity, 0.4)] }
+        deck = DeckJourney(api: api as? any DeckServing, uploader: deckUploader ?? (fake ? FakeDeckUploader(Self.fakeScript) : DeckS3Uploader()), store: deckStore, timing: timing)
+    }
+
+    /// The fake server's script for the fake upload (debug runs only; production never reads it).
+    nonisolated static var fakeScript: FakeDeckScript {
+        #if DEBUG
+        FakeDeckScript.parse(ProcessInfo.processInfo.environment["VMK_DEBUG_DECK"] ?? "ok")
+        #else
+        FakeDeckScript()
+        #endif
+    }
 
     /// Capabilities from the server; any failure (not deployed yet, offline) falls back to 16:9 and 1080p with no request check.
     func loadCapabilities(userID: String?) async {
@@ -61,7 +78,45 @@ final class CreateModel {
 
     func clearPhotos(library: inout [LibraryPhoto]) { photos.clear(); library = [] }
 
-    var hasEdits: Bool { form.hasContent || !photos.isEmpty }
+    var hasEdits: Bool { form.hasContent || !photos.isEmpty || deck.isActive }
+
+    // MARK: presentation
+
+    var deckAvailable: Bool { caps.deck != nil }
+
+    /// A file from the Files app: any photos are dropped (the caller confirmed), 16:9 becomes the default, and the upload journey starts.
+    func pickDeck(_ url: URL) {
+        guard let d = caps.deck else { return }
+        photos.clear()
+        form.startDeck(caps)
+        deck.pick(url, caps: d)
+    }
+
+    /// A file that could not even be read: shown as a problem card like any other.
+    func rejectDeck(name: String, problem: DeckProblem) { photos.clear(); form.startDeck(caps); deck.reject(name: name, problem: problem) }
+
+    func removeDeck() { deck.discard(); form.clearDeck() }
+
+    /// Keeps the form in step with the journey: the deck's own length and price once it is ready.
+    func syncDeck() {
+        switch deck.state {
+        case .ready(let r): form.deckReady(r.price)
+        case .idle: if form.hasDeck { form.clearDeck() }
+        default: break
+        }
+    }
+
+    var deckComposer: DeckComposer {
+        switch deck.state {
+        case .idle: .none
+        case .uploading, .processing: .working
+        case .failed: .problem
+        case .ready: .ready
+        }
+    }
+
+    /// The price line of the ready card: "4 credits for about 4 minutes", for the length chosen now.
+    var deckCostText: String { tr("deck.cost", tr("credits.count", form.options.credits), LengthLabel.spoken(form.minutes)) }
 
     // MARK: status
 
@@ -69,7 +124,7 @@ final class CreateModel {
 
     /// The bottom status line: price, reason and fix (the photo hint has its own place under the lengths).
     func status(balance: Int?, dictating: Bool, checking: Bool = false) -> ComposerStatus {
-        ComposerPlan.status(text: form.text, balance: balance, options: form.options, photos: 0, dictating: dictating, sending: checking, lengths: caps.lengthPresets)
+        ComposerPlan.status(text: form.text, balance: balance, options: form.options, photos: 0, dictating: dictating, sending: checking, lengths: caps.lengthPresets, deck: deckComposer)
     }
 
     // MARK: Create
@@ -81,7 +136,7 @@ final class CreateModel {
     /// Taps Create: the request check (skipped when the server has none), then questions, then the video.
     func create(mediaCount: Int, submit: @escaping ([String: String]?) -> Void) {
         guard stage == .form else { return }
-        guard caps.intake, let checker else { submit(nil); return }
+        guard caps.intake, !form.hasDeck, let checker else { submit(nil); return }       // a presentation skips the request check: its prompt is only a tone hint
         stage = .checking(slow: false)
         let req = request(answers: [], mediaCount: mediaCount)
         Task {
@@ -145,6 +200,21 @@ final class CreateModel {
         case "4ksummary": pick("youtube"); form.setResolution("2160p")
         default: break
         }
+    }
+
+    /// `VMK_DEBUG_DECK_FILE=Quarterly review.pptx[:megabytes]` picks that file the way the Files app would (a sparse file of that size, never any content).
+    /// Needs `VMK_DEBUG_FAKE_LIBRARY=1`, `VMK_DEBUG_DECK=<script>` and `VMK_DEBUG_CREATE=<state>`.
+    func debugPickDeck(_ spec: String) {
+        let parts = spec.split(separator: ":", maxSplits: 1).map(String.init)
+        guard let name = parts.first, !name.isEmpty else { return }
+        let mb = parts.count > 1 ? Int(parts[1]) ?? 3 : 3
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("VMKDebugDecks", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let url = dir.appendingPathComponent(name)
+        FileManager.default.createFile(atPath: url.path, contents: Data("debug".utf8))
+        if let h = try? FileHandle(forWritingTo: url) { try? h.truncate(atOffset: UInt64(mb) * 1024 * 1024); try? h.close() }
+        if caps.deck == nil { return }
+        pickDeck(url)
     }
 
     func debugStage(_ name: String) {

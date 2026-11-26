@@ -12,7 +12,7 @@ public extension VideoItem {
     /// Equal in everything the person can see: the signed links only count by their stable key.
     func visiblyEqual(_ o: VideoItem) -> Bool {
         id == o.id && status == o.status && title == o.title && durationSeconds == o.durationSeconds && createdAt == o.createdAt
-            && rejectReason == o.rejectReason && editable == o.editable && aspect == o.aspect && resolution == o.resolution
+            && rejectReason == o.rejectReason && editable == o.editable && aspect == o.aspect && resolution == o.resolution && deckStage == o.deckStage
             && ImageKey.stable(previewGifURL) == ImageKey.stable(o.previewGifURL) && ImageKey.stable(videoURL) == ImageKey.stable(o.videoURL)
     }
 }

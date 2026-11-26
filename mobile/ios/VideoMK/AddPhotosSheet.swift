@@ -17,6 +17,8 @@ struct AddPhotosSheet: View {
     let attached: Int
     let minutes: Double
     let onAdd: ([PhotosPickerItem], [LibraryPhoto]) -> Void
+    /// Only when the server has presentations on: "Add a presentation instead" closes this sheet and opens the Files picker.
+    var onDeck: (() -> Void)?
 
     enum Source: Int { case phone, library }
     @State private var source: Source
@@ -27,8 +29,8 @@ struct AddPhotosSheet: View {
     @State private var toast: String?
     @State private var addingToLibrary: [PhotosPickerItem] = []
 
-    init(attached: Int, minutes: Double, startOnLibrary: Bool, onAdd: @escaping ([PhotosPickerItem], [LibraryPhoto]) -> Void) {
-        self.attached = attached; self.minutes = minutes; self.onAdd = onAdd
+    init(attached: Int, minutes: Double, startOnLibrary: Bool, onDeck: (() -> Void)? = nil, onAdd: @escaping ([PhotosPickerItem], [LibraryPhoto]) -> Void) {
+        self.attached = attached; self.minutes = minutes; self.onAdd = onAdd; self.onDeck = onDeck
         _source = State(initialValue: startOnLibrary ? .library : .phone)
     }
 
@@ -168,6 +170,10 @@ struct AddPhotosSheet: View {
                 .accessibilityIdentifier("phonePicker")
                 Text(tr("add.same_selection", PhotoLimits.maxPhotos))
                     .font(.vmk(13)).foregroundStyle(Theme.textTertiary).multilineTextAlignment(.center)
+                if let onDeck {
+                    Button { onDeck(); dismiss() } label: { Text(tr("deck.add_link")).font(.vmk(15, weight: .semibold)).multilineTextAlignment(.center).frame(minHeight: 44) }
+                        .accessibilityIdentifier("addPresentationLink")
+                }
             }
             .padding(32).frame(maxWidth: .infinity)
         }

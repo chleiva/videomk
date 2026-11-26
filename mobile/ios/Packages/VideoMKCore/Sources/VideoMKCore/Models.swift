@@ -59,14 +59,19 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
     /// The frame shape the video was made in ("16:9", "9:16", "1:1", "4:5") and its resolution; nil for videos from before formats existed.
     public let aspect: String?
     public let resolution: String?
+    /// While a video made from a presentation is being planned (`PLOT_CREATION`): reading the slides, then writing the narration. nil for every other video.
+    public let deckStage: DeckStage?
+
+    public enum DeckStage: String, Sendable, Equatable { case reading = "deck_reading", writing = "deck_writing" }
 
     enum CodingKeys: String, CodingKey {
         case videoID = "video_id", status, title, durationS = "duration_s", createdAt = "created_at"
-        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution
+        case videoURL = "video_url", previewGifURL = "preview_gif_url", rejectReason = "reject_reason", editable, aspect, resolution, stage
     }
 
     public init(id: String, status: VideoStatus, title: String? = nil, durationSeconds: Double? = nil, createdAt: Date? = nil,
-                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil) {
+                videoURL: URL? = nil, previewGifURL: URL? = nil, rejectReason: String? = nil, editable: Bool = false, aspect: String? = nil, resolution: String? = nil, deckStage: DeckStage? = nil) {
+        self.deckStage = deckStage
         self.id = id; self.status = status; self.title = title; self.durationSeconds = durationSeconds; self.createdAt = createdAt
         self.videoURL = videoURL; self.previewGifURL = previewGifURL; self.rejectReason = rejectReason; self.editable = editable; self.aspect = aspect; self.resolution = resolution
     }
@@ -84,6 +89,7 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
         editable = (try? c.decode(Bool.self, forKey: .editable)) ?? false
         aspect = try? c.decode(String.self, forKey: .aspect)
         resolution = try? c.decode(String.self, forKey: .resolution)
+        deckStage = (try? c.decode(String.self, forKey: .stage)).flatMap(DeckStage.init(rawValue:))
     }
 
     static func parseDate(_ s: String) -> Date? {
@@ -136,16 +142,18 @@ public struct CreateOptions: Sendable, Equatable {
 
     /// What the chosen resolution costs relative to 1080p (2 for 4K), from the capabilities.
     public var creditsMultiplier: Int
+    /// A presentation is attached: its price at its own length (the server's number), the usual rule for any other length.
+    public var deck: DeckPrice?
 
-    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "other", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1) {
-        self.creditsMultiplier = max(1, creditsMultiplier); self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
+    public init(minutes: Double = CreateOptions.defaultMinutes, look: VideoLook? = nil, captions: Bool = true, platform: String = "other", aspect: String = "16:9", resolution: String = "1080p", language: String = "auto", creditsMultiplier: Int = 1, deck: DeckPrice? = nil) {
+        self.deck = deck; self.creditsMultiplier = max(1, creditsMultiplier); self.minutes = minutes; self.look = look; self.captions = captions; self.platform = platform; self.aspect = aspect; self.resolution = resolution; self.language = language
     }
 }
 
 public extension CreateOptions {
     /// 1 credit per started minute, at least 1 (matches the server; the server's number is the one that is charged).
     /// Times the resolution's multiplier: 3 minutes is 3 credits at 1080p and 6 at 4K.
-    var credits: Int { max(1, min(12, Int(minutes.rounded(.up)))) * creditsMultiplier }
+    var credits: Int { if let deck { return deck.credits(minutes: minutes, multiplier: creditsMultiplier) }; return max(1, min(12, Int(minutes.rounded(.up)))) * creditsMultiplier }
 }
 
 public struct WalletBucket: Sendable, Equatable, Decodable {

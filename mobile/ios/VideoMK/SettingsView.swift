@@ -56,7 +56,7 @@ struct SettingsView: View {
                 }
                 Section(tr("settings.about")) {
                     LabeledContent(tr("settings.version"), value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
-                    Link(tr("settings.support"), destination: URL(string: "mailto:support@plorer.ai")!).accessibilityIdentifier("supportLink")
+                    Link(tr("settings.support"), destination: URL(string: "mailto:hello@videomk.com")!).accessibilityIdentifier("supportLink")
                     Link(tr("legal.terms"), destination: URL(string: tr("legal.terms_url"))!).accessibilityIdentifier("termsLink")
                     Link(tr("legal.privacy"), destination: URL(string: tr("legal.privacy_url"))!)
                 }

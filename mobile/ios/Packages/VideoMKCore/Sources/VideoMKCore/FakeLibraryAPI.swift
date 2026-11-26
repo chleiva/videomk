@@ -227,10 +227,13 @@ public actor FakeCreateAPI: CreateServing {
     private var responses: [BriefResponse]
     private var delay: Duration
     private var fails = false
+    private let deckScript: FakeDeckScript
+    private var deckPolls: [String: Int] = [:]
+    public private(set) var deckCalls: [String] = []          // "slot", "process", "status": what the app asked (never any file content)
 
     public init(capabilities: Result<CreateCapabilities, Error> = .success(FakeCreateAPI.richCapabilities),
-                responses: [BriefResponse] = [.ok(brief: [:])], delay: Duration = .zero) {
-        self.caps = capabilities; self.responses = responses; self.delay = delay
+                responses: [BriefResponse] = [.ok(brief: [:])], delay: Duration = .zero, deck: FakeDeckScript = FakeDeckScript()) {
+        self.caps = capabilities; self.responses = responses; self.delay = delay; self.deckScript = deck
     }
     public func setFails(_ b: Bool) { fails = b }
     public func capabilities() async throws -> CreateCapabilities { try caps.get() }
@@ -272,4 +275,81 @@ extension FakeCreateAPI {
             languages: [.init(id: "en", label: "English"), .init(id: "es", label: "Español")], intake: true,
             lengths: .init(minMinutes: 0.25, maxMinutes: 12, presets: [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]))
     }
+}
+
+// MARK: presentation decks (fake)
+
+/// How the fake server treats a deck. `VMK_DEBUG_DECK=ok|slow|uploading|processing|offline|fail:<code>` (see mobile/ios/README.md).
+public struct FakeDeckScript: Sendable, Equatable {
+    public enum Outcome: Sendable, Equatable { case ready(slides: Int, minutes: Double, credits: Int), failed(code: String) }
+    public enum Stall: Sendable, Equatable { case uploading, processing }
+    public var outcome: Outcome = .ready(slides: 12, minutes: 4, credits: 4)
+    /// How many status calls answer "processing" before the outcome.
+    public var processingPolls = 2
+    /// The upload fails this many times (a lost connection) and then works.
+    public var uploadFailures = 0
+    public var stall: Stall?
+    public init() {}
+
+    public static func parse(_ spec: String) -> FakeDeckScript {
+        var s = FakeDeckScript()
+        switch spec {
+        case "slow": s.processingPolls = 8
+        case "uploading": s.stall = .uploading
+        case "processing": s.stall = .processing
+        case "offline": s.uploadFailures = 1
+        case "ok", "": break
+        case "short": s.outcome = .ready(slides: 3, minutes: 1, credits: 1)
+        case "long": s.outcome = .ready(slides: 48, minutes: 12, credits: 12)
+        default:
+            if spec.hasPrefix("fail:") { s.outcome = .failed(code: String(spec.dropFirst(5))) }
+        }
+        return s
+    }
+}
+
+extension FakeCreateAPI: DeckServing {
+    public func requestSlot(format: String, size: Int) async throws -> DeckSlot {
+        deckCalls.append("slot")
+        return DeckSlot(id: "fakedeck1", format: format, url: URL(string: "https://upload.invalid/deck")!, fields: ["key": "fake"])
+    }
+    public func process(deckID: String) async throws { deckCalls.append("process") }
+    public func status(deckID: String) async throws -> DeckStatus {
+        deckCalls.append("status")
+        let n = (deckPolls[deckID] ?? 0) + 1
+        deckPolls[deckID] = n
+        if deckScript.stall == .processing || n <= deckScript.processingPolls { return .processing }
+        switch deckScript.outcome {
+        case .ready(let slides, let minutes, let credits): return .ready(DeckReady(slides: slides, suggestedMinutes: minutes, suggestedCredits: credits))
+        case .failed(let code): return .failed(code: code, message: "Server message for \(code)")
+        }
+    }
+}
+
+/// An upload that never touches the network: progress in steps, optional stalls and failures.
+public final class FakeDeckUploader: DeckUploading, @unchecked Sendable {
+    private let lock = NSLock()
+    private let script: FakeDeckScript
+    private let stepDelay: Double
+    private var failuresLeft: Int
+    private var _uploads = 0
+    public init(_ script: FakeDeckScript = FakeDeckScript(), stepDelay: Double = 0.15) { self.script = script; self.stepDelay = stepDelay; failuresLeft = script.uploadFailures }
+    public var uploads: Int { lock.withLock { _uploads } }
+
+    public func upload(file: URL, to slot: DeckSlot, progress: @escaping @Sendable (Double) -> Void) async throws {
+        lock.withLock { _uploads += 1 }
+        for step in 1...5 {
+            try await Task.sleep(for: .seconds(stepDelay))
+            progress(Double(step) * 0.2 * (script.stall == .uploading ? 0.45 : 1))
+            if script.stall == .uploading, step == 2 { try await Task.sleep(for: .seconds(3600)) }
+            if step == 3, lock.withLock({ if failuresLeft > 0 { failuresLeft -= 1; return true } else { return false } }) { throw DeckError(.network) }
+        }
+    }
+}
+
+public extension DeckCapabilities { static var fake: DeckCapabilities { DeckCapabilities(maxMB: 50, maxSlides: 60, formats: ["pptx", "pdf"]) } }
+
+public extension CreateCapabilities {
+    /// The same capabilities with the deck feature on (the server sends `deck` only when it is enabled).
+    func withDeck(_ deck: DeckCapabilities = .fake) -> CreateCapabilities { var c = self; c.deck = deck; return c }
 }

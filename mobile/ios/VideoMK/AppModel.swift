@@ -28,6 +28,10 @@ final class AppModel {
     var createProblem: CreateProblem?                       // generate answered blocked or paused after Create closed
     private var linkStamp: [String: Date] = [:]            // when each video's picture links were last taken (they are swapped quietly before they expire)
     private var intakeBriefs: [String: [String: String]] = [:]
+    private var deckIDs: [String: String] = [:]            // the ready presentation per pending request (kept for a retry; the server deletes it when the video starts)
+    private var deckPrompts: [String: String] = [:]       // what the person typed (who it is for); the row's title may be the file name instead
+    private var deckMinutes: [String: Bool] = [:]          // whether the person chose a length (only then `target_minutes` is sent)
+    private var deckVideos: Set<String> = []               // videos made from a presentation: "Try again" cannot reuse the (deleted) deck
 
     struct CreateProblem: Identifiable, Equatable { let id = UUID(); let message: String; let retryAfter: Int?; let paused: Bool; let prompt: String }
     var selectedTab = 0                                    // 0 videos, 1 media
@@ -73,7 +77,7 @@ final class AppModel {
         media = api.map { MediaModel(api: LibraryClient(api: $0)) }
         createModel = CreateModel(api: api)
         #if DEBUG
-        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: FakeCreateAPI(capabilities: .success(ProcessInfo.processInfo.environment["VMK_DEBUG_CREATE"]?.hasPrefix("4k") == true ? FakeCreateAPI.fourKCapabilities : FakeCreateAPI.richCapabilities))); userID = "demo-user" }
+        if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_LIBRARY"] == "1" { media = MediaModel(api: FakeLibraryAPI.demo(), fake: true); createModel = CreateModel(api: Self.debugCreateAPI()); userID = "demo-user" }
         selectedTab = Int(ProcessInfo.processInfo.environment["VMK_DEBUG_TAB"] ?? "") ?? 0
         seedDebugScreens()
         configureDebugDeletion()
@@ -146,8 +150,9 @@ final class AppModel {
         UserDefaults.standard.set(true, forKey: Self.signedOutKey)
         await auth?.signOut()
         await media?.wipe()      // another account must never see this one's cached photos or queued uploads
+        createModel.deck.wipe()  // a presentation copy left in the temp folder
         composerLibrary = []; libraryIDs = [:]
-        wallet = nil; videos = []; pending = []; photoData = [:]; photoMeta = [:]; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
+        wallet = nil; videos = []; pending = []; deckIDs = [:]; deckMinutes = [:]; deckPrompts = [:]; deckVideos = []; photoData = [:]; photoMeta = [:]; stageSince = [:]; briefs = [:]; minutes = [:]; loadState = .idle
         phase = .signedOut
     }
 
@@ -165,7 +170,7 @@ final class AppModel {
         let fm = FileManager.default
         let caches = fm.urls(for: .cachesDirectory, in: .userDomainMask)[0], support = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         LocalWipe.clearContents(of: [caches.appendingPathComponent("VideoMKMedia"), caches.appendingPathComponent("VideoMKVideoImages"),
-                                     support.appendingPathComponent("VideoMKUploadQueue"), fm.temporaryDirectory])
+                                     support.appendingPathComponent("VideoMKUploadQueue"), DeckTempStore.defaultDirectory, fm.temporaryDirectory])
         await media?.wipe()                               // again: recreates the empty folders its stores expect
         StableImageStore.shared.removeAll()
         URLCache.shared.removeAllCachedResponses()
@@ -237,11 +242,13 @@ final class AppModel {
     // MARK: ask for a video without leaving the home screen
 
     /// Adds a placeholder row immediately and sends the request in the background; the user can keep browsing or ask for more.
-    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil) {
-        let p = PendingVideo(brief: Brief.normalized(brief), options: options, photoCount: photos.count, state: photos.isEmpty ? .sending : .uploading(done: 0, total: photos.count))
+    func submit(brief: String, options: CreateOptions, photos: [Data] = [], meta: [PhotoMeta?] = [], libraryMedia: [String] = [], intake: [String: String]? = nil, deckID: String? = nil, deckName: String? = nil, sendsMinutes: Bool = true) {
+        let title = Brief.normalized(brief).isEmpty && deckID != nil ? tr("deck.video_title", deckName ?? "") : Brief.normalized(brief)
+        let p = PendingVideo(brief: title, options: options, photoCount: photos.count, state: photos.isEmpty ? .sending : .uploading(done: 0, total: photos.count))
         if !photos.isEmpty { photoData[p.id] = photos; photoMeta[p.id] = meta }
         if !libraryMedia.isEmpty { libraryIDs[p.id] = libraryMedia }
         if let intake, !intake.isEmpty { intakeBriefs[p.id] = intake }
+        if let deckID { deckIDs[p.id] = deckID; deckMinutes[p.id] = sendsMinutes; deckPrompts[p.id] = Brief.normalized(brief) }
         pending.insert(p, at: 0)
         Task { await send(p.id) }
     }
@@ -254,12 +261,13 @@ final class AppModel {
 
     /// "Try again" on a video the server could not finish: ask for the same thing again when we remember it, else put its title back in the composer.
     func tryAgain(_ video: VideoItem) {
+        if deckVideos.contains(video.id) { createRequested = true; return }       // the deck was used up: start again from Create
         if let brief = briefs[video.id], Brief.isValid(brief) {
             submit(brief: brief, options: CreateOptions(minutes: minutes[video.id] ?? CreateOptions.defaultMinutes))
         } else { composerDraft = video.displayTitle }
     }
 
-    func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil }
+    func dismissPending(_ id: String) { pending.removeAll { $0.id == id }; deckIDs[id] = nil; deckMinutes[id] = nil; deckPrompts[id] = nil; photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil }
 
     private func setProgress(_ id: String, done: Int, total: Int) {
         if let i = pending.firstIndex(where: { $0.id == id }), case .uploading = pending[i].state { pending[i].state = .uploading(done: done, total: total) }
@@ -276,7 +284,12 @@ final class AppModel {
                 }
                 if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .sending }
             }
-            let videoID = try await create(brief: p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id])
+            #if DEBUG
+            if self.media?.isFake == true, deckIDs[id] != nil { acceptFakeDeck(p); return }        // fake runs never reach the backend
+            #endif
+            let videoID = try await create(brief: deckIDs[id] != nil ? (deckPrompts[id] ?? "") : p.brief, requestID: p.id, options: p.options, media: media, mediaMeta: PhotoMetaReader.mediaMeta(ids: media, metas: photoMeta[id] ?? []), libraryMedia: libraryIDs[id] ?? [], intake: intakeBriefs[id], deck: deckIDs[id], sendMinutes: deckMinutes[id] ?? true)
+            if deckIDs[id] != nil { deckVideos.insert(videoID) }
+            deckIDs[id] = nil; deckMinutes[id] = nil; deckPrompts[id] = nil
             photoData[id] = nil; photoMeta[id] = nil; uploadedMedia[id] = nil; libraryIDs[id] = nil
             briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
             if let i = pending.firstIndex(where: { $0.id == id }) { pending[i].state = .accepted(videoID: videoID) }
@@ -309,9 +322,9 @@ final class AppModel {
 
     // MARK: create / play
 
-    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil) async throws -> String {
+    func create(brief: String, requestID: String, options: CreateOptions, media: [String] = [], mediaMeta: [String: PhotoMeta] = [:], libraryMedia: [String] = [], intake: [String: String]? = nil, deck: String? = nil, sendMinutes: Bool = true) async throws -> String {
         guard let api else { throw APIError.server }
-        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake) }
+        do { return try await api.startGeneration(prompt: brief, clientRequestID: requestID, options: options, media: media, mediaMeta: mediaMeta, libraryMedia: libraryMedia, brief: intake, deck: deck, sendMinutes: sendMinutes) }
         catch let e as AuthError where e == .signedOut { await signOut(); throw APIError.unauthorized }
     }
 
@@ -336,6 +349,29 @@ final class AppModel {
     }
 
     #if DEBUG
+    /// The fake Create backend of screenshot runs: `VMK_DEBUG_DECK` (any value) switches the presentation feature on in its capabilities, and says how the fake server treats the deck.
+    static func debugCreateAPI() -> FakeCreateAPI {
+        let env = ProcessInfo.processInfo.environment
+        var caps = env["VMK_DEBUG_CREATE"]?.hasPrefix("4k") == true ? FakeCreateAPI.fourKCapabilities : FakeCreateAPI.richCapabilities
+        var script = FakeDeckScript()
+        if let spec = env["VMK_DEBUG_DECK"] { caps = caps.withDeck(); script = FakeDeckScript.parse(spec) }
+        return FakeCreateAPI(capabilities: .success(caps), deck: script)
+    }
+
+    /// A fake video made from a presentation: first reading the slides, then writing the narration (what the server reports while it plans).
+    private func acceptFakeDeck(_ p: PendingVideo) {
+        let videoID = "fakedeckvideo-\(p.id.prefix(6))"
+        deckVideos.insert(videoID); briefs[videoID] = p.brief; minutes[videoID] = p.options.minutes
+        videos.insert(VideoItem(id: videoID, status: .running(.writing), title: p.brief, createdAt: .now, deckStage: .reading), at: 0)
+        stageSince[videoID] = (.writing, .now)
+        if let i = pending.firstIndex(where: { $0.id == p.id }) { pending[i].state = .accepted(videoID: videoID) }
+        deckIDs[p.id] = nil; deckMinutes[p.id] = nil; deckPrompts[p.id] = nil
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(6))
+            if let i = videos.firstIndex(where: { $0.id == videoID }) { videos[i] = VideoItem(id: videoID, status: .running(.writing), title: p.brief, createdAt: videos[i].createdAt, deckStage: .writing) }
+        }
+    }
+
     /// Screenshots with `VMK_DEBUG_FAKE_LIBRARY=1`: a wallet (`VMK_DEBUG_BALANCE`), a few videos (`VMK_DEBUG_FAKE_VIDEOS=1`) and an upload moment.
     private func seedDebugScreens() {
         guard media?.isFake == true else { return }
@@ -350,6 +386,12 @@ final class AppModel {
             }
             briefs["v0"] = "Making a long list"; minutes["v0"] = 3
             stageSince["v0"] = (.voiceAndVisuals, Date().addingTimeInterval(-40))
+        }
+        if env["VMK_DEBUG_FAKE_VIDEOS"] == "deck" {
+            // two videos made from presentations: reading the slides, then writing the narration
+            videos = [VideoItem(id: "d1", status: .running(.writing), title: "Presentation: Quarterly review", createdAt: .now, deckStage: .reading),
+                      VideoItem(id: "d2", status: .running(.writing), title: "Presentation: Onboarding for new teachers", createdAt: .now.addingTimeInterval(-60), deckStage: .writing)]
+            for id in ["d1", "d2"] { briefs[id] = videos.first { $0.id == id }?.title; minutes[id] = 4; deckVideos.insert(id); stageSince[id] = (.writing, Date().addingTimeInterval(-20)) }
         }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "1" {
             videos = [

@@ -66,11 +66,13 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     public var maxPhotos: Int
     public var intake: Bool
     public var lengths: Lengths
+    /// Present only when the server has presentation decks switched on; the whole feature is hidden otherwise.
+    public var deck: DeckCapabilities?
 
-    enum CodingKeys: String, CodingKey { case aspects, resolutions, platforms, languages, lengths, maxPhotos = "max_photos", intake }
+    enum CodingKeys: String, CodingKey { case aspects, resolutions, platforms, languages, lengths, maxPhotos = "max_photos", intake, deck }
 
-    public init(aspects: [Aspect], resolutions: [Resolution], platforms: [Platform], languages: [Language] = [], maxPhotos: Int = 100, intake: Bool = true, lengths: Lengths = Lengths()) {
-        self.lengths = lengths; self.aspects = aspects; self.resolutions = resolutions; self.platforms = platforms; self.languages = languages; self.maxPhotos = maxPhotos; self.intake = intake
+    public init(aspects: [Aspect], resolutions: [Resolution], platforms: [Platform], languages: [Language] = [], maxPhotos: Int = 100, intake: Bool = true, lengths: Lengths = Lengths(), deck: DeckCapabilities? = nil) {
+        self.deck = deck; self.lengths = lengths; self.aspects = aspects; self.resolutions = resolutions; self.platforms = platforms; self.languages = languages; self.maxPhotos = maxPhotos; self.intake = intake
     }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
@@ -78,6 +80,7 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
         platforms = (try? c.decode([Platform].self, forKey: .platforms)) ?? []; languages = (try? c.decode([Language].self, forKey: .languages)) ?? []
         maxPhotos = (try? c.decode(Int.self, forKey: .maxPhotos)) ?? 100; intake = (try? c.decode(Bool.self, forKey: .intake)) ?? false
         lengths = (try? c.decode(Lengths.self, forKey: .lengths)) ?? Lengths()
+        deck = try? c.decode(DeckCapabilities.self, forKey: .deck)
     }
 
     /// The length chips: the server's presets from 15 seconds up, or 1, 2, 3, 5, 8, 12 when it does not say.
@@ -166,12 +169,39 @@ public struct CreateForm: Equatable, Sendable {
     /// What each listed resolution costs relative to 1080p, from the capabilities (`normalize`).
     public private(set) var multipliers: [String: Int] = [:]
 
+    /// A presentation is attached (uploading, ready or failed): the prompt is optional, 16:9 is the default and a vertical shape gets a gentle warning.
+    public var hasDeck = false
+    /// The server's price once the deck is read; the length is then the deck's own unless the person picks another.
+    public private(set) var deckPrice: DeckPrice?
+
     public mutating func setMinutes(_ m: Double) { minutes = m; lengthTouched = true; userTouched = true }
+
+    /// A deck was chosen: default to 16:9 (the slide is small in 9:16). The person can still pick any shape afterwards.
+    public mutating func startDeck(_ caps: CreateCapabilities) {
+        hasDeck = true; deckPrice = nil
+        guard aspect != "16:9", caps.readyAspects.contains(where: { $0.id == "16:9" }) else { return }
+        let chips = PlatformChips.make(caps).filter { $0.supported && $0.aspect == "16:9" }
+        if let chip = chips.first(where: { $0.id == "other" }) ?? chips.first { select(chip) } else { aspect = "16:9"; normalize(caps) }
+    }
+    /// The server read the deck: its suggested length is used (and charged) unless the person has chosen one.
+    public mutating func deckReady(_ price: DeckPrice) {
+        hasDeck = true; deckPrice = price
+        if !lengthTouched { minutes = price.suggestedMinutes }
+    }
+    public mutating func clearDeck() {
+        let wasSuggested = deckPrice.map { !lengthTouched && abs(minutes - $0.suggestedMinutes) < 1e-6 } ?? false
+        hasDeck = false; deckPrice = nil
+        if wasSuggested { minutes = CreateOptions.defaultMinutes }
+    }
+    /// The slide is small in a vertical frame: the line under the format.
+    public var deckVerticalWarning: Bool { hasDeck && VideoItem.ratio(aspect) < 1 }
+    /// Sent as `target_minutes` only when the person chose a length; absent means the deck's suggestion, charged exactly that.
+    public var sendsDeckMinutes: Bool { deckPrice == nil || lengthTouched || abs(minutes - (deckPrice?.suggestedMinutes ?? minutes)) > 1e-6 }
     public mutating func setResolution(_ id: String) { resolution = id; resolutionTouched = true; userTouched = true }
     public mutating func resetTouches() { lengthTouched = false; userTouched = false; resolutionTouched = false }
 
     public var creditsMultiplier: Int { multipliers[resolution] ?? 1 }
-    public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language, creditsMultiplier: creditsMultiplier) }
+    public var options: CreateOptions { CreateOptions(minutes: minutes, look: look, captions: captions, platform: platform, aspect: aspect, resolution: resolution, language: language, creditsMultiplier: creditsMultiplier, deck: deckPrice) }
 
     /// The resolutions to show for the chosen shape, in the server's order (one that cannot be made in this shape is left out).
     public func resolutionChoices(_ caps: CreateCapabilities) -> [CreateCapabilities.Resolution] { caps.resolutions.filter { $0.supports(aspect: aspect) } }
@@ -226,7 +256,7 @@ public struct CreateForm: Equatable, Sendable {
         guard chip.supported else { return }
         platform = chip.id; aspect = chip.aspect; userTouched = true
         if !resolutionTouched { resolution = chip.resolution }                  // an explicit resolution stays; a platform never picks 4K
-        if !lengthTouched, let m = chip.recommendedMinutes { minutes = m }
+        if !lengthTouched, deckPrice == nil, let m = chip.recommendedMinutes { minutes = m }
     }
 
     /// One line for the collapsed "More options" row.

@@ -18,6 +18,10 @@ struct CreateView: View {
     @State private var flash = false
     @State private var showingCost = false
     @State private var shake: CGFloat = 0
+    @State private var showingImporter = false
+    @State private var confirmDeckReplace = false      // a presentation was chosen while photos are attached
+    @State private var confirmPhotosReplace = false    // photos were chosen while a presentation is attached
+    @State private var pendingDeckPick = false
     @FocusState private var focused: Bool
 
     private var balance: Int? { model.wallet.flatMap { $0.unlimited ? nil : $0.balance } }
@@ -34,11 +38,14 @@ struct CreateView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         promptCard.id("prompt")
+                        if form.hasDeck { Text(tr("deck.prompt_hint")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 6).padding(.top, 6).accessibilityIdentifier("deckPromptHint") }
                         photosRow.padding(.top, 12)
+                        deckSection.padding(.top, 12)
                         section(tr("create.what_is_it_for")).padding(.top, 20)
                         platformChips.padding(.top, 8)
                         recommendation(proxy).padding(.top, 10)
                         alsoWorks
+                        deckVerticalWarning.padding(.top, 4)
                         fourKAdvice.padding(.top, 4)
                         section(tr("create.length")).padding(.top, 18)
                         lengthChips.padding(.top, 8)
@@ -49,6 +56,10 @@ struct CreateView: View {
                     .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
                 }
                 .scrollDismissesKeyboard(.interactively)
+                .onChange(of: create.deck.state) { _, state in
+                    // a result (ready or a problem) is brought fully into view: on a small phone its buttons start under the bottom bar
+                    switch state { case .ready, .failed: withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { proxy.scrollTo("deck", anchor: .bottom) }; default: break }
+                }
                 .onChange(of: create.showMore) { _, open in if open { withAnimation { proxy.scrollTo("format", anchor: .top) } } }
                 .task { if create.showMore { try? await Task.sleep(for: .milliseconds(300)); proxy.scrollTo("more", anchor: .top) } }
                 .background(Theme.background.ignoresSafeArea())
@@ -69,14 +80,29 @@ struct CreateView: View {
         }
         .onAppear { dictation.onText = { create.form.text = $0 }; dictation.onKeyboardFallback = { focused = true } }
         .onDisappear { dictation.stop() }
-        .sheet(isPresented: $showingAdd) {
-            AddPhotosSheet(attached: totalPhotos, minutes: form.minutes, startOnLibrary: addOnLibrary) { phone, library in
+        .sheet(isPresented: $showingAdd, onDismiss: { if pendingDeckPick { pendingDeckPick = false; startDeckPick() } }) {
+            AddPhotosSheet(attached: totalPhotos, minutes: form.minutes, startOnLibrary: addOnLibrary, onDeck: create.deckAvailable ? { pendingDeckPick = true } : nil) { phone, library in
                 create.photos.add(phone)
                 let known = Set(model.composerLibrary.map(\.id))
                 model.composerLibrary += library.filter { !known.contains($0.id) }
                 create.photos.libraryCount = model.composerLibrary.count
             }
         }
+        .fileImporter(isPresented: $showingImporter, allowedContentTypes: deckContentTypes(create.caps.deck), allowsMultipleSelection: false) { result in
+            switch result {
+            case .success(let urls): if let url = urls.first { create.pickDeck(url); Haptics.play(.selection) }
+            case .failure(let e): if (e as? CocoaError)?.code != .userCancelled { create.rejectDeck(name: "", problem: .corrupt) }
+            }
+        }
+        .alert(tr("deck.replace_photos.title"), isPresented: $confirmDeckReplace) {      // an alert, not a dialog: on iOS 26 a dialog opened from a sheet showed no way to say no
+            Button(tr("deck.replace_photos.confirm"), role: .destructive) { clearAttachedPhotos(); showingImporter = true }
+            Button(tr("deck.replace_photos.keep"), role: .cancel) {}
+        } message: { Text(tr("deck.replace_photos.message", totalPhotos)) }
+        .alert(tr("deck.replace_deck.title"), isPresented: $confirmPhotosReplace) {
+            Button(tr("deck.replace_deck.confirm"), role: .destructive) { create.removeDeck(); showingAdd = true }
+            Button(tr("deck.replace_deck.keep"), role: .cancel) {}
+        } message: { Text(tr("deck.replace_deck.message")) }
+        .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
         .sheet(isPresented: $showingCost) { CostExplainerSheet() }
         .sheet(isPresented: $showingPhotos) { AttachedPhotosSheet(create: create) { showingPhotos = false; showingAdd = true } }
         .sheet(isPresented: Binding(get: { create.stage != .form && create.stage != .checking(slow: false) }, set: { if !$0 { create.dismissOverlay() } })) {
@@ -93,7 +119,7 @@ struct CreateView: View {
 
     private var promptCard: some View {
         ZStack(alignment: .bottomTrailing) {
-            TextField(tr("create.describe_your_video_for_example"), text: $create.form.text, axis: .vertical)
+            TextField(form.hasDeck ? tr("deck.placeholder") : tr("create.describe_your_video_for_example"), text: $create.form.text, axis: .vertical)
                 .focused($focused).lineLimit(3...10).font(.vmk(19)).tint(Theme.primary)
                 .textInputAutocapitalization(.sentences)
                 .foregroundStyle(dictation.isListening ? Theme.textSecondary : Theme.text)
@@ -102,7 +128,7 @@ struct CreateView: View {
                 .accessibilityIdentifier("composerField")
             HStack(spacing: 8) {
                 if dictation.isListening { Text(tr("create.listening_tap_to_stop")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("listeningHint") }
-                else if !form.hasContent { Text(tr("create.tap_the_mic_to_speak")).font(.vmk(13)).foregroundStyle(Theme.textTertiary) }
+                else if !form.hasContent && !form.hasDeck { Text(tr("create.tap_the_mic_to_speak")).font(.vmk(13)).foregroundStyle(Theme.textTertiary) }
                 mic
             }
         }
@@ -145,7 +171,7 @@ struct CreateView: View {
 
     @ViewBuilder private var photosRow: some View {
         if totalPhotos == 0 && create.photos.loading == 0 {
-            Button { focused = false; addOnLibrary = false; showingAdd = true } label: {
+            Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: {
                 HStack(spacing: 14) {
                     Image(systemName: "photo.badge.plus").font(.vmk(20)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     VStack(alignment: .leading, spacing: 1) {
@@ -185,6 +211,39 @@ struct CreateView: View {
             .padding(14).frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+        }
+    }
+
+    // presentation
+
+    /// Choosing photos while a presentation is attached replaces it (after asking).
+    private func startPhotoAdd() { if AttachRule.photos(deckActive: create.deck.isActive) == .confirm { confirmPhotosReplace = true } else { showingAdd = true } }
+
+    /// Choosing a presentation while photos are attached replaces them (after asking).
+    private func startDeckPick() {
+        focused = false
+        if AttachRule.deck(photos: totalPhotos + create.photos.loading) == .confirm { confirmDeckReplace = true } else { showingImporter = true }
+    }
+
+    private func clearAttachedPhotos() { create.clearPhotos(library: &model.composerLibrary) }
+
+    @ViewBuilder private var deckSection: some View {
+        if create.deck.isActive { DeckCard(create: create) { startDeckPick() }.id("deck") }
+        else if create.deckAvailable { DeckAddRow { startDeckPick() } }
+    }
+
+    /// The slide is small in a vertical frame: a gentle line and one tap back to 16:9. Never a block.
+    @ViewBuilder private var deckVerticalWarning: some View {
+        if form.deckVerticalWarning {
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "info.circle").font(.vmk(14)).foregroundStyle(Theme.warning).padding(.top, 2).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("deck.vertical_warning")).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckVerticalWarning")
+                    FixChip(title: tr("create.use", "16:9")) { create.form.aspect = "16:9"; create.form.normalize(create.caps); Haptics.play(.selection) }.accessibilityIdentifier("deckUse169")
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(12).background(Theme.warningContainer.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
     }
 
@@ -468,8 +527,11 @@ struct CreateView: View {
             Button { tapCreate(s, proxy) } label: {
                 HStack(spacing: 8) {
                     if checking { ProgressView().tint(Theme.onPrimary) }
-                    Text(tr("create.create_video")).font(.vmk(19, weight: .bold)); Text(verbatim: "·").font(.vmk(19, weight: .bold))
-                    HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.vmk(15)); Text("\(form.options.credits)").font(.vmk(19, weight: .bold).monospacedDigit()) }
+                    Text(tr("create.create_video")).font(.vmk(19, weight: .bold))
+                    if showsPrice {          // not while a presentation is still being read: its price is not known yet
+                        Text(verbatim: "·").font(.vmk(19, weight: .bold))
+                        HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.vmk(15)); Text("\(form.options.credits)").font(.vmk(19, weight: .bold).monospacedDigit()) }
+                    }
                 }
                 .foregroundStyle(ready || checking ? Theme.onPrimary : Theme.textTertiary).multilineTextAlignment(.center).frame(maxWidth: .infinity, minHeight: 54).padding(.vertical, 6)
                 .background { Capsule().fill(Theme.surface3).opacity(ready || checking ? 0 : 1); Capsule().fill(Theme.gradient).opacity(ready || checking ? 1 : 0) }
@@ -486,6 +548,8 @@ struct CreateView: View {
         .background(.bar)
         .overlay(alignment: .top) { Divider() }
     }
+
+    private var showsPrice: Bool { create.deckComposer == .none || create.deckComposer == .ready }
 
     private func tint(_ s: ComposerStatus) -> Color { s.kind == .tooLong ? Theme.danger : (s.isProblem && s.kind != .tooShort) ? Theme.warning : Theme.textSecondary }
 
@@ -514,9 +578,11 @@ struct CreateView: View {
 
     /// The request is cleared (or confirmed): the video starts, the screen closes onto the library.
     private func finish(_ brief: [String: String]?) {
-        model.submit(brief: form.text, options: form.options, photos: create.photos.items.map(\.data), meta: create.photos.items.map(\.meta), libraryMedia: model.composerLibrary.map(\.id), intake: brief)
+        model.submit(brief: form.text, options: form.options, photos: create.photos.items.map(\.data), meta: create.photos.items.map(\.meta), libraryMedia: model.composerLibrary.map(\.id), intake: brief,
+                     deckID: create.deck.ready == nil ? nil : create.deck.deckID, deckName: create.deck.fileName, sendsMinutes: form.sendsDeckMinutes)
         create.remember()
         create.photos.clear(); model.composerLibrary = []
+        create.deck.consume(); create.form.clearDeck()
         create.stage = .form; create.form.text = ""
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         dismiss()
@@ -525,7 +591,7 @@ struct CreateView: View {
     private func cancel() {
         if create.hasEdits { confirmDiscard = true } else { create.cancelCheck(); dismiss() }
     }
-    private func discard() { dictation.cancel(); create.cancelCheck(); create.photos.clear(); model.composerLibrary = []; create.form.text = ""; dismiss() }
+    private func discard() { dictation.cancel(); create.cancelCheck(); create.photos.clear(); model.composerLibrary = []; create.removeDeck(); create.form.text = ""; dismiss() }
 }
 
 // MARK: attached photos
