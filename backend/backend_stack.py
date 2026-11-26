@@ -591,7 +591,7 @@ class BackendStack(Stack):
             schema=apigw.JsonSchema(
                 schema=apigw.JsonSchemaVersion.DRAFT4,
                 type=apigw.JsonSchemaType.OBJECT,
-                required=[],   # a prompt is required unless a deck is given: the launcher decides (a deck needs no description)
+                # no "required": a prompt is required unless a deck is given, and the launcher decides (a deck needs no description). An empty list is invalid in JSON Schema draft 4.
                 properties={
                     "prompt": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, min_length=10, max_length=2000),
                     "deck": apigw.JsonSchema(type=apigw.JsonSchemaType.STRING, pattern="^[0-9a-f]{16}$"),   # a prepared presentation (docs/DECK_TO_VIDEO.md); ownership and readiness: the launcher

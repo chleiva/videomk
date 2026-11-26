@@ -105,4 +105,7 @@ def test_the_generate_request_model_accepts_a_deck_without_a_prompt(synth):
     models = [v for v in of(t, "AWS::ApiGateway::Model").values() if v["Properties"].get("Name") == "GenerateRequest"]
     assert models, "GenerateRequest model missing"
     schema = models[0]["Properties"]["Schema"]
-    assert "deck" in schema["properties"] and not schema.get("required")   # the launcher still refuses a request with neither prompt nor deck
+    assert "deck" in schema["properties"] and "required" not in schema   # the launcher still refuses a request with neither prompt nor deck
+    # API Gateway (JSON Schema draft 4) rejects an empty 'required' list at deploy time: no model may carry one
+    for m in of(t, "AWS::ApiGateway::Model").values():
+        assert m["Properties"].get("Schema", {}).get("required", ["x"]) != [], m["Properties"].get("Name")
