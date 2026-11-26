@@ -13,42 +13,50 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Account") {
-                    if case .signedIn(let email) = model.phase, let email { LabeledContent("Signed in as", value: email) }
-                    Button("Sign out", role: .destructive) { confirmSignOut = true }.accessibilityIdentifier("signOutButton")
+                Section(tr("settings.account")) {
+                    if case .signedIn(let email) = model.phase, let email { LabeledContent(tr("settings.signed_in_as"), value: email) }
+                    Button(tr("settings.sign_out"), role: .destructive) { confirmSignOut = true }.accessibilityIdentifier("signOutButton")
                 }
                 Section {
-                    Button(role: .destructive) { showDelete = true } label: { Label { Text("Delete account") } icon: { Image(systemName: "trash").foregroundStyle(.red) } }
+                    Button(role: .destructive) { showDelete = true } label: { Label { Text(tr("settings.delete_account")) } icon: { Image(systemName: "trash").foregroundStyle(.red) } }
                         .accessibilityIdentifier("deleteAccountButton")
                 } footer: {
-                    Text("Permanently deletes your account, your videos, your photos in My media and your credits.")
+                    Text(tr("settings.delete_footer"))
                 }
                 Section {
-                    Toggle("Use photo dates", isOn: $useDates).accessibilityIdentifier("usePhotoDates")
-                    Toggle("Use photo locations", isOn: $useLocations).accessibilityIdentifier("usePhotoLocations")
-                } header: { Text("Photos") } footer: {
-                    Text("Use photo dates: puts your photos in the order they were taken and groups them by day.\n\nUse photo locations: names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves.")
+                    Picker(tr("settings.language"), selection: Binding(get: { Localization.shared.choice }, set: { model.setLanguage($0) })) {
+                        Text(tr("settings.language_system")).tag(LanguageChoice.system)
+                        Text(AppLanguage.en.nativeName).tag(LanguageChoice.en)
+                        Text(AppLanguage.es.nativeName).tag(LanguageChoice.es)
+                    }
+                    .accessibilityIdentifier("languagePicker")
+                } header: { Text(tr("settings.language")) } footer: { Text(tr("settings.language_footer")) }
+                Section {
+                    Toggle(tr("settings.photo_dates"), isOn: $useDates).accessibilityIdentifier("usePhotoDates")
+                    Toggle(tr("settings.photo_locations"), isOn: $useLocations).accessibilityIdentifier("usePhotoLocations")
+                } header: { Text(tr("settings.photos")) } footer: {
+                    Text(tr("settings.photos_footer"))
                 }
                 if let media = model.media {
                     Section {
                         VStack(alignment: .leading, spacing: 10) {
-                            Label("Organize new uploads", systemImage: "sparkles").font(.system(size: 16, weight: .semibold))
-                            Picker("Organize new uploads", selection: Binding(get: { media.organizePref }, set: { media.setOrganizePref($0) })) {
+                            Label(tr("settings.organize"), systemImage: "sparkles").font(.system(size: 16, weight: .semibold))
+                            Picker(tr("settings.organize"), selection: Binding(get: { media.organizePref }, set: { media.setOrganizePref($0) })) {
                                 ForEach(OrganizePref.allCases, id: \.self) { Text($0.title).tag($0) }
                             }
                             .pickerStyle(.segmented).labelsHidden().accessibilityIdentifier("organizePref")
                         }
                         .padding(.vertical, 4)
                     } footer: {
-                        Text("Ask offers after a big upload. Always groups photos by place and month, and adds later uploads to matching collections. Never leaves everything as it is.")
+                        Text(tr("settings.organize_footer"))
                     }
                 }
-                Section("My media") {
+                Section(tr("media.title")) {
                     Text(MediaCopy.privacy).font(.footnote).foregroundStyle(Theme.textSecondary)
                 }
-                Section("About") {
-                    LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
-                    Link("Privacy Policy", destination: URL(string: "https://videomk.com/privacy")!)
+                Section(tr("settings.about")) {
+                    LabeledContent(tr("settings.version"), value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
+                    Link(tr("legal.privacy"), destination: URL(string: tr("legal.privacy_url"))!)
                 }
             }
             .sheet(isPresented: $showDelete) { DeleteAccountView() }
@@ -56,11 +64,11 @@ struct SettingsView: View {
             .onAppear { if ProcessInfo.processInfo.environment["VMK_DEBUG_SHEET"] == "delete" { showDelete = true } }
             #endif
             .task { if model.media?.summary == nil { await model.media?.loadSummary() } }
-            .navigationTitle("Settings")
+            .navigationTitle(tr("settings.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .confirmationDialog("Sign out of videomk?", isPresented: $confirmSignOut, titleVisibility: .visible) {
-                Button("Sign out", role: .destructive) { dismiss(); Task { await model.signOut() } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
+            .confirmationDialog(tr("settings.sign_out_confirm"), isPresented: $confirmSignOut, titleVisibility: .visible) {
+                Button(tr("settings.sign_out"), role: .destructive) { dismiss(); Task { await model.signOut() } }
             }
         }
     }

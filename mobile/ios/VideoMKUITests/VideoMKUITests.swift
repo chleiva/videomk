@@ -6,7 +6,7 @@ final class VideoMKUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
     private func launch(signedIn: Bool, minutes: String? = nil, photoFiles: String? = nil) throws -> XCUIApplication {
-        let app = XCUIApplication()
+        let app = XCUIApplication.english()
         if let photoFiles { app.launchEnvironment["VMK_DEBUG_PHOTO_FILES"] = photoFiles }
         app.launchEnvironment["VMK_DEBUG_RESET"] = "1"  // the simulator Keychain survives between launches
         if let minutes { app.launchEnvironment["VMK_DEBUG_DEFAULT_MINUTES"] = minutes }
@@ -50,13 +50,13 @@ final class VideoMKUITests: XCTestCase {
 
     /// No backend needed: signed out, the social buttons exist only when their (debug) switch is on.
     func testSocialSignInButtonsFollowTheSwitches() {
-        let off = XCUIApplication()
+        let off = XCUIApplication.english()
         off.launchEnvironment["VMK_DEBUG_RESET"] = "1"
         off.launch()
         XCTAssertTrue(off.buttons["signInButton"].waitForExistence(timeout: 15))
         XCTAssertFalse(element(off, "signInApple").exists || element(off, "signInGoogle").exists, "default: no social buttons")
         off.terminate()
-        let on = XCUIApplication()
+        let on = XCUIApplication.english()
         on.launchEnvironment["VMK_DEBUG_RESET"] = "1"
         on.launchEnvironment["VMK_DEBUG_AUTH_APPLE"] = "1"
         on.launchEnvironment["VMK_DEBUG_AUTH_GOOGLE"] = "1"
@@ -70,7 +70,7 @@ final class VideoMKUITests: XCTestCase {
     private func fakeSession(_ env: [String: String]) -> XCUIApplication {
         func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
         let token = "\(b64(["alg": "none"])).\(b64(["sub": "demo-user", "email": "demo@example.com", "exp": Int(Date().timeIntervalSince1970) + 86400])).sig"
-        let app = XCUIApplication()
+        let app = XCUIApplication.english()
         app.launchEnvironment["VMK_DEBUG_RESET"] = "1"
         app.launchEnvironment["VMK_DEBUG_ID_TOKEN"] = token
         app.launchEnvironment["VMK_DEBUG_REFRESH_TOKEN"] = "fake"
@@ -166,7 +166,7 @@ final class VideoMKUITests: XCTestCase {
     func testMediaTabWithFakeLibrary() throws {
         func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
         let token = "\(b64(["alg": "none"])).\(b64(["sub": "demo-user", "email": "demo@example.com", "exp": Int(Date().timeIntervalSince1970) + 86400])).sig"
-        let app = XCUIApplication()
+        let app = XCUIApplication.english()
         app.launchEnvironment["VMK_DEBUG_RESET"] = "1"
         app.launchEnvironment["VMK_DEBUG_ID_TOKEN"] = token
         app.launchEnvironment["VMK_DEBUG_REFRESH_TOKEN"] = "fake"
@@ -392,7 +392,7 @@ final class VideoMKUITests: XCTestCase {
     func testLongHomeListHoldsStill() throws {
         func b64(_ o: [String: Any]) -> String { (try! JSONSerialization.data(withJSONObject: o)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "") }
         let token = "\(b64(["alg": "none"])).\(b64(["sub": "demo-user", "email": "demo@example.com", "exp": Int(Date().timeIntervalSince1970) + 86400])).sig"
-        let app = XCUIApplication()
+        let app = XCUIApplication.english()
         app.launchEnvironment["VMK_DEBUG_RESET"] = "1"
         app.launchEnvironment["VMK_DEBUG_ID_TOKEN"] = token
         app.launchEnvironment["VMK_DEBUG_REFRESH_TOKEN"] = "fake"

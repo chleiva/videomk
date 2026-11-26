@@ -13,26 +13,26 @@ struct OptionsSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Video options").font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("options.video_options")).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button("Done") { dismiss() }.font(.system(size: 17, weight: .semibold)).frame(minWidth: 44, minHeight: 44)
+                Button(tr("common.done")) { dismiss() }.font(.system(size: 17, weight: .semibold)).frame(minWidth: 44, minHeight: 44)
             }
             .padding(.horizontal, 20).padding(.top, 12)
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    overline("Length")
+                    overline(tr("create.length"))
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: typeSize.isAccessibilitySize ? 1 : 3), spacing: 10) {
                         ForEach(CreateOptions.lengths, id: \.self) { lengthCard($0) }
                     }
-                    Text("Each started minute costs 1 credit.\(balance.map { " You have \($0)." } ?? "")").font(.system(size: 14)).foregroundStyle(Theme.textSecondary).padding(.top, 2)
-                    overline("Look").padding(.top, 18)
+                    Text(balance.map { tr("options.cost_note_balance", $0) } ?? tr("options.cost_note")).font(.system(size: 14)).foregroundStyle(Theme.textSecondary).padding(.top, 2)
+                    overline(tr("create.look")).padding(.top, 18)
                     HStack(alignment: .top, spacing: 10) {
-                        swatch(nil, title: "Auto")
+                        swatch(nil, title: tr("create.look_auto"))
                         ForEach(VideoLook.allCases) { swatch($0, title: $0.title) }
                     }
                     Divider().padding(.top, 14)
                     Toggle(isOn: $options.captions) {
-                        Label("Subtitles", systemImage: "captions.bubble").font(.system(size: 17)).foregroundStyle(Theme.text)
+                        Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.system(size: 17)).foregroundStyle(Theme.text)
                     }
                     .tint(Theme.primary).frame(minHeight: 56)
                     .accessibilityIdentifier("subtitlesToggle")
@@ -41,7 +41,7 @@ struct OptionsSheet: View {
             }
             Button { dismiss() } label: {
                 HStack(spacing: 6) {
-                    Text("Done ·"); Image(systemName: "bolt.fill").font(.system(size: 14)); Text("\(ComposerPlan.plural(options.credits, "credit"))")
+                    Text(tr("common.done") + " ·"); Image(systemName: "bolt.fill").font(.system(size: 14)); Text(tr("credits.count", options.credits))
                 }
                 .font(.system(size: 17, weight: .semibold)).foregroundStyle(affordable ? Theme.onPrimary : Theme.warning)
                 .frame(maxWidth: .infinity, minHeight: 52)
@@ -49,7 +49,7 @@ struct OptionsSheet: View {
                 .overlay(Capsule().stroke(Theme.warning, lineWidth: affordable ? 0 : 1.5))
             }
             .buttonStyle(.plain).padding(.horizontal, 20).padding(.bottom, 8).padding(.top, 6)
-            .accessibilityLabel("Done, \(ComposerPlan.plural(options.credits, "credit"))")
+            .accessibilityLabel(tr("options.done_a11y", tr("credits.count", options.credits)))
             .accessibilityIdentifier("optionsDone")
         }
         .presentationBackground(Theme.surface)
@@ -67,7 +67,7 @@ struct OptionsSheet: View {
         let costly = balance.map { credits > $0 } ?? false
         return Button { options.minutes = m; UISelectionFeedbackGenerator().selectionChanged() } label: {
             VStack(spacing: 2) {
-                Text("\(Int(m)) min").font(.system(size: 17, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text)
+                Text(LengthLabel.chip(m)).font(.system(size: 17, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text)
                 HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.system(size: 10)); Text("\(credits)").font(.system(size: 12.5).monospacedDigit()) }
                     .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
             }
@@ -76,7 +76,7 @@ struct OptionsSheet: View {
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(ComposerPlan.plural(Int(m), "minute")), \(ComposerPlan.plural(credits, "credit"))")
+        .accessibilityLabel(tr("create.length_a11y", LengthLabel.spoken(m), tr("credits.count", credits)))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("length-\(Int(m))")
     }
@@ -90,12 +90,12 @@ struct OptionsSheet: View {
                     .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
                     .padding(selected ? 3 : 0)
                     .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
-                Text(title).font(.system(size: 15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text)
+                Text(title).font(.system(size: 15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.7)
             }
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
-        .accessibilityLabel(look == nil ? "Auto, the producer decides the look" : look!.title)
+        .accessibilityLabel(look == nil ? tr("create.look_auto_a11y") : look!.title)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("look-\(look?.rawValue ?? "auto")")
     }

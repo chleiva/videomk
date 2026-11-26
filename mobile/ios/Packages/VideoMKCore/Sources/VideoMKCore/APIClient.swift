@@ -17,15 +17,15 @@ public enum APIError: Error, Equatable, Sendable {
 
     public var message: String {
         switch self {
-        case .unauthorized: "Your session expired. Please sign in again."
+        case .unauthorized: tr("err.session_expired")
         case .invalid(let m), .quota(let m): m
-        case .notReady: "This video isn't ready yet."
+        case .notReady: tr("err.video_not_ready")
         case .conflict(let m): m
-        case .insufficientCredits(let have, let need): "This video needs \(need) credit\(need == 1 ? "" : "s") and you have \(have)."
+        case .insufficientCredits(let have, let need): tr("err.insufficient_credits", need, have)
         case .blocked(let m): m
         case .paused(let m, _): m
-        case .network: "Network problem. Check your connection and try again."
-        case .server: "Something went wrong on our side. Please try again."
+        case .network: tr("err.network")
+        case .server: tr("err.server")
         }
     }
 }
@@ -41,11 +41,12 @@ public struct APIClient: Sendable {
     private let session: URLSession
     private let appVersion: String
     private let region: @Sendable () -> String?
-
+    private let locale: @Sendable () -> String
     /// `region`: the device's region setting (ISO country code). The server uses it only to pick a default voice accent.
     public init(config: AppConfig, auth: any AuthorizationProviding, session: URLSession = .shared, appVersion: String = "0",
-                region: @escaping @Sendable () -> String? = { Locale.current.region?.identifier }) {
-        self.config = config; self.auth = auth; self.session = session; self.appVersion = appVersion; self.region = region
+                region: @escaping @Sendable () -> String? = { Locale.current.region?.identifier },
+                locale: @escaping @Sendable () -> String = { Localization.shared.headerValue }) {
+        self.config = config; self.auth = auth; self.session = session; self.appVersion = appVersion; self.region = region; self.locale = locale
     }
 
     public func requestUploads(count: Int) async throws -> [UploadSlot] {
@@ -121,6 +122,7 @@ public struct APIClient: Sendable {
         req.setValue(appVersion, forHTTPHeaderField: "X-App-Version")
         req.setValue(TimeZone.current.identifier, forHTTPHeaderField: "X-Timezone")  // where the user's day ends, for the daily free credits
         if let region = region(), region.count == 2 { req.setValue(region.uppercased(), forHTTPHeaderField: "X-Region") }
+        req.setValue(locale(), forHTTPHeaderField: "X-Locale")   // the app language (en|es): the server answers in it (docs/I18N.md)
         if let body { req.httpBody = body; req.setValue("application/json", forHTTPHeaderField: "Content-Type") }
 
         let data: Data, resp: URLResponse
@@ -138,9 +140,9 @@ public struct APIClient: Sendable {
         case 200..<300: return (data, http)
         case 401, 403: throw APIError.unauthorized
         case 400:
-            if (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status == "blocked" { throw APIError.blocked(Self.message(data) ?? "We can't make this video.") }
-            throw APIError.invalid(Self.message(data) ?? "That brief can't be used.")
-        case 409 where conflictIsEdit: throw APIError.conflict(Self.message(data) ?? "This video changed. Reload to continue.")
+            if (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status == "blocked" { throw APIError.blocked(Self.message(data) ?? tr("err.blocked")) }
+            throw APIError.invalid(Self.message(data) ?? tr("err.brief_invalid"))
+        case 409 where conflictIsEdit: throw APIError.conflict(Self.message(data) ?? tr("err.video_changed"))
         case 409: throw APIError.notReady(VideoStatus(serverStatus: (try? JSONDecoder().decode(MessageResponse.self, from: data))?.status ?? ""))
         case 402:
             struct Short: Decodable { let balance: Int?; let needed: Int? }
@@ -148,8 +150,8 @@ public struct APIClient: Sendable {
             throw APIError.insufficientCredits(balance: s?.balance ?? 0, needed: s?.needed ?? 1)
         case 429:
             struct Paused: Decodable { let status: String?; let message: String?; let retry_after: Int? }
-            if let p = try? JSONDecoder().decode(Paused.self, from: data), p.status == "paused" { throw APIError.paused(p.message ?? "Creating videos is paused for now.", retryAfter: p.retry_after) }
-            throw APIError.quota(Self.message(data) ?? "You've reached today's limit. Try again tomorrow.")
+            if let p = try? JSONDecoder().decode(Paused.self, from: data), p.status == "paused" { throw APIError.paused(p.message ?? tr("err.paused"), retryAfter: p.retry_after) }
+            throw APIError.quota(Self.message(data) ?? tr("err.daily_limit"))
         default: throw APIError.server
         }
     }

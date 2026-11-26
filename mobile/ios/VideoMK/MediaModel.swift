@@ -97,7 +97,7 @@ final class MediaModel {
             let s = try await api.summary()
             summary = s; collections = s.collections; summaryError = nil
         } catch is CancellationError {
-        } catch { summaryError = (error as? LibraryAPIError)?.message ?? "Couldn't load your storage." }
+        } catch { summaryError = (error as? LibraryAPIError)?.message ?? tr("media.err.storage") }
     }
 
     private var lastProcessed = 0
@@ -120,7 +120,7 @@ final class MediaModel {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 UIAccessibility.post(notification: .announcement, argument: msg.text)
                 let shown = toast
-                Task { try? await Task.sleep(for: .seconds(msg.action == "Review" ? 8 : 8)); if toast == shown { toast = nil } }
+                Task { try? await Task.sleep(for: .seconds(8)); if toast == shown { toast = nil } }
             }
             if let target = ReadyWait.target(baseline: baseline ?? summary?.count ?? 0, progress: p) {
                 readyTarget = target
@@ -227,7 +227,7 @@ final class MediaModel {
         let old = s.prefs.organize
         s.prefs.organize = pref; summary = s
         UISelectionFeedbackGenerator().selectionChanged()
-        Task { do { try await api.setOrganizePref(pref) } catch { if var s2 = summary { s2.prefs.organize = old; summary = s2 }; notice = (error as? LibraryAPIError)?.message ?? "Couldn't save that." } }
+        Task { do { try await api.setOrganizePref(pref) } catch { if var s2 = summary { s2.prefs.organize = old; summary = s2 }; notice = (error as? LibraryAPIError)?.message ?? tr("media.err.save") } }
     }
 
     private func applyOrganize(_ job: OrganizeJob?) {
@@ -273,7 +273,7 @@ final class MediaModel {
             await queue.enqueue(prepared.compactMap { $0 })
         }
         preparing = 0; preparingTotal = 0
-        if unreadable > 0 { notice = "\(unreadable) \(unreadable == 1 ? "photo" : "photos") couldn't be read."; unreadable = 0 }
+        if unreadable > 0 { notice = tr("attach.unreadable", unreadable); unreadable = 0 }
     }
 
     nonisolated static func prepare(_ raw: Data, dates: Bool, locations: Bool) async -> PreparedUpload? {
@@ -305,26 +305,26 @@ final class MediaModel {
             version += 1
             await loadSummary()
             return true
-        } catch { notice = (error as? LibraryAPIError)?.message ?? "Couldn't delete. Please try again."; return false }
+        } catch { notice = (error as? LibraryAPIError)?.message ?? tr("media.err.delete"); return false }
     }
 
     func createCollection(name: String, emoji: String? = nil) async -> LibraryCollection? {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !n.isEmpty else { return nil }
         do { let c = try await api.createCollection(name: String(n.prefix(40)), emoji: emoji); collections.append(c); return c }
-        catch { notice = (error as? LibraryAPIError)?.message ?? "Couldn't create the collection."; return nil }
+        catch { notice = (error as? LibraryAPIError)?.message ?? tr("media.err.collection_create"); return nil }
     }
 
     func rename(_ c: LibraryCollection, to name: String) async {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !n.isEmpty else { return }
         do { let u = try await api.updateCollection(id: c.id, name: String(n.prefix(40)), emoji: nil); if let i = collections.firstIndex(where: { $0.id == c.id }) { collections[i] = u } }
-        catch { notice = (error as? LibraryAPIError)?.message ?? "Couldn't rename the collection." }
+        catch { notice = (error as? LibraryAPIError)?.message ?? tr("media.err.collection_rename") }
     }
 
     func deleteCollection(_ c: LibraryCollection) async {
         do { try await api.deleteCollection(id: c.id); collections.removeAll { $0.id == c.id }; version += 1 }
-        catch { notice = (error as? LibraryAPIError)?.message ?? "Couldn't delete the collection." }
+        catch { notice = (error as? LibraryAPIError)?.message ?? tr("media.err.collection_delete") }
     }
 
     func edit(_ c: LibraryCollection, add: [String] = [], remove: [String] = []) async -> Bool {
@@ -334,7 +334,7 @@ final class MediaModel {
             }
             await loadSummary(); version += 1
             return true
-        } catch { notice = (error as? LibraryAPIError)?.message ?? "Couldn't update the collection."; return false }
+        } catch { notice = (error as? LibraryAPIError)?.message ?? tr("media.err.collection_update"); return false }
     }
 
     // MARK: images
@@ -501,7 +501,7 @@ final class PhotoFeed {
             merge(page); state = .loaded; offline = false; chips = []; semantic = false
         } catch is CancellationError {
         } catch {
-            if photos.isEmpty { state = .failed((error as? LibraryAPIError)?.message ?? "Couldn't load your photos.") } else { state = .loaded; offline = (error as? LibraryAPIError) == .network }
+            if photos.isEmpty { state = .failed((error as? LibraryAPIError)?.message ?? tr("media.err.photos")) } else { state = .loaded; offline = (error as? LibraryAPIError) == .network }
         }
     }
 
@@ -559,7 +559,7 @@ final class PhotoFeed {
             semantic = r.mode == "semantic"
             chips = r.understood.chips; set(r.items); cursor = nil; searchCursor = semantic ? nil : r.cursor; state = .loaded; offline = false
         } catch is CancellationError {
-        } catch { state = .failed((error as? LibraryAPIError)?.message ?? "Search didn't work. Please try again."); photos = []; sections = []; searchCursor = nil }
+        } catch { state = .failed((error as? LibraryAPIError)?.message ?? tr("media.err.search")); photos = []; sections = []; searchCursor = nil }
     }
 
     func drop(_ chip: SearchChip) async { await runSearch(searchQuery, drop: dropped + [chip.label]) }

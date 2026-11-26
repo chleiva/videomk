@@ -25,13 +25,13 @@ struct UploadBatchSection: View {
                 }
             } header: {
                 HStack {
-                    Text("Adding \(ComposerPlan.plural(all.count, "photo"))").font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text)
+                    Text(tr("upload.adding_title", all.count)).font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text)
                     Spacer()
-                    Text("Newest first").font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.newest_first")).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
                 }
                 .padding(.horizontal, 16).padding(.vertical, 10)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Adding \(ComposerPlan.plural(all.count, "photo")), \(doneCount) done")
+                .accessibilityLabel(tr("upload.adding_a11y", tr("photos.count", all.count), doneCount))
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("addingHeader")
             }
@@ -87,7 +87,7 @@ struct UploadTile: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityHidden(s != .failed)              // the grid header carries the aggregate; only a failed tile asks for the person
-        .accessibilityLabel("Photo failed to upload. Double tap to retry.")
+        .accessibilityLabel(tr("upload.photo_failed_to_upload_double"))
         .accessibilityAddTraits(s == .failed ? .isButton : [])
         .accessibilityIdentifier("uploadTile")
     }
@@ -111,7 +111,7 @@ struct UploadTile: View {
         case .processing:
             ProcessingShimmer()
             if showLabel {
-                VStack { Spacer(); HStack { glass(media.waiting ? "Getting it ready" : "Taking longer than usual", symbol: "sparkles"); Spacer() } }.padding(8)
+                VStack { Spacer(); HStack { glass(media.waiting ? tr("upload.getting_it_ready") : tr("upload.taking_longer_than_usual"), symbol: "sparkles"); Spacer() } }.padding(8)
             }
         case .done:
             if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(.white, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
@@ -119,11 +119,11 @@ struct UploadTile: View {
             Color(red: 0.72, green: 0.11, blue: 0.11).opacity(0.55)
             VStack(spacing: 6) {
                 Image(systemName: "arrow.clockwise").font(.system(size: 18, weight: .semibold)).foregroundStyle(.white).frame(width: 44, height: 44).background(.white.opacity(0.25), in: Circle())
-                Text("Tap to retry").font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
+                Text(tr("upload.tap_to_retry")).font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
             }
         case .alreadyThere:
             Color(navy).opacity(0.38)
-            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)); Text("Already there").font(.system(size: 11, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
+            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)); Text(tr("upload.already_there")).font(.system(size: 11, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
         }
     }
 
@@ -188,10 +188,10 @@ struct UploadBar: View {
             }
             .padding(.horizontal, 12).padding(.bottom, 8)
             .transition(.move(edge: .bottom).combined(with: .opacity))
-            .confirmationDialog("Cancel \(media.upload.queued + media.upload.uploading + media.upload.noSpace) uploads?", isPresented: $confirmCancel, titleVisibility: .visible) {
-                Button("Cancel remaining", role: .destructive) { media.cancelUploads() }
-                Button("Keep uploading", role: .cancel) {}
-            } message: { Text("Photos already added stay.") }
+            .confirmationDialog(tr("upload.cancel_title", media.upload.queued + media.upload.uploading + media.upload.noSpace), isPresented: $confirmCancel, titleVisibility: .visible) {
+                Button(tr("media.cancel_remaining"), role: .destructive) { media.cancelUploads() }
+                Button(tr("media.keep_uploading"), role: .cancel) {}
+            } message: { Text(tr("media.photos_already_added_stay")) }
         }
     }
 
@@ -215,10 +215,10 @@ struct UploadBar: View {
                     }
                     Spacer(minLength: 4)
                     if bar.kind == .needsAttention {
-                        Text("Review").font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.primary)
+                        Text(tr("upload.review")).font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.primary)
                     } else if bar.kind != .storageFull {
                         Button { p.paused ? media.resumeUploads() : media.pauseUploads() } label: { Image(systemName: p.paused ? "play.fill" : "pause.fill").font(.system(size: 17)).foregroundStyle(Theme.text).frame(width: 44, height: 44) }
-                            .buttonStyle(.plain).accessibilityLabel(p.paused ? "Resume uploads" : "Pause uploads").accessibilityIdentifier("pauseUploads")
+                            .buttonStyle(.plain).accessibilityLabel(p.paused ? tr("upload.resume_uploads") : tr("upload.pause_uploads")).accessibilityIdentifier("pauseUploads")
                     }
                     Image(systemName: media.barExpanded ? "chevron.down" : "chevron.up").font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 36, height: 44)
                 }
@@ -227,7 +227,7 @@ struct UploadBar: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("\(bar.title). \(bar.subtitle)")
-            .accessibilityHint(media.barExpanded ? "Collapses the upload details" : "Shows the upload details")
+            .accessibilityHint(media.barExpanded ? tr("upload.collapses_the_upload_details") : tr("upload.shows_the_upload_details"))
             .accessibilityIdentifier("uploadBar")
             GeometryReader { g in Rectangle().fill(tint(bar)).frame(width: g.size.width * bar.fraction) }.frame(height: 3)
         }
@@ -248,9 +248,9 @@ struct UploadBar: View {
                 }
             }
             HStack(spacing: 10) {
-                Button(action: onManageStorage) { Text("Manage storage").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.onPrimary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule()) }
+                Button(action: onManageStorage) { Text(tr("upload.manage_storage")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.onPrimary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule()) }
                     .buttonStyle(.plain).accessibilityIdentifier("manageStorage")
-                Button { withAnimation(.snappy) { storageNotNow = true } } label: { Text("Not now").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
+                Button { withAnimation(.snappy) { storageNotNow = true } } label: { Text(tr("organize.not_now")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
                     .buttonStyle(.plain)
             }
         }
@@ -280,22 +280,22 @@ struct UploadPanel: View {
                         Text(bar.subtitle).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
-                    Button(action: onClose) { Image(systemName: "chevron.down").font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }.accessibilityLabel("Collapse")
+                    Button(action: onClose) { Image(systemName: "chevron.down").font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }.accessibilityLabel(tr("upload.collapse"))
                 }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: typeSize.isAccessibilitySize ? 2 : 4), spacing: 8) {
-                    stat(bar.added, "Added"); stat(bar.gettingReady, "Getting ready"); stat(bar.waiting, "Waiting"); stat(bar.needYou, "Need you", danger: bar.needYou > 0)
+                    stat(bar.added, tr("upload.stat_added")); stat(bar.gettingReady, tr("upload.stat_getting_ready")); stat(bar.waiting, tr("upload.stat_waiting")); stat(bar.needYou, tr("upload.stat_need_you"), danger: bar.needYou > 0)
                 }
                 if !failed.isEmpty {
-                    Text("NEEDS ATTENTION").font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.needs_attention")).font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
                     ForEach(Array(failed.prefix(4).enumerated()), id: \.element.id) { n, item in failedRow(item, n) }
-                    if failed.count > 4 { Text("and \(failed.count - 4) more").font(.system(size: 13)).foregroundStyle(Theme.textSecondary) }
+                    if failed.count > 4 { Text(tr("upload.and_more", failed.count - 4)).font(.system(size: 13)).foregroundStyle(Theme.textSecondary) }
                 }
-                Text("You can close the app. Uploads carry on, and pick up where they stopped when you come back.").font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
+                Text(tr("upload.you_can_close_the_app")).font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
                 HStack {
-                    Button("Cancel remaining", role: .destructive, action: cancel).font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.danger).frame(minHeight: 44)
+                    Button(tr("media.cancel_remaining"), role: .destructive, action: cancel).font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.danger).frame(minHeight: 44)
                     Spacer()
                     Button { media.upload.paused ? media.resumeUploads() : media.pauseUploads() } label: {
-                        Label(media.upload.paused ? "Resume all" : "Pause all", systemImage: media.upload.paused ? "play.fill" : "pause.fill").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.primary)
+                        Label(media.upload.paused ? tr("upload.resume_all") : tr("upload.pause_all"), systemImage: media.upload.paused ? "play.fill" : "pause.fill").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.primary)
                             .padding(.horizontal, 18).frame(minHeight: 48).background(Theme.primaryContainer, in: Capsule())
                     }.buttonStyle(.plain)
                 }
@@ -324,11 +324,11 @@ struct UploadPanel: View {
         HStack(spacing: 12) {
             FailedThumb(item: item, media: media)
             VStack(alignment: .leading, spacing: 1) {
-                Text(item.file.hasSuffix(".jpg") && item.file.count < 24 ? item.file : "Photo \(n + 1)").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
-                Text(item.reason ?? "Connection dropped. Tap to try again.").font(.system(size: 13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true)
+                Text(item.file.hasSuffix(".jpg") && item.file.count < 24 ? item.file : tr("attach.photo_n", n + 1)).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                Text(item.reason ?? tr("upload.connection_dropped")).font(.system(size: 13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 4)
-            Button { media.retryItem(item.id) } label: { Text("Retry").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
+            Button { media.retryItem(item.id) } label: { Text(tr("upload.retry")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 16).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
                 .buttonStyle(.plain).accessibilityIdentifier("retryItem")
         }
     }
@@ -356,7 +356,7 @@ struct UploadToast: View {
             Image(systemName: "checkmark.circle.fill").font(.system(size: 20)).foregroundStyle(Color(hex: 0x4ADE80))
             Text(toast.text).font(.system(size: 14.5)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 4)
-            if let action = toast.action { Button(action: action == "Review" || action == "View" ? onAction : onDismiss) { Text(action).font(.system(size: 14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
+            if let action = toast.action { Button(action: action == tr("upload.review") || action == tr("org.view") ? onAction : onDismiss) { Text(action).font(.system(size: 14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
         }
         .padding(.leading, 14).padding(.trailing, 8).frame(minHeight: 52)
         .background(Color(hex: 0x23263F), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -376,12 +376,12 @@ struct UploadPill: View {
             Button(action: onTap) {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.primary)
-                    Text(ob.kind == .running ? ob.title.replacingOccurrences(of: "Organizing…", with: "Organizing") : ob.title).font(.system(size: 14, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
+                    Text(ob.kind == .running ? ob.title.replacingOccurrences(of: "…", with: "") : ob.title).font(.system(size: 14, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
                     Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
                 }
                 .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).elevation(2).frame(minHeight: 44)
             }
-            .buttonStyle(.plain).accessibilityLabel("\(ob.title). Opens Media.").accessibilityIdentifier("organizePill")
+            .buttonStyle(.plain).accessibilityLabel(tr("upload.opens_media_a11y", ob.title)).accessibilityIdentifier("organizePill")
         } else if let bar = media.bar, bar.kind != .finished {
             Button(action: onTap) {
                 HStack(spacing: 8) {
@@ -393,7 +393,7 @@ struct UploadPill: View {
                 .frame(minHeight: 44)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("\(bar.title). Opens Media.")
+            .accessibilityLabel(tr("upload.opens_media_a11y", bar.title))
             .accessibilityIdentifier("uploadPill")
         }
     }

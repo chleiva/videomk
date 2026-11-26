@@ -111,7 +111,7 @@ public struct PhotoUploader: Sendable {
     }
 
     public func upload(_ photos: [Data], already: [Int: String] = [:], progress: @Sendable (Int, Int) -> Void = { _, _ in }) async throws -> [String] {
-        guard !photos.isEmpty, photos.count <= PhotoLimits.maxPhotos else { throw APIError.invalid("Choose between 1 and \(PhotoLimits.maxPhotos) photos.") }
+        guard !photos.isEmpty, photos.count <= PhotoLimits.maxPhotos else { throw APIError.invalid(tr("photos.choose_range", PhotoLimits.maxPhotos)) }
         let total = photos.count
         var done = already.filter { $0.key >= 0 && $0.key < total }
         progress(done.count, total)
@@ -154,7 +154,7 @@ public struct PhotoUploader: Sendable {
         // deliberately no Authorization header: the presigned fields are the credential, and the login token must never go to storage
         do {
             let (_, resp) = try await session.upload(for: req, from: form.body)
-            guard let code = (resp as? HTTPURLResponse)?.statusCode, (200..<300).contains(code) else { throw APIError.invalid("A photo couldn't be uploaded. Please try again.") }
+            guard let code = (resp as? HTTPURLResponse)?.statusCode, (200..<300).contains(code) else { throw APIError.invalid(tr("photos.upload_failed")) }
         } catch let e as APIError { throw e }
         catch is CancellationError { throw CancellationError() }
         catch { throw APIError.network }
@@ -242,17 +242,15 @@ public enum PhotoCapacity {
         guard photos > fits else { return nil }
         let need = minimumMinutes(photos: photos)
         let sorted = options.sorted()
-        let n = fits
-        let intro = "About \(n) of your \(photos) \(photos == 1 ? "photo" : "photos") \(n == 1 ? "fits" : "fit") in \(length(minutes))"
         if let better = sorted.first(where: { $0 >= need - 1e-9 && $0 > minutes }) {
-            return "\(intro) (the best ones, no duplicates). Choose \(length(better)) to show \(photos == 1 ? "it" : "them all")."
+            return tr("photos.hint_better", fits, photos, length(minutes), length(better))
         }
-        return "\(intro) (the best ones, no duplicates)."
+        return tr("photos.hint", fits, photos, length(minutes))
     }
 
     /// "15 seconds", "1 minute", "3 minutes" (the words the hint uses).
     static func length(_ m: Double) -> String {
-        if m < 1 { let sec = Int((m * 60).rounded()); return "\(sec) seconds" }
-        let n = Int(m.rounded()); return n == 1 ? "1 minute" : "\(n) minutes"
+        if m < 1 { return tr("duration.seconds", Int((m * 60).rounded())) }
+        return tr("duration.minutes", Int(m.rounded()))
     }
 }

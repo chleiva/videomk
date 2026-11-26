@@ -98,7 +98,7 @@ private struct SectionHeader: View {
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(.bar)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title), \(count) \(count == 1 ? "photo" : "photos")")
+        .accessibilityLabel(tr("media.section_a11y", title, tr("photos.count", count)))
         .accessibilityAddTraits(.isHeader)
     }
 }
@@ -146,9 +146,9 @@ struct PhotoTile: View {
             .contentShape(Rectangle())
             .task(id: photo.id) { if image == nil { image = await media.thumbnail(for: photo) } }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(MediaGrouping.accessibilityLabel(photo) + (selected ? ", selected" + (order.map { ", number \($0)" } ?? "") : ""))
+            .accessibilityLabel(MediaGrouping.accessibilityLabel(photo) + (selected ? (order.map { tr("media.tile_selected_n", $0) } ?? tr("media.tile_selected")) : ""))
             .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
-            .accessibilityHint(selecting ? "Double tap to \(selected ? "deselect" : "select")" : "Double tap to open. Press and hold to select.")
+            .accessibilityHint(selecting ? tr(selected ? "media.hint_deselect" : "media.hint_select") : tr("media.hint_open"))
             .accessibilityIdentifier("mediaTile")
     }
 }
@@ -166,6 +166,6 @@ struct SkeletonGrid: View {
             }
         }
         .onAppear { if !reduceMotion { withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true } } }
-        .accessibilityElement(children: .ignore).accessibilityLabel("Loading your photos")
+        .accessibilityElement(children: .ignore).accessibilityLabel(tr("media.loading_your_photos"))
     }
 }

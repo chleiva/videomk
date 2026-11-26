@@ -171,15 +171,15 @@ public enum LibraryAPIError: Error, Equatable, Sendable {
 
     public var message: String {
         switch self {
-        case .unauthorized: "Your session expired. Please sign in again."
-        case .notFound: "That photo is no longer in your library."
-        case .conflict: "That changed in the meantime. Pull down to refresh and try again."
-        case .tooLarge: "That photo is too large to upload."
-        case .network: "No connection. Your photos are kept, and this continues when you are back online."
-        case .server: "Something went wrong on our side. Please try again."
+        case .unauthorized: tr("err.session_expired")
+        case .notFound: tr("lib.err.not_found")
+        case .conflict: tr("lib.err.conflict")
+        case .tooLarge: tr("lib.err.too_large")
+        case .network: tr("lib.err.offline")
+        case .server: tr("err.server")
         case .invalid(let m): m
-        case .rateLimited: "Too many requests right now. Please wait a moment and try again."
-        case .storageFull: "Your storage is full. Free some space or choose a larger plan."
+        case .rateLimited: tr("lib.err.rate_limited")
+        case .storageFull: tr("lib.err.storage_full")
         }
     }
 }
@@ -187,7 +187,7 @@ public enum LibraryAPIError: Error, Equatable, Sendable {
 /// What the apps do after an upload (account preference on the server).
 public enum OrganizePref: String, Codable, Sendable, CaseIterable, Equatable {
     case ask, always, never
-    public var title: String { rawValue.capitalized }
+    public var title: String { tr("organize_pref." + rawValue) }
     public init(from decoder: Decoder) throws { self = OrganizePref(rawValue: (try? decoder.singleValueContainer().decode(String.self)) ?? "") ?? .ask }
     /// The sheet's switch: on is Always, off is Ask (the switch is hidden for Never).
     public var switchIsOn: Bool { self == .always }

@@ -136,6 +136,12 @@ final class AppModel {
         }
     }
 
+    /// The language row in Settings: applied at once (no restart). The server's capability labels are fetched again in the new language.
+    func setLanguage(_ choice: LanguageChoice) {
+        Localization.shared.setChoice(choice)
+        Task { await createModel.loadCapabilities(userID: userID) }
+    }
+
     func signOut() async {
         UserDefaults.standard.set(true, forKey: Self.signedOutKey)
         await auth?.signOut()
@@ -211,7 +217,7 @@ final class AppModel {
             await signOut()
         } catch {
             // keep what we have on screen; only a first load shows a full-screen error
-            if videos.isEmpty { loadState = .failed((error as? APIError)?.message ?? "Couldn't load your videos.") } else { loadState = .loaded }
+            if videos.isEmpty { loadState = .failed((error as? APIError)?.message ?? tr("videos.load_failed")) } else { loadState = .loaded }
         }
     }
 

@@ -54,8 +54,8 @@ public enum SignInFlow {
     public static func message(for error: Error) -> String? {
         switch error as? AuthError {
         case .cancelled: nil
-        case .accountLinkRetry: "Your accounts were linked, but we couldn't finish signing you in. Please tap the button again."
-        default: "We couldn't sign you in. Please try again."
+        case .accountLinkRetry: tr("auth.link_retry")
+        default: tr("auth.failed")
         }
     }
 

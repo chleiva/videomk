@@ -29,7 +29,7 @@ struct MediaView: View {
                     if !privacySeen { PrivacyNote { withAnimation(reduceMotion ? nil : .snappy) { privacySeen = true } } }
                     MediaHeader(media: media) { showStorage = true }
                     if media.summary?.readOnly == true {
-                        Label("Read only until you are under the limit. You can still view and delete photos.", systemImage: "lock.fill")
+                        Label(tr("media.read_only_until_you_are"), systemImage: "lock.fill")
                             .font(.footnote).foregroundStyle(Theme.warning).padding(.horizontal, 16).frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityIdentifier("readOnlyNote")
                     }
@@ -42,14 +42,14 @@ struct MediaView: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Media")
+            .navigationTitle(tr("media.media"))
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
             .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
             .toolbar { toolbar }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
-                    if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == "View" { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
+                    if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == tr("org.view") { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
                     UploadBar(media: media, onManageStorage: { showStorage = true })
                     if media.bar == nil || media.bar?.kind == .finished { OrganizeBar(media: media) }
                     if selection.active { SelectionBar(selection: selection, feed: feed, onCollection: { showAddToCollection = true }, onVideo: makeVideo, onDelete: { confirmDelete = true }) }
@@ -80,19 +80,19 @@ struct MediaView: View {
         .fullScreenCover(item: $viewing) { ctx in
             PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { photo in viewing = nil; send([photo]) })
         }
-        .confirmationDialog("Delete \(selection.count) \(selection.count == 1 ? "photo" : "photos")?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete \(selection.count) \(selection.count == 1 ? "photo" : "photos")", role: .destructive) {
+        .confirmationDialog(tr("media.delete_title", selection.count), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(tr("media.delete_button", selection.count), role: .destructive) {
                 let ids = selection.ids
                 Task { if await media.delete(Array(ids)) { feed.remove(ids); selection.clear() } }
             }
-        } message: { Text("They are removed from your library and from every collection. This can't be undone.") }
-        .alert("New collection", isPresented: $newCollection) {
-            TextField("Name", text: $newName)
-            Button("Create") { let n = newName; newName = ""; Task { _ = await media.createCollection(name: n) } }
-            Button("Cancel", role: .cancel) { newName = "" }
+        } message: { Text(tr("media.they_are_removed_from_your")) }
+        .alert(tr("media.new_collection"), isPresented: $newCollection) {
+            TextField(tr("media.name"), text: $newName)
+            Button(tr("media.create")) { let n = newName; newName = ""; Task { _ = await media.createCollection(name: n) } }
+            Button(tr("common.cancel"), role: .cancel) { newName = "" }
         }
-        .alert("Heads up", isPresented: Binding(get: { media.notice != nil }, set: { if !$0 { media.notice = nil } })) {
-            Button("OK", role: .cancel) {}
+        .alert(tr("media.heads_up"), isPresented: Binding(get: { media.notice != nil }, set: { if !$0 { media.notice = nil } })) {
+            Button(tr("media.ok"), role: .cancel) {}
         } message: { Text(media.notice ?? "") }
     }
 
@@ -100,18 +100,18 @@ struct MediaView: View {
         switch feed.state {
         case .loading: SkeletonGrid()
         case .failed(let message):
-            MediaMessage(symbol: "wifi.exclamationmark", title: "Couldn't load your photos", text: message, button: "Try again") { Task { await feed.reload() } }
+            MediaMessage(symbol: "wifi.exclamationmark", title: tr("add.couldnt_load_your_photos"), text: message, button: tr("common.try_again")) { Task { await feed.reload() } }
         case .loaded:
             if showBatch { UploadBatchSection(media: media, listed: listed).padding(.bottom, 4) }
             if feed.photos.isEmpty {
                 if showBatch { EmptyView() }
                 else if feed.isSearching && !feed.searching {
-                    MediaMessage(symbol: "magnifyingglass", title: "No photos match", text: "Try fewer words, or remove one of the filters above.", button: nil) {}
+                    MediaMessage(symbol: "magnifyingglass", title: tr("media.no_photos_match"), text: tr("media.try_fewer_words_or_remove"), button: nil) {}
                 } else if !feed.isSearching {
                     EmptyLibrary(pickerItems: $pickerItems, readOnly: media.summary?.readOnly == true)
                 }
             } else {
-                if feed.offline { Label("Offline. Showing what's saved on this phone.", systemImage: "icloud.slash").font(.caption).foregroundStyle(Theme.textSecondary) }
+                if feed.offline { Label(tr("media.offline_showing_whats_saved_on"), systemImage: "icloud.slash").font(.caption).foregroundStyle(Theme.textSecondary) }
                 PhotoGrid(feed: feed, media: media, selection: selection, onOpen: { open($0) }, hidden: batchIDs)
             }
         }
@@ -119,22 +119,22 @@ struct MediaView: View {
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            if selection.active { Button("Cancel") { withAnimation(.snappy) { selection.clear() } } }
+            if selection.active { Button(tr("common.cancel")) { withAnimation(.snappy) { selection.clear() } } }
         }
         ToolbarItemGroup(placement: .topBarTrailing) {
             if !feed.photos.isEmpty {
-                Button(selection.active ? "Done" : "Select") { withAnimation(.snappy) { if selection.active { selection.clear() } else { selection.active = true } } }
+                Button(selection.active ? tr("common.done") : tr("media.select")) { withAnimation(.snappy) { if selection.active { selection.clear() } else { selection.active = true } } }
                     .accessibilityIdentifier("selectButton")
             }
             if media.summary?.readOnly != true {
                 PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Image(systemName: "plus") }
-                    .accessibilityLabel("Add photos to your library").accessibilityIdentifier("addToLibraryButton")
+                    .accessibilityLabel(tr("media.add_photos_to_your_library")).accessibilityIdentifier("addToLibraryButton")
             }
             Menu {
-                Button { media.organizeLibrary() } label: { Label("Organize my library", systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
-                Button { showStorage = true } label: { Label("Storage", systemImage: "externaldrive") }
+                Button { media.organizeLibrary() } label: { Label(tr("media.organize_my_library"), systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
+                Button { showStorage = true } label: { Label(tr("media.storage"), systemImage: "externaldrive") }
             } label: { Image(systemName: "ellipsis") }
-                .accessibilityLabel("More").accessibilityIdentifier("mediaMore")
+                .accessibilityLabel(tr("media.more")).accessibilityIdentifier("mediaMore")
         }
     }
 
@@ -166,10 +166,10 @@ struct MediaView: View {
                     .padding(.bottom, 70)
             }
             .transition(.opacity)
-            .confirmationDialog("Cancel remaining uploads?", isPresented: $confirmCancelUploads, titleVisibility: .visible) {
-                Button("Cancel remaining", role: .destructive) { media.cancelUploads() }
-                Button("Keep uploading", role: .cancel) {}
-            } message: { Text("Photos already added stay.") }
+            .confirmationDialog(tr("media.cancel_remaining_uploads"), isPresented: $confirmCancelUploads, titleVisibility: .visible) {
+                Button(tr("media.cancel_remaining"), role: .destructive) { media.cancelUploads() }
+                Button(tr("media.keep_uploading"), role: .cancel) {}
+            } message: { Text(tr("media.photos_already_added_stay")) }
         }
     }
 
@@ -204,7 +204,7 @@ struct MediaHeader: View {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text(meter.label).font(.footnote.weight(.medium)).foregroundStyle(meter.state == .ok ? Theme.textSecondary : tint(meter))
-                        if meter.state != .ok { Text(meter.state == .full ? "Full" : "Almost full").font(.footnote.weight(.semibold)).foregroundStyle(tint(meter)) }
+                        if meter.state != .ok { Text(meter.state == .full ? tr("media.full") : tr("media.almost_full")).font(.footnote.weight(.semibold)).foregroundStyle(tint(meter)) }
                         Spacer()
                         Image(systemName: "chevron.right").font(.caption2).foregroundStyle(Theme.textSecondary)
                     }
@@ -214,8 +214,8 @@ struct MediaHeader: View {
             .buttonStyle(.plain)
             .padding(.horizontal, 16)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Storage: \(meter.label)\(meter.state == .full ? ", full" : meter.state == .warning ? ", almost full" : "")")
-            .accessibilityHint("Shows your storage")
+            .accessibilityLabel(tr(meter.state == .full ? "media.storage_a11y_full" : meter.state == .warning ? "media.storage_a11y_warning" : "media.storage_a11y", meter.label))
+            .accessibilityHint(tr("media.shows_your_storage"))
             .accessibilityIdentifier("storageMeter")
         } else if media.summaryError != nil {
             EmptyView()
@@ -230,11 +230,11 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            TextField("Search your photos, try ‘beach in Thailand’", text: $feed.text).font(.system(size: 15))
+            TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.system(size: 15))
                 .focused($focused).submitLabel(.search).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .accessibilityIdentifier("mediaSearch")
             if feed.searching { ProgressView().controlSize(.small) }
-            else if !feed.text.isEmpty { Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary) }.accessibilityLabel("Clear search") }
+            else if !feed.text.isEmpty { Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary) }.accessibilityLabel(tr("media.clear_search")) }
         }
         .padding(.horizontal, 12).frame(minHeight: 40)
         .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -258,8 +258,8 @@ struct ChipsRow: View {
                             .padding(.horizontal, 10).padding(.vertical, 6)
                             .background(Theme.primary.opacity(0.15), in: RoundedRectangle(cornerRadius: 16, style: .continuous)).foregroundStyle(Theme.primary)
                         }
-                        .accessibilityLabel("\(chip.label), understood from your search")
-                        .accessibilityHint("Double tap to remove this filter")
+                        .accessibilityLabel(tr("media.chip_a11y", chip.label))
+                        .accessibilityHint(tr("media.double_tap_to_remove_this"))
                         .accessibilityIdentifier("searchChip")
                     }
                 }
@@ -277,7 +277,7 @@ struct PrivacyNote: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "lock.shield.fill").foregroundStyle(Theme.primary).accessibilityHidden(true)
             Text(MediaCopy.privacy).font(.footnote).foregroundStyle(Theme.text)
-            Button(action: onDismiss) { Image(systemName: "xmark").font(.footnote.weight(.semibold)) }.accessibilityLabel("Dismiss privacy note").foregroundStyle(Theme.textSecondary)
+            Button(action: onDismiss) { Image(systemName: "xmark").font(.footnote.weight(.semibold)) }.accessibilityLabel(tr("media.dismiss_privacy_note")).foregroundStyle(Theme.textSecondary)
         }
         .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
         .padding(.horizontal, 16).accessibilityIdentifier("mediaPrivacyNote")
@@ -287,7 +287,7 @@ struct PrivacyNote: View {
 enum MediaCopy {
     /// Where "Get more storage" goes. None is configured yet, so the button stays hidden even when the server says `can_upgrade`.
     static let upgradeURL: URL? = nil
-    static let privacy = "Your photos are private to you. Only you can see them. Nobody at videomk browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time."
+    static var privacy: String { tr("media.privacy_note") }
 }
 
 struct MediaMessage: View {
@@ -310,11 +310,11 @@ struct EmptyLibrary: View {
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: "photo.stack").font(.system(size: 48)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
-            Text("Your photos, in one private place").font(.title3.bold()).foregroundStyle(Theme.text).multilineTextAlignment(.center)
-            Text("Add photos once, find them by describing them, and make videos from them without picking files each time.")
+            Text(tr("media.your_photos_in_one_private")).font(.title3.bold()).foregroundStyle(Theme.text).multilineTextAlignment(.center)
+            Text(tr("media.add_photos_once_find_them"))
                 .font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
             if !readOnly {
-                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Text("Add photos").font(.headline).frame(maxWidth: 240, minHeight: 48) }
+                PhotosPicker(selection: $pickerItems, maxSelectionCount: nil, matching: .images) { Text(tr("create.add_photos")).font(.headline).frame(maxWidth: 240, minHeight: 48) }
                     .buttonStyle(.borderedProminent).accessibilityIdentifier("emptyAddPhotos")
             }
         }
@@ -331,7 +331,7 @@ struct SelectionBar: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Text(selection.count == 0 ? "Select photos" : "\(selection.count) selected").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
+                Text(selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
                 Spacer()
                 if !feed.photos.isEmpty {
                     let all = SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered)
@@ -343,9 +343,9 @@ struct SelectionBar: View {
                 }
             }
             HStack {
-                action("folder.badge.plus", "Add to collection", onCollection)
-                action("sparkles.tv", "Make a video", onVideo)
-                action("trash", "Delete", onDelete, role: .destructive)
+                action("folder.badge.plus", tr("collections.add_to_collection"), onCollection)
+                action("sparkles.tv", tr("collections.make_a_video"), onVideo)
+                action("trash", tr("common.delete"), onDelete, role: .destructive)
             }
             .disabled(selection.count == 0)
         }
@@ -376,22 +376,22 @@ struct StorageSheet: View {
                             Text(meter.label).font(.title3.weight(.semibold)).foregroundStyle(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.text)
                             ProgressView(value: meter.fraction).tint(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.primary)
                         }
-                        LabeledContent("Plan", value: s.plan == "pro" ? "Pro" : "Free")
-                        LabeledContent("Photos", value: "\(s.count)")
-                        LabeledContent("Left", value: StorageMeter.format(meter.remaining))
+                        LabeledContent(tr("media.plan"), value: s.plan == "pro" ? tr("media.pro") : tr("media.free"))
+                        LabeledContent(tr("create.photos"), value: "\(s.count)")
+                        LabeledContent(tr("media.left"), value: StorageMeter.format(meter.remaining))
                     }
-                    Section("When it is full") {
-                        Text("Photos that fit are still added and the rest are listed, so nothing is lost silently. Nothing is ever deleted for you. If a plan ends, your library stays: you can view, download and delete until you are back under the limit.")
+                    Section(tr("media.when_it_is_full")) {
+                        Text(tr("media.photos_that_fit_are_still"))
                             .font(.subheadline)
                     }
                     if s.canUpgrade, let url = MediaCopy.upgradeURL {
-                        Section { Button("Get more storage") { openURL(url) }.accessibilityIdentifier("upgradeStorage") }
+                        Section { Button(tr("media.get_more_storage")) { openURL(url) }.accessibilityIdentifier("upgradeStorage") }
                     }
                 } else { ProgressView().frame(maxWidth: .infinity) }
-                Section("Privacy") { Text(MediaCopy.privacy).font(.subheadline) }
+                Section(tr("media.privacy")) { Text(MediaCopy.privacy).font(.subheadline) }
             }
-            .navigationTitle("Storage").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .navigationTitle(tr("media.storage")).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
         }
         .presentationDetents([.medium, .large])
         .task { await media.loadSummary() }

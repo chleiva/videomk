@@ -28,6 +28,7 @@ public enum OrganizeSince {
 
 public enum SuggestedNames {
     static let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    static let monthsES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic"]
 
     public static func isValid(_ name: String) -> Bool { let n = name.trimmingCharacters(in: .whitespacesAndNewlines); return !n.isEmpty && n.count <= 60 }
 
@@ -35,10 +36,15 @@ public enum SuggestedNames {
     static func points(_ date: String) -> [Int] {
         guard let year = date.split(whereSeparator: { !$0.isNumber }).compactMap({ $0.count == 4 ? Int($0) : nil }).last else { return [] }
         let words = date.split(whereSeparator: { !$0.isLetter }).map(String.init)
-        return words.compactMap { w in months.firstIndex(of: w).map { year * 12 + $0 } }
+        // Names from the server may come in either language: read both
+        return words.compactMap { w in
+            let l = w.lowercased()
+            let i = months.firstIndex { $0.lowercased() == l } ?? monthsES.firstIndex { $0 == l } ?? (l == "sep" ? 8 : nil)
+            return i.map { year * 12 + $0 }
+        }
     }
 
-    static func label(_ point: Int) -> String { "\(months[point % 12]) \(point / 12)" }
+    static func label(_ point: Int) -> String { "\(Localization.shared.language == .es ? monthsES[point % 12] : months[point % 12]) \(point / 12)" }
 
     /// Name ideas for "Put all in one collection": the main place with a date, then the date range. The first one is pre-filled.
     public static func suggest(groups: [OrganizeGroup]) -> [String] {
@@ -171,12 +177,12 @@ public struct OrganizeBarState: Equatable, Sendable {
 
     public static func make(_ job: OrganizeJob?, uploadActive: Bool = false) -> OrganizeBarState? {
         guard let job, job.isActive else { return nil }
-        let counts = "\(job.done.formatted()) of \(job.total.formatted())"
+        let done = job.done.formatted(.number.locale(Localization.shared.locale)), total = job.total.formatted(.number.locale(Localization.shared.locale))
         switch job.state {
-        case .waiting: return OrganizeBarState(kind: .waiting, title: "Waiting for a connection", subtitle: "\(counts) organized", fraction: job.fraction)
-        case .failed: return OrganizeBarState(kind: .failed, title: "Couldn't finish organizing", subtitle: "Try again to carry on where it stopped.", fraction: job.fraction)
+        case .waiting: return OrganizeBarState(kind: .waiting, title: tr("org.waiting"), subtitle: tr("org.waiting_sub", done, total), fraction: job.fraction)
+        case .failed: return OrganizeBarState(kind: .failed, title: tr("org.failed_title"), subtitle: tr("org.failed_sub"), fraction: job.fraction)
         default:
-            return OrganizeBarState(kind: .running, title: "\(job.resumed ? "Resuming…" : "Organizing…") \(counts)", subtitle: uploadActive ? "Organizing after the upload" : "You can leave this screen.", fraction: job.fraction)
+            return OrganizeBarState(kind: .running, title: tr(job.resumed ? "org.resuming" : "org.running", done, total), subtitle: uploadActive ? tr("org.running_after_upload") : tr("org.leave_screen"), fraction: job.fraction)
         }
     }
 }
@@ -186,9 +192,9 @@ public enum OrganizeSummary {
     public static func message(_ job: OrganizeJob) -> Message? {
         guard job.state == .finished else { return nil }
         let n = job.created + job.updated
-        if job.mode == .single { return Message(text: "Organized into 1 collection", action: "View") }
-        if n == 0 { return Message(text: "Everything is already organized", action: nil) }
-        return Message(text: "Organized into \(ComposerPlan.plural(n, "collection"))", action: "View")
+        if job.mode == .single { return Message(text: tr("org.done_n", 1), action: tr("org.view")) }
+        if n == 0 { return Message(text: tr("org.all_done"), action: nil) }
+        return Message(text: tr("org.done_n", n), action: tr("org.view"))
     }
 }
 
@@ -204,13 +210,13 @@ public struct OrganizeAnnouncer: Sendable {
         let bar = OrganizeBarState.make(job)
         defer { lastKind = bar?.kind }
         if bar?.kind != lastKind, let kind = bar?.kind {
-            if kind == .waiting { return "Waiting for a connection" }
-            if kind == .failed { return "Couldn't finish organizing" }
+            if kind == .waiting { return tr("org.waiting") }
+            if kind == .failed { return tr("org.failed_title") }
         }
         let step = max(1, Int((Double(job.total) * 0.1).rounded(.up)))
         guard job.state == .running, job.done - lastDone >= step else { return nil }
         if let t = lastTime, now.timeIntervalSince(t) < 15 { return nil }
         lastDone = job.done; lastTime = now
-        return "Organized \(job.done.formatted()) of \(job.total.formatted()) photos"
+        return tr("org.announce_progress", job.done.formatted(.number.locale(Localization.shared.locale)), job.total.formatted(.number.locale(Localization.shared.locale)))
     }
 }

@@ -33,18 +33,18 @@ struct PhotoViewer: View {
         .overlay(alignment: .top) {
             HStack {
                 Button { dismiss() } label: { Image(systemName: "xmark.circle.fill").font(.title).symbolRenderingMode(.palette).foregroundStyle(.white, Color.white.opacity(0.25)) }
-                    .accessibilityLabel("Close")
+                    .accessibilityLabel(tr("common.close"))
                 Spacer()
-                if photos.count > 1 { Text("\(index + 1) of \(photos.count)").font(.footnote.monospacedDigit()).foregroundStyle(.white.opacity(0.8)) }
+                if photos.count > 1 { Text(tr("viewer.position", index + 1, photos.count)).font(.footnote.monospacedDigit()).foregroundStyle(.white.opacity(0.8)) }
             }.padding()
         }
         .overlay(alignment: .bottom) {
             if let p = current {
                 HStack(spacing: 28) {
-                    bar("info.circle", "Info") { showInfo = true }
-                    bar("folder.badge.plus", "Add to collection") { showCollections = true }
-                    bar("sparkles.tv", "Make a video from this") { onMakeVideo(p) }
-                    bar("trash", "Delete") { confirmDelete = true }
+                    bar("info.circle", tr("viewer.info")) { showInfo = true }
+                    bar("folder.badge.plus", tr("collections.add_to_collection")) { showCollections = true }
+                    bar("sparkles.tv", tr("viewer.make_video")) { onMakeVideo(p) }
+                    bar("trash", tr("common.delete")) { confirmDelete = true }
                 }
                 .padding(.vertical, 12).padding(.horizontal, 20).background(.ultraThinMaterial, in: Capsule()).padding(.bottom, 16)
             }
@@ -52,9 +52,9 @@ struct PhotoViewer: View {
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showInfo) { if let p = current { PhotoInfoSheet(media: media, photo: p) } }
         .sheet(isPresented: $showCollections) { if let p = current { AddToCollectionSheet(media: media, photoIDs: [p.id]) {} } }
-        .confirmationDialog("Delete this photo?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete photo", role: .destructive) { deleteCurrent() }
-        } message: { Text("It is removed from your library and every collection. This can't be undone.") }
+        .confirmationDialog(tr("viewer.delete_this_photo"), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(tr("viewer.delete_photo"), role: .destructive) { deleteCurrent() }
+        } message: { Text(tr("viewer.it_is_removed_from_your")) }
     }
 
     private func bar(_ symbol: String, _ label: String, _ run: @escaping () -> Void) -> some View {
@@ -112,14 +112,14 @@ struct PhotoInfoSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                if let d = MediaGrouping.day(of: photo, calendar: .current) { LabeledContent(photo.taken == nil ? "Added" : "Taken", value: MediaGrouping.title(y: d.y, m: d.m, d: d.d, calendar: .current)) }
-                if let place = photo.place { LabeledContent("Place", value: place) }
-                if photo.w > 0 { LabeledContent("Size", value: "\(photo.w) x \(photo.h) px, \(StorageMeter.format(photo.bytes))") } else { LabeledContent("Size", value: StorageMeter.format(photo.bytes)) }
+                if let d = MediaGrouping.day(of: photo, calendar: .current) { LabeledContent(photo.taken == nil ? tr("viewer.added") : tr("viewer.taken"), value: MediaGrouping.title(y: d.y, m: d.m, d: d.d, calendar: .current)) }
+                if let place = photo.place { LabeledContent(tr("viewer.place"), value: place) }
+                if photo.w > 0 { LabeledContent(tr("viewer.size"), value: "\(photo.w) x \(photo.h) px, \(StorageMeter.format(photo.bytes))") } else { LabeledContent(tr("viewer.size"), value: StorageMeter.format(photo.bytes)) }
                 let names = media.collections.filter { photo.collections.contains($0.id) }.map(\.name)
-                LabeledContent("Collections", value: names.isEmpty ? "None" : names.joined(separator: ", "))
+                LabeledContent(tr("viewer.collections"), value: names.isEmpty ? tr("viewer.none") : names.joined(separator: ", "))
             }
-            .navigationTitle("Info").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .navigationTitle(tr("viewer.info")).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
         }
         .presentationDetents([.medium])
     }

@@ -19,17 +19,17 @@ struct EditorView: View {
                 } else { ProgressView() }
             }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Edit video")
+            .navigationTitle(tr("editor.edit_video"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { if model?.isDirty == true { confirmDiscard = true } else { dismiss() } }
+                    Button(tr("common.close")) { if model?.isDirty == true { confirmDiscard = true } else { dismiss() } }
                         .disabled(model?.isLocked == true).accessibilityIdentifier("closeEditor")
                 }
                 ToolbarItem(placement: .confirmationAction) { if model?.phase == .editing { EditButton() } }
             }
-            .confirmationDialog("Discard your changes?", isPresented: $confirmDiscard, titleVisibility: .visible) {
-                Button("Discard changes", role: .destructive) { dismiss() }
+            .confirmationDialog(tr("editor.discard_your_changes"), isPresented: $confirmDiscard, titleVisibility: .visible) {
+                Button(tr("editor.discard_changes"), role: .destructive) { dismiss() }
             }
         }
         .environment(\.editMode, $editMode)
@@ -45,9 +45,9 @@ struct EditorView: View {
         case .loading: ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed(let message):
             ContentUnavailableView {
-                Label("Can't edit right now", systemImage: "exclamationmark.triangle")
+                Label(tr("editor.cant_edit_right_now"), systemImage: "exclamationmark.triangle")
             } description: { Text(message) } actions: {
-                Button("Reload") { Task { await model.load() } }.buttonStyle(.borderedProminent)
+                Button(tr("editor.reload")) { Task { await model.load() } }.buttonStyle(.borderedProminent)
             }
         case .rendering(let mode): RenderingView(mode: mode)
         case .done(let mode): DoneView(mode: mode, url: model.resultURL, onKeepEditing: { model.keepEditing() }, onClose: { dismiss() })
@@ -62,13 +62,13 @@ struct EditorView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(banner).font(.callout).foregroundStyle(Theme.danger).accessibilityIdentifier("editorBanner")
-                        Button("Reload and discard my changes") { Task { await model.load() } }.font(.callout)
+                        Button(tr("editor.reload_and_discard_my_changes")) { Task { await model.load() } }.font(.callout)
                     }
                 }
             }
-            Section("Title") {
-                TextField("Title", text: $model.title).accessibilityIdentifier("titleField")
-                Toggle("Subtitles", isOn: $model.captions).accessibilityIdentifier("captionsToggle")
+            Section(tr("editor.title")) {
+                TextField(tr("editor.title"), text: $model.title).accessibilityIdentifier("titleField")
+                Toggle(tr("create.subtitles"), isOn: $model.captions).accessibilityIdentifier("captionsToggle")
             }
             Section {
                 ForEach(model.beats) { beat in
@@ -78,8 +78,8 @@ struct EditorView: View {
                 }
                 .onMove { model.move(from: $0, to: $1) }
                 .onDelete { model.delete(at: $0) }
-            } header: { Text("Scenes (\(model.beats.count))") } footer: {
-                Text("Tap a scene to change its narration or photo. Use Edit to reorder or delete.")
+            } header: { Text(tr("editor.scenes_title", model.beats.count)) } footer: {
+                Text(tr("editor.tap_a_scene_to_change"))
             }
         }
         .scrollContentBackground(.hidden)
@@ -92,12 +92,12 @@ struct EditorView: View {
     private func actionBar(_ model: EditorModel) -> some View {
         VStack(spacing: 8) {
             HStack(spacing: 12) {
-                Button { Task { await model.submit(.preview) } } label: { Text("Preview").frame(maxWidth: .infinity, minHeight: 44) }
+                Button { Task { await model.submit(.preview) } } label: { Text(tr("editor.preview")).frame(maxWidth: .infinity, minHeight: 44) }
                     .buttonStyle(.bordered).disabled(!model.isDirty).accessibilityIdentifier("previewButton")
-                Button { Task { await model.submit(.final) } } label: { Text("Publish").frame(maxWidth: .infinity) }
+                Button { Task { await model.submit(.final) } } label: { Text(tr("editor.publish")).frame(maxWidth: .infinity) }
                     .buttonStyle(PrimaryButtonStyle()).disabled(!model.isDirty && !model.canPublishWithoutChanges).accessibilityIdentifier("publishButton")
             }
-            Text(model.isDirty ? "Preview is a quick draft. Publish makes the full-quality video and replaces the current one." : "Make a change to enable Preview and Publish.")
+            Text(model.isDirty ? tr("editor.preview_is_a_quick_draft") : tr("editor.make_a_change_to_enable"))
                 .font(.caption).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
         }
         .padding(.horizontal, 20).padding(.vertical, 10).background(.bar)
@@ -125,13 +125,13 @@ struct BeatRow: View {
             .frame(width: 64, height: 44)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    Text(beat.kind?.label ?? "Scene").font(.caption.weight(.semibold)).foregroundStyle(Theme.primary)
+                    Text(beat.kind?.label ?? tr("editor.scene")).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary)
                     if let d = beat.duration { Text("\(Int(d.rounded())) s").font(.caption).foregroundStyle(Theme.textSecondary) }
-                    if edited { Text("Edited").font(.caption.weight(.semibold)).foregroundStyle(Theme.warning) }
-                    else if beat.stale { Text("Will be re-made").font(.caption).foregroundStyle(Theme.textSecondary) }
+                    if edited { Text(tr("editor.edited")).font(.caption.weight(.semibold)).foregroundStyle(Theme.warning) }
+                    else if beat.stale { Text(tr("editor.will_be_remade")).font(.caption).foregroundStyle(Theme.textSecondary) }
                 }
                 if beat.silent && beat.narration.isEmpty {
-                    Label("Silent pause" + (beat.hold.map { ", \(Int($0.rounded())) s" } ?? ""), systemImage: "speaker.slash").font(.callout).foregroundStyle(Theme.textSecondary)
+                    Label(tr("editor.silent_pause") + (beat.hold.map { ", \(Int($0.rounded())) s" } ?? ""), systemImage: "speaker.slash").font(.callout).foregroundStyle(Theme.textSecondary)
                         .accessibilityIdentifier("silentBeatLabel")
                 } else {
                     Text(beat.narration).font(.callout).foregroundStyle(Theme.text).lineLimit(2)
@@ -149,8 +149,8 @@ struct RenderingView: View {
     var body: some View {
         VStack(spacing: 18) {
             ProgressView().controlSize(.large)
-            Text(mode == .final ? "Publishing your video" : "Making your preview").font(.title3.bold()).foregroundStyle(Theme.text)
-            Text("Only the scenes you changed are re-made, so this is usually quick. You can't edit while it renders.")
+            Text(mode == .final ? tr("editor.publishing_your_video") : tr("editor.making_your_preview")).font(.title3.bold()).foregroundStyle(Theme.text)
+            Text(tr("editor.only_the_scenes_you_changed"))
                 .font(.callout).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
         }
         .padding(32).frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -168,13 +168,13 @@ struct DoneView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                Text(mode == .final ? "Published" : "Preview ready").font(.title2.bold()).foregroundStyle(Theme.text).accessibilityIdentifier("doneTitle")
+                Text(mode == .final ? tr("editor.published") : tr("editor.preview_ready")).font(.title2.bold()).foregroundStyle(Theme.text).accessibilityIdentifier("doneTitle")
                 if let player {
                     InlinePlayer(player: player).aspectRatio(16 / 9, contentMode: .fit)
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
                 }
-                if mode == .preview { Text("This is a draft. Publish from the editor to make the full-quality video.").font(.callout).foregroundStyle(Theme.textSecondary) }
-                Button(mode == .final ? "Done" : "Back to editing") { mode == .final ? onClose() : onKeepEditing() }
+                if mode == .preview { Text(tr("editor.this_is_a_draft_publish")).font(.callout).foregroundStyle(Theme.textSecondary) }
+                Button(mode == .final ? tr("common.done") : tr("editor.back_to_editing")) { mode == .final ? onClose() : onKeepEditing() }
                     .buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("doneButton")
             }.padding(20)
         }

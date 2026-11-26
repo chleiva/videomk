@@ -52,26 +52,26 @@ public struct UploadBarState: Equatable, Sendable {
         }
         let storageFull = p.noSpace > 0 && p.queued == 0 && p.uploading == 0
         if storageFull {
-            return make(.storageFull, "Your storage is full", "\(ComposerPlan.plural(p.noSpace, "photo")) \(p.noSpace == 1 ? "is" : "are") waiting. Free up space and they will carry on by themselves.")
+            return make(.storageFull, tr("upload.storage_full_title"), tr("upload.storage_full_sub", p.noSpace))
         }
-        if p.isFinished { return make(p.failed > 0 ? .needsAttention : .finished, p.failed > 0 ? "\(p.failed) need you" : "Done", p.failed > 0 ? "\(ComposerPlan.plural(uploaded, "photo")) added" : "") }
+        if p.isFinished { return make(p.failed > 0 ? .needsAttention : .finished, p.failed > 0 ? tr("upload.need_you_title", p.failed) : tr("upload.done"), p.failed > 0 ? tr("upload.photos_added", uploaded) : "") }
         if p.paused && p.lastError != nil || p.lastError != nil {
-            return make(.offline, "Waiting for a connection", "\(ComposerPlan.plural(p.queued + p.uploading, "photo")) will upload automatically")
+            return make(.offline, tr("upload.offline_title"), tr("upload.offline_sub", p.queued + p.uploading))
         }
         if p.paused {
-            return make(.paused, "Paused · \(uploaded) of \(p.total)", p.uploading > 0 ? "Pausing after the current photos" : "Resume when you're ready")
+            return make(.paused, tr("upload.paused_title", uploaded, p.total), p.uploading > 0 ? tr("upload.pausing") : tr("upload.resume_hint"))
         }
-        return make(.uploading, "Uploading \(uploaded) of \(p.total)", leftText(p, elapsed: elapsed))
+        return make(.uploading, tr("upload.uploading_title", uploaded, p.total), leftText(p, elapsed: elapsed))
     }
 
     static func leftText(_ p: QueueProgress, elapsed: TimeInterval?) -> String {
         let left = max(0, p.totalBytes - p.doneBytes)
-        var text = "\(StorageMeter.format(left)) left"
+        let size = StorageMeter.format(left)
         if let elapsed, elapsed > 5, p.doneBytes > 0 {
             let seconds = Double(left) / (Double(p.doneBytes) / elapsed)
-            text += " · " + (seconds < 60 ? "less than a minute" : "about \(Int((seconds / 60).rounded(.up))) min")
+            return seconds < 60 ? tr("upload.left_less_than_minute", size) : tr("upload.left_about_minutes", size, Int((seconds / 60).rounded(.up)))
         }
-        return text
+        return tr("upload.left", size)
     }
 }
 
@@ -82,18 +82,18 @@ public enum UploadSummary {
     public static func message(_ p: QueueProgress) -> Message? {
         guard p.isFinished else { return nil }
         var text: String
-        if p.done > 0 { text = "\(ComposerPlan.plural(p.done, "photo")) added." }
+        if p.done > 0 { text = tr("upload.summary_added", p.done) }
         else if p.duplicates > 0 { text = "" }
-        else { return p.failed > 0 ? Message(text: "\(ComposerPlan.plural(p.failed, "photo")) need your attention.", action: "Review") : nil }
-        if p.failed > 0 { text += " \(p.failed) \(p.failed == 1 ? "needs" : "need") your attention." }
-        else if p.duplicates > 0 { text += (text.isEmpty ? "" : " ") + "\(p.duplicates) \(p.duplicates == 1 ? "was" : "were") already there." }
-        return Message(text: text, action: p.failed > 0 ? "Review" : "Got it")
+        else { return p.failed > 0 ? Message(text: tr("upload.summary_attention", p.failed), action: tr("upload.review")) : nil }
+        if p.failed > 0 { text += " " + tr("upload.summary_attention", p.failed) }
+        else if p.duplicates > 0 { text += (text.isEmpty ? "" : " ") + tr("upload.summary_duplicates", p.duplicates) }
+        return Message(text: text, action: p.failed > 0 ? tr("upload.review") : tr("upload.got_it"))
     }
 }
 
 /// The honest "Making" card: four named steps, a line that says what is happening, and a time left. The server reports stages, not scenes.
 public enum MakingProgress {
-    public static let steps = ["Script", "Voice", "Pictures", "Final cut"]
+    public static var steps: [String] { [tr("making.step.script"), tr("making.step.voice"), tr("making.step.pictures"), tr("making.step.final_cut")] }
     // Where each step ends on the overall 0...1 estimate (matches ProgressEstimator's slices).
     static let edges: [Double] = [0.22, 0.42, 0.62, 1.0]
 
@@ -111,10 +111,10 @@ public enum MakingProgress {
         let current = min(edges.count - 1, edges.firstIndex { f < $0 } ?? edges.count - 1)
         let what: String
         switch stage {
-        case .starting: what = "Getting started."
-        case .writing: what = "Writing the script."
-        case .voiceAndVisuals: what = "Recording the voice and drawing the pictures."
-        case .rendering: what = "Putting it all together."
+        case .starting: what = tr("making.line.starting")
+        case .writing: what = tr("making.line.writing")
+        case .voiceAndVisuals: what = tr("making.line.voice_visuals")
+        case .rendering: what = tr("making.line.rendering")
         }
         return Info(segments: segs, current: current, line: "\(what) \(timeLeft(stage: stage, secondsInStage: secondsInStage, minutes: minutes))")
     }
@@ -123,8 +123,8 @@ public enum MakingProgress {
     public static func timeLeft(stage: VideoStatus.Stage, secondsInStage: Double, minutes: Double) -> String {
         var left = max(0, ProgressEstimator.expectedSeconds(stage, minutes: minutes) - secondsInStage)
         for s in VideoStatus.Stage.allCases where s > stage { left += ProgressEstimator.expectedSeconds(s, minutes: minutes) }
-        if left < 60 { return "Less than a minute left." }
-        return "About \(Int((left / 60).rounded(.up))) min left."
+        if left < 60 { return tr("making.time_less_than_minute") }
+        return tr("making.time_about_minutes", Int((left / 60).rounded(.up)))
     }
 }
 
@@ -142,7 +142,7 @@ public struct UploadAnnouncer: Sendable {
         guard !p.isEmpty, !p.isFinished, p.processed - lastProcessed >= step else { return nil }
         if let t = lastTime, now.timeIntervalSince(t) < 15 { return nil }
         lastProcessed = p.processed; lastTime = now
-        return "Uploaded \(uploaded) of \(p.total) photos."
+        return tr("upload.announce_progress", uploaded, p.total)
     }
 
     /// "Upload paused", "Waiting for connection", "Storage is full": said once when the state is entered.
@@ -151,9 +151,9 @@ public struct UploadAnnouncer: Sendable {
         defer { lastKind = kind }
         guard kind != lastKind else { return nil }
         switch kind {
-        case .paused?: return "Upload paused"
-        case .offline?: return "Waiting for connection"
-        case .storageFull?: return "Storage is full"
+        case .paused?: return tr("upload.announce_paused")
+        case .offline?: return tr("upload.announce_offline")
+        case .storageFull?: return tr("upload.announce_storage_full")
         default: return nil
         }
     }

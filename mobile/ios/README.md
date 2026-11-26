@@ -32,6 +32,19 @@ Sign in on the simulator with any account created through the sign-in page (emai
 2. If `com.videomk.app` is taken for your team, change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` **and** the redirect `com.videomk.app://auth/callback` in `backend/backend_stack.py` (the `MobileClient`), redeploy, then regenerate.
 3. Connect the phone, select it as the destination, Run. Trust the developer profile on the phone (Settings, General, VPN & Device Management) the first time.
 
+## Languages (English and Spanish)
+Policy, glossary and tone: `docs/I18N.md` (section "iOS decisions" at the end). The app follows Settings > Language (Automatic, English, Español), else the iPhone language (per-app language in iOS Settings works too), else English.
+- **Add a string**: add the key to `Packages/VideoMKCore/Sources/VideoMKCore/Strings/Localizable.xcstrings` with `en` and `es` (plurals: `one` and `other`, count as the FIRST argument; positional `%1$@`, `%2$lld` when the word order differs), then use `tr("area.key", args...)`. Never `Text("literal")`, never concatenate sentences. Dates, numbers, sizes: `Localization.shared` helpers. Permission texts: `VideoMK/InfoPlist.xcstrings`.
+- **Gates** (run all before a TestFlight build):
+```
+python3 scripts/check_strings.py [--pseudo]   # catalog: Spanish for every key, translated state, placeholders, plurals, glossary words, unused/missing keys, longest-string report
+python3 scripts/check_literals.py             # no hard-coded user-visible text in VideoMK/*.swift
+VMK_FORCE_LANG=en swift test --package-path Packages/VideoMKCore
+xcodebuild test ... -only-testing:VideoMKUITests/VideoMKSpanishUITests   # launches with -AppleLanguages "(es)" -AppleLocale es_ES
+```
+- **See Spanish**: `xcrun simctl launch <device> com.videomk.app -AppleLanguages "(es)" -AppleLocale es_ES`, or Settings > Language in the app. `VMK_FORCE_LANG=es|en` in the environment overrides the device language (tests, screenshots). Screenshots from the Spanish UI test: `TEST_RUNNER_VMK_SHOTS_DIR=/some/dir` (add `TEST_RUNNER_VMK_SHOTS_MODE=dark|large`). English UI tests pin `-AppleLanguages "(en)"` (`XCUIApplication.english()`).
+- Server texts (messages, capability labels and notes) come back already localized; the app only sends `X-Locale`.
+
 ## Tests
 ```
 swift test --package-path Packages/VideoMKCore                       # 13 unit tests, no network

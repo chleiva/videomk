@@ -1,4 +1,5 @@
 import SwiftUI
+import VideoMKCore
 
 @main
 struct VideoMKApp: App {
@@ -9,6 +10,7 @@ struct VideoMKApp: App {
             RootView()
                 .environment(model)
                 .tint(Theme.primary)
+                .modifier(LocalizedRoot())
                 .task { await model.start() }
         }
     }
@@ -24,8 +26,8 @@ struct RootView: View {
         switch model.phase {
         case .launching: Theme.background.ignoresSafeArea()
         case .notConfigured:
-            ContentUnavailableView("Not configured", systemImage: "gearshape.2",
-                                   description: Text("This build has no server address. Use the Debug build, or fill in the Release settings."))
+            ContentUnavailableView(tr("app.not_configured"), systemImage: "gearshape.2",
+                                   description: Text(tr("app.not_configured_sub")))
         case .signedOut: SignInView()
         case .signedIn: MainTabs()
         }
@@ -40,11 +42,11 @@ struct MainTabs: View {
     var body: some View {
         @Bindable var model = model
         TabView(selection: $model.selectedTab) {
-            LibraryView().tabItem { Label("Videos", systemImage: "play.rectangle.on.rectangle") }.tag(0)
+            LibraryView().tabItem { Label(tr("tab.videos"), systemImage: "play.rectangle.on.rectangle") }.tag(0)
             Group {
-                if let media = model.media { MediaView(media: media) } else { ContentUnavailableView("Not available", systemImage: "photo.on.rectangle") }
+                if let media = model.media { MediaView(media: media) } else { ContentUnavailableView(tr("app.not_available"), systemImage: "photo.on.rectangle") }
             }
-            .tabItem { Label("Media", systemImage: "photo.on.rectangle") }.tag(1)
+            .tabItem { Label(tr("tab.media"), systemImage: "photo.on.rectangle") }.tag(1)
         }
     }
 }

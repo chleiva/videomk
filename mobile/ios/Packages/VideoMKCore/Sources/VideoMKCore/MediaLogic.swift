@@ -8,16 +8,18 @@ public struct StorageMeter: Sendable, Equatable {
     public var fraction: Double { limit > 0 ? min(1, Double(used) / Double(limit)) : (used > 0 ? 1 : 0) }
     /// ok below 85 %, warning from 85 %, full at 100 % (or no room at all).
     public var state: State { used >= limit && (limit > 0 || used > 0) ? .full : fraction >= 0.85 ? .warning : .ok }
-    public var label: String { "\(Self.format(used)) of \(Self.format(limit))" }
+    public var label: String { tr("storage.used_of", Self.format(used), Self.format(limit)) }
     public var remaining: Int { max(0, limit - used) }
 
     /// Decimal units (what storage plans use): "640 MB", "1.2 GB", "100 GB".
     public static func format(_ bytes: Int) -> String {
         let b = Double(max(0, bytes))
-        if b >= 1e9 { let g = b / 1e9; return g >= 10 || g == g.rounded() ? "\(Int(g.rounded())) GB" : String(format: "%.1f GB", g) }
-        if b >= 1e6 { return "\(Int((b / 1e6).rounded())) MB" }
-        if b >= 1e3 { return "\(Int((b / 1e3).rounded())) KB" }
-        return "\(Int(b)) B"
+        let loc = Localization.shared.locale
+        func whole(_ v: Double) -> String { Int(v.rounded()).formatted(.number.locale(loc)) }
+        if b >= 1e9 { let g = b / 1e9; return g >= 10 || g == g.rounded() ? "\(whole(g)) GB" : "\(g.formatted(.number.precision(.fractionLength(1)).locale(loc))) GB" }
+        if b >= 1e6 { return "\(whole(b / 1e6)) MB" }
+        if b >= 1e3 { return "\(whole(b / 1e3)) KB" }
+        return "\(whole(b)) B"
     }
 }
 
@@ -73,7 +75,7 @@ public enum MediaGrouping {
         }
         var out: [Section] = []
         for month in months {
-            if month.key == "unknown" { out.append(Section(id: "unknown", title: "Undated", items: month.items)); continue }
+            if month.key == "unknown" { out.append(Section(id: "unknown", title: tr("media.undated"), items: month.items)); continue }
             if month.items.count > dayThreshold {
                 var days: [(key: String, y: Int, m: Int, d: Int, items: [LibraryPhoto])] = []
                 for p in month.items {
@@ -91,7 +93,7 @@ public enum MediaGrouping {
 
     public static func title(y: Int, m: Int, d: Int?, calendar: Calendar) -> String {
         let f = DateFormatter()
-        f.calendar = calendar; f.timeZone = calendar.timeZone; f.locale = calendar.locale ?? .current
+        f.calendar = calendar; f.timeZone = calendar.timeZone; f.locale = Localization.shared.locale
         f.setLocalizedDateFormatFromTemplate(d == nil ? "MMMMyyyy" : "EEEdMMMMyyyy")
         var c = DateComponents(); c.year = y; c.month = m; c.day = d ?? 1; c.hour = 12
         return calendar.date(from: c).map(f.string(from:)) ?? "\(y)-\(m)"
@@ -99,7 +101,7 @@ public enum MediaGrouping {
 
     /// What VoiceOver reads for a photo: its date and place.
     public static func accessibilityLabel(_ p: LibraryPhoto, calendar: Calendar = .current) -> String {
-        var parts = ["Photo"]
+        var parts = [tr("photo.a11y")]
         if let d = day(of: p, calendar: calendar) { parts.append(title(y: d.y, m: d.m, d: d.d, calendar: calendar)) }
         if let place = p.place, !place.isEmpty { parts.append(place) }
         return parts.joined(separator: ", ")
@@ -134,16 +136,21 @@ public final class SearchDebouncer: @unchecked Sendable {
 /// Does the video prompt itself describe photos from the library ("a video of my holidays in Thailand in 2024")?
 public enum PromptPhotoIntent {
     static let subjects = ["photo", "photos", "picture", "pictures", "pics", "holiday", "holidays", "vacation", "vacations", "trip", "trips", "honeymoon", "wedding", "birthday",
-                           "christmas", "kids", "children", "family", "pets", "travels", "journey", "weekend", "summer", "winter", "graduation", "party"]
+                           "christmas", "kids", "children", "family", "pets", "travels", "journey", "weekend", "summer", "winter", "graduation", "party",
+                           // Spanish (the description is in the person's language)
+                           "foto", "fotos", "fotografías", "imágenes", "vacaciones", "viaje", "viajes", "boda", "cumpleaños", "navidad", "niños", "hijos", "familia",
+                           "mascotas", "verano", "invierno", "graduación", "fiesta", "escapada"]
     public static func looksLikePhotoQuery(_ prompt: String) -> Bool {
         let words = prompt.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
         guard words.count >= 2 else { return false }
         let set = Set(words)
-        if prompt.lowercased().contains("my library") || prompt.lowercased().contains("my media") || prompt.lowercased().contains("my gallery") { return true }
-        let mine = !set.isDisjoint(with: ["my", "our", "mine"])
+        let lower = prompt.lowercased()
+        if ["my library", "my media", "my gallery", "mi biblioteca", "mi galería", "mis fotos"].contains(where: lower.contains) { return true }
+        let mine = !set.isDisjoint(with: ["my", "our", "mine", "mi", "mis", "nuestro", "nuestra", "nuestros", "nuestras"])
         let hasSubject = !set.isDisjoint(with: Set(subjects))
         let hasYear = words.contains { $0.count == 4 && ($0.hasPrefix("19") || $0.hasPrefix("20")) && Int($0) != nil }
-        return (mine && hasSubject) || (set.contains("photos") || set.contains("pictures")) && (mine || hasYear) || (mine && hasYear)
+        let photoWord = set.contains("photos") || set.contains("pictures") || set.contains("fotos") || set.contains("imágenes")
+        return (mine && hasSubject) || photoWord && (mine || hasYear) || (mine && hasYear)
     }
 }
 
@@ -157,7 +164,7 @@ public enum ComposerPhotos {
 /// "Select all" in a list of photos: whatever is in view (All photos, a collection, search results), loading further pages when needed, up to what one
 /// video can hold, counting photos already chosen elsewhere (from the phone).
 public enum SelectAll {
-    public static let limitNote = "Selected the first \(PhotoLimits.maxPhotos): the limit for one video"
+    public static var limitNote: String { tr("select_all.limit_note", PhotoLimits.maxPhotos) }
 
     public static func allSelected(view: [String], selected: [String]) -> Bool {
         let s = Set(selected); return !view.isEmpty && view.allSatisfy(s.contains)
@@ -165,8 +172,8 @@ public enum SelectAll {
 
     /// The label of the control: "Select all 38", "Select all (up to 100)" while more pages exist, "Clear" once everything in view is selected.
     public static func label(viewCount: Int, hasMore: Bool, allSelected: Bool, limit: Int = PhotoLimits.maxPhotos) -> String {
-        if allSelected { return "Clear" }
-        return hasMore ? "Select all (up to \(limit))" : "Select all \(viewCount)"
+        if allSelected { return tr("select_all.clear") }
+        return hasMore ? tr("select_all.up_to", limit) : tr("select_all.count", viewCount)
     }
 
     /// Adds what is in view, in order, until `room` more photos are chosen. `limited` says the limit stopped it.

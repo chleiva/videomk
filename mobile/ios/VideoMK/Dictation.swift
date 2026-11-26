@@ -88,7 +88,7 @@ final class Dictation {
             try engine.start()
         } catch {
             teardown()
-            Self.keyboardDictationEnabled ? fallBackToKeyboard("The microphone isn't available for dictation right now, so use the microphone key on your keyboard.") : (state = .unavailable("Couldn't start the microphone. Is another app or a call using it?"))
+            Self.keyboardDictationEnabled ? fallBackToKeyboard(tr("dictation.mic_unavailable_keyboard")) : (state = .unavailable(tr("dictation.mic_start_failed")))
             return
         }
         task = recognizer.recognitionTask(with: request, resultHandler: Self.makeResultHandler(for: self))
@@ -122,7 +122,7 @@ final class Dictation {
                 retriedOnServer = true
                 teardown()
                 listen(onDevice: false)
-            case .retryOnServer: teardown(); state = .unavailable("Dictation stopped unexpectedly (\(error.domain) \(error.code)). You can use the microphone key on your keyboard instead.")
+            case .retryOnServer: teardown(); state = .unavailable(tr("dictation.stopped", error.domain, String(error.code)))
             case .message(let m): teardown(); state = .unavailable(m)
             }
         } else if isFinal {

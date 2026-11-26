@@ -26,19 +26,19 @@ public enum AccountError: Error, Equatable, Sendable {
     /// Plain words for the person. Never server text.
     public var message: String {
         switch self {
-        case .signedOut: "You're not signed in any more. Sign in again, then delete your account."
-        case .reauthRequired: "Please sign in again to confirm it's you."
-        case .sessionExpired: "Your session expired. Nothing was deleted. Please try again."
-        case .reauthCancelled: "You didn't finish signing in, so nothing was deleted and your account is unchanged."
-        case .reauthFailed: "We couldn't sign you in again, so nothing was deleted. Check your connection and try again."
-        case .wrongAccount: "That sign-in was for a different account, so nothing was deleted. Sign in with the account you are deleting."
-        case .reauthNotAccepted: "We couldn't confirm that it's you. Nothing was deleted. Please try again. If it keeps happening, email us and we will delete your account."
-        case .forbidden: "This request doesn't match the account you're signed in to, so nothing was deleted. Sign out, sign in again and try once more."
-        case .requestRejected: "We couldn't use that request, so nothing was deleted. Please try again. If it keeps happening, email us."
-        case .server: "Something went wrong on our side. Nothing was started. Please try again."
-        case .network: "We couldn't reach videomk, so nothing was deleted. Check your connection and try again."
-        case .uncertain: "We couldn't reach videomk and can't tell whether your request arrived. It is safe to try again: asking twice does no harm."
-        case .revokeUnavailable: "We couldn't start that step."
+        case .signedOut: tr("del.err.signed_out")
+        case .reauthRequired: tr("del.err.reauth_required")
+        case .sessionExpired: tr("del.err.session_expired")
+        case .reauthCancelled: tr("del.err.reauth_cancelled")
+        case .reauthFailed: tr("del.err.reauth_failed")
+        case .wrongAccount: tr("del.err.wrong_account")
+        case .reauthNotAccepted: tr("del.err.reauth_not_accepted")
+        case .forbidden: tr("del.err.forbidden")
+        case .requestRejected: tr("del.err.request_rejected")
+        case .server: tr("del.err.server")
+        case .network: tr("del.err.network")
+        case .uncertain: tr("del.err.uncertain")
+        case .revokeUnavailable: tr("del.err.revoke_unavailable")
         }
     }
 
@@ -93,6 +93,7 @@ public struct AccountClient: AccountAPI {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         req.setValue("ios", forHTTPHeaderField: "X-Platform")
         req.setValue(appVersion, forHTTPHeaderField: "X-App-Version")
+        req.setValue(Localization.shared.headerValue, forHTTPHeaderField: "X-Locale")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.httpBody = try? JSONSerialization.data(withJSONObject: body)
         do {
@@ -124,7 +125,7 @@ public enum AppleRevoke {
         return s
     }
 
-    public static let manualSteps = "To finish, open Settings on your iPhone, tap your name, Sign in with Apple, videomk, and choose Stop using Apple ID."
+    public static var manualSteps: String { tr("del.manual_steps") }
 }
 
 // MARK: - The flow
@@ -159,6 +160,11 @@ public struct AccountDeletionFlow: Sendable {
 
     public init(auth: any DeletionAuth, api: any AccountAPI, now: @escaping @Sendable () -> Date = { Date() }) {
         self.auth = auth; self.api = api; self.now = now
+    }
+
+    /// The typed confirmation: the word of the app language (DELETE, ELIMINAR) or the other one; case and edge spaces do not matter.
+    public static func isConfirmation(_ typed: String) -> Bool {
+        ["DELETE", "ELIMINAR"].contains(typed.trimmingCharacters(in: .whitespaces).uppercased())
     }
 
     public static func isRecent(_ idToken: String, now: Date) -> Bool {

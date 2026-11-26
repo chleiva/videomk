@@ -65,14 +65,14 @@ struct LibraryView: View {
             Button { openCreate() } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "plus").font(.system(size: 22, weight: .semibold))
-                    Text("New video").font(.system(size: 19, weight: .bold))
+                    Text(tr("create.new_video")).font(.system(size: 19, weight: .bold))
                 }
                 .foregroundStyle(.white).frame(maxWidth: empty ? .infinity : nil, minHeight: 58).padding(.horizontal, empty ? 0 : 24)
                 .background(Theme.gradient, in: Capsule())
                 .shadow(color: Theme.gradientStart.opacity(0.4), radius: 14, y: 8)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("New video").accessibilityHint("Opens the screen where you describe your video").accessibilityIdentifier("newVideo")
+            .accessibilityLabel(tr("create.new_video")).accessibilityHint(tr("videos.opens_the_screen_where_you")).accessibilityIdentifier("newVideo")
         }
         .frame(maxWidth: .infinity, alignment: empty ? .center : .trailing)
         .padding(.horizontal, 16).padding(.bottom, 14)
@@ -85,7 +85,7 @@ struct LibraryView: View {
             HStack(spacing: 10) {
                 Image(systemName: "play.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(.white).frame(width: 30, height: 30)
                     .background(Theme.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous)).accessibilityHidden(true)
-                Text("videomk").font(.system(size: 21, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("videos.videomk")).font(.system(size: 21, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
             }
             Spacer()
             if let wallet = model.wallet {
@@ -97,12 +97,12 @@ struct LibraryView: View {
                     .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).frame(minHeight: 44)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(wallet.unlimited ? "Unlimited credits" : ComposerPlan.plural(wallet.balance, "credit"))
-                .accessibilityHint("Shows your credits")
+                .accessibilityLabel(wallet.unlimited ? tr("videos.unlimited_credits") : tr("credits.count", wallet.balance))
+                .accessibilityHint(tr("videos.shows_your_credits"))
                 .accessibilityIdentifier("balanceChip")
             }
             Button { showingSettings = true } label: { Image(systemName: "gearshape").font(.system(size: 20)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
-                .accessibilityLabel("Settings").accessibilityIdentifier("settingsButton")
+                .accessibilityLabel(tr("videos.settings")).accessibilityIdentifier("settingsButton")
         }
         .padding(.leading, 16).padding(.trailing, 8).frame(minHeight: 52)
     }
@@ -112,7 +112,7 @@ struct LibraryView: View {
     private var feed: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
-                Text("Your videos").font(.system(size: 30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
+                Text(tr("videos.your_videos")).font(.system(size: 30, weight: .bold)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 2).accessibilityAddTraits(.isHeader)
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14, alignment: .top), count: sizeClass == .regular ? 2 : 1), spacing: 14) {
                     ForEach(model.entries) { entry in card(entry) }
                 }
@@ -133,17 +133,17 @@ struct LibraryView: View {
             case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(.plain)
             case .complete: NavigationLink(value: v.id) { ReadyCard(video: v) }.buttonStyle(.plain)
             case .failed:
-                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: "No credits were used.", retry: { model.tryAgain(v) })
+                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: { model.tryAgain(v) })
                     .accessibilityIdentifier("failedVideo")
             case .rejected:
-                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? "Try describing something different.", rejected: true)
+                FailedCard(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), rejected: true)
             }
         }
     }
 
     private var loadingState: some View {
         ScrollView { VStack(spacing: 14) { SkeletonCard(); SkeletonCard() }.padding(.horizontal, 16).padding(.top, 40) }
-            .accessibilityElement(children: .ignore).accessibilityLabel("Loading your videos")
+            .accessibilityElement(children: .ignore).accessibilityLabel(tr("videos.loading_your_videos"))
     }
 
     // MARK: empty
@@ -152,10 +152,10 @@ struct LibraryView: View {
         ScrollView {
             VStack(spacing: 0) {
                 FilmFrames().frame(height: 120).padding(.top, 6).accessibilityHidden(true)
-                Text("Describe it.\nWe’ll make the video.").font(.system(size: 28, weight: .bold)).tracking(-0.8).multilineTextAlignment(.center).foregroundStyle(Theme.text).padding(.top, 8)
+                Text(tr("videos.describe_itnwell_make_the_video")).font(.system(size: 28, weight: .bold)).tracking(-0.8).multilineTextAlignment(.center).foregroundStyle(Theme.text).padding(.top, 8)
                     .accessibilityAddTraits(.isHeader)
-                Text("Narrated and illustrated in minutes. Add your own photos if you like.").font(.system(size: 15.5)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary).padding(.top, 8).padding(.horizontal, 24)
-                Text("TRY ONE").font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20).padding(.bottom, 8)
+                Text(tr("videos.narrated_and_illustrated_in_minutes")).font(.system(size: 15.5)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary).padding(.top, 8).padding(.horizontal, 24)
+                Text(tr("videos.try_one")).font(.system(size: 13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20).padding(.bottom, 8)
                 VStack(spacing: 10) { ForEach(ExamplePrompt.all) { example in exampleCard(example) } }
             }
             .padding(.horizontal, 16).padding(.bottom, 96)
@@ -181,7 +181,7 @@ struct LibraryView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(e.text), \(e.tag)")
-        .accessibilityHint("Fills in the description. It does not send.")
+        .accessibilityHint(tr("videos.fills_in_the_description_it"))
         .accessibilityIdentifier("example")
     }
 
@@ -193,9 +193,9 @@ struct LibraryView: View {
 
     private func errorState(_ message: String) -> some View {
         ContentUnavailableView {
-            Label("Couldn't load your videos", systemImage: "wifi.exclamationmark")
+            Label(tr("videos.couldnt_load_your_videos"), systemImage: "wifi.exclamationmark")
         } description: { Text(message) } actions: {
-            Button("Try again") { Task { await model.refresh() } }.buttonStyle(.borderedProminent)
+            Button(tr("common.try_again")) { Task { await model.refresh() } }.buttonStyle(.borderedProminent)
         }
     }
 
@@ -214,9 +214,9 @@ struct ExamplePrompt: Identifiable {
     var usesPhotos = false
     var id: String { text }
     static let all = [
-        ExamplePrompt(text: "A calm one-minute story about a lighthouse keeper", tag: "1 min", symbol: "film", minutes: 1),
-        ExamplePrompt(text: "How bees make honey, explained for kids", tag: "3 min", symbol: "sparkles", minutes: 3),
-        ExamplePrompt(text: "My holiday in Thailand, told from my photos", tag: "Your photos", symbol: "photo", minutes: nil, usesPhotos: true),
+        ExamplePrompt(text: tr("videos.a_calm_oneminute_story_about"), tag: LengthLabel.chip(1), symbol: "film", minutes: 1),
+        ExamplePrompt(text: tr("videos.how_bees_make_honey_explained"), tag: LengthLabel.chip(3), symbol: "sparkles", minutes: 3),
+        ExamplePrompt(text: tr("videos.my_holiday_in_thailand_told"), tag: tr("videos.tag_photos"), symbol: "photo", minutes: nil, usesPhotos: true),
     ]
 }
 
@@ -252,7 +252,7 @@ struct VideoRow: View {
                     StatusChip(status: video.status)
                     if let d = video.durationSeconds, video.status == .complete { Text(Self.duration(d)).font(.caption).foregroundStyle(Theme.textSecondary) }
                 }
-                if let created = video.createdAt { Text(Self.relative.localizedString(for: created, relativeTo: .now)).font(.caption).foregroundStyle(Theme.textSecondary) }
+                if let created = video.createdAt { Text(Localization.shared.relativeShort(created)).font(.caption).foregroundStyle(Theme.textSecondary) }
                 if video.status == .rejected, let r = video.rejectReason { Text(r).font(.caption).foregroundStyle(Theme.warning).lineLimit(2) }
             }
         }
@@ -284,7 +284,7 @@ struct RunningRow: View {
                     .frame(width: 112, height: 63)
                     .clipShape(RoundRectangle(radius: 10))
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(model.brief(for: video.id) ?? (video.title.flatMap { $0.isEmpty ? nil : $0 } ?? "Making your video"))
+                    Text(model.brief(for: video.id) ?? (video.title.flatMap { $0.isEmpty ? nil : $0 } ?? tr("detail.making")))
                         .font(.headline).foregroundStyle(Theme.text).lineLimit(2)
                     ProgressView(value: fraction).tint(Theme.primary).animation(.smooth(duration: 0.8), value: fraction)
                     HStack {
@@ -299,8 +299,8 @@ struct RunningRow: View {
             }
             .padding(.vertical, 4)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Making video: \(model.brief(for: video.id) ?? video.displayTitle)")
-            .accessibilityValue("\(stage.title), about \(Int(fraction * 100)) percent")
+            .accessibilityLabel(tr("videos.making_a11y", model.brief(for: video.id) ?? video.displayTitle))
+            .accessibilityValue(tr("videos.stage_percent_a11y", stage.title, Int(fraction * 100)))
         }
         .accessibilityIdentifier("runningRow")
     }
@@ -325,15 +325,15 @@ struct PendingRow: View {
                 if let message = failed {
                     Text(message).font(.caption).foregroundStyle(Theme.danger).lineLimit(2)
                     HStack(spacing: 16) {
-                        Button("Try again", action: onRetry).font(.caption.weight(.semibold))
-                        Button("Remove", role: .destructive, action: onDismiss).font(.caption)
+                        Button(tr("common.try_again"), action: onRetry).font(.caption.weight(.semibold))
+                        Button(tr("videos.remove"), role: .destructive, action: onDismiss).font(.caption)
                     }.buttonStyle(.borderless)
                 } else if case .uploading(let done, let total) = pending.state {
                     ProgressView(value: Double(done), total: Double(max(total, 1))).tint(Theme.primary).animation(.smooth, value: done)
-                    Text("Uploading \(done) of \(total)").font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.uploading_title", done, total)).font(.caption).foregroundStyle(Theme.textSecondary)
                 } else {
                     ProgressView().controlSize(.small)
-                    Text("Sending your request…").font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text(tr("videos.sending_your_request")).font(.caption).foregroundStyle(Theme.textSecondary)
                 }
             }
         }
@@ -408,10 +408,10 @@ struct StatusChip: View {
 
     private var label: String {
         switch status {
-        case .running: "Making"
-        case .complete: "Ready"
-        case .failed: "Failed"
-        case .rejected: "Not allowed"
+        case .running: tr("videos.making")
+        case .complete: tr("videos.ready")
+        case .failed: tr("videos.failed")
+        case .rejected: tr("videos.not_allowed")
         }
     }
 
@@ -458,13 +458,13 @@ struct CreateProblemSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Image(systemName: "exclamationmark.triangle").font(.system(size: 34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).padding(.top, 22).accessibilityHidden(true)
-            Text(problem.paused ? "Creating videos is paused" : "We can’t make this one").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
+            Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
             Text(problem.message).font(.system(size: 17)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
             if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
             Spacer()
-            Text("Nothing was charged.").font(.system(size: 15)).foregroundStyle(Theme.textSecondary)
-            Button { onEdit(problem) } label: { Text("Edit request").font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
-            Button("Close") { dismiss() }.font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
+            Text(tr("create.nothing_was_charged")).font(.system(size: 15)).foregroundStyle(Theme.textSecondary)
+            Button { onEdit(problem) } label: { Text(tr("create.edit_request")).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
+            Button(tr("common.close")) { dismiss() }.font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
         }
         .padding(.horizontal, 20).padding(.bottom, 6)
         .presentationBackground(Theme.surface).presentationDetents([.height(470), .large]).presentationDragIndicator(.visible)

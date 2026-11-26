@@ -38,14 +38,14 @@ public enum DictationPlan: Equatable, Sendable {
         let appCanWork = speech != .denied && microphone != .denied && recognizerAvailable
         if appCanWork { return .useApp }
         if keyboardDictationEnabled {
-            let why = microphone == .denied ? "Microphone access is off for videomk, so use the microphone key on your keyboard instead."
-                : speech == .denied ? "Speech recognition is off for videomk, so use the microphone key on your keyboard instead."
-                : "Tap the microphone key on your keyboard to dictate."
+            let why = microphone == .denied ? tr("dictation.mic_off_keyboard")
+                : speech == .denied ? tr("dictation.speech_off_keyboard")
+                : tr("dictation.tap_keyboard_mic")
             return .useKeyboard(why)
         }
-        if microphone == .denied { return .blocked("Allow microphone access for videomk in Settings, or turn on Dictation in Settings › General › Keyboard.") }
-        if speech == .denied { return .blocked("Allow speech recognition for videomk in Settings, or turn on Dictation in Settings › General › Keyboard.") }
-        return .blocked("Dictation isn't available right now. You can turn it on in Settings › General › Keyboard, or type your idea.")
+        if microphone == .denied { return .blocked(tr("dictation.allow_mic")) }
+        if speech == .denied { return .blocked(tr("dictation.allow_speech")) }
+        return .blocked(tr("dictation.unavailable"))
     }
 }
 
@@ -59,10 +59,10 @@ public enum DictationFailure: Equatable, Sendable {
     public static func classify(domain: String, code: Int, gotText: Bool, onDevice: Bool, dictationEnabled: Bool) -> DictationFailure {
         if gotText { return .finishQuietly }                                   // errors after speech are how a session normally ends
         if code == 216 || code == 301 { return .finishQuietly }                // cancelled
-        if code == 1110 || code == 1107 && domain.contains("Assistant") { return .message("I didn't hear anything. Tap the microphone and start speaking.") }
+        if code == 1110 || code == 1107 && domain.contains("Assistant") { return .message(tr("dictation.heard_nothing")) }
         if onDevice { return .retryOnServer }                                  // always try the server recognizer first: our reading of the Dictation setting must never block a working microphone
-        if !dictationEnabled { return .message("Dictation is turned off on this iPhone. Turn it on in Settings › General › Keyboard › Enable Dictation, then tap the microphone again.") }
-        if domain == "NSURLErrorDomain" || code == 1100 || code == 203 { return .message("Dictation needs an internet connection right now. Check your connection and try again, or use the microphone key on your keyboard.") }
-        return .message("Dictation stopped unexpectedly (\(domain) \(code)). You can use the microphone key on your keyboard instead.")
+        if !dictationEnabled { return .message(tr("dictation.turned_off")) }
+        if domain == "NSURLErrorDomain" || code == 1100 || code == 203 { return .message(tr("dictation.needs_internet")) }
+        return .message(tr("dictation.stopped", domain, String(code)))
     }
 }

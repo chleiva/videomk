@@ -1,5 +1,6 @@
 import AVKit
 import SwiftUI
+import VideoMKCore
 
 /// The system player (scrubbing, captions, AirPlay, Picture in Picture) wrapped directly.
 struct PlayerController: UIViewControllerRepresentable {
@@ -44,7 +45,7 @@ final class LandscapePlayerController: AVPlayerViewController {
         close.tintColor = .white
         close.backgroundColor = UIColor.black.withAlphaComponent(0.55)
         close.layer.cornerRadius = 20
-        close.accessibilityLabel = "Close full screen"
+        close.accessibilityLabel = tr("player.close_full_screen")
         close.accessibilityIdentifier = "closeFullScreenButton"
         close.translatesAutoresizingMaskIntoConstraints = false
         close.addAction(UIAction { [weak self] _ in self?.dismiss(animated: true) }, for: .touchUpInside)
@@ -117,7 +118,7 @@ struct InlinePlayer: View {
                     .background(.black.opacity(0.55), in: Circle())
             }
             .padding(10)
-            .accessibilityLabel("Full screen")
+            .accessibilityLabel(tr("player.full_screen"))
             .accessibilityIdentifier("fullScreenButton")
         }
         .onAppear { PlaybackAudio.prepare() }

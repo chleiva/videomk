@@ -70,7 +70,7 @@ public actor LibraryUploadQueue {
             items = saved.map { item in
                 var i = item
                 if i.state == .uploading { i.state = .queued }
-                if i.state == .queued || i.state == .failed || i.state == .noSpace, !FileManager.default.fileExists(atPath: directory.appendingPathComponent(i.file).path) { i.state = .failed; i.reason = "The photo file is gone." }
+                if i.state == .queued || i.state == .failed || i.state == .noSpace, !FileManager.default.fileExists(atPath: directory.appendingPathComponent(i.file).path) { i.state = .failed; i.reason = tr("queue.file_gone") }
                 return i
             }
         }
@@ -203,11 +203,11 @@ public actor LibraryUploadQueue {
                 case .noSpace: finish(item.id, .noSpace)
                 case .upload:
                     if let url = r.url, let fields = r.fields { jobs.append(Job(id: item.id, file: directory.appendingPathComponent(item.file), url: url, fields: fields, libraryID: r.id)) }
-                    else { finish(item.id, .failed, reason: "The server gave no upload address.") }
-                case .rejected, .unknown: finish(item.id, .failed, reason: r.reason ?? "This photo can't be added.")
+                    else { finish(item.id, .failed, reason: tr("queue.no_address")) }
+                case .rejected, .unknown: finish(item.id, .failed, reason: r.reason ?? tr("queue.cant_add"))
                 }
             }
-            for (n, item) in batch.enumerated() where !seen.contains(n) { finish(item.id, .failed, reason: "The server did not answer for this photo.") }
+            for (n, item) in batch.enumerated() where !seen.contains(n) { finish(item.id, .failed, reason: tr("queue.no_answer")) }
             changed()
 
             enum Outcome: Sendable { case done, failed(String), stopped }
@@ -221,15 +221,15 @@ public actor LibraryUploadQueue {
                 }
                 self.changed()
             }) { _, job in
-                guard let data = try? Data(contentsOf: job.file) else { return .failed("The photo file is gone.") }
-                var last = "The upload failed."
+                guard let data = try? Data(contentsOf: job.file) else { return .failed(tr("queue.file_gone")) }
+                var last = tr("queue.upload_failed")
                 for attempt in 0..<tries {
                     if await self.shouldStop() { return .stopped }
                     if attempt > 0 { try? await Task.sleep(for: waits.isEmpty ? .zero : waits[min(attempt - 1, waits.count - 1)]) }
                     do { try await poster.post(data, to: job.url, fields: job.fields); return .done }
                     catch is CancellationError { return .stopped }
                     catch let e as LibraryAPIError { last = e.message }
-                    catch { last = "The upload failed." }
+                    catch { last = tr("queue.upload_failed") }
                 }
                 return .failed(last)
             }

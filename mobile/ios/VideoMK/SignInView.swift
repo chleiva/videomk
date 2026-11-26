@@ -21,7 +21,7 @@ struct SignInView: View {
                         Text("videomk")
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundStyle(Theme.text)
-                        Text("Describe a video. We write it, voice it and draw it.")
+                        Text(tr("signin.tagline"))
                             .font(.title3)
                             .multilineTextAlignment(.center)
                             .foregroundStyle(Theme.textSecondary)
@@ -36,7 +36,7 @@ struct SignInView: View {
                         ForEach(model.authOptions.choices, id: \.self) { choice in
                             button(for: choice).dynamicTypeSize(...DynamicTypeSize.accessibility1)   // buttons stay readable; the page scrolls
                         }
-                        Text("By continuing you agree to the [Terms](https://videomk.com/terms) and [Privacy Policy](https://videomk.com/privacy).")
+                        md(tr("signin.terms_md"))
                             .font(.caption)
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
@@ -72,7 +72,7 @@ struct SignInView: View {
                 .opacity(busy(.apple) ? 0.4 : 1)
             if busy(.apple) { ProgressView().tint(scheme == .dark ? .black : .white) }
             Button { Task { await model.signIn(.apple) } } label: { Color.clear }
-                .accessibilityLabel("Continue with Apple")
+                .accessibilityLabel(tr("signin.apple"))
         }
         .frame(maxWidth: .infinity, minHeight: min(buttonHeight, 64), maxHeight: min(buttonHeight, 64))   // the system button's text does not grow, so its height is capped
         .clipShape(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
@@ -86,7 +86,7 @@ struct SignInView: View {
         Button { Task { await model.signIn(.google) } } label: {
             HStack(spacing: 10) {
                 if busy(.google) { ProgressView() } else { Image("GoogleG").resizable().scaledToFit().frame(width: logoSize, height: logoSize).accessibilityHidden(true) }
-                Text("Continue with Google").font(.headline).fixedSize(horizontal: false, vertical: true)
+                Text(tr("signin.google")).font(.headline).fixedSize(horizontal: false, vertical: true)
             }
             .multilineTextAlignment(.center)
             .foregroundStyle(scheme == .dark ? Color(hex: 0xE3E3E3) : Color(hex: 0x1F1F1F))
@@ -97,7 +97,7 @@ struct SignInView: View {
         }
         .buttonStyle(.plain)
         .disabled(model.isSigningIn)
-        .accessibilityLabel("Continue with Google")
+        .accessibilityLabel(tr("signin.google"))
         .accessibilityIdentifier("signInGoogle")
     }
 
@@ -105,7 +105,7 @@ struct SignInView: View {
         let only = model.authOptions.emailIsOnlyOption
         Button { Task { await model.signIn() } } label: {
             if busy(.email) { ProgressView().tint(only ? .white : Theme.primary) }
-            else { Text(only ? "Sign in or create account" : "Continue with email").multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
+            else { Text(only ? tr("signin.email_only") : tr("signin.email")).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
         }
         .buttonStyle(EmailButtonStyle(primary: only))
         .disabled(model.isSigningIn)

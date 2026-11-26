@@ -12,9 +12,9 @@ struct CollectionsStrip: View {
         VStack(alignment: .leading, spacing: 4) {
         if !media.collections.isEmpty {
             HStack {
-                Text("Collections").font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+                Text(tr("viewer.collections")).font(.system(size: 17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button("See all") { media.showCollectionsList = true }.font(.system(size: 14.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
+                Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.system(size: 14.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
             }.padding(.horizontal, 16)
         }
         ScrollView(.horizontal, showsIndicators: false) {
@@ -23,35 +23,35 @@ struct CollectionsStrip: View {
                     VStack(spacing: 6) {
                         RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.surface).frame(width: 104, height: 104)
                             .overlay { Image(systemName: "plus").font(.title2).foregroundStyle(Theme.primary) }
-                        Text("New").font(.caption).foregroundStyle(Theme.textSecondary)
+                        Text(tr("collections.new")).font(.caption).foregroundStyle(Theme.textSecondary)
                     }
                 }
-                .accessibilityLabel("New collection").accessibilityIdentifier("newCollection")
+                .accessibilityLabel(tr("media.new_collection")).accessibilityIdentifier("newCollection")
                 ForEach(media.collections) { c in
                     NavigationLink(value: c) { CollectionCard(media: media, collection: c) }
                         .buttonStyle(.plain)
                         .contextMenu {
-                            Button { renameText = c.name; renaming = c } label: { Label("Rename", systemImage: "pencil") }
-                            Button(role: .destructive) { deleting = c } label: { Label("Delete collection", systemImage: "trash") }
+                            Button { renameText = c.name; renaming = c } label: { Label(tr("collections.rename"), systemImage: "pencil") }
+                            Button(role: .destructive) { deleting = c } label: { Label(tr("collections.delete_collection"), systemImage: "trash") }
                         }
-                        .accessibilityLabel("\(c.name), \(c.count) \(c.count == 1 ? "photo" : "photos")\(c.auto ? ", automatic collection" : "")")
-                        .accessibilityHint("Opens the collection. Actions: rename, delete.")
-                        .accessibilityAction(named: "Rename") { renameText = c.name; renaming = c }
-                        .accessibilityAction(named: "Delete collection") { deleting = c }
+                        .accessibilityLabel(tr(c.auto ? "collections.row_a11y_auto" : "collections.row_a11y", c.name, tr("photos.count", c.count)))
+                        .accessibilityHint(tr("collections.opens_the_collection_actions_rename"))
+                        .accessibilityAction(named: tr("collections.rename")) { renameText = c.name; renaming = c }
+                        .accessibilityAction(named: tr("collections.delete_collection")) { deleting = c }
                 }
             }
             .padding(.horizontal, 16).padding(.bottom, 6)
         }
         .frame(minHeight: 148)
         }
-        .alert("Rename collection", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
-            TextField("Name", text: $renameText)
-            Button("Save") { if let c = renaming { let t = renameText; Task { await media.rename(c, to: t) } } }
-            Button("Cancel", role: .cancel) {}
+        .alert(tr("collections.rename_collection"), isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
+            TextField(tr("media.name"), text: $renameText)
+            Button(tr("collections.save")) { if let c = renaming { let t = renameText; Task { await media.rename(c, to: t) } } }
+            Button(tr("common.cancel"), role: .cancel) {}
         }
-        .confirmationDialog("Delete \"\(deleting?.name ?? "")\"?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
-            Button("Delete collection", role: .destructive) { if let c = deleting { Task { await media.deleteCollection(c) } } }
-        } message: { Text("The photos stay in your library.") }
+        .confirmationDialog(tr("collections.delete_title", deleting?.name ?? ""), isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+            Button(tr("collections.delete_collection"), role: .destructive) { if let c = deleting { Task { await media.deleteCollection(c) } } }
+        } message: { Text(tr("collections.the_photos_stay_in_your")) }
     }
 }
 
@@ -101,29 +101,29 @@ struct CollectionDetailView: View {
         ScrollView {
             switch feed.state {
             case .loading: SkeletonGrid()
-            case .failed(let m): MediaMessage(symbol: "wifi.exclamationmark", title: "Couldn't load this collection", text: m, button: "Try again") { Task { await feed.reload() } }
+            case .failed(let m): MediaMessage(symbol: "wifi.exclamationmark", title: tr("collections.couldnt_load_this_collection"), text: m, button: tr("common.try_again")) { Task { await feed.reload() } }
             case .loaded:
-                if feed.photos.isEmpty { MediaMessage(symbol: "photo.on.rectangle", title: "Nothing here yet", text: "Select photos in your library and choose Add to collection.", button: nil) {} }
+                if feed.photos.isEmpty { MediaMessage(symbol: "photo.on.rectangle", title: tr("collections.nothing_here_yet"), text: tr("collections.select_photos_in_your_library"), button: nil) {} }
                 else { PhotoGrid(feed: feed, media: media, selection: selection) { photo in viewing = ViewerContext(photos: feed.photos, index: feed.photos.firstIndex(of: photo) ?? 0) } }
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle("\(current.emoji.map { $0 + " " } ?? "")\(current.name)")
+        .navigationTitle("\(current.emoji.map { $0 + " " } ?? "")\(current.name)")   // i18n-ok
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if !feed.photos.isEmpty { Button(selection.active ? "Done" : "Select") { if selection.active { selection.clear() } else { selection.active = true } } }
+                if !feed.photos.isEmpty { Button(selection.active ? tr("common.done") : tr("media.select")) { if selection.active { selection.clear() } else { selection.active = true } } }
                 Menu {
-                    Button { name = current.name; renaming = true } label: { Label("Rename", systemImage: "pencil") }
-                    Button(role: .destructive) { confirmDelete = true } label: { Label("Delete collection", systemImage: "trash") }
-                } label: { Image(systemName: "ellipsis.circle") }.accessibilityLabel("Collection actions")
+                    Button { name = current.name; renaming = true } label: { Label(tr("collections.rename"), systemImage: "pencil") }
+                    Button(role: .destructive) { confirmDelete = true } label: { Label(tr("collections.delete_collection"), systemImage: "trash") }
+                } label: { Image(systemName: "ellipsis.circle") }.accessibilityLabel(tr("collections.collection_actions"))
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if selection.active {
                 VStack(spacing: 0) {
                     HStack {
-                        Text(selection.count == 0 ? "Select photos" : "\(selection.count) selected").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
+                        Text(selection.count == 0 ? tr("media.select_photos") : tr("attach.selected", selection.count)).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
                         Spacer()
                         if !feed.photos.isEmpty {
                             Button(SelectAll.label(viewCount: feed.photos.count, hasMore: feed.canLoadMore, allSelected: SelectAll.allSelected(view: feed.photos.map(\.id), selected: selection.ordered))) {
@@ -133,9 +133,9 @@ struct CollectionDetailView: View {
                         }
                     }.padding(.horizontal, 16).padding(.top, 6)
                 HStack {
-                    Button { model.composerLibrary = Array(feed.photos.filter { selection.contains($0.id) }.prefix(100)); model.selectedTab = 0; model.createRequested = true; selection.clear() } label: { Label("Make a video", systemImage: "sparkles.tv") }
+                    Button { model.composerLibrary = Array(feed.photos.filter { selection.contains($0.id) }.prefix(100)); model.selectedTab = 0; model.createRequested = true; selection.clear() } label: { Label(tr("collections.make_a_video"), systemImage: "sparkles.tv") }
                     Spacer()
-                    Button(role: .destructive) { let ids = selection.ids; Task { if await media.edit(current, remove: Array(ids)) { feed.remove(ids); selection.clear() } } } label: { Label("Remove from collection", systemImage: "minus.circle") }
+                    Button(role: .destructive) { let ids = selection.ids; Task { if await media.edit(current, remove: Array(ids)) { feed.remove(ids); selection.clear() } } } label: { Label(tr("collections.remove_from_collection"), systemImage: "minus.circle") }
                 }
                 .disabled(selection.count == 0).padding(.horizontal, 16).padding(.vertical, 12)
                 }
@@ -147,14 +147,14 @@ struct CollectionDetailView: View {
         .fullScreenCover(item: $viewing) { ctx in
             PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { p in viewing = nil; model.composerLibrary = [p]; model.selectedTab = 0; model.createRequested = true })
         }
-        .alert("Rename collection", isPresented: $renaming) {
-            TextField("Name", text: $name)
-            Button("Save") { let n = name; Task { await media.rename(current, to: n) } }
-            Button("Cancel", role: .cancel) {}
+        .alert(tr("collections.rename_collection"), isPresented: $renaming) {
+            TextField(tr("media.name"), text: $name)
+            Button(tr("collections.save")) { let n = name; Task { await media.rename(current, to: n) } }
+            Button(tr("common.cancel"), role: .cancel) {}
         }
-        .confirmationDialog("Delete \"\(current.name)\"?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete collection", role: .destructive) { Task { await media.deleteCollection(current); dismiss() } }
-        } message: { Text("The photos stay in your library.") }
+        .confirmationDialog(tr("collections.delete_title", current.name), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(tr("collections.delete_collection"), role: .destructive) { Task { await media.deleteCollection(current); dismiss() } }
+        } message: { Text(tr("collections.the_photos_stay_in_your")) }
     }
 }
 
@@ -172,24 +172,24 @@ struct AddToCollectionSheet: View {
         NavigationStack {
             List {
                 Section {
-                    Button { creating = true } label: { Label("New collection", systemImage: "plus.circle.fill") }
+                    Button { creating = true } label: { Label(tr("media.new_collection"), systemImage: "plus.circle.fill") }
                 }
                 Section {
                     ForEach(media.collections) { c in
                         Button { add(to: c) } label: {
-                            HStack { Text("\(c.emoji ?? "") \(c.name)").foregroundStyle(Theme.text); Spacer(); Text("\(c.count)").foregroundStyle(Theme.textSecondary) }
+                            HStack { Text(verbatim: "\(c.emoji ?? "") \(c.name)").foregroundStyle(Theme.text); Spacer(); Text(verbatim: "\(c.count)").foregroundStyle(Theme.textSecondary) }
                         }
-                        .accessibilityLabel("Add to \(c.name)")
+                        .accessibilityLabel(tr("collections.add_to_named", c.name))
                     }
                 }
             }
             .disabled(working)
-            .navigationTitle("Add to collection").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
-            .alert("New collection", isPresented: $creating) {
-                TextField("Name", text: $name)
-                Button("Create and add") { let n = name; name = ""; Task { working = true; if let c = await media.createCollection(name: n) { await finish(c) }; working = false } }
-                Button("Cancel", role: .cancel) { name = "" }
+            .navigationTitle(tr("collections.add_to_collection")).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(tr("common.cancel")) { dismiss() } } }
+            .alert(tr("media.new_collection"), isPresented: $creating) {
+                TextField(tr("media.name"), text: $name)
+                Button(tr("collections.create_and_add")) { let n = name; name = ""; Task { working = true; if let c = await media.createCollection(name: n) { await finish(c) }; working = false } }
+                Button(tr("common.cancel"), role: .cancel) { name = "" }
             }
         }
         .presentationDetents([.medium, .large])
@@ -209,24 +209,24 @@ struct CollectionsListView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Newest first. ").foregroundStyle(Theme.textSecondary) + Text("Auto").foregroundStyle(Theme.primary).fontWeight(.semibold) + Text(" collections are made for you.").foregroundStyle(Theme.textSecondary)
+                accentText(tr("collections.auto_note"), accent: Theme.primary, base: Theme.textSecondary)
                 ForEach(media.collections) { c in row(c) }
             }
             .font(.system(size: 14.5)).padding(.horizontal, 16).padding(.bottom, 24)
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle("Collections").navigationBarTitleDisplayMode(.large)
+        .navigationTitle(tr("viewer.collections")).navigationBarTitleDisplayMode(.large)
         .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
-        .alert("Rename collection", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
-            TextField("Name", text: $renameText)
-            Button("Save") { if let c = renaming { let t = renameText; Task { await media.rename(c, to: t) } } }
-            Button("Cancel", role: .cancel) {}
+        .alert(tr("collections.rename_collection"), isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
+            TextField(tr("media.name"), text: $renameText)
+            Button(tr("collections.save")) { if let c = renaming { let t = renameText; Task { await media.rename(c, to: t) } } }
+            Button(tr("common.cancel"), role: .cancel) {}
         }
-        .confirmationDialog("Delete “\(deleting?.name ?? "")”?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
-            Button("Delete", role: .destructive) { if let c = deleting { withAnimation(.easeOut(duration: 0.2)) { Task { await media.deleteCollection(c) } } } }
-            Button("Cancel", role: .cancel) {}
+        .confirmationDialog(tr("collections.delete_title", deleting?.name ?? ""), isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+            Button(tr("collections.delete"), role: .destructive) { if let c = deleting { withAnimation(.easeOut(duration: 0.2)) { Task { await media.deleteCollection(c) } } } }
+            Button(tr("common.cancel"), role: .cancel) {}
         } message: {
-            Text("The collection is removed. Its \(deleting?.count ?? 0) photos stay in My media.\(media.organizePref == .always && deleting?.auto == true ? " New uploads from that month may create it again." : "")")
+            Text(tr("collections.delete_msg", deleting?.count ?? 0) + (media.organizePref == .always && deleting?.auto == true ? " " + tr("collections.recreate_note") : ""))
         }
     }
 
@@ -239,7 +239,7 @@ struct CollectionsListView: View {
                         Text(c.name).font(.system(size: 16.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                         HStack(spacing: 8) {
                             if c.auto { AutoChip() }
-                            Text("\(c.count.formatted()) \(c.count == 1 ? "photo" : "photos")").font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
+                            Text(tr("photos.count", c.count)).font(.system(size: 14)).foregroundStyle(Theme.textSecondary)
                         }
                     }
                     Spacer(minLength: 0)
@@ -247,16 +247,16 @@ struct CollectionsListView: View {
                 .contentShape(Rectangle())
             }.buttonStyle(.plain)
             Menu {
-                Button { renameText = c.name; renaming = c } label: { Label("Rename", systemImage: "pencil") }
-                Button(role: .destructive) { deleting = c } label: { Label("Delete collection", systemImage: "xmark") }
-                Section { Button("Photos stay in My media. Only the collection is removed.") {}.disabled(true) }
+                Button { renameText = c.name; renaming = c } label: { Label(tr("collections.rename"), systemImage: "pencil") }
+                Button(role: .destructive) { deleting = c } label: { Label(tr("collections.delete_collection"), systemImage: "xmark") }
+                Section { Button(tr("collections.photos_stay_in_my_media")) {}.disabled(true) }
             } label: { Image(systemName: "ellipsis").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
-                .accessibilityLabel("Actions for \(c.name)")
+                .accessibilityLabel(tr("collections.actions_for", c.name))
         }
         .frame(minHeight: 80)
         .accessibilityElement(children: .contain)
-        .accessibilityAction(named: "Rename") { renameText = c.name; renaming = c }
-        .accessibilityAction(named: "Delete collection") { deleting = c }
+        .accessibilityAction(named: tr("collections.rename")) { renameText = c.name; renaming = c }
+        .accessibilityAction(named: tr("collections.delete_collection")) { deleting = c }
     }
 }
 

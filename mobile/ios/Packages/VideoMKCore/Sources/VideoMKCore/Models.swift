@@ -14,19 +14,19 @@ public enum VideoStatus: Sendable, Equatable {
         /// Fits on one line in a list row.
         public var shortTitle: String {
             switch self {
-            case .starting: "Starting"
-            case .writing: "Writing the story"
-            case .voiceAndVisuals: "Voice and visuals"
-            case .rendering: "Rendering"
+            case .starting: tr("stage.short.starting")
+            case .writing: tr("stage.short.writing")
+            case .voiceAndVisuals: tr("stage.short.voice_visuals")
+            case .rendering: tr("stage.short.rendering")
             }
         }
 
         public var title: String {
             switch self {
-            case .starting: "Getting started"
-            case .writing: "Writing the story"
-            case .voiceAndVisuals: "Recording the voice and finding visuals"
-            case .rendering: "Rendering"
+            case .starting: tr("stage.long.starting")
+            case .writing: tr("stage.long.writing")
+            case .voiceAndVisuals: tr("stage.long.voice_visuals")
+            case .rendering: tr("stage.long.rendering")
             }
         }
     }
@@ -100,7 +100,7 @@ public struct VideoItem: Sendable, Equatable, Identifiable, Decodable {
         return p.count == 2 && p[0] > 0 && p[1] > 0 ? p[0] / p[1] : 16.0 / 9.0
     }
 
-    public var displayTitle: String { (title?.isEmpty == false ? title! : nil) ?? "Untitled video" }
+    public var displayTitle: String { (title?.isEmpty == false ? title! : nil) ?? tr("video.untitled") }
 }
 
 struct VideoListResponse: Decodable { let items: [VideoItem] }
@@ -118,7 +118,7 @@ struct MessageResponse: Decodable { let message: String? ; let status: String? }
 public enum VideoLook: String, CaseIterable, Sendable, Identifiable {
     case midnight, paper, sunrise
     public var id: String { rawValue }
-    public var title: String { rawValue.capitalized }
+    public var title: String { tr("look." + rawValue) }
 }
 
 public struct CreateOptions: Sendable, Equatable {

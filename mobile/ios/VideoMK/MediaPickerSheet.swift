@@ -27,34 +27,34 @@ struct MediaPickerSheet: View {
                     SearchBar(feed: feed)
                     if promptLooksLikePhotos {
                         Button { fromPrompt() } label: {
-                            Label("Photos from your prompt", systemImage: "wand.and.stars").font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 40)
+                            Label(tr("picker.photos_from_your_prompt"), systemImage: "wand.and.stars").font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 40)
                         }
                         .buttonStyle(.bordered).padding(.horizontal, 16).accessibilityIdentifier("photosFromPrompt")
-                        .accessibilityHint("Searches your library with what you typed and selects the matches")
+                        .accessibilityHint(tr("picker.searches_your_library_with_what"))
                     }
                     ChipsRow(feed: feed)
                     switch feed.state {
                     case .loading: SkeletonGrid()
-                    case .failed(let m): MediaMessage(symbol: "wifi.exclamationmark", title: "Couldn't load your photos", text: m, button: "Try again") { Task { await feed.reload() } }
+                    case .failed(let m): MediaMessage(symbol: "wifi.exclamationmark", title: tr("add.couldnt_load_your_photos"), text: m, button: tr("common.try_again")) { Task { await feed.reload() } }
                     case .loaded:
                         if feed.photos.isEmpty {
-                            MediaMessage(symbol: "photo.on.rectangle", title: feed.isSearching ? "No photos match" : "Your library is empty", text: feed.isSearching ? "Try fewer words, or remove a filter." : "Add photos in the Media tab first.", button: nil) {}
+                            MediaMessage(symbol: "photo.on.rectangle", title: feed.isSearching ? tr("media.no_photos_match") : tr("picker.your_library_is_empty"), text: feed.isSearching ? tr("picker.try_fewer_words_or_remove") : tr("picker.add_photos_in_the_media"), button: nil) {}
                         } else { PhotoGrid(feed: feed, media: media, selection: selection) { selection.toggle($0.id) } }
                     }
                 }
             }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("My media").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(tr("add.my_media")).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Done") { done() }.fontWeight(.semibold).accessibilityIdentifier("pickerDone") }
+                ToolbarItem(placement: .cancellationAction) { Button(tr("common.cancel")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { done() }.fontWeight(.semibold).accessibilityIdentifier("pickerDone") }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 HStack {
-                    Text("\(selection.count) of \(room) selected").font(.subheadline.weight(.semibold).monospacedDigit()).foregroundStyle(Theme.text)
+                    Text(tr("picker.selected_of", selection.count, room)).font(.subheadline.weight(.semibold).monospacedDigit()).foregroundStyle(Theme.text)
                     Spacer()
-                    if feed.isSearching, !feed.photos.isEmpty { Button(feed.canLoadMore ? "Select all (up to \(room))" : "Select all \(min(feed.photos.count, room))") { Task { await feed.loadAll(upTo: room); selection.select(all: feed.photos.map(\.id)) } }.font(.footnote.weight(.semibold)) }
-                    if selection.count > 0 { Button("Clear") { selection.set([]) }.font(.footnote) }
+                    if feed.isSearching, !feed.photos.isEmpty { Button(feed.canLoadMore ? tr("select_all.up_to", room) : tr("select_all.count", min(feed.photos.count, room))) { Task { await feed.loadAll(upTo: room); selection.select(all: feed.photos.map(\.id)) } }.font(.footnote.weight(.semibold)) }
+                    if selection.count > 0 { Button(tr("picker.clear")) { selection.set([]) }.font(.footnote) }
                 }
                 .padding(.horizontal, 16).padding(.vertical, 12).background(.bar)
                 .accessibilityElement(children: .combine)

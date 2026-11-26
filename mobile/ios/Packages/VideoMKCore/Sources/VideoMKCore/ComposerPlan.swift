@@ -9,8 +9,8 @@ public struct ComposerStatus: Equatable, Sendable {
         case addCredits
         public var title: String {
             switch self {
-            case .useMinutes(let m, let c): "Use \(Int(m)) min · ⚡\(c)"
-            case .addCredits: "Add credits"
+            case .useMinutes(let m, let c): tr("composer.fix.use_minutes", Int(m), c)
+            case .addCredits: tr("composer.fix.add_credits")
             }
         }
     }
@@ -23,9 +23,9 @@ public struct ComposerStatus: Equatable, Sendable {
     /// Spoken when a tonal send is tapped.
     public var announcement: String {
         switch kind {
-        case .dictating: "Still listening. Stop dictation first."
+        case .dictating: tr("composer.announce.dictating")
         case .sending: message
-        default: fix.map { "\(message). \($0.title.replacingOccurrences(of: "⚡", with: "")). Double tap the suggestion to fix it." } ?? message
+        default: fix.map { tr("composer.announce.fix", message, $0.title.replacingOccurrences(of: "⚡", with: "")) } ?? message
         }
     }
 }
@@ -57,26 +57,26 @@ public enum ComposerPlan {
         let count = Brief.normalized(text).count
         let affordable = balance.map { cost <= $0 } ?? true
         let valid = Brief.isValid(text)
-        if sending { return ComposerStatus(kind: .sending, message: "Starting your video…", fix: nil, canSend: false) }
-        if dictating { return ComposerStatus(kind: .dictating, message: "Listening…", fix: nil, canSend: false) }
+        if sending { return ComposerStatus(kind: .sending, message: tr("composer.sending"), fix: nil, canSend: false) }
+        if dictating { return ComposerStatus(kind: .dictating, message: tr("composer.listening"), fix: nil, canSend: false) }
         if count > Brief.maxLength {
-            return ComposerStatus(kind: .tooLong, message: "\(count.formatted()) of \(Brief.maxLength.formatted()). Please shorten it.", fix: nil, canSend: false)
+            return ComposerStatus(kind: .tooLong, message: tr("composer.too_long", count.formatted(), Brief.maxLength.formatted()), fix: nil, canSend: false)
         }
         if !affordable, let balance {
-            if balance <= 0 { return ComposerStatus(kind: .noCredits, message: "You have no credits", fix: .addCredits, canSend: false) }
-            return ComposerStatus(kind: .notAffordable, message: "Needs \(plural(cost, "credit")), you have \(balance)", fix: affordableFix(balance: balance, lengths: lengths, multiplier: options.creditsMultiplier), canSend: false)
+            if balance <= 0 { return ComposerStatus(kind: .noCredits, message: tr("composer.no_credits"), fix: .addCredits, canSend: false) }
+            return ComposerStatus(kind: .notAffordable, message: tr("composer.not_affordable", cost, balance), fix: affordableFix(balance: balance, lengths: lengths, multiplier: options.creditsMultiplier), canSend: false)
         }
         if count > 0 && !valid {
-            return ComposerStatus(kind: .tooShort, message: "Add a few more words (\(Brief.minLength - count) to go)", fix: nil, canSend: false)
+            return ComposerStatus(kind: .tooShort, message: tr("composer.too_short", Brief.minLength - count), fix: nil, canSend: false)
         }
         if let hint = PhotoCapacity.hint(photos: photos, minutes: options.minutes, options: lengths) {
             return ComposerStatus(kind: .photoHint, message: hint, fix: photoFix(photos: photos, minutes: options.minutes, balance: balance, lengths: lengths, multiplier: options.creditsMultiplier), canSend: valid)
         }
         if valid {
-            let left = balance.map { " · you'll have \($0 - cost) left" } ?? ""
-            return ComposerStatus(kind: .ready, message: "\(plural(cost, "credit"))\(left)", fix: nil, canSend: true)
+            let text = balance.map { tr("composer.ready_left", cost, $0 - cost) } ?? tr("credits.count", cost)
+            return ComposerStatus(kind: .ready, message: text, fix: nil, canSend: true)
         }
-        return ComposerStatus(kind: .price, message: "A \(Int(options.minutes)) minute video costs \(plural(cost, "credit"))", fix: nil, canSend: false)
+        return ComposerStatus(kind: .price, message: tr("composer.price", Int(options.minutes), tr("credits.count", cost)), fix: nil, canSend: false)
     }
 }
 
@@ -112,13 +112,13 @@ public struct AttachSelection: Equatable, Sendable {
     /// "1", "2", ... on the tile: order within its own source, as the grids show it.
     public func libraryOrder(_ id: String) -> Int? { library.firstIndex(of: id).map { $0 + 1 } }
 
-    public func title() -> String { selected == 0 ? "Nothing selected" : "\(selected) selected" }
-    public func buttonTitle() -> String { selected == 0 ? "Add" : "Add \(selected)" }
+    public func title() -> String { selected == 0 ? tr("attach.nothing_selected") : tr("attach.selected", selected) }
+    public func buttonTitle() -> String { selected == 0 ? tr("attach.add") : tr("attach.add_n", selected) }
 
     public func subline(minutes: Double) -> String {
-        let fit = "About \(PhotoCapacity.capacity(minutes: minutes)) fit in \(PhotoCapacity.length(minutes))."
-        if !phone.isEmpty && !library.isEmpty { return "\(phone.count) from this phone, \(library.count) from My media. \(fit)" }
-        if total > 80 { return "\(total) of \(limit) photos. \(fit)" }
-        return "Up to \(limit - attached) photos. \(fit)"
+        let fit = tr("attach.fit", PhotoCapacity.capacity(minutes: minutes), PhotoCapacity.length(minutes))
+        if !phone.isEmpty && !library.isEmpty { return tr("attach.subline_both", phone.count, library.count, fit) }
+        if total > 80 { return tr("attach.subline_total", total, limit, fit) }
+        return tr("attach.subline_up_to", limit - attached, fit)
     }
 }

@@ -22,8 +22,8 @@ struct VideoDetailView: View {
                     switch video.status {
                     case .complete: playerSection(video)
                     case .running(let stage): ProgressCard(stage: stage)
-                    case .failed: message("Something went wrong", "We couldn't finish this video. You haven't been charged for it.", icon: "exclamationmark.triangle", color: Theme.danger)
-                    case .rejected: message("This request can't be turned into a video", video.rejectReason ?? "Try describing something different.", icon: "hand.raised", color: Theme.warning)
+                    case .failed: message(tr("detail.failed_title"), tr("detail.failed_body"), icon: "exclamationmark.triangle", color: Theme.danger)
+                    case .rejected: message(tr("detail.rejected_title"), video.rejectReason ?? tr("detail.rejected_body"), icon: "hand.raised", color: Theme.warning)
                     }
                 }
                 .padding(20)
@@ -32,7 +32,7 @@ struct VideoDetailView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle(model.video(videoID)?.displayTitle ?? "Video")
+        .navigationTitle(model.video(videoID)?.displayTitle ?? tr("detail.video"))
         .navigationBarTitleDisplayMode(.inline)
         .task(id: model.video(videoID)?.status) { await loadPlayerIfReady() }
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
@@ -40,7 +40,7 @@ struct VideoDetailView: View {
         .toolbar {
             if let v = model.video(videoID), v.editable, v.status == .complete {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Edit") { player?.pause(); editing = true }.accessibilityIdentifier("editButton")
+                    Button(tr("common.edit")) { player?.pause(); editing = true }.accessibilityIdentifier("editButton")
                 }
             }
         }
@@ -56,7 +56,7 @@ struct VideoDetailView: View {
             else if let playbackError {
                 VStack(spacing: 12) {
                     Text(playbackError).foregroundStyle(Theme.textSecondary)
-                    Button("Try again") { Task { await loadPlayerIfReady() } }
+                    Button(tr("common.try_again")) { Task { await loadPlayerIfReady() } }
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
         }
@@ -69,7 +69,7 @@ struct VideoDetailView: View {
 
         Text(video.displayTitle).font(.title3.bold()).foregroundStyle(Theme.text)
         if let d = videoDescription {
-            DisclosureGroup("Description and photo credits") {
+            DisclosureGroup(tr("detail.description_credits")) {
                 Text(Linkified.attributed(d)).font(.footnote).foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled).padding(.top, 6)
             }
@@ -79,7 +79,7 @@ struct VideoDetailView: View {
             HStack(spacing: 10) {
                 if let playbackURL {
                     ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle), preview: SharePreview(video.displayTitle)) {
-                        Label("Share", systemImage: "square.and.arrow.up").lineLimit(1).frame(maxWidth: .infinity)
+                        Label(tr("common.share"), systemImage: "square.and.arrow.up").lineLimit(1).frame(maxWidth: .infinity)
                     }.buttonStyle(.bordered)
                 }
                 Button {
@@ -87,7 +87,7 @@ struct VideoDetailView: View {
                     copied = true
                     Task { try? await Task.sleep(for: .seconds(2)); copied = false }
                 } label: {
-                    Label(copied ? "Copied" : "Copy title", systemImage: copied ? "checkmark" : "doc.on.doc").lineLimit(1).frame(maxWidth: .infinity)
+                    Label(copied ? tr("common.copied") : tr("detail.copy_title"), systemImage: copied ? "checkmark" : "doc.on.doc").lineLimit(1).frame(maxWidth: .infinity)
                 }.buttonStyle(.bordered)
             }
             if let d = videoDescription {
@@ -96,7 +96,7 @@ struct VideoDetailView: View {
                     copiedDescription = true
                     Task { try? await Task.sleep(for: .seconds(2)); copiedDescription = false }
                 } label: {
-                    Label(copiedDescription ? "Copied" : "Copy description with credits", systemImage: copiedDescription ? "checkmark" : "text.alignleft").lineLimit(1).frame(maxWidth: .infinity)
+                    Label(copiedDescription ? tr("common.copied") : tr("detail.copy_description"), systemImage: copiedDescription ? "checkmark" : "text.alignleft").lineLimit(1).frame(maxWidth: .infinity)
                 }.buttonStyle(.bordered).accessibilityIdentifier("copyDescription")
             }
         }
@@ -145,8 +145,8 @@ struct ProgressCard: View {
     var body: some View {
         Card {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Making your video").font(.headline).foregroundStyle(Theme.text)
-                Text("This usually takes a few minutes. You can leave this screen; it keeps going.").font(.callout).foregroundStyle(Theme.textSecondary)
+                Text(tr("detail.making")).font(.headline).foregroundStyle(Theme.text)
+                Text(tr("detail.making_sub")).font(.callout).foregroundStyle(Theme.textSecondary)
                 ForEach(VideoStatus.Stage.allCases, id: \.self) { s in
                     HStack(spacing: 10) {
                         if s < stage { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success) }

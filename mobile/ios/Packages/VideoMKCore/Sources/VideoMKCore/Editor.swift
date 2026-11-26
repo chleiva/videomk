@@ -23,13 +23,13 @@ public struct PhotoCandidate: Sendable, Equatable, Identifiable, Decodable {
         provider = try c.decode(String.self, forKey: .provider)
         candidateID = try c.decode(String.self, forKey: .candidateID)
         thumbURL = (try? c.decode(String.self, forKey: .thumbURL)).flatMap(URL.init(string:))
-        creator = (try? c.decode(String.self, forKey: .creator)) ?? "Unknown"
+        creator = (try? c.decode(String.self, forKey: .creator)) ?? tr("editor.unknown_creator")
         license = (try? c.decode(String.self, forKey: .license)) ?? ""
         alt = (try? c.decode(String.self, forKey: .alt)) ?? ""
         landingURL = (try? c.decode(String.self, forKey: .landingURL)).flatMap(URL.init(string:))
     }
 
-    public init(provider: String, id: String, creator: String = "Unknown", license: String = "") {
+    public init(provider: String, id: String, creator: String = tr("editor.unknown_creator"), license: String = "") {
         self.provider = provider; candidateID = id; thumbURL = nil; self.creator = creator; self.license = license; alt = ""; landingURL = nil
     }
 }
@@ -70,15 +70,15 @@ public enum SceneKind: String, Sendable, CaseIterable {
     }
     public var label: String {
         switch self {
-        case .title: "Title"
-        case .bullets: "List"
-        case .diagram: "Diagram"
-        case .chart: "Chart"
-        case .timeline: "Timeline"
-        case .stat: "Big number"
-        case .quote: "Quote"
-        case .image: "Photo"
-        case .clip: "Video clip"
+        case .title: tr("scene.title")
+        case .bullets: tr("scene.list")
+        case .diagram: tr("scene.diagram")
+        case .chart: tr("scene.chart")
+        case .timeline: tr("scene.timeline")
+        case .stat: tr("scene.stat")
+        case .quote: tr("scene.quote")
+        case .image: tr("scene.photo")
+        case .clip: tr("scene.clip")
         }
     }
 }
@@ -240,8 +240,8 @@ public enum EditorDiff {
     public static func narrationError(_ text: String, limits: EditorLimits, silent: Bool = false) -> String? {
         let n = normalize(text).split(separator: " ").count
         if silent && n == 0 { return nil }          // a pause has no narration; typing words into it gives it a voice, and then the usual limits apply
-        if n < limits.minWords { return "Needs at least \(limits.minWords) words (now \(n))." }
-        if n > limits.maxWords { return "Limited to \(limits.maxWords) words per scene (now \(n)). Split it into two scenes." }
+        if n < limits.minWords { return tr("editor.err.min_words", limits.minWords, n) }
+        if n > limits.maxWords { return tr("editor.err.max_words", limits.maxWords, n) }
         return nil
     }
 

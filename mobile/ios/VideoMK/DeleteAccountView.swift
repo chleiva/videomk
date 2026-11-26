@@ -31,7 +31,7 @@ final class DeletionModel {
     private var running = false
 
     var isWorking: Bool { if case .working = state { true } else { false } }
-    var canDelete: Bool { typed.trimmingCharacters(in: .whitespaces) == "DELETE" && !isWorking && !running }
+    var canDelete: Bool { AccountDeletionFlow.isConfirmation(typed) && !isWorking && !running }
 
     init() {
         #if DEBUG
@@ -79,9 +79,9 @@ struct DeleteAccountView: View {
             Group {
                 if case .working(let stage) = model.state { progress(stage) } else { details }
             }
-            .navigationTitle("Delete account")
+            .navigationTitle(tr("settings.delete_account"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { if !model.isWorking { Button("Cancel") { dismiss() }.accessibilityIdentifier("deleteCancel") } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { if !model.isWorking { Button(tr("common.cancel")) { dismiss() }.accessibilityIdentifier("deleteCancel") } } }
         }
         .interactiveDismissDisabled(model.isWorking)
     }
@@ -92,34 +92,34 @@ struct DeleteAccountView: View {
         ScrollViewReader { proxy in
         List {
             Section {
-                Text("This permanently deletes your videomk account. It can't be undone.").font(.headline).foregroundStyle(Theme.text)
+                Text(tr("delete.warning")).font(.headline).foregroundStyle(Theme.text)
             }
-            Section("What will be deleted") {
-                item("play.rectangle.on.rectangle", "Your videos", "Every video you made, including ones still being made.")
-                item("photo.on.rectangle", "Your photos and My media", "Every photo and collection you uploaded.")
-                item("bolt.fill", "Your credits", "Credits you have left are lost.")
-                item("person.crop.circle", "Your sign-in", "Your email, Google or Apple sign-in for videomk.")
-            }
-            Section {
-                Text("If you last signed in more than 10 minutes ago, you will be asked to sign in again to confirm it's you.")
-                Text("Your videos, photos and credits are removed within minutes.")
-                Text("Your sign-in is removed within about an hour or two. If you want to sign up again with the same email, please wait until then.")
-            } header: { Text("What happens next") } footer: {
-                Text("Short-lived technical copies, such as logs and backups, expire on their own schedule. See the [Privacy Policy](https://videomk.com/privacy).")
+            Section(tr("delete.what_deleted")) {
+                item("play.rectangle.on.rectangle", tr("delete.item.videos"), tr("delete.item.videos_sub"))
+                item("photo.on.rectangle", tr("delete.item.media"), tr("delete.item.media_sub"))
+                item("bolt.fill", tr("delete.item.credits"), tr("delete.item.credits_sub"))
+                item("person.crop.circle", tr("delete.item.signin"), tr("delete.item.signin_sub"))
             }
             Section {
-                TextField("DELETE", text: $model.typed)
+                Text(tr("delete.next.reauth"))
+                Text(tr("delete.next.data"))
+                Text(tr("delete.next.signin"))
+            } header: { Text(tr("delete.what_next")) } footer: {
+                markdown(tr("delete.footer_md"))
+            }
+            Section {
+                TextField(tr("delete.word"), text: $model.typed)
                     .textInputAutocapitalization(.characters).autocorrectionDisabled().focused($focused)
-                    .accessibilityLabel("Type DELETE to confirm").accessibilityIdentifier("deleteConfirmField")
+                    .accessibilityLabel(tr("delete.type_a11y", tr("delete.word"))).accessibilityIdentifier("deleteConfirmField")
                 if case .failed(let e) = model.state { errorBox(e).id("deleteErrorBox") }
-            } header: { Text("To confirm, type DELETE") }
+            } header: { Text(tr("delete.type_header", tr("delete.word"))) }
             Section {
                 Button { focused = false; Task { await model.delete(app: app) } } label: {
-                    Text(isFailed ? "Try again" : "Delete my account").multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                    Text(isFailed ? tr("common.try_again") : tr("delete.confirm_button")).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                 }
                 .buttonStyle(DestructiveButtonStyle()).disabled(!model.canDelete).listRowInsets(.init(top: 8, leading: 16, bottom: 4, trailing: 16)).listRowBackground(Color.clear).listRowSeparator(.hidden)
                 .accessibilityIdentifier("deleteConfirmButton")
-                Button { dismiss() } label: { Text("Keep my account").multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
+                Button { dismiss() } label: { Text(tr("delete.keep")).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
                     .buttonStyle(KeepButtonStyle()).listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16)).listRowBackground(Color.clear).listRowSeparator(.hidden)
                     .accessibilityIdentifier("deleteKeepButton")
             }
@@ -133,6 +133,8 @@ struct DeleteAccountView: View {
     private func scrollToError(_ proxy: ScrollViewProxy) {
         Task { try? await Task.sleep(for: .milliseconds(150)); withAnimation { proxy.scrollTo("deleteErrorBox", anchor: .center) } }
     }
+
+    private func markdown(_ s: String) -> Text { Text((try? AttributedString(markdown: s)) ?? AttributedString(s)) }
 
     private var isFailed: Bool { if case .failed = model.state { true } else { false } }
 
@@ -151,9 +153,9 @@ struct DeleteAccountView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label { Text(e.message).fixedSize(horizontal: false, vertical: true) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
                 .font(.subheadline).foregroundStyle(Theme.danger)
-            if e.offersEmail { Link("Email support@plorer.ai", destination: URL(string: "mailto:support@plorer.ai?subject=Delete%20my%20videomk%20account")!).font(.subheadline.weight(.semibold)) }
+            if e.offersEmail { Link(tr("delete.email_support"), destination: URL(string: "mailto:support@plorer.ai?subject=Delete%20my%20videomk%20account")!).font(.subheadline.weight(.semibold)) }
             if e == .uncertain || e == .network || e == .server || e == .reauthFailed || e == .reauthNotAccepted {
-                Text("You are still signed in.").font(.footnote).foregroundStyle(Theme.textSecondary)
+                Text(tr("delete.still_signed_in")).font(.footnote).foregroundStyle(Theme.textSecondary)
             }
         }
         .padding(.vertical, 4)
@@ -165,9 +167,9 @@ struct DeleteAccountView: View {
     private func progress(_ stage: DeletionStage) -> some View {
         VStack(spacing: 16) {
             ProgressView().controlSize(.large)
-            Text(stage == .checking ? "Checking your sign-in…" : stage == .signingIn ? "Sign in again to confirm it's you…" : "Deleting your account…")
+            Text(stage == .checking ? tr("delete.progress.checking") : stage == .signingIn ? tr("delete.progress.signing_in") : tr("delete.progress.deleting"))
                 .font(.title3.weight(.semibold)).multilineTextAlignment(.center).accessibilityIdentifier("deleteProgress")
-            Text("Please keep the app open. Nothing else will be asked of you.").font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+            Text(tr("delete.progress.keep_open")).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
         }
         .padding(24).frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background.ignoresSafeArea())
@@ -186,16 +188,16 @@ struct AccountDeletedView: View {
         ScrollView {
             VStack(spacing: 20) {
                 Image(systemName: "checkmark.circle.fill").font(.system(size: 64)).foregroundStyle(Theme.success).accessibilityHidden(true).padding(.top, 32)
-                Text("Your account is being deleted").font(.title.bold()).multilineTextAlignment(.center).foregroundStyle(Theme.text)
+                Text(tr("deleted.title")).font(.title.bold()).multilineTextAlignment(.center).foregroundStyle(Theme.text)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("deletedTitle")
-                Text("Your data is removed within minutes and your sign-in within about an hour or two. If you want to sign up again with the same email, please wait until then.")
+                Text(tr("deleted.body"))
                     .font(.body).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
                 if notice.assumed {
-                    Text("We didn't get a final answer from our servers, but your sign-in has already been switched off, which only happens once a deletion has started.")
+                    Text(tr("deleted.assumed"))
                         .font(.footnote).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
                 }
                 apple
-                Button("Done") { app.dismissDeletionNotice() }.buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("deletedDone").padding(.top, 8)
+                Button(tr("common.done")) { app.dismissDeletionNotice() }.buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("deletedDone").padding(.top, 8)
             }
             .padding(.horizontal, 24).padding(.bottom, 24).frame(maxWidth: 560).frame(maxWidth: .infinity)
         }
@@ -206,22 +208,22 @@ struct AccountDeletedView: View {
     @ViewBuilder private var apple: some View {
         switch notice.apple {
         case .notLinked: EmptyView()
-        case .revokeOff: card("Sign in with Apple", AppleRevoke.manualSteps)
-        case .unknown: card("Sign in with Apple", "If you signed in with Apple, you can also remove it yourself. " + AppleRevoke.manualSteps)
+        case .revokeOff: card(tr("deleted.apple_title"), AppleRevoke.manualSteps)
+        case .unknown: card(tr("deleted.apple_title"), tr("deleted.apple_unknown", AppleRevoke.manualSteps))
         case .revokeAvailable:
             VStack(alignment: .leading, spacing: 12) {
-                Text("One more step: Sign in with Apple").font(.headline)
+                Text(tr("deleted.apple_step")).font(.headline)
                 switch revoke {
                 case .done:
-                    Label("Done. videomk can no longer use your Apple Account to sign in.", systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success).font(.subheadline)
+                    Label(tr("deleted.apple_done"), systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success).font(.subheadline)
                 case .manual(let why):
-                    Text(why == .cancelled ? "You closed the Apple page." : "We couldn't finish this step.").font(.subheadline)
+                    Text(why == .cancelled ? tr("deleted.apple_closed") : tr("deleted.apple_failed")).font(.subheadline)
                     Text(AppleRevoke.manualSteps).font(.subheadline).foregroundStyle(Theme.textSecondary)
-                    if notice.revokeToken != nil { revokeButton("Try again") }
+                    if notice.revokeToken != nil { revokeButton(tr("common.try_again")) }
                 default:
-                    Text("Apple keeps a link between videomk and your Apple Account. Remove it now with Face ID or your Apple Account password. Your account is deleted either way.")
+                    Text(tr("deleted.apple_explain"))
                         .font(.subheadline).foregroundStyle(Theme.textSecondary)
-                    revokeButton("Remove Sign in with Apple access")
+                    revokeButton(tr("deleted.apple_remove"))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading).padding(16)

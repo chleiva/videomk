@@ -34,8 +34,8 @@ struct OrganizeSheet: View {
     private var total: Int { preview?.total ?? 0 }
     private var organized: Int { preview?.organized ?? 0 }
     private var title: String {
-        guard preview != nil else { return "Organize your photos?" }
-        return allExisting ? "Add \(organized.formatted()) new photos to your collections?" : "Organize \(request.fromBatch ? "\(total.formatted()) new" : total.formatted()) photos?"
+        guard preview != nil else { return tr("organize.title_default") }
+        return allExisting ? tr("organize.title_add_existing", organized) : tr(request.fromBatch ? "organize.title_new_batch" : "organize.title_total", total)
     }
 
     var body: some View {
@@ -44,8 +44,8 @@ struct OrganizeSheet: View {
                 switch phase {
                 case .loading: content(skeleton: true)
                 case .ready: single ? AnyView(singleContent) : AnyView(content(skeleton: false))
-                case .failed: message("exclamationmark.triangle", "Couldn't check your photos", "Try again in a moment.", primary: "Try again", { Task { await load() } })
-                case .nothing: message("sparkles", "Nothing to organize right now", "Your photos are already in collections, or there aren't at least 5 from the same place and month yet.", primary: "OK", { dismiss() })
+                case .failed: message("exclamationmark.triangle", tr("organize.check_failed_title"), tr("organize.check_failed_sub"), primary: tr("common.try_again"), { Task { await load() } })
+                case .nothing: message("sparkles", tr("organize.nothing_title"), tr("organize.nothing_sub"), primary: tr("media.ok"), { dismiss() })
                 }
             }
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: single)
@@ -79,17 +79,17 @@ struct OrganizeSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title).font(.system(size: 23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
-                    Text("We’ll group them by place and month into collections. Nothing is moved or deleted.").font(.system(size: 14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
+                    Text(tr("organize.well_group_them_by_place")).font(.system(size: 14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
                     VStack(spacing: 0) {
                         if skeleton { ForEach(0..<3, id: \.self) { _ in SkeletonRow() } }
                         else { ForEach(showAll ? groups : Array(groups.prefix(5))) { GroupRow(media: media, group: $0) } }
                     }.padding(.top, 14)
                     if !skeleton, groups.count > 5, !showAll {
-                        Button { withAnimation(reduceMotion ? nil : .snappy) { showAll = true } } label: { Text("+ \(groups.count - 5) more collections").font(.system(size: 14.5, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44, alignment: .leading) }
-                            .buttonStyle(.plain).accessibilityLabel("Plus \(groups.count - 5) more collections").accessibilityIdentifier("organizeMore")
+                        Button { withAnimation(reduceMotion ? nil : .snappy) { showAll = true } } label: { Text(tr("organize.more", groups.count - 5)).font(.system(size: 14.5, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44, alignment: .leading) }
+                            .buttonStyle(.plain).accessibilityLabel(tr("organize.more_a11y", groups.count - 5)).accessibilityIdentifier("organizeMore")
                     }
                     if let p = preview, p.skipped > 0, !skeleton {
-                        Text("\(p.skipped.formatted()) photos had no clear group and stay as they are.").font(.system(size: 13)).foregroundStyle(Theme.textSecondary).padding(.top, 4).accessibilityIdentifier("organizeSkipped")
+                        Text(tr("organize.skipped", p.skipped)).font(.system(size: 13)).foregroundStyle(Theme.textSecondary).padding(.top, 4).accessibilityIdentifier("organizeSkipped")
                     }
                     Divider().padding(.top, 14)
                     if media.organizePref != .never { alwaysRow }
@@ -103,8 +103,8 @@ struct OrganizeSheet: View {
     private var alwaysRow: some View {
         Toggle(isOn: Binding(get: { media.organizePref.switchIsOn }, set: { media.setOrganizePref(OrganizePref.fromSwitch($0)) })) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Always organize new uploads").font(.system(size: 15.5, weight: .semibold)).foregroundStyle(Theme.text)
-                Text("Photos from later uploads join matching collections automatically.").font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                Text(tr("organize.always_organize_new_uploads")).font(.system(size: 15.5, weight: .semibold)).foregroundStyle(Theme.text)
+                Text(tr("organize.photos_from_later_uploads_join")).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
             }
         }
         .tint(Theme.primary).padding(.vertical, 10).accessibilityIdentifier("alwaysOrganize")
@@ -113,7 +113,7 @@ struct OrganizeSheet: View {
     private func actions(skeleton: Bool) -> some View {
         VStack(spacing: 10) {
             Button { runAuto() } label: {
-                Text("Organize").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient.opacity(skeleton ? 0.4 : 1), in: Capsule())
+                Text(tr("organize.organize")).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient.opacity(skeleton ? 0.4 : 1), in: Capsule())
             }.buttonStyle(.plain).disabled(skeleton).accessibilityIdentifier("organizeGo")
             if typeSize.isAccessibilitySize {
                 putAllButton(skeleton); notNow
@@ -126,12 +126,12 @@ struct OrganizeSheet: View {
 
     private func putAllButton(_ skeleton: Bool) -> some View {
         Button { name = SuggestedNames.suggest(groups: groups).first ?? ""; single = true; Task { try? await Task.sleep(for: .milliseconds(300)); nameFocused = true } } label: {
-            Text("Put all in one collection").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: 46).background(Theme.primaryContainer, in: Capsule())
+            Text(tr("organize.put_all_in_one_collection")).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: 46).background(Theme.primaryContainer, in: Capsule())
         }.buttonStyle(.plain).disabled(skeleton).accessibilityIdentifier("organizeSingle")
     }
 
     private var notNow: some View {
-        Button { dismiss() } label: { Text("Not now").font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 46) }
+        Button { dismiss() } label: { Text(tr("organize.not_now")).font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 46) }
             .buttonStyle(.plain).accessibilityIdentifier("organizeNotNow")
     }
 
@@ -145,21 +145,21 @@ struct OrganizeSheet: View {
 
     private var singleContent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Put all \(organized.formatted()) photos in one collection").font(.system(size: 23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
-            Text("Give it a name. You can rename it any time.").font(.system(size: 14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
-            TextField("Collection name", text: $name).focused($nameFocused).font(.system(size: 17)).padding(.horizontal, 14).frame(height: 52)
+            Text(tr("organize.put_all_title", organized)).font(.system(size: 23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
+            Text(tr("organize.give_it_a_name_you")).font(.system(size: 14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
+            TextField(tr("organize.collection_name"), text: $name).focused($nameFocused).font(.system(size: 17)).padding(.horizontal, 14).frame(height: 52)
                 .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.primary, lineWidth: nameFocused ? 2 : 0))
                 .padding(.top, 16).submitLabel(.done).accessibilityIdentifier("collectionName")
-            Text("SUGGESTIONS").font(.system(size: 12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
+            Text(tr("organize.suggestions")).font(.system(size: 12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
             ScrollView(.horizontal, showsIndicators: false) {
                 WrapLayout(spacing: 8) { ForEach(SuggestedNames.suggest(groups: groups), id: \.self) { s in FixChip(title: s) { name = s } } }
             }
             Spacer()
             HStack(spacing: 10) {
-                Button { single = false } label: { Text("Back").font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minWidth: 70, minHeight: 50) }.buttonStyle(.plain)
+                Button { single = false } label: { Text(tr("create.back")).font(.system(size: 15, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minWidth: 70, minHeight: 50) }.buttonStyle(.plain)
                 Button { create() } label: {
-                    Text("Create collection").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 50)
+                    Text(tr("organize.create_collection")).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 50)
                         .background(Theme.gradient.opacity(SuggestedNames.isValid(name) ? 1 : 0.4), in: Capsule())
                 }.buttonStyle(.plain).disabled(!SuggestedNames.isValid(name)).accessibilityIdentifier("createCollection")
             }
@@ -181,7 +181,7 @@ struct OrganizeSheet: View {
             Text(title).font(.system(size: 20, weight: .bold)).foregroundStyle(Theme.text)
             Text(text).font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
             Button(action: action) { Text(primary).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 52).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8)
-            if primary == "Try again" { Button("Not now") { dismiss() }.foregroundStyle(Theme.textSecondary).frame(minHeight: 44) }
+            if primary == tr("common.try_again") { Button(tr("organize.not_now")) { dismiss() }.foregroundStyle(Theme.textSecondary).frame(minHeight: 44) }
             Spacer()
         }
         .padding(.horizontal, 24)
@@ -199,7 +199,7 @@ private struct GroupRow: View {
             }.frame(width: 70, alignment: .leading).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 Text(group.name).font(.system(size: 15.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(typeSize.isAccessibilitySize ? 3 : 1).minimumScaleFactor(0.8)
-                Text("\(group.count.formatted()) photos").font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                Text(tr("photos.count", group.count)).font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
                 if typeSize.isAccessibilitySize, group.existing { existing }
             }
             Spacer(minLength: 4)
@@ -207,10 +207,10 @@ private struct GroupRow: View {
         }
         .frame(minHeight: 56).padding(.vertical, 4)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(group.name). \(group.count.formatted()) photos.\(group.existing ? " Adds to existing collection." : "")")
+        .accessibilityLabel(tr(group.existing ? "organize.group_a11y_existing" : "organize.group_a11y", group.name, tr("photos.count", group.count)))
     }
     private var existing: some View {
-        Text("+ Adds to existing").font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 24).background(Theme.primaryContainer, in: Capsule()).lineLimit(1).fixedSize()
+        Text(tr("organize.adds_to_existing")).font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 24).background(Theme.primaryContainer, in: Capsule()).lineLimit(1).fixedSize()
     }
 }
 
@@ -259,10 +259,10 @@ struct OrganizeBar: View {
                     }
                     Spacer(minLength: 4)
                     if bar.kind == .failed {
-                        Button("Try again") { media.retryOrganize() }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("organizeRetry")
+                        Button(tr("common.try_again")) { media.retryOrganize() }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("organizeRetry")
                     }
                     Button { confirmStop = true } label: { Image(systemName: "xmark").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
-                        .buttonStyle(.plain).accessibilityLabel("Stop organizing").accessibilityIdentifier("stopOrganize")
+                        .buttonStyle(.plain).accessibilityLabel(tr("organize.stop_organizing")).accessibilityIdentifier("stopOrganize")
                 }
                 .padding(.horizontal, 14).padding(.vertical, 2)
                 GeometryReader { g in Rectangle().fill(tint(bar)).frame(width: g.size.width * bar.fraction) }.frame(height: 3)
@@ -273,12 +273,12 @@ struct OrganizeBar: View {
             .elevation(3)
             .padding(.horizontal, 12).padding(.bottom, 8)
             .accessibilityElement(children: .contain)
-            .accessibilityValue("\(Int(bar.fraction * 100)) percent")
+            .accessibilityValue(tr("common.percent_a11y", Int(bar.fraction * 100)))
             .accessibilityIdentifier("organizeBar")
-            .confirmationDialog("Stop organizing?", isPresented: $confirmStop, titleVisibility: .visible) {
-                Button("Keep going", role: .cancel) {}
-                Button("Stop", role: .destructive) { media.cancelOrganize() }
-            } message: { Text("Collections already made stay as they are.") }
+            .confirmationDialog(tr("organize.stop_organizing_2"), isPresented: $confirmStop, titleVisibility: .visible) {
+                Button(tr("organize.keep_going"), role: .cancel) {}
+                Button(tr("organize.stop"), role: .destructive) { media.cancelOrganize() }
+            } message: { Text(tr("organize.collections_already_made_stay_as")) }
             .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
@@ -294,8 +294,8 @@ struct AutoBadge: View {
 
 struct AutoChip: View {
     var body: some View {
-        HStack(spacing: 3) { Image(systemName: "sparkles").font(.system(size: 10)); Text("Auto").font(.system(size: 12, weight: .bold)) }
+        HStack(spacing: 3) { Image(systemName: "sparkles").font(.system(size: 10)); Text(tr("collections.auto")).font(.system(size: 12, weight: .bold)) }
             .foregroundStyle(Theme.primary).padding(.horizontal, 8).frame(height: 20).background(Theme.primaryContainer, in: Capsule())
-            .accessibilityLabel("Automatic collection")
+            .accessibilityLabel(tr("organize.automatic_collection"))
     }
 }

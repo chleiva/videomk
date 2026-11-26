@@ -1,4 +1,5 @@
 import SwiftUI
+import VideoMKCore
 
 /// Design tokens, exactly the numbers of docs/UI_DESIGN.md section (g). Semantic names only; views never use raw colours.
 enum Theme {
@@ -91,7 +92,7 @@ struct FixChip: View {
                 .frame(minHeight: 32).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
-        .buttonStyle(.plain).layoutPriority(1).accessibilityLabel(title.replacingOccurrences(of: " · ⚡", with: ", ").replacingOccurrences(of: "⚡", with: "credits "))
+        .buttonStyle(.plain).layoutPriority(1).accessibilityLabel(title.replacingOccurrences(of: " · ⚡", with: ", ").replacingOccurrences(of: "⚡", with: tr("a11y.credits_word")))
     }
 
     /// "Use 1 min · ⚡1": the bolt is the app's own symbol, not the emoji.

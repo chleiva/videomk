@@ -11,16 +11,16 @@ struct WalletView: View {
                 if let w = model.wallet {
                     Section {
                         VStack(spacing: 4) {
-                            Text(w.unlimited ? "∞" : "\(w.balance)").font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Theme.text)
-                            Text(w.unlimited ? "unlimited (test account)" : w.balance == 1 ? "credit" : "credits").foregroundStyle(Theme.textSecondary)
+                            Text(w.unlimited ? "∞" : Localization.shared.number(w.balance)).font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Theme.text)
+                            Text(w.unlimited ? tr("wallet.unlimited") : tr("wallet.unit", w.balance)).foregroundStyle(Theme.textSecondary)
                         }
                         .frame(maxWidth: .infinity).padding(.vertical, 8)
                         .accessibilityElement(children: .combine)
                     }
-                    Section("What you have") {
+                    Section(tr("wallet.what_you_have")) {
                         ForEach(Array(w.buckets.enumerated()), id: \.offset) { _, b in
                             LabeledContent {
-                                Text("\(b.remaining)").font(.body.monospacedDigit())
+                                Text(Localization.shared.number(b.remaining)).font(.body.monospacedDigit())
                             } label: {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(Self.title(b.kind))
@@ -28,24 +28,24 @@ struct WalletView: View {
                                 }
                             }
                         }
-                        if w.buckets.isEmpty { Text("No credits right now.").foregroundStyle(Theme.textSecondary) }
+                        if w.buckets.isEmpty { Text(tr("wallet.none")).foregroundStyle(Theme.textSecondary) }
                     }
                     Section {
                         if let next = w.nextFreeAt {
-                            Label("Next free credits: \(next.formatted(.relative(presentation: .named)))", systemImage: "clock")
+                            Label(tr("wallet.next_free", Localization.shared.relative(next)), systemImage: "clock")
                         }
-                        Label(w.dailyCredits == 1 ? "1 free credit every day. It expires that night." : "\(w.dailyCredits) free credits every day. They expire that night.", systemImage: "gift")
+                        Label(tr("wallet.daily_free", w.dailyCredits), systemImage: "gift")
                     } footer: {
-                        Text("1 credit makes up to 1 minute of video, rounded up: a 10-second video and a 60-second video cost 1 credit, a 61-second video costs 2. Free credits expire; credits you buy never do.")
+                        Text(tr("wallet.rules"))
                     }
-                    Section { Button("Get more credits") {}.disabled(true) } footer: { Text("Buying credits is coming soon.") }
+                    Section { Button(tr("wallet.get_more")) {}.disabled(true) } footer: { Text(tr("wallet.coming_soon")) }
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Credits")
+            .navigationTitle(tr("wallet.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
             .task { await model.refreshWallet() }
         }
         .presentationDetents([.medium, .large])
@@ -53,17 +53,17 @@ struct WalletView: View {
 
     static func title(_ k: WalletBucket.Kind) -> String {
         switch k {
-        case .daily: "Free today"
-        case .signup: "Welcome credits"
-        case .paid: "Purchased"
-        case .refund: "Returned credits"
-        case .other: "Credits"
+        case .daily: tr("wallet.bucket.daily")
+        case .signup: tr("wallet.bucket.signup")
+        case .paid: tr("wallet.bucket.paid")
+        case .refund: tr("wallet.bucket.refund")
+        case .other: tr("wallet.bucket.other")
         }
     }
 
     static func expiry(_ b: WalletBucket) -> String? {
-        guard let d = b.expiresAt else { return "Never expire" }
-        if b.kind == .daily { return "Expire tonight" }
-        return "Expire \(d.formatted(date: .abbreviated, time: .omitted))"
+        guard let d = b.expiresAt else { return tr("wallet.never_expire") }
+        if b.kind == .daily { return tr("wallet.expire_tonight") }
+        return tr("wallet.expire_on", Localization.shared.abbreviatedDate(d))
     }
 }

@@ -83,17 +83,17 @@ public struct CreateCapabilities: Codable, Sendable, Equatable {
     /// The length chips: the server's presets from 15 seconds up, or 1, 2, 3, 5, 8, 12 when it does not say.
     public var lengthPresets: [Double] { lengths.presets }
 
-    public static let platformDefaults: [Platform] = [
+    public static var platformDefaults: [Platform] { [
         Platform(id: "youtube", label: "YouTube", aspect: "16:9", resolution: "1080p"), Platform(id: "linkedin", label: "LinkedIn", aspect: "16:9", resolution: "1080p"),
-        Platform(id: "x", label: "X", aspect: "16:9", resolution: "1080p"), Platform(id: "other", label: "Just a video", aspect: "16:9", resolution: "1080p"),
+        Platform(id: "x", label: "X", aspect: "16:9", resolution: "1080p"), Platform(id: "other", label: tr("platform.other"), aspect: "16:9", resolution: "1080p"),
         Platform(id: "shorts", label: "Shorts", aspect: "9:16", resolution: "1080p"), Platform(id: "reels", label: "Reels", aspect: "9:16", resolution: "1080p"),
         Platform(id: "tiktok", label: "TikTok", aspect: "9:16", resolution: "1080p"), Platform(id: "instagram_feed", label: "Instagram", aspect: "4:5", resolution: "1080p"),
-    ]
+    ] }
 
     /// 16:9 and 1080p only, no intake (the check is skipped): what the app offers while the server cannot say more.
-    public static let fallback = CreateCapabilities(
-        aspects: [Aspect(id: "16:9", label: "Landscape"), Aspect(id: "9:16", label: "Vertical", ready: false), Aspect(id: "1:1", label: "Square", ready: false), Aspect(id: "4:5", label: "Portrait", ready: false)],
-        resolutions: [Resolution(id: "1080p")], platforms: platformDefaults, intake: false)
+    public static var fallback: CreateCapabilities { CreateCapabilities(
+        aspects: [Aspect(id: "16:9", label: tr("aspect.landscape")), Aspect(id: "9:16", label: tr("aspect.vertical"), ready: false), Aspect(id: "1:1", label: tr("aspect.square"), ready: false), Aspect(id: "4:5", label: tr("aspect.portrait"), ready: false)],
+        resolutions: [Resolution(id: "1080p")], platforms: platformDefaults, intake: false) }
 
     public var readyAspects: [Aspect] { aspects.filter(\.ready) }
     public func aspect(_ id: String) -> Aspect? { aspects.first { $0.id == id } }
@@ -129,7 +129,7 @@ public enum PlatformChips {
         var byID = Dictionary(uniqueKeysWithValues: CreateCapabilities.platformDefaults.map { ($0.id, $0) })
         for p in caps.platforms { byID[p.id] = p }
         let o = byID["other"]
-        byID["other"] = CreateCapabilities.Platform(id: "other", label: "Just a video", aspect: o?.aspect ?? "16:9", resolution: o?.resolution ?? "1080p", note: o?.note, recommendedMinutes: o?.recommendedMinutes,
+        byID["other"] = CreateCapabilities.Platform(id: "other", label: tr("platform.other"), aspect: o?.aspect ?? "16:9", resolution: o?.resolution ?? "1080p", note: o?.note, recommendedMinutes: o?.recommendedMinutes,
                                                     maxMinutes: o?.maxMinutes, otherAspects: o?.otherAspects ?? [], supports4K: o?.supports4K ?? true, note4K: o?.note4K)
         func chip(_ ids: [String], _ label: String) -> PlatformChip? {
             let found = ids.compactMap { byID[$0] }
@@ -138,7 +138,7 @@ public enum PlatformChips {
                                 note: first.note, recommendedMinutes: first.recommendedMinutes, maxMinutes: first.maxMinutes, otherAspects: first.otherAspects.filter { id in caps.readyAspects.contains { $0.id == id } },
                                 supports4K: found.allSatisfy(\.supports4K), note4K: found.first { !$0.supports4K }?.note4K)
         }
-        let all = [chip(["youtube"], "YouTube"), chip(["linkedin"], "LinkedIn"), chip(["x"], "X"), chip(["other"], "Just a video"),
+        let all = [chip(["youtube"], "YouTube"), chip(["linkedin"], "LinkedIn"), chip(["x"], "X"), chip(["other"], tr("platform.other")),
                    chip(["shorts", "reels", "tiktok"], "Shorts · Reels · TikTok"), chip(["instagram_feed"], "Instagram")].compactMap { $0 }
         return all.filter(\.supported) + all.filter { !$0.supported }
     }
@@ -185,7 +185,7 @@ public struct CreateForm: Equatable, Sendable {
         guard caps.multiplier(resolution) > 1, let c = chip(caps), !c.supports4K else { return nil }
         let back = resolutionChoices(caps).last { $0.creditsMultiplier == 1 }?.id ?? c.resolution
         guard back != resolution else { return nil }
-        let text = (c.note4K?.isEmpty == false ? c.note4K : nil) ?? "\(c.label) does not show \(caps.resolutionLabel(resolution)); it would cost \(caps.multiplier(resolution)) times the credits for no visible gain."
+        let text = (c.note4K?.isEmpty == false ? c.note4K : nil) ?? tr("create.fourk_advice", c.label, caps.resolutionLabel(resolution), caps.multiplier(resolution))
         return (text, back)
     }
     public var hasContent: Bool { !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -199,7 +199,7 @@ public struct CreateForm: Equatable, Sendable {
     /// ("YouTube · Landscape 16:9 · 1080p", or "Custom · Vertical 9:16 · 1080p").
     public func recommendation(_ caps: CreateCapabilities) -> String {
         let c = chip(caps)
-        let name = isCustom(caps) ? "Custom" : (c?.label ?? "Just a video")
+        let name = isCustom(caps) ? tr("create.custom") : (c?.label ?? tr("platform.other"))
         if !isCustom(caps), let c, c.aspect == aspect, c.resolution == resolution, let note = c.note, !note.isEmpty { return "\(name) · \(note)" }
         return "\(name) · \(caps.aspectName(aspect)) · \(caps.resolutionLabel(resolution))"
     }
@@ -215,7 +215,7 @@ public struct CreateForm: Equatable, Sendable {
         guard let c = chip(caps), let max = c.maxMinutes, minutes > max + 1e-9 else { return nil }
         let presets = caps.lengthPresets.sorted()
         let fix = presets.last { $0 <= max + 1e-9 } ?? presets.first ?? max
-        return ("\(c.label) allows up to \(LengthLabel.clock(max)).", fix)
+        return (tr("create.max_length", c.label, LengthLabel.clock(max)), fix)
     }
 
     /// The Change link exists only when there is a real choice to make.
@@ -231,8 +231,8 @@ public struct CreateForm: Equatable, Sendable {
 
     /// One line for the collapsed "More options" row.
     public func moreSummary(_ caps: CreateCapabilities) -> String {
-        let lang = language == "auto" ? "Same language as description" : (caps.languages.first { $0.id == language }?.label ?? language)
-        return "\(look?.title ?? "Auto") look · Subtitles \(captions ? "on" : "off") · \(lang)"
+        let lang = language == "auto" ? tr("create.same_language") : (caps.languages.first { $0.id == language }?.label ?? language)
+        return tr(captions ? "create.more_summary_on" : "create.more_summary_off", look?.title ?? tr("look.auto"), lang)
     }
 
     /// Keeps the choices inside what the server lists (a stored format that is gone falls back to the first supported one, quietly).
@@ -415,7 +415,7 @@ public struct IntakeFlow: Sendable, Equatable {
     public init(_ questions: [IntakeQuestion]) { self.questions = Array(questions.prefix(3)) }
 
     public var current: IntakeQuestion? { questions.indices.contains(index) ? questions[index] : nil }
-    public var progressText: String { "Question \(index + 1) of \(questions.count)" }
+    public var progressText: String { tr("questions.progress", index + 1, questions.count) }
     /// Done asking: every question has an answer (or a skip), or the person chose Make it now.
     public var isComplete: Bool { madeItNow || (editing == nil && questions.allSatisfy { answers[$0.id] != nil }) }
     public var canGoBack: Bool { index > 0 && editing == nil }
@@ -453,10 +453,10 @@ public enum RetryText {
     /// "Try again in about 1 hour." from the server's seconds.
     public static func make(_ seconds: Int?) -> String? {
         guard let s = seconds, s > 0 else { return nil }
-        if s < 90 { return "Try again in about a minute." }
-        if s < 3600 { return "Try again in about \(ComposerPlan.plural((s + 30) / 60, "minute"))." }
-        if s < 86_400 { return "Try again in about \(ComposerPlan.plural((s + 1800) / 3600, "hour"))." }
-        return "Try again in about \(ComposerPlan.plural((s + 43_200) / 86_400, "day"))."
+        if s < 90 { return tr("retry.minute") }
+        if s < 3600 { return tr("retry.minutes", (s + 30) / 60) }
+        if s < 86_400 { return tr("retry.hours", (s + 1800) / 3600) }
+        return tr("retry.days", (s + 43_200) / 86_400)
     }
 }
 
@@ -468,7 +468,7 @@ public enum LengthLabel {
     /// "2:20" for 2 minutes 20 seconds.
     public static func clock(_ minutes: Double) -> String { let s = Int((minutes * 60).rounded()); return String(format: "%d:%02d", s / 60, s % 60) }
     /// "15 seconds", "2 minutes" for screen readers.
-    public static func spoken(_ minutes: Double) -> String { minutes < 1 ? "\(Int((minutes * 60).rounded())) seconds" : ComposerPlan.plural(Int(minutes.rounded()), "minute") }
+    public static func spoken(_ minutes: Double) -> String { minutes < 1 ? tr("duration.seconds", Int((minutes * 60).rounded())) : tr("duration.minutes", Int(minutes.rounded())) }
 }
 
 /// How a chip with a label of unknown length is laid out so its text is never cut: on one line when it fits the row, otherwise at the full

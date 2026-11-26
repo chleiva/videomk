@@ -18,36 +18,36 @@ struct BeatEditorView: View {
                             .focused($focused)
                             .frame(minHeight: 140)
                             .accessibilityIdentifier("narrationField")
-                    } header: { Text("Narration") } footer: {
+                    } header: { Text(tr("editor.narration")) } footer: {
                         VStack(alignment: .leading, spacing: 4) {
                             let words = EditorDiff.wordCount(beat.narration)
                             if beat.silent && words == 0 {
-                                Text("A silent pause: nothing is spoken for \(Int((beat.hold ?? 0).rounded())) seconds and the music carries it. Type words here to give it a voice.")
+                                Text(tr("editor.silent_note", Int((beat.hold ?? 0).rounded())))
                             } else {
-                                Text("\(words) words, about \(Int(EditorDiff.spokenSeconds(beat.narration).rounded())) seconds spoken. \(model.limits.minWords)–\(model.limits.maxWords) words per scene.")
+                                Text(tr("editor.word_stats", words, Int(EditorDiff.spokenSeconds(beat.narration).rounded()), model.limits.minWords, model.limits.maxWords))
                             }
                             if let error = model.narrationError(for: beatID) { Text(error).foregroundStyle(Theme.danger) }
                         }
                     }
-                    Section("Visual") {
+                    Section(tr("editor.visual")) {
                         Label {
                             VStack(alignment: .leading) {
-                                Text(beat.kind?.label ?? "Scene").font(.headline)
+                                Text(beat.kind?.label ?? tr("editor.scene")).font(.headline)
                                 if !beat.summary.isEmpty { Text(beat.summary).font(.callout).foregroundStyle(Theme.textSecondary) }
                             }
                         } icon: { Image(systemName: beat.kind?.symbol ?? "square") }
                         if beat.kind != .image {
-                            Text("Charts, diagrams and other scenes are drawn from the narration. Edit the narration and the visual is re-made.")
+                            Text(tr("editor.charts_diagrams_and_other_scenes"))
                                 .font(.footnote).foregroundStyle(Theme.textSecondary)
                         }
                     }
                     if beat.kind == .image { photoSection(beat) }
                 }
-                .navigationTitle("Scene")
+                .navigationTitle(tr("editor.scene"))
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.disabled(model.narrationError(for: beatID) != nil) } }
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() }.disabled(model.narrationError(for: beatID) != nil) } }
                 .interactiveDismissDisabled(model.narrationError(for: beatID) != nil)
-            } else { ContentUnavailableView("Scene not found", systemImage: "questionmark") }
+            } else { ContentUnavailableView(tr("editor.scene_not_found"), systemImage: "questionmark") }
         }
         .presentationDetents([.large])
     }
@@ -59,14 +59,14 @@ struct BeatEditorView: View {
                     .frame(height: 180).frame(maxWidth: .infinity).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 if let credit = photo.credit { Text(credit).font(.footnote).foregroundStyle(Theme.textSecondary) }
             } else if beat.photo?.noPhoto == true, model.picks[beatID] == nil {
-                Label("No suitable photo was found. Pick one below, or the scene becomes a title card.", systemImage: "photo.badge.exclamationmark")
+                Label(tr("editor.no_suitable_photo_was_found"), systemImage: "photo.badge.exclamationmark")
                     .font(.callout).foregroundStyle(Theme.warning)
             }
             if let picked = model.picks[beatID], let c = beat.candidates.first(where: { $0.key == picked }) {
-                Label("Will use the photo by \(c.creator)", systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success)
-                Button("Undo photo change") { model.clearPick(for: beatID) }
+                Label(tr("editor.will_use_photo", c.creator), systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success)
+                Button(tr("editor.undo_photo_change")) { model.clearPick(for: beatID) }
             }
-        } header: { Text("Photo") }
+        } header: { Text(tr("editor.photo")) }
         if !beat.candidates.isEmpty {
             Section {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 10)], spacing: 10) {
@@ -82,10 +82,10 @@ struct BeatEditorView: View {
                             }
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Photo by \(c.creator)\(chosen ? ", selected" : "")")
+                        .accessibilityLabel(tr(chosen ? "editor.photo_by_selected" : "editor.photo_by", c.creator))
                     }
                 }
-            } header: { Text("Other photos") } footer: { Text("Credit for the chosen photo is added to the video and its description automatically.") }
+            } header: { Text(tr("editor.other_photos")) } footer: { Text(tr("editor.credit_for_the_chosen_photo")) }
         }
     }
 }

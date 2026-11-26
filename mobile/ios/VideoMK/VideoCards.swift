@@ -36,12 +36,12 @@ struct ReadyCard: View {
             }
             Theme.mediaScrim
             VStack(alignment: .leading, spacing: 0) {
-                HStack { GlassChip(text: "Ready", dot: Color(hex: 0x4ADE80)); Spacer() }
+                HStack { GlassChip(text: tr("videos.ready"), dot: Color(hex: 0x4ADE80)); Spacer() }
                 Spacer()
                 HStack(alignment: .bottom) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(video.displayTitle).font(.system(size: 18, weight: .semibold)).foregroundStyle(.white).lineLimit(2)
-                        if let created = video.createdAt { Text(VideoRow.relative.localizedString(for: created, relativeTo: .now)).font(.system(size: 13, weight: .medium)).foregroundStyle(.white.opacity(0.78)) }
+                        if let created = video.createdAt { Text(Localization.shared.relativeShort(created)).font(.system(size: 13, weight: .medium)).foregroundStyle(.white.opacity(0.78)) }
                     }
                     Spacer(minLength: 8)
                     if let d = video.durationSeconds {
@@ -57,7 +57,7 @@ struct ReadyCard: View {
         .clipShape(RoundedRectangle(cornerRadius: cardRadius, style: .continuous))
         .elevation(2)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(video.displayTitle). Ready.\(video.isPortrait ? " Vertical." : "")\(video.durationSeconds.map { " \(VideoRow.duration($0))." } ?? "")")
+        .accessibilityLabel([tr("videos.ready_a11y", video.displayTitle), video.isPortrait ? tr("videos.vertical_a11y") : nil, video.durationSeconds.map { tr("videos.duration_a11y", VideoRow.duration($0)) }].compactMap { $0 }.joined(separator: " "))
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier("videoRow")
     }
@@ -88,9 +88,9 @@ struct MakingCard: View {
             } else { Color.white.opacity(0.08) }
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    GlassChip(text: "Making", dot: Color(hex: 0xC9CBFF))
+                    GlassChip(text: tr("videos.making"), dot: Color(hex: 0xC9CBFF))
                     Spacer()
-                    if let onRemove { Menu { Button("Remove", role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold)).foregroundStyle(.white).frame(width: 44, height: 44) }.accessibilityLabel("More") }
+                    if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold)).foregroundStyle(.white).frame(width: 44, height: 44) }.accessibilityLabel(tr("media.more")) }
                 }
                 Text(title).font(.system(size: 19, weight: .semibold)).foregroundStyle(.white).lineLimit(typeSize.isAccessibilitySize ? 4 : 2).padding(.top, 10)
                 Text(line).font(.system(size: 15)).foregroundStyle(.white.opacity(0.82)).padding(.top, 4).lineLimit(typeSize.isAccessibilitySize ? nil : 2)
@@ -116,7 +116,7 @@ struct MakingCard: View {
         .clipShape(RoundRectangle(radius: cardRadius))
         .elevation(2)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title). Making. \(line)")
+        .accessibilityLabel(tr("videos.making_row_a11y", title, line))
     }
 }
 
@@ -134,16 +134,16 @@ struct FailedCard: View {
             Color(red: 0.15, green: 0.03, blue: 0.04).opacity(0.5)
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    GlassChip(text: rejected ? "Not allowed" : "Didn’t finish", symbol: "exclamationmark.triangle", fill: Color(hex: 0xB91C1C).opacity(0.9))
+                    GlassChip(text: rejected ? tr("videos.not_allowed") : tr("videos.didnt_finish"), symbol: "exclamationmark.triangle", fill: Color(hex: 0xB91C1C).opacity(0.9))
                     Spacer()
-                    if let onRemove { Menu { Button("Remove", role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold)).foregroundStyle(.white).frame(width: 44, height: 44) }.accessibilityLabel("More") }
+                    if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.system(size: 18, weight: .bold)).foregroundStyle(.white).frame(width: 44, height: 44) }.accessibilityLabel(tr("media.more")) }
                 }
                 Spacer(minLength: 10)
                 Text(title).font(.system(size: 19, weight: .semibold)).foregroundStyle(.white).lineLimit(typeSize.isAccessibilitySize ? 4 : 2)
                 HStack(spacing: 12) {
                     if let retry {
                         Button(action: retry) {
-                            Label("Try again", systemImage: "arrow.clockwise").font(.system(size: 16, weight: .semibold)).foregroundStyle(Color(hex: 0x11142B))
+                            Label(tr("common.try_again"), systemImage: "arrow.clockwise").font(.system(size: 16, weight: .semibold)).foregroundStyle(Color(hex: 0x11142B))
                                 .padding(.horizontal, 16).frame(height: 44).background(.white, in: Capsule())
                         }.buttonStyle(.plain).accessibilityIdentifier("tryAgain")
                     }
@@ -156,7 +156,7 @@ struct FailedCard: View {
         .clipShape(RoundRectangle(radius: cardRadius))
         .elevation(2)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(title). \(rejected ? "Not allowed" : "Didn’t finish"). \(message)")
+        .accessibilityLabel(tr("videos.failed_row_a11y", title, rejected ? tr("videos.not_allowed") : tr("videos.didnt_finish"), message))
     }
 }
 
@@ -182,7 +182,7 @@ struct RunningCard: View {
             let info = model.stage(for: video.id)
             let stage: VideoStatus.Stage = { if case .running(let s) = video.status { s } else { .starting } }()
             let p = MakingProgress.info(stage: stage, secondsInStage: info.map { context.date.timeIntervalSince($0.since) } ?? 0, minutes: model.requestedMinutes(for: video.id))
-            MakingCard(title: model.brief(for: video.id) ?? (video.title.flatMap { $0.isEmpty ? nil : $0 } ?? "Making your video"), line: p.line, segments: p.segments, current: p.current)
+            MakingCard(title: model.brief(for: video.id) ?? (video.title.flatMap { $0.isEmpty ? nil : $0 } ?? tr("detail.making")), line: p.line, segments: p.segments, current: p.current)
         }
         .accessibilityIdentifier("runningRow")
     }
@@ -196,7 +196,7 @@ struct PendingCard: View {
     var body: some View {
         Group {
             if case .failed(let message) = pending.state {
-                FailedCard(title: pending.brief, message: message.isEmpty ? "No credits were used." : "\(message) No credits were used.", retry: onRetry, onRemove: onDismiss)
+                FailedCard(title: pending.brief, message: message.isEmpty ? tr("videos.no_credits_were_used") : tr("videos.message_no_credits", message), retry: onRetry, onRemove: onDismiss)
                     .accessibilityIdentifier("failedRow")
             } else {
                 MakingCard(title: pending.brief, line: line, segments: [0, 0, 0, 0], current: 0, onRemove: nil)
@@ -206,7 +206,7 @@ struct PendingCard: View {
     }
 
     private var line: String {
-        if case .uploading(let done, let total) = pending.state { return "Uploading \(done) of \(total) photos." }
-        return "Starting your video…"
+        if case .uploading(let done, let total) = pending.state { return tr("videos.uploading_photos", done, total) }
+        return tr("composer.sending")
     }
 }

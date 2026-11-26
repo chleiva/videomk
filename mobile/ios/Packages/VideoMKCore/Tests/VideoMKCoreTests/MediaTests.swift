@@ -657,7 +657,7 @@ private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
         p.duplicates = 0; p.total = 120
         #expect(UploadSummary.message(p)?.text == "120 photos added.")
         p.done = 108; p.failed = 5; p.total = 113
-        #expect(UploadSummary.message(p) == .init(text: "108 photos added. 5 need your attention.", action: "Review"))
+        #expect(UploadSummary.message(p) == .init(text: "108 photos added. 5 photos need your attention.", action: "Review"))
         var one = QueueProgress(); one.total = 1; one.done = 1
         #expect(UploadSummary.message(one)?.text == "1 photo added.")
         var dup = QueueProgress(); dup.total = 3; dup.duplicates = 3

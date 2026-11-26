@@ -61,9 +61,9 @@ struct AddPhotosSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Picker("Source", selection: $source.animation(reduceMotion ? nil : .easeInOut(duration: 0.2))) {
-                Text("This phone").tag(Source.phone)
-                Text("My media").tag(Source.library)
+            Picker(tr("add.source"), selection: $source.animation(reduceMotion ? nil : .easeInOut(duration: 0.2))) {
+                Text(tr("add.this_phone")).tag(Source.phone)
+                Text(tr("add.my_media")).tag(Source.library)
             }
             .pickerStyle(.segmented).padding(.horizontal, 20).padding(.bottom, 10)
             .accessibilityIdentifier("sourcePicker")
@@ -96,9 +96,9 @@ struct AddPhotosSheet: View {
 
     private var header: some View {
         HStack {
-            Text("Add photos").font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
+            Text(tr("create.add_photos")).font(.system(size: 19, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
             Spacer()
-            Button("Cancel") { dismiss() }.font(.system(size: 17)).frame(minWidth: 44, minHeight: 44).accessibilityIdentifier("addCancel")
+            Button(tr("common.cancel")) { dismiss() }.font(.system(size: 17)).frame(minWidth: 44, minHeight: 44).accessibilityIdentifier("addCancel")
         }
         .padding(.horizontal, 20).padding(.top, 14)
     }
@@ -107,12 +107,12 @@ struct AddPhotosSheet: View {
         let sel = selection
         return VStack(spacing: 0) {
             Divider()
-            Text("Location data is removed from your photos, and the originals are deleted once your video is made.")
+            Text(tr("add.location_data_is_removed_from"))
                 .font(.system(size: 11.5)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.top, 8)
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(sel.selected == 0 ? "Choose photos" : sel.title()).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text)
+                        Text(sel.selected == 0 ? tr("add.choose_photos") : sel.title()).font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.text)
                         if let label = selectAllLabel {
                             Text("·").foregroundStyle(Theme.textSecondary)
                             Button(label) { selectAllTapped() }.font(.system(size: 15, weight: .semibold)).frame(minHeight: 32).accessibilityIdentifier("selectAll")
@@ -153,20 +153,20 @@ struct AddPhotosSheet: View {
 
     @ViewBuilder private var phoneTab: some View {
         if selection.phoneCap == 0 && phoneItems.isEmpty {
-            MediaMessage(symbol: "photo.stack", title: "100 photos chosen", text: "You have chosen the most a video can use, from My media. Deselect some there to pick from this phone.", button: "Open My media") { source = .library }
+            MediaMessage(symbol: "photo.stack", title: tr("add.limit_chosen_title", PhotoLimits.maxPhotos), text: tr("add.you_have_chosen_the_most"), button: tr("add.open_my_media")) { source = .library }
         } else {
             VStack(spacing: 14) {
                 Image(systemName: "iphone.gen3").font(.system(size: 44)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
-                Text(phoneItems.isEmpty ? "Pick from this phone" : "\(ComposerPlan.plural(phoneItems.count, "photo")) chosen from this phone")
+                Text(phoneItems.isEmpty ? tr("add.pick_from_phone") : tr("add.chosen_from_phone", phoneItems.count))
                     .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.text)
-                Text("videomk only sees the photos you pick. Nothing else in your library is read, and no permission is needed.")
+                Text(tr("add.videomk_only_sees_the_photos"))
                     .font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
                 PhotosPicker(selection: $phoneItems, maxSelectionCount: max(1, selection.phoneCap), selectionBehavior: .ordered, matching: .images, photoLibrary: .shared()) {
-                    Text(phoneItems.isEmpty ? "Choose photos" : "Change selection").font(.headline).frame(maxWidth: 260, minHeight: 48)
+                    Text(phoneItems.isEmpty ? tr("add.choose_photos") : tr("add.change_selection")).font(.headline).frame(maxWidth: 260, minHeight: 48)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.primary)
                 .accessibilityIdentifier("phonePicker")
-                Text("Choosing here adds to the same selection as My media. The most a video can use is \(PhotoLimits.maxPhotos).")
+                Text(tr("add.same_selection", PhotoLimits.maxPhotos))
                     .font(.system(size: 13)).foregroundStyle(Theme.textTertiary).multilineTextAlignment(.center)
             }
             .padding(32).frame(maxWidth: .infinity)
@@ -175,9 +175,9 @@ struct AddPhotosSheet: View {
 
     @ViewBuilder private var libraryTab: some View {
         if let media {
-            LibraryChooser(media: media, selection: librarySelection, collectionID: $collectionID, feeds: $feeds, onLimit: { showToast("You can add up to \(PhotoLimits.maxPhotos) photos. Remove one to choose another.") }, addingToLibrary: $addingToLibrary)
+            LibraryChooser(media: media, selection: librarySelection, collectionID: $collectionID, feeds: $feeds, onLimit: { showToast(tr("add.limit_toast", PhotoLimits.maxPhotos)) }, addingToLibrary: $addingToLibrary)
         } else {
-            MediaMessage(symbol: "photo.on.rectangle", title: "My media isn't available", text: "Sign in again to use your private library.", button: nil) {}
+            MediaMessage(symbol: "photo.on.rectangle", title: tr("add.my_media_isnt_available"), text: tr("add.sign_in_again_to_use"), button: nil) {}
         }
     }
 
@@ -239,7 +239,7 @@ private struct LibraryChooser: View {
         if !feed.isSearching, !media.collections.isEmpty {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    chip("All photos", selected: collectionID == nil) { collectionID = nil }
+                    chip(tr("add.all_photos"), selected: collectionID == nil) { collectionID = nil }
                     ForEach(media.collections) { c in chip(c.name, selected: collectionID == c.id) { collectionID = c.id } }
                 }.padding(.horizontal, 20)
             }
@@ -260,21 +260,21 @@ private struct LibraryChooser: View {
 
     @ViewBuilder private func content(_ feed: PhotoFeed) -> some View {
         if feed.offline && feed.photos.isEmpty {
-            MediaMessage(symbol: "icloud.slash", title: "You're offline", text: "Your library is not available. This phone stays usable.", button: nil) {}
+            MediaMessage(symbol: "icloud.slash", title: tr("add.youre_offline"), text: tr("add.your_library_is_not_available"), button: nil) {}
         } else {
             switch feed.state {
             case .loading: SkeletonGrid()
-            case .failed(let m): MediaMessage(symbol: "wifi.exclamationmark", title: "Couldn't load your photos", text: m, button: "Try again") { Task { await feed.reload() } }
+            case .failed(let m): MediaMessage(symbol: "wifi.exclamationmark", title: tr("add.couldnt_load_your_photos"), text: m, button: tr("common.try_again")) { Task { await feed.reload() } }
             case .loaded:
                 if feed.photos.isEmpty {
-                    if feed.isSearching { MediaMessage(symbol: "magnifyingglass", title: "Nothing matches '\(feed.text)'", text: "Try fewer words, like 'beach'.", button: nil) {} }
-                    else if media.summary?.readOnly == true { MediaMessage(symbol: "lock", title: "Your library is read only", text: "Free up storage in the Media tab to add photos.", button: nil) {} }
+                    if feed.isSearching { MediaMessage(symbol: "magnifyingglass", title: tr("add.nothing_matches", feed.text), text: tr("add.try_fewer_words_like_beach"), button: nil) {} }
+                    else if media.summary?.readOnly == true { MediaMessage(symbol: "lock", title: tr("add.your_library_is_read_only"), text: tr("add.free_up_storage_in_the"), button: nil) {} }
                     else {
                         VStack(spacing: 14) {
                             Image(systemName: "icloud.and.arrow.up").font(.system(size: 44)).foregroundStyle(Theme.gradient).accessibilityHidden(true)
-                            Text("Your private library is empty").font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.text)
-                            Text("Photos you add here can be reused in any video.").font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
-                            PhotosPicker(selection: $addingToLibrary, maxSelectionCount: nil, matching: .images) { Text("Add photos to My media").font(.headline).frame(maxWidth: 260, minHeight: 48) }
+                            Text(tr("add.your_private_library_is_empty")).font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.text)
+                            Text(tr("add.photos_you_add_here_can")).font(.system(size: 15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+                            PhotosPicker(selection: $addingToLibrary, maxSelectionCount: nil, matching: .images) { Text(tr("add.add_photos_to_my_media")).font(.headline).frame(maxWidth: 260, minHeight: 48) }
                                 .buttonStyle(.borderedProminent).accessibilityIdentifier("emptyAddToLibrary")
                         }.padding(32).frame(maxWidth: .infinity)
                     }

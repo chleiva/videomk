@@ -34,7 +34,7 @@ final class PhotoAttachments {
 
     var remaining: Int { ComposerPhotos.room(phone: items.count + loading, library: libraryCount) }
     var isEmpty: Bool { items.isEmpty && loading == 0 }
-    var preparingText: String? { loading > 0 ? "Preparing \(batchTotal - loading + 1) of \(batchTotal)" : nil }
+    var preparingText: String? { loading > 0 ? tr("attach.preparing", batchTotal - loading + 1, batchTotal) : nil }
 
     func remove(_ id: UUID) { items.removeAll { $0.id == id } }
     func clear() { items = []; notice = nil }
@@ -57,7 +57,7 @@ final class PhotoAttachments {
         }
         unreadable = prepared.count - prepared.filter { $0 != nil }.count
         if unreadable > 0 {
-            let msg = "\(unreadable) \(unreadable == 1 ? "photo" : "photos") couldn't be read."
+            let msg = tr("attach.unreadable", unreadable)
             notice = [notice, msg].compactMap { $0 }.joined(separator: " ")
         }
         batchTotal = 0
@@ -106,9 +106,9 @@ struct AttachedPhotosStrip: View {
     private var total: Int { photos.items.count + library.count }
     private var sourceNote: String {
         switch (photos.items.isEmpty, library.isEmpty) {
-        case (false, false): "From this phone and My media"
-        case (true, false): "From My media"
-        default: "From this phone"
+        case (false, false): tr("attach.source_both")
+        case (true, false): tr("attach.source_library")
+        default: tr("attach.source_phone")
         }
     }
 
@@ -116,12 +116,12 @@ struct AttachedPhotosStrip: View {
         VStack(alignment: .leading, spacing: 8) {
             if total > 0 || photos.loading > 0 {
                 HStack {
-                    Text("\(total) of \(PhotoLimits.maxPhotos) photos").font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
+                    Text(tr("attach.total_of", total, PhotoLimits.maxPhotos)).font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
                     Spacer(minLength: 8)
                     Text(sourceNote).font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.textSecondary).lineLimit(1)
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(total) of \(PhotoLimits.maxPhotos) photos. \(sourceNote). Location data is removed, and the originals are deleted once your video is made.")
+                .accessibilityLabel(tr("attach.strip_a11y", total, PhotoLimits.maxPhotos, sourceNote))
                 .accessibilityIdentifier("photosNote")
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 8) {
@@ -130,13 +130,13 @@ struct AttachedPhotosStrip: View {
                                 .resizable().scaledToFill()
                                 .frame(width: 56, height: 56)
                                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                .overlay(alignment: .topTrailing) { RemoveX(label: "Remove photo \(index + 1)") { withAnimation(.snappy) { photos.remove(photo.id) } } }
+                                .overlay(alignment: .topTrailing) { RemoveX(label: tr("attach.remove_photo", index + 1)) { withAnimation(.snappy) { photos.remove(photo.id) } } }
                                 .accessibilityElement(children: .contain)
-                                .accessibilityLabel("Photo \(index + 1) of \(photos.items.count)")
+                                .accessibilityLabel(tr("attach.photo_n_of", index + 1, photos.items.count))
                                 .accessibilityIdentifier("attachedPhoto")
                         }
                         ForEach(Array(library.enumerated()), id: \.element.id) { index, photo in
-                            LibraryStripTile(photo: photo, media: media, label: "My media photo \(index + 1) of \(library.count)") { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
+                            LibraryStripTile(photo: photo, media: media, label: tr("attach.library_photo_n_of", index + 1, library.count)) { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
                         }
                         if photos.loading > 0 {   // one spinner tile, however many are still being prepared
                             ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -188,7 +188,7 @@ struct LibraryStripTile: View {
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.system(size: 10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
-            .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: "Remove \(label)", action: onRemove) } }
+            .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: tr("attach.remove_label", label), action: onRemove) } }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("\(label). \(MediaGrouping.accessibilityLabel(photo))")
             .accessibilityIdentifier("attachedLibraryPhoto")

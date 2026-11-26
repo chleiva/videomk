@@ -64,7 +64,7 @@ final class EditorModel {
     func clearPick(for id: String) { picks[id] = nil }
     func move(from: IndexSet, to: Int) { beats.move(fromOffsets: from, toOffset: to) }
     func delete(at offsets: IndexSet) {
-        guard beats.count - offsets.count >= 1 else { banner = "A video needs at least one scene."; return }
+        guard beats.count - offsets.count >= 1 else { banner = tr("editor.err.one_scene"); return }
         beats.remove(atOffsets: offsets)
     }
     func discard() { if let s = snapshot { adopt(s); banner = nil } }
@@ -82,7 +82,7 @@ final class EditorModel {
             phase = .rendering(mode)
             await waitForRender(mode)
         } catch let e as APIError {
-            if case .conflict = e { banner = e.message + " Your edits on this screen are kept until you reload." } else { banner = e.message }
+            if case .conflict = e { banner = e.message + " " + tr("editor.edits_kept") } else { banner = e.message }
         } catch { banner = APIError.server.message }
     }
 
@@ -92,12 +92,12 @@ final class EditorModel {
             if Task.isCancelled { return }
             guard let s = try? await app.editorSnapshot(videoID), s.editState != .rendering else { continue }
             adopt(s)
-            if s.editState == .failed { phase = .failed("The render didn't finish. Your changes are saved; try again."); return }
+            if s.editState == .failed { phase = .failed(tr("editor.render_failed")); return }
             resultURL = mode == .final ? s.finalURL : s.previewURL
             phase = .done(mode)
             return
         }
-        phase = .failed("This is taking longer than usual. Close the editor and check back in a few minutes.")
+        phase = .failed(tr("editor.render_slow"))
     }
 
     func keepEditing() { phase = .editing }

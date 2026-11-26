@@ -58,7 +58,7 @@ public struct LibraryClient: LibraryAPI {
         catch let e as APIError { throw e == .network ? LibraryAPIError.network : e == .unauthorized ? LibraryAPIError.unauthorized : LibraryAPIError.server }
         switch http.statusCode {
         case 200..<300: return data
-        case 400: throw LibraryAPIError.invalid(((try? JSONDecoder().decode(MessageResponse.self, from: data))?.message) ?? "That request can't be used.")
+        case 400: throw LibraryAPIError.invalid(((try? JSONDecoder().decode(MessageResponse.self, from: data))?.message) ?? tr("lib.err.invalid"))
         case 401, 403: throw LibraryAPIError.unauthorized
         case 404: throw LibraryAPIError.notFound
         case 409: throw LibraryAPIError.conflict
@@ -75,7 +75,7 @@ public struct LibraryClient: LibraryAPI {
     public func summary() async throws -> LibrarySummary { try await call("GET", ["summary"]) }
 
     public func requestUploads(_ items: [UploadRequestItem]) async throws -> UploadsResponse {
-        guard (1...100).contains(items.count) else { throw LibraryAPIError.invalid("Between 1 and 100 photos per request.") }
+        guard (1...100).contains(items.count) else { throw LibraryAPIError.invalid(tr("lib.err.batch_range")) }
         return try await call("POST", ["uploads"], body: ["items": items])
     }
 
@@ -89,7 +89,7 @@ public struct LibraryClient: LibraryAPI {
     public func item(id: String) async throws -> LibraryPhoto { try await call("GET", ["items", id]) }
 
     public func delete(ids: [String]) async throws -> DeleteResult {
-        guard (1...100).contains(ids.count) else { throw LibraryAPIError.invalid("Between 1 and 100 photos per request.") }
+        guard (1...100).contains(ids.count) else { throw LibraryAPIError.invalid(tr("lib.err.batch_range")) }
         return try await call("POST", ["items", "delete"], body: ["ids": ids])
     }
 
