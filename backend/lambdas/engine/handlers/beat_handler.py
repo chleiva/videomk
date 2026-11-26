@@ -11,7 +11,7 @@ from common.secrets import get_secret_param
 
 from ..scenes import ELEMENTS
 from ..scenes.registry import PrepareCtx
-from .. import align, assets, audio, awsio, clips, costs, format_options, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from .. import align, assets, audio, awsio, catalog_pick, clips, costs, format_options, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -116,6 +116,11 @@ def make_photo(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
                 result = {"jpeg": jpeg, "entry": stock.ledger_entry(chosen), "credit": stock.credit_line(chosen), "chosen": pick, "candidates": cands, "review": {}}
         except Exception:
             result = None
+    if result is None and catalog_pick.catalog.enabled():   # videomk's own library first (flag `imageCatalog`, off by default); nothing passes -> stock exactly as before
+        fr = plan.get("frame") or {}
+        result = catalog_pick.try_catalog(query, _context(beat), props.get("alt", ""), video_id, aspect=str(fr.get("aspect") or "16:9"), big=big)
+        if result:
+            costs.add_cost(video_id, float(result["review"].get("cost_usd", 0.0)), field=cost_field, part="stock")
     if result is None:
         result = stock.scout_reviewed(query, _context(beat), props.get("alt", ""), unsplash_key=unsplash_key, **({"big": True} if big else {}))
         if result:
@@ -176,7 +181,7 @@ def make_clip(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_fi
     if len(queries) > 1:   # a montage: every clip found, reviewed and verified on its own; failed ones dropped, fewer than half left -> the photo
         result = clips.scout_montage(queries, _context(beat), props.get("alt", ""), need_seconds=need, **keys)
     else:
-        result = clips.scout_clip(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)   # searches the clip_query, the alt wording and shortened forms in one pool
+        result = clips.scout_with_retry(query, _context(beat), props.get("alt", ""), need_seconds=need, **keys)   # one retry with a stock-staple wording when nothing passes; searches the clip_query, the alt wording and shortened forms in one pool
     if result:
         costs.add_cost(video_id, float(result.get("review", {}).get("cost_usd", 0.0)), field=cost_field, part="stock")
     if result and result.get("mp4"):

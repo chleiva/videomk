@@ -194,13 +194,13 @@ def test_clip_search_asks_for_the_videos_orientation():
         seen.append(url)
         return {"videos": [], "hits": []}
 
-    clips.pexels_search("ocean", "k", fetch, orientation="portrait")
+    clips.pexels_search("ocean", "k", fetch, orientation="portrait")   # the true shape first, then landscape footage (cropped; owner decision 2026-11-26)
     clips.pexels_search("ocean", "k", fetch)
-    assert "orientation=portrait" in seen[0] and "orientation=landscape" in seen[1]
+    assert "orientation=portrait" in seen[0] and "orientation=landscape" in seen[1] and "orientation=landscape" in seen[2] and len(seen) == 3
     hits = {"hits": [{"id": 1, "duration": 12, "tags": "a", "pageURL": "https://pixabay.com/x", "user": "u", "videos": {"medium": {"url": "https://v/a.mp4", "width": 720, "height": 1280, "size": 1000, "thumbnail": "https://t/a.jpg"}}},
                      {"id": 2, "duration": 12, "tags": "b", "pageURL": "https://pixabay.com/y", "user": "u", "videos": {"medium": {"url": "https://v/b.mp4", "width": 1920, "height": 1080, "size": 1000, "thumbnail": "https://t/b.jpg"}}}]}
     clips._CACHE.clear()
-    assert [c["id"] for c in clips.pixabay_search("q1", "k", lambda u, **kw: hits, orientation="portrait")] == ["1"]
+    assert [c["id"] for c in clips.pixabay_search("q1", "k", lambda u, **kw: hits, orientation="portrait")] == ["1", "2"]   # a vertical video takes landscape footage too, true portrait first
     clips._CACHE.clear()
     assert [c["id"] for c in clips.pixabay_search("q2", "k", lambda u, **kw: hits)] == ["2"]
     assert clips.ORIENTATIONS["portrait"] == (720, 1280)

@@ -14,6 +14,7 @@ from tests.test_engine import small_timeline
 def _no_real_llm_or_cache(monkeypatch):
     monkeypatch.setenv("CLIP_VERIFY", "0")   # tests that exercise verification turn it on and pass their own model stub
     monkeypatch.setenv("CLIPS_COMMONS", "1")  # the interleaving tests include Commons; the test of its contact rule sets this itself
+    monkeypatch.setenv("CLIP_RETRY", "0")    # tests of the retry pass switch it on with their own stubs (no model calls)
     monkeypatch.setenv("CLIPS_NASA", "0")    # no network in tests; the NASA tests switch it on with their own stubs
     clips._CACHE.clear()
 
@@ -223,7 +224,7 @@ def test_nasa_candidates_use_the_720p_rendition_credit_nasa_and_skip_interviews_
     assert clips.credit_line(c) == "Video: NASA" and c["attribution"].startswith("Video: NASA (Jane Doe), https://images.nasa.gov/details/GSFC_1_Tides")
     assert clips.stock.ledger_entry(c)["source"] == "nasa" and "public domain" in c["license"]
     assert clips.nasa_search("tides", fetch=nasa_fetch, hd=True)[0]["video_url"].endswith("~large.mp4")
-    assert clips.nasa_search("tides", fetch=nasa_fetch, orientation="portrait") == []
+    assert [c["id"] for c in clips.nasa_search("tides", fetch=nasa_fetch, orientation="portrait")] == ["GSFC_1_Tides"]   # a vertical video takes landscape footage too (cropped)
 
 
 def test_nasa_joins_the_gather_and_can_be_switched_off(monkeypatch):
@@ -664,3 +665,146 @@ def test_the_timeline_plays_a_montage_like_any_clip_and_the_editor_can_replace_o
     assert [b["id"] for b in new["beats"]] == ["b2"]
     view = editor_get._beat_view(plan, {**plan["beats"][0], "media": {"clip_asset": "g/c.mp4", "credit": "Video: A / Pixabay, B / NASA", "segments": 2, "query": "a b|c d", "duration": 9.0}}, "g/")
     assert view["clip"]["segments"] == 2 and view["clip"]["queries"] == ["a b", "c d"] and view["clip"]["has_clip"] is True
+
+
+# ---------------------------------------------------------------- landscape footage in vertical and square videos (owner, 2026-11-26)
+def test_vertical_and_square_videos_take_landscape_footage_but_prefer_true_shape():
+    assert clips.shape_ok(1.78, "landscape") and not clips.shape_ok(0.56, "landscape") and not clips.shape_ok(1.0, "landscape")   # a landscape video never takes tall or square footage
+    assert all(clips.shape_ok(r, o) for r in (0.56, 1.0, 1.78) for o in ("portrait", "square"))
+    assert clips.fit_rank(0.56, "portrait") == 0 and clips.fit_rank(1.78, "portrait") == 1 and clips.fit_rank(1.0, "square") == 0 and clips.fit_rank(1.78, "square") == 1
+    data = {"hits": [
+        {"id": 1, "pageURL": "https://pixabay.com/videos/id-1/", "tags": "a", "duration": 9, "user": "A", "user_id": 1, "videos": {"medium": {"url": "https://cdn.pixabay.com/video/l.mp4", "width": 1280, "height": 720, "size": 1_000_000, "thumbnail": "https://cdn.pixabay.com/video/l.jpg"}}},
+        {"id": 2, "pageURL": "https://pixabay.com/videos/id-2/", "tags": "b", "duration": 9, "user": "B", "user_id": 2, "videos": {"medium": {"url": "https://cdn.pixabay.com/video/p.mp4", "width": 720, "height": 1280, "size": 1_000_000, "thumbnail": "https://cdn.pixabay.com/video/p.jpg"}}}]}
+    assert [c["id"] for c in clips.pixabay_search("q", "K", fetch=lambda *a, **k: data)] == ["1"]                              # landscape video: as before
+    assert [c["id"] for c in clips.pixabay_search("q", "K", fetch=lambda *a, **k: data, orientation="portrait")] == ["2", "1"]   # vertical video: true portrait first, then the cropped landscape
+    assert [c["id"] for c in clips.pixabay_search("q", "K", fetch=lambda *a, **k: data, orientation="square")] == ["1", "2"]   # neither is square: both are cropped, the provider's order stays
+
+
+def test_pexels_asks_for_the_true_shape_then_for_landscape_when_there_is_too_little():
+    seen = []
+    def fetch(url, **kw):
+        seen.append(url)
+        return PEXELS if "orientation=landscape" in url else {"videos": []}
+    got = clips.pexels_search("waves", "KEY", fetch=fetch, orientation="portrait")
+    assert ["orientation=portrait" in u for u in seen] == [True, False] and len(got) == 1
+    seen.clear()
+    clips.pexels_search("waves", "KEY", fetch=fetch)
+    assert len(seen) == 1 and "orientation=landscape" in seen[0]                                                                # landscape: exactly the old single call
+
+
+def test_the_poster_the_reviewer_sees_is_the_crop_the_video_will_show(tmp_path):
+    import io
+    buf = io.BytesIO()
+    Image.new("RGB", (640, 360), (200, 30, 30)).save(buf, "JPEG")
+    wide = buf.getvalue()
+    assert clips.crop_poster(wide, "landscape") == wide
+    portrait = Image.open(io.BytesIO(clips.crop_poster(wide, "portrait")))
+    assert portrait.size == (202, 360) and abs(portrait.width / portrait.height - 9 / 16) < 0.01
+    assert Image.open(io.BytesIO(clips.crop_poster(wide, "square"))).size == (360, 360)
+    seen = {}
+    monkeypatched = clips.stock.llm_review
+    clips.stock.llm_review = lambda cands, n, a, q, **k: (seen.update(size=Image.open(io.BytesIO(k["fetch_bytes_fn"](cands[0]["thumb_url"]))).size), (None, "x", 0.0, []))[1]
+    try:
+        clips._review([cand("pixabay", 1)], "n", "a", "q", fetch_bytes_fn=lambda url, **kw: wide, orientation="portrait")
+    finally:
+        clips.stock.llm_review = monkeypatched
+    assert seen["size"] == (202, 360)
+
+
+def test_scout_clip_gives_the_orientation_to_the_review_only_for_non_landscape_videos(monkeypatch):
+    got = []
+    monkeypatch.setattr(clips, "gather", lambda q, **kw: [cand("pixabay", 1), cand("pixabay", 2)])
+    def review(cands, n, a, q, **kw):
+        got.append(kw.get("orientation"))
+        return 0, "ok", 0.0, [0, 1]
+    for o in ("landscape", "portrait"):
+        clips.scout_clip("a", "n", fetch_bytes_fn=lambda *a, **k: b"x", review=review, normalise_fn=lambda raw, **kw: (b"m", 5.0), verify_fn=None, orientation=o)
+    assert got == [None, "portrait"]
+
+
+def test_landscape_footage_is_cropped_to_portrait_a_little_above_the_middle_and_the_verify_sees_the_crop(tmp_path):
+    src = make_source(seconds=3, size="1280x720", tmp_path=tmp_path)
+    mp4, secs = clips.normalise(src, need_seconds=2.5, source_seconds=3.0, suffix=".mp4", orientation="portrait")
+    f = tmp_path / "p.mp4"
+    f.write_bytes(mp4)
+    assert clips.ClipFrames(str(f)).frame(0).size == (720, 1280)
+    frames = clips.extract_frames(mp4, [0.5])
+    assert Image.open(__import__("io").BytesIO(frames[0])).size[0] < Image.open(__import__("io").BytesIO(frames[0])).size[1]   # the checker gets tall frames: a subject the crop lost is not in them
+
+
+# ---------------------------------------------------------------- one retry with a stock-staple wording
+def retry_scout(results, log):
+    def scout(q, narration, alt="", **kw):
+        log.append(q)
+        notes = kw["notes"]
+        notes["cost"] += 0.001
+        r = results.get(q)
+        if r is None:
+            notes["reasons"].append(f"verify: 4/10 for {q}")
+            return None
+        return {"mp4": b"MP4:" + q.encode(), "entry": {"id": q}, "credit": f"Video: {q} / Pixabay", "chosen": f"pixabay:{q}", "loops_after": r, "review": {"cost_usd": 0.001}}
+    return scout
+
+
+def test_a_failed_clip_is_retried_once_with_a_rewritten_wording_through_the_same_pipeline(monkeypatch):
+    monkeypatch.setenv("CLIP_RETRY", "1")
+    log, asked = [], []
+    rewrite = lambda q, n, a, reasons: (asked.append((q, list(reasons))), ("laboratory scientist", 0.0002))[1]
+    out = clips.scout_with_retry("dna strand animation", "n", "alt", scout=retry_scout({"laboratory scientist": 8}, log), rewrite=rewrite, need_seconds=5.0)
+    assert log == ["dna strand animation", "laboratory scientist"] and out["chosen"] == "pixabay:laboratory scientist"
+    assert asked == [("dna strand animation", ["verify: 4/10 for dna strand animation"])]                    # the rewrite is told why the first wording failed
+    assert out["review"]["retry_query"] == "laboratory scientist" and out["review"]["cost_usd"] == pytest.approx(0.001 + 0.0002 + 0.001)   # everything spent, failures included
+    log.clear()
+    both = clips.scout_with_retry("a", "n", "alt", scout=retry_scout({}, log), rewrite=lambda *a: ("b", 0.0), need_seconds=5.0)
+    assert both is None and log == ["a", "b"]                                                                 # one retry at most
+    log.clear()
+    fine = clips.scout_with_retry("a", "n", "alt", scout=retry_scout({"a": 7}, log), rewrite=lambda *a: pytest.fail("no retry when it worked"), need_seconds=5.0)
+    assert fine is not None and log == ["a"]
+    log.clear()
+    assert clips.scout_with_retry("a", "n", scout=retry_scout({}, log), rewrite=lambda *a: ("A", 0.0), need_seconds=5.0) is None and log == ["a"]   # the same wording again is pointless
+    monkeypatch.setenv("CLIP_RETRY", "0")
+    log.clear()
+    assert clips.scout_with_retry("a", "n", scout=retry_scout({}, log), rewrite=lambda *a: pytest.fail("off"), need_seconds=5.0) is None and log == ["a"]
+
+
+def test_the_retry_respects_the_per_beat_cost_cap_and_time_budget(monkeypatch):
+    monkeypatch.setenv("CLIP_RETRY", "1")
+    log = []
+    rw = lambda *a: ("b", 0.0)
+    box = {"cost": clips.RETRY_COST_CAP_USD, "t0": __import__("time").time()}
+    assert clips.scout_with_retry("a", "n", scout=retry_scout({}, log), rewrite=rw, box=box, need_seconds=5.0) is None and log == ["a"]   # the beat already spent its cap
+    log.clear()
+    late = {"cost": 0.0, "t0": __import__("time").time() - clips.RETRY_TIME_BUDGET_S - 1}
+    assert clips.scout_with_retry("a", "n", scout=retry_scout({}, log), rewrite=rw, box=late, need_seconds=5.0) is None and log == ["a"]   # too late: the Lambda has 180 s
+
+
+def test_a_segment_that_would_start_after_the_beat_time_limit_is_not_searched():
+    log = []
+    gone = {"cost": 0.0, "t0": __import__("time").time() - clips.BEAT_TIME_LIMIT_S - 1}
+    assert clips.scout_with_retry("a", "n", scout=retry_scout({"a": 7}, log), box=gone, need_seconds=5.0) is None and log == []   # the beat falls back to its photo instead of timing out the Lambda
+
+
+def test_the_rewrite_is_a_small_model_call_that_never_raises_and_rejects_nonsense():
+    calls = []
+    def complete(system, user, **kw):
+        calls.append((system, user, kw))
+        return '{"query": "tailor sewing fabric"}', {"cost_usd": 0.0002}
+    assert clips.rewrite_query("scissors cutting thread", "Cas9 cuts DNA.", "gene editing", ["verify: 3/10"], complete=complete) == ("tailor sewing fabric", 0.0002)
+    assert "scissors cutting thread" in calls[0][1] and "verify: 3/10" in calls[0][1] and kw_effort(calls[0]) == "low"
+    assert clips.rewrite_query("a", "n", "", [], complete=lambda *a, **k: ("not json", {})) == ("", 0.0)
+    assert clips.rewrite_query("a", "n", "", [], complete=lambda *a, **k: ('{"query": "one two three four five six seven eight"}', {"cost_usd": 0.1})) == ("", 0.1)
+    def boom(*a, **k):
+        raise RuntimeError("bedrock")
+    assert clips.rewrite_query("a", "n", "", [], complete=boom) == ("", 0.0)
+
+
+def kw_effort(call):
+    return call[2].get("effort")
+
+
+def test_a_montage_segment_that_fails_gets_its_retry_and_the_beat_cost_includes_failures(monkeypatch):
+    monkeypatch.setenv("CLIP_RETRY", "1")
+    log = []
+    out = clips.scout_montage(["a", "b", "c"], "x " * 30, need_seconds=12.6, scout=retry_scout({"a": 7, "b2": 7, "c": 7}, log), assemble_fn=assembled, workers=1, rewrite=lambda q, *a: (q + "2", 0.0))
+    assert out["segments"] == 3 and out["chosen_all"] == ["pixabay:a", "pixabay:b2", "pixabay:c"] and sorted(log) == ["a", "b", "b2", "c"]
+    assert out["review"]["cost_usd"] == pytest.approx(0.004)                                                  # four scout runs, the failed one included
