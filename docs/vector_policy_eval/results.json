@@ -1,0 +1,1664 @@
+{
+ "date": "2026-11-27",
+ "spend_usd": 1.9634,
+ "results": [
+  {
+   "id": "kids-story",
+   "prompt": "A bedtime story for five-year-olds about a little cloud who is afraid of thunder",
+   "expect": "yes",
+   "cost": 0.1426997,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "kids-family"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "kids",
+    "style": "auto",
+    "share": 0.4,
+    "candidates": [
+     "flower_meadow",
+     "spring_orchard",
+     "pine_forest_valley"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "kids",
+     "why": "Gentle children's bedtime story about a friendly cloud",
+     "scene": "soft cartoon sky with fluffy clouds"
+    }
+   },
+   "s2": {
+    "seconds": 41.7,
+    "beats": 11,
+    "types": [
+     "clip",
+     "title",
+     "clip",
+     "bullets",
+     "dialogue",
+     "diagram",
+     "clip",
+     "steps",
+     "kinetic_text",
+     "clip",
+     "clip"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "never",
+     "style": "auto",
+     "reason": "no_catalog_match",
+     "share": 0.0,
+     "candidates": [],
+     "aspect": "16:9",
+     "used": [],
+     "beats": 11,
+     "cap": 0
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "kids-photosynthesis",
+   "prompt": "How photosynthesis works, explained for children",
+   "expect": "yes",
+   "cost": 0.0993687,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "kids-family",
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "kids",
+    "style": "auto",
+    "share": 0.4,
+    "candidates": [
+     "flower_meadow",
+     "pine_forest_valley",
+     "autumn_forest_path"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "kids",
+     "why": "Simple children's explanation of photosynthesis, a natural-world topic",
+     "scene": "sunny green meadow with leaves"
+    }
+   },
+   "s2": {
+    "seconds": 28.1,
+    "beats": 10,
+    "types": [
+     "clip",
+     "definition",
+     "vector_scene",
+     "icons",
+     "clip",
+     "diagram",
+     "clip",
+     "vector_scene",
+     "timeline",
+     "kinetic_text"
+    ],
+    "used": [
+     {
+      "beat": 2,
+      "id": "flower_meadow",
+      "narration": "Think of a leaf as a tiny kitchen. The green stuff inside the leaf catches light, like a solar panel. That is why leaves look green."
+     },
+     {
+      "beat": 7,
+      "id": "river_valley_morning",
+      "narration": "And the oxygen? The plant lets it out into the air. Every breath you take has oxygen, so plants help you breathe. Thank you, plants!"
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "kids",
+     "share": 0.4,
+     "candidates": [
+      "flower_meadow",
+      "solar_wind_farm",
+      "river_valley_morning"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "kids",
+      "why": "Simple children's science explainer on a general natural process",
+      "scene": "sunny meadow with green plants"
+     },
+     "used": [
+      {
+       "beat": 2,
+       "id": "flower_meadow"
+      },
+      {
+       "beat": 7,
+       "id": "river_valley_morning"
+      }
+     ],
+     "beats": 10,
+     "cap": 4
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 5,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 2,
+       "ok": true,
+       "note": "Simple kid-friendly analogy; flower meadow fits plants"
+      },
+      {
+       "beat": 7,
+       "ok": true,
+       "note": "Gentle wrap-up about plants and breathing; morning valley fits"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "kids-seasons",
+   "prompt": "Why do we have seasons? For kids aged 7",
+   "expect": "yes",
+   "cost": 0.0006246,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "kids-family",
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "not_suited:Seasons explanation depends on astronomy best shown with real imagery",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "kids-es-volcano",
+   "prompt": "Explícale a un niño de 6 años cómo funcionan los volcanes",
+   "expect": "yes",
+   "cost": 0.09442000000000003,
+   "s1": {
+    "language": "es",
+    "skills": [
+     "kids-family",
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "kids",
+    "style": "auto",
+    "share": 0.4,
+    "candidates": [
+     "volcano_island",
+     "snowy_peaks_cabin",
+     "factory_skyline"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "kids",
+     "why": "Children's explanation of volcanoes; simple natural-world topic for kids",
+     "scene": "cartoon volcano with gentle smoke"
+    }
+   },
+   "s2": {
+    "seconds": 29.4,
+    "beats": 10,
+    "types": [
+     "vector_scene",
+     "diagram",
+     "definition",
+     "steps",
+     "kinetic_text",
+     "clip",
+     "clip",
+     "bullets",
+     "versus",
+     "vector_scene"
+    ],
+    "used": [
+     {
+      "beat": 0,
+      "id": "volcano_island",
+      "narration": "¿Sabías que dentro de la Tierra hay roca tan caliente que se derrite? Por eso existen los volcanes. Hoy vamos a descubrir cómo funcionan, pa"
+     },
+     {
+      "beat": 9,
+      "id": "river_valley_morning",
+      "narration": "Así que ya lo sabes: debajo de la tierra hay magma caliente que sube, sale por el cráter y se vuelve lava. Un volcán es la chimenea de la Ti"
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "kids",
+     "share": 0.4,
+     "candidates": [
+      "volcano_island",
+      "pine_forest_valley",
+      "river_valley_morning"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "kids",
+      "why": "Simple volcano explanation for a six-year-old; illustrated style works",
+      "scene": "cartoon volcano erupting over green hills"
+     },
+     "used": [
+      {
+       "beat": 0,
+       "id": "volcano_island"
+      },
+      {
+       "beat": 9,
+       "id": "river_valley_morning"
+      }
+     ],
+     "beats": 10,
+     "cap": 4
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 4,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 0,
+       "ok": true,
+       "note": "Kid-friendly volcano explainer; scene matches topic"
+      },
+      {
+       "beat": 9,
+       "ok": true,
+       "note": "Simple kid explainer; river valley scene mismatches volcano"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "light-es-water",
+   "prompt": "Cómo ahorrar agua en casa, con un tono simpático y cercano",
+   "expect": "either",
+   "cost": 0.15365280000000003,
+   "s1": {
+    "language": "es",
+    "skills": [
+     "tutorial-howto"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "judged:wellness",
+    "style": "auto",
+    "share": 0.2,
+    "candidates": [
+     "kitchen_window_garden",
+     "workshop_exterior",
+     "snowy_peaks_cabin"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "wellness",
+     "why": "Friendly everyday household tip, general and non-visual",
+     "scene": "cozy cartoon home kitchen with water tap"
+    }
+   },
+   "s2": {
+    "seconds": 46.3,
+    "beats": 10,
+    "types": [
+     "counter",
+     "clip",
+     "stat",
+     "clip",
+     "steps",
+     "diagram",
+     "clip",
+     "clip",
+     "checklist",
+     "kinetic_text"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "judged:concept",
+     "share": 0.2,
+     "candidates": [
+      "snowy_peaks_cabin",
+      "suburb_street_morning",
+      "workshop_exterior"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "concept",
+      "why": "General household habit explained in a friendly, simple tone",
+      "scene": "cozy cartoon home with water droplets"
+     },
+     "used": [],
+     "beats": 10,
+     "cap": 2
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "abstract-internet",
+   "prompt": "How does the internet work, in simple terms",
+   "expect": "either",
+   "cost": 0.09984989999999991,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "explainer-education",
+     "science-wonder"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "judged:concept",
+    "style": "auto",
+    "share": 0.2,
+    "candidates": [
+     "city_skyline_dusk",
+     "laboratory_building",
+     "skyscraper_district"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "concept",
+     "why": "General technology idea explained simply for beginners, no real footage needed",
+     "scene": "stylized city network with glowing cables"
+    }
+   },
+   "s2": {
+    "seconds": 29.7,
+    "beats": 10,
+    "types": [
+     "clip",
+     "bullets",
+     "clip",
+     "definition",
+     "diagram",
+     "image",
+     "clip",
+     "timeline",
+     "chart",
+     "kinetic_text"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "judged:concept",
+     "share": 0.2,
+     "candidates": [
+      "data_center_landscape",
+      "solar_wind_farm",
+      "train_through_hills"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "concept",
+      "why": "Simple general explanation of an everyday technology idea for beginners",
+      "scene": "stylized network of glowing cables across hills"
+     },
+     "used": [],
+     "beats": 10,
+     "cap": 2
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "abstract-blockchain",
+   "prompt": "Explain blockchain simply for complete beginners",
+   "expect": "either",
+   "cost": 0.0007425000000000005,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "explainer-education",
+     "finance-business"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "no_catalog_match",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "wellness-sleep",
+   "prompt": "Five simple habits for better sleep, in a friendly tone",
+   "expect": "either",
+   "cost": 0.08745469999999998,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "health-wellbeing",
+     "listicle-ranking"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "judged:wellness",
+    "style": "auto",
+    "share": 0.2,
+    "candidates": [
+     "study_desk_window",
+     "city_skyline_dusk"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "wellness",
+     "why": "General sleep habits tips in a friendly, calm tone",
+     "scene": "cozy bedroom at dusk with moonlight"
+    }
+   },
+   "s2": {
+    "seconds": 23.9,
+    "beats": 10,
+    "types": [
+     "clip",
+     "bullets",
+     "clip",
+     "icons",
+     "steps",
+     "vector_scene",
+     "diagram",
+     "clip",
+     "bullets",
+     "kinetic_text"
+    ],
+    "used": [
+     {
+      "beat": 5,
+      "id": "study_desk_window",
+      "narration": "Think of it as a signal. When you repeat the same calm routine each night, your brain starts to learn that sleep is coming."
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "judged:wellness",
+     "share": 0.2,
+     "candidates": [
+      "study_desk_window"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "wellness",
+      "why": "General friendly wellness tips about sleep habits, no real people or footage nee",
+      "scene": "calm bedroom with moonlit window"
+     },
+     "used": [
+      {
+       "beat": 5,
+       "id": "study_desk_window"
+      }
+     ],
+     "beats": 10,
+     "cap": 2
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 5,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 5,
+       "ok": true,
+       "note": "Simple wellness habit; calm study scene fits well."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "funny-cats",
+   "prompt": "Why do cats knock things off tables? A funny explainer",
+   "expect": "either",
+   "cost": 0.14173739999999993,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "funny-light",
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "judged:kids",
+    "style": "auto",
+    "share": 0.2,
+    "candidates": [
+     "library_interior_view"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "kids",
+     "why": "Light, funny pet explainer suited to families with simple general ideas",
+     "scene": "cozy living room with table"
+    }
+   },
+   "s2": {
+    "seconds": 47.4,
+    "beats": 10,
+    "types": [
+     "clip",
+     "bullets",
+     "image",
+     "diagram",
+     "gallery",
+     "clip",
+     "kinetic_text",
+     "steps",
+     "checklist",
+     "clip"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "judged:kids",
+     "share": 0.2,
+     "candidates": [
+      "library_interior_view",
+      "study_desk_window"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "kids",
+      "why": "Light-hearted pet explainer with general, non-factual cat behavior ideas",
+      "scene": "cozy living room with cartoon cat"
+     },
+     "used": [],
+     "beats": 10,
+     "cap": 2
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "motivation-habits",
+   "prompt": "Why small daily habits beat big goals",
+   "expect": "either",
+   "cost": 0.1359142,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "inspiration-motivation",
+     "health-wellbeing"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "judged:concept",
+    "style": "auto",
+    "share": 0.2,
+    "candidates": [
+     "flower_meadow",
+     "autumn_forest_path",
+     "coast_cliffs"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "concept",
+     "why": "Abstract self-improvement idea explained in simple general terms",
+     "scene": "gentle hills with a winding path"
+    }
+   },
+   "s2": {
+    "seconds": 40.7,
+    "beats": 10,
+    "types": [
+     "kinetic_text",
+     "clip",
+     "bullets",
+     "gallery",
+     "clip",
+     "vector_scene",
+     "diagram",
+     "clip",
+     "steps",
+     "kinetic_text"
+    ],
+    "used": [
+     {
+      "beat": 5,
+      "id": "flower_meadow",
+      "narration": "Then something powerful happens. Each repeat becomes a small vote for the kind of person you want to be. Over time, the habit starts to feel"
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "judged:concept",
+     "share": 0.2,
+     "candidates": [
+      "flower_meadow",
+      "autumn_forest_path",
+      "coast_cliffs"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "concept",
+      "why": "Abstract self-improvement idea explained in simple general terms",
+      "scene": "gentle hills with a winding path"
+     },
+     "used": [
+      {
+       "beat": 5,
+       "id": "flower_meadow"
+      }
+     ],
+     "beats": 10,
+     "cap": 2
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 5,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 5,
+       "ok": true,
+       "note": "Abstract self-improvement idea; flower meadow suits gentle, wellness-style topic."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "travel-beach",
+   "prompt": "A relaxing beach holiday: what to pack and how to unwind",
+   "expect": "either",
+   "cost": 0.09796359999999987,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "judged:travel",
+    "style": "auto",
+    "share": 0.2,
+    "candidates": [
+     "tropical_beach",
+     "volcano_island"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "travel",
+     "why": "Relaxing beach holiday packing and unwinding tips, light-hearted travel content",
+     "scene": "sunny tropical beach with palm trees"
+    }
+   },
+   "s2": {
+    "seconds": 29.9,
+    "beats": 10,
+    "types": [
+     "clip",
+     "bullets",
+     "kinetic_text",
+     "versus",
+     "gallery",
+     "vector_scene",
+     "clip",
+     "steps",
+     "bullets",
+     "clip"
+    ],
+    "used": [
+     {
+      "beat": 5,
+      "id": "tropical_beach",
+      "narration": "Now the bag is packed. Time to slow down. Find a spot, lay your towel flat, and let the sound of the waves do the first bit of work."
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "judged:travel",
+     "share": 0.2,
+     "candidates": [
+      "tropical_beach",
+      "volcano_island"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "travel",
+      "why": "Relaxing beach holiday packing and unwinding tips, light-hearted travel content.",
+      "scene": "calm tropical beach with palm trees"
+     },
+     "used": [
+      {
+       "beat": 5,
+       "id": "tropical_beach"
+      }
+     ],
+     "beats": 10,
+     "cap": 2
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 5,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 5,
+       "ok": true,
+       "note": "Relaxing wellness moment; flat illustrated beach suits it."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "travel-rome",
+   "prompt": "A tour of Rome: the Colosseum, the Vatican and the Trevi Fountain",
+   "expect": "no",
+   "cost": 0.0006473999999999998,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "travel-places",
+     "history-story"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "serious_topic:history-story",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "cooking-pancakes",
+   "prompt": "How to make fluffy pancakes",
+   "expect": "either",
+   "cost": 0.00042050000000000073,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "tutorial-howto"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "not_suited:Cooking how-to needs real footage to show technique",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "finance-earnings",
+   "prompt": "Quarterly earnings summary for a SaaS company: revenue up 12 percent, churn down to 2 percent",
+   "expect": "no",
+   "cost": 0.1448065000000001,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "finance-business",
+     "recap-summary"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "serious_topic:recap-summary",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   },
+   "s2": {
+    "seconds": 39.5,
+    "beats": 10,
+    "types": [
+     "counter",
+     "diagram",
+     "clip",
+     "stat",
+     "definition",
+     "counter",
+     "diagram",
+     "bullets",
+     "checklist",
+     "kinetic_text"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "never",
+     "style": "auto",
+     "reason": "serious_topic:recap-summary",
+     "share": 0.0,
+     "candidates": [],
+     "aspect": "16:9",
+     "used": [],
+     "beats": 10,
+     "cap": 0
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "news-ukraine",
+   "prompt": "What happened this week in the war in Ukraine",
+   "expect": "no",
+   "cost": 0.000516700000000001,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "news-explainer"
+    ],
+    "research": "web",
+    "decision": "never",
+    "reason": "current_events",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "news-election",
+   "prompt": "Latest news on the polls for the US presidential election this month",
+   "expect": "no",
+   "cost": 0.13011369999999992,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "news-explainer"
+    ],
+    "research": "web",
+    "decision": "never",
+    "reason": "current_events",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   },
+   "s2": {
+    "seconds": 39.8,
+    "beats": 10,
+    "types": [
+     "kinetic_text",
+     "diagram",
+     "clip",
+     "bullets",
+     "image",
+     "chart",
+     "clip",
+     "map",
+     "checklist",
+     "kinetic_text"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "never",
+     "style": "auto",
+     "reason": "serious_topic:news-explainer",
+     "share": 0.0,
+     "candidates": [],
+     "aspect": "16:9",
+     "used": [],
+     "beats": 10,
+     "cap": 0
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "product-launch",
+   "prompt": "Launch video for our new noise-cancelling headphones, the AeroSound X2",
+   "expect": "no",
+   "cost": 0.09669990000000002,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "product-marketing"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "serious_topic:product-marketing",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   },
+   "s2": {
+    "seconds": 38.2,
+    "beats": 10,
+    "types": [
+     "clip",
+     "clip",
+     "title",
+     "diagram",
+     "versus",
+     "timeline",
+     "clip",
+     "bullets",
+     "kinetic_text",
+     "title"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "never",
+     "style": "auto",
+     "reason": "serious_topic:product-marketing",
+     "share": 0.0,
+     "candidates": [],
+     "aspect": "16:9",
+     "used": [],
+     "beats": 10,
+     "cap": 0
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "es-pensions",
+   "prompt": "Resumen de la reforma de pensiones en España",
+   "expect": "no",
+   "cost": 0.00024180000000000035,
+   "s1": {
+    "language": "es",
+    "skills": [
+     "recap-summary",
+     "news-explainer"
+    ],
+    "research": "web",
+    "decision": "never",
+    "reason": "current_events",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "linkedin-leadership",
+   "prompt": "Three lessons on leading remote teams",
+   "expect": "no",
+   "cost": 0.0007664000000000004,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "platform_linkedin",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "user-photos",
+   "prompt": "Make a video of my holiday photos",
+   "expect": "no",
+   "cost": 0.00043479999999999994,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "travel-places"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "user_media",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "medical-heart-attack",
+   "prompt": "What to do if you think you are having a heart attack",
+   "expect": "no",
+   "cost": 0.0008840999999999996,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "health-wellbeing",
+     "tutorial-howto"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "not_suited:Medical emergency guidance needs real, accurate visuals and advice",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "history-rome",
+   "prompt": "The fall of the Roman Empire",
+   "expect": "no",
+   "cost": 0.000392,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "history-story"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "serious_topic:history-story",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "tragedy-titanic",
+   "prompt": "The Titanic disaster and why so many people died",
+   "expect": "no",
+   "cost": 0.09327200000000005,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "history-story",
+     "mystery-true-crime"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "serious_topic:history-story",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   },
+   "s2": {
+    "seconds": 26.2,
+    "beats": 10,
+    "types": [
+     "counter",
+     "image",
+     "clip",
+     "stat",
+     "diagram",
+     "chart",
+     "clip",
+     "bullets",
+     "stat",
+     "kinetic_text"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "never",
+     "style": "auto",
+     "reason": "serious_topic:history-story",
+     "share": 0.0,
+     "candidates": [],
+     "aspect": "16:9",
+     "used": [],
+     "beats": 10,
+     "cap": 0
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "science-jwst",
+   "prompt": "How the James Webb telescope sees the early universe",
+   "expect": "no",
+   "cost": 0.0005431000000000004,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "science-wonder",
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "not_suited:Real telescope science best shown with actual space imagery",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "coding-fastapi",
+   "prompt": "How to build a REST API in Python with FastAPI",
+   "expect": "no",
+   "cost": 0.000544600000000001,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "coding-tutorial",
+     "tutorial-howto"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "serious_topic:coding-tutorial",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "compare-phones",
+   "prompt": "iPhone vs Android: which should you buy in 2026",
+   "expect": "no",
+   "cost": 0.00032680000000000035,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "comparison-versus",
+     "product-marketing"
+    ],
+    "research": "web",
+    "decision": "never",
+    "reason": "current_events",
+    "style": "auto",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   }
+  },
+  {
+   "id": "cartoon-bill",
+   "prompt": "Make it a cartoon: how a bill becomes law",
+   "expect": "yes",
+   "cost": 0.09022420000000024,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "style_cartoon",
+    "style": "cartoon",
+    "share": 0.6,
+    "candidates": [
+     "suburb_street_morning",
+     "workshop_exterior",
+     "laboratory_building",
+     "solar_wind_farm",
+     "modern_office_exterior",
+     "volcano_island"
+    ],
+    "judged": {
+     "fit": false,
+     "kind": "other",
+     "why": "classifier failed",
+     "scene": ""
+    }
+   },
+   "s2": {
+    "seconds": 29.4,
+    "beats": 10,
+    "types": [
+     "vector_scene",
+     "steps",
+     "vector_scene",
+     "diagram",
+     "bullets",
+     "vector_scene",
+     "flowchart",
+     "kinetic_text",
+     "checklist",
+     "vector_scene"
+    ],
+    "used": [
+     {
+      "beat": 0,
+      "id": "suburb_street_morning",
+      "narration": "Every law you follow started as a simple idea on paper. So how does one idea get past hundreds of lawmakers and become the rules everyone li"
+     },
+     {
+      "beat": 2,
+      "id": "modern_office_exterior",
+      "narration": "Next, the bill goes to a committee. This small group of lawmakers studies it, listens to experts, and makes changes. Many bills die here and"
+     },
+     {
+      "beat": 5,
+      "id": "workshop_exterior",
+      "narration": "Think of it like a relay race. The bill is the baton, and it must be carried across every finish line. One dropped baton, and the whole race"
+     },
+     {
+      "beat": 9,
+      "id": "solar_wind_farm",
+      "narration": "So a law is an idea that survived every checkpoint. Next time you hear about a bill, ask which step it is on. Slow by design, so it is built"
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "cartoon",
+     "reason": "style_cartoon",
+     "share": 0.6,
+     "candidates": [
+      "suburb_street_morning",
+      "workshop_exterior",
+      "laboratory_building",
+      "solar_wind_farm",
+      "modern_office_exterior",
+      "volcano_island"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": false,
+      "kind": "other",
+      "why": "Civic process explainer tied to real government institutions needing real footag",
+      "scene": ""
+     },
+     "used": [
+      {
+       "beat": 0,
+       "id": "suburb_street_morning"
+      },
+      {
+       "beat": 2,
+       "id": "modern_office_exterior"
+      },
+      {
+       "beat": 5,
+       "id": "workshop_exterior"
+      },
+      {
+       "beat": 9,
+       "id": "solar_wind_farm"
+      }
+     ],
+     "beats": 10,
+     "cap": 6
+    },
+    "warnings": [],
+    "judge_error": "JSONDecodeError: Expecting ',' delimiter: line 1 column 309 (char 308)"
+   }
+  },
+  {
+   "id": "cartoon-es-water",
+   "prompt": "Un vídeo con dibujos animados sobre el ciclo del agua",
+   "expect": "yes",
+   "cost": 0.13582160000000024,
+   "s1": {
+    "language": "es",
+    "skills": [
+     "explainer-education",
+     "kids-family"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "style_cartoon",
+    "style": "cartoon",
+    "share": 0.6,
+    "candidates": [
+     "volcano_island",
+     "waterfall_jungle",
+     "river_valley_morning",
+     "pine_forest_valley",
+     "coast_cliffs",
+     "tropical_beach"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "kids",
+     "why": "Simple water cycle explainer for children, cartoon style",
+     "scene": "stylized sky, sea, clouds and rain"
+    }
+   },
+   "s2": {
+    "seconds": 36.3,
+    "beats": 10,
+    "types": [
+     "vector_scene",
+     "clip",
+     "definition",
+     "diagram",
+     "clip",
+     "clip",
+     "vector_scene",
+     "gallery",
+     "steps",
+     "kinetic_text"
+    ],
+    "used": [
+     {
+      "beat": 0,
+      "id": "river_valley_morning",
+      "narration": "El agua que bebes hoy ya existía hace millones de años. Es la misma de siempre, y viaja sin parar. ¿Cómo lo hace? Sigamos a una pequeña gota"
+     },
+     {
+      "beat": 6,
+      "id": "pine_forest_valley",
+      "narration": "En la montaña, la nieve se derrite en primavera. El agua se mete en la tierra y forma arroyos, que se unen en ríos. Así sigue su camino."
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "cartoon",
+     "reason": "style_cartoon",
+     "share": 0.6,
+     "candidates": [
+      "river_valley_morning",
+      "glacier_arctic",
+      "pine_forest_valley",
+      "volcano_island",
+      "deep_ocean_reef",
+      "city_skyline_day"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": true,
+      "kind": "kids",
+      "why": "Simple natural-world topic suited to a children's cartoon",
+      "scene": "stylized cartoon ocean, clouds, and rivers"
+     },
+     "used": [
+      {
+       "beat": 0,
+       "id": "river_valley_morning"
+      },
+      {
+       "beat": 6,
+       "id": "pine_forest_valley"
+      }
+     ],
+     "beats": 10,
+     "cap": 6
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 5,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 0,
+       "ok": true,
+       "note": "Simple water-cycle explainer suits a cartoon river scene"
+      },
+      {
+       "beat": 6,
+       "ok": true,
+       "note": "Gentle snowmelt and river flow fits a cartoon mountain scene"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "cartoon-mortgage",
+   "prompt": "Cartoon-style video about how mortgages work",
+   "expect": "yes",
+   "cost": 0.05069170000000002,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "finance-business",
+     "explainer-education"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "style_cartoon",
+    "style": "cartoon",
+    "share": 0.6,
+    "candidates": [
+     "suburb_street_morning",
+     "workshop_exterior",
+     "spring_orchard",
+     "laboratory_building",
+     "snowy_peaks_cabin",
+     "harbour_boats"
+    ],
+    "judged": {
+     "fit": false,
+     "kind": "other",
+     "why": "Mortgages involve financial advice and specific real-world products",
+     "scene": ""
+    }
+   },
+   "s2": {
+    "seconds": 17.1,
+    "beats": 10,
+    "types": [
+     "vector_scene",
+     "diagram",
+     "definition",
+     "flowchart",
+     "vector_scene",
+     "table",
+     "steps",
+     "versus",
+     "vector_scene",
+     "kinetic_text"
+    ],
+    "used": [
+     {
+      "beat": 0,
+      "id": "suburb_street_morning",
+      "narration": "Almost nobody pays for a house with cash. So how does a regular family end up owning one? The answer is a loan with a very old, very dramati"
+     },
+     {
+      "beat": 4,
+      "id": "home_garden_backyard",
+      "narration": "Each month, you pay the same amount. But inside that payment, two things are hiding. One part is interest, the price of borrowing. The other"
+     },
+     {
+      "beat": 8,
+      "id": "workshop_exterior",
+      "narration": "Calculators help you test the trade-offs. Change the loan size or the rate, and watch the monthly payment move until it fits your budget com"
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "cartoon",
+     "reason": "style_cartoon",
+     "share": 0.6,
+     "candidates": [
+      "suburb_street_morning",
+      "home_garden_backyard",
+      "workshop_exterior",
+      "spring_orchard",
+      "laboratory_building",
+      "snowy_peaks_cabin"
+     ],
+     "aspect": "16:9",
+     "judged": {
+      "fit": false,
+      "kind": "other",
+      "why": "Mortgage explanation touches financial advice; needs care",
+      "scene": "suburban house with garden"
+     },
+     "used": [
+      {
+       "beat": 0,
+       "id": "suburb_street_morning"
+      },
+      {
+       "beat": 4,
+       "id": "home_garden_backyard"
+      },
+      {
+       "beat": 8,
+       "id": "workshop_exterior"
+      }
+     ],
+     "beats": 10,
+     "cap": 6
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 2,
+     "request_suits_cartoon": false,
+     "beats": [
+      {
+       "beat": 0,
+       "ok": false,
+       "note": "Mortgage finance topic; cartoon scene is unsuitable"
+      },
+      {
+       "beat": 4,
+       "ok": false,
+       "note": "Interest and principal breakdown needs real visuals or charts"
+      },
+      {
+       "beat": 8,
+       "ok": false,
+       "note": "Budget trade-off numbers need a chart, not cartoon"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "real-bees",
+   "prompt": "Explain how bees make honey, use real footage and real photos",
+   "expect": "no",
+   "cost": 0.1331528999999999,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "explainer-education",
+     "science-wonder"
+    ],
+    "research": "encyclopedia",
+    "decision": "never",
+    "reason": "style_real",
+    "style": "real",
+    "share": 0,
+    "candidates": [],
+    "judged": null
+   },
+   "s2": {
+    "seconds": 41.0,
+    "beats": 10,
+    "types": [
+     "clip",
+     "gallery",
+     "diagram",
+     "clip",
+     "kinetic_text",
+     "clip",
+     "image",
+     "steps",
+     "clip",
+     "image"
+    ],
+    "used": [],
+    "vector": {
+     "decision": "never",
+     "style": "real",
+     "reason": "style_real",
+     "share": 0.0,
+     "candidates": [],
+     "aspect": "16:9",
+     "used": [],
+     "beats": 10,
+     "cap": 0
+    },
+    "warnings": []
+   }
+  },
+  {
+   "id": "kids-tiktok-vertical",
+   "prompt": "Fun fact for kids: why is the sky blue",
+   "expect": "either",
+   "cost": 0.03747499999999991,
+   "s1": {
+    "language": "en",
+    "skills": [
+     "kids-family",
+     "science-wonder"
+    ],
+    "research": "encyclopedia",
+    "decision": "offered",
+    "reason": "kids",
+    "style": "auto",
+    "share": 0.4,
+    "candidates": [
+     "tall_forest_trail",
+     "tall_lighthouse_cliff",
+     "tall_city_tower"
+    ],
+    "judged": {
+     "fit": true,
+     "kind": "kids",
+     "why": "Kids fun fact about sky color, simple natural-world explanation.",
+     "scene": "bright cartoon sky over rolling hills"
+    }
+   },
+   "s2": {
+    "seconds": 9.8,
+    "beats": 4,
+    "types": [
+     "clip",
+     "vector_scene",
+     "bullets",
+     "clip"
+    ],
+    "used": [
+     {
+      "beat": 1,
+      "id": "tall_forest_trail",
+      "narration": "When sunlight zooms into the air, it bumps into tiny bits of gas. These bumps bounce the light all around the sky. That's called scattering."
+     }
+    ],
+    "vector": {
+     "decision": "offered",
+     "style": "auto",
+     "reason": "kids",
+     "share": 0.4,
+     "candidates": [
+      "tall_forest_trail",
+      "tall_city_tower",
+      "tall_lighthouse_cliff"
+     ],
+     "aspect": "9:16",
+     "judged": {
+      "fit": true,
+      "kind": "kids",
+      "why": "Children's fun fact about sky color, simple general explanation",
+      "scene": "bright cartoon sky over rolling green hills"
+     },
+     "used": [
+      {
+       "beat": 1,
+       "id": "tall_forest_trail"
+      }
+     ],
+     "beats": 4,
+     "cap": 1
+    },
+    "warnings": [],
+    "judge": {
+     "overall": 5,
+     "request_suits_cartoon": true,
+     "beats": [
+      {
+       "beat": 1,
+       "ok": true,
+       "note": "Kid-friendly science explainer; abstract cartoon scene fits"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}
