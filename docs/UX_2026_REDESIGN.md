@@ -317,3 +317,76 @@ First visible result for the owner: the iOS video screen and Create sheet after 
 ## 12. Files produced
 
 `docs/UX_2026_REDESIGN.md` (this); `docs/ux_2026/board_light.png`, `board_dark.png` (mockups), `gen.py`, `tokens.css`, `board_*.html`; evidence `ev_a_home_create.png`, `ev_b_create_options_questions.png`, `ev_c_detail_media.png`, `ev_d_settings_wallet_feedback_rating.png`, `ev_e_questions_blocked.png`. Nothing under `mobile/`, `backend/` or `frontend/` was changed.
+
+<!-- IOS-STATUS-BEGIN (written by the iPhone implementer, 2026-11-27; the Android implementer keeps its own block) -->
+## iPhone implementation status (2026-11-27)
+
+Everything below is built in `mobile/ios`, committed locally (not pushed, not on TestFlight). Screenshots: `docs/ux_2026/ios/` (iPhone 17 Pro on iOS 26.5 in light and dark, an iPhone SE-size simulator on iOS 18.2, Spanish for Create, the player, home, settings and the question sheet).
+
+### Work packages
+
+| WP | Status | What shipped |
+|---|---|---|
+| I0 Foundations | done | `GlassKit.swift`: `BrandMark` (the Sparklet Trio tile as a vector asset), `GlassIconButton` (44 pt, spoken label required), `Pill` (menu with the value as its label), `InfoPopover` (the only place for a sentence of help), `FloatingTabBar` (Videos and Media on one glass capsule plus the round (+); the "New video" pill is gone, so nothing is covered). Glass is `glassEffect` on iOS 26 and a material below. The old play tile is gone from the home header and from sign-in. |
+| I1 Video screen | done | One caption (`1:20 · 1080p`), five icons (Share filled, Save, Edit when editable, Info, More), Info sheet, More menu (New video, Send feedback), end card with Replay and New video, failed and rejected states as icon + one line + Try again, making state as the title plus one card. The tab bar steps aside while a video is open. |
+| I2 Create | done | Prompt-first surface: keyboard opens at once, photo and options icons under the prompt, mic, three pills (For, Length, Look) that open native menus, one thumbnail strip when photos are attached, one notice at most (4K advice, platform maximum, vertical deck), `Create · 2` with one caption under it. One Options sheet (For, Look, Quality with the 2x tag and an (i), Subtitles, Language, Format icon tiles; not-ready formats are hidden). Question sheet: dots, one Skip, no helper line. Summary and "we can't make this" sheets lose their duplicate exits (one close icon). |
+| I3 Home, first run, making | done | Mark, credits chip and account icon; large title "Videos"; one thin Making card (title, one stage line, one bar); thumbnail rows with the duration on the picture and an icon for non-landscape shapes; day headers; failed row says "Didn't finish" and offers Try again. First run: headline, a real prompt field, three short example chips. |
+| I4 Settings, credits, feedback | done | Settings has no footers (two (i) popovers were folded into one on Photos), Delete account is the last plain red row. Credits: hero, the buckets, "How credits work" (i). Feedback: one line of intro, the topic chips, Send. |
+| I5 Media | partly | Search placeholder is "Search photos". The rest of Media was already the lightest screen; the storage ring and collection-name wrapping from the spec are not done (deferred, see below). |
+| I6 Hardening | partly | Radii, sizes and colours normalised (table below), `check_strings`, `check_literals`, `check_fonts` clean, `swift test` 308 pass, UI tests updated and a text-budget UI test added. Not done: Dynamic Type XXL screenshots of the redesigned screens (the XXL UI tests pass, the images were not captured) and a TestFlight build (not requested here). |
+| Sign-in (coordinator priority A) | done, social switches off | New screen: the lockup (mark and wordmark, light and dark variants), the tagline, Continue with Apple (the system button), Continue with Google, Continue with email. Apple and Google already open the Cognito authorize URL directly with `identity_provider=SignInWithApple|Google` in `ASWebAuthenticationSession` (`AuthService.beginSignIn(provider:)`); email uses the hosted page. Buttons show only when `VMK_AUTH_APPLE` / `VMK_AUTH_GOOGLE` are YES. |
+
+### Sign-in: what is missing to turn social on (nothing in the app)
+
+The app side is finished; enabling is a config change (`project.yml`, `VMK_AUTH_GOOGLE: "YES"` and `VMK_AUTH_APPLE: "YES"` for the Beta/TestFlight configuration, or per build with `xcodebuild ... VMK_AUTH_GOOGLE=YES`). I did **not** switch them on because the QA backend has no identity provider behind them: tapping the button would land on a Cognito error page.
+- **Google on QA:** the owner creates a web OAuth client for `https://videomk-qa-225438.auth.eu-west-1.amazoncognito.com/oauth2/idpresponse`, the secret goes to SSM and Secrets Manager, QA is deployed with `-c socialGoogle=1`. Prod Google is live (`login.videomk.com`); the Release configuration has no server address yet, so a prod build needs `VMK_API_BASE`, `VMK_AUTH_DOMAIN=https://login.videomk.com`, `VMK_CLIENT_ID=6m66fkeue20dqmileh6ert9c2n` and `VMK_AUTH_GOOGLE=YES`.
+- **Apple:** needs the Apple Sign-in service ID, team and key (owner), then `-c socialApple=1`.
+- **Email natively:** not built. A native form needs the Cognito app client to allow a password or SRP flow plus sign-up and confirm calls (a backend change and an SRP implementation); the hosted page (branded separately, Managed Login) stays the email path.
+
+### Polish audit (before / after, `mobile/ios/VideoMK/*.swift`)
+
+| Measure | Before | After |
+|---|---|---|
+| Distinct literal corner radii | 16 values (6 to 25) | 4 (small chips 6, 8, 10 and one 16) and the tokens `field` 12, `card` 16, `videoCard` 22, `composer` 28 for everything else |
+| Distinct font sizes passed to `.vmk(...)` | 33 (26 uses fractional, e.g. 15.5, 13.5) | 25, no fractional; all map to Dynamic Type text styles (`check_fonts.py` clean) |
+| Hard-coded `.system(size:)` | 2 (decorative 40+ pt) | 2 (unchanged, decorative) |
+| Raw `Color(hex:)` in views | 32 | 31, and the repeated toast and destructive colours are now `Theme.toastSurface`, `toastAccent`, `toastSuccess`, `dangerSolid` |
+| Dead UI removed | | `CostExplainer`, `CostExplainerSheet`, `DeckAddRow`, `FeedbackLink`, `FilmFrames`, 36 orphaned strings |
+| Icon buttons below 44 pt | several (gear, chips) | none in touched screens: every icon control goes through `GlassIconButton` or `Pill` |
+| Strings in the catalog | 767 | 732 (new ones added: pills, options, replay, info) |
+
+### Words and taps per screen (before / after)
+
+Words are visible static text in English, one state, without the user's own content. "After" was counted from the captures; the UI test `VideoMKBudgetUITests` fails the build if Create, first run or the video screen grow past their limits.
+
+| Screen | Words before | Words after | Budget | Taps to the main task before / after |
+|---|---|---|---|---|
+| Create, surface | 82 | 11 (12 while empty) | 14 | New video, type, Create = 2 taps plus typing, down from 2 taps plus up to 5 optional chip choices; first video from an example chip: 2 taps |
+| Create, Options | 55 | about 35 | 40 | not needed for the main task |
+| Video screen | 22 | 4 (title, `1:20`) plus the system player | 6 | Share: 2 taps (Share, target) |
+| Home, first run | 70 | 19 content + 2 tab titles | 14 | 3 taps (card, type, Create) before; after: tap an example, Create = 2 |
+| Home, list | 45 | about 10 plus the user's titles | 6 plus titles | open a video: 1 tap |
+| Settings | 100 (70 in footers) | about 33 | 30 | sign out: 2 taps |
+| Credits | 85 | about 16 | 18 | 1 tap to open |
+| Making (detail) | 45 | 17 | 12 | no action needed |
+| Feedback | 45 | about 14 | 14 | 3 taps (row, type, Send) |
+| Question sheet | 22 | about 12 | 12 | one tap per answer or Skip |
+| Sign-in | 26 | 26 (copy unchanged on purpose) | n/a | 1 tap to the system sheet |
+
+Over budget and why: first run (19 against 14: the headline is the existing brand line and the three example chips are the point of the screen) and Making (17 against 12: the "you can leave" promise is 9 words; shortening it further loses the reassurance). Both are one-string decisions for the owner.
+
+### Deferred
+
+- Tab-bar minimise on scroll (`tabBarMinimizeBehavior`): the bar is custom now; a minimise needs scroll tracking in two tabs.
+- Scene thumbnails in the making card (needs the backend); the card shows stage and bar.
+- Storage ring and rotating placeholder on Media; Upload and Organize sheet helper text.
+- iPad split view (not in scope).
+- Whether the system inline player already has a full-screen button was not verified: ours stays (dimmed while playing) until it is checked on a device.
+
+### Verification status (read this before trusting the checks)
+
+- `swift test` (308), `check_strings.py`, `check_literals.py`, `check_fonts.py`: pass on the final tree.
+- UI tests run on the iPhone 17 Pro simulator: the three text-budget tests (`VideoMKBudgetUITests`) and `testChoosingADeckRemovesPhotosAfterAskingAndKeepingThemIsPossible` passed on the final build; an earlier full run on the previous build passed the Spanish sign-in, Dynamic Type, home list, media tab, social sign-in switches and the delete-account tests. The rest of the UI suites (the deck suite, Feedback, Spanish create/settings, delete account, credits info, media tab) were edited for the new controls and were **not** re-run to completion on the final build: the machine was at a load average of 70 to 300 from other jobs, so each test took minutes and the runs had to be cut. They need one clean run (`xcodebuild test ... -only-testing:VideoMKUITests`) before TestFlight.
+- Live tests against QA (`testLive*`, photo video, edit narration) need QA tokens and were updated by reading only.
+- Screenshots in `docs/ux_2026/ios/` were taken before the last two small changes (the corner-radius and colour normalisation, and the keyboard opening at once on an empty Create prompt), so edges differ by a few points and the Create captures show no keyboard. The Spanish set is partial: home, first run and making are Spanish; the remaining Spanish captures of an interrupted batch were discarded because a test run on the same simulator had changed the app language under them. The batch script `.../scratchpad/ios2/batch_final.sh` re-takes every capture (Pro light and dark, SE, Spanish) and writes to `.../scratchpad/ios2/shots/` when the machine is quiet.
+<!-- IOS-STATUS-END -->
