@@ -142,3 +142,12 @@ def test_generate_and_brief_answers_carry_the_chosen_look(monkeypatch):
     b = video_brief._look("How do volcanoes work?", {"look": "cartoon"}, 2, "en")
     assert b["look"]["reason"] == "own_photos" and b["note"].startswith("Made from your photos")
     assert video_brief._look("How do volcanoes work?", {}, 0, "en") == {}
+
+
+def test_characters_and_a_board_in_words_is_the_cartoon_look_with_its_board(monkeypatch):
+    from common import looks
+    on = {"cartoon": True, "whiteboard": True, "bg_animated": True, "bg_loops": True, "presenters": True}
+    r = looks.resolve("Explain rain with animated characters who draw it on a whiteboard", f=on)
+    assert r["style"] == "cartoon" and r["presenter"] is True and r["note"] is None and r["adapted"] == []
+    r = looks.resolve("Explain rain with animated characters", "whiteboard", f=on)                                # the whiteboard FIELD is a whiteboard video: no characters, and the note says so
+    assert r["style"] == "whiteboard" and r["presenter"] is False and r["note"]

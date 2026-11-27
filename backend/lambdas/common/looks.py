@@ -193,6 +193,8 @@ def resolve(prompt: Any, option: Any = None, lang: Optional[str] = None, *, mode
 
     if "real" in asked:
         style = "real"
+    elif "whiteboard" in asked and "characters" in asked and option != "whiteboard" and f.get("presenters") and f.get("whiteboard") and not serious and not photos:
+        style = "cartoon"   # characters AND a board, in words: the cartoon look with its hand-drawn board (engine/art_direction.py), not a whiteboard video without them
     elif "whiteboard" in asked:
         if f.get("whiteboard") and not serious and not photos:
             style = "whiteboard"

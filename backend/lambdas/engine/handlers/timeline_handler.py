@@ -90,5 +90,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "duration": tl["duration"],
         "chunks": [{**c, "video_id": video_id, "timeline_key": key} for c in (
             chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if format_options.is_4k(frame["resolution"]) and mode != "preview"
-            else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"), max_frames=CHUNK_MAX_FRAMES_VECTOR if any(sc.get("type") == "vector_scene" for sc in tl["scenes"]) else 0))],
+            else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"), max_frames=CHUNK_MAX_FRAMES_VECTOR if any(sc.get("type") == "vector_scene" or (sc.get("type") == "presenter" and (sc.get("props") or {}).get("backdrop")) for sc in tl["scenes"]) else 0))],   # a character in front of a cartoon scene draws that scene too
     }
