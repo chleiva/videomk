@@ -196,9 +196,9 @@ def stacked(kind):
 
 
 # ---------- Android ----------
-def vector(paths):
+def vector(paths, aapt=False):
     head = ('<?xml version="1.0" encoding="utf-8"?>\n<!-- Made by docs/brand/final/build_final.py: do not edit by hand. -->\n'
-            '<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"\n'
+            '<vector xmlns:android="http://schemas.android.com/apk/res/android"' + (' xmlns:aapt="http://schemas.android.com/aapt"' if aapt else '') + '\n'
             '    android:width="108dp" android:height="108dp" android:viewportWidth="1024" android:viewportHeight="1024">\n')
     return head + paths + "</vector>\n"
 
@@ -210,7 +210,7 @@ def android_files():
           '            <gradient android:startX="0" android:startY="0" android:endX="1024" android:endY="1024" android:type="linear">\n'
           f'                <item android:offset="0" android:color="{ACTION[0]}" />\n                <item android:offset="1" android:color="{ACTION[1]}" />\n'
           '            </gradient>\n        </aapt:attr>\n    </path>\n')
-    return {"ic_launcher_foreground.xml": vector(fg), "ic_launcher_monochrome.xml": vector(fg), "ic_launcher_background.xml": vector(bg)}
+    return {"ic_launcher_foreground.xml": vector(fg), "ic_launcher_monochrome.xml": vector(fg), "ic_launcher_background.xml": vector(bg, aapt=True)}
 
 
 def android_svgs():
