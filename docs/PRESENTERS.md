@@ -113,6 +113,8 @@ Per character before (wrong way / discontinuity of 58,876 frames each): Inés 8,
 
 What the numbers do not say: the thresholds are ours (400 degrees a second, the elbow curve); "natural" was judged by looking at every frame of the clips below. The instrument checks the skeleton, not the paint: a hand SHAPE that changes size as it opens (the open hand is drawn larger than the relaxed one) is not counted.
 
+Re-run on the final code (after merging main, 2026-11-27 23:00): matrix with cut-in pairs 844,150 frames and scenes 55,272 frames, every class 0; fastest segment 389 degrees a second (limit 400), largest change of speed 3,506. `plan_gestures(home_by=)`: a gesture that may choose its word (a question's shrug, emphasis) now picks one that starts early enough for the hand to be home when the shot ends. Clips re-rendered with this code.
+
 ### Render time
 No change. The same windows rendered with the old and the new code on the laptop, 720p, one process: Inés alone 59 and 59 ms a frame, three characters 66 and 66, the 9:16 two-shot on a backdrop 220 and 220, the owl 80 and 67 (the 16:9 two-shot on a backdrop, 147 and 242, was measured while other jobs ran and is not used). The arm maths is a few hundred floating-point operations a frame; turned pieces are cached as before (the sway moves a bone by one cache step about four times a second). Not measured on Lambda: nothing suggests a change from the 65 to 137 s a piece in `docs/ART_DIRECTION.md`.
 
