@@ -26,6 +26,7 @@ final class CreateModel {
     var showMore = false
     /// The Look sheet (tiles, cast, the board switch). Only when the server lists `looks.look`.
     var showLook = false
+    var showCast = false           // the Characters sheet (a look with a cast)
     /// One line under the attachments when photos or a presentation sent the look back to Auto.
     private(set) var lookNotice: String?
     /// "My holiday in Thailand" opens Add photos straight away, on My media when the library has photos.
@@ -76,7 +77,7 @@ final class CreateModel {
     /// A fresh Create screen with the last used choices (the prompt and the photos are never remembered).
     /// `platformChip` and `language`: "Make another" on a finished video opens the same sentence with one choice changed (a Short, another language, a shorter cut).
     func open(prefill: String? = nil, minutes: Double? = nil, platformChip: String? = nil, language: String? = nil) {
-        stage = .form; showMore = false; showLook = false; capsule.reset(); startError = nil; typeIn = nil; checkRun = nil
+        stage = .form; showMore = false; showLook = false; showCast = false; capsule.reset(); startError = nil; typeIn = nil; checkRun = nil
         // A draft (a sentence, photos or a presentation left when Create was closed) is kept: closing never asks and never loses anything.
         // Anything that opens Create with its own content (an example, "Make another", Try again) starts fresh.
         if prefill == nil, minutes == nil, platformChip == nil, language == nil, hasEdits { return }
@@ -137,6 +138,25 @@ final class CreateModel {
 
     /// A tap on a look tile; the length moves when the look needs a longer video (the returned nudge says what was done).
     func pickLook(_ id: String, attached: LookRules.Attached) -> LookRules.LengthNudge? { lookNotice = nil; return form.selectLook(id, caps: caps, attached: attached) }
+
+    /// The line was read: the next touch of the pill it sits above takes it away.
+    func dismissLookNotice() { lookNotice = nil }
+
+    /// Something about the look was changed for the person (the length a look needs): the one line above the pills says so.
+    func sayAboutLook(_ line: String) { lookNotice = line; UIAccessibility.post(notification: .announcement, argument: line) }
+
+    /// The chosen look has characters to choose (or a switch of its own): Create shows the Characters pill.
+    var lookHasCast: Bool {
+        guard let looks = caps.looks, let o = looks.option(form.lookChoice.look), !o.isAuto else { return false }
+        return o.cast && looks.cast.map { $0.available && !$0.members.isEmpty } == true || o.extras.contains(where: \.available)
+    }
+
+    #if DEBUG
+    /// `VMK_DEBUG_LOOK_SINGLE=1`: the one-sheet picker (tiles and cast together), kept for comparison captures.
+    static let singleLookSheet = ProcessInfo.processInfo.environment["VMK_DEBUG_LOOK_SINGLE"] == "1"
+    #else
+    static let singleLookSheet = false
+    #endif
 
     /// Photos or a presentation were attached or removed: a look that is not made from them goes back to Auto, with one line saying so.
     func syncLook(attached: LookRules.Attached) {
@@ -248,6 +268,7 @@ final class CreateModel {
         guard let spec = ProcessInfo.processInfo.environment["VMK_DEBUG_LOOK"] else { return }
         for (n, part) in spec.split(separator: ":").enumerated() {
             if part == "sheet" { showLook = true }
+            else if part == "cast" { showCast = true }
             else if part == "board" { form.setLookExtra("board", on: true) }
             else if n == 0 { _ = pickLook(String(part), attached: .nothing) }
             else { for id in part.split(separator: "+") { _ = form.toggleCast(String(id), caps: caps) } }

@@ -1,19 +1,19 @@
 import SwiftUI
 import VideoMKCore
 
-/// The Look of a video, chosen by its picture (docs/CREATE_API.md, "Video look (chosen and enforced)"): at most four tiles drawn from the server's own
-/// previews (Auto, Real, Whiteboard, Cartoon). One tap picks a look and the sheet steps aside. Cartoon keeps it open for the cast: "Auto" and the
-/// characters as faces (people, then animals), up to three, and one switch for the hand-drawn board. Nothing here is hard-coded: tiles, words, faces
-/// and limits are the server's; what the plan does not include is shown locked, what cannot be made from the attached photos or slides is not shown.
+/// The one-sheet picker (tiles and cast together), kept beside the split one (`LookSheet` and `CharactersSheet`) for comparison.
+/// The Look of a video, chosen by its picture (docs/CREATE_API.md, "Video look (chosen and enforced)"): at most four tiles (Auto, Real, Whiteboard,
+/// Cartoon), always in the same places. One tap picks a look and the sheet steps aside. Cartoon keeps it open for the cast: ten faces, up to three,
+/// one line that says what the choice means, and one switch for the board. Words, faces and limits are the server's. A look the plan does not include,
+/// or that is not made from the attached photos or slides, stays in place, dimmed, with its reason; only a look this stage does not have is hidden.
 struct LookPickerSheet: View {
     @Bindable var create: CreateModel
     let attached: LookRules.Attached
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var lengthLine: String?         // "Length is now 30 s: a conversation needs 20 s."
-    @State private var full = false                // a fourth face was tapped: the line says the limit for a moment
+    @State private var lengthLine: String?         // "Length changed to 30 s. A conversation needs 20 s or more.": takes the cast line's place for this visit
     @State private var closing: Task<Void, Never>?
+    @State private var scrollTarget: String?
 
     private var looks: LookCapabilities? { create.caps.looks }
     private var choice: LookChoice { create.form.lookChoice }
@@ -23,227 +23,265 @@ struct LookPickerSheet: View {
     private var spring: Animation { reduceMotion ? Theme.Motion.fade : Theme.Motion.spring }
 
     var body: some View {
-        FittedSheet {
+        FittedSheet(scrollTo: scrollTarget) {
+            SheetHeader(title: tr("create.look"), closeLabel: tr("common.done"), closeID: "lookDone") { dismiss() }.padding(.bottom, Theme.Space.m)
+        } content: {
             VStack(alignment: .leading, spacing: Theme.Space.l) {
-                SheetHeader(title: tr("create.look"), closeLabel: tr("common.done"), closeID: "lookDone") { dismiss() }
                 if let looks {
-                    tiles(LookRules.tiles(looks, attached: attached))
-                    let hidden = LookRules.hidden(looks, attached: attached)
-                    if !hidden.isEmpty {
-                        quietLine(tr(attached.deck ? "looks.not_with_deck" : "looks.not_with_photos", Localization.shared.list(hidden.map(\.label))), symbol: "photo.on.rectangle", id: "lookHiddenLine")
+                    LookTiles(tiles: LookRules.tiles(looks, attached: attached), selected: choice.look, pick: pick)
+                    if cast != nil || !extras.isEmpty {
+                        CastPicker(create: create, cast: cast, extras: extras, lengthLine: $lengthLine).id("cast").transition(.opacity)
                     }
-                    if let better = betterShapes { quietLine(better, symbol: "aspectratio", id: "lookShapeHint") }
-                    if let cast { castSection(cast).transition(.opacity) }
-                    if let lengthLine { quietLine(lengthLine, symbol: "clock", id: "lookLengthLine", strong: true).transition(.opacity) }      // right under what caused it
-                    ForEach(extras) { extra in extraSwitch(extra) }
                 }
             }
+            .padding(.top, Theme.Space.xs)          // room for the ring of a chosen tile in the first row
         }
-        .accessibilityIdentifier("lookSheet")
         .onDisappear { closing?.cancel() }
     }
 
-    // MARK: tiles
-
-    /// Two tiles across; at the largest text sizes one per row, a wide picture over its words, so every word is whole.
-    @ViewBuilder private func tiles(_ all: [LookRules.Tile]) -> some View {
-        if typeSize.isAccessibilitySize {
-            VStack(spacing: Theme.Space.xl) { ForEach(all) { tile($0, wide: true) } }
-        } else {
-            VStack(spacing: Theme.Space.l) {
-                ForEach(Array(stride(from: 0, to: all.count, by: 2)), id: \.self) { i in
-                    HStack(alignment: .top, spacing: Theme.Space.m) {
-                        tile(all[i], wide: false)
-                        if i + 1 < all.count { tile(all[i + 1], wide: false) } else { Color.clear.frame(maxWidth: .infinity, maxHeight: 1) }
-                    }
-                }
-            }
+    private func pick(_ t: LookRules.Tile) {
+        guard !t.locked else { return }
+        closing?.cancel(); scrollTarget = nil
+        let nudge = withAnimation(spring) { create.pickLook(t.id, attached: attached) }
+        Haptics.play(.selection)
+        if let nudge {          // the length was moved for the person: the line says what was done (and VoiceOver hears it)
+            let line = LookWords.moved(nudge, form: create.form, caps: create.caps)
+            withAnimation(spring) { lengthLine = line }
+            UIAccessibility.post(notification: .announcement, argument: line)
         }
+        // A look with nothing more to choose: the tap was the whole job, the sheet steps aside (after a beat, so the ring is seen). Cartoon stays for its cast.
+        let more = t.option.cast && looks?.cast?.available == true || t.option.extras.contains(where: \.available)
+        if more { Task { try? await Task.sleep(for: .milliseconds(250)); scrollTarget = "cast" }; return }      // where the sheet scrolls, the cast comes to the top
+        guard nudge == nil, !UIAccessibility.isVoiceOverRunning else { return }
+        closing = Task { try? await Task.sleep(for: .milliseconds(320)); if !Task.isCancelled { dismiss() } }
     }
+}
 
-    private func tile(_ t: LookRules.Tile, wide: Bool) -> some View {
-        let o = t.option, selected = choice.look == o.id
-        let plan = t.locked ? (o.requiresPlan.map { tr("looks.plan", $0) } ?? tr("looks.plan_none")) : nil
-        let picture = LookPicture(option: o, selected: selected, locked: t.locked, ratio: wide ? 2.4 : 1.6)
-        let words = VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 5) {
-                if o.isAuto { Image(systemName: "sparkle").font(.role(.footnote, weight: .bold)).foregroundStyle(Theme.primary).accessibilityHidden(true) }
-                Text(o.label).font(.role(.headline)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-            }
-            if let line = plan ?? o.note {
-                Text(line).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+/// The Look sheet: the four tiles and nothing else, always the same height. One tap chooses and the sheet steps aside, for every look.
+/// A look with characters shows its Characters pill on Create (`CharactersSheet`).
+struct LookSheet: View {
+    @Bindable var create: CreateModel
+    let attached: LookRules.Attached
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var closing: Task<Void, Never>?
+
+    var body: some View {
+        FittedSheet {
+            SheetHeader(title: tr("create.look"), closeLabel: tr("common.done"), closeID: "lookDone") { dismiss() }.padding(.bottom, Theme.Space.m)
+        } content: {
+            if let looks = create.caps.looks {
+                LookTiles(tiles: LookRules.tiles(looks, attached: attached), selected: create.form.lookChoice.look, pick: pick)
+                    .padding(.top, Theme.Space.xs)          // room for the ring of a chosen tile in the first row
             }
         }
-        return Button { pick(t) } label: {
-            VStack(alignment: .leading, spacing: Theme.Space.s) { picture; words.padding(.horizontal, 3) }
-                .frame(maxWidth: .infinity, alignment: .topLeading).contentShape(Rectangle())
-        }
-        .buttonStyle(TilePress())
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(o.label).accessibilityValue(plan ?? o.note ?? "")
-        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
-        .accessibilityIdentifier("lookTile-\(o.id)")
-        .disabled(t.locked)         // after the spoken element is made, so VoiceOver says "dimmed"
+        .onDisappear { closing?.cancel() }
     }
 
     private func pick(_ t: LookRules.Tile) {
         guard !t.locked else { return }
         closing?.cancel()
-        let nudge = withAnimation(spring) { create.pickLook(t.id, attached: attached) }
+        let nudge = withAnimation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring) { create.pickLook(t.id, attached: attached) }
         Haptics.play(.selection)
-        say(nudge)
-        // A look with nothing more to choose: the tap was the whole job, the sheet steps aside (after a beat, so the tick is seen). Cartoon stays for its cast.
-        let more = t.option.cast && looks?.cast?.available == true || t.option.extras.contains(where: \.available)
-        guard !more, nudge == nil, !UIAccessibility.isVoiceOverRunning else { return }
-        closing = Task { try? await Task.sleep(for: .milliseconds(320)); if !Task.isCancelled { dismiss() } }
-    }
-
-    /// The length was moved for the person: one line says what was done (and VoiceOver hears it).
-    private func say(_ nudge: LookRules.LengthNudge?) {
-        guard let nudge else { return }
-        let line = LookWords.moved(nudge, form: create.form, caps: create.caps)
-        withAnimation(spring) { lengthLine = line }
-        UIAccessibility.post(notification: .announcement, argument: line)
-    }
-
-    private var betterShapes: String? {
-        let ids = LookRules.betterAspects(choice, caps: looks, aspect: create.form.aspect)
-        guard !ids.isEmpty else { return nil }
-        let ours = ["16:9": "aspect.landscape", "9:16": "aspect.vertical", "1:1": "aspect.square", "4:5": "aspect.portrait"]       // the words of the Format tiles
-        return tr("looks.best_shape", Localization.shared.list(ids.map { id in (ours[id].map { tr($0) } ?? create.caps.aspect(id)?.label ?? id).lowercased() }))
-    }
-
-    // MARK: cast
-
-    private var columns: Int { typeSize.isAccessibilitySize ? 3 : typeSize >= .xLarge ? 4 : 6 }
-
-    /// "Auto" and the characters as faces: people in one group, animals in the next. Up to `max`; two or three talk to each other.
-    private func castSection(_ cast: LookCapabilities.Cast) -> some View {
-        let groups = cast.groups
-        return VStack(alignment: .leading, spacing: Theme.Space.m) {
-            SectionLabel(tr("looks.cast"))
-            ForEach(Array(groups.enumerated()), id: \.offset) { index, group in
-                FaceGrid(columns: columns, count: group.members.count + (index == 0 ? 1 : 0)) { i in
-                    if index == 0, i == 0 { autoFace(cast) } else { face(group.members[i - (index == 0 ? 1 : 0)], cast: cast) }
-                }
-                .accessibilityElement(children: .contain).accessibilityLabel(tr(group.kind == "animal" ? "looks.group_animals" : "looks.group_people"))
-            }
-            castLine(cast)
-        }
-        .padding(.top, Theme.Space.xs)
-    }
-
-    private func autoFace(_ cast: LookCapabilities.Cast) -> some View {
-        let selected = choice.cast.isEmpty
-        let name = tr("look.auto")          // the short word of the pill: it fits under a face in every language; VoiceOver hears the server's own
-        return Button { withAnimation(spring) { create.form.clearCast() }; full = false; Haptics.play(.selection) } label: {
-            FaceCell(name: name, selected: selected) {
-                ZStack { Theme.primaryContainer; Image(systemName: "sparkles").font(.role(.headline)).foregroundStyle(Theme.primary) }
-            }
-        }
-        .buttonStyle(TilePress())
-        .accessibilityElement(children: .ignore).accessibilityLabel(cast.autoLabel ?? name).accessibilityValue(cast.autoNote ?? "")
-        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton).accessibilityIdentifier("cast-auto")
-    }
-
-    private func face(_ m: LookCapabilities.Member, cast: LookCapabilities.Cast) -> some View {
-        let selected = choice.cast.contains(m.id)
-        return Button { tap(m, cast: cast) } label: {
-            FaceCell(name: m.name, selected: selected) {
-                ZStack {
-                    Theme.surfaceRaised
-                    if let image = InlineImage.image(m.thumbnail) { Image(uiImage: image).resizable().scaledToFill() }
-                    else { Image(systemName: m.kind == "animal" ? "pawprint.fill" : "person.fill").font(.role(.headline)).foregroundStyle(Theme.textSecondary) }
-                }
-            }
-        }
-        .buttonStyle(TilePress())
-        .accessibilityElement(children: .ignore).accessibilityLabel(m.name).accessibilityValue([m.role, m.topic].compactMap { $0 }.joined(separator: ", "))
-        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton).accessibilityIdentifier("cast-\(m.id)")
-    }
-
-    private func tap(_ m: LookCapabilities.Member, cast: LookCapabilities.Cast) {
-        let result = withAnimation(spring) { create.form.toggleCast(m.id, caps: create.caps) }
-        switch result.tap {
-        case .full:
-            Haptics.play(.warning)
-            withAnimation(spring) { full = true }
-            UIAccessibility.post(notification: .announcement, argument: tr("looks.cast_max", cast.max))
-        case .added, .removed:
-            Haptics.play(.selection); full = false
-            say(result.nudge)
-        }
-    }
-
-    /// One quiet line under the faces: we choose (Auto), who presents (one), that they talk it through (two or three), or the limit.
-    private func castLine(_ cast: LookCapabilities.Cast) -> some View {
-        let ids = choice.cast
-        let text: String? = full ? tr("looks.cast_max", cast.max)
-            : ids.isEmpty ? cast.autoNote
-            : ids.count >= cast.conversationFrom ? cast.conversationNote
-            : cast.member(ids[0]).map { m in [m.name, m.role, m.topic].compactMap { $0 }.joined(separator: " · ") }
-        let symbol = full ? "exclamationmark.circle" : ids.isEmpty ? "sparkle" : ids.count >= cast.conversationFrom ? "bubble.left.and.bubble.right" : "person"
-        return quietLine(text ?? " ", symbol: symbol, id: "castLine", strong: full)
-            .animation(Theme.Motion.select, value: text)
-    }
-
-    // MARK: the extra (one switch)
-
-    private func extraSwitch(_ extra: LookCapabilities.Extra) -> some View {
-        Toggle(isOn: Binding(get: { choice.extras.contains(extra.id) }, set: { on in create.form.setLookExtra(extra.id, on: on); Haptics.play(.selection) })) {
-            Label(extra.label, systemImage: "scribble.variable").font(.role(.body)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
-        }
-        .tint(Theme.success).frame(minHeight: 52)
-        .accessibilityHint(extra.note ?? "").accessibilityIdentifier("extra-\(extra.id)")
-    }
-
-    private func quietLine(_ text: String, symbol: String, id: String, strong: Bool = false) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 7) {
-            Image(systemName: symbol).font(.role(.footnote, weight: .semibold)).foregroundStyle(strong ? Theme.warning : Theme.primary).frame(minWidth: 18).accessibilityHidden(true)
-            Text(text).font(.role(.footnote, weight: strong ? .medium : .regular)).foregroundStyle(strong ? Theme.text : Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier(id)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        // the look needs a longer video: the length was moved, and Create says so right above the pills
+        if let nudge { create.sayAboutLook(LookWords.moved(nudge, form: create.form, caps: create.caps)) }
+        guard !UIAccessibility.isVoiceOverRunning else { return }          // VoiceOver hears "selected" first and closes the sheet itself
+        closing = Task { try? await Task.sleep(for: .milliseconds(320)); if !Task.isCancelled { dismiss() } }      // after a beat, so the ring is seen
     }
 }
 
-/// The picture of a look: the server's preview cropped to the tile, the ring and the tick when it is chosen, a lock when the plan does not include it.
+/// The Characters sheet of a look that has them: the faces, the one line, the board switch. It stays until it is closed.
+struct CharactersSheet: View {
+    @Bindable var create: CreateModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var lengthLine: String?
+
+    var body: some View {
+        let looks = create.caps.looks, option = looks?.option(create.form.lookChoice.look)
+        FittedSheet {
+            SheetHeader(title: tr("looks.cast"), closeLabel: tr("common.done"), closeID: "castDone") { dismiss() }.padding(.bottom, Theme.Space.m)
+        } content: {
+            CastPicker(create: create, cast: option?.cast == true ? looks?.cast.flatMap { $0.available && !$0.members.isEmpty ? $0 : nil } : nil,
+                       extras: option?.extras.filter(\.available) ?? [], lengthLine: $lengthLine, showsLabel: false)
+        }
+    }
+}
+
+// MARK: tiles
+
+/// The looks as pictures, two across. At the largest text sizes they are rows (a small picture, the name beside it), so all four fit one screen.
+struct LookTiles: View {
+    let tiles: [LookRules.Tile]
+    let selected: String
+    let pick: (LookRules.Tile) -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        if typeSize.isAccessibilitySize {
+            VStack(spacing: Theme.Space.m) { ForEach(tiles) { tile($0, row: true) } }
+        } else {
+            VStack(spacing: Theme.Space.l) {
+                ForEach(Array(stride(from: 0, to: tiles.count, by: 2)), id: \.self) { i in
+                    HStack(alignment: .top, spacing: Theme.Space.m) {
+                        tile(tiles[i], row: false)
+                        if i + 1 < tiles.count { tile(tiles[i + 1], row: false) } else { Color.clear.frame(maxWidth: .infinity, maxHeight: 1) }
+                    }
+                }
+            }
+        }
+    }
+
+    private func reason(_ t: LookRules.Tile) -> String? {
+        switch t.blocked {
+        case .plan: t.option.requiresPlan.map { tr("looks.plan", $0) } ?? tr("looks.plan_none")
+        case .photos: tr("looks.no_photos")
+        case .deck: tr("looks.no_deck")
+        case nil: nil
+        }
+    }
+
+    /// The server's note as one line without its full stop (an older server still sends sentences).
+    private func note(_ o: LookCapabilities.Option) -> String? { o.note.map { $0.hasSuffix(".") ? String($0.dropLast()) : $0 } }
+
+    @ViewBuilder private func tile(_ t: LookRules.Tile, row: Bool) -> some View {
+        let o = t.option, chosen = selected == o.id, why = reason(t)
+        let words = VStack(alignment: .leading, spacing: 2) {
+            Text(o.label).font(.role(.headline)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+            if let why {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    if t.blocked == .plan { Image(systemName: "lock.fill").font(.vmk(11)).accessibilityHidden(true) }
+                    Text(why).font(.role(.footnote)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                }
+                .foregroundStyle(Theme.text)          // the whole tile is at 40 percent: the reason starts from the text colour so it stays readable
+            } else if !row, let line = note(o) {
+                Text(line).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(1)
+            }
+        }
+        let face = Group {
+            if row { HStack(alignment: .center, spacing: Theme.Space.m) { LookPicture(option: o, selected: chosen, row: true); words } }
+            else { VStack(alignment: .leading, spacing: Theme.Space.s) { LookPicture(option: o, selected: chosen, row: false); words } }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading).contentShape(Rectangle())
+        if t.locked {
+            // "You cannot have this" has one look: in place, dimmed, with the reason where the note was. A tap answers softly and changes nothing.
+            face.opacity(0.4)
+                .accessibilityElement(children: .ignore).accessibilityLabel(o.label).accessibilityValue(why ?? "").accessibilityAddTraits(.isButton)
+                .accessibilityIdentifier("lookTile-\(o.id)")
+                .disabled(true)          // after the spoken element is made, so VoiceOver says "dimmed"
+                .onTapGesture { Haptics.play(.selection) }
+        } else {
+            Button { pick(t) } label: { face }
+                .buttonStyle(TilePress())
+                .accessibilityElement(children: .ignore).accessibilityLabel(o.label).accessibilityValue(note(o) ?? "")
+                .accessibilityAddTraits(chosen ? [.isButton, .isSelected] : .isButton)
+                .accessibilityIdentifier("lookTile-\(o.id)")
+        }
+    }
+}
+
+/// The picture of a look, on the gutter: the server's preview cropped to the tile with a hairline edge (a white picture still has one on a white sheet).
+/// Auto has no photograph: it is the sparkle of "we choose", as everywhere else. Chosen: a ring around it, outside the picture, and nothing else.
 private struct LookPicture: View {
     let option: LookCapabilities.Option
     let selected: Bool
-    let locked: Bool
-    var ratio: CGFloat = 1.6
-    private let radius = Theme.Radii.card
+    let row: Bool
+    private var radius: CGFloat { row ? Theme.Radii.thumb : Theme.Radii.card }
 
     var body: some View {
-        Color.clear.aspectRatio(ratio, contentMode: .fit)
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        Color.clear
+            .frame(width: row ? 96 : nil, height: row ? 60 : nil).aspectRatio(row ? nil : 1.6, contentMode: .fit)
             .overlay {
-                if let image = InlineImage.image(option.preview) { Image(uiImage: image).resizable().scaledToFill() }
-                else { ZStack { Theme.makingGradient; Image(systemName: symbol).font(.role(.title, weight: .regular)).foregroundStyle(Theme.onMedia.opacity(0.9)) } }
+                if option.isAuto { ZStack { Theme.primaryContainer; Image(systemName: "sparkles").font(.role(row ? .headline : .title, weight: .regular)).dynamicTypeSize(...DynamicTypeSize.xxxLarge).foregroundStyle(Theme.primary) } }
+                else if let image = InlineImage.image(option.preview) { Image(uiImage: image).resizable().scaledToFill() }
+                else { ZStack { Theme.makingGradient; Image(systemName: symbol).font(.role(row ? .headline : .title, weight: .regular)).dynamicTypeSize(...DynamicTypeSize.xxxLarge).foregroundStyle(Theme.onMedia.opacity(0.9)) } }
             }
-            .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-            .saturation(locked ? 0 : 1).opacity(locked ? 0.45 : 1)
-            .overlay(alignment: .topLeading) {
-                if locked {
-                    Image(systemName: "lock.fill").font(.role(.caption, weight: .bold)).dynamicTypeSize(...DynamicTypeSize.large).foregroundStyle(Theme.onMedia).frame(width: 26, height: 26).background(Theme.mediaInk.opacity(0.72), in: Circle()).padding(Theme.Space.s)
-                }
-            }
-            .overlay(alignment: .topTrailing) {
-                if selected {
-                    Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).dynamicTypeSize(...DynamicTypeSize.large).foregroundStyle(Theme.onPrimary).frame(width: 26, height: 26).background(Theme.primary, in: Circle())
-                        .overlay(Circle().strokeBorder(Theme.surface, lineWidth: 2)).padding(Theme.Space.s).transition(.scale.combined(with: .opacity))
-                }
-            }
-            .padding(4)
-            .overlay(RoundedRectangle(cornerRadius: radius + 4, style: .continuous).strokeBorder(Theme.primary, lineWidth: selected ? 2.5 : 0))
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(Theme.text.opacity(0.08), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: radius + 4, style: .continuous).strokeBorder(Theme.primary, lineWidth: selected ? 2.5 : 0).padding(-4))
             .accessibilityHidden(true)
     }
 
     private var symbol: String {
-        switch option.id { case "auto": "sparkles"; case "real": "photo"; case "whiteboard": "pencil.and.scribble"; case "cartoon": "face.smiling"; default: "play.rectangle" }
+        switch option.id { case "real": "photo"; case "whiteboard": "pencil.and.scribble"; case "cartoon": "face.smiling"; default: "play.rectangle" }
     }
 }
 
-/// A face and its name: a circle, ringed and ticked when chosen. The name is whole at every text size (it wraps, it is never cut).
+// MARK: cast
+
+/// The characters of a look that has them: ten faces five across (people, then animals), up to `max`; none chosen means we choose. One line under them
+/// says what the choice means, and one switch per extra the look allows (the board).
+struct CastPicker: View {
+    @Bindable var create: CreateModel
+    let cast: LookCapabilities.Cast?
+    let extras: [LookCapabilities.Extra]
+    @Binding var lengthLine: String?
+    var showsLabel = true
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var choice: LookChoice { create.form.lookChoice }
+    private var spring: Animation { reduceMotion ? Theme.Motion.fade : Theme.Motion.spring }
+    private var columns: Int { typeSize.isAccessibilitySize ? 3 : typeSize >= .xLarge ? 4 : 5 }
+    private var gap: CGFloat { typeSize.isAccessibilitySize ? Theme.Space.m : Theme.Space.s }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
+            if let cast {
+                if showsLabel { SectionLabel(tr("looks.cast")) }
+                let members = cast.groups.flatMap(\.members), full = LookRules.castIsFull(choice, caps: create.caps.looks)
+                FaceGrid(columns: columns, gap: gap, count: members.count) { i in face(members[i], inert: full && !choice.cast.contains(members[i].id)) }
+                let line = lengthLine ?? LookRules.castLine(choice, caps: create.caps.looks)
+                Text(line).font(.role(.footnote)).foregroundStyle(lengthLine == nil ? Theme.textSecondary : Theme.text)
+                    .fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("castLine").animation(Theme.Motion.select, value: line)
+            }
+            ForEach(extras) { extra in
+                Toggle(isOn: Binding(get: { choice.extras.contains(extra.id) }, set: { on in create.form.setLookExtra(extra.id, on: on); Haptics.play(.selection) })) {
+                    Text(extra.label).font(.role(.body)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                }
+                .tint(Theme.primary).frame(minHeight: 52)
+                .accessibilityHint(extra.note ?? "").accessibilityIdentifier("extra-\(extra.id)")
+            }
+        }
+    }
+
+    private func face(_ m: LookCapabilities.Member, inert: Bool) -> some View {
+        let selected = choice.cast.contains(m.id)
+        return Button { tap(m) } label: { FaceCell(name: m.name, selected: selected) { CastFace(member: m) } }
+            .buttonStyle(TilePress())
+            .opacity(inert ? 0.4 : 1)
+            .accessibilityElement(children: .ignore).accessibilityLabel(m.name).accessibilityValue([m.role, m.topic].compactMap { $0 }.joined(separator: ", "))
+            .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton).accessibilityIdentifier("cast-\(m.id)")
+            .disabled(inert)         // the limit is reached: the others wait, dimmed, until one is let go
+    }
+
+    private func tap(_ m: LookCapabilities.Member) {
+        let result = withAnimation(spring) { create.form.toggleCast(m.id, caps: create.caps) }
+        guard result.tap != .full else { return }
+        Haptics.play(.selection)
+        if let nudge = result.nudge {          // a conversation needs a longer video: the length was moved, the line says so (and VoiceOver hears it)
+            let line = LookWords.moved(nudge, form: create.form, caps: create.caps)
+            withAnimation(spring) { lengthLine = line }
+            UIAccessibility.post(notification: .announcement, argument: line)
+        }
+    }
+}
+
+/// The face of a character: the server's drawing, or a plain mark when it sent none.
+struct CastFace: View {
+    let member: LookCapabilities.Member
+    var body: some View {
+        ZStack {
+            Theme.surfaceRaised
+            if let image = InlineImage.image(member.thumbnail) { Image(uiImage: image).resizable().scaledToFill() }
+            else { Image(systemName: member.kind == "animal" ? "pawprint.fill" : "person.fill").font(.role(.headline)).foregroundStyle(Theme.textSecondary) }
+        }
+    }
+}
+
+/// A face and its name. Chosen: a ring drawn on the edge of the face itself, so no face is ever larger or smaller than its neighbours and the first
+/// one sits on the gutter. The name is whole at every text size (it wraps, it is never cut) and never changes colour or weight.
 private struct FaceCell<Face: View>: View {
     let name: String
     let selected: Bool
@@ -251,37 +289,44 @@ private struct FaceCell<Face: View>: View {
 
     var body: some View {
         VStack(spacing: 5) {
-            face.aspectRatio(1, contentMode: .fit).frame(maxWidth: 64).clipShape(Circle())
-                .padding(3).overlay(Circle().strokeBorder(Theme.primary, lineWidth: selected ? 2.5 : 0))
-                .overlay(alignment: .bottomTrailing) {
-                    if selected {
-                        Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).dynamicTypeSize(...DynamicTypeSize.large).foregroundStyle(Theme.onPrimary).frame(width: 20, height: 20)
-                            .background(Theme.primary, in: Circle()).overlay(Circle().strokeBorder(Theme.surface, lineWidth: 2)).transition(.scale.combined(with: .opacity))
-                    }
-                }
-            Text(name).font(.role(.caption, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text)
-                .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+            face.aspectRatio(1, contentMode: .fit).clipShape(Circle())
+                .overlay { if selected { ZStack { Circle().strokeBorder(Theme.surface, lineWidth: 4.5); Circle().strokeBorder(Theme.primary, lineWidth: 2.5) } } }
+            Text(name).font(.role(.caption, weight: .regular)).foregroundStyle(Theme.text).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, minHeight: Theme.minTouch, alignment: .top).contentShape(Rectangle())
     }
 }
 
-/// Rows of equal cells (the faces line up under each other from group to group).
+/// Rows of equal cells, edge to edge.
 private struct FaceGrid<Cell: View>: View {
     let columns: Int
+    let gap: CGFloat
     let count: Int
     @ViewBuilder var cell: (Int) -> Cell
 
     var body: some View {
         VStack(spacing: Theme.Space.m) {
             ForEach(Array(stride(from: 0, to: count, by: columns)), id: \.self) { start in
-                HStack(alignment: .top, spacing: 6) {
+                HStack(alignment: .top, spacing: gap) {
                     ForEach(start..<start + columns, id: \.self) { i in
                         if i < count { cell(i) } else { Color.clear.frame(maxWidth: .infinity, maxHeight: 1).accessibilityHidden(true) }
                     }
                 }
             }
         }
+    }
+}
+
+/// The chosen characters in a pill: up to three small faces that overlap, in the order they were chosen.
+struct PillFaces: View {
+    let members: [LookCapabilities.Member]
+    var body: some View {
+        HStack(spacing: -6) {
+            ForEach(members.prefix(3)) { m in
+                CastFace(member: m).frame(width: 20, height: 20).clipShape(Circle()).overlay(Circle().strokeBorder(Theme.surfaceRaised, lineWidth: 1.5))
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -312,7 +357,7 @@ enum LookWords {
     private static func what(_ nudge: LookRules.LengthNudge, _ form: CreateForm, _ caps: CreateCapabilities) -> (name: String?, need: String) {
         (nudge.conversation ? nil : caps.looks?.option(form.lookChoice.look)?.label, LengthLabel.chip(nudge.needSeconds / 60))
     }
-    /// "Length is now 30 s: a conversation needs 20 s."
+    /// "Length changed to 30 s. A conversation needs 20 s or more."
     static func moved(_ nudge: LookRules.LengthNudge, form: CreateForm, caps: CreateCapabilities) -> String {
         let w = what(nudge, form, caps)
         return w.name.map { tr("looks.length_moved_look", LengthLabel.chip(nudge.minutes), $0, w.need) } ?? tr("looks.length_moved_talk", LengthLabel.chip(nudge.minutes), w.need)

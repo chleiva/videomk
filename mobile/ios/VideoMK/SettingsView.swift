@@ -45,9 +45,9 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: Theme.Space.s) {
                     SectionLabel(tr("settings.photos"))
                     SettingsCard {
-                        Toggle(isOn: $useDates) { Text(tr("settings.photo_dates")).font(.role(.body)).foregroundStyle(Theme.text) }.tint(Theme.success).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("usePhotoDates")
+                        Toggle(isOn: $useDates) { Text(tr("settings.photo_dates")).font(.role(.body)).foregroundStyle(Theme.text) }.tint(Theme.primary).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("usePhotoDates")
                         SettingsDivider()
-                        Toggle(isOn: $useLocations) { Text(tr("settings.photo_locations")).font(.role(.body)).foregroundStyle(Theme.text) }.tint(Theme.success).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("usePhotoLocations")
+                        Toggle(isOn: $useLocations) { Text(tr("settings.photo_locations")).font(.role(.body)).foregroundStyle(Theme.text) }.tint(Theme.primary).padding(.horizontal, Theme.Space.l).frame(minHeight: 52).accessibilityIdentifier("usePhotoLocations")
                         if let media = model.media {
                             SettingsDivider()
                             Menu {

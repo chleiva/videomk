@@ -238,27 +238,37 @@ struct Pill<MenuContent: View>: View {
     }
 }
 
-/// The same pill for a choice with pictures: it opens a sheet instead of a menu (the Look). A long value takes a second line, never an ellipsis.
-struct PillButton: View {
+/// The same pill for a choice with pictures: it opens a sheet instead of a menu (the Look, the Characters). One line, always: the value is a word,
+/// and what does not fit in a word (the chosen faces) is drawn after it as `accessory`. An empty value leaves the accessory alone (the compact pill).
+struct PillButton<Accessory: View>: View {
     let value: String
     let spoken: String
     var spokenValue: String?
     var identifier: String = ""
     let action: () -> Void
+    @ViewBuilder var accessory: Accessory
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                Text(value).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                if !value.isEmpty { Text(value).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1) }
+                accessory
                 Image(systemName: "chevron.down").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
             }
-            .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 38)
-            .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
-            .frame(minHeight: Theme.minTouch).contentShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+            .padding(.horizontal, 14).frame(minHeight: 38)
+            .background(Theme.surfaceRaised, in: Capsule())
+            .frame(minHeight: Theme.minTouch).contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(spoken).accessibilityValue(spokenValue ?? value)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spoken).accessibilityValue(spokenValue ?? value).accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(identifier)
+    }
+}
+
+extension PillButton where Accessory == EmptyView {
+    init(value: String, spoken: String, spokenValue: String? = nil, identifier: String = "", action: @escaping () -> Void) {
+        self.init(value: value, spoken: spoken, spokenValue: spokenValue, identifier: identifier, action: action) { EmptyView() }
     }
 }
 
@@ -496,7 +506,7 @@ struct SheetHeader: View {
     let onClose: () -> Void
     var body: some View {
         HStack(alignment: .center, spacing: Theme.Space.m) {
-            Text(title).textRole(.title).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
+            Text(title).textRole(.title).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader).accessibilityIdentifier("sheetTitle")
             Spacer(minLength: Theme.Space.s)
             IconButton(symbol: "xmark", label: closeLabel, identifier: closeID, action: onClose)
         }
@@ -509,22 +519,49 @@ private struct SheetHeightKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
 
+private struct SheetHeaderHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
 /// A sheet as tall as what it holds (never half empty), on the opaque surface, with the 20 pt gutter. Past the screen it scrolls.
-struct FittedSheet<Content: View>: View {
+/// `header` stays pinned: only the body scrolls, so the title and the close button are always there and nothing slides under the grabber.
+/// `scrollTo`: the id of a view in the body to bring to the top when the value changes.
+struct FittedSheet<Header: View, Content: View>: View {
+    var scrollTo: String?
+    @ViewBuilder var header: Header
     @ViewBuilder var content: Content
     @State private var height: CGFloat = 360
+    @State private var headerHeight: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    init(scrollTo: String? = nil, @ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) { self.scrollTo = scrollTo; self.header = header(); self.content = content() }
+
     var body: some View {
-        ScrollView {
-            content
-                .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.l)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(GeometryReader { g in Color.clear.preference(key: SheetHeightKey.self, value: g.size.height) })
+        ScrollViewReader { proxy in
+            ScrollView {
+                content
+                    .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.l)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(GeometryReader { g in Color.clear.preference(key: SheetHeightKey.self, value: g.size.height) })
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                header
+                    .padding(.horizontal, Theme.gutter).frame(maxWidth: .infinity, alignment: .leading).background(Theme.surface)
+                    .background(GeometryReader { g in Color.clear.preference(key: SheetHeaderHeightKey.self, value: g.size.height) })
+            }
+            .onChange(of: scrollTo) { _, id in if let id { withAnimation(reduceMotion ? nil : Theme.Motion.spring) { proxy.scrollTo(id, anchor: .top) } } }
         }
-        .scrollBounceBehavior(.basedOnSize)
         .onPreferenceChange(SheetHeightKey.self) { h in Task { @MainActor in if h > 0, abs(h - height) > 0.5 { height = h } } }
-        .presentationDetents([.height(height), .large])
+        .onPreferenceChange(SheetHeaderHeightKey.self) { h in Task { @MainActor in if abs(h - headerHeight) > 0.5 { headerHeight = h } } }
+        .presentationDetents([.height(height + headerHeight), .large])
         .presentationBackground(Theme.surface).presentationDragIndicator(.visible)
     }
+}
+
+extension FittedSheet where Header == EmptyView {
+    init(@ViewBuilder content: () -> Content) { self.init(header: { EmptyView() }, content: content) }
 }
 
 /// A section label inside a sheet or a list: small, never the tertiary colour (it is essential text).

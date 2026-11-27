@@ -761,7 +761,7 @@ final class AppModel {
                 VideoItem(id: "v7", status: .complete, title: "The jobs of tomorrow", durationSeconds: 58, createdAt: .now.addingTimeInterval(-272800), previewGifURL: pic("landscape", "s_jobs"), aspect: "16:9", resolution: "1080p"),
             ]
             briefs["v1"] = "How honey is made"; minutes["v1"] = 2
-            if env["VMK_DEBUG_LOOK_NOTE"] == "1" { lookNotes["v1"] = Localization.shared.language == .es ? "En un video tan corto presenta un solo personaje; una conversación necesita al menos 20 segundos." : "In a video this short one character presents; a conversation needs at least 20 seconds." }
+            if env["VMK_DEBUG_LOOK_NOTE"] == "1" { lookNotes["v1"] = Localization.shared.language == .es ? "Presenta un solo personaje. Una conversación necesita 20 s o más." : "One character presents. A conversation needs 20 s or more." }
             stageSince["v1"] = (.voiceAndVisuals, Date().addingTimeInterval(-40))
         }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "1" {

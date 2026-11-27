@@ -102,7 +102,7 @@ struct NotifyCard: View {
                     Text(tr("making.notify")).font(.role(.headline, weight: .medium)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .tint(Theme.success)
+            .tint(Theme.primary)
             .padding(.horizontal, 18).padding(.vertical, Theme.Space.m).frame(minHeight: 64)
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
             .elevation(2)

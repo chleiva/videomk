@@ -13124,104 +13124,19 @@
         }
       }
     },
-    "looks.cast_max" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose up to %lld."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige hasta %lld."
-          }
-        }
-      }
-    },
-    "looks.group_people" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "People"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personas"
-          }
-        }
-      }
-    },
-    "looks.group_animals" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Animals"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Animales"
-          }
-        }
-      }
-    },
-    "looks.not_with_photos" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not with your photos: %@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No con tus fotos: %@."
-          }
-        }
-      }
-    },
-    "looks.not_with_deck" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not with a presentation: %@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No con una presentación: %@."
-          }
-        }
-      }
-    },
     "looks.reset_photos" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Look is now Auto: %@ is not made from your photos."
+            "value" : "Look set to Auto. %@ can't use your photos."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El estilo ahora es Auto: %@ no se hace con tus fotos."
+            "value" : "Estilo cambiado a Auto. %@ no usa tus fotos."
           }
         }
       }
@@ -13232,13 +13147,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Look is now Auto: %@ is not made from a presentation."
+            "value" : "Look set to Auto. %@ can't use a presentation."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El estilo ahora es Auto: %@ no se hace con una presentación."
+            "value" : "Estilo cambiado a Auto. %@ no usa una presentación."
           }
         }
       }
@@ -13249,13 +13164,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Look is now Auto: %@ is not available."
+            "value" : "Look set to Auto. %@ is not available."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El estilo ahora es Auto: %@ no está disponible."
+            "value" : "Estilo cambiado a Auto. %@ no está disponible."
           }
         }
       }
@@ -13266,13 +13181,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Length is now %1$@: a conversation needs %2$@."
+            "value" : "Length changed to %1$@. A conversation needs %2$@ or more."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La duración ahora es %1$@: una conversación necesita %2$@."
+            "value" : "Duración cambiada a %1$@. Una conversación necesita %2$@ o más."
           }
         }
       }
@@ -13283,13 +13198,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Length is now %1$@: %2$@ needs %3$@."
+            "value" : "Length changed to %1$@. %2$@ needs %3$@ or more."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La duración ahora es %1$@: %2$@ necesita %3$@."
+            "value" : "Duración cambiada a %1$@. %2$@ necesita %3$@ o más."
           }
         }
       }
@@ -13362,23 +13277,6 @@
         }
       }
     },
-    "looks.best_shape" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Looks best in %@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se ve mejor en %@."
-          }
-        }
-      }
-    },
     "looks.name_real" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13425,7 +13323,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dibujos animados"
+            "value" : "Animado"
           }
         }
       }
@@ -13460,6 +13358,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Colores"
+          }
+        }
+      }
+    },
+    "looks.cast_none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We pick for you. Or choose up to %lld."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegimos por ti. O elige hasta %lld."
+          }
+        }
+      }
+    },
+    "looks.cast_one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ presents."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ presenta."
+          }
+        }
+      }
+    },
+    "looks.cast_talk" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ talk it through."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ lo conversan."
+          }
+        }
+      }
+    },
+    "looks.no_deck" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not with slides"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No con presentación"
+          }
+        }
+      }
+    },
+    "looks.no_photos" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not with photos"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No con fotos"
           }
         }
       }
