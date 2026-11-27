@@ -20,7 +20,7 @@ MAX_IDLE_S = 2.2             # longest stretch with the pen off the board (estim
 COUNT_PASS_COVERAGE = 0.40  # a board ONE thing short of the count that already covers this much of the picture passes
 # What the director alone can repair. The rest of the complaints are mended without a model (overlaps, things off the board: `make_safe`; an empty-looking board:
 # `fill_out`; touching marks and arrows: `make_clean`; a resting pen: `fill_rests` at the timeline, with the real word times) and are never a reason to ask again.
-DIRECTOR_KINDS = ("count", "arrow", "crossed", "small", "late", "layout")
+DIRECTOR_KINDS = ("count", "arrow", "crossed", "small", "late", "layout", "gap")
 MAX_LATE_S = 0.8             # with estimated word times only a clear delay is worth a complaint (the renderer starts things earlier to stay within about 0.3 s)
 
 
@@ -179,7 +179,7 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
             off = _off_board(rep)
             sc.update(seconds=round(total, 1), items=len(kinds), solid=len(solid), coverage=rep["coverage"], min_text=round(min(texts), 3) if texts else None,
                       min_drawing=round(min(draws), 3) if draws else None, overlaps=rep["overlaps"], crossed=rep["crossed"], off_board=off,
-                      collisions=rep["collisions"], blocked=[x for x in rep["arrows"]["stub"]] + [x[0] for x in rep["arrows"]["dropped"]],
+                      collisions=rep["collisions"], close_texts=rep["close_texts"], blocked=[x for x in rep["arrows"]["stub"]] + [x[0] for x in rep["arrows"]["dropped"]],
                       marks={k_: len(v) for k_, v in rep["marks"].items()},
                       pen_busy=round(busy / max(total, 1e-6), 2), longest_idle_s=round(idle, 2), late=late)
             need = max(MIN_SOLID if total >= 10 else 2, int(total / 10.0 * MIN_SOLID_PER_10S))
@@ -209,6 +209,8 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
             for j in [x for x in sc["blocked"] if x not in lost_ok][:2]:
                 add("arrow", f"the arrow '{name(j)}' has no clear way between its two things (other drawings or texts are in between, or the two nearly touch): connect neighbours "
                                         "with free space between them, or move one end to a zone next to the other")
+            for a, c, gp in rep["close_texts"][:2]:
+                add("gap", f"the writing '{name(a)}' and '{name(c)}' stand only {gp:.0f} units apart and read as one word: give them their own zones or more room between them")
             for a, c in [x for x in rep["collisions"] if x[0] not in rep["crossed"]][:2]:
                 add("mark", f"the mark '{name(a)}' touches '{name(c)}': mark something with free space round it")
             if texts and min(texts) < MIN_TEXT:
@@ -238,7 +240,7 @@ def summary(scores: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {"boards": len(scores), "failed": sum(1 for s in scores if not s["ok"]), "items_per_board": round(sum(s["items"] for s in good) / max(1, len(good)), 1),
             "solid_per_board": round(sum(s["solid"] for s in good) / max(1, len(good)), 1), "coverage": round(sum(s["coverage"] * s["seconds"] for s in good) / tot, 3),
             "min_text": min(texts) if texts else None, "pen_busy": round(sum(s["pen_busy"] * s["seconds"] for s in good) / tot, 2),
-            "longest_idle_s": max((s["longest_idle_s"] for s in good), default=0.0), "overlaps": sum(len(s.get("overlaps") or []) for s in scores),
+            "longest_idle_s": max((s["longest_idle_s"] for s in good), default=0.0), "overlaps": sum(len(s.get("overlaps") or []) for s in scores), "close_texts": sum(len(s.get("close_texts") or []) for s in scores),
             "off_board": sum(len(s.get("off_board") or []) for s in scores), "not_laid_out": len(scores) - len(good),
             "crossed": sum(len(s.get("crossed") or []) for s in scores), "collisions": sum(len(s.get("collisions") or []) for s in scores),
             "arrows_blocked": sum(len(s.get("blocked") or []) for s in scores), "marks_degraded": sum((s.get("marks") or {}).get("degraded", 0) for s in scores),

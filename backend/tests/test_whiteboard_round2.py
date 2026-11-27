@@ -114,3 +114,96 @@ def test_a_board_that_only_looks_empty_is_filled_without_the_director(on, monkey
     wp.review(p, policy(p), lambda s, u: asked.append(u) or "{}")
     for s in only_deterministic:
         assert f"BOARD {s['board']} " not in (asked[0] if asked else "")
+
+
+# ----------------------------------------------------------------------------- layout: the measures and the fixes (2, 3 and the tall frame)
+from engine.frame import Frame  # noqa: E402
+from engine.scenes import ELEMENTS  # noqa: E402
+from engine.scenes.base import SceneCtx  # noqa: E402
+from engine.scenes.elements import whiteboard as wbe  # noqa: E402
+from engine.whiteboard import spec  # noqa: E402
+
+
+def _board(items, aspect="16:9"):
+    props = ELEMENTS["whiteboard"].sanitize({"items": items})
+    ctx = SceneCtx(frame=Frame.parse(aspect, "1080p"), captions=True)
+    return wbe.build(props, 10.0, ctx, 480, 270, load=score._stub_loader(), layout_only=True)[3]
+
+
+def test_two_texts_never_read_as_one_word():
+    """The French sea-salt video: "sel" and "soleil" touched ("selsoleil"). The ink of different texts keeps TEXT_GAP apart, the score counts it."""
+    p = plan("fr_sea_salt_r2")
+    sc = score.score_plan(p, "16:9")
+    assert [s["close_texts"] for s in sc] == [[], []]
+    # the measure itself sees the old layout: put the label back where it was (9 units under the text) and the pair is reported
+    items = [{"id": "sw", "write": "sel", "zone": "left", "size": "l"}, {"id": "sol", "write": "soleil", "near": "sw", "side": "right", "size": "s"}]
+    assert _board(items)["close_texts"] == []
+    real = spec._apart_texts
+    spec._apart_texts = lambda blk, x, y, *a, **k: (x, y)
+    old_gap = spec.TEXT_GAP
+    try:
+        orig_free = spec._free_side
+        spec._free_side = lambda tb, w, h, side, gap, by_id, L: orig_free(tb, w, h, side, 9.4, by_id, L)
+        close = _board(items)["close_texts"]
+    finally:
+        spec._apart_texts, spec._free_side, spec.TEXT_GAP = real, orig_free, old_gap
+    assert close and close[0][2] < spec.TEXT_GAP
+    assert any(c[0] == "sw" for c in close)
+
+
+def test_a_close_pair_is_a_complaint_for_the_director_not_a_failure_to_hide():
+    assert "gap" in score.DIRECTOR_KINDS
+
+
+def test_an_arrow_aims_at_the_words_and_the_underline_yields():
+    """An arrow coming from below a underlined word stopped at the underline tip (74 units under the writing) and pointed at the underline."""
+    r = _board([{"id": "b", "write": "Hielo", "zone": "top", "size": "l"}, {"id": "a", "write": "Calor", "zone": "bottom", "size": "l"},
+                {"id": "x", "connect": "arrow", "from": "a", "to": "b"}, {"id": "u", "mark": "underline", "on": "b"}])
+    tip_y = r["arrow_ends"]["x"][1][1]
+    assert r["boxes"]["b"][3] < tip_y < r["boxes"]["b"][3] + 40, tip_y            # was about 74 below the writing
+    assert ["u", "an arrow needed the room"] in r["marks"]["dropped"] and r["collisions"] == []
+
+
+def test_underlines_are_capped_and_never_end_to_end():
+    """Six circles degraded into two rows of underlines end to end (QA, vaccine video): over the real boards no board has more than the cap, and no two underlines
+    of one board at about the same height end less than UNDER_END_GAP apart."""
+    import glob
+
+    seen = 0
+    for f in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "fixtures", "whiteboard_boards", "*.json"))):
+        with open(f, encoding="utf-8") as fh:
+            fx = json.load(fh)
+        ctx = SceneCtx(frame=Frame.parse(fx["aspect"], "1080p"), captions=fx["captions"])
+        for sc_ in fx["scenes"]:
+            r = wbe.build(sc_["props"], sc_["duration"], ctx, 480, 270, load=score._stub_loader(), layout_only=True)[3]
+            under = [i for i, k in r["kinds"].items() if k == "mark" and any(it["id"] == i.split(":")[-1] and it.get("mark", "").endswith("underline") or
+                                                                                 [d for d in r["marks"]["degraded"] if d[0] == i.split(":")[-1] and d[2] == "underline"]
+                                                                                 for it in sc_["props"]["items"])]
+            degraded = [x for x in r["marks"]["degraded"] if x[2] == "underline"]
+            assert len(degraded) <= spec.UNDERLINES_DEGRADED, f
+            seen += len(under)
+            boxes = sorted((r["boxes"][i] for i in under), key=lambda b: b[0])
+            for a_, b_ in zip(boxes, boxes[1:]):
+                same_row = abs((a_[1] + a_[3]) / 2 - (b_[1] + b_[3]) / 2) < 45
+                assert not same_row or b_[0] - a_[2] >= spec.UNDER_END_GAP, (f, a_, b_)
+    assert seen > 10
+
+
+def test_a_loop_keeps_a_wider_clear_margin_to_the_next_item():
+    assert spec.LOOP_CLEAR >= 30.0 and spec.LOOP_CLEAR > spec.MARK_CLEAR
+
+
+def test_a_lonely_column_is_centred_and_a_tall_board_gives_empty_rows_nothing():
+    items = [{"id": "t", "write": "ARN\nmensajero", "zone": "top-left"}, {"id": "c", "draw": "cell", "zone": "left"}, {"id": "l", "write": "Pieza", "near": "c"}]
+    out = spec.centred(items)
+    assert [i.get("zone") for i in out] == ["top", "centre", None]
+    two = items + [{"id": "r", "draw": "sun", "zone": "right"}]
+    assert spec.centred(two) is two                                    # two columns used: nothing moves
+    assert spec.weights(items, tall=True)[0][2] < spec.weights(items)[0][2] and spec.weights(items, tall=True)[1][2] < spec.weights(items)[1][2]
+
+
+def test_a_block_of_several_lines_stands_centred_in_its_zone():
+    r = _board([{"id": "t", "write": "ARN\nmensajero", "zone": "top-row", "size": "m"}], "9:16")
+    x0, _, x1, _ = r["boxes"]["t"]
+    W = r["view"][2]
+    assert abs((x0 + x1) / 2 - (r["view"][0] + W / 2)) < 0.15 * W, (x0, x1, r["view"])      # was flush against the left edge of the zone
