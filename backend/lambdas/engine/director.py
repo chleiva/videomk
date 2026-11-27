@@ -142,7 +142,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
     if background.enabled() and not photos:   # the moving background, chosen by the topic's mood (BG_ANIMATED, QA only; docs/BACKGROUNDS_ANIMATED.md): one small call, never a failure
-        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 60))
+        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 300))   # the answer is about 20 tokens, but the model's own thinking counts against the limit (60 came back empty on QA)
         info["background"] = {k: plan["background"][k] for k in ("style", "palette", "by")}
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)

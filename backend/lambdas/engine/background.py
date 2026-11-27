@@ -109,6 +109,8 @@ def choose(prompt: str, plan: Dict[str, Any], ask: Optional[Callable[[str, str],
         except Exception as e:  # noqa: BLE001 - a background is never worth a failed video
             log.warning("BACKGROUND_CHOICE_FAILED %s", type(e).__name__)
             wish = {}
+    if ask is not None and str(wish.get("style") or "").strip().lower() not in STYLES:
+        log.warning("BACKGROUND_CHOICE_UNUSABLE keys=%s", sorted(wish)[:4])   # never the text itself
     by = "director" if str(wish.get("style") or "").strip().lower() in STYLES else "mood"
     style, palette = settle(wish.get("style"), wish.get("palette"), mood, theme)
     seed = zlib.crc32(str(plan.get("title") or prompt or "").encode("utf-8")) % 9973 + 1
