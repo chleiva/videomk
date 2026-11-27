@@ -63,7 +63,7 @@ Props from the director: `{heading (<=48), points: 0-4 (<=60)}`, or `{heading, c
 **Art that would lift the quality** (in order of effect): 5 to 6 mouth shapes and eyebrow pieces (expression); a three-quarter head and torso (turning toward the content); sleeves built into a round-shouldered torso (clean raised arms); a second relaxed hand per side; a seated or desk variant for 9:16. About 3 sheets per character (about $0.11 to $0.17).
 
 ## Animal presenters (built 2026-11-27 on branch `animal-cast`; the owner approved the list and the cost)
-Same house style and rig as the Fox, made with the same pipeline (`backend/scripts/vector_character_sheet5.py --animals`, `vector_character_build5.py --only <id>`, `vector_character_hands.py generate|build --only <id>`): one parts sheet and one hands sheet each, no retries, USD 0.3611 for the five (ledger `docs/vector_character_spend.jsonl`, runs `vector-character-animals` and `vector-character-hands`).
+Same house style and rig as the Fox, made with the same pipeline (`backend/scripts/vector_character_sheet5.py --animals`, `vector_character_build5.py --only <id>`, `vector_character_hands.py generate|build --only <id>`): one parts sheet and one hands sheet each, no retries, USD 0.3618 for the five (ledger `docs/vector_character_spend.jsonl`, runs `vector-character-animals` and `vector-character-hands`).
 
 | id | Name | Role EN / ES | Look | Topics (children's and fun videos) | Voice EN / ES | Tail | Size |
 |---|---|---|---|---|---|---|---|
