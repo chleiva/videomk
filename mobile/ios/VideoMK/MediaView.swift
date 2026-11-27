@@ -13,21 +13,21 @@ struct MediaView: View {
     @State private var showStorage = false
     @State private var viewing: ViewerContext?
     @State private var showAddToCollection = false
-    @State private var confirmDelete = false
+    @State private var path: [MediaRoute] = []
     @State private var newCollection = false
+    @FocusState private var searchFocused: Bool
     @State private var confirmCancelUploads = false
     @State private var tabVisible = false
     @State private var newName = ""
     @AppStorage("mediaPrivacyNoteSeen") private var privacySeen = false
-    @AppStorage("mediaCoachSeen") private var coachSeen = false
 
     init(media: MediaModel) { self.media = media; _feed = State(initialValue: PhotoFeed(kind: .timeline, media: media)) }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 0) {
             topBar
-            ScrollView {
+            SparkleRefreshScroll(action: { await media.loadSummary(); await feed.reload() }) {
                 VStack(spacing: Theme.Space.m) {
                     if !privacySeen { PrivacyNote { withAnimation(reduceMotion ? nil : .snappy) { privacySeen = true } } }
                     MediaHeader(media: media) { showStorage = true }
@@ -36,12 +36,10 @@ struct MediaView: View {
                             .font(.role(.footnote)).foregroundStyle(Theme.warning).padding(.horizontal, Theme.gutter).frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityIdentifier("readOnlyNote")
                     }
-                    SearchBar(feed: feed)
+                    SearchBar(feed: feed, focused: $searchFocused)
                     if media.summary?.readOnly != true, !selection.active, !feed.isSearching, !(feed.photos.isEmpty && !showBatch) { AddPhotosButton(pickerItems: $pickerItems) }
                     ChipsRow(feed: feed)
-                    if showCoach { CoachMark(text: tr("media.coach")) { withAnimation(reduceMotion ? nil : .snappy) { coachSeen = true } }.transition(.opacity) }
-                    if !feed.isSearching, !selection.active, !media.collections.isEmpty { CollectionsStrip(media: media, onNew: { newCollection = true }) }       // while selecting, the photos sit right under the search field
-                    content
+                    content         // straight to the month grid: Collections live behind More, and "Select" in the bar needs no coach line
                 }
                 .padding(.top, Theme.Space.xs)
                 .padding(.bottom, Theme.Space.l)
@@ -50,8 +48,12 @@ struct MediaView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
-            .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
+            .navigationDestination(for: MediaRoute.self) { route in
+                switch route {
+                case .collections: CollectionsListView(media: media, onNew: { newCollection = true })
+                case .collection(let c): CollectionDetailView(media: media, collection: c)
+                }
+            }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 TabBarRoom(reserve: !selection.active) {
                     if model.selectedTab == 1 { UndoToastHost() }
@@ -59,18 +61,20 @@ struct MediaView: View {
                     UploadBar(media: media, onManageStorage: { showStorage = true })
                     if media.bar == nil || media.bar?.kind == .finished { OrganizeBar(media: media) }
                     if showNextStep { NextStepBar(count: justAdded.count, onMake: { model.startVideo(with: justAdded) }, onDismiss: { withAnimation(reduceMotion ? nil : .snappy) { media.clearLastBatch() } }) }
-                    if selection.active { SelectionBar(selection: selection, onVideo: makeVideo, icons: [.init(id: "addToCollection", symbol: "folder.badge.plus", label: tr("collections.add_to_collection")) { showAddToCollection = true }, .init(id: "deleteSelection", symbol: "trash", label: tr("common.delete"), danger: true) { confirmDelete = true }]) }
+                    if selection.active { SelectionBar(selection: selection, onVideo: makeVideo, icons: [.init(id: "addToCollection", symbol: "folder.badge.plus", label: tr("collections.add_to_collection")) { showAddToCollection = true }, .init(id: "deleteSelection", symbol: "trash", label: tr("common.delete"), danger: true) { deleteSelected() }]) }
                 }
                 .animation(reduceMotion ? nil : .snappy, value: media.toast)
                 .animation(reduceMotion ? nil : .snappy, value: media.bar?.kind)
                 .animation(reduceMotion ? nil : .snappy, value: media.organizeBar?.kind)
             }
-            .refreshable { await media.loadSummary(); await feed.reload() }
+
         }
         .overlay { expandedPanel }
         .task { await media.start() }
         .onChange(of: selection.ordered) { _, ids in model.mediaSelection = ids.compactMap { id in feed.photos.first { $0.id == id } } }
-        .onChange(of: selection.active) { _, on in model.mediaSelecting = on; if on { coachSeen = true } }
+        .onChange(of: selection.active) { _, on in model.mediaSelecting = on; if on { searchFocused = false } }      // Select puts the keyboard away: the selection bar sits at the bottom
+        .onChange(of: path) { _, p in model.mediaPushed = !p.isEmpty }                                                // the tab bar steps aside on every pushed page
+        .onChange(of: media.showCollectionsList, initial: true) { _, show in if show { media.showCollectionsList = false; if path.last != .collections { path.append(.collections) } } }
         .onChange(of: model.submitted) { _, _ in withAnimation(.snappy) { selection.clear() }; media.clearLastBatch() }
         .onDisappear { model.mediaSelecting = false }
         .onChange(of: settleKey) { _, _ in settleBatchIfDone() }
@@ -91,12 +95,7 @@ struct MediaView: View {
         .fullScreenCover(item: $viewing) { ctx in
             PhotoViewer(media: media, photos: ctx.photos, start: ctx.index, onDeleted: { feed.remove([$0]) }, onMakeVideo: { photo in viewing = nil; send([photo]) })
         }
-        .confirmationDialog(tr("media.delete_title", selection.count), isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button(tr("media.delete_button", selection.count), role: .destructive) {
-                let ids = selection.ids
-                Task { if await media.delete(Array(ids)) { feed.remove(ids); selection.clear() } }
-            }
-        } message: { Text(tr("media.they_are_removed_from_your")) }
+
         .alert(tr("media.new_collection"), isPresented: $newCollection) {
             TextField(tr("media.name"), text: $newName)
             Button(tr("media.create")) { let n = newName; newName = ""; Task { _ = await media.createCollection(name: n) } }
@@ -123,7 +122,7 @@ struct MediaView: View {
                 }
             } else {
                 if feed.offline { Label(tr("media.offline_showing_whats_saved_on"), systemImage: "icloud.slash").font(.role(.caption)).foregroundStyle(Theme.textSecondary) }
-                PhotoGrid(feed: feed, media: media, selection: selection, onOpen: { open($0) }, hidden: batchIDs)
+                PhotoGrid(feed: feed, media: media, selection: selection, onOpen: { open($0) }, hidden: batchIDs.union(media.hiddenPhotos))
             }
         }
     }
@@ -153,19 +152,20 @@ struct MediaView: View {
         } else {
             TopBar(title: tr("media.media")) {
                 if !feed.photos.isEmpty {
-                    Button(tr("media.select")) { withAnimation(.snappy) { selection.active = true } }.buttonStyle(TextButtonStyle()).accessibilityIdentifier("selectButton")
+                    Button(tr("media.select")) { searchFocused = false; withAnimation(.snappy) { selection.active = true } }.buttonStyle(TextButtonStyle()).accessibilityIdentifier("selectButton")
                 }
                 Menu {
+                    if !media.shownCollections.isEmpty { Button { path.append(.collections) } label: { Label(tr("viewer.collections"), systemImage: "folder") }.accessibilityIdentifier("seeAllCollections") }
                     Button { newCollection = true } label: { Label(tr("media.new_collection"), systemImage: "folder.badge.plus") }.accessibilityIdentifier("newCollectionMenu")
                     Button { media.organizeLibrary() } label: { Label(tr("media.organize_my_library"), systemImage: "sparkles") }.accessibilityIdentifier("organizeLibrary")
                     Button { showStorage = true } label: { Label(tr("media.storage"), systemImage: "externaldrive") }
                 } label: { IconButtonFace(symbol: "ellipsis") }
-                    .accessibilityLabel(tr("media.more")).accessibilityIdentifier("mediaMore")
+                    .menuOrder(.fixed).accessibilityLabel(tr("media.more")).accessibilityIdentifier("mediaMore")
             }
         }
     }
 
-    // MARK: next step, coach mark, room for the tab bar
+    // MARK: next step
 
     /// The photos of the last upload batch that the server already lists: "Make a video from these" is offered until it is used or dismissed.
     private var justAdded: [LibraryPhoto] {
@@ -173,7 +173,7 @@ struct MediaView: View {
         return ids.isEmpty ? [] : feed.photos.filter { ids.contains($0.id) }
     }
     private var showNextStep: Bool { !selection.active && !justAdded.isEmpty && !feed.isSearching && (media.bar == nil || media.bar?.kind == .finished) }
-    private var showCoach: Bool { !coachSeen && !selection.active && !feed.photos.isEmpty && !feed.isSearching && !showNextStep }
+
 
     // MARK: the upload batch in the grid
 
@@ -223,6 +223,13 @@ struct MediaView: View {
     }
 
     private func send(_ photos: [LibraryPhoto]) { model.startVideo(with: photos) }
+
+    /// No question: the photos leave the grid at once and "Deleted · Undo" shows for six seconds.
+    private func deleteSelected() {
+        let ids = Array(selection.ids), feed = feed
+        withAnimation(.snappy) { selection.clear() }
+        media.deletePhotos(ids, undo: model.undo) { feed.remove($0) }
+    }
 }
 
 struct ViewerContext: Identifiable { let id = UUID(); let photos: [LibraryPhoto]; let index: Int }
@@ -258,21 +265,34 @@ struct MediaHeader: View {
     private func tint(_ m: StorageMeter) -> Color { m.state == .full ? Theme.danger : m.state == .warning ? Theme.warning : Theme.primary }
 }
 
+/// The search field. While it has the focus a Cancel text button sits beside it (it clears the words and puts the keyboard away).
 struct SearchBar: View {
     @Bindable var feed: PhotoFeed
-    @FocusState private var focused: Bool
+    var focused: FocusState<Bool>.Binding?
+    @FocusState private var ownFocus: Bool
+    private var isFocused: Bool { focused?.wrappedValue ?? ownFocus }
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.role(.body))
-                .focused($focused).submitLabel(.search).textInputAutocapitalization(.never).autocorrectionDisabled()
-                .accessibilityIdentifier("mediaSearch")
-            if feed.searching { ProgressView().controlSize(.small) }
-            else if !feed.text.isEmpty { Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary) }.accessibilityLabel(tr("media.clear_search")) }
+        HStack(spacing: Theme.Space.s) {
+            HStack(spacing: Theme.Space.s) {
+                Image(systemName: "magnifyingglass").foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
+                TextField(tr("media.search_your_photos_try_beach"), text: $feed.text).font(.role(.body))
+                    .focused(focused ?? $ownFocus).submitLabel(.search).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .accessibilityIdentifier("mediaSearch")
+                if feed.searching { ProgressView().controlSize(.small) }
+                else if !feed.text.isEmpty {
+                    Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch).contentShape(Rectangle()) }
+                        .buttonStyle(.plain).padding(.trailing, -Theme.Space.m).accessibilityLabel(tr("media.clear_search")).accessibilityIdentifier("clearSearch")
+                }
+            }
+            .padding(.horizontal, Theme.Space.l).frame(minHeight: 48)
+            .background(Theme.surfaceRaised, in: Capsule())
+            if isFocused {
+                Button(tr("common.cancel")) { feed.text = ""; if let focused { focused.wrappedValue = false } else { ownFocus = false } }
+                    .buttonStyle(TextButtonStyle()).transition(.move(edge: .trailing).combined(with: .opacity)).accessibilityIdentifier("searchCancel")
+            }
         }
-        .padding(.horizontal, Theme.Space.l).frame(minHeight: 48)
-        .background(Theme.surfaceRaised, in: Capsule())
         .padding(.horizontal, Theme.gutter)
+        .animation(Theme.Motion.select, value: isFocused)
     }
 }
 
@@ -287,7 +307,7 @@ struct ChipsRow: View {
                             HStack(spacing: 4) {
                                 Image(systemName: chip.kind == "place" ? "mappin.and.ellipse" : chip.kind == "date" ? "calendar" : "tag").font(.role(.caption))
                                 Text(chip.label).font(.role(.footnote, weight: .medium)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-                                Image(systemName: "xmark").font(.vmk(9, weight: .bold))
+                                Image(systemName: "xmark").font(.role(.caption, weight: .bold))
                             }
                             .padding(.horizontal, 10).padding(.vertical, 6)
                             .background(Theme.primary.opacity(0.15), in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous)).foregroundStyle(Theme.primary)
@@ -311,7 +331,8 @@ struct PrivacyNote: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "lock.shield.fill").foregroundStyle(Theme.primary).accessibilityHidden(true)
             Text(MediaCopy.privacy).font(.role(.footnote)).foregroundStyle(Theme.text)
-            Button(action: onDismiss) { Image(systemName: "xmark").font(.role(.footnote, weight: .semibold)) }.accessibilityLabel(tr("media.dismiss_privacy_note")).foregroundStyle(Theme.textSecondary)
+            Button(action: onDismiss) { Image(systemName: "xmark").font(.role(.footnote, weight: .semibold)).frame(width: Theme.minTouch, height: Theme.minTouch).contentShape(Rectangle()) }.buttonStyle(.plain).padding(.top, -Theme.Space.m).padding(.trailing, -Theme.Space.m)
+                .accessibilityLabel(tr("media.dismiss_privacy_note")).foregroundStyle(Theme.textSecondary)
         }
         .padding(12).background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
         .padding(.horizontal, Theme.gutter).accessibilityIdentifier("mediaPrivacyNote")
@@ -367,7 +388,7 @@ struct AddPhotosButton: View {
     }
 }
 
-// MARK: selection bar, next step, coach mark
+// MARK: selection bar, next step
 
 /// While selecting: ONE primary button (Make a video with the count) and two quiet icons. "Select all" and Cancel live in the navigation bar.
 struct SelectionBar: View {
@@ -410,9 +431,9 @@ struct NextStepBar: View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success).accessibilityHidden(true)
-                Text(tr("upload.summary_added", count)).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text)
+                Text(tr("upload.summary_added", count)).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text)
                 Spacer(minLength: 4)
-                Button(action: onDismiss) { Image(systemName: "xmark").font(.vmk(13, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
+                Button(action: onDismiss) { Image(systemName: "xmark").font(.role(.footnote, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
                     .accessibilityLabel(tr("common.close")).accessibilityIdentifier("nextStepDismiss")
             }
             Button(action: onMake) {
@@ -429,24 +450,6 @@ struct NextStepBar: View {
     }
 }
 
-/// One line, shown once: how to get from photos to a video.
-struct CoachMark: View {
-    let text: String
-    let onDismiss: () -> Void
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "lightbulb").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.primary).accessibilityHidden(true)
-            Text(text).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 4)
-            Button(action: onDismiss) { Image(systemName: "xmark").font(.vmk(12, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
-                .accessibilityLabel(tr("common.close")).accessibilityIdentifier("coachDismiss")
-        }
-        .padding(.leading, 12).padding(.vertical, 2)
-        .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-        .padding(.horizontal, Theme.gutter).accessibilityIdentifier("mediaCoach")
-    }
-}
-
 // MARK: storage
 
 struct StorageSheet: View {
@@ -454,34 +457,38 @@ struct StorageSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     var body: some View {
-        NavigationStack {
-            List {
+        FittedSheet {
+            VStack(alignment: .leading, spacing: Theme.Space.l) {
+                SheetHeader(title: tr("media.storage"), closeID: "storageClose") { dismiss() }
                 if let s = media.summary {
                     let meter = StorageMeter(used: s.usedBytes, limit: s.limitBytes)
-                    Section {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(meter.label).font(.role(.title)).foregroundStyle(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.text)
-                            ProgressView(value: meter.fraction).tint(meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.primary)
-                        }
-                        LabeledContent(tr("media.plan"), value: s.plan == "pro" ? tr("media.pro") : tr("media.free"))
-                        LabeledContent(tr("create.photos"), value: "\(s.count)")
-                        LabeledContent(tr("media.left"), value: StorageMeter.format(meter.remaining))
+                    let tint = meter.state == .full ? Theme.danger : meter.state == .warning ? Theme.warning : Theme.primary
+                    VStack(alignment: .leading, spacing: Theme.Space.s) {
+                        Text(meter.label).textRole(.title).foregroundStyle(Theme.text)
+                        ProgressView(value: meter.fraction).tint(tint)
+                            .accessibilityLabel(tr("media.storage")).accessibilityValue(meter.label)       // the bar says what it measures and how full it is
+                        if meter.state != .ok { Label(meter.state == .full ? tr("media.full") : tr("media.almost_full"), systemImage: "exclamationmark.circle").font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.text) }
                     }
-                    Section(tr("media.when_it_is_full")) {
-                        Text(tr("media.photos_that_fit_are_still"))
-                            .font(.role(.subhead))
+                    .accessibilityIdentifier("storageMeterDetail")
+                    VStack(spacing: 0) {
+                        row(tr("media.plan"), s.plan == "pro" ? tr("media.pro") : tr("media.free"))
+                        Divider().overlay(Theme.outline)
+                        row(tr("create.photos"), "\(s.count)")
+                        Divider().overlay(Theme.outline)
+                        row(tr("media.left"), StorageMeter.format(meter.remaining))
                     }
-                    if s.canUpgrade, let url = MediaCopy.upgradeURL {
-                        Section { Button(tr("media.get_more_storage")) { openURL(url) }.accessibilityIdentifier("upgradeStorage") }
-                    }
-                } else { ProgressView().frame(maxWidth: .infinity) }
-                Section(tr("media.privacy")) { Text(MediaCopy.privacy).font(.role(.subhead)) }
+                    Text(tr("media.photos_that_fit_are_still")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    if s.canUpgrade, let url = MediaCopy.upgradeURL { Button(tr("media.get_more_storage")) { openURL(url) }.buttonStyle(TonalButtonStyle()).accessibilityIdentifier("upgradeStorage") }
+                } else { LiveSpinner().frame(maxWidth: .infinity).padding(.vertical, Theme.Space.xxl) }
+                Label(MediaCopy.privacy, systemImage: "lock.shield").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
             }
-            .navigationTitle(tr("media.storage")).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
         }
-        .presentationDetents([.medium, .large])
         .task { await media.loadSummary() }
+    }
+
+    private func row(_ label: String, _ value: String) -> some View {
+        HStack { Text(label).foregroundStyle(Theme.text); Spacer(minLength: Theme.Space.s); Text(value).foregroundStyle(Theme.textSecondary).monospacedDigit() }
+            .font(.role(.body)).frame(minHeight: Theme.minTouch).accessibilityElement(children: .combine)
     }
 }
 

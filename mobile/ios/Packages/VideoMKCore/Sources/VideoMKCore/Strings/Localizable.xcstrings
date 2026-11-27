@@ -2293,40 +2293,6 @@
         }
       }
     },
-    "create.discard" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discard"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar"
-          }
-        }
-      }
-    },
-    "create.discard_this_video" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discard this video?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Descartar este video?"
-          }
-        }
-      }
-    },
     "create.edit_request" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2391,23 +2357,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ no muestra %2$@; costaría %3$lld veces los créditos sin ninguna ganancia visible."
-          }
-        }
-      }
-    },
-    "create.keep_editing" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep editing"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seguir editando"
           }
         }
       }
@@ -5686,13 +5635,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Putting it all together."
+            "value" : "Putting the scenes together"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uniendo todo."
+            "value" : "Uniendo las escenas"
           }
         }
       }
@@ -5703,13 +5652,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Getting started."
+            "value" : "Getting started"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Empezando."
+            "value" : "Empezando"
           }
         }
       }
@@ -5720,13 +5669,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Making voice and pictures"
+            "value" : "Recording the voice, finding pictures"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voz e imágenes"
+            "value" : "Grabando la voz, buscando imágenes"
           }
         }
       }
@@ -5737,13 +5686,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Writing the script."
+            "value" : "Finding the story"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escribiendo el guion."
+            "value" : "Buscando la historia"
           }
         }
       }
@@ -9049,23 +8998,6 @@
         }
       }
     },
-    "settings.sign_out_confirm" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign out of videomk?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cerrar sesión en videomk?"
-          }
-        }
-      }
-    },
     "settings.support" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9191,13 +9123,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By continuing you agree to the [Terms](https://videomk.com/terms) and [Privacy Policy](https://videomk.com/privacy)."
+            "value" : "You accept our [Terms](https://videomk.com/terms) and [Privacy](https://videomk.com/privacy)."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Al continuar, aceptas los [Términos y condiciones](https://videomk.com/es/terms) y la [Política de privacidad](https://videomk.com/es/privacy)."
+            "value" : "Aceptas los [Términos](https://videomk.com/es/terms) y la [Privacidad](https://videomk.com/es/privacy)."
           }
         }
       }
@@ -12624,13 +12556,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reading your slides."
+            "value" : "Reading your slides"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leyendo tus diapositivas."
+            "value" : "Leyendo tus diapositivas"
           }
         }
       }
@@ -12641,13 +12573,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Writing the narration."
+            "value" : "Writing the narration"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escribiendo la narración."
+            "value" : "Escribiendo la narración"
           }
         }
       }
@@ -13310,13 +13242,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dates put your photos in order. Places are approximate (about 1 km), never exact, and not kept after planning. Location is removed from your files. Your photos are private to you."
+            "value" : "Places are approximate, never exact, and not kept. Your photos stay private."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las fechas ordenan tus fotos. Los lugares son aproximados (1 km), nunca exactos, y no se guardan tras la planificación. La ubicación se elimina de tus archivos. Tus fotos son privadas."
+            "value" : "Los lugares son aproximados, nunca exactos, y no se guardan. Tus fotos son privadas."
           }
         }
       }
@@ -14555,6 +14487,258 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Agregar · %lld"
+          }
+        }
+      }
+    },
+    "editor.reorder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reorder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reordenar"
+          }
+        }
+      }
+    },
+    "editor.loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening your video"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abriendo tu video"
+          }
+        }
+      }
+    },
+    "editor.row_kind_seconds" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%2$@, %1$lld second"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%2$@, %1$lld seconds"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%2$@, %1$lld segundo"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%2$@, %1$lld segundos"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "signin.sample_a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sample video: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un video de ejemplo: %@"
+          }
+        }
+      }
+    },
+    "a11y.refresh" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar"
+          }
+        }
+      }
+    },
+    "making.cancel_video" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel video"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar video"
+          }
+        }
+      }
+    },
+    "making.cancelled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelado"
+          }
+        }
+      }
+    },
+    "making.cancelled_refund" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cancelled · %lld credit back"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cancelled · %lld credits back"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cancelado · %lld crédito devuelto"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cancelado · %lld créditos devueltos"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "making.not_cancelled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not cancelled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se canceló"
+          }
+        }
+      }
+    },
+    "making.cancel_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This video can't be cancelled right now."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora no se puede cancelar este video."
+          }
+        }
+      }
+    },
+    "videos.cancelled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelado"
+          }
+        }
+      }
+    },
+    "videos.credits_back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your credits are back."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus créditos volvieron."
           }
         }
       }

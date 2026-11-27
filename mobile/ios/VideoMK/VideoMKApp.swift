@@ -50,7 +50,7 @@ struct RootView: View {
 struct MainTabs: View {
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private var barShown: Bool { !model.tabBarHidden && !(model.mediaSelecting && model.selectedTab == 1) }
+    private var barShown: Bool { model.selectedTab == 0 ? !model.tabBarHidden : !(model.mediaSelecting || model.mediaPushed) }      // hidden on every pushed page, and while selecting
 
     var body: some View {
         @Bindable var model = model

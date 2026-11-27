@@ -54,6 +54,7 @@ final class AppModel {
     struct RetryNotice: Identifiable, Equatable { let id = UUID(); var title: String = tr("retry.notice_title"); let message: String }
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var mediaSelection: [LibraryPhoto] = []                // what is ticked on the Media tab right now (the round (+) attaches it to a new video)
+    var mediaPushed = false                                // a collection page is open in Media: the tab bar steps aside there too
     var mediaSelecting = false                             // Select mode is on in Media: the tab bar steps aside so the action bar is never covered
     private(set) var submitted = 0                         // counts videos sent from Create: Media clears its selection when it grows
     var signInError: String?
@@ -126,6 +127,22 @@ final class AppModel {
         if media?.isFake == true { return }
         #endif
         if let w = try? await api.wallet(), w != wallet { wallet = w }
+        scheduleFreeCredit()
+    }
+
+    @ObservationIgnored private var freeCreditTask: Task<Void, Never>?
+    /// The free credit is not pushed: the server adds it the first time the wallet is read at or after `next_free_credit_at`. So the wallet is read
+    /// again at that moment (while the app is running; coming back to the front reads it anyway).
+    private func scheduleFreeCredit() {
+        freeCreditTask?.cancel()
+        guard let at = wallet?.nextFree?.at else { return }
+        let wait = at.timeIntervalSinceNow + 2
+        guard wait > 0, wait < 36 * 3600 else { return }
+        freeCreditTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(wait))
+            guard !Task.isCancelled else { return }
+            await self?.refreshWallet()
+        }
     }
 
     /// What the server says about a video being made: the screen's own fresher answer when there is one, else what came with the list.
@@ -448,8 +465,8 @@ final class AppModel {
     #endif
 
     /// Deletes a video (one that did not finish, or a finished one from the player's More menu): it leaves the list at once and "Deleted · Undo" shows
-    /// for six seconds; the server is told when that time is up. If the server says no (today it only removes videos that did not finish), the video
-    /// comes back and one line says why.
+    /// for six seconds; the DELETE is only sent when that time is up, because the server has no undo and no bin (rule 8: undo over confirm).
+    /// If the server says no (an edit of it is still rendering, or it is being made), the video comes back and one line says why.
     func deleteVideo(_ video: VideoItem) {
         let id = video.id
         deleting.insert(id)
@@ -457,11 +474,60 @@ final class AppModel {
         undo.offer(tr("undo.deleted"), undo: { [weak self] in self?.deleting.remove(id) }, commit: { [weak self] in await self?.commitDelete(id) })
     }
 
+    // MARK: cancel a video that is being made
+
+    /// One line that needs no answer ("Cancelled · 2 credits back"): shown where the Undo toast shows, for a few seconds.
+    private(set) var infoToast: InfoToast?
+    struct InfoToast: Identifiable, Equatable { let id = UUID(); let text: String }
+    func say(_ text: String) {
+        let t = InfoToast(text: text); infoToast = t
+        Task { try? await Task.sleep(for: .seconds(4)); if infoToast?.id == t.id { infoToast = nil } }
+    }
+    private(set) var cancelling: Set<String> = []
+
+    /// "Cancel video" on a video that is being made. The server stops it and gives the credits of this attempt back; the card becomes a cancelled one
+    /// (Try again, Remove). If it finished in the meantime, nothing is refunded and the finished video is simply there.
+    func cancelVideo(_ video: VideoItem) {
+        guard !cancelling.contains(video.id) else { return }
+        let id = video.id
+        #if DEBUG
+        if media?.isFake == true {
+            if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_CANCEL"] == "finished" { retryNotice = RetryNotice(title: tr("making.not_cancelled"), message: "This video is already made."); return }
+            markCancelled(id); say(tr("making.cancelled_refund", max(1, Int((minutes[id] ?? 1).rounded(.up))))); Haptics.play(.selection); return
+        }
+        #endif
+        guard let api else { return }
+        cancelling.insert(id)
+        Task {
+            defer { cancelling.remove(id) }
+            do {
+                switch try await api.cancelVideo(videoID: id) {
+                case .cancelled(let refunded):
+                    markCancelled(id); Haptics.play(.selection)
+                    say(refunded > 0 ? tr("making.cancelled_refund", refunded) : tr("making.cancelled"))
+                    await refresh()          // the server's own item (can_retry) and the credits that came back
+                case .notCancellable(let message): await refresh(); if self.video(id)?.status.isRunning == true { retryNotice = RetryNotice(title: tr("making.not_cancelled"), message: message) }
+                case .tryAgain, .unsupported: retryNotice = RetryNotice(title: tr("making.not_cancelled"), message: tr("making.cancel_unavailable"))
+                }
+            } catch let e as AuthError where e == .signedOut { await signOut()
+            } catch let e as APIError where e == .unauthorized { await signOut()
+            } catch let e as APIError { retryNotice = RetryNotice(title: tr("making.not_cancelled"), message: e.message)
+            } catch { retryNotice = RetryNotice(title: tr("making.not_cancelled"), message: APIError.server.message) }
+        }
+    }
+
+    private func markCancelled(_ id: String) {
+        guard let i = videos.firstIndex(where: { $0.id == id }) else { return }
+        let v = videos[i]
+        videos[i] = VideoItem(id: v.id, status: .cancelled, title: v.title, durationSeconds: nil, createdAt: v.createdAt, videoURL: nil, previewGifURL: nil, rejectReason: nil, editable: false, aspect: v.aspect, resolution: v.resolution, deckStage: nil, canRetry: !deckVideos.contains(id))
+        stageSince[id] = nil; liveMaking[id] = nil
+    }
+
     private func commitDelete(_ id: String) async {
         defer { deleting.remove(id) }
         #if DEBUG
         if media?.isFake == true {
-            if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_DELETE_VIDEO"] == "refused", video(id)?.status == .complete { retryNotice = RetryNotice(title: tr("undo.not_deleted"), message: tr("retry.remove_unavailable")); return }
+            if ProcessInfo.processInfo.environment["VMK_DEBUG_FAKE_DELETE_VIDEO"] == "busy", video(id)?.status == .complete { retryNotice = RetryNotice(title: tr("undo.not_deleted"), message: "An edit of this video is still rendering. Try again when it is done."); return }
             videos.removeAll { $0.id == id }; return
         }
         #endif
@@ -638,9 +704,9 @@ final class AppModel {
         let env = ProcessInfo.processInfo.environment
         if let b = env["VMK_DEBUG_BALANCE"].flatMap(Int.init) {
             // `VMK_DEBUG_WALLET=buckets` lists where the credits came from; `nodate` is a server that sends no date for the next free credit
-            let tomorrow = Calendar.current.startOfDay(for: .now.addingTimeInterval(86400)).addingTimeInterval(60)
+            let tomorrow = Calendar.current.startOfDay(for: .now.addingTimeInterval(86400))
             let buckets = env["VMK_DEBUG_WALLET"] == "buckets" ? [WalletBucket(kind: "daily", remaining: 1, expiresAt: tomorrow), WalletBucket(kind: "signup", remaining: max(0, b - 1), expiresAt: .now.addingTimeInterval(20 * 86400))] : []
-            wallet = WalletInfo(balance: b, buckets: buckets, nextFreeAt: env["VMK_DEBUG_WALLET"] == "nodate" ? nil : tomorrow)
+            wallet = env["VMK_DEBUG_WALLET"] == "dailyoff" ? WalletInfo(balance: b, nextFreeCredits: 0, dailyCredits: 0) : WalletInfo(balance: b, buckets: buckets, nextFreeAt: env["VMK_DEBUG_WALLET"] == "nodate" ? nil : tomorrow, nextFreeCredits: env["VMK_DEBUG_WALLET"] == "nodate" ? nil : 1)
         }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "many" {
             // 40 videos, every fifth one vertical, one still being made: a long list to flick through

@@ -138,13 +138,14 @@ struct LibraryView: View {
 
     private var feed: some View {
         let blocks = VideoFeed.blocks(finished, singleColumn: typeSize.isAccessibilitySize)
-        return ScrollView {
+        return SparkleRefreshScroll(action: { await model.refresh() }) {
             LazyVStack(alignment: .leading, spacing: Theme.Space.xl) {
                 ForEach(activeEntries) { entry in card(entry).transition(.opacity) }
                 ForEach(blocks) { block in
                     switch block {
                     case .hero(let v): link(v) { VideoRow(video: v, meta: Self.when(v.createdAt), note: firstVideoNote(v)) }.matchedGeometryEffect(id: v.id, in: reveal, properties: .position, isSource: false)
                     case .pair(let a, let b): PairRow(a: a, b: b) { v in link(v) { VideoRow(video: v, posterHeight: VideoFeed.pairHeight(a, b)) } }
+                    case .half(let v): PairLayout(share: 0.5, spacing: Theme.Space.m) { link(v) { VideoRow(video: v, posterHeight: VideoFeed.pairHeight(v, v)) }; Color.clear.frame(height: 1).accessibilityHidden(true) }
                     case .problem(let v): card(.video(v))
                     }
                 }
@@ -154,7 +155,6 @@ struct LibraryView: View {
             .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: statusKeys)
         }
         .scrollDismissesKeyboard(.interactively)
-        .refreshable { await model.refresh() }
     }
 
     private func link<Label: View>(_ v: VideoItem, @ViewBuilder label: () -> Label) -> some View {
@@ -184,6 +184,9 @@ struct LibraryView: View {
                 // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a used-up presentation or one out of retries.
                 FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.deleteVideo(v) })
                     .accessibilityIdentifier("failedVideo")
+            case .cancelled:
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.credits_back"), retry: v.canRetry == false || model.retrying.contains(v.id) ? nil : { model.tryAgain(v) }, onRemove: { model.deleteVideo(v) }, cancelled: true)
+                    .accessibilityIdentifier("cancelledVideo")
             case .rejected:
                 FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), onRemove: { model.deleteVideo(v) }, rejected: true)
             }
@@ -200,9 +203,10 @@ struct LibraryView: View {
 
     /// First run: one line, a prompt that opens Create with the caret ready, and the three examples. Nothing else.
     private var emptyState: some View {
-        ScrollView {
+        SparkleRefreshScroll(action: { await model.refresh() }) {
             VStack(alignment: .leading, spacing: 0) {
-                Text(tr("videos.describe_itnwell_make_the_video")).textRole(.largeTitle).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, Theme.Space.xxl).accessibilityAddTraits(.isHeader)
+                EmptyScene().padding(.top, Theme.Space.s)
+                Text(tr("videos.describe_itnwell_make_the_video")).textRole(.largeTitle).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, Theme.Space.xl).accessibilityAddTraits(.isHeader)
                 Button { openCreate() } label: {
                     HStack(spacing: Theme.Space.s) {
                         Text(tr("create.describe_your_video_for_example")).textRole(.title, weight: .semibold).foregroundStyle(Theme.textSecondary)
@@ -223,7 +227,6 @@ struct LibraryView: View {
             .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xxl)
             .frame(maxWidth: 640).frame(maxWidth: .infinity)
         }
-        .refreshable { await model.refresh() }
     }
 
     /// The list could not be loaded: what happened in one line, and one action.
@@ -270,8 +273,8 @@ struct PressScale: ButtonStyle {
 /// finish as a full-width card where it belongs in time. Pure layout rules, no views.
 enum VideoFeed {
     enum Block: Identifiable {
-        case hero(VideoItem), pair(VideoItem, VideoItem), problem(VideoItem)
-        var id: String { switch self { case .hero(let v): "h-\(v.id)"; case .pair(let a, let b): "p-\(a.id)-\(b.id)"; case .problem(let v): "x-\(v.id)" } }
+        case hero(VideoItem), pair(VideoItem, VideoItem), half(VideoItem), problem(VideoItem)
+        var id: String { switch self { case .hero(let v): "h-\(v.id)"; case .pair(let a, let b): "p-\(a.id)-\(b.id)"; case .half(let v): "s-\(v.id)"; case .problem(let v): "x-\(v.id)" } }
     }
 
     static func blocks(_ videos: [VideoItem], singleColumn: Bool) -> [Block] {
@@ -281,7 +284,9 @@ enum VideoFeed {
             if !heroDone, let first = rest.first { out.append(.hero(first)); rest = rest.dropFirst(); heroDone = true }
             while let a = rest.first {
                 rest = rest.dropFirst()
-                if !singleColumn, let b = rest.first { out.append(.pair(a, b)); rest = rest.dropFirst() } else { out.append(.hero(a)) }
+                // only the newest video is the large one; an odd one out keeps its half width (at the largest text sizes every video has a full row)
+                if singleColumn { out.append(.hero(a)) }
+                else if let b = rest.first { out.append(.pair(a, b)); rest = rest.dropFirst() } else { out.append(.half(a)) }
             }
             run = []
         }

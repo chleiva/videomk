@@ -120,25 +120,25 @@ struct PhotoTile: View {
                     Rectangle().fill(Theme.surfaceRaised)
                     if let image { Image(uiImage: image).resizable().scaledToFill() }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: selected ? 10 : 0, style: .continuous))
-                .scaleEffect(selected && !reduceMotion ? 0.92 : 1)
-                .overlay { if selected { RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.primary.opacity(0.12)).scaleEffect(reduceMotion ? 1 : 0.92) } }
-                .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: selected)
+                // selected: the picture springs 4% smaller inside ONE 3 pt border, with a tick (never colour alone)
+                .clipShape(RoundedRectangle(cornerRadius: selected ? 8 : 0, style: .continuous))
+                .overlay { if selected { RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Theme.primary, lineWidth: 3) } }
+                .scaleEffect(selected && !reduceMotion ? 0.96 : 1)
+                .animation(reduceMotion ? nil : Theme.Motion.spring, value: selected)
             }
-            .overlay { if selected { Rectangle().stroke(Theme.gradientStart, lineWidth: 3) } }
             .clipped()
-            .overlay(alignment: .topTrailing) {
+            .overlay(alignment: .bottomTrailing) {
                 if selecting {
                     ZStack {
                         if selected {
-                            Circle().fill(Theme.gradient)
-                            Text(order.map(String.init) ?? "").font(.vmk(12, weight: .bold).monospacedDigit()).foregroundStyle(.white)
+                            Circle().fill(Theme.primary)
+                            Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.onPrimary).dynamicTypeSize(...DynamicTypeSize.large)
                         } else {
-                            Circle().fill(Color.black.opacity(0.18))
+                            Circle().fill(Theme.mediaInk.opacity(0.18))
+                            Circle().strokeBorder(Theme.onMedia, lineWidth: 2)
                         }
-                        Circle().stroke(.white, lineWidth: 2)
                     }
-                    .frame(width: 24, height: 24).padding(6).accessibilityHidden(true)
+                    .frame(width: 24, height: 24).padding(Theme.Space.s).accessibilityHidden(true)
                 }
             }
             .opacity(dimmed ? 0.45 : 1)

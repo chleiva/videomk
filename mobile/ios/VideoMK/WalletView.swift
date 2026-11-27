@@ -34,11 +34,12 @@ struct WalletView: View {
         .task { await model.refreshWallet() }
     }
 
-    /// "1 free credit tomorrow". Without a date from the server: what arrives every day. Nothing when the account gets no free credits.
+    /// "1 free credit tomorrow" (the server's `next_free_credit_at` and `next_free_credits`, said in the phone's own day). Hidden when the server
+    /// says no free credits are coming; then, with nothing left, one honest line instead of a dead end.
     static func nextLine(_ w: WalletInfo) -> String? {
-        guard w.dailyCredits > 0 else { return w.balance > 0 ? nil : tr("wallet.none") }
-        if let at = w.nextFreeAt { return tr("wallet.next_free_n", w.dailyCredits, Localization.shared.nextFree(at)) }
-        return tr("wallet.daily_short", w.dailyCredits)
+        guard let next = w.nextFree else { return w.balance > 0 ? nil : tr("wallet.none") }
+        if let at = next.at { return tr("wallet.next_free_n", next.credits, Localization.shared.nextFree(at)) }
+        return tr("wallet.daily_short", next.credits)
     }
 
     private func bucketRow(_ b: WalletBucket) -> some View {

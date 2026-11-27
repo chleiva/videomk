@@ -25,9 +25,9 @@ struct UploadBatchSection: View {
                 }
             } header: {
                 HStack {
-                    Text(tr("upload.adding_title", all.count)).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text)
+                    Text(tr("upload.adding_title", all.count)).font(.role(.body, weight: .bold)).foregroundStyle(Theme.text)
                     Spacer()
-                    Text(tr("upload.newest_first")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.newest_first")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary)
                 }
                 .padding(.horizontal, Theme.gutter).padding(.vertical, 10)
                 .accessibilityElement(children: .ignore)
@@ -114,25 +114,25 @@ struct UploadTile: View {
                 VStack { Spacer(); HStack { glass(media.waiting ? tr("upload.getting_it_ready") : tr("upload.taking_longer_than_usual"), symbol: "sparkles"); Spacer() } }.padding(8)
             }
         case .done:
-            if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.vmk(12, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(.white, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
+            if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(.white, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
         case .failed:
             Color(red: 0.72, green: 0.11, blue: 0.11).opacity(0.55)
             VStack(spacing: 6) {
-                Image(systemName: "arrow.clockwise").font(.vmk(18, weight: .semibold)).foregroundStyle(.white).frame(width: 44, height: 44).background(.white.opacity(0.25), in: Circle())
-                Text(tr("upload.tap_to_retry")).font(.vmk(11, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
+                Image(systemName: "arrow.clockwise").font(.role(.headline, weight: .semibold)).foregroundStyle(.white).frame(width: 44, height: 44).background(.white.opacity(0.25), in: Circle())
+                Text(tr("upload.tap_to_retry")).font(.role(.caption, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
             }
         case .alreadyThere:
             Color(navy).opacity(0.38)
-            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.vmk(10, weight: .bold)); Text(tr("upload.already_there")).font(.vmk(11, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
+            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.role(.caption, weight: .bold)); Text(tr("upload.already_there")).font(.role(.caption, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
         }
     }
 
     private func badge(_ symbol: String) -> some View {
-        Image(systemName: symbol).font(.vmk(11, weight: .bold)).foregroundStyle(.white).frame(width: 24, height: 24).background(Color.black.opacity(0.5), in: Circle())
+        Image(systemName: symbol).font(.role(.caption, weight: .bold)).foregroundStyle(.white).frame(width: 24, height: 24).background(Color.black.opacity(0.5), in: Circle())
     }
 
     private func glass(_ text: String, symbol: String) -> some View {
-        HStack(spacing: 4) { Image(systemName: symbol).font(.vmk(10)); Text(text).font(.vmk(11, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
+        HStack(spacing: 4) { Image(systemName: symbol).font(.role(.caption, weight: .regular)); Text(text).font(.role(.caption, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
             .foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
     }
 }
@@ -148,7 +148,7 @@ struct ProgressRing: View {
                 Circle().fill(Color.black.opacity(0.3))
                 Circle().stroke(.white.opacity(0.35), lineWidth: 3)
                 Circle().trim(from: 0, to: 0.28).stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round)).rotationEffect(.degrees(angle - 90))
-                Image(systemName: symbol).font(.vmk(15, weight: .semibold)).foregroundStyle(.white)
+                Image(systemName: symbol).font(.role(.subhead, weight: .semibold)).foregroundStyle(.white)
             }
             .frame(width: 44, height: 44)
         }

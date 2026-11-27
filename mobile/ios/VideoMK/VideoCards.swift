@@ -89,15 +89,16 @@ struct FailedRow: View {
     var retry: (() -> Void)?
     var onRemove: (() -> Void)?
     var rejected = false
+    var cancelled = false       // the person stopped it: a calm mark and its own word, not an error
     var onPage = false          // on the video's own page: Remove is a labelled button beside Try again (no menu), and the card has no shadow of its own
 
-    private var status: String { rejected ? tr("videos.not_allowed") : tr("videos.didnt_finish") }
+    private var status: String { rejected ? tr("videos.not_allowed") : cancelled ? tr("videos.cancelled") : tr("videos.didnt_finish") }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.m) {
             HStack(alignment: .top, spacing: Theme.Space.m) {
-                Image(systemName: rejected ? "hand.raised" : "exclamationmark").font(.role(.headline)).foregroundStyle(rejected ? Theme.warning : Theme.danger)
-                    .frame(width: Theme.iconButton, height: Theme.iconButton).background(rejected ? Theme.warningContainer : Theme.dangerContainer, in: Circle()).accessibilityHidden(true)
+                Image(systemName: rejected ? "hand.raised" : cancelled ? "xmark" : "exclamationmark").font(.role(.headline)).foregroundStyle(rejected ? Theme.warning : cancelled ? Theme.textSecondary : Theme.danger)
+                    .frame(width: Theme.iconButton, height: Theme.iconButton).background(rejected ? Theme.warningContainer : cancelled ? Theme.surfaceRaised : Theme.dangerContainer, in: Circle()).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.role(.headline)).foregroundStyle(Theme.text).lineLimit(3).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                     Text(message.map { tr("videos.row_meta", status, $0) } ?? status).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
@@ -153,7 +154,7 @@ struct RunningCard: View {
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
-            MakingCard(snapshot: model.makingSnapshot(for: video, now: context.date))
+            MakingCard(snapshot: model.makingSnapshot(for: video, now: context.date), onCancel: model.cancelling.contains(video.id) ? nil : { model.cancelVideo(video) })
         }
         .accessibilityIdentifier("runningRow")
     }

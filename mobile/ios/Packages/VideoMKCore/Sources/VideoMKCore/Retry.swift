@@ -26,6 +26,22 @@ public enum RetryRules {
         }
     }
 
+    /// The answer to `POST /users/{user}/videos/{video}/cancel`: 200 cancelled (also "already cancelled", refunded 0), 409 `not_cancellable` or
+    /// `try_again`, a bare 403/404/405 is a server without the route.
+    public static func cancelled(status: Int, body: Data) throws -> CancelResult {
+        struct Cancel: Decodable { let code: String?; let message: String?; let refunded: Int? }
+        let r = try? JSONDecoder().decode(Cancel.self, from: body)
+        switch status {
+        case 200, 202: return .cancelled(refunded: max(0, r?.refunded ?? 0))
+        case 401: throw APIError.unauthorized
+        case 409 where r?.code == "try_again": return .tryAgain
+        case 409: return .notCancellable(message: r?.message ?? tr("err.server"))
+        case 404 where r?.code == "not_found": return .notCancellable(message: r?.message ?? tr("err.server"))
+        case 403, 404, 405: return .unsupported
+        default: throw APIError.server
+        }
+    }
+
     /// The answer to `DELETE /users/{user}/videos/{video}`: true when the video is gone (also when it already was), false when the server has no such route.
     public static func removed(status: Int, body: Data) throws -> Bool {
         let r = try? JSONDecoder().decode(Body.self, from: body)

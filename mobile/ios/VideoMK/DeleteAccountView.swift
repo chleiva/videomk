@@ -68,6 +68,8 @@ final class DeletionModel {
     }
 }
 
+/// Delete account: the one place the app asks to confirm (rule 8). The app's own header, opaque cards, and its own pills: one solid red
+/// destructive button, and "Keep my account" as the labelled way back.
 struct DeleteAccountView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
@@ -75,14 +77,10 @@ struct DeleteAccountView: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if case .working(let stage) = model.state { progress(stage) } else { details }
-            }
-            .navigationTitle(tr("settings.delete_account"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { if !model.isWorking { Button(tr("common.cancel")) { dismiss() }.accessibilityIdentifier("deleteCancel") } } }
+        Group {
+            if case .working(let stage) = model.state { progress(stage) } else { details }
         }
+        .presentationBackground(Theme.background).presentationDragIndicator(.visible)
         .interactiveDismissDisabled(model.isWorking)
     }
 
@@ -90,44 +88,52 @@ struct DeleteAccountView: View {
 
     private var details: some View {
         ScrollViewReader { proxy in
-        List {
-            Section {
-                Text(tr("delete.warning")).font(.headline).foregroundStyle(Theme.text)
-            }
-            Section(tr("delete.what_deleted")) {
-                item("play.rectangle.on.rectangle", tr("delete.item.videos"), tr("delete.item.videos_sub"))
-                item("photo.on.rectangle", tr("delete.item.media"), tr("delete.item.media_sub"))
-                item("bolt.fill", tr("delete.item.credits"), tr("delete.item.credits_sub"))
-                item("person.crop.circle", tr("delete.item.signin"), tr("delete.item.signin_sub"))
-            }
-            Section {
-                Text(tr("delete.next.reauth"))
-                Text(tr("delete.next.data"))
-                Text(tr("delete.next.signin"))
-            } header: { Text(tr("delete.what_next")) } footer: {
-                markdown(tr("delete.footer_md"))
-            }
-            Section {
-                TextField(tr("delete.word"), text: $model.typed)
-                    .textInputAutocapitalization(.characters).autocorrectionDisabled().focused($focused)
-                    .accessibilityLabel(tr("delete.type_a11y", tr("delete.word"))).accessibilityIdentifier("deleteConfirmField")
-                if case .failed(let e) = model.state { errorBox(e).id("deleteErrorBox") }
-            } header: { Text(tr("delete.type_header", tr("delete.word"))) }
-            Section {
-                Button { focused = false; Task { await model.delete(app: app) } } label: {
-                    Text(isFailed ? tr("common.try_again") : tr("delete.confirm_button")).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.Space.xl) {
+                SheetHeader(title: tr("settings.delete_account"), closeLabel: tr("common.cancel"), closeID: "deleteCancel") { dismiss() }
+                Text(tr("delete.warning")).font(.role(.headline)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                group(tr("delete.what_deleted")) {
+                    SettingsCard {
+                        item("play.rectangle.on.rectangle", tr("delete.item.videos"), tr("delete.item.videos_sub")); SettingsDivider()
+                        item("photo.on.rectangle", tr("delete.item.media"), tr("delete.item.media_sub")); SettingsDivider()
+                        item("bolt.fill", tr("delete.item.credits"), tr("delete.item.credits_sub")); SettingsDivider()
+                        item("person.crop.circle", tr("delete.item.signin"), tr("delete.item.signin_sub"))
+                    }
                 }
-                .buttonStyle(DestructiveButtonStyle()).disabled(!model.canDelete).listRowInsets(.init(top: 8, leading: 16, bottom: 4, trailing: 16)).listRowBackground(Color.clear).listRowSeparator(.hidden)
-                .accessibilityIdentifier("deleteConfirmButton")
-                Button { dismiss() } label: { Text(tr("delete.keep")).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
-                    .buttonStyle(KeepButtonStyle()).listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16)).listRowBackground(Color.clear).listRowSeparator(.hidden)
-                    .accessibilityIdentifier("deleteKeepButton")
+                group(tr("delete.what_next")) {
+                    VStack(alignment: .leading, spacing: Theme.Space.s) {
+                        ForEach([tr("delete.next.reauth"), tr("delete.next.data"), tr("delete.next.signin")], id: \.self) { line in
+                            Text(line).font(.role(.subhead)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                        }
+                        markdown(tr("delete.footer_md")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).tint(Theme.primary).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                group(tr("delete.type_header", tr("delete.word"))) {
+                    TextField(tr("delete.word"), text: $model.typed)
+                        .font(.role(.body)).textInputAutocapitalization(.characters).autocorrectionDisabled().focused($focused)
+                        .padding(.horizontal, Theme.Space.l).frame(minHeight: 52).background(Theme.surface, in: Capsule())
+                        .accessibilityLabel(tr("delete.type_a11y", tr("delete.word"))).accessibilityIdentifier("deleteConfirmField")
+                    if case .failed(let e) = model.state { errorBox(e).id("deleteErrorBox") }
+                }
+                VStack(spacing: Theme.Space.s) {
+                    Button { focused = false; Task { await model.delete(app: app) } } label: {
+                        Text(isFailed ? tr("common.try_again") : tr("delete.confirm_button")).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buttonStyle(DestructiveButtonStyle()).disabled(!model.canDelete).accessibilityIdentifier("deleteConfirmButton")
+                    Button(tr("delete.keep")) { dismiss() }.buttonStyle(TonalButtonStyle()).accessibilityIdentifier("deleteKeepButton")
+                }
             }
+            .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xxl)
+            .frame(maxWidth: 640).frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
         .onAppear { if isFailed { scrollToError(proxy) } }          // the page is rebuilt after progress: bring the message into view
         .onChange(of: model.state) { if isFailed { scrollToError(proxy) } }
         }
+    }
+
+    private func group<C: View>(_ title: String, @ViewBuilder content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Space.s) { SectionLabel(title); content() }
     }
 
     private func scrollToError(_ proxy: ScrollViewProxy) {
@@ -139,39 +145,41 @@ struct DeleteAccountView: View {
     private var isFailed: Bool { if case .failed = model.state { true } else { false } }
 
     private func item(_ icon: String, _ title: String, _ detail: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon).foregroundStyle(Theme.danger).frame(width: 26).accessibilityHidden(true)
+        HStack(alignment: .top, spacing: Theme.Space.m) {
+            Image(systemName: icon).font(.role(.body)).foregroundStyle(Theme.danger).frame(width: 28).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.body.weight(.semibold))
-                Text(detail).font(.subheadline).foregroundStyle(Theme.textSecondary)
+                Text(title).font(.role(.body, weight: .semibold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                Text(detail).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
             }
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, Theme.Space.l).padding(.vertical, Theme.Space.m)
         .accessibilityElement(children: .combine)
     }
 
     private func errorBox(_ e: AccountError) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label { Text(e.message).fixedSize(horizontal: false, vertical: true) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
-                .font(.subheadline).foregroundStyle(Theme.danger)
-            if e.offersEmail { Link(tr("delete.email_support"), destination: URL(string: "mailto:hello@videomk.com?subject=Delete%20my%20videomk%20account")!).font(.subheadline.weight(.semibold)) }
+            Label { Text(e.message).fixedSize(horizontal: false, vertical: true) } icon: { Image(systemName: "exclamationmark.circle") }
+                .labelStyle(DangerMarkLabel()).font(.role(.subhead)).foregroundStyle(Theme.text)
+            if e.offersEmail { Link(tr("delete.email_support"), destination: URL(string: "mailto:hello@videomk.com?subject=Delete%20my%20videomk%20account")!).font(.role(.subhead, weight: .semibold)).frame(minHeight: Theme.minTouch) }
             if e == .uncertain || e == .network || e == .server || e == .reauthFailed || e == .reauthNotAccepted {
-                Text(tr("delete.still_signed_in")).font(.footnote).foregroundStyle(Theme.textSecondary)
+                Text(tr("delete.still_signed_in")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(.vertical, 4)
+        .padding(Theme.Space.l).frame(maxWidth: .infinity, alignment: .leading).background(Theme.dangerContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
         .accessibilityElement(children: .combine).accessibilityIdentifier("deleteError")
     }
 
     // MARK: progress
 
     private func progress(_ stage: DeletionStage) -> some View {
-        VStack(spacing: 16) {
-            ProgressView().controlSize(.large)
+        VStack(spacing: Theme.Space.l) {
+            LiveSpinner(size: 34)
             Text(stage == .checking ? tr("delete.progress.checking") : stage == .signingIn ? tr("delete.progress.signing_in") : tr("delete.progress.deleting"))
-                .font(.title3.weight(.semibold)).multilineTextAlignment(.center).accessibilityIdentifier("deleteProgress")
-            Text(tr("delete.progress.keep_open")).font(.subheadline).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
+                .textRole(.title).foregroundStyle(Theme.text).multilineTextAlignment(.center).accessibilityIdentifier("deleteProgress")
+            Text(tr("delete.progress.keep_open")).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
         }
-        .padding(24).frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Theme.Space.xl).frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background.ignoresSafeArea())
     }
 }
@@ -186,20 +194,20 @@ struct AccountDeletedView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                Image(systemName: "checkmark.circle.fill").font(.vmk(64)).foregroundStyle(Theme.success).accessibilityHidden(true).padding(.top, 32)
-                Text(tr("deleted.title")).font(.title.bold()).multilineTextAlignment(.center).foregroundStyle(Theme.text)
+            VStack(spacing: Theme.Space.xl) {
+                Image(systemName: "checkmark.circle.fill").font(.vmk(64)).foregroundStyle(Theme.success).accessibilityHidden(true).padding(.top, Theme.Space.xxxl)
+                Text(tr("deleted.title")).textRole(.largeTitle).multilineTextAlignment(.center).foregroundStyle(Theme.text)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("deletedTitle")
                 Text(tr("deleted.body"))
-                    .font(.body).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
+                    .font(.role(.body)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
                 if notice.assumed {
                     Text(tr("deleted.assumed"))
-                        .font(.footnote).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
+                        .font(.role(.footnote)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary)
                 }
                 apple
                 Button(tr("common.done")) { app.dismissDeletionNotice() }.buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("deletedDone").padding(.top, 8)
             }
-            .padding(.horizontal, 24).padding(.bottom, 24).frame(maxWidth: 560).frame(maxWidth: .infinity)
+            .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xxl).frame(maxWidth: 560).frame(maxWidth: .infinity)
         }
         .background(Theme.background.ignoresSafeArea())
         .accessibilityIdentifier("deletedScreen")
@@ -212,39 +220,39 @@ struct AccountDeletedView: View {
         case .unknown: card(tr("deleted.apple_title"), tr("deleted.apple_unknown", AppleRevoke.manualSteps))
         case .revokeAvailable:
             VStack(alignment: .leading, spacing: 12) {
-                Text(tr("deleted.apple_step")).font(.headline)
+                Text(tr("deleted.apple_step")).font(.role(.headline)).foregroundStyle(Theme.text)
                 switch revoke {
                 case .done:
-                    Label(tr("deleted.apple_done"), systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success).font(.subheadline)
+                    Label(tr("deleted.apple_done"), systemImage: "checkmark.circle.fill").foregroundStyle(Theme.text).font(.role(.subhead))
                 case .manual(let why):
-                    Text(why == .cancelled ? tr("deleted.apple_closed") : tr("deleted.apple_failed")).font(.subheadline)
-                    Text(AppleRevoke.manualSteps).font(.subheadline).foregroundStyle(Theme.textSecondary)
+                    Text(why == .cancelled ? tr("deleted.apple_closed") : tr("deleted.apple_failed")).font(.role(.subhead)).foregroundStyle(Theme.text)
+                    Text(AppleRevoke.manualSteps).font(.role(.subhead)).foregroundStyle(Theme.textSecondary)
                     if notice.revokeToken != nil { revokeButton(tr("common.try_again")) }
                 default:
                     Text(tr("deleted.apple_explain"))
-                        .font(.subheadline).foregroundStyle(Theme.textSecondary)
+                        .font(.role(.subhead)).foregroundStyle(Theme.textSecondary)
                     revokeButton(tr("deleted.apple_remove"))
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(16)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
+            .frame(maxWidth: .infinity, alignment: .leading).padding(Theme.Space.l)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
         }
     }
 
     private func revokeButton(_ title: String) -> some View {
         Button { Task { await runRevoke() } } label: {
-            if revoke == .working { ProgressView() } else { Text(title).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
+            if revoke == .working { LiveSpinner() } else { Text(title).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
         }
-        .buttonStyle(KeepButtonStyle()).disabled(revoke == .working).accessibilityIdentifier("appleRevokeButton")
+        .buttonStyle(TonalButtonStyle()).disabled(revoke == .working).accessibilityIdentifier("appleRevokeButton")
     }
 
     private func card(_ title: String, _ text: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.headline)
-            Text(text).font(.subheadline).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+            Text(title).font(.role(.headline)).foregroundStyle(Theme.text)
+            Text(text).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, alignment: .leading).padding(16)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .leading).padding(Theme.Space.l)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
         .accessibilityElement(children: .combine).accessibilityIdentifier("appleManualCard")
     }
 
@@ -255,19 +263,13 @@ struct AccountDeletedView: View {
     }
 }
 
+/// The one destructive confirm of the app: the primary's shape (a full pill), solid red, white words. Disabled: the opaque fill, like every pill.
 private struct DestructiveButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.headline).foregroundStyle(.white).frame(maxWidth: .infinity, minHeight: 50).padding(.horizontal, 12)
-            .background(Theme.dangerSolid.opacity(isEnabled ? 1 : 0.35), in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
-            .opacity(configuration.isPressed ? 0.85 : 1)
-    }
-}
-
-private struct KeepButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.headline).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: 50).padding(.horizontal, 12)
-            .overlay(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous).stroke(Theme.outline, lineWidth: 1))
-            .contentShape(Rectangle()).opacity(configuration.isPressed ? 0.85 : 1)
+        configuration.label.font(.role(.headline)).foregroundStyle(isEnabled ? Theme.onMedia : Theme.textSecondary).padding(.horizontal, Theme.Space.xxl).padding(.vertical, Theme.Space.s)
+            .frame(maxWidth: .infinity, minHeight: Theme.primaryHeight)
+            .background(isEnabled ? Theme.dangerSolid : Theme.surface3, in: Capsule())
+            .opacity(configuration.isPressed ? 0.85 : 1).contentShape(Capsule())
     }
 }

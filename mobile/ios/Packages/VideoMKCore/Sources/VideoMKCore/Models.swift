@@ -6,6 +6,9 @@ public enum VideoStatus: Sendable, Equatable {
     case complete
     case failed
     case rejected
+    /// The person stopped it while it was being made (`POST .../cancel`): the credits of that attempt are back. Shown like one that did not finish
+    /// (Try again when the server allows it, Remove), with its own word.
+    case cancelled
 
     public enum Stage: Int, Sendable, CaseIterable, Comparable {
         case starting, writing, voiceAndVisuals, rendering
@@ -34,7 +37,8 @@ public enum VideoStatus: Sendable, Equatable {
     public init(serverStatus raw: String) {
         switch raw.uppercased() {
         case "COMPLETE", "PREVIEW_READY": self = .complete
-        case "FAILED", "EDIT_FAILED", "CANCELLED": self = .failed
+        case "FAILED", "EDIT_FAILED": self = .failed
+        case "CANCELLED": self = .cancelled
         case "REJECTED": self = .rejected
         case "PLOT_CREATION": self = .running(.writing)
         case "ASSETS_CREATION", "STORYBOARD_CREATION": self = .running(.voiceAndVisuals)
@@ -183,24 +187,44 @@ public struct WalletInfo: Sendable, Equatable, Decodable {
     public let balance: Int
     public let buckets: [WalletBucket]
     public let nextFreeAt: Date?
+    /// How many free credits arrive at `nextFreeAt` (the server's `next_free_credits`; 0 when daily credits are off). Nil from an older server.
+    public let nextFreeCredits: Int?
     public let dailyCredits: Int
     public let signupCredits: Int
     /// Test and staff accounts the server never charges.
     public let unlimited: Bool
-    enum CodingKeys: String, CodingKey { case balance, buckets, nextDailyAt = "next_daily_at", rules, unlimited }
+    enum CodingKeys: String, CodingKey { case balance, buckets, nextDailyAt = "next_daily_at", nextFreeCreditAt = "next_free_credit_at", nextFreeCredits = "next_free_credits", rules, unlimited }
     private struct Rules: Decodable { let daily: Int?; let signup: Int? }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         balance = try c.decode(Int.self, forKey: .balance)
         buckets = (try? c.decode([WalletBucket].self, forKey: .buckets)) ?? []
-        nextFreeAt = (try? c.decode(Double.self, forKey: .nextDailyAt)).map(Date.init(timeIntervalSince1970:))
+        // `next_free_credit_at` (ISO 8601, UTC) is the documented field; `next_daily_at` (the same moment in epoch seconds) is read when it is absent
+        let iso = (try? c.decode(String.self, forKey: .nextFreeCreditAt)).flatMap(WalletInfo.parseISO)
+        nextFreeAt = iso ?? (try? c.decode(Double.self, forKey: .nextDailyAt)).map(Date.init(timeIntervalSince1970:))
+        nextFreeCredits = try? c.decode(Int.self, forKey: .nextFreeCredits)
         let r = try? c.decode(Rules.self, forKey: .rules)
         dailyCredits = r?.daily ?? 1; signupCredits = r?.signup ?? 5
         unlimited = (try? c.decode(Bool.self, forKey: .unlimited)) ?? false
     }
-    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, dailyCredits: Int = 1, signupCredits: Int = 5, unlimited: Bool = false) {
-        self.balance = balance; self.buckets = buckets; self.nextFreeAt = nextFreeAt; self.dailyCredits = dailyCredits; self.signupCredits = signupCredits; self.unlimited = unlimited
+    public init(balance: Int, buckets: [WalletBucket] = [], nextFreeAt: Date? = nil, nextFreeCredits: Int? = nil, dailyCredits: Int = 1, signupCredits: Int = 5, unlimited: Bool = false) {
+        self.balance = balance; self.buckets = buckets; self.nextFreeAt = nextFreeAt; self.nextFreeCredits = nextFreeCredits; self.dailyCredits = dailyCredits; self.signupCredits = signupCredits; self.unlimited = unlimited
+    }
+
+    static func parseISO(_ s: String) -> Date? {
+        let f = ISO8601DateFormatter()
+        if let d = f.date(from: s) { return d }
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.date(from: s)
+    }
+
+    /// What the Credits sheet says about the next free credits: how many and when. Nil when the server says there are none coming
+    /// (daily credits off: `next_free_credits` 0, or no date and no daily rule).
+    public var nextFree: (credits: Int, at: Date?)? {
+        if let n = nextFreeCredits { return n > 0 && nextFreeAt != nil ? (n, nextFreeAt) : nil }
+        guard dailyCredits > 0 else { return nil }
+        return (dailyCredits, nextFreeAt)
     }
 
     /// Whether `credits` can be paid right now.

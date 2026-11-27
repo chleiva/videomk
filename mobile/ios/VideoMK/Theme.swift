@@ -86,17 +86,6 @@ extension Color {
     }
 }
 
-struct Card<Content: View>: View {
-    @ViewBuilder var content: Content
-    var body: some View {
-        content
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
-    }
-}
-
-
 /// Shadow levels 2 and 3 (one soft shadow per card; never a border and a shadow together).
 struct Elevation: ViewModifier {
     let level: Int
@@ -117,7 +106,7 @@ struct FixChip: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            chipLabel.font(.vmk(13, weight: .bold)).foregroundStyle(tint).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 7)
+            chipLabel.font(.role(.footnote, weight: .bold)).foregroundStyle(tint).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 7)
                 .frame(minHeight: 32).background(Theme.primaryContainer, in: Capsule())
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
@@ -127,7 +116,7 @@ struct FixChip: View {
     /// "Use 1 min · ⚡1": the bolt is the app's own symbol, not the emoji.
     @ViewBuilder private var chipLabel: some View {
         let parts = title.components(separatedBy: " · ⚡")
-        if parts.count == 2 { HStack(spacing: 3) { Text(parts[0] + " ·"); Image(systemName: "bolt.fill").font(.vmk(11)); Text(parts[1]) } }
+        if parts.count == 2 { HStack(spacing: 3) { Text(parts[0] + " ·"); Image(systemName: "bolt.fill").font(.role(.caption, weight: .regular)); Text(parts[1]) } }
         else { Text(title) }
     }
 }

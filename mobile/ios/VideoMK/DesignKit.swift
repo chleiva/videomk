@@ -163,7 +163,7 @@ struct IconButtonFace: View {
     @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
-        Image(systemName: symbol).font(.vmk(size >= 52 ? 20 : 18, weight: .medium)).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        Image(systemName: symbol).font(.role(.headline, weight: .medium)).imageScale(size >= 52 ? .large : .medium).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .foregroundStyle(tint ?? (style == .onMedia ? Theme.onMedia : Theme.text))
             .frame(width: size, height: size)
             .modifier(IconButtonSurface(style: style))
@@ -274,8 +274,8 @@ struct SparkleChip: View {
 struct PlaySparkle: View {
     var scale: CGFloat = 1
     var body: some View {
-        Image(systemName: "play.fill").font(.vmk(22, weight: .semibold)).dynamicTypeSize(...DynamicTypeSize.large)
-            .overlay(alignment: .topTrailing) { Image(systemName: "sparkle").font(.vmk(11, weight: .bold)).dynamicTypeSize(...DynamicTypeSize.large).offset(x: 9, y: -5) }
+        Image(systemName: "play.fill").font(.role(.title, weight: .semibold)).dynamicTypeSize(...DynamicTypeSize.large)
+            .overlay(alignment: .topTrailing) { Image(systemName: "sparkle").font(.role(.caption, weight: .bold)).dynamicTypeSize(...DynamicTypeSize.large).offset(x: 9, y: -5) }
             .scaleEffect(scale).offset(x: -1)
             .accessibilityHidden(true)
     }
@@ -332,8 +332,9 @@ struct FloatingTabBar: View {
                 tab(0, "play.rectangle", tr("tab.videos"), "tabVideos")
                 tab(1, "photo.on.rectangle", tr("tab.media"), "tabMedia")
             }
+            // the capsule hugs its two tabs (no fixed width: a longer word such as "Biblioteca" at a large text size has the room it needs)
             .padding(.horizontal, 7).frame(height: Theme.fab).vmkGlass(in: Capsule())
-            .frame(maxWidth: 230)
+            .accessibilityElement(children: .contain).accessibilityAddTraits(.isTabBar).accessibilityIdentifier("tabBar")
             Spacer(minLength: 0)
             Button(action: onCreate) {
                 PlaySparkle().foregroundStyle(Theme.onPrimary)
@@ -356,11 +357,11 @@ struct FloatingTabBar: View {
             Haptics.play(.selection)
         } label: {
             VStack(spacing: 2) {
-                Image(systemName: symbol).font(.vmk(20, weight: selected ? .medium : .regular)).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                Text(title).font(.vmk(11, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8).vmkOneLineCap()
+                Image(systemName: symbol).font(.role(.headline, weight: selected ? .medium : .regular)).imageScale(.large).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                Text(title).font(.role(.caption, weight: .semibold)).lineLimit(1).fixedSize().dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             }
             .foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .padding(.horizontal, Theme.Space.m).frame(minWidth: 92, minHeight: 50)
             .background { if selected { Capsule().fill(Theme.primaryContainer).matchedGeometryEffect(id: "tabSel", in: ns) } }
             .contentShape(Capsule())
         }
@@ -450,9 +451,13 @@ struct UndoToastHost: View {
         Group {
             if let p = model.undo.current {
                 ToastBar(text: p.text, symbol: "trash", action: tr("common.undo"), identifier: "undoToast") { model.undo.undo(); Haptics.play(.selection) }.id(p.id)
+            } else if let info = model.infoToast {
+                ToastBar(text: info.text, symbol: "checkmark.circle.fill", identifier: "infoToast").id(info.id)
             }
         }
         .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.undo.current?.id)
+        .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.infoToast?.id)
+        .onChange(of: model.infoToast?.id) { _, id in if id != nil, let t = model.infoToast { UIAccessibility.post(notification: .announcement, argument: t.text) } }
         .onChange(of: model.undo.current?.id) { _, id in if id != nil, let p = model.undo.current { UIAccessibility.post(notification: .announcement, argument: tr("undo.announce", p.text)) } }
     }
 }
@@ -540,5 +545,131 @@ struct ChoiceChip: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(spoken ?? title).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier(identifier)
+    }
+}
+
+// MARK: pull to refresh (the sparkle of the logo, drawn by the pull)
+
+/// The four-point sparkle of the mark, as one outline (so it can be drawn stroke by stroke).
+struct SparkleShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let c = CGPoint(x: rect.midX, y: rect.midY), r = min(rect.width, rect.height) / 2, k = r * 0.18
+        var p = Path()
+        p.move(to: CGPoint(x: c.x, y: c.y - r))
+        p.addQuadCurve(to: CGPoint(x: c.x + r, y: c.y), control: CGPoint(x: c.x + k, y: c.y - k))
+        p.addQuadCurve(to: CGPoint(x: c.x, y: c.y + r), control: CGPoint(x: c.x + k, y: c.y + k))
+        p.addQuadCurve(to: CGPoint(x: c.x - r, y: c.y), control: CGPoint(x: c.x - k, y: c.y + k))
+        p.addQuadCurve(to: CGPoint(x: c.x, y: c.y - r), control: CGPoint(x: c.x - k, y: c.y - k))
+        p.closeSubpath()
+        return p
+    }
+}
+
+private struct PullKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+/// A scroll view whose pull to refresh draws the sparkle: the further the pull, the more of its outline; past the threshold it fills, the list
+/// reloads, and it turns until the answer is in. Reduce Motion: the sparkle simply appears and stands still. VoiceOver keeps the system's
+/// "refresh" action.
+struct SparkleRefreshScroll<Content: View>: View {
+    let action: @MainActor () async -> Void
+    @ViewBuilder var content: Content
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var pull: CGFloat = 0
+    @State private var refreshing = false
+    @State private var armed = true
+    private let threshold: CGFloat = 76
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                GeometryReader { g in Color.clear.preference(key: PullKey.self, value: g.frame(in: .named("sparklePull")).minY) }.frame(height: 0)
+                if refreshing { mark(progress: 1, turning: true).frame(maxWidth: .infinity).frame(height: 44).transition(.opacity) }
+                content
+            }
+        }
+        .coordinateSpace(name: "sparklePull")
+        .overlay(alignment: .top) {
+            if !refreshing, pull > 10 { mark(progress: min(1, (pull - 10) / (threshold - 10)), turning: false).frame(height: 44).offset(y: min(pull, threshold) / 2 - 22).allowsHitTesting(false) }
+        }
+        .onPreferenceChange(PullKey.self) { y in Task { @MainActor in moved(y) } }
+        .accessibilityAction(named: tr("a11y.refresh")) { Task { await run() } }
+    }
+
+    private func moved(_ y: CGFloat) {
+        pull = max(0, y)
+        if y < 4 { armed = true }
+        if y >= threshold, armed, !refreshing { armed = false; Haptics.play(.selection); Task { await run() } }
+    }
+
+    private func run() async {
+        guard !refreshing else { return }
+        withAnimation(Theme.Motion.spring) { refreshing = true }
+        let began = ContinuousClock.now
+        await action()
+        let spent = ContinuousClock.now - began
+        if spent < .milliseconds(700) { try? await Task.sleep(for: .milliseconds(700) - spent) }       // long enough to be seen: nothing flickers
+        withAnimation(Theme.Motion.spring) { refreshing = false }
+    }
+
+    private func mark(progress: CGFloat, turning: Bool) -> some View {
+        ZStack {
+            SparkleShape().fill(Theme.primary).opacity(progress >= 1 ? 1 : 0)
+            SparkleShape().trim(from: 0, to: reduceMotion ? 1 : progress).stroke(Theme.primary, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+        }
+        .frame(width: 26, height: 26)
+        .modifier(Turning(on: turning && !reduceMotion))
+        .accessibilityHidden(true).accessibilityIdentifier("sparkleRefresh")
+    }
+}
+
+private struct Turning: ViewModifier {
+    let on: Bool
+    func body(content: Content) -> some View {
+        if on {
+            TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
+                content.rotationEffect(.degrees(ctx.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 2.4) / 2.4 * 360))
+            }
+        } else { content }
+    }
+}
+
+// MARK: the empty-state scene (our own cartoon, slow parallax)
+
+/// One of our flat-cartoon scenes (docs/VECTOR_CATALOG.md, "mountain cabin"), in its depth layers. The layers drift a little against each other,
+/// the nearer the more, and the clouds wander: slow, endless, never the only signal. Reduce Motion: a still picture. Decoration: hidden from VoiceOver.
+struct EmptyScene: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private static let depths: [CGFloat] = [0, 0.05, 0.2, 0.4, 0.6, 0.8, 1]
+
+    var body: some View {
+        Color.clear.aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .overlay {
+                if reduceMotion { layers(phase: 0, clouds: 0) }
+                else {
+                    TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
+                        let t = ctx.date.timeIntervalSinceReferenceDate
+                        layers(phase: CGFloat(sin(t * 2 * .pi / 18)), clouds: CGFloat((t / 60).truncatingRemainder(dividingBy: 1)))
+                    }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.hero, style: .continuous))
+            .accessibilityHidden(true).accessibilityIdentifier("emptyScene")
+    }
+
+    private func layers(phase: CGFloat, clouds: CGFloat) -> some View {
+        GeometryReader { g in
+            ZStack {
+                ForEach(0..<Self.depths.count, id: \.self) { i in
+                    Image("EmptyScene\(i)").resizable().scaledToFill()
+                        .frame(width: g.size.width, height: g.size.height)
+                        .scaleEffect(1.08)                                                       // room to drift without showing an edge
+                        .offset(x: i == 1 ? (clouds - 0.5) * g.size.width * 0.06 : phase * Self.depths[i] * g.size.width * 0.022)
+                }
+            }
+            .frame(width: g.size.width, height: g.size.height).clipped()
+        }
     }
 }

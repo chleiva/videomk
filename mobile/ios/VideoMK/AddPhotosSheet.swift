@@ -139,11 +139,11 @@ private struct LibraryChooser: View {
     }
 
     @ViewBuilder private func chips(_ feed: PhotoFeed) -> some View {
-        if !feed.isSearching, !media.collections.isEmpty {
+        if !feed.isSearching, !media.shownCollections.isEmpty {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Theme.Space.s) {
                     chip(tr("add.all_photos"), selected: collectionID == nil) { collectionID = nil }
-                    ForEach(media.collections) { c in chip(c.name, selected: collectionID == c.id) { collectionID = c.id } }
+                    ForEach(media.shownCollections) { c in chip(c.name, selected: collectionID == c.id) { collectionID = c.id } }
                 }.padding(.horizontal, Theme.gutter)
             }
         }

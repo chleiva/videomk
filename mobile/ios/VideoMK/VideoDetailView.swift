@@ -33,7 +33,15 @@ struct VideoDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TopBar(leading: { IconButton(symbol: "chevron.left", label: tr("common.back"), identifier: "backButton") { dismiss() } })
+            TopBar(title: nil, leading: { IconButton(symbol: "chevron.left", label: tr("common.back"), identifier: "backButton") { dismiss() } }, trailing: {
+                // Making: More holds the way out. Cancel stops the video and gives the credits of this attempt back.
+                if isRunning, let video {
+                    Menu {
+                        Button(role: .destructive) { model.cancelVideo(video) } label: { Label(tr("making.cancel_video"), systemImage: "xmark.circle") }.accessibilityIdentifier("cancelVideo")
+                    } label: { IconButtonFace(symbol: "ellipsis") }
+                        .disabled(model.cancelling.contains(video.id)).accessibilityLabel(tr("media.more")).accessibilityIdentifier("makingMore")
+                }
+            })
             ScrollView {
                 if let video {
                     VStack(alignment: .leading, spacing: 0) {
@@ -44,6 +52,9 @@ struct VideoDetailView: View {
                         case .failed:
                             FailedRow(title: model.brief(for: video.id) ?? video.displayTitle, message: tr("videos.no_credits_were_used"), retry: video.canRetry == false || model.retrying.contains(video.id) ? nil : { model.tryAgain(video) }, onRemove: { dismiss(); model.deleteVideo(video) }, onPage: true)
                                 .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).accessibilityIdentifier("failedPage")
+                        case .cancelled:
+                            FailedRow(title: model.brief(for: video.id) ?? video.displayTitle, message: tr("videos.credits_back"), retry: video.canRetry == false || model.retrying.contains(video.id) ? nil : { model.tryAgain(video) }, onRemove: { dismiss(); model.deleteVideo(video) }, cancelled: true, onPage: true)
+                                .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).accessibilityIdentifier("cancelledPage")
                         case .rejected:
                             FailedRow(title: model.brief(for: video.id) ?? video.displayTitle, message: video.rejectReason ?? tr("detail.rejected_body"), onRemove: { dismiss(); model.deleteVideo(video) }, rejected: true, onPage: true)
                                 .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).accessibilityIdentifier("rejectedPage")
@@ -58,6 +69,7 @@ struct VideoDetailView: View {
             .scrollBounceBehavior(.basedOnSize)
         }
         // at the largest text sizes the switch is part of the page (it scrolls after the narration line instead of covering it)
+        .safeAreaInset(edge: .bottom, spacing: 0) { UndoToastHost() }
         .safeAreaInset(edge: .bottom, spacing: 0) { if isRunning, !typeSize.isAccessibilitySize { NotifyCard().padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s).frame(maxWidth: 640).transition(.opacity) } }
         .background(Theme.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)

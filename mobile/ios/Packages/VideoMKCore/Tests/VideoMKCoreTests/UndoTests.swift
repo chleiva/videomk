@@ -145,3 +145,41 @@ final class ExpiredStub: URLProtocol, @unchecked Sendable {
         #expect(ExpiredStub.tokens == ["Bearer stale"], "one try, no loop")
     }
 }
+
+@Suite struct CancelDeleteWalletTests {
+    private func body(_ s: String) -> Data { Data(s.utf8) }
+
+    @Test func cancelAnswers() throws {
+        #expect(try RetryRules.cancelled(status: 200, body: body(#"{"message":"cancelled","video_id":"v","status":"CANCELLED","retries":0,"refunded":2}"#)) == .cancelled(refunded: 2))
+        #expect(try RetryRules.cancelled(status: 200, body: body(#"{"message":"already cancelled","refunded":0}"#)) == .cancelled(refunded: 0))
+        #expect(try RetryRules.cancelled(status: 409, body: body(#"{"code":"not_cancellable","message":"This video is already made.","status":"COMPLETE"}"#)) == .notCancellable(message: "This video is already made."))
+        #expect(try RetryRules.cancelled(status: 409, body: body(#"{"code":"try_again","message":"x"}"#)) == .tryAgain)
+        #expect(try RetryRules.cancelled(status: 404, body: body(#"{"message":"Not Found"}"#)) == .unsupported, "an older server without the route")
+        #expect(try RetryRules.cancelled(status: 403, body: body("{}")) == .unsupported)
+        #expect(throws: APIError.unauthorized) { _ = try RetryRules.cancelled(status: 401, body: Data()) }
+    }
+
+    @Test func deleteAnswersForAFinishedVideo() throws {
+        #expect(try RetryRules.removed(status: 200, body: body(#"{"message":"deleted","video_id":"v"}"#)))
+        #expect(try RetryRules.removed(status: 404, body: body(#"{"code":"not_found"}"#)), "a repeated delete is a success")
+        #expect(throws: APIError.conflict("An edit of this video is still rendering.")) { _ = try RetryRules.removed(status: 409, body: body(#"{"code":"busy","message":"An edit of this video is still rendering."}"#)) }
+        #expect(throws: APIError.conflict("Cancel it first.")) { _ = try RetryRules.removed(status: 409, body: body(#"{"code":"not_deletable","message":"Cancel it first."}"#)) }
+        #expect(try !RetryRules.removed(status: 404, body: body(#"{"message":"Not Found"}"#)))
+    }
+
+    @Test func aCancelledVideoIsItsOwnStatus() throws {
+        #expect(VideoStatus(serverStatus: "CANCELLED") == .cancelled && VideoStatus(serverStatus: "FAILED") == .failed && !VideoStatus.cancelled.isRunning)
+        let item = try JSONDecoder().decode(VideoItem.self, from: body(#"{"video_id":"v1","status":"CANCELLED","title":"Bees","can_retry":true}"#))
+        #expect(item.status == .cancelled && item.canRetry == true && item.making == nil)
+    }
+
+    @Test func theWalletSaysWhenTheNextFreeCreditArrives() throws {
+        let w = try JSONDecoder().decode(WalletInfo.self, from: body(#"{"balance":0,"buckets":[],"next_daily_at":1795906800,"next_free_credit_at":"2026-11-28T23:00:00Z","next_free_credits":1,"rules":{"daily":1,"signup":12}}"#))
+        #expect(w.nextFreeAt == Date(timeIntervalSince1970: 1_795_906_800) && w.nextFreeCredits == 1)
+        #expect(w.nextFree?.credits == 1 && w.nextFree?.at == w.nextFreeAt)
+        let off = try JSONDecoder().decode(WalletInfo.self, from: body(#"{"balance":3,"buckets":[],"next_daily_at":null,"next_free_credit_at":null,"next_free_credits":0,"rules":{"daily":0}}"#))
+        #expect(off.nextFree == nil && off.nextFreeAt == nil, "daily credits off: the line is hidden")
+        let old = try JSONDecoder().decode(WalletInfo.self, from: body(#"{"balance":3,"buckets":[],"next_daily_at":1795906800,"rules":{"daily":2}}"#))
+        #expect(old.nextFree?.credits == 2 && old.nextFree?.at != nil, "an older server: the epoch field and the daily rule")
+    }
+}

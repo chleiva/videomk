@@ -194,7 +194,7 @@ struct CreateView: View {
             Haptics.play(.selection)
         } label: {
             if dictation.isListening {
-                Image(systemName: "stop.fill").font(.vmk(16, weight: .semibold)).dynamicTypeSize(...DynamicTypeSize.xxxLarge).foregroundStyle(Theme.onPrimary)
+                Image(systemName: "stop.fill").font(.role(.body, weight: .semibold)).dynamicTypeSize(...DynamicTypeSize.xxxLarge).foregroundStyle(Theme.onPrimary)
                     .frame(width: Theme.iconButton, height: Theme.iconButton).background(Theme.dangerSolid, in: Circle())
                     .frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
             } else { IconButtonFace(symbol: "mic") }
@@ -593,22 +593,3 @@ struct DangerMarkLabel: LabelStyle {
         HStack(alignment: .firstTextBaseline, spacing: 6) { configuration.icon.foregroundStyle(Theme.danger); configuration.title }
     }
 }
-
-// MARK: attached photos
-
-extension CreateModel {
-    enum Thumb { case phone(AttachedPhoto), library(LibraryPhoto) }
-    func thumbs(library: [LibraryPhoto]) -> [Thumb] { photos.items.map(Thumb.phone) + library.map(Thumb.library) }
-}
-
-struct ThumbCell: View {
-    let thumb: CreateModel.Thumb
-    let media: MediaModel?
-    var body: some View {
-        switch thumb {
-        case .phone(let p): Image(uiImage: p.thumbnail).resizable().scaledToFill().frame(width: 62, height: 62).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous)).accessibilityIdentifier("attachedPhoto")
-        case .library(let l): LibraryStripTile(photo: l, media: media, label: tr("create.library_photo_a11y"), showRemove: false) {}
-        }
-    }
-}
-

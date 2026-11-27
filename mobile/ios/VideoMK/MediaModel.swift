@@ -311,6 +311,34 @@ final class MediaModel {
         } catch { notice = (error as? LibraryAPIError)?.message ?? tr("media.err.delete"); return false }
     }
 
+    // MARK: undo over confirm (photos and collections leave the screen at once; the server is told when the Undo toast is gone)
+
+    private(set) var hiddenPhotos: Set<String> = []
+    private(set) var hiddenCollections: Set<String> = []
+    /// The collections to show: without the ones whose delete can still be undone.
+    var shownCollections: [LibraryCollection] { hiddenCollections.isEmpty ? collections : collections.filter { !hiddenCollections.contains($0.id) } }
+
+    /// Photos leave every grid now. Undo brings them back; otherwise they are deleted when the toast goes and `removed` lets the caller drop them from its feed.
+    func deletePhotos(_ ids: [String], undo: UndoCenter, removed: @escaping @MainActor (Set<String>) -> Void) {
+        let set = Set(ids)
+        guard !set.isEmpty else { return }
+        hiddenPhotos.formUnion(set)
+        undo.offer(tr("undo.deleted"), undo: { [weak self] in self?.hiddenPhotos.subtract(set) }, commit: { [weak self] in
+            guard let self else { return }
+            if await self.delete(ids) { removed(set) }
+            self.hiddenPhotos.subtract(set)
+        })
+    }
+
+    func deleteCollection(_ c: LibraryCollection, undo: UndoCenter) {
+        hiddenCollections.insert(c.id)
+        undo.offer(tr("undo.deleted"), undo: { [weak self] in self?.hiddenCollections.remove(c.id) }, commit: { [weak self] in
+            guard let self else { return }
+            await self.deleteCollection(c)
+            self.hiddenCollections.remove(c.id)
+        })
+    }
+
     func createCollection(name: String, emoji: String? = nil) async -> LibraryCollection? {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !n.isEmpty else { return nil }

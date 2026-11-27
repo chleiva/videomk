@@ -166,7 +166,7 @@ struct LookSwatch: View {
             switch look {
             case nil:
                 Theme.primaryContainer
-                Image(systemName: "sparkles").font(.vmk(26)).foregroundStyle(Theme.primary)
+                Image(systemName: "sparkles").font(.role(.title, weight: .regular)).foregroundStyle(Theme.primary)
             case .midnight?:
                 LinearGradient(colors: [Color(hex: 0x1C2150), Color(hex: 0x0C0F28)], startPoint: .top, endPoint: .bottom)
                 lines([Theme.toastAccent, Color(hex: 0x7C80FF), Color(hex: 0x5F63F0)])

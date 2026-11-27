@@ -252,4 +252,24 @@ final class VideoMKDesignBarUITests: XCTestCase {
         XCTAssertTrue(el(app, "videoTitle").waitForExistence(timeout: 2.5), "the Making screen became the video page at once")
         XCTAssertFalse(el(app, "liveLine").exists)
     }
+
+    /// Making has a way out: More > Cancel video. No question; the credits of the attempt come back and the video becomes a cancelled one
+    /// with Try again and Remove.
+    func testCancelAVideoWhileItIsBeingMade() {
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_OPEN": "v1"])
+        XCTAssertTrue(el(app, "makingMore").waitForExistence(timeout: 20), "the Making screen has a More button")
+        el(app, "makingMore").tap()
+        XCTAssertTrue(app.buttons["cancelVideo"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["cancelVideo"].label, "Cancel video")
+        app.buttons["cancelVideo"].tap()
+        XCTAssertFalse(app.alerts.firstMatch.waitForExistence(timeout: 1), "no confirm dialog")
+        XCTAssertTrue(el(app, "cancelledPage").waitForExistence(timeout: 5), "the page shows the cancelled video")
+        XCTAssertTrue(app.staticTexts["Cancelled · 2 credits back"].waitForExistence(timeout: 3), "the toast says what came back")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Cancelled' AND label CONTAINS 'Your credits are back.'")).firstMatch.exists)
+        XCTAssertTrue(app.buttons["tryAgain"].exists && app.buttons["removeVideo"].exists)
+        XCTAssertFalse(el(app, "liveLine").exists)
+        shot(app, "cancelled-page")
+        el(app, "backButton").tap()
+        XCTAssertTrue(el(app, "cancelledVideo").waitForExistence(timeout: 5), "and the list shows it as cancelled, not as failed")
+    }
 }

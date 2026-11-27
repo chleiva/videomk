@@ -14,13 +14,13 @@ struct CostLine: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Image(systemName: symbol).font(.vmk(14, weight: .semibold)).foregroundStyle(symbol == "bolt.fill" ? Theme.primary : tint).accessibilityHidden(true)
-                Text(text).font(.vmk(14, weight: .medium)).foregroundStyle(tint).fixedSize(horizontal: false, vertical: true)
+                Image(systemName: symbol).font(.role(.subhead, weight: .semibold)).foregroundStyle(symbol == "bolt.fill" ? Theme.primary : tint).accessibilityHidden(true)
+                Text(text).font(.role(.subhead, weight: .medium)).foregroundStyle(tint).fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 4)
             }
-            if fourKNote { Text(tr("create.cost_4k_double")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).padding(.leading, 22).fixedSize(horizontal: false, vertical: true) }
+            if fourKNote { Text(tr("create.cost_4k_double")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).padding(.leading, 22).fixedSize(horizontal: false, vertical: true) }
             if let onExplain {
-                Button(action: onExplain) { Text(tr("create.cost_why")).font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch, alignment: .leading) }
+                Button(action: onExplain) { Text(tr("create.cost_why")).font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch, alignment: .leading) }
                     .buttonStyle(.plain).padding(.leading, 22).accessibilityIdentifier("costWhy")
             }
         }
@@ -53,19 +53,5 @@ struct WalletHero: View {
         #else
         tr("videos.unlimited_credits")
         #endif
-    }
-}
-
-/// Art (or symbol), a 28 pt headline, 15 pt body and at most one action. Used by the empty home and any other empty list.
-struct EmptyState<Art: View>: View {
-    let title: String
-    var message: String?
-    @ViewBuilder var art: Art
-    var body: some View {
-        VStack(spacing: 0) {
-            art.padding(.top, 6).accessibilityHidden(true)
-            Text(title).font(.vmk(28, weight: .bold)).tracking(-0.8).multilineTextAlignment(.center).foregroundStyle(Theme.text).padding(.top, 8).accessibilityAddTraits(.isHeader)
-            if let message { Text(message).font(.vmk(15)).multilineTextAlignment(.center).foregroundStyle(Theme.textSecondary).padding(.top, 8).padding(.horizontal, 24) }
-        }
     }
 }

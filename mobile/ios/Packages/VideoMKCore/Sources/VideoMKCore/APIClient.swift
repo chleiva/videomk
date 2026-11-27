@@ -37,6 +37,14 @@ public enum RetryResult: Equatable, Sendable {
     case refused(code: String, message: String)
 }
 
+/// The answer to `POST .../videos/{id}/cancel`.
+public enum CancelResult: Equatable, Sendable {
+    case cancelled(refunded: Int)                    // stopped (or already was): the item is CANCELLED, `refunded` credits are back
+    case notCancellable(message: String)             // it is not being made any more (it finished, failed or was refused meanwhile): refresh the item
+    case tryAgain                                    // it moved between two steps: send the same call once more
+    case unsupported                                 // an older server without the route
+}
+
 public protocol AuthorizationProviding: Sendable {
     /// A valid ID token (refreshed if needed) and the user id (the token's `sub`).
     func authorization() async throws -> (idToken: String, userID: String)
@@ -124,7 +132,19 @@ public struct APIClient: Sendable {
         return try RetryRules.result(status: http.statusCode, body: data)
     }
 
-    /// Removes a video that did not finish (failed, cancelled or refused). A made video is never deleted here (409). False: the server does not have the route.
+    /// Stops a video that is being made. The credits of this attempt come back (`refunded`). "try_again" from the server is sent once more here.
+    public func cancelVideo(videoID: String) async throws -> CancelResult {
+        var (data, http) = try await perform("POST", ["videos", videoID, "cancel"])
+        var result = try RetryRules.cancelled(status: http.statusCode, body: data)
+        if result == .tryAgain {
+            (data, http) = try await perform("POST", ["videos", videoID, "cancel"])
+            result = try RetryRules.cancelled(status: http.statusCode, body: data)
+        }
+        return result
+    }
+
+    /// Deletes a video: a finished one, or one that did not finish (failed, cancelled or refused). One that is being made must be cancelled first
+    /// (409 `not_deletable`), and one whose edit is rendering is `busy` (409): both throw with the server's line. False: the server does not have the route.
     public func deleteVideo(videoID: String) async throws -> Bool {
         let (data, http) = try await perform("DELETE", ["videos", videoID])
         return try RetryRules.removed(status: http.statusCode, body: data)

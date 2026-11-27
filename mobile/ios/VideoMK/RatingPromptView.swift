@@ -17,46 +17,29 @@ struct RatingPromptView: View {
     var body: some View {
         Group {
             switch stage {
-            case .question: content(title: tr("rating.question"), body: nil) {
-                button(tr("rating.yes"), primary: true, id: "ratingYes") { go(.ask) }
-                button(tr("rating.not_really"), primary: false, id: "ratingNotReally") { model.rating.resolve(.notReally); go(.feedback) }
-            }
-            case .ask: content(title: tr("rating.ask_title"), body: tr("rating.ask_body")) {
-                button(tr("rating.rate"), primary: true, id: "ratingRate") { model.rating.resolve(.rate); openURL(AppStoreInfo.writeReviewURL()); dismiss() }
-                button(tr("rating.later"), primary: false, id: "ratingLater") { model.rating.resolve(.maybeLater); dismiss() }
-                Button(tr("rating.already")) { model.rating.resolve(.alreadyRated); dismiss() }
-                    .font(.vmk(15)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: Theme.minTouch).accessibilityIdentifier("ratingAlready")
-            }
-            case .feedback: FeedbackSheet(composer: model.makeFeedback(.ratingPrompt), intro: tr("rating.sorry"))
+            case .question: FittedSheet { content(title: tr("rating.question"), body: nil) {
+                Button(tr("rating.yes")) { go(.ask) }.buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("ratingYes")
+                Button(tr("rating.not_really")) { model.rating.resolve(.notReally); go(.feedback) }.buttonStyle(TonalButtonStyle()).accessibilityIdentifier("ratingNotReally")
+            } }
+            case .ask: FittedSheet { content(title: tr("rating.ask_title"), body: tr("rating.ask_body")) {
+                Button(tr("rating.rate")) { model.rating.resolve(.rate); openURL(AppStoreInfo.writeReviewURL()); dismiss() }.buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("ratingRate")
+                Button(tr("rating.later")) { model.rating.resolve(.maybeLater); dismiss() }.buttonStyle(TonalButtonStyle()).accessibilityIdentifier("ratingLater")
+                Button(tr("rating.already")) { model.rating.resolve(.alreadyRated); dismiss() }.buttonStyle(TextButtonStyle(tint: Theme.textSecondary)).frame(maxWidth: .infinity).accessibilityIdentifier("ratingAlready")
+            } }
+            case .feedback: FeedbackSheet(composer: model.makeFeedback(.ratingPrompt), intro: tr("rating.sorry")).presentationDetents([.large]).presentationDragIndicator(.visible)
             }
         }
-        .presentationDetents(stage == .feedback ? [.large] : [.medium, .large])
-        .presentationDragIndicator(.visible)
     }
 
     private func go(_ s: Stage) { withAnimation(reduceMotion ? nil : Theme.Motion.insert) { stage = s } }
 
+    /// As tall as its words and buttons (never a half-empty sheet): the question, then the app's own pills.
     private func content(title: String, body: String?, @ViewBuilder buttons: () -> some View) -> some View {
-        ScrollView {
-            VStack(spacing: 14) {
-                Text(title).font(.vmk(28, weight: .bold)).foregroundStyle(Theme.text).multilineTextAlignment(.center).accessibilityAddTraits(.isHeader)
-                if let body { Text(body).font(.vmk(17)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true) }
-                VStack(spacing: 10) { buttons() }.padding(.top, 8)
-            }
-            .padding(Theme.Space.xl).padding(.top, 16).frame(maxWidth: .infinity)
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
+            Text(title).textRole(.title).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, Theme.Space.xxl).accessibilityAddTraits(.isHeader)
+            if let body { Text(body).font(.role(.body)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true) }
+            VStack(spacing: Theme.Space.s) { buttons() }.padding(.top, Theme.Space.s)
         }
-        .background(Theme.background.ignoresSafeArea())
-    }
-
-    private func button(_ title: String, primary: Bool, id: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title).multilineTextAlignment(.center)
-                .font(.vmk(17, weight: .semibold)).foregroundStyle(primary ? Theme.onPrimary : Theme.primary)
-                .frame(maxWidth: .infinity, minHeight: 50).padding(.horizontal, 8)
-                .background { if primary { Theme.gradient } else { Theme.primaryContainer } }
-                .clipShape(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
-        }
-        .buttonStyle(.plain).accessibilityIdentifier(id)
     }
 }
 

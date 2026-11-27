@@ -1,4 +1,4 @@
-import AuthenticationServices
+import AVFoundation
 import SwiftUI
 import VideoMKCore
 
@@ -8,6 +8,7 @@ struct SignInView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .body) private var logoSize: CGFloat = 20
 
     var body: some View {
@@ -32,7 +33,8 @@ struct SignInView: View {
                         }
                         .padding(.top, 28)
                         md(tr("signin.terms_md")).font(.role(.caption)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity).padding(.top, 22)
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTouch).padding(.top, Theme.Space.m)      // a 44 pt row: the two links are easy to hit
+                            .accessibilityIdentifier("signInLegal")
                     }
                     .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xxl)
                     .background { VStack(spacing: 0) { LinearGradient(colors: [Theme.background.opacity(0), Theme.background], startPoint: .top, endPoint: .bottom).frame(height: 96); Theme.background }.padding(.top, -28).padding(.bottom, -400) }
@@ -48,18 +50,13 @@ struct SignInView: View {
     /// The sample: one frame of a video videomk made, and the sentence it was made from. It fades into the page.
     private func sample(height: CGFloat, top: CGFloat) -> some View {
         Color.clear.frame(maxWidth: .infinity).frame(height: height)
-            .overlay { Image("SignInSample").resizable().scaledToFill() }.clipped()
+            .overlay { Image("SignInSample").resizable().scaledToFill() }       // the still: what shows first, and all that shows with Reduce Motion
+            .overlay { if !reduceMotion { SampleLoop().transition(.opacity) } }   // six silent seconds of a video videomk made, looping
+            .clipped()
             .overlay { LinearGradient(stops: [.init(color: Theme.mediaInk.opacity(0.3), location: 0), .init(color: .clear, location: 0.22), .init(color: .clear, location: 0.46), .init(color: Theme.background, location: 0.96)], startPoint: .top, endPoint: .bottom) }
-            .overlay(alignment: .top) {
-                HStack(spacing: Theme.Space.s) {
-                    Image(systemName: "sparkle").font(.role(.footnote, weight: .bold)).foregroundStyle(Theme.live).accessibilityHidden(true)
-                    Text(tr("signin.sample_title")).font(.role(.subhead, weight: .medium)).foregroundStyle(Theme.onMedia).lineLimit(2).multilineTextAlignment(.center)
-                }
-                .padding(.horizontal, Theme.Space.l).frame(minHeight: 40).background(Theme.mediaInk.opacity(0.6), in: Capsule())
-                .padding(.top, top + Theme.Space.xxl).padding(.horizontal, Theme.gutter)
-                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
-            }
             .ignoresSafeArea(edges: .top)
+            // the footage speaks for itself (the screen's budget is 12 words plus the buttons); VoiceOver still hears what it is
+            .accessibilityElement().accessibilityLabel(tr("signin.sample_a11y", tr("signin.sample_title"))).accessibilityAddTraits(.isImage)
             .accessibilityHidden(typeSize.isAccessibilitySize)        // at the largest sizes the page scrolls over it
     }
 
@@ -73,23 +70,25 @@ struct SignInView: View {
 
     private func busy(_ c: SignInChoice) -> Bool { model.signingInWith == c }
 
-    /// The system's own Sign in with Apple button (exact HIG styling and wording), in the pill shape. Its native flow is not used: the button is only drawn,
-    /// and a transparent button on top starts the hosted-UI flow, because Cognito cannot take a native Apple token.
+    /// Sign in with Apple, drawn to Apple's rules for a custom button (the logo and "Continue with Apple" in the system font, black on light and
+    /// white on dark, never smaller than the other buttons) so its words grow with the text size like the Google button's. The system button's
+    /// text does not scale; and its native flow could not be used anyway: Cognito takes the hosted-page flow, not a native Apple token.
     private var appleButton: some View {
-        ZStack {
-            SignInWithAppleButton(.continue, onRequest: { _ in }, onCompletion: { _ in })
-                .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-                .opacity(busy(.apple) ? 0.4 : 1)
-            if busy(.apple) { ProgressView().tint(scheme == .dark ? .black : .white) }
-            Button { Task { await model.signIn(.apple) } } label: { Color.clear }
-                .accessibilityLabel(tr("signin.apple"))
+        Button { Task { await model.signIn(.apple) } } label: {
+            HStack(spacing: 8) {
+                if busy(.apple) { ProgressView().tint(AppleBrand.text) } else { Image(systemName: "apple.logo").font(.role(.headline)).accessibilityHidden(true) }
+                Text(tr("signin.apple")).font(.role(.headline)).fixedSize(horizontal: false, vertical: true)
+            }
+            .multilineTextAlignment(.center)
+            .foregroundStyle(AppleBrand.text)
+            .frame(maxWidth: .infinity, minHeight: Theme.primaryHeight)
+            .padding(.horizontal, Theme.Space.m)
+            .background(AppleBrand.surface, in: Capsule())
+            .contentShape(Capsule())
         }
-        .frame(maxWidth: .infinity, minHeight: Theme.primaryHeight, maxHeight: Theme.primaryHeight)   // the system button's text does not grow, so its height is fixed
-        .clipShape(Capsule())
+        .buttonStyle(PressScale())
         .disabled(model.isSigningIn)
-        .accessibilityElement(children: .contain)
+        .accessibilityLabel(tr("signin.apple"))
         .accessibilityIdentifier("signInApple")
     }
 
@@ -134,4 +133,44 @@ private enum GoogleBrand {
     static let surface = Theme.dyn(0xFFFFFF, 0x131314)
     static let text = Theme.dyn(0x1F1F1F, 0xE3E3E3)
     static let stroke = Theme.dyn(0x747775, 0x8E918F)
+}
+
+/// Apple's sign-in button colours: black with white words in the light appearance, white with black words in the dark one.
+private enum AppleBrand {
+    static let surface = Theme.dyn(0x000000, 0xFFFFFF)
+    static let text = Theme.dyn(0xFFFFFF, 0x000000)
+}
+
+/// The sample footage of the sign-in screen: `sample_signin.mp4` from the app bundle (six seconds, no sound track), filling its frame and looping.
+/// It has no audio, so music playing on the phone is never interrupted. Nothing is drawn if the file is missing: the still underneath stays.
+struct SampleLoop: UIViewRepresentable {
+    func makeUIView(context: Context) -> LoopView { LoopView() }
+    func updateUIView(_ view: LoopView, context: Context) {}
+    static func dismantleUIView(_ view: LoopView, coordinator: ()) { view.stop() }
+
+    final class LoopView: UIView {
+        override class var layerClass: AnyClass { AVPlayerLayer.self }
+        private var player: AVQueuePlayer?
+        private var looper: AVPlayerLooper?
+        private var observers: [NSObjectProtocol] = []
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            isUserInteractionEnabled = false; isAccessibilityElement = false; alpha = 0
+            guard let url = Bundle.main.url(forResource: "sample_signin", withExtension: "mp4") else { return }
+            let item = AVPlayerItem(url: url)
+            let p = AVQueuePlayer()
+            p.isMuted = true; p.preventsDisplaySleepDuringVideoPlayback = false; p.allowsExternalPlayback = false
+            looper = AVPlayerLooper(player: p, templateItem: item)
+            (layer as? AVPlayerLayer)?.player = p
+            (layer as? AVPlayerLayer)?.videoGravity = .resizeAspectFill
+            player = p
+            p.play()
+            UIView.animate(withDuration: 0.6, delay: 0.3) { self.alpha = 1 }       // it fades in over the still
+            observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in MainActor.assumeIsolated { self?.player?.play() } })
+        }
+        required init?(coder: NSCoder) { fatalError("not used") }
+
+        func stop() { player?.pause(); looper = nil; player = nil; observers.forEach(NotificationCenter.default.removeObserver); observers = [] }
+    }
 }

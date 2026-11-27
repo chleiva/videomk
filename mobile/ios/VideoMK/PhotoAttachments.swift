@@ -96,67 +96,6 @@ final class PhotoAttachments {
     #endif
 }
 
-/// The strip of attached photos above the text field: one strip for both sources (This phone and My media).
-struct AttachedPhotosStrip: View {
-    @Bindable var photos: PhotoAttachments
-    var library: [LibraryPhoto] = []
-    var media: MediaModel?
-    var onRemoveLibrary: (String) -> Void = { _ in }
-
-    private var total: Int { photos.items.count + library.count }
-    private var sourceNote: String {
-        switch (photos.items.isEmpty, library.isEmpty) {
-        case (false, false): tr("attach.source_both")
-        case (true, false): tr("attach.source_library")
-        default: tr("attach.source_phone")
-        }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if total > 0 || photos.loading > 0 {
-                HStack {
-                    Text(tr("attach.total_of", total, PhotoLimits.maxPhotos)).font(.vmk(12, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.textSecondary)
-                    Spacer(minLength: 8)
-                    Text(sourceNote).font(.vmk(12, weight: .semibold)).foregroundStyle(Theme.textSecondary).lineLimit(1)
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(tr("attach.strip_a11y", total, PhotoLimits.maxPhotos, sourceNote))
-                .accessibilityIdentifier("photosNote")
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 8) {
-                        ForEach(Array(photos.items.enumerated()), id: \.element.id) { index, photo in
-                            Image(uiImage: photo.thumbnail)
-                                .resizable().scaledToFill()
-                                .frame(width: 56, height: 56)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
-                                .overlay(alignment: .topTrailing) { RemoveX(label: tr("attach.remove_photo", index + 1)) { withAnimation(.snappy) { photos.remove(photo.id) } } }
-                                .accessibilityElement(children: .contain)
-                                .accessibilityLabel(tr("attach.photo_n_of", index + 1, photos.items.count))
-                                .accessibilityIdentifier("attachedPhoto")
-                        }
-                        ForEach(Array(library.enumerated()), id: \.element.id) { index, photo in
-                            LibraryStripTile(photo: photo, media: media, label: tr("attach.library_photo_n_of", index + 1, library.count)) { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
-                        }
-                        if photos.loading > 0 {   // one spinner tile, however many are still being prepared
-                            ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
-                        }
-                    }
-                }
-                .frame(height: 60)       // a horizontal scroll view would otherwise take all the height it is offered
-            }
-            if let preparing = photos.preparingText {
-                Text(preparing).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary)
-                    .accessibilityIdentifier("photosPreparing")
-            }
-            if let notice = photos.notice {
-                Text(notice).font(.caption).foregroundStyle(Theme.danger)
-                    .accessibilityIdentifier("photosNotice")
-            }
-        }
-        .transition(.opacity.combined(with: .move(edge: .bottom)))
-    }
-}
 
 /// The small remove button on a strip tile: 18 pt drawn, 44 pt to hit.
 struct RemoveX: View {
@@ -164,8 +103,8 @@ struct RemoveX: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            Image(systemName: "xmark").font(.vmk(9, weight: .bold)).foregroundStyle(.white)
-                .frame(width: 18, height: 18).background(Color.black.opacity(0.62), in: Circle())
+            Image(systemName: "xmark").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.onMedia)
+                .frame(width: 18, height: 18).background(Theme.mediaInk.opacity(0.62), in: Circle())
                 .frame(width: 44, height: 44).contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -175,7 +114,7 @@ struct RemoveX: View {
     }
 }
 
-/// A photo chosen from My media, in the composer strip. Same size as a phone photo, with a small library badge.
+/// A photo chosen from Media, in the composer strip: the same tile as a photo from the phone (no badge: where it came from does not matter here).
 struct LibraryStripTile: View {
     let photo: LibraryPhoto
     let media: MediaModel?
@@ -187,7 +126,6 @@ struct LibraryStripTile: View {
         Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
             .frame(width: 62, height: 62)
             .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
-            .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.vmk(10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
             .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: tr("attach.remove_label", label), action: onRemove) } }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("\(label). \(MediaGrouping.accessibilityLabel(photo))")

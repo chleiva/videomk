@@ -1,31 +1,35 @@
 import SwiftUI
 import VideoMKCore
 
-/// Full-screen viewer: swipe between photos, pinch or double-tap to zoom, info, collections, delete, make a video.
+/// Full-screen viewer: swipe between photos, pinch or double-tap to zoom. The same controls as the rest of the app, over the picture:
+/// one close button, ONE primary ("Make a video", with the play-sparkle), and quiet icons for info, collections, share and delete (with Undo).
 struct PhotoViewer: View {
+    @Environment(AppModel.self) private var model
     let media: MediaModel
-    @State var photos: [LibraryPhoto]
+    let photos: [LibraryPhoto]
     @State private var index: Int
     let onDeleted: (String) -> Void
     let onMakeVideo: (LibraryPhoto) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var showInfo = false
     @State private var showCollections = false
-    @State private var confirmDelete = false
     @State private var shareImage: Image?
 
     init(media: MediaModel, photos: [LibraryPhoto], start: Int, onDeleted: @escaping (String) -> Void, onMakeVideo: @escaping (LibraryPhoto) -> Void) {
-        self.media = media; _photos = State(initialValue: photos); _index = State(initialValue: min(max(0, start), max(0, photos.count - 1)))
+        self.media = media; self.photos = photos; _index = State(initialValue: min(max(0, start), max(0, photos.count - 1)))
         self.onDeleted = onDeleted; self.onMakeVideo = onMakeVideo
     }
 
-    private var current: LibraryPhoto? { photos.indices.contains(index) ? photos[index] : nil }
+    /// Without the photos whose delete can still be undone (Undo brings them back into the pages).
+    private var shown: [LibraryPhoto] { photos.filter { !media.hiddenPhotos.contains($0.id) } }
+    private var current: LibraryPhoto? { let s = shown; return s.isEmpty ? nil : s[min(index, s.count - 1)] }
 
     var body: some View {
+        let shown = self.shown
         ZStack {
-            Color.black.ignoresSafeArea()
+            Theme.mediaInk.ignoresSafeArea()
             TabView(selection: $index) {
-                ForEach(Array(photos.enumerated()), id: \.element.id) { i, photo in
+                ForEach(Array(shown.enumerated()), id: \.element.id) { i, photo in
                     ZoomablePhoto(media: media, photo: photo).tag(i)
                 }
             }
@@ -33,33 +37,34 @@ struct PhotoViewer: View {
         }
         .overlay(alignment: .top) {
             HStack {
-                Button { dismiss() } label: { Image(systemName: "xmark.circle.fill").font(.title).symbolRenderingMode(.palette).foregroundStyle(.white, Color.white.opacity(0.25)) }
-                    .accessibilityLabel(tr("common.close"))
+                IconButton(symbol: "xmark", label: tr("common.close"), style: .onMedia, identifier: "viewerClose") { dismiss() }
                 Spacer()
-                if photos.count > 1 { Text(tr("viewer.position", index + 1, photos.count)).font(.footnote.monospacedDigit()).foregroundStyle(.white.opacity(0.8)) }
-            }.padding()
+                if shown.count > 1 {
+                    Text(tr("viewer.position", min(index, shown.count - 1) + 1, shown.count)).font(.role(.footnote, weight: .medium).monospacedDigit()).foregroundStyle(Theme.onMedia)
+                        .padding(.horizontal, Theme.Space.m).frame(minHeight: 32).background(Theme.mediaInk.opacity(0.55), in: Capsule()).accessibilityIdentifier("viewerPosition")
+                }
+            }
+            .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s)
         }
         .overlay(alignment: .bottom) {
-            if let p = current {
-                VStack(spacing: 12) {
-                    Button { onMakeVideo(p) } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "sparkles").font(.vmk(17, weight: .semibold)).accessibilityHidden(true)
-                            Text(tr("collections.make_a_video")).font(.vmk(17, weight: .semibold))
-                        }
-                        .foregroundStyle(Theme.onPrimary).frame(maxWidth: 320, minHeight: 52).frame(maxWidth: .infinity).background(Theme.gradient, in: Capsule())
+            VStack(spacing: Theme.Space.m) {
+                UndoToastHost().padding(.horizontal, -Theme.gutter)
+                if let p = current {
+                    HStack(spacing: Theme.Space.s) {
+                        Button { onMakeVideo(p) } label: { HStack(spacing: Theme.Space.s) { PlaySparkle(scale: 0.7); Text(tr("collections.make_a_video")).lineLimit(1).minimumScaleFactor(0.8) } }
+                            .buttonStyle(PrimaryButtonStyle()).accessibilityHint(tr("viewer.make_video")).accessibilityIdentifier("viewerMakeVideo")
+                        Menu {
+                            Button { showInfo = true } label: { Label(tr("viewer.info"), systemImage: "info.circle") }.accessibilityIdentifier("viewerInfo")
+                            Button { showCollections = true } label: { Label(tr("collections.add_to_collection"), systemImage: "folder.badge.plus") }
+                            if let image = shareImage { ShareLink(item: image, preview: SharePreview(tr("viewer.share"), image: image)) { Label(tr("viewer.share"), systemImage: "square.and.arrow.up") }.accessibilityIdentifier("viewerShare") }
+                        } label: { IconButtonFace(symbol: "ellipsis", style: .onMedia, size: Theme.primaryHeight) }
+                            .menuOrder(.fixed).accessibilityLabel(tr("media.more")).accessibilityIdentifier("viewerMore")
+                        IconButton(symbol: "trash", label: tr("common.delete"), style: .onMedia, size: Theme.primaryHeight, identifier: "viewerDelete") { deleteCurrent() }
                     }
-                    .buttonStyle(.plain).accessibilityHint(tr("viewer.make_video")).accessibilityIdentifier("viewerMakeVideo")
-                    HStack(spacing: 28) {
-                        bar("info.circle", tr("viewer.info")) { showInfo = true }
-                        bar("folder.badge.plus", tr("collections.add_to_collection")) { showCollections = true }
-                        if let image = shareImage { ShareLink(item: image, preview: SharePreview(tr("viewer.share"), image: image)) { Image(systemName: "square.and.arrow.up").font(.title3).foregroundStyle(.white).frame(minWidth: 44, minHeight: 44) }.accessibilityLabel(tr("viewer.share")).accessibilityIdentifier("viewerShare") }
-                        bar("trash", tr("common.delete")) { confirmDelete = true }
-                    }
-                    .padding(.vertical, 4).padding(.horizontal, 20).background(.ultraThinMaterial, in: Capsule())
+                    .vmkOneLineCap()
                 }
-                .padding(.horizontal, 20).padding(.bottom, 16)
             }
+            .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s)
         }
         .preferredColorScheme(.dark)
         .task(id: current?.id) {
@@ -67,25 +72,21 @@ struct PhotoViewer: View {
             guard let p = current, let full = await media.fullImage(for: p) else { return }
             shareImage = Image(uiImage: full)
         }
+        .onChange(of: index) { _, i in       // swiping pages says where you are (VoiceOver reads nothing by itself)
+            let n = self.shown.count
+            if n > 1 { UIAccessibility.post(notification: .pageScrolled, argument: tr("viewer.position", min(i, n - 1) + 1, n)) }
+        }
+        .onChange(of: shown.count) { _, n in if n == 0 { dismiss() } else if index > n - 1 { index = n - 1 } }
         .sheet(isPresented: $showInfo) { if let p = current { PhotoInfoSheet(media: media, photo: p) } }
         .sheet(isPresented: $showCollections) { if let p = current { AddToCollectionSheet(media: media, photoIDs: [p.id]) {} } }
-        .confirmationDialog(tr("viewer.delete_this_photo"), isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button(tr("viewer.delete_photo"), role: .destructive) { deleteCurrent() }
-        } message: { Text(tr("viewer.it_is_removed_from_your")) }
     }
 
-    private func bar(_ symbol: String, _ label: String, _ run: @escaping () -> Void) -> some View {
-        Button(action: run) { Image(systemName: symbol).font(.title3).foregroundStyle(.white).frame(minWidth: 44, minHeight: 44) }.accessibilityLabel(label)
-    }
-
+    /// No question: the photo leaves at once and "Deleted · Undo" shows for six seconds.
     private func deleteCurrent() {
         guard let p = current else { return }
-        Task {
-            guard await media.delete([p.id]) else { return }
-            onDeleted(p.id)
-            photos.removeAll { $0.id == p.id }
-            if photos.isEmpty { dismiss() } else { index = min(index, photos.count - 1) }
-        }
+        Haptics.play(.selection)
+        let gone = onDeleted
+        media.deletePhotos([p.id], undo: model.undo) { ids in ids.forEach(gone) }
     }
 }
 
@@ -110,7 +111,7 @@ struct ZoomablePhoto: View {
                         .simultaneousGesture(DragGesture().onChanged { if scale > 1 { offset = CGSize(width: dragBase.width + $0.translation.width, height: dragBase.height + $0.translation.height) } }
                             .onEnded { _ in dragBase = offset })
                         .onTapGesture(count: 2) { withAnimation(.snappy) { if scale > 1 { scale = 1; base = 1; offset = .zero; dragBase = .zero } else { scale = 2.5; base = 2.5 } } }
-                } else { ProgressView().tint(.white).frame(width: geo.size.width, height: geo.size.height) }
+                } else { ProgressView().tint(Theme.onMedia).frame(width: geo.size.width, height: geo.size.height) }
             }
         }
         .accessibilityLabel(MediaGrouping.accessibilityLabel(photo))
@@ -127,17 +128,23 @@ struct PhotoInfoSheet: View {
     let photo: LibraryPhoto
     @Environment(\.dismiss) private var dismiss
     var body: some View {
-        NavigationStack {
-            List {
-                if let d = MediaGrouping.day(of: photo, calendar: .current) { LabeledContent(photo.taken == nil ? tr("viewer.added") : tr("viewer.taken"), value: MediaGrouping.title(y: d.y, m: d.m, d: d.d, calendar: .current)) }
-                if let place = photo.place { LabeledContent(tr("viewer.place"), value: place) }
-                if photo.w > 0 { LabeledContent(tr("viewer.size"), value: "\(photo.w) x \(photo.h) px, \(StorageMeter.format(photo.bytes))") } else { LabeledContent(tr("viewer.size"), value: StorageMeter.format(photo.bytes)) }
-                let names = media.collections.filter { photo.collections.contains($0.id) }.map(\.name)
-                LabeledContent(tr("viewer.collections"), value: names.isEmpty ? tr("viewer.none") : names.joined(separator: ", "))
+        FittedSheet {
+            VStack(alignment: .leading, spacing: 0) {
+                SheetHeader(title: tr("viewer.info"), closeID: "photoInfoClose") { dismiss() }.padding(.bottom, Theme.Space.s)
+                if let d = MediaGrouping.day(of: photo, calendar: .current) { row(photo.taken == nil ? tr("viewer.added") : tr("viewer.taken"), MediaGrouping.title(y: d.y, m: d.m, d: d.d, calendar: .current)) }
+                if let place = photo.place { row(tr("viewer.place"), place) }
+                row(tr("viewer.size"), photo.w > 0 ? "\(photo.w) x \(photo.h) px, \(StorageMeter.format(photo.bytes))" : StorageMeter.format(photo.bytes))
+                let names = media.shownCollections.filter { photo.collections.contains($0.id) }.map(\.name)
+                row(tr("viewer.collections"), names.isEmpty ? tr("viewer.none") : names.joined(separator: ", "))
             }
-            .navigationTitle(tr("viewer.info")).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
         }
-        .presentationDetents([.medium])
+    }
+
+    private func row(_ label: String, _ value: String) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: Theme.Space.m) { Text(label).foregroundStyle(Theme.textSecondary); Spacer(minLength: Theme.Space.s); Text(value).foregroundStyle(Theme.text).multilineTextAlignment(.trailing) }
+            VStack(alignment: .leading, spacing: 2) { Text(label).foregroundStyle(Theme.textSecondary); Text(value).foregroundStyle(Theme.text) }.frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .font(.role(.body)).frame(minHeight: Theme.minTouch).accessibilityElement(children: .combine)
     }
 }
