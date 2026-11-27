@@ -14,8 +14,9 @@ The flow, in the director:
      rules of `assign`: women's characters take nl, pl, fi) and the plan's `polyglot` record is made.
   4. `block(poly, direction, ...)`  the paragraph the writer is shown: every character speaks ITS language, with a line length in words per language, a translation
      per line into the main language, card text in the speaker's language.
-  5. `finish(plan, poly, ask)`  after the plan exists: voices of the right language per speaker, every line in its speaker's language (one rewrite), missing
-     translations filled, the audit (voice language equals line language), the record `plan.polyglot`.
+  5. `prepare(plan, poly)` right after the first cartoon repair (the record `plan.polyglot`, a voice of the right language per speaker: the length fit needs them) and
+     `finish(plan, poly, ask)` last, after every repair and the length fit: every line in its speaker's language (one rewrite), translations for the lines that still say what they
+     said, the audit (voice language equals line language).
 Output: `plan.polyglot = {"mode": "conversation", "translate": bool, "translation": "auto|on|off", "speakers": {id: lang}, "by": "form|words|app", "languages": [...],
 "notes": [text], "audit": {...}}`.
 """
@@ -58,6 +59,7 @@ class Polyglot:
     dropped: List[str] = field(default_factory=list)
     cast_chosen: List[str] = field(default_factory=list)       # the cast the person chose in the form (ids), if any
     used_model: bool = False
+    snapshot: Dict[str, str] = field(default_factory=dict)      # beat id -> the line as `prepare` saw it: a line that changed since (cut by the length fit) lost its translation
 
     def summary(self) -> Dict[str, Any]:
         return {"by": self.by, "languages": list(self.languages), "named": dict(self.named), "implicit": self.implicit, "learning": self.learning, "dropped": list(self.dropped),
@@ -369,20 +371,39 @@ def fill_translations(plan: Dict[str, Any], ask: Ask, main: str) -> int:
     return n
 
 
-def finish(plan: Dict[str, Any], poly: Optional[Polyglot], ask: Optional[Ask]) -> List[str]:
-    """After the cartoon repair: records `plan.polyglot`, gives every speaker a voice of its language, checks and rewrites the lines once, fills the translations, audits.
-    -> warnings (for the plan's warnings). Never raises."""
+def prepare(plan: Dict[str, Any], poly: Optional[Polyglot]) -> None:
+    """Right after the first cartoon repair, before the length fit: records `plan.polyglot` and gives every speaker a voice of its own language (no model call), so the length
+    fit estimates each line with the voice that will speak it. A plan with no polyglot is not touched. Never raises."""
     if poly is None or not poly.speakers:
-        return []
-    warnings: List[str] = []
+        return
     try:
-        main = plan_langs.main_language(plan)
-        beats = plan.get("beats") or []
-        for b in beats:   # a speaker the cast does not have speaks as the first one: never a line without a language
+        for b in plan.get("beats") or []:   # a speaker the cast does not have speaks as the first one: never a line without a language
             if b.get("speaker") not in poly.speakers and not b.get("silent"):
                 b["speaker"] = next(iter(poly.speakers))
         plan["polyglot"] = {"mode": "conversation", "translate": poly.translation != "off", "translation": poly.translation, "speakers": dict(poly.speakers), "by": poly.by,
                             "languages": list(dict.fromkeys(poly.speakers.values())), "notes": note_texts(poly)}
+        plan_langs.recast(plan)
+        poly.snapshot = {str(b.get("id")): str(b.get("narration") or "") for b in plan.get("beats") or []}
+    except Exception:   # noqa: BLE001
+        logging.exception("POLYGLOT_PREPARE_FAILED")
+
+
+def finish(plan: Dict[str, Any], poly: Optional[Polyglot], ask: Optional[Ask]) -> List[str]:
+    """The last step, after every repair and the length fit: voices again (a second cartoon repair resets them to the main language), a translation only for a line that still
+    says what it said (a line the fit cut lost its translation: it is written again), every line checked against its speaker's language (one rewrite), missing translations
+    filled, the audit. -> warnings (for the plan's warnings). Never raises."""
+    if poly is None or not poly.speakers:
+        return []
+    warnings: List[str] = []
+    try:
+        if not isinstance(plan.get("polyglot"), dict):
+            prepare(plan, poly)
+        main = plan_langs.main_language(plan)
+        stale = 0
+        for b in plan.get("beats") or []:
+            if poly.snapshot and b.get("translation") and str(b.get("narration") or "") != poly.snapshot.get(str(b.get("id")), b.get("narration")):
+                b.pop("translation")
+                stale += 1
         plan_langs.recast(plan)
         s = plan_langs.settle(plan, ask)
         warnings += s["warnings"]
@@ -395,7 +416,7 @@ def finish(plan: Dict[str, Any], poly: Optional[Polyglot], ask: Optional[Ask]) -
         warnings += [f"polyglot: {p}" for p in a["problems"]]
         if a["problems"]:
             logging.warning("POLYGLOT_AUDIT %s", a["problems"][:5])
-        logging.warning("POLYGLOT speakers=%s languages=%s wrong=%s rewritten=%s asked=%s audit_ok=%s", poly.speakers, plan["polyglot"]["languages"], s["wrong"], s["rewritten"], s["asked"], a["ok"])
+        logging.warning("POLYGLOT speakers=%s languages=%s wrong=%s rewritten=%s asked=%s stale=%s audit_ok=%s", poly.speakers, plan["polyglot"]["languages"], s["wrong"], s["rewritten"], s["asked"], stale, a["ok"])
     except Exception:   # noqa: BLE001 - recorded, never fatal: a plan that could not be settled is made as written
         logging.exception("POLYGLOT_FINISH_FAILED")
         warnings.append("polyglot: the language check failed; the plan was left as written")
