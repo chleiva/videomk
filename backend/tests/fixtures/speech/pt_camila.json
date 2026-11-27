@@ -1,0 +1,145 @@
+{
+ "text": "Por que o céu é azul? A resposta, surpreendentemente, tem pouco a ver com o oceano: a luz do sol se espalha no ar, e a luz azul é a que mais se espalha.",
+ "voice": "Camila",
+ "engine": "neural",
+ "language": "pt",
+ "rate": 8000,
+ "marks": [
+  {
+   "word": "Por",
+   "start": 0.062
+  },
+  {
+   "word": "que",
+   "start": 0.25
+  },
+  {
+   "word": "o",
+   "start": 0.375
+  },
+  {
+   "word": "céu",
+   "start": 0.5
+  },
+  {
+   "word": "é",
+   "start": 0.837
+  },
+  {
+   "word": "azul?",
+   "start": 1.0
+  },
+  {
+   "word": "A",
+   "start": 1.992
+  },
+  {
+   "word": "resposta,",
+   "start": 2.105
+  },
+  {
+   "word": "surpreendentemente,",
+   "start": 3.067
+  },
+  {
+   "word": "tem",
+   "start": 4.505
+  },
+  {
+   "word": "pouco",
+   "start": 4.817
+  },
+  {
+   "word": "a",
+   "start": 5.155
+  },
+  {
+   "word": "ver",
+   "start": 5.242
+  },
+  {
+   "word": "com",
+   "start": 5.492
+  },
+  {
+   "word": "o",
+   "start": 5.692
+  },
+  {
+   "word": "oceano:",
+   "start": 5.755
+  },
+  {
+   "word": "a",
+   "start": 6.63
+  },
+  {
+   "word": "luz",
+   "start": 6.742
+  },
+  {
+   "word": "do",
+   "start": 7.017
+  },
+  {
+   "word": "sol",
+   "start": 7.13
+  },
+  {
+   "word": "se",
+   "start": 7.43
+  },
+  {
+   "word": "espalha",
+   "start": 7.555
+  },
+  {
+   "word": "no",
+   "start": 8.055
+  },
+  {
+   "word": "ar,",
+   "start": 8.255
+  },
+  {
+   "word": "e",
+   "start": 8.505
+  },
+  {
+   "word": "a",
+   "start": 8.867
+  },
+  {
+   "word": "luz",
+   "start": 8.93
+  },
+  {
+   "word": "azul",
+   "start": 9.192
+  },
+  {
+   "word": "é",
+   "start": 9.617
+  },
+  {
+   "word": "a",
+   "start": 9.68
+  },
+  {
+   "word": "que",
+   "start": 9.805
+  },
+  {
+   "word": "mais",
+   "start": 9.942
+  },
+  {
+   "word": "se",
+   "start": 10.205
+  },
+  {
+   "word": "espalha.",
+   "start": 10.355
+  }
+ ]
+}

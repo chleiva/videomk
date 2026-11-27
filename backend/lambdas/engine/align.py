@@ -39,7 +39,10 @@ import numpy as np
 
 HOP_S = 0.01
 MIN_PAUSE_S = 0.10
-_VOWELS = re.compile(r"[aeiouyáéíóúüàèìòùâêîôûäëïöå]+", re.I)
+RATE_GAP = 1.8           # two neighbouring phrases may differ in pace by this factor; past it the comma between them was matched to the wrong silence
+MIN_RATE_TOKENS = 3      # the pace of a phrase shorter than this ("First,") says nothing
+_VOWELS = re.compile(r"[aeiouyáéíóúüàèìòùâêîôûäëïöåãõąęœæøÿý]+", re.I)   # the vowels of every Latin-script language Polly's generative voices speak
+_HANGUL = re.compile(r"[\uac00-\ud7a3]")          # one Hangul block is one spoken syllable (Korean)
 _BOUNDARY = {",": 0.5, ";": 0.7, ":": 0.6, "—": 0.6, "–": 0.5, ".": 1.0, "!": 1.0, "?": 1.0, "…": 0.8}
 
 
@@ -61,7 +64,7 @@ def syllable_weight(token: str) -> float:
         w += 1.0
     if letters:
         low = letters.lower()
-        groups = len(_VOWELS.findall(low))
+        groups = len(_VOWELS.findall(low)) + len(_HANGUL.findall(low))
         if re.search(r"[^aeiouy]e$", low) and not re.search(r"[^aeiouy]le$", low) and groups > 1:   # a silent final e ("there", "are", "make"), but not "table"
             groups -= 1
         if re.search(r"[^aeiouytd]ed$|[^aeiouy]es$", low) and groups > 1:                              # "walked", "makes"
@@ -156,15 +159,40 @@ def align_words(samples: np.ndarray, sr: int, text: str) -> Tuple[List[Word], fl
             j = pj
         i = pi
 
-    # anchors: (token index after which the phrase ends, pause) -> segment boundaries in frames
-    segs: List[Tuple[int, int, int, int]] = []        # (token_lo, token_hi_exclusive, frame_lo, frame_hi)
-    tok_lo, fr_lo = 0, first
-    for bi in sorted(matches):
-        tok_idx = bounds[bi][0]
-        a, b = pauses[matches[bi]]
-        segs.append((tok_lo, tok_idx + 1, fr_lo, a))
-        tok_lo, fr_lo = tok_idx + 1, b
-    segs.append((tok_lo, len(tokens), fr_lo, last))
+    def segments(m: Dict[int, int]) -> List[Tuple[int, int, int, int]]:
+        """anchors: (token index after which the phrase ends, pause) -> segment boundaries in frames: (token_lo, token_hi_exclusive, frame_lo, frame_hi)"""
+        out_, tok_lo, fr_lo = [], 0, first
+        for bi in sorted(m):
+            tok_idx = bounds[bi][0]
+            a, b = pauses[m[bi]]
+            out_.append((tok_lo, tok_idx + 1, fr_lo, a))
+            tok_lo, fr_lo = tok_idx + 1, b
+        out_.append((tok_lo, len(tokens), fr_lo, last))
+        return out_
+
+    def rate(seg: Tuple[int, int, int, int]) -> float:
+        """Syllable weight per voiced frame of one phrase."""
+        tlo, thi, flo, fhi = seg
+        v = float(cum[max(0, min(fhi, last) - first)] - cum[max(0, flo - first)])
+        return float(before[thi] - before[tlo]) / max(v, 1.0)
+
+    # A comma is not always a pause, and a long consonant can be one (the closure of a double consonant in Italian or Finnish lasts as long as a short breath):
+    # a comma matched to such a silence leaves one phrase spoken impossibly slowly and its neighbour impossibly fast. Where two neighbouring phrases differ in
+    # pace by more than RATE_GAP, the weak boundary between them is released and the words are placed by syllable weight across both. Full stops stay anchored.
+    while True:
+        segs = segments(matches)
+        order = sorted(matches)
+        worst, drop = RATE_GAP, None
+        for n, bi in enumerate(order):
+            if bounds[bi][1] >= 0.9 or min(segs[n][1] - segs[n][0], segs[n + 1][1] - segs[n + 1][0]) < MIN_RATE_TOKENS:
+                continue
+            r0, r1 = rate(segs[n]), rate(segs[n + 1])
+            gap = max(r0, r1) / max(min(r0, r1), 1e-6)
+            if gap > worst:
+                worst, drop = gap, bi
+        if drop is None:
+            break
+        del matches[drop]
 
     def frame_at_voiced(v: float) -> float:
         """Inverse of the cumulative voiced axis (v in voiced frames from `first`) -> frame index."""

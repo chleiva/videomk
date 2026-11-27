@@ -1,0 +1,133 @@
+{
+ "text": "Perché il cielo è blu? La risposta, sorprendentemente, ha poco a che fare con l'oceano: la luce del sole si diffonde nell'aria, e la luce blu si diffonde più di tutte.",
+ "voice": "Bianca",
+ "engine": "neural",
+ "language": "it",
+ "rate": 8000,
+ "marks": [
+  {
+   "word": "Perché",
+   "start": 0.062
+  },
+  {
+   "word": "il",
+   "start": 0.45
+  },
+  {
+   "word": "cielo",
+   "start": 0.625
+  },
+  {
+   "word": "è",
+   "start": 1.062
+  },
+  {
+   "word": "blu?",
+   "start": 1.137
+  },
+  {
+   "word": "La",
+   "start": 2.055
+  },
+  {
+   "word": "risposta,",
+   "start": 2.23
+  },
+  {
+   "word": "sorprendentemente,",
+   "start": 3.167
+  },
+  {
+   "word": "ha",
+   "start": 4.555
+  },
+  {
+   "word": "poco",
+   "start": 4.867
+  },
+  {
+   "word": "a",
+   "start": 5.18
+  },
+  {
+   "word": "che",
+   "start": 5.23
+  },
+  {
+   "word": "fare",
+   "start": 5.417
+  },
+  {
+   "word": "con",
+   "start": 5.792
+  },
+  {
+   "word": "l'oceano:",
+   "start": 5.917
+  },
+  {
+   "word": "la",
+   "start": 6.792
+  },
+  {
+   "word": "luce",
+   "start": 6.992
+  },
+  {
+   "word": "del",
+   "start": 7.292
+  },
+  {
+   "word": "sole",
+   "start": 7.542
+  },
+  {
+   "word": "si",
+   "start": 7.792
+  },
+  {
+   "word": "diffonde",
+   "start": 7.942
+  },
+  {
+   "word": "nell'aria,",
+   "start": 8.417
+  },
+  {
+   "word": "e",
+   "start": 9.242
+  },
+  {
+   "word": "la",
+   "start": 9.355
+  },
+  {
+   "word": "luce",
+   "start": 9.542
+  },
+  {
+   "word": "blu",
+   "start": 9.855
+  },
+  {
+   "word": "si",
+   "start": 10.105
+  },
+  {
+   "word": "diffonde",
+   "start": 10.23
+  },
+  {
+   "word": "più",
+   "start": 10.73
+  },
+  {
+   "word": "di",
+   "start": 10.867
+  },
+  {
+   "word": "tutte.",
+   "start": 11.017
+  }
+ ]
+}

@@ -1,0 +1,125 @@
+{
+ "text": "Warum ist der Himmel blau? Die Antwort hat überraschenderweise wenig mit dem Ozean zu tun: Das Sonnenlicht wird in der Luft gestreut, und blaues Licht wird am stärksten gestreut.",
+ "voice": "Vicki",
+ "engine": "neural",
+ "language": "de",
+ "rate": 8000,
+ "marks": [
+  {
+   "word": "Warum",
+   "start": 0.137
+  },
+  {
+   "word": "ist",
+   "start": 0.45
+  },
+  {
+   "word": "der",
+   "start": 0.687
+  },
+  {
+   "word": "Himmel",
+   "start": 0.875
+  },
+  {
+   "word": "blau?",
+   "start": 1.137
+  },
+  {
+   "word": "Die",
+   "start": 2.105
+  },
+  {
+   "word": "Antwort",
+   "start": 2.23
+  },
+  {
+   "word": "hat",
+   "start": 2.692
+  },
+  {
+   "word": "überraschenderweise",
+   "start": 2.917
+  },
+  {
+   "word": "wenig",
+   "start": 3.942
+  },
+  {
+   "word": "mit",
+   "start": 4.367
+  },
+  {
+   "word": "dem",
+   "start": 4.48
+  },
+  {
+   "word": "Ozean",
+   "start": 4.667
+  },
+  {
+   "word": "zu",
+   "start": 5.192
+  },
+  {
+   "word": "tun:",
+   "start": 5.417
+  },
+  {
+   "word": "Das",
+   "start": 6.042
+  },
+  {
+   "word": "Sonnenlicht",
+   "start": 6.23
+  },
+  {
+   "word": "wird",
+   "start": 6.792
+  },
+  {
+   "word": "in",
+   "start": 6.98
+  },
+  {
+   "word": "der",
+   "start": 7.117
+  },
+  {
+   "word": "Luft",
+   "start": 7.23
+  },
+  {
+   "word": "gestreut,",
+   "start": 7.542
+  },
+  {
+   "word": "und",
+   "start": 8.417
+  },
+  {
+   "word": "blaues",
+   "start": 8.605
+  },
+  {
+   "word": "Licht",
+   "start": 9.042
+  },
+  {
+   "word": "wird",
+   "start": 9.305
+  },
+  {
+   "word": "am",
+   "start": 9.53
+  },
+  {
+   "word": "stärksten",
+   "start": 9.68
+  },
+  {
+   "word": "gestreut.",
+   "start": 10.217
+  }
+ ]
+}

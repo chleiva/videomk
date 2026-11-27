@@ -29,7 +29,8 @@ RESOLUTIONS: List[Dict[str, Any]] = [
 ]
 RESOLUTION_4K = "2160p"
 PLATFORMS_4K = ("youtube", "other")   # where a 4K file is worth making (owner decision); every other platform publishes at 1080p or lower
-LANGUAGE_LABELS = {"en": "English", "es": "Español"}   # every language the engine can voice; READY_LANGUAGES picks which are offered
+# every language the engine can make a video in (engine/voices.READY), each named in itself; READY_LANGUAGES picks which the create form offers
+LANGUAGE_LABELS = {"en": "English", "es": "Español", "fr": "Français", "de": "Deutsch", "it": "Italiano", "pt": "Português (Brasil)", "nl": "Nederlands", "pl": "Polski", "fi": "Suomi"}
 
 # aspect -> (width units, height units); the SHORT side is 720, 1080 or 2160 pixels
 _RATIOS: Dict[str, Tuple[int, int]] = {"16:9": (16, 9), "9:16": (9, 16), "1:1": (1, 1), "4:5": (4, 5)}

@@ -28,11 +28,22 @@ def hook_rule(minutes: Optional[float]) -> str:
             "Open one question early and pay it off before the end.")
 
 
+def banned_phrases(language: str = "en") -> str:
+    """The filler lines the writer must avoid. Listed in English and Spanish; in any other language the English list stands for its equivalents."""
+    if language == "es":
+        return ", ".join('"%s"' % b for b in BANNED_ES)
+    out = ", ".join('"%s"' % b for b in BANNED_EN)
+    if language and language != "en":
+        from . import voices
+        out += f" (nor their equivalents in {voices.LANGUAGES.get(language, 'the language of the video')})"
+    return out
+
+
 def block(prompt: str, minutes: Optional[float], language: str = "en", photos: bool = False) -> str:
     """The rules to append to `craft`; empty when disabled or for a video made from the person's own photos (its own guide governs)."""
     if not enabled() or photos:
         return ""
-    banned = ", ".join('"%s"' % b for b in (BANNED_ES if language == "es" else BANNED_EN))
+    banned = banned_phrases(language)
     short = minutes is not None and minutes < 1
     cadence = ("a new picture or on-screen change at least every 4 seconds" if short else "a new picture or on-screen change at least every 8 seconds (a bullets or steps scene earns its place only if its items appear as they are spoken)")
     out = ["\n\nENGAGEMENT (the goal is a video people watch to the end, whatever the request; these refine the rules above):",

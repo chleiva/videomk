@@ -114,10 +114,15 @@ TOOLS = [
 ]
 
 
+def _language_name(language: str) -> str:
+    from . import voices
+    return voices.LANGUAGES.get(language, "English")
+
+
 def _system(language: str, region: Optional[str], today: str, b: Budget) -> str:
     return (
         "You gather evidence for the script of a short explainer video. You do not write the script.\n"
-        f"Today is {today}. The video will be in {'Spanish' if language == 'es' else 'English'}." + (f" The viewer is in {region}." if region else "") + "\n"
+        f"Today is {today}. The video will be in {_language_name(language)}." + (f" The viewer is in {region}." if region else "") + "\n"
         f"Use web_search (at most {b.max_searches} searches) to find reliable, specific, recent sources: prefer official and primary sources and reputable outlets. "
         f"Use read_page (at most {b.max_reads}) only when a snippet is promising but too thin. Stop as soon as you hold solid facts (dates, names, numbers) for "
         "roughly 4 to 8 key points; do not keep searching for more.\n"

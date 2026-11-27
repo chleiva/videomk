@@ -225,7 +225,19 @@ Return only the JSON object."""
 
 def system_prompt(f: Optional[Dict[str, bool]] = None) -> str:
     """The classifier prompt for THIS stage: the looks paragraph is built from the server switches (common/looks.py), the same ones capabilities reports."""
-    return _SYSTEM.replace("@@LOOKS@@", looks.prompt_block(f))
+    return _languages(_SYSTEM.replace("@@LOOKS@@", looks.prompt_block(f)))
+
+
+def _languages(text: str) -> str:
+    """The prompt names the languages a video can be made in on THIS stage (server setting VIDEO_LANGUAGES, engine/voices.enabled): English or Spanish by default."""
+    try:
+        from engine import voices
+        names = voices.language_names()
+    except Exception:   # the engine package is always beside this one; if it is not, the prompt keeps its two languages
+        return text
+    if names == ["English", "Spanish"]:
+        return text
+    return text.replace("English or Spanish", ", ".join(names[:-1]) + " or " + names[-1])
 
 
 SYSTEM = system_prompt({})   # the prompt with every optional look off (for reading and tests); `check` builds the stage's own

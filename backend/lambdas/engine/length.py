@@ -20,6 +20,9 @@ RATES: Dict[str, Tuple[float, float, float]] = {
     "Amy": (0.0558, 0.309, 0.23), "Ruth": (0.0547, 0.351, 0.16), "Lucia": (0.0495, 0.378, 0.14), "Lupe": (0.0570, 0.311, 0.14),
 }
 LANG_RATES: Dict[str, Tuple[float, float, float]] = {"en": (0.0555, 0.33, 0.20), "es": (0.0530, 0.345, 0.14)}   # a voice without its own fit
+# The four fitted voices say the catalogue's sentence 4 to 10 percent faster than their fits predict (Ruth 11.6 s against 12.3, Amy 12.0 / 12.5, Lucia 10.7 / 11.2,
+# Lupe 11.2 / 12.3: finished beats carry a little more silence than one clean sentence), so a rate derived from that sentence is raised by the median of the four.
+SAMPLE_CALIBRATION = 1.05
 
 OVER = 0.05              # the window above the asked length: asked .. asked * 1.05
 CUT_ABOVE = 1.03         # a script estimated past this share of the asked length is cut ...
@@ -30,12 +33,41 @@ MIN_SENTENCE_WORDS = 3   # a piece shorter than this is not a sentence on its ow
 
 _PUNCT = re.compile(r"[.!?;:,—–…]")
 _DIGIT = re.compile(r"\d")
-_NEXT = r"(?=[\"'\u201c\u2018(\u00bf\u00a1]*[A-Z\u00c0-\u00dc0-9])"
+_NEXT = r"(?=[\"'“‘„«(¿¡]*[A-ZÀ-ÜĄ-Ž0-9])"   # the next sentence opens with a capital (Latin Extended-A too: Polish Ł, Ś, Ż) or a digit
 _SPLIT = re.compile(r"(?:(?<=[.!?\u2026])|(?<=[.!?\u2026][\"'\u201d\u2019)]))\s+" + _NEXT)
 
 
+def _measured(voice: str, lang: str) -> Optional[Tuple[float, float, float]]:
+    """A voice with no fit of its own: the language rate scaled by how long the voice took to say the catalogue's fixed sentence (engine/voice_data.py, one
+    measurement per voice) against what the language rate predicts for that sentence. For the languages without a fit (French, German, ...) the English shape
+    (seconds per character, pause and digit) is scaled the same way, so the estimate is right for that one sentence and approximately right elsewhere."""
+    from . import voice_data
+    v = next((x for x in voice_data.VOICES if x["id"] == voice), None)
+    text = voice_data.SAMPLE.get(v["language"]) if v else None
+    if not v or not text or not v.get("sample_s"):
+        return None
+    c, p, d = LANG_RATES.get(v["language"], LANG_RATES["en"])
+    predicted = len(text) * c + len(_PUNCT.findall(text)) * p + len(_DIGIT.findall(text)) * d
+    k = SAMPLE_CALIBRATION * float(v["sample_s"]) / predicted
+    return (round(c * k, 5), round(p * k, 4), round(d * k, 4))
+
+
+_MEASURED: Dict[str, Optional[Tuple[float, float, float]]] = {}
+
+
 def rate_for(language: str = "en", voice: Optional[str] = None) -> Tuple[float, float, float]:
-    return RATES.get(str(voice or ""), LANG_RATES["es" if str(language or "en").lower().startswith("es") else "en"])
+    """(seconds per character, per punctuation mark, per digit): the voice's own fit, else its one measured sentence, else the language's rate."""
+    name, lang = str(voice or ""), str(language or "en").lower()[:2]
+    if name in RATES:
+        return RATES[name]
+    if name and name not in _MEASURED:
+        _MEASURED[name] = _measured(name, lang)
+    if _MEASURED.get(name):
+        return _MEASURED[name]
+    if lang not in LANG_RATES:   # no voice known: the language's default voice stands for it
+        from . import voices
+        return rate_for(lang, voices.default_voice(lang)) if lang in voices.LANGUAGES and voices.default_voice(lang) != name else LANG_RATES["en"]
+    return LANG_RATES[lang]
 
 
 def estimate_speech(text: str, language: str = "en", voice: Optional[str] = None) -> float:

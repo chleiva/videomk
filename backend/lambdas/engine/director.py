@@ -39,10 +39,10 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
-    if language not in voices.LANGUAGES:  # not chosen by the caller: work it out from the brief (free for clear briefs)
+    if language not in voices.enabled():  # not chosen by the caller (or not offered on this stage): work it out from the brief (free for clear briefs)
         language = lang_mod.detect(prompt, lambda s, u: ask_small(s, u, 20))
-        if language not in voices.LANGUAGES:
-            return {"legit": False, "reason": lang_mod.unsupported_message()}
+        if language not in voices.enabled():
+            return {"legit": False, "reason": lang_mod.unsupported_message(language)}
 
     today = today or date.today().isoformat()
     info: Dict[str, Any] = {"mode": "encyclopedia"}

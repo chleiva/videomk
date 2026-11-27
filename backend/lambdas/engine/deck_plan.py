@@ -295,10 +295,10 @@ def direct_deck(deck: Dict[str, Any], images: Sequence[bytes], *, prompt: str, m
         return {"legit": False, "reason": "empty"}
     minutes = float(minutes) if minutes else auto_minutes(len(slides), [s.get("role") for s in slides])
     sample = " ".join(fence_clean(s.get("title"), 80) + " " + " ".join(b["t"] for b in s.get("blocks", [])[:3]) for s in slides[:6])
-    if language not in voices.LANGUAGES:   # the deck's own language wins over the request's, unless the person chose one
+    if language not in voices.enabled():   # the deck's own language wins over the request's, unless the person chose one
         language = lang_mod.detect(sample or prompt, lambda s, u: ask_small(s, u, 20))
-        if language not in voices.LANGUAGES:
-            return {"legit": False, "reason": lang_mod.unsupported_message()}
+        if language not in voices.enabled():
+            return {"legit": False, "reason": lang_mod.unsupported_message(language)}
     info, flagged = understand(deck, images, ask_vision)
     dropped = {f["n"] for f in flagged}
     if len(dropped) * 2 > len(slides):
@@ -341,7 +341,7 @@ def direct_deck(deck: Dict[str, Any], images: Sequence[bytes], *, prompt: str, m
 
 
 def deck_engagement(language: str, minutes: float) -> str:
-    banned = ", ".join('"%s"' % b for b in (engagement.BANNED_ES if language == "es" else engagement.BANNED_EN))
+    banned = engagement.banned_phrases(language)
     return ("\n\nDECK ENGAGEMENT: " + "beat 1 (under 10 seconds) says what the deck is about and why it matters, with its most concrete fact; no title-card reading. "
             f"Open one question in beat 1 and pay it off at the end. No filler openers or closers and none of these phrases: {banned}. Vary sentence length; no 'there are N things' announcements. "
             "The last beat lands the takeaway or the decision asked for in one line the viewer can repeat.")

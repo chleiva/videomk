@@ -50,14 +50,14 @@ First decide if the request is legitimate and safe to make into an educational/e
 
 Otherwise return ONLY JSON (no markdown):
 {{"legit": true, "title": "<<=60 chars>", "description": "<2 sentences for the video description>", "mood": "calm"|"bright"|"tense", "theme": "midnight"|"paper"|"sunrise",
- "voices": {{"narrator": "<voice name from the list>"}},
+ "voices": {{"narrator": {{<what you want: see the voices rule>}}}},
  "music": {{...as described below...}},
  "sections": [{{"title": "<<=60 chars, becomes a chapter title>", "goal": "<what this section makes the viewer understand, <=200 chars>",
                "key_points": ["<3-6 concrete points, facts or examples this section must cover>"], "queries": ["<1-3 web searches that would find the grounding for THIS section>"],
                "minutes": <number>, "music": <optional: a different music choice for this section, same shape as above>}}]}}
 
 Rules:
-- Write everything in {voice_mod.LANGUAGES.get(language, "English")}. Cast only voices from this list: {voice_mod.prompt_list(language)}. The default voice is {default_voice}: use it unless the brief asks otherwise.
+- Write everything in {voice_mod.LANGUAGES.get(language, "English")}. Voices are not chosen by name: say what you want and the closest voice is cast. {{"narrator": {{}}}} is the default voice of the viewer ({voice_mod.CATALOG[default_voice][1]}): use it unless the brief asks otherwise, then say {{"accent": "<one of: {", ".join(voice_mod.accents(language))}>", "gender": "female"|"male", "pace": "slow"|"fast"}} (each optional) or {{"name": "<a voice the brief names>"}}.
 - Make EXACTLY the requested number of sections; their "minutes" add up to the requested length. Section 1 opens with a hook (a surprising fact, a vivid question or a tension, never a greeting or an agenda); the last section ends with one takeaway. Each section covers different ground: no overlap between them. Shape the sections as an arc, each one raising a question or a turn that the next picks up, and put the strongest, most surprising material where attention usually sags (the middle).
 - Order the sections so the story builds (context, how it works, examples, consequences, what next), not as an encyclopedia list.
 {plan_mod.music_rules(tracks)}

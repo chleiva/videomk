@@ -1,0 +1,109 @@
+{
+ "text": "Joka aamu noin 300 junaa lähtee päärautatieasemalta. Jotkut kulkevat koko maan halki, kun taas toiset ajavat vain naapurikaupunkiin, ja jokainen noudattaa kuukausia sitten suunniteltua aikataulua.",
+ "voice": "Suvi",
+ "engine": "neural",
+ "language": "fi",
+ "rate": 8000,
+ "marks": [
+  {
+   "word": "Joka",
+   "start": 0.025
+  },
+  {
+   "word": "aamu",
+   "start": 0.45
+  },
+  {
+   "word": "noin",
+   "start": 0.75
+  },
+  {
+   "word": "300",
+   "start": 0.987
+  },
+  {
+   "word": "junaa",
+   "start": 1.675
+  },
+  {
+   "word": "lähtee",
+   "start": 2.037
+  },
+  {
+   "word": "päärautatieasemalta.",
+   "start": 2.425
+  },
+  {
+   "word": "Jotkut",
+   "start": 4.392
+  },
+  {
+   "word": "kulkevat",
+   "start": 4.867
+  },
+  {
+   "word": "koko",
+   "start": 5.38
+  },
+  {
+   "word": "maan",
+   "start": 5.655
+  },
+  {
+   "word": "halki,",
+   "start": 5.967
+  },
+  {
+   "word": "kun",
+   "start": 6.58
+  },
+  {
+   "word": "taas",
+   "start": 6.78
+  },
+  {
+   "word": "toiset",
+   "start": 7.08
+  },
+  {
+   "word": "ajavat",
+   "start": 7.542
+  },
+  {
+   "word": "vain",
+   "start": 7.967
+  },
+  {
+   "word": "naapurikaupunkiin,",
+   "start": 8.217
+  },
+  {
+   "word": "ja",
+   "start": 9.605
+  },
+  {
+   "word": "jokainen",
+   "start": 9.717
+  },
+  {
+   "word": "noudattaa",
+   "start": 10.267
+  },
+  {
+   "word": "kuukausia",
+   "start": 10.892
+  },
+  {
+   "word": "sitten",
+   "start": 11.655
+  },
+  {
+   "word": "suunniteltua",
+   "start": 12.067
+  },
+  {
+   "word": "aikataulua.",
+   "start": 12.93
+  }
+ ]
+}
