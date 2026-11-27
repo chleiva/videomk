@@ -4,6 +4,7 @@
     "region": "eu-west-1",
     "profile": "qa",
     "domain": null,
+    "adminHost": "d1aoqi2jnahm8s.cloudfront.net",
     "bgAnimated": true,
     "bgLoops": true,
     "vectorScenes": true,

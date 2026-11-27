@@ -189,8 +189,15 @@ def note_first_seen(ctx: Optional[Dict[str, Any]], now: float) -> None:
 
 
 # ----------------------------------------------------------------------------- the global daily budget and the per-account monthly cap
+def _budget_knobs(cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """The owner's emergency switch "stop free videos" (common/ops_switches.py) reads as a budget of 0: no free credit can be spent, paid credits work. Fails open."""
+    from common import ops_switches
+    return {**cfg, "free_daily_budget_credits": 0, "free_budget_unlimited": False} if ops_switches.stopped(ops_switches.FREE_VIDEOS) else cfg
+
+
 def budget_state(cfg: Dict[str, Any], now: Optional[float] = None) -> Dict[str, Any]:
     now = time.time() if now is None else now
+    cfg = _budget_knobs(cfg)
     limit = int(cfg["free_daily_budget_credits"])
     resumes = (int(now // 86400) + 1) * 86400
     out = {"limit_credits": limit, "limit_usd": plans.usd(limit, cfg), "resumes_at": datetime.fromtimestamp(resumes, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
@@ -205,6 +212,7 @@ def budget_take(n: int, cfg: Dict[str, Any], now: Optional[float] = None) -> boo
     now = time.time() if now is None else now
     if n <= 0:
         return True
+    cfg = _budget_knobs(cfg)
     if cfg["free_budget_unlimited"]:
         return _count("fbudget", _day(now), now, n=n, keep_days=400)
     limit = int(cfg["free_daily_budget_credits"])

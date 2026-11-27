@@ -291,3 +291,6 @@ client_secret_*.json
 *.pem
 *.jks
 *service-account*.json
+
+# owner console synth output
+backend/cdk.admin.out/

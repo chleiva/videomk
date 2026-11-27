@@ -8,7 +8,7 @@ from typing import Any, Dict
 import logging
 import time
 
-from common import free_grants, i18n, look_choice, looks as look_flags, plans, wallet, watermark_store
+from common import free_grants, i18n, look_choice, looks as look_flags, ops_switches, plans, wallet, watermark_store
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from engine import format_options
@@ -110,4 +110,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                                                       plan_max_seconds=plan_max_s))
     except Exception:   # noqa: BLE001
         logger.exception("CAPABILITIES_LOOK_PICKER_FAILED")
+    creation = ops_switches.creation_state(loc)   # the owner's switch "stop all new videos" (the launcher then answers 503 `maintenance`); fails open
+    if creation["paused"]:   # only then: `creation: {"paused": true, "code": "maintenance", "message": ...}`, so the apps can say it before the tap (absent = running)
+        body["creation"] = creation
     return json_response(200, body, {"Cache-Control": "private, max-age=60", "Content-Language": loc, **i18n.vary_headers()})

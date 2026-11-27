@@ -20,7 +20,7 @@ from common.http import json_response
 from common.identity import extract_cognito_sub
 import plan_gate
 import video_retry
-from common import deck_limits, i18n, intake, library, look_choice, looks, safety, usage, wallet, watermark_store
+from common import deck_limits, i18n, intake, library, look_choice, looks, ops_switches, safety, usage, wallet, watermark_store
 from engine import format_options, presenter_policy, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
@@ -321,6 +321,10 @@ def look_note(prompt: str, options: Dict[str, Any], loc: str, read: Optional[Dic
 
 def handler(event: Dict[str, Any], context: Any):
     resource, method = str((event or {}).get("resource") or ""), str((event or {}).get("httpMethod") or "").upper()
+    if not resource.endswith("/{video_id}/cancel") and method != "DELETE":   # the owner's emergency switch "stop all new videos" (common/ops_switches.py): generate and retry answer 503 `maintenance`; cancel and delete keep working; fails open
+        stopped = ops_switches.maintenance(event)
+        if stopped:
+            return stopped
     if resource.endswith("/{video_id}/retry"):   # POST /users/{user_id}/videos/{video_id}/retry: the same video again (lambdas/video_retry.py)
         return video_retry.retry_handler(event, context)
     if resource.endswith("/{video_id}/cancel"):   # POST /users/{user_id}/videos/{video_id}/cancel: stop a video that is being made, credits back

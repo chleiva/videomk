@@ -40,6 +40,19 @@ cli_account = os.getenv("CDK_DEFAULT_ACCOUNT")
 if cli_account and cli_account != cfg["account"]:
     raise SystemExit(f"Refusing: stage '{stage}' belongs to account {cfg['account']} but credentials are for {cli_account}.")
 
+if app.node.try_get_context("admin"):  # the owner console (docs/ADMIN_CONSOLE_DESIGN_2026-11-28.md), its own stack per stage: scripts/admin_console.sh <stage> diff|deploy
+    from admin_stack import DEFAULT_ALERT_EMAIL, AdminStack, main_stack_values
+    _given = app.node.try_get_context("adminMainValues")   # the main stack's names as JSON (tests, or a machine without credentials); else read from the deployed launcher
+    if _given:
+        _main = json.loads(_given)
+    else:
+        import boto3
+        _main = main_stack_values(boto3.Session(profile_name=cfg["profile"], region_name=cfg["region"]))
+    AdminStack(app, f"videomk-admin-{stage}", stage=stage, main=_main, host=app.node.try_get_context("adminHost") or cfg.get("adminHost"),
+               alert_email=str(app.node.try_get_context("adminAlertEmail") or DEFAULT_ALERT_EMAIL), cli_profile=cfg["profile"], env=cdk.Environment(account=cfg["account"], region=cfg["region"]))
+    app.synth()
+    raise SystemExit(0)
+
 _google, _apple = social_flag(app.node, "socialGoogle"), social_flag(app.node, "socialApple")
 if (_google or _apple) and not app.node.try_get_context("socialSkipCheck"):
     import boto3

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F7FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06070D" media="(prefers-color-scheme: dark)">
+<title>VideoMK ops</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <picture class="logo">
+    <source srcset="logo-dark.svg" media="(prefers-color-scheme: dark)">
+    <img src="logo-light.svg" alt="VideoMK" width="111" height="26">
+  </picture>
+  <span class="ops">ops</span>
+  <span class="grow"></span>
+  <span id="stage" class="badge" hidden></span>
+  <span id="clock" class="muted"></span>
+</header>
+<main id="app" aria-live="polite">
+  <p class="muted pad">Loading…</p>
+</main>
+<noscript><p class="pad">This page needs JavaScript.</p></noscript>
+<script src="app.js" defer></script>
+</body>
+</html>

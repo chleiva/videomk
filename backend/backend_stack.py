@@ -38,6 +38,10 @@ from plans_feature import Plans, enabled as plans_enabled, device_proof as plans
 
 from engine_v2 import EngineV2
 
+USAGE_DAY_INDEX = "GSI_UsageDay"
+# what the day index carries beside its keys (usage_day, created_at, video_id): status, plan, account id, costs, length, shape, failure code. NOT the prompt, title or request.
+USAGE_DAY_FIELDS = ("status", "plan", "user_id", "cost_usd", "c_speech", "c_script", "c_research", "c_photos", "c_stock", "c_deck", "duration_s", "aspect", "resolution",
+                    "failure_code", "credits_charged", "credits_multiplier", "free_credits", "last_rendered_at", "retries", "deck")
 OPENAI_SSM_PARAM = "/videomk/openai_api_key"  # standard SSM parameter: free (Secrets Manager costs ~$0.40/mo idle)
 TRANSIENT_LAMBDA_ERRORS = [
     "Lambda.ServiceException",
@@ -83,6 +87,15 @@ class BackendStack(Stack):
             partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
             sort_key=dynamodb.Attribute(name="created_at", type=dynamodb.AttributeType.STRING),
             projection_type=dynamodb.ProjectionType.ALL,
+        )
+
+        # The videos of one day, for the owner console's hourly rollup (docs/ADMIN_CONSOLE_DESIGN_2026-11-28.md section 2.3): small fields only, never the prompt.
+        # An index is part of the table: no new CloudFormation resource.
+        videos_table.add_global_secondary_index(
+            index_name=USAGE_DAY_INDEX,
+            partition_key=dynamodb.Attribute(name="usage_day", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="created_at", type=dynamodb.AttributeType.STRING),
+            projection_type=dynamodb.ProjectionType.INCLUDE, non_key_attributes=list(USAGE_DAY_FIELDS),
         )
 
         assets_bucket = s3.Bucket(
