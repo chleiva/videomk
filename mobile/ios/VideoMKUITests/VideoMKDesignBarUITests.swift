@@ -150,4 +150,19 @@ final class VideoMKDesignBarUITests: XCTestCase {
         XCTAssertTrue(app.buttons["sendButton"].isEnabled)
         shot(app, "remix-short-create")
     }
+
+    /// The video is over: Replay and New video on the last frame. Needs a short local mp4 (`TEST_RUNNER_VMK_DEBUG_SHORT_FILE`).
+    func testEndCardOffersReplayAndNewVideo() throws {
+        guard let file = ProcessInfo.processInfo.environment["VMK_DEBUG_SHORT_FILE"], !file.isEmpty else { throw XCTSkip("needs TEST_RUNNER_VMK_DEBUG_SHORT_FILE (a local mp4 of a few seconds)") }
+        let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "bar", "VMK_DEBUG_OPEN": "v3", "VMK_DEBUG_PLAYBACK_FILE": file, "VMK_DEBUG_AUTOPLAY": "1"])
+        XCTAssertTrue(app.buttons["replayButton"].waitForExistence(timeout: 90), "the end card appears when the video is over")
+        XCTAssertEqual(app.buttons["replayButton"].label, "Replay")
+        XCTAssertEqual(app.buttons["endNewVideo"].label, "New video")
+        shot(app, "end-card")
+        app.buttons["replayButton"].tap()
+        XCTAssertTrue(app.buttons["replayButton"].waitForNonExistence(timeout: 3), "Replay starts it again")
+        XCTAssertTrue(app.buttons["replayButton"].waitForExistence(timeout: 90))
+        app.buttons["endNewVideo"].tap()
+        XCTAssertTrue(el(app, "composerField").waitForExistence(timeout: 10), "New video opens Create")
+    }
 }

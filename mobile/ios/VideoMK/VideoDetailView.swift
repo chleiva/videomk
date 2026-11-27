@@ -99,7 +99,6 @@ struct VideoDetailView: View {
         .background(Theme.mediaInk)
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.hero, style: .continuous))
         .padding(.horizontal, Theme.Space.m).padding(.top, Theme.Space.s)
-        .accessibilityIdentifier("player")
         .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime)) { n in
             if let item = n.object as? AVPlayerItem, item === player?.currentItem { withAnimation(Theme.Motion.reveal) { ended = true } }
         }
@@ -134,7 +133,10 @@ struct VideoDetailView: View {
     }
 
     private func replayButton(_ player: AVPlayer) -> some View {
-        IconButton(symbol: "arrow.counterclockwise", label: tr("detail.replay"), style: .onMedia, size: 56, identifier: "replayButton") { player.seek(to: .zero); player.play(); ended = false }
+        IconButton(symbol: "arrow.counterclockwise", label: tr("detail.replay"), style: .onMedia, size: 56, identifier: "replayButton") {
+            withAnimation(Theme.Motion.fade) { ended = false }
+            Task { await player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero); player.play() }       // play only once it is back at the start: playing at the end ends it again at once
+        }
     }
 
     private var newVideoButton: some View {
@@ -150,30 +152,40 @@ struct VideoDetailView: View {
 
     /// Share is the ONE labelled primary. Save, Edit, Info and More are quiet icons, each with a spoken label.
     @ViewBuilder private func actions(_ video: VideoItem) -> some View {
-        let stacked = typeSize.isAccessibilitySize
-        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: Theme.Space.m)) : AnyLayout(HStackLayout(spacing: Theme.Space.s))
-        layout {
+        if typeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: Theme.Space.m) { shareButton(video, compact: false); quietIcons(video) }
+        } else {
+            ViewThatFits(in: .horizontal) {         // one row when the word fits on one line (it never breaks); else Share on its own row
+                HStack(spacing: Theme.Space.s) { shareButton(video, compact: true); quietIcons(video) }
+                VStack(alignment: .leading, spacing: Theme.Space.m) { shareButton(video, compact: false); quietIcons(video) }
+            }
+        }
+    }
+
+    @ViewBuilder private func shareButton(_ video: VideoItem, compact: Bool) -> some View {
+        if let playbackURL {
+            ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle, onShared: { Task { @MainActor in Haptics.play(.shareDone) } }), preview: SharePreview(video.displayTitle)) {
+                PrimaryLabel(title: tr("common.share"), symbol: "square.and.arrow.up").lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+            }
+            .buttonStyle(PrimaryButtonStyle(compact: compact)).accessibilityIdentifier("shareButton")
+        } else {
+            PrimaryLabel(title: tr("common.share"), symbol: "square.and.arrow.up").lineLimit(1).modifier(PrimaryPlaceholder(compact: compact))
+        }
+    }
+
+    private func quietIcons(_ video: VideoItem) -> some View {
+        HStack(spacing: Theme.Space.s) {
             if let playbackURL {
-                ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle, onShared: { Task { @MainActor in Haptics.play(.shareDone) } }), preview: SharePreview(video.displayTitle)) {
-                    PrimaryLabel(title: tr("common.share"), symbol: "square.and.arrow.up")
-                }
-                .buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("shareButton")
-            } else {
-                PrimaryLabel(title: tr("common.share"), symbol: "square.and.arrow.up").modifier(PrimaryPlaceholder())
+                if save == .saving { ProgressView().frame(width: 46, height: 46).background(Theme.surfaceRaised, in: Circle()) }
+                else { IconButton(symbol: save == .saved ? "checkmark" : "arrow.down.to.line", label: saveLabel, size: 46, identifier: "saveButton") { Task { await saveToPhotos(playbackURL, name: video.displayTitle) } } }
             }
-            HStack(spacing: Theme.Space.s) {
-                if let playbackURL {
-                    if save == .saving { ProgressView().frame(width: 48, height: 48).background(Theme.surfaceRaised, in: Circle()) }
-                    else { IconButton(symbol: save == .saved ? "checkmark" : "arrow.down.to.line", label: saveLabel, size: 48, identifier: "saveButton") { Task { await saveToPhotos(playbackURL, name: video.displayTitle) } } }
-                }
-                if video.editable { IconButton(symbol: "pencil", label: tr("common.edit"), size: 48, identifier: "editButton") { player?.pause(); editing = true } }
-                if videoDescription != nil { IconButton(symbol: "info.circle", label: tr("detail.info"), size: 48, identifier: "infoButton") { showInfo = true } }
-                Menu {
-                    Button { dismiss(); model.createRequested = true } label: { Label(tr("create.new_video"), systemImage: "play") }.accessibilityIdentifier("makeAnother")
-                    Button { showFeedback = true } label: { Label(tr("feedback.title"), systemImage: "bubble.left") }.accessibilityIdentifier("sendFeedbackLink")
-                } label: { IconButtonFace(symbol: "ellipsis", size: 48) }
-                .accessibilityLabel(tr("media.more")).accessibilityIdentifier("moreButton")
-            }
+            if video.editable { IconButton(symbol: "pencil", label: tr("common.edit"), size: 46, identifier: "editButton") { player?.pause(); editing = true } }
+            if videoDescription != nil { IconButton(symbol: "info.circle", label: tr("detail.info"), size: 46, identifier: "infoButton") { showInfo = true } }
+            Menu {
+                Button { dismiss(); model.createRequested = true } label: { Label(tr("create.new_video"), systemImage: "play") }.accessibilityIdentifier("makeAnother")
+                Button { showFeedback = true } label: { Label(tr("feedback.title"), systemImage: "bubble.left") }.accessibilityIdentifier("sendFeedbackLink")
+            } label: { IconButtonFace(symbol: "ellipsis", size: 46) }
+            .accessibilityLabel(tr("media.more")).accessibilityIdentifier("moreButton")
         }
     }
 
@@ -222,6 +234,9 @@ struct VideoDetailView: View {
             watcher?.stop()
             let id = videoID
             watcher = PlaybackWatcher(player: p, onPlaying: { model.isPlayingVideo = $0 }, onComplete: { model.rating.recordCompleted(id) })
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["VMK_DEBUG_AUTOPLAY"] == "1" { p.play() }       // UI tests and screenshots: play to the end card without touching the system controls
+            #endif
             if wasMaking, !reduceMotion { wasMaking = false; await revealPlay(p) }       // the reveal: it starts by itself, from silent to full in 300 ms (Reduce Motion: nothing autoplays)
         } catch let e as APIError { playbackError = e.message } catch { playbackError = APIError.server.message }
     }
@@ -312,8 +327,9 @@ struct VideoInfoSheet: View {
 
 /// The primary button's shape while its action is not ready yet (the link is still loading): same place, dimmed, not a control.
 private struct PrimaryPlaceholder: ViewModifier {
+    var compact = false
     func body(content: Content) -> some View {
-        content.font(.role(.headline)).foregroundStyle(Theme.onPrimary).padding(.horizontal, Theme.Space.xxl).frame(maxWidth: .infinity, minHeight: Theme.primaryHeight)
+        content.font(.role(.headline)).foregroundStyle(Theme.onPrimary).padding(.horizontal, compact ? Theme.Space.l : Theme.Space.xxl).frame(maxWidth: .infinity, minHeight: Theme.primaryHeight)
             .background(Theme.gradient, in: Capsule()).opacity(0.45).accessibilityHidden(true)
     }
 }

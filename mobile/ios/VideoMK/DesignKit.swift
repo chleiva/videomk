@@ -46,12 +46,13 @@ extension View {
 /// (Share next to the quiet icons). Disabled: the same shape at 45%.
 struct PrimaryButtonStyle: ButtonStyle {
     var fullWidth = true
+    var compact = false         // beside other controls (Share next to the quiet icons): less padding, the same height
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.role(.headline)).foregroundStyle(Theme.onPrimary).multilineTextAlignment(.center)
-            .padding(.horizontal, Theme.Space.xxl).padding(.vertical, Theme.Space.s)
+            .padding(.horizontal, compact ? Theme.Space.l : Theme.Space.xxl).padding(.vertical, Theme.Space.s)
             .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: Theme.primaryHeight)
             .background(Theme.gradient, in: Capsule())
             .shadow(color: Theme.gradientStart.opacity(isEnabled ? 0.32 : 0), radius: 14, y: 8)

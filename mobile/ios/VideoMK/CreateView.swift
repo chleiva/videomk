@@ -119,7 +119,7 @@ struct CreateView: View {
 
     /// The prompt: a caret and "A video about…", large and borderless. Nothing else competes with it.
     private var promptField: some View {
-        TextField(form.hasDeck ? tr("deck.placeholder") : tr("create.describe_your_video_for_example"), text: $create.form.text, axis: .vertical)
+        TextField("", text: $create.form.text, prompt: Text(form.hasDeck ? tr("deck.placeholder") : tr("create.describe_your_video_for_example")).foregroundStyle(Theme.textTertiary), axis: .vertical)
             .focused($focused).lineLimit(1...12).textRole(.prompt).tint(Theme.primary)
             .textInputAutocapitalization(.sentences)
             .foregroundStyle(dictation.isListening ? Theme.textSecondary : Theme.text)

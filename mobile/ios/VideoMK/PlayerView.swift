@@ -109,15 +109,14 @@ struct InlinePlayer: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             PlayerController(player: fullScreen ? nil : player)   // one screen owns the player at a time
+                .accessibilityIdentifier("player")                 // on the player itself: on the container it would rename the buttons laid over it
             Button {
                 fullScreen = true
                 FullScreen.present(player, landscape: landscape) { fullScreen = false }
             } label: {
-                Image(systemName: "arrow.up.left.and.arrow.down.right").font(.vmk(15, weight: .bold)).foregroundStyle(.white).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                    .frame(width: 40, height: 40).background(.black.opacity(0.5), in: Circle()).overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 0.5))
-                    .frame(width: Theme.minTouch, height: Theme.minTouch).contentShape(Circle())
+                IconButtonFace(symbol: "arrow.up.left.and.arrow.down.right", style: .onMedia, size: 40)
             }
-            .padding(6)
+            .buttonStyle(.plain).padding(6)
             .opacity(playing ? 0.5 : 1)                                  // quieter while the video plays; always reachable (the system inline controls are not verified to carry their own)
             .animation(Theme.Motion.fade, value: playing)
             .accessibilityLabel(tr("player.full_screen"))

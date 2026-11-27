@@ -47,7 +47,7 @@ xcodebuild test ... -only-testing:VideoMKUITests/VideoMKSpanishUITests   # launc
 
 ## Tests
 ```
-swift test --package-path Packages/VideoMKCore                       # 13 unit tests, no network
+swift test --package-path Packages/VideoMKCore                       # unit tests, no network
 
 # UI tests (QA backend, creates one real video, about 5 minutes). Needs a QA user's tokens, never commit them:
 export TEST_RUNNER_VMK_DEBUG_ID_TOKEN=...  TEST_RUNNER_VMK_DEBUG_REFRESH_TOKEN=...
@@ -63,6 +63,16 @@ mobile/ios/scripts/testflight.sh           # archive the Beta build (QA backend)
 mobile/ios/scripts/testflight.sh --local   # only build a signed .ipa, no upload
 ```
 The build appears under TestFlight in App Store Connect 10-30 minutes later. Without the app record the upload stops with `missingApp`.
+
+## Design bar 2026 (iPhone)
+Spec: `docs/DESIGN_BAR_2026.md`, mockups `docs/design_bar/mockups/phone_*.jpg`, captures of the app `docs/design_bar/ios/`. This replaces the look described in the next section where they differ.
+- **Tokens**: `DesignTokens.swift` holds the section 4 table (colours light/dark, type roles, 20 pt gutter, radii, the action and brand gradients, motion, haptics); `Theme.swift` turns it into SwiftUI; `Typography.swift` has `Font.role(_:)` / `.textRole(_:)` (Dynamic Type styles, no fixed sizes).
+- **Components** (`DesignKit.swift`, one of each): `PrimaryButton` / `PrimaryButtonStyle` (the ONE gradient action of a screen), `TonalButtonStyle`, `TextButtonStyle`, `IconButton` / `IconButtonFace` (quiet, glass, on media; a spoken label is required), `TopBar`, `Pill`, `SparkleChip`, `PlaySparkle`, `LiveRing`, `LiveSpinner`, `FloatingTabBar`, `TabBarFade`. Glass only floats over content and becomes an opaque surface with Reduce Transparency.
+- **Create** (`CreateView.swift`): the caret and "A video about…", three examples that type themselves in, photos and mic icons, three pills, one Create button with its price. After the tap `CreateCapsule` (VideoMKCore, pure state machine) drives the live capsule: checking (Cancel), starting, and exactly one ending (question, refusal, Making, form restored).
+- **Making** (`MakingCard.swift`, `MakingScreen.swift`, `Making.swift` in VideoMKCore): the optional `making` object of `docs/CREATE_API.md` is read leniently (`MakingInfo`, never fails the answer it arrives in). Pictures when the server sends them, brand-gradient tiles without, a calm indeterminate line without `making` at all. "Tell me when it's ready" is a local notification (`ReadyNotifier`): there is no push from the server yet.
+- **Player** (`VideoDetailView.swift`): Share is the one primary; Save, Edit, Info, More are icons; the end card has Replay and New video; "Make another" chips (`RemixOption`) open Create filled in and are shown only when the server's capabilities can make that variant.
+- **Debug fixtures**: `VMK_DEBUG_FAKE_VIDEOS=bar` (the mockup's list), `VMK_DEBUG_MAKING=thumbs|tiles|none`, `VMK_DEBUG_IMAGE_DIR=/path` (real pictures for `fake://` links), `VMK_DEBUG_FAKE_START=fail|blocked|paused|slow`, `VMK_DEBUG_AUTOPLAY=1` (plays to the end card), `VMK_DEBUG_CREATE=checking|checkingfast`.
+- **Tests**: `MakingTests.swift` (lenient decoding, the capsule), UI tests `VideoMKDesignBarUITests` (fake only; `TEST_RUNNER_VMK_DEBUG_PLAYBACK_FILE` and `TEST_RUNNER_VMK_DEBUG_SHORT_FILE` point at local mp4 files for the player and the end card).
 
 ## Design system (UX redesign, iPhone)
 Spec: `docs/UX_REVIEW.md` (section "iOS implementation status" lists what is done). Where things live:
