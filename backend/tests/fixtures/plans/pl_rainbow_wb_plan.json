@@ -1,0 +1,312 @@
+{
+ "_note": "The plan of the first Polish whiteboard video as QA shipped it on 2026-11-27 (c5e1ee3): beat 3 says board 'same' but kept the zones of a board of its own, on top of beat 2's. Used by tests/test_whiteboard_score.py.",
+ "title": "Jak powstaje tęcza? Siedem kolorów po deszczu",
+ "language": "pl",
+ "captions": true,
+ "target_seconds": 45,
+ "beats": [
+  {
+   "narration": "Skąd na niebie bierze się tęcza po deszczu? Potrzebne są tylko dwie rzeczy: słońce i krople wody wiszące w powietrzu.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t",
+       "write": "Jak powstaje tęcza?",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "top-row",
+       "size": "l",
+       "say": "tęcza"
+      },
+      {
+       "id": "sun",
+       "draw": "sun",
+       "zone": "left",
+       "size": "l",
+       "say": "deszczu"
+      },
+      {
+       "id": "rc",
+       "draw": "rain_cloud",
+       "zone": "right",
+       "size": "l",
+       "say": "rzeczy"
+      },
+      {
+       "id": "sl",
+       "write": "słońce",
+       "tool": "pen",
+       "near": "sun",
+       "side": "below",
+       "size": "s",
+       "say": "słońce"
+      },
+      {
+       "id": "drop",
+       "draw": "water_drop",
+       "zone": "centre",
+       "size": "l",
+       "say": "krople"
+      },
+      {
+       "id": "dl",
+       "write": "krople",
+       "tool": "pen",
+       "near": "drop",
+       "side": "below",
+       "size": "s",
+       "say": "wody"
+      },
+      {
+       "id": "a1",
+       "connect": "arrow",
+       "from": "sun",
+       "to": "drop",
+       "color": "orange",
+       "say": "powietrzu"
+      },
+      {
+       "id": "m1",
+       "mark": "underline",
+       "on": "t",
+       "color": "red"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Promień słońca wpada do kropli i zwalnia. Skręca, odbija się od tylnej ścianki i wychodzi z kropli drugą stroną.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "t2",
+       "write": "Bieg promienia",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "top",
+       "size": "l",
+       "say": "kropli"
+      },
+      {
+       "id": "sun2",
+       "draw": "sun",
+       "zone": "top-left",
+       "size": "l",
+       "say": "Skręca"
+      },
+      {
+       "id": "lb2",
+       "write": "załamanie",
+       "tool": "marker",
+       "ink": "orange",
+       "zone": "left",
+       "size": "m",
+       "say": "się"
+      },
+      {
+       "id": "d2",
+       "draw": "water_drop",
+       "zone": "centre",
+       "size": "l",
+       "say": "tylnej"
+      },
+      {
+       "id": "a2",
+       "connect": "arrow",
+       "from": "sun2",
+       "to": "d2",
+       "color": "orange",
+       "say": "ścianki"
+      },
+      {
+       "id": "u2",
+       "mark": "underline",
+       "on": "lb2",
+       "color": "red",
+       "say": "wychodzi"
+      },
+      {
+       "id": "refl",
+       "write": "odbicie",
+       "tool": "marker",
+       "ink": "green",
+       "zone": "right",
+       "size": "l",
+       "say": "drugą"
+      },
+      {
+       "id": "a3",
+       "connect": "arrow",
+       "from": "d2",
+       "to": "refl",
+       "color": "green",
+       "say": "stroną"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "narration": "Światło słońca jest mieszanką barw. Każda skręca pod innym kątem, więc kolory się rozdzielają: czerwony, pomarańczowy, żółty, zielony, niebieski i fiołkowy.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "sun3",
+       "draw": "sun",
+       "zone": "left",
+       "size": "l",
+       "say": "słońca"
+      },
+      {
+       "id": "t2",
+       "write": "Światło = mieszanka",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "top-row",
+       "size": "l",
+       "say": "mieszanką"
+      },
+      {
+       "id": "pr",
+       "draw": "prism",
+       "zone": "centre",
+       "size": "l",
+       "say": "barw"
+      },
+      {
+       "id": "a4",
+       "connect": "arrow",
+       "from": "sun3",
+       "to": "pr",
+       "color": "orange",
+       "say": "skręca"
+      },
+      {
+       "id": "pl",
+       "write": "inny kąt",
+       "tool": "pen",
+       "near": "pr",
+       "side": "below",
+       "size": "s",
+       "say": "kątem"
+      },
+      {
+       "id": "cols",
+       "write": "1. czerwony\n2. żółty\n3. zielony\n4. fiołkowy",
+       "tool": "marker",
+       "ink": "red",
+       "zone": "right",
+       "size": "m",
+       "say": "rozdzielają"
+      },
+      {
+       "id": "a5",
+       "connect": "arrow",
+       "from": "pr",
+       "to": "cols",
+       "color": "blue",
+       "say": "czerwony"
+      },
+      {
+       "id": "em0_pl",
+       "mark": "underline",
+       "on": "pl",
+       "color": "red",
+       "say": "zielony"
+      },
+      {
+       "id": "m3",
+       "mark": "box",
+       "on": "cols",
+       "color": "green",
+       "say": "fiołkowy"
+      }
+     ],
+     "board": "same"
+    }
+   }
+  },
+  {
+   "narration": "Miliony kropli robią to naraz. Z naszego miejsca widzimy kolory ułożone w łuk, czerwony na zewnątrz, fiołkowy w środku.",
+   "scene": {
+    "type": "whiteboard",
+    "props": {
+     "items": [
+      {
+       "id": "mil",
+       "write": "miliony",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "bottom-left",
+       "size": "m",
+       "say": "robia"
+      },
+      {
+       "id": "ttl",
+       "write": "Tęcza",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "top",
+       "size": "l",
+       "say": "naszego"
+      },
+      {
+       "id": "eye",
+       "draw": "eye",
+       "zone": "bottom-right",
+       "size": "l",
+       "say": "kolory"
+      },
+      {
+       "id": "rb",
+       "draw": "rainbow",
+       "zone": "centre",
+       "size": "l",
+       "say": "uozone"
+      },
+      {
+       "id": "a6",
+       "connect": "arrow",
+       "from": "mil",
+       "to": "rb",
+       "color": "blue",
+       "say": "czerwony"
+      },
+      {
+       "id": "red",
+       "write": "czerwony",
+       "tool": "marker",
+       "ink": "red",
+       "zone": "left",
+       "size": "m",
+       "say": "zewnątrz"
+      },
+      {
+       "id": "m4",
+       "mark": "circle",
+       "on": "eye",
+       "color": "red",
+       "say": "fiołkowy"
+      },
+      {
+       "id": "vio",
+       "write": "fiołkowy",
+       "tool": "marker",
+       "ink": "blue",
+       "zone": "right",
+       "size": "m",
+       "say": "środku"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

@@ -72,6 +72,25 @@ def boards_of(beats: List[Dict[str, Any]]) -> List[List[int]]:
     return out
 
 
+def _off_board(rep: Dict[str, Any]) -> List[str]:
+    return [w.split(" leaves")[0] for w in rep["warnings"] if w.endswith("leaves the board")]
+
+
+def defects(props_list: List[Dict[str, Any]], aspect: str = "16:9", captions: bool = True) -> Dict[str, List[Any]]:
+    """The geometry of ONE board, the props of the beats that share it, laid out as the renderer will: -> {"overlaps": [[id, id]], "off_board": [id]} of its
+    drawings, texts and charts. Ids are the board-wide names (`j:id`, j the beat's place on the board) when beats share it, the plain ids when it is one beat's.
+    Raises what the layout raises: the caller decides what a board that cannot be laid out means."""
+    from .. import whiteboard_policy
+    from ..frame import Frame
+    from ..scenes.base import SceneCtx
+    from ..scenes.elements import whiteboard as wbe
+
+    ctx = SceneCtx(frame=Frame.parse(aspect, "1080p"), captions=captions)
+    props = dict(whiteboard_policy.linked_props([{k: v for k, v in p.items() if k != "cues"} for p in props_list], [len(props_list)])[-1])
+    _, _, _, rep = wbe.build(props, 10.0, ctx, 480, 270, load=_stub_loader(), layout_only=True)
+    return {"overlaps": [list(x) for x in rep["overlaps"]], "off_board": _off_board(rep)}
+
+
 def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any]]:
     """-> one score per board: {"board", "beats", "seconds", "items", "solid", "coverage", "min_text", "min_drawing", "overlaps", "crossed", "off_board",
     "pen_busy", "longest_idle_s", "late", "ok", "complaints": [plain sentences]}. Never raises: a board that cannot be laid out fails with that as its complaint."""
@@ -122,7 +141,7 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
             px = geo["box"][2] / rep["view"][2] / min(frame.W, frame.H)          # share of the frame's shorter side per board unit, in this board's framing
             texts = [v * px for v in rep["text_sizes"].values()]
             draws = [max(boxes[j][2] - boxes[j][0], boxes[j][3] - boxes[j][1]) * px for j in solid if kinds[j] == "draw"]
-            off = [w.split(" leaves")[0] for w in rep["warnings"] if w.endswith("leaves the board")]
+            off = _off_board(rep)
             sc.update(seconds=round(total, 1), items=len(kinds), solid=len(solid), coverage=rep["coverage"], min_text=round(min(texts), 3) if texts else None,
                       min_drawing=round(min(draws), 3) if draws else None, overlaps=rep["overlaps"], crossed=rep["crossed"], off_board=off,
                       pen_busy=round(busy / max(total, 1e-6), 2), longest_idle_s=round(idle, 2), late=late)
@@ -159,15 +178,17 @@ def score_plan(plan: Dict[str, Any], aspect: str = "16:9") -> List[Dict[str, Any
 
 
 def summary(scores: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """The video in a few numbers (logged, and kept in plan["whiteboard"]["score"])."""
+    """The video in a few numbers (logged, and kept in plan["whiteboard"]["score"]). Overlaps and things off the board are counted on EVERY board, passing or
+    failing, shared or not; a board that could not be laid out at all has no numbers and is counted in `not_laid_out`."""
     good = [s for s in scores if "seconds" in s]
     tot = sum(s["seconds"] for s in good) or 1.0
     texts = [s["min_text"] for s in good if s.get("min_text")]
     return {"boards": len(scores), "failed": sum(1 for s in scores if not s["ok"]), "items_per_board": round(sum(s["items"] for s in good) / max(1, len(good)), 1),
             "solid_per_board": round(sum(s["solid"] for s in good) / max(1, len(good)), 1), "coverage": round(sum(s["coverage"] * s["seconds"] for s in good) / tot, 3),
             "min_text": min(texts) if texts else None, "pen_busy": round(sum(s["pen_busy"] * s["seconds"] for s in good) / tot, 2),
-            "longest_idle_s": max((s["longest_idle_s"] for s in good), default=0.0), "overlaps": sum(len(s["overlaps"]) for s in good), "crossed": sum(len(s["crossed"]) for s in good),
-            "seconds_per_board": round(tot / max(1, len(good)), 1)}
+            "longest_idle_s": max((s["longest_idle_s"] for s in good), default=0.0), "overlaps": sum(len(s.get("overlaps") or []) for s in scores),
+            "off_board": sum(len(s.get("off_board") or []) for s in scores), "not_laid_out": len(scores) - len(good),
+            "crossed": sum(len(s.get("crossed") or []) for s in scores), "seconds_per_board": round(tot / max(1, len(good)), 1)}
 
 
 def better(a: Optional[List[Dict[str, Any]]], b: List[Dict[str, Any]]) -> bool:

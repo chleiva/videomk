@@ -97,3 +97,81 @@ def test_review_keeps_the_first_boards_when_the_repair_is_worse_or_broken(on):
     assert wp.review(plan, policy, lambda s, u: (_ for _ in ()).throw(AssertionError("a passing plan asks nothing"))) == [] and plan["whiteboard"]["score"]["failed"] == 0
     assert wp.review({"beats": [beat(SPARSE)]}, wp.Policy(False, "flag_off"), None) == []
     assert wp.review({"beats": [beat(SPARSE)]}, policy, None)                     # no model: scored, logged, nothing changed
+
+
+# ================================================================= shared boards never overlap (the first Polish video, 2026-11-27)
+PL = os.path.join(os.path.dirname(__file__), "fixtures", "plans", "pl_rainbow_wb_plan.json")
+
+
+def _pl():
+    with open(PL, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _geometry(plan):
+    """Overlaps and things off the board on every board of the plan, as the renderer will lay them out."""
+    out = []
+    for g in score.boards_of(plan["beats"]):
+        d = score.defects([plan["beats"][i]["scene"]["props"] for i in g], "16:9")
+        out += [tuple(x) for x in d["overlaps"]] + d["off_board"]
+    return out
+
+
+def test_the_polish_plan_as_shipped_overlaps_and_the_score_says_so():
+    plan = _pl()
+    s = score.score_plan(plan)
+    assert [x["beats"] for x in s] == [[1], [2, 3], [4]] and len(s[1]["overlaps"]) == 3            # beat 3 on beat 2's board, in beat 2's zones
+    assert score.summary(s)["overlaps"] == 3 and not s[1]["ok"]                                    # counted although that board fails
+
+
+def test_review_takes_the_whole_board_it_scored_not_only_its_flag(on):
+    """What happened: beats 2 and 4 were written again; `compose` then put beat 3 on beat 2's new board, in free zones, in the TRIAL; the plan took the
+    rewritten beats and only the FLAG of beat 3, whose things stayed in the zones of a board of its own: three overlaps shipped, zero reported."""
+    shipped = _pl()
+    plan = _pl()
+    plan["beats"][2]["scene"]["props"].pop("board")                                                # before the review: four boards, one per beat
+    plan["beats"][1]["scene"]["props"]["items"] = [dict(it) for it in SPARSE]                      # board 2 fails, so it is written again ...
+    plan["beats"][1]["scene"]["props"]["items"][0]["say"] = "kropli"
+    answer = json.dumps({"beats": [{"beat": 2, "board": "new", "items": shipped["beats"][1]["scene"]["props"]["items"]}]}, ensure_ascii=False)   # ... as the director did
+    asked = []
+    wp.review(plan, wp.Policy(True, "asked"), lambda s, u: asked.append(u) or answer, "pl")
+    assert len(asked) == 1 and plan["whiteboard"]["score"]["replanned"]
+    assert _geometry(plan) == []                                                                   # nothing overlaps, nothing leaves a board
+    sc = plan["whiteboard"]["score"]
+    again = score.summary(score.score_plan(plan))
+    assert sc["overlaps"] == again["overlaps"] == 0 and sc["off_board"] == again["off_board"] == 0  # and the record is the score of what ships
+    assert [b["narration"] for b in plan["beats"]] == [b["narration"] for b in shipped["beats"]]
+
+
+def test_a_beat_shares_a_board_only_when_its_things_really_fit():
+    """Free ZONES are not room: the list of colours fits no single corner. With the aspect known the beat gets its own board and its author's zones back."""
+    plan = _pl()
+    plan["beats"][2]["scene"]["props"].pop("board")
+    zones = [it.get("zone") for it in plan["beats"][2]["scene"]["props"]["items"]]
+    blind = _pl()
+    blind["beats"][2]["scene"]["props"].pop("board")
+    assert wp.compose(blind["beats"])["shared"] == 1 and _geometry(blind) != []                    # by zones alone: shared, and 'cols' leaves the board
+    st = wp.compose(plan["beats"], "16:9")
+    assert st["split"] == 1 and st["shared"] == 0 and st["boards"] == 4
+    assert [it.get("zone") for it in plan["beats"][2]["scene"]["props"]["items"]] == zones and _geometry(plan) == []
+    easy = {"beats": [beat(FULL[:5]), beat([FULL[5], FULL[6], FULL[8], FULL[9], FULL[10]])]}          # things that do fit still share (boards stay full)
+    assert wp.compose(easy["beats"], "16:9")["shared"] == 1 and _geometry(easy) == []
+
+
+def test_a_board_that_still_overlaps_is_never_shipped_as_it_is(on, capsys):
+    """No model, a repair refused, or a repair that broke: the shipped Polish board goes through the last resort and comes out without an overlap."""
+    for ask in (None, lambda s, u: "sorry, no", lambda s, u: (_ for _ in ()).throw(RuntimeError("model down"))):
+        plan = _pl()
+        notes = wp.review(plan, wp.Policy(True, "asked"), ask, "pl")
+        sc = plan["whiteboard"]["score"]
+        assert _geometry(plan) == [] and sc["overlaps"] == 0 and sc["off_board"] == 0 and sc["made_safe"]["left"] == 0 and sc["made_safe"]["boards"] == [2]
+        assert any("overlapping or off the board" in n for n in notes)
+        assert sc["made_safe"]["split"] == 1 and sc["made_safe"]["dropped"] == 0 and sc["boards"] == 4                 # a fresh board was the room: nothing was lost
+        assert "board" not in plan["beats"][2]["scene"]["props"] and any(it["id"] == "cols" for it in plan["beats"][2]["scene"]["props"]["items"])
+        assert all(sum(1 for it in b["scene"]["props"]["items"] if it.get("draw") or it.get("write")) >= 1 for b in plan["beats"])     # no beat lost its board
+    logged = [json.loads(line.split(" ", 1)[1]) for line in capsys.readouterr().out.splitlines() if line.startswith("WHITEBOARD_SCORE ")]
+    assert logged[0]["overlaps"] == 3 and [x for x in logged if x["pass"] == "safe"][0]["overlaps"] == 0
+    # a pile of long texts in one zone: moved apart, made smaller, or taken off, until the layout is clean; it always ends
+    pile = {"beats": [beat([{"id": f"w{k}", "write": "a rather long line of handwriting", "zone": "centre", "size": "xl", "say": "sun"} for k in range(6)])]}
+    r = wp.untangle([pile["beats"][0]["scene"]["props"]])
+    assert r["left"] == 0 and _geometry(pile) == [] and r["moved"] + r["smaller"] + r["dropped"] > 0 and pile["beats"][0]["scene"]["props"]["items"]
