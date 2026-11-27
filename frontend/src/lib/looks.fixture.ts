@@ -3,7 +3,7 @@
 const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=";
 const PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 const ALL = ["16:9", "9:16", "1:1", "4:5"];
-const tile = (o: Record<string, unknown>) => ({ preview: JPEG, available: true, allowed: true, requires_plan: null, with_photos: true, with_deck: true, min_seconds: 15, aspects: ALL, best_aspects: ALL, cast: false, extras: [], ...o });
+const tile = (o: Record<string, unknown>): Record<string, any> => ({ preview: JPEG, available: true, allowed: true, requires_plan: null, with_photos: true, with_deck: true, min_seconds: 15, aspects: ALL, best_aspects: ALL, cast: false, extras: [], ...o });
 const member = (id: string, name: string, role: string, kind: "person" | "animal", topic: string) => ({ id, name, role, kind, topic, thumbnail: PNG });
 
 export const LOOKS_FIXTURE = {

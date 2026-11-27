@@ -157,5 +157,22 @@
  "create.pill_look_k": "Look",
  "create.cta_word": "Create",
  "create.pill_look_phone": "{look} look",
- "create.credits_left": "{n, plural, one {# credit left} other {# credits left}}"
+ "create.credits_left": "{n, plural, one {# credit left} other {# credits left}}",
+ "create.pick_a11y": "Look: {look}",
+ "create.pick_cast": "Cast",
+ "create.pick_from_photos": "Made from your photos, so only these looks apply.",
+ "create.pick_from_deck": "Made from your slides, so only these looks apply.",
+ "create.pick_reset_photos": "{look} isn’t made from your own photos. The look is back to {auto}.",
+ "create.pick_reset_deck": "{look} isn’t made from a presentation. The look is back to {auto}.",
+ "create.pick_min": "{look} works from {length}.",
+ "create.pick_use": "Use {length}",
+ "create.pick_talk_min": "A conversation needs {length} or more. In a shorter video, one character presents.",
+ "create.pick_best": "{look} looks best in {shapes}.",
+ "create.plan_needs": "Needs {plan}",
+ "create.plan_locked": "Not on your plan",
+ "create.colors": "Colors",
+ "create.locked_fallback": "Creating videos isn’t available on this account right now.",
+ "create.locked_plan": "{plan} plan · Paid plans are coming soon.",
+ "create.locked_soon": "Paid plans are coming soon.",
+ "create.showcase": "Made with VideoMK"
 }

@@ -151,7 +151,7 @@ describe("photos in a video", () => {
 });
 
 // ---------------------------------------------------------------- the video look and the plan's limits (docs/CREATE_API.md "Video look", "Plans")
-import { lengthMenu, parseCapabilities, planMaxPreset, qualityChoices } from "./create";
+import { parseCapabilities, planMaxPreset } from "./create";
 import { LOOKS_FIXTURE } from "./looks.fixture";
 
 const body = (extra: Record<string, unknown> = {}) => ({ aspects: caps.aspects, resolutions: caps.resolutions, platforms: caps.platforms, languages: caps.languages, lengths: caps.lengths, intake: true, ...extra });

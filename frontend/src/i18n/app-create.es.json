@@ -157,5 +157,22 @@
  "create.pill_look_k": "Estilo",
  "create.cta_word": "Crear",
  "create.pill_look_phone": "Estilo {look}",
- "create.credits_left": "{n, plural, one {# crédito disponible} other {# créditos disponibles}}"
+ "create.credits_left": "{n, plural, one {# crédito disponible} other {# créditos disponibles}}",
+ "create.pick_a11y": "Estilo: {look}",
+ "create.pick_cast": "Personajes",
+ "create.pick_from_photos": "Se hace con tus fotos: solo aplican estos estilos.",
+ "create.pick_from_deck": "Se hace con tus diapositivas: solo aplican estos estilos.",
+ "create.pick_reset_photos": "{look} no se hace con tus propias fotos. El estilo vuelve a {auto}.",
+ "create.pick_reset_deck": "{look} no se hace con una presentación. El estilo vuelve a {auto}.",
+ "create.pick_min": "{look} funciona desde {length}.",
+ "create.pick_use": "Usar {length}",
+ "create.pick_talk_min": "Una conversación necesita {length} o más. En un video más corto presenta un solo personaje.",
+ "create.pick_best": "{look} se ve mejor en {shapes}.",
+ "create.plan_needs": "Requiere {plan}",
+ "create.plan_locked": "No incluido en tu plan",
+ "create.colors": "Colores",
+ "create.locked_fallback": "Crear videos no está disponible en esta cuenta por ahora.",
+ "create.locked_plan": "Plan {plan} · Los planes de pago llegarán pronto.",
+ "create.locked_soon": "Los planes de pago llegarán pronto.",
+ "create.showcase": "Hecho con VideoMK"
 }
