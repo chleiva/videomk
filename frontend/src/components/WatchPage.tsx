@@ -71,19 +71,19 @@ export default function WatchPage() {
         )}
       </div>
       <section className="page page-narrow">
-        <a href="/generations/index.html" className="inline-flex min-h-11 items-center gap-1 font-semibold no-underline"><Icon name="back" size={18} />{t("watch.back")}</a>
+        <a href="/generations" className="inline-flex min-h-11 items-center gap-1 font-semibold no-underline"><Icon name="back" size={18} />{t("watch.back")}</a>
         <h1 className="h1 mt-2" style={{ fontSize: "var(--fs-title)" }}>{title}</h1>
         {duration && <p className="caption mt-1">{duration}</p>}
         <div className="mt-5 flex flex-wrap gap-3">
           <button type="button" className="btn btn-primary" onClick={share} disabled={!url}><Icon name="share" size={18} />{t("watch.share")}</button>
           {url ? <a href={url} download={fileName} target="_blank" rel="noopener" className="btn btn-tonal"><Icon name="download" size={18} />{t("watch.save")}</a> : <span className="btn btn-tonal" aria-disabled="true"><Icon name="download" size={18} />{t("watch.save")}</span>}
-          {info.editable && <a href={`/edit/index.html?id=${encodeURIComponent(id)}`} className="btn btn-tonal"><Icon name="edit" size={18} />{t("gen.edit")}</a>}
+          {info.editable && <a href={`/edit?id=${encodeURIComponent(id)}`} className="btn btn-tonal"><Icon name="edit" size={18} />{t("gen.edit")}</a>}
         </div>
         <div className="card mt-8 flex flex-wrap items-center justify-between gap-3 p-5">
           <div><p className="font-semibold">{t("watch.make_another")}</p><p className="caption">{t("watch.make_another_sub")}</p></div>
-          <a href="/generations/index.html" className="btn btn-line btn-sm">{t("gen.create")}</a>
+          <a href="/generations" className="btn btn-line btn-sm">{t("gen.create")}</a>
         </div>
-        <p className="caption mt-6"><a href="/feedback/index.html?from=after_video" className="inline-flex min-h-11 items-center">{t("feedback.after_video")}</a></p>
+        <p className="caption mt-6"><a href="/feedback?from=after_video" className="inline-flex min-h-11 items-center">{t("feedback.after_video")}</a></p>
       </section>
       {toast.node}
     </div>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildAuthorizeUrl, chooserOptions, isLinkRaceError, parseProvider, safeReturnPath, sanitizeAuthError, shouldRetry, socialEnabled } from "./authUrl";
 
-const base = { authDomain: "https://auth.example.com", clientId: "cid", redirectUri: "https://x.test/auth/callback/index.html", state: "st4te", challenge: "chal" };
+const base = { authDomain: "https://auth.example.com", clientId: "cid", redirectUri: "https://x.test/auth/callback", state: "st4te", challenge: "chal" };
 const params = (u: string) => new URL(u).searchParams;
 
 describe("locale in the authorize URL and the chooser", () => {

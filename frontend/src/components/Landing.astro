@@ -16,7 +16,7 @@ const tr = (k: string) => translate(k, locale);
 		const here = (window as unknown as { __vmkLanding?: string }).__vmkLanding;
 		// A Spanish browser (or a saved Spanish choice) lands on /es/; the switcher in the footer remembers the opposite choice.
 		if (here === "en" && getLocale() === "es") location.replace("/es/");
-		else getTokensIfAvailable().then((t) => { if (t) location.replace("/generations/index.html"); }).catch(() => {});
+		else getTokensIfAvailable().then((t) => { if (t) location.replace("/generations"); }).catch(() => {});
 	</script>
 	<section class="hero">
 		<div class="hero-in">

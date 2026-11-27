@@ -13,7 +13,7 @@ const pageDescription = description ?? tr("meta.description");
 const here = (Astro.url.pathname || "/").replace(/index\.html$/, "");
 const withSlash = (p: string) => (p.endsWith("/") ? p : p + "/");
 const abs = (l: Locale) => `https://${SITE}${withSlash(pathForLocale(here, l))}`;
-const navItems = [["/generations/index.html", "nav.videos", "videos"], ["/wallet/index.html", "nav.credits", "credits"], ["/feedback/index.html", "nav.feedback", "feedback"]] as const;
+const navItems = [["/generations", "nav.videos", "videos"], ["/wallet", "nav.credits", "credits"], ["/feedback", "nav.feedback", "feedback"]] as const;
 const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/support", "footer.support"], ["/delete-account", "footer.delete"]] as const;
 ---
 <html lang={L} data-i18n-title={titleKey}>
@@ -51,7 +51,7 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 		<a href="#content" data-i18n="common.skip" class="skip-link">{tr("common.skip")}</a>
 		<header class="site-header">
 			<div class="site-header-in">
-				<a href={app ? "/generations/index.html" : pathForLocale("/", L)} class="brand" aria-label="videomk">
+				<a href={app ? "/generations" : pathForLocale("/", L)} class="brand" aria-label="videomk">
 					<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
 					<span>videomk</span>
 				</a>

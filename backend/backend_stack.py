@@ -50,7 +50,7 @@ def _web_origins(stage_cfg) -> list:
     from urllib.parse import urlsplit
     urls = list((stage_cfg or {}).get("callbackUrls") or ["http://localhost:4321/auth/callback"])
     origins = {f"{u.scheme}://{u.netloc}" for u in map(urlsplit, urls) if u.scheme in ("http", "https") and u.netloc}
-    origins |= {"https://videomk.com", "https://www.videomk.com", "http://localhost:4321"}
+    origins |= {"https://videomk.com", "https://www.videomk.com", "https://app.videomk.com", "http://localhost:4321"}
     return sorted(origins)
 
 

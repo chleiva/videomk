@@ -25,7 +25,7 @@ export default function GenerationsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {wallet && (
-            <a href="/wallet/index.html" className="credit-pill" aria-label={wallet.unlimited ? t("wallet.unlimited_short") : t("wallet.balance_a11y", { n: wallet.balance })}>
+            <a href="/wallet" className="credit-pill" aria-label={wallet.unlimited ? t("wallet.unlimited_short") : t("wallet.balance_a11y", { n: wallet.balance })}>
               <Icon name="bolt" size={16} />{wallet.unlimited ? t("wallet.unlimited_short") : wallet.balance}
             </a>
           )}

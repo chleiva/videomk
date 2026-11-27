@@ -18,7 +18,7 @@ const K = {
 /** An error whose message is already sanitised and safe to show to the user. */
 export class AuthDisplayError extends Error {}
 
-export const SIGNIN_PATH = "/signin/index.html";
+export const SIGNIN_PATH = "/signin";
 
 export interface Tokens {
   access_token: string;
@@ -32,7 +32,7 @@ const SKEW_MS = 60_000;
 function redirectUri(): string {
   return location.hostname === "localhost"
     ? "http://localhost:4321/auth/callback"
-    : `${location.origin}/auth/callback/index.html`;
+    : `${location.origin}/auth/callback`;
 }
 
 function b64url(bytes: ArrayBuffer | Uint8Array): string {
@@ -132,9 +132,9 @@ export async function beginAuthorize(returnTo?: string, provider?: Provider): Pr
 /** Where the chooser sends the user after login (set by startLogin; same-origin paths only). */
 export function pendingReturnPath(): string {
   try {
-    return safeReturnPath(localStorage.getItem(K.redirect), "/generations/index.html");
+    return safeReturnPath(localStorage.getItem(K.redirect), "/generations");
   } catch {
-    return "/generations/index.html";
+    return "/generations";
   }
 }
 
@@ -149,7 +149,7 @@ export async function completeLogin(): Promise<string> {
   const incoming = url.searchParams.get("state");
   const stored = localStorage.getItem(K.state);
   const verifier = localStorage.getItem(K.verifier);
-  const fallback = "/generations/index.html";
+  const fallback = "/generations";
   const error = url.searchParams.get("error");
   const target = () => {
     const t = localStorage.getItem(K.redirect);

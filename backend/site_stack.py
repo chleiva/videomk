@@ -16,6 +16,20 @@ from aws_cdk import aws_s3_deployment as s3deploy
 from constructs import Construct
 
 
+APP_HOST = "app.videomk.com"
+APP_PATHS = "signin|generations|wallet|feedback|watch|edit|questions|auth\\/callback"   # the app screens that used to live on videomk.com
+# CloudFront Functions run ES5.1: no template strings, no arrow functions.
+MARKETING_FUNCTION = (
+    "function handler(e){var r=e.request;var u=r.uri;"
+    "var m=/^\\/(" + APP_PATHS + ")(\\/(index\\.html)?)?$/.exec(u);"
+    "if(m){var q=[];var qs=r.querystring||{};for(var k in qs){var o=qs[k];"
+    "if(o.multiValue){for(var i=0;i<o.multiValue.length;i++){q.push(encodeURIComponent(k)+'='+encodeURIComponent(o.multiValue[i].value));}}"
+    "else{q.push(encodeURIComponent(k)+'='+encodeURIComponent(o.value));}}"
+    "return {statusCode:301,statusDescription:'Moved Permanently',headers:{location:{value:'https://" + APP_HOST + "/'+m[1]+(q.length?'?'+q.join('&'):'')}}};}"
+    "if(u.endsWith('/')){r.uri=u+'index.html';}else if(u.indexOf('.')<0){r.uri=u+'/index.html';}return r;}"
+)
+
+
 class SiteStack(Stack):
     def __init__(self, scope: Construct, cid: str, *, domain: str, phase: str, site_dir: str, **kw) -> None:
         super().__init__(scope, cid, **kw)
@@ -27,10 +41,9 @@ class SiteStack(Stack):
         names = [domain, f"www.{domain}"]
         cert = acm.Certificate(self, "Cert", domain_name=domain, subject_alternative_names=[names[1]], validation=acm.CertificateValidation.from_dns(zone))
         bucket = s3.Bucket(self, "Bucket", block_public_access=s3.BlockPublicAccess.BLOCK_ALL, encryption=s3.BucketEncryption.S3_MANAGED, enforce_ssl=True, removal_policy=RemovalPolicy.RETAIN)
-        # /privacy -> /privacy/index.html (the pages are folders)
-        rewrite = cf.Function(self, "Rewrite", code=cf.FunctionCode.from_inline(
-            "function handler(e){var r=e.request;var u=r.uri;"
-            "if(u.endsWith('/')){r.uri=u+'index.html';}else if(u.indexOf('.')<0){r.uri=u+'/index.html';}return r;}"))
+        # /privacy -> /privacy/index.html (the pages are folders). The web app moved to app.videomk.com (docs/WEB_REDESIGN_2026.md): its old addresses 301 there,
+        # keeping the path and the query string. The public pages (privacy, terms, support, delete-account) stay here.
+        rewrite = cf.Function(self, "Rewrite", code=cf.FunctionCode.from_inline(MARKETING_FUNCTION))
         headers = cf.ResponseHeadersPolicy(self, "Headers", security_headers_behavior=cf.ResponseSecurityHeadersBehavior(
             strict_transport_security=cf.ResponseHeadersStrictTransportSecurity(access_control_max_age=Duration.days(365), include_subdomains=True, override=True),
             content_type_options=cf.ResponseHeadersContentTypeOptions(override=True),

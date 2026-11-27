@@ -9,11 +9,13 @@
     "account": "464863885161",
     "region": "us-west-2",
     "profile": "default",
-    "domain": null,
+    "domain": "videomk.com",
     "callbackUrls": [
+      "https://app.videomk.com/auth/callback",
       "https://videomk.com/auth/callback"
     ],
     "logoutUrls": [
+      "https://app.videomk.com/",
       "https://videomk.com/"
     ]
   }

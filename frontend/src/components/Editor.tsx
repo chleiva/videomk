@@ -105,7 +105,7 @@ export default function Editor() {
   if (!plan || !meta) return (
     <div className="mx-auto max-w-xl px-6 py-16 text-center">
       <p className="text-fg" role="alert">{error || t("editor.nothing")}</p>
-      <a href="/generations/index.html" className="mt-4 inline-block text-sm underline">{t("editor.back_link")}</a>
+      <a href="/generations" className="mt-4 inline-block text-sm underline">{t("editor.back_link")}</a>
     </div>
   );
 
@@ -118,7 +118,7 @@ export default function Editor() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 page-editor">
       <div className="flex flex-wrap items-center gap-3">
-        <a href="/generations/index.html" className="btn btn-line btn-sm">{t("editor.back")}</a>
+        <a href="/generations" className="btn btn-line btn-sm">{t("editor.back")}</a>
         <input aria-label={t("editor.title_aria")} className={`${input} max-w-md font-semibold`} value={meta.title} maxLength={60} disabled={rendering} onChange={(e) => setMeta({ ...meta, title: e.target.value })} />
         <select aria-label={t("editor.look")} className={compact} value={meta.theme} disabled={rendering} onChange={(e) => setMeta({ ...meta, theme: e.target.value })}>
           <option value="midnight">{t("editor.theme.midnight")}</option><option value="paper">{t("editor.theme.paper")}</option><option value="sunrise">{t("editor.theme.sunrise")}</option>

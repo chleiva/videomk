@@ -38,7 +38,7 @@ export default function FeedbackPage() {
           <h1 className="h1 mt-4" style={{ fontSize: "var(--fs-title2)" }}>{t("feedback.thanks_title")}</h1>
           <p className="muted mt-2">{t("feedback.thanks_body")}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <a href="/generations/index.html" className="btn btn-primary">{t("feedback.back")}</a>
+            <a href="/generations" className="btn btn-primary">{t("feedback.back")}</a>
             <button type="button" className="btn btn-line" onClick={() => setState("edit")}>{t("feedback.another")}</button>
           </div>
         </div>

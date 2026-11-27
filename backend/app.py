@@ -15,6 +15,11 @@ if app.node.try_get_context("site"):  # the public website (videomk.com): script
               site_dir=os.path.join(os.path.dirname(__file__), "build", "site"), env=cdk.Environment(account="464863885161", region="us-east-1"))
     app.synth()
     raise SystemExit(0)
+if app.node.try_get_context("appSite"):  # the web app (app.videomk.com, docs/WEB_REDESIGN_2026.md): scripts/site.sh app
+    from app_site_stack import AppSiteStack
+    AppSiteStack(app, "videomk-app-site", app_dir=os.path.join(os.path.dirname(__file__), "build", "app"), env=cdk.Environment(account="464863885161", region="us-east-1"))
+    app.synth()
+    raise SystemExit(0)
 if app.node.try_get_context("mail"):  # email forwarding for videomk.com (docs/EMAIL_FORWARDING.md): prod account, us-east-1, like the site
     from mail_forward import MailForwardStack, PROD_ACCOUNT, REGION, DEFAULT_FROM, DEFAULT_TO, ZONE_ID, _ctx_email
     _cli = os.getenv("CDK_DEFAULT_ACCOUNT")

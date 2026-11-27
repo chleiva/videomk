@@ -52,7 +52,7 @@ export default function PromptForm({ locale: fixedLocale }: { locale?: Locale })
         return;
       }
       sessionStorage.removeItem(STORAGE_KEYS.prompt);
-      window.location.href = "/generations/index.html";
+      window.location.href = "/generations";
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);

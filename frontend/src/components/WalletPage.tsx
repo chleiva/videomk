@@ -56,7 +56,7 @@ export default function WalletPage() {
         </ul>
       </div>
       <p className="notice notice-info mt-6">{t("wallet.coming_soon")}</p>
-      <div className="mt-6"><a href="/generations/index.html" className="btn btn-primary">{t("gen.create")}</a></div>
+      <div className="mt-6"><a href="/generations" className="btn btn-primary">{t("gen.create")}</a></div>
     </section>
   );
 }

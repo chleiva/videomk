@@ -61,7 +61,7 @@ export default function QuestionsStepper() {
         body: JSON.stringify({ answers }),
       });
       if (!res.ok) throw new Error(`Failed to submit: ${res.status}`);
-      window.location.href = "/generations/index.html";
+      window.location.href = "/generations";
     } catch (e) {
       console.error(e);
       alert(t("questions.submit_error"));

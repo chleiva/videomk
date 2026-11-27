@@ -169,7 +169,7 @@ export default function CreateSheet({ onClose, onCreated, initialText = "" }: { 
       <form onSubmit={submit} className="mt-4">
         <label htmlFor="create-text" className="sr-only-vmk">{ready ? t("deck.prompt_label") : t("create.title")}</label>
         <textarea id="create-text" ref={area} data-autofocus rows={4} className="field" value={f.text} maxLength={1500} onChange={(e) => { setHint(null); set({ text: e.target.value }); }} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint" />
-        <p id="create-hint" className={`hint ${short ? "" : ""}`} aria-live="polite">{hint ? <>{hint.text}{hint.credits && <> <a href="/wallet/index.html">{t("create.see_credits")}</a></>}</> : short ? t("gen.more_detail") : ""}</p>
+        <p id="create-hint" className={`hint ${short ? "" : ""}`} aria-live="polite">{hint ? <>{hint.text}{hint.credits && <> <a href="/wallet">{t("create.see_credits")}</a></>}</> : short ? t("gen.more_detail") : ""}</p>
 
         {c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
 

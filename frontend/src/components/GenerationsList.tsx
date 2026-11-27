@@ -193,7 +193,7 @@ function VideoCard({ t, view, ago }: { t: TaskItem; view: "grid" | "list"; ago: 
   const title = t.title || tr("gen.untitled");
   const durationLabel = formatDuration(t.duration_s);
   const failed = t.status === "error" || t.status === "rejected";
-  const href = `/watch/index.html?id=${encodeURIComponent(t.id)}`;
+  const href = `/watch?id=${encodeURIComponent(t.id)}`;
   const remember = () => {
     const playUrl = t.video_url || t.download_url;
     if (playUrl && playUrl.startsWith("http")) { try { sessionStorage.setItem(`vmk_play_url_${t.id}`, playUrl); } catch {} }
@@ -231,7 +231,7 @@ function EditLink({ t }: { t: TaskItem }) {
   if (t.status !== "complete" || !t.editable) return null;
   return (
     <div className="mt-3">
-      <a href={`/edit/index.html?id=${encodeURIComponent(t.id)}`} className="btn btn-tonal btn-sm">{tr("gen.edit")}</a>
+      <a href={`/edit?id=${encodeURIComponent(t.id)}`} className="btn btn-tonal btn-sm">{tr("gen.edit")}</a>
     </div>
   );
 }

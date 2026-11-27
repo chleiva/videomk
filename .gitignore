@@ -279,3 +279,4 @@ backend/layers/bin/
 *.p12
 *.mobileprovision
 AuthKey_*
+frontend/dist-app/
