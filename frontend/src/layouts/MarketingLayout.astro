@@ -2,6 +2,7 @@
 // Layout of the public site (videomk.com): landing page, privacy, terms, support, delete-account. No sign-in code (the build strips every script anyway:
 // backend/scripts/site.sh), a header with one call to action into the app, and the footer with language and theme. Package A (marketing) owns the look
 // through styles/marketing.css; this file and tokens/shell/global CSS belong to the shell (WP0).
+import Wordmark from "../components/Wordmark.astro";
 import "../styles/global.css";
 import "../styles/shell.css";
 import "../styles/marketing.css";
@@ -35,7 +36,7 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 			<div class="site-header-in">
 				<a href={pathForLocale("/", L)} class="brand" aria-label="VideoMK">
 					<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
-					<span>VideoMK</span>
+					<Wordmark />
 				</a>
 				<slot name="nav" />
 				<a href={appUrl("/")} class="btn btn-inverse btn-sm site-cta">{tr("home.open_app")}</a>

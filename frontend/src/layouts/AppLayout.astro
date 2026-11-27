@@ -2,6 +2,7 @@
 // Layout of the web app (app.videomk.com): a left rail on desktop, a tab bar on phones, no footer. The navigation list is lib/appNav.ts. Pages are
 // client-rendered React islands that follow the saved language or the browser (lib/i18nDom.ts), so text here carries data-i18n.
 // `shell={false}`: no rail or tab bar (sign-in, OAuth callback): a centred, quiet page. Packages B and C own styles/app.css; this file belongs to the shell (WP0).
+import Wordmark from "../components/Wordmark.astro";
 import "../styles/global.css";
 import "../styles/shell.css";
 import "../styles/app.css";
@@ -59,13 +60,13 @@ const tr = (k: string) => translate(k, "en");   // build-time English; the brows
 				<header class="app-topbar">
 					<a href="/generations" class="brand" aria-label="VideoMK">
 						<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
-						<span>VideoMK</span>
+						<Wordmark />
 					</a>
 				</header>
 				<nav class="app-nav" aria-label="VideoMK" data-i18n-aria="shell.menu">
 					<a href="/generations" class="brand app-nav-brand" aria-label="VideoMK">
 						<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
-						<span>VideoMK</span>
+						<Wordmark />
 					</a>
 					<ul class="app-nav-list">
 						{APP_NAV.filter((n) => n.rail).map((n) => (

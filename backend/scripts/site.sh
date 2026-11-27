@@ -19,7 +19,7 @@ build() {
     mkdir -p "$OUT/$p" "$OUT/es/$p"; cp "$ASTRO_OUT/$p/index.html" "$OUT/$p/"; cp "$ASTRO_OUT/es/$p/index.html" "$OUT/es/$p/"
   done
   mkdir -p "$OUT/_astro"; cp "$ASTRO_OUT"/_astro/*.css "$OUT/_astro/"; cp "$ASTRO_OUT/favicon.svg" "$OUT/"
-  for f in apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$ASTRO_OUT/$f" ] && cp "$ASTRO_OUT/$f" "$OUT/$f"; done   # linked from every page head
+  for f in favicon.ico apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$ASTRO_OUT/$f" ] && cp "$ASTRO_OUT/$f" "$OUT/$f"; done   # linked from every page head
   # the home pages come from the Astro build (components/Landing.astro, both languages); only the 404 page is still hand-written
   cp "$ASTRO_OUT/index.html" "$OUT/index.html"; cp "$ASTRO_OUT/es/index.html" "$OUT/es/index.html"; cp ../frontend/site-pages/404.html "$OUT/404.html"
   # the home page's sample videos, posters and share image (frontend/public/samples, og.jpg)
@@ -53,7 +53,7 @@ app_build() {
   mkdir -p "$APP_OUT/es/delete-account"; cp "$APP_ASTRO_OUT/es/delete-account/index.html" "$APP_OUT/es/delete-account/"   # Apple's revoke page returns to /delete-account: its language switch needs the Spanish page too
   mkdir -p "$APP_OUT/auth/callback"; cp "$APP_ASTRO_OUT/auth/callback/index.html" "$APP_OUT/auth/callback/"
   cp -R "$APP_ASTRO_OUT/_astro" "$APP_OUT/_astro"
-  for f in favicon.svg apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$APP_ASTRO_OUT/$f" ] && cp "$APP_ASTRO_OUT/$f" "$APP_OUT/$f"; done
+  for f in favicon.svg favicon.ico apple-touch-icon.png icon-192.png icon-512.png site.webmanifest; do [ -f "$APP_ASTRO_OUT/$f" ] && cp "$APP_ASTRO_OUT/$f" "$APP_OUT/$f"; done
   # The root and any unknown address (CloudFront answers /index.html for them): signed-in people go to their videos, the sign-in page handles the rest.
   cat > "$APP_OUT/index.html" <<'HTML'
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>VideoMK</title>

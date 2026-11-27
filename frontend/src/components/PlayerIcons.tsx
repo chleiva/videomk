@@ -43,7 +43,7 @@ export function PIcon({ name, size = 22, className }: { name: keyof typeof PATHS
   return <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width={size} height={size} className={className}>{PATHS[name]}</svg>;
 }
 
-/** The VideoMK mark (Sparklet Trio, docs/brand/final/favicon.svg) as inline SVG so the sign-in page needs no request: a play triangle that emits sparks, on the brand gradient. */
+/** The VideoMK mark (docs/brand/final/favicon.svg): a play and two stars, white on the action gradient tile. */
 export function BrandMark({ size = 64 }: { size?: number }) {
   return <img src="/favicon.svg" width={size} height={size} alt="" aria-hidden="true" className="brand-tile" style={{ width: size, height: size }} />;
 }

@@ -54,6 +54,7 @@ h1, h2, h3 { text-wrap: balance; }
 .brand { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 800; letter-spacing: -0.03em; font-size: var(--fs-title3); color: var(--text); text-decoration: none; min-height: var(--min-touch); }
 .brand-mark { width: 2rem; height: 2rem; border-radius: 0.6rem; overflow: hidden; background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); flex: none; }
 .brand-mark img { width: 100%; height: 100%; display: block; }
+.brand-word { height: 0.83rem; width: auto; display: block; flex: none; fill: currentColor; }   /* the lockup: cap height 0.4 of the tile (docs/BRAND.md) */
 .nav { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .nav a { display: inline-flex; align-items: center; min-height: var(--min-touch); padding: 0 var(--space-3); border-radius: var(--radius-pill); color: var(--text-secondary); font-weight: 600; font-size: var(--fs-subhead); text-decoration: none; }
 .nav a:hover { color: var(--text); background: var(--surface-2); }
