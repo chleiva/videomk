@@ -60,7 +60,7 @@ TALK: Dict[str, Dict[str, Any]] = {
     # the parrot speaks Spanish (a Spanish Polly voice): the natural Spanish-first character
     "parrot": {"text": "¡Hola! Soy Paco. Hoy aprendemos a saludar en tres idiomas. Primero, en español: hola. Segundo, en inglés: hello. Y tercero, en francés: bonjour. Mira qué fácil. ¡Gracias, y buen viaje!",
                "framing": "three_quarter", "side": "right", "scene": "tropical_river_jungle", "card": ("Saludar en tres idiomas", [("Primero,", "Español: hola"), ("Segundo,", "Inglés: hello"), ("tercero,", "Francés: bonjour")])},
-    "turtle": {"text": "Hello, I'm Tula. The sea is full of life. Let's go step by step. First, sunlight feeds tiny plants. Second, small fish eat them. Third, bigger fish follow. Slow down, look closely, and the sea tells its story. Thank you!",
+    "turtle": {"text": "Hello, I'm Tula. The sea is full of life. First, sunlight feeds tiny plants. Second, small fish eat them. Third, bigger fish follow. Take your time and look closely: the sea tells its story. Thank you!",
                "framing": "three_quarter", "side": "left", "scene": "deep_ocean_reef", "card": ("Life in the sea", [("First,", "1  Sunlight feeds tiny plants"), ("Second,", "2  Small fish eat them"), ("Third,", "3  Bigger fish follow")])},
 }
 SIZE = {c: old.CAST[c]["size"] for c in ORDER + ANIMALS}
@@ -378,6 +378,31 @@ def framing_sheet(out: str, store: str, cell_h: int = 420) -> None:
 
 
 # ----------------------------------------------------------------------------- encode
+def animal_group(out: str, store: str, W: int = 1920, H: int = 1080, scene: str = "flower_meadow") -> None:
+    """One still of the six animals together (the fox and the animal cast), each at a different gesture, on a cartoon scene."""
+    ids = ["fox"] + ANIMALS
+    img = backdrop(store, scene, W, H, 0.06)(2.0, 10.0)
+    ppu = H / 425.0
+    K = cg.KEY
+    kinds = ["wave", "count", "thumb", "count", "thumb", "wave"]            # gestures that stay close to the body: six figures stand shoulder to shoulder
+    shapes = ["open", "two", "thumb", "three", "thumb", "open"]
+    for i, cid in enumerate(ids):
+        ch = vp.load(cid, ppu, SIZE[cid])
+        A = ch.g.arm
+        kind = kinds[i % len(kinds)]
+        key = (K[kind][0][0] * A, K[kind][0][1] * A)
+        shape = shapes[i % len(shapes)]
+        left = i < len(ids) / 2                                  # the outer arm gestures: the left arm on the left half of the picture
+        rest = (cg.REST_WRIST, K[kind][1])
+        pose: Dict[str, Any] = {"hands": (key, key) if kind == "open" else (key, None) if left else (None, key),
+                                "hand_shape": (shape, shape) if kind == "open" else (shape, "relaxed") if left else ("relaxed", shape),
+                                "wrist": (K[kind][1], K[kind][1]) if kind == "open" else rest[::-1] if left else rest, "mouth": ("half", "closed", "wide")[i % 3], "tail": (-5.0, 4.0)[i % 2]}
+        ch.draw(img, W * (0.09 + 0.158 * i), H * 0.93, pose)
+        label(img, old.CAST[cid]["name"], W * (0.09 + 0.158 * i) - W * 0.035, H * 0.94)
+    img.convert("RGB").save(out, quality=90)
+    print("wrote", out)
+
+
 def encode(frame, audio: np.ndarray, total: float, W: int, H: int, fps: int, out: str, music: Optional[str] = None) -> None:
     tmp = out + ".silent.mp4"
     p = subprocess.Popen(["nice", "-n", "12", "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264",
@@ -441,6 +466,7 @@ def main() -> int:
     ap.add_argument("--peaks", action="store_true")
     ap.add_argument("--plan", action="store_true")
     ap.add_argument("--no-video", action="store_true")
+    ap.add_argument("--animals", action="store_true", help="one still of the six animals together (animal_cast_all.jpg)")
     a = ap.parse_args()
     W, H = (int(x) for x in a.size.lower().split("x"))
     os.makedirs(a.out, exist_ok=True)
@@ -458,6 +484,8 @@ def main() -> int:
         if not a.no_video:
             encode(frame, audio, total, W, H, a.fps, os.path.join(a.out, name + ".mp4"), music)
 
+    if a.animals:
+        animal_group(os.path.join(a.out, "animal_cast_all.jpg"), a.store)
     if a.talk:
         for cid in ORDER + [c for c in ANIMALS if c in (a.only or [])]:
             if a.only and cid not in a.only:

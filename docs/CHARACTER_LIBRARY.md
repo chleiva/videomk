@@ -2,6 +2,8 @@
 
 **2026-11-27, later: the five are wired into real videos behind the switch `PRESENTERS` (QA on, production off): see `docs/PRESENTERS.md`.**
 
+**2026-11-27, evening: five animal presenters joined the Fox (owl Hugo, bear Bruno, cat Mika, parrot Paco, turtle Tula), branch `animal-cast`: see "The animal cast" at the end of this note and `docs/PRESENTERS.md` "Animal presenters".**
+
 Owner decision: generate only **5** new characters, animate them, look at the videos, and only then decide whether to build more. This note is that test. Nothing is deployed and the characters are not wired into the planner.
 
 ## Update, same day: the five as standing speakers
@@ -95,3 +97,21 @@ OpenAI: 5 parts sheets, USD 0.1802 of the USD 1.00 cap (no retries needed: all f
 ## Files
 
 New: `backend/scripts/vector_character_sheet5.py`, `vector_character_build5.py`, `vector_character_cast_demo.py`, `backend/tests/test_vector_character_cast.py`, `backend/lambdas/engine/assets/vector_characters/{ines,david,priya,mateo,fox}/`, `docs/vector_character_spend.jsonl`, this note. Nothing existing was edited.
+
+## The animal cast (2026-11-27, branch `animal-cast`)
+
+| id | Name | Role | Look (house-v2 flat cartoon, the Fox's rig) | EN voice | ES voice |
+|---|---|---|---|---|---|
+| `owl` | Hugo | owl professor | chestnut feathers, cream face disc, ear tufts, round gold glasses, olive tweed waistcoat, dark-red bow tie, brown trousers; small tail fan | Brian, Matthew | Sergio, Pedro |
+| `bear` | Bruno | wellbeing friend | honey-brown fur, tan muzzle, teal knitted jumper with a cream zigzag, blue trousers, brown boots; no tail | Stephen, Matthew | Andres, Pedro |
+| `cat` | Mika | tech explorer | grey tabby, white muzzle and paws, orange hoodie, navy trousers, sneakers; striped tail | Olivia, Salli | Mia, Lucia |
+| `parrot` | Paco | language and travel guide (Spanish first) | scarlet macaw, white face patch, crest, yellow neckerchief, blue feathered hands, grey boots; long tail feathers | Nate, Matthew | Pedro, Sergio |
+| `turtle` | Tula | nature guide | soft green, cream belly plate, olive shell behind the body, orange backpack straps, sand trousers, hiking boots; small tail | Amy, Ruth | Lupe, Lucia |
+
+Made with the same two sheets per character as the Fox (parts sheet, hands sheet with the tail as the sixth piece): `vector_character_sheet5.py --animals --only <id>`, `vector_character_build5.py SHEETS --only <id>`, `vector_character_hands.py generate|build --only <id>`. All ten sheets followed the layout at the first attempt; spend USD 0.3611 (ten calls of USD 0.0355 to 0.0368). The source sheets are kept outside the repository in `~/videomk-session-backup/characters/animal_sheets/`.
+
+What an animal sheet must say (learned here): limbs as long and slim as a person's (the rig scales every limb to a fixed length); wings as arms ending in hands; the head blank and, for a bird, WITHOUT the beak (the three mouth pieces are the beak closed, half open, wide open); the hand in a clearly different colour from the forearm (the wrist finder needs it); a shell as part of the torso; "no tail piece" on the parts sheet (the tail comes with the hands sheet). What the sheet cannot give is set by eye and kept in the scripts: the face layout (`build5.ANIMAL_FACE`), `shoulder_x` (`hands.RIG`), where the tail hangs (`hands.TAIL_DEFAULT`), the thumb side of the forearm drawing (`hands.RELAXED_THUMB`).
+
+Checked for each: the pose sheet next to the Fox (rest, wave, one, two, three, present, open palms, shrug, thumb up), the talk clip's gesture peaks, `tests/test_vector_presenter.py` (pieces, limbs attached in pixels, hand shapes, rest pose and thumb sides) and `tests/test_vector_character_cast.py` (assets, metadata, under 1 MB: 0.70 to 0.92 MB).
+
+Rating as speakers: Bruno SHIP, Mika SHIP, Hugo SHIP (glove-like hands; busy tail fan when small), Paco SHIP (plain red legs), Tula NEEDS WORK in close shots (plain head, thin arms, the shell hides behind the arms at rest). A second sheet for Tula with a wider shell and thicker arms (about USD 0.07) is the first thing to try.
