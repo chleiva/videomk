@@ -20,7 +20,7 @@ from common.http import json_response
 from common.identity import extract_cognito_sub
 import plan_gate
 import video_retry
-from common import deck_limits, i18n, intake, library, safety, usage, wallet, watermark_store
+from common import deck_limits, i18n, intake, library, looks, safety, usage, wallet, watermark_store
 from engine import format_options, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
@@ -138,8 +138,8 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
                 raise BadRequest(f"'{field}' must be one of: " + ", ".join(allowed))
             out[field] = body[field]
     if "style" in body and body["style"] is not None:   # the look of the scenes: 'auto' (the director decides, cartoon scenes only where the policy allows), 'cartoon' (illustrated), 'real' (photographs and footage only); docs/VECTOR_SCENE_POLICY.md
-        if not isinstance(body["style"], str) or body["style"] not in ("auto", "cartoon", "real"):
-            raise BadRequest("'style' must be one of: auto, cartoon, real")
+        if not isinstance(body["style"], str) or body["style"] not in ("auto", "cartoon", "real", "whiteboard"):
+            raise BadRequest("'style' must be one of: auto, cartoon, real, whiteboard")
         if body["style"] != "auto":
             out["style"] = body["style"]
     if out.get("aspect", format_options.DEFAULT_ASPECT) not in format_options.ready_aspects():
@@ -164,6 +164,7 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
     if not watermark_store.enabled():
         options.pop("watermark", None)
         return None
+    wr: Dict[str, Any] = {}
     try:
         wr = watermark_store.rights(user_id)   # by plan where plans are on (docs/PLANS.md), else the flags and the stack policy as before
         premium, forced = wr["premium"], wr["forced"]
@@ -175,7 +176,8 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
         if forced and wr.get("by_plan"):
             spec = watermark_store.forced_spec(spec)
     except watermark_store.WatermarkError as e:
-        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {}), **e.extra})
+        by_plan = {"plan": wr.get("plan"), "can_upgrade": plan_gate.plans.PURCHASES_LIVE} if wr.get("by_plan") and "requires_plan" in e.extra else {}   # a plan refusal says the same as the others (docs/PLANS.md section 4)
+        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {}), **e.extra, **by_plan})
     except Exception:   # noqa: BLE001 - a watermark lookup problem must never stop a video: the policy default decides
         logger.exception("WATERMARK_RESOLVE_FAILED user=%s", user_id)
         from common import plans as _plans
@@ -273,18 +275,33 @@ def _register_intent(user_id: str, prompt: str, video_id: str, usage_day: str, *
 
 
 def safety_gate(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[str, Any], locale: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """None to go on; else the response: 429 `paused` for a paused or held account, 400 `blocked` (recorded) for a request that must be stopped.
+    return gate_and_look(user_id, prompt, brief, options, locale)[0]
+
+
+def gate_and_look(user_id: str, prompt: str, brief: Dict[str, Any], options: Dict[str, Any], locale: Optional[str] = None) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
+    """(the response that stops the request or None, the check's reading of a look wish or None). None to go on; else the response: 429 `paused` for a paused or held account, 400 `blocked` (recorded) for a request that must be stopped.
     One attempt with a 4 s timeout, then the deterministic screen (no retry here: the function has a 10 s budget and a clear prompt must never wait on this)."""
     if not safety.enabled():
-        return None
+        return None, None
     lang = locale or safety.guess_language(prompt, options.get("language"))   # the app's language (X-Locale) when it sends one, else the language of the request
     stopped = intake.paused(user_id, lang)
     if stopped:
-        return json_response(429, stopped, {"Retry-After": str(stopped["retry_after"])})
+        return json_response(429, stopped, {"Retry-After": str(stopped["retry_after"])}), None
     chk = intake.check(prompt + " " + intake.brief_text(brief) if brief else prompt, options={}, attempts=1)
     if chk.block:
-        return json_response(400, intake.stop(user_id, chk, prompt, lang))
-    return None
+        return json_response(400, intake.stop(user_id, chk, prompt, lang)), None
+    return None, chk.look
+
+
+def look_note(prompt: str, options: Dict[str, Any], loc: str, read: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """`note` (and `look`) for the 202 answer when a look the person asked for was adapted (docs/CREATE_API.md "Looks"): the video is made in the closest look this
+    stage has, never refused. Empty when nothing was asked. Reads the words, the `style` option and the server switches; no model call of its own."""
+    try:
+        r = looks.resolve(prompt, options.get("style"), loc, model=read, media_count=len(options.get("media") or []) + len(options.get("library_media") or []) + (1 if options.get("deck") else 0))
+    except Exception:   # a note must never stop a video
+        logger.exception("look note failed")
+        return {}
+    return {"look": {"style": r["style"], "asked": r["asked"], "adapted": r["adapted"], "presenter": r["presenter"]}, **({"note": r["note"]} if r["note"] else {})} if r["asked"] else {}
 
 
 def handler(event: Dict[str, Any], context: Any):
@@ -333,9 +350,10 @@ def handler(event: Dict[str, Any], context: Any):
             return json_response(202, {"message": "workflow already started", "video_id": video_id})
 
     # Safety gate: before any charge, copy or duplicate claim. The same check as POST .../videos/brief, so skipping `brief` skips nothing.
-    gated = safety_gate(user_id, prompt, brief, options, i18n.explicit_locale(event))
+    gated, look_read = gate_and_look(user_id, prompt, brief, options, i18n.explicit_locale(event))
     if gated:
         return gated
+    noted = look_note(prompt, options, i18n.explicit_locale(event) or looks.guess_lang(prompt, options.get("language")), look_read)   # a look wish that was adapted is said, never refused (docs/CREATE_API.md "Looks")
     if brief:
         options["brief"] = brief
 
@@ -434,5 +452,6 @@ def handler(event: Dict[str, Any], context: Any):
             "message": "workflow started",
             "video_id": video_id,
             "startDate": start_date.isoformat() if hasattr(start_date, "isoformat") else "",
+            **noted,   # optional `note` + `look`: a look the person asked for that was adapted (a line on the Making screen or a toast)
         },
     )

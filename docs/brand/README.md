@@ -1,66 +1,71 @@
-# videomk brand mark (v3: play + AI sparks, no letters)
+# VideoMK logo: B1 "Action"
 
-Status: proposal for owner approval. No app or site code uses these files. Earlier directions are kept in `archive-mk-cursor/` (shared-stem MK cursor, rejected) and `archive-play-mk/` (white play with MK knocked out, superseded by the owner's "remove the letters").
+Chosen by the owner on 27 Nov 2026. The rules are in `docs/BRAND.md`; this file says what is in these folders and how the files are made.
 
 ## The mark
 
-A large soft white **play triangle** that **emits a sparkle from its tip**: a big cyan four-point sparkle sits in a bite cut out of the triangle's tip (a thin gradient-coloured halo keeps them apart), with a medium and a small sparkle trailing to the upper right in a 3 : 2 : 1 size rhythm. Reading: play = video, sparks = AI; the order says "the video comes out of the AI". The triangle stays dominant (about 60% of the mark's area).
+One rounded **play triangle** and **two four-point stars** above its tip: a big one and a second at 0.66 of its size. No letters. The same drawing at every size, from the 1024 px icon to the 16 px favicon: the second star is never dropped and there is no simplified small version.
 
-- Two colours plus the gradient background: white and cyan.
-- Real filled paths (even-odd, no masks, strokes or fonts), so Android VectorDrawable and Xcode import cleanly. The monochrome layer is the same shape in one colour with the halo gap preserved.
-- Sparkles are concave four-point stars (exponent 3.0, deliberately a little fuller than the stock slim Gemini star).
+- Colour: **white on the action gradient** `#3B36C8` to `#7A4BE6` (top left to bottom right), the gradient of the Create button.
+- Dark-appearance app icon: the Midnight ink tile `#151828` to `#06070D`, play `#6360FF` to `#B56CFF`, big star cyan `#7CEBFA` to `#22D3EE`, small star `#E9E8FF`.
+- Without a tile: the mark in the action gradient on light backgrounds, white on dark ones, or one colour (white, ink `#0B0C14`, or any single colour through `mark-mono.svg`).
+- Geometry on a 1024 grid: play `tri(242, 326, h 468, w 420, r 54)`, stars at (630, 318) radius 128 and (786, 472) radius 84; ink box 628 x 574. In the app icon the mark is 1.06 of the grid about the centre; in the rounded tile 1.155; on Android 0.848 (all ink inside the 66 dp safe circle: farthest point 304 px, limit 313).
 
-## Colour and contrast (WCAG 2.x, computed)
+## The wordmark
 
-| Item | Value | Contrast |
-|---|---|---|
-| Gradient start / end | `#2b2f9a` / `#6a3fc4` (`--making-start` / `--making-end` in `tokens.css`) | |
-| White triangle on gradient | `#ffffff` | 10.6:1 / 6.7:1 |
-| Cyan sparks on gradient | `#22d3ee` (`--live`) | 5.9:1 / 3.7:1 (passes 3:1 for graphics) |
-| Wordmark on light | `#11142b` on `#f6f7fc` | 16.9:1 |
-| Wordmark on dark | `#f3f4fb` on `#0a0d1f` | 17.6:1 |
+"VideoMK" in **Inter** (SIL Open Font License), "Video" at weight 600 and "MK" at 800, tracking -18/1000, one colour. Outlines only (`final/wordmark.json`), never live text in a logo file.
 
-Cyan on white or light surfaces is 1.7:1: never place the sparks there; on light pages the mark lives on its gradient tile and the wordmark is ink only. Continuity: indigo-violet and the cyan accent are the app's own; the old icon was a cyan triangle on navy.
+## Contrast (WCAG, computed)
+
+| Pair | Ratio |
+|---|---|
+| White mark on the gradient | 8.2:1 at `#3B36C8`, 5.3:1 at `#7A4BE6` |
+| Gradient mark on the page `#F7F7FA` | 7.7:1 to 4.9:1 |
+| Dark icon: play, big star, small star on the ink tile | 3.9:1, 9.7:1, 14.6:1 |
+| Wordmark: ink on `#F7F7FA`, `#F4F5FA` on `#06070D` | 18.2:1, 18.5:1 |
 
 ## Files
 
-`final/` (recommended): `icon-1024.svg/.png` (iOS, full-bleed, no rounding, no alpha), `android-adaptive-foreground.svg` (scaled to 0.73 so every point of ink is inside the 66 dp safe circle; verified numerically), `android-adaptive-background.svg`, `android-monochrome.svg`, `wordmark-lockup-light.svg/.png`, `wordmark-lockup-dark.svg/.png`, `favicon.svg` (+ `favicon-512.png`; triangle plus the big sparkle only), `preview.png`.
-`final-alt/` (runner-up, same set): white play with a sparkle (plus a small companion) cut out of it.
-Wordmark: `videomk`, lowercase, hand-built round monoline letters converted to filled paths (no font licence). Android: import the SVGs with Vector Asset; the 1024 grid stands for the 108 dp canvas.
+`final/` (the masters; made by `final/build_final.py`, plain paths only: no groups, transforms, masks, clip paths or fonts):
 
-## Clear space, minimum size, do / do not
+| File | Use |
+|---|---|
+| `mark-tile.svg` | The mark on the rounded gradient tile (the favicon, the mark inside the apps and the site) |
+| `mark-gradient.svg`, `mark-white.svg`, `mark-black.svg`, `mark-mono.svg` | The mark alone: gradient ink for light backgrounds, white, ink, and `currentColor` for any single colour |
+| `icon-1024.svg/.png` | App icon, default (light). Full-bleed, square, no alpha |
+| `icon-1024-dark.svg/.png` | App icon, dark appearance (iPhone) |
+| `icon-1024-tinted.svg/.png` | App icon, tinted appearance (iPhone): grey values only, opaque; iOS lays the tint over it |
+| `android-adaptive-foreground.svg`, `android-adaptive-background.svg`, `android-monochrome.svg` | The three layers of the Android adaptive icon (1024 stands for 108 dp) |
+| `lockup-horizontal-tile-light/-tile-dark.svg/.png` | Tile + word, for light and dark backgrounds (headers, the sign-in page) |
+| `lockup-horizontal-light/-dark/-white/-black.svg` | Mark without the tile + word; `-white` is the watermark's source (`.png` too) |
+| `lockup-stacked-*.svg` | The same six, mark above the word |
+| `favicon.svg`, `favicon-512.png` | The rounded tile for browsers |
+| `wordmark.json` | The wordmark's outlines |
+| `preview.png` | All of it on one sheet |
 
-- Clear space: half the tile height on every side. Minimum: icon 29 pt (triangle plus a cyan glint; the three sparks are separate from about 60 px), lockup 24 px tile height, favicon 16 px (triangle plus one spark). Below 24 px use the tile without the wordmark.
-- Do: use files unmodified; dark lockup on dark, light on light; keep the 3 : 2 : 1 sizes and the halo bite.
-- Do not: recolour; add more sparks, glow or shadow; move the sparks onto the triangle; put cyan on white; round the iOS art; add text; use another font for the wordmark.
+`store/` (upload these by hand):
 
-## How it was chosen
+| File | Where |
+|---|---|
+| `videomk-app-store-icon-1024.png` | App Store Connect (comes with the build; also the listing icon). 1024, no alpha, square corners |
+| `videomk-play-store-icon-512.png` | Google Play Console, Store listing, App icon. 512, 32-bit PNG, full-bleed (Play rounds it) |
+| `videomk-play-feature-graphic-1024x500.png` | Google Play Console, Store listing, Feature graphic |
+| `videomk-google-consent-logo-120.png` | Google Cloud console, OAuth consent screen, App logo |
+| `videomk-og-1200x630.jpg` | The share image (the site's `og.jpg`); also for social profiles' link previews |
 
-Round 1 (`concepts/contact-sheet-round1a.png`, `...1b.png`; 9 concepts; each at 1024 full-bleed and iOS-masked, and 180 / 60 / 29 px on light and dark):
+## Rebuilding
 
-| # | Concept | Verdict |
-|---|---|---|
-| S1 | Play with one sparkle cut out | Clean, best at 29 px; most generic of the survivors. Becomes the runner-up |
-| S2 | Play + sparkle trio orbiting upper right | Most "AI", but the sparks float free and the pair reads as the Gemini sparkle next to a play icon |
-| S3 | Sparkle at the tip (halo bite) | Distinctive: the play button produces the spark. Becomes the base of the recommendation |
-| S4 | Edge dissolving into spark points | Truncated triangle reads as a trapezoid; play shape lost. Rejected |
-| S5 | Play built from a three-point concave star | Reads as a propeller or blob, not a play button. Rejected |
-| S6 | Trio of stars cut out of the play | Busy at 60 px, sparks merge |
-| S7 | Play + eight-point burst | Looks like a virus or a sun. Rejected |
-| S8 | Slim sparkle overlapping the corner, halo | Closest to the stock Gemini/Google sparkle. Too generic |
-| S9 | Outline play + cyan sparkle in the centre | Tidy but thin, weak at 29 px, reads as a "favourite/premium play" icon |
+```
+.venv/bin/python docs/brand/final/build_final.py      # masters, store files, and the copies in the apps, the site and the sign-in page
+.venv/bin/python backend/scripts/watermark_assets.py  # the watermark art the video engine ships
+```
 
-Round 2 (`round2/contact-sheet-round2.png`): R2-1 cut-out with a smaller companion (runner-up), **R2-2 tip sparkle with 3:2:1 trio (chosen)**, R2-3 tip with a flattened lens-flare star (unusual, but the sparkle becomes a streak and the AI cue weakens).
+`build_final.py` also writes: `mobile/ios/VideoMK/Assets.xcassets/{AppIcon.appiconset (light, dark, tinted), BrandMark.imageset, Lockup.imageset}`, `mobile/android/app/src/main/res/drawable/ic_launcher_{foreground,background,monochrome}.xml`, `frontend/public/{favicon.svg, favicon.ico, apple-touch-icon.png, icon-192.png, icon-512.png, og.jpg}`, `backend/login_branding/{logo-light.svg, logo-dark.svg, favicon.svg, favicon.ico}`. The web header's word is `frontend/src/components/Wordmark.astro` (the same outlines).
 
-## Honest limits
+## History
 
-- A white rounded triangle plus cyan four-point sparkles is, as a category, the "AI video" look of 2025-26: any single element here is generic. What is ours: the sparkle is generated by the play shape (tip bite with halo), the strict 3:2:1 rhythm, the fuller star, the gradient and cyan from our own tokens. Put next to Gemini or CapCut, you can tell it is not them, but you might not tell it is videomk from the icon alone; the lockup carries that.
-- At 29 px the sparks are a cyan glint at the tip, not three stars (intended: "implied").
-- The sparkle does change the reading from "player" (watch) to "creator" (make), which is the point, but a play triangle will still be read as media app first.
+- `2026-11-27-play-star/`: the six play + star options (round 1) and the eight colour treatments of option B's shape (round 2, `round2/`), with the look-alike check and the sources on what makes a mark work. B1 won.
+- `archive/2026-11-26-sparklet-trio/`: the previous mark (a play with three sparks at its tip, lowercase hand-built wordmark). Superseded; not used anywhere.
+- `final-alt/`, `concepts/`, `round2/`, `round3/`, `archive-mk-cursor/`, `archive-play-mk/`: earlier explorations.
 
-## Look-alike check (from knowledge, no live trademark search)
-
-- Too close in spirit: **Google Gemini** (blue four-point concave star): our sparks use the same family of shape, so never use a single big sparkle alone or the Gemini blue-to-purple; **Canva Magic** and **Adobe Firefly / Photoshop AI** and **Notion AI / Copilot / Meta AI** (all use sparkle glyphs as AI badges, usually black or white on tiles): S2 and S8 would merge with these; the tip-sparkle halo and cyan-on-indigo keep the recommended one apart but it stays in the same family.
-- **YouTube** (red rounded rectangle, white triangle): different colour and container; the white triangle on its own is shared by everyone, which is why the tip sparkle matters.
-- **CapCut** (white stylised cut mark on black), **Runway** (letter/abstract mark), **HeyGen** (abstract blue mark), **Synthesia** (S wordmark/glyph), **Descript** (D-shaped waveform), **InVideo** (letter mark), **Pictory** (P/play-like in a rounded square; check it closely before launch because its mark is also a rounded play shape): none combines a play triangle with a trailing sparkle trio.
-- Do a proper trademark and app-store similarity search before launch (Pictory and Google sparkles first); this is a design check, not legal clearance.
+A design check is not legal clearance: do a trademark and store similarity search before launch (generic "AI video" play + sparkle glyphs are common; ours is told apart by the two stars in a fixed 3:2 rhythm and the indigo-violet).

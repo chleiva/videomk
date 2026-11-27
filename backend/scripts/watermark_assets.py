@@ -5,7 +5,9 @@
 
 mark.svg / lockup.svg: ONE colour (white), tight viewBox, so the engine can tint and shadow them. mark.png / lockup.png: 1024 px tall renders of the same, which the engine
 only ever scales DOWN (a 4K frame at the largest size needs about 150 px), so the mark is crisp at every resolution without a rasteriser at render time.
-The mark is the Sparklet Trio (play triangle + three sparks); the lockup is the mark plus the hand-built 'videomk' wordmark (docs/brand/README.md).
+The mark is the VideoMK logo (one play, two stars; docs/BRAND.md section 2); the lockup is the mark plus the 'VideoMK' wordmark (Inter outlines). Sources:
+docs/brand/final/mark-white.svg and lockup-horizontal-white.svg, made by docs/brand/final/build_final.py. After a change of shape, update MARK_RATIO and LOCKUP_RATIO in
+engine/watermark_spec.py to the sizes this prints.
 """
 import io
 import os
@@ -26,7 +28,7 @@ def _render(svg: str, w: int, h: int) -> Image.Image:
 
 
 def _white(path_tag: str) -> str:
-    return re.sub(r'fill="#[0-9a-fA-F]{3,8}"', 'fill="#ffffff"', path_tag)
+    return re.sub(r'fill="[^"]+"', 'fill="#ffffff"', path_tag)
 
 
 def _tight(svg_body: str, vb: tuple) -> tuple:
@@ -52,15 +54,17 @@ def build(name: str, svg_body: str, vb: tuple) -> None:
     print(name, "viewBox", tvb, "png", img.size)
 
 
+def _source(name: str) -> tuple:
+    """(the file's paths in white, its viewBox)"""
+    text = open(os.path.join(BRAND, name)).read()
+    vb = tuple(float(v) for v in re.search(r'viewBox="([^"]+)"', text).group(1).split())
+    return "".join(_white(p) for p in re.findall(r"<path[^>]*>", text)), vb
+
+
 def main() -> None:
     os.makedirs(OUT, exist_ok=True)
-    mono = open(os.path.join(BRAND, "android-monochrome.svg")).read()
-    mark_paths = "".join(_white(p) for p in re.findall(r"<path[^>]*>", mono))
-    build("mark", mark_paths, (0, 0, 1024, 1024))
-    lock = open(os.path.join(BRAND, "wordmark-lockup-dark.svg")).read()
-    vb = tuple(float(v) for v in re.search(r'viewBox="([^"]+)"', lock).group(1).split())
-    paths = re.findall(r"<path[^>]*>", lock)   # triangle, three sparks, wordmark (the gradient tile is a <rect> and is dropped)
-    build("lockup", "".join(_white(p) for p in paths), vb)
+    build("mark", *_source("mark-white.svg"))                  # the play and the two stars
+    build("lockup", *_source("lockup-horizontal-white.svg"))   # the same, then the wordmark
 
 
 if __name__ == "__main__":

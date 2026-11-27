@@ -1,5 +1,5 @@
 {
- "gen.page_title": "Videos — videomk",
+ "gen.page_title": "Videos — VideoMK",
  "gen.title": "Mis videos",
  "gen.subtitle": "Retoma donde lo dejaste.",
  "gen.toggle_view": "Cambiar vista",
@@ -105,7 +105,7 @@
  "media.max_select": "Un video admite hasta {n} fotos.",
  "media.photo_a11y": "{label}",
  "media.photo_selected": "seleccionada",
- "media.privacy": "Tus fotos son privadas. Solo tú puedes verlas. Nadie en videomk las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina cualquier foto, o todas, cuando quieras.",
+ "media.privacy": "Tus fotos son privadas. Solo tú puedes verlas. Nadie en VideoMK las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina cualquier foto, o todas, cuando quieras.",
  "media.privacy_dismiss": "Entendido",
  "media.storage": "{used} de {limit}",
  "media.storage_a11y": "Almacenamiento: {used} de {limit}",

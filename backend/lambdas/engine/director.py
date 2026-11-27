@@ -11,7 +11,7 @@ from datetime import date
 
 import logging
 
-from . import background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices
+from . import background, engagement, language as lang_mod, length as length_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices, whiteboard_policy
 from .netsafe import quality_fixes
 
 def fit_to_target() -> bool:
@@ -87,10 +87,15 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     vpolicy = vector_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes,
                                    expected_beats=plan_mod.expected_beats(minutes, len(photos or [])), search=vector_search,
                                    ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)   # the cartoon scenes: a special style, offered only where the policy allows (docs/VECTOR_SCENE_POLICY.md)
-    craft += vpolicy.prompt_block(language)
+    # the whiteboard look (docs/WHITEBOARD.md, flag WHITEBOARD): a whole-video style; when it is on for this video the cartoon scenes are not offered
+    wpolicy = whiteboard_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"],
+                                       ask=(lambda sys_, usr: ask_small(sys_, usr, 120)) if whiteboard_policy.enabled() else None)
+    if wpolicy.allowed:
+        vpolicy = vector_policy.Policy(False, vpolicy.style, "whiteboard_video", aspect=vpolicy.aspect, flag=vpolicy.flag)
+    craft += vpolicy.prompt_block(language) + wpolicy.prompt_block(language)
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
-    with vector_policy.scope(vpolicy):
+    with vector_policy.scope(vpolicy), whiteboard_policy.scope(wpolicy):
         if staged_mod.is_staged(minutes, len(photos or [])):
             # a long video is written in stages (outline, then each section on its own, each with its own research): see engine/staged.py
             lock = threading.Lock()
@@ -124,6 +129,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
     warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]
+    warnings += whiteboard_policy.enforce(plan, wpolicy)   # look on: text beats the director left become boards; records plan["whiteboard"]
     rejected = plan.pop("_rejected_scenes", None) or []
     if fetch_errors:
         info["fetch_errors"] = fetch_errors[:20]
@@ -148,15 +154,17 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             info["opening"] = opened[0].split(": ", 1)[-1]
     if theme in ("midnight", "paper", "sunrise"):  # the user's choice beats the model's
         plan["theme"] = theme
+    if wpolicy.allowed:   # a whiteboard video is on paper whatever theme was chosen (captions and the closing card match the board), and has no moving background behind it
+        plan["theme"] = whiteboard_policy.THEME
     fetched: List[str] = [s["title"] for s in sources]
     used = plan.pop("sources_used", None)
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
-    bg_wish = None if photos else background.request_wish(prompt)   # "with a purple 3D background", "fondo fijo": a stated wish wins over the mood (never on a video of the person's own photos)
+    bg_wish = None if photos or wpolicy.allowed else background.request_wish(prompt)   # "with a purple 3D background", "fondo fijo": a stated wish wins over the mood (never on a video of the person's own photos)
     if bg_wish and background.enabled() and theme not in ("midnight", "paper", "sunrise") and background.wish_theme(bg_wish):
         plan["theme"] = background.wish_theme(bg_wish)   # the look asked for needs its theme (a light background is the paper theme); a theme chosen in the options stays
-    if background.enabled() and not photos and (bg_wish or {}).get("kind") != "none" and (bg_wish or not background.data_heavy(plan)):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
+    if background.enabled() and not photos and not wpolicy.allowed and (bg_wish or {}).get("kind") != "none" and (bg_wish or not background.data_heavy(plan)):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
         bg_menu = None
         if background.loops_enabled():   # the pre-rendered 3D loops in the assets bucket: the premium look, offered when the flag is on and the index can be read
             from . import bg_loops
@@ -181,4 +189,6 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             plan["photo_story"] = {"story": story.get("story", ""), "voice": story.get("voice"), "tone": story.get("tone", ""), "chapters": [{"title": c.get("title", ""), "summary": c.get("summary", "")} for c in story["chapters"]],
                                    "unused": story.get("unused", [])}
     plan["sources"] = sources
+    if wpolicy.allowed:   # the narration is final now: every board is tied to the words really said and gets emphasis marks where its pen would rest
+        warnings = [w for w in warnings if "whiteboard twice in a row" not in w] + whiteboard_policy.settle(plan, wpolicy)
     return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

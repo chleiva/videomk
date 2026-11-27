@@ -1,6 +1,6 @@
-# videomk for iPhone (SwiftUI, iOS 17+)
+# VideoMK for iPhone (SwiftUI, iOS 17+)
 
-Thin native client for the videomk backend. Product spec: `docs/mobile/SPEC.md`. Status: milestones 1 and 2 of the spec (sign-in,
+Thin native client for the VideoMK backend. Product spec: `docs/mobile/SPEC.md`. Status: milestones 1 and 2 of the spec (sign-in,
 library, create, progress, player/share, settings). Sign in with Apple/Google exist behind build switches (`VMK_AUTH_APPLE`, `VMK_AUTH_GOOGLE` in `project.yml`, default NO). Not yet: push, Live Activity (clean seams exist, see Design system)
 (sign-in is the Cognito hosted page, which supports email + password).
 
@@ -39,6 +39,7 @@ Policy, glossary and tone: `docs/I18N.md` (section "iOS decisions" at the end). 
 ```
 python3 scripts/check_strings.py [--pseudo]   # catalog: Spanish for every key, translated state, placeholders, plurals, glossary words, unused/missing keys, longest-string report
 python3 scripts/check_literals.py             # no hard-coded user-visible text in VideoMK/*.swift
+python3 scripts/check_brand.py                # the name is written "VideoMK" wherever a person reads it (docs/BRAND.md); lowercase only in identifiers
 VMK_FORCE_LANG=en swift test --package-path Packages/VideoMKCore
 xcodebuild test ... -only-testing:VideoMKUITests/VideoMKSpanishUITests   # launches with -AppleLanguages "(es)" -AppleLocale es_ES
 ```
@@ -57,7 +58,7 @@ Debug builds also accept `VMK_DEBUG_ID_TOKEN` / `VMK_DEBUG_REFRESH_TOKEN` / `VMK
 signed in or signed out. This code is compiled out of Release.
 
 ## TestFlight
-One-time, in the browser: create the app record in App Store Connect (name videomk, bundle ID `com.videomk.app`, any SKU). Then:
+One-time, in the browser: create the app record in App Store Connect (name VideoMK, bundle ID `com.videomk.app`, any SKU). Then:
 ```
 mobile/ios/scripts/testflight.sh           # archive the Beta build (QA backend) and upload; uses the App Store Connect API key from .env
 mobile/ios/scripts/testflight.sh --local   # only build a signed .ipa, no upload

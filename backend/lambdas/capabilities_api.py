@@ -3,13 +3,12 @@
 No data access: the answer comes from the server settings (READY_ASPECTS, BETA_ASPECTS, READY_LANGUAGES, INTAKE_ENABLED), see engine/format_options.py.
 The path user must be the signed-in user, like every other route.
 """
-import os
 from typing import Any, Dict
 
 import logging
 import time
 
-from common import free_grants, i18n, plans, wallet, watermark_store
+from common import free_grants, i18n, looks as look_flags, plans, wallet, watermark_store
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from engine import format_options
@@ -34,24 +33,23 @@ def add_plan(body: Dict[str, Any], user: str, event: Dict[str, Any], loc: str) -
     body["plan_max_photos"] = min(int(body.get("max_photos") or limits["photos_per_video"]), limits["photos_per_video"])
 
 
-def _on(name: str) -> bool:
-    return os.environ.get(name, "0").strip().lower() in ("1", "true", "on", "yes")
-
-
 def looks(loc: str) -> Dict[str, Any]:
     """The looks a video can have on THIS stage (docs/CREATE_API.md "Looks"): the scene style the person may choose (`style` in generate) and which moving
     backgrounds the director can use here (nothing to send: the director decides per video). From the server switches VECTOR_SCENES, BG_ANIMATED and BG_LOOPS."""
-    cartoon = _on("VECTOR_SCENES")
+    f = look_flags.flags()   # the same switches the request check reads (common/looks.py), so the two can never disagree
+    cartoon = f["cartoon"]
     return {
         "style": {"param": "style", "default": "auto", "options": [
             {"id": "auto", "label": i18n.t("cap.look.auto", loc), "note": i18n.t("cap.look.auto_note" if cartoon else "cap.look.auto_note_real", loc), "available": True},
             {"id": "cartoon", "label": i18n.t("cap.look.cartoon", loc), "note": i18n.t("cap.look.cartoon_note", loc), "available": cartoon},
-            {"id": "real", "label": i18n.t("cap.look.real", loc), "note": i18n.t("cap.look.real_note", loc), "available": True}]},
-        "backgrounds": {"animated": _on("BG_ANIMATED"), "loops_3d": _on("BG_LOOPS"), "chosen_by": "director", "note": i18n.t("cap.look.backgrounds_note", loc),
+            {"id": "real", "label": i18n.t("cap.look.real", loc), "note": i18n.t("cap.look.real_note", loc), "available": True},
+            # the whiteboard look (docs/WHITEBOARD.md): a whole video drawn and written by a marker; server switch WHITEBOARD
+            {"id": "whiteboard", "label": i18n.t("cap.look.whiteboard", loc), "note": i18n.t("cap.look.whiteboard_note", loc), "say": i18n.t("cap.look.whiteboard_say", loc), "available": f["whiteboard"]}]},
+        "backgrounds": {"animated": f["bg_animated"], "loops_3d": f["bg_loops"], "chosen_by": "director", "note": i18n.t("cap.look.backgrounds_note", loc),
                         # what a person can write in the request to ask for one (engine/background.request_wish reads the words; there is no request field)
                         "ask": ([{"id": lid, "label": i18n.t(f"cap.look.bg.{key}", loc), "say": i18n.t(f"cap.look.bg.{key}_say", loc)}
-                                 for lid, key in (("gas-brand-dark", "purple"), ("gas-ember-dark", "warm"), ("gas-aurora-dark", "green"), ("gas-brand-light", "light")) if _on("BG_LOOPS")]
-                                + [{"id": k, "label": i18n.t(f"cap.look.bg.{k}", loc), "say": i18n.t(f"cap.look.bg.{k}_say", loc)} for k in ("animated", "none") if _on("BG_ANIMATED") or _on("BG_LOOPS")])},
+                                 for lid, key in (("gas-brand-dark", "purple"), ("gas-ember-dark", "warm"), ("gas-aurora-dark", "green"), ("gas-brand-light", "light")) if f["bg_loops"]]
+                                + [{"id": k, "label": i18n.t(f"cap.look.bg.{k}", loc), "say": i18n.t(f"cap.look.bg.{k}_say", loc)} for k in ("animated", "none") if f["bg_animated"] or f["bg_loops"]])},
     }
 
 

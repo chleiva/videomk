@@ -7,7 +7,8 @@
     "bgAnimated": true,
     "bgLoops": true,
     "vectorScenes": true,
-    "forceWatermark": true
+    "forceWatermark": true,
+    "whiteboard": true
   },
   "prod": {
     "account": "464863885161",

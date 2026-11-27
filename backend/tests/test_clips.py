@@ -845,7 +845,7 @@ def test_own_clips_lead_the_pool_and_are_credited(own_lib, monkeypatch):
     monkeypatch.setenv("CLIPS_COMMONS", "0")
     pool = clips.gather("green forest", pexels_key="k", pixabay_key="k")
     assert pool and pool[0]["provider"] == "own"
-    assert clips.credit_line(pool[0]) == "Video: AI-generated (videomk)"
+    assert clips.credit_line(pool[0]) == "Video: AI-generated (VideoMK)"
 
 
 def test_own_fetch_reads_only_inside_the_library(own_lib):
@@ -868,7 +868,7 @@ def test_scout_clip_serves_an_own_clip_through_the_normal_checks(own_lib, monkey
 
     r = clips.scout_clip("green forest canopy", "Sunlight filters through the canopy.", need_seconds=4.5, review=None, verify_fn=verify)
     assert r["mp4"] and r["chosen"] == "own:a" and r["entry"]["source"] == "own" and seen["bytes"] > 1000
-    assert r["credit"] == "Video: AI-generated (videomk)"
+    assert r["credit"] == "Video: AI-generated (VideoMK)"
     none = clips.scout_clip("green forest canopy", "x", need_seconds=4.5, review=None, verify_fn=lambda *a: (False, "wrong", 0.0))
     assert none is None   # a clip that fails verification is dropped, never used
     short = clips.scout_clip("green forest canopy", "x", need_seconds=9.0, review=None, verify_fn=None)

@@ -350,8 +350,11 @@ def test_free_videos_always_carry_the_videomk_mark_with_the_name_and_the_end_car
     assert (wm["mode"], wm["style"], wm["end_card"]) == ("videomk", "lockup", True) and wm["opacity"] >= 0.65
     r = launch(launcher, target_minutes=0.5, watermark={"mode": "none"})
     assert r["statusCode"] == 403 and body_of(r)["code"] == "plan_watermark" and body_of(r)["requires_plan"] == "pro"
+    assert body_of(r)["plan"] == "free" and body_of(r)["can_upgrade"] is False                # like every plan refusal: which plan the account has, and that nothing can be bought yet
     r = launch(launcher, target_minutes=0.5, watermark={"mode": "custom"})
     assert r["statusCode"] == 403 and body_of(r)["code"] == "watermark_premium" and body_of(r)["requires_plan"] == "max"
+    assert "Max" in body_of(r)["message"] and "Pro" not in body_of(r)["message"]               # found on QA 2026-11-27: the sentence said Pro while requires_plan said max
+    assert body_of(r)["plan"] == "free" and body_of(r)["can_upgrade"] is False
     # the person may still choose the corner and the size, but cannot fade the mark away or drop the name
     assert launch(launcher, target_minutes=0.5, watermark={"mode": "videomk", "position": "tl", "size": "medium", "opacity": 0.2, "style": "mark", "end_card": False})["statusCode"] == 202
     wm = started(launcher)["watermark"]

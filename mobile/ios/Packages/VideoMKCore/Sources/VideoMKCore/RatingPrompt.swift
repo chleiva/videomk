@@ -1,6 +1,6 @@
 import Foundation
 
-// The "Enjoying videomk?" rating prompt. Everything here is pure: the clock and the storage are injected, nothing touches UIKit.
+// The "Enjoying VideoMK?" rating prompt. Everything here is pure: the clock and the storage are injected, nothing touches UIKit.
 // The long explanation and the state machine are in docs/FEEDBACK.md, section "Rating prompt".
 
 /// The App Store page of the app.
@@ -68,7 +68,7 @@ public struct RatingContext: Sendable {
 /// * Never when: `done`, 3 asks already, app version equal to the one of the last ask, app launched less than 2 minutes ago, a video is playing,
 ///   Create or another sheet is open, the app id is still the placeholder, or UI-test / screenshot mode.
 /// * Showing it counts as an ask (`didShow`): swipe-down, tap outside, "Maybe later" and "Not really" all just wait for the next threshold.
-/// * "Rate videomk" and "I already rated it" end it for good (`done`): we cannot know whether the review was written, and asking a person who
+/// * "Rate VideoMK" and "I already rated it" end it for good (`done`): we cannot know whether the review was written, and asking a person who
 ///   went to the store again would be nagging.
 /// Next ask after a close is therefore at completed video 21, then 31, at most 3 asks in total.
 public final class RatingPrompt: @unchecked Sendable {

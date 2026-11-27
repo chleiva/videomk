@@ -6,7 +6,7 @@ Options (one dict, the same in the request, the profile, the plan and the timeli
   opacity   0.2 .. 1.0 (default 0.65)
   size      'small' (mark height 5 % of the short side) | 'medium' (7 %)
   style     'mark' (default) | 'lockup' (mark plus the word 'videomk')       only for mode 'videomk'
-  end_card  true | false (default false)                                      only for mode 'videomk': 2.4 s 'Made with videomk' card after the last scene
+  end_card  true | false (default false)                                      only for mode 'videomk': 2.4 s 'Made with VideoMK' card after the last scene
   presence  'always' (there for the whole video) | 'moments' (fades in for about 4 s near the start and about every 30 s, see `moments`)   only for mode 'videomk'
 
 Placement is worked out in DESIGN units (the frame's 1080-short-side canvas) and never covers the captions, the clip credit line or (auto, 9:16) the platform UI zones:
@@ -44,11 +44,12 @@ GAP = 10.0               # design units kept clear of a protected zone
 CONTENT_GAP = 18.0       # design units between a top-corner mark and the first line of the scene under it
 FADE_IN_S = 0.6
 END_CARD_S = 2.4
-MAX_LOGO_RATIO = 6.3     # the widest a custom logo may be drawn, as a multiple of the mark height (the videomk lockup is 6.26)
-MARK_RATIO = 1384 / 1024     # width / height of assets/watermark/mark.png
-LOCKUP_RATIO = 6407 / 1024   # and of lockup.png
-LOCKUP_SCALE = 0.76          # the lockup is drawn at this share of the mark's height: at the full height it was 31 % of the width of a vertical video and as tall as a heading
-                             # (seen on frames of all four shapes, 2026-11-27); now 257 x 41 design px for 'small', a quarter of the width, the word still 17 px tall at 720p
+MAX_LOGO_RATIO = 6.3     # the widest a custom logo may be drawn, as a multiple of the mark height (the VideoMK lockup is 4.27: well inside)
+MARK_RATIO = 1120 / 1024     # width / height of assets/watermark/mark.png (the play and two stars, 2026-11-27)
+LOCKUP_RATIO = 4369 / 1024   # and of lockup.png (the mark, then "VideoMK" in Inter)
+LOCKUP_SCALE = 0.92          # the lockup is drawn at this share of the mark's height. It is set by the WORD: in this lockup the capitals are 51 % of the height, so 0.92 keeps
+                             # them 25 design px for 'small' (17 px at 720p), the size the word had in the previous lockup (0.76 of a drawing whose word was 62 % of its height).
+                             # 'small' is 212 x 50 design px, a fifth of the width of a vertical video (the previous one was 257 x 41, a quarter)
 
 AUTO_POSITION = {"16:9": "br", "1:1": "tl", "4:5": "tl", "9:16": "tl"}   # square and 4:5: the captions take almost the whole bottom width, so the quiet corner is the top left
 _OTHERS = {"tl": ("bl", "br", "tr"), "tr": ("br", "bl", "tl"), "bl": ("tl", "tr", "br"), "br": ("tr", "tl", "bl")}
@@ -129,7 +130,7 @@ def parse(raw: Any, *, strict: bool = True) -> Optional[Dict[str, Any]]:
         if not strict and pres == "moments" and isinstance(raw.get("windows"), list):   # server-written by the timeline: when the mark is on screen
             out["windows"] = clean_windows(raw["windows"])
     elif strict and raw.get("presence") is not None:
-        raise WatermarkError("'presence' is only for the videomk watermark")
+        raise WatermarkError("'presence' is only for the VideoMK watermark")
     if not strict:   # server-written fields of a stored spec (the custom logo's file in the video's own folder, its content hash)
         if mode == "custom" and isinstance(raw.get("asset"), str):
             out["asset"] = raw["asset"]

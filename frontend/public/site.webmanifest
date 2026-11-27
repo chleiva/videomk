@@ -1,1 +1,1 @@
-{"name":"videomk","short_name":"videomk","icons":[{"src":"/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"/icon-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#2b2f9a","background_color":"#0a0d1f","display":"standalone"}
+{"name":"VideoMK","short_name":"VideoMK","icons":[{"src":"/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"/icon-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#3B36C8","background_color":"#06070D","display":"standalone"}

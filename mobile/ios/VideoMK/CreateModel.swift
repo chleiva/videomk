@@ -268,7 +268,7 @@ final class CreateModel {
         case "checkingfast": capsule.handle(.tapCreate(needsCheck: true))                         // the first moments: the form is locked, the capsule says what happens
         case "starting": capsule.handle(.tapCreate(needsCheck: false))
         case "startfailed": startError = APIError.network.message
-        case "unsupported": stage = .notSupported(message: "This request is outside what videomk can make. Try describing the topic in a different way.", suggestion: "A calm story about a lighthouse keeper")
+        case "unsupported": stage = .notSupported(message: "This request is outside what VideoMK can make. Try describing the topic in a different way.", suggestion: "A calm story about a lighthouse keeper")
         case "blocked": stage = .blocked("We can’t make this one. Try describing something different.")
         case "paused": stage = .paused(message: "Creating videos is paused for this account for now.", retryAfter: 3600)
         default: break

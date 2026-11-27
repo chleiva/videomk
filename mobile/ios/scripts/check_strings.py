@@ -15,7 +15,7 @@ ROOT = os.path.join(HERE, '..')
 CATALOG = os.path.join(ROOT, 'Packages/VideoMKCore/Sources/VideoMKCore/Strings/Localizable.xcstrings')
 INFOPLIST = os.path.join(ROOT, 'VideoMK/InfoPlist.xcstrings')
 # identical in both languages on purpose: brand and product names, units, symbols, words that are the same in Spanish
-ALLOW_SAME = {'%lld%%', 'videomk', 'Beta', 'Pro', 'Auto', 'Vertical', 'Video', 'Videos', 'Plan', 'Info', 'Original', 'Vertical.', '%1$@ %2$@, beta'}
+ALLOW_SAME = {'%lld%%', 'VideoMK', 'Beta', 'Pro', 'Auto', 'Vertical', 'Video', 'Videos', 'Plan', 'Info', 'Original', 'Vertical.', '%1$@ %2$@, beta'}
 FORBIDDEN = [r'vídeo', r'\bmóvil', r'celular', r'ordenador', r'computadora', r'Configuración', r'\busted', r'\bprompt\b', r'renderiz', r'Generaciones', r'Mis medios', r'\bBorrar (cuenta|video|foto)', r'\btenés\b']
 ph = re.compile(r'%(?:(\d+)\$)?(@|lld|d|ld)')
 

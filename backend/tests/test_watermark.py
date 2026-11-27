@@ -320,14 +320,14 @@ def test_the_optional_end_card_is_one_silent_scene_after_the_last():
     tl = build_timeline(plan, infos, video_id="v")
     assert len(tl["scenes"]) == len(plain["scenes"]) + 1
     last = tl["scenes"][-1]
-    assert last["type"] == "title" and last["silent"] and last["words"] == [] and last["audio_key"] is None and last["props"]["title"] == "Made with videomk"
+    assert last["type"] == "title" and last["silent"] and last["words"] == [] and last["audio_key"] is None and last["props"]["title"] == "Made with VideoMK"
     assert abs(tl["duration"] - plain["duration"] - ws.END_CARD_S) < 1e-6 and abs(last["start"] - plain["duration"]) < 1e-6
     plan["language"] = "es"
-    assert build_timeline(plan, infos, video_id="v")["scenes"][-1]["props"]["title"] == "Hecho con videomk"
+    assert build_timeline(plan, infos, video_id="v")["scenes"][-1]["props"]["title"] == "Hecho con VideoMK"
     plan["watermark"] = {"mode": "videomk", "end_card": False}
     assert len(build_timeline(plan, infos, video_id="v")["scenes"]) == len(plain["scenes"])
     plan["watermark"] = {"mode": "custom", "end_card": True, "asset": "k"}
-    assert len(build_timeline(plan, infos, video_id="v")["scenes"]) == len(plain["scenes"])   # a custom logo has no 'Made with videomk' card
+    assert len(build_timeline(plan, infos, video_id="v")["scenes"]) == len(plain["scenes"])   # a custom logo has no 'Made with VideoMK' card
 
 
 # ======================================================================== the policy

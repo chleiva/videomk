@@ -23,7 +23,7 @@ def on_event(event, _ctx=None, ses=None):
         current = _active(ses)
         if current and current != name:
             raise RuntimeError(f"Refusing to deploy: the receipt rule set '{current}' is already active in this region and only one can be. "
-                               f"Not touching it. Merge the videomk rule into it by hand or deactivate it first (docs/EMAIL_FORWARDING.md).")
+                               f"Not touching it. Merge the VideoMK rule into it by hand or deactivate it first (docs/EMAIL_FORWARDING.md).")
         ses.set_active_receipt_rule_set(RuleSetName=name)
         log.info("activated %s", name)
     elif kind == "Delete":

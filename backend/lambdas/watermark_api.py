@@ -56,7 +56,7 @@ def _clean(body: Dict[str, Any], *, premium: bool, forced: Optional[bool] = None
         raise store.WatermarkError(400, "wm.invalid", "invalid")
     by_plan = modes is not None   # plans on (docs/PLANS.md): the refusal also names the plan that unlocks the mode
     if spec["mode"] == "custom" and not premium:
-        raise store.WatermarkError(403, "wm.premium", "watermark_premium", extra={"requires_plan": store._plan_for_mode("custom")} if by_plan else None)
+        raise store.WatermarkError(403, "wm.premium_max" if by_plan else "wm.premium", "watermark_premium", extra={"requires_plan": store._plan_for_mode("custom")} if by_plan else None)
     is_forced = (store.force_policy() and not premium) if forced is None else forced
     if spec["mode"] == "none" and is_forced:
         raise store.WatermarkError(403, "wm.required", "watermark_required", extra={"requires_plan": store._plan_for_mode("none")} if by_plan else None)   # the owner's policy: a free account's videos carry the videomk name for the whole video (capabilities.watermark.forced_watermark)
@@ -90,8 +90,9 @@ def route(event: Dict[str, Any], user: str, loc: str) -> Dict[str, Any]:
         store.delete_logo(user)
         return view(user, loc)
     if res == f"{base}/logo" and method == "PUT":
-        if not store.rights(user)["premium"]:
-            raise store.WatermarkError(403, "wm.premium", "watermark_premium", extra={"requires_plan": "max"})
+        wr = store.rights(user)
+        if not wr["premium"]:
+            raise store.WatermarkError(403, "wm.premium_max" if wr.get("by_plan") else "wm.premium", "watermark_premium", extra={"requires_plan": "max"})
         try:
             usage.consume(f"wmlogo:{user}", limit=LOGO_UPLOADS_PER_DAY)
         except usage.QuotaExceeded:

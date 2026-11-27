@@ -479,7 +479,7 @@ final class VideoMKUITests: XCTestCase {
     func testSignedOutUserSeesSignIn() throws {
         let app = try launch(signedIn: false)
         XCTAssertTrue(app.buttons["signInButton"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.images["videomk"].exists || app.staticTexts["videomk"].exists, "the logo lockup names the app")
+        XCTAssertTrue(app.images["VideoMK"].exists || app.staticTexts["VideoMK"].exists, "the logo lockup names the app")
     }
 
     /// The whole create flow happens on the home screen: a live row appears in the list, the composer is free again at once,

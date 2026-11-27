@@ -32,7 +32,7 @@
  "consent.ok": "Entendido",
  "consent.close": "Cerrar",
  "notfound.title": "Página no encontrada",
- "notfound.back": "Volver a videomk",
+ "notfound.back": "Volver a VideoMK",
  "val.narr_min": "La narración necesita al menos {min} palabras.",
  "val.narr_max": "La narración admite como máximo {max} palabras por escena: divídela en dos escenas.",
  "val.title": "Agrega un título.",

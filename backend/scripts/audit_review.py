@@ -47,7 +47,7 @@ def ordered(runs):
 
 HTML = r"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>videomk quality review</title>
+<title>VideoMK quality review</title>
 <style>
 :root{--bg:#fafaf7;--fg:#1d1d1b;--mut:#66665f;--card:#fff;--line:#dcdcd4;--acc:#1f5fbf;--es:#c2410c;--ok:#15803d;--bad:#b91c1c}
 @media (prefers-color-scheme:dark){:root{--bg:#161614;--fg:#ecece6;--mut:#a0a09a;--card:#1f1f1c;--line:#3a3a35;--acc:#7aa7ff;--es:#fb923c;--ok:#4ade80;--bad:#f87171}}

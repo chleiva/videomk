@@ -187,7 +187,7 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
     if mode == "custom" and (not premium or not has_logo):
         if explicit:
             if not premium:
-                raise WatermarkError(403, "wm.premium", "watermark_premium", extra={"feature": "watermark", "requires_plan": _plan_for_mode("custom")} if modes is not None else None)
+                raise WatermarkError(403, "wm.premium_max" if modes is not None else "wm.premium", "watermark_premium", extra={"feature": "watermark", "requires_plan": _plan_for_mode("custom")} if modes is not None else None)
             raise WatermarkError(400, "wm.logo_missing", "watermark_logo_missing")
         spec = {"mode": "videomk"} if forced else {"mode": "none"}
         mode = spec["mode"]
