@@ -222,8 +222,6 @@ class BackendStack(Stack):
         usage_table.grant_read_write_data(launcher_fn)
         launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[uploads_objects]))  # HeadObject: are the photos really there?
         # "Try again" (lambdas/video_retry.py): give the video's photos back (read the kept originals and cleaned copies of THIS video's prefix, write the uploads), clear the failed attempt's working files, read the first run's input
-        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*"]))
-        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[uploads_objects]))
         launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["uploads/*", "generation/v2/*"] + (["watermark/*"] if watermark_enabled(self.node) else [])}}))   # watermark/*: has the person a logo? (a missing one must answer 404, not 403)
         for fn in (launcher_fn, wallet_fn):
             wallet_table.grant_read_write_data(fn)
@@ -421,7 +419,13 @@ class BackendStack(Stack):
 
         active_machine.grant_start_execution(launcher_fn)
         launcher_fn.add_environment("STATE_MACHINE_ARN", active_machine.state_machine_arn)
-        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["states:DescribeExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]))   # older videos: the request they were started with
+        # "Try again" (lambdas/video_retry.py), as ONE separate policy (statements added one by one to the launcher's default policy made CDK drop the tombstone's ListUsers and secret rights):
+        # give a video's photos back (read the kept originals and cleaned copies under generation/v2/, write the uploads), clear the failed attempt's working files, and read the first run's input
+        launcher_fn.role.attach_inline_policy(iam.Policy(self, "LauncherRetryPolicy", statements=[
+            iam.PolicyStatement(actions=["s3:GetObject", "s3:DeleteObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/generation/v2/*"]),
+            iam.PolicyStatement(actions=["s3:PutObject"], resources=[uploads_objects]),
+            iam.PolicyStatement(actions=["states:DescribeExecution"], resources=[f"arn:aws:states:{self.region}:{self.account}:execution:{active_machine.state_machine_name}:*"]),   # older videos: the request they were started with
+        ]))
 
         # ============================
         # API Gateway + custom domain
