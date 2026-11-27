@@ -1,4 +1,4 @@
-"""Stock photo scouting: Unsplash + Openverse candidates -> LLM (vision) review -> one licensed photo.
+"""Stock photo scouting: Openverse + Unsplash candidates -> LLM (vision) review -> one licensed photo. Unsplash is the last resort (see LAST_RESORT below).
 
 Unsplash API rules this module is built around (from Unsplash's help-centre guidelines; the primary terms pages
 could not be read from the build sandbox, so re-read https://unsplash.com/api-terms before production):
@@ -97,22 +97,28 @@ def openverse_search(query: str, fetch: Callable[..., Any] = fetch_json) -> List
     return out
 
 
+# Sources whose API terms tie a credit ON THE FRAME to every display of the photo (Unsplash: api-terms section 9; docs/LIBRARY_ON_DEMAND.md A5, tracker R155). They are
+# searched like every other source, but a photo of theirs is only looked at when no other source has a suitable one: the last resort. When one is used its
+# on-frame credit is drawn exactly as before (credit_line).
+LAST_RESORT = ("unsplash",)
+
+
+def is_last_resort(c: Candidate) -> bool:
+    return c.get("provider") in LAST_RESORT
+
+
 def gather(query: str, *, unsplash_key: str = "", fetch: Callable[..., Any] = fetch_json, limit: int = MAX_REVIEW_CANDIDATES, big: bool = False) -> List[Candidate]:
-    """Unsplash first (better photography), Openverse to fill; failures of one provider never block the other."""
+    """The other sources first (up to `limit`, in their own relevance order), then the last-resort source (up to `limit`); failures of one provider never block the other.
+    scout_reviewed() shows the reviewer the first group alone, and the second only when nothing in the first is suitable."""
     pools: List[List[Candidate]] = []
-    for fn in (lambda: unsplash_search(query, unsplash_key, fetch, **({"big": True} if big else {})), lambda: openverse_search(query, fetch)):
+    for fn in (lambda: openverse_search(query, fetch), lambda: unsplash_search(query, unsplash_key, fetch, **({"big": True} if big else {}))):
         try:
             pools.append(fn())
         except (FetchError, ValueError, KeyError, TypeError) as e:
             logging.warning("stock provider failed for %r: %s: %s", query, type(e).__name__, e)
             pools.append([])
-    # interleave so the reviewer sees both sources, keeping each provider's own relevance order
-    out: List[Candidate] = []
-    for i in range(max(map(len, pools), default=0)):
-        for p in pools:
-            if i < len(p) and len(out) < limit:
-                out.append(p[i])
-    return out
+    both = [c for p in pools for c in p]
+    return [c for c in both if not is_last_resort(c)][:limit] + [c for c in both if is_last_resort(c)][:limit]
 
 
 def public_meta(c: Candidate) -> Dict[str, Any]:
@@ -246,27 +252,40 @@ def scout_reviewed(
     if not cands:
         logging.warning("no photo candidates for %r", query)
         return None
+    # Two groups, in order: every other source, then the last-resort one (its on-frame credit is tied to each display). The reviewer sees one group at a time and the
+    # second only when it found nothing suitable in the first, so a last-resort photo is used only when no other source has one for this moment.
+    groups = [g for g in ([c for c in cands if not is_last_resort(c)], [c for c in cands if is_last_resort(c)]) if g]
     info: Dict[str, Any] = {"source": "first-result", "reason": "", "cost_usd": 0.0}
-    order = list(range(len(cands)))
-    if review and len(cands) > 1:
-        try:
-            idx, reason, cost, _ = review(cands, narration, alt, query, fetch_bytes_fn=fetch_bytes_fn)
-            info = {"source": "llm", "reason": reason, "cost_usd": cost}
-            if idx is None:
-                logging.warning("reviewer rejected all %d candidates for %r: %s", len(cands), query, reason)
-                return {"jpeg": None, "candidates": [public_meta(c) for c in cands], "review": info, "rejected_all": True}
-            order = [idx] + [i for i in order if i != idx]
-        except Exception as e:  # reviewer unavailable/garbled: degrade to provider relevance order, never block the video
-            logging.warning("photo review failed for %r: %s: %s", query, type(e).__name__, e)
-            info = {"source": "fallback", "reason": f"review failed: {type(e).__name__}", "cost_usd": 0.0}
-    for i in order:  # first downloadable candidate in preference order
-        c = cands[i]
-        try:
-            jpeg, _ = assets.to_jpeg(fetch_full(c, fetch_bytes_fn), max_side=assets.max_side_for(big))
-        except (FetchError, OSError, ValueError, Image.DecompressionBombError) as e:
-            logging.warning("photo download failed (%s) for %r: %s", candidate_key(c), query, type(e).__name__)
-            continue
-        track_download(c, unsplash_key, fetch_json_fn)
-        return {"jpeg": jpeg, "entry": ledger_entry(c), "credit": credit_line(c), "chosen": candidate_key(c),
-                "candidates": [public_meta(x) for x in cands], "review": info}
+    spent = 0.0
+    for gi, group in enumerate(groups):
+        last = gi == len(groups) - 1
+        order = list(range(len(group)))
+        reviewed = False
+        if review and (len(group) > 1 or not last):   # a lone candidate is still shown to the reviewer when another group could do better
+            try:
+                idx, reason, cost, _ = review(group, narration, alt, query, fetch_bytes_fn=fetch_bytes_fn)
+                spent += cost
+                info = {"source": "llm", "reason": reason, "cost_usd": spent}
+                if idx is None:
+                    if not last:
+                        continue
+                    logging.warning("reviewer rejected all %d candidates for %r: %s", len(cands), query, reason)
+                    return {"jpeg": None, "candidates": [public_meta(c) for c in cands], "review": info, "rejected_all": True}
+                order = [idx] + [i for i in order if i != idx]
+                reviewed = True
+            except Exception as e:  # reviewer unavailable/garbled: degrade to provider relevance order, never block the video
+                logging.warning("photo review failed for %r: %s: %s", query, type(e).__name__, e)
+                info = {"source": "fallback", "reason": f"review failed: {type(e).__name__}", "cost_usd": spent}
+        if not last:
+            order = order[:1] if reviewed else (order if not review else [])   # before the last group only the photo the reviewer chose is taken (no reviewer at all: provider order, as always)
+        for i in order:  # first downloadable candidate in preference order
+            c = group[i]
+            try:
+                jpeg, _ = assets.to_jpeg(fetch_full(c, fetch_bytes_fn), max_side=assets.max_side_for(big))
+            except (FetchError, OSError, ValueError, Image.DecompressionBombError) as e:
+                logging.warning("photo download failed (%s) for %r: %s", candidate_key(c), query, type(e).__name__)
+                continue
+            track_download(c, unsplash_key, fetch_json_fn)
+            return {"jpeg": jpeg, "entry": ledger_entry(c), "credit": credit_line(c), "chosen": candidate_key(c),
+                    "candidates": [public_meta(x) for x in cands], "review": info}
     return None

@@ -180,3 +180,55 @@ describe("the optional making object (docs/CREATE_API.md Making status)", () => 
     expect(cached).toContain("Adding footage");
   });
 });
+
+// ---------------------------------------------------------------- cancel while making, delete a finished video, the look a video got
+import { cancelOutcome, deleteOutcome, markCancelled, normalizeItem as norm, reuseUnchanged as reuse } from "./videos";
+
+describe("cancel a video that is being made (docs/CREATE_API.md)", () => {
+  it("200 cancelled, with the credits that came back; a second tap is the same", () => {
+    expect(cancelOutcome(200, { message: "cancelled", status: "CANCELLED", refunded: 2 })).toEqual({ ok: true, refunded: 2 });
+    expect(cancelOutcome(200, { message: "already cancelled", refunded: 0 })).toEqual({ ok: true, refunded: 0 });
+    expect(cancelOutcome(200, null)).toEqual({ ok: true, refunded: 0 });
+  });
+  it("409 try_again is sent once more; 409 not_cancellable means it finished meanwhile", () => {
+    expect(cancelOutcome(409, { code: "try_again" })).toMatchObject({ ok: false, kind: "try_again" });
+    expect(cancelOutcome(409, { code: "not_cancellable", message: "This video is ready." })).toEqual({ ok: false, kind: "done", message: "This video is ready." });
+  });
+  it("404 not_found is gone; a 404 without the code, 403 or 405 is an older server without the route", () => {
+    expect(cancelOutcome(404, { code: "not_found" })).toMatchObject({ kind: "gone" });
+    for (const s of [404, 403, 405]) expect(cancelOutcome(s, {})).toEqual({ ok: false, kind: "unsupported" });
+    expect(cancelOutcome(500, null)).toMatchObject({ kind: "error" });
+  });
+  it("the list right after: the same item, stopped", () => {
+    const a = norm({ video_id: "a", status: "ASSETS_CREATION", making: { scene_total: 3, scene_done: 1 } })!;
+    const [after] = markCancelled([a], "a");
+    expect(after).toMatchObject({ id: "a", status: "error", cancelled: true, making: null });
+    expect(norm({ video_id: "a", status: "CANCELLED", can_retry: true })).toMatchObject({ status: "error", cancelled: true, can_retry: true });
+    expect(norm({ video_id: "a", status: "FAILED" })!.cancelled).toBeUndefined();
+  });
+});
+
+describe("delete a video", () => {
+  it("200 is deleted, and so is a repeated delete (404)", () => {
+    expect(deleteOutcome(200, { message: "deleted" })).toEqual({ ok: true });
+    expect(deleteOutcome(404, { code: "not_found" })).toEqual({ ok: true });
+  });
+  it("409 not_deletable (being made) and busy (an edit is rendering) keep the video, with the server's sentence", () => {
+    expect(deleteOutcome(409, { code: "not_deletable", message: "Cancel it first." })).toEqual({ ok: false, kind: "making", message: "Cancel it first." });
+    expect(deleteOutcome(409, { code: "busy", message: "Try again when the edit is done." })).toEqual({ ok: false, kind: "busy", message: "Try again when the edit is done." });
+    expect(deleteOutcome(500, null)).toMatchObject({ ok: false, kind: "error" });
+  });
+});
+
+describe("the look a video got (optional on the record)", () => {
+  it("is read when the server sends it and absent otherwise", () => {
+    expect(norm({ video_id: "a", status: "COMPLETE", look: { chosen: "auto", applied: "whiteboard", why: "Clearest drawn.", by: "auto", cast: [], extras: [] } })!.look).toMatchObject({ applied: "whiteboard", by: "auto", why: "Clearest drawn." });
+    expect(norm({ video_id: "a", status: "COMPLETE" })!.look).toBeUndefined();
+    expect(norm({ video_id: "a", status: "COMPLETE", look: "x" })!.look).toBeUndefined();
+  });
+  it("a poll that brings the look redraws that card", () => {
+    const a = norm({ video_id: "a", status: "COMPLETE" })!, b = norm({ video_id: "a", status: "COMPLETE", look: { applied: "real" } })!;
+    expect(reuse([a], [norm({ video_id: "a", status: "COMPLETE" })!])[0]).toBe(a);
+    expect(reuse([a], [b])[0]).toBe(b);
+  });
+});

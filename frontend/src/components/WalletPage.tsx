@@ -7,7 +7,8 @@ import { PIcon } from "./PlayerIcons";
 import { Skeleton } from "./ui/Skeleton";
 import { useLocale } from "../lib/useLocale";
 
-const KINDS = ["daily", "signup", "paid", "refund"];
+const KINDS = ["daily", "signup", "paid", "refund", "plan"];
+const seconds = (s: number) => (s < 60 ? `${Math.round(s)} s` : `${Math.round((s / 60) * 10) / 10} min`);
 
 export default function WalletPage() {
   const { t, locale } = useLocale();
@@ -43,6 +44,13 @@ export default function WalletPage() {
             <p className="credits-num">{wallet.unlimited ? "∞" : wallet.balance}</p>
             <p className="credits-word">{wallet.unlimited ? t("credits.unlimited") : wallet.balance === 0 ? t("credits.word_none") : t("credits.word")}</p>
           </div>
+          {wallet.plans?.plan && (   /* the plan and what it makes; nothing can be bought yet, so there is no button here */
+            <p className="credits-line credits-plan">
+              <span className="plan-chip">{t("wallet.plan", { plan: wallet.plans.plan.name })}</span>
+              {wallet.plans.plan.maxSeconds != null && <span>{t("wallet.plan_length", { length: seconds(wallet.plans.plan.maxSeconds) })}</span>}
+            </p>
+          )}
+          {wallet.plans?.free && !wallet.plans.free.available && wallet.plans.free.message && !wallet.unlimited && <p className="credits-line" role="status">{wallet.plans.free.message}</p>}
           {wallet.next_daily_at && !wallet.unlimited && <p className="credits-line">{t("credits.next_free", { date: day(wallet.next_daily_at) })}</p>}
 
           <div className="credits-actions">

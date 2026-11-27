@@ -429,6 +429,8 @@ def credit_line(c: Candidate) -> str:
         return "Video: NASA"
     if c.get("provider") == OWN_PROVIDER:
         return "Video: AI-generated (VideoMK)"
+    if c.get("provider") == "videomk-library":   # clip_library.PROVIDER: our own library, credited like a stock source (owner, 2026-11-27)
+        return "Video: VideoMK library"
     return f"Video: {c.get('creator', 'Unknown')} ({c.get('license', '')})"
 
 
@@ -618,13 +620,18 @@ def scout_clip(
     orientation: str = "landscape",
     hd: bool = False,
     notes: Optional[Dict[str, Any]] = None,
+    own_library: bool = False,
 ) -> Optional[Dict[str, Any]]:
-    """Find, review, download and normalise one clip. `orientation` ('landscape' | 'portrait' | 'square', the video's `Frame.orientation`; 4:5 is portrait) asks
+    """Find, review, download and normalise one clip. `own_library` (docs/CLIPS_ON_DEMAND.md): VideoMK's own library is asked first; a clip of ours that passes the strict check is used and no stock library is searched. `orientation` ('landscape' | 'portrait' | 'square', the video's `Frame.orientation`; 4:5 is portrait) asks
     the stock providers for footage of that shape and normalises it to it. `hd` (4K videos) prefers a 1080p source file and normalises to 1080p instead of 720p. Never raises. Returns
     {mp4, entry, credit, chosen, candidates, review, loops_after} | {mp4: None, rejected_all: True, ...} | None when nothing usable exists."""
     notes = notes if notes is not None else {}
     notes.setdefault("reasons", [])
     notes.setdefault("cost", 0.0)
+    if own_library:
+        ours = scout_own(query, narration, alt, need_seconds=need_seconds, orientation=orientation, hd=hd, normalise_fn=normalise_fn, verify_fn=verify_fn, notes=notes)
+        if ours:
+            return ours
     if own_dir():
         fetch_bytes_fn = own_fetch(fetch_bytes_fn)   # reads the own library's file:// paths; every other URL as before
     pools: List[List[Candidate]] = []
@@ -680,6 +687,54 @@ def scout_clip(
             info["verified"] = why
         return {"mp4": mp4, "entry": stock.ledger_entry(c), "credit": credit_line(c), "chosen": candidate_key(c), "loops_after": round(loops_after, 2),
                 "candidates": [public_meta(x) for x in cands], "review": info}
+    return None
+
+
+def scout_own(query: str, narration: str, alt: str = "", *, need_seconds: float = 8.0, orientation: str = "landscape", hd: bool = False, ids: Optional[Sequence[str]] = None,
+              normalise_fn: Callable[..., Tuple[bytes, float]] = normalise, verify_fn: Optional[Callable[..., Tuple[bool, str, float]]] = verify,
+              notes: Optional[Dict[str, Any]] = None, tries: int = 2) -> Optional[Dict[str, Any]]:
+    """A clip of VideoMK's own library for this moment, or None (docs/CLIPS_ON_DEMAND.md). Found by meaning (embedding search over the wording and its second wording), or
+    the given `ids` (a clip that was just made for this beat: it is still read back from the library and checked like any other). Each candidate is trimmed and cropped to
+    the video's shape and must pass the same strict 3-frame check against the narration as stock footage; footage too short for the scene is never offered. In a 4K video
+    the 720p clip stays 720p (`transcode`) and the renderer shows it in the framed window. Never raises. Returns what `scout_clip` returns."""
+    try:
+        from . import clip_library as lib
+
+        notes = notes if notes is not None else {"reasons": [], "cost": 0.0}
+        o = _orient(orientation)
+        min_len = MIN_FILL * min(need_seconds, MAX_CLIP_SECONDS)
+        found: Dict[str, Tuple[float, Dict[str, Any]]] = {}
+        if ids:
+            for r in lib.rows(fresh=True):
+                if r["sk"] in ids and lib.shape_fit(r, o) is not None and float(r.get("seconds") or 0) >= min_len:
+                    found[r["sk"]] = (1.0, r)
+        else:
+            for q in query_variants(query, alt)[:2]:
+                for s, r in lib.search(q, o, k=3, min_seconds=min_len):
+                    if r["sk"] not in found or s > found[r["sk"]][0]:
+                        found[r["sk"]] = (s, r)
+        cost = 0.0
+        for score, row in sorted(found.values(), key=lambda t: -t[0])[:tries]:
+            c = lib.candidate(row, score)
+            try:
+                raw = lib.fetch(fetch_bytes)(c["video_url"])
+                mp4, loops_after = normalise_fn(raw, need_seconds=need_seconds, source_seconds=float(c["duration"] or need_seconds), suffix=".mp4",
+                                                **({"orientation": orientation} if o != "landscape" else {}), **({"hd": True} if hd else {}))
+            except Exception as e:
+                logging.warning("library clip %s unusable: %s: %s", c["id"][:12], type(e).__name__, e)
+                continue
+            why = "not checked"
+            if verify_fn:
+                ok, why, vc = verify_fn(mp4, narration, alt, query, loops_after)
+                cost += vc
+                notes["cost"] = float(notes.get("cost", 0.0)) + vc
+                if not ok:
+                    notes.setdefault("reasons", []).append(f"library verify: {why}")
+                    continue
+            return {"mp4": mp4, "entry": stock.ledger_entry(c), "credit": credit_line(c), "chosen": candidate_key(c), "loops_after": round(loops_after, 2),
+                    "candidates": [public_meta(c)], "review": {"source": "library", "reason": f"score {score:g}", "cost_usd": cost, "verified": why}}
+    except Exception:
+        logging.exception("own library lookup failed for %r", query)
     return None
 
 

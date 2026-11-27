@@ -186,3 +186,87 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 .composer-card.is-locked .compose-go { opacity: 1; }
 .compose-progress { display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin: var(--space-4) 0 0; color: var(--text-secondary); font-size: var(--fs-body); }
 .chip.chip-add { gap: var(--space-2); }
+
+/* ---- the Look picker (docs/CREATE_API.md "Video look"): the pill, the surface under the card (a bottom sheet on a phone), picture tiles, the cast, the board switch */
+.composer-bar { position: relative; }
+.look-root { display: inline-block; }   /* not positioned: the surface is placed against the composer bar, so it is as wide as the card at every width */
+.look-pill-thumb { display: none; width: 1.5rem; height: 1.5rem; border-radius: 0.375rem; object-fit: cover; flex: none; }
+.look-pill-auto { width: auto; height: auto; color: var(--primary); }
+.look-pill-faces { display: inline-flex; align-items: center; flex: none; }
+.look-pill-faces .face-img { width: 1.375rem; height: 1.375rem; margin-left: -0.375rem; box-shadow: 0 0 0 2px var(--surface-2); font-size: var(--fs-caption); }
+.look-pill-faces .face-img:first-child { margin-left: 0; }
+@media (min-width: 40.01rem) { .vm-pop.look-pop { left: 0; right: 0; width: auto; max-width: 47.5rem; max-height: none; margin-inline: auto; top: calc(100% + var(--space-3)); scroll-margin: var(--space-6); } }
+/* an open menu or surface belongs above everything else on the page (the lines under the card, the phone's tab bar): the card is raised while one is open */
+.app-shell .compose > .composer-card:has(.vm-pop, .vm-menu-list) { z-index: var(--z-sheet); }
+.vm-pop.look-pop { container: lookpop / inline-size; padding-top: 0; }
+.look-panel { display: flex; flex-direction: column; gap: var(--space-4); }
+.look-panel .opts-head { position: sticky; top: 0; z-index: 2; margin-bottom: calc(-1 * var(--space-2)); padding: var(--space-4) 0 var(--space-2); background: var(--surface); }   /* Done stays in reach while a long sheet scrolls */
+.look-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5) var(--space-3); padding: 4px 0; }
+.look-tile { display: flex; flex-direction: column; align-items: stretch; padding: 0; border-radius: var(--radius-field); text-align: left; color: var(--text); cursor: pointer; }   /* one left edge: the picture, the name and the note start on the surface's gutter */
+.look-tile:focus-visible { outline: 3px solid var(--focus); outline-offset: 6px; border-radius: var(--radius-field); }
+.look-pic { position: relative; display: block; aspect-ratio: 16 / 9; margin-bottom: var(--space-2); border-radius: var(--radius-field); overflow: hidden; background: var(--surface-3); transition: box-shadow var(--dur-select) var(--ease); }
+.look-pic::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent); pointer-events: none; }   /* a hairline so a near-white picture has an edge */
+.look-pic img, .look-ph { display: block; width: 100%; height: 100%; object-fit: cover; }
+.look-ph { display: flex; align-items: center; justify-content: center; background: var(--primary-container); color: var(--primary); }   /* Auto is not a photo: the brand tint and the sparkle Auto has everywhere */
+.look-tile.is-on .look-pic { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary); }   /* selection is shown one way: the ring */
+.look-name { font-size: var(--fs-subhead); font-weight: 700; line-height: 1.3; }
+.look-note { display: flex; align-items: center; gap: var(--space-1); font-size: var(--fs-caption); line-height: 1.35; color: var(--text-secondary); text-wrap: pretty; }
+.look-note svg { flex: none; }
+.look-tile.is-off { opacity: 0.4; cursor: default; }   /* stays in its place, dimmed; the reason is where the note was */
+.look-close { margin-right: calc(-1 * var(--space-2)); color: var(--text); }
+.look-line { min-height: 1.25rem; font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
+.look-reset { margin-top: var(--space-4); font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
+.app-shell .look-reset + .composer-bar { margin-top: var(--space-2); }
+.look-cast { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--outline); animation: vmk-fade var(--dur-insert) var(--ease); }
+.look-cast .label { margin: 0; }
+.cast-row { display: grid; grid-template-columns: repeat(5, 3.5rem); justify-content: space-between; align-items: start; gap: var(--space-3) 0; }   /* five by two; the first face sits on the gutter */
+.face { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-width: 0; padding: 0; border-radius: var(--radius-field); color: var(--text); cursor: pointer; }
+.face:focus-visible { outline: 3px solid var(--focus); outline-offset: 6px; border-radius: var(--radius-field); }
+.face-img { display: block; width: 3.5rem; height: 3.5rem; border-radius: 50%; object-fit: cover; background: var(--surface-2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent); transition: box-shadow var(--dur-select) var(--ease); }
+.face-ph { display: inline-flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); background: var(--primary-container); }
+.face-name { font-size: var(--fs-caption); font-weight: 600; line-height: 1.2; text-align: center; white-space: nowrap; }
+.face.is-on .face-img { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary); }
+.face.is-dim { opacity: 0.4; cursor: default; }
+.look-extra { padding-top: var(--space-3); border-top: 1px solid var(--outline); cursor: pointer; }
+.look-extra-name { display: block; font-weight: 600; }
+.look-extra-note { display: block; font-size: var(--fs-caption); font-weight: 400; line-height: 1.4; color: var(--text-secondary); }
+@container lookpop (min-width: 36rem) {   /* the surface is wide enough for one row of four (it follows the card's width, not the window's) */
+  .look-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .look-tiles[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .look-tiles[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 14rem)); }
+  .cast-row { grid-template-columns: repeat(10, 3.5rem); }   /* the ten on one line */
+}
+@media (max-width: 47.99rem) {   /* phones: the pill is the look's picture and its name; a long name (Spanish) takes the next line, it is never cut */
+  .app-shell .composer-pills:has(.look-root) { flex-wrap: wrap; }
+  .app-shell .composer-pills .look-pill > span { overflow: visible; }
+  .look-pill-thumb { display: block; }
+  .look-pill:has(.look-pill-faces) .look-pill-thumb { display: none; }   /* the faces already say which look */
+}
+@media (prefers-reduced-motion: reduce) { .look-pic, .face-img { transition: none; } }
+
+/* ---- what the plan does not make: a small lock with the plan's name (lengths, 4K, looks). No buy button: nothing can be bought yet. */
+.plan-tag { display: inline-flex; align-items: center; gap: var(--space-1); height: 1.5rem; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-secondary); font-size: var(--fs-caption); font-weight: 700; white-space: nowrap; }
+
+/* ---- Create when the account cannot make a video right now: the server's sentence, then the showcase */
+.app-shell .composer-card.create-locked { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-8) var(--space-6); text-align: center; }
+.locked-badge { display: inline-flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--primary-container); color: var(--primary); }
+.locked-msg { max-width: 34rem; font-size: var(--fs-title3); font-weight: 600; line-height: var(--lh-snug); letter-spacing: var(--track-title); text-wrap: balance; }
+.locked-plan { font-size: var(--fs-subhead); color: var(--text-secondary); }
+.showcase { margin-top: var(--space-10); }
+.show-grid { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: var(--space-5) var(--space-3); }
+@media (min-width: 40rem) { .show-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6) var(--space-4); } }
+.show-pic { position: relative; display: block; border-radius: 1.125rem; overflow: hidden; background: var(--surface-3); }
+.show-play, .show-pic video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.show-play img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.show-pic video { object-fit: contain; background: var(--stage); }
+.show-glyph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--scrim); color: var(--on-scrim); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.show-play:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; border-radius: 1.125rem; }
+
+/* ---- Videos: Delete with Undo (the toast's button), the menu's destructive line */
+.vm-menu-item.is-danger { color: var(--danger); }
+.toast .toast-sep { opacity: 0.6; }
+
+/* ---- Create between a tablet and a small laptop (found at 768 px with the rail) */
+@media (min-width: 48rem) and (max-width: 74.99rem) {
+  .app-shell .compose-aura { inset: 3rem 0 auto 0; }   /* the glow stays inside the page: it made the page scroll sideways by 64 px */
+}

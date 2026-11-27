@@ -2,6 +2,7 @@
 import "../../styles/app-b.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState, Spinner, Thumb, useToast } from "../ui";
+import { Dialog } from "../ui/Dialog";
 import { AIcon as Icon } from "./icons";
 import { Menu } from "./Menu";
 import Shortcuts from "./Shortcuts";
@@ -11,6 +12,7 @@ import FilmStrip from "./FilmStrip";
 import { filterVideos, formatDuration, isMaking, makingInfo, minutesLeft, sceneCounter, stripTiles } from "../../lib/videos";
 import type { RetryOutcome, TaskItem } from "../../lib/videos";
 import { promptFor } from "../../lib/prompts";
+import { noteFor } from "../../lib/looks";
 import { useLocale } from "../../lib/useLocale";
 
 function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, number>) => string): string | null {
@@ -28,10 +30,12 @@ function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, 
   return mon < 12 ? tr("time.months", { n: mon }) : tr("time.years", { n: Math.floor(mon / 12) });
 }
 
+const UNDO_MS = 6000;
+export const DELETE_HANDOFF = "vmk_delete_handoff";
 const STEPS = ["making.step.script", "making.step.voice", "making.step.pictures", "making.step.final_cut"];
 /** The video being made: one wide banner over the grid (design bar: the wait is a story, not a spinner). Title, one live line, the scenes filling a film strip, the time left.
  *  The strip and the live line come from the optional `making` object (docs/CREATE_API.md); a server that does not send it gets the four steps, as before. */
-function MakingBanner({ v, sceneThumbs }: { v: TaskItem; sceneThumbs: Record<string, string> }) {
+function MakingBanner({ v, sceneThumbs, onCancel }: { v: TaskItem; sceneThumbs: Record<string, string>; onCancel: (v: TaskItem) => void }) {
   const { t } = useLocale();
   const info = makingInfo(v.stage);
   const mins = minutesLeft(v.eta_seconds);
@@ -41,23 +45,28 @@ function MakingBanner({ v, sceneThumbs }: { v: TaskItem; sceneThumbs: Record<str
   const live = v.making?.live_line || t(`making.line.${info.line}`);
   const line = scene && v.making?.live_line ? `${t("making.scene_counter", scene)} · ${live}` : scene ? `${t("making.scene_counter", scene)} · ${t(`making.line.${info.line}`)}` : live;
   const title = v.title || promptFor(v.id) || t("gen.untitled");   // before the script names it, the sentence the person typed (when this browser made it)
+  const note = useMemo(() => noteFor(v.id), [v.id]);   // the server adapted the chosen look ("Made from your photos: the Cartoon look is not used..."): its sentence, as received
   return (
     <div className="mkb" role="group" aria-label={t("making.a11y", { title, stage: line })}>
       <div className="mkb-text">
         <p className="mkb-title">{title}</p>
         <p className="mkb-line" role="status"><Icon name="sparkle" size={18} /><span>{line}</span></p>
+        {note && <p className="mkb-note"><Icon name="info" size={16} /><span>{note}</span></p>}
       </div>
       {tiles.length > 0 ? <FilmStrip tiles={tiles} className="mkb-strip" /> : (
         <ol className="mkb-steps" aria-hidden="true">
           {STEPS.map((k, i) => <li key={k} className={i < info.current ? "is-done" : i === info.current ? "is-now" : ""}><span>{t(k)}</span></li>)}
         </ol>
       )}
-      {eta && <p className="mkb-eta">{eta}</p>}
+      <div className="mkb-end">
+        {eta && <p className="mkb-eta">{eta}</p>}
+        <button type="button" className="mkb-cancel" aria-label={t("making.cancel_a11y", { title })} onClick={() => onCancel(v)}>{t("making.cancel")}</button>
+      </div>
     </div>
   );
 }
 
-function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: string; onCopied: () => void; onRetry: (id: string) => Promise<void>; onRemove: (id: string) => Promise<void> }) {
+function Card({ v, thumb, onCopied, onRetry, onRemove, onDelete }: { v: TaskItem; thumb?: string; onCopied: () => void; onRetry: (id: string) => Promise<void>; onRemove: (id: string) => Promise<void>; onDelete: (id: string) => void }) {
   const { t } = useLocale();
   const [busy, setBusy] = useState<"retry" | "remove" | null>(null);
   const act = async (what: "retry" | "remove") => { if (busy) return; setBusy(what); try { await (what === "retry" ? onRetry(v.id) : onRemove(v.id)); } finally { setBusy(null); } };
@@ -70,6 +79,7 @@ function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: 
     ...(v.editable && v.status === "complete" ? [{ id: "edit", label: t("gen.edit"), href: `${APP_PATHS.edit}?id=${encodeURIComponent(v.id)}` }] : []),
     ...(v.status === "complete" ? [{ id: "copy", label: t("gen.copy_link") }] : []),
     ...(v.status === "complete" && v.download_url ? [{ id: "download", label: t("gen.download"), href: v.download_url }] : []),
+    ...(v.status === "complete" ? [{ id: "delete", label: t("gen.delete"), danger: true }] : []),
   ];
   const copy = async () => { try { await navigator.clipboard.writeText(appUrl(APP_PATHS.watch, { id: v.id })); onCopied(); } catch { /* clipboard blocked */ } };
   return (
@@ -77,7 +87,7 @@ function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: 
       {failed ? (
         <div className="vtile-fail">
           <p className="vtile-title">{title}</p>
-          <p className="muted">{v.status === "rejected" ? (v.reject_reason || t("gen.rejected_default")) : t("gen.error_detail")}</p>
+          <p className="muted">{v.status === "rejected" ? (v.reject_reason || t("gen.rejected_default")) : v.cancelled ? t("gen.cancelled_detail") : t("gen.error_detail")}</p>
           <div className="vtile-actions">
             {v.status === "error" && v.can_retry && <button type="button" className="btn btn-tonal btn-sm" disabled={busy !== null} aria-busy={busy === "retry"} onClick={() => void act("retry")}>{busy === "retry" ? <Spinner /> : <Icon name="retry" size={16} />}{t("gen.retry")}</button>}
             <button type="button" className="btn btn-line btn-sm" disabled={busy !== null} aria-busy={busy === "remove"} onClick={() => void act("remove")}>{busy === "remove" && <Spinner />}{t("gen.remove")}</button>
@@ -90,14 +100,16 @@ function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: 
           <p className="vtile-meta">{[ago(v.created_at, t), v.aspect || "16:9"].filter(Boolean).join(" · ")}</p>
         </a>
       )}
-      {items.length > 0 && <Menu className="vtile-menu" triggerClass="icon-btn vtile-more" label={t("gen.more")} trigger={<Icon name="dots" size={20} />} items={items} align="end" onPick={(id) => { if (id === "copy") void copy(); }} />}
+      {items.length > 0 && <Menu className="vtile-menu" triggerClass="icon-btn vtile-more" label={t("gen.more")} trigger={<Icon name="dots" size={20} />} items={items} align="end" onPick={(id) => { if (id === "copy") void copy(); else if (id === "delete") onDelete(v.id); }} />}
     </article>
   );
 }
 
 export default function VideosPage() {
   const { t } = useLocale();
-  const { items, thumbs, sceneThumbs, state, reload, retry, remove } = useVideos();
+  const { items, thumbs, sceneThumbs, state, reload, retry, remove, cancel, hide, unhide, destroy } = useVideos();
+  const [stopping, setStopping] = useState<{ v: TaskItem; busy: boolean } | null>(null);   // "Stop making this video?"
+  const pending = useRef<{ id: string; timer: number } | null>(null);                      // the video waiting out its Undo time
   const [q, setQ] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -118,6 +130,39 @@ export default function VideosPage() {
   const onRetry = async (id: string) => { const out = await retry(id); if (out.ok) { toast.show(t("gen.retry_started")); window.scrollTo({ top: 0, behavior: "smooth" }); } else toast.show(out.message || t(RETRY_KEY[out.kind])); };
   const onRemove = async (id: string) => { toast.show(t((await remove(id)) ? "gen.removed" : "gen.remove_error")); };
 
+  // ---- cancel a video that is being made: one question, then the credits are back
+  const CANCEL_KEY: Record<Exclude<Awaited<ReturnType<typeof cancel>>, { ok: true }>["kind"], string> = { try_again: "making.cancel_error", done: "making.cancel_done", gone: "gen.retry_gone", unsupported: "making.cancel_unsupported", error: "making.cancel_error" };
+  const stop = async () => {
+    if (!stopping || stopping.busy) return;
+    setStopping({ ...stopping, busy: true });
+    const out = await cancel(stopping.v.id);
+    setStopping(null);
+    toast.show(out.ok ? (out.refunded > 0 ? t("making.cancelled_refund", { n: out.refunded }) : t("making.cancelled")) : out.kind === "done" || out.kind === "unsupported" ? t(CANCEL_KEY[out.kind]) : out.message || t(CANCEL_KEY[out.kind]));
+  };
+
+  // ---- delete a finished video: it leaves at once, "Deleted · Undo" for a few seconds, and only then is it really deleted (the server has no bin)
+  const commit = (keepalive = false) => {
+    const p = pending.current;
+    if (!p) return;
+    pending.current = null; window.clearTimeout(p.timer);
+    void destroy(p.id, keepalive).then((out) => { if (!out.ok) toast.show(out.message || t("gen.delete_error")); });
+  };
+  const undo = () => { const p = pending.current; if (!p) return; pending.current = null; window.clearTimeout(p.timer); unhide(p.id); toast.show(null, 1); };
+  const onDelete = (id: string) => {
+    commit();   // an earlier delete is final now: one Undo at a time
+    hide(id);
+    pending.current = { id, timer: window.setTimeout(() => commit(), UNDO_MS) };
+    toast.show(<><span>{t("gen.deleted")}</span><span className="toast-sep" aria-hidden="true">·</span><button type="button" onClick={undo}>{t("gen.undo")}</button></>, UNDO_MS);
+  };
+  useEffect(() => {
+    const leave = () => commit(true);   // leaving before the Undo time is over: the delete is sent now, and survives the navigation
+    window.addEventListener("pagehide", leave);
+    let id: string | null = null;   // the Watch page's "Delete video" hands the video over and comes here, so there is ONE place that deletes and one Undo
+    try { id = sessionStorage.getItem(DELETE_HANDOFF); sessionStorage.removeItem(DELETE_HANDOFF); } catch { /* private mode */ }
+    if (id) onDelete(id);
+    return () => { window.removeEventListener("pagehide", leave); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const making = useMemo(() => items.filter(isMaking), [items]);
   const rest = useMemo(() => filterVideos(items.filter((i) => !isMaking(i)), q), [items, q]);
   const showMaking = !q.trim();
@@ -132,9 +177,9 @@ export default function VideosPage() {
   } else {
     body = (
       <>
-        {showMaking && making.map((m) => <MakingBanner key={m.id} v={m} sceneThumbs={sceneThumbs} />)}
+        {showMaking && making.map((m) => <MakingBanner key={m.id} v={m} sceneThumbs={sceneThumbs} onCancel={(v) => setStopping({ v, busy: false })} />)}
         <div className="vgrid">
-          {rest.map((v) => <Card key={v.id} v={v} thumb={thumbs[v.id]} onCopied={() => toast.show(t("gen.link_copied"))} onRetry={onRetry} onRemove={onRemove} />)}
+          {rest.map((v) => <Card key={v.id} v={v} thumb={thumbs[v.id]} onCopied={() => toast.show(t("gen.link_copied"))} onRetry={onRetry} onRemove={onRemove} onDelete={onDelete} />)}
         </div>
         {q.trim() && rest.length === 0 && <p className="muted vempty" role="status">{t("gen.search_none", { q: q.trim() })}</p>}
       </>
@@ -151,6 +196,7 @@ export default function VideosPage() {
         </div>
       </header>
       {body}
+      {stopping && <Dialog title={t("making.cancel_title")} confirmLabel={t("making.cancel_stop")} cancelLabel={t("making.cancel_keep")} danger busy={stopping.busy} onConfirm={() => void stop()} onCancel={() => { if (!stopping.busy) setStopping(null); }}>{t("making.cancel_body")}</Dialog>}
       {toast.node}
       <Shortcuts />
     </section>

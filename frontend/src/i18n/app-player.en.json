@@ -242,5 +242,11 @@
  "watch.another_en": "English version",
  "watch.another_again": "Same idea, new take",
  "watch.prompt": "The prompt",
- "watch.prompt_again": "Use this prompt again"
+ "watch.prompt_again": "Use this prompt again",
+ "watch.look": "Look",
+ "watch.look_auto": "chosen for you",
+ "watch.delete": "Delete video",
+ "wallet.plan": "{plan} plan",
+ "wallet.plan_length": "Videos up to {length}",
+ "wallet.bucket.plan": "Plan credits"
 }

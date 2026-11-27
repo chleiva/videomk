@@ -1,4 +1,7 @@
 // The video list: item shape, normalisation of the API payload, day groups (Today / Yesterday / Earlier, as in the apps' DayGroup) and the making progress.
+import { parseVideoLook } from "./looks";
+import type { VideoLook } from "./looks";
+
 export type Status = "queued" | "running" | "complete" | "error" | "rejected";
 export type Stage = "starting" | "writing" | "deck_reading" | "deck_writing" | "assets" | "storyboard" | "rendering";
 
@@ -17,6 +20,8 @@ export interface TaskItem {
   video_url?: string | null;
   aspect?: string | null;   // "9:16", "1:1", "4:5" (absent: 16:9)
   can_retry?: boolean;   // a failed video the server will run again as the SAME item (POST .../retry)
+  look?: VideoLook | null;   // the look the video got (docs/CREATE_API.md "The video record"); absent on older servers and before the plan exists
+  cancelled?: boolean;   // stopped by the person (CANCELLED): credits came back, it can be tried again or removed
   making?: Making | null;   // what is known about the video being made (scenes done, one live line); absent on older servers and before the plan exists
 }
 
@@ -142,6 +147,8 @@ export function normalizeItem(it: any): TaskItem | null {
     can_retry: it?.can_retry === true,
     aspect: typeof it?.aspect === "string" && /^\d+:\d+$/.test(it.aspect) ? it.aspect : null,
     making: status === "queued" || status === "running" ? parseMaking(it?.making) : null,
+    ...(parseVideoLook(it?.look) ? { look: parseVideoLook(it.look) } : {}),
+    ...((it?.status || "").toString().toUpperCase() === "CANCELLED" ? { cancelled: true } : {}),
   };
 }
 
@@ -224,7 +231,8 @@ export function reuseUnchanged(prev: TaskItem[], next: TaskItem[]): TaskItem[] {
     const p = by.get(n.id);
     if (!p) return n;
     const same = p.status === n.status && p.stage === n.stage && p.title === n.title && p.eta_seconds === n.eta_seconds && p.duration_s === n.duration_s && p.editable === n.editable
-      && p.reject_reason === n.reject_reason && (p.preview_gif_url ? true : !n.preview_gif_url) && p.created_at === n.created_at && p.can_retry === n.can_retry && sameMaking(p.making, n.making);
+      && p.reject_reason === n.reject_reason && (p.preview_gif_url ? true : !n.preview_gif_url) && p.created_at === n.created_at && p.can_retry === n.can_retry && sameMaking(p.making, n.making)
+      && !!p.cancelled === !!n.cancelled && JSON.stringify(p.look ?? null) === JSON.stringify(n.look ?? null);
     return same ? p : n;
   });
 }
@@ -261,4 +269,33 @@ export function retryOutcome(status: number, body: any): RetryOutcome {
 /** The list right after a retry was accepted: the same item, now being made (first in the list until the next poll brings the server's view). */
 export function markRetrying(items: TaskItem[], id: string): TaskItem[] {
   return items.map((i) => (i.id === id ? { ...i, status: "running" as Status, stage: "starting" as Stage, can_retry: false, reject_reason: null } : i));
+}
+
+// ---------------------------------------------------------------- cancel while making / delete a finished video (docs/CREATE_API.md "Cancel", "Delete")
+/** What the cancel route answered. "try_again": the video moved a step between the server's read and write: the same call is sent once more. "done": it finished (or failed)
+ *  meanwhile, so there is nothing to cancel and the list is refreshed. */
+export type CancelOutcome =
+  | { ok: true; refunded: number }
+  | { ok: false; kind: "try_again" | "done" | "gone" | "unsupported" | "error"; message?: string };
+
+export function cancelOutcome(status: number, body: any): CancelOutcome {
+  const message = typeof body?.message === "string" ? body.message : undefined;
+  if (status === 200) return { ok: true, refunded: typeof body?.refunded === "number" && body.refunded > 0 ? Math.floor(body.refunded) : 0 };
+  if (status === 409) return body?.code === "try_again" ? { ok: false, kind: "try_again", message } : body?.code === "not_cancellable" ? { ok: false, kind: "done", message } : { ok: false, kind: "error", message };
+  if (status === 404) return body?.code === "not_found" ? { ok: false, kind: "gone", message } : { ok: false, kind: "unsupported" };   // an older server has no such route
+  if (status === 403 || status === 405) return { ok: false, kind: "unsupported" };
+  return { ok: false, kind: "error", message };
+}
+/** The list right after a cancel: the same item, now stopped (it can be tried again or removed). The next poll brings `can_retry` from the server. */
+export function markCancelled(items: TaskItem[], id: string): TaskItem[] {
+  return items.map((i) => (i.id === id ? { ...i, status: "error" as Status, stage: undefined, making: null, cancelled: true } : i));
+}
+
+/** What DELETE answered. A repeated delete answers 404 not_found, which is success (the card goes). "making": cancel it first. "busy": an edit is rendering. */
+export type DeleteOutcome = { ok: true } | { ok: false; kind: "making" | "busy" | "error"; message?: string };
+export function deleteOutcome(status: number, body: any): DeleteOutcome {
+  const message = typeof body?.message === "string" ? body.message : undefined;
+  if ((status >= 200 && status < 300) || status === 404) return { ok: true };
+  if (status === 409) return { ok: false, kind: body?.code === "not_deletable" ? "making" : body?.code === "busy" ? "busy" : "error", message };
+  return { ok: false, kind: "error", message };
 }

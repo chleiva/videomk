@@ -30,6 +30,26 @@ if app.node.try_get_context("mail"):  # email forwarding for videomk.com (docs/E
                      zone_id=str(app.node.try_get_context("mailZoneId") or ZONE_ID), reserved=int(_res) if _res else None, env=cdk.Environment(account=PROD_ACCOUNT, region=REGION))
     app.synth()
     raise SystemExit(0)
+if app.node.try_get_context("clipsAlarms"):  # the two alarms of library clips on demand (docs/CLIPS_ON_DEMAND.md): a tiny stack of its own, because the main one is near 500 resources
+    from clips_obs import ClipsObsStack
+    _stage = str(app.node.try_get_context("stage") or "")
+    with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
+        _cfg = json.load(f)[_stage]
+    ClipsObsStack(app, f"videomk-{_stage}-clips-obs", day_budget_usd=float(app.node.try_get_context("clipsDayBudgetUsd") or 10), env=cdk.Environment(account=_cfg["account"], region=_cfg["region"]))
+    app.synth()
+    raise SystemExit(0)
+if app.node.try_get_context("objectTracer"):  # the whiteboard tracer function (docs/LIBRARY_ON_DEMAND.md part D): a small stack of its own, for the same reason
+    from object_tracer import ObjectTracerStack
+    _stage = str(app.node.try_get_context("stage") or "")
+    with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
+        _cfg = json.load(f)[_stage]
+    _cli = os.getenv("CDK_DEFAULT_ACCOUNT")
+    if _cli and _cli != _cfg["account"]:
+        raise SystemExit(f"Refusing: stage '{_stage}' belongs to account {_cfg['account']} but credentials are for {_cli}.")
+    ObjectTracerStack(app, f"videomk-{_stage}-wb-tracer", stage=_stage, plan_model_id=str(app.node.try_get_context("planModelId") or ""),
+                      env=cdk.Environment(account=_cfg["account"], region=_cfg["region"]))
+    app.synth()
+    raise SystemExit(0)
 stage = app.node.try_get_context("stage")
 with open(os.path.join(os.path.dirname(__file__), "stages.json")) as f:
     stages = json.load(f)

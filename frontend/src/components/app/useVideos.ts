@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getAuthorizationHeader } from "../../lib/auth";
 import { apiGateway } from "../../lib/config";
 import { currentLocaleHeaders } from "../../lib/i18n";
-import { isMaking, markRetrying, nextPollMs, normalizeItem, retryOutcome, reuseUnchanged, stableSceneThumbs, stableThumbs, withoutSceneLinks } from "../../lib/videos";
-import type { RetryOutcome, TaskItem } from "../../lib/videos";
+import { cancelVideo } from "../../lib/api";
+import { deleteOutcome, isMaking, markCancelled, markRetrying, nextPollMs, normalizeItem, retryOutcome, reuseUnchanged, stableSceneThumbs, stableThumbs, withoutSceneLinks } from "../../lib/videos";
+import type { CancelOutcome, DeleteOutcome, RetryOutcome, TaskItem } from "../../lib/videos";
 
 const CACHE = "vmk_tasks";
 const newestFirst = (a: TaskItem, b: TaskItem) => (b.created_at ? Date.parse(b.created_at) : 0) - (a.created_at ? Date.parse(a.created_at) : 0);
@@ -18,6 +19,8 @@ export function useVideos() {
   const timer = useRef<number | undefined>(undefined);
   const attempt = useRef(0);
   const alive = useRef(true);
+  const auth = useRef<{ Authorization: string; userId: string } | null>(null);   // the last good sign-in header: a delete sent while the page is being left cannot wait for one
+  const hidden = useRef(new Set<string>());   // videos the person deleted and may still bring back (Undo): gone from the screen, not yet from the server
 
   const load = useCallback(async (): Promise<void> => {
     window.clearTimeout(timer.current);
@@ -25,10 +28,11 @@ export function useVideos() {
     try {
       const { Authorization, userId } = await getAuthorizationHeader();
       if (!userId) throw new Error("no session");
+      auth.current = { Authorization, userId };
       const res = await fetch(apiGateway.listVideos(userId), { headers: { Authorization, ...currentLocaleHeaders() } });
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as { items?: unknown[] };
-      const next = (Array.isArray(data.items) ? data.items : []).map(normalizeItem).filter(Boolean) as TaskItem[];
+      const next = ((Array.isArray(data.items) ? data.items : []).map(normalizeItem).filter(Boolean) as TaskItem[]).filter((i) => !hidden.current.has(i.id));
       next.sort(newestFirst);
       making = next.some(isMaking);
       if (!alive.current) return;
@@ -82,5 +86,33 @@ export function useVideos() {
     } catch { return false; }
   }, []);
 
-  return { items, thumbs, sceneThumbs, state, reload, retry, remove };
+  /** Cancel a video that is being made (POST .../cancel): the workflow stops and the credits of this attempt come back. A step change between the server's read and
+   *  write answers `try_again`: the same call is sent once more. */
+  const cancel = useCallback(async (id: string): Promise<CancelOutcome> => {
+    const out = await cancelVideo(id);
+    if (alive.current && out.ok) setItems((prev) => { const next = markCancelled(prev, id); try { sessionStorage.setItem(CACHE, JSON.stringify(withoutSceneLinks(next))); } catch { /* full */ } return next; });
+    if (alive.current && (out.ok || out.kind === "done" || out.kind === "gone")) { attempt.current = 0; void load(); }   // the server's view: stopped, finished meanwhile, or gone
+    return out;
+  }, [load]);
+
+  /** Delete with Undo. The server has no bin (docs/CREATE_API.md: "There is no undo"), so the card leaves the screen at once and the DELETE is sent only when the
+   *  Undo time is over (`commit`), or when the page is left before that. `undo` simply brings the card back: nothing was sent. */
+  const hide = useCallback((id: string): void => {
+    hidden.current.add(id);
+    setItems((prev) => { const next = prev.filter((i) => i.id !== id); try { sessionStorage.setItem(CACHE, JSON.stringify(withoutSceneLinks(next))); } catch { /* full */ } return next; });
+  }, []);
+  const unhide = useCallback((id: string) => { hidden.current.delete(id); attempt.current = 0; void load(); }, [load]);
+  const destroy = useCallback(async (id: string, keepalive = false): Promise<DeleteOutcome> => {
+    try {
+      const { Authorization, userId } = keepalive && auth.current ? auth.current : await getAuthorizationHeader();   // leaving the page: sent at once, with a request that outlives it
+      if (!userId) return { ok: false, kind: "error" };
+      const res = await fetch(apiGateway.getVideo(userId, id), { method: "DELETE", keepalive, headers: { Authorization, ...currentLocaleHeaders() } });
+      const out = deleteOutcome(res.status, await res.json().catch(() => null));
+      if (!out.ok && alive.current) unhide(id);   // it could not be deleted (an edit is rendering, the network): the card comes back
+      else hidden.current.delete(id);
+      return out;
+    } catch { if (alive.current) unhide(id); return { ok: false, kind: "error" }; }
+  }, [unhide]);
+
+  return { items, thumbs, sceneThumbs, state, reload, retry, remove, cancel, hide, unhide, destroy };
 }

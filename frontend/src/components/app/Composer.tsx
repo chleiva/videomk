@@ -8,6 +8,8 @@ import { AIcon as Icon } from "./icons";
 import { Menu, Popover, Segmented } from "./Menu";
 import DeckPicker, { useDeck } from "../DeckPicker";
 import MediaPicker from "./MediaPicker";
+import LookPicker from "./LookPicker";
+import CreateLocked from "./CreateLocked";
 import Shortcuts from "./Shortcuts";
 import { useUploadQueue } from "./useUploadQueue";
 import { newRequestId, startGeneration, getWallet } from "../../lib/api";
@@ -17,6 +19,9 @@ import {
   normalize, overPlatformLimit, photoCapacity, pillValues, platformOf, qualityChoices, resolutionsFor, saveChoices, selectPlatform,
 } from "../../lib/create";
 import type { Answer, Capabilities, Form, Question } from "../../lib/create";
+import { AUTO, loadLook, lookHints, normalizeChoice, optionOf, presetFor, rememberNote, saveLook } from "../../lib/looks";
+import type { LookChoice } from "../../lib/looks";
+import { createLock, planName } from "../../lib/plan";
 import { DECK_ASPECT, deckAspectWarning, deckCredits, deckGenerateExtras, deckMinutes } from "../../lib/deck";
 import { appendDictation, dictationSupported, speechLang, startDictation } from "../../lib/dictation";
 import type { Dictation } from "../../lib/dictation";
@@ -50,12 +55,22 @@ function readHandoff(): LibPick[] {
   } catch { return []; }
 }
 
+/** "Pro" with a small lock: a length (or anything else) the plan does not make. There is no buy button: nothing can be bought yet (`can_upgrade` is false). */
+function PlanTag({ plan, t }: { plan: string | null; t: (k: string, p?: Record<string, string | number>) => string }) {
+  return <span className="plan-tag"><Icon name="lock" size={14} />{plan && <span aria-hidden="true">{plan}</span>}<span className="sr-only-vmk">{plan ? t("create.plan_needs", { plan }) : t("create.plan_locked")}</span></span>;
+}
+/** "Landscape": a shape in the server's words. */
+const shapeName = (id: string, c: Capabilities): string => c.aspects.find((a) => a.id === id)?.label ?? id;
+
 export default function Composer() {
   const { t, locale } = useLocale();
   const [caps, setCaps] = useState<Capabilities | null>(null);
   const [live, setLive] = useState(false);
   const [form, setForm] = useState<Form | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [walletRead, setWalletRead] = useState(false);
+  const [lookLine, setLookLine] = useState<string | null>(null);   // one line when a chosen look went back to Auto (photos or a deck were attached)
+  const briefNote = useRef<string | undefined>(undefined);
   const [stage, setStage] = useState<Stage>({ k: "form" });
   const [hint, setHint] = useState<{ text: string; credits?: boolean } | null>(null);
   const [sending, setSending] = useState(false);
@@ -93,9 +108,9 @@ export default function Composer() {
       if (a && cc.aspects.some((x) => x.id === a && x.ready)) pre.aspect = a;
       if (m > 0 && m <= 12) pre.minutes = m;
       if (l && cc.languages.some((x) => x.id === l)) pre.language = l;
-      setForm(normalize({ ...defaultForm(cc, loadSaved()), ...pre, text: prompt }, cc));
+      setForm(normalize({ ...defaultForm(cc, loadSaved()), pick: loadLook() ?? AUTO, ...pre, text: prompt }, cc));   // the look chosen last time, when it is still offered
     });
-    getWallet().then((w) => alive && setWallet(w));
+    getWallet().then((w) => { if (alive) { setWallet(w); setWalletRead(true); } });
     setLibPicks(readHandoff());
     return () => { alive = false; dict.current?.stop(); urls.current.forEach((u) => URL.revokeObjectURL(u)); };
   }, []);
@@ -116,6 +131,18 @@ export default function Composer() {
   const addingPhotos = photos.items.some((i) => i.state === "queued" || i.state === "preparing" || i.state === "uploading");
   const totalPhotos = directItems.filter((i) => i.state !== "failed" && i.state !== "unsupported" && i.state !== "no_space").length + libPicks.length;
   const room = Math.max(0, MAX_VIDEO_PHOTOS - totalPhotos);
+
+  // ---- the look: a look that is not made from the person's own photos or slides goes back to Auto when they are attached, with one line that says so
+  const lookCtx = useMemo(() => ({ photos: totalPhotos > 0, deck: deckActive }), [totalPhotos, deckActive]);
+  const pick = f?.pick ?? AUTO;
+  useEffect(() => {
+    if (!c.looks) return;
+    const n = normalizeChoice(pick, c.looks, lookCtx);
+    if (!n.reset) return;
+    setLookLine(t(n.reset === "deck" ? "create.pick_reset_deck" : "create.pick_reset_photos", { look: optionOf(c.looks, pick.look)?.label ?? "", auto: t("create.look_auto") }));
+    setForm((x) => (x ? { ...x, pick: AUTO } : x));
+  }, [lookCtx, pick, c.looks]); // eslint-disable-line react-hooks/exhaustive-deps
+  const choosePick = (next: LookChoice) => { setLookLine(null); saveLook(next); set({ pick: next }); };
 
   function addFiles(list: FileList | File[] | null | undefined) {
     const pics = pictureFiles(list ? Array.from(list) : []);
@@ -148,29 +175,37 @@ export default function Composer() {
   const limit = f ? overPlatformLimit({ ...f, minutes }, c) : null;
   const platform = f ? platformOf(c, f.platform) : undefined;
   const capacity = photoCapacity(minutes);
+  const looks = c.looks;
+  const lh = f && looks && !ready ? lookHints(f.pick, looks, minutes * 60, f.aspect) : null;
+  const lookName = looks ? optionOf(looks, pick.look)?.label ?? "" : "";
+  const longer = lh ? presetFor(Math.max(lh.minSeconds ?? 0, lh.conversationSeconds ?? 0), c.lengths.presets, c.limits?.planMaxSeconds) : null;
+  const gate = walletRead ? createLock(wallet, c.plans) : null;
+  const nameOfPlan = (id: string | null) => planName(wallet?.plans ?? c.plans, id);
   const fitHint = totalPhotos > capacity ? (() => { const better = minutesForPhotos(totalPhotos, c); return better ? t("create.photos_fit_better", { n: capacity, total: totalPhotos, length: lengthLabel(minutes), better: lengthLabel(better) }) : t("create.photos_fit", { n: capacity, total: totalPhotos, length: lengthLabel(minutes) }); })() : null;
 
   // ---- sending
+  const options = () => buildOptions(f!, c, live, lookCtx);
   async function generate(brief?: Record<string, string>) {
     if (!f) return;
     setSending(true); setHint(null); setStage({ k: "form" });
     const text = f.text.trim();
-    const { target_minutes: _len, ...rest } = buildOptions(f, c, live);
-    const base = ready ? { ...rest, ...deckGenerateExtras(ready.id, picked) } : buildOptions(f, c, live);
-    const options = { ...base, ...(ready ? {} : mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById())) };
-    const key = JSON.stringify([text, options, brief ?? null]);
+    const { target_minutes: _len, ...rest } = options();
+    const base = ready ? { ...rest, ...deckGenerateExtras(ready.id, picked) } : options();
+    const sent = { ...base, ...(ready ? {} : mediaExtras(directReady, libPicks.map((p) => p.id), photos.queue.metaById())) };
+    const key = JSON.stringify([text, sent, brief ?? null]);
     if (req.current.key !== key) req.current = { key, id: newRequestId() };   // same request, same id: a retry cannot bill twice
     try {
-      const r = await startGeneration(text, req.current.id, { ...options, ...(brief ? { brief } : {}) });
+      const r = await startGeneration(text, req.current.id, { ...sent, ...(brief ? { brief } : {}) });
       if (!r.ok) {
         setSending(false);
         if (ready && r.kind === "invalid" && r.code?.startsWith("deck_") && r.code !== "deck_not_ready") { deck.reportError(r.code, ready.name); return; }
         if (r.kind === "blocked" || r.kind === "paused") setStage({ k: "stop", kind: r.kind, message: r.message });
-        else setHint({ text: r.message, credits: r.kind === "credits" });
+        else setHint({ text: r.message, credits: r.kind === "credits" });   // a plan refusal (403 plan_*, 429 free_budget_spent) is the server's own sentence, shown here; the draft stays as it is
         return;
       }
       if (!ready) saveChoices(f);
       rememberPrompt(r.videoId, text);   // the video page shows the sentence that made it
+      rememberNote(r.videoId, r.look?.note ?? briefNote.current);   // "Made from your photos: the Cartoon look is not used..." is shown while the video is made
       try { sessionStorage.removeItem(MEDIA_SELECTION); } catch { /* private mode */ }   // the photos were used: My media starts clean
       location.assign(`${APP_PATHS.videos}?started=1`);
     } catch (e) {
@@ -193,13 +228,15 @@ export default function Composer() {
     if (!live || c.intake === false) { await generate(); return; }
     setHint(null); setStage({ k: "checking" });
     const run = ++checkRun.current;
-    const out = await checkRequest(text, buildOptions(f, c, live), []);
+    briefNote.current = undefined;
+    const out = await checkRequest(text, options(), []);
     if (run !== checkRun.current) return;   // cancelled meanwhile: the form is already back, untouched
     followBrief(out, []);
   }
   /** Cancel while the request is being checked: nothing was sent to be made yet, so the form simply comes back as it was. */
   function cancelCheck() { if (stage.k !== "checking" || sending) return; checkRun.current++; setStage({ k: "form" }); setTimeout(() => area.current?.focus(), 20); }
   function followBrief(out: Awaited<ReturnType<typeof checkRequest>>, answers: Answer[]) {
+    if (out.status === "ok") briefNote.current = out.note;
     if (out.status === "questions") { setOther(""); setStage({ k: "questions", questions: out.questions, i: 0, answers }); }
     else if (out.status === "ok") void generate(out.brief);
     else setStage({ k: "stop", kind: out.status, message: out.message, suggestion: out.status === "not_supported" ? out.suggestion : undefined });
@@ -214,13 +251,15 @@ export default function Composer() {
     if (!f) return;
     setStage({ k: "checking" });
     const run = ++checkRun.current;
-    const out = await checkRequest(f.text.trim(), buildOptions(f, c, live), answers);
+    const out = await checkRequest(f.text.trim(), options(), answers);
     if (run !== checkRun.current) return;
+    if (out.status === "ok") briefNote.current = out.note;
     if (out.status === "ok") void generate(out.brief); else if (out.status === "questions") void generate(); else followBrief(out, answers);   // asked enough: make it
   }
 
   // ---- screens
   if (!f || !caps) return <section className="page compose"><p className="muted" role="status"><Spinner /> {t("gen.loading")}</p></section>;
+  if (gate) return <CreateLocked lock={gate} plan={(wallet?.plans ?? c.plans)?.plan?.name ?? null} />;
 
   const pv = pillValues(f, c, t("create.other_platform"));
   const lookLabel = (l: string) => t(`create.look_${l}`);
@@ -228,7 +267,7 @@ export default function Composer() {
   const lenRows = lengthMenu(c, f);
   const lengthItems = [
     ...(ready ? [{ id: "suggested", label: t("deck.suggested_chip", { length: lengthLabel(ready.suggested_minutes) }), checked: picked === null }] : []),
-    ...lenRows.filter((r) => !ready || r.minutes !== ready.suggested_minutes).map((r) => ({ id: String(r.minutes), label: lengthLabel(r.minutes), detail: <span className="vm-menu-price">{t("create.credits", { n: ready ? deckCredits({ ...ready, suggested_minutes: r.minutes }, r.minutes, f.resolution, c) : r.credits })}</span>, checked: ready ? picked === r.minutes : f.minutes === r.minutes, disabled: r.over })),
+    ...lenRows.filter((r) => !ready || r.minutes !== ready.suggested_minutes).map((r) => ({ id: String(r.minutes), label: lengthLabel(r.minutes), detail: r.locked ? <PlanTag plan={nameOfPlan(r.locked.requires)} t={t} /> : <span className="vm-menu-price">{t("create.credits", { n: ready ? deckCredits({ ...ready, suggested_minutes: r.minutes }, r.minutes, f.resolution, c) : r.credits })}</span>, checked: ready ? picked === r.minutes : f.minutes === r.minutes, disabled: r.over || !!r.locked })),
   ];
   const lookItems = LOOKS.map((l) => ({ id: l, label: <span className="look-item"><i className={`swatch swatch-${l}`} aria-hidden="true" />{lookLabel(l)}</span>, checked: f.look === l }));
   const wm = c.watermark;
@@ -277,6 +316,7 @@ export default function Composer() {
 
         {deckActive && c.deck && live && <DeckPicker caps={c.deck} deck={deck} />}
 
+        {lookLine && <p className="look-reset" role="status">{lookLine}</p>}{/* right above the pill it explains; it goes with the next choice */}
         <div className="composer-bar">
           <div className="composer-tools">
             <Menu label={t("create.add_photos")} className="tool" triggerClass="icon-btn tool-btn" trigger={<Icon name="image" size={22} />} align="start"
@@ -290,18 +330,19 @@ export default function Composer() {
             {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_for_k")}</span><span>{pv.for}</span><Icon name="chevdown" size={16} /></>} items={forItems} onPick={(id) => setForm(selectPlatform(f, c, id))} />}
             <Menu label={t("create.pill_length")} triggerClass="pill" trigger={<><span>{ready ? lengthLabel(minutes) : pv.length}</span><Icon name="chevdown" size={16} /></>} items={lengthItems}
               onPick={(id) => (ready ? setPicked(id === "suggested" ? null : Number(id)) : set({ minutes: Number(id) }))} />
-            <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_look_k")}</span><span className="pill-v">{lookLabel(f.look)}</span><span className="pill-phone">{t("create.pill_look_phone", { look: lookLabel(f.look) })}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />
+            {looks ? <LookPicker caps={looks} choice={pick} ctx={lookCtx} planName={nameOfPlan} onChange={choosePick} /> : <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_look_k")}</span><span className="pill-v">{lookLabel(f.look)}</span><span className="pill-phone">{t("create.pill_look_phone", { look: lookLabel(f.look) })}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />}
             {live && (
               <Popover label={t("create.options")} triggerClass="icon-btn tool-btn" trigger={<Icon name="sliders" size={22} />}>
                 {(close) => (
                   <div className="opts">
                     <div className="opts-head"><h2 className="h2">{t("create.options")}</h2><button type="button" className="btn btn-tonal btn-sm" onClick={close}>{t("create.done")}</button></div>
                     {aspects.length > 1 && <div className="opt"><p className="label" id="o-format">{t("create.format")}</p><Segmented label={t("create.format")} value={f.aspect} options={aspects.map((a) => ({ id: a.id, label: a.label }))} onChange={(v) => set({ aspect: v })} /></div>}
-                    {quality.length > 1 && <div className="opt"><p className="label">{t("create.resolution")}</p><Segmented label={t("create.resolution")} value={f.resolution} options={quality.map((r) => ({ id: r.id, label: r.label, hint: r.credits_multiplier > 1 ? `${r.credits_multiplier}×` : undefined }))} onChange={(v) => set({ resolution: v })} />
+                    {quality.length > 1 && <div className="opt"><p className="label">{t("create.resolution")}</p><Segmented label={t("create.resolution")} value={f.resolution} options={quality.map((r) => ({ id: r.id, label: r.label, disabled: r.available === false, hint: r.available === false ? nameOfPlan(r.requires_plan ?? null) ?? undefined : r.credits_multiplier > 1 ? `${r.credits_multiplier}×` : undefined }))} onChange={(v) => set({ resolution: v })} />
                       {resolutionsFor(c, f.aspect).find((r) => r.id === f.resolution)?.credits_multiplier! > 1 && <p className="hint">{t("create.cost_4k_double")}</p>}</div>}
                     <label className="opt-row" htmlFor="o-captions"><span>{t("create.subtitles")}</span><input id="o-captions" type="checkbox" role="switch" className="vm-switch" checked={f.captions} onChange={(e) => set({ captions: e.target.checked })} /></label>
                     {c.languages.length > 0 && <label className="opt-row" htmlFor="o-lang"><span>{t("create.narration")}</span><select id="o-lang" className="field field-inline" value={f.language} onChange={(e) => set({ language: e.target.value })}><option value="auto">{t("create.lang_auto")}</option>{c.languages.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}</select></label>}
-                    {SCENE_STYLE_ON && !ready && <div className="opt"><p className="label">{t("create.scenes_title")}</p><Segmented label={t("create.scenes_a11y")} value={f.scenes} options={[{ id: "auto", label: t("create.scenes_auto") }, { id: "cartoon", label: t("create.scenes_illustrated") }, { id: "real", label: t("create.scenes_real") }]} onChange={(v) => set({ scenes: v })} /><p className="hint">{t("create.scenes_hint")}</p></div>}
+                    {looks && <div className="opt"><p className="label">{t("create.colors")}</p><Segmented label={t("create.colors")} value={f.look} options={LOOKS.map((l) => ({ id: l, label: lookLabel(l) }))} onChange={(v) => set({ look: v })} /></div>}
+                    {SCENE_STYLE_ON && !looks && !ready && <div className="opt"><p className="label">{t("create.scenes_title")}</p><Segmented label={t("create.scenes_a11y")} value={f.scenes} options={[{ id: "auto", label: t("create.scenes_auto") }, { id: "cartoon", label: t("create.scenes_illustrated") }, { id: "real", label: t("create.scenes_real") }]} onChange={(v) => set({ scenes: v })} /><p className="hint">{t("create.scenes_hint")}</p></div>}
                     {wm && <div className="opt"><p className="label">{t("create.wm_title")}</p>
                       <Segmented label={t("create.wm_title")} value={f.watermark ?? "saved"} options={[
                         ...(wm.forced ? [] : [{ id: "saved", label: t("create.wm_saved") }]),
@@ -340,6 +381,9 @@ export default function Composer() {
         {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
         {fitHint && <p className="hint">{fitHint}</p>}
         {advice && <p className="hint">{advice}</p>}
+        {lh?.minSeconds != null && <p className="hint">{t("create.pick_min", { look: lookName, length: lengthLabel(lh.minSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
+        {lh?.minSeconds == null && lh?.conversationSeconds != null && <p className="hint">{t("create.pick_talk_min", { length: lengthLabel(lh.conversationSeconds / 60) })}{longer != null && <> <button type="button" className="cost-link" onClick={() => set({ minutes: longer })}>{t("create.pick_use", { length: lengthLabel(longer) })}</button></>}</p>}
+        {lh?.bestAspects && <p className="hint">{t("create.pick_best", { look: lookName, shape: shapeName(lh.bestAspects[0], c) })} <button type="button" className="cost-link" onClick={() => set({ aspect: lh.bestAspects![0] })}>{t("create.pick_use_shape", { shape: shapeName(lh.bestAspects[0], c) })}</button></p>}
         {ready && deckAspectWarning(f.aspect) && <p className="hint">{t("deck.vertical_warn")} <button type="button" className="cost-link" onClick={() => set({ aspect: DECK_ASPECT })}>{t("deck.use_landscape")}</button></p>}
       </div>
 

@@ -231,7 +231,7 @@ def test_crop_rules_keep_the_centre_for_every_aspect():
 
 # ----------------------------------------------------------------------------- the generator
 PASS = json.dumps({"adherence": 9, "quality": 9, "text_visible": False, "logo_or_brand": False, "real_person_likeness": False, "anatomy_problem": False, "warped_objects": False, "unsafe": False,
-                   "centre_subject": True, "calm_bottom": True, "style_ok": True, "reasons": "clean"})
+                   "centre_subject": True, "calm_bottom": True, "style_ok": True, "policy": "none", "reasons": "clean"})   # "policy": the library's safety policy (common/media_policy.py)
 FAIL = json.dumps({**json.loads(PASS), "text_visible": True, "reasons": "a sign with letters"})
 
 

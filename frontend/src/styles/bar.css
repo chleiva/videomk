@@ -54,6 +54,16 @@
 @media (max-width: 63.99rem) { .strip { overflow-x: auto; scrollbar-width: none; gap: var(--space-2); } .strip::-webkit-scrollbar { display: none; } .strip .strip-tile { flex: none; width: 3rem; height: 3rem; } .mkb-strip { order: 3; flex-basis: 100%; justify-content: flex-start; padding: 3px; margin: -3px; } .watch-strip { justify-content: safe center; padding: 3px; } }
 @media (prefers-reduced-motion: reduce) { .strip-tile, .strip-tile img { animation: none; } }
 .mkb-eta { font-size: var(--fs-body); font-weight: 500; white-space: nowrap; }
+/* the note (the server adapted the chosen look) and Cancel: quiet, on the gradient */
+.mkb-note { display: flex; align-items: flex-start; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--fs-caption); line-height: 1.4; color: rgba(255, 255, 255, 0.86); }
+.mkb-note svg { flex: none; margin-top: 2px; }
+.mkb-end { display: flex; align-items: center; gap: var(--space-4); flex: none; }
+.mkb-cancel { flex: none; height: var(--min-touch); padding: 0 var(--space-4); border-radius: var(--radius-pill); color: var(--on-making); font-size: var(--fs-subhead); font-weight: 600; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4); }
+.mkb-cancel:hover { background: rgba(255, 255, 255, 0.14); }
+.mkb-cancel:focus-visible { outline: 3px solid var(--on-making); outline-offset: 2px; border-radius: var(--radius-pill); }
+@media (max-width: 63.99rem) { .mkb-end { order: 4; flex-basis: 100%; justify-content: space-between; } }
+.watch-making-note { display: flex; align-items: flex-start; justify-content: center; gap: var(--space-2); font-size: var(--fs-caption); line-height: 1.4; color: rgba(255, 255, 255, 0.86); text-wrap: balance; }
+.watch-making-note svg { flex: none; margin-top: 2px; }
 @media (max-width: 47.99rem) { .mkb-steps { order: 3; width: 100%; gap: var(--space-2); } .mkb-steps li { flex: 1; width: auto; height: 2.75rem; padding: var(--space-2); white-space: nowrap; } }
 @media (min-width: 64rem) { .mkb-text { flex: 0 1 28rem; } .mkb-strip { flex: 1 1 0; } .mkb-strip .strip-tile { flex: 1 1 0; max-width: 6rem; } .mkb { flex-wrap: nowrap; padding: var(--space-6) var(--space-10); gap: var(--space-8); margin-bottom: 3.375rem; } .mkb-title { font-size: 1.625rem; line-height: 2rem; } .mkb-line { font-size: 1.0625rem; } }
 @media (prefers-reduced-motion: reduce) { .mkb::after { animation: none; } }
@@ -103,8 +113,10 @@
   .app-shell .composer-card { padding: 1.875rem 1.875rem 1.375rem; border-radius: 2rem; }
   .app-shell .compose-text { min-height: 6.375rem; font-size: 1.5rem; line-height: 2.125rem; letter-spacing: -0.025em; }
   .app-shell .compose { max-width: calc(51.25rem + 6rem); }
-  .app-shell .composer-bar { margin-top: 1.375rem; padding-top: 1.125rem; flex-wrap: nowrap; }
-  .app-shell .composer-pills { flex-wrap: nowrap; }
+  /* one line when it fits (the mockup); when it does not (a tablet beside the rail, Spanish labels, a long look name with its faces) the pills take what they
+     need and Create moves to its own line, right-aligned: nothing ever runs out of the card or under another control */
+  .app-shell .composer-bar { margin-top: 1.375rem; padding-top: 1.125rem; flex-wrap: wrap; row-gap: var(--space-3); }
+  .app-shell .composer-pills { flex: 1 1 auto; flex-wrap: wrap; }
 }
 
 .pill-phone, .compose-balance { display: none; }
@@ -186,3 +198,12 @@
 .watch-chips .chip { text-decoration: none; }
 @media (min-width: 48rem) { .app-shell .watch { padding: 1.5rem 3rem 3.75rem; } .app-shell .watch-title { font-size: 2rem; } .app-shell .watch-under { margin-top: 1.625rem; } }
 @media (min-width: 72rem) { .watch-grid { grid-template-columns: minmax(0, 50rem) minmax(13rem, 1fr); gap: 3.75rem; } .watch-side { padding-top: var(--space-2); } .watch-chips { flex-direction: column; align-items: flex-start; } }
+
+/* ---- Watch: the look in Details, Delete in More */
+.info-look { width: 100%; }
+.info-look .eyebrow { margin-bottom: var(--space-2); }
+.info-look-name { font-size: var(--fs-body); font-weight: 600; }
+.app-shell .menu button.is-danger { color: var(--danger); }
+.credits-plan { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2) var(--space-3); }
+.plan-chip { display: inline-flex; align-items: center; height: 1.75rem; padding: 0 var(--space-3); border-radius: var(--radius-pill); background: var(--primary-container); color: var(--primary); font-weight: 700; }
+@media (max-width: 47.99rem) { .app-shell .toast-host { bottom: calc(var(--tabbar-height) + var(--space-4) + env(safe-area-inset-bottom)); } }   /* a toast with an action (Undo) never sits on the tab bar */
