@@ -129,7 +129,7 @@ final class VideoMKUITests: XCTestCase {
 
     /// The page is a lazy list: the field exists once it has been scrolled near.
     private func revealConfirmField(_ app: XCUIApplication) {
-        XCTAssertTrue(app.buttons["deleteKeepButton"].waitForExistence(timeout: 1) || app.navigationBars["Delete account"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["deleteKeepButton"].waitForExistence(timeout: 1) || app.staticTexts["Delete account"].waitForExistence(timeout: 10))
         for _ in 0..<6 where !app.textFields["deleteConfirmField"].exists { app.swipeUp() }
         XCTAssertTrue(app.textFields["deleteConfirmField"].waitForExistence(timeout: 5))
     }
@@ -173,11 +173,11 @@ final class VideoMKUITests: XCTestCase {
         snap(app, "1-settings"); app.terminate()
 
         app = fakeSession(["VMK_DEBUG_SHEET": "delete"])
-        XCTAssertTrue(app.navigationBars["Delete account"].waitForExistence(timeout: 15)); sleep(1)
+        XCTAssertTrue(app.staticTexts["Delete account"].waitForExistence(timeout: 15)); sleep(1)
         snap(app, "2-sheet-top"); scrollDown(app); sleep(1); snap(app, "3-sheet-bottom"); app.terminate()
 
         app = fakeSession(["VMK_DEBUG_SHEET": "delete", "VMK_DEBUG_DELETE_STATE": "typed"])
-        XCTAssertTrue(app.navigationBars["Delete account"].waitForExistence(timeout: 15)); scrollDown(app); sleep(1)
+        XCTAssertTrue(app.staticTexts["Delete account"].waitForExistence(timeout: 15)); scrollDown(app); sleep(1)
         snap(app, "4-sheet-typed"); app.terminate()
 
         for (state, name) in [("signingin", "5a-signing-in"), ("working", "5b-deleting")] {
@@ -186,7 +186,7 @@ final class VideoMKUITests: XCTestCase {
         }
         for (state, name) in [("error_uncertain", "6a-error-lost"), ("error_cancelled", "6b-error-cancelled"), ("error_stuck", "6c-error-stuck"), ("error_forbidden", "6d-error-forbidden"), ("error_server", "6e-error-server")] {
             app = fakeSession(["VMK_DEBUG_SHEET": "delete", "VMK_DEBUG_DELETE_STATE": state])
-            XCTAssertTrue(app.navigationBars["Delete account"].waitForExistence(timeout: 15)); scrollDown(app); sleep(1); snap(app, name); app.terminate()
+            XCTAssertTrue(app.staticTexts["Delete account"].waitForExistence(timeout: 15)); scrollDown(app); sleep(1); snap(app, name); app.terminate()
         }
         for (done, name) in [("notlinked", "7a-done"), ("available", "7b-done-apple"), ("off", "7c-done-apple-off"), ("assumed", "7d-done-assumed")] {
             app = fakeSession(["VMK_DEBUG_DELETE_DONE": done])
@@ -225,17 +225,25 @@ final class VideoMKUITests: XCTestCase {
         field.tap(); field.typeText("A calm film about my holiday in Thailand")
         XCTAssertTrue(NSPredicate(format: "value CONTAINS 'Ready'").evaluate(with: send) || send.waitForExistence(timeout: 2), "ready after typing")
         app.buttons["photoButton"].tap()
-        XCTAssertTrue(element(app, "sourcePicker").waitForExistence(timeout: 5), "Add photos opens one sheet with the source switch")
-        app.buttons["My media"].tap()
-        XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "My media shows the library in the same sheet")
+        XCTAssertTrue(app.buttons["photosMenuItem"].waitForExistence(timeout: 5) && app.buttons["mediaMenuItem"].exists, "the photo icon is a two-item menu: Photo library, Media")
+        XCTAssertEqual(app.buttons["photosMenuItem"].label, "Photo library"); XCTAssertEqual(app.buttons["mediaMenuItem"].label, "Media")
+        XCTAssertFalse(element(app, "sourcePicker").exists, "no explainer sheet in between")
+        app.buttons["mediaMenuItem"].tap()
+        XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "Media opens the library directly")
+        XCTAssertFalse(app.buttons["addSelected"].isEnabled, "nothing selected: the one button waits")
         element(app, "mediaTile").tap()
-        XCTAssertTrue(app.buttons["addSelected"].label.contains("Add 1"), "one photo selected")
+        XCTAssertEqual(app.buttons["addSelected"].label, "Add · 1", "the same selection bar as the Media tab")
         app.buttons["addSelected"].tap()
         XCTAssertTrue(element(app, "attachedLibraryPhoto").waitForExistence(timeout: 5), "the photo lands in the Create screen")
         XCTAssertTrue(element(app, "photosNote").label.contains("1 photo"), "the Photos card shows the count")
         app.buttons["createCancel"].tap()
-        app.buttons["Discard"].tap()
+        XCTAssertFalse(app.buttons["Discard"].waitForExistence(timeout: 1), "closing never asks")
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10), "Create closed onto the library")
+        app.buttons["newVideo"].tap()                 // the draft is kept: the sentence and the photo are there again
+        XCTAssertEqual(element(app, "composerField").value as? String, "A calm film about my holiday in Thailand", "closing Create keeps the draft")
+        XCTAssertTrue(element(app, "attachedLibraryPhoto").exists)
+        app.buttons["createCancel"].tap()
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10))
         sleep(1)
         app.buttons["tabMedia"].tap()
         XCTAssertTrue(element(app, "mediaSearch").waitForExistence(timeout: 10))
@@ -656,8 +664,8 @@ final class VideoMKUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 20))
         sleep(3); shot(app, "3-player")
         let credits = app.buttons["infoButton"]
-        if credits.waitForExistence(timeout: 10) { credits.tap(); sleep(1); shot(app, "3b-credits"); app.buttons["Done"].tap() }
-        app.navigationBars.buttons.firstMatch.tap()
+        if credits.waitForExistence(timeout: 10) { credits.tap(); sleep(1); shot(app, "3b-credits"); app.buttons["infoClose"].tap() }
+        app.buttons["backButton"].tap()
         let field = openCreate(app)
         field.tap()
         field.typeText("A visual tour of the landmarks of Rome")
@@ -666,13 +674,13 @@ final class VideoMKUITests: XCTestCase {
         app.buttons["moreOptions"].tap()
         XCTAssertTrue(element(app, "subtitlesToggle").waitForExistence(timeout: 5), "More options opens in place")
         sleep(1); shot(app, "5b-options")
-        app.buttons["createCancel"].tap()
-        app.buttons["Discard"].tap()
-        XCTAssertTrue(app.buttons["balanceChip"].exists, "the credit balance is always visible")
+        app.buttons["optionsDone"].tap()
+        app.buttons["createCancel"].tap()             // closing never asks; the draft is kept
+        XCTAssertTrue(app.buttons["balanceChip"].waitForExistence(timeout: 5), "the credit balance is always visible")
         app.buttons["balanceChip"].tap()
-        XCTAssertTrue(app.navigationBars["Credits"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Credits"].waitForExistence(timeout: 5))
         sleep(1); shot(app, "5c-credits")
-        app.buttons["Done"].tap()
+        app.buttons["walletClose"].tap()
         app.buttons["settingsButton"].tap()
         XCTAssertTrue(app.buttons["signOutButton"].waitForExistence(timeout: 5))
         shot(app, "6-settings")
@@ -715,7 +723,7 @@ final class VideoMKUITests: XCTestCase {
         field.typeText(" And that is the idea.")
         shot(app, "8-scene")
         app.buttons["Done"].tap()
-        XCTAssertTrue(app.staticTexts["Edited"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier == %@ AND label CONTAINS %@", "beatRow", "Edited")).firstMatch.waitForExistence(timeout: 5), "the row says it was edited (one spoken label)")
         XCTAssertTrue(app.buttons["previewButton"].isEnabled)
 
         app.buttons["previewButton"].tap()

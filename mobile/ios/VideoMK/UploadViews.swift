@@ -3,7 +3,6 @@ import VideoMKCore
 
 // The upload journey (docs/UI_DESIGN.md m): local pictures first, one persistent bar, one summary toast.
 
-private let navy = Color(red: 8 / 255, green: 10 / 255, blue: 28 / 255)
 
 /// The "Adding 120 photos" section at the top of the Media grid: the person's own pictures, newest first, each with its state.
 struct UploadBatchSection: View {
@@ -103,10 +102,10 @@ struct UploadTile: View {
     @ViewBuilder private func overlay(_ s: UploadTileState) -> some View {
         switch s {
         case .queued, .waiting:
-            Color(navy).opacity(s == .queued ? 0.28 : 0.4)
+            Theme.mediaInk.opacity(s == .queued ? 0.28 : 0.4)
             VStack { HStack { Spacer(); badge(s == .queued ? "clock" : "pause.fill") }; Spacer() }.padding(6)
         case .uploading:
-            Color(navy).opacity(0.38)
+            Theme.mediaInk.opacity(0.38)
             ProgressRing(symbol: "arrow.up")
         case .processing:
             ProcessingShimmer()
@@ -114,26 +113,26 @@ struct UploadTile: View {
                 VStack { Spacer(); HStack { glass(media.waiting ? tr("upload.getting_it_ready") : tr("upload.taking_longer_than_usual"), symbol: "sparkles"); Spacer() } }.padding(8)
             }
         case .done:
-            if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(.white, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
+            if tick { VStack { HStack { Spacer(); Image(systemName: "checkmark").font(.role(.caption, weight: .bold)).foregroundStyle(Theme.success).frame(width: 24, height: 24).background(Theme.onMedia, in: Circle()) }; Spacer() }.padding(6).transition(.opacity) }
         case .failed:
-            Color(red: 0.72, green: 0.11, blue: 0.11).opacity(0.55)
+            Theme.dangerSolid.opacity(0.55)
             VStack(spacing: 6) {
-                Image(systemName: "arrow.clockwise").font(.role(.headline, weight: .semibold)).foregroundStyle(.white).frame(width: 44, height: 44).background(.white.opacity(0.25), in: Circle())
-                Text(tr("upload.tap_to_retry")).font(.role(.caption, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(.white, in: Capsule())
+                Image(systemName: "arrow.clockwise").font(.role(.headline, weight: .semibold)).foregroundStyle(Theme.onMedia).frame(width: 44, height: 44).background(Theme.onMedia.opacity(0.25), in: Circle())
+                Text(tr("upload.tap_to_retry")).font(.role(.caption, weight: .bold)).foregroundStyle(Theme.danger).padding(.horizontal, 8).frame(height: 22).background(Theme.onMedia, in: Capsule())
             }
         case .alreadyThere:
-            Color(navy).opacity(0.38)
-            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.role(.caption, weight: .bold)); Text(tr("upload.already_there")).font(.role(.caption, weight: .semibold)) }.foregroundStyle(Color(hex: 0x11142B)).padding(.horizontal, 8).frame(height: 22).background(.white.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
+            Theme.mediaInk.opacity(0.38)
+            VStack { Spacer(); HStack { HStack(spacing: 4) { Image(systemName: "checkmark").font(.role(.caption, weight: .bold)); Text(tr("upload.already_there")).font(.role(.caption, weight: .semibold)) }.foregroundStyle(Theme.mediaInk).padding(.horizontal, 8).frame(height: 22).background(Theme.onMedia.opacity(0.92), in: Capsule()); Spacer() } }.padding(8)
         }
     }
 
     private func badge(_ symbol: String) -> some View {
-        Image(systemName: symbol).font(.role(.caption, weight: .bold)).foregroundStyle(.white).frame(width: 24, height: 24).background(Color.black.opacity(0.5), in: Circle())
+        Image(systemName: symbol).font(.role(.caption, weight: .bold)).foregroundStyle(Theme.onMedia).frame(width: 24, height: 24).background(Theme.mediaInk.opacity(0.5), in: Circle())
     }
 
     private func glass(_ text: String, symbol: String) -> some View {
         HStack(spacing: 4) { Image(systemName: symbol).font(.role(.caption, weight: .regular)); Text(text).font(.role(.caption, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
-            .foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
+            .foregroundStyle(Theme.onMedia).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Theme.mediaInk.opacity(0.45), in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
     }
 }
 
@@ -145,10 +144,10 @@ struct ProgressRing: View {
         TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { ctx in
             let angle = reduceMotion ? 0 : ctx.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.4) / 1.4 * 360
             ZStack {
-                Circle().fill(Color.black.opacity(0.3))
-                Circle().stroke(.white.opacity(0.35), lineWidth: 3)
-                Circle().trim(from: 0, to: 0.28).stroke(.white, style: StrokeStyle(lineWidth: 3, lineCap: .round)).rotationEffect(.degrees(angle - 90))
-                Image(systemName: symbol).font(.role(.subhead, weight: .semibold)).foregroundStyle(.white)
+                Circle().fill(Theme.mediaInk.opacity(0.3))
+                Circle().stroke(Theme.onMedia.opacity(0.35), lineWidth: 3)
+                Circle().trim(from: 0, to: 0.28).stroke(Theme.onMedia, style: StrokeStyle(lineWidth: 3, lineCap: .round)).rotationEffect(.degrees(angle - 90))
+                Image(systemName: symbol).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.onMedia)
             }
             .frame(width: 44, height: 44)
         }
@@ -158,12 +157,12 @@ struct ProgressRing: View {
 struct ProcessingShimmer: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
-        if reduceMotion { Color.white.opacity(0.08) }
+        if reduceMotion { Theme.onMedia.opacity(0.08) }
         else {
             TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
                 let t = ctx.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 2.4) / 2.4
                 GeometryReader { g in
-                    LinearGradient(colors: [.clear, .white.opacity(0.32), .clear], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(colors: [.clear, Theme.onMedia.opacity(0.32), .clear], startPoint: .leading, endPoint: .trailing)
                         .frame(width: g.size.width * 0.6).rotationEffect(.degrees(12)).offset(x: -g.size.width * 0.6 + g.size.width * 1.7 * t)
                 }
             }

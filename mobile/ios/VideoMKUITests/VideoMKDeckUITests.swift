@@ -132,16 +132,16 @@ final class VideoMKDeckUITests: XCTestCase {
         XCTAssertTrue(waitForLabel(el(app, "deckCost"), contains: "2 credits"), "the usual rule for another length: \(el(app, "deckCost").label)")
         el(app, "sendButton").tap()
         XCTAssertTrue(el(app, "runningRow").waitForExistence(timeout: 15), "the video is on the home screen")
-        XCTAssertTrue(app.staticTexts["Reading your slides."].waitForExistence(timeout: 5), "the deck's first stage in the Making card")
+        XCTAssertTrue(app.staticTexts["Reading your slides"].waitForExistence(timeout: 5), "the deck's first stage in the Making card")
         shot(app, "deck-09-making-reading")
-        XCTAssertTrue(app.staticTexts["Writing the narration."].waitForExistence(timeout: 12), "then the second")
+        XCTAssertTrue(app.staticTexts["Writing the narration"].waitForExistence(timeout: 12), "then the second")
         shot(app, "deck-10-making-writing")
     }
 
     func testTheDescriptionIsOptionalForADeck() {
         let app = create("ok")
         XCTAssertTrue(el(app, "deckSummary").waitForExistence(timeout: 30))
-        XCTAssertEqual(el(app, "composerField").placeholderValue, "Who is this for? e.g. executives, students")
+        XCTAssertEqual(el(app, "composerField").placeholderValue, "Who is it for?")
         let send = el(app, "sendButton")
         XCTAssertTrue((send.value as? String ?? "").contains("Ready") || send.isEnabled, "Create works with no description")
         XCTAssertFalse(el(app, "notEnoughCredits").exists)
@@ -244,6 +244,7 @@ final class VideoMKDeckUITests: XCTestCase {
         XCTAssertFalse(el(app, "attachedPhoto").exists)
         reveal(app, "photoButton")
         el(app, "photoButton").tap()
+        app.buttons["photosMenuItem"].tap()
         XCTAssertTrue(app.alerts.buttons["Use photos"].waitForExistence(timeout: 5), "and the reverse asks before removing the deck")
         app.alerts.buttons["Keep presentation"].tap()
         XCTAssertTrue(el(app, "deckSummary").exists)
@@ -253,8 +254,8 @@ final class VideoMKDeckUITests: XCTestCase {
 
     func testWaitingCardsShowTheDeckStages() {
         let app = launch(["VMK_DEBUG_FAKE_VIDEOS": "deck"])
-        XCTAssertTrue(app.staticTexts["Reading your slides."].waitForExistence(timeout: 15))
-        XCTAssertTrue(app.staticTexts["Writing the narration."].exists)
+        XCTAssertTrue(app.staticTexts["Reading your slides"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["Writing the narration"].exists)
         shot(app, "deck-11-making-both")
     }
 
@@ -265,7 +266,7 @@ final class VideoMKDeckUITests: XCTestCase {
         XCTAssertTrue(el(app, "deckSummary").waitForExistence(timeout: 30))
         XCTAssertTrue(label(app, "deckSummary").contains("12 diapositivas"), label(app, "deckSummary"))
         XCTAssertTrue(el(app, "deckCost").label.contains("4 créditos"), el(app, "deckCost").label)
-        XCTAssertEqual(el(app, "composerField").placeholderValue, "¿Para quién es? Por ejemplo: directivos, estudiantes")
+        XCTAssertEqual(el(app, "composerField").placeholderValue, "¿Para quién es?")
         shot(app, "es-deck-05-ready")
         app.terminate()
         app = create("fail:deck_encrypted", spanish: true)
@@ -282,8 +283,8 @@ final class VideoMKDeckUITests: XCTestCase {
         app = create("processing", spanish: true); XCTAssertTrue(el(app, "deckProcessing").waitForExistence(timeout: 15)); shot(app, "es-deck-04-processing"); app.terminate()
         app = create("ok", state: "shorts", spanish: true); XCTAssertTrue(el(app, "deckVerticalWarning").waitForExistence(timeout: 30)); app.swipeUp(); shot(app, "es-deck-07-vertical"); app.terminate()
         app = launch(spanish: true, ["VMK_DEBUG_FAKE_VIDEOS": "deck"])
-        XCTAssertTrue(app.staticTexts["Leyendo tus diapositivas."].waitForExistence(timeout: 15))
-        XCTAssertTrue(app.staticTexts["Escribiendo la narración."].exists)
+        XCTAssertTrue(app.staticTexts["Leyendo tus diapositivas"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["Escribiendo la narración"].exists)
         shot(app, "es-deck-11-making-both")
     }
 

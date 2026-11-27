@@ -481,7 +481,7 @@ final class AppModel {
     struct InfoToast: Identifiable, Equatable { let id = UUID(); let text: String }
     func say(_ text: String) {
         let t = InfoToast(text: text); infoToast = t
-        Task { try? await Task.sleep(for: .seconds(4)); if infoToast?.id == t.id { infoToast = nil } }
+        Task { try? await Task.sleep(for: UndoCenter.window); if infoToast?.id == t.id { infoToast = nil } }
     }
     private(set) var cancelling: Set<String> = []
 

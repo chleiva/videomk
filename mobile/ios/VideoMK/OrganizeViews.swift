@@ -255,7 +255,7 @@ struct OrganizeBar: View {
 /// Collections made by the organiser carry a small sparkle badge on their cover.
 struct AutoBadge: View {
     var body: some View {
-        Image(systemName: "sparkles").font(.role(.caption, weight: .semibold)).foregroundStyle(.white).frame(width: 22, height: 22).background(.black.opacity(0.5), in: Circle()).accessibilityHidden(true)
+        Image(systemName: "sparkles").font(.role(.caption, weight: .semibold)).foregroundStyle(Theme.onMedia).frame(width: 22, height: 22).background(Theme.mediaInk.opacity(0.5), in: Circle()).accessibilityHidden(true)
     }
 }
 

@@ -69,8 +69,12 @@ struct VideoDetailView: View {
             .scrollBounceBehavior(.basedOnSize)
         }
         // at the largest text sizes the switch is part of the page (it scrolls after the narration line instead of covering it)
-        .safeAreaInset(edge: .bottom, spacing: 0) { UndoToastHost() }
-        .safeAreaInset(edge: .bottom, spacing: 0) { if isRunning, !typeSize.isAccessibilitySize { NotifyCard().padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s).frame(maxWidth: 640).transition(.opacity) } }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                UndoToastHost()         // "Cancelled · 2 credits back"
+                if isRunning, !typeSize.isAccessibilitySize { NotifyCard().padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s).frame(maxWidth: 640).transition(.opacity) }
+            }
+        }
         .background(Theme.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task(id: video?.status) { await loadPlayerIfReady() }

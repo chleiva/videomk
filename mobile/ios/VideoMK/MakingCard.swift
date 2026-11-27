@@ -30,7 +30,6 @@ struct MakingSnapshot: Equatable {
 /// The Making card of the Videos list: the brand gradient, the title, the time left, the scene tiles filling one by one, one live line.
 struct MakingCard: View {
     let snapshot: MakingSnapshot
-    var onCancel: (() -> Void)?          // "Cancel video" behind More (only for a video the server is making)
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -39,10 +38,6 @@ struct MakingCard: View {
                 Text(snapshot.title).font(.role(.headline)).foregroundStyle(Theme.onPrimary).lineLimit(typeSize.isAccessibilitySize ? 4 : 2).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: Theme.Space.xs)
                 if let time = snapshot.timeLeft, !typeSize.isAccessibilitySize { Text(time).font(.role(.footnote, weight: .medium)).monospacedDigit().foregroundStyle(Theme.onPrimary.opacity(0.84)).lineLimit(1).fixedSize() }
-                if let onCancel {
-                    Menu { Button(role: .destructive, action: onCancel) { Label(tr("making.cancel_video"), systemImage: "xmark.circle") } } label: { Image(systemName: "ellipsis").font(.role(.headline)).foregroundStyle(Theme.onPrimary).frame(width: Theme.minTouch, height: Theme.minTouch).contentShape(Rectangle()) }
-                        .accessibilityLabel(tr("media.more")).accessibilityIdentifier("makingCardMore").padding(.vertical, -10).padding(.trailing, -10)
-                }
             }
             if let info = snapshot.info, !info.tiles.isEmpty { SceneTiles(tiles: info.window(7), surface: .gradient, size: 46) }
             else { CalmTrack() }
@@ -58,7 +53,7 @@ struct MakingCard: View {
         .background(Theme.makingGradient, in: RoundedRectangle(cornerRadius: Theme.Radii.hero, style: .continuous))
         .shadow(color: Theme.makingStart.opacity(0.3), radius: 18, y: 10)
         .contentShape(RoundedRectangle(cornerRadius: Theme.Radii.hero, style: .continuous))
-        .accessibilityElement(children: onCancel == nil ? .ignore : .contain)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(snapshot.spoken)
     }
 }

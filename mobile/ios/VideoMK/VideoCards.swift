@@ -154,7 +154,7 @@ struct RunningCard: View {
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
-            MakingCard(snapshot: model.makingSnapshot(for: video, now: context.date), onCancel: model.cancelling.contains(video.id) ? nil : { model.cancelVideo(video) })
+            MakingCard(snapshot: model.makingSnapshot(for: video, now: context.date))
         }
         .accessibilityIdentifier("runningRow")
     }

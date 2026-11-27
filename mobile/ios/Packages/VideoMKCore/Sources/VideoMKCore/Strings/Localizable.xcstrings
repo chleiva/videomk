@@ -18,23 +18,6 @@
         }
       }
     },
-    "add.add_photos_to_my_media" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add photos to My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Agregar fotos a Mi biblioteca"
-          }
-        }
-      }
-    },
     "add.all_photos" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48,81 +31,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todas las fotos"
-          }
-        }
-      }
-    },
-    "add.change_selection" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change selection"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cambiar selección"
-          }
-        }
-      }
-    },
-    "add.choose_photos" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose photos"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elegir fotos"
-          }
-        }
-      }
-    },
-    "add.chosen_from_phone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld photo chosen from this phone"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld photos chosen from this phone"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld foto elegida de este teléfono"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld fotos elegidas de este teléfono"
-                }
-              }
-            }
           }
         }
       }
@@ -161,47 +69,6 @@
         }
       }
     },
-    "add.limit_chosen_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld photo chosen"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld photos chosen"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld foto elegida"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld fotos elegidas"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "add.limit_toast" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -215,40 +82,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Puedes agregar hasta %lld fotos. Quita una para elegir otra."
-          }
-        }
-      }
-    },
-    "add.location_data_is_removed_from" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Location data is removed from your photos, and the originals are deleted once your video is made."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los datos de ubicación se quitan de tus fotos y los originales se eliminan cuando tu video está listo."
-          }
-        }
-      }
-    },
-    "add.my_media" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mi biblioteca"
           }
         }
       }
@@ -287,74 +120,6 @@
         }
       }
     },
-    "add.open_my_media" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir Mi biblioteca"
-          }
-        }
-      }
-    },
-    "add.photos_you_add_here_can" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photos you add here can be reused in any video."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las fotos que agregues aquí se pueden reutilizar en cualquier video."
-          }
-        }
-      }
-    },
-    "add.pick_from_phone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick from this phone"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige de este teléfono"
-          }
-        }
-      }
-    },
-    "add.same_selection" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choosing here adds to the same selection as My media. The most a video can use is %lld."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que elijas aquí se suma a la misma selección que en Mi biblioteca. Un video puede usar como máximo %lld."
-          }
-        }
-      }
-    },
     "add.sign_in_again_to_use" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -372,40 +137,6 @@
         }
       }
     },
-    "add.source" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Origen"
-          }
-        }
-      }
-    },
-    "add.this_phone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This phone"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este teléfono"
-          }
-        }
-      }
-    },
     "add.try_fewer_words_like_beach" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -419,40 +150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prueba con menos palabras, como “playa”."
-          }
-        }
-      }
-    },
-    "add.videomk_only_sees_the_photos" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "videomk only sees the photos you pick. Nothing else in your library is read, and no permission is needed."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "videomk solo ve las fotos que eliges. No se lee nada más de tu biblioteca y no hace falta ningún permiso."
-          }
-        }
-      }
-    },
-    "add.you_have_chosen_the_most" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You have chosen the most a video can use, from My media. Deselect some there to pick from this phone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elegiste el máximo que puede usar un video, desde Mi biblioteca. Quita algunas allí para elegir de este teléfono."
           }
         }
       }
@@ -855,74 +552,6 @@
         }
       }
     },
-    "attach.source_both" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From this phone and My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De este teléfono y de Mi biblioteca"
-          }
-        }
-      }
-    },
-    "attach.source_library" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De Mi biblioteca"
-          }
-        }
-      }
-    },
-    "attach.source_phone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From this phone"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De este teléfono"
-          }
-        }
-      }
-    },
-    "attach.strip_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld of %2$lld photos. %3$@. Location data is removed, and the originals are deleted once your video is made."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld de %2$lld fotos. %3$@. Los datos de ubicación se quitan y los originales se eliminan cuando tu video está listo."
-          }
-        }
-      }
-    },
     "attach.subline_both" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -970,23 +599,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hasta %1$lld fotos. %2$@"
-          }
-        }
-      }
-    },
-    "attach.total_of" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld of %2$lld photos"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld de %2$lld fotos"
           }
         }
       }
@@ -1134,23 +746,6 @@
         }
       }
     },
-    "collections.auto_note" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Newest first. **Auto** collections are made for you."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las más recientes primero. Las colecciones **Auto** se crean por ti."
-          }
-        }
-      }
-    },
     "collections.collection_actions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1202,23 +797,6 @@
         }
       }
     },
-    "collections.delete" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eliminar"
-          }
-        }
-      }
-    },
     "collections.delete_collection" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1232,64 +810,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminar colección"
-          }
-        }
-      }
-    },
-    "collections.delete_msg" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "The collection is removed. Its %lld photo stays in My media."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "The collection is removed. Its %lld photos stay in My media."
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Se elimina la colección. Su %lld foto se queda en Mi biblioteca."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Se elimina la colección. Sus %lld fotos se quedan en Mi biblioteca."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "collections.delete_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete “%@”?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Eliminar “%@”?"
           }
         }
       }
@@ -1311,23 +831,6 @@
         }
       }
     },
-    "collections.new" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nueva"
-          }
-        }
-      }
-    },
     "collections.nothing_here_yet" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1341,57 +844,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aún no hay nada aquí"
-          }
-        }
-      }
-    },
-    "collections.opens_the_collection_actions_rename" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the collection. Actions: rename, delete."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre la colección. Acciones: cambiar nombre, eliminar."
-          }
-        }
-      }
-    },
-    "collections.photos_stay_in_my_media" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photos stay in Media. Only the collection is removed."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las fotos se quedan en Biblioteca. Solo se quita la colección."
-          }
-        }
-      }
-    },
-    "collections.recreate_note" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New uploads from that month may create it again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las subidas nuevas de ese mes pueden volver a crearla."
           }
         }
       }
@@ -1447,40 +899,6 @@
         }
       }
     },
-    "collections.row_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@"
-          }
-        }
-      }
-    },
-    "collections.row_a11y_auto" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@, automatic collection"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@, colección automática"
-          }
-        }
-      }
-    },
     "collections.save" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1494,57 +912,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardar"
-          }
-        }
-      }
-    },
-    "collections.see_all" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "See all"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver todo"
-          }
-        }
-      }
-    },
-    "collections.select_photos_in_your_library" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select photos in your library and choose Add to collection."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selecciona fotos en tu biblioteca y elige Agregar a una colección."
-          }
-        }
-      }
-    },
-    "collections.the_photos_stay_in_your" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The photos stay in your library."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las fotos se quedan en tu biblioteca."
           }
         }
       }
@@ -1971,23 +1338,6 @@
         }
       }
     },
-    "create.add_photos" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photos"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fotos"
-          }
-        }
-      }
-    },
     "create.answers" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2056,23 +1406,6 @@
         }
       }
     },
-    "create.checking_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checking your request"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Revisando tu solicitud"
-          }
-        }
-      }
-    },
     "create.checking_your_request" : {
       "localizations" : {
         "en" : {
@@ -2102,23 +1435,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@, %2$@, próximamente, atenuado"
-          }
-        }
-      }
-    },
-    "create.choose_photos_from_this_phone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From your photo library or Media. Optional."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De tu fototeca o de Biblioteca. Opcional."
           }
         }
       }
@@ -2412,23 +1728,6 @@
         }
       }
     },
-    "create.library_photo_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Media photo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foto de Biblioteca"
-          }
-        }
-      }
-    },
     "create.listening_tap_to_stop" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2510,47 +1809,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ permite hasta %2$@."
-          }
-        }
-      }
-    },
-    "create.more_photos" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld more photo"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld more photos"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld foto más"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld fotos más"
-                }
-              }
-            }
           }
         }
       }
@@ -3973,23 +3231,6 @@
         }
       }
     },
-    "detail.video" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Video"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Video"
-          }
-        }
-      }
-    },
     "dictation.allow_mic" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4912,23 +4153,6 @@
         }
       }
     },
-    "editor.tap_a_scene_to_change" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap a scene to change its narration or photo. Use Edit to reorder or delete."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca una escena para cambiar su narración o su foto. Usa Editar para reordenar o eliminar."
-          }
-        }
-      }
-    },
     "editor.this_is_a_draft_publish" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5555,64 +4779,6 @@
         }
       }
     },
-    "making.eta_short" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "about %lld min left"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "about %lld min left"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "falta aprox. %lld min"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "faltan aprox. %lld min"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "making.eta_under_minute" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "less than a minute left"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "falta menos de un minuto"
-          }
-        }
-      }
-    },
     "making.leave_promise" : {
       "localizations" : {
         "en" : {
@@ -5989,88 +5155,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Crear"
-          }
-        }
-      }
-    },
-    "media.delete_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Delete %lld photo"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Delete %lld photos"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Eliminar %lld foto"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Eliminar %lld fotos"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "media.delete_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Delete %lld photo?"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Delete %lld photos?"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "¿Eliminar %lld foto?"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "¿Eliminar %lld fotos?"
-                }
-              }
-            }
           }
         }
       }
@@ -6619,23 +5703,6 @@
         }
       }
     },
-    "media.privacy" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privacy"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privacidad"
-          }
-        }
-      }
-    },
     "media.privacy_note" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6840,23 +5907,6 @@
         }
       }
     },
-    "media.they_are_removed_from_your" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "They are removed from your library and from every collection. This can't be undone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se quitan de tu biblioteca y de todas las colecciones. No se puede deshacer."
-          }
-        }
-      }
-    },
     "media.tile_selected" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6887,23 +5937,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ", seleccionada, número %lld"
-          }
-        }
-      }
-    },
-    "media.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mi biblioteca"
           }
         }
       }
@@ -6942,23 +5975,6 @@
         }
       }
     },
-    "media.when_it_is_full" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When it is full"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cuando está lleno"
-          }
-        }
-      }
-    },
     "media.your_photos_in_one_private" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6972,74 +5988,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tus fotos, en un solo lugar privado"
-          }
-        }
-      }
-    },
-    "options.cost_note" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Each started minute costs 1 credit."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cada minuto empezado cuesta 1 crédito."
-          }
-        }
-      }
-    },
-    "options.cost_note_balance" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Each started minute costs 1 credit. You have %lld."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cada minuto empezado cuesta 1 crédito. Tienes %lld."
-          }
-        }
-      }
-    },
-    "options.done_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done, %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listo, %@"
-          }
-        }
-      }
-    },
-    "options.video_options" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Video options"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opciones del video"
           }
         }
       }
@@ -8144,125 +7092,6 @@
         }
       }
     },
-    "picker.add_photos_in_the_media" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add photos in the Media tab first."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primero agrega fotos en la pestaña Biblioteca."
-          }
-        }
-      }
-    },
-    "picker.clear" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quitar"
-          }
-        }
-      }
-    },
-    "picker.photos_from_your_prompt" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Photos from your prompt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fotos de tu descripción"
-          }
-        }
-      }
-    },
-    "picker.searches_your_library_with_what" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Searches your library with what you typed and selects the matches"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Busca en tu biblioteca con lo que escribiste y selecciona las coincidencias"
-          }
-        }
-      }
-    },
-    "picker.selected_of" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld of %2$lld selected"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld de %2$lld seleccionadas"
-          }
-        }
-      }
-    },
-    "picker.try_fewer_words_or_remove" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try fewer words, or remove a filter."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prueba con menos palabras o quita un filtro."
-          }
-        }
-      }
-    },
-    "picker.your_library_is_empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your library is empty"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu biblioteca está vacía"
-          }
-        }
-      }
-    },
     "platform.other" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8276,40 +7105,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Solo un video"
-          }
-        }
-      }
-    },
-    "player.close_full_screen" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close full screen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrar pantalla completa"
-          }
-        }
-      }
-    },
-    "player.full_screen" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full screen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pantalla completa"
           }
         }
       }
@@ -9066,23 +7861,6 @@
         }
       }
     },
-    "signin.email_only" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in or create account"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Iniciar sesión o crear cuenta"
-          }
-        }
-      }
-    },
     "signin.google" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9477,47 +8255,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "El almacenamiento está lleno"
-          }
-        }
-      }
-    },
-    "upload.cancel_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Cancel %lld upload?"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Cancel %lld uploads?"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "¿Cancelar %lld subida?"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "¿Cancelar %lld subidas?"
-                }
-              }
-            }
           }
         }
       }
@@ -10404,23 +9141,6 @@
         }
       }
     },
-    "videos.a_calm_oneminute_story_about" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A calm one-minute story about a lighthouse keeper"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una historia tranquila de un minuto sobre un farero"
-          }
-        }
-      }
-    },
     "videos.couldnt_load_your_videos" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10434,23 +9154,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No pudimos cargar tus videos"
-          }
-        }
-      }
-    },
-    "videos.creating_videos_is_paused" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Creating videos is paused"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La creación de videos está en pausa"
           }
         }
       }
@@ -10506,23 +9209,6 @@
         }
       }
     },
-    "videos.failed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falló"
-          }
-        }
-      }
-    },
     "videos.failed_row_a11y" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10553,23 +9239,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rellena la descripción. No la envía."
-          }
-        }
-      }
-    },
-    "videos.group_earlier" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Earlier"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antes"
           }
         }
       }
@@ -10608,23 +9277,6 @@
         }
       }
     },
-    "videos.how_bees_make_honey_explained" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How bees make honey, explained for kids"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómo hacen la miel las abejas, explicado para niños"
-          }
-        }
-      }
-    },
     "videos.load_failed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10659,23 +9311,6 @@
         }
       }
     },
-    "videos.making_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Making video: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Creando video: %@"
-          }
-        }
-      }
-    },
     "videos.making_row_a11y" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10706,23 +9341,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ No se usaron créditos."
-          }
-        }
-      }
-    },
-    "videos.my_holiday_in_thailand_told" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "My holiday in Thailand, told from my photos"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mis vacaciones en Tailandia, contadas con mis fotos"
           }
         }
       }
@@ -10778,23 +9396,6 @@
         }
       }
     },
-    "videos.ready" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ready"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listo"
-          }
-        }
-      }
-    },
     "videos.ready_a11y" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10846,23 +9447,6 @@
         }
       }
     },
-    "videos.sending_your_request" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sending your request…"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enviando tu solicitud…"
-          }
-        }
-      }
-    },
     "videos.settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10893,40 +9477,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Muestra tus créditos"
-          }
-        }
-      }
-    },
-    "videos.stage_percent_a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, about %2$lld percent"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, aproximadamente %2$lld por ciento"
-          }
-        }
-      }
-    },
-    "videos.tag_photos" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your photos"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tus fotos"
           }
         }
       }
@@ -10999,23 +9549,6 @@
         }
       }
     },
-    "videos.we_cant_make_this_one" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We can’t make this one"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No podemos crear este video"
-          }
-        }
-      }
-    },
     "videos.your_videos" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11067,40 +9600,6 @@
         }
       }
     },
-    "viewer.delete_photo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete photo"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eliminar foto"
-          }
-        }
-      }
-    },
-    "viewer.delete_this_photo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete this photo?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Eliminar esta foto?"
-          }
-        }
-      }
-    },
     "viewer.info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11114,23 +9613,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Información"
-          }
-        }
-      }
-    },
-    "viewer.it_is_removed_from_your" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "It is removed from your library and every collection. This can't be undone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se quita de tu biblioteca y de todas las colecciones. No se puede deshacer."
           }
         }
       }
@@ -13287,74 +11769,6 @@
         }
       }
     },
-    "videos.chip_story" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A calm story"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una historia"
-          }
-        }
-      }
-    },
-    "videos.chip_bees" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How bees make honey"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómo hacen miel las abejas"
-          }
-        }
-      }
-    },
-    "videos.chip_holiday" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "My holiday photos"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mis fotos de vacaciones"
-          }
-        }
-      }
-    },
-    "pill.auto" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auto"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auto"
-          }
-        }
-      }
-    },
     "media.add_photos" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13385,23 +11799,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Crear un video · %lld"
-          }
-        }
-      }
-    },
-    "media.coach" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap Select, choose photos, then Make a video."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca Seleccionar, elige fotos y luego Crear un video."
           }
         }
       }
@@ -13568,22 +11965,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ya casi"
-          }
-        }
-      }
-    },
-    "pill.auto_look" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auto look"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estilo auto"
           }
         }
       }
@@ -14116,23 +12497,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eliminado"
-          }
-        }
-      }
-    },
-    "undo.removed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Removed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quitado"
           }
         }
       }

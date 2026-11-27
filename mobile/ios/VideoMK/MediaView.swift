@@ -477,7 +477,7 @@ struct StorageSheet: View {
                         Divider().overlay(Theme.outline)
                         row(tr("media.left"), StorageMeter.format(meter.remaining))
                     }
-                    Text(tr("media.photos_that_fit_are_still")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    if meter.state != .ok { Text(tr("media.photos_that_fit_are_still")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true) }      // only when it matters
                     if s.canUpgrade, let url = MediaCopy.upgradeURL { Button(tr("media.get_more_storage")) { openURL(url) }.buttonStyle(TonalButtonStyle()).accessibilityIdentifier("upgradeStorage") }
                 } else { LiveSpinner().frame(maxWidth: .infinity).padding(.vertical, Theme.Space.xxl) }
                 Label(MediaCopy.privacy, systemImage: "lock.shield").font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)

@@ -68,12 +68,12 @@ final class VideoMKSpanishUITests: XCTestCase {
         XCTAssertEqual(el(app, "forPill").label, "Para", "the pills speak Spanish")
         app.buttons["createCancel"].tap()
         app.buttons["settingsButton"].tap()
-        XCTAssertTrue(app.navigationBars["Ajustes"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Ajustes"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["signOutButton"].waitForExistence(timeout: 5), "Sign out is at the top of Settings")
         for _ in 0..<5 where !app.buttons["deleteAccountButton"].exists { app.swipeUp() }
         XCTAssertEqual(app.buttons["deleteAccountButton"].label, "Eliminar cuenta")
         app.buttons["deleteAccountButton"].tap()
-        XCTAssertTrue(app.navigationBars["Eliminar cuenta"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Eliminar cuenta"].waitForExistence(timeout: 5))
         for _ in 0..<6 where !app.textFields["deleteConfirmField"].exists { app.swipeUp() }
         XCTAssertTrue(app.textFields["deleteConfirmField"].exists)
         XCTAssertEqual(app.textFields["deleteConfirmField"].placeholderValue, "ELIMINAR")
@@ -85,11 +85,11 @@ final class VideoMKSpanishUITests: XCTestCase {
     /// The in-app language row switches the whole app at once, without a restart.
     func testLanguageRowSwitchesWithoutRestart() {
         let app = session(["VMK_DEBUG_SHEET": "settings"])
-        XCTAssertTrue(app.navigationBars["Ajustes"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["Ajustes"].waitForExistence(timeout: 15))
         for _ in 0..<3 where !app.buttons["languagePicker"].exists { app.swipeUp() }      // the list grew taller with the new Support and Terms rows
         app.buttons["languagePicker"].tap()
         app.buttons["English"].tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
     }
 
     /// Screenshots of the main screens (no assertions beyond "it renders").
@@ -100,8 +100,8 @@ final class VideoMKSpanishUITests: XCTestCase {
         for s in ["empty", "filled", "photos", "options", "notaffordable", "q1", "summary", "checking", "unsupported", "paused"] {
             app = session(["VMK_DEBUG_CREATE": s]); _ = el(app, "composerField").waitForExistence(timeout: 15); sleep(1); shot(app, "10-create-\(s)"); app.terminate()
         }
-        app = session(["VMK_DEBUG_SHEET": "settings"]); _ = app.navigationBars["Ajustes"].waitForExistence(timeout: 15); shot(app, "20-settings"); app.swipeUp(); shot(app, "21-settings-bottom"); app.terminate()
-        app = session(["VMK_DEBUG_SHEET": "delete"]); _ = app.navigationBars["Eliminar cuenta"].waitForExistence(timeout: 15); shot(app, "22-delete"); for _ in 0..<3 { app.swipeUp() }; shot(app, "23-delete-bottom"); app.terminate()
+        app = session(["VMK_DEBUG_SHEET": "settings"]); _ = app.staticTexts["Ajustes"].waitForExistence(timeout: 15); shot(app, "20-settings"); app.swipeUp(); shot(app, "21-settings-bottom"); app.terminate()
+        app = session(["VMK_DEBUG_SHEET": "delete"]); _ = app.staticTexts["Eliminar cuenta"].waitForExistence(timeout: 15); shot(app, "22-delete"); for _ in 0..<3 { app.swipeUp() }; shot(app, "23-delete-bottom"); app.terminate()
         app = session(["VMK_DEBUG_DELETE_DONE": "available"]); _ = el(app, "deletedTitle").waitForExistence(timeout: 15); shot(app, "24-deleted"); app.terminate()
     }
 }

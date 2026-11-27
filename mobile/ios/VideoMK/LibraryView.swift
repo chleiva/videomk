@@ -178,7 +178,11 @@ struct LibraryView: View {
             PendingCard(pending: p, onRetry: { model.retry(p.id) }, onDismiss: { model.dismissPending(p.id) })
         case .video(let v):
             switch v.status {
-            case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(PressScale()).matchedGeometryEffect(id: v.id, in: reveal, properties: .position)
+            // the card is one button (it opens the Making screen, whose More menu holds Cancel video); a long press and VoiceOver's actions offer Cancel here too
+            case .running:
+                NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(PressScale()).matchedGeometryEffect(id: v.id, in: reveal, properties: .position)
+                    .contextMenu { Button(role: .destructive) { model.cancelVideo(v) } label: { Label(tr("making.cancel_video"), systemImage: "xmark.circle") } }
+                    .accessibilityAction(named: tr("making.cancel_video")) { model.cancelVideo(v) }
             case .complete: link(v) { VideoRow(video: v) }
             case .failed:
                 // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a used-up presentation or one out of retries.
