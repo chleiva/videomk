@@ -218,7 +218,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         for b in plan["beats"]:
             b.pop("speaker", None)
     if plan["tts"]["provider"] == "polly":  # recorded in the plan so edits months later still use the same voice
-        plan["tts"].update({"engine": os.environ.get("POLLY_ENGINE", "generative"), "region": os.environ.get("POLLY_REGION", "us-east-1")})
+        # `rate` 24000: the engine's own sample rate (as MP3); raw PCM stops at 16 kHz and loses everything above 8 kHz (engine/tts.PollyTTS)
+        plan["tts"].update({"engine": os.environ.get("POLLY_ENGINE", "generative"), "region": os.environ.get("POLLY_REGION", "us-east-1"),
+                            "rate": int(os.environ.get("POLLY_SAMPLE_RATE", "24000"))})
     key = awsio.prefix(video_id) + "plan_r1.json"
     awsio.put_json(key, plan)
     update_status(video_id, "ASSETS_CREATION", extra_attributes={"title": plan["title"], "n_beats": len(plan["beats"]), **making_progress.plan_attributes(plan), **_look_attribute(plan)})   # + the planned scenes for the Making screen

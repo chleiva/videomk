@@ -32,6 +32,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     out["has"]["amix_normalize_option"] = "normalize" in amix_help
     decoders = subprocess.run([ff, "-hide_banner", "-decoders"], capture_output=True, text=True).stdout
     out["has"].update({f"decode_{n}": (f" {n} " in decoders) for n in ("h264", "vp8", "vp9", "theora")})  # stock clips arrive as mp4, webm and ogv
+    out["has"]["decode_mp3"] = (" mp3 " in decoders) or (" mp3float " in decoders)   # full-band Polly speech arrives as MP3 (engine/tts.PollyTTS)
     out["imports_s"] = round(time.time() - t, 2)
 
     # render 60 frames of a mixed-scene timeline, encode, time it
