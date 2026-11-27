@@ -147,9 +147,13 @@ def test_a_beat_shares_a_board_only_when_its_things_really_fit():
     """Free ZONES are not room: the list of colours fits no single corner. With the aspect known the beat gets its own board and its author's zones back."""
     plan = _pl()
     plan["beats"][2]["scene"]["props"].pop("board")
-    zones = [it.get("zone") for it in plan["beats"][2]["scene"]["props"]["items"]]
     blind = _pl()
     blind["beats"][2]["scene"]["props"].pop("board")
+    for pl_ in (plan, blind):                                   # (a beat that writes its own top-row title opens a new subject and never shares: this test is about ROOM, so its heading is a plain text)
+        for it in pl_["beats"][2]["scene"]["props"]["items"]:
+            if it.get("write") == "Światło = mieszanka":
+                it["zone"] = "top"
+    zones = [it.get("zone") for it in plan["beats"][2]["scene"]["props"]["items"]]
     assert wp.compose(blind["beats"])["shared"] == 1 and _geometry(blind) != []                    # by zones alone: shared, and 'cols' leaves the board
     st = wp.compose(plan["beats"], "16:9")
     assert st["split"] == 1 and st["shared"] == 0 and st["boards"] == 4
