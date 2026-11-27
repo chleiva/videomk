@@ -163,6 +163,17 @@ class AuthTest {
         assertNotNull(offline.load())   // offline is not "signed out"
     }
 
+    @Test fun `a refresh that failed once (no network on the way back) works the next time`() = runBlocking {
+        // R124: the token ran out while the phone was locked, the first refresh met no network, and every later call died with it until the app was restarted
+        val store = InMemoryTokenStore(Tokens(fakeJwt(sub = "old"), "a", "r-old", Instant.now().minusSeconds(10)))
+        val auth = service(store)
+        server.enqueue(json(503, "{}"))
+        try { auth.authorization(); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }
+        server.enqueue(json(body = tokenBody(id = fakeJwt(sub = "fresh"))))
+        assertEquals("fresh", kotlinx.coroutines.withTimeout(5000) { auth.authorization().userId })
+        assertEquals(2, server.requestCount)
+    }
+
     @Test fun `no tokens means signed out and sign out clears`() = runBlocking {
         val store = InMemoryTokenStore(); val auth = service(store)
         try { auth.authorization(); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.SignedOut, e.kind) }
