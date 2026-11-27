@@ -32,7 +32,7 @@ object DebugHooks {
 
     /** `vmk_debug_fake_media`: fake My media data (no server) for screenshots. Read from a file flag so it works without an intent at container time. */
     fun fakeMedia(context: android.content.Context): com.videomk.app.core.MediaApi? =
-        if (java.io.File(context.filesDir, "fake_media").exists()) FakeMediaApi(full = java.io.File(context.filesDir, "fake_full").exists()) else null
+        if (java.io.File(context.filesDir, "fake_media").exists()) FakeMediaApi(full = java.io.File(context.filesDir, "fake_full").exists(), dupes = java.io.File(context.filesDir, "fake_dupes").exists()) else null
 
     /** `files/fake_balance` holds a number: the credits the app pretends to have (to look at the "not enough credits" composer). */
     fun balanceOverride(context: android.content.Context): Int? =

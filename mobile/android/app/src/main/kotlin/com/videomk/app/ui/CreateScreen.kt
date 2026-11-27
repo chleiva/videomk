@@ -354,7 +354,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 CreateButton(status.sendReady, phaseText, options.credits, status.text, status.fix != null, ::tapCreate)
                 if (status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint) {
                     if (balance != null) Text(pluralStringResource(R.plurals.create_credits_left, balance, balance), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().testTag("costLine"))
-                } else StatusLine(status, flash.value, shake.value, ::applyFix)
+                } else if (phaseText == null) StatusLine(status, flash.value, shake.value, ::applyFix)   // while locked the button itself says what is happening: no second copy of the line
             }
         }
     }
@@ -506,7 +506,7 @@ private fun PhotoStrip(composer: ComposerViewModel, onAdd: () -> Unit) {
             item {
                 val add = stringResource(R.string.create_add_photos)
                 Box(Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).clickable(role = Role.Button, onClickLabel = add, onClick = onAdd).semantics { contentDescription = add }, contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Add, null, tint = Vmk.colors.primary)
+                    Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary)
                 }
             }
         }

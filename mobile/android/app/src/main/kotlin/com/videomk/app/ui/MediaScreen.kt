@@ -549,17 +549,22 @@ fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, in
     var pick by remember { mutableStateOf(false) }
     var confirm by remember { mutableStateOf(false) }
     val n = vm.selection.size
-    val makeLabel = if (n > 0) stringResource(R.string.media_make_video_count, n) else stringResource(R.string.media_make_video_none)
-    val makeDesc = if (n > 0) stringResource(R.string.media_make_video_desc, n) else stringResource(R.string.media_make_video_none)
+    val max = com.videomk.app.core.PhotoLimits.MAX_PHOTOS
+    val used = minOf(n, max)   // a video takes at most [max] photos: the button says how many it will really use
+    val makeLabel = if (n > 0) stringResource(R.string.media_make_video_count, used) else stringResource(R.string.media_make_video_none)
+    val makeDesc = if (n > 0) stringResource(R.string.media_make_video_desc, used) else stringResource(R.string.media_make_video_none)
     Surface(color = Vmk.colors.surface, shadowElevation = 8.dp) {
-        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
+        if (n > max) Text(stringResource(R.string.media_make_video_limit, max), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).testTag("makeVideoLimit"))
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             GlassIconButton(Icons.Filled.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0)
             GlassIconButton(Icons.Filled.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0)
-            PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(100)) }, Modifier.weight(1f).testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
+            PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(max)) }, Modifier.weight(1f).testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
                 Icon(Icons.Filled.Movie, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary); Spacer(Modifier.width(8.dp))
                 Text(makeLabel, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             })
         }
+      }
     }
     if (pick) CollectionPickerDialog(vm, onDismiss = { pick = false }) { c -> vm.addToCollection(c, vm.selection.toList()); pick = false }
     if (confirm) AlertDialog(

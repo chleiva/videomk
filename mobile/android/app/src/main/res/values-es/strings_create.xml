@@ -233,8 +233,8 @@
         <item quantity="other">%1$d no cupieron en tu almacenamiento.</item>
     </plurals>
     <plurals name="photos_hint_suggest">
-        <item quantity="one">Caben unas %2$d de tu %1$d foto en %3$s (las mejores, sin duplicados). Elige %4$s para mostrarlas todas.</item>
-        <item quantity="other">Caben unas %2$d de tus %1$d fotos en %3$s (las mejores, sin duplicados). Elige %4$s para mostrarlas todas.</item>
+        <item quantity="one">Cabe %2$d de %1$d foto en %3$s.</item>
+        <item quantity="other">Caben unas %2$d de %1$d fotos en %3$s.</item>
     </plurals>
     <plurals name="photos_hint_longest">
         <item quantity="one">Caben unas %2$d de tu %1$d foto en el video más largo.</item>

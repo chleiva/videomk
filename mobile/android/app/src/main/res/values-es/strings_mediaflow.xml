@@ -9,4 +9,5 @@
     <string name="media_make_video_desc">Crear un video con las %1$d fotos seleccionadas</string>
     <string name="create_phase_checking">Revisando tu solicitud…</string>
     <string name="create_phase_starting">Iniciando tu video…</string>
+    <string name="media_make_video_limit">Un video admite hasta %1$d fotos. Se usan las primeras %1$d.</string>
 </resources>

@@ -233,8 +233,8 @@
         <item quantity="other">%1$d did not fit in your storage.</item>
     </plurals>
     <plurals name="photos_hint_suggest">
-        <item quantity="one">About %2$d of your %1$d photo fit in %3$s (the best ones, no duplicates). Choose %4$s to show them all.</item>
-        <item quantity="other">About %2$d of your %1$d photos fit in %3$s (the best ones, no duplicates). Choose %4$s to show them all.</item>
+        <item quantity="one">About %2$d of %1$d photo fits in %3$s.</item>
+        <item quantity="other">About %2$d of %1$d photos fit in %3$s.</item>
     </plurals>
     <plurals name="photos_hint_longest">
         <item quantity="one">About %2$d of your %1$d photo fit in the longest video.</item>

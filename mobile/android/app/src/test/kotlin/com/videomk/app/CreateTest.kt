@@ -370,7 +370,7 @@ class CreateTest {
         assertEquals(2, CreateOptions(61.0 / 60).credits); assertEquals(1, CreateOptions(0.25).credits)
         assertEquals(12, com.videomk.app.core.PhotoCapacity.capacity(0.25)); assertEquals(25, com.videomk.app.core.PhotoCapacity.capacity(0.5))
         assertEquals(38, com.videomk.app.core.PhotoCapacity.capacity(0.75)); assertEquals(51, com.videomk.app.core.PhotoCapacity.capacity(1.0))
-        assertEquals("About 12 of your 30 photos fit in 15 seconds (the best ones, no duplicates). Choose 45 seconds to show them all.", com.videomk.app.core.PhotoCapacity.hint(30, 0.25, c.presets)!!.replace("Choose 45 seconds", "Choose 45 seconds"))
+        assertEquals("About 12 of 30 photos fit in 15 seconds.", com.videomk.app.core.PhotoCapacity.hint(30, 0.25, c.presets)!!.replace("Choose 45 seconds", "Choose 45 seconds"))
         // no `lengths` in the payload: the old presets
         assertEquals(com.videomk.app.core.Lengths.OLD_PRESETS, Capabilities.fromJson(com.videomk.app.core.parseObject(PAYLOAD.replace(Regex("\"lengths\":\\{[^}]*\\},"), ""))).presets)
         // the old whole-minute choice is still remembered; 45 s too

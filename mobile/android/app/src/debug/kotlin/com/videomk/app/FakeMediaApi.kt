@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 
 /** Debug only: made-up My media data with gradient thumbnails (data: URIs), to look at the screens without a server. Never in a release build. */
-class FakeMediaApi(private val full: Boolean = false) : MediaApi {
+class FakeMediaApi(private val full: Boolean = false, private val dupes: Boolean = false) : MediaApi {
     private val places = listOf("Phuket, Thailand", "Lisbon, Portugal", "Kyoto, Japan", null, "Cape Town, South Africa", null)
     private val photos = MutableList(150) { i ->
         val t = LocalDateTime.of(2025, 9, 28, 14, 0).minusDays(i * 2L).minusHours(i % 5L)
@@ -44,7 +44,9 @@ class FakeMediaApi(private val full: Boolean = false) : MediaApi {
         val all = photos.filter { filter.collection == null || filter.collection in it.collections }
         val start = cursor?.toIntOrNull() ?: 0
         val end = minOf(all.size, start + limit)
-        return MediaPage(all.subList(start, end), if (end < all.size) end.toString() else null)
+        // `files/fake_dupes`: every page repeats some ids and photos share a timestamp (what a server hiccup can send), to prove the grids survive it
+        val page = all.subList(start, end).let { p -> if (dupes) p + p.take(5) + p.takeLast(3).map { it.copy(taken = p.first().taken) } else p }
+        return MediaPage(page, if (end < all.size) end.toString() else null)
     }
     override suspend fun item(id: String) = photos.first { it.id == id }.copy(url = photos.first { it.id == id }.thumbUrl)
     override suspend fun delete(ids: List<String>): DeleteResult { photos.removeAll { it.id in ids }; return DeleteResult(ids.size, 1_700_000_000) }

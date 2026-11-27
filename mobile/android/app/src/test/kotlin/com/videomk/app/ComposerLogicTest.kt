@@ -59,7 +59,7 @@ class ComposerLogicTest {
     @Test fun `too many photos for the length gives a hint with a fix, and send stays ready`() {
         val s = st(minutes = 1.0, balance = 5, photos = 100)
         assertEquals(StatusKind.PhotoHint, s.kind); assertTrue(s.sendReady)
-        assertTrue(s.text.startsWith("About 51 of your 100 photos fit in 1 minute")); assertEquals(2.0, s.fix!!.minutes!!, 0.0); assertEquals("Use 2 min · ⚡2", s.fix!!.label())
+        assertTrue(s.text.startsWith("About 51 of 100 photos fit in 1 minute")); assertEquals(2.0, s.fix!!.minutes!!, 0.0); assertEquals("Use 2 min · ⚡2", s.fix!!.label())
         assertEquals(StatusKind.Ready, st(minutes = 2.0, photos = 100).kind)
         assertEquals(2.0, PhotoCapacity.suggestion(100, 1.0, listOf(1.0, 2.0, 3.0))!!, 0.0); assertNull(PhotoCapacity.suggestion(40, 1.0, listOf(1, 2, 3)))
     }
