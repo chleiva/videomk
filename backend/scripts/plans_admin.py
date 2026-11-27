@@ -266,7 +266,7 @@ def main() -> None:
         ap.add_argument(f"--{name}", type=int)
     ap.add_argument("--days", type=int, default=7)
     ap.add_argument("--show-prompt", action="store_true", help="showcase add: list the video's real prompt with it")
-    ap.add_argument("--made-by-us", action="store_true", help="showcase add: you checked that this video was made by videomk, not by a customer")
+    ap.add_argument("--made-by-us", action="store_true", help="showcase add: you checked that this video was made by VideoMK, not by a customer")
     a = ap.parse_args()
     a.knob = a.target
     if a.command == "config":

@@ -96,7 +96,7 @@ registered in Cognito (CDK does that), not at Google or Apple. The list per prov
 | Result | Client ID and Client secret |
 No Android or iOS Google client is needed: the apps use the hosted UI in a browser sheet.
 
-OAuth consent screen (once per project): User type **External**; app name videomk; support email; app home page `https://videomk.com`; privacy policy `https://videomk.com/privacy`;
+OAuth consent screen (once per project): User type **External**; app name VideoMK; support email; app home page `https://videomk.com`; privacy policy `https://videomk.com/privacy`;
 terms `https://videomk.com/terms`; authorised domain `videomk.com` (verify it in Google Search Console first); scopes only `openid`, `email`, `profile` (non-sensitive: no Google verification review);
 **Publishing status: In production** (in "Testing" only listed test users can sign in and refresh tokens die after 7 days).
 

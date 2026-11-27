@@ -80,7 +80,7 @@ def test_headers_are_rewritten():
     assert kw["Source"] == FROM and kw["Destinations"] == [TO]
     m = sent_msg(ses)
     assert m["From"].addresses[0].addr_spec == FROM
-    assert m["From"].addresses[0].display_name == "Ana García via videomk"
+    assert m["From"].addresses[0].display_name == "Ana García via VideoMK"
     assert m["Reply-To"].addresses[0].addr_spec == "other@example.org"
     assert m["To"].addresses[0].addr_spec == TO
     assert m["Cc"] is None

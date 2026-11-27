@@ -19,7 +19,7 @@ def _back(kind: str, status: str) -> Dict[str, Any]:
     base = os.environ["APPLE_APP_RETURN"] if kind == "app" else os.environ["APPLE_WEB_RETURN"]
     sep = "&" if "?" in base else "?"
     url = f"{base}{sep}status={status}"
-    html = f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url={url}"><title>videomk</title><p><a href="{url}">Back to videomk</a></p>'
+    html = f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url={url}"><title>VideoMK</title><p><a href="{url}">Back to VideoMK</a></p>'
     return {"statusCode": 303, "headers": {"Location": url, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}, "body": html, "isBase64Encoded": False}
 
 

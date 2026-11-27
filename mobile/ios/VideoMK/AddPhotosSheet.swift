@@ -3,7 +3,7 @@ import SwiftUI
 import VideoMKCore
 
 /// Photos for the video come from two places, each one tap from the photo icon of Create (a two-item menu, no explainer in between):
-/// "Photo library" opens the system picker directly (it runs in its own process: videomk only receives the photos that are tapped, and no permission
+/// "Photo library" opens the system picker directly (it runs in its own process: VideoMK only receives the photos that are tapped, and no permission
 /// is asked), and "Media" opens this sheet, the person's own library with the same top bar and one primary button as the Media tab ("Add · 3").
 struct LibraryPickerSheet: View {
     @Environment(AppModel.self) private var model

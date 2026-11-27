@@ -29,9 +29,9 @@ targets:
     info:
       path: VideoMK/Info.plist
       properties:
-        CFBundleDisplayName: videomk
+        CFBundleDisplayName: VideoMK
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, es]    # the app speaks English and Spanish (docs/I18N.md); iOS Settings > videomk > Language lists both
+        CFBundleLocalizations: [en, es]    # the app speaks English and Spanish (docs/I18N.md); iOS Settings > VideoMK > Language lists both
         UILaunchScreen:
           UIColorName: LaunchBackground
         # iPhone is portrait. The full-screen player alone turns sideways, through AppDelegate.supportedInterfaceOrientationsFor (OrientationLock).
@@ -44,9 +44,9 @@ targets:
         # "Tell me when it's ready": a look at the list when iOS grants a background refresh (there is no push from the server yet)
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [com.videomk.app.ready]
-        NSPhotoLibraryAddUsageDescription: videomk saves a finished video to your Photos only when you tap Save to Photos.
-        NSMicrophoneUsageDescription: videomk uses the microphone only while you hold dictation on, so you can say what video you want instead of typing it.
-        NSSpeechRecognitionUsageDescription: videomk turns your speech into text for your video brief. Where your iPhone supports it, this happens on the device.
+        NSPhotoLibraryAddUsageDescription: VideoMK saves a finished video to your Photos only when you tap Save to Photos.
+        NSMicrophoneUsageDescription: VideoMK uses the microphone only while you hold dictation on, so you can say what video you want instead of typing it.
+        NSSpeechRecognitionUsageDescription: VideoMK turns your speech into text for your video brief. Where your iPhone supports it, this happens on the device.
         VMKApiBase: $(VMK_API_BASE)
         VMKAuthDomain: $(VMK_AUTH_DOMAIN)
         VMKClientID: $(VMK_CLIENT_ID)

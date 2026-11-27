@@ -158,7 +158,7 @@ def test_gallery_only_mode_is_a_complete_state(launcher, defaults):
     w = body_of(wallet_api.handler(app_event(resource="/users/{user_id}/wallet", method="GET"), None))
     assert w["free_creation"] == "none" and w["balance"] == 0 and w["buckets"] == []
     assert w["free"]["available"] is False and w["free"]["reason"] == "off" and w["free"]["credits_left"] == 0 and w["free"]["budget_paused"] is False
-    assert w["free"]["message"] == "Creating videos needs a plan. Watch what videomk makes in the gallery."
+    assert w["free"]["message"] == "Creating videos needs a plan. Watch what VideoMK makes in the gallery."
     assert w["plan"]["id"] == "free" and w["can_upgrade"] is False and w["next_free_credit_at"] is None
     c = body_of(capabilities_api.handler(app_event(headers={"X-Locale": "es"}), None))
     assert c["free_creation"] == "none" and c["free"]["reason"] == "off" and c["free"]["message"].startswith("Para crear videos necesitas un plan")

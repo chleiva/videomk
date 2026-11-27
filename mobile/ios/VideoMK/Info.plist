@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>videomk</string>
+	<string>VideoMK</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -43,11 +43,11 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>videomk uses the microphone only while you hold dictation on, so you can say what video you want instead of typing it.</string>
+	<string>VideoMK uses the microphone only while you hold dictation on, so you can say what video you want instead of typing it.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>videomk saves a finished video to your Photos only when you tap Save to Photos.</string>
+	<string>VideoMK saves a finished video to your Photos only when you tap Save to Photos.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>videomk turns your speech into text for your video brief. Where your iPhone supports it, this happens on the device.</string>
+	<string>VideoMK turns your speech into text for your video brief. Where your iPhone supports it, this happens on the device.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

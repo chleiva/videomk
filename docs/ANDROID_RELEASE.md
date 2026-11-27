@@ -130,7 +130,7 @@ Assets and text to prepare (none exist yet):
   Spanish listing is the remaining owner task. In Play Console add the languages under *Store presence > Main store listing > Manage translations* (Spanish (Spain) es-ES and Spanish (Latin America) es-419 can share one text),
   and prepare: app name (30), short description (80), full description (4000), Spanish phone screenshots (take them in the app set to Español; `mobile/android/README.md` says how to run the app on canned data), a Spanish
   feature graphic if it contains text, release notes per language (`<es-ES>...</es-ES>` tags), the localized privacy policy URL (`https://videomk.com/es/privacy`) and the data-safety and content-rating answers (language-neutral).
-  The app label is `videomk` in both languages (a brand name).
+  The app label is `VideoMK` in both languages (a brand name).
 
 ## 8. Before the first production release
 1. Production backend deployed; set the three `vmkProd*` values; the production Cognito mobile client has the redirect `com.videomk.app://auth/callback`; run the instrumented tests against it.

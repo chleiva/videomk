@@ -1,5 +1,5 @@
 {
- "gen.page_title": "Videos — videomk",
+ "gen.page_title": "Videos — VideoMK",
  "gen.title": "Your videos",
  "gen.subtitle": "Pick up where you left off.",
  "gen.toggle_view": "Toggle view",
@@ -105,7 +105,7 @@
  "media.max_select": "A video takes up to {n} photos.",
  "media.photo_a11y": "{label}",
  "media.photo_selected": "selected",
- "media.privacy": "Your photos are private to you. Only you can see them. Nobody at videomk browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.",
+ "media.privacy": "Your photos are private to you. Only you can see them. Nobody at VideoMK browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time.",
  "media.privacy_dismiss": "Got it",
  "media.storage": "{used} of {limit}",
  "media.storage_a11y": "Storage: {used} of {limit}",

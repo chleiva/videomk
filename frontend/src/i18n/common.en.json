@@ -32,7 +32,7 @@
  "consent.ok": "OK",
  "consent.close": "Close",
  "notfound.title": "Page not found",
- "notfound.back": "Back to videomk",
+ "notfound.back": "Back to VideoMK",
  "val.narr_min": "Narration needs at least {min} words.",
  "val.narr_max": "Narration is limited to {max} words per beat: split it into two beats.",
  "val.title": "Add a title.",

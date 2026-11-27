@@ -1,4 +1,4 @@
-# videomk brand mark (v3: play + AI sparks, no letters)
+# VideoMK brand mark (v3: play + AI sparks, no letters)
 
 Status: proposal for owner approval. No app or site code uses these files. Earlier directions are kept in `archive-mk-cursor/` (shared-stem MK cursor, rejected) and `archive-play-mk/` (white play with MK knocked out, superseded by the owner's "remove the letters").
 

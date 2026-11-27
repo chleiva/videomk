@@ -1,5 +1,5 @@
 // The sample videos on the home page (public/samples/). Rules (docs/WEB_REDESIGN_2026.md section 7):
-//  - every video is a REAL videomk output made through the real pipeline (nothing mocked); the files here are short cuts (<= 30 s) with their sound;
+//  - every video is a REAL VideoMK output made through the real pipeline (nothing mocked); the files here are short cuts (<= 30 s) with their sound;
 //  - `prompt` is shown with the video ONLY when it is the real prompt that produced it (an excerpt taken word for word is allowed); `null` means "title only";
 //  - no personal photos or identifiable people (the Majorca family videos were left out on purpose);
 //  - features that are not live for everybody yet (animated backgrounds, cartoon scenes) are not shown.

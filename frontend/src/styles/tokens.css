@@ -1,4 +1,4 @@
-/* videomk design tokens for the web. ONE file: every colour, size and duration the pages use comes from here.
+/* VideoMK design tokens for the web. ONE file: every colour, size and duration the pages use comes from here.
    Values follow the design bar (docs/DESIGN_BAR_2026.md section 4, docs/design_bar/src/base.css); the semantic names are the apps' (DesignTokens.swift).
    Light by default; dark follows the system (prefers-color-scheme) unless the person chose one (html[data-theme="light|dark"], set by the footer switch).
    The dark block appears twice (system and manual): src/styles/tokens.test.ts checks both are identical and computes WCAG contrast for every pair.

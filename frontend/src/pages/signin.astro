@@ -5,7 +5,7 @@ import { chooserOptions } from "../lib/authUrl";
 // Apple first when it is on (Apple asks for equal prominence), then Google, then email.
 const options = chooserOptions({ google: AUTH_GOOGLE, apple: AUTH_APPLE }).sort((a, b) => ["apple", "google", "email"].indexOf(a.id) - ["apple", "google", "email"].indexOf(b.id));
 ---
-<AppLayout shell={false} title="Sign in · videomk" description="Sign in to videomk." titleKey="signin.page_title">
+<AppLayout shell={false} title="Sign in · VideoMK" description="Sign in to VideoMK." titleKey="signin.page_title">
 	<div class="signin">
 		<div class="card" role="group" aria-labelledby="signin-title">
 			<img class="mark" src="/favicon.svg" width="72" height="72" alt="" aria-hidden="true" />

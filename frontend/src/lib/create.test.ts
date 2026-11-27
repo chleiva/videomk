@@ -114,7 +114,7 @@ describe("quality", () => {
 });
 
 describe("look, scenes and watermark in the request", () => {
-  const wcaps = { ...caps, watermark: { modes: [{ id: "none" as const, label: "None", available: true }, { id: "videomk" as const, label: "videomk", available: true }, { id: "custom" as const, label: "Your logo (Pro)", available: false, requires: "premium" }], forced: false, premium: false } };
+  const wcaps = { ...caps, watermark: { modes: [{ id: "none" as const, label: "None", available: true }, { id: "videomk" as const, label: "VideoMK", available: true }, { id: "custom" as const, label: "Your logo (Pro)", available: false, requires: "premium" }], forced: false, premium: false } };
   it("nothing extra is sent for the defaults (auto look, auto scenes, saved watermark)", () => {
     expect(buildOptions(defaultForm(wcaps), wcaps, true)).toEqual({ platform: "other", aspect: "16:9", resolution: "1080p", captions: true, language: "auto", target_minutes: 1 });
   });
@@ -131,7 +131,7 @@ describe("look, scenes and watermark in the request", () => {
   it("capabilities.watermark is parsed defensively", () => {
     expect(parseWatermarkCaps(undefined)).toBeUndefined();
     expect(parseWatermarkCaps({ modes: [{ id: "bogus", label: "x" }] })).toBeUndefined();
-    expect(parseWatermarkCaps({ modes: [{ id: "videomk", label: "videomk" }], forced: true })).toEqual({ modes: [{ id: "videomk", label: "videomk", available: true, requires: undefined }], forced: true, premium: false });
+    expect(parseWatermarkCaps({ modes: [{ id: "videomk", label: "VideoMK" }], forced: true })).toEqual({ modes: [{ id: "videomk", label: "VideoMK", available: true, requires: undefined }], forced: true, premium: false });
   });
 });
 

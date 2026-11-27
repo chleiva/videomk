@@ -164,6 +164,7 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
     if not watermark_store.enabled():
         options.pop("watermark", None)
         return None
+    wr: Dict[str, Any] = {}
     try:
         wr = watermark_store.rights(user_id)   # by plan where plans are on (docs/PLANS.md), else the flags and the stack policy as before
         premium, forced = wr["premium"], wr["forced"]
@@ -175,7 +176,8 @@ def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional
         if forced and wr.get("by_plan"):
             spec = watermark_store.forced_spec(spec)
     except watermark_store.WatermarkError as e:
-        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {}), **e.extra})
+        by_plan = {"plan": wr.get("plan"), "can_upgrade": plan_gate.plans.PURCHASES_LIVE} if wr.get("by_plan") and "requires_plan" in e.extra else {}   # a plan refusal says the same as the others (docs/PLANS.md section 4)
+        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {}), **e.extra, **by_plan})
     except Exception:   # noqa: BLE001 - a watermark lookup problem must never stop a video: the policy default decides
         logger.exception("WATERMARK_RESOLVE_FAILED user=%s", user_id)
         from common import plans as _plans

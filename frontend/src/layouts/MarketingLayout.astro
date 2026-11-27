@@ -10,7 +10,7 @@ import { pathForLocale, translate } from "../lib/i18n";
 import type { Locale } from "../lib/i18n";
 import { appUrl } from "../lib/links";
 // `locale`: marketing pages are written in one language (at / and at /es/). `alternates`: this page exists in both languages (hreflang + canonical).
-const { title = "videomk", description, locale = "en", alternates = true, ogImage = "/og.jpg" } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean; ogImage?: string };
+const { title = "VideoMK", description, locale = "en", alternates = true, ogImage = "/og.jpg" } = Astro.props as { title?: string; description?: string; locale?: Locale; alternates?: boolean; ogImage?: string };
 const L: Locale = locale;
 const tr = (k: string) => translate(k, L);
 const here = (Astro.url.pathname || "/").replace(/index\.html$/, "");
@@ -33,9 +33,9 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 		<a href="#content" class="skip-link">{tr("shell.skip")}</a>
 		<header class="site-header">
 			<div class="site-header-in">
-				<a href={pathForLocale("/", L)} class="brand" aria-label="videomk">
+				<a href={pathForLocale("/", L)} class="brand" aria-label="VideoMK">
 					<span class="brand-mark" aria-hidden="true"><img src="/favicon.svg" alt="" width="32" height="32" /></span>
-					<span>videomk</span>
+					<span>VideoMK</span>
 				</a>
 				<slot name="nav" />
 				<a href={appUrl("/")} class="btn btn-inverse btn-sm site-cta">{tr("home.open_app")}</a>
@@ -45,7 +45,7 @@ const footer = [["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/s
 			<slot />
 		</main>
 		<footer class="site-footer">
-			<nav class="footer-row" aria-label="videomk">
+			<nav class="footer-row" aria-label="VideoMK">
 				{footer.map(([path, key], i) => (
 					<>
 						{i > 0 && <span aria-hidden="true">·</span>}
