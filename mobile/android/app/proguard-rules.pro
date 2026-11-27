@@ -5,3 +5,6 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+
+# Play review-ktx references a compile-time-only annotation from Play services base
+-dontwarn com.google.android.gms.common.annotation.NoNullnessRewrite
