@@ -1,0 +1,62 @@
+{
+ "_note": "The plan of the first pt QA video (2026-11-27, c5e1ee3), asked for 45 s: its narration and the measured speech of each beat (`_speech_s`). The narration ended 37.0 s into a 45.4 s video; the last scene was held 16.0 s. Used by tests/test_length_fit.py.",
+ "language": "pt",
+ "voices": {
+  "narrator": "Camila"
+ },
+ "target_seconds": 45,
+ "_speech_s": [
+  7.67,
+  7.21,
+  6.83,
+  7.23
+ ],
+ "_scene_s": [
+  10.22,
+  9.76,
+  9.38,
+  16.03
+ ],
+ "beats": [
+  {
+   "id": "43fe2aeb",
+   "narration": "A Lua não muda de forma nenhuma. Ela é sempre uma esfera. O que muda é a parte iluminada que enxergamos daqui da Terra.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  },
+  {
+   "id": "a8ccd196",
+   "narration": "O Sol sempre ilumina metade da Lua. Mas, conforme ela gira em volta da Terra, vemos mais ou menos dessa metade clara.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  },
+  {
+   "id": "8a22ea51",
+   "narration": "Na lua nova, o lado iluminado fica de costas para nós e ela some. Depois ela cresce, até a lua cheia.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  },
+  {
+   "id": "6bc01d86",
+   "narration": "Depois ela diminui e volta à nova. Esse ciclo leva pouco mais de 29 dias. Olhe para o céu toda noite e confira.",
+   "scene": {
+    "type": "title",
+    "props": {
+     "title": "x"
+    }
+   }
+  }
+ ]
+}

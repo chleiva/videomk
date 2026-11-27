@@ -32,7 +32,7 @@ A video can be narrated in a language that the apps themselves are not translate
 | Line breaking | at spaces | fine | fine (French puts a space before ? and :, so a lone "?" can be highlighted as its own caption word: cosmetic) | Korean breaks at spaces too, but lines are denser: untested |
 | Word timing from the audio | `engine/align.py` | 96 and 97 ms mean error | 71 to 145 ms (table below) | 73 ms |
 | Numbers | `engine/numfmt.py` | 1,250.5 and 1250,5 | decimal comma, thousands spaced from five digits (12 345,6): the international form | decimal point |
-| Length fit (speaking rate) | `engine/length.py` | four voices fitted on 1,700 real beats | every voice measured on one sentence (approximate) | measured |
+| Length fit (speaking rate) | `engine/length.py`, `engine/plan.words_per_s` | four voices fitted on 1,700 real beats; word budget 2.4 words a second | since 2026-11-27: the default voice of each language fitted on a 70-word passage and, for fr, de, it, pt, pl, the four beats of a QA video; the other voices are that fit scaled by their one sentence; **the word budget follows the language** (table below) | one sentence |
 | Research | the Wikipedia of the language; web research told the language | as before | fr, de, it, pt, nl, pl, fi Wikipedias | ko |
 | Stock photo and clip search | the planner writes the search words | in the video's language or English, as before | **told to write search words in English** | - |
 | Presenter characters | a voice of the language for the character's gender (`presenter_policy.voice_for`) | hand-picked voices | by the resolver; Dutch, Polish and Finnish have no male voice, so David, Mateo and the male animals get a woman's voice there | - |
@@ -66,8 +66,35 @@ Two changes to the aligner, both for every language: a Hangul block counts as a 
 4. **Wishes written in the request are read in English and Spanish only** where they are read by rules: "whiteboard", "cartoon", "with a presenter", "no background", gestures cued by "first, second". In other languages the request check (a model) still understands the look asked for, but the rule-based shortcuts do not fire. The video is made; the wish may be missed.
 5. **Numbers:** German, Italian, Dutch and Portuguese more often group thousands with a point (12.345,6); we write 12 345,6, which is correct and unambiguous but less customary.
 6. **Filler-phrase bans** ("in this video", "welcome") are listed in English and Spanish; other languages are told "nor their equivalents".
-7. **The pace estimate for a new voice comes from one sentence**, so the length fit is less exact than for Ruth, Amy, Lucia and Lupe; the timeline's stretch and tighten steps absorb it, as they do today.
+7. **Pace and length (corrected 2026-11-27, see "Length in other languages").** The first five QA videos showed the limit was not the one written here: the time estimate from one sentence was within 5 percent; what was wrong was the budget counted in WORDS at the English rate. Non-default voices still rest on one sentence each, and Dutch and Finnish on one passage.
 8. **Edit by text, captions, chapters** use the same code paths and were not separately exercised per language.
+
+## Length in other languages (2026-11-27, branch `languages-qa-fixes`)
+
+**What was seen:** in the first French and Portuguese 45 s videos the narration ended at 34.7 and 36.9 s; the last board and caption stood still for 8 to 11 s with music only (English: 42.5 s).
+
+**Cause:** the writer is given a budget in words (89 for 45 s) at 2.4 words a second, an English figure. Characters predict speaking time, words do not:
+
+| Language (default voice) | Words a second, measured | Words asked for 45 s | for 60 s |
+|---|---|---|---|
+| English (Ruth), Spanish (Lucia) | 2.63 (median of 174 videos); budget 2.4, unchanged | 89 | 130 |
+| French (Léa) | 3.03 | 103 | 150 |
+| Portuguese (Camila) | 3.09 | 105 | 153 |
+| Dutch (Laura) | 2.79 (one passage) | 95 | 138 |
+| German (Vicki) | 2.66 | 90 | 131 |
+| Italian (Bianca) | 2.59 | 88 | 128 |
+| Polish (Ola) | 2.37 | 80 | 117 |
+| Finnish (Suvi) | 1.95 (one passage) | 66 | 96 |
+
+Measured on one explainer passage of 65 to 76 words per language (Polly generative, the default voice) and the four beats of the QA video of the language where there is one; the two agree within 1 percent for every language that has both. The 81 French words that were delivered are 26.7 s of speech; a 45 s video needs about 38.
+
+**What changed:**
+1. `plan.expected_words(minutes, photos, language)`: the budget in the prompt, the "too short, write it again" check and the "too long" check count in the language's words. English and Spanish are exactly as before.
+2. `length.RATES` has a fit for the default voice of each new language (error on the QA videos and the passage: at most 5 percent; before: 4 percent long for Léa, 6 to 8 percent short for Vicki, Camila and Laura).
+3. `length.extend_script` (director, before the cut step; not for English and Spanish, not for photo videos): a script estimated so short that holding every scene 1.6 s longer cannot reach the length is sent to the writer ONCE to be lengthened, beat by beat, existing sentences kept word for word. One call of the script model when it happens. Recorded in `research.length_extended` and as a plan warning.
+4. `timeline.stretch_to`, every language, with the measured audio: what is still missing after every spoken scene is held 1.6 s longer goes to the last scene only if it is 2.5 s or less; more is shared by all spoken scenes. A video is still never shorter than asked (the product's promise, `docs/QUALITY_REVIEW.md` 11); it no longer reaches its length by freezing its last picture.
+
+**Replay on the two QA plans with their real audio** (`tests/fixtures/plans/`): French, script unchanged: narration ends at 40.1 s instead of 34.8, every scene held 3.4 s instead of the last one 8.7 s; with the script lengthened as asked (+35 words): 42.2 s. Portuguese: 40.6 s instead of 37.0; lengthened (+27 words): 42.6 s. **Not measured on a real new video yet.**
 
 ## Korean: what it needs (not done)
 

@@ -349,20 +349,32 @@ def photo_frame_s(target_minutes: float) -> float:
     return SHORT_PHOTO_FRAME_S if is_short(target_minutes) else PHOTO_FRAME_S
 
 
-def expected_words(target_minutes: float, n_photos: int = 0) -> int:
-    """The narration words that make a video `target_minutes` long: the speaking time left after every beat's lead-in and tail, at the measured speaking rate."""
+def words_per_s(language: str = "en") -> float:
+    """The words a second the budget counts on, in this language. English and Spanish: SPOKEN_WORDS_PER_S, as always. The other languages say more or
+    fewer WORDS in the same time (French 3.03 a second, Finnish 1.95, measured: engine/length.WORDS_PER_S), so the same budget in words gave a French video
+    whose narration ended 10 s early and would give a Finnish one that has to be cut: their budget is the English one in the proportion of the real rates."""
+    from . import length
+
+    lang = str(language or "en").lower()[:2]
+    real = length.WORDS_PER_S.get(lang)
+    return SPOKEN_WORDS_PER_S if lang in ("en", "es") or not real else SPOKEN_WORDS_PER_S * real / length.WORDS_PER_S["en"]
+
+
+def expected_words(target_minutes: float, n_photos: int = 0, language: str = "en") -> int:
+    """The narration words that make a video `target_minutes` long: the speaking time left after every beat's lead-in and tail, at the measured speaking rate
+    (of the language: `words_per_s`)."""
     short = is_short(target_minutes)
     left = target_minutes * 60 - (photo_frame_s(target_minutes) if n_photos else (SHORT_END_S if short else 0.0)) - expected_beats(target_minutes, n_photos) * BEAT_OVERHEAD_S
-    return max(20 if short else 60, int(left * SPOKEN_WORDS_PER_S * (SHORT_WORDS_CALIBRATION if short else 1.0)))
+    return max(20 if short else 60, int(left * words_per_s(language) * (SHORT_WORDS_CALIBRATION if short else 1.0)))
 
 
 def spoken_words(beats: List[Dict[str, Any]]) -> int:
     return sum(len(b.get("narration", "").split()) for b in beats if not b.get("silent"))
 
 
-def length_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0) -> Optional[str]:
+def length_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0, language: str = "en") -> Optional[str]:
     """A message when the script is too short for the length that was asked for (and paid for); None when it is fine or the video is short anyway."""
-    target = expected_words(target_minutes, n_photos)
+    target = expected_words(target_minutes, n_photos, language)
     short = is_short(target_minutes)
     if target < 250 and not short:  # about a minute and a half or less: the plan lands close enough, and short test plans are common
         return None
@@ -398,11 +410,11 @@ def beats_phrase(beats: int, short: bool = False) -> str:
     return f"{beats} to {beats + 2} beats" if quality_fixes() else f"at least {beats} beats"
 
 
-def long_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0) -> Optional[str]:
+def long_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0, language: str = "en") -> Optional[str]:
     """A message when the script would make a longer video than the one asked for (QUALITY_FIXES only); None otherwise. Photo videos are paced by their photos."""
     if not quality_fixes() or (n_photos and not is_short(target_minutes)):
         return None
-    target = expected_words(target_minutes, n_photos)
+    target = expected_words(target_minutes, n_photos, language)
     have = spoken_words(plan.get("beats") or [])
     if have <= (SHORT_HIGH_SHARE if is_short(target_minutes) else MAX_LENGTH_SHARE) * target:
         return None
@@ -416,9 +428,10 @@ def long_problem(plan: Dict[str, Any], target_minutes: float, n_photos: int = 0)
             f"keep the hook, the key points and the ending, and do not go under {int(target * TARGET_LOW)} words")
 
 
-def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None) -> str:
+def build_user_prompt(topic: str, notes: str, target_minutes: float, today: Optional[str] = None, photos: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None,
+                      language: str = "en") -> str:
     beats = expected_beats(target_minutes, photo_slots(photos, story))
-    words = expected_words(target_minutes, photo_slots(photos, story))
+    words = expected_words(target_minutes, photo_slots(photos, story), language)
     return (
         f"Topic: {topic}\n\n"
         f"Target length: {length_phrase(target_minutes)}. This is a hard requirement: the narration must total between {int(words * (SHORT_ASK_LOW if is_short(target_minutes) else TARGET_LOW if quality_fixes() else 0.9))} and {int(words * (SHORT_ASK_HIGH if is_short(target_minutes) else TARGET_HIGH if quality_fixes() else 1.1))} words "
@@ -977,9 +990,9 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
     """llm(system, user) -> text. One repair attempt feeds the validation error back to the model."""
     max_images_per_minute = min(MAX_IMAGES_PER_MINUTE, max(0.0, float(max_images_per_minute)))
     slots = photo_slots(photos, story)
-    if expected_words(target_minutes, slots) >= 250:
+    if expected_words(target_minutes, slots, language) >= 250:
         retries = max(retries, 2)   # a long video may need a length repair on top of the other checks
-    user = build_user_prompt(topic, notes, target_minutes, today, photos, story)
+    user = build_user_prompt(topic, notes, target_minutes, today, photos, story, language)
     last_err: Optional[Exception] = None
     over: Optional[Tuple[Dict[str, Any], List[str], List[Dict[str, Any]]]] = None   # QUALITY_FIXES: a valid script that was only too long (kept if the trimmed one is worse)
     for attempt in range(retries + 1):
@@ -992,10 +1005,10 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
             if plan.get("legit") and attempt < retries and plan.get("beats") and len(replaced) * 2 > len(plan["beats"]):
                 raise ValueError("most scenes were invalid: " + "; ".join(replaced[:4]) + ". Every scene must be {\"type\": ..., \"props\": {...}} following the scene docs exactly")
             if plan.get("legit") and attempt < retries:
-                short = length_problem(plan, target_minutes, slots)
+                short = length_problem(plan, target_minutes, slots, language)
                 if short:  # the script would make a shorter video than the one asked for and paid for
                     raise ValueError(short)
-                long_ = long_problem(plan, target_minutes, slots)
+                long_ = long_problem(plan, target_minutes, slots, language)
                 if long_:   # one bounded pass to trim it (the retries are the bound): keep this script in case the trimmed one is worse
                     over = (plan, warns, rejects)
                     raise ValueError(long_)
@@ -1034,14 +1047,14 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
                     warns.append("added scenes for unused photos: " + ", ".join(p["id"] for p in unused))
             if plan.get("legit") and over is not None:   # this is the trimmed script: use it unless it overshot the other way or is still longer than the first
                 have0, have1 = spoken_words(over[0]["beats"]), spoken_words(plan["beats"])
-                want = expected_words(target_minutes, slots)
-                if length_problem(plan, target_minutes, slots) or have1 < TARGET_LOW * want or have1 >= have0:
+                want = expected_words(target_minutes, slots, language)
+                if length_problem(plan, target_minutes, slots, language) or have1 < TARGET_LOW * want or have1 >= have0:
                     plan, warns, rejects = over
             if plan.get("legit"):
-                short = length_problem(plan, target_minutes, slots)
+                short = length_problem(plan, target_minutes, slots, language)
                 if short:  # still short after the repairs: the video is made, and the warning is logged
                     warns.append("length: " + short)
-                long_ = long_problem(plan, target_minutes, slots)
+                long_ = long_problem(plan, target_minutes, slots, language)
                 if long_:
                     warns.append("length: " + long_)
                 if rejects and quality_fixes():
@@ -1049,10 +1062,10 @@ def generate_plan(topic: str, notes: str, target_minutes: float, llm: Callable[[
             return plan, warns
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e
-            user = build_user_prompt(topic, notes, target_minutes, today, photos, story) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
+            user = build_user_prompt(topic, notes, target_minutes, today, photos, story, language) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only."
     if over is not None:   # the trimmed attempt failed outright: the first script was valid, only long
         plan, warns, rejects = over
-        warns.append("length: " + (long_problem(plan, target_minutes, slots) or "too long"))
+        warns.append("length: " + (long_problem(plan, target_minutes, slots, language) or "too long"))
         if rejects:
             plan["_rejected_scenes"] = rejects
         return plan, warns

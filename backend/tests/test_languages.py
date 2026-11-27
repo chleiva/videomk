@@ -196,7 +196,12 @@ def test_every_voice_has_a_measured_pace_and_the_fitted_voices_keep_their_fit():
         if v["id"] in length.RATES:
             continue
         est = length.estimate_speech(voice_data.SAMPLE[v["language"]], v["language"], v["id"])
-        assert est == pytest.approx(v["sample_s"] * length.SAMPLE_CALIBRATION, rel=0.01), v["id"]         # the estimate reproduces the one sentence the voice was heard saying
+        if v["language"] in ("en", "es", "ko"):
+            assert est == pytest.approx(v["sample_s"] * length.SAMPLE_CALIBRATION, rel=0.01), v["id"]     # the estimate reproduces the one sentence the voice was heard saying
+        else:   # a newer language: its default voice is fitted on a long passage and real beats (length.RATES); the others are that fit, as much faster or slower as they said the sentence
+            base = next(x for x in voice_data.VOICES if x["id"] == voices.default_voice(v["language"]))
+            assert base["id"] in length.RATES
+            assert est == pytest.approx(length.estimate_speech(voice_data.SAMPLE[v["language"]], v["language"], base["id"]) * v["sample_s"] / base["sample_s"], rel=0.01), v["id"]
     assert length.rate_for("fr") == length.rate_for("fr", "Lea") and length.rate_for("xx") == length.LANG_RATES["en"]
     assert length.estimate_speech("Bonjour à tous.", "fr", "Florian") < length.estimate_speech("Bonjour à tous.", "fr", "Lea")   # Florian speaks faster than Léa
     # sentences are cut at capitals of every Latin alphabet (a Polish sentence opening with Ś or Ł is a sentence)

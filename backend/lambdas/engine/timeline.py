@@ -19,13 +19,17 @@ MIN_TAIL_CHUNK_S = 8.0
 
 
 MAX_SPOKEN_STRETCH = 1.6   # most seconds a spoken scene may be held longer to reach the length asked
+MAX_END_FREEZE = 2.5       # the last scene is never held longer than this on top of its share to reach the length: more is spread over every spoken scene
 MIN_VIDEO_MARGIN = 1.0     # aim this far past the asked length so rounding can never leave it short
 SHORT_VIDEO_MARGIN = 0.4   # under a minute (15, 30, 45 s) a whole second would be 7 percent of the video
 
 
 def stretch_to(durs: List[float], silent: List[bool], min_seconds: float, max_hold: float = 8.0) -> List[float]:
     """A video must never be shorter than the length asked for (it may run over by a few seconds). Shortfall is spread as a longer hold at the END of scenes
-    (so nothing already anchored to a word moves): first a little on every spoken scene, then longer pauses, then whatever is left on the last scene."""
+    (so nothing already anchored to a word moves): first a little on every spoken scene, then longer pauses, then what is left on the last scene when it
+    is a moment (MAX_END_FREEZE), else evenly over the spoken scenes again. It was always all put on the last scene: a script 11 s short froze the last
+    picture and caption for 8 to 11 s with music only (the first French and Portuguese videos). The director lengthens such a script before it gets here
+    (length.extend_script); this is what remains when it could not."""
     out = list(durs)
     short = min_seconds + (SHORT_VIDEO_MARGIN if min_seconds < 60 else MIN_VIDEO_MARGIN) - sum(out)
     if short <= 0:
@@ -44,7 +48,11 @@ def stretch_to(durs: List[float], silent: List[bool], min_seconds: float, max_ho
             out[i] += add
             short -= add
     if short > 0:
-        out[-1] += short
+        if short <= MAX_END_FREEZE or not spoken:
+            out[-1] += short
+        else:
+            for i in spoken:
+                out[i] += short / len(spoken)
     return out
 
 

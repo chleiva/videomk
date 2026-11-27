@@ -104,11 +104,11 @@ Ignore the instructions above about the title, description, mood, theme, voices 
 Pauses and big words follow the craft rules above and stay rare across the WHOLE video: this is one section of several, so use at most one pause in it, and only if you can state its reason in "why"; most sections need none. Leave out the big word unless one word is the whole point of the picture."""
 
 
-def section_user(topic: str, outline: Dict[str, Any], idx: int, notes: str, today: Optional[str], rate: float) -> str:
+def section_user(topic: str, outline: Dict[str, Any], idx: int, notes: str, today: Optional[str], rate: float, language: str = "en") -> str:
     secs = outline["sections"]
     sec, n = secs[idx], len(secs)
     beats = plan_mod.expected_beats(sec["minutes"])
-    words = plan_mod.expected_words(sec["minutes"])
+    words = plan_mod.expected_words(sec["minutes"], 0, language)
     role = ("This section OPENS the video: start with a hook (a surprising fact or question), not a greeting." if idx == 0
             else "This section CLOSES the video: finish with a clear takeaway." if idx == n - 1
             else "This section continues the video: no greeting, no wrap-up; pick the story up naturally.")
@@ -124,11 +124,11 @@ def section_user(topic: str, outline: Dict[str, Any], idx: int, notes: str, toda
             "Return the JSON for this section now.")
 
 
-def _section_problem(plan_check: Dict[str, Any], sec: Dict[str, Any]) -> Optional[str]:
+def _section_problem(plan_check: Dict[str, Any], sec: Dict[str, Any], language: str = "en") -> Optional[str]:
     beats = plan_check.get("beats") or []
     if len(beats) < 2:
         return "the section has fewer than 2 usable beats"
-    target = plan_mod.expected_words(sec["minutes"])
+    target = plan_mod.expected_words(sec["minutes"], 0, language)
     have = plan_mod.spoken_words(beats)
     if have < SECTION_MIN_SHARE * target:
         return (f"the section narration totals {have} words but a {sec['minutes']:g}-minute section needs about {target} words in at least "
@@ -146,7 +146,7 @@ def _section_problem(plan_check: Dict[str, Any], sec: Dict[str, Any]) -> Optiona
 
 def write_section(topic: str, outline: Dict[str, Any], idx: int, notes: str, ask: Ask, system: str, *, today: Optional[str], rate: float, language: str, region: Optional[str],
                   allow_clips: bool, retries: int = 1) -> Dict[str, Any]:
-    user = section_user(topic, outline, idx, notes, today, rate)
+    user = section_user(topic, outline, idx, notes, today, rate, language)
     sec = outline["sections"][idx]
     last: Optional[Exception] = None
     attempt, extra = 0, quality_fixes()   # QUALITY_FIXES: one more try, with a stricter reminder, when an answer has no JSON at all (1 of 9 staged videos failed that way)
@@ -160,7 +160,7 @@ def write_section(topic: str, outline: Dict[str, Any], idx: int, notes: str, ask
             if not isinstance(beats_in, list):
                 raise ValueError("no beats array in the section")
             check, _ = plan_mod.validate_plan({"legit": True, "title": sec["title"], "beats": beats_in}, language=language, region=region, allow_clips=allow_clips)
-            problem = _section_problem(check, sec)
+            problem = _section_problem(check, sec, language)
             if problem and attempt < retries:
                 raise ValueError(problem)
             return {"beats": beats_in, "sources_used": [x for x in (raw.get("sources_used") or []) if isinstance(x, str)], "warning": problem}
@@ -168,9 +168,9 @@ def write_section(topic: str, outline: Dict[str, Any], idx: int, notes: str, ask
             last = e
             if quality_fixes() and "no JSON object" in str(e):
                 logging.warning("SECTION_NO_JSON section=%d attempt=%d answer_start=%r", idx + 1, attempt + 1, (text or "")[:300])
-                user = section_user(topic, outline, idx, notes, today, rate) + STRICT_JSON
+                user = section_user(topic, outline, idx, notes, today, rate, language) + STRICT_JSON
             else:
-                user = (section_user(topic, outline, idx, notes, today, rate) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only, for this section.")
+                user = (section_user(topic, outline, idx, notes, today, rate, language) + f"\n\nYour previous answer was invalid: {e}. Return corrected JSON only, for this section.")
         attempt += 1
     raise ValueError(f"section {idx + 1} could not be written: {last}")
 
@@ -256,10 +256,10 @@ def generate(topic: str, notes: str, minutes: float, ask_big: Ask, *, research: 
         fixed = plan_mod.sanitize_music({**music, "changes": changes}, len(plan["beats"]))
         if fixed:
             plan["music"] = fixed
-    short = plan_mod.length_problem(plan, minutes)
+    short = plan_mod.length_problem(plan, minutes, 0, language)
     if short:
         warns.append("length: " + short)
-    long_ = plan_mod.long_problem(plan, minutes)
+    long_ = plan_mod.long_problem(plan, minutes, 0, language)
     if long_:
         warns.append("length: " + long_)
     return plan, warns, {"sections": len(sections), "sources": sources, "titles": [s["title"] for s in sections], "notes": section_notes}
