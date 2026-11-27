@@ -16,6 +16,7 @@ export interface Sample {
   lang: "en" | "es";   // narration language
   title: Record<"en" | "es", string>;   // what the video is about (the plan title, in the narration language; the other language gets a translation of it)
   prompt: string | null;               // verbatim excerpt of the real prompt, or null
+  promptShort?: string;                // a shorter word-for-word excerpt of `prompt` (shown over the hero video)
   description: Record<"en" | "es", string>;
 }
 
@@ -23,6 +24,7 @@ export const SAMPLES: Sample[] = [
   {
     id: "forest", file: "/samples/forest.mp4", poster: "/samples/forest.webp", width: 1280, height: 720, seconds: 28, aspect: "wide", lang: "en",
     title: { en: "How a forest breathes and why forests matter", es: "Cómo respira un bosque y por qué importa" },
+    promptShort: "A calm explainer about how a forest breathes and why forests matter",
     prompt: "A calm explainer about how a forest breathes and why forests matter: how trees take in carbon dioxide and release oxygen, how roots and soil store carbon, and how a forest keeps the air and water clean. Please use real video footage of forests wherever it fits. Warm, gentle, wonder-filled tone.",
     description: { en: "Footage, a counting statistic and an animated list, narrated and captioned.", es: "Imágenes de video, una estadística animada y una lista, con narración y subtítulos." },
   },

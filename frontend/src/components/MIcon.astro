@@ -1,6 +1,6 @@
 ---
 // Small line icons for the marketing page (24 px grid, 1.75 stroke, currentColor). Decorative: the text next to them carries the meaning.
-interface Props { name: "say" | "make" | "share" | "voice" | "media" | "clips" | "edit" | "captions" | "devices" | "play" | "sound" | "apple" | "android"; size?: number }
+interface Props { name: "say" | "make" | "share" | "voice" | "media" | "clips" | "edit" | "captions" | "devices" | "play" | "sound" | "apple" | "android" | "mic" | "spark"; size?: number }
 const { name, size = 24 } = Astro.props;
 const P: Record<string, string> = {
 	say: "M12 3.5a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0v-5a3 3 0 0 1 3-3Z M5.5 11.5a6.5 6.5 0 0 0 13 0 M12 18v3 M9 21h6",
@@ -13,6 +13,8 @@ const P: Record<string, string> = {
 	captions: "M4.5 6h15a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z M7.5 11.5h3 M7.5 14.5h2 M13 11.5h3.5 M12.5 14.5h4",
 	devices: "M9 4h9a1.5 1.5 0 0 1 1.5 1.5v13A1.5 1.5 0 0 1 18 20H9a1.5 1.5 0 0 1-1.5-1.5v-13A1.5 1.5 0 0 1 9 4Z M12.5 17.5h2 M3 9h2.5 M3 13h2.5",
 	play: "M8 5.5v13l11-6.5-11-6.5Z",
+	mic: "M12 14.5a3 3 0 0 0 3-3v-5a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z M6.5 11.5a5.5 5.5 0 0 0 11 0 M12 17v3.5",
+	spark: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z",
 	sound: "M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z M15.5 9a4 4 0 0 1 0 6 M18 6.5a7.5 7.5 0 0 1 0 11",
 	apple: "M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8c-1.5 0-3 .9-3.800 2.300-1.600 2.800-.4 7 1.200 9.300.8 1.100 1.700 2.400 2.900 2.300 1.200 0 1.600-.7 3-.7s1.800.7 3 .7c1.300 0 2.100-1.100 2.800-2.200.9-1.300 1.300-2.500 1.300-2.600-.1 0-2.500-1-2.500-3.800ZM14.200 5.800c.600-.8 1.100-1.800 1-2.800-.9 0-2 .6-2.600 1.400-.6.700-1.100 1.800-1 2.700 1 .1 2-.5 2.600-1.300Z",
 	android: "M6 9.5h12v7a1.500 1.500 0 0 1-1.500 1.500h-9A1.500 1.500 0 0 1 6 16.500v-7Z M6 9.500a6 6 0 0 1 12 0 M9.500 6.500 8 4.500 M14.500 6.500 16 4.500",

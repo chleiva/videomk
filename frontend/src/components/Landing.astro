@@ -33,28 +33,31 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 	</Fragment>
 	<nav slot="nav" class="mk-nav" aria-label="videomk">
 		<a href="#gallery">{tr("landing.nav_gallery")}</a>
-		<a href="#formats">{tr("landing.nav_formats")}</a>
 		<a href="#pricing">{tr("landing.nav_pricing")}</a>
 		<a href={pathForLocale("/support", locale)}>{tr("landing.nav_help")}</a>
+		<a class="mk-nav-signin" href={appUrl(APP_PATHS.signin)}>{tr("landing.nav_signin")}</a>
 	</nav>
 
 	<section class="mk-hero" aria-labelledby="hero-title">
 		<div class="mk-wrap mk-center">
-			<h1 id="hero-title" class="mk-h1">{tr("hero.title")}</h1>
+			<h1 id="hero-title" class="mk-h1">{tr("hero.title_1")}<br /><span class="mk-grad">{tr("hero.title_2")}</span></h1>
 			<p class="mk-lead">{tr("hero.lead")}</p>
 			<form class="mk-ask" action={appUrl(APP_PATHS.create)} method="get">
 				<label for="hero-prompt" class="sr-only-vmk">{tr("hero.field")}</label>
 				<input id="hero-prompt" class="mk-ask-input" type="text" name="prompt" maxlength="500" placeholder={tr("hero.placeholder")} autocomplete="off" enterkeyhint="go" />
+				<button class="mk-ask-mic" type="button" hidden data-mic data-lang={locale === "es" ? "es-ES" : "en-US"} aria-label={tr("hero.mic")} title={tr("hero.mic")}><MIcon name="mic" size={20} /></button>
 				<button class="btn btn-primary mk-ask-btn" type="submit">{tr("hero.cta")}</button>
 			</form>
 			<p class="mk-fine">{tr("hero.fine")}</p>
 		</div>
-		<div class="mk-wrap mk-hero-stage">
+		<div class="mk-hero-stage">
 			<SampleCard sample={HERO} locale={locale} hero />
 			<div class="mk-prompt">
-				<p class="eyebrow">{tr("hero.prompt_label")}</p>
-				<blockquote class="mk-prompt-text" lang="en">{heroPrompt}</blockquote>
-				<a class="btn btn-tonal" href={tryPromptUrl(heroPrompt)}>{tr("hero.try")}</a>
+				<div class="mk-prompt-in">
+					<p class="mk-prompt-label">{tr("hero.prompt_label")}</p>
+					<blockquote class="mk-prompt-text" lang="en" title={heroPrompt}>{HERO.promptShort ?? heroPrompt}.</blockquote>
+				</div>
+				<a class="btn mk-btn-white" href={tryPromptUrl(heroPrompt)}><MIcon name="spark" size={18} />{tr("hero.try")}</a>
 			</div>
 		</div>
 	</section>
@@ -168,5 +171,6 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 	<script is:inline data-keep>(function(){var d=document,m=matchMedia,rm=m("(prefers-reduced-motion: reduce)").matches,c=navigator.connection,sd=c&&c.saveData;var vs=[].slice.call(d.querySelectorAll("video[data-sample]"));if(!vs.length||rm||sd||!("IntersectionObserver" in window))return;d.documentElement.classList.add("mk-js");
 function stop(except){vs.forEach(function(v){if(v!==except&&v.dataset.sound){v.pause();v.muted=true;v.controls=false;delete v.dataset.sound}})}
 var io=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(v.dataset.sound)return;if(e.isIntersecting){v.preload="auto";var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true})}else v.pause()})},{threshold:.5});
-vs.forEach(function(v){v.controls=false;v.muted=true;v.loop=true;io.observe(v);v.addEventListener("click",function(){if(v.dataset.sound){v.paused?v.play():v.pause();return}stop(v);v.dataset.sound="1";v.muted=false;v.controls=true;v.currentTime=0;v.play()})})})();</script>
+vs.forEach(function(v){v.controls=false;v.muted=true;v.loop=true;io.observe(v);v.addEventListener("click",function(){if(v.dataset.sound){v.paused?v.play():v.pause();return}stop(v);v.dataset.sound="1";v.muted=false;v.controls=true;v.currentTime=0;v.play()})})})();
+(function(){var b=document.querySelector("[data-mic]"),R=window.SpeechRecognition||window.webkitSpeechRecognition,i=document.getElementById("hero-prompt");if(!b||!R||!i)return;b.hidden=false;var r=null;b.addEventListener("click",function(){if(r){r.stop();return}r=new R();r.lang=b.dataset.lang;r.interimResults=true;b.classList.add("is-live");r.onresult=function(e){var s="";for(var k=0;k<e.results.length;k++)s+=e.results[k][0].transcript;i.value=s.slice(0,500)};r.onend=r.onerror=function(){r=null;b.classList.remove("is-live");i.focus()};try{r.start()}catch(x){r=null;b.classList.remove("is-live")}})})();</script>
 </MarketingLayout>

@@ -15,6 +15,7 @@ export interface TaskItem {
   preview_gif_url?: string | null;
   duration_s?: number | null;
   video_url?: string | null;
+  aspect?: string | null;   // "9:16", "1:1", "4:5" (absent: 16:9)
   can_retry?: boolean;   // a failed video the server will run again as the SAME item (POST .../retry)
 }
 
@@ -58,6 +59,7 @@ export function normalizeItem(it: any): TaskItem | null {
     duration_s: typeof it?.duration_s === "number" ? it.duration_s : null,
     video_url: typeof it?.video_url === "string" ? it.video_url : null,
     can_retry: it?.can_retry === true,
+    aspect: typeof it?.aspect === "string" && /^\d+:\d+$/.test(it.aspect) ? it.aspect : null,
   };
 }
 

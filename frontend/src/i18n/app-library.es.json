@@ -75,9 +75,9 @@
  "gen.sc_credits": "Ir a Créditos",
  "gen.sc_help": "Mostrar atajos",
  "media.nav_label": "Biblioteca",
- "media.title": "Mi biblioteca",
+ "media.title": "Biblioteca",
  "media.add": "Añadir fotos",
- "media.search_ph": "Busca tus fotos, «Tailandia 2024»",
+ "media.search_ph": "Buscar fotos: «playa al atardecer»",
  "media.search_label": "Buscar fotos",
  "media.clear_search": "Borrar búsqueda",
  "media.chip_remove": "Quitar {label}",
@@ -170,5 +170,8 @@
  "gen.retry_gone": "Este video ya no está aquí.",
  "gen.retry_unsupported": "Ahora mismo no se puede volver a intentar. Tu video y sus fotos no han cambiado.",
  "gen.retry_error": "No pudimos iniciarlo de nuevo. Prueba en un momento.",
- "media.make_video_n": "Crear un video · {n}"
+ "media.make_video_n": "Crear un video · {n}",
+ "media.select": "Seleccionar",
+ "media.select_done": "Listo",
+ "media.photos_n": "{n, plural, one {# foto} other {# fotos}}"
 }

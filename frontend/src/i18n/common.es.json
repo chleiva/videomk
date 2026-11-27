@@ -53,5 +53,8 @@
  "nav.feedback": "Opiniones",
  "shell.skip": "Saltar al contenido",
  "shell.menu": "Principal",
- "shell.settings": "Idioma y apariencia"
+ "shell.settings": "Idioma y apariencia",
+ "shell.credits_n": "{n, plural, one {# crédito} other {# créditos}}",
+ "shell.free_soon": "Uno más gratis mañana",
+ "shell.new_video": "Nuevo video"
 }

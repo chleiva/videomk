@@ -386,3 +386,31 @@ Taps: watch to share 1; sign in 1 (provider) ; delete account 3 + typing.
 **Needs backend (blocks upload to My media in a browser):** the media bucket (`backend/media_library.py`) has NO CORS rule. A presigned POST from `app.videomk.com` needs `AllowedMethods=[POST]`, `AllowedOrigins=_web_origins(stage_cfg)` (same as the assets bucket in `backend_stack.py`), `AllowedHeaders=["*"]`. Thumbnails (plain `<img>`) need nothing. Photos for ONE video ("From this device") go to the assets bucket, which already has the rule.
 **Not verified:** a real upload against QA (no CORS yet), the real capabilities payload with `watermark`, axe accessibility run (labels, roles, focus and keyboard were built in and checked by hand and by tests, not by axe), Safari and Firefox (only Chrome was driven).
 **Notes for the shell owner:** Spanish tab bar label `nav.videos` ("Mis videos") wraps to two lines at 390 px; the rail's credit pill from the spec is not in the shell yet; `components/ui.tsx` has no `search`, `image`, `sliders`, `trash` icons, so package B draws its own in `components/app/icons.tsx`.
+
+<!-- DESIGN-BAR-PASS-BEGIN (2026-11-27, web) -->
+## Design bar pass (2026-11-27): the web now follows docs/DESIGN_BAR_2026.md and its web mockups
+
+Source of truth for the look: `docs/design_bar/mockups/web_1..web_5` (and `docs/design_bar/src/base.css` for the values). What changed, and where it lives:
+
+| Area | What it is now | Files |
+|---|---|---|
+| Tokens | The design bar's colours in both modes (near-black `#06070d` dark, `#f7f7fa` light), one deep primary gradient with white text in both modes, headline gradient tokens | `styles/tokens.css`, `styles/tokens.test.ts` |
+| Home | Two-line headline with the gradient second line, one field with a working mic (hidden where the browser has no speech recognition), "Free to start. No card.", a 1120 px hero video with the prompt and "Try this prompt" on its lower edge (above the video's own caption line; under the video on phones), gallery "One sentence in. Any shape out." with aspect badges; nav Gallery, Pricing, Help, Sign in and one inverse pill | `components/Landing.astro`, `components/SampleCard.astro`, `styles/marketing.css` (last block), `data/samples.ts` |
+| App shell | 248 px rail: Videos, Media, Settings; the credits card (links to Credits) and the account (links to Settings) at its foot. Phones: a floating glass tab bar with the same three places and ONE round button that makes a video | `layouts/AppLayout.astro`, `styles/shell.css`, `lib/appNav.ts` |
+| Videos | 40 px title, search field, one New video button, the making banner (title, one live line, the four steps as tiles, time left), aspect badges, failed card with Try again (same video) and Remove | `components/app/VideosPage.tsx`, `useVideos.ts`, `lib/videos.ts`, `styles/bar.css` |
+| Create | "What's the video about?", one centred card, photo strip with count, For / Length / Look pills, options, Create with the credit cost, suggestion chips, and the locked wait capsule ("Checking your request…" with Cancel, then "Starting your video…") | `components/app/Composer.tsx`, `styles/bar.css` |
+| Media | Search in the header, Select / Done, one labelled Add photos, month groups with counts, 3:2 tiles, the floating selection bar "N selected · folder · delete · Make a video · N", upload progress as a floating card; the selection survives the trip to Create and back | `components/app/MediaPage.tsx`, `MediaGrid.tsx`, `styles/bar.css` |
+| Watch | Back to Videos, the player (800 px), title and meta, Share as the one primary, save / edit / more, "Make another" chips that open Create pre-filled (Short, other language, same idea) | `components/WatchPage.tsx`, `styles/bar.css` |
+
+Rules kept from the design bar: one primary action per screen, never more than one "+" on a screen (New video is a sparkle, Add photos an image-plus, New collection a folder), no number shown at zero (home samples start past their count-up), word budgets (tests in `components/app/app.test.tsx`).
+
+Known gaps against the mockups (in priority order):
+1. **Making banner tiles**: the mockup shows scene thumbnails appearing; the API has no per-scene thumbnails yet, so the banner shows the four real steps. Needs a backend field (scene previews) first.
+2. **Gallery lines**: the mockup shows the sentence that made each sample; only the hero's prompt was saved, so the others show their title (no invented prompts). New samples with saved prompts fix this.
+3. **Watch "The prompt"**: the video API returns a description, not the prompt; the side column shows "Make another" only. Needs the prompt in `GET /videos/{id}`.
+4. **Get the app**: the header pill says "Open the app" until store links exist (`PUBLIC_APP_STORE_URL`, `PUBLIC_PLAY_STORE_URL`).
+5. **Phone web**: follows the phone mockups' language (floating bar, round button, same cards); the phone Create card stacks its pills in two rows.
+6. **Signed-in flows against the real API**: verified with mocks and with real preflights only (no test token could be minted in this session). My media needed a backend fix (every `/library` route lacked the browser preflight; commit `786cd5b`, deployed with the next backend deploy).
+
+Tooling: `docs/web_2026/src/walk.mjs` (tour and behaviour checks against a mocked API) and `shoot_home.mjs` (home page, local or live).
+<!-- DESIGN-BAR-PASS-END -->

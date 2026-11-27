@@ -1,23 +1,23 @@
 /* videomk design tokens for the web. ONE file: every colour, size and duration the pages use comes from here.
-   Mirrors the apps (docs/UX_REVIEW.md section 6, mobile/ios/.../DesignTokens.swift, docs/ux_review/tokens_v2.css): same semantic names, same values.
+   Values follow the design bar (docs/DESIGN_BAR_2026.md section 4, docs/design_bar/src/base.css); the semantic names are the apps' (DesignTokens.swift).
    Light by default; dark follows the system (prefers-color-scheme) unless the person chose one (html[data-theme="light|dark"], set by the footer switch).
    The dark block appears twice (system and manual): src/styles/tokens.test.ts checks both are identical and computes WCAG contrast for every pair.
    Do not write a raw hex colour in a component: add or use a token. */
 :root {
   /* colour: surfaces, outline, text (textTertiary is the v2 value: 5.0:1 on surface2) */
-  --background: #f6f7fc; --surface: #ffffff; --surface-2: #eef0f9; --surface-3: #e2e5f4; --outline: #dadded;
-  --text: #11142b; --text-secondary: #565d78; --text-tertiary: #5f6585;
+  --background: #f7f7fa; --surface: #ffffff; --surface-2: #eeeff4; --surface-3: #e4e6ee; --outline: #e4e5ec;
+  --text: #0b0c14; --text-secondary: #5c6175; --text-tertiary: #666b80;
   /* colour: brand and status (each status colour has its container) */
-  --primary: #4f52e0; --on-primary: #ffffff; --primary-container: #e8e9ff;
+  --primary: #4b45e0; --on-primary: #ffffff; --primary-container: #ecebff;
   --success: #127035; --success-container: #ddf3e4; --warning: #9a4a06; --warning-container: #fdf0da; --danger: #b91c1c; --danger-container: #fce4e4;
-  --gradient-start: #5b5ef0; --gradient-end: #8452f4; --making-start: #2b2f9a; --making-end: #6a3fc4; --live: #22d3ee;
+  --gradient-start: #3b36c8; --gradient-end: #7a4be6; --headline-1: #3b36c8; --headline-2: #7a4be6; --headline-3: #1fa8c9; --making-start: #2b2f9a; --making-end: #6a3fc4; --live: #22d3ee;
   /* the one text colour that sits on the making gradient and on thumbnails' scrims, and the scrim itself */
-  --stage: #000000; --on-making: #ffffff; --scrim: rgba(10, 13, 31, 0.72); --on-scrim: #ffffff; --overlay: rgba(10, 13, 31, 0.5);
+  --stage: #000000; --on-making: #ffffff; --scrim: rgba(8, 9, 16, 0.6); --on-scrim: #ffffff; --overlay: rgba(6, 7, 13, 0.55);
   --glass: rgba(255, 255, 255, 0.72); --focus: var(--primary);
   /* elevation: 1 hairline, 2 raised card, 3 sheet and floating bar. Dark mode swaps the shadow for a 1 px ring on a lighter surface. */
   --elev-1: 0 0 0 1px var(--outline);
-  --elev-2: 0 8px 24px rgba(40, 44, 110, 0.1);
-  --elev-3: 0 16px 48px rgba(40, 44, 110, 0.18);
+  --elev-2: 0 1px 2px rgba(15, 18, 40, 0.05), 0 4px 14px rgba(15, 18, 40, 0.06);
+  --elev-3: 0 12px 40px rgba(20, 22, 60, 0.14);
 
   /* type: Inter first (when the device has it), then the system font. rem, 16 px base. Nothing is below 14 px (0.875rem). */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", ui-sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
@@ -31,7 +31,7 @@
   /* spacing: 4 px base. Screen margin 16, sheet margin 20, touch target 44. */
   --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
   --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem; --space-24: 6rem; --section-pad: 3.5rem; --gutter: 1rem;
-  --rail-width: 15rem; --tabbar-height: 3.5rem; --header-height: 3.5rem;
+  --rail-width: 15.5rem; --tabbar-height: 5.25rem; --header-height: 3.5rem;
   --screen-margin: 1rem; --sheet-margin: 1.25rem; --min-touch: 2.75rem; --page-width: 72rem;
 
   /* radii: 12 fields, 14 thumbs, 16 cards, 22 video cards, 28 composer, 30 sheets, pill */
@@ -50,25 +50,25 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background: #0a0d1f; --surface: #11152b; --surface-2: #1a1f3b; --surface-3: #252b4d; --outline: #2a3157;
-    --text: #f3f4fb; --text-secondary: #a2a9c5; --text-tertiary: #8a92b0;
-    --primary: #9ea0ff; --on-primary: #0a0d1f; --primary-container: #25295a;
+    --background: #06070d; --surface: #11131d; --surface-2: #1a1d2b; --surface-3: #242838; --outline: #1e2130;
+    --text: #f4f5fa; --text-secondary: #a2a8bc; --text-tertiary: #878da3;
+    --primary: #aaa8ff; --on-primary: #ffffff; --primary-container: #22224a;
     --success: #4ade80; --success-container: #12301f; --warning: #fbbf24; --warning-container: #3a2b0c; --danger: #f87171; --danger-container: #3b1517;
-    --gradient-start: #8f92ff; --gradient-end: #ae8aff;
-    --glass: rgba(26, 31, 59, 0.72);
-    --elev-2: 0 0 0 1px var(--outline), 0 8px 24px rgba(0, 0, 0, 0.45);
+    --gradient-start: #3b36c8; --gradient-end: #7a4be6; --headline-1: #b7b4ff; --headline-2: #d9b8ff; --headline-3: #7fe7f5;
+    --glass: rgba(22, 25, 40, 0.66);
+    --elev-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
     --elev-3: 0 0 0 1px var(--outline), 0 16px 48px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --background: #0a0d1f; --surface: #11152b; --surface-2: #1a1f3b; --surface-3: #252b4d; --outline: #2a3157;
-  --text: #f3f4fb; --text-secondary: #a2a9c5; --text-tertiary: #8a92b0;
-  --primary: #9ea0ff; --on-primary: #0a0d1f; --primary-container: #25295a;
+  --background: #06070d; --surface: #11131d; --surface-2: #1a1d2b; --surface-3: #242838; --outline: #1e2130;
+  --text: #f4f5fa; --text-secondary: #a2a8bc; --text-tertiary: #878da3;
+  --primary: #aaa8ff; --on-primary: #ffffff; --primary-container: #22224a;
   --success: #4ade80; --success-container: #12301f; --warning: #fbbf24; --warning-container: #3a2b0c; --danger: #f87171; --danger-container: #3b1517;
-  --gradient-start: #8f92ff; --gradient-end: #ae8aff;
-  --glass: rgba(26, 31, 59, 0.72);
-  --elev-2: 0 0 0 1px var(--outline), 0 8px 24px rgba(0, 0, 0, 0.45);
+  --gradient-start: #3b36c8; --gradient-end: #7a4be6; --headline-1: #b7b4ff; --headline-2: #d9b8ff; --headline-3: #7fe7f5;
+  --glass: rgba(22, 25, 40, 0.66);
+  --elev-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
   --elev-3: 0 0 0 1px var(--outline), 0 16px 48px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }

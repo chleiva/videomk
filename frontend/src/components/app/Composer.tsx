@@ -26,7 +26,7 @@ import { directDeps } from "../../lib/uploadDeps";
 import { useLocale } from "../../lib/useLocale";
 import type { Photo } from "../../lib/library";
 
-const EXAMPLES = ["create.example1", "create.example2", "create.example3"];
+const EXAMPLES = ["create.example1", "create.example2", "create.example3", "create.example4"];
 const MEDIA_SELECTION = "vmk_media_selection";   // My media keeps its ticked photos here while the composer is open, so Back returns to the same selection
 const HANDOFF = "vmk_compose_library";       // My media -> "Make a video": the chosen photos wait here for the composer
 // The scene-style row stays hidden until the server's VECTOR_SCENES switch is on in this environment (docs/VECTOR_SCENE_POLICY.md): set PUBLIC_SCENE_STYLE=1 at build time then.
@@ -81,8 +81,19 @@ export default function Composer() {
 
   useEffect(() => {
     let alive = true;
-    const prompt = new URLSearchParams(location.search).get("prompt")?.slice(0, 500) ?? "";
-    getCapabilities().then((c) => { if (!alive) return; const cc = c ?? FALLBACK_CAPS; setLive(!!c); setCaps(cc); setForm({ ...defaultForm(cc, loadSaved()), text: prompt }); });
+    const qs = new URLSearchParams(location.search);
+    const prompt = qs.get("prompt")?.slice(0, 500) ?? "";
+    getCapabilities().then((c) => {
+      if (!alive) return;
+      const cc = c ?? FALLBACK_CAPS; setLive(!!c); setCaps(cc);
+      // "Make another" on the video page opens Create with one thing changed (shape, length or language); anything the stack does not offer is ignored
+      const pre: Partial<Form> = {};
+      const a = qs.get("aspect"), m = Number(qs.get("minutes")), l = qs.get("language");
+      if (a && cc.aspects.some((x) => x.id === a && x.ready)) pre.aspect = a;
+      if (m > 0 && m <= 12) pre.minutes = m;
+      if (l && cc.languages.some((x) => x.id === l)) pre.language = l;
+      setForm(normalize({ ...defaultForm(cc, loadSaved()), ...pre, text: prompt }, cc));
+    });
     getWallet().then((w) => alive && setWallet(w));
     setLibPicks(readHandoff());
     return () => { alive = false; dict.current?.stop(); urls.current.forEach((u) => URL.revokeObjectURL(u)); };
@@ -228,6 +239,7 @@ export default function Composer() {
 
   return (
     <section className="page compose">
+      <div className="compose-aura" aria-hidden="true" />
       <div className="compose-head">
         <h1 className="compose-title">{t("create.heading")}</h1>
       </div>
@@ -273,10 +285,10 @@ export default function Composer() {
           </div>
 
           <div className="composer-pills">
-            {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><span>{pv.for}</span><Icon name="chevdown" size={16} /></>} items={forItems} onPick={(id) => setForm(selectPlatform(f, c, id))} />}
+            {c.platforms.length > 0 && <Menu label={t("create.pill_for")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_for_k")}</span><span>{pv.for}</span><Icon name="chevdown" size={16} /></>} items={forItems} onPick={(id) => setForm(selectPlatform(f, c, id))} />}
             <Menu label={t("create.pill_length")} triggerClass="pill" trigger={<><span>{ready ? lengthLabel(minutes) : pv.length}</span><Icon name="chevdown" size={16} /></>} items={lengthItems}
               onPick={(id) => (ready ? setPicked(id === "suggested" ? null : Number(id)) : set({ minutes: Number(id) }))} />
-            <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><Icon name="sparkle" size={16} /><span>{lookLabel(f.look)}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />
+            <Menu label={t("create.pill_look")} triggerClass="pill" trigger={<><span className="pill-k">{t("create.pill_look_k")}</span><span>{lookLabel(f.look)}</span><Icon name="chevdown" size={16} /></>} items={lookItems} onPick={(id) => set({ look: id as Form["look"] })} />
             {live && (
               <Popover label={t("create.options")} triggerClass="icon-btn tool-btn" trigger={<Icon name="sliders" size={22} />}>
                 {(close) => (
@@ -302,7 +314,7 @@ export default function Composer() {
           </div>
 
           <button type="submit" className="btn btn-primary compose-go" disabled={!canSend} aria-busy={sending || stage.k === "checking"} aria-label={t("create.cta_a11y", { credits: t("create.credits", { n: credits }) })}>
-            {sending || stage.k === "checking" ? <><Spinner /><span>{sending ? t("create.starting") : t("create.checking")}</span></> : addingPhotos ? <><Spinner /><span>{t("create.photos_wait")}</span></> : <><span>{t("create.cta", { n: credits })}</span><Icon name="bolt" size={18} /></>}
+            {sending || stage.k === "checking" ? <><Spinner /><span>{t("create.cta_word")}</span></> : addingPhotos ? <><Spinner /><span>{t("create.photos_wait")}</span></> : <><span>{t("create.cta_word")}</span><span className="go-cost"><Icon name="bolt" size={16} />{credits}</span></>}
           </button>
         </div>
         <input ref={files} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
@@ -311,7 +323,7 @@ export default function Composer() {
 
       {locked && (
         <p className="compose-progress" role="status">
-          <span>{sending ? t("create.starting") : t("create.checking")}</span>
+          <Spinner /><span>{sending ? t("create.starting") : t("create.checking")}</span>
           {!sending && <button type="button" className="btn btn-line btn-sm" onClick={cancelCheck}>{t("create.cancel")}</button>}
         </p>
       )}
@@ -321,7 +333,7 @@ export default function Composer() {
         {micError && <p className="hint hint-bad" role="status">{t("create.dictate_denied")}</p>}
         {hint && <p id="create-hint" className="hint hint-bad" role="status">{hint.text}{hint.credits && <> <a href={APP_PATHS.credits}>{t("create.see_credits")}</a></>}</p>}
         {!hint && <p id="create-hint" className="sr-only-vmk" />}
-        {!hint && wallet && !wallet.unlimited && <p className="hint">{enough ? t("create.left", { n: wallet.balance - credits }) : t("create.you_have", { n: wallet.balance })}</p>}
+        {!hint && wallet && !wallet.unlimited && !enough && <p className="hint">{t("create.you_have", { n: wallet.balance })}</p>}
         {limit != null && platform && <p className="hint">{t("create.max_length", { platform: platform.label, length: lengthLabel(limit) })}</p>}
         {fitHint && <p className="hint">{fitHint}</p>}
         {advice && <p className="hint">{advice}</p>}
@@ -330,7 +342,7 @@ export default function Composer() {
 
       {empty && (
         <div className="chips compose-examples" role="group" aria-label={t("create.try_one")}>
-          {EXAMPLES.map((k) => <button key={k} type="button" className="chip" onClick={() => { setHint(null); set({ text: t(k) }); area.current?.focus(); }}>{t(k)}</button>)}
+          {EXAMPLES.map((k) => <button key={k} type="button" className="chip" onClick={() => { setHint(null); set({ text: t(k) }); area.current?.focus(); }}><Icon name="sparkle" size={15} />{t(k)}</button>)}
         </div>
       )}
 

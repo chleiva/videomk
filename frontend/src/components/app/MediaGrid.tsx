@@ -53,7 +53,7 @@ export default function MediaGrid({ items, grouped, selection, onSelection, onOp
         const label = grouped ? monthLabel(g, locale) ?? t("media.undated") : null;
         return (
           <section key={g.key} aria-label={label ?? undefined}>
-            {label && <h2 className="mhead">{label}</h2>}
+            {label && <h2 className="mhead"><span>{label}</span><span className="mhead-n">{t("media.photos_n", { n: g.items.length })}</span></h2>}
             <div className="mgrid" role="list">
               {g.items.map((p) => {
                 const on = selection.ids.includes(p.id);

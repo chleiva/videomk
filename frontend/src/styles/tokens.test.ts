@@ -45,14 +45,15 @@ const PAIRS: [string, string, number][] = [
 ];
 
 describe("tokens.css", () => {
-  it("has the same colour roles as the apps (DesignTokens.swift)", () => {
-    expect(light["--background"]).toBe("#f6f7fc");
-    expect(light["--primary"]).toBe("#4f52e0");
-    expect(light["--text-tertiary"]).toBe("#5f6585"); // v2 fix
-    expect(dark["--text-tertiary"]).toBe("#8a92b0");
-    expect(dark["--on-primary"]).toBe("#0a0d1f");
-    expect(light["--gradient-start"]).toBe("#5b5ef0");
-    expect(light["--gradient-end"]).toBe("#8452f4");
+  it("has the design bar's colours (docs/DESIGN_BAR_2026.md section 4)", () => {
+    expect(light["--background"]).toBe("#f7f7fa");
+    expect(light["--primary"]).toBe("#4b45e0");
+    expect(dark["--background"]).toBe("#06070d");
+    expect(dark["--primary"]).toBe("#aaa8ff");
+    expect(dark["--on-primary"]).toBe("#ffffff");   // the primary button is the same deep gradient in both modes, with white text
+    expect(light["--gradient-start"]).toBe("#3b36c8");
+    expect(light["--gradient-end"]).toBe("#7a4be6");
+    expect(dark["--gradient-end"]).toBe(light["--gradient-end"]);
     expect(light["--live"]).toBe("#22d3ee");
   });
   it("dark mode is defined once for the system and once for the manual switch, identically", () => {

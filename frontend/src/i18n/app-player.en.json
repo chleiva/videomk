@@ -234,5 +234,11 @@
  "wallet.expire_on": "Expire {date}",
  "feedback.counter": "{n} / {max}",
  "settings.skip": "Skip",
- "editor.undo": "Undo"
+ "editor.undo": "Undo",
+ "watch.back_short": "Videos",
+ "watch.another": "Make another",
+ "watch.another_short": "Make it a Short",
+ "watch.another_es": "Spanish version",
+ "watch.another_en": "English version",
+ "watch.another_again": "Same idea, new take"
 }

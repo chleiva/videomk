@@ -1,13 +1,13 @@
 // Videos: a grid of real thumbnails (the making card first), a search pill, a New video button. No per-card buttons: the card opens the video, the ... menu holds the rest.
 import "../../styles/app-b.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { EmptyState, MakingCard, Spinner, Thumb, useToast } from "../ui";
+import { EmptyState, Spinner, Thumb, useToast } from "../ui";
 import { AIcon as Icon } from "./icons";
 import { Menu } from "./Menu";
 import Shortcuts from "./Shortcuts";
 import { useVideos } from "./useVideos";
 import { APP_PATHS, appUrl } from "../../lib/links";
-import { filterVideos, formatDuration, isMaking } from "../../lib/videos";
+import { filterVideos, formatDuration, isMaking, makingInfo, minutesLeft } from "../../lib/videos";
 import type { RetryOutcome, TaskItem } from "../../lib/videos";
 import { useLocale } from "../../lib/useLocale";
 
@@ -24,6 +24,29 @@ function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, 
   if (day < 30) return tr("time.days", { n: day });
   const mon = Math.floor(day / 30);
   return mon < 12 ? tr("time.months", { n: mon }) : tr("time.years", { n: Math.floor(mon / 12) });
+}
+
+const STEPS = ["making.step.script", "making.step.voice", "making.step.pictures", "making.step.final_cut"];
+/** The video being made: one wide banner over the grid (design bar: the wait is a story, not a spinner). Title, one live line, the four steps as tiles, the time left. */
+function MakingBanner({ v }: { v: TaskItem }) {
+  const { t } = useLocale();
+  const info = makingInfo(v.stage);
+  const mins = minutesLeft(v.eta_seconds);
+  const eta = mins === null ? null : mins <= 0 ? t("making.eta_under_minute") : t("making.eta_short", { n: mins });
+  const line = t(`making.line.${info.line}`);
+  const title = v.title || t("gen.untitled");
+  return (
+    <div className="mkb" role="group" aria-label={t("making.a11y", { title, stage: line })}>
+      <div className="mkb-text">
+        <p className="mkb-title">{title}</p>
+        <p className="mkb-line" role="status"><Icon name="sparkle" size={18} /><span>{line}</span></p>
+      </div>
+      <ol className="mkb-steps" aria-hidden="true">
+        {STEPS.map((k, i) => <li key={k} className={i < info.current ? "is-done" : i === info.current ? "is-now" : ""}><span>{t(k)}</span></li>)}
+      </ol>
+      {eta && <p className="mkb-eta">{eta}</p>}
+    </div>
+  );
 }
 
 function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: string; onCopied: () => void; onRetry: (id: string) => Promise<void>; onRemove: (id: string) => Promise<void> }) {
@@ -54,9 +77,9 @@ function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: 
         </div>
       ) : (
         <a href={watch} onClick={remember} className="vtile-link" aria-label={dur ? t("gen.watch_duration", { title, duration: dur }) : t("gen.watch", { title })}>
-          <Thumb id={v.id} src={thumb} duration={dur} />
+          <span className="vtile-thumb"><Thumb id={v.id} src={thumb} duration={dur} />{v.aspect && v.aspect !== "16:9" && <span className="asp">{v.aspect}</span>}</span>
           <p className="vtile-title">{title}</p>
-          <p className="vtile-meta">{ago(v.created_at, t)}</p>
+          <p className="vtile-meta">{[ago(v.created_at, t), v.aspect || "16:9"].filter(Boolean).join(" · ")}</p>
         </a>
       )}
       {items.length > 0 && <Menu className="vtile-menu" triggerClass="icon-btn vtile-more" label={t("gen.more")} trigger={<Icon name="dots" size={20} />} items={items} align="end" onPick={(id) => { if (id === "copy") void copy(); }} />}
@@ -68,7 +91,6 @@ export default function VideosPage() {
   const { t } = useLocale();
   const { items, thumbs, state, reload, retry, remove } = useVideos();
   const [q, setQ] = useState("");
-  const [open, setOpen] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -79,7 +101,7 @@ export default function VideosPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {   // "/" focuses the search (Shortcuts asks the page; answering with preventDefault means "handled")
-    const on = (e: Event) => { e.preventDefault(); setOpen(true); setTimeout(() => input.current?.focus(), 0); };
+    const on = (e: Event) => { e.preventDefault(); input.current?.focus(); };
     window.addEventListener("vmk:search", on);
     return () => window.removeEventListener("vmk:search", on);
   }, []);
@@ -102,8 +124,8 @@ export default function VideosPage() {
   } else {
     body = (
       <>
+        {showMaking && making.map((m) => <MakingBanner key={m.id} v={m} />)}
         <div className="vgrid">
-          {showMaking && making.map((m) => <MakingCard key={m.id} title={m.title} stage={m.stage} etaSeconds={m.eta_seconds} />)}
           {rest.map((v) => <Card key={v.id} v={v} thumb={thumbs[v.id]} onCopied={() => toast.show(t("gen.link_copied"))} onRetry={onRetry} onRemove={onRemove} />)}
         </div>
         {q.trim() && rest.length === 0 && <p className="muted vempty" role="status">{t("gen.search_none", { q: q.trim() })}</p>}
@@ -116,10 +138,8 @@ export default function VideosPage() {
       <header className="page-head">
         <h1 className="h1">{t("gen.nav_label")}</h1>
         <div className="page-tools">
-          {items.length > 0 && (open
-            ? <div className="search-pill is-open" role="search"><Icon name="search" size={18} /><input ref={input} type="search" value={q} placeholder={t("gen.search_ph")} aria-label={t("gen.search_ph")} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape") { setQ(""); setOpen(false); } }} onBlur={() => { if (!q) setOpen(false); }} /></div>
-            : <button type="button" className="search-pill" onClick={() => { setOpen(true); setTimeout(() => input.current?.focus(), 0); }}><Icon name="search" size={18} /><span>{t("gen.search")}</span></button>)}
-          {!(state === "ready" && items.length === 0) && <a href="/new" className="btn btn-primary"><Icon name="plus" size={18} />{t("gen.new_video")}</a>}
+          {items.length > 0 && <div className="search-pill is-open vsearch" role="search"><Icon name="search" size={18} /><input ref={input} type="search" value={q} placeholder={t("gen.search")} aria-label={t("gen.search_ph")} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape") setQ(""); }} /></div>}
+          {!(state === "ready" && items.length === 0) && <a href="/new" className="btn btn-primary vnew"><Icon name="newvideo" size={18} />{t("gen.new_video")}</a>}
         </div>
       </header>
       {body}

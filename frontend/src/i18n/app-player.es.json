@@ -234,5 +234,11 @@
  "wallet.expire_on": "Vencen el {date}",
  "feedback.counter": "{n} / {max}",
  "settings.skip": "Omitir",
- "editor.undo": "Deshacer"
+ "editor.undo": "Deshacer",
+ "watch.back_short": "Videos",
+ "watch.another": "Crear otro",
+ "watch.another_short": "Hazlo un Short",
+ "watch.another_es": "Versión en español",
+ "watch.another_en": "Versión en inglés",
+ "watch.another_again": "La misma idea, otra versión"
 }

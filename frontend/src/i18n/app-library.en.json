@@ -75,9 +75,9 @@
  "gen.sc_credits": "Go to Credits",
  "gen.sc_help": "Show shortcuts",
  "media.nav_label": "Media",
- "media.title": "My media",
+ "media.title": "Media",
  "media.add": "Add photos",
- "media.search_ph": "Search your photos, “Thailand 2024”",
+ "media.search_ph": "Search photos: “beach at sunset”",
  "media.search_label": "Search photos",
  "media.clear_search": "Clear search",
  "media.chip_remove": "Remove {label}",
@@ -170,5 +170,8 @@
  "gen.retry_gone": "This video is no longer here.",
  "gen.retry_unsupported": "Trying again isn't available right now. Your video and its photos were not changed.",
  "gen.retry_error": "We couldn't start it again. Try in a moment.",
- "media.make_video_n": "Make a video · {n}"
+ "media.make_video_n": "Make a video · {n}",
+ "media.select": "Select",
+ "media.select_done": "Done",
+ "media.photos_n": "{n, plural, one {# photo} other {# photos}}"
 }

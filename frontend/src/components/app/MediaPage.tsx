@@ -32,6 +32,7 @@ export default function MediaPage() {
   const toast = useToast();
   const [sel, setSelRaw] = useState<Selection>(() => { try { const ids = JSON.parse(sessionStorage.getItem(SELECTION) || "null"); return Array.isArray(ids) && ids.length ? { ids: ids.filter((x) => typeof x === "string").slice(0, MAX_SELECT), anchor: null } : emptySelection; } catch { return emptySelection; } });
   const setSel = useCallback((next: Selection) => { setSelRaw(next); try { if (next.ids.length) sessionStorage.setItem(SELECTION, JSON.stringify(next.ids)); else sessionStorage.removeItem(SELECTION); } catch { /* private mode */ } }, []);
+  const [selectMode, setSelectMode] = useState(() => sel.ids.length > 0);   // Select: tiles tick instead of opening; it ends with Done, the close (x), or when the video is sent
   const [viewer, setViewer] = useState<number | null>(null);
   const [confirm, setConfirm] = useState<string[] | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -85,8 +86,10 @@ export default function MediaPage() {
 
   const order = useMemo(() => lib.items.map((p) => p.id), [lib.items]);
   const selecting = sel.ids.length > 0;
+  const endSelect = () => { setSel(emptySelection); setSelectMode(false); };
   const filterOn = lib.filter.kind !== "all";
   const sum = lib.summary;
+  const storagePct = sum && sum.limit_bytes > 0 ? sum.used_bytes / sum.limit_bytes : 0;
   const tone = sum ? storageTone(sum) : "ok";
   const years = sum?.years.slice(0, 3) ?? [];
   const places = sum?.places.slice(0, 3) ?? [];
@@ -122,15 +125,16 @@ export default function MediaPage() {
   else if (lib.loading && lib.items.length === 0) body = <div className="mgrid" role="status" aria-label={t("gen.loading")}>{Array.from({ length: 12 }, (_, i) => <div key={i} className="mtile skeleton" />)}</div>;
   else if (!lib.query && !filterOn && lib.items.length === 0) body = <EmptyState title={t("media.empty_title")} body={t("media.empty_body")} action={<button type="button" className="btn btn-primary" onClick={() => input.current?.click()}>{t("media.add")}</button>} />;
   else if (lib.items.length === 0) body = <EmptyState title={t("media.no_match")} body={t("media.no_match_body")} />;
-  else body = <MediaGrid items={lib.items} grouped={!lib.query.trim() && lib.filter.kind !== "collection"} selection={sel} onSelection={setSel} onOpen={(id) => setViewer(order.indexOf(id))} max={MAX_SELECT} hasMore={lib.more} onMore={lib.loadMore} />;
+  else body = <MediaGrid items={lib.items} grouped={!lib.query.trim() && lib.filter.kind !== "collection"} selection={sel} onSelection={setSel} onOpen={(id) => setViewer(order.indexOf(id))} selectOnly={selectMode} max={MAX_SELECT} hasMore={lib.more} onMore={lib.loadMore} />;
 
   return (
     <section className="page mpage">
       <header className="page-head">
         <h1 className="h1">{t("media.title")}</h1>
         <div className="page-tools">
-          {sum && sum.limit_bytes > 0 && <p className={`storage tone-${tone}`} aria-label={t("media.storage_a11y", { used: formatBytes(sum.used_bytes, locale), limit: formatBytes(sum.limit_bytes, locale) })}><span className="storage-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, Math.round((sum.used_bytes / sum.limit_bytes) * 100))}%` }} /></span><span>{t("media.storage", { used: formatBytes(sum.used_bytes, locale), limit: formatBytes(sum.limit_bytes, locale) })}</span></p>}
-          <button type="button" className="btn btn-primary" onClick={() => input.current?.click()} disabled={sum?.read_only}><Icon name="upload" size={18} />{t("media.add")}</button>
+          <div className="search-pill is-open msearch" role="search"><Icon name="search" size={18} /><input ref={search} type="search" value={lib.query} placeholder={t("media.search_ph")} aria-label={t("media.search_label")} onChange={(e) => lib.setQuery(e.target.value)} />{lib.searching && <Spinner />}</div>
+          {lib.items.length > 0 && <button type="button" className="btn btn-quiet" aria-pressed={selectMode} onClick={() => (selectMode ? endSelect() : setSelectMode(true))}>{t(selectMode ? "media.select_done" : "media.select")}</button>}
+          <button type="button" className="btn btn-tonal" onClick={() => input.current?.click()} disabled={sum?.read_only}><Icon name="addphoto" size={18} />{t("media.add")}</button>
         </div>
         <input ref={input} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { add(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
       </header>
@@ -140,7 +144,7 @@ export default function MediaPage() {
       {(up.summary.storageFull || (sum && tone === "full" && !sum.read_only)) && <p className="notice notice-warn" role="status"><span><strong>{t("media.storage_full")}</strong> {t("media.storage_full_body")}</span></p>}
       <UploadBanner queue={up.queue} summary={up.summary} onDismiss={() => up.queue.clearFinished()} />
 
-      <div className="search-pill is-open wide" role="search"><Icon name="search" size={18} /><input ref={search} type="search" value={lib.query} placeholder={t("media.search_ph")} aria-label={t("media.search_label")} onChange={(e) => lib.setQuery(e.target.value)} />{lib.searching && <Spinner />}</div>
+      {sum && storagePct >= 0.5 && <p className={`storage tone-${tone}`} aria-label={t("media.storage_a11y", { used: formatBytes(sum.used_bytes, locale), limit: formatBytes(sum.limit_bytes, locale) })}><span className="storage-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, Math.round(storagePct * 100))}%` }} /></span><span>{t("media.storage", { used: formatBytes(sum.used_bytes, locale), limit: formatBytes(sum.limit_bytes, locale) })}</span></p>}
       {lib.chips.length > 0 && <div className="chips mchips" aria-live="polite">{lib.chips.map((c) => <button key={c.label} type="button" className="chip is-on" aria-label={t("media.chip_remove", { label: c.label })} onClick={() => lib.dropChip(c.label)}>{c.label}<Icon name="close" size={14} /></button>)}</div>}
 
       {!lib.query && sum && (years.length > 0 || places.length > 0 || sum.collections.length > 0) && (
@@ -156,16 +160,15 @@ export default function MediaPage() {
 
       {body}
 
-      {selecting && (
+      {(selecting || selectMode) && (
         <div className="selbar" role="toolbar" aria-label={t("media.selected_n", { n: sel.ids.length })}>
           <span className="selbar-n" role="status">{t("media.selected_n", { n: sel.ids.length })}</span>
-          <button type="button" className="btn btn-primary btn-sm selbar-go" onClick={() => makeVideo(sel.ids)}>{t("media.make_video_n", { n: sel.ids.length })}</button>
-          <Menu label={t("media.add_to_collection")} triggerClass="btn btn-line btn-sm" trigger={<span>{t("media.add_to_collection")}</span>} align="end"
-            items={[...(sum?.collections ?? []).filter((c) => !c.auto || true).map((c) => ({ id: c.id, label: `${c.emoji ? c.emoji + " " : ""}${c.name}` })), { id: "__new", label: t("media.new_collection") }]}
+          <Menu label={t("media.add_to_collection")} triggerClass="icon-btn" trigger={<Icon name="folderplus" size={22} />} align="end"
+            items={[...(sum?.collections ?? []).map((c) => ({ id: c.id, label: `${c.emoji ? c.emoji + " " : ""}${c.name}`, disabled: !selecting })), { id: "__new", label: t("media.new_collection"), disabled: !selecting }]}
             onPick={(id) => { if (id === "__new") { setPendingAdd(sel.ids); setNewName(""); } else void addTo(id, sel.ids, sum?.collections.find((c) => c.id === id)?.name ?? ""); }} />
-          <button type="button" className="icon-btn" aria-label={t("media.delete")} onClick={() => setConfirm(sel.ids)}><Icon name="trash" size={20} /></button>
-          <button type="button" className="icon-btn" aria-label={t("media.clear_selection")} onClick={() => setSel(emptySelection)}><Icon name="close" size={20} /></button>
-          <button type="button" className="btn btn-line btn-sm selbar-all" onClick={() => setSel({ ids: order.slice(0, MAX_SELECT), anchor: order[0] ?? null })}>{t("media.select_all")}</button>
+          <button type="button" className="icon-btn selbar-del" aria-label={t("media.delete")} disabled={!selecting} onClick={() => setConfirm(sel.ids)}><Icon name="trash" size={22} /></button>
+          <button type="button" className="btn btn-primary selbar-go" disabled={!selecting} onClick={() => makeVideo(sel.ids)}><Icon name="newvideo" size={18} />{t("media.make_video_n", { n: sel.ids.length })}</button>
+          <button type="button" className="icon-btn" aria-label={t("media.clear_selection")} onClick={endSelect}><Icon name="close" size={20} /></button>
         </div>
       )}
 

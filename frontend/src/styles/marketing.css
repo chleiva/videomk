@@ -116,3 +116,67 @@ html.marketing { scroll-padding-top: 4.5rem; scroll-behavior: smooth; }
 @media (max-width: 39.99rem) { .legal-meta { flex-direction: column; } .legal-meta li + li::before { content: none; } }
 
 @media (prefers-reduced-motion: reduce) { .mk-own-card, .mk-faq summary::after { transition: none; } .mk-own-card:hover { transform: none; } }
+
+/* ================= design bar (docs/DESIGN_BAR_2026.md, mockup docs/design_bar/mockups/web_1_home_*): later rules win over the ones above ================= */
+/* header: flat on the page, no hairline; Sign in as a text link, the app as the one inverse pill */
+html.marketing .site-header { background: transparent; border-bottom-color: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; position: absolute; left: 0; right: 0; }
+html.marketing .site-header-in { max-width: none; min-height: 4.5rem; padding-inline: var(--gutter); gap: var(--space-3); }
+html.marketing .brand { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+html.marketing main { padding-top: 4.5rem; }
+.mk-nav { gap: var(--space-2); }
+.mk-nav a { font-weight: 500; padding: 0 var(--space-3); }
+.mk-nav a:hover { background: transparent; color: var(--text); }
+.mk-nav .mk-nav-signin { color: var(--text); }
+.btn-inverse { color: var(--background); background: var(--text); min-height: 2.5rem; padding: 0 var(--space-5); font-size: var(--fs-subhead); font-weight: 600; }
+.btn-inverse:hover { filter: brightness(0.92); }
+@media (min-width: 64rem) { html.marketing .site-header-in { padding-inline: 4rem; gap: var(--space-4); } .mk-nav { gap: var(--space-4); } }
+
+/* hero: two lines, the second in the brand gradient; one field; the video carries its prompt */
+.mk-hero { position: relative; margin-top: -4.5rem; padding: calc(4.5rem + clamp(2.5rem, 6vw, 4.75rem)) 0 var(--section-pad); background: radial-gradient(60% 47.5rem at 50% 0%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 70%); }
+.mk-h1 { font-size: clamp(2.75rem, 5.2vw + 1.2rem, 5.5rem); line-height: 1.045; font-weight: 700; letter-spacing: -0.036em; word-spacing: 0; }
+.mk-grad { background: linear-gradient(100deg, var(--headline-1), var(--headline-2) 60%, var(--headline-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mk-lead { margin-top: var(--space-6); max-width: 46rem; font-size: clamp(1.125rem, 0.6vw + 1rem, 1.375rem); line-height: 1.45; letter-spacing: -0.014em; }
+.mk-ask { max-width: 40rem; min-height: 4.25rem; margin-top: var(--space-10); padding: 0 0.5625rem 0 1.75rem; gap: 0.625rem; box-shadow: var(--elev-3); }
+.mk-ask:focus-within { box-shadow: var(--elev-3), 0 0 0 2px var(--focus); }
+.mk-ask-input { padding: 0; font-size: 1.1875rem; }
+.mk-ask-mic { flex: none; display: inline-flex; align-items: center; justify-content: center; width: var(--min-touch); height: var(--min-touch); border-radius: var(--radius-pill); color: var(--text-tertiary); }
+.mk-ask-mic[hidden] { display: none; }
+.mk-ask-mic:hover { color: var(--text); background: var(--surface-2); }
+.mk-ask-mic.is-live { color: var(--danger); background: var(--danger-container); }
+.mk-ask-btn { min-height: 3.125rem; padding: 0 1.625rem; font-size: 1.0625rem; font-weight: 600; box-shadow: 0 8px 22px rgba(75, 60, 220, 0.32); }
+.mk-fine { margin-top: var(--space-4); color: var(--text-tertiary); }
+.mk-hero-stage { position: relative; max-width: 70rem; margin: var(--space-12) auto 0; padding-inline: var(--gutter); }
+.mk-sample-hero { max-width: none; }
+.mk-sample-hero .mk-frame { border-radius: var(--radius-video); box-shadow: 0 40px 100px rgba(10, 10, 40, 0.35); }
+.mk-prompt { max-width: none; margin: var(--space-5) 0 0; flex-direction: column; align-items: flex-start; gap: var(--space-4); text-align: left; }
+.mk-prompt-label { font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); }
+.mk-prompt-text { margin-top: 0.625rem; font-size: 1.125rem; line-height: 1.4; font-weight: 500; letter-spacing: -0.014em; color: var(--text); }
+.mk-btn-white { background: var(--text); color: var(--background); min-height: 3.125rem; padding: 0 var(--space-6); font-weight: 600; gap: var(--space-2); }
+@media (min-width: 56rem) {
+  .mk-hero-stage { margin-top: 4rem; }
+  .mk-sample-hero .mk-frame { border-radius: 2.25rem; }
+  /* the prompt sits on the video's lower edge, above the video's own caption line */
+  .mk-prompt { position: absolute; left: calc(var(--gutter) + 2.25rem); right: calc(var(--gutter) + 2.25rem); bottom: 6.5rem; margin: 0; flex-direction: row; align-items: flex-end; gap: var(--space-6); color: var(--on-scrim); pointer-events: none; }
+  .mk-prompt > * { pointer-events: auto; }
+  .mk-prompt-in { flex: 1; min-width: 0; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55); }
+  .mk-prompt-label { color: var(--on-scrim); opacity: 0.78; }
+  .mk-prompt-text { max-width: 42.5rem; font-size: 1.375rem; line-height: 1.4; color: var(--on-scrim); }
+  .mk-btn-white { background: var(--on-scrim); color: var(--stage); }
+  .mk-sample-hero .mk-frame::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46%; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.62)); }
+  .mk-sample-hero .mk-frame:has(video[data-sound])::after { display: none; }
+  .mk-hero-stage:has(video[data-sound]) .mk-prompt { display: none; }
+}
+
+/* gallery: one row of shapes with the same height, an aspect badge on each, the title under it */
+.mk-h2 { font-size: clamp(2rem, 3vw + 1.25rem, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.032em; word-spacing: 0; }
+.mk-sub { margin-top: var(--space-4); font-size: clamp(1.0625rem, 0.5vw + 0.95rem, 1.25rem); line-height: 1.5; }
+.mk-rail { margin-top: var(--space-10); gap: var(--space-6); }
+.mk-rail .mk-frame { border-radius: 1.5rem; box-shadow: var(--elev-2); }
+.mk-rail .mk-sample { width: min(calc(100vw - 3rem), calc(20rem * var(--w) / var(--h))); }
+.mk-asp { position: absolute; left: var(--space-3); top: var(--space-3); height: 1.5rem; padding: 0 var(--space-2); border-radius: var(--radius-field); background: var(--scrim); color: var(--on-scrim); font-size: var(--fs-caption); font-weight: 600; line-height: 1.5rem; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); pointer-events: none; }
+.mk-rail .mk-hint { top: var(--space-3); }
+.mk-cap { margin-top: 0.875rem; }
+.mk-cap-title { font-size: var(--fs-subhead); line-height: 1.45; font-weight: 400; letter-spacing: 0; color: var(--text-secondary); }
+.mk-own-card { height: 20rem; border-radius: 1.5rem; }
+@media (min-width: 64rem) { .mk-rail { max-width: 76rem; } .mk-rail .mk-sample { width: calc(20rem * var(--w) / var(--h)); } .mk-own-card { height: 20rem; } }
+.mk-alt { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }

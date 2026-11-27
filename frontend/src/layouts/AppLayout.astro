@@ -5,6 +5,7 @@
 import "../styles/global.css";
 import "../styles/shell.css";
 import "../styles/app.css";
+import "../styles/bar.css";
 import Head from "./Head.astro";
 import { APP_NAV } from "../lib/appNav";
 import { translate } from "../lib/i18n";
@@ -23,7 +24,30 @@ const tr = (k: string) => translate(k, "en");   // build-time English; the brows
 			initThemeSwitch();
 			const p = location.pathname;
 			if (!p.startsWith("/auth/callback") && !p.startsWith("/signin") && !p.startsWith("/ui-kit")) {   // /ui-kit: developer preview, never published, needs no account
-				bootstrapAuthForPage().catch((e) => console.error("Auth bootstrap failed", e));
+				bootstrapAuthForPage().then(fillRail).catch((e) => console.error("Auth bootstrap failed", e));
+			}
+			// The rail's foot: the credit balance (one line, links to Credits) and the account (links to Settings). Filled once the session is known; hidden until then.
+			async function fillRail() {
+				const { getTokensIfAvailable } = await import("../lib/auth");
+				const { getWallet } = await import("../lib/api");
+				const { t } = await import("../lib/i18n");
+				const tok = await getTokensIfAvailable();
+				if (!tok) return;
+				try {
+					const mail = String(JSON.parse(decodeURIComponent(escape(atob(tok.id_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))))).email || "");
+					const acc = document.querySelector<HTMLElement>("[data-account]");
+					if (acc && mail) { acc.querySelector("[data-account-mail]")!.textContent = mail; acc.querySelector("[data-account-initial]")!.textContent = mail[0].toUpperCase(); acc.hidden = false; }
+				} catch { /* no email claim: the row stays hidden */ }
+				const paint = async () => {
+					const w = await getWallet();
+					const box = document.querySelector<HTMLElement>("[data-credits]");
+					if (!w || !box) return;
+					box.querySelector("[data-credits-n]")!.textContent = w.unlimited ? t("credits.unlimited") : t("shell.credits_n", { n: w.balance });
+					box.querySelector("[data-credits-sub]")!.textContent = w.unlimited || !w.next_daily_at ? "" : t("shell.free_soon");
+					box.hidden = false;
+				};
+				void paint();
+				window.addEventListener("vmk-locale", () => void paint());
 			}
 		</script>
 	</head>
@@ -43,34 +67,27 @@ const tr = (k: string) => translate(k, "en");   // build-time English; the brows
 						<span>videomk</span>
 					</a>
 					<ul class="app-nav-list">
-						{APP_NAV.map((n) => (
+						{APP_NAV.filter((n) => n.rail).map((n) => (
 							<li>
 								<a href={n.href} aria-current={active === n.id ? "page" : undefined}>
-									<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={n.icon} /></svg>
+									<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={n.icon} /></svg>
 									<span data-i18n={n.key}>{tr(n.key)}</span>
 								</a>
 							</li>
 						))}
 					</ul>
+					<a href="/new" class="app-fab" aria-current={active === "new" ? "page" : undefined} data-i18n-aria="shell.new_video" aria-label={tr("shell.new_video")}>
+						<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM18.5 15v5M16 17.5h5" /></svg>
+					</a>
 					<div class="app-nav-foot">
-						<p class="footer-row" data-lang-switch>
-							<span class="sr-only-vmk" data-i18n="footer.language">{tr("footer.language")}</span>
-							<a href="#" lang="en" hreflang="en" data-lang-option="en" aria-current="true">EN</a>
-							<span aria-hidden="true">·</span>
-							<a href="#" lang="es" hreflang="es" data-lang-option="es" aria-current="false">ES</a>
-						</p>
-						<div class="footer-row" data-theme-switch hidden>
-							<div class="theme-switch" role="group" data-i18n-aria="theme.label" aria-label={tr("theme.label")}>
-								<button type="button" data-theme-option="auto" aria-pressed="true" data-i18n="theme.auto">{tr("theme.auto")}</button>
-								<button type="button" data-theme-option="light" aria-pressed="false" data-i18n="theme.light">{tr("theme.light")}</button>
-								<button type="button" data-theme-option="dark" aria-pressed="false" data-i18n="theme.dark">{tr("theme.dark")}</button>
-							</div>
-						</div>
-						<p class="footer-row app-legal">
-							<a href={siteUrl("/privacy")} data-path="/privacy" data-i18n="footer.privacy" rel="noopener">{tr("footer.privacy")}</a>
-							<span aria-hidden="true">·</span>
-							<a href={siteUrl("/terms")} data-path="/terms" data-i18n="footer.terms" rel="noopener">{tr("footer.terms")}</a>
-						</p>
+						<a href="/wallet" class="app-credits" aria-current={active === "credits" ? "page" : undefined} hidden data-credits>
+							<span class="app-credits-n"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z" /></svg><span data-credits-n></span></span>
+							<span class="app-credits-sub" data-credits-sub></span>
+						</a>
+						<a href="/settings" class="app-account" hidden data-account>
+							<span class="app-avatar" aria-hidden="true" data-account-initial></span>
+							<span class="app-account-mail" data-account-mail></span>
+						</a>
 					</div>
 				</nav>
 			</>

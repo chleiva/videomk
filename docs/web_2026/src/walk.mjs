@@ -77,6 +77,7 @@ const browser = await chromium.launch({ channel: "chrome" });
 async function shot(name, sz, url, { scheme = "dark", locale = "en", s = {}, act } = {}) {
   const [w, h] = SZ[sz];
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: scheme, locale: locale === "es" ? "es-ES" : "en-US", deviceScaleFactor: sz === "p" ? 2 : 1 });
+  tokens.id_token = `${b64({ alg: "none" })}.${b64({ sub: "user-1", email: "chris@example.com" })}.x`;
   await ctx.addInitScript(([t, loc]) => { try { localStorage.setItem("vmk_auth_tokens", JSON.stringify(t)); localStorage.setItem("vmk_locale", loc); localStorage.setItem("vmk_media_privacy_seen", "1"); } catch {} }, [tokens, locale]);
   await setup(ctx, s);
   const page = await ctx.newPage();
@@ -95,9 +96,10 @@ async function shot(name, sz, url, { scheme = "dark", locale = "en", s = {}, act
 const PROMPT = "How a forest breathes, for curious teenagers";
 for (const sz of ["d", "p"]) {
   await shot("04_videos", sz, "/generations/");
+  await shot("05a_create_empty", sz, "/new/");
   await shot("05_create", sz, "/new/?prompt=" + encodeURIComponent(PROMPT), { act: async (p) => { const v = await p.locator("#create-text").inputValue(); return v === PROMPT ? "prompt carried" : "PROMPT NOT CARRIED: " + v; } });
   await shot("06_create_locked", sz, "/new/?prompt=" + encodeURIComponent(PROMPT), { s: { slowBrief: true }, act: async (p) => { await p.locator(".compose-go").click(); await p.waitForTimeout(700); const inert = await p.locator("form.composer-card").evaluate((f) => f.hasAttribute("inert")); const txt = await p.locator(".compose-progress").innerText(); return `inert=${inert} status="${txt.replace(/\n/g, " ")}"`; } });
-  await shot("07_media_selected", sz, "/media/", { act: async (p) => { for (const n of [1, 2, 4]) await p.locator(`.mtile:nth-child(${n}) .mtile-check`).first().click(); await p.waitForTimeout(300); return "bar=" + (await p.locator(".selbar-go").innerText()); } });
+  await shot("07_media_selected", sz, "/media/", { act: async (p) => { await p.locator("button:has-text('Select')").first().click(); for (const n of [1, 2, 4, 7, 9]) await p.locator(".mtile-btn").nth(n).click(); await p.waitForTimeout(300); return "bar=" + (await p.locator(".selbar-go").innerText()); } });
 }
 await shot("08_watch", "d", "/watch/?id=v3");
 await shot("09_settings", "d", "/settings/");
@@ -111,6 +113,6 @@ const calls2 = [];
 await shot("12_retry_409", "d", "/generations/", { s: { calls: calls2, retry409: true }, act: async (p) => { await p.locator(".vtile.is-failed button:has-text('Try again')").click(); await p.waitForTimeout(900); const failed = await p.locator(".vtile.is-failed").count(); const toast = await p.locator("[role=status]").allInnerTexts(); return `calls=${JSON.stringify(calls2)} failedCardsAfter=${failed} toast=${JSON.stringify(toast.filter(Boolean).slice(-1))}`; } });
 const calls3 = [];
 await shot("13_remove", "d", "/generations/", { s: { calls: calls3 }, act: async (p) => { await p.locator(".vtile.is-failed button:has-text('Remove')").click(); await p.waitForTimeout(900); return `calls=${JSON.stringify(calls3)} failedCardsAfter=${await p.locator(".vtile.is-failed").count()}`; } });
-await shot("14_media_back_keeps_selection", "d", "/media/", { act: async (p) => { for (const n of [1, 2, 4]) await p.locator(`.mtile:nth-child(${n}) .mtile-check`).first().click(); await p.locator(".selbar-go").click(); await p.waitForURL(/\/new/); await p.waitForTimeout(1200); const attached = await p.locator(".attach").count(); await p.goBack(); await p.waitForTimeout(1500); const bar = await p.locator(".selbar-go").innerText().catch(() => "NO BAR"); return `attachedInCreate=${attached} afterBack="${bar}"`; } });
+await shot("14_media_back_keeps_selection", "d", "/media/", { act: async (p) => { await p.locator("button:has-text('Select')").first().click(); for (const n of [1, 2, 4]) await p.locator(`.mtile:nth-child(${n}) .mtile-btn`).first().click(); await p.locator(".selbar-go").click(); await p.waitForURL(/\/new/); await p.waitForTimeout(1200); const attached = await p.locator(".attach").count(); await p.goBack(); await p.waitForTimeout(1500); const bar = await p.locator(".selbar-go").innerText().catch(() => "NO BAR"); return `attachedInCreate=${attached} afterBack="${bar}"`; } });
 await browser.close();
 console.log(out.join("\n"));

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Player from "./Player";
 import type { PlayerMeta } from "./Player";
 import { PIcon } from "./PlayerIcons";
+import { AIcon } from "./app/icons";
 import { Sheet, Spinner, useToast } from "./ui";
 import { IconButton } from "./ui/IconButton";
 import { Button } from "./ui/Button";
@@ -22,7 +23,7 @@ function known(id: string): Known {
 }
 
 export default function WatchPage() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const id = useMemo(() => new URLSearchParams(location.search).get("id") || "", []);
   const info = useMemo(() => known(id), [id]);
   const [view, setView] = useState<View>({ state: "loading" });
@@ -110,47 +111,59 @@ export default function WatchPage() {
   };
 
   const newHref = "/new";
+  // "Make another": the same subject, pre-filled in Create with one thing changed (the person still presses Create; nothing is made from here)
+  const otherLang = locale === "es" ? "en" : "es";
+  const againHref = (o: { aspect?: string; minutes?: number; language?: string }) => `/new?${new URLSearchParams({ prompt: shown, ...(o.aspect ? { aspect: o.aspect } : {}), ...(o.minutes ? { minutes: String(o.minutes) } : {}), ...(o.language ? { language: o.language } : {}) }).toString()}`;
   const feedbackHref = `/feedback?from=after_video&video=${encodeURIComponent(id)}`;
   const reportHref = `/feedback?from=report&kind=problem&video=${encodeURIComponent(id)}`;
 
   return (
     <section className="watch">
-      <header className="watch-top">
-        <IconButton label={t("watch.back")} className="glass-btn" onClick={() => (document.referrer.startsWith(location.origin) && history.length > 1 ? history.back() : location.assign("/generations"))}><PIcon name="back" size={22} /></IconButton>
-        <h1 className="watch-title" title={shown}>{shown}</h1>
-        <span className="watch-top-end" aria-hidden="true" />
-      </header>
-
-      <div className="watch-stage" style={{ ["--ar" as any]: String(ar) }} data-aspect={ratio ?? undefined}>
-        {view.state === "ready" && url ? (
-          <Player src={url} title={shown} poster={info.preview_gif_url} onMeta={setMeta} newVideoHref={newHref} />
-        ) : (
-          <div className="watch-state" role={view.state === "loading" || view.state === "making" ? "status" : "alert"}>
-            {view.state === "loading" && <Spinner />}
-            {view.state === "making" && <><p>{t("watch.making")}</p><a className="btn btn-tonal" href="/generations">{t("watch.back")}</a></>}
-            {view.state === "error" && <><p>{t("watch.load_error")}</p><Button variant="tonal" onClick={() => setTries((n) => n + 1)}>{t("watch.retry")}</Button></>}
-            {view.state === "failed" && <><p>{t("watch.failed")}</p><a className="btn btn-tonal" href="/generations">{t("watch.back")}</a></>}
+      <a className="watch-back" href="/generations" onClick={(e) => { if (document.referrer.startsWith(location.origin) && history.length > 1) { e.preventDefault(); history.back(); } }}><PIcon name="back" size={20} /><span>{t("watch.back_short")}</span></a>
+      <div className="watch-grid">
+        <div className="watch-main">
+          <div className="watch-stage" style={{ ["--ar" as any]: String(ar) }} data-aspect={ratio ?? undefined}>
+            {view.state === "ready" && url ? (
+              <Player src={url} title={shown} poster={info.preview_gif_url} onMeta={setMeta} newVideoHref={newHref} />
+            ) : (
+              <div className="watch-state" role={view.state === "loading" || view.state === "making" ? "status" : "alert"}>
+                {view.state === "loading" && <Spinner />}
+                {view.state === "making" && <><p>{t("watch.making")}</p><a className="btn btn-tonal" href="/generations">{t("watch.back")}</a></>}
+                {view.state === "error" && <><p>{t("watch.load_error")}</p><Button variant="tonal" onClick={() => setTries((n) => n + 1)}>{t("watch.retry")}</Button></>}
+                {view.state === "failed" && <><p>{t("watch.failed")}</p><a className="btn btn-tonal" href="/generations">{t("watch.back")}</a></>}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      {caption && <p className="watch-meta">{caption}</p>}
-
-      <div className="watch-actions" role="toolbar" aria-label={shown}>
-        <button type="button" className="action action-primary" onClick={share} disabled={!url} aria-label={t("watch.share")} title={t("watch.share")}><PIcon name="share" size={24} /></button>
-        <IconButton label={t("watch.save")} className="action" onClick={save} disabled={!url || saving}>{saving ? <Spinner /> : <PIcon name="download" />}</IconButton>
-        {info.editable && <a className="icon-btn action" href={`/edit?id=${encodeURIComponent(id)}`} aria-label={t("watch.edit")} title={t("watch.edit")}><PIcon name="sliders" /></a>}
-        <IconButton label={t("watch.info")} className="action" onClick={() => setSheet(true)} disabled={!url}><PIcon name="info" /></IconButton>
-        <span className="menu-anchor">
-          <button ref={moreRef} type="button" className="icon-btn action" onClick={() => setMenu((m) => !m)} aria-label={t("watch.more")} title={t("watch.more")} aria-haspopup="menu" aria-expanded={menu}><PIcon name="more" /></button>
-          {menu && (
-            <div ref={menuRef} className="menu" role="menu" aria-label={t("watch.more")}>
-              <a role="menuitem" href={newHref}><PIcon name="plus" size={20} />{t("watch.make_another")}</a>
-              <a role="menuitem" href={feedbackHref}><PIcon name="chat" size={20} />{t("watch.feedback")}</a>
-              <a role="menuitem" href={reportHref}><PIcon name="flag" size={20} />{t("watch.report")}</a>
+          <div className="watch-under">
+            <div className="watch-head">
+              <h1 className="watch-title" title={shown}>{shown}</h1>
+              {caption && <p className="watch-meta">{caption}</p>}
             </div>
-          )}
-        </span>
+            <div className="watch-actions" role="toolbar" aria-label={shown}>
+              <button type="button" className="btn btn-primary watch-share" onClick={share} disabled={!url}><PIcon name="share" size={20} />{t("watch.share")}</button>
+              <IconButton label={t("watch.save")} className="action" onClick={save} disabled={!url || saving}>{saving ? <Spinner /> : <PIcon name="download" />}</IconButton>
+              {info.editable && <a className="icon-btn action" href={`/edit?id=${encodeURIComponent(id)}`} aria-label={t("watch.edit")} title={t("watch.edit")}><PIcon name="edit" /></a>}
+              <span className="menu-anchor">
+                <button ref={moreRef} type="button" className="icon-btn action" onClick={() => setMenu((m) => !m)} aria-label={t("watch.more")} title={t("watch.more")} aria-haspopup="menu" aria-expanded={menu}><PIcon name="more" /></button>
+                {menu && (
+                  <div ref={menuRef} className="menu" role="menu" aria-label={t("watch.more")}>
+                    <button role="menuitem" type="button" onClick={() => { setMenu(false); setSheet(true); }} disabled={!url}><PIcon name="info" size={20} />{t("watch.info")}</button>
+                    <a role="menuitem" href={feedbackHref}><PIcon name="chat" size={20} />{t("watch.feedback")}</a>
+                    <a role="menuitem" href={reportHref}><PIcon name="flag" size={20} />{t("watch.report")}</a>
+                  </div>
+                )}
+              </span>
+            </div>
+          </div>
+        </div>
+        <aside className="watch-side">
+          <p className="eyebrow">{t("watch.another")}</p>
+          <div className="watch-chips">
+            <a className="chip" href={againHref({ aspect: "9:16", minutes: 0.5 })}><AIcon name="sparkle" size={15} />{t("watch.another_short")}</a>
+            <a className="chip" href={againHref({ language: otherLang })}><AIcon name="sparkle" size={15} />{t(otherLang === "es" ? "watch.another_es" : "watch.another_en")}</a>
+            <a className="chip" href={againHref({})}><AIcon name="sparkle" size={15} />{t("watch.another_again")}</a>
+          </div>
+        </aside>
       </div>
 
       {sheet && (

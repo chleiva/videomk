@@ -2,30 +2,43 @@
    pages in styles/app.css (B and C) and styles/marketing.css (A). Everything reads tokens.css; no raw colours. */
 .site-cta { margin-left: auto; }
 
-/* ---- app shell */
-.app-shell { min-height: 100dvh; }
-.app-topbar { position: sticky; top: 0; z-index: var(--z-sticky); display: flex; align-items: center; padding: var(--space-1) var(--screen-margin); min-height: var(--header-height); background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--outline); padding-top: env(safe-area-inset-top); }
-.app-nav { position: fixed; z-index: var(--z-sticky); left: 0; right: 0; bottom: 0; display: flex; background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--outline); padding-bottom: env(safe-area-inset-bottom); }
+/* ---- app shell (docs/DESIGN_BAR_2026.md, mockups web_2..web_5 and phone_2): a 248 px rail with three places, the credits card and the account at its foot;
+   on phones a floating glass tab bar with the same three places and ONE round button that makes a video. */
+.app-shell { min-height: 100dvh; background: var(--background); }
+.app-topbar { display: none; }
+.app-nav { position: fixed; z-index: var(--z-sticky); left: var(--space-4); right: calc(var(--space-4) + 4.125rem + var(--space-3)); bottom: calc(var(--space-4) + env(safe-area-inset-bottom)); display: flex; align-items: center; height: 4.125rem; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--glass); backdrop-filter: saturate(160%) blur(30px); -webkit-backdrop-filter: saturate(160%) blur(30px); box-shadow: inset 0 0 0 1px var(--outline), var(--elev-3); }
 .app-nav-brand, .app-nav-foot { display: none; }
-.app-nav-list { display: flex; flex: 1; list-style: none; margin: 0; padding: 0; }
+.app-nav-list { display: flex; flex: 1; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
 .app-nav-list li { flex: 1; }
-.app-nav-list a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: var(--tabbar-height); padding: var(--space-1); color: var(--text-secondary); font-size: var(--fs-caption); font-weight: 600; text-decoration: none; }
-.app-nav-list a[aria-current="page"] { color: var(--primary); }
-.app-nav-list a:hover { color: var(--text); }
-.app-main { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); min-height: 70vh; }
+.app-nav-list a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 3.125rem; border-radius: var(--radius-pill); color: var(--text-secondary); font-size: var(--fs-caption); line-height: 1; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.app-nav-list a[aria-current="page"] { color: var(--primary); background: var(--primary-container); }
+/* .app-nav has a backdrop-filter, so it is the containing block of its children: the round button is placed against the bar, to its right */
+.app-fab { position: absolute; left: calc(100% + var(--space-3)); top: 0; width: 4.125rem; height: 4.125rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); box-shadow: 0 14px 34px rgba(80, 60, 230, 0.45); transition: transform var(--dur-press) var(--ease); }
+.app-fab:active { transform: scale(0.96); }
+.app-fab[aria-current="page"] { display: none; }
+.app-main { padding-bottom: calc(4.125rem + var(--space-10) + env(safe-area-inset-bottom)); min-height: 70vh; }
 
 @media (min-width: 48rem) {
-  .app-topbar { display: none; }
-  .app-nav { top: 0; right: auto; bottom: 0; width: var(--rail-width); flex-direction: column; border-top: 0; border-right: 1px solid var(--outline); padding: var(--space-4) var(--space-3); gap: var(--space-4); background: var(--surface); }
-  .app-nav-brand { display: inline-flex; padding-inline: var(--space-2); }
+  .app-nav { inset: 0 auto 0 0; width: var(--rail-width); height: auto; flex-direction: column; align-items: stretch; gap: var(--space-1); padding: 1.75rem var(--space-4) var(--space-5); border-radius: 0; background: var(--background); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: inset -1px 0 0 var(--outline); }
+  .app-nav-brand { display: inline-flex; align-items: center; gap: 0.625rem; padding: 0 0.625rem 1.625rem; font-size: 1.1875rem; font-weight: 700; letter-spacing: -0.025em; }
+  .app-nav-brand .brand-mark { width: 1.875rem; height: 1.875rem; border-radius: 0.5rem; }
   .app-nav-list { flex: 0; flex-direction: column; gap: var(--space-1); }
-  .app-nav-list a { flex-direction: row; justify-content: flex-start; gap: var(--space-3); min-height: var(--min-touch); padding: 0 var(--space-3); border-radius: var(--radius-field); font-size: var(--fs-body); }
-  .app-nav-list a:hover { background: var(--surface-2); }
-  .app-nav-list a[aria-current="page"] { background: var(--primary-container); }
-  .app-nav-foot { display: flex; flex-direction: column; gap: var(--space-2); margin-top: auto; align-items: flex-start; }
-  .app-nav-foot .footer-row { justify-content: flex-start; }
-  .app-nav-foot a { color: var(--text-secondary); font-size: var(--fs-footnote); padding: var(--space-1); }
-  .app-nav-foot [aria-current="true"] { color: var(--text); font-weight: 700; }
+  .app-nav-list a { flex-direction: row; justify-content: flex-start; gap: var(--space-3); height: 2.75rem; padding: 0 var(--space-3); border-radius: var(--radius-field); font-size: var(--fs-subhead); font-weight: 500; }
+  .app-nav-list a:hover { background: var(--surface-2); color: var(--text); }
+  .app-nav-list a[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 600; }
+  .app-fab { display: none; }
+  .app-nav-foot { display: flex; flex-direction: column; gap: 0; margin-top: auto; }
+  .app-credits { display: flex; flex-direction: column; gap: 0.375rem; padding: 0.875rem; border-radius: var(--radius-card); background: var(--surface-2); color: var(--text); text-decoration: none; transition: background var(--dur-select) var(--ease); }
+  .app-credits[hidden], .app-account[hidden] { display: none; }
+  .app-credits:hover, .app-credits[aria-current="page"] { background: var(--surface-3); }
+  .app-credits-n { display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--fs-subhead); font-weight: 600; }
+  .app-credits-n svg { color: var(--primary); }
+  .app-credits-sub { font-size: var(--fs-caption); color: var(--text-tertiary); }
+  .app-credits-sub:empty { display: none; }
+  .app-account { display: flex; align-items: center; gap: 0.625rem; padding: 0.875rem 0.625rem 0; color: var(--text-secondary); text-decoration: none; font-size: var(--fs-caption); font-weight: 500; min-width: 0; }
+  .app-account:hover { color: var(--text); }
+  .app-avatar { flex: none; width: 2rem; height: 2rem; border-radius: 50%; background: var(--surface-3); display: inline-flex; align-items: center; justify-content: center; font-weight: 600; }
+  .app-account-mail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app-main { margin-left: var(--rail-width); padding-bottom: 0; }
 }
 

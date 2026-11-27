@@ -1,0 +1,135 @@
+/* The design bar applied to the app (docs/DESIGN_BAR_2026.md, mockups docs/design_bar/mockups/web_2..web_5 and phone_2..phone_6).
+   Loaded by AppLayout after the packages' sheets; every rule is scoped to .app-shell so load order cannot undo it. Tokens only (the few rgba values are white
+   or brand glows drawn on the making gradient, as in global.css). */
+
+/* ---- page frame, titles, buttons, search */
+.app-shell .page { max-width: none; margin: 0; padding: var(--space-5) var(--screen-margin) var(--space-8); }
+.app-shell .h1 { font-size: var(--fs-large); line-height: 1.15; letter-spacing: -0.03em; }
+.app-shell .page-head { margin-bottom: var(--space-6); gap: var(--space-4); }
+.app-shell .page-tools { gap: var(--space-3); }
+.app-shell .btn { min-height: var(--min-touch); padding: 0 var(--space-5); font-size: var(--fs-subhead); font-weight: 600; }
+.app-shell .btn-primary { box-shadow: 0 8px 22px rgba(75, 60, 220, 0.32); }
+.app-shell .btn-quiet { background: var(--surface-2); color: var(--text); }
+.app-shell .btn-quiet:hover, .app-shell .btn-quiet[aria-pressed="true"] { background: var(--surface-3); }
+.app-shell .search-pill { height: var(--min-touch); padding: 0 var(--space-4); gap: 0.625rem; background: var(--surface-2); box-shadow: none; font-weight: 400; color: var(--text-tertiary); }
+.app-shell .search-pill.is-open { box-shadow: none; }
+.app-shell .search-pill.is-open:focus-within { box-shadow: inset 0 0 0 2px var(--primary); }
+.app-shell .search-pill input { width: 100%; }
+.app-shell .vsearch, .app-shell .msearch { flex: 1 1 12rem; }
+.app-shell .chip svg { color: var(--primary); }
+.app-shell .menu button { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--min-touch); padding: 0 var(--space-3); border-radius: var(--radius-field); color: var(--text); font-size: var(--fs-body); font-weight: 500; text-align: left; }
+.app-shell .menu button:hover, .app-shell .menu button:focus-visible { background: var(--surface-2); }
+@media (max-width: 47.99rem) { .app-shell .page-head { flex-direction: column; align-items: stretch; } .app-shell .page-tools { flex-wrap: nowrap; } .app-shell .vnew { display: none; } }
+@media (min-width: 48rem) {
+  .app-shell .page { padding: 2.25rem 3rem 3.75rem; }
+  .app-shell .h1 { font-size: 2.5rem; line-height: 2.875rem; letter-spacing: -0.0625rem; }
+  .app-shell .page-head { flex-wrap: nowrap; margin-bottom: 2.25rem; }
+  .app-shell .page-tools { flex: 0 1 auto; min-width: 0; }
+  .app-shell .vsearch { flex: 0 1 26rem; width: 26rem; }
+  .app-shell .msearch { flex: 0 1 30rem; width: 30rem; }
+}
+
+/* ---- Videos: the making banner, the grid */
+.mkb { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-6); padding: var(--space-5); margin-bottom: var(--space-8); border-radius: var(--radius-composer); color: var(--on-making); background: linear-gradient(135deg, var(--making-start), var(--making-end)); box-shadow: 0 18px 50px rgba(60, 50, 200, 0.28); }
+.mkb::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.12) 46%, transparent 62%); transform: translateX(-100%); animation: vmk-shimmer var(--dur-shimmer) linear infinite; }
+.mkb > * { position: relative; z-index: 1; }
+.mkb-text { flex: 1 1 14rem; min-width: 0; }
+.mkb-title { font-size: var(--fs-title2); line-height: 1.25; font-weight: 600; letter-spacing: -0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mkb-line { display: flex; align-items: center; gap: 0.625rem; margin-top: var(--space-1); font-size: var(--fs-body); }
+.mkb-line svg { flex: none; color: var(--live); }
+.mkb-steps { display: flex; gap: 0.625rem; list-style: none; margin: 0; padding: 0; }
+.mkb-steps li { display: flex; align-items: flex-end; width: 5.75rem; height: 3.5rem; padding: var(--space-2) 0.625rem; border-radius: var(--radius-field); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.3); font-size: var(--fs-caption); font-weight: 600; line-height: 1.1; color: rgba(255, 255, 255, 0.82); }
+.mkb-steps li.is-done { background: rgba(255, 255, 255, 0.24); box-shadow: none; color: var(--on-making); }
+.mkb-steps li.is-now { background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 2px var(--live); color: var(--on-making); }
+.mkb-eta { font-size: var(--fs-body); font-weight: 500; white-space: nowrap; }
+@media (max-width: 47.99rem) { .mkb-steps { order: 3; width: 100%; gap: var(--space-2); } .mkb-steps li { flex: 1; width: auto; height: 2.75rem; padding: var(--space-2); white-space: nowrap; } }
+@media (min-width: 64rem) { .mkb { flex-wrap: nowrap; padding: var(--space-6) var(--space-10); gap: var(--space-8); margin-bottom: 3.375rem; } .mkb-title { font-size: 1.625rem; line-height: 2rem; } .mkb-line { font-size: 1.0625rem; } }
+@media (prefers-reduced-motion: reduce) { .mkb::after { animation: none; } }
+
+.app-shell .vpage .vgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-3); }
+@media (min-width: 40rem) { .app-shell .vpage .vgrid { grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: 2.25rem var(--space-6); } }
+.vtile-thumb { position: relative; display: block; }
+.app-shell .vtile-link .thumb { border-radius: 1.125rem; }
+.asp { position: absolute; left: 0.625rem; top: 0.625rem; height: 1.5rem; padding: 0 var(--space-2); border-radius: var(--radius-field); background: var(--scrim); color: var(--on-scrim); font-size: var(--fs-caption); font-weight: 600; line-height: 1.5rem; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.app-shell .duration { right: 0.625rem; bottom: 0.625rem; height: 1.5rem; padding: 0 var(--space-2); border-radius: var(--radius-field); line-height: 1.5rem; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.app-shell .vtile-title { margin-top: var(--space-3); font-size: var(--fs-subhead); line-height: 1.33; letter-spacing: -0.01em; }
+.app-shell .vtile-meta { margin-top: 2px; font-size: var(--fs-caption); color: var(--text-tertiary); }
+.app-shell .vtile { min-width: 0; }
+.app-shell .vtile.is-failed .vtile-fail { display: flex; flex-direction: column; justify-content: center; min-height: 9rem; padding: var(--space-4) var(--space-5); border-radius: 1.125rem; }
+.app-shell .vtile.is-failed .muted { font-size: var(--fs-caption); }
+@media (max-width: 39.99rem) { .app-shell .vtile.is-failed { grid-column: 1 / -1; } }
+.app-shell .vtile.is-failed .vtile-title { margin-top: 0; }
+.app-shell .vskel { border-radius: 1.125rem; }
+
+/* ---- Create: one centred card, a soft aura behind it */
+.app-shell .compose { position: relative; max-width: calc(51.25rem + 2 * var(--screen-margin)); margin: 0 auto; padding-top: clamp(var(--space-6), 9vh, 6.75rem); }
+.compose-aura { position: absolute; z-index: 0; inset: 3rem -4rem auto -4rem; height: 30rem; pointer-events: none; background: radial-gradient(closest-side at 30% 55%, rgba(122, 75, 230, 0.2), transparent), radial-gradient(closest-side at 74% 45%, rgba(34, 211, 238, 0.12), transparent); filter: blur(40px); }
+.app-shell .compose > :not(.compose-aura) { position: relative; z-index: 1; }
+.app-shell .compose-head { margin-bottom: var(--space-6); }
+.app-shell .compose-title { font-size: clamp(2rem, 3vw + 1.25rem, 3rem); line-height: 1.125; font-weight: 700; letter-spacing: -0.03em; }
+.app-shell .composer-card { padding: var(--space-5) var(--space-5) var(--space-4); border-radius: 1.75rem; background: var(--surface); box-shadow: var(--elev-3); }
+.app-shell .composer-card:focus-within { box-shadow: var(--elev-3), inset 0 0 0 1.5px var(--primary-container); }
+.app-shell .compose-text { min-height: 5.5rem; padding: 0; font-size: 1.25rem; line-height: 1.4; font-weight: 500; letter-spacing: -0.02em; }
+.app-shell .attach-strip { flex-wrap: nowrap; overflow-x: auto; gap: 0.625rem; padding: var(--space-2) 0 0; scrollbar-width: none; }
+.app-shell .attach-strip::-webkit-scrollbar { display: none; }
+.app-shell .attach { width: 4.5rem; height: 4.5rem; border-radius: var(--radius-card); }
+.app-shell .attach-count { flex: none; margin-left: var(--space-2); font-size: var(--fs-caption); color: var(--text-tertiary); white-space: nowrap; }
+.app-shell .composer-bar { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--outline); gap: var(--space-2); }
+.app-shell .composer-tools { gap: var(--space-2); margin-right: var(--space-2); }
+.app-shell .composer-pills { gap: var(--space-2); }
+.app-shell .pill { height: var(--min-touch); min-height: 0; padding: 0 0.875rem; gap: 0.375rem; font-weight: 600; }
+.pill-k { color: var(--text-tertiary); font-weight: 500; }
+.app-shell .pill > svg { color: var(--text-tertiary); }
+.app-shell .compose-go { height: 3.125rem; padding: 0 1.375rem 0 1.625rem; gap: var(--space-4); font-size: var(--fs-body); }
+.go-cost { display: inline-flex; align-items: center; gap: var(--space-1); font-variant-numeric: tabular-nums; }
+.app-shell .compose-examples { margin-top: 1.875rem; gap: 0.625rem; justify-content: center; }
+.app-shell .compose-examples .chip { min-height: 2.5rem; font-weight: 500; }
+.app-shell .compose-progress { width: max-content; max-width: 100%; margin: var(--space-6) auto 0; min-height: 3rem; padding: 0 var(--space-2) 0 var(--space-5); border-radius: var(--radius-pill); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--outline); color: var(--text); font-weight: 600; }
+.app-shell .compose-progress:not(:has(button)) { padding-right: var(--space-5); }
+@media (min-width: 48rem) {
+  .app-shell .compose-head { margin-bottom: var(--space-10); }
+  .app-shell .composer-card { padding: 1.875rem 1.875rem 1.375rem; border-radius: 2rem; }
+  .app-shell .compose-text { min-height: 6.375rem; font-size: 1.5rem; line-height: 2.125rem; letter-spacing: -0.025em; }
+  .app-shell .compose { max-width: calc(51.25rem + 6rem); }
+  .app-shell .composer-bar { margin-top: 1.375rem; padding-top: 1.125rem; flex-wrap: nowrap; }
+  .app-shell .composer-pills { flex-wrap: nowrap; }
+}
+
+/* ---- Media: month grid, selection, the floating bar, the upload toast */
+.app-shell .mhead { position: static; display: flex; align-items: baseline; gap: var(--space-3); margin: var(--space-8) 0 var(--space-4); padding: 0; background: none; font-size: var(--fs-title2); font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+.app-shell .mgrid-wrap > section:first-child .mhead { margin-top: var(--space-2); }
+.mhead-n { font-size: var(--fs-caption); font-weight: 400; letter-spacing: 0; color: var(--text-tertiary); }
+.app-shell .mgrid { gap: var(--space-2); grid-template-columns: repeat(3, 1fr); }
+.app-shell .mtile { aspect-ratio: 1; border-radius: var(--radius-field); }
+.app-shell .mtile.is-on { background: var(--surface-3); box-shadow: 0 0 0 3px var(--primary); }
+.app-shell .mtile.is-on .mtile-btn img { transform: none; border-radius: 0; }
+.app-shell .mtile-check, .app-shell .mtile-tick { left: auto; right: 0.625rem; top: 0.625rem; width: 2rem; height: 2rem; }
+.app-shell .mtile-tick { color: var(--background); }
+@media (min-width: 40rem) { .app-shell .mgrid { gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); } .app-shell .mtile { aspect-ratio: 3 / 2; border-radius: var(--radius-card); } }
+.app-shell .selbar { flex-wrap: nowrap; gap: var(--space-2); padding: 0.625rem 0.75rem 0.625rem 1.5rem; background: var(--glass); backdrop-filter: saturate(160%) blur(30px); -webkit-backdrop-filter: saturate(160%) blur(30px); box-shadow: inset 0 0 0 1px var(--outline), var(--elev-3); }
+.app-shell .selbar-n { padding: 0; margin-right: var(--space-2); font-weight: 600; white-space: nowrap; }
+.app-shell .selbar-del { color: var(--danger); }
+.app-shell .selbar-go { height: 3.125rem; padding: 0 var(--space-6); white-space: nowrap; }
+.app-shell .selbar .icon-btn:disabled, .app-shell .selbar .btn:disabled { opacity: 0.45; }
+@media (max-width: 47.99rem) { .app-shell .selbar { left: var(--space-4); right: var(--space-4); transform: none; width: auto; max-width: none; justify-content: space-between; padding-left: var(--space-4); } .app-shell .selbar-go { padding: 0 var(--space-4); } }
+.app-shell .upload-banner { position: fixed; z-index: var(--z-sticky); left: var(--space-4); right: var(--space-4); bottom: calc(var(--tabbar-height) + var(--space-4) + env(safe-area-inset-bottom)); margin: 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-video); background: var(--surface); box-shadow: inset 0 0 0 1px var(--outline), var(--elev-3); }
+@media (min-width: 48rem) { .app-shell .upload-banner { left: auto; right: 3rem; bottom: var(--space-6); width: 28rem; } }
+
+/* ---- Watch: the player, the title with Share, "make another" at the side */
+.app-shell .watch { max-width: none; margin: 0; padding: var(--space-3) var(--screen-margin) var(--space-8); }
+.watch-back { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--min-touch); margin-bottom: var(--space-2); color: var(--text-secondary); font-size: var(--fs-body); font-weight: 500; text-decoration: none; }
+.watch-back:hover { color: var(--text); }
+.watch-grid { display: grid; gap: var(--space-8); grid-template-columns: minmax(0, 1fr); }
+.app-shell .watch-stage { justify-content: flex-start; }
+.watch-under { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-4) var(--space-6); margin-top: var(--space-5); }
+.watch-head { min-width: 0; flex: 1 1 14rem; }
+.app-shell .watch-title { text-align: left; white-space: normal; font-size: var(--fs-title); line-height: 1.2; letter-spacing: -0.03em; }
+.app-shell .watch-meta { margin-top: 0.375rem; text-align: left; font-size: var(--fs-subhead); color: var(--text-tertiary); }
+.app-shell .watch-actions { margin-top: 0; flex-wrap: nowrap; justify-content: flex-start; gap: var(--space-3); }
+.app-shell .watch-share { height: 3rem; padding: 0 var(--space-6); font-size: var(--fs-body); }
+.app-shell .action { width: 3rem; height: 3rem; }
+.watch-side .eyebrow { margin-bottom: var(--space-4); }
+.watch-chips { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.watch-chips .chip { text-decoration: none; }
+@media (min-width: 48rem) { .app-shell .watch { padding: 1.5rem 3rem 3.75rem; } .app-shell .watch-title { font-size: 2rem; } .app-shell .watch-under { margin-top: 1.625rem; } }
+@media (min-width: 72rem) { .watch-grid { grid-template-columns: minmax(0, 50rem) minmax(13rem, 1fr); gap: 3.75rem; } .watch-side { padding-top: var(--space-2); } .watch-chips { flex-direction: column; align-items: flex-start; } }

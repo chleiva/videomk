@@ -5,6 +5,7 @@ import { translate } from "../lib/i18n";
 import type { Locale } from "../lib/i18n";
 import MIcon from "./MIcon.astro";
 import { ASPECT_KEY } from "../data/samples";
+const ASPECT_RATIO = { wide: "16:9", tall: "9:16", square: "1:1", portrait: "4:5" } as const;
 import type { Sample } from "../data/samples";
 interface Props { sample: Sample; locale: Locale; hero?: boolean }
 const { sample: s, locale, hero = false } = Astro.props;
@@ -18,12 +19,12 @@ const style = `aspect-ratio:${s.width}/${s.height}`;
 			<source src={s.file} type="video/mp4" />
 			<a href={s.file}>{tr("hero.open_file")}</a>
 		</video>
+		{!hero && <span class="mk-asp" aria-hidden="true">{ASPECT_RATIO[s.aspect]}</span>}
 		<span class="mk-hint" aria-hidden="true"><MIcon name="sound" size={18} /></span>
 	</div>
 	{!hero && (
 		<figcaption class="mk-cap">
-			<strong class="mk-cap-title">{title}</strong>
-			<span class="mk-meta">{tr(ASPECT_KEY[s.aspect])} · {tr("gallery.seconds", { n: s.seconds })} · {tr(s.lang === "es" ? "gallery.lang_es" : "gallery.lang_en")}</span>
+			<span class="mk-cap-title">{title}</span>
 		</figcaption>
 	)}
 </figure>
