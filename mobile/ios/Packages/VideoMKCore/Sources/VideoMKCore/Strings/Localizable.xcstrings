@@ -6747,13 +6747,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SUGGESTIONS"
+            "value" : "Suggestions"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SUGERENCIAS"
+            "value" : "Sugerencias"
           }
         }
       }
@@ -8333,13 +8333,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Getting it ready"
+            "value" : "Getting ready"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preparándola"
+            "value" : "Preparando"
           }
         }
       }
@@ -9079,13 +9079,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap to retry"
+            "value" : "Retry"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toca para reintentar"
+            "value" : "Reintentar"
           }
         }
       }

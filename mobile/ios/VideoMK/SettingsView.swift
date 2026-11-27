@@ -20,7 +20,8 @@ struct SettingsView: View {
                 SettingsCard {
                     if case .signedIn(let email) = model.phase, let email {
                         // the whole address, on two lines if it needs them (never cut in the middle)
-                        SettingsRow(symbol: "person.crop.circle") { Text(email).font(.role(.body)).foregroundStyle(Theme.text).lineLimit(2).fixedSize(horizontal: false, vertical: true) }
+                        SettingsRow(symbol: "person.crop.circle") { Text(verbatim: Self.breakable(email)).font(.role(.body)).foregroundStyle(Theme.text).lineLimit(3).fixedSize(horizontal: false, vertical: true) }
+                            .accessibilityLabel(email)
                             .accessibilityIdentifier("accountEmail")
                         SettingsDivider()
                     }
@@ -95,6 +96,9 @@ struct SettingsView: View {
         .task { if model.media?.summary == nil { await model.media?.loadSummary() } }
     }
 
+    /// An address may break after "@" and after a dot (invisible break points), so it wraps whole, without a hyphen and without losing its middle.
+    static func breakable(_ email: String) -> String { email.replacingOccurrences(of: "@", with: "@\u{200B}").replacingOccurrences(of: ".", with: ".\u{200B}") }
+
     private var languageValue: String {
         switch Localization.shared.choice { case .system: tr("settings.language_system"); case .en: AppLanguage.en.nativeName; case .es: AppLanguage.es.nativeName }
     }
@@ -132,10 +136,10 @@ struct SettingsRow<Label: View>: View {
         HStack(spacing: Theme.Space.m) {
             if let symbol { Image(systemName: symbol).font(.role(.body)).foregroundStyle(tint).frame(width: 28).accessibilityHidden(true) }
             if typeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 2) { label; if let value { Text(value).font(.role(.subhead)).foregroundStyle(Theme.textSecondary) } }
+                VStack(alignment: .leading, spacing: 2) { label.multilineTextAlignment(.leading); if let value { Text(value).font(.role(.subhead)).foregroundStyle(Theme.textSecondary) } }
                 Spacer(minLength: Theme.Space.s)
             } else {
-                label
+                label.multilineTextAlignment(.leading)
                 Spacer(minLength: Theme.Space.s)
                 if let value { Text(value).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).lineLimit(1) }
             }

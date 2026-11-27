@@ -183,3 +183,49 @@ final class ExpiredStub: URLProtocol, @unchecked Sendable {
         #expect(old.nextFree?.credits == 2 && old.nextFree?.at != nil, "an older server: the epoch field and the daily rule")
     }
 }
+
+/// Records the platform header of every request, by path.
+final class PlatformStub: URLProtocol, @unchecked Sendable {
+    nonisolated(unsafe) static var seen: [String: String] = [:]
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        let path = request.url?.path ?? ""
+        Self.seen["\(request.httpMethod ?? "GET") \(path)"] = request.value(forHTTPHeaderField: "X-Platform") ?? "<none>"
+        let body: String
+        if path.hasSuffix("/wallet") { body = #"{"balance":4,"buckets":[]}"# }
+        else if path.hasSuffix("/generate") { body = #"{"video_id":"v9"}"# }
+        else if path.hasSuffix("/cancel") { body = #"{"message":"cancelled","refunded":1}"# }
+        else if path.hasSuffix("/retry") { body = #"{"message":"workflow restarted","photos":0}"# }
+        else if path.hasSuffix("/videos") { body = #"{"items":[]}"# }
+        else if path.hasSuffix("/capabilities") { body = #"{"aspects":[{"id":"16:9","ready":true}],"resolutions":[{"id":"1080p"}],"platforms":[]}"# }
+        else { body = #"{"message":"deleted"}"# }
+        client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: path.hasSuffix("/retry") ? 202 : 200, httpVersion: nil, headerFields: nil)!, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(body.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}
+
+@Suite(.serialized) struct PlatformHeaderTests {
+    struct Auth: AuthorizationProviding { func authorization() async throws -> (idToken: String, userID: String) { ("t", "u1") } }
+    let cfg = AppConfig(apiBase: URL(string: "https://platform.test/prod")!, authDomain: URL(string: "https://auth.test")!, clientID: "cid")
+    func session() -> URLSession { let c = URLSessionConfiguration.ephemeral; c.protocolClasses = [PlatformStub.self]; return URLSession(configuration: c) }
+
+    /// The server grants and spends free credits only for requests that say `X-Platform: ios`: every call the app makes carries it
+    /// (they all go through `APIClient.perform`), the ones that spend or read credits first of all.
+    @Test func everyAPIRequestSaysItComesFromTheIPhoneApp() async throws {
+        PlatformStub.seen = [:]
+        let api = APIClient(config: cfg, auth: Auth(), session: session())
+        _ = try await api.wallet()
+        _ = try await api.listVideos()
+        _ = try await api.capabilities()
+        _ = try await api.startGeneration(prompt: "A tour of Paris, calm and warm", clientRequestID: "r1")
+        _ = try await api.retryVideo(videoID: "v1")
+        _ = try await api.cancelVideo(videoID: "v1")
+        _ = try await api.deleteVideo(videoID: "v1")
+        #expect(PlatformStub.seen.count == 7, "\(PlatformStub.seen.keys.sorted())")
+        for (call, platform) in PlatformStub.seen { #expect(platform == "ios", "\(call) sent X-Platform: \(platform)") }
+        #expect(PlatformStub.seen["POST /prod/users/u1/videos/generate"] == "ios" && PlatformStub.seen["GET /prod/users/u1/wallet"] == "ios")
+    }
+}

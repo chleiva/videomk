@@ -679,7 +679,7 @@ private actor CallLog { var n = 0; func hit() -> Int { n += 1; return n } }
 
     @Test func theLineIsHonestAboutWhatItKnows() {
         let l = MakingProgress.info(stage: .voiceAndVisuals, secondsInStage: 10, minutes: 3).line
-        #expect(l.hasPrefix("Making voice and pictures") && l.contains("left.") && !l.contains("scene"))
+        #expect(l.hasPrefix("Recording the voice, finding pictures. ") && l.contains("left.") && !l.contains("scene"))
         #expect(MakingProgress.info(stage: .rendering, secondsInStage: 1000, minutes: 1).line.hasSuffix("Less than a minute left."))
         #expect(MakingProgress.timeLeft(stage: .starting, secondsInStage: 0, minutes: 3).hasPrefix("About "))
     }
