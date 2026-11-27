@@ -46,7 +46,9 @@ def looks(loc: str) -> Dict[str, Any]:
         "style": {"param": "style", "default": "auto", "options": [
             {"id": "auto", "label": i18n.t("cap.look.auto", loc), "note": i18n.t("cap.look.auto_note" if cartoon else "cap.look.auto_note_real", loc), "available": True},
             {"id": "cartoon", "label": i18n.t("cap.look.cartoon", loc), "note": i18n.t("cap.look.cartoon_note", loc), "available": cartoon},
-            {"id": "real", "label": i18n.t("cap.look.real", loc), "note": i18n.t("cap.look.real_note", loc), "available": True}]},
+            {"id": "real", "label": i18n.t("cap.look.real", loc), "note": i18n.t("cap.look.real_note", loc), "available": True},
+            # the whiteboard look (docs/WHITEBOARD.md): a whole video drawn and written by a marker; server switch WHITEBOARD
+            {"id": "whiteboard", "label": i18n.t("cap.look.whiteboard", loc), "note": i18n.t("cap.look.whiteboard_note", loc), "say": i18n.t("cap.look.whiteboard_say", loc), "available": _on("WHITEBOARD")}]},
         "backgrounds": {"animated": _on("BG_ANIMATED"), "loops_3d": _on("BG_LOOPS"), "chosen_by": "director", "note": i18n.t("cap.look.backgrounds_note", loc),
                         # what a person can write in the request to ask for one (engine/background.request_wish reads the words; there is no request field)
                         "ask": ([{"id": lid, "label": i18n.t(f"cap.look.bg.{key}", loc), "say": i18n.t(f"cap.look.bg.{key}_say", loc)}

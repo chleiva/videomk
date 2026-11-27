@@ -13,13 +13,7 @@ BACKEND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 WRONG = re.compile(r"(?<![\w@./:\-])videomk(?![\w]|[.\-_/:]\w)", re.I)
 SKIP_DIRS = {"tests", "cdk.out", "__pycache__", ".venv", "node_modules", "music-draft", "whiteboard_proto"}
 # engine strings another agent owns right now (2026-11-27): remove each entry as it is fixed there
-ENGINE_PENDING = {
-    ("lambdas/engine/timeline.py", "Hecho con videomk"), ("lambdas/engine/timeline.py", "Made with videomk"),          # the closing card's title
-    ("lambdas/engine/watermark_spec.py", "'presence' is only for the videomk watermark"),                                # a refusal message
-    ("lambdas/engine/clips.py", "videomk AI-generated"), ("lambdas/engine/clips.py", "AI-generated video by videomk"),  # credit of our own clips
-    ("lambdas/engine/clips.py", "Video: AI-generated (videomk)"),
-    ("lambdas/engine/language.py", "videomk can make videos in English and Spanish for now. Try describing your video in one of those."),
-}
+ENGINE_PENDING: set = set()   # emptied 2026-11-27: the closing card, the watermark message, the clip credits and the language refusal say VideoMK
 # data labels, not sentences: stored with catalog items and compared as written
 DATA_LABELS = {("lambdas/common/catalog.py", "videomk library")}
 

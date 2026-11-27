@@ -417,6 +417,13 @@ class BackendStack(Stack):
                 if str(self.node.try_get_context("imageCatalog") or "").lower() not in ("1", "true"):
                     raise ValueError("vectorScenes needs the catalog bucket: deploy with -c imageCatalog=1")
                 engine_env["VECTOR_SCENES"] = "1"
+            # the whiteboard look (docs/WHITEBOARD.md): a whole-video style; same switch pattern (stages.json "whiteboard" or -c whiteboard=1). Needs the catalog bucket
+            # (-c imageCatalog=1): the drawing packages are read from it at render time (w/<id>.json). No new function or route: only this variable and one policy statement.
+            whiteboard = str(self.node.try_get_context("whiteboard") or ("1" if stage_cfg.get("whiteboard") else "")).lower() in ("1", "true")
+            if whiteboard:
+                if str(self.node.try_get_context("imageCatalog") or "").lower() not in ("1", "true"):
+                    raise ValueError("whiteboard needs the catalog bucket: deploy with -c imageCatalog=1")
+                engine_env["WHITEBOARD"] = "1"
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
@@ -436,6 +443,10 @@ class BackendStack(Stack):
             if vector_scenes:   # the functions that draw frames read one scene package at a time: v/<scene id>/* of the catalog bucket, nothing else, no listing, no write
                 for fn in (v2.chunk_fn, v2.selftest_fn):
                     fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/v/*"]))
+                    fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)
+            if whiteboard:   # the functions that draw frames read one drawing package at a time: w/<id>.json of the catalog bucket, nothing else, no listing, no write
+                for fn in (v2.chunk_fn, v2.selftest_fn):
+                    fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/w/*"]))
                     fn.add_environment("CATALOG_BUCKET", self.catalog.bucket.bucket_name)
 
         active_machine.grant_start_execution(launcher_fn)
@@ -579,7 +590,7 @@ class BackendStack(Stack):
             ready_resolutions=ready_resolutions,
         )
         # what capabilities says about the looks of this stage (lambdas/capabilities_api.looks): the same three switches the engine functions get
-        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS")):
+        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS"), ("whiteboard", "WHITEBOARD")):
             if str(self.node.try_get_context(ctx_key) or ("1" if stage_cfg.get(ctx_key) else "")).lower() in ("1", "true"):
                 req_options.fn.add_environment(env_key, "1")
 

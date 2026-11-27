@@ -138,8 +138,8 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
                 raise BadRequest(f"'{field}' must be one of: " + ", ".join(allowed))
             out[field] = body[field]
     if "style" in body and body["style"] is not None:   # the look of the scenes: 'auto' (the director decides, cartoon scenes only where the policy allows), 'cartoon' (illustrated), 'real' (photographs and footage only); docs/VECTOR_SCENE_POLICY.md
-        if not isinstance(body["style"], str) or body["style"] not in ("auto", "cartoon", "real"):
-            raise BadRequest("'style' must be one of: auto, cartoon, real")
+        if not isinstance(body["style"], str) or body["style"] not in ("auto", "cartoon", "real", "whiteboard"):
+            raise BadRequest("'style' must be one of: auto, cartoon, real, whiteboard")
         if body["style"] != "auto":
             out["style"] = body["style"]
     if out.get("aspect", format_options.DEFAULT_ASPECT) not in format_options.ready_aspects():
