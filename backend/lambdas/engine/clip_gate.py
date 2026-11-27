@@ -21,7 +21,8 @@ from . import media
 
 FRAME_AT = (0.04, 0.22, 0.42, 0.60, 0.80, 0.96)   # six frames across the whole clip: artefacts often appear late
 MIN_LENGTH_SHARE = 0.9
-MIN_MOTION = 1.2          # mean absolute difference (0-255) between the first and last frame: a frozen picture is not a clip
+MIN_SHORT_SIDE, MIN_LONG_SIDE = 648, 1152   # 90 % of 720p
+MIN_MOTION = 0.5          # mean absolute difference (0-255, small grey frames) between frames: a frozen picture is not a clip (calm scenes move little, so the bar is low)
 MAX_CUT_RATIO = 6.0       # one step between frames changing this many times more than the median step looks like a cut
 
 GATE_SYSTEM = """You are the quality gate of a stock-footage library. You see 6 frames of ONE AI-generated video clip, in order from its start to its end, and the brief it was made for.
@@ -82,8 +83,8 @@ def technical(info: Dict[str, Any], *, asked_seconds: float, aspect: str) -> Opt
         return "unreadable video"
     if info["seconds"] < MIN_LENGTH_SHARE * asked_seconds:
         return "too short"
-    want = (720, 1280) if aspect == "9:16" else (1280, 720)
-    if w < want[0] or h < want[1] or (w > h) != (want[0] > want[1]):
+    tall = aspect == "9:16"
+    if min(w, h) < MIN_SHORT_SIDE or max(w, h) < MIN_LONG_SIDE or (h > w) != tall:   # about 720p (providers round sizes to their own grid) and the shape that was asked
         return "wrong size or shape"
     if any(float(a.mean()) < 6 or float(a.mean()) > 249 or float(a.std()) < 3 for a in g):
         return "black or blank frame"

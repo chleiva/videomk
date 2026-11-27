@@ -185,7 +185,7 @@ class Job:
 def _run(job: Job, *, store: cs.Store, cfg: Dict[str, Any], lines: List[Dict[str, Any]], kind: str, brief: Dict[str, Any], prompt: str, seconds: int, aspect: str,
          price: float, ledger: Tuple[str, str], claim: Tuple[str, str], lock_key: str, video_id: str) -> None:
     t0 = time.time()
-    outcome, reason, charged, cid, gate = "provider_failed", "", price, None, {}
+    outcome, reason, charged, cid, gate, provider_usd = "provider_failed", "", price, None, {}, None
     try:
         try:
             made = clip_gen.provider(str(cfg["model"])).generate(prompt, seconds=seconds, aspect=aspect, timeout=float(cfg["gen_timeout_s"]))
@@ -198,6 +198,7 @@ def _run(job: Job, *, store: cs.Store, cfg: Dict[str, Any], lines: List[Dict[str
             emit("ProviderError", Kind=e.kind)
             return
         emit("GenerationSeconds", round(time.time() - t0, 1), "Seconds")
+        provider_usd = clip_gen.usage_usd(made.get("usage"))
         gate = clip_gate.check(made["mp4"], brief["brief"], asked_seconds=seconds, aspect=aspect, min_score=float(cfg["gate_min_score"]))
         if not gate["ok"]:
             outcome, reason = "gate_rejected", str(gate["reason"])
@@ -221,7 +222,7 @@ def _run(job: Job, *, store: cs.Store, cfg: Dict[str, Any], lines: List[Dict[str
         try:
             took = round(time.time() - t0, 1)
             store.add(ledger[0], ledger[1], fields={"outcome": outcome, "reason": reason[:120], "charged_usd": charged, "latency_s": took, "clip_id": cid,
-                                                    "gate_score": gate.get("score"), "gate_usd": gate.get("cost_usd")})
+                                                    "gate_score": gate.get("score"), "gate_usd": gate.get("cost_usd"), "provider_usd": provider_usd})
             if outcome != "generated":
                 store.add(claim[0], claim[1], fields={"state": outcome})
             store.delete(cs.LOCK, lock_key)

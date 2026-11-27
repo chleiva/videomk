@@ -145,8 +145,13 @@ def test_a_config_that_cannot_be_read_leaves_generation_off(monkeypatch):
     assert cc.config()["enabled"] is False
 
 
+def test_what_the_providers_own_token_counts_come_to():
+    usage = {"total_input_tokens": 132, "total_output_tokens": 5793, "output_tokens_by_modality": [{"modality": "video", "tokens": 5793}], "total_thought_tokens": 1166}   # a real 3 s 360p answer
+    assert clip_gen.usage_usd(usage) == pytest.approx(0.0802, abs=0.0001) and clip_gen.usage_usd(None) is None and clip_gen.usage_usd({"output_tokens_by_modality": "x"}) is None
+
+
 def test_the_price_of_a_generation():
-    assert cc.price_usd(8, cc.clean_config({})) == pytest.approx(0.568) and cc.price_usd(10, cc.clean_config({})) == pytest.approx(0.707)
+    assert cc.price_usd(8, cc.clean_config({})) == pytest.approx(0.581) and cc.price_usd(10, cc.clean_config({})) == pytest.approx(0.72)
 
 
 def test_the_account_allowance_is_half_of_what_is_left_after_all_credits_at_the_high_cost():
@@ -322,17 +327,17 @@ def test_a_generated_clip_is_stored_in_the_library_with_everything_before_anyone
     call = env.prov.calls[0]
     assert call["seconds"] == 8 and call["aspect"] == "16:9" and "fruit market stall" in call["prompt"].lower() and "Markets are where" not in call["prompt"]   # only the general brief goes out
     doc = json.loads(env.store.get_object(f"m/{cid}.json"))
-    assert doc["brief"] == GOOD_BRIEF["brief"] and doc["license"] == "VideoMK library" and doc["scope"] == "library" and doc["cost_usd"] == pytest.approx(0.568)
+    assert doc["brief"] == GOOD_BRIEF["brief"] and doc["license"] == "VideoMK library" and doc["scope"] == "library" and doc["cost_usd"] == pytest.approx(0.581)
     assert doc["prompt"] == call["prompt"] and doc["provider"] == "mock" and doc["aspect"] == "16:9" and doc["seconds"] == 8.0 and doc["center_safe"] is True
     assert doc["demand_video"] == lib.video_ref("v1") and "v1" not in json.dumps(doc) and "u1" not in json.dumps(doc) and doc["tvec"] and doc["ivec"] and doc["paid_by"] == "paid"
     assert env.store.get_object(f"v/{cid}.mp4") == MP4 and env.store.has_object(f"p/{cid}.jpg")
     row = env.store.get(cs.LIB, cid)
     assert row["uses"] == 0 and row["brief"] == doc["brief"]
     # the money: one price on the four counters, a closed ledger line, no lock left
-    assert spent(env.store) == spent(env.store, span="month") == pytest.approx(0.568)
-    assert cs.usd(env.store.get(cs.ACCT + "u1", cs.month())["spent"]) == pytest.approx(0.568) and env.store.get(cs.VIDEO + "v1", "n")["n"] == 1
+    assert spent(env.store) == spent(env.store, span="month") == pytest.approx(0.581)
+    assert cs.usd(env.store.get(cs.ACCT + "u1", cs.month())["spent"]) == pytest.approx(0.581) and env.store.get(cs.VIDEO + "v1", "n")["n"] == 1
     (line,) = ledger(env.store)
-    assert line["outcome"] == "generated" and line["clip_id"] == cid and line["charged_usd"] == pytest.approx(0.568) and line["kind"] == "paid" and line["account"] == lib.account_ref("u1")
+    assert line["outcome"] == "generated" and line["clip_id"] == cid and line["charged_usd"] == pytest.approx(0.581) and line["kind"] == "paid" and line["account"] == lib.account_ref("u1")
     assert env.store.query(cs.LOCK) == [] and outcomes(env.store) == {"generated": 1}
     assert spent(env.store, "test") == 0
 
@@ -342,7 +347,7 @@ def test_a_rejected_clip_is_never_stored_and_still_counts_against_the_budgets(en
     job = ask(env)
     assert job.wait() is None and not job.generated
     assert env.store.list_objects("v/") == [] and env.store.list_objects("m/") == [] and env.store.query(cs.LIB) == []
-    assert spent(env.store) == pytest.approx(0.568) and ledger(env.store)[0]["outcome"] == "gate_rejected" and ledger(env.store)[0]["reason"] == "artefacts"
+    assert spent(env.store) == pytest.approx(0.581) and ledger(env.store)[0]["outcome"] == "gate_rejected" and ledger(env.store)[0]["reason"] == "artefacts"
     assert outcomes(env.store) == {"gate_rejected": 1} and env.store.query(cs.LOCK) == []
 
 
@@ -355,7 +360,7 @@ def test_a_provider_refusal_before_anything_was_made_gives_the_money_back(env):
 
 def test_a_provider_failure_that_may_have_been_billed_stays_charged(env):
     clip_gen.set_provider(clip_gen.Mock(error=clip_gen.GenError("provider", "HTTP 500")))
-    assert ask(env).wait() is None and spent(env.store) == pytest.approx(0.568)
+    assert ask(env).wait() is None and spent(env.store) == pytest.approx(0.581)
 
 
 def test_a_slow_generation_is_abandoned_and_the_beat_goes_on(env, monkeypatch):
@@ -365,7 +370,7 @@ def test_a_slow_generation_is_abandoned_and_the_beat_goes_on(env, monkeypatch):
     t = time.time()
     job = ask(env)
     assert job.wait() is None and time.time() - t < 1.0       # the caller got its answer; the stock clip or photo is used
-    assert spent(env.store) == pytest.approx(0.568) and outcomes(env.store)["timeout"] == 1   # assumed billed
+    assert spent(env.store) == pytest.approx(0.581) and outcomes(env.store)["timeout"] == 1   # assumed billed
     job.thread.join(5)
 
 
@@ -380,13 +385,13 @@ def test_a_scene_the_library_already_has_is_used_and_nothing_is_generated(env):
     first = ask(env).wait()
     env.rows["v2"] = dict(env.rows["v1"])
     job = ask(env, video="v2", query="market fruit stall", alt="hands picking fruit")
-    assert job.outcome == "library_hit" and job.wait() == first and not job.generated and len(env.prov.calls) == 1 and spent(env.store) == pytest.approx(0.568)
+    assert job.outcome == "library_hit" and job.wait() == first and not job.generated and len(env.prov.calls) == 1 and spent(env.store) == pytest.approx(0.581)
 
 
 def test_a_retried_beat_never_pays_twice(env):
     first = ask(env).wait()
     again = ask(env)                                           # Step Functions ran the same beat again
-    assert again.wait() == first and len(env.prov.calls) == 1 and spent(env.store) == pytest.approx(0.568)
+    assert again.wait() == first and len(env.prov.calls) == 1 and spent(env.store) == pytest.approx(0.581)
     env.models.gate = {**GOOD_GATE, "text": True}
     env.models.brief = {**GOOD_BRIEF, "brief": "slow river flowing through a quiet green valley at dawn", "tags": ["river"]}
     assert ask(env, beat="b2", query="river valley").wait() is None
@@ -417,7 +422,7 @@ def test_at_most_two_generations_per_video(env):
         if job:
             job.wait()
     assert len(env.prov.calls) == 2 and outcomes(env.store)["cap_video"] == 1 and env.store.get(cs.STATS, cs.day())["cap_video"] == 1
-    assert spent(env.store) == pytest.approx(2 * 0.568)        # the refused one moved no counter
+    assert spent(env.store) == pytest.approx(2 * 0.581)        # the refused one moved no counter
 
 
 def test_the_account_allowance_stops_the_sixth_generation_of_the_month(env):
@@ -428,10 +433,10 @@ def test_the_account_allowance_stops_the_sixth_generation_of_the_month(env):
         if job:
             job.wait()
             made += 1
-    assert made == 5 and len(env.prov.calls) == 5              # 5 x 0.568 = 2.84 <= 2.915 < 6 x 0.568
-    assert outcomes(env.store)["cap_account"] == 2 and cs.usd(env.store.get(cs.ACCT + "u1", cs.month())["spent"]) == pytest.approx(2.84)
+    assert made == 5 and len(env.prov.calls) == 5              # 5 x 0.581 = 2.905 <= 2.915 < 6 x 0.581
+    assert outcomes(env.store)["cap_account"] == 2 and cs.usd(env.store.get(cs.ACCT + "u1", cs.month())["spent"]) == pytest.approx(2.905)
     # the invariant, with every credit of the month used at the high cost, at the lowest price
-    assert 30.83 - 0.20 * 120 - 2.84 >= 1.0
+    assert 30.83 - 0.20 * 120 - 2.905 >= 1.0
 
 
 def test_a_yearly_account_generates_nothing(env):
@@ -461,7 +466,7 @@ def test_the_platform_daily_budget_is_a_hard_stop(env):
         job = ask(env, video=f"w{i}", query=_different_scene(env, i))
         if job:
             job.wait()
-    assert len(env.prov.calls) == 1 and spent(env.store) == pytest.approx(0.568)
+    assert len(env.prov.calls) == 1 and spent(env.store) == pytest.approx(0.581)
     assert outcomes(env.store)["budget_day"] == 2 and env.store.get(cs.STATS, cs.day())["cap_platform_day"] == 2
     assert env.store.get(cs.ACCT + "user1", cs.month()) is None                # a refused reservation moved nothing, on any counter
 
@@ -478,8 +483,8 @@ def test_test_and_comped_accounts_use_their_own_budget_and_cap(env):
     assert ask(env, query=_different_scene(env, 0)).wait()
     assert ask(env, video="v2", query=_different_scene(env, 1)).wait()        # a comped yearly Max: the flat test cap, not the formula
     env.rows["v3"] = {"user_id": "tester2", "plan": "test"}
-    assert ask(env, video="v3", query=_different_scene(env, 2)) is None       # 3 x 0.568 > 1.20
-    assert spent(env.store, "test") == pytest.approx(1.136) and spent(env.store, "paid") == 0 and outcomes(env.store)["budget_day"] == 1
+    assert ask(env, video="v3", query=_different_scene(env, 2)) is None       # 3 x 0.581 > 1.20
+    assert spent(env.store, "test") == pytest.approx(1.162) and spent(env.store, "paid") == 0 and outcomes(env.store)["budget_day"] == 1
     assert {l["kind"] for l in ledger(env.store)} == {"test"}
     cc.set_config({**ON, "test_account_cap_usd": 0.5})
     env.rows["v4"] = {"user_id": "tester", "plan": "test"}
@@ -488,7 +493,7 @@ def test_test_and_comped_accounts_use_their_own_budget_and_cap(env):
 
 def test_when_half_the_day_is_spent_only_scenes_asked_twice_are_made(env):
     cc.set_config({**ON, "platform_day_usd": 1.0})
-    assert ask(env, query=_different_scene(env, 0)).wait()                     # 0.568 of 1.00: the day is now tight
+    assert ask(env, query=_different_scene(env, 0)).wait()                     # 0.581 of 1.00: the day is now tight
     env.rows["v2"] = {**env.rows["v1"], "user_id": "u2"}
     env.rows["v3"] = {**env.rows["v1"], "user_id": "u3"}
     q = _different_scene(env, 1)
@@ -526,7 +531,7 @@ def test_no_double_spend_when_many_beats_race_for_the_last_dollars(env, monkeypa
     started = [j for j in jobs if j is not None]
     assert len(started) == 2
     assert all(j.wait() for j in started)
-    assert spent(env.store) == pytest.approx(2 * 0.568) and len(ledger(env.store)) == 2 and len(env.store.query(cs.LIB)) == 2
+    assert spent(env.store) == pytest.approx(2 * 0.581) and len(ledger(env.store)) == 2 and len(env.store.query(cs.LIB)) == 2
 
 
 # ================================================================= the store: the transaction on DynamoDB
@@ -548,9 +553,9 @@ def test_rows_on_dynamodb(aws):
     store = cs.AwsStore("Usage", "bucket")
     assert store.put(cs.LOCK, "k", {"expires": 100}, only_if_absent=True) and not store.put(cs.LOCK, "k", {"expires": 100}, only_if_absent=True)
     assert not store.put(cs.LOCK, "k", {"expires": 300}, only_if_absent=True, or_expired=50) and store.put(cs.LOCK, "k", {"expires": 300}, only_if_absent=True, or_expired=200)
-    store.add(cs.LIB, "c1", {"uses": 1}, sets={"videos": ["a"]}, fields={"last_used": 5, "cost_usd": 0.568})
+    store.add(cs.LIB, "c1", {"uses": 1}, sets={"videos": ["a"]}, fields={"last_used": 5, "cost_usd": 0.581})
     store.add(cs.LIB, "c1", {"uses": 1}, sets={"videos": ["a", "b"]})
-    assert store.get(cs.LIB, "c1") == {"pk": cs.LIB, "sk": "c1", "uses": 2, "videos": ["a", "b"], "last_used": 5, "cost_usd": 0.568}
+    assert store.get(cs.LIB, "c1") == {"pk": cs.LIB, "sk": "c1", "uses": 2, "videos": ["a", "b"], "last_used": 5, "cost_usd": 0.581}
     assert [r["sk"] for r in store.query(cs.LIB)] == ["c1"]
     store.delete(cs.LIB, "c1")
     assert store.query(cs.LIB) == []
@@ -563,7 +568,7 @@ def test_the_whole_flow_on_dynamodb_and_s3(aws, env):
     cid = ask(env).wait()
     assert cid and store.has_object(f"v/{cid}.mp4") and not store.has_object("v/" + "0" * 64 + ".mp4") and store.list_objects("m/") == [f"m/{cid}.json"]
     assert boto3.client("s3", region_name="us-west-2").list_objects_v2(Bucket="bucket", Prefix="cliplib/v/")["KeyCount"] == 1
-    assert spent(store) == pytest.approx(0.568) and [r["sk"] for r in lib.rows(store, fresh=True)] == [cid]
+    assert spent(store) == pytest.approx(0.581) and [r["sk"] for r in lib.rows(store, fresh=True)] == [cid]
     with pytest.raises(ValueError):
         store.put_object("../x", b"", "x")
 
@@ -575,7 +580,7 @@ def test_account_rows_go_with_the_account():
 # ================================================================= the library: search, shapes, scope, promotion
 def _add(store, brief, *, aspect="16:9", safe=True, seconds=8.0, n=1, **meta):
     return lib.add_clip(store, mp4=MP4 + bytes([n]) + brief.encode(), poster=_jpeg(), tvec=_vec(brief), ivec=_vec("picture"),
-                        meta={"brief": brief, "aspect": aspect, "center_safe": safe, "seconds": seconds, "width": 1280, "height": 720, "cost_usd": 0.568, **meta})
+                        meta={"brief": brief, "aspect": aspect, "center_safe": safe, "seconds": seconds, "width": 1280, "height": 720, "cost_usd": 0.581, **meta})
 
 
 def test_search_finds_clips_by_meaning_and_respects_the_floor(env):
@@ -633,7 +638,7 @@ def test_promotion_copies_without_generating_or_embedding_again(env, tmp_path):
     assert [p["action"] for p in done if p["id"] == a] == ["copied"]
     assert prod.get_object(f"v/{a}.mp4") == env.store.get_object(f"v/{a}.mp4") and prod.has_object(f"p/{a}.jpg")
     doc = json.loads(prod.get_object(f"m/{a}.json"))
-    assert doc["cost_usd"] == 0.568 and doc["promoted_from"] and doc["tvec"] == json.loads(env.store.get_object(f"m/{a}.json"))["tvec"]
+    assert doc["cost_usd"] == 0.581 and doc["promoted_from"] and doc["tvec"] == json.loads(env.store.get_object(f"m/{a}.json"))["tvec"]
     assert prod.get(cs.LIB, a)["uses"] == 0                                        # use counts are the target's own history
     assert [p["action"] for p in lib.promote(env.store, prod, dry_run=False) if p["id"] == a] == ["already there"]
     lib.set_embedder(query=_vec)
@@ -836,9 +841,9 @@ def test_the_report_shows_spend_rejections_cap_hits_and_which_clips_are_misses(e
     od.used("x1", f"videomk-library:{b}", generated_id=b)
     rep = admin.report(env.store, 30)
     assert rep["generations"] == 3 and rep["kept"] == 2 and rep["rejected"] == 1 and rep["rejection_rate"] == pytest.approx(0.333, abs=0.001)
-    assert rep["spend_usd"] == pytest.approx(3 * 0.568) and rep["cost_per_kept_clip_usd"] == pytest.approx(0.852) and rep["not_kept_by_reason"] == {"gate_rejected:text": 1}
+    assert rep["spend_usd"] == pytest.approx(3 * 0.581) and rep["cost_per_kept_clip_usd"] == pytest.approx(0.8715, abs=0.001) and rep["not_kept_by_reason"] == {"gate_rejected:text": 1}
     assert rep["cap_hits"] == {"video": 1} and rep["budget_stops"] == 0 and rep["decisions"]["generated"] == 2 and rep["used"] == {"library": 3, "generated": 1}
-    assert rep["spend_by_day"]["paid"] == {cs.day(): pytest.approx(1.704)} and len(rep["spend_by_account"]) == 2 and "u1" not in json.dumps(rep)
+    assert rep["spend_by_day"]["paid"] == {cs.day(): pytest.approx(1.743)} and len(rep["spend_by_account"]) == 2 and "u1" not in json.dumps(rep)
     assert rep["library"]["clips"] == 2 and rep["reuse"]["miss_rate"] is None            # nothing is 30 days old yet
     later = admin.report(env.store, 30, now=time.time() + 31 * 86400)
     assert later["reuse"]["older_than_30_days"] == 2 and later["reuse"]["misses"] == 1 and later["reuse"]["miss_rate"] == 0.5

@@ -18,6 +18,20 @@ from typing import Any, Callable, Dict, Optional
 API = "https://generativelanguage.googleapis.com/v1beta"
 KEY_PARAM = "/videomk/gemini_api_key"   # SecureString; the beat function may already read /videomk/*_api_key
 MAX_BYTES = 60_000_000
+USD_PER_M = {"video": 12.0, "text": 9.0, "input": 1.5}   # Google's price list for gemini-omni-1.2-flash, read 2026-11-27 (aistudio.google.com/docs/pricing)
+
+
+def usage_usd(usage: Any) -> Optional[float]:
+    """What the provider's own token counts come to at the list price: video output, the model's 'thought' tokens (counted as text output: measured about 1,100 a
+    call, one cent) and the prompt. None when the answer carried no usage. For the ledger and the report; the budgets are charged the configured price."""
+    try:
+        if not isinstance(usage, dict):
+            return None
+        video = sum(int(m.get("tokens") or 0) for m in usage.get("output_tokens_by_modality") or [] if m.get("modality") == "video")
+        other = max(0, int(usage.get("total_output_tokens") or 0) - video) + int(usage.get("total_thought_tokens") or 0)
+        return round((video * USD_PER_M["video"] + other * USD_PER_M["text"] + int(usage.get("total_input_tokens") or 0) * USD_PER_M["input"]) / 1e6, 6)
+    except Exception:
+        return None
 ASPECTS = ("16:9", "9:16")
 
 
@@ -111,7 +125,7 @@ class GeminiOmni(Provider):
         if aspect not in ASPECTS:
             raise GenError("bad_request", "aspect", billed=False)
         t_end = time.time() + timeout
-        body = {"model": self.model, "input": prompt, "background": False, "store": False, "stream": False,
+        body = {"model": self.model, "input": prompt, "background": False, "store": True, "stream": False,   # the provider requires store=true for URI delivery (answered so on 2026-11-27)
                 "response_format": {"type": "video", "aspect_ratio": aspect, "duration": f"{int(seconds)}s", "resolution": self.resolution, "delivery": "uri"}}
         res = self._call("POST", f"{API}/interactions", body, timeout, key)
         status = str(res.get("status") or "")

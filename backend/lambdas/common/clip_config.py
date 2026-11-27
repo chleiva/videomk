@@ -36,7 +36,7 @@ KNOBS: Dict[str, tuple] = {
     "kept_usd_year": (25.70, "float", 0.0, 1000.0),         # ... from a yearly one, per month
     "video_cap_clips": (2, "int", 0, 20),                   # generations per video
     "price_per_second_usd": (0.0695, "float", 0.0, 10.0),   # what the provider bills per second at 720p (it reports no dollar amount)
-    "overhead_usd": (0.012, "float", 0.0, 1.0),             # the checks and embeddings around one generation
+    "overhead_usd": (0.025, "float", 0.0, 1.0),             # around one generation: the provider's "thought" tokens (measured: about 1 cent), the gate, the checks, the embeddings
     "clip_seconds": (8, "int", 3, 15),
     "clip_seconds_long": (10, "int", 3, 15),                # for a beat longer than clip_seconds + 0.5
     "gen_timeout_s": (150, "int", 10, 280),                 # the provider call is abandoned after this
