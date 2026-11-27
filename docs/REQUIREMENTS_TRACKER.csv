@@ -1,0 +1,90 @@
+﻿ID,Area,Requirement (what the owner asked for),Date asked,Status,Where it is live,Blocker / what is left,Owner action needed
+R001,Setup,"Continue the work from HANDOFF/DEPLOY docs, deploy QA, fix errors myself, ask only for decisions",22/11/2026,DONE,QA + Prod,,
+R002,Models,Use Claude Sonnet 5.5 and Haiku 5.5 (not 4.x) for planning/review/research,2026-11-23/25,PARTIAL,QA on 5.5; Prod on Sonnet 4.6 / Haiku 4.5,Prod account is denied Claude 5.x on Bedrock,Request Claude 5.5 access in prod Bedrock console/support case (text provided); then I redeploy prod without model flags and probe
+R003,Models,"Use Bedrock GLOBAL inference endpoints for Sonnet/Haiku 5.5, not regional",25/11/2026,DONE,QA,Confirm same on prod once 5.5 is granted,
+R004,Infra,Commit and push work; deploy QA and prod through scripts,23/11/2026,DONE,Repo / QA / Prod,,
+R005,iOS,Native iPhone app in Swift,23/11/2026,DONE,TestFlight (QA backend),,
+R006,iOS,"Deliver via TestFlight (not cable install); App Store Connect record 'videomk: AI Video Maker', team 39ANXJNUTL, bundle com.videomk.app",23/11/2026,DONE,App Store Connect,ITMS-90725 SDK warning (needs Xcode 27 by April 2027),Later: upgrade Xcode/SDK
+R007,iOS,Deploy new builds to TestFlight after changes,24/11/2026,PARTIAL,TestFlight has older build,"Builds with feedback, rating, Spanish, UX redesign, deck-to-video not uploaded yet",None (I do it)
+R008,Android,"Native Android app (Compose), test on emulator first, then Google Play",24/11/2026,DONE,Play internal testing (bundle up to ~11),Newer bundle (feedback/rating/ES/deck) not uploaded; emulator unreliable for screenshots,Android device for screenshots
+R009,Android,"Publish Android to Play internal testing; testers chleiva@gmail.com, juanhlb@gmail.com",24/11/2026,DONE,Play internal testing,,
+R010,Android,"Fix: submit button missing, duplicate add-photo buttons, single media dialog, uploads not refreshing",25/11/2026,DONE,QA + Play build,,
+R011,Android,"Fix video list flicker, add select all",25/11/2026,DONE,QA (list shaking at bottom not reproduced; defensive fix only),Root cause unproven,
+R012,iOS+Android,Answer chips must not clip text,25/11/2026,DONE,QA,,
+R013,iOS,Full-screen video player,23/11/2026,DONE,TestFlight,,
+R014,iOS,"Microphone/dictation must not crash; detect dictation availability, fallback",23/11/2026,DONE,TestFlight,Owner to confirm on real iPhone,Test dictation on real iPhone
+R015,iOS,Mic press-and-hold animation idea,24/11/2026,REJECTED,n/a,Owner withdrew: 'not for this app',
+R016,iOS+Android,Subtitles optional toggle,24/11/2026,DONE,QA,,
+R017,iOS+Android,"Smart collections / Organize for uploaded media (by place, month+year)",25/11/2026,DONE,QA + both apps,,
+R018,iOS+Android,World-class UI for upload and My media,25/11/2026,DONE,QA + both apps,,
+R019,iOS+Android,"Create-video flow redesign (request check, questions, formats, lengths, platform presets)",25/11/2026,DONE,QA + both apps,,
+R020,iOS,UX/UI redesign phases 1-3 (UX_REVIEW spec),26/11/2026,IN-REPO,Working tree/commit; not on TestFlight,Android and web redesign pending; needs review,Review in TestFlight when uploaded
+R021,Android+Web,Implement UX redesign (Android) and web unification per docs/UX_REVIEW.md,26/11/2026,PENDING,Not started (web partly),Android emulator unusable for capture,
+R022,Apps,"Full Spanish localization everywhere (iOS, Android, web, server) by device locale",26/11/2026,DONE,QA,Prod gets it with next prod deploy of apps,
+R023,Apps,"Supports Spanish for UI copy; Spanish voices; locale-based voice default (US default, UK, India, Canada, LatAm Mexican, Spain)",23/11/2026,DONE,QA,,
+R024,Apps,Sign in with Google and Apple on web + iOS + Android,26/11/2026,PARTIAL,Google live in prod; Apple off,Apple credentials missing; Google not yet tested end to end; no QA Google client,Create QA Google client; give Apple Sign-in credentials; publish OAuth consent screen
+R025,Apps,Account deletion in-app (store requirement) incl. cleanup,26/11/2026,DONE,QA + Prod backend,Apple revoke flag off until Apple credentials,
+R026,Apps,Feedback: permanent easy way to send a phrase of feedback; table; daily email only if new; LLM classification later,26/11/2026,DONE,QA + Prod backend; web page built not published; apps committed not shipped,"Site publish, app uploads, real email test (first send); LLM classification not built",Confirm email recipient (set to chris@agilegency.com)
+R027,Apps,Rating prompt after 11th fully watched video; 'already rated' stops forever; re-ask after 10 more; no nagging,26/11/2026,IN-REPO,iOS + Android committed,iOS prompt suppressed until real App Store ID; iOS 'Rate' ends it forever (differs from Android),Send App Store ID; decide iOS vs Android re-ask behavior
+R028,Apps,Designer pass on feedback/rating UX: users feel supported,26/11/2026,DONE,Built in apps,iPhone SE UI test not run,
+R029,Commercial,"Credits: 5 on sign-up, then 1 per day; 1 credit per minute (up to 1 min = 1 credit)",2026-11-23/25,DONE,QA + Prod,,
+R030,Commercial,"4K costs more credits (about 2x), recommended only for YouTube/general, not TikTok/LinkedIn",25/11/2026,PARTIAL,QA only,Prod Lambda memory cap blocks 4K; QA render memory is higher,Decide: raise prod render memory to match QA (you said use QA settings in prod if it works)
+R031,Commercial,Unlimited credits for owner test account and two testers (non-hackable),2026-11-23/24,DONE,QA,Verify none leaks to prod users,
+R032,Commercial,"Cost awareness: storage costs, per-video cost report, total AWS cost, cost by resolution/duration",2026-11-23/25,DONE,Reports given in chat,,
+R033,Commercial,"Media storage plans (free 2 GB, pro 100 GB, add-on blocks), search by meaning",25/11/2026,PARTIAL,Library + semantic search built; no billing,"Pro price, add-on blocks, in-app purchase, can_upgrade off",Pricing decision; App Store/Play products
+R034,Commercial,Paywall / in-app purchases / Play Billing,24/11/2026,PENDING,Not built,Business decisions,Decide pricing and plans
+R035,Video,"Natural narration voices: keep generative Polly voices, agent picks; multi-voice dialogue; balanced accents; Spanish voices; Ruth",23/11/2026,DONE,QA + Prod,,
+R036,Video,Do not hard-code pauses/silence; director agent decides using engagement best practices (no 'SILENCE' title bias),24/11/2026,DONE,QA,,
+R037,Video,5-minute videos must be at least the asked length (may exceed slightly),24/11/2026,DONE,QA,,
+R038,Video,"Audio and visuals synchronised (lists, photos); cheap alignment check",24/11/2026,DONE,QA,,
+R039,Video,Fix animated header that draws first letter then stalls,25/11/2026,DONE,QA,,
+R040,Video,Faster long-video generation by parallelising (Step Functions + Lambdas),24/11/2026,DONE,QA + Prod,Latency re-measure after prod deploy pending,
+R041,Video,Fix duplicate request creating two videos,24/11/2026,DONE,QA,,
+R042,Video,Short video lengths 15/30/45 s and per-platform recommended length/size/aspect,25/11/2026,DONE,QA + Prod,,
+R043,Video,"Vertical, square and 4:5 formats natively for all scenes/elements",25/11/2026,DONE,QA + Prod,,
+R044,Video,4K (2160p) output,25/11/2026,PARTIAL,QA only,See 4K credit/memory item,
+R045,Video,"Production quality: improve all elements, engaging videos regardless of prompt (engagement prompt + audit)",26/11/2026,PARTIAL,Engagement prompt on; audit score ~3.3/5,"QUALITY_REVIEW backlog: beat length 14s to 10s, beat 1 not a title card, chart first cue, ghost slots, icon picker no-match",
+R046,Video,"Quality of list and diagram-flow elements: modern, world-class, with style options",25/11/2026,DONE,QA,,
+R047,Video,"Rich element library (map, code, counter, headline, versus, steps, kinetic text, definition, tables, ranking, dialogue, charts, etc.)",24/11/2026,DONE,QA + Prod,,
+R048,Video,"Platform skills (LinkedIn, TikTok, Instagram, YouTube...) plus common skills",26/11/2026,BUILT-OFF,Code; flag PLATFORM_SKILLS off,A/B showed noise; not proven better,Decision when more evidence
+R049,Video,Remove bell sound effect; any future SFX must make sense (no tonal SFX),25/11/2026,DONE,QA + Prod,,
+R050,Video,Background music: not same for all videos; agent selects; diverse styles per prompt type; no old MIDI tracks; delete epic-orchestral-lite,24/11/2026,DONE,QA + Prod,Possible AI music provider undecided,
+R051,Video,Narration volume/music ducking best practices,25/11/2026,DONE,QA,,
+R052,Video,PowerPoint to video,26/11/2026,BUILT-OFF,"QA only (deckToVideo=1); web, iOS, Android UIs built","Tidy-ups: long title opening, flat grey background; not in prod; apps not uploaded",Test with a real deck; decide prod enable
+R053,Media,"Photos in videos from user phone, then 100 photos with thumbnail catalog for the LLM",2026-11-23/24,DONE,QA + both apps,,
+R054,Media,"Photo metadata (time, location) to model, toggles in settings",24/11/2026,DONE,QA + both apps,,
+R055,Media,"Use as many photos as possible when many are uploaded; collages; direct per prompt, not one by one",2026-11-24/25,DONE,QA,,
+R056,Media,Use my uploaded media automatically from the prompt (no manual selection needed),25/11/2026,PARTIAL,Library search built,Confirm prompt-driven selection flow UX,
+R057,Media,Never use embeddings from Titan: Cohere only,25/11/2026,DONE,QA,,
+R058,Media,"Web images: only fully licensed (Unsplash prod key, Wikimedia, Pixabay); never copyrighted",23/11/2026,DONE,QA + Prod,Own Unsplash production approval for videomk still needed,Apply for videomk's own Unsplash production key
+R059,Media,"Agentic web research (Plorer's Tavily, news/recent topics)",23/11/2026,DONE,QA + Prod,Separate Tavily key for videomk deferred,Later: own Tavily key
+R060,Media,Short video clips from providers (Pexels/Pixabay/Wikimedia); verify clips with frames; prefer discarding bad matches,2026-11-24/25,DONE,QA + Prod,Pexels key paused by provider; planner clip share 25% vs 30-45% target,
+R061,Media,"More clips than images (competitor comparison); clip retry pass, portrait crop, landscape footage in vertical",26/11/2026,PARTIAL,QA + Prod,Clip share below target,
+R062,Media,Request-check stage: validate/clarify user prompt; safety stops with account tracking (strikes),25/11/2026,DONE,QA + Prod,,
+R063,Media,"Own image catalog: reusable AI images, house style, OpenAI GPT Image 2.6 Flare, first 100 at $15 cap",26/11/2026,PARTIAL,"QA only (98 images, flag imageCatalog=1)","Prod not copied/enabled; weak themes (city, animals); not yet seen serving in a real video",Decide prod promotion
+R064,Media,"Demand loop: when agent searches the same thing in 3+ different videos, generate a matching image",26/11/2026,PARTIAL,Read-only opportunities script; demand logging on QA,"Generation step manual; opportunities (honeycomb, castle, cargo ships) held for approval",Approve next image batch
+R065,Media,Own video clip library (best provider/cost for ~100 short reusable clips),26/11/2026,BLOCKED-ON-OWNER,Pilot of 10 clips done ($3.75),Waiting approval of 100-clip batch at $75 cap; Gemini API has no indemnity (Vertex does),Choose Gemini key vs Vertex; confirm key's Google project
+R066,Avatars,"Presenter avatars: research, self-hosted lip-sync on GPU with strict cost guardrails (Stockholm eu-north-1)",26/11/2026,DONE,Experiments + docs/AVATARS_3D.md,Face looked artificial (no eye/face motion),
+R067,Avatars,MetaHuman / NVIDIA Audio2Face evaluation; Epic licensing,26/11/2026,BLOCKED-ON-OWNER,Research done,MetaHuman test must run on a Mac with Epic login; Hugging Face click-through; Epic licensing form,Decide whether to spike; do Epic items
+R068,Brand,"Permanent logo/app icon: minimalist, tells 'video', AI cue, no letters (Sparklet Trio)",26/11/2026,PARTIAL,Files in docs/brand/store; not applied anywhere,"Apply to iOS, Android adaptive icons, favicon, site; feature graphic 1024x500 for Play",Upload icons in Play Console and Google consent screen
+R069,Legal,Privacy Policy and Terms drafted from best-practice sources; publish at videomk.com; legal review not a gate,2026-11-24/26,DONE,Prod site (EN + ES),"Draft, not lawyer-reviewed",
+R070,Legal,"Fill legal blanks: Agilegency Ltd number 16838077, address, ICO ZC137157, minimum age 16",26/11/2026,DONE,Prod site,Other facts in docs/LEGAL_DRAFT_NOTES.md,Answer the remaining 14 facts
+R071,Legal,US DMCA designated agent registration,26/11/2026,PENDING-OWNER,,"dmca.copyright.gov, $6; then I add number to Terms",Register (owner chose to do it)
+R072,Legal,UK trademark for videomk,26/11/2026,PENDING-OWNER,,"Check register, classes 9/41/42",File application
+R073,Legal,"Liability insurance (PI/tech E&O, cyber, public liability)",26/11/2026,PENDING-OWNER,,,Buy
+R074,Legal,Store age ratings 16+,26/11/2026,PENDING-OWNER,,,Set in App Store Connect and Play
+R075,Site,videomk.com on CloudFront in prod account; privacy/terms/support/delete pages,24/11/2026,DONE,Prod us-east-1,,
+R076,Site,"Republish site with feedback page, nav and /es pages",26/11/2026,PENDING,"Built, not published",,
+R077,Email,hello@videomk.com forwarding to chris@agilegency.com; used in all legal pages and store contacts,26/11/2026,DONE,"Prod (verified, forward tested)",Play/App Store contact set by owner,
+R078,Email,Use hello@videomk.com as Wikimedia User-Agent contact,26/11/2026,DONE,Prod + QA,Prod deploy gate cleared,
+R079,Auth,Own Cognito domain for hosted sign-in (trustworthy host),26/11/2026,DONE,Prod login.videomk.com,auth.videomk.com blocked by an external CloudFront alias conflict in another AWS account,Release the old alias in the other account if you want auth.
+R080,Auth,Google sign-in on in prod; consent screen to pass brand verification,26/11/2026,PARTIAL,Prod enabled,"Search Console domain verification, consent screen branding, publish to In production, upload logo","Verify domain (I add TXT), fill consent screen, publish"
+R081,Auth,Delete stuck Cognito user in QA,26/11/2026,DONE,QA,Nothing existed to delete,
+R082,Auth,Store Google client secret safely; delete downloaded client_secret_*.json,26/11/2026,PENDING-OWNER,Secrets stored,,Delete the JSON file in repo root
+R083,Stores,"Play Store listing and app, Data safety form, content rating, store assets",24/11/2026,PARTIAL,Internal testing only,"Data safety, content rating, assets, production release",Complete forms; upload icon
+R084,Stores,"App Store Connect contacts (support URL, review contact) and app store ID",26/11/2026,PENDING-OWNER,,,Fill and send app ID
+R085,Abuse,Apple DeviceCheck / App Attest: one welcome grant per device,24/11/2026,PENDING-OWNER,Not built,Needs Apple DeviceCheck key,Provide key
+R086,Abuse,Play Integrity on Android,24/11/2026,PENDING,Not built,,
+R087,Compliance,'Report AI content' path (Play policy); test account for store reviewers,24/11/2026,PENDING,Not built,,Provide reviewer test account details
+R088,Process,Remind owner of pending items at natural pauses; autonomous progress; security first; cost conscious,2026-11-24/26,ONGOING,This file + memory,,
+R089,Process,Record of all requirements for tracking (this file),26/11/2026,DONE,docs/REQUIREMENTS_TRACKER.csv,Keep updated each session,

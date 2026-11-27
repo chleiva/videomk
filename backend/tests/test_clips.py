@@ -808,3 +808,68 @@ def test_a_montage_segment_that_fails_gets_its_retry_and_the_beat_cost_includes_
     out = clips.scout_montage(["a", "b", "c"], "x " * 30, need_seconds=12.6, scout=retry_scout({"a": 7, "b2": 7, "c": 7}, log), assemble_fn=assembled, workers=1, rewrite=lambda q, *a: (q + "2", 0.0))
     assert out["segments"] == 3 and out["chosen_all"] == ["pixabay:a", "pixabay:b2", "pixabay:c"] and sorted(log) == ["a", "b", "b2", "c"]
     assert out["review"]["cost_usd"] == pytest.approx(0.004)                                                  # four scout runs, the failed one included
+
+
+# ---------------------------------------------------------------- videomk's own clip library (CLIPS_OWN_DIR)
+@pytest.fixture
+def own_lib(tmp_path, monkeypatch):
+    import json
+    for n in ("a", "b"):
+        (tmp_path / f"{n}.mp4").write_bytes(make_source(seconds=5, tmp_path=tmp_path))
+        (tmp_path / f"{n}.jpg").write_bytes(b"\xff\xd8poster")
+    (tmp_path / "library.json").write_text(json.dumps([
+        {"id": "a", "file": "a.mp4", "poster": "a.jpg", "prompt": "sunbeams through a green forest canopy", "tags": ["forest", "trees"], "duration": 5.0},
+        {"id": "b", "file": "b.mp4", "poster": "b.jpg", "prompt": "golden autumn leaves drifting down in a park", "tags": ["autumn", "leaves"], "duration": 5.0},
+        {"id": "x", "file": "../escape.mp4", "prompt": "forest", "tags": [], "duration": 5.0},
+    ]))
+    monkeypatch.setenv("CLIPS_OWN_DIR", str(tmp_path))
+    return tmp_path
+
+
+def test_own_library_is_off_unless_the_folder_is_set(monkeypatch):
+    monkeypatch.delenv("CLIPS_OWN_DIR", raising=False)
+    assert clips.own_dir() == "" and clips.own_search("forest") == []
+
+
+def test_own_search_ranks_by_shared_words_and_ignores_paths_outside_the_folder(own_lib):
+    got = clips.own_search("forest canopy sunlight")
+    assert [c["id"] for c in got] == ["a"] and got[0]["provider"] == "own" and got[0]["video_url"].startswith("file://")
+    assert clips.own_search("autumn leaves")[0]["id"] == "b"
+    assert clips.own_search("volcano") == []
+    assert clips.own_search("forest", orientation="portrait") == []   # footage is landscape only
+
+
+def test_own_clips_lead_the_pool_and_are_credited(own_lib, monkeypatch):
+    monkeypatch.setattr(clips, "pexels_search", lambda *a, **k: [])
+    monkeypatch.setattr(clips, "pixabay_search", lambda *a, **k: [])
+    monkeypatch.setenv("CLIPS_COMMONS", "0")
+    pool = clips.gather("green forest", pexels_key="k", pixabay_key="k")
+    assert pool and pool[0]["provider"] == "own"
+    assert clips.credit_line(pool[0]) == "Video: AI-generated (videomk)"
+
+
+def test_own_fetch_reads_only_inside_the_library(own_lib):
+    f = clips.own_fetch(lambda url, **k: b"net")
+    assert f("file://" + str(own_lib / "a.jpg")) == b"\xff\xd8poster"
+    assert f("https://x/y") == b"net"
+    with pytest.raises(FetchError):
+        f("file:///etc/hosts")
+
+
+def test_scout_clip_serves_an_own_clip_through_the_normal_checks(own_lib, monkeypatch):
+    monkeypatch.setattr(clips, "pexels_search", lambda *a, **k: [])
+    monkeypatch.setattr(clips, "pixabay_search", lambda *a, **k: [])
+    monkeypatch.setenv("CLIPS_COMMONS", "0")
+    seen = {}
+
+    def verify(mp4, narration, alt, query, seconds):   # the strict check still runs on the normalised footage
+        seen["bytes"] = len(mp4)
+        return True, "shows a forest", 0.001
+
+    r = clips.scout_clip("green forest canopy", "Sunlight filters through the canopy.", need_seconds=4.5, review=None, verify_fn=verify)
+    assert r["mp4"] and r["chosen"] == "own:a" and r["entry"]["source"] == "own" and seen["bytes"] > 1000
+    assert r["credit"] == "Video: AI-generated (videomk)"
+    none = clips.scout_clip("green forest canopy", "x", need_seconds=4.5, review=None, verify_fn=lambda *a: (False, "wrong", 0.0))
+    assert none is None   # a clip that fails verification is dropped, never used
+    short = clips.scout_clip("green forest canopy", "x", need_seconds=9.0, review=None, verify_fn=None)
+    assert short is None  # a 5 s clip never covers a 9 s scene: no looping

@@ -583,3 +583,5 @@
 {"ts": "2026-11-26T22:13:44.141132Z", "run": "catalog-batch-1b-1795731075", "item": "c022", "what": "vision-check", "usd": 0.000219, "run_total": 0.71701}
 {"ts": "2026-11-26T22:13:44.438672Z", "run": "catalog-batch-1b-1795731075", "item": "c022", "what": "embed", "usd": 0.0005, "run_total": 0.71751}
 {"ts": "2026-11-26T22:40:00Z", "run": "opportunities-qa-fixture", "item": "", "what": "text-embeddings+3 small-model subject calls (estimate, not metered)", "usd": 0.01, "run_total": 0.01}
+{"ts": "2026-11-27T00:26:24.301463Z", "run": "vector-scene-proto", "item": "sea", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon", "usd": 0.0371, "run_total": 0.0371}
+{"ts": "2026-11-27T00:26:31.957109Z", "run": "vector-scene-proto", "item": "mountain", "what": "gpt-image-2.6-flare 2048x1152 medium flat-cartoon", "usd": 0.0371, "run_total": 0.07418}

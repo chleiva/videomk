@@ -295,6 +295,72 @@ def nasa_usable() -> bool:
     return os.environ.get("CLIPS_NASA", "1") != "0"
 
 
+# ----------------------------------------------------------------------------- videomk's own clip library (docs/VIDEO_CATALOG.md section 8, first small step)
+OWN_PROVIDER = "own"
+_OWN_STOP = set("a an the and or of in on at to for with by from as is are it its this that over under into through slowly slow camera gently soft light".split())
+
+
+def own_dir() -> str:
+    """`CLIPS_OWN_DIR` (a folder with `library.json` and the clips it lists) switches the own library on; unset, nothing changes. `CLIPS_OWN=0` switches it off again."""
+    d = os.environ.get("CLIPS_OWN_DIR", "")
+    return d if d and os.environ.get("CLIPS_OWN", "1") != "0" and os.path.isfile(os.path.join(d, "library.json")) else ""
+
+
+def _own_words(text: str) -> set:
+    out = set()
+    for w in re.findall(r"[a-z]+", str(text or "").lower()):
+        if len(w) > 2 and w not in _OWN_STOP:
+            out.add(w[:-1] if len(w) > 4 and w.endswith("s") else w)
+    return out
+
+
+def own_search(query: str, orientation: str = "landscape", limit: int = 4) -> List[Candidate]:
+    """Clips of our own library whose description or tags share words with the wording, best first. The library file is a list of
+    {id, file, poster, prompt, tags, duration, width, height}; paths are relative to the folder and never leave it. Footage is landscape only."""
+    base = own_dir()
+    if not base or _orient(orientation) != "landscape":
+        return []
+    try:
+        entries = json.load(open(os.path.join(base, "library.json")))
+    except (OSError, ValueError):
+        return []
+    q = _own_words(query)
+    if not q:
+        return []
+    root = os.path.realpath(base)
+    scored: List[Tuple[float, Candidate]] = []
+    for e in entries if isinstance(entries, list) else []:
+        try:
+            video, poster = os.path.realpath(os.path.join(base, e["file"])), os.path.realpath(os.path.join(base, e.get("poster") or ""))
+            if not video.startswith(root + os.sep) or not os.path.isfile(video):
+                continue
+            hit = len(q & _own_words(" ".join([str(e.get("prompt", "")), " ".join(e.get("tags") or [])])))
+            if hit == 0:
+                continue
+            scored.append((hit / len(q), {
+                "provider": OWN_PROVIDER, "id": str(e["id"]), "thumb_url": ("file://" + poster) if os.path.isfile(poster) and poster.startswith(root + os.sep) else "",
+                "video_url": "file://" + video, "width": int(e.get("width") or 1280), "height": int(e.get("height") or 720), "duration": float(e.get("duration") or 0),
+                "creator": "videomk", "creator_url": "", "landing_url": "", "license": "videomk AI-generated", "alt": str(e.get("prompt", ""))[:200], "attribution": "AI-generated video by videomk"}))
+        except (KeyError, TypeError, ValueError):
+            continue
+    scored.sort(key=lambda t: -t[0])
+    return [c for _, c in scored[:limit]]
+
+
+def own_fetch(inner: Callable[..., bytes]) -> Callable[..., bytes]:
+    """A fetch function that also reads `file://` paths of the own library (and only those: a path outside the library folder is refused); everything else goes to `inner`."""
+    def fetch(url: str, **kw: Any) -> bytes:
+        if str(url).startswith("file://"):
+            base = own_dir()
+            path = os.path.realpath(str(url)[7:])
+            if not base or not path.startswith(os.path.realpath(base) + os.sep):
+                raise FetchError("path outside the own clip library")
+            with open(path, "rb") as fh:
+                return fh.read(MAX_SOURCE_BYTES + 1)[:MAX_SOURCE_BYTES]
+        return inner(url, **kw)
+    return fetch
+
+
 def query_variants(query: str, alt: str = "") -> List[str]:
     """The planner's `clip_query`, its `alt` wording and a shortened form of each (first two words), distinct, at most 3: stock libraries index footage by very different words,
     and one variant often finds nothing (or only unusable files) that another finds."""
@@ -325,6 +391,8 @@ def gather(query: str, *, pexels_key: str = "", pixabay_key: str = "", fetch: Ca
     if hd:
         o["hd"] = True
     providers = [lambda: pexels_search(query, pexels_key, fetch, **o), lambda: pixabay_search(query, pixabay_key, fetch, **o)]
+    if own_dir():   # our own library goes first: its clips lead the pool the reviewer sees (and are still reviewed and verified like any other)
+        providers.insert(0, lambda: own_search(query, orientation))
     if nasa_usable():
         providers.append(lambda: nasa_search(query, fetch, limit=NASA_PER_QUERY, **o))
     if commons_usable():
@@ -359,6 +427,8 @@ def credit_line(c: Candidate) -> str:
         return f"Video: {c.get('creator', 'Unknown')} / Pixabay"
     if c.get("provider") == "nasa":
         return "Video: NASA"
+    if c.get("provider") == OWN_PROVIDER:
+        return "Video: AI-generated (videomk)"
     return f"Video: {c.get('creator', 'Unknown')} ({c.get('license', '')})"
 
 
@@ -526,6 +596,8 @@ def scout_clip(
     notes = notes if notes is not None else {}
     notes.setdefault("reasons", [])
     notes.setdefault("cost", 0.0)
+    if own_dir():
+        fetch_bytes_fn = own_fetch(fetch_bytes_fn)   # reads the own library's file:// paths; every other URL as before
     pools: List[List[Candidate]] = []
     for q in query_variants(query, alt):   # every wording is searched (free API calls); the pool the reviewer sees mixes their best results
         try:
