@@ -262,20 +262,19 @@ fun SelectionTopBar(vm: MediaViewModel) {
     BackHandler(enabled = vm.selecting) { vm.clearSelection() }
     val n = vm.selection.size
     val desc = stringResource(R.string.media_selection_top_desc)
-    val bigText = androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.3f   // large text: "Select all" drops to its own line so the count is never squeezed
     val count: @Composable (Modifier) -> Unit = { m ->
         Text(
-            pluralStringResource(R.plurals.media_selected, n, n), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, maxLines = 2,
+            pluralStringResource(R.plurals.media_selected, n, n), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 2,
             modifier = m.semantics { contentDescription = Txt.n(R.plurals.media_selected_desc, n); stateDescription = desc; heading() },
         )
     }
-    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 8.dp, vertical = 4.dp).testTag("selectionTopBar")) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            GlassIconButton(Sym.Close, stringResource(R.string.media_cancel_selection), { vm.clearSelection() }, Modifier.testTag("closeSelection"))
-            count(Modifier.weight(1f).padding(horizontal = 8.dp))
-            if (!bigText) SelectAllButton(vm)
+    // the count and "Select all" share a line when both fit; a longer language or larger text puts "Select all" on the next line instead of cutting a word
+    Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = Vmk.space.screen - 12.dp, vertical = 4.dp).testTag("selectionTopBar"), verticalAlignment = Alignment.Top) {
+        GlassIconButton(Sym.Close, stringResource(R.string.media_cancel_selection), { vm.clearSelection() }, Modifier.testTag("closeSelection"))
+        androidx.compose.foundation.layout.FlowRow(Modifier.weight(1f).padding(start = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, itemVerticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.heightIn(min = Vmk.minTouch), contentAlignment = Alignment.CenterStart) { count(Modifier) }
+            SelectAllButton(vm)
         }
-        if (bigText) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { SelectAllButton(vm) }
     }
 }
 

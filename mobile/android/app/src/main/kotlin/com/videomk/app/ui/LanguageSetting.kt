@@ -46,8 +46,14 @@ fun LanguageSetting() {
             Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_language_title)) { open = true },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+            // at large text the value sits under the name, so neither word is ever broken in two
+            if (isLargeText()) androidx.compose.foundation.layout.Column(Modifier.weight(1f).padding(vertical = Vmk.space.s)) {
+                Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge)
+                Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+            }
             Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Vmk.colors.surface) {
