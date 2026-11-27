@@ -55,21 +55,20 @@ final class VideoMKDynamicTypeUITests: XCTestCase {
         }
     }
 
-    func testFirstRunOffersAPrefilledThirtySecondVideo() {
+    func testFirstRunOffersAPromptAndExamples() {
         let app = launch(spanish: false, signedIn: true, largeText: false)
-        XCTAssertTrue(el(app, "firstVideoButton").waitForExistence(timeout: 15), "an empty list shows the first-video card")
-        el(app, "firstVideoButton").tap()
+        XCTAssertTrue(el(app, "firstVideoButton").waitForExistence(timeout: 15), "an empty list shows the prompt field")
+        XCTAssertTrue(el(app, "example").exists, "and example chips")
+        el(app, "example").tap()
         XCTAssertTrue(el(app, "composerField").waitForExistence(timeout: 10))
-        XCTAssertTrue((el(app, "composerField").value as? String ?? "").contains("bees"), "the prompt is prefilled")
-        for _ in 0..<4 where !el(app, "length-30s").exists { app.swipeUp() }
-        XCTAssertTrue(el(app, "length-30s").waitForExistence(timeout: 5), app.debugDescription)
-        XCTAssertTrue(el(app, "length-30s").isSelected, "30 seconds is chosen")
+        XCTAssertFalse((el(app, "composerField").value as? String ?? "").isEmpty, "an example fills the prompt")
+        XCTAssertTrue(el(app, "lengthPill").waitForExistence(timeout: 5), "the length is a pill")
     }
 
-    func testCostExplainerOpensFromCreate() {
-        let app = launch(spanish: false, signedIn: true, env: ["VMK_DEBUG_CREATE": "filled"])
-        XCTAssertTrue(el(app, "costWhy").waitForExistence(timeout: 15))
-        el(app, "costWhy").tap()
-        XCTAssertTrue(app.staticTexts["How credits work"].waitForExistence(timeout: 5) || app.navigationBars["How credits work"].exists)
+    func testCreditsInfoOpensFromTheCreditsSheet() {
+        let app = launch(spanish: false, signedIn: true, env: ["VMK_DEBUG_SHEET": "wallet"], largeText: false)
+        XCTAssertTrue(el(app, "walletInfo").waitForExistence(timeout: 15))
+        el(app, "walletInfo").tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '1 min = 1 credit'")).firstMatch.waitForExistence(timeout: 5))
     }
 }

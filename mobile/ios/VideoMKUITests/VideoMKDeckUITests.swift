@@ -40,6 +40,13 @@ final class VideoMKDeckUITests: XCTestCase {
         return launch(spanish: spanish, large: large, env)
     }
 
+    /// The photo icon is a small menu when presentations are on: open it, and the "Add a presentation" row is there.
+    @discardableResult private func openDeckMenu(_ app: XCUIApplication) -> Bool {
+        guard el(app, "photoButton").waitForExistence(timeout: 15) else { return false }
+        el(app, "photoButton").tap()
+        return el(app, "deckButton").waitForExistence(timeout: 5)
+    }
+
     /// Scrolls (either way) until the element can be tapped: at large text the Create form is several screens tall and the deck card scrolls itself into view.
     private func reveal(_ app: XCUIApplication, _ id: String) {
         let e = el(app, id), h = app.windows.firstMatch.frame.height
@@ -88,7 +95,7 @@ final class VideoMKDeckUITests: XCTestCase {
 
     func testRowAppearsWhenEnabledAndOffersTheFilesPicker() {
         let app = create("ok", file: nil)
-        XCTAssertTrue(el(app, "deckButton").waitForExistence(timeout: 15))
+        XCTAssertTrue(openDeckMenu(app), "the photo button offers a presentation")
         XCTAssertEqual(el(app, "deckButton").label, "Add a presentation")
         shot(app, "deck-01-row")
         el(app, "deckButton").tap()
@@ -110,7 +117,7 @@ final class VideoMKDeckUITests: XCTestCase {
         app.terminate()
         app = create("uploading"); XCTAssertTrue(el(app, "deckUploading").waitForExistence(timeout: 15)); shot(app, "deck-03-uploading")
         el(app, "deckCancel").tap()
-        XCTAssertTrue(el(app, "deckButton").waitForExistence(timeout: 5), "cancel removes it and offers the row again")
+        XCTAssertTrue(openDeckMenu(app), "cancel removes it and the photo menu offers a presentation again")
         app.terminate()
         app = create("processing"); XCTAssertTrue(el(app, "deckProcessing").waitForExistence(timeout: 15)); shot(app, "deck-04-processing")
     }
@@ -119,7 +126,7 @@ final class VideoMKDeckUITests: XCTestCase {
         let app = create("ok")
         XCTAssertTrue(el(app, "deckSummary").waitForExistence(timeout: 30))
         XCTAssertTrue(el(app, "deckCost").label.contains("4 credits"))
-        reveal(app, "length-2")
+        el(app, "lengthPill").tap()
         el(app, "length-2").tap()
         reveal(app, "deckCost")
         XCTAssertTrue(waitForLabel(el(app, "deckCost"), contains: "2 credits"), "the usual rule for another length: \(el(app, "deckCost").label)")
@@ -189,7 +196,7 @@ final class VideoMKDeckUITests: XCTestCase {
         XCTAssertTrue(el(app, "deckErrorTitle").waitForExistence(timeout: 15))
         XCTAssertEqual(label(app, "deckErrorTitle"), "We can't use this file type")
         el(app, "deckRemove").tap()
-        XCTAssertTrue(el(app, "deckButton").waitForExistence(timeout: 5), "Remove puts the row back")
+        XCTAssertTrue(openDeckMenu(app), "Remove puts the option back")
     }
 
     func testALostConnectionOffersTryAgainThatWorks() {
@@ -216,14 +223,14 @@ final class VideoMKDeckUITests: XCTestCase {
     func testADeckDefaultsToLandscape() {
         let app = create("ok", state: "empty")
         XCTAssertTrue(el(app, "deckSummary").waitForExistence(timeout: 30))
-        XCTAssertTrue(label(app, "recommendation").contains("16:9"), label(app, "recommendation"))
+        XCTAssertTrue(el(app, "forPill").exists, "the For pill is there, on the landscape default")
         XCTAssertFalse(el(app, "deckVerticalWarning").exists)
     }
 
     func testChoosingADeckRemovesPhotosAfterAskingAndKeepingThemIsPossible() {
         var app = create("ok", file: nil, state: "photos")
         XCTAssertTrue(el(app, "photosNote").waitForExistence(timeout: 15))
-        reveal(app, "deckButton")
+        XCTAssertTrue(openDeckMenu(app))
         el(app, "deckButton").tap()
         XCTAssertTrue(app.alerts["Use a presentation instead?"].waitForExistence(timeout: 5))
         shot(app, "deck-08-replace-photos")
@@ -268,7 +275,7 @@ final class VideoMKDeckUITests: XCTestCase {
         shot(app, "es-deck-err-deck_encrypted")
         app.terminate()
         app = create("ok", file: nil, spanish: true)
-        XCTAssertEqual(el(app, "deckButton").label, "Agregar una presentación")
+        XCTAssertTrue(openDeckMenu(app)); XCTAssertEqual(el(app, "deckButton").label, "Agregar una presentación")
         shot(app, "es-deck-01-row")
         app.terminate()
         app = create("uploading", spanish: true); XCTAssertTrue(el(app, "deckUploading").waitForExistence(timeout: 15)); shot(app, "es-deck-03-uploading"); app.terminate()

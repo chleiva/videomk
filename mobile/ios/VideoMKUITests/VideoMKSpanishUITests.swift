@@ -60,14 +60,16 @@ final class VideoMKSpanishUITests: XCTestCase {
         let app = session()
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 15))
         XCTAssertEqual(app.buttons["newVideo"].label, "Nuevo video")
-        XCTAssertTrue(app.tabBars.buttons["Biblioteca"].exists && app.tabBars.buttons["Videos"].exists)
+        XCTAssertTrue(app.buttons["tabMedia"].exists && app.buttons["tabVideos"].exists)
+        XCTAssertEqual(app.buttons["tabMedia"].label, "Biblioteca")
         app.buttons["newVideo"].tap()
         XCTAssertTrue(app.buttons["sendButton"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["sendButton"].label.contains("Crear video"))
-        XCTAssertTrue(app.navigationBars["Nuevo video"].exists)
+        XCTAssertTrue(app.buttons["sendButton"].label.contains("Crear"))
+        XCTAssertEqual(el(app, "forPill").label, "Para", "the pills speak Spanish")
         app.buttons["createCancel"].tap()
         app.buttons["settingsButton"].tap()
         XCTAssertTrue(app.navigationBars["Ajustes"].waitForExistence(timeout: 5))
+        for _ in 0..<5 where !app.buttons["deleteAccountButton"].exists { app.swipeUp() }
         XCTAssertEqual(app.buttons["deleteAccountButton"].label, "Eliminar cuenta")
         XCTAssertTrue(app.buttons["signOutButton"].exists)
         app.buttons["deleteAccountButton"].tap()
@@ -93,7 +95,7 @@ final class VideoMKSpanishUITests: XCTestCase {
     /// Screenshots of the main screens (no assertions beyond "it renders").
     func testScreenshots() {
         var app = session(); XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 15)); shot(app, "01-home")
-        XCTAssertTrue(app.tabBars.buttons["Biblioteca"].waitForExistence(timeout: 10)); app.tabBars.buttons["Biblioteca"].tap(); sleep(2); shot(app, "02-media"); app.terminate()
+        XCTAssertTrue(app.buttons["tabMedia"].waitForExistence(timeout: 10)); app.buttons["tabMedia"].tap(); sleep(2); shot(app, "02-media"); app.terminate()
         app = session(["VMK_DEBUG_SIGNED_OUT": "1"], signedIn: false); _ = app.buttons["signInButton"].waitForExistence(timeout: 15); shot(app, "03-signin"); app.terminate()
         for s in ["empty", "filled", "photos", "options", "notaffordable", "q1", "summary", "checking", "unsupported", "paused"] {
             app = session(["VMK_DEBUG_CREATE": s]); _ = el(app, "composerField").waitForExistence(timeout: 15); sleep(1); shot(app, "10-create-\(s)"); app.terminate()

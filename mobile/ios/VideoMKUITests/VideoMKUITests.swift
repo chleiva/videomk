@@ -31,8 +31,21 @@ final class VideoMKUITests: XCTestCase {
 
     /// A real request check may ask clarifying questions; these tests do not answer them ("Make it now").
     private func goOnPastQuestions(_ app: XCUIApplication) {
-        if element(app, "makeItNow").waitForExistence(timeout: 4) { app.buttons["makeItNow"].tap() }
+        for _ in 0..<4 {            // one Skip per question (at most three), or the request check's own Skip while it is still thinking
+            if element(app, "skipQuestion").waitForExistence(timeout: 4) { app.buttons["skipQuestion"].tap() }
+            else if element(app, "makeItNow").exists { app.buttons["makeItNow"].tap() }
+            else { break }
+        }
     }
+
+    /// The For pill is a menu now: open it and pick the platform (`platform-shorts`, `platform-youtube`...).
+    private func choosePlatform(_ app: XCUIApplication, _ id: String) {
+        element(app, "forPill").tap()
+        XCTAssertTrue(element(app, id).waitForExistence(timeout: 5), "the platform is in the For menu: \(id)")
+        element(app, id).tap()
+    }
+
+    private func forValue(_ app: XCUIApplication) -> String { element(app, "forPill").value as? String ?? "" }
 
     private func element(_ app: XCUIApplication, _ id: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: id).firstMatch
@@ -83,6 +96,7 @@ final class VideoMKUITests: XCTestCase {
     private func openDeleteSheet(_ app: XCUIApplication) {
         XCTAssertTrue(app.buttons["settingsButton"].waitForExistence(timeout: 15))
         app.buttons["settingsButton"].tap()
+        for _ in 0..<5 where !app.buttons["deleteAccountButton"].exists { app.swipeUp() }        // the last row of the list
         XCTAssertTrue(app.buttons["deleteAccountButton"].waitForExistence(timeout: 5), "Settings has a clear Delete account row")
         app.buttons["deleteAccountButton"].tap()
         revealConfirmField(app)
@@ -130,7 +144,7 @@ final class VideoMKUITests: XCTestCase {
         func scrollDown(_ app: XCUIApplication) { for _ in 0..<3 { app.swipeUp() } }
 
         var app = fakeSession(["VMK_DEBUG_SHEET": "settings"])
-        XCTAssertTrue(app.buttons["deleteAccountButton"].waitForExistence(timeout: 15)); sleep(1)
+        for _ in 0..<5 where !app.buttons["deleteAccountButton"].waitForExistence(timeout: 3) { app.swipeUp() }; sleep(1)
         snap(app, "1-settings"); app.terminate()
 
         app = fakeSession(["VMK_DEBUG_SHEET": "delete"])
@@ -173,13 +187,15 @@ final class VideoMKUITests: XCTestCase {
         app.launchEnvironment["VMK_DEBUG_FAKE_LIBRARY"] = "1"
         app.launch()
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 15), "signed in: the home screen offers New video")
-        XCTAssertTrue(app.tabBars.buttons["Videos"].exists, "the tab bar offers Videos")
+        XCTAssertTrue(app.buttons["tabVideos"].exists, "the tab bar offers Videos")
         XCTAssertFalse(app.textFields["composerField"].exists, "the home screen has no text input")
         let field = openCreate(app)
         XCTAssertFalse(element(app, "libraryButton").exists, "there is ONE attach control")
         let send = app.buttons["sendButton"]
         XCTAssertTrue(send.exists && (send.value as? String ?? "").contains("Not ready"), "Create is drawn even when it cannot act")
-        XCTAssertTrue(element(app, "platform-youtube").exists && element(app, "platform-shorts").exists, "the platform chips are there, the unsupported ones too")
+        element(app, "forPill").tap()
+        XCTAssertTrue(element(app, "platform-youtube").waitForExistence(timeout: 5) && element(app, "platform-shorts").exists, "the platforms are in the For menu, the unsupported ones too")
+        element(app, "platform-other").tap()
         send.tap()                                   // a tonal tap explains instead of doing nothing, and must not crash
         field.tap(); field.typeText("A calm film about my holiday in Thailand")
         XCTAssertTrue(NSPredicate(format: "value CONTAINS 'Ready'").evaluate(with: send) || send.waitForExistence(timeout: 2), "ready after typing")
@@ -196,7 +212,7 @@ final class VideoMKUITests: XCTestCase {
         app.buttons["Discard"].tap()
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10), "Create closed onto the library")
         sleep(1)
-        app.tabBars.buttons["Media"].tap()
+        app.buttons["tabMedia"].tap()
         XCTAssertTrue(element(app, "storageMeter").waitForExistence(timeout: 10), "the storage meter shows")
         XCTAssertTrue(element(app, "mediaSearch").exists)
         XCTAssertTrue(element(app, "mediaTile").waitForExistence(timeout: 10), "photos show in the grid")
@@ -204,7 +220,7 @@ final class VideoMKUITests: XCTestCase {
         app.buttons["organizeLibrary"].tap()
         XCTAssertTrue(app.staticTexts["Nothing to organize right now"].waitForExistence(timeout: 10), "Organize my library explains kindly when there is nothing to do")
         app.buttons["OK"].tap()
-        app.tabBars.buttons["Videos"].tap()
+        app.buttons["tabVideos"].tap()
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 5), "back on the home screen with New video")
     }
 
@@ -230,10 +246,11 @@ final class VideoMKUITests: XCTestCase {
         openCreate(app)
         sleep(2)
         shot(app, "01-create-capabilities")
-        XCTAssertTrue(element(app, "platform-shorts").exists, "the Shorts / Reels / TikTok chip is there")
-        XCTAssertTrue(element(app, "platform-shorts").isHittable, "and it is enabled (9:16 is ready on the server)")
+        element(app, "forPill").tap()
+        XCTAssertTrue(element(app, "platform-shorts").waitForExistence(timeout: 5), "the Shorts / Reels / TikTok row is in the For menu")
+        XCTAssertTrue(element(app, "platform-shorts").isEnabled, "and it is enabled (9:16 is ready on the server)")
         element(app, "platform-shorts").tap()
-        XCTAssertTrue(element(app, "recommendation").label.contains("9:16") && element(app, "recommendation").label.contains("1080p"), "Shorts selects Vertical 9:16 · 1080p: \(element(app, "recommendation").label)")
+        XCTAssertTrue(forValue(app).contains("Shorts"), "Shorts is selected: \(forValue(app))")
         app.buttons["moreOptions"].tap()
         sleep(1)
         shot(app, "02-more-options-formats")
@@ -267,8 +284,8 @@ final class VideoMKUITests: XCTestCase {
         type("Make a video about my business")
         tapCreate()
         XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20))
-        app.buttons["skipQuestion"].tap()
-        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "skipping goes straight to making the video")
+        goOnPastQuestions(app)
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "skipping the questions goes on to make the video")
         shot(app, "07-after-skip")
     }
 
@@ -301,16 +318,16 @@ final class VideoMKUITests: XCTestCase {
         // 3c + 6. a real vertical video, started with "Make it now" on the question
         let field = openCreate(app)
         sleep(2)                                    // the chip row scrolls the chosen chip into view when the screen opens
-        element(app, "platform-shorts").tap()
-        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is selected: \(element(app, "recommendation").label)")
+        choosePlatform(app, "platform-shorts")
+        XCTAssertTrue(forValue(app).contains("Shorts"), "Shorts is selected: \(forValue(app))")
         field.tap(); field.typeText("Make a video about my business")     // (no tap on the screen centre: it lands on a platform chip)
-        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is still selected after typing")
+        XCTAssertTrue(forValue(app).contains("Shorts"), "Shorts is still selected after typing")
         shot(app, "10-shorts-filled")
         tapCreate()
         XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20), "the ambiguous request asks, also for Shorts")
         shot(app, "10b-shorts-question")
-        app.buttons["makeItNow"].tap()
-        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "Make it now started the vertical video")
+        goOnPastQuestions(app)
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "skipping the questions started the vertical video")
         shot(app, "11-shorts-making")
 
         // 5. ONE clearly harmful request: the blocked sheet. (Only once: repeated blocks pause an account.)
@@ -359,16 +376,16 @@ final class VideoMKUITests: XCTestCase {
         // 3c + 6. a real vertical video, started with "Make it now" on the question
         let field = openCreate(app)
         sleep(2)                                    // the chip row scrolls the chosen chip into view when the screen opens
-        element(app, "platform-shorts").tap()
-        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is selected: \(element(app, "recommendation").label)")
+        choosePlatform(app, "platform-shorts")
+        XCTAssertTrue(forValue(app).contains("Shorts"), "Shorts is selected: \(forValue(app))")
         field.tap(); field.typeText("Make a video about my business")     // (no tap on the screen centre: it lands on a platform chip)
-        XCTAssertTrue(element(app, "recommendation").label.contains("9:16"), "Shorts is still selected after typing")
+        XCTAssertTrue(forValue(app).contains("Shorts"), "Shorts is still selected after typing")
         shot(app, "10-shorts-filled")
         tapCreate()
         XCTAssertTrue(element(app, "questionTitle").waitForExistence(timeout: 20), "the ambiguous request asks, also for Shorts")
         shot(app, "10b-shorts-question")
-        app.buttons["makeItNow"].tap()
-        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "Make it now started the vertical video")
+        goOnPastQuestions(app)
+        XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 20), "skipping the questions started the vertical video")
         shot(app, "11-shorts-making")
 
         // 6 (continued). wait for Ready, look at the card and the player
@@ -454,7 +471,7 @@ final class VideoMKUITests: XCTestCase {
         let appeared = element(app, "pendingRow").waitForExistence(timeout: 10) || element(app, "runningRow").waitForExistence(timeout: 30)
         XCTAssertFalse(element(app, "failedRow").exists, "the request failed (daily limit? connection?)")
         XCTAssertTrue(appeared, "a row for the new video should appear")
-        XCTAssertTrue(app.tabBars.buttons["Videos"].isSelected, "still on the home screen")
+        XCTAssertTrue(app.buttons["tabVideos"].isSelected, "still on the home screen")
         XCTAssertTrue(app.buttons["newVideo"].waitForExistence(timeout: 10), "the Create sheet closed onto the library")
         XCTAssertTrue(element(app, "runningRow").waitForExistence(timeout: 60))
         shot(app, "11-live-row")
@@ -472,7 +489,7 @@ final class VideoMKUITests: XCTestCase {
         let both = Date().addingTimeInterval(60)
         while liveCount() < 2 && Date() < both { sleep(1) }
         XCTAssertGreaterThanOrEqual(liveCount(), 2, "two videos should be in progress at once")
-        XCTAssertTrue(app.tabBars.buttons["Videos"].isSelected, "still on the home screen")
+        XCTAssertTrue(app.buttons["tabVideos"].isSelected, "still on the home screen")
         shot(app, "11b-two-live-rows")
 
         // It finishes in place: no running or pending rows are left and the list still shows videos.
@@ -607,13 +624,13 @@ final class VideoMKUITests: XCTestCase {
         readyRow(app).tap()
         XCTAssertTrue(app.otherElements["player"].waitForExistence(timeout: 20))
         sleep(3); shot(app, "3-player")
-        let credits = app.buttons["Description and photo credits"]
-        if credits.waitForExistence(timeout: 10) { credits.tap(); sleep(1); shot(app, "3b-credits") }
+        let credits = app.buttons["infoButton"]
+        if credits.waitForExistence(timeout: 10) { credits.tap(); sleep(1); shot(app, "3b-credits"); app.buttons["Done"].tap() }
         app.navigationBars.buttons.firstMatch.tap()
         let field = openCreate(app)
         field.tap()
         field.typeText("A visual tour of the landmarks of Rome")
-        XCTAssertTrue(app.staticTexts["costLine"].waitForExistence(timeout: 5), "the Create screen shows what the video will cost")
+        XCTAssertTrue(element(app, "costLine").waitForExistence(timeout: 5), "the Create screen shows what is left after the video")
         shot(app, "5-create-filled")
         app.buttons["moreOptions"].tap()
         XCTAssertTrue(element(app, "subtitlesToggle").waitForExistence(timeout: 5), "More options opens in place")
@@ -638,7 +655,7 @@ final class VideoMKUITests: XCTestCase {
         field.tap()
         field.typeText("A very long documentary about the history of Rome")
         XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Ready"), "affordable at the default length")
-        app.buttons["length-12"].tap()
+        element(app, "lengthPill").tap(); element(app, "length-12").tap()
         XCTAssertTrue(app.staticTexts["notEnoughCredits"].waitForExistence(timeout: 5), "12 credits is more than a test account has")
         XCTAssertTrue(app.buttons["sendButton"].exists, "the send button never disappears")
         XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("Not ready"))
