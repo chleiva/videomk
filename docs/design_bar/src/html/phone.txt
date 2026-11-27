@@ -1,0 +1,6 @@
+phone_1_signin 948 985
+phone_2_videos 948 985
+phone_3_create 1840 985
+phone_4_making 948 985
+phone_5_player 948 985
+phone_6_media 1840 985

@@ -1,0 +1,10 @@
+web_1_home_light 1440 1880
+web_1_home_dark 1440 1880
+web_2_videos_light 1440 900
+web_2_videos_dark 1440 900
+web_3_create_light 1440 900
+web_3_create_dark 1440 900
+web_4_media_light 1440 900
+web_4_media_dark 1440 900
+web_5_watch_light 1440 900
+web_5_watch_dark 1440 900
