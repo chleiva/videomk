@@ -549,8 +549,8 @@ fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, in
         if (n > max) Text(stringResource(R.string.media_make_video_limit, max), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.screen).testTag("makeVideoLimit"))
         Row(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
             PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(max)) }, Modifier.weight(1f).testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
-                Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = Vmk.colors.onPrimary)
-                Text(makeLabel, style = VmkType.cta, color = Vmk.colors.onPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = androidx.compose.material3.LocalContentColor.current)
+                Text(makeLabel, style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current, maxLines = 2, overflow = TextOverflow.Ellipsis)
             })
             GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0, size = 56.dp, raised = true)
             GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0, size = 56.dp, tint = Vmk.colors.danger, raised = true)

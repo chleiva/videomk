@@ -11,8 +11,12 @@ interface Backend {
     suspend fun applyEdits(videoId: String, baseRev: Int, ops: List<EditOp>, mode: RenderMode): Int
     /** "Try again" reuses the failed video on the server (all its photos and options); [RetryResult.Unsupported] from an older server. */
     suspend fun retryVideo(videoId: String): RetryResult = RetryResult.Unsupported
-    /** Removes a video that did not finish; false when the server cannot. */
+    /** Removes a video (finished or not); false when the server cannot. */
     suspend fun deleteVideo(videoId: String): Boolean = false
+    /** Stops a video that is being made and gives its credits back. */
+    suspend fun cancelVideo(videoId: String): CancelResult = CancelResult.Unsupported
+    /** The public showcase. */
+    suspend fun gallery(): List<GalleryVideo> = emptyList()
 }
 
 /**
@@ -37,4 +41,6 @@ class ApiBackend(private val api: ApiClient, private val uploader: PhotoUploader
     override suspend fun applyEdits(videoId: String, baseRev: Int, ops: List<EditOp>, mode: RenderMode) = guarded { api.applyEdits(videoId, baseRev, ops, mode) }
     override suspend fun retryVideo(videoId: String) = guarded { api.retryVideo(videoId) }
     override suspend fun deleteVideo(videoId: String) = guarded { api.deleteVideo(videoId) }
+    override suspend fun cancelVideo(videoId: String) = guarded { api.cancelVideo(videoId) }
+    override suspend fun gallery() = api.gallery()
 }

@@ -3,4 +3,27 @@
 <resources>
     <string name="lib_status_cancelled">Cancelled</string>
     <string name="video_cancelled_body">Your credits are back.</string>
+    <string name="err_plan_default">This isn\'t included in your plan.</string>
+    <string name="question_skip_all">Skip all</string>
+    <string name="question_position">Question %1$d of %2$d</string>
+    <plurals name="stop_paused_hours">
+        <item quantity="one">Paused · try again in about %1$d hour</item>
+        <item quantity="other">Paused · try again in about %1$d hours</item>
+    </plurals>
+    <plurals name="stop_paused_minutes">
+        <item quantity="one">Paused · try again in %1$d minute</item>
+        <item quantity="other">Paused · try again in %1$d minutes</item>
+    </plurals>
+    <string name="stop_paused_minute">Paused · try again in a minute</string>
+    <string name="stop_plan_title">Not on your plan</string>
+    <string name="stop_free_paused_title">Free videos are done for today</string>
+    <string name="stop_free_unavailable_title">Free videos aren\'t available</string>
+    <string name="stop_resumes">Back %1$s.</string>
+    <string name="plan_coming_soon">%1$s is coming soon.</string>
+    <string name="plan_today_at">today, %1$s</string>
+    <string name="plan_tomorrow_at">tomorrow, %1$s</string>
+    <string name="plan_tomorrow">tomorrow</string>
+    <string name="create_use_length">Use %1$s</string>
+    <string name="common_undo">Undo</string>
+    <string name="common_deleted">Deleted</string>
 </resources>

@@ -105,15 +105,24 @@ data class CreateOptions(
     val platform: String = "other", val aspect: String = "16:9", val resolution: String = "1080p", val language: String = "auto",
     /** A ready presentation made at the length the server suggested: its price (the server's own number) and no `target_minutes` on the wire. Null for everything else. */
     val suggestedCredits: Int? = null,
+    /** Scene style (docs/CREATE_API.md "Looks"): `auto`, `cartoon`, `real` or another id the server lists; only a choice away from `auto` is sent. */
+    val style: String = "auto",
+    /** A background wish: the server's own phrase (`looks.backgrounds.ask[].say`), added to the end of the description when the video is sent. Null: the director decides. */
+    val backgroundWish: String? = null,
+    /** The watermark, only when the person changed it for this video (docs/WATERMARK.md): `none` or `videomk`, and for `videomk` its presence (`always`, `moments`). Null: not sent. */
+    val watermarkMode: String? = null, val watermarkPresence: String? = null,
+    /** What the chosen resolution costs relative to 1080p (the server's `credits_multiplier`; 2 for 4K). */
+    val creditsMultiplier: Int = 1,
 ) {
     /** 1 credit per started minute, at least 1, at most 12 (matches the server; the server's number is the one that is charged). A presentation at its suggested length shows the server's price. */
-    val credits: Int get() = suggestedCredits ?: Lengths.credits(minutes)
+    val credits: Int get() = suggestedCredits ?: (Lengths.credits(minutes) * maxOf(1, creditsMultiplier))
     val useSuggestedLength: Boolean get() = suggestedCredits != null
     /** True when a server-offered 4K resolution is chosen (the app offers 720p and 1080p today); only then the cost line states that 4K costs double. */
     val isFourK: Boolean get() = resolution.lowercase().let { it == "4k" || it == "2160p" }
 
     companion object {
         val LENGTHS = Lengths.OLD_PRESETS
+        /** What a video is assumed to be when its length is not known (older videos in the list, the estimate). Create's own first-run default is CreateDefaults.FIRST_TIME. */
         const val DEFAULT_MINUTES = 3.0
     }
 }
@@ -137,7 +146,12 @@ data class WalletBucket(val kindName: String, val remaining: Int, val expiresAt:
 data class WalletInfo(
     val balance: Int,
     val buckets: List<WalletBucket> = emptyList(),
+    /** When the next free credit arrives (`next_free_credit_at`, else the older `next_daily_at`); null when the daily credit is off: the line is hidden. */
     val nextFreeAt: Instant? = null,
+    /** How many arrive then (today 1). */
+    val nextFreeCredits: Int = 1,
+    /** The plan, the free plan's state and whether anything can be bought (never today). */
+    val plans: PlanState = PlanState.NONE,
     val dailyCredits: Int = 1,
     val signupCredits: Int = 5,
     /** Test and staff accounts the server never charges. */
@@ -151,7 +165,9 @@ data class WalletInfo(
             return WalletInfo(
                 balance = o.requireInt("balance"),
                 buckets = o.arr("buckets")?.mapNotNull { e -> e.asObject()?.let { runCatching { WalletBucket.fromJson(it) }.getOrNull() } } ?: emptyList(),
-                nextFreeAt = epochSeconds(o.num("next_daily_at")),
+                nextFreeAt = parseInstant(o.str("next_free_credit_at")) ?: epochSeconds(o.num("next_daily_at")),
+                nextFreeCredits = o.int("next_free_credits") ?: 1,
+                plans = PlanState.fromJson(o),
                 dailyCredits = rules?.int("daily") ?: 1,
                 signupCredits = rules?.int("signup") ?: 5,
                 unlimited = o.bool("unlimited") ?: false,

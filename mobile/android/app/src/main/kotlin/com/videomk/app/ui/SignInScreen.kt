@@ -121,7 +121,7 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
                                 else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary, textAlign = TextAlign.Center)
                             } else PrimaryButton(label, onClick = { onSignIn(option) }, enabled = !busy || emailSpinning, modifier = Modifier.fillMaxWidth().testTag("signInButton")) {
                                 if (emailSpinning) LiveRing(Modifier.semantics { contentDescription = signingInText }, track = Color.White.copy(alpha = 0.3f), color = Color.White)
-                                else Text(label, style = VmkType.cta, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+                                else Text(label, style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current, textAlign = TextAlign.Center)
                             }
                         }
                     }

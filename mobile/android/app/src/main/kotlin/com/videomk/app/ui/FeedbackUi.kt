@@ -168,8 +168,8 @@ fun FeedbackSheet(api: FeedbackApi?, draft: FeedbackDraft, context: FeedbackCont
                 onClick = { haptics.play(DesignTokens.Haptic.Send); scope.launch { flow.send() } },
                 enabled = FeedbackRules.isValid(text) && !sending, modifier = Modifier.testTag("feedbackSend"),
             ) {
-                if (sending) { CircularProgressIndicator(Modifier.size(20.dp), color = Vmk.colors.onPrimary, strokeWidth = 2.dp); androidx.compose.foundation.layout.Spacer(Modifier.padding(4.dp)) }
-                Text(stringResource(if (sending) R.string.feedback_sending else if (failed) R.string.common_try_again else R.string.feedback_send), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+                if (sending) { CircularProgressIndicator(Modifier.size(20.dp), color = androidx.compose.material3.LocalContentColor.current, strokeWidth = 2.dp); androidx.compose.foundation.layout.Spacer(Modifier.padding(4.dp)) }
+                Text(stringResource(if (sending) R.string.feedback_sending else if (failed) R.string.common_try_again else R.string.feedback_send), style = MaterialTheme.typography.titleMedium, color = androidx.compose.material3.LocalContentColor.current, textAlign = TextAlign.Center)
             }
             TextButton(onClick = onClose, enabled = !sending, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("feedbackClose")) { Text(stringResource(R.string.common_close), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
         }

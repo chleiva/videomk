@@ -185,8 +185,8 @@ private fun PlayerSection(
                     sharing = false
                 }
             }, modifier = Modifier.testTag("shareButton"), enabled = url != null, fill = false) {
-                if (sharing) LiveRing(size = 20.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White) else Icon(Sym.Share, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary)
-                Text(shareLabel, style = VmkType.cta, color = Vmk.colors.onPrimary)
+                if (sharing) LiveRing(size = 20.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White) else Icon(Sym.Share, null, Modifier.size(20.dp), tint = androidx.compose.material3.LocalContentColor.current)
+                Text(shareLabel, style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current)
             }
             if (Build.VERSION.SDK_INT >= 29) {
                 if (saving) Box(Modifier.size(Vmk.minTouch).semantics { contentDescription = Txt.s(R.string.video_saving) }, contentAlignment = Alignment.Center) { LiveRing() }

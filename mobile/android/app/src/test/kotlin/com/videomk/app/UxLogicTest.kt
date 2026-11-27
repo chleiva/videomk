@@ -68,9 +68,9 @@ class UxLogicTest {
         assertEquals(null, MakingSnapshot.pending("t", "Sending", 0.0).eta)
     }
 
-    @Test fun firstVideoIsThirtySeconds() {
-        assertEquals(0.5, com.videomk.app.core.CreateDefaults.FIRST_TIME.minutes, 0.0)
-        assertEquals(1, com.videomk.app.core.Lengths.credits(0.5))
+    @Test fun firstVideoIsOneMinuteForYouTubeAndCostsOneCredit() {
+        assertEquals(1.0, com.videomk.app.core.CreateDefaults.FIRST_TIME.minutes, 0.0); assertEquals("youtube", com.videomk.app.core.CreateDefaults.FIRST_TIME.platform)
+        assertEquals(1, com.videomk.app.core.CreateDefaults.FIRST_TIME.credits); assertEquals(1, com.videomk.app.core.Lengths.credits(0.5))
     }
 
     @Test fun fourKIsRecognisedOnlyWhenOffered() {

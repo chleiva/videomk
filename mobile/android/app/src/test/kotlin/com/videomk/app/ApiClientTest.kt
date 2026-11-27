@@ -233,4 +233,27 @@ class ApiClientTest {
         server.enqueue(json(401, "{}")); server.enqueue(json(body = tokenJson("user-1"))); server.enqueue(json(401, "{}"))
         try { client.deleteVideo("v1"); fail() } catch (e: ApiError) { assertEquals(ApiError.Unauthorized, e) }   // refused again with a fresh token: that stands
     }
+
+    // ---- X-Platform: android on EVERY call (free credits are granted and spent only from the mobile apps: docs/PLANS.md)
+
+    @Test fun `every call the app makes says it is the Android app`() = runBlocking {
+        val calls: List<suspend () -> Any?> = listOf(
+            { api.listVideos() }, { api.wallet() }, { api.playback("v1") }, { api.startGeneration("Explain rainbows please", "r1") }, { api.retryVideo("v1") }, { api.cancelVideo("v1") },
+            { api.deleteVideo("v1") }, { api.capabilities() }, { api.brief(kotlinx.serialization.json.JsonObject(emptyMap())) }, { api.requestUploads(2) }, { api.editorSnapshot("v1") },
+            { api.applyEdits("v1", 1, emptyList(), RenderMode.Preview) }, { api.deck("POST") }, { api.deck("GET", listOf("d1")) }, { api.library("GET", listOf("summary")) },
+            { api.library("POST", listOf("items", "delete"), kotlinx.serialization.json.JsonObject(emptyMap())) }, { api.sendFeedback("Nice app, thank you", null, com.videomk.app.core.FeedbackContext.Settings) },
+            { api.deleteAccount("tok", "user-1") }, { api.appleRevokeUrl("tok", "user-1") }, { api.gallery() },
+        )
+        for (call in calls) { server.enqueue(json(body = "{}")); runCatching { call() } }
+        assertEquals(calls.size, server.requestCount)
+        repeat(calls.size) { val r = server.takeRequest(); assertEquals("${r.method} ${r.url.encodedPath}", "android", r.headers["X-Platform"]); assertNotNull(r.headers["X-Locale"]) }
+    }
+
+    @Test fun `no request to the API is built without the platform header`() {
+        // a new endpoint written with its own request builder must carry the header too: every builder in the client is followed by it
+        val src = java.io.File("src/main/kotlin/com/videomk/app/core/Api.kt").readText()
+        val builders = Regex("Request\\.Builder\\(\\)").findAll(src).count()
+        val headers = Regex("\\.header\\(\"X-Platform\", \"android\"\\)").findAll(src).count()
+        assertTrue("found $builders request builders and $headers platform headers", builders > 0 && builders == headers)
+    }
 }

@@ -36,9 +36,12 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -287,3 +290,121 @@ fun Modifier.vmkAura(strength: Float): Modifier = this.then(
     Modifier.background(Brush.radialGradient(listOf(Color(0xFF000000L or DesignTokens.gradientEnd.light.toLong()).copy(alpha = 0.34f * strength), Color.Transparent), center = Offset(0f, Float.POSITIVE_INFINITY), radius = 900f))
         .background(Brush.radialGradient(listOf(Color(0xFF000000L or DesignTokens.live.toLong()).copy(alpha = 0.26f * strength), Color.Transparent), center = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY), radius = 1000f)),
 )
+
+
+/**
+ * The ONE secondary button: a tonal pill (primary on its container), 48 dp, labelled. [onSurface]: it sits on a tinted card, so its own fill is the plain surface.
+ * [danger]: a destructive choice (delete), in the danger colour on its container. Never more prominent than the screen's primary.
+ */
+@Composable
+fun TonalButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: ImageVector? = null, onSurface: Boolean = false, danger: Boolean = false, enabled: Boolean = true, fill: Boolean = false) {
+    val fg = if (!enabled) Vmk.colors.textSecondary else if (danger) Vmk.colors.danger else Vmk.colors.primary
+    val bg = if (!enabled) Vmk.colors.surface3 else if (danger) Vmk.colors.dangerContainer else if (onSurface) Vmk.colors.surface else Vmk.colors.primaryContainer
+    Row(
+        modifier.then(if (fill) Modifier.fillMaxWidth() else Modifier).heightIn(min = Vmk.minTouch).clip(CircleShape).background(bg)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick).padding(horizontal = Vmk.space.xl, vertical = Vmk.space.s),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s, Alignment.CenterHorizontally),
+    ) {
+        if (icon != null) Icon(icon, null, tint = fg, modifier = Modifier.size(20.dp))
+        Text(text, style = MaterialTheme.typography.titleSmall, color = fg, maxLines = 2, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** A quiet text action (Cancel, Not now): 48 dp to hit, the secondary text colour unless it is a link. */
+@Composable
+fun TextAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, color: Color = Vmk.colors.primary, enabled: Boolean = true) {
+    Box(modifier.heightIn(min = Vmk.minTouch).clip(CircleShape).clickable(enabled = enabled, role = Role.Button, onClick = onClick).padding(horizontal = Vmk.space.l, vertical = Vmk.space.s), contentAlignment = Alignment.Center) {
+        Text(text, style = MaterialTheme.typography.titleSmall, color = if (enabled) color else Vmk.colors.textTertiary)
+    }
+}
+
+/** The head of every sheet: its title (the sheet-title role) and one close icon. Nothing else lives here. */
+@Composable
+fun SheetHeader(title: String, onClose: () -> Unit, modifier: Modifier = Modifier, closeTag: String = "sheetClose", closeLabel: String? = null) {
+    Row(modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+        Text(title, style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
+        GlassIconButton(Sym.Close, closeLabel ?: stringResource(R.string.common_close), onClose, Modifier.testTag(closeTag))
+    }
+}
+
+/** The one switch look, everywhere (Making, Options, Settings, Editor): the success green when on, so "on" is never the same lavender as a link. */
+@Composable
+fun vmkSwitchColors() = androidx.compose.material3.SwitchDefaults.colors(
+    checkedTrackColor = Vmk.colors.success, checkedThumbColor = Color.White, checkedBorderColor = Color.Transparent,
+    uncheckedTrackColor = Vmk.colors.surface3, uncheckedThumbColor = Vmk.colors.textSecondary, uncheckedBorderColor = Color.Transparent,
+)
+
+/**
+ * The ONE row of Settings and of every list sheet: an optional leading icon, the title (and a quiet line under it), then a value, a switch or a trailing glyph.
+ * At least 56 dp; the whole row is the target. [danger]: a destructive row.
+ */
+@Composable
+fun VmkRow(
+    title: String, modifier: Modifier = Modifier, icon: ImageVector? = null, subtitle: String? = null, value: String? = null, trailing: ImageVector? = null, danger: Boolean = false,
+    checked: Boolean? = null, onCheckedChange: ((Boolean) -> Unit)? = null, onClick: (() -> Unit)? = null, onClickLabel: String? = null,
+) {
+    val on = stringResource(R.string.create_state_on); val off = stringResource(R.string.create_state_off)
+    val base = modifier.fillMaxWidth().heightIn(min = 56.dp)
+    val interactive = when {
+        checked != null && onCheckedChange != null -> base.clickable(role = Role.Switch) { onCheckedChange(!checked) }.semantics(mergeDescendants = true) { stateDescription = if (checked) on else off }
+        onClick != null -> base.clickable(role = Role.Button, onClickLabel = onClickLabel, onClick = onClick)
+        else -> base.semantics(mergeDescendants = true) { }
+    }
+    Row(interactive.padding(horizontal = Vmk.space.l, vertical = Vmk.space.s), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.m)) {
+        if (icon != null) Icon(icon, null, tint = if (danger) Vmk.colors.danger else Vmk.colors.textSecondary, modifier = Modifier.size(22.dp))
+        androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = if (danger) Vmk.colors.danger else Vmk.colors.text)
+            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
+        }
+        if (value != null) Text(value, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.End, modifier = Modifier.weight(0.8f, fill = false))
+        if (checked != null) androidx.compose.material3.Switch(checked, onCheckedChange = null, colors = vmkSwitchColors())
+        if (trailing != null) Icon(trailing, null, tint = Vmk.colors.textTertiary, modifier = Modifier.size(20.dp))
+    }
+}
+
+/** A group of rows on one opaque card (Settings, the Credits sheet). */
+@Composable
+fun VmkGroup(modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    androidx.compose.foundation.layout.Column(modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surface).padding(vertical = Vmk.space.xs), content = content)
+}
+
+/** The ONE text field outside the prompt: a filled, rounded field with the primary ring while it has focus. */
+@Composable
+fun VmkField(
+    value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier, placeholder: String? = null, singleLine: Boolean = true, minHeight: Dp = 52.dp, enabled: Boolean = true,
+    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default, keyboardActions: androidx.compose.foundation.text.KeyboardActions = androidx.compose.foundation.text.KeyboardActions.Default,
+) {
+    val shape = RoundedCornerShape(Vmk.radii.field)
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    androidx.compose.foundation.text.BasicTextField(
+        value = value, onValueChange = onValueChange, singleLine = singleLine, enabled = enabled, textStyle = MaterialTheme.typography.bodyLarge.copy(color = Vmk.colors.text),
+        cursorBrush = androidx.compose.ui.graphics.SolidColor(Vmk.colors.primary), keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
+        modifier = modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused },
+        decorationBox = { inner ->
+            Box(
+                Modifier.fillMaxWidth().heightIn(min = minHeight).clip(shape).background(Vmk.colors.surfaceRaised).then(if (focused) Modifier.border(2.dp, Vmk.colors.primary, shape) else Modifier).padding(horizontal = Vmk.space.l, vertical = Vmk.space.m),
+                contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart,
+            ) { if (value.isEmpty() && placeholder != null) Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary); inner() }
+        },
+    )
+}
+
+/**
+ * The ONE bar for "Deleted · Undo" and for short confirmations ("Cancelled · 2 credits back"): the inverse of the page, floating above the tab bar, read out at once.
+ * Undo is its only action; the bar leaves by itself (the removal is sent when it does). See core/Undo.kt.
+ */
+@Composable
+fun UndoBar(item: com.videomk.app.core.UndoCenter.Item, onUndo: () -> Unit, modifier: Modifier = Modifier) {
+    val undo = stringResource(R.string.common_undo)
+    Row(
+        modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen).vmkShadow(2, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.colors.inverseSurface)
+            .heightIn(min = 52.dp).padding(start = Vmk.space.xl, end = Vmk.space.s)
+            .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }.testTag("undoBar"),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s),
+    ) {
+        Text(item.text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.inverseOnSurface, modifier = Modifier.weight(1f).padding(vertical = Vmk.space.m))
+        if (item.undoable) Box(Modifier.heightIn(min = Vmk.minTouch).clip(CircleShape).clickable(role = Role.Button, onClick = onUndo).padding(horizontal = Vmk.space.l).testTag("undoButton"), contentAlignment = Alignment.Center) {
+            Text(undo, style = MaterialTheme.typography.titleSmall, color = if (Vmk.colors.dark) Color(0xFF000000L or DesignTokens.primary.light.toLong()) else Color(0xFF000000L or DesignTokens.primary.dark.toLong()))
+        }
+    }
+}

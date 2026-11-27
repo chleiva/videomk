@@ -21,6 +21,11 @@ sealed class ApiError : Exception() {
     data class Paused(val text: String, val retryAfterSeconds: Int?) : ApiError() { override val message: String get() = text }
     /** A presentation call the server refused with one of its stable `code`s (`deck_encrypted`, `too_many_decks`, `missing`...). [text] is the server's localized message. */
     data class Deck(val code: String, val text: String) : ApiError() { override val message: String get() = text }
+    /**
+     * A refusal that comes from the account's plan (docs/PLANS.md section 4): too long, 4K, no watermark, more photos than the plan uses, or free videos that are
+     * not available or used up for today ([resumesAt]). Nothing was charged. [text] is the server's localized sentence, shown as received.
+     */
+    data class Plan(val code: String, val text: String, val requiresPlan: String? = null, val resumesAt: java.time.Instant? = null, val maxSeconds: Int? = null) : ApiError() { override val message: String get() = text }
     data object Network : ApiError() { override val message: String get() = Txt.s(R.string.err_network) }
     data object Server : ApiError() { override val message: String get() = Txt.s(R.string.err_server) }
     data class InsufficientCredits(val balance: Int, val needed: Int) : ApiError() {

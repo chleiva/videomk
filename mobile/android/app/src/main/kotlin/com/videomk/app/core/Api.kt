@@ -23,6 +23,16 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /** The answer to "Try again" on a video that did not finish (docs/CREATE_API.md, "Retry a video"). */
+/** The answer to "Cancel video" on a video that is being made. */
+sealed interface CancelResult {
+    /** Stopped; [refunded] credits are back in the wallet (0 on a repeated call). */
+    data class Cancelled(val refunded: Int) : CancelResult
+    /** It is not being made any more (it finished or failed meanwhile): the list says what it is now. */
+    data class NotCancellable(val message: String) : CancelResult
+    /** An older server without the route. */
+    data object Unsupported : CancelResult
+}
+
 sealed interface RetryResult {
     /** The SAME video is making again with everything it was made with; [photos] is how many photos it carries, [unusable] how many of the original ones could not be used. */
     data class Started(val photos: Int?, val unusable: Int) : RetryResult
@@ -84,7 +94,9 @@ class ApiClient(
     suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions = CreateOptions(), media: List<String> = emptyList(), mediaMeta: JsonObject? = null, libraryMedia: List<String> = emptyList(), brief: JsonObject? = null, deck: String? = null): String {
         val body = buildJsonObject {
             // a presentation needs no description: an empty one is simply not sent (the server then uses its short default)
-            if (deck == null || Brief.normalized(prompt).isNotEmpty()) put("prompt", Brief.normalized(prompt))
+            // a background wish is asked for in words: the server's own phrase goes at the end of the description (docs/CREATE_API.md "Looks")
+            val text = Brief.normalized(listOfNotNull(prompt, options.backgroundWish?.takeIf { deck == null && media.isEmpty() && libraryMedia.isEmpty() }).joinToString(" ")).take(Brief.MAX_LENGTH)
+            if (deck == null || text.isNotEmpty()) put("prompt", text)
             deck?.let { put("deck", it) }
             put("client_request_id", clientRequestId)
             // a presentation made at its suggested length sends no length: the server charges exactly the suggestion it showed
@@ -99,6 +111,8 @@ class ApiClient(
             if (options.aspect != "16:9") put("aspect", options.aspect)
             if (options.resolution != "1080p") put("resolution", options.resolution)
             if (options.language != "auto") put("language", options.language)
+            if (options.style != "auto") put("style", options.style)
+            options.watermarkMode?.let { mode -> put("watermark", buildJsonObject { put("mode", mode); if (mode == "videomk") options.watermarkPresence?.let { put("presence", it) } }) }
             brief?.let { put("brief", it) }
         }
         return send("POST", listOf("videos", "generate"), body = body, deck = deck != null).requireString("video_id")
@@ -120,7 +134,34 @@ class ApiClient(
         }
     }
 
-    /** Removes a video that did not finish (failed, cancelled or refused); a made video is never deleted here (409). False: the server does not have the route. */
+    /**
+     * Stops a video that is being made; the credits of this attempt come back (docs/CREATE_API.md "Cancel a video"). A second call answers the same with 0 refunded.
+     * `try_again` (the video moved between two steps while we asked) is sent once more by itself.
+     */
+    suspend fun cancelVideo(videoId: String): CancelResult {
+        repeat(2) { attempt ->
+            val (code, text) = authed("POST", listOf("videos", videoId, "cancel"))
+            val o = runCatching { parseObject(text) }.getOrNull()
+            when (code) {
+                200 -> return CancelResult.Cancelled(o?.int("refunded") ?: 0)
+                401 -> throw ApiError.Unauthorized
+                409 -> if (o?.str("code") == "try_again" && attempt == 0) Unit else return CancelResult.NotCancellable(o?.str("message") ?: Txt.s(R.string.err_server))
+                403, 404, 405 -> return if (o?.str("code") == "not_found") CancelResult.NotCancellable(o.str("message") ?: Txt.s(R.string.err_not_found)) else CancelResult.Unsupported
+                else -> throw ApiError.Server
+            }
+        }
+        throw ApiError.Server
+    }
+
+    /** The public showcase (`GET /gallery`, no token): videos made with the product, for an account that cannot create right now. An empty list is a valid answer. */
+    suspend fun gallery(): List<GalleryVideo> {
+        val rb = Request.Builder().url(config.apiBase.newBuilder().addPathSegment("gallery").build())
+            .header("X-Platform", "android").header("X-App-Version", appVersion).header("X-Locale", locale()).header("X-Timezone", timeZone()).get()
+        val response = try { http.newBuilder().callTimeout(30, TimeUnit.SECONDS).build().newCall(rb.build()).await() } catch (e: CancellationException) { throw e } catch (e: IOException) { throw ApiError.Network }
+        return response.use { r -> if (r.code !in 200..299) emptyList() else runCatching { GalleryVideo.listFromJson(parseObject(r.body.string())) }.getOrDefault(emptyList()) }
+    }
+
+    /** Removes a video from the list and the server: one that did not finish, or (since 2026-11-27) a finished one. There is no bin on the server: the app's own "Undo" waits before it calls this. False: an older server without the route. */
     suspend fun deleteVideo(videoId: String): Boolean {
         val (code, text) = authed("DELETE", listOf("videos", videoId))
         val o = runCatching { parseObject(text) }.getOrNull()
@@ -261,7 +302,8 @@ class ApiClient(
             when (r.code) {
                 in 200..299 -> return if (text.isBlank()) JsonObject(emptyMap()) else parseObject(text)
                 401 -> if (first) throw TokenRejected() else throw ApiError.Unauthorized
-                403 -> if (soft) throw ApiError.NotFound else throw ApiError.Unauthorized
+                // a 403 with a code is a refusal the person can read (a plan limit, free videos not available): never the end of the session
+                403 -> planRefusal(text)?.let { throw it } ?: if (soft) throw ApiError.NotFound else throw ApiError.Unauthorized
                 404 -> if (deck) throw ApiError.Deck(codeOf(text) ?: "unavailable", message(text) ?: "") else if (library || soft) throw ApiError.NotFound else throw ApiError.Server
                 413 -> if (library) throw ApiError.Invalid(Txt.s(R.string.err_photo_too_large)) else throw ApiError.Server
                 402 -> if (library) {
@@ -284,6 +326,7 @@ class ApiClient(
                 429 -> {
                     val o = runCatching { parseObject(text) }.getOrNull()
                     if (o?.str("status") == "paused") throw ApiError.Paused(o.str("message") ?: Txt.s(R.string.err_paused_default), o.int("retry_after") ?: r.header("Retry-After")?.toIntOrNull())
+                    if (o?.str("code")?.startsWith("free_") == true) planRefusal(text)?.let { throw it }
                     if (deck && o?.str("code") != null) throw ApiError.Deck(o.str("code")!!, o.str("message") ?: "")
                     throw ApiError.Quota(
                         message(text) ?: if (library) (r.header("Retry-After")?.toIntOrNull()?.let { if (it >= 120) Txt.n(R.plurals.err_rate_limited_minutes, it / 60) else Txt.n(R.plurals.err_rate_limited_seconds, it) } ?: Txt.s(R.string.err_rate_limited))
@@ -293,6 +336,13 @@ class ApiClient(
                 else -> throw ApiError.Server
             }
         }
+    }
+
+    /** `{"code": "plan_length", "message": "...", "requires_plan": "pro", "limit": {"max_seconds": 30}, "resumes_at": "..."}`: null when the body carries no code (API Gateway's own 403). */
+    private fun planRefusal(text: String): ApiError.Plan? {
+        val o = runCatching { parseObject(text) }.getOrNull() ?: return null
+        val code = o.str("code") ?: return null
+        return ApiError.Plan(code, o.str("message")?.takeIf { it.isNotBlank() } ?: Txt.s(R.string.err_plan_default), o.str("requires_plan"), parseInstant(o.str("resumes_at")), o.obj("limit")?.int("max_seconds"))
     }
 
     private fun codeOf(text: String): String? = runCatching { parseObject(text).str("code") }.getOrNull()

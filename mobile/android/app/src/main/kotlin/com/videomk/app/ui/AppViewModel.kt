@@ -447,7 +447,7 @@ class AppViewModel(
         } catch (e: CancellationException) {
             throw e
         } catch (e: ApiError) {
-            if (interactive && (e is ApiError.Blocked || e is ApiError.Paused)) { dismissPending(id); return SubmitOutcome.Stopped(e) }
+            if (interactive && (e is ApiError.Blocked || e is ApiError.Paused || e is ApiError.Plan)) { dismissPending(id); return SubmitOutcome.Stopped(e) }   // a plan refusal is read on Create, with the draft intact
             if (interactive && e is ApiError.Network) { dismissPending(id); return SubmitOutcome.Offline(e.message) }
             if (e is ApiError.InsufficientCredits) refreshWallet()
             if (e !is ApiError.Unauthorized) setPendingState(id, PendingVideo.State.Failed(e.message))

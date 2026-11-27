@@ -100,41 +100,64 @@ object CreatePlatforms {
 }
 
 /** What is remembered per person after a successful Create (prompt and photos never). */
-data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Double, val look: String?, val captions: Boolean, val language: String) {
+data class CreatePrefs(val platform: String, val aspect: String, val resolution: String, val minutes: Double, val look: String?, val captions: Boolean, val language: String, val style: String = "auto") {
     fun toJson(): String = buildJsonObject {
-        put("platform", platform); put("aspect", aspect); put("resolution", resolution); put("minutes", minutes); look?.let { put("look", it) }; put("captions", captions); put("language", language)
+        put("platform", platform); put("aspect", aspect); put("resolution", resolution); put("minutes", minutes); look?.let { put("look", it) }; put("captions", captions); put("language", language); if (style != "auto") put("style", style)
     }.toString()
 
     companion object {
-        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes, o.look?.wire, o.captions, o.language)
+        fun of(o: CreateOptions) = CreatePrefs(o.platform, o.aspect, o.resolution, o.minutes, o.look?.wire, o.captions, o.language, o.style)
         fun fromJson(text: String?): CreatePrefs? = runCatching {
             val o = parseObject(text ?: return null)
-            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.num("minutes") ?: 3.0, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto")
+            CreatePrefs(o.str("platform") ?: "other", o.str("aspect") ?: "16:9", o.str("resolution") ?: "1080p", o.num("minutes") ?: 3.0, o.str("look"), o.bool("captions") ?: true, o.str("language") ?: "auto", o.str("style") ?: "auto")
         }.getOrNull()
     }
 }
 
 object CreateDefaults {
-    /** First launch: Just a video, Landscape 16:9, 1080p, 30 s (1 credit; owner decision, docs/UX_REVIEW.md), Auto look, subtitles on, same language as the description. */
-    const val FIRST_TIME_MINUTES = 0.5
-    val FIRST_TIME = CreateOptions(minutes = FIRST_TIME_MINUTES)
+    /**
+     * First launch (audit ruling 1): YouTube · 1 min. One minute is 1 credit, and "YouTube" says landscape 16:9 where "Video" said nothing. After the first video the
+     * person's last choice is remembered. Where the plan's longest video is shorter (30 s on Free) the longest length the plan makes is used instead.
+     */
+    const val FIRST_TIME_MINUTES = 1.0
+    const val FIRST_TIME_PLATFORM = "youtube"
+    val FIRST_TIME = CreateOptions(minutes = FIRST_TIME_MINUTES, platform = FIRST_TIME_PLATFORM)
 
     /**
-     * The options to start Create with: the remembered ones, but never something the server no longer offers (a stored format that is gone falls back to the
-     * first ready format, a stored resolution to the first listed, a language that is not listed to "auto", a length outside the range to the default).
+     * The options to start Create with: the remembered ones, but never something the server no longer offers or the plan cannot make (a stored format that is gone falls
+     * back to the first ready format, a stored resolution to the first one available, a language that is not listed to "auto", a length outside the range or over the
+     * plan's longest to the nearest one that works, a style that is no longer offered to "auto").
      */
     fun resolve(stored: CreatePrefs?, caps: Capabilities): CreateOptions {
-        // an older server may not offer 30 s: the shortest of 30 s, 1 min and the old default that it does offer
-        if (stored == null) return FIRST_TIME.copy(minutes = listOf(FIRST_TIME_MINUTES, 1.0, CreateOptions.DEFAULT_MINUTES).firstOrNull { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: caps.presets.first(), aspect = caps.readyAspects.first().id.takeIf { caps.isReady("16:9") } ?: caps.readyAspects.first().id, resolution = firstRes(caps, "1080p"))
-        val aspect = if (caps.isReady(stored.aspect)) stored.aspect else caps.readyAspects.first().id
-        val res = if (caps.resolutions.any { it.id == stored.resolution }) stored.resolution else firstRes(caps, "1080p")
-        val lang = if (stored.language == "auto" || caps.languages.any { it.id == stored.language }) stored.language else "auto"
-        val minutes = stored.minutes.takeIf { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: CreateOptions.DEFAULT_MINUTES.takeIf { it in caps.presets } ?: caps.presets.first()
-        val platform = if (CreatePlatforms.chip(caps, stored.platform)?.enabled == true) stored.platform else "other"
-        return CreateOptions(minutes, VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang)
+        val o = if (stored == null) {
+            // an older server may not offer 1 min or know YouTube: the nearest it does offer, and "Just a video"
+            val platform = if (CreatePlatforms.chip(caps, FIRST_TIME_PLATFORM)?.enabled == true && caps.platforms.any { it.id == FIRST_TIME_PLATFORM }) FIRST_TIME_PLATFORM else "other"
+            val chip = CreatePlatforms.chip(caps, platform)?.takeIf { it.enabled && platform != "other" }
+            CreateOptions(
+                minutes = listOf(FIRST_TIME_MINUTES, 0.5, CreateOptions.DEFAULT_MINUTES).firstOrNull { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: caps.presets.first(),
+                platform = platform, aspect = chip?.aspect ?: (caps.readyAspects.first().id.takeIf { caps.isReady("16:9") }?.let { "16:9" } ?: caps.readyAspects.first().id),
+                resolution = firstRes(caps, chip?.resolution ?: "1080p"),
+            )
+        } else {
+            val aspect = if (caps.isReady(stored.aspect)) stored.aspect else caps.readyAspects.first().id
+            val res = if (caps.resolutions.any { it.id == stored.resolution && it.available }) stored.resolution else firstRes(caps, "1080p")
+            val lang = if (stored.language == "auto" || caps.languages.any { it.id == stored.language }) stored.language else "auto"
+            val minutes = stored.minutes.takeIf { m -> caps.presets.any { Math.abs(it - m) < 1e-9 } } ?: FIRST_TIME_MINUTES.takeIf { it in caps.presets } ?: caps.presets.first()
+            val platform = if (CreatePlatforms.chip(caps, stored.platform)?.enabled == true) stored.platform else "other"
+            val style = stored.style.takeIf { s -> caps.looks?.styles?.any { it.id == s && it.available } == true } ?: "auto"
+            CreateOptions(minutes, VideoLook.entries.firstOrNull { it.wire == stored.look }, stored.captions, platform, aspect, res, lang, style = style)
+        }
+        return priced(o.copy(minutes = withinPlan(o.minutes, caps)), caps)
     }
 
-    private fun firstRes(caps: Capabilities, preferred: String) = caps.resolutions.firstOrNull { it.id == preferred }?.id ?: caps.resolutions.first().id
+    /** The length itself when the plan makes it, else the longest preset the plan does make (the shortest preset when even that is over). */
+    fun withinPlan(minutes: Double, caps: Capabilities): Double =
+        if (caps.lengthAllowed(minutes)) minutes else caps.presets.filter { caps.lengthAllowed(it) }.maxOrNull() ?: caps.presets.first()
+
+    /** The same options carrying what their resolution costs (the server's multiplier: 2 for 4K). */
+    fun priced(o: CreateOptions, caps: Capabilities): CreateOptions = o.copy(creditsMultiplier = caps.resolution(o.resolution)?.multiplier ?: 1)
+
+    private fun firstRes(caps: Capabilities, preferred: String) = caps.resolutions.firstOrNull { it.id == preferred && it.available }?.id ?: caps.resolutions.firstOrNull { it.available }?.id ?: caps.resolutions.first().id
 }
 
 /**
@@ -221,6 +244,8 @@ sealed interface CreateStop {
     data class NotSupported(val message: String, val suggestion: String?) : CreateStop
     data class Blocked(val message: String) : CreateStop
     data class Paused(val message: String, val retryAfterSeconds: Int?) : CreateStop
+    /** The plan does not allow this request, or free videos are not available right now. [shorterMinutes]: the one-tap fix for "too long" (the longest length the plan makes). */
+    data class Plan(val code: String, val message: String, val requiresPlan: String?, val resumesAt: java.time.Instant?, val shorterMinutes: Double? = null) : CreateStop
 }
 
 object CreateErrors {
@@ -238,7 +263,31 @@ object CreateErrors {
     fun fromGenerate(e: ApiError): CreateStop? = when (e) {
         is ApiError.Blocked -> CreateStop.Blocked(e.text)
         is ApiError.Paused -> CreateStop.Paused(e.text, e.retryAfterSeconds)
+        is ApiError.Plan -> CreateStop.Plan(e.code, e.text, e.requiresPlan, e.resumesAt)
         else -> null
+    }
+
+    /** "Too long for the plan" comes with its fix: the longest length the plan makes, when the server offers one. */
+    fun withFix(stop: CreateStop, caps: Capabilities, error: ApiError? = null): CreateStop {
+        if (stop !is CreateStop.Plan || stop.code != "plan_length") return stop
+        val max = (error as? ApiError.Plan)?.maxSeconds ?: caps.planMaxSeconds ?: return stop
+        return stop.copy(shorterMinutes = caps.presets.filter { it * 60 <= max + 0.5 }.maxOrNull())
+    }
+
+    /** The pause sheet's title carries the time: "Paused · try again in about 1 hour" (plain "Creating videos is paused" when the server gives no time). */
+    fun pausedTitle(seconds: Int?): String = seconds?.takeIf { it > 0 }?.let {
+        when {
+            it >= 3600 -> Math.round(it / 3600.0).toInt().let { h -> Txt.n(R.plurals.stop_paused_hours, h) }
+            it >= 120 -> Txt.n(R.plurals.stop_paused_minutes, it / 60)
+            else -> Txt.s(R.string.stop_paused_minute)
+        }
+    } ?: Txt.s(R.string.stop_paused_title)
+
+    /** A message that only says the title again (ignoring case, punctuation and a trailing "for now") is not worth a second line. */
+    fun repeats(title: String, message: String): Boolean {
+        fun key(t: String) = t.lowercase(Txt.locale).filter { it.isLetterOrDigit() || it == ' ' }.trim()
+        val a = key(title); val b = key(message)
+        return b.isEmpty() || a == b || (b.startsWith(a) && b.length - a.length <= 12) || (a.startsWith(b) && a.length - b.length <= 12)
     }
 
     /** "You can try again in about 1 hour." (no retry loop: the person decides). */
@@ -262,3 +311,25 @@ sealed interface SubmitOutcome {
 
 /** The brief object for generate: the server's own, passed back untouched. */
 fun briefForGenerate(r: IntakeResult): JsonObject? = (r as? IntakeResult.Ok)?.brief
+
+/** Plan wording that needs a date: "tomorrow, 01:00" / "today, 23:00" in the app language and the phone's time zone. */
+object PlanText {
+    fun moment(at: java.time.Instant, now: java.time.Instant = java.time.Instant.now(), zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): String {
+        val d = at.atZone(zone); val today = now.atZone(zone).toLocalDate()
+        val time = java.time.format.DateTimeFormatter.ofLocalizedTime(java.time.format.FormatStyle.SHORT).withLocale(Txt.locale).format(d)
+        return when (d.toLocalDate()) {
+            today -> Txt.s(R.string.plan_today_at, time)
+            today.plusDays(1) -> Txt.s(R.string.plan_tomorrow_at, time)
+            else -> java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(Txt.locale).format(d)
+        }
+    }
+
+    /** "tomorrow" / "today, 23:00": when the next free credit arrives (midnight needs no hour). */
+    fun freeCredit(at: java.time.Instant, now: java.time.Instant = java.time.Instant.now(), zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): String {
+        val d = at.atZone(zone); val today = now.atZone(zone).toLocalDate()
+        return if (d.toLocalDate() == today.plusDays(1) && d.hour == 0 && d.minute == 0) Txt.s(R.string.plan_tomorrow) else moment(at, now, zone)
+    }
+
+    /** "0:30" / "5 min": the longest video of a plan. */
+    fun longest(seconds: Int): String = if (seconds < 60) Lengths.short(seconds / 60.0) else Lengths.short(seconds / 60.0)
+}
