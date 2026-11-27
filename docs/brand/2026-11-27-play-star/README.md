@@ -1,6 +1,6 @@
 # VideoMK logo options: play + star (27 Nov 2026)
 
-Status: **proposal, waiting for the owner's pick.** Nothing here is used by the apps, the site or the stores. The mark in use is still the Sparklet Trio (`../final/`).
+Status: **decided (27 Nov 2026).** The owner chose option B's shape in round 2's colour treatment **B1 "Action"** (`round2/`). The final files are in `../final/` and the rules in `docs/BRAND.md`; this folder is the record of the options.
 
 The brief: the owner prefers the lean glyph on the Create button (a play triangle with a little star; "one play and two stars is fine as well") and asked for a colour combination worthy of a top startup. No letters in the mark, it must say "video" at a glance, minimalist, right as an app icon.
 
