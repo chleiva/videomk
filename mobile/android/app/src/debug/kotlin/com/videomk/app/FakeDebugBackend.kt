@@ -10,7 +10,7 @@ import java.time.Instant
  */
 class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
     private val now = Instant.now()
-    private val videos = listOf(
+    private val videos = mutableListOf(
         VideoItem("v1", VideoStatus.Complete, "How bees make honey", 182.0, now.minusSeconds(3600), "https://example.com/v1.mp4", null, null, true, "16:9", "1080p"),
         VideoItem("v2", VideoStatus.Running(VideoStatus.Stage.VoiceAndVisuals), "The history of the lighthouse", null, now.minusSeconds(240), null, null, null, false, "9:16", "1080p"),
         VideoItem("v3", VideoStatus.Failed, "A calm walk through Kyoto", null, now.minusSeconds(86400), null, null, null, false, "16:9", "1080p"),
@@ -24,7 +24,17 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
         VideoItem("d2", VideoStatus.Running(VideoStatus.Stage.Writing, VideoStatus.DeckStage.Writing), "Sales kickoff", null, now.minusSeconds(60), null, null, null, false, "16:9", "1080p"),
     )
 
-    override suspend fun listVideos(): List<VideoItem> = if (deckDemo) deckVideos + videos else videos
+    override suspend fun listVideos(): List<VideoItem> = if (deckDemo) deckVideos + videos.toList() else videos.toList()
+    /** "Try again" on the canned failed video: the SAME row turns into a making one (as the server does), so the in-place change can be looked at. */
+    override suspend fun retryVideo(videoId: String): RetryResult {
+        kotlinx.coroutines.delay(1200)
+        val i = videos.indexOfFirst { it.id == videoId }
+        if (i < 0) return RetryResult.Refused("not_found", "This video is gone.")
+        if (videos[i].status is VideoStatus.Running) return RetryResult.AlreadyRunning
+        videos[i] = videos[i].copy(status = VideoStatus.Running(VideoStatus.Stage.Writing))
+        return RetryResult.Started(45, 0)
+    }
+    override suspend fun deleteVideo(videoId: String): Boolean { videos.removeAll { it.id == videoId }; return true }
     override suspend fun wallet() = WalletInfo(balance = 9, buckets = listOf(WalletBucket("daily", 1, now.plusSeconds(7200)), WalletBucket("signup", 3, now.plusSeconds(86400L * 20)), WalletBucket("paid", 5, null)), nextFreeAt = now.plusSeconds(5400))
     override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?) = "v-new"
     override suspend fun uploadPhotos(photos: List<ByteArray>, progress: (Int, Int) -> Unit): List<String> = photos.indices.map { "m$it" }
