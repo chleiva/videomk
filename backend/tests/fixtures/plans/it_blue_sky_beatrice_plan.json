@@ -1,0 +1,108 @@
+{
+ "_about": "The first Italian video with Beatrice (QA, 2026-11-27): asked 45 s, came out 51.4 s. `beats` is the script as it was spoken (the lengthening step had added the sentences in `added`, which say the sentence before again); `speech_s` is what Beatrice took for each beat in the QA video and in two more takes of the same text; `f0_hz` the median pitch of each beat in those takes. `written_with_new_prompt`: what the lengthening step wrote for the same script with the prompt of 2026-11-27 (real model, once).",
+ "language": "it",
+ "region": "US",
+ "target_seconds": 45,
+ "voices": {
+  "narrator": "Beatrice"
+ },
+ "tts": {
+  "provider": "polly",
+  "engine": "generative",
+  "region": "us-east-1",
+  "rate": 24000
+ },
+ "beats": [
+  {
+   "id": "c5102e78",
+   "narration": "Perché il cielo di giorno è azzurro, e la sera diventa rosso? La luce del sole sembra bianca, ma contiene tutti i colori dell'arcobaleno. Ogni colore viaggia in modo diverso."
+  },
+  {
+   "id": "e7c4cdf5",
+   "narration": "Nell'aria ci sono molecole minuscole. Colpendole, la luce blu viene diffusa in ogni direzione, molto più del rosso. Per questo guardando in alto vediamo azzurro. Il blu ci arriva da ogni parte."
+  },
+  {
+   "id": "22608c9e",
+   "narration": "Al tramonto il sole è basso, e la sua luce attraversa molta più aria. Il blu si disperde lungo la strada e non arriva. Si perde prima di raggiungerci."
+  },
+  {
+   "id": "15a8e7fd",
+   "narration": "Resta il rosso, che passa meglio. Così il cielo si tinge di rosso. È sempre la stessa luce: cambia solo il suo viaggio. Cambia la strada, non la luce."
+  }
+ ],
+ "added": [
+  "Il blu ci arriva da ogni parte.",
+  "Si perde prima di raggiungerci.",
+  "Cambia la strada, non la luce."
+ ],
+ "speech_s": [
+  [
+   12.3,
+   12.21,
+   11.31,
+   12.32
+  ],
+  [
+   12.12,
+   12.09,
+   10.78,
+   12.26
+  ],
+  [
+   12.11,
+   11.85,
+   10.95,
+   12.68
+  ]
+ ],
+ "f0_hz": [
+  [
+   200.4,
+   174.8,
+   178.5,
+   270.6
+  ],
+  [
+   185.4,
+   174.7,
+   183.2,
+   179.7
+  ],
+  [
+   245.1,
+   163.8,
+   186.1,
+   253.3
+  ]
+ ],
+ "written_with_new_prompt": [
+  {
+   "beat": "c5102e78",
+   "index": 0,
+   "sentences": [
+    "Lo vediamo quando un prisma o la pioggia separano i colori."
+   ]
+  },
+  {
+   "beat": "e7c4cdf5",
+   "index": 1,
+   "sentences": [
+    "Il rosso invece tende a proseguire dritto, quasi senza deviare."
+   ]
+  },
+  {
+   "beat": "22608c9e",
+   "index": 2,
+   "sentences": [
+    "Gli strati vicini all'orizzonte filtrano la luce come un lungo tunnel."
+   ]
+  },
+  {
+   "beat": "15a8e7fd",
+   "index": 3,
+   "sentences": [
+    "Lo stesso accade all'alba, quando il sole sale dall'orizzonte."
+   ]
+  }
+ ]
+}

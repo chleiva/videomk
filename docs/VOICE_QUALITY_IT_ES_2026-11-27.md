@@ -5,6 +5,10 @@ voices "are not great". This is the investigation: what is really synthesised, w
 
 Branch `voices-quality` (two commits, not merged, not deployed). Samples: `~/Downloads/videomk-looks/web/voices/` (21 MP3 and `voices_index.json`).
 
+**Later the same day:** the owner decided speech stays on Polly, Spain keeps a Castilian voice (Sergio) and everyone else hears Lupe. Every other voice was
+measured, the defaults of every language followed, and what the first QA videos with lively voices showed (length, register, music level) was fixed:
+`docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md`. Sections 5 and 7 below (other providers, the open choice for Spain) are history.
+
 ## The answer in five lines
 
 1. **Nothing falls back.** Italian, Spanish and German go through the same code and the stored audio is, sample for sample, Polly's generative engine.

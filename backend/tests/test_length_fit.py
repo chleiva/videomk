@@ -286,7 +286,7 @@ def test_the_word_budget_follows_the_language():
     en = plan_mod.expected_words(0.75)
     assert en == plan_mod.expected_words(0.75, 0, "en") == plan_mod.expected_words(0.75, 0, "es") == 89 and plan_mod.words_per_s("es") == plan_mod.SPOKEN_WORDS_PER_S   # as they were
     w = {lang: plan_mod.expected_words(0.75, 0, lang) for lang in ("fr", "de", "it", "pt", "nl", "pl", "fi")}
-    assert w["pt"] > w["fr"] >= 100 and w["fi"] < w["pl"] < en <= w["de"] <= en + 3 and w["nl"] > en
+    assert w["fr"] > w["pt"] >= 100 and w["fi"] < w["pl"] < w["it"] < en <= w["de"] <= en + 3 and w["nl"] > en   # French counts on Ambre (3.41 words a second; Léa was 3.03), Italian on Beatrice (2.54)
     assert all(plan_mod.expected_words(m, 0, "fr") > plan_mod.expected_words(m) > plan_mod.expected_words(m, 0, "fi") for m in (0.25, 0.5, 1, 2, 5))
     fr = _qa("fr_sea_salt")
     assert plan_mod.spoken_words(fr["beats"]) == 81

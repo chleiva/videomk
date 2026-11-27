@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from .. import awsio, format_options
 from .. import sync as sync_mod
-from ..timeline import beat_info_from_plan, build_timeline, chunk_plan
+from ..timeline import beat_info_from_plan, build_timeline, chunk_plan, shortest
 
 MAX_DURATION_S = float(os.environ.get("MAX_VIDEO_SECONDS", str(13 * 60)))
 CHUNK_SECONDS = int(os.environ.get("CHUNK_SECONDS", "10"))
@@ -29,6 +29,81 @@ def credits_ledger(plan: Dict[str, Any]) -> list:
     return out
 
 
+def fit_speech(plan: Dict[str, Any], video_id: str, asked: float) -> list:
+    """The guard on the length, for any voice (engine/speechcut.py): when the speech that was really made leaves the video past its window (the length asked
+    plus 5 percent) even with the shortest silences, whole sentences are cut out of the stored audio at their pauses, the ones the lengthening step added
+    first. The shorter audio is stored under the hash of the shorter text (what an edit of that text would look for), its words are measured again, and the
+    plan says what went (`length_cut`). Nothing is read from storage when the video fits. -> the cuts."""
+    import copy
+    import io
+    import wave
+
+    import numpy as np
+
+    from .. import align, audio, length, plan as plan_mod, speechcut
+
+    beats = plan["beats"]
+    durs = [float((b.get("media") or {}).get("duration") or 0.0) for b in beats]
+    total, target = shortest(plan, durs, asked)
+    if length.overrun(total, target) <= 0:
+        return []
+    pfx = awsio.prefix(video_id)
+    audio_of: Dict[int, Any] = {}
+    words_of: Dict[int, Any] = {}
+    for i, b in enumerate(beats):
+        m = b.get("media") or {}
+        key = m.get("audio_key")
+        if b.get("silent") or not isinstance(key, str) or not key.startswith(pfx + "audio/") or ".." in key or len(length.sentences(b.get("narration", ""))) < 2:
+            continue
+        with wave.open(io.BytesIO(awsio.get_bytes(key)), "rb") as w:
+            if w.getframerate() != audio.SR or w.getnchannels() != 1:
+                continue
+            audio_of[i] = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float32) / 32768.0
+        wkey = m.get("words_key")
+        if isinstance(wkey, str) and wkey.startswith(pfx + "audio/") and ".." not in wkey:
+            try:
+                words_of[i] = awsio.get_json(wkey)["words"]
+            except Exception:
+                pass
+
+    def total_with(changed: Dict[int, float]) -> float:
+        return shortest(plan, [changed.get(i, d) for i, d in enumerate(durs)], asked)[0]
+
+    work = copy.deepcopy(plan)   # the plan itself changes beat by beat, each only once its shorter audio is stored
+    cuts = speechcut.fit(work, audio_of, audio.SR, total_with, target, words_of, min_beat_words=plan_mod.MIN_BEAT_WORDS)
+    for i in sorted({c["beat"] for c in cuts}):
+        b, samples = beats[i], audio_of[i]
+        narration = work["beats"][i]["narration"]
+        h = plan_mod.tts_hash(plan, {**b, "narration": narration})
+        key, wkey, dur = f"{pfx}audio/{h}.wav", f"{pfx}audio/{h}.words.json", round(samples.size / audio.SR, 3)
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(audio.SR)
+            w.writeframes((np.clip(samples, -1, 1) * 32767).astype("<i2").tobytes())
+        awsio.put_bytes_meta(key, buf.getvalue(), "audio/wav", {"duration": str(dur)})
+        media = {**(b.get("media") or {}), "tts_hash": h, "audio_key": key, "duration": dur}
+        media.pop("words_key", None)
+        try:
+            words, conf = align.align_words(samples, audio.SR, narration)
+            if words and conf >= 0.6:
+                awsio.put_json(wkey, {"words": [list(x) for x in words], "conf": conf})
+                media["words_key"] = wkey
+        except Exception:
+            logging.exception("word alignment failed after a cut")
+        b["narration"], b["media"] = narration, media
+    if cuts:
+        ids = [beats[c["beat"]].get("id") for c in cuts]
+        plan["length_cut"] = [{"beat": ids[k], "sentence": c["text"], "seconds": c["seconds"], "added": c["added"]} for k, c in enumerate(cuts)]
+        after = total_with({i: audio_of[i].size / audio.SR for i in {c["beat"] for c in cuts}})
+        logging.warning("LENGTH_CUT asked=%s shortest_before=%.1f shortest_after=%.1f sentences=%s added=%s seconds=%.1f", asked, total, after, len(cuts),
+                        sum(1 for c in cuts if c["added"]), sum(c["seconds"] for c in cuts))
+    if length.overrun(total_with({i: audio_of[i].size / audio.SR for i in audio_of}), target) > 0:
+        logging.warning("LENGTH_OVER asked=%s: the speech is longer than the window and no sentence could be cut", asked)
+    return cuts
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     rev = int(event.get("rev", 1))
@@ -42,6 +117,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             b["media"] = new_media[b["id"]]
         if not (b.get("media") or {}).get("duration"):
             raise ValueError(f"beat {b['id']} has no audio")
+    if rev == 1 and float(plan.get("target_seconds") or 0) and os.environ.get("FIT_TO_TARGET", "1") != "0":
+        try:   # a first render is never longer than asked plus the window: if the voice took longer than every estimate, sentences come out of the audio
+            fit_speech(plan, video_id, float(plan["target_seconds"]))
+        except Exception:   # never a reason to lose the video: it is then longer than asked, as before this guard
+            logging.exception("LENGTH_CUT failed")
     awsio.put_json(event["plan_key"], plan)  # the plan now carries its measured media (editor + future edits read it)
 
     infos = beat_info_from_plan(plan)

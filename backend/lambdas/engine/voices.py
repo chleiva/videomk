@@ -15,8 +15,8 @@ from . import voice_data
 # What the catalogue knows about a voice, and nothing more: language, accent, gender, measured pace. Polly publishes no description of a voice's character
 # ("warm", "calm"), nobody has listened to all of them, so there are no such labels here and the resolver does not pretend to match on them.
 INFO: Dict[str, Dict[str, Any]] = {v["id"]: v for v in voice_data.VOICES}
-# The order voices are offered in when nothing else decides: the owner's choices first (Ruth for US English, Lucia for Spain, Mia for a Mexican accent), then the order
-# the English and Spanish catalogue always had, then Polly's own order for the languages added on 2026-11-27.
+# The order voices are offered in when nothing else decides (after gender, accent and family: see `resolve`): the order the English and Spanish catalogue always
+# had (Ruth first for US English), then Polly's own order for the languages added on 2026-11-27.
 _FIRST = ("Ruth Danielle Joanna Salli Tiffany Matthew Stephen Kenneth Nate Amy Brian Olivia Russell Curtis Kajal Kiara Arjun Niamh Aria Ayanda Jasmine "
           "Lucia Sergio Mia Andres Lupe Pedro Carlos Lea Remi Celine Ambre Florian Gabrielle Liam Isabelle Vicki Daniel Tina Lennart Hannah Sabrina "
           "Bianca Lorenzo Beatrice Camila Leo Carolina Laura Lisa Ola Ewa Suvi Seoyeon Hyunduk").split()
@@ -44,28 +44,46 @@ def language_names(codes: Optional[List[str]] = None, native: bool = False) -> L
 
 # Where the viewer is decides the default accent; the brief can always ask for another ("with a British voice").
 # There is no Canadian English generative voice, so Canada (and anywhere unlisted) gets American.
-_EN_BY_REGION = {"GB": "Amy", "IE": "Niamh", "AU": "Olivia", "NZ": "Aria", "ZA": "Ayanda", "IN": "Kajal", "SG": "Jasmine"}
+# South Africa has one voice, Ayanda, of the steady family (see STEADY): kept, there is no other South African voice. India was Kajal (steady) until 2026-11-27.
+_EN_BY_REGION = {"GB": "Amy", "IE": "Niamh", "AU": "Olivia", "NZ": "Aria", "ZA": "Ayanda", "IN": "Kiara", "SG": "Jasmine"}
 _LATAM = set("MX AR CO CL PE VE EC GT CU BO DO HN PY SV NI CR PA UY PR".split())
-# The languages added on 2026-11-27: the voice Polly has offered longest in each accent (nobody has listened and chosen yet: the owner should).
+# The other languages: a LIVELY voice of the viewer's accent wherever Polly has one (every voice measured on 2026-11-27: docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md).
+# French (France) was Léa (steady) and is Ambre. An accent whose voices are all steady keeps its own voice, never another accent's lively one: Canadian French
+# (Gabrielle; Liam measures the same), Belgian French (Isabelle, its only voice), Dutch of the Netherlands (Laura, its only voice; the Flemish Lisa is lively) and
+# Polish (Ola; Ewa measures the same).
 _BY_REGION = {"fr": {"CA": "Gabrielle", "BE": "Isabelle"}, "de": {"AT": "Hannah", "CH": "Sabrina"}, "nl": {"BE": "Lisa"}}
-_DEFAULT = {"fr": "Lea", "de": "Vicki", "it": "Beatrice", "pt": "Camila", "nl": "Laura", "pl": "Ola", "fi": "Suvi", "ko": "Seoyeon"}
+_DEFAULT = {"fr": "Ambre", "de": "Vicki", "it": "Beatrice", "pt": "Camila", "nl": "Laura", "pl": "Ola", "fi": "Suvi", "ko": "Seoyeon"}
 # Polly's "generative" engine is two families of voices, and they do not speak alike (measured 2026-11-27, docs/VOICE_QUALITY_IT_ES_2026-11-27.md).
 # These 18 give the same audio every time for the same text, read each sentence alone, ignore what the text is about, and move their pitch about as little as
 # the neural engine does (Bianca: 2.8 semitones of spread on a children's passage, Lucia 3.3, Mia 3.2). The other 37 (Vicki, Ruth, Amy, Beatrice, Lorenzo,
 # Lupe, Carlos ...) give a new take each time, lift their voice for a question or a lively text, and move twice as much (Beatrice 6.6, Lupe 5.2, Vicki 5.6).
-# They are also exactly the voices missing from eu-west-2 and ca-central-1 (voice_data.PARTIAL_REGIONS). A default should not be one of these when its accent
-# has another voice: that is why Italian is Beatrice and Latin America is Lupe. Spain has only Lucia and Sergio, both of this family.
+# They are also exactly the voices missing from eu-west-2 and ca-central-1 (voice_data.PARTIAL_REGIONS). A default is never one of these when its accent
+# has another voice (Italian Beatrice, French Ambre, Indian English Kiara, Spanish Lupe), and `resolve` prefers the other family inside an accent. They stay in
+# the catalogue: a brief that names one gets it. Spain has only Lucia and Sergio, both of this family: Sergio, who moves a little more, is its default.
 STEADY = frozenset("Andres Ayanda Bianca Celine Daniel Ewa Gabrielle Isabelle Kajal Laura Lea Liam Lucia Mia Ola Pedro Remi Sergio".split())
 
 
 def default_voice(language: str, region: Optional[str] = None) -> str:
     """The voice for a viewer in `region` (ISO 3166 alpha-2, any case) when the brief doesn't ask for one."""
     r = (region or "").strip().upper()
-    if language == "es":
-        return "Lucia" if r in ("", "ES") else "Lupe" if (r == "US" or r in _LATAM) else "Lucia"   # Latin America was Mia (Mexican) until 2026-11-27: see STEADY
+    if language == "es":   # owner, 2026-11-27: a viewer in Spain keeps a Castilian voice (Sergio; the woman is Lucia); everyone else, the Americas, any other country and
+        return "Sergio" if r == "ES" else "Lupe"   # an unknown one, hears Lupe (the man is Carlos). Until then Lucia outside the Americas and Mia (Mexican) in Latin America
     if language in _DEFAULT:
         return _BY_REGION.get(language, {}).get(r, _DEFAULT[language])
     return _EN_BY_REGION.get(r, "Ruth")
+
+
+def lively(voice: str) -> bool:
+    """A voice of the family that gives a new take each time and moves its pitch about twice as much (see STEADY)."""
+    return voice in CATALOG and voice not in STEADY
+
+
+def second_voice(language: str, region: Optional[str] = None) -> str:
+    """The default voice of the other gender for this viewer (the second speaker of a conversation when nothing else is asked): the resolver's own answer.
+    A language with voices of one gender only gives another voice of that gender, and a language with one voice gives that voice."""
+    first = default_voice(language, region)
+    other = "male" if CATALOG[first][2] == "female" else "female"
+    return resolve({"gender": other}, language, region, [first])[0]
 
 
 def clean_region(raw: object) -> Optional[str]:
@@ -121,7 +139,7 @@ _ACCENTS: List[Tuple[str, List[str]]] = [
     (r"canadian|canada|qu[eé]b[eé]c|canadien|kanad", ["fr-CA", "~en-US"]),
     (r"mexican|mexico|m[eé]xic|mejic", ["es-MX"]),
     (r"castilian|castellan|peninsular|spain|espa[ñn]a|\bde espa|european spanish|iberian", ["es-ES"]),
-    (r"argentin|colombia|chile|peru|venez|ecuador|urugua|cuba|caribe|caribbean|centroam|central america", ["~es-MX"]),
+    (r"argentin|colombia|chile|peru|venez|ecuador|urugua|cuba|caribe|caribbean|centroam|central america", ["~es-US", "~es-MX"]),   # no such voice: the Latin American ones, the lively pair first
     (r"belgian|belgium|belgi|flemish|vlaams|wallon", ["fr-BE", "nl-BE"]),
     (r"swiss|switzerland|suisse|schweiz", ["de-CH", "~fr-FR"]),
     (r"austrian|austria|[oö]sterreich|autrich", ["de-AT"]),
@@ -140,6 +158,12 @@ _MALE = re.compile(r"\b(male|man|men|boy|he|his|masculine|hombre|masculin[ao]|ch
 _SLOW = re.compile(r"\b(slow|slower|slowly|calm|unhurried|relaxed|gentle|measured|lento|lenta|despacio|pausad[oa]|tranquil[oa]|lent|lente|langsam|ruhig)\b", re.I)
 _FAST = re.compile(r"\b(fast|faster|quick|brisk|lively|energetic|upbeat|snappy|r[aá]pid[oa]|[aá]gil|en[eé]rgic[oa]|rapide|vif|schnell|lebhaft)\b", re.I)
 W_GENDER, W_ACCENT, W_NEAR, W_REGION, W_DEFAULT, W_PACE = 6.0, 5.0, 3.0, 2.0, 1.0, 0.5   # a wrong gender is heard at once, a neighbouring accent is not
+# A lively voice before a steady one (see STEADY) of the same gender and accent: more than pace, and less than the viewer's own accent (W_REGION) or the step
+# from the accent asked to its neighbour (W_ACCENT - W_NEAR) even with pace against it, so a Castilian or Mexican wish is never answered with another accent.
+W_LIVELY = 0.9
+# With no accent asked, after the viewer's own accent: a Latin American viewer's next voice is Mexican before Castilian (a tie-breaker, smaller than everything else).
+_HOME_NEAR = {"es-US": ["es-MX"]}
+W_HOME_NEAR = 0.6
 
 
 def accents(language: str) -> List[str]:
@@ -212,8 +236,12 @@ def resolve(raw: object, language: str = "en", region: Optional[str] = None, tak
                 sc += W_NEAR
         elif v["locale"] == home:
             sc += W_REGION
-        if n == default:
+        elif v["locale"] in _HOME_NEAR.get(home, ()):
+            sc += W_HOME_NEAR
+        if n == default and (not want["locales"] or v["locale"] in want["locales"]):   # the viewer's default counts only inside the accent asked
             sc += W_DEFAULT
+        if n not in STEADY:
+            sc += W_LIVELY
         if want["pace"] and v.get("wpm") and median:
             sc += W_PACE * max(-1.0, min(1.0, (v["wpm"] - median) / 15.0)) * (1 if want["pace"] == "fast" else -1)
         return sc
