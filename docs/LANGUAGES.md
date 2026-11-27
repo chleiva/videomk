@@ -111,7 +111,7 @@ None of these is new with the seven languages: Spanish videos have them too. Lis
 | A whiteboard drawing the library does not have | its English name in a box ("prism") unless the director gave a `label` | `whiteboard/spec.py` |
 | Photo videos: a collage or frame without a title, a photo story without chapter titles | "Photos", "Photo", "Part 2" | `scenes/elements/photo_layouts.py`, `engine/curate.py` |
 | A video without a title | "Untitled" | `handlers/finalize_handler.py` |
-| Presenter characters' roles | English and Spanish only ("Teacher", "Profesora") | `presenter_policy.py` (in the app's cast list, which is English or Spanish by design) |
+| Presenter characters' roles | English and Spanish only ("Teacher", "Profesora") | `presenter_policy.py` (used in the director's prompt; not seen drawn in a video: not checked further) |
 
 The closing card is in the language for all nine (tested). App and server messages (refusals, the reason a look was chosen, the maintenance notice) are English or Spanish by design (`docs/I18N.md`).
 
