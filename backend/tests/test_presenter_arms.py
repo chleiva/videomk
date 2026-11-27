@@ -24,7 +24,7 @@ from engine import vector_presenter as vp  # noqa: E402
 CAST = ("ines", "david", "priya", "mateo", "fox", "owl", "bear", "cat", "parrot", "turtle")
 TAILS = {"fox", "owl", "cat", "parrot", "turtle"}
 KINDS = tuple(cg.KINDS)
-GESTURES = tuple(k for k in KINDS if k != "beat")
+GESTURES = tuple(k for k in KINDS if k != "beat")          # (the old rig had no table of two-handed gestures: TWO_HANDED is read where it is used)
 
 
 def maker(cid):
@@ -304,7 +304,7 @@ def test_the_home_pose_is_still_the_pinned_one():
     assert cg.REST_POSES[0] == (vp.REST_UPPER, vp.REST_FORE, cg.REST_WRIST) and all(u > 0 and abs(f - u) < 22 for u, f, _ in cg.REST_POSES)
 
 
-@pytest.mark.parametrize("cid", sorted(cg.FOLDERS))
+@pytest.mark.parametrize("cid", sorted(getattr(cg, "FOLDERS", CAST)))
 def test_a_listener_brings_its_hands_together_and_apart_again(cid):
     g = geom(cid)
     perf = maker(cid)(0.3, -1, 0.14)

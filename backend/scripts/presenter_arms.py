@@ -79,9 +79,9 @@ def cell(ch, pose, w, h, ppu, skeleton=False, label=None, bg=(238, 240, 245), cu
             d.line(pts, fill=(255, 0, 200, 255), width=3)
             for q in pts:
                 d.ellipse((q[0] - 4, q[1] - 4, q[0] + 4, q[1] + 4), fill=(0, 220, 255, 255), outline=(0, 0, 0, 255))
-    if label:
-        d.rectangle((0, 0, 8 + 7 * len(label), 16), fill=(20, 20, 30, 255))
-        d.text((4, 2), label, fill=(255, 235, 90, 255))
+    if label:                                      # under the figure it names
+        d.rectangle((0, h - 17, 8 + 7 * len(label), h), fill=(20, 20, 30, 255))
+        d.text((4, h - 15), label, fill=(255, 235, 90, 255))
     return im.convert("RGB")
 
 

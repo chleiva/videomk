@@ -46,6 +46,7 @@ RETRACT_S = 0.92            # the shortest retraction
 LATE_MAX_S = 0.45           # the only late strokes: a gesture on the first word of a shot that fades in over another may land this much after its word
 QUIET_MAX_S = 4.0           # a speaker who has not moved a hand for this long gives the most stressed word of the next sentence one open hand
 RISE_DPS = 200.0            # degrees a second the forearm averages on the way up (its top speed is about 1.5 times that)
+HOME_RAISED_S = 1.10        # the shortest way home of a hand that was up by the shoulder or the head
 FALL_DPS = 132.0            # ... and on the way home
 MIN_HOLD_S = 0.45
 MAX_HOLD_S = 1.9
@@ -595,13 +596,13 @@ class Performance:
         gs, beats = plan_gestures(words, self.seed + 0.01 * len(self.talk), self.content_side, level, end)
         if self.limit is not None:                           # the shot ends: hands are home by then, or the gesture is not made
             kept = []
-            for g in gs:
-                over = g.t1 - (self.limit - 0.04)
+            for g in gs:                                     # (the time RESERVED for the way home may run past the end: the shortest way home may not)
+                over = g.hold_end + (RETRACT_S if g.kind in PALMS else HOME_RAISED_S) - (self.limit - 0.04)
                 if over > 0:
                     if g.hold_end - over < _last_beat(g) + 0.30:
                         continue
                     g.hold_end -= over
-                    g.t1 -= over
+                g.t1 = min(g.t1, self.limit - 0.04)
                 kept.append(g)
             gs = kept
             beats = [b for b in beats if b[0] < self.limit - 0.7]
@@ -860,7 +861,7 @@ class Performance:
             return 0.0
         fs, fe = self._link()[(id(g), s)]
         if fe is None:
-            fe = fs + min(retract, max(0.5, g.t1 + lag - fs))
+            fe = fs + min(retract, max(0.78, g.t1 + lag - fs))
         if t < st:
             return _rise((t - t0) / max(st - t0, 1e-6))
         if t <= fs:
