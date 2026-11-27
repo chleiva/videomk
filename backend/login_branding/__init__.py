@@ -19,10 +19,10 @@ from typing import Any, Dict, List
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 INK, MUTED = "11142bff", "5a607aff"
-LIGHT = dict(page="f6f7fcff", card="ffffffff", card_border="e3e5f2ff", input_border="c3c7dcff", placeholder="7a8099ff", primary="4a3fc4ff", primary_hover="372e9fff",
+LIGHT = dict(btn_text="ffffffff", page="f6f7fcff", card="ffffffff", card_border="e3e5f2ff", input_border="c3c7dcff", placeholder="7a8099ff", primary="4a3fc4ff", primary_hover="372e9fff",
              primary_active="2b2f9aff", link="4a3fc4ff", link_hover="2b2f9aff", focus="4a3fc4ff", divider="e3e5f2ff")
-DARK = dict(page="0a0d1fff", card="141833ff", card_border="262b52ff", input_border="3a4075ff", placeholder="8a90b0ff", primary="6a3fc4ff", primary_hover="7d55d6ff",
-            primary_active="6a3fc4ff", link="b8c0ffff", link_hover="ffffffff", focus="22d3eeff", divider="262b52ff")
+DARK = dict(btn_text="0a0d1fff", page="0a0d1fff", card="141833ff", card_border="262b52ff", input_border="3a4075ff", placeholder="8a90b0ff", primary="c4b5fdff", primary_hover="e0d9ffff",
+            primary_active="a99bffff", link="b8c0ffff", link_hover="ffffffff", focus="22d3eeff", divider="262b52ff")
 
 
 def _read(name: str, mode: str = "rb") -> bytes:
@@ -42,8 +42,8 @@ def _merge(base: Dict[str, Any], over: Dict[str, Any]) -> Dict[str, Any]:
 def settings(color_scheme: str = "DYNAMIC") -> Dict[str, Any]:
     s = json.loads(_read("default_settings.json", "r"))   # Cognito's own defaults (snapshot), then our overrides: unspecified keys stay valid
     L, D = LIGHT, DARK
-    btn = lambda c: {"defaults": {"backgroundColor": c["primary"], "textColor": "ffffffff"}, "hover": {"backgroundColor": c["primary_hover"], "textColor": "ffffffff"},
-                     "active": {"backgroundColor": c["primary_active"], "textColor": "ffffffff"}, "disabled": {"backgroundColor": c["divider"], "borderColor": c["divider"]}}
+    btn = lambda c: {"defaults": {"backgroundColor": c["primary"], "textColor": c["btn_text"]}, "hover": {"backgroundColor": c["primary_hover"], "textColor": c["btn_text"]},
+                     "active": {"backgroundColor": c["primary_active"], "textColor": c["btn_text"]}, "disabled": {"backgroundColor": c["divider"], "borderColor": c["divider"]}}
     sec = lambda c: {"defaults": {"backgroundColor": "00000000", "borderColor": c["primary"], "textColor": c["link"]}, "hover": {"backgroundColor": "4a3fc41a", "borderColor": c["link_hover"], "textColor": c["link_hover"]},
                      "active": {"backgroundColor": "4a3fc426", "borderColor": c["link_hover"], "textColor": c["link_hover"]}}
     idp = lambda c, text: {"defaults": {"backgroundColor": c["card"], "borderColor": c["input_border"], "textColor": text}, "hover": {"backgroundColor": c["page"], "borderColor": c["link"], "textColor": text},
@@ -71,7 +71,7 @@ def settings(color_scheme: str = "DYNAMIC") -> Dict[str, Any]:
             "focusState": {"lightMode": {"borderColor": L["focus"]}, "darkMode": {"borderColor": D["focus"]}},
             "divider": {"lightMode": {"borderColor": L["divider"]}, "darkMode": {"borderColor": D["divider"]}},
             "dropDown": {"borderRadius": 12.0},
-            "optionControls": {"lightMode": {"selected": {"backgroundColor": L["primary"], "foregroundColor": "ffffffff"}}, "darkMode": {"selected": {"backgroundColor": D["primary"], "foregroundColor": "ffffffff"}}},
+            "optionControls": {"lightMode": {"selected": {"backgroundColor": L["primary"], "foregroundColor": "ffffffff"}}, "darkMode": {"selected": {"backgroundColor": D["primary"], "foregroundColor": D["btn_text"]}}},
         },
         "categories": {
             "global": {"colorSchemeMode": color_scheme, "spacingDensity": "REGULAR", "pageHeader": {"enabled": False}, "pageFooter": {"enabled": False}},
