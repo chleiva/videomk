@@ -441,3 +441,56 @@ def test_a_drawing_matched_only_by_meaning_is_replaced_by_the_real_thing(wb, mon
     assert props["items"][0]["draw"] == "honeycomb" and "asked" not in props["items"][0] and props["items"][1]["draw"] == bundled
     monkeypatch.setenv("CLIPS_ON_DEMAND", "0")
     assert "asked" not in wbe._sanitize({"items": [{"id": "a", "draw": "kite"}]})["items"][0]                                      # without the flag the plan is exactly what it was
+
+
+def test_the_director_may_name_missing_drawings_only_when_this_video_can_have_them_made(wb, monkeypatch):
+    """Found on QA (2026-11-27): the whiteboard prompt said "Use ONLY drawing ids from the list ... never invent an id", so the director drew a house for a beehive and a
+    puzzle piece for a honeycomb, `missing` found nothing and the tracer was never called. The plan step now tells the director when new names are allowed."""
+    from engine import whiteboard_policy as wp
+    ctx = od.context("v1")
+    block = lambda: wp.Policy(True, "asked", asked=True).prompt_block("en")   # noqa: E731
+    only = "Use ONLY drawing ids from the list."
+    wp.allow_new_drawings(0)
+    before = block()
+    assert only in before and "new names" not in before
+    assert oo.offer(ctx) == 6                                                                     # Max (or test) account, flag and switches on, a maker: up to one call's worth
+    wp.allow_new_drawings(oo.offer(ctx))
+    try:
+        opened = block()
+        assert only not in opened and "At most 6 such new names" in opened and "never a house for a beehive" in opened and "otherwise its name is written" in opened
+        assert opened.replace(wp._NEW_LINE.format(n=6), "") == before.replace("  * " + only + " If nothing in the list shows the idea, WRITE the word instead (a written label is always fine); never invent an id.\n", "")   # nothing else changes
+    finally:
+        wp.allow_new_drawings(0)
+    assert block() == before                                                                      # and back: a warm function never keeps the last video's answer
+    # who is NOT offered it: every case in which `fill` would make nothing
+    wb.rows["v1"]["plan"] = "pro"
+    assert oo.offer(od.context("v1")) == 0
+    wb.rows["v1"]["plan"] = "max"
+    assert oo.offer(od.context("v1"), is_edit=True) == 0 and oo.offer(None) == 0
+    cc.set_config({**ON, "object_enabled": False})
+    assert oo.offer(od.context("v1")) == 0
+    cc.set_config({**ON, "object_enabled": True, "master_enabled": False})
+    assert oo.offer(od.context("v1")) == 0
+    cc.set_config({**ON, "object_enabled": True})
+    monkeypatch.setenv("CLIPS_ON_DEMAND", "0")
+    assert oo.offer(od.context("v1")) == 0
+    monkeypatch.setenv("CLIPS_ON_DEMAND", "1")
+    oo.set_maker(None)
+    monkeypatch.setenv("WHITEBOARD_PROTO_DIR", "/nonexistent")
+    monkeypatch.delenv("OBJECT_TRACER_FUNCTION", raising=False)
+    assert oo.offer(od.context("v1")) == 0                                                        # no tracer: nothing could be made
+
+
+def test_a_new_name_that_was_not_made_is_written_not_left_as_a_stand_in(wb, monkeypatch):
+    from engine.scenes.elements import whiteboard as wbe
+    bundled = wblib.ids()[0]
+    monkeypatch.setattr(wblib, "search", lambda name, k=3, embed=None: [{"id": bundled, "score": 0.36, "title": "x"}])
+    props = wbe._sanitize({"items": [{"id": "a", "draw": "honeycomb"}, {"id": "b", "draw": "blob thing"}, {"id": "c", "draw": bundled}]})
+    plan = {"beats": [{"id": "w", "scene": {"type": "whiteboard", "props": props}}]}
+    assert oo.fill(plan, video_id="v1", ctx=od.context("v1"))["made"] == ["honeycomb"]            # the maker of the fixture rejects "blob thing"
+    assert props["items"][1]["draw"] == bundled and props["items"][1]["asked"] == "blob thing"    # still the unsure stand-in
+    assert oo.settle(plan) == 1
+    a, b, c = props["items"]
+    assert a["draw"] == "honeycomb" and c["draw"] == bundled                                      # the made drawing and the director's own choice from the list: untouched
+    assert b["write"] == "blob thing" and b["boxed"] is True and b["size"] == "m" and not ({"draw", "asked", "match"} & set(b))
+    assert oo.settle(plan) == 0
