@@ -488,7 +488,7 @@ struct CreateView: View {
     @ViewBuilder private var middle: some View {
         Spacer(minLength: Theme.Space.xs)
         if dictation.isListening {
-            Text(tr("composer.listening")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(1).accessibilityIdentifier("listeningHint").transition(.opacity)
+            Text(tr("composer.listening")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(1).minimumScaleFactor(0.8).layoutPriority(-1).accessibilityIdentifier("listeningHint").transition(.opacity)
             Spacer(minLength: Theme.Space.xs)
         }
     }
@@ -514,7 +514,7 @@ struct CreateView: View {
         let inactive = !s.canSend && affordable == nil
         return Button { if let affordable { create.form.setMinutes(affordable.minutes); Haptics.play(.selection) }; tapCreate(status, proxy) } label: {
             HStack(spacing: 6) {
-                Text(affordable.map { tr("create.create_length", LengthLabel.chip($0.minutes)) } ?? tr("create.create_video")).lineLimit(1)
+                Text(affordable.map { tr("create.create_length", LengthLabel.chip($0.minutes)) } ?? tr("create.create_video")).lineLimit(1).fixedSize()
                 if showsPrice {          // not while a presentation is still being read: its price is not known yet
                     HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.role(.subhead)); Text("\(credits)").monospacedDigit() }.accessibilityHidden(true)
                 }
