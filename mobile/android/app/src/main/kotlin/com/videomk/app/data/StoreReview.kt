@@ -10,7 +10,7 @@ import com.google.android.play.core.ktx.requestReview
 import kotlinx.coroutines.CancellationException
 
 /**
- * "Rate videomk". Uses the Google Play In-App Review API: the rating happens in a Google sheet on top of the app. It is quota limited by Google
+ * "Rate VideoMK". Uses the Google Play In-App Review API: the rating happens in a Google sheet on top of the app. It is quota limited by Google
  * and deliberately gives no result (the app cannot tell whether the sheet was shown, or whether the person rated), which is why the prompt never
  * reacts to the outcome. When the flow is unavailable (no Play Store, an error, the quota) the Play Store listing opens instead: `market://` first, https as the fallback.
  */

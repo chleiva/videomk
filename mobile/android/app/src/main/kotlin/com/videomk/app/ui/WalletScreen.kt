@@ -1,5 +1,6 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,8 +61,8 @@ import java.util.Date
 fun CreditsSheet(app: AppViewModel, onDismiss: () -> Unit) {
     val state by app.state.collectAsState()
     LaunchedEffect(Unit) { app.refreshWallet() }
-    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet)) {
-        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("creditsSheet"), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = Vmk.colors.surface, shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet)) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Vmk.space.sheet).navigationBarsPadding().padding(bottom = Vmk.space.xxl).semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("creditsSheet"), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
             SheetHeader(stringResource(R.string.wallet_title), onDismiss, closeTag = "creditsClose")
             val w = state.wallet
             if (w == null) { Box(Modifier.fillMaxWidth().heightIn(min = 120.dp), contentAlignment = Alignment.Center) { LiveRing(size = 28.dp) }; return@Column }
@@ -83,7 +84,7 @@ fun CreditsSheet(app: AppViewModel, onDismiss: () -> Unit) {
             w.plans.free?.takeIf { !it.available && it.message != null && w.balance == 0 }?.let { f ->
                 Text(f.message!! + (f.resumesAt?.let { " " + stringResource(R.string.stop_resumes, com.videomk.app.core.PlanText.moment(it)) } ?: ""), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("freeMessage"))
             }
-            VmkGroup(Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surfaceRaised)) {
+            VmkGroup(onSheet = true) {
                 w.plans.plan?.let { plan ->
                     val limits = listOfNotNull(
                         plan.maxSeconds?.let { stringResource(R.string.wallet_plan_longest, com.videomk.app.core.Lengths.short(it / 60.0)) },

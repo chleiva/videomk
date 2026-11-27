@@ -292,7 +292,7 @@ private fun copyText(context: Context, label: String, text: String) {
     runCatching { (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText(label, text)) }
 }
 
-/** Copies the video into the phone's gallery (Movies/videomk) through MediaStore: no storage permission is needed from Android 10; older versions do not offer Save. */
+/** Copies the video into the phone's gallery (Movies/VideoMK) through MediaStore: no storage permission is needed from Android 10; older versions do not offer Save. */
 @androidx.annotation.RequiresApi(29)
 private suspend fun saveVideoToGallery(context: Context, http: OkHttpClient, url: String, name: String) {
     withContext(Dispatchers.IO) {
@@ -300,7 +300,7 @@ private suspend fun saveVideoToGallery(context: Context, http: OkHttpClient, url
         val values = android.content.ContentValues().apply {
             put(android.provider.MediaStore.Video.Media.DISPLAY_NAME, "$safe.mp4")
             put(android.provider.MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-            put(android.provider.MediaStore.Video.Media.RELATIVE_PATH, "Movies/videomk")
+            put(android.provider.MediaStore.Video.Media.RELATIVE_PATH, "Movies/VideoMK")
             put(android.provider.MediaStore.Video.Media.IS_PENDING, 1)
         }
         val resolver = context.contentResolver

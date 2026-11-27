@@ -116,7 +116,7 @@ data class RatingContext(
  *  - [shouldShow]: eligible, and not while a video plays, not while creating, not within [LAUNCH_QUIET_MS] (2 minutes) of launch, not when suppressed.
  *    [debugForce] (debug builds only, set by the caller) skips every condition except the played video.
  *  - [onShown]: the pre-prompt appeared. It uses one of the 3 asks at once (askedCount + 1, askedAtCount = completedCount, lastAskedAt = now), so
- *    any way of leaving it (swipe, back, tap outside, "Maybe later", "Not really" or a tap on "Rate videomk" the store may ignore) means "ask again
+ *    any way of leaving it (swipe, back, tap outside, "Maybe later", "Not really" or a tap on "Rate VideoMK" the store may ignore) means "ask again
  *    after 10 more completed videos", until the 3 asks are used.
  *  - [onAlreadyRated]: done = true, never again. The only way to end it early. ("Not really" goes to the feedback sheet, it does not end it.)
  */

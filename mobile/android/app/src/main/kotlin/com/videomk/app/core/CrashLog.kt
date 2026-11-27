@@ -18,7 +18,7 @@ object CrashLog {
         var c: Throwable? = t
         var depth = 0
         PrintWriter(sw).use { w ->
-            w.println("videomk $version  thread=$thread  at=$now")
+            w.println("VideoMK $version  thread=$thread  at=$now")
             while (c != null && depth < 4) {
                 w.println((if (depth == 0) "" else "caused by ") + c!!.javaClass.name)
                 for (f in c!!.stackTrace.take(30)) w.println("    at $f")

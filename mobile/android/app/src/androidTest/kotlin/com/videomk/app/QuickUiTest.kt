@@ -20,7 +20,7 @@ class QuickUiTest {
     @Test fun signedOutUserSeesSignIn() {
         Ui.launch(signedIn = false)
         Ui.require("signInButton")
-        assertTrue(device.hasObject(By.text("videomk")))
+        assertTrue(device.hasObject(By.text("VideoMK")))
         assertFalse(Ui.has("composerField"))
         Ui.shot("01-signin")
     }

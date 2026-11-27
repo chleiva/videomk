@@ -320,7 +320,7 @@ private fun UploadAnnouncements(progress: com.videomk.app.core.QueueProgress?) {
 /** A collection's own screen: its photos in the same grid, with search and selection. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit) {
+fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit, onAddPhotos: (() -> Unit)? = null) {
     vm.undo = LocalContainerOrNull.current?.undo
     LaunchedEffect(Unit) { vm.start() }
     val collection = vm.collections.firstOrNull { it.id == collectionId }
@@ -344,7 +344,8 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
         Box(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
             Column(Modifier.fillMaxSize()) {
                 NoticeLine(vm)
-                MediaBody(vm, onAdd = null, onOpenCollection = {}, onMakeVideo = onMakeVideo, header = null)
+                // an empty collection offers the way to fill it: Media opens ready to select, and the folder button there adds to this collection
+                MediaBody(vm, onAdd = onAddPhotos, onOpenCollection = {}, onMakeVideo = onMakeVideo, header = null, emptyInCollection = true)
             }
             Box(Modifier.align(Alignment.BottomCenter)) { SelectionBar(vm, onMakeVideo, inCollection = true) }
         }
@@ -357,7 +358,7 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
 fun MediaBody(
     vm: MediaViewModel, onAdd: (() -> Unit)?, onOpenCollection: (String) -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit,
     header: (@Composable () -> Unit)?, modifier: Modifier = Modifier, selectionHint: String? = null,
-    order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(),
+    order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(), emptyInCollection: Boolean = false,
 ) {
     val columns = rememberColumns()
     androidx.compose.material3.pulltorefresh.PullToRefreshBox(isRefreshing = vm.refreshing, onRefresh = { vm.pullRefresh() }, modifier = modifier.fillMaxSize()) {
@@ -376,7 +377,8 @@ fun MediaBody(
             }
             vm.photos.isEmpty() && !vm.search.active -> Column(Modifier.fillMaxSize()) {
                 header?.invoke()
-                StateMessage(stringResource(R.string.media_empty_title), if (onAdd != null) stringResource(R.string.media_empty_text) else stringResource(R.string.media_empty_text_pick), if (onAdd != null) stringResource(R.string.media_add_photos) else null) { onAdd?.invoke() }
+                if (emptyInCollection) StateMessage(stringResource(R.string.collection_empty_title), "", if (onAdd != null) stringResource(R.string.media_add_photos) else null) { onAdd?.invoke() }
+                else StateMessage(stringResource(R.string.media_empty_title), if (onAdd != null) stringResource(R.string.media_empty_text) else stringResource(R.string.media_empty_text_pick), if (onAdd != null) stringResource(R.string.media_add_photos) else null) { onAdd?.invoke() }
             }
             else -> PhotoGrid(
                 photos = vm.photos, selected = vm.selection.toSet(), selecting = vm.selecting, columns = columns,
@@ -403,7 +405,8 @@ private fun StateMessage(title: String, text: String, button: String?, onClick: 
     Column(Modifier.fillMaxSize().padding(32.dp).testTag("mediaState"), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(Sym.PhotoLibrary, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(48.dp))
         Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.padding(top = 12.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 16.dp))
+        if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+        Spacer(Modifier.size(Vmk.space.l))
         if (button != null) TonalButton(button, onClick, Modifier.testTag("stateAction"), icon = Sym.AddPhotoAlternate.takeIf { button == stringResource(R.string.media_add_photos) })
     }
 }
@@ -538,7 +541,7 @@ fun StorageSheet(summary: MediaSummary, live: Pair<Long, Long>?, onDismiss: () -
         Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).testTag("storageSheet"), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
             SheetHeader(stringResource(R.string.media_storage), onDismiss)
             StorageMeterRow(used, limit, onClick = {})
-            VmkGroup(Modifier.clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surfaceRaised)) {
+            VmkGroup(onSheet = true) {
                 VmkRow(stringResource(R.string.media_plan), value = if (summary.plan == "pro") stringResource(R.string.media_plan_pro) else summary.plan.replaceFirstChar { it.uppercase() }.ifBlank { stringResource(R.string.media_plan_free) })
                 VmkRow(stringResource(R.string.media_photos_label), value = String.format(Txt.locale, "%,d", summary.count))
                 VmkRow(stringResource(R.string.media_used), value = StorageMeter.label(used, limit))

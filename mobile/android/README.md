@@ -1,6 +1,6 @@
-# videomk for Android (Kotlin, Jetpack Compose, Material 3)
+# VideoMK for Android (Kotlin, Jetpack Compose, Material 3)
 
-Native client for the videomk backend, feature parity with the iPhone app in `mobile/ios` (that app is the spec). Package / application id `com.videomk.app`,
+Native client for the VideoMK backend, feature parity with the iPhone app in `mobile/ios` (that app is the spec). Package / application id `com.videomk.app`,
 minSdk 26, targetSdk 36, compileSdk 37. Single activity, `ViewModel` + `StateFlow`, a thin repository layer (`Backend`), OkHttp + kotlinx.serialization, coroutines,
 manual DI (`AppContainer`). Release-ready (R8, signing from outside the repository) but nothing has been published: see `docs/ANDROID_RELEASE.md`.
 

@@ -65,8 +65,9 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
         loadJob = viewModelScope.launch {
             try {
                 val info = (backend ?: throw ApiError.Server).playback(videoId)
-                _playback.value = PlaybackState.Ready(info.url, info.description)
+                // the player exists before the page is told it is ready: the page reads `player` when it draws the ready state (the other order drew a player with no controls)
                 createPlayer(info.url)
+                _playback.value = PlaybackState.Ready(info.url, info.description)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: ApiError) {

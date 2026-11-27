@@ -110,7 +110,7 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
                 Segmented(caps.resolutions, o.resolution, { caps.planName(it) }) { composer.updateOptions(o.copy(resolution = it)) }
             }
             // rows: subtitles, narration language, watermark
-            VmkGroup(Modifier.clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surfaceRaised)) {
+            VmkGroup(onSheet = true) {
                 VmkRow(stringResource(R.string.create_subtitles), Modifier.testTag("subtitlesRow"), icon = Sym.ClosedCaption, checked = o.captions, onCheckedChange = { composer.updateOptions(o.copy(captions = it)) })
                 Box {
                     VmkRow(stringResource(R.string.create_language), Modifier.testTag("languageRow"), icon = Sym.Language, value = CreatePlatforms.languageLabel(o, caps), trailing = Sym.ExpandMore, onClick = { languageMenu = true }, onClickLabel = stringResource(R.string.create_language_desc))

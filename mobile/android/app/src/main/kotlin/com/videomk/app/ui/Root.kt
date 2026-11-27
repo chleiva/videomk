@@ -104,6 +104,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     androidx.compose.runtime.LaunchedEffect(completions) { if (completions > seenCompletions) haptics.play(com.videomk.app.core.DesignTokens.Haptic.VideoReady); seenCompletions = completions }
     var feedbackFrom by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<FeedbackContext?>(null) }
     // photos picked in My media and sent to Create stay selected until the video is sent or the draft is discarded: back from Create returns to the same selection
+    var pendingSelect by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var creditsOpen by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     var mediaSelecting by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     var madeFromSelection by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
@@ -131,6 +132,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         composable("media") { entry ->
             val vm: MediaViewModel = viewModel(entry, key = "media-home", factory = mediaFactory)
             SelectionAfterCreate(vm, composer, madeFromSelection) { madeFromSelection = false }
+            androidx.compose.runtime.LaunchedEffect(pendingSelect) { if (pendingSelect) { pendingSelect = false; vm.beginSelecting() } }
             MediaScreen(vm, container.mediaUploads, onOpenCollection = { nav.navigate("media/collection/$it") }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) }, organize = container.organize, onOpenCollections = { nav.navigate("media/collections") }, onSelectingChange = { mediaSelecting = it })
         }
         composable("media/collections") {
@@ -143,7 +145,10 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             val id = entry.arguments?.getString("id").orEmpty()
             val vm: MediaViewModel = viewModel(entry, key = "media-collection-$id", factory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, id, null) } })
             SelectionAfterCreate(vm, composer, madeFromSelection) { madeFromSelection = false }
-            CollectionScreen(vm, id, onBack = { nav.popBackStack() }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) })
+            CollectionScreen(vm, id, onBack = { nav.popBackStack() }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) }, onAddPhotos = {
+                // back to Media with selection already on: choose the photos, then the folder button adds them here
+                nav.popBackStack("media", inclusive = false); pendingSelect = true
+            })
         }
         composable("video/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()

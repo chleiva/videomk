@@ -1,5 +1,10 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.clickable
 
@@ -84,22 +89,17 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
-                    useController = true
-                    controllerShowTimeoutMs = 3000
-                    quietControls()
+                    useController = false   // our own controls below: one vocabulary (play or pause, the time bar, full screen)
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
-                    setControllerVisibilityListener(PlayerView.ControllerVisibilityListener { v -> controlsVisible = v == android.view.View.VISIBLE })
+                    setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
                     this.player = player
                 }
             },
-            update = { if (it.player !== player) it.player = player; it.useController = !ended },   // the end card replaces the controls
+            update = { if (it.player !== player) it.player = player },
             onRelease = { it.player = null },
             modifier = Modifier.matchParentSize(),
         )
-        if (player != null) androidx.compose.animation.AnimatedVisibility(controlsVisible && !ended, Modifier.align(Alignment.TopEnd), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) {
-            GlassIconButton(Sym.Fullscreen, stringResource(R.string.player_full_screen), onFullScreen, Modifier.padding(6.dp).testTag("fullScreenButton"), onDark = true)
-        }
+        if (player != null && !ended) PlayerControls(player, onFullScreen, Modifier.matchParentSize())
         // the end card: Replay (a quiet glass icon) and New video (a labelled white pill with the play-sparkle glyph)
         if (ended && player != null) Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.55f)).testTag("endCard"), contentAlignment = Alignment.Center) {
             Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.l), verticalAlignment = Alignment.CenterVertically) {
@@ -118,13 +118,52 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
 }
 
 
-/** The media controls reduced to one vocabulary: play or pause, the time bar and (ours) full screen. No skip buttons and no settings gear (it opened a stock menu in another style). */
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun androidx.media3.ui.PlayerView.quietControls() {
-    setShowNextButton(false); setShowPreviousButton(false); setShowRewindButton(false); setShowFastForwardButton(false); setShowSubtitleButton(false); setShowShuffleButton(false)
-    for (id in intArrayOf(androidx.media3.ui.R.id.exo_settings, androidx.media3.ui.R.id.exo_fullscreen, androidx.media3.ui.R.id.exo_minimal_fullscreen)) findViewById<android.view.View>(id)?.let { v ->
-        v.visibility = android.view.View.GONE; v.layoutParams = v.layoutParams?.apply { width = 0 }
-        // the controller shows its buttons again whenever it lays itself out: keep this one gone
-        v.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ -> if (view.visibility != android.view.View.GONE) view.visibility = android.view.View.GONE }
+/** "1:05" for a position in milliseconds. */
+private fun clock(ms: Long): String { val t = (maxOf(0L, ms) / 1000).toInt(); return "%d:%02d".format(t / 60, t % 60) }
+
+/**
+ * The ONE set of player controls, for the inline player and for full screen: play or pause in the middle, and along the bottom the time, the bar to scrub and
+ * (inline) the full-screen button. No skip buttons and no settings gear. A tap on the picture shows or hides them; they leave by themselves after three seconds
+ * of playing and stay while paused. Everything is a 48 dp target with a spoken label; the bar is a slider TalkBack can move.
+ */
+@Composable
+fun PlayerControls(player: Player, onFullScreen: (() -> Unit)?, modifier: Modifier = Modifier, bottomInset: androidx.compose.ui.unit.Dp = 0.dp) {
+    var visible by remember { mutableStateOf(true) }
+    var playing by remember { mutableStateOf(player.isPlaying) }
+    var buffering by remember { mutableStateOf(false) }
+    var position by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    var duration by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    var scrub by remember { mutableStateOf<Float?>(null) }
+    var touched by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    androidx.compose.runtime.LaunchedEffect(player) {
+        while (true) {
+            playing = player.playWhenReady && player.playbackState != Player.STATE_ENDED; buffering = player.playbackState == Player.STATE_BUFFERING
+            position = player.currentPosition; duration = player.duration.takeIf { it > 0 } ?: 0L
+            kotlinx.coroutines.delay(250)
+        }
+    }
+    androidx.compose.runtime.LaunchedEffect(visible, playing, touched, scrub != null) { if (visible && playing && scrub == null) { kotlinx.coroutines.delay(3000); visible = false } }
+    val showHide = stringResource(R.string.player_controls)
+    Box(modifier.clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null, onClickLabel = showHide) { visible = !visible; touched++ }) {
+        if (buffering && !visible) LiveRing(Modifier.align(Alignment.Center), size = 36.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White)
+        androidx.compose.animation.AnimatedVisibility(visible, Modifier.matchParentSize(), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) {
+            Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Transparent, 0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.6f)))) {
+                if (buffering) LiveRing(Modifier.align(Alignment.Center), size = 36.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White)
+                else GlassIconButton(if (playing) Sym.Pause else Sym.PlayArrow, stringResource(if (playing) R.string.player_pause else R.string.player_play), { if (playing) player.pause() else player.play(); touched++ }, Modifier.align(Alignment.Center).testTag("playPause"), onDark = true, size = 64.dp)
+                Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(start = Vmk.space.l, end = Vmk.space.xs, bottom = bottomInset), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+                    val shown = scrub?.let { (it * duration).toLong() } ?: position
+                    Text(clock(shown) + " / " + clock(duration), style = MaterialTheme.typography.labelMedium, color = Color.White, maxLines = 1, modifier = Modifier.testTag("playerTime"))
+                    val seekLabel = stringResource(R.string.player_seek)
+                    androidx.compose.material3.Slider(
+                        value = scrub ?: if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f,
+                        onValueChange = { scrub = it; touched++ }, onValueChangeFinished = { scrub?.let { player.seekTo((it * duration).toLong()) }; scrub = null },
+                        enabled = duration > 0, modifier = Modifier.weight(1f).heightIn(min = Vmk.minTouch).semantics { contentDescription = seekLabel }.testTag("playerSeek"),
+                        colors = androidx.compose.material3.SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color.White, inactiveTrackColor = Color.White.copy(alpha = 0.35f)),
+                    )
+                    if (onFullScreen != null) GlassIconButton(Sym.Fullscreen, stringResource(R.string.player_full_screen), onFullScreen, Modifier.testTag("fullScreenButton"), onDark = true)
+                    else Spacer(Modifier.width(Vmk.space.s))
+                }
+            }
+        }
     }
 }

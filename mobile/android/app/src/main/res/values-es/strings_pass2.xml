@@ -60,4 +60,9 @@
     <string name="wallet_bucket_plan">Créditos del plan</string>
     <string name="settings_photos_footer">Las fechas y los lugares ordenan tus fotos en un video. Tus fotos siguen siendo privadas.</string>
     <string name="media_storage_short">Con el almacenamiento lleno puedes ver y eliminar fotos; las nuevas esperan.</string>
+    <string name="player_controls">Mostrar u ocultar los controles</string>
+    <string name="player_play">Reproducir</string>
+    <string name="player_pause">Pausar</string>
+    <string name="player_seek">Posición en el video</string>
+    <string name="collection_empty_title">Aún no hay fotos aquí</string>
 </resources>

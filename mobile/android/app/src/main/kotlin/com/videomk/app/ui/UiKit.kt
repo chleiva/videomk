@@ -1,5 +1,6 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -353,11 +354,13 @@ fun VmkRow(
     }
     Row(interactive.padding(horizontal = Vmk.space.l, vertical = Vmk.space.s), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.m)) {
         if (icon != null) Icon(icon, null, tint = if (danger) Vmk.colors.danger else Vmk.colors.textSecondary, modifier = Modifier.size(22.dp))
+        val stacked = value != null && isLargeText()   // at large text the value moves under the title, so neither is squeezed or broken mid-word
         androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, color = if (danger) Vmk.colors.danger else Vmk.colors.text)
+            if (stacked) Text(value!!, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
         }
-        if (value != null) Text(value, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.End, modifier = Modifier.weight(0.8f, fill = false))
+        if (value != null && !stacked) Text(value, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.End, modifier = Modifier.widthIn(max = 200.dp))
         if (checked != null) androidx.compose.material3.Switch(checked, onCheckedChange = null, colors = vmkSwitchColors())
         if (trailing != null) Icon(trailing, null, tint = Vmk.colors.textTertiary, modifier = Modifier.size(20.dp))
     }
@@ -365,8 +368,9 @@ fun VmkRow(
 
 /** A group of rows on one opaque card (Settings, the Credits sheet). */
 @Composable
-fun VmkGroup(modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
-    androidx.compose.foundation.layout.Column(modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surface).padding(vertical = Vmk.space.xs), content = content)
+fun VmkGroup(modifier: Modifier = Modifier, onSheet: Boolean = false, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    // on the page a group is a surface card; on a sheet (which is the surface itself) it steps one tone down
+    androidx.compose.foundation.layout.Column(modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.card)).background(if (onSheet) Vmk.colors.surfaceRaised else Vmk.colors.surface).padding(vertical = Vmk.space.xs), content = content)
 }
 
 /** The ONE text field outside the prompt: a filled, rounded field with the primary ring while it has focus. */

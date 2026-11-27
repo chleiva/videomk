@@ -58,7 +58,7 @@ fun defaultHttpClient(): OkHttpClient = OkHttpClient.Builder()
     .build()
 
 /**
- * Every endpoint of the videomk API. [region] is the device's region setting (ISO country code); the server uses it only to pick a default
+ * Every endpoint of the VideoMK API. [region] is the device's region setting (ISO country code); the server uses it only to pick a default
  * voice accent. [timeZone] says where the user's day ends, for the daily free credits.
  */
 class ApiClient(
