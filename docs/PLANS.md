@@ -52,14 +52,13 @@ Lapsed plans: storage over the Free limit becomes read-only (nothing is deleted,
 
 **Problem:** a heavy free user costs $4 to $6 a month. So the Free plan is small by default and every number is a setting that changes **without a deploy**.
 
-Where: one SSM parameter per stage, `/videomk/<stage>/plans/config`, a JSON object (created empty = every default). Functions cache it for 60 seconds; an unreadable or invalid value falls back to the default knob by knob. Change it with:
+Where: one SSM parameter per stage, `/videomk/<stage>/plans/config`, a JSON object. It is not part of the stack: absent means every default, the first `config set` creates it, and a deploy can never reset it. Functions cache it for 60 seconds; an unreadable value keeps the last good one, an invalid knob falls back to its default. Change it with:
 ```
 python backend/scripts/plans_admin.py config show [--stage qa|prod]
 python backend/scripts/plans_admin.py config set <knob> <value> [--stage prod]      # checked before saving, live within a minute
 python backend/scripts/plans_admin.py config reset <knob>
 python backend/scripts/plans_admin.py gallery-only on|off                           # welcome_credits 0 + daily off, or back to the defaults
 ```
-(A later CDK deploy does not reset the parameter: CloudFormation only rewrites it if the template's value changes, and it stays `{}`.)
 
 | Knob | Default | What it does |
 |---|---|---|
@@ -281,4 +280,4 @@ Decisions made while building, for the owner:
 7. **Refunds do not claw back spent credits**; a repeat-refund flag belongs to phase 2.
 8. **Claims are kept 2 years** (`claim_retention_days`); the privacy text must say so before production.
 9. **`require_device_proof` true in production** means no free creation there until attestation is live.
-10. The stack is near CloudFormation's limit: 421 resources before plans, **455 with plans, 466 with the device routes**, of 500. The next sizeable feature needs a second stack or nested stacks.
+10. The stack is near CloudFormation's limit: 421 resources before plans, **454 with plans, 465 with the device routes**, of 500. The next sizeable feature needs a second stack or nested stacks.

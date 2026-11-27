@@ -180,16 +180,15 @@ def test_alarms_on_free_spend_exist_without_actions_and_the_daily_metric_runs(sy
     assert can(t, "plans_daily", "dynamodb:Scan", table_id(t, "VideosTable")) and not any(can(t, "plans_daily", a, table_id(t, "VideosTable")) for a in WRITES)
 
 
-def test_the_knobs_parameter_starts_empty_so_every_default_applies(synth):
-    params = [p["Properties"] for p in of(synth(), "AWS::SSM::Parameter").values() if p["Properties"].get("Name") == "/videomk/qa/plans/config"]
-    assert len(params) == 1 and params[0]["Value"] == "{}"
+def test_the_knobs_parameter_is_not_owned_by_the_stack_so_a_deploy_can_never_reset_it(synth):
+    assert not of(synth(), "AWS::SSM::Parameter")   # absent = every default; scripts/plans_admin.py creates it on the first `config set`
 
 
 def test_plans_stay_frugal_with_cloudformation_resources(synth):
     """The stack is close to CloudFormation's 500 resources: plans may add at most 36, the device routes 12 more, and the whole QA stack must keep room to grow."""
     flags = dict(deckToVideo="1", imageCatalog="1", socialGoogle="1", socialApple="1", intakeEnabled="1")
     off, on, dev = (len(synth(**flags, **x)["Resources"]) for x in ({"plans": "0"}, {}, {"deviceProof": "1"}))
-    assert on - off <= 36 and dev - on <= 12 and dev <= 475, (off, on, dev)
+    assert on - off <= 34 and dev - on <= 12 and dev <= 470, (off, on, dev)
 
 
 def test_every_plans_function_can_be_called_by_the_api(synth):

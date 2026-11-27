@@ -1,5 +1,5 @@
 """Plans, phase 1 (docs/PLANS.md): the entitlements table, the free-allowance claims, the owner's knobs, the plan and gallery routes, the purchase stubs, the daily metric
-and the alarms on free spend. Everything is ADDITIVE: two new tables, one SSM parameter, new functions and routes; no existing table, bucket or user pool property changes.
+and the alarms on free spend. Everything is ADDITIVE: two new tables, new functions and routes (the knobs parameter is created by the admin script, not by the stack); no existing table, bucket or user pool property changes.
 
 On by default; `-c plans=0` removes all of it (every function then behaves exactly as before plans).
 `-c deviceProof=1` adds the device-proof routes (iOS App Attest; needs the apple_deps layer: `backend/layers/build_layer.sh apple_deps`). Off by default.
@@ -7,7 +7,7 @@ On by default; `-c plans=0` removes all of it (every function then behaves exact
 
 The stack is close to CloudFormation's 500 resources (421 before plans), so this construct is frugal: one Lambda permission per function for the whole API
 (scope_permission_to_method=False), `{store}` path parameters instead of a resource per store, CORS preflight only where a browser needs it (GET .../plan), and the
-statements go into each function's own default policy. Plans add about 34 resources, the device routes about 11 more.
+statements go into each function's own default policy. Plans add 33 resources, the device routes 11 more.
 
 Who may do what (least privilege; the launcher gets ONE separate inline policy, because adding statements one by one to its large default policy has dropped statements before):
   entitlements table   READ for the launcher, wallet, capabilities, watermark, library, plan and device functions; DeleteItem for the account-deletion worker; NOBODY at
@@ -19,7 +19,7 @@ Who may do what (least privilege; the launcher gets ONE separate inline policy, 
 from typing import Any, Callable, Dict, List, Optional
 
 from aws_cdk import CfnOutput, Duration, RemovalPolicy, Stack, aws_apigateway as apigw, aws_cloudwatch as cw, aws_dynamodb as dynamodb, aws_events as events, aws_events_targets as targets
-from aws_cdk import aws_iam as iam, aws_lambda as _lambda, aws_ssm as ssm
+from aws_cdk import aws_iam as iam, aws_lambda as _lambda
 from constructs import Construct
 
 NAMESPACE = "videomk/Plans"
@@ -53,9 +53,9 @@ class Plans(Construct):
             self, "FreeClaimsTable", partition_key=dynamodb.Attribute(name="pk", type=dynamodb.AttributeType.STRING), billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             time_to_live_attribute="ttl", removal_policy=keep,   # salted hashes only; no backup on purpose (a claim that expired must not come back)
         )
+        # The knobs: ONE SSM parameter, a JSON object. It is NOT created here: absent means every default, the admin script creates it on the first `config set`, and a
+        # deploy can therefore never reset what the owner set.
         param_name = f"/videomk/{stage}/plans/config"
-        ssm.StringParameter(self, "Config", parameter_name=param_name, string_value="{}",
-                            description="videomk plans: the owner's knobs as one JSON object (docs/PLANS.md). Edit with backend/scripts/plans_admin.py config set; {} = every default.")
         param_arn = f"arn:aws:ssm:{stack.region}:{stack.account}:parameter{param_name}"
         env = {"PLANS_ENABLED": "1", "ENTITLEMENTS_TABLE": entitlements.table_name, "FREE_CLAIMS_TABLE": claims.table_name, "PLANS_CONFIG_PARAM": param_name,
                "PLANS_REQUIRE_DEVICE_PROOF_DEFAULT": "1" if is_prod else "0"}   # production: no free creation without a device proof; other stages: testing goes on

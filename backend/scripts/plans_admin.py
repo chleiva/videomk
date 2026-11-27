@@ -74,7 +74,7 @@ def read_raw(ssm, name: str) -> dict:
     try:
         return json.loads(ssm.get_parameter(Name=name)["Parameter"]["Value"] or "{}")
     except ssm.exceptions.ParameterNotFound:
-        sys.exit(f"{name} does not exist: deploy the stack with plans on first")
+        return {}   # never set: every default applies; the first `config set` creates it
 
 
 def write_raw(ssm, name: str, raw: dict) -> None:

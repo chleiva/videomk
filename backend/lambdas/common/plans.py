@@ -151,7 +151,10 @@ def _read_raw() -> Dict[str, Any]:
     if _ssm is None:
         import boto3
         _ssm = boto3.client("ssm")
-    return json.loads(_ssm.get_parameter(Name=name)["Parameter"]["Value"] or "{}")
+    try:
+        return json.loads(_ssm.get_parameter(Name=name)["Parameter"]["Value"] or "{}")
+    except _ssm.exceptions.ParameterNotFound:   # never set: every default (the admin script creates the parameter on the first `config set`)
+        return {}
 
 
 def config(now: Optional[float] = None) -> Dict[str, Any]:

@@ -91,9 +91,8 @@ def test_the_knobs_are_read_from_one_parameter_with_a_short_cache_and_survive_a_
     ssm.put_parameter(Name="/videomk/qa/plans/config", Value="{broken", Type="String", Overwrite=True)
     assert plans.config(now=1200.0)["welcome_credits"] == 0                                   # unreadable: the last good values stay
     ssm.delete_parameter(Name="/videomk/qa/plans/config")
-    assert plans.config(now=1400.0)["free_daily_credits"] == 1
-    plans._cache.update({"at": 0.0, "raw": None})
-    assert plans.config(now=1500.0)["welcome_credits"] == 2                                   # nothing ever read: the defaults
+    c = plans.config(now=1400.0)
+    assert (c["welcome_credits"], c["free_daily_credits"]) == (2, 0)                           # no parameter (never set, or removed): every default, and no error
 
 
 # ======================================================================== the default free plan: 2 welcome credits from the app, no daily credit
