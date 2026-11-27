@@ -25,7 +25,13 @@ COVERED_BUCKETS = {"AssetsBucket": ["videos/<user>/", "uploads/<user>/", "waterm
 COVERED_VECTOR_INDEXES = ["PhotoIndex"]
 # Resources that exist only behind a flag and hold NO personal data: the image catalog (docs/IMAGE_CATALOG.md) is videomk's own generated pictures; its demand table keeps generic search
 # phrases and a salted hash of a video (no user id, no prompt) and expires after 12 months. They are not cleaned per user because nothing in them belongs to a user.
-OPTIONAL_EXEMPT_TABLES = {"CatalogTable": "generated pictures' metadata", "DemandTable": "generic phrases and salted video hashes, no user id, 12-month expiry"}
+OPTIONAL_EXEMPT_TABLES = {"CatalogTable": "generated pictures' metadata", "DemandTable": "generic phrases and salted video hashes, no user id, 12-month expiry",
+                          # Plans (plans_feature.py, removable with -c plans=0). The plan record IS deleted with the account: by the worker's `flags` step (it gets DeleteItem on
+                          # the table there; tests/test_plans_cdk.py checks it), so it is listed here only because this table exists behind a switch.
+                          "EntitlementsTable": "the account's plan record: deleted by the worker's flags step",
+                          # Kept on purpose: one free allowance per person. A claim is a salted HMAC of the normalised email / sign-in identity / device key, a day and a counter:
+                          # no account id, nothing that leads back to a person. It expires by itself (knob claim_retention_days). docs/PLANS.md, "Abuse controls".
+                          "FreeClaimsTable": "free-allowance claims: salted hashes only, no account id, own expiry"}
 OPTIONAL_EXEMPT_BUCKETS = {"CatalogBucket": "generated pictures"}
 OPTIONAL_EXEMPT_VECTOR_INDEXES = ["CatalogIndex"]
 

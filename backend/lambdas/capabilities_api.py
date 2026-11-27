@@ -6,10 +6,32 @@ The path user must be the signed-in user, like every other route.
 import os
 from typing import Any, Dict
 
-from common import i18n, watermark_store
+import logging
+import time
+
+from common import free_grants, i18n, plans, wallet, watermark_store
 from common.http import json_response
 from common.identity import extract_cognito_sub
 from engine import format_options
+
+logger = logging.getLogger()
+
+
+def add_plan(body: Dict[str, Any], user: str, event: Dict[str, Any], loc: str) -> None:
+    """The plan part of the answer (docs/PLANS.md): which plan, its limits, what is locked and the plan that unlocks it, the three plans for a paywall, whether a plan can be
+    bought yet, and what the Free plan offers this account right now (`free_creation`: none | welcome | daily; `free.available`, `free.reason`, `free.credits_left`,
+    `free.budget_paused`). Read only: nothing is granted here. The existing lists keep every option and gain `available` / `requires_plan`, so a locked option shows its badge."""
+    w = wallet._balance_plans(user, now=time.time(), tz=None, ctx=free_grants.context(event), grant=False)
+    limits = w["plan"]["limits"]
+    body["plan"] = {**w["plan"], "plans": plans.catalog()}
+    body["free_creation"], body["free"], body["can_upgrade"] = w["free_creation"], w["free"], w["can_upgrade"]
+    body["free"]["message"] = i18n.t(f"plan.free.{w['free']['reason']}", loc) if w["free"]["reason"] else None
+    for r in body.get("resolutions", []):
+        r["available"] = r["id"] in limits["resolutions"]
+        r["requires_plan"] = None if r["available"] else plans.lowest_plan(lambda x, rid=r["id"]: rid in x["resolutions"])
+    body["lengths"].update({"plan_max_seconds": limits["max_seconds"], "plan_max_minutes": limits["max_minutes"],
+                            "locked": [x for x in w["plan"]["locked"] if x["feature"] == "length"]})
+    body["plan_max_photos"] = min(int(body.get("max_photos") or limits["photos_per_video"]), limits["photos_per_video"])
 
 
 def _on(name: str) -> bool:
@@ -49,4 +71,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         except Exception:   # noqa: BLE001
             pass
     body["looks"] = looks(loc)
+    if plans.enabled():   # a read failure must never stop the creation options: the launcher still enforces
+        try:
+            add_plan(body, user, event, loc)
+        except Exception:   # noqa: BLE001
+            logger.exception("CAPABILITIES_PLAN_FAILED")
     return json_response(200, body, {"Cache-Control": "private, max-age=60", "Content-Language": loc, **i18n.vary_headers()})

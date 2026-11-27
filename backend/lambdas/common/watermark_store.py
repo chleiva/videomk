@@ -6,6 +6,10 @@ Entitlements come from the admin-written flags table (read only at runtime, like
   an active Pro library plan           (flags.storage_plan = 'pro', not lapsed)
   an unlimited test account            (flags.unlimited, only where ALLOW_UNLIMITED_ACCOUNTS=1, never in production)
 The policy hook FORCE_WATERMARK=1 (stack context `forceWatermark=1`, default off) makes every video of a NON-premium account carry the videomk mark: 'none' is then not available to them.
+
+Where plans are on (docs/PLANS.md) the PLAN decides instead, through `rights()`: Free = the videomk mark with the name and the end card, always; Pro = may remove it (and the
+gentle 'moments' mode once the engine has it); Max = also its own logo. The admin flag `watermark_custom` stays an override (own logo, nothing forced) and an unlimited test
+account has the rights of Max. An active Pro STORAGE flag no longer gives the logo there (owner decision 6 of the plans proposal: own logo is Max only).
 """
 import io
 import json
@@ -34,9 +38,9 @@ _ddb = None
 class WatermarkError(Exception):
     """An error the API turns into a response: status, a message key (common/i18n) and a stable `code` for the apps."""
 
-    def __init__(self, status: int, key: str, code: str = "", **params: Any):
+    def __init__(self, status: int, key: str, code: str = "", extra: Optional[Dict[str, Any]] = None, **params: Any):
         super().__init__(key)
-        self.status, self.key, self.code, self.params = status, key, code, params
+        self.status, self.key, self.code, self.params, self.extra = status, key, code, params, extra or {}   # extra: fields for the response body (which plan unlocks it)
 
 
 def s3():
@@ -108,29 +112,64 @@ def is_premium(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[f
 # (mark + the word), small, in the quiet corner of the shape, there for the whole video, and the closing "Made with videomk" card. Nothing of it can be chosen away.
 FORCED_SPEC: Dict[str, Any] = {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": ws.DEFAULT_OPACITY}
 PREMIUM_DEFAULT_PRESENCE = "moments"   # a premium account that keeps the videomk mark gets the gentle form unless it says otherwise
+def rights(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[float] = None) -> Dict[str, Any]:
+    """{premium (own logo), forced (the videomk mark cannot be removed), modes (the modes the plan allows, None where plans are off), by_plan, plan}."""
+    from common import plans
+    if not plans.enabled():
+        premium = is_premium(user, item, now)
+        return {"premium": premium, "forced": force_policy() and not premium, "modes": None, "by_plan": False, "plan": None}
+    from common import entitlements
+    item = flags(user) if item is None else item
+    unlimited = item.get("unlimited") is True and os.environ.get("ALLOW_UNLIMITED_ACCOUNTS", "0") == "1"
+    ent = entitlements.effective(user, now=now, unlimited=unlimited)
+    cfg = plans.config()
+    r = plans.rights(ent["plan"], cfg)
+    modes, forced = list(r["watermark_modes"]), bool(r["watermark_forced"]) and bool(cfg["enforce"])
+    if not cfg["enforce"]:
+        modes = list(plans.PLANS["pro"]["watermark_modes"]) if "none" not in modes else modes
+    if item.get("watermark_custom") is True:   # the admin's override: own logo, and the mark is not forced
+        modes, forced = sorted(set(modes) | {"none", "videomk", "custom"}), False
+    return {"premium": "custom" in modes, "forced": forced, "modes": modes, "by_plan": True, "plan": ent["plan"]}
+
+
+def _plan_for_mode(mode: str) -> Optional[str]:
+    from common import plans
+    return plans.lowest_plan(lambda x: mode in x["watermark_modes"])
+
+
+def forced_spec(spec: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """The Free plan's watermark: the videomk mark WITH the name and the end card. The person keeps the corner and the size; the opacity never goes under the default."""
+    keep = {k: v for k, v in (spec or {}).items() if k in ("position", "size")}
+    opacity = max(float((spec or {}).get("opacity") or ws.DEFAULT_OPACITY), ws.DEFAULT_OPACITY)
+    return ws.parse({**keep, "mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "opacity": opacity}, strict=False) or {"mode": "videomk"}   # there for the whole video: 'moments' is a paid plan's right
 
 
 def capabilities(user: str, locale: Optional[str] = None) -> Dict[str, Any]:
     """The `watermark` block of GET /users/{user}/capabilities."""
     from common import i18n
-    premium = is_premium(user)
-    forced = force_policy() and not premium
+    wr = rights(user)
+    premium, forced = wr["premium"], wr["forced"]
     loc = i18n.normalize(locale) or i18n.DEFAULT
-    modes = [{"id": "none", "available": not forced, "label": i18n.t("wm.mode.none", loc)},
+    modes = [{"id": "none", "available": not forced and (wr["modes"] is None or "none" in wr["modes"]), "label": i18n.t("wm.mode.none", loc)},
              {"id": "videomk", "available": True, "label": i18n.t("wm.mode.videomk", loc)},
              {"id": "custom", "available": premium, "requires": "premium", "label": i18n.t("wm.mode.custom", loc)}]
+    may_moments = (not forced) if not wr["by_plan"] else ("moments" in wr["modes"] and not forced)   # 'moments' is the `presence` of the videomk mark (not a mode): by plan where plans are on
+    if wr["by_plan"]:   # which plan unlocks each mode, so the apps can put its name on the option
+        for m in modes:
+            m["requires_plan"] = None if m["available"] else _plan_for_mode(m["id"])
     return {"modes": modes, "positions": list(ws.POSITIONS), "sizes": list(ws.SIZES), "styles": list(ws.STYLES),
             "style_options": [{"id": "mark", "available": not forced, "label": i18n.t("wm.style.mark", loc)}, {"id": "lockup", "available": True, "label": i18n.t("wm.style.lockup", loc)}],
             "presences": [{"id": "always", "available": True, "label": i18n.t("wm.presence.always", loc), "note": i18n.t("wm.presence.always_note", loc)},
-                          {"id": "moments", "available": not forced, **({"requires": "premium"} if forced else {}), "label": i18n.t("wm.presence.moments", loc), "note": i18n.t("wm.presence.moments_note", loc)}],
-            "default_presence": "always" if forced or not premium else PREMIUM_DEFAULT_PRESENCE,
+                          {"id": "moments", "available": may_moments, **({"requires": "premium"} if not may_moments else {}), **({"requires_plan": None if may_moments else _plan_for_mode("moments")} if wr["by_plan"] else {}),
+                           "label": i18n.t("wm.presence.moments", loc), "note": i18n.t("wm.presence.moments_note", loc)}],
+            "default_presence": PREMIUM_DEFAULT_PRESENCE if may_moments and (premium or wr["by_plan"]) else "always",
             "opacity": {"min": ws.OPACITY_MIN, "max": ws.OPACITY_MAX, "default": ws.DEFAULT_OPACITY},
             "premium": premium, "forced": forced, "end_card": True,
             **({"forced_watermark": dict(FORCED_SPEC), "forced_note": i18n.t("wm.forced_note", loc)} if forced else {}),
             "logo": {"max_bytes": MAX_LOGO_BYTES, "max_px": MAX_LOGO_PX, "types": ["image/png", "image/jpeg", "image/svg+xml"]}}
 
 
-def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any]], *, premium: bool, forced: bool, has_logo: bool) -> Dict[str, Any]:
+def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any]], *, premium: bool, forced: bool, has_logo: bool, modes: Optional[list] = None) -> Dict[str, Any]:
     """The watermark a video gets. `requested`: what the request asked for (already cleaned) or None; `profile`: the person's saved default or None.
     An explicit 'custom' by someone who is not premium, or without a logo, is refused; a saved 'custom' that no longer applies (lapsed plan, deleted logo) quietly falls back.
     `forced` (a free account where the stack forces the mark): always exactly FORCED_SPEC, whatever was asked or saved. A premium account's videomk mark without a
@@ -140,16 +179,26 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
     if not spec:
         spec = {"mode": "videomk"} if forced else {"mode": "none"}
     mode = spec.get("mode", "none")
+    if modes is not None and explicit and mode != "custom" and mode not in modes:   # plans: an explicit request for a mode the plan lacks is refused with the plan that has it
+        raise WatermarkError(403, "plan.watermark", "plan_watermark", extra={"feature": "watermark", "requires_plan": _plan_for_mode(mode)})
+    if modes is not None and not explicit and mode not in modes and mode != "custom":   # a saved setting from a plan that ended: falls back quietly
+        spec = {"mode": "videomk"} if forced else {"mode": "none"}
+        mode = spec["mode"]
     if mode == "custom" and (not premium or not has_logo):
         if explicit:
             if not premium:
-                raise WatermarkError(403, "wm.premium", "watermark_premium")
+                raise WatermarkError(403, "wm.premium", "watermark_premium", extra={"feature": "watermark", "requires_plan": _plan_for_mode("custom")} if modes is not None else None)
             raise WatermarkError(400, "wm.logo_missing", "watermark_logo_missing")
         spec = {"mode": "videomk"} if forced else {"mode": "none"}
         mode = spec["mode"]
-    if forced:   # the owner's policy: a free account's video always carries the name, for the whole video, with the closing card; nothing asked or saved changes it
-        return ws.parse(FORCED_SPEC, strict=False) or dict(FORCED_SPEC)
-    if mode == "videomk" and spec.get("presence") not in ws.PRESENCES and premium:
+    if forced and modes is None:   # the owner's policy where plans are off: a free account's video always carries the name, for the whole video, with the closing card; nothing asked or saved changes it
+        return ws.parse(FORCED_SPEC, strict=False) or dict(FORCED_SPEC)   # (with plans on, the launcher applies forced_spec to what comes out below: the same mark, and the person keeps the corner and the size)
+    may_moments = premium if modes is None else "moments" in modes   # the right to a mark that comes and goes: premium where plans are off, the plan's own list where they are on
+    if mode == "videomk" and spec.get("presence") == "moments" and modes is not None and not may_moments:
+        if explicit:
+            raise WatermarkError(403, "plan.watermark", "plan_watermark", extra={"feature": "watermark", "requires_plan": _plan_for_mode("moments")})
+        spec.pop("presence", None)   # a saved setting from a plan that ended
+    if mode == "videomk" and spec.get("presence") not in ws.PRESENCES and may_moments:
         spec["presence"] = PREMIUM_DEFAULT_PRESENCE   # (everyone else: absent, which is 'always', exactly as before the option existed)
     out = ws.parse(spec, strict=False) or {"mode": "none"}
     return out
