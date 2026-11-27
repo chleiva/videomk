@@ -253,6 +253,12 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     /** A platform chip: its format and resolution, and its recommended length unless a length was chosen since this screen opened. */
     fun selectPlatform(chip: PlatformChip) { options = CreatePlatforms.select(options, chip, lengthChosen || deckState is DeckState.Ready, caps.presets); touched = true }
 
+    /** "Make another" from a finished video: Create opens with the idea filled in and one choice changed (core/Remix.kt). Nothing is sent. */
+    fun startRemix(prompt: String, kind: com.videomk.app.core.RemixKind) {
+        text = prompt
+        com.videomk.app.core.Remix.apply(options, kind, caps)?.let { options = it; touched = true; if (kind == com.videomk.app.core.RemixKind.Cut30) lengthChosen = true }
+    }
+
     /** The Create screen opened: start from what this person used last time (or the first-time defaults). */
     fun openCreate(stored: CreatePrefs?) {
         storedPrefs = stored; touched = false; lengthChosen = false

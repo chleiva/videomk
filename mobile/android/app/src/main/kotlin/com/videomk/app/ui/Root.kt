@@ -146,8 +146,12 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         composable("video/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
             val detail: VideoDetailViewModel = viewModel(entry, key = "video-$id", factory = viewModelFactory { initializer { VideoDetailViewModel(application, container.backend, id) { container.ratingPrompt.recordCompletion(it) } } })
+            // "Make another" needs to know what this server can make (a Short, the other language, a 30-second cut): the same capabilities Create uses
+            androidx.compose.runtime.LaunchedEffect(Unit) { container.intake?.let { api -> runCatching { api.capabilities() }.getOrNull()?.let { composer.applyCapabilities(it) } } }
             VideoDetailScreen(app, detail, container.http, onFeedback = { feedbackFrom = FeedbackContext.AfterVideo }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("editor/$id") }, onMakeAnother = {
                 composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create")
+            }, caps = composer.caps, onRemix = { prompt, kind ->
+                composer.openCreate(container.createPrefs?.load(email)); composer.startRemix(prompt, kind); nav.navigate("create")
             })
         }
         composable("editor/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->

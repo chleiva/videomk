@@ -18,4 +18,10 @@
     <string name="notify_failed_title">Tu video no se terminó</string>
     <!-- Videos -->
     <string name="lib_play">Reproducir</string>
+    <!-- Player -->
+    <string name="remix_title">Crear otro</string>
+    <string name="remix_short">Hazlo un Short</string>
+    <string name="remix_spanish">Versión en español</string>
+    <string name="remix_english">Versión en inglés</string>
+    <string name="remix_cut30">Corte de 30 segundos</string>
 </resources>

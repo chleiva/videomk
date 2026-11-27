@@ -66,6 +66,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.width
 import com.videomk.app.core.VideoItem
+import com.videomk.app.core.Remix
+import com.videomk.app.core.RemixKind
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.videomk.app.core.VideoStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -77,7 +81,10 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkHttpClient, onBack: () -> Unit, onEdit: () -> Unit, onMakeAnother: () -> Unit = {}, onFeedback: () -> Unit = {}) {
+fun VideoDetailScreen(
+    app: AppViewModel, detail: VideoDetailViewModel, http: OkHttpClient, onBack: () -> Unit, onEdit: () -> Unit, onMakeAnother: () -> Unit = {}, onFeedback: () -> Unit = {},
+    caps: com.videomk.app.core.Capabilities = com.videomk.app.core.Capabilities.FALLBACK, onRemix: (String, RemixKind) -> Unit = { _, _ -> },
+) {
     val state by app.state.collectAsState()
     val video = state.video(detail.videoId)
     val playback by detail.playback.collectAsState()
@@ -92,29 +99,20 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
 
     Scaffold(
         containerColor = Vmk.colors.background,
-        topBar = {
-            // back (a glass circle), the title once, nothing on the right (docs/UX_2026_REDESIGN.md 4.1)
-            Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 56.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                GlassIconButton(Sym.ArrowBack, stringResource(R.string.common_back), onBack, Modifier.testTag("backButton"))
-                Text(
-                    if (video?.status?.isRunning == true) "" else video?.displayTitle ?: stringResource(R.string.video_title_fallback), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text,
-                    maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier.weight(1f).padding(horizontal = 8.dp).semantics { heading() },
-                )
-                Spacer(Modifier.size(48.dp))
-            }
-        },
+        // only the way back: the title sits under the picture, once
+        topBar = { VmkTopBar(onBack = onBack) },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             if (video == null) { FullScreenSpinner(); return@Box }
             val kind = when (video.status) { VideoStatus.Complete -> 1; is VideoStatus.Running -> 0; VideoStatus.Failed -> 2; VideoStatus.Rejected -> 3 }
             // Making settles into the player with a cross-fade (the same component as the home card, in its roomier layout)
             SettleCrossfade(kind, Modifier.fillMaxSize()) { k ->
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
                     when (k) {
-                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = onMakeAnother, onFeedback = onFeedback)
+                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = { detail.pause(); onMakeAnother() }, onFeedback = onFeedback, remixPrompt = Remix.prompt(state.briefs[video.id], video.title), caps = caps, onRemix = { p, k -> detail.pause(); onRemix(p, k) })
                         0 -> MakingBody(rememberMakingSnapshot(video, state), video.id, video.frameRatio, LocalContainerOrNull.current?.readyNotifier, Modifier.testTag("progressCard"))
-                        2 -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Sym.Warning, Vmk.colors.danger) }
-                        else -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Sym.PanTool, Vmk.colors.warning) }
+                        2 -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Sym.Warning, Vmk.colors.danger) }
+                        else -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Sym.PanTool, Vmk.colors.warning) }
                     }
                 }
             }
@@ -127,28 +125,37 @@ private fun captionOf(video: VideoItem): String? = listOfNotNull(video.durationS
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playback: PlaybackState, http: OkHttpClient, onEdit: () -> Unit, onMakeAnother: () -> Unit, onFeedback: () -> Unit) {
+private fun PlayerSection(
+    video: VideoItem, detail: VideoDetailViewModel, playback: PlaybackState, http: OkHttpClient, onEdit: () -> Unit, onMakeAnother: () -> Unit, onFeedback: () -> Unit,
+    remixPrompt: String?, caps: com.videomk.app.core.Capabilities, onRemix: (String, RemixKind) -> Unit,
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val fullScreen = rememberLauncherForActivityResult(FullScreenContract()) { r -> r?.let { detail.returnFromFullScreen(it.positionMs, it.playWhenReady, it.completed) } }
 
-    // edge to edge: the picture uses the whole width (black bars for tall videos), everything else keeps the 20 dp margin
-    when (playback) {
-        is PlaybackState.Ready -> InlinePlayer(detail.player, onFullScreen = { detail.enterFullScreen(video.isTall)?.let { fullScreen.launch(it) } }, ratio = video.frameRatio, edgeToEdge = true, onNew = onMakeAnother)
-        is PlaybackState.Error -> Column(
-            Modifier.padding(horizontal = 20.dp).fillMaxWidth().background(Vmk.colors.surface, androidx.compose.foundation.shape.RoundedCornerShape(Vmk.radius)).padding(24.dp).testTag("playbackError"),
-            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(playback.message, color = Vmk.colors.textSecondary)
-            OutlinedButton(onClick = { detail.reload() }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_try_again)) }
+    // the picture is a rounded card a little wider than the text gutter; a tall video keeps its own shape
+    Box(Modifier.padding(horizontal = Vmk.space.m)) {
+        when (playback) {
+            is PlaybackState.Ready -> InlinePlayer(detail.player, onFullScreen = { detail.enterFullScreen(video.isTall)?.let { fullScreen.launch(it) } }, ratio = video.frameRatio, onNew = onMakeAnother)
+            is PlaybackState.Error -> Column(
+                Modifier.fillMaxWidth().background(Vmk.colors.surface, RoundedCornerShape(Vmk.radii.videoCard)).padding(Vmk.space.xxl).testTag("playbackError"),
+                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Vmk.space.m),
+            ) {
+                Text(playback.message, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
+                TextButton(onClick = { detail.reload() }, modifier = Modifier.heightIn(min = Vmk.minTouch)) { Text(stringResource(R.string.common_try_again), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary) }
+            }
+            // the picture's place is kept while the link loads: nothing jumps when it arrives
+            else -> Box(Modifier.fillMaxWidth().aspectRatio(maxOf(video.frameRatio, 1f)).clip(RoundedCornerShape(Vmk.radii.videoCard)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { LiveRing(size = 28.dp) }
         }
-        else -> Box(Modifier.fillMaxWidth().androidAspect(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
     }
 
-    Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.padding(horizontal = Vmk.space.screen).padding(bottom = Vmk.space.xxl), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
         val liveAnnounce = stringResource(R.string.making_ready_announce, video.displayTitle)
-        // the caption also carries the "ready" announcement for screen readers (the visible title is in the top bar)
-        captionOf(video)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "$liveAnnounce $it"; liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }.testTag("videoCaption")) }
+        Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
+            Text(video.displayTitle, style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, maxLines = 4, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() }.testTag("videoTitle"))
+            // the caption also carries the "ready" announcement for screen readers
+            captionOf(video)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = "$liveAnnounce $it"; liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }.testTag("videoCaption")) }
+        }
 
         val description = (playback as? PlaybackState.Ready)?.description
         var sharing by remember { mutableStateOf(false) }
@@ -163,47 +170,64 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
         val savedText = stringResource(R.string.video_saved)
         val haptics = rememberHaptics()
 
-        // five icons, one primary (Share, filled); they wrap to a second row at large text sizes, never clip
-        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalArrangement = Arrangement.spacedBy(8.dp), itemVerticalAlignment = Alignment.CenterVertically) {
-            if (url != null) {
-                val shareLabel = stringResource(if (sharing) R.string.share_preparing else R.string.share_action)
-                Box(
-                    Modifier.size(56.dp).clip(CircleShape).background(Vmk.gradientNow)
-                        .clickable(enabled = !sharing, role = androidx.compose.ui.semantics.Role.Button) {
-                            sharing = true; shareError = null
-                            scope.launch {
-                                try { shareVideo(context, http, url, video.displayTitle) } catch (e: Exception) { shareError = shareFailedText }
-                                sharing = false
-                            }
-                        }.semantics { contentDescription = shareLabel }.testTag("shareButton"),
-                    contentAlignment = Alignment.Center,
-                ) { if (sharing) CircularProgressIndicator(Modifier.size(24.dp), color = Vmk.colors.onPrimary, strokeWidth = 2.dp) else Icon(Sym.Share, null, Modifier.size(26.dp), tint = Vmk.colors.onPrimary) }
+        // Share is the one labelled primary; Save, Edit, Info and More are quiet icons. They wrap to a second row at large text sizes, never clip.
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalArrangement = Arrangement.spacedBy(Vmk.space.s), itemVerticalAlignment = Alignment.CenterVertically) {
+            val shareLabel = stringResource(if (sharing) R.string.share_preparing else R.string.share_action)
+            PrimaryButton(shareLabel, onClick = {
+                val u = url ?: return@PrimaryButton
+                if (sharing) return@PrimaryButton
+                sharing = true; shareError = null
+                scope.launch {
+                    try { shareVideo(context, http, u, video.displayTitle); haptics.play(DesignTokens.Haptic.UploadDone) } catch (e: Exception) { shareError = shareFailedText; haptics.play(DesignTokens.Haptic.Warning) }
+                    sharing = false
+                }
+            }, modifier = Modifier.testTag("shareButton"), enabled = url != null, fill = false) {
+                if (sharing) LiveRing(size = 20.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White) else Icon(Sym.Share, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary)
+                Text(shareLabel, style = VmkType.cta, color = Vmk.colors.onPrimary)
             }
-            if (url != null && Build.VERSION.SDK_INT >= 29) {
-                if (saving) Box(Modifier.size(48.dp).semantics { contentDescription = Txt.s(R.string.video_saving) }, contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp) }
+            if (Build.VERSION.SDK_INT >= 29) {
+                if (saving) Box(Modifier.size(Vmk.minTouch).semantics { contentDescription = Txt.s(R.string.video_saving) }, contentAlignment = Alignment.Center) { LiveRing() }
                 else GlassIconButton(
-                    if (saved) Sym.Check else Sym.Download, stringResource(R.string.video_save),
+                    if (saved) Sym.Check else Sym.Download, stringResource(R.string.video_save), enabled = url != null,
                     onClick = {
+                        val u = url ?: return@GlassIconButton
                         saving = true; shareError = null; saved = false
                         scope.launch {
-                            try { saveVideoToGallery(context, http, url, video.displayTitle); saved = true; haptics.play(DesignTokens.Haptic.UploadDone); android.widget.Toast.makeText(context, savedText, android.widget.Toast.LENGTH_SHORT).show() } catch (e: Exception) { shareError = saveFailedText }
+                            try { saveVideoToGallery(context, http, u, video.displayTitle); saved = true; haptics.play(DesignTokens.Haptic.UploadDone); android.widget.Toast.makeText(context, savedText, android.widget.Toast.LENGTH_SHORT).show() } catch (e: Exception) { shareError = saveFailedText; haptics.play(DesignTokens.Haptic.Warning) }
                             saving = false
                         }
                     },
                     modifier = Modifier.testTag("saveButton"),
                 )
             }
-            if (video.editable) GlassIconButton(Sym.Tune, stringResource(R.string.video_edit_desc), onEdit, Modifier.testTag("editButton"))
-            if (description != null) GlassIconButton(Sym.Info, stringResource(R.string.action_info), { infoOpen = true }, Modifier.testTag("infoButton"))
+            if (video.editable) GlassIconButton(Sym.Edit, stringResource(R.string.video_edit_desc), onEdit, Modifier.testTag("editButton"))
+            GlassIconButton(Sym.Info, stringResource(R.string.action_info), { infoOpen = true }, Modifier.testTag("infoButton"), enabled = description != null)
             Box {
                 GlassIconButton(Sym.MoreHoriz, stringResource(R.string.action_more), { moreOpen = true }, Modifier.testTag("moreButton"))
-                androidx.compose.material3.DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }, containerColor = Vmk.colors.surface) {
-                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.lib_new_video)) }, leadingIcon = { Icon(Sym.Add, null) }, onClick = { moreOpen = false; onMakeAnother() }, modifier = Modifier.testTag("makeAnother"))
+                androidx.compose.material3.DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(Vmk.radii.card)) {
+                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.lib_new_video)) }, leadingIcon = { Icon(Sym.PlaySparkle, null) }, onClick = { moreOpen = false; onMakeAnother() }, modifier = Modifier.testTag("makeAnother"))
                     androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.feedback_title)) }, leadingIcon = { Icon(Sym.ChatBubbleOutline, null) }, onClick = { moreOpen = false; onFeedback() }, modifier = Modifier.testTag("feedbackLink"))
                 }
             }
         }
-        shareError?.let { Text(it, color = Vmk.colors.danger, style = MaterialTheme.typography.bodySmall, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) }
+        shareError?.let {
+            Row(Modifier.fillMaxWidth().semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+                Icon(Sym.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
+                Text(it, color = Vmk.colors.text, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+
+        // "Make another": the same idea with one choice changed. A chip opens Create prefilled (nothing is sent there until the person taps Create); only what this server can make is offered.
+        val offers = remember(video, caps, remixPrompt) { Remix.offers(video, caps, Txt.localeTag.take(2), remixPrompt != null) }
+        if (remixPrompt != null && offers.isNotEmpty()) Column(Modifier.padding(top = Vmk.space.s).testTag("remix"), verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+            Overline(stringResource(R.string.remix_title))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+                for (k in offers) SparkleChip(
+                    stringResource(when (k) { RemixKind.Short -> R.string.remix_short; RemixKind.Spanish -> R.string.remix_spanish; RemixKind.English -> R.string.remix_english; RemixKind.Cut30 -> R.string.remix_cut30 }),
+                    { haptics.play(DesignTokens.Haptic.Selection); onRemix(remixPrompt, k) }, Modifier.testTag("remix-${k.name}"), onClickLabel = stringResource(R.string.lib_new_video),
+                )
+            }
+        }
 
         if (infoOpen && description != null) InfoSheet(description, onDismiss = { infoOpen = false })
     }

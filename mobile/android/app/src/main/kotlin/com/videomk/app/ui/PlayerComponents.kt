@@ -1,5 +1,8 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -77,7 +80,7 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
     androidx.compose.foundation.layout.BoxWithConstraints(modifier.fillMaxWidth().then(if (edgeToEdge) Modifier.background(Color.Black) else Modifier), contentAlignment = Alignment.Center) {
     val frame = if (ratio >= 1f) Modifier.fillMaxWidth().aspectRatio(ratio)
         else Modifier.height(minOf(maxWidth / ratio, MAX_TALL_DP.dp)).aspectRatio(ratio)
-    Box(frame.clip(if (edgeToEdge) androidx.compose.ui.graphics.RectangleShape else RoundedCornerShape(Vmk.radius)).background(Color.Black).testTag("player")) {
+    Box(frame.clip(if (edgeToEdge) androidx.compose.ui.graphics.RectangleShape else RoundedCornerShape(Vmk.radii.videoCard)).background(Color.Black).testTag("player")) {
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
@@ -97,12 +100,16 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
         if (player != null) androidx.compose.animation.AnimatedVisibility(controlsVisible && !ended, Modifier.align(Alignment.TopEnd), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) {
             GlassIconButton(Sym.Fullscreen, stringResource(R.string.player_full_screen), onFullScreen, Modifier.padding(6.dp).testTag("fullScreenButton"), onDark = true)
         }
-        if (ended && player != null) Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.62f)).testTag("endCard"), contentAlignment = Alignment.Center) {
-            Row(horizontalArrangement = Arrangement.spacedBy(28.dp), verticalAlignment = Alignment.CenterVertically) {
+        // the end card: Replay (a quiet glass icon) and New video (a labelled white pill with the play-sparkle glyph)
+        if (ended && player != null) Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.55f)).testTag("endCard"), contentAlignment = Alignment.Center) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.l), verticalAlignment = Alignment.CenterVertically) {
                 GlassIconButton(Sym.Replay, stringResource(R.string.video_replay), { player.seekTo(0); player.play() }, Modifier.testTag("replayButton"), onDark = true, size = 56.dp)
-                if (onNew != null) Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    GlassIconButton(Sym.Add, stringResource(R.string.lib_new_video), onNew, Modifier.testTag("endNewVideo"), filled = true, size = 56.dp)
-                    Text(stringResource(R.string.lib_new_video), style = MaterialTheme.typography.labelMedium, color = Color.White, modifier = Modifier.padding(top = 2.dp))
+                if (onNew != null) Row(
+                    Modifier.heightIn(min = 52.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color.White).clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onNew).padding(horizontal = Vmk.space.xl, vertical = Vmk.space.m).testTag("endNewVideo"),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s),
+                ) {
+                    Icon(Sym.PlaySparkle, null, tint = Color(0xFF000000L or com.videomk.app.core.DesignTokens.primary.light.toLong()), modifier = Modifier.size(22.dp))
+                    Text(stringResource(R.string.lib_new_video), style = VmkType.cta, color = Color(0xFF000000L or com.videomk.app.core.DesignTokens.text.light.toLong()))
                 }
             }
         }
