@@ -40,7 +40,7 @@
     <string name="lib_pending_uploading">Uploading photos %1$d of %2$d</string>
     <string name="lib_pending_sending">Sending your request…</string>
     <string name="lib_upload_pill">Uploading %1$d of %2$d</string>
-    <string name="lib_open_media">Open My media</string>
+    <string name="lib_open_media">Open Media</string>
 
     <!-- progress estimate and steps -->
     <string name="lib_left_less_than_minute">Less than a minute left.</string>
@@ -49,10 +49,10 @@
     <string name="lib_step_voice">Voice</string>
     <string name="lib_step_pictures">Pictures</string>
     <string name="lib_step_final_cut">Final cut</string>
-    <string name="lib_sentence_starting">Getting started.</string>
-    <string name="lib_sentence_writing">Writing the story.</string>
-    <string name="lib_sentence_voice">Finding pictures and a voice.</string>
-    <string name="lib_sentence_rendering">Putting it all together.</string>
+    <string name="lib_sentence_starting">Getting started</string>
+    <string name="lib_sentence_writing">Finding the story</string>
+    <string name="lib_sentence_voice">Finding pictures and a voice</string>
+    <string name="lib_sentence_rendering">Putting it all together</string>
 
     <!-- relative times -->
     <string name="lib_ago_now">Just now</string>
@@ -106,8 +106,8 @@
     <string name="share_copied">Copied</string>
     <string name="share_failed">Couldn\'t prepare the video to share. Check your connection and try again.</string>
     <string name="share_chooser_title">Share video</string>
-    <string name="share_clip_label_title">videomk title</string>
-    <string name="share_clip_label_description">videomk description</string>
+    <string name="share_clip_label_title">VideoMK title</string>
+    <string name="share_clip_label_description">VideoMK description</string>
 
     <!-- editor -->
     <string name="editor_title">Edit video</string>

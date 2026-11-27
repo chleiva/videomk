@@ -24,7 +24,7 @@ object Txt {
 
     var provider: StringProvider
         get() = installed ?: ServiceLoader.load(StringProvider::class.java).firstOrNull()?.also { installed = it }
-            ?: error("No StringProvider installed (VideoMkApp installs one; JVM tests get JvmStringProvider from the test source set)")
+            ?: error("No StringProvider installed (the application class installs one; JVM tests get JvmStringProvider from the test source set)")
         set(value) { installed = value }
 
     fun s(@StringRes id: Int, vararg args: Any): String = provider.string(id, args)

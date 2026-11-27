@@ -29,8 +29,8 @@
     <string name="deck_status_failed">Fix your presentation to continue</string>
     <string name="deck_status_short">Add a few more words, or leave the description empty</string>
     <string name="deck_title_fallback">Narrated presentation</string>
-    <string name="lib_sentence_deck_reading">Reading your slides.</string>
-    <string name="lib_sentence_deck_writing">Writing the narration.</string>
+    <string name="lib_sentence_deck_reading">Reading your slides</string>
+    <string name="lib_sentence_deck_writing">Writing the narration</string>
 
     <string name="deck_err_too_large_title">That file is too big</string>
     <string name="deck_err_too_large_body">Presentations can be up to %1$d MB. Try making the pictures smaller, or export it as a PDF.</string>

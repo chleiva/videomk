@@ -181,21 +181,22 @@ fun VideoMkTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () 
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fill: Boolean = true, content: (@Composable RowScope.() -> Unit)? = null) {
     val shape = CircleShape
+    // disabled is an opaque fill with a quiet label and no glow: never a see-through gradient (over a photo grid that printed two texts on top of each other)
+    val label = if (enabled) Vmk.colors.onPrimary else Vmk.colors.textSecondary
     Box(
         modifier
             .then(if (fill) Modifier.fillMaxWidth() else Modifier)
             .heightIn(min = Vmk.primaryButton)
-            .alpha(if (enabled) 1f else 0.4f)
             .then(if (enabled) Modifier.vmkGlow(shape) else Modifier)
             .clip(shape)
-            .background(Vmk.gradient, shape)
+            .then(if (enabled) Modifier.background(Vmk.gradient, shape) else Modifier.background(Vmk.colors.surface3, shape))
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = Vmk.space.xxl, vertical = Vmk.space.m),
         contentAlignment = Alignment.Center,
     ) {
-        CompositionLocalProvider(LocalContentColor provides Vmk.colors.onPrimary) {
+        CompositionLocalProvider(LocalContentColor provides label) {
             if (content != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) { content() }
-            else Text(text, style = VmkType.cta, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+            else Text(text, style = VmkType.cta, color = label, textAlign = TextAlign.Center)
         }
     }
 }

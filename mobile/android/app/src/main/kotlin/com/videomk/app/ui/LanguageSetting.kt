@@ -40,30 +40,12 @@ fun LanguageSetting() {
     var choice by remember { mutableStateOf(language.choice) }
     var open by remember { mutableStateOf(false) }
     @Composable fun nameOf(c: String) = stringResource(when (c) { "en" -> R.string.settings_language_en; "es" -> R.string.settings_language_es; else -> R.string.settings_language_system })
-    // one row: the name on the left, the value and a chevron on the right; the choices are a menu (no footer: the app language does not change the language of videos)
+    // the same row as every other setting: the name, the value and a chevron; the choices are a menu
     Box(Modifier.fillMaxWidth().testTag("languageSetting")) {
-        Row(
-            Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_language_title)) { open = true },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // at large text the value sits under the name, so neither word is ever broken in two
-            if (isLargeText()) androidx.compose.foundation.layout.Column(Modifier.weight(1f).padding(vertical = Vmk.space.s)) {
-                Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge)
-                Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
-            } else {
-                Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
-            }
-            Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary)
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Vmk.colors.surface) {
+        VmkRow(stringResource(R.string.settings_language_title), icon = Sym.Language, value = nameOf(choice), trailing = Sym.ExpandMore, onClick = { open = true })
+        VmkMenu(open, { open = false }) {
             AppLocale.choices.forEach { c ->
-                DropdownMenuItem(
-                    text = { Text(nameOf(c), fontWeight = if (choice == c) FontWeight.Bold else FontWeight.Normal) },
-                    trailingIcon = { if (choice == c) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
-                    onClick = { open = false; if (choice != c) { choice = c; if (language.set(c)) (context as? android.app.Activity)?.recreate() } },
-                    modifier = Modifier.testTag("language-$c"),
-                )
+                VmkMenuItem(nameOf(c), null, Modifier.testTag("language-$c"), selected = choice == c) { open = false; if (choice != c) { choice = c; if (language.set(c)) (context as? android.app.Activity)?.recreate() } }
             }
         }
     }

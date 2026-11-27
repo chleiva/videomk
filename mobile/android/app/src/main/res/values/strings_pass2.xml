@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Second pass (2026-11-27): cancel, delete with undo, credits sheet, plans, looks, watermark. -->
+<resources>
+    <string name="lib_status_cancelled">Cancelled</string>
+    <string name="video_cancelled_body">Your credits are back.</string>
+    <string name="err_plan_default">This isn\'t included in your plan.</string>
+    <string name="question_skip_all">Skip all</string>
+    <string name="question_position">Question %1$d of %2$d</string>
+    <plurals name="stop_paused_hours">
+        <item quantity="one">Paused · try again in about %1$d hour</item>
+        <item quantity="other">Paused · try again in about %1$d hours</item>
+    </plurals>
+    <plurals name="stop_paused_minutes">
+        <item quantity="one">Paused · try again in %1$d minute</item>
+        <item quantity="other">Paused · try again in %1$d minutes</item>
+    </plurals>
+    <string name="stop_paused_minute">Paused · try again in a minute</string>
+    <string name="stop_plan_title">Not on your plan</string>
+    <string name="stop_free_paused_title">Free videos are done for today</string>
+    <string name="stop_free_unavailable_title">Free videos aren\'t available</string>
+    <string name="stop_resumes">Back %1$s.</string>
+    <string name="plan_coming_soon">%1$s is coming soon.</string>
+    <string name="plan_today_at">today, %1$s</string>
+    <string name="plan_tomorrow_at">tomorrow, %1$s</string>
+    <string name="plan_tomorrow">tomorrow</string>
+    <string name="create_use_length">Use %1$s</string>
+    <string name="common_undo">Undo</string>
+    <string name="common_deleted">Deleted</string>
+    <string name="cancel_done">Cancelled</string>
+    <plurals name="cancel_done_credits">
+        <item quantity="one">Cancelled · %1$d credit back</item>
+        <item quantity="other">Cancelled · %1$d credits back</item>
+    </plurals>
+    <string name="cancel_unavailable">This video can\'t be cancelled from here right now.</string>
+    <string name="making_cancel">Cancel video</string>
+    <string name="video_delete">Delete</string>
+    <string name="video_cancelled_title">Cancelled</string>
+    <string name="info_about">About</string>
+    <string name="info_made_with_ai">Made with AI by VideoMK.</string>
+    <string name="info_captions">Captions are part of the picture.</string>
+    <string name="info_sources">Sources and credits</string>
+    <string name="photo_menu_library">Photo library</string>
+    <string name="photo_menu_presentation">Presentation</string>
+    <string name="deck_replaced_photos">A presentation replaces the photos.</string>
+    <string name="create_with_length">Create · %1$s</string>
+    <string name="create_locked_default">Free videos aren\'t available right now.</string>
+    <string name="plans_coming_soon">Pro and Max plans are coming soon.</string>
+    <string name="opt_scenes">Scenes</string>
+    <string name="opt_background">Background</string>
+    <string name="opt_watermark">Watermark</string>
+    <string name="opt_watermark_default">Default</string>
+    <string name="opt_presence">Shows</string>
+    <string name="opt_beta">Beta</string>
+    <string name="brand_name" translatable="false">VideoMK</string>
+    <plurals name="wallet_next_free_credit">
+        <item quantity="one">Next free credit: %1$s</item>
+        <item quantity="other">Next free credits: %1$s</item>
+    </plurals>
+    <string name="wallet_plan">Plan</string>
+    <string name="wallet_plan_longest">Videos up to %1$s</string>
+    <string name="wallet_plan_watermark">VideoMK watermark</string>
+    <string name="wallet_bucket_plan">Plan credits</string>
+    <string name="settings_photos_footer">Dates and places put your photos in order in a video. Your photos stay private.</string>
+    <string name="media_storage_short">When storage is full you can still view and delete photos; new ones wait.</string>
+    <string name="player_controls">Show or hide the controls</string>
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_seek">Position in the video</string>
+    <string name="collection_empty_title">No photos here yet</string>
+</resources>

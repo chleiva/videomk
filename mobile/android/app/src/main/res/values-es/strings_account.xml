@@ -2,7 +2,7 @@
 <resources>
     <!-- navigation, tabs, player -->
     <string name="nav_tab_videos">Videos</string>
-    <string name="nav_tab_media">Mi biblioteca</string>
+    <string name="nav_tab_media">Biblioteca</string>
     <string name="nav_load_videos_failed">No pudimos cargar tus videos.</string>
     <string name="nav_minutes_short">%1$d min</string>
     <string name="player_full_screen">Pantalla completa</string>
@@ -60,22 +60,22 @@
     <string name="auth_sign_in_or_create">Iniciar sesión o crear cuenta</string>
     <string name="auth_sign_in_failed">No pudimos iniciar sesión. Inténtalo de nuevo.</string>
     <string name="auth_account_link_failed">Vinculamos tus cuentas, pero no pudimos terminar de iniciar sesión. Toca el botón una vez más.</string>
-    <string name="auth_legal_line">Al continuar, aceptas los %1$s y la %2$s.</string>
-    <string name="auth_terms">Términos y condiciones</string>
-    <string name="auth_privacy_policy">Política de privacidad</string>
+    <string name="auth_legal_line">Se aplican los %1$s y la %2$s.</string>
+    <string name="auth_terms">Términos</string>
+    <string name="auth_privacy_policy">Privacidad</string>
 
     <!-- settings -->
     <string name="settings_title">Ajustes</string>
     <string name="settings_account">Cuenta</string>
     <string name="settings_signed_in_as">Sesión iniciada como</string>
     <string name="settings_sign_out">Cerrar sesión</string>
-    <string name="settings_sign_out_confirm">¿Cerrar sesión en videomk?</string>
+    <string name="settings_sign_out_confirm">¿Cerrar sesión en VideoMK?</string>
     <string name="settings_photos">Fotos</string>
     <string name="settings_photo_dates">Usar fechas de las fotos</string>
     <string name="settings_photo_dates_hint">Ordena tus fotos según cuándo se tomaron y las agrupa por día</string>
     <string name="settings_photo_locations">Usar ubicaciones de las fotos</string>
     <string name="settings_photo_locations_hint">Nombra los lugares en tu historia. Se envía una ubicación aproximada (a ~1 km), nunca el punto exacto, y no se guarda cuando tu video ya está planificado. La ubicación siempre se quita de los archivos de las fotos.</string>
-    <string name="settings_media_privacy">Tus fotos son privadas. Solo tú puedes verlas. Nadie en videomk las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina una foto o todo cuando quieras.</string>
+    <string name="settings_media_privacy">Tus fotos son privadas. Solo tú puedes verlas. Nadie en VideoMK las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina una foto o todo cuando quieras.</string>
     <string name="settings_organize_title">Organizar nuevas subidas</string>
     <string name="settings_organize_hint">Preguntar te ofrece organizar tras una subida grande. Siempre agrupa las fotos por lugar y mes, y añade las subidas posteriores a las colecciones que coincidan. Nunca deja todo como está.</string>
     <string name="settings_about">Acerca de</string>
@@ -86,11 +86,11 @@
     <!-- account deletion -->
     <string name="deletion_card_title">Eliminar cuenta</string>
     <string name="deletion_card_button">Eliminar mi cuenta…</string>
-    <string name="deletion_settings_body">Elimina de forma permanente tu cuenta, tus videos, tus fotos y Mi biblioteca, tus créditos y tu inicio de sesión. No se puede deshacer.</string>
+    <string name="deletion_settings_body">Elimina de forma permanente tu cuenta, tus videos, tus fotos y Biblioteca, tus créditos y tu inicio de sesión. No se puede deshacer.</string>
     <string name="deletion_header">¿Eliminar tu cuenta?</string>
     <string name="deletion_deletes_title">Se eliminará para siempre:</string>
     <string name="deletion_item_videos">Tus videos</string>
-    <string name="deletion_item_photos">Tus fotos y todo lo de Mi biblioteca</string>
+    <string name="deletion_item_photos">Tus fotos y todo lo de Biblioteca</string>
     <string name="deletion_item_credits">Tus créditos, incluidos los que te queden</string>
     <string name="deletion_item_signin">Tu inicio de sesión</string>
     <string name="deletion_irreversible">No se puede deshacer.</string>
@@ -105,12 +105,12 @@
     <string name="deletion_reauth_opening">Abriendo la página de inicio de sesión en tu navegador. Inicia sesión allí de nuevo para confirmar. No se elimina nada hasta que lo hagas.</string>
     <string name="deletion_reauth_body">Inicia sesión de nuevo en tu navegador para confirmar que eres tú. No se elimina nada hasta que lo hagas.</string>
     <string name="deletion_done_title">Tu cuenta se está eliminando</string>
-    <string name="deletion_apple_available">Iniciaste sesión con Apple. Para terminar, confirma con Apple para que videomk deje de estar conectado a tu Apple ID. Es opcional y tu cuenta se elimina de todos modos.</string>
-    <string name="deletion_apple_manual">Para terminar, ve a appleid.apple.com, inicia sesión, abre Inicio de sesión y seguridad, luego Iniciar sesión con Apple, elige videomk y selecciona Dejar de usar el Apple ID.</string>
-    <string name="deletion_apple_done">Listo: videomk ya no tiene acceso a través de tu Apple ID.</string>
+    <string name="deletion_apple_available">Iniciaste sesión con Apple. Para terminar, confirma con Apple para que VideoMK deje de estar conectado a tu Apple ID. Es opcional y tu cuenta se elimina de todos modos.</string>
+    <string name="deletion_apple_manual">Para terminar, ve a appleid.apple.com, inicia sesión, abre Inicio de sesión y seguridad, luego Iniciar sesión con Apple, elige VideoMK y selecciona Dejar de usar el Apple ID.</string>
+    <string name="deletion_apple_done">Listo: VideoMK ya no tiene acceso a través de tu Apple ID.</string>
     <string name="deletion_apple_button">Terminar con Apple</string>
     <string name="deletion_skip_close">Omitir y cerrar</string>
-    <string name="deletion_fail_offline">No pudimos conectar con videomk, así que no sabemos si la eliminación empezó. Revisa tu conexión e inténtalo de nuevo. Es seguro volver a intentarlo.</string>
+    <string name="deletion_fail_offline">No pudimos conectar con VideoMK, así que no sabemos si la eliminación empezó. Revisa tu conexión e inténtalo de nuevo. Es seguro volver a intentarlo.</string>
     <string name="deletion_fail_server">Algo salió mal por nuestra parte y no se eliminó nada. Inténtalo de nuevo.</string>
     <string name="deletion_fail_forbidden">Esta solicitud no coincide con la cuenta en la que tienes la sesión iniciada, así que no se eliminó nada. Cierra sesión, inicia sesión de nuevo y vuelve a intentarlo.</string>
     <string name="deletion_fail_rejected">No se aceptó la confirmación, así que no se eliminó nada. Revisa la palabra e inténtalo de nuevo.</string>

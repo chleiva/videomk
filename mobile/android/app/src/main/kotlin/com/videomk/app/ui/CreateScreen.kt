@@ -142,13 +142,11 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     val scroll = rememberScrollState()
     val focus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
-    var discard by remember { mutableStateOf(false) }
+    var photoMenu by remember { mutableStateOf(false) }
     var moreOpen by rememberSaveable { mutableStateOf(false) }
-    var languageOpen by remember { mutableStateOf(false) }
     var costInfo by remember { mutableStateOf(false) }
     var tip by remember { mutableStateOf<String?>(null) }
     var pulse by remember { mutableIntStateOf(0) }
-    var confirmDeck by rememberSaveable { mutableStateOf(false) }   // photos exist: ask before a presentation replaces them
     val deckState = composer.deckState
     val shake = remember { Animatable(0f) }
     val flash = remember { Animatable(0f) }
@@ -167,7 +165,10 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         if (uri != null) composer.addDeck(com.videomk.app.data.DeckPicker.pickOf(context.contentResolver, uri), replacePhotos = true)
     }
     fun launchDeckPicker() { val types = caps.deck?.mimeTypes ?: return; if (types.isNotEmpty()) docPicker.launch(types) }
-    fun addDeck() { if (composer.totalPhotos > 0) confirmDeck = true else launchDeckPicker() }
+    // a video is made from photos or from a presentation: picking a presentation replaces the photos (no question; the bar says so)
+    val replacedText = stringResource(R.string.deck_replaced_photos)
+    fun addDeck() { if (composer.totalPhotos > 0) container?.undo?.say(replacedText); launchDeckPicker() }
+    val pickFromPhone = rememberPhonePhotoPicker(composer)
     LaunchedEffect(composer.focusRequests) { if (composer.focusRequests > 0) { runCatching { focus.requestFocus() }; keyboard?.show() } }
     LaunchedEffect(tip) { if (tip != null) { delay(2500); tip = null } }
     LaunchedEffect(pulse) {
@@ -179,7 +180,12 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     }
 
     val lengths = caps.presets
-    val status = ComposerLogic.status(composer.text, options, balance, 0, listening, sending = false, lengths = lengths, createScreen = true, checking = composer.checking, deck = deckState.takeIf { it.attached })
+    // the lengths this plan makes: a fix is never a length the server would refuse
+    val status = ComposerLogic.status(composer.text, options, balance, 0, listening, sending = false, lengths = lengths.filter { caps.lengthAllowed(it) }, createScreen = true, checking = composer.checking, deck = deckState.takeIf { it.attached })
+    // "not enough credits" comes with its fix ON the button: one tap makes the longest video the balance pays for
+    val offer = status.fix?.minutes?.takeIf { status.kind == StatusKind.NotAffordable }
+    // a Free account with nothing to spend and no free video available: the plans and the showcase instead of a form that cannot work
+    val gate = if (com.videomk.app.DebugHooks.balanceOverride(context) != null) null else com.videomk.app.core.CreateGate.locked(state.wallet, caps.plans)
     val announcement = statusAnnouncement(status)
     val photoTotal = composer.totalPhotos
     val comingSoonText = stringResource(R.string.create_coming_soon)
@@ -228,6 +234,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     fun tapCreate() {
         if (!CreateSubmit.tapAllowed(phase)) return
         if (status.sendReady) { haptics.play(DesignTokens.Haptic.Send); composer.create(container?.intake, ::send, ::accepted) }
+        else if (offer != null) { haptics.play(DesignTokens.Haptic.Send); composer.setLength(offer); composer.create(container?.intake, ::send, ::accepted) }
         else {
             haptic(false); pulse++
             view.announceForAccessibility(announcement)
@@ -240,12 +247,12 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
         if (fix.addCredits) onOpenWallet() else composer.setLength(fix.minutes!!)
     }
 
-    // back is never destructive: a draft that is only photos picked in My media just closes (they stay attached, and Media keeps its selection); anything typed asks first
+    // back is never destructive and never asks: the draft (words, photos, a presentation) stays for the next visit; the person empties it by deleting the words
     fun close() {
         if (CreateSubmit.closeIsBlocked(phase)) { view.announceForAccessibility(phaseText.orEmpty()); return }
         if (CreateSubmit.closeCancelsCheck(phase)) { composer.dismissSheet(); return }
-        val onlyLibraryPhotos = composer.text.isBlank() && composer.photos.isEmpty() && composer.loading == 0 && !composer.deckState.attached
-        if (composer.hasDraft && !onlyLibraryPhotos) discard = true else if (onlyLibraryPhotos && composer.library.isNotEmpty()) onClose() else { composer.discardDraft(); onClose() }
+        composer.dictation.stop(); composer.dismissSheet()
+        onClose()
     }
     BackHandler { close() }
 
@@ -274,7 +281,15 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
             Column(Modifier.fillMaxWidth().then(if (locked) Modifier.alpha(dim).lockTouches() else Modifier), verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
                 // photos and mic on the left, options on the right: three quiet icons (gone while a request runs: only Cancel is offered then)
                 if (!locked) Row(Modifier.fillMaxWidth().offset(x = (-2).dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-                    if (!deckState.attached) GlassIconButton(Sym.AddPhotoAlternate, stringResource(R.string.create_add_photos), { composer.openAddPhotos(null) }, Modifier.testTag("photoButton"), badge = AddPhotosLogic.badge(photoTotal))
+                    // the photo icon is a menu, each row goes straight to its picker: the phone's own photo picker, Media, and a presentation where the server offers it
+                    if (!deckState.attached) Box {
+                        GlassIconButton(Sym.AddPhotoAlternate, stringResource(R.string.create_add_photos), { haptics.play(DesignTokens.Haptic.Selection); photoMenu = true }, Modifier.testTag("photoButton"), badge = AddPhotosLogic.badge(photoTotal))
+                        VmkMenu(photoMenu, { photoMenu = false }) {
+                            VmkMenuItem(stringResource(R.string.photo_menu_library), Sym.Image, Modifier.testTag("photoMenuLibrary")) { photoMenu = false; pickFromPhone() }
+                            if (container?.mediaApi != null) VmkMenuItem(stringResource(R.string.nav_tab_media), Sym.PhotoLibrary, Modifier.testTag("photoMenuMedia")) { photoMenu = false; composer.openAddPhotos(1) }
+                            if (caps.deck != null) VmkMenuItem(stringResource(R.string.photo_menu_presentation), Sym.Slideshow, Modifier.testTag("addDeck")) { photoMenu = false; addDeck() }
+                        }
+                    }
                     GlassIconButton(if (listening) Sym.Stop else Sym.Mic, stringResource(if (listening) R.string.create_stop_dictation else R.string.create_dictate_desc), ::onMic, Modifier.testTag("micButton"), filled = listening)
                     if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger, modifier = Modifier.weight(1f)) else Spacer(Modifier.weight(1f))
                     GlassIconButton(Sym.Tune, stringResource(R.string.create_options), { optionsOpen = true }, Modifier.testTag("optionsMenu"))
@@ -298,10 +313,14 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                             LengthMenuRow(stringResource(R.string.deck_suggested) + " · " + Lengths.short(ready.info.suggestedMinutes), ready.info.suggestedCredits, options.useSuggestedLength, balance != null && ready.info.suggestedCredits > balance, true, "length-suggested") { lengthOpen = false; composer.useSuggestedLength() }
                         }
                         var anyOver = false
+                        val longerPlan = caps.planName(caps.longerPlan)
                         for (mi in caps.presets) {
                             val over = maxMinutes != null && mi > maxMinutes + 1e-9
                             if (over) anyOver = true
-                            LengthMenuRow(Lengths.short(mi), Lengths.credits(mi), !options.useSuggestedLength && Math.abs(options.minutes - mi) < 1e-9, balance != null && Lengths.credits(mi) > balance, !over, "length-${if (mi == Math.floor(mi)) mi.toInt().toString() else mi.toString()}") { lengthOpen = false; haptics.play(DesignTokens.Haptic.Selection); composer.setLength(mi) }
+                            // a length the plan does not make is shown with the plan that does and cannot be picked (the server refuses it, it does not shorten it)
+                            val onPlan = caps.lengthAllowed(mi)
+                            val price = Lengths.credits(mi) * maxOf(1, options.creditsMultiplier)
+                            LengthMenuRow(Lengths.short(mi), price, !options.useSuggestedLength && Math.abs(options.minutes - mi) < 1e-9, balance != null && price > balance, !over && onPlan, "length-${if (mi == Math.floor(mi)) mi.toInt().toString() else mi.toString()}", plan = longerPlan.takeIf { !onPlan }) { lengthOpen = false; haptics.play(DesignTokens.Haptic.Selection); composer.setLength(mi) }
                         }
                         if (anyOver && maxMinutes != null) Text(stringResource(R.string.create_over_max, CreatePlatforms.chip(caps, options.platform)!!.label, Lengths.clock(maxMinutes)), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.l, vertical = Vmk.space.s).widthIn(max = 240.dp))
                     }
@@ -320,6 +339,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
             Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = Vmk.space.screen - 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 GlassIconButton(Sym.Close, stringResource(if (CreateSubmit.closeCancelsCheck(phase)) R.string.common_cancel else R.string.common_close), ::close, Modifier.testTag("createCancel"), enabled = !CreateSubmit.closeIsBlocked(phase))
             }
+            if (gate != null) { LockedCreate(gate, caps, container, Modifier.weight(1f)); return@Column }
 
             Column(Modifier.weight(1f).verticalScroll(scroll).padding(horizontal = Vmk.space.screen), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
                 Column(Modifier.fillMaxWidth().then(if (locked) Modifier.alpha(dim).lockTouches() else Modifier), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
@@ -334,7 +354,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                     dictationHint(dictationState)
                     if (deckState.attached) DeckCard(
                         deckState, caps.deck, onRemove = { composer.removeDeck() }, onPickAgain = { composer.removeDeck(); launchDeckPicker() }, onRetry = { composer.deck.retry() }, onKeepWaiting = { composer.deck.keepWaiting() },
-                    ) else if (photoTotal > 0) PhotoStrip(composer, locked) { composer.openAddPhotos(null) }
+                    ) else if (photoTotal > 0) PhotoStrip(composer, locked) { photoMenu = true }
                     tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = it }) }
                     // only when there is something to say: slides are wide, a platform's limit, what the photos can fill
                     if (composer.deckVerticalWarning) Column(Modifier.fillMaxWidth().testTag("deckVerticalWarning")) {
@@ -368,35 +388,56 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 androidx.compose.animation.AnimatedContent(capsule is CreateCapsule.View.Live, transitionSpec = { androidx.compose.animation.fadeIn(tween(if (still) DesignTokens.Motion.reducedFade else 220)) togetherWith androidx.compose.animation.fadeOut(tween(DesignTokens.Motion.reducedFade)) }, label = "capsule") { live ->
                     if (live) (capsule as? CreateCapsule.View.Live ?: CreateCapsule.View.Live(CreateCapsule.Step.Starting, false)).let { LiveCapsule(it, onCancel = { haptics.play(DesignTokens.Haptic.Selection); composer.dismissSheet() }) }
                     else Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-                        CreateButton(status.sendReady, options.credits, status.text, status.fix != null, ::tapCreate)
+                        CreateButton(status.sendReady, if (offer != null) Lengths.credits(offer) * maxOf(1, options.creditsMultiplier) else options.credits, status.text, status.fix != null, offer, ::tapCreate)
                         if (status.kind == StatusKind.Ready || status.kind == StatusKind.PhotoHint || (status.kind == StatusKind.TooShort && composer.text.isEmpty() && pulse == 0 && !deckState.attached)) {
                             Text(if (balance != null) pluralStringResource(R.plurals.create_credits_left, balance, balance) else "", style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().testTag("costLine"))
-                        } else StatusLine(status, flash.value, shake.value, ::applyFix)
+                        } else StatusLine(if (offer != null) status.copy(fix = null) else status, flash.value, shake.value, ::applyFix)
                     }
                 }
             }
         }
     }
 
-    if (optionsOpen) CreateOptionsSheet(composer, caps, options, onLanguage = { languageOpen = true }, onCostInfo = { costInfo = true }, onDismiss = { optionsOpen = false })
+    if (optionsOpen) CreateOptionsSheet(composer, caps, options, photoTotal > 0 || deckState.attached, onCostInfo = { costInfo = true }, onDismiss = { optionsOpen = false })
 
-    if (composer.addPhotosRequest != null) AddPhotosSheet(
-        composer, container?.mediaApi, container?.mediaUploads?.arrivals, startOnMyMedia = composer.addPhotosRequest?.tab == 1, onDismiss = { composer.closeAddPhotos() },
-        onAddDeck = if (caps.deck != null) ({ addDeck() }) else null,
-    )
-    if (confirmDeck) AlertDialog(
-        onDismissRequest = { confirmDeck = false }, title = { Text(stringResource(R.string.deck_replace_photos_title)) }, text = { Text(stringResource(R.string.deck_replace_photos_text)) },
-        confirmButton = { TextButton(onClick = { confirmDeck = false; launchDeckPicker() }, modifier = Modifier.heightIn(min = 48.dp).testTag("deckReplaceConfirm")) { Text(stringResource(R.string.deck_replace_photos_confirm)) } },
-        dismissButton = { TextButton(onClick = { confirmDeck = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.deck_replace_photos_keep)) } },
-    )
+    if (composer.addPhotosRequest != null && container?.mediaApi != null) AddPhotosSheet(composer, container.mediaApi, container.mediaUploads?.arrivals, onDismiss = { composer.closeAddPhotos() })
     CreateSheetsHost(composer, balance, options, onSubmitEdit = {}, onWallet = onOpenWallet)
-    if (costInfo) CostSheet(fourK = caps.resolutions.any { it.id.lowercase() == "4k" || it.id.lowercase() == "2160p" }) { costInfo = false }
-    if (languageOpen) LanguageDialog(composer, options, caps) { languageOpen = false }
-    if (discard) AlertDialog(
-        onDismissRequest = { discard = false }, title = { Text(stringResource(R.string.create_discard_title)) }, text = { Text(stringResource(R.string.create_discard_text)) },
-        confirmButton = { TextButton(onClick = { discard = false; composer.discardDraft(); onClose() }, modifier = Modifier.heightIn(min = 48.dp).testTag("discardConfirm")) { Text(stringResource(R.string.create_discard), color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { discard = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.create_keep_editing)) } },
-    )
+    if (costInfo) CostSheet(fourK = caps.resolutions.any { it.multiplier > 1 && it.available }) { costInfo = false }
+}
+
+/**
+ * Create for an account that cannot make a video right now (a Free account with no credit to spend while free videos are off, used up or paused for today):
+ * the server's own sentence, when it comes back, the plans by name (nothing can be bought yet, so no button), and the showcase of videos made with the product.
+ */
+@Composable
+private fun LockedCreate(gate: com.videomk.app.core.CreateGate.Locked, caps: com.videomk.app.core.Capabilities, container: com.videomk.app.AppContainer?, modifier: Modifier = Modifier) {
+    var videos by remember { mutableStateOf<List<com.videomk.app.core.GalleryVideo>?>(null) }
+    LaunchedEffect(Unit) { videos = runCatching { container?.backend?.gallery() }.getOrNull().orEmpty() }
+    val play = rememberLauncherForActivityResult(FullScreenContract()) { }
+    Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = Vmk.space.screen).padding(bottom = Vmk.space.xxl).testTag("createLocked"), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+            Text(gate.message ?: stringResource(R.string.create_locked_default), style = VmkType.prompt, color = Vmk.colors.text, modifier = Modifier.semantics { heading() }.testTag("lockedMessage"))
+            gate.resumesAt?.let { Text(stringResource(R.string.stop_resumes, com.videomk.app.core.PlanText.moment(it)), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary) }
+            if (!caps.plans.canUpgrade) Text(stringResource(R.string.plans_coming_soon), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("plansSoon"))
+        }
+        val list = videos
+        if (list == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radii.videoCard)).background(Vmk.colors.surfaceRaised))
+        else for (v in list) {
+            val shape = RoundedCornerShape(Vmk.radii.videoCard)
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.tile)).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_play)) { play.launch(FullScreenArgs(v.videoUrl, 0, true, com.videomk.app.core.VideoItem.ratioOf(v.aspect) < 0.99f)) }
+                    .semantics(mergeDescendants = true) { }.testTag("showcaseVideo"),
+                verticalArrangement = Arrangement.spacedBy(Vmk.space.s),
+            ) {
+                Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(shape).background(Vmk.makingGradient)) {
+                    if (v.posterUrl != null) StableImage(v.posterUrl, ContentScale.Crop, Modifier.fillMaxSize())
+                    else Icon(Sym.PlayArrow, null, tint = Color.White.copy(alpha = 0.9f), modifier = Modifier.align(Alignment.Center).size(44.dp))
+                    v.seconds?.let { GlassChip(duration(it), Modifier.align(Alignment.BottomEnd).padding(Vmk.space.s)) }
+                }
+                if (v.title.isNotBlank()) Text(v.title, style = VmkType.makingTitle, color = Vmk.colors.text, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = Vmk.space.xs).padding(bottom = Vmk.space.xs))
+            }
+        }
+    }
 }
 
 @Composable
@@ -433,15 +474,18 @@ private fun PhotoHintBlock(hint: String, fix: Double?, composer: ComposerViewMod
  * Create: the ONE primary button, full width, never absent. The verb on the left and its price on the right. With nothing to send yet it is tonal and a tap explains why.
  */
 @Composable
-private fun CreateButton(ready: Boolean, credits: Int, reason: String, hasFix: Boolean, onClick: () -> Unit) {
+private fun CreateButton(ready: Boolean, credits: Int, reason: String, hasFix: Boolean, offer: Double?, onClick: () -> Unit) {
     val shape = CircleShape
-    val createLabel = stringResource(R.string.create_create_video)
-    val boxState = if (ready) pluralStringResource(R.plurals.create_state_ready, credits, credits)
+    val active = ready || offer != null
+    // "Create" alone, or with the length the balance pays for: "Create · 1 min" (one tap makes that video)
+    val createLabel = if (offer != null) stringResource(R.string.create_with_length, Lengths.short(offer)) else stringResource(R.string.create_create_video)
+    val boxState = if (active) pluralStringResource(R.plurals.create_state_ready, credits, credits)
         else stringResource(if (hasFix) R.string.create_state_not_ready_fix else R.string.create_state_not_ready, reason)
-    val c = Vmk.colors.onPrimary
+    // when it cannot send it LOOKS like it cannot: an opaque quiet fill, no glow. The tap still answers (it says what is missing).
+    val c = if (active) Vmk.colors.onPrimary else Vmk.colors.textSecondary
     Row(
-        Modifier.fillMaxWidth().heightIn(min = Vmk.primaryButton).vmkGlow(shape).clip(shape).background(Vmk.gradient)
-            .clickable(role = Role.Button, onClickLabel = if (ready) createLabel else stringResource(R.string.create_explain_not_ready), onClick = onClick)
+        Modifier.fillMaxWidth().heightIn(min = Vmk.primaryButton).then(if (active) Modifier.vmkGlow(shape) else Modifier).clip(shape).then(if (active) Modifier.background(Vmk.gradient) else Modifier.background(Vmk.colors.surface3))
+            .clickable(role = Role.Button, onClickLabel = if (active) createLabel else stringResource(R.string.create_explain_not_ready), onClick = onClick)
             .semantics { contentDescription = createLabel; stateDescription = boxState }.testTag("sendButton")
             .padding(horizontal = Vmk.space.xxl, vertical = Vmk.space.m),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s),
@@ -477,7 +521,7 @@ private fun LiveCapsule(v: CreateCapsule.View.Live, onCancel: () -> Unit) {
         }
         // Cancel keeps its place while the send is in flight (it cannot be taken back then), so nothing jumps
         TextButton(onClick = onCancel, enabled = v.canCancel, modifier = Modifier.heightIn(min = Vmk.minTouch).alpha(if (v.canCancel) 1f else 0f).testTag("capsuleCancel")) {
-            Text(stringResource(R.string.common_cancel), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.textSecondary)
+            Text(stringResource(R.string.common_cancel), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text)
         }
     }
 }
@@ -486,29 +530,6 @@ private fun LiveCapsule(v: CreateCapsule.View.Live, onCancel: () -> Unit) {
 private fun Modifier.lockTouches(): Modifier = this.pointerInput(Unit) {
     awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() } } }
 }
-
-@Composable
-private fun LanguageDialog(composer: ComposerViewModel, o: CreateOptions, caps: com.videomk.app.core.Capabilities, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss, title = { Text(stringResource(R.string.create_narration_language)) },
-        text = {
-            Column {
-                val rows = listOf("auto" to stringResource(R.string.create_same_as_description)) + caps.languages.map { it.id to it.label }
-                for ((id, label) in rows) {
-                    Row(
-                        Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.RadioButton) { composer.updateOptions(o.copy(language = id)); onDismiss() }.padding(vertical = 4.dp).testTag("language-$id"),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        androidx.compose.material3.RadioButton(selected = o.language == id, onClick = null)
-                        Text(label, color = Vmk.colors.text)
-                    }
-                }
-            }
-        },
-        confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
-}
-
 
 /** The prompt: large borderless text on the page (no card, no outline); the short hint is the only words around it. */
 @Composable
@@ -561,8 +582,8 @@ private fun RemovableThumb(onRemove: () -> Unit, content: @Composable () -> Unit
     val remove = stringResource(R.string.media_remove_photo)
     Box(Modifier.size(64.dp)) {
         Box(Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))) { content() }
-        Box(Modifier.align(Alignment.TopEnd).size(40.dp).clickable(role = Role.Button, onClickLabel = remove, onClick = onRemove).semantics { contentDescription = remove }.testTag("removePhoto"), contentAlignment = Alignment.TopEnd) {
-            Box(Modifier.padding(2.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.Center) {
+        Box(Modifier.align(Alignment.TopEnd).offset(x = 8.dp, y = (-8).dp).size(Vmk.minTouch).clickable(role = Role.Button, onClickLabel = remove, onClick = onRemove).semantics { contentDescription = remove }.testTag("removePhoto"), contentAlignment = Alignment.TopEnd) {
+            Box(Modifier.padding(10.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.Center) {
                 Icon(Sym.Close, null, tint = Color.White, modifier = Modifier.size(14.dp))
             }
         }
@@ -571,7 +592,7 @@ private fun RemovableThumb(onRemove: () -> Unit, content: @Composable () -> Unit
 
 /** One row of the Length menu: "2 min" and its price; greyed when over the platform's limit; the warning tint when the balance is short. */
 @Composable
-private fun LengthMenuRow(label: String, credits: Int, selected: Boolean, overBalance: Boolean, enabled: Boolean, tag: String, onClick: () -> Unit) {
+private fun LengthMenuRow(label: String, credits: Int, selected: Boolean, overBalance: Boolean, enabled: Boolean, tag: String, plan: String? = null, onClick: () -> Unit) {
     val tint = if (overBalance) Vmk.colors.warning else Vmk.colors.textSecondary
     val desc = pluralStringResource(if (selected) R.plurals.create_length_desc_selected else R.plurals.create_length_desc, credits, credits, label)
     androidx.compose.material3.DropdownMenuItem(
@@ -584,15 +605,21 @@ private fun LengthMenuRow(label: String, credits: Int, selected: Boolean, overBa
                 }
             }
         },
-        trailingIcon = { if (selected) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
-        enabled = enabled, onClick = onClick, modifier = Modifier.semantics { this.selected = selected; contentDescription = desc }.testTag(tag),
+        trailingIcon = { if (selected) Icon(Sym.Check, null, tint = Vmk.colors.primary) else if (plan != null) PlanTag(plan) },
+        enabled = enabled, onClick = onClick, modifier = Modifier.semantics { this.selected = selected; contentDescription = if (plan != null) "$desc. $plan" else desc }.testTag(tag),
     )
 }
 
-/** The pill value is one short word: "Shorts" for the vertical-video group, "Video" for no platform in particular (the menu rows carry the long names). */
+/** The pill shows the same word as its menu row (rule 13); only the long vertical-video group is shortened to "Shorts". */
 @Composable
 private fun platformPillValue(o: CreateOptions, caps: com.videomk.app.core.Capabilities): String {
     if (CreatePlatforms.isCustom(o, caps)) return stringResource(R.string.create_custom)
-    val c = CreatePlatforms.chip(caps, o.platform) ?: return stringResource(R.string.create_pill_video)
-    return when (c.id) { "shorts" -> "Shorts"; "other" -> stringResource(R.string.create_pill_video); else -> c.label }
+    val c = CreatePlatforms.chip(caps, o.platform) ?: return stringResource(R.string.create_platform_other)
+    return when (c.id) { "shorts" -> "Shorts"; else -> c.label }
+}
+
+/** The plan that unlocks a choice ("Pro", "Max"): a small tonal tag on the locked row or tile. */
+@Composable
+internal fun PlanTag(plan: String, modifier: Modifier = Modifier) {
+    Text(plan, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 1, modifier = modifier.clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = Vmk.space.s, vertical = 2.dp))
 }

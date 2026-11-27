@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="media_title">Mi biblioteca</string>
-    <string name="media_privacy_copy">Tus fotos son privadas. Solo tú puedes verlas y nadie en videomk las revisa. Se usan para encontrarlas y para crear los videos que pidas. Elimina una foto o todo cuando quieras.</string>
+    <string name="media_title">Biblioteca</string>
+    <string name="media_privacy_copy">Tus fotos son privadas. Solo tú puedes verlas y nadie en VideoMK las revisa. Se usan para encontrarlas y para crear los videos que pidas. Elimina una foto o todo cuando quieras.</string>
     <string name="media_add_photos">Agregar fotos</string>
-    <string name="media_add_to_library">Agregar fotos a Mi biblioteca</string>
+    <string name="media_add_to_library">Agregar fotos a Biblioteca</string>
     <string name="media_select">Seleccionar</string>
     <string name="media_more">Más</string>
-    <string name="media_organize_library">Organizar mi biblioteca</string>
+    <string name="media_organize_library">Organizar Biblioteca</string>
     <string name="media_storage">Almacenamiento</string>
     <string name="media_read_only">Solo lectura hasta que vuelvas a estar por debajo de tu límite de almacenamiento. Aún puedes ver y eliminar fotos.</string>
     <string name="media_close_upload_details">Cerrar detalles de la subida</string>
@@ -28,7 +28,7 @@
     <string name="media_clear_search">Borrar búsqueda</string>
     <string name="media_empty_title">Tus fotos, en un lugar privado</string>
     <string name="media_empty_text">Agrega fotos una vez, encuéntralas describiéndolas y crea videos con ellas.</string>
-    <string name="media_empty_text_pick">Aún no hay fotos. Agrégalas en Mi biblioteca.</string>
+    <string name="media_empty_text_pick">Aún no hay fotos. Agrégalas en Biblioteca.</string>
     <string name="media_offline">Sin conexión. Se muestran las fotos guardadas en este teléfono.</string>
     <string name="media_select_all_in_view">Seleccionar todo aquí</string>
     <string name="media_private_title">Privado por diseño</string>
@@ -40,7 +40,7 @@
     <string name="media_rename_or_delete">Cambiar nombre o eliminar</string>
     <string name="media_new_collection">Nueva colección</string>
     <string name="media_create">Crear</string>
-    <string name="media_collection_menu_note">Las fotos se quedan en Mi biblioteca. Solo se elimina la colección.</string>
+    <string name="media_collection_menu_note">Las fotos se quedan en Biblioteca. Solo se elimina la colección.</string>
     <string name="media_name">Nombre</string>
     <string name="media_cancel_selection">Cancelar selección</string>
     <string name="media_collection">Colección</string>
@@ -70,7 +70,7 @@
     <string name="media_select_clear">Quitar selección</string>
     <string name="media_select_all_count">Seleccionar todo (%1$d)</string>
     <string name="media_select_all">Seleccionar todo</string>
-    <string name="media_err_unavailable">Mi biblioteca no está disponible en esta versión.</string>
+    <string name="media_err_unavailable">Biblioteca no está disponible en esta versión.</string>
     <string name="media_added_to">Se agregó a %1$s.</string>
     <string name="upload_banner">Subiendo %1$d de %2$d · %3$s</string>
     <string name="upload_err_post">No se pudo subir una foto.</string>
@@ -137,7 +137,7 @@
     <string name="organize_stop_button">Detener</string>
     <string name="organize_paused">Organización en pausa</string>
     <string name="organize_pill_progress">Organizando %1$,d de %2$,d</string>
-    <string name="organize_open_media">Abrir Mi biblioteca</string>
+    <string name="organize_open_media">Abrir Biblioteca</string>
     <string name="organize_auto">Auto</string>
     <string name="organize_auto_desc">Colección automática</string>
     <string name="upload_newest_first">Más recientes primero</string>
@@ -175,12 +175,12 @@
     <string name="upload_resume">Reanudar</string>
     <string name="upload_pause_all">Pausar todas</string>
     <string name="photos_tab_phone">Este teléfono</string>
-    <string name="photos_tab_media">Mi biblioteca</string>
+    <string name="photos_tab_media">Biblioteca</string>
     <string name="photos_tab_desc">%1$s, pestaña %2$d de 2</string>
     <string name="photos_choose_title">Elige fotos de tu teléfono</string>
-    <string name="photos_picker_explain">El selector de fotos del sistema muestra tu galería. videomk solo recibe las fotos que elijas y nunca necesita acceso al resto.</string>
+    <string name="photos_picker_explain">El selector de fotos del sistema muestra tu galería. VideoMK solo recibe las fotos que elijas y nunca necesita acceso al resto.</string>
     <string name="photos_open_picker">Abrir selector de fotos</string>
-    <string name="photos_picker_note">Elige fotos de tu teléfono con el selector del sistema. videomk solo recibe las fotos que elijas y nunca necesita acceso a toda tu galería.</string>
+    <string name="photos_picker_note">Elige fotos de tu teléfono con el selector del sistema. VideoMK solo recibe las fotos que elijas y nunca necesita acceso a toda tu galería.</string>
     <string name="photos_open_picker_label">Abrir el selector de fotos</string>
     <string name="photos_choose_desc">Elegir fotos de este teléfono</string>
     <string name="photos_choose">Elegir fotos</string>
@@ -208,12 +208,12 @@
         <item quantity="other">%1$d fotos</item>
     </plurals>
     <plurals name="media_delete_collection_body">
-        <item quantity="one">Se elimina la colección. Su %1$d foto se queda en Mi biblioteca.</item>
-        <item quantity="other">Se elimina la colección. Sus %1$d fotos se quedan en Mi biblioteca.</item>
+        <item quantity="one">Se elimina la colección. Su %1$d foto se queda en Biblioteca.</item>
+        <item quantity="other">Se elimina la colección. Sus %1$d fotos se quedan en Biblioteca.</item>
     </plurals>
     <plurals name="media_delete_collection_body_auto">
-        <item quantity="one">Se elimina la colección. Su %1$d foto se queda en Mi biblioteca. Las fotos nuevas de ese mes podrían crearla de nuevo.</item>
-        <item quantity="other">Se elimina la colección. Sus %1$d fotos se quedan en Mi biblioteca. Las fotos nuevas de ese mes podrían crearla de nuevo.</item>
+        <item quantity="one">Se elimina la colección. Su %1$d foto se queda en Biblioteca. Las fotos nuevas de ese mes podrían crearla de nuevo.</item>
+        <item quantity="other">Se elimina la colección. Sus %1$d fotos se quedan en Biblioteca. Las fotos nuevas de ese mes podrían crearla de nuevo.</item>
     </plurals>
     <plurals name="media_selected">
         <item quantity="one">%1$d seleccionada</item>

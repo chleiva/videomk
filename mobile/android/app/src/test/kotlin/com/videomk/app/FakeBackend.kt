@@ -35,7 +35,13 @@ class FakeBackend : Backend {
     val startOptions = mutableListOf<CreateOptions>()
     val startMeta = mutableListOf<kotlinx.serialization.json.JsonObject?>()
 
-    override suspend fun listVideos(): List<VideoItem> { listCalls++; listError?.let { throw it }; return videos }
+    /** When set, the next list call waits on it (a request left hanging by a sleeping phone); it is used once. */
+    var listHang: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+    override suspend fun listVideos(): List<VideoItem> {
+        listCalls++
+        listHang?.let { h -> listHang = null; h.await() }
+        listError?.let { throw it }; return videos
+    }
     override suspend fun wallet(): WalletInfo = wallet
     override suspend fun startGeneration(prompt: String, clientRequestId: String, options: CreateOptions, media: List<String>, mediaMeta: kotlinx.serialization.json.JsonObject?, libraryMedia: List<String>, brief: kotlinx.serialization.json.JsonObject?, deck: String?): String {
         startBriefs += brief
@@ -58,7 +64,14 @@ class FakeBackend : Backend {
         if (retryResult is RetryResult.Started || retryResult == RetryResult.AlreadyRunning) videos = videos.map { if (it.id == videoId) it.copy(status = com.videomk.app.core.VideoStatus.Running(com.videomk.app.core.VideoStatus.Stage.Starting)) else it }   // the server list shows the same video making
         return retryResult
     }
-    override suspend fun deleteVideo(videoId: String): Boolean { deleteCalls += videoId; return deleteResult }
+    override suspend fun deleteVideo(videoId: String): Boolean { deleteCalls += videoId; if (deleteResult) videos = videos.filterNot { it.id == videoId }; return deleteResult }
+    var cancelResult: com.videomk.app.core.CancelResult = com.videomk.app.core.CancelResult.Unsupported
+    val cancelCalls = mutableListOf<String>()
+    override suspend fun cancelVideo(videoId: String): com.videomk.app.core.CancelResult {
+        cancelCalls += videoId
+        if (cancelResult is com.videomk.app.core.CancelResult.Cancelled) videos = videos.map { if (it.id == videoId) it.copy(status = com.videomk.app.core.VideoStatus.Cancelled) else it }
+        return cancelResult
+    }
     override suspend fun playback(videoId: String) = PlaybackInfo("https://example.com/$videoId.mp4", null)
     override suspend fun editorSnapshot(videoId: String): EditorSnapshot = if (snapshots.size > 1) snapshots.removeFirst() else snapshots.firstOrNull() ?: throw ApiError.Server
     override suspend fun applyEdits(videoId: String, baseRev: Int, ops: List<EditOp>, mode: RenderMode): Int {

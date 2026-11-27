@@ -152,8 +152,8 @@ class DeckTest {
             Txt.provider = JvmStringProvider("es")
             for (p in DeckProblem.entries) { assertTrue(p.name, DeckFailure(p).title().isNotBlank()); assertFalse(p.name, DeckFailure(p).body(CAPS).contains("deck_err")) }
             assertEquals("Ese archivo tiene contraseña", DeckFailure(DeckProblem.Encrypted).title())
-            assertEquals("Leyendo tus diapositivas.", MakingSteps.deckSentence(VideoStatus.DeckStage.Reading))
-            assertEquals("Escribiendo la narración.", MakingSteps.deckSentence(VideoStatus.DeckStage.Writing))
+            assertEquals("Leyendo tus diapositivas", MakingSteps.deckSentence(VideoStatus.DeckStage.Reading))
+            assertEquals("Escribiendo la narración", MakingSteps.deckSentence(VideoStatus.DeckStage.Writing))
         } finally { Txt.provider = old }
     }
 
@@ -558,7 +558,7 @@ class DeckTest {
 
         val reading = MakingSnapshot.ofDeck("Q3 review", VideoStatus.DeckStage.Reading, 0.0, 4.0)
         val writing = MakingSnapshot.ofDeck("Q3 review", VideoStatus.DeckStage.Writing, 0.0, 4.0)
-        assertEquals("Reading your slides.", reading.stageLine); assertEquals("Writing the narration.", writing.stageLine)
+        assertEquals("Reading your slides", reading.stageLine); assertEquals("Writing the narration", writing.stageLine)
         assertEquals(0, reading.current); assertEquals(0, writing.current)   // still inside the first usual step (Script)
         assertTrue(reading.fills.sum() < writing.fills.sum() + 1e-6 || writing.fills[0] > 0f)
         // the bar never goes backwards from reading to writing to the usual steps, and never passes the end of its slice

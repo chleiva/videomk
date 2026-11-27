@@ -72,13 +72,14 @@ internal fun DeleteAccountCard(onOpen: () -> Unit) {
 /** Filled red button for the one action that cannot be undone. White text on the light red, dark text on the lighter dark-mode red (contrast above 4.5:1 in both). */
 @Composable
 internal fun DestructiveButton(text: String, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(Vmk.radius)
+    // the same pill and size as the primary button, in the danger colour; disabled is the kit's opaque quiet fill
+    val shape = androidx.compose.foundation.shape.CircleShape
     Box(
-        modifier.fillMaxWidth().heightIn(min = 52.dp).alpha(if (enabled) 1f else 0.4f)
-            .clip(shape).background(Vmk.colors.danger, shape)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier.fillMaxWidth().heightIn(min = Vmk.primaryButton)
+            .clip(shape).background(if (enabled) Vmk.colors.danger else Vmk.colors.surface3, shape)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick).padding(horizontal = Vmk.space.xxl, vertical = Vmk.space.m),
         contentAlignment = Alignment.Center,
-    ) { Text(text, style = MaterialTheme.typography.titleMedium, color = if (Vmk.colors.dark) Color(0xFF2A0B0B) else Color.White, textAlign = TextAlign.Center) }
+    ) { Text(text, style = VmkType.cta, color = if (!enabled) Vmk.colors.textSecondary else MaterialTheme.colorScheme.onError, textAlign = TextAlign.Center) }
 }
 
 /**
@@ -154,13 +155,9 @@ private fun Form(typed: String, onTyped: (String) -> Unit, onStart: (String) -> 
     Text(DeletionText.REAUTH_NOTE, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
     Text(stringResource(R.string.deletion_type_to_confirm, DeletionText.CONFIRM_WORD), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, fontWeight = FontWeight.SemiBold)
     val typeToConfirm = stringResource(R.string.deletion_type_to_confirm, DeletionText.CONFIRM_WORD)
-    OutlinedTextField(
-        value = typed, onValueChange = onTyped, singleLine = true,
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, autoCorrectEnabled = false),
-        modifier = Modifier.fillMaxWidth().semantics { contentDescription = typeToConfirm }.testTag("deleteConfirmField"),
-    )
+    VmkField(typed, onTyped, Modifier.semantics { contentDescription = typeToConfirm }.testTag("deleteConfirmField"), keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, autoCorrectEnabled = false))
     DestructiveButton(stringResource(R.string.deletion_confirm_button), enabled = typed.trim() == DeletionText.CONFIRM_WORD, onClick = { onStart(typed) }, modifier = Modifier.testTag("deleteAccountConfirm"))
-    TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("deleteAccountCancel")) { Text(stringResource(R.string.common_cancel), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
+    TextAction(stringResource(R.string.common_cancel), onClose, Modifier.fillMaxWidth().testTag("deleteAccountCancel"), color = Vmk.colors.textSecondary)
 }
 
 @Composable

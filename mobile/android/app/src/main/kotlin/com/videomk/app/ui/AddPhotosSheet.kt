@@ -67,6 +67,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.widthIn
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -78,150 +79,66 @@ import com.videomk.app.core.PhotoLimits
 import com.videomk.app.core.PromptSearch
 
 /**
- * ONE sheet for adding photos (docs/UI_DESIGN.md section f): a segmented control (This phone | My media) over ONE selection and ONE selection bar.
- *
- * How "This phone" works without any storage permission: the grid shows the photos already chosen from the phone; its first tile opens the system Photo
- * Picker (PickMultipleVisualMedia, or the app's chooser when the picker is missing), and what comes back lands in the composer's strip at once and is
- * numbered here. "My media" is a real grid of the private library. Both tabs write into the composer live, so the strip behind the sheet is always the
- * truth, the numbers run across both sources, and the 100 total is enforced for both.
+ * The phone's photos, straight from the system Photo Picker (no storage permission, no explainer in between): one tap on "Photo library" in Create's photo menu
+ * opens it, and what comes back lands in Create's strip. Returns the function that opens it; when there is no room left it says so instead.
  */
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
-fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: ArrivalTracker?, startOnMyMedia: Boolean, onDismiss: () -> Unit, onAddDeck: (() -> Unit)? = null) {
+fun rememberPhonePhotoPicker(composer: ComposerViewModel): () -> Unit {
     val context = LocalContext.current
-    var tab by rememberSaveable { mutableIntStateOf(if (startOnMyMedia && api != null) 1 else 0) }
-    val vm: MediaViewModel? = if (api != null) viewModel(key = "media-picker", factory = viewModelFactory { initializer { MediaViewModel(api, null, null, PhotoLimits.MAX_PHOTOS, tracker ?: ArrivalTracker()) } }) else null
-    val initialLibrary = remember { composer.library.toList() }
-    val phoneCount = composer.photos.size + composer.loading
-    val libraryCount = composer.library.size
-    val total = AddPhotosLogic.total(phoneCount, libraryCount)
-    val prompt = composer.text
-    val container = LocalContainerOrNull.current
-
-    if (vm != null) {
-        // the picker is "ready" once it has taken over what is already chosen; before that the selection is empty and writing it into the composer would wipe the
-        // library behind the sheet for a frame (the strip then measured items that were gone)
-        var ready by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { vm.start(); vm.startPicker(initialLibrary); ready = true; vm.onVisible() }
-        LaunchedEffect(phoneCount) { vm.setLimit(PhotoLimits.MAX_PHOTOS - phoneCount) }
-        // live: the strip behind the sheet is always what is chosen
-        LaunchedEffect(vm.selection.toList(), ready) { if (ready) composer.setLibrary(vm.selectedPhotos()) }
-        DisposableEffect(vm) { onDispose { vm.stopWaiting() } }
-    }
-
-    // the system Photo Picker: no READ_MEDIA_IMAGES, no storage permission. Opened from inside the sheet; its result goes straight into the strip.
     val platformMax = remember {
         if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) runCatching { pickImagesMaxLimit() }.getOrDefault(PhotoLimits.MAX_PHOTOS) else PhotoLimits.MAX_PHOTOS
     }
-    val room = AddPhotosLogic.room(phoneCount, libraryCount)
+    val phoneCount = composer.photos.size + composer.loading
+    val room = AddPhotosLogic.room(phoneCount, composer.library.size)
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(PhotoIntake.pickerMax(platformMax, room))) { uris ->
         if (uris.isNotEmpty()) composer.addPhotos(context.contentResolver, uris)
     }
     val chooser = rememberPhotoChooser { uris -> composer.addPhotos(context.contentResolver, uris) }
-    fun pickFromPhone() {
-        if (room == 0) { vm?.notice = AddPhotosLogic.LIMIT_MESSAGE; composer.flagLimit(); return }
-        try {
+    return {
+        if (room == 0) composer.flagLimit()
+        else try {
             if (ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(context)) picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) else chooser()
         } catch (e: Exception) { chooser() }
     }
+}
+
+/**
+ * Photos from Media, picked for the video being written: the same grid as the Media tab under one header and one button, "Add · 3". The selection is written into
+ * Create's strip live, so the strip behind the sheet is always the truth and the 100 total holds across the phone's photos and these. Closing with the X puts
+ * back what was chosen before the sheet opened.
+ */
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+@Composable
+fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: ArrivalTracker?, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val vm: MediaViewModel = viewModel(key = "media-picker", factory = viewModelFactory { initializer { MediaViewModel(api, null, null, PhotoLimits.MAX_PHOTOS, tracker ?: ArrivalTracker()) } })
+    val initialLibrary = remember { composer.library.toList() }
+    val phoneCount = composer.photos.size + composer.loading
+    val prompt = composer.text
+    val container = LocalContainerOrNull.current
+
+    // the picker is "ready" once it has taken over what is already chosen; before that the selection is empty and writing it into the composer would wipe the
+    // library behind the sheet for a frame (the strip then measured items that were gone)
+    var ready by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { vm.start(); vm.startPicker(initialLibrary); ready = true; vm.onVisible() }
+    LaunchedEffect(phoneCount) { vm.setLimit(PhotoLimits.MAX_PHOTOS - phoneCount) }
+    // live: the strip behind the sheet is always what is chosen
+    LaunchedEffect(vm.selection.toList(), ready) { if (ready) composer.setLibrary(vm.selectedPhotos()) }
+    DisposableEffect(vm) { onDispose { vm.stopWaiting() } }
     val addToLibrary = rememberPhotoChooser { uris -> container?.mediaUploads?.add(context.contentResolver, uris) }
 
-    val shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
     ModalBottomSheet(
-        onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), shape = shape, containerColor = Vmk.colors.surface,
+        onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet), containerColor = Vmk.colors.surface,
     ) {
         Column(Modifier.fillMaxHeight(0.94f).fillMaxWidth().semantics { if (com.videomk.app.BuildConfig.DEBUG) testTagsAsResourceId = true }.testTag("addPhotosSheet")) {
-            Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp).heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.media_add_photos), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                TextButton(onClick = { composer.setLibrary(initialLibrary); onDismiss() }, modifier = Modifier.heightIn(min = 44.dp).testTag("addPhotosCancel")) { Text(stringResource(R.string.common_cancel), fontWeight = FontWeight.SemiBold) }
-            }
-            // only where the server offers presentations; it closes this sheet and opens the system document picker
-            if (onAddDeck != null) DeckEntryRow(onClick = { onDismiss(); onAddDeck() }, modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
-            if (api != null) Segmented(tab, onTab = { tab = it }, Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
+            SheetHeader(stringResource(R.string.nav_tab_media), { composer.setLibrary(initialLibrary); onDismiss() }, Modifier.padding(start = Vmk.space.sheet, end = Vmk.space.m), closeTag = "addPhotosCancel", closeLabel = stringResource(R.string.common_cancel))
             Box(Modifier.weight(1f).fillMaxWidth()) {
-                when {
-                    tab == 1 && vm != null -> MyMediaTab(vm, composer, phoneCount, prompt, onAddToLibrary = if (container?.mediaUploads != null) addToLibrary else null)
-                    else -> PhoneTab(composer, onPick = ::pickFromPhone)
-                }
+                MyMediaTab(vm, composer, phoneCount, prompt, onAddToLibrary = if (container?.mediaUploads != null) addToLibrary else null)
                 // a tap that cannot be honoured always says why
-                val note = vm?.notice ?: composer.notice
+                val note = vm.notice ?: composer.notice
                 if (note != null) Snack(note, Modifier.align(Alignment.BottomCenter).padding(16.dp))
             }
-            SelectionBar(composer, total, phoneCount, libraryCount, onDone = onDismiss, selectAll = if (tab == 1 && vm != null) vm else null)
-        }
-    }
-}
-
-@Composable
-private fun Segmented(selected: Int, onTab: (Int) -> Unit, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(12.dp)
-    Row(modifier.fillMaxWidth().heightIn(min = 40.dp).clip(shape).background(Vmk.colors.surfaceRaised).padding(3.dp)) {
-        listOf(stringResource(R.string.photos_tab_phone) to Sym.PhoneAndroid, stringResource(R.string.photos_tab_media) to Sym.Shield).forEachIndexed { i, (label, icon) ->
-            val sel = i == selected
-            val tabDesc = stringResource(R.string.photos_tab_desc, label, i + 1)
-            val selectedText = stringResource(R.string.media_state_selected)
-            Row(
-                Modifier.weight(1f).heightIn(min = 40.dp).clip(RoundedCornerShape(10.dp)).then(if (sel) Modifier.background(if (Vmk.colors.dark) Vmk.colors.surface3 else Vmk.colors.surface) else Modifier)
-                    .clickable(role = Role.Tab, onClickLabel = label) { onTab(i) }
-                    .semantics { this.selected = sel; contentDescription = tabDesc; stateDescription = if (sel) selectedText else "" }
-                    .testTag(if (i == 0) "tabThisPhone" else "tabMyMedia"),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            ) {
-                Icon(icon, null, tint = if (sel) Vmk.colors.text else Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
-                Text(label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (sel) Vmk.colors.text else Vmk.colors.textSecondary)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PhoneTab(composer: ComposerViewModel, onPick: () -> Unit) {
-    if (composer.photos.isEmpty() && composer.loading == 0) {
-        // nothing chosen yet: one clear way in
-        Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.size(72.dp).clip(CircleShape).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Sym.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(36.dp)) }
-            Text(stringResource(R.string.photos_choose_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
-            Text(stringResource(R.string.photos_picker_explain), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            Box(Modifier.padding(top = 6.dp).heightIn(min = 48.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClick = onPick).padding(horizontal = 26.dp).testTag("pickFromPhone"), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.photos_open_picker), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.White)
-            }
-        }
-        return
-    }
-    Column(Modifier.fillMaxSize()) {
-        Text(
-            stringResource(R.string.photos_picker_note),
-            style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-        )
-        LazyVerticalGrid(
-            GridCells.Fixed(3), Modifier.fillMaxSize().testTag("phoneGrid"), contentPadding = PaddingValues(bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp), verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            item(key = "pick") {
-                val chooseDesc = stringResource(R.string.photos_choose_desc)
-                Column(
-                    Modifier.aspectRatio(1f).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = stringResource(R.string.photos_open_picker_label), onClick = onPick)
-                        .semantics { contentDescription = chooseDesc }.testTag("pickFromPhone"),
-                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
-                ) {
-                    Icon(Sym.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(32.dp))
-                    Text(stringResource(R.string.photos_choose), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, modifier = Modifier.padding(top = 6.dp))
-                }
-            }
-            itemsIndexed(composer.photos.toList(), key = { _, p -> p.id }) { index, photo ->
-                val tileDesc = stringResource(R.string.photos_tile_desc, index + 1)
-                Box(
-                    Modifier.aspectRatio(1f).clickable(role = Role.Checkbox, onClickLabel = stringResource(R.string.common_remove)) { composer.removePhoto(photo.id) }
-                        .semantics { contentDescription = tileDesc; selected = true }.testTag("phoneTile"),
-                ) {
-                    photo.thumbnail?.let { androidx.compose.foundation.Image(it.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().padding(8.dp).clip(RoundedCornerShape(10.dp))) }
-                    Box(Modifier.fillMaxSize().border(3.dp, MaterialTheme.colorScheme.primary).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)))
-                    NumberBadge(index + 1, Modifier.align(Alignment.TopEnd).padding(6.dp))
-                }
-            }
-            if (composer.loading > 0) item(key = "preparing") {
-                Box(Modifier.aspectRatio(1f).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp) }
-            }
+            SelectionBar(vm.selection.size, onDone = onDismiss, selectAll = vm)
         }
     }
 }
@@ -274,26 +191,15 @@ private fun Snack(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** The one selection bar under both tabs: "7 selected", where they come from, and the button that closes the sheet with them in the strip. */
+/** The one bar under the grid: Select all on the left, and the ONE primary, "Add · 3" (opaque and quiet until something is chosen). */
 @Composable
-private fun SelectionBar(composer: ComposerViewModel, total: Int, phone: Int, library: Int, onDone: () -> Unit, selectAll: MediaViewModel? = null) {
-    Column(Modifier.fillMaxWidth().background(Vmk.colors.surface).navigationBarsPadding()) {
-        Box(Modifier.fillMaxWidth().size(1.dp).background(Vmk.colors.outline))
-        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(Modifier.weight(1f).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(AddPhotosLogic.title(total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("selectedCount"))
-                    if (selectAll != null) { Text("  ·", color = Vmk.colors.textTertiary); SelectAllButton(selectAll) }
-                }
-                Text(AddPhotosLogic.subline(phone, library, composer.options.minutes), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("selectionSubline"))
-            }
-            val on = total > 0
-            Box(
-                Modifier.heightIn(min = 48.dp).clip(CircleShape).then(if (on) Modifier.background(Vmk.gradientNow) else Modifier.background(Vmk.colors.surface3))
-                    .clickable(enabled = on, role = Role.Button, onClick = onDone).padding(horizontal = 26.dp).testTag("addPhotosDone"),
-                contentAlignment = Alignment.Center,
-            ) { Text(AddPhotosLogic.addLabel(total), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = if (on) Color.White else Vmk.colors.textTertiary) }
-        }
+private fun SelectionBar(count: Int, onDone: () -> Unit, selectAll: MediaViewModel) {
+    Row(
+        Modifier.fillMaxWidth().background(Vmk.colors.surface).navigationBarsPadding().padding(horizontal = Vmk.space.sheet, vertical = Vmk.space.m),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.m),
+    ) {
+        SelectAllButton(selectAll)
+        androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+        PrimaryButton(AddPhotosLogic.addLabel(count), onDone, Modifier.widthIn(min = 132.dp).testTag("addPhotosDone").semantics { liveRegion = LiveRegionMode.Polite }, enabled = count > 0, fill = false)
     }
 }
-

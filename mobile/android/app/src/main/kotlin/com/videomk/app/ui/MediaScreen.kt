@@ -1,5 +1,8 @@
 package com.videomk.app.ui
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import com.videomk.app.R
@@ -119,6 +122,7 @@ fun MediaScreen(
 ) {
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
+    vm.undo = LocalContainerOrNull.current?.undo
     LaunchedEffect(Unit) { vm.start(); vm.refreshLinksIfStale() }
     // while photos are being selected the tab bar and the round Create button step aside: the selection bar is the only thing at the bottom (one primary action)
     LaunchedEffect(vm.selecting) { onSelectingChange(vm.selecting) }
@@ -239,12 +243,12 @@ private fun MediaHeader(vm: MediaViewModel, organize: com.videomk.app.data.Organ
     val bigText = androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.3f   // large text: the title gets its own line, so a word is never cut in two
     val actions: @Composable () -> Unit = {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            if (vm.photos.isNotEmpty()) TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = 48.dp).testTag("selectMode")) { Text(stringResource(R.string.media_select), fontWeight = FontWeight.SemiBold) }
+            if (vm.photos.isNotEmpty()) TextAction(stringResource(R.string.media_select), { vm.beginSelecting() }, Modifier.testTag("selectMode"))
             Box {
                 GlassIconButton(Sym.MoreHoriz, stringResource(R.string.media_more), { onMenu(true) }, Modifier.testTag("mediaMenu"))
-                DropdownMenu(menuOpen, { onMenu(false) }) {
-                    if (organize != null) DropdownMenuItem(text = { Text(stringResource(R.string.media_organize_library)) }, leadingIcon = { Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary) }, onClick = { onMenu(false); organize.organizeLibrary() }, modifier = Modifier.testTag("organizeLibrary"))
-                    DropdownMenuItem(text = { Text(stringResource(R.string.media_storage)) }, onClick = { onMenu(false); onStorage() })
+                VmkMenu(menuOpen, { onMenu(false) }) {
+                    if (organize != null) VmkMenuItem(stringResource(R.string.media_organize_library), Sym.AutoAwesome, Modifier.testTag("organizeLibrary")) { onMenu(false); organize.organizeLibrary() }
+                    VmkMenuItem(stringResource(R.string.media_storage), Sym.CloudUpload) { onMenu(false); onStorage() }
                 }
             }
         }
@@ -316,22 +320,22 @@ private fun UploadAnnouncements(progress: com.videomk.app.core.QueueProgress?) {
 /** A collection's own screen: its photos in the same grid, with search and selection. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit) {
+fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit, onAddPhotos: (() -> Unit)? = null) {
+    vm.undo = LocalContainerOrNull.current?.undo
     LaunchedEffect(Unit) { vm.start() }
     val collection = vm.collections.firstOrNull { it.id == collectionId }
     var menu by remember { mutableStateOf(false) }
     var rename by remember { mutableStateOf(false) }
-    var delete by remember { mutableStateOf(false) }
     Scaffold(
         containerColor = Vmk.colors.background,
         topBar = {
             if (vm.selecting) SelectionTopBar(vm) else VmkTopBar(title = listOfNotNull(collection?.emoji, collection?.name ?: stringResource(R.string.media_collection_default)).joinToString(" "), onBack = onBack) {
-                if (vm.photos.isNotEmpty()) TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("selectMode")) { Text(stringResource(R.string.media_select), style = MaterialTheme.typography.titleMedium) }
+                if (vm.photos.isNotEmpty()) TextAction(stringResource(R.string.media_select), { vm.beginSelecting() }, Modifier.testTag("selectMode"))
                 Box {
                     GlassIconButton(Sym.MoreHoriz, stringResource(R.string.media_edit), { menu = true }, Modifier.testTag("collectionMenu"))
-                    DropdownMenu(menu, { menu = false }, containerColor = Vmk.colors.surface) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.media_rename)) }, onClick = { menu = false; rename = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.media_delete_collection), color = Vmk.colors.danger) }, onClick = { menu = false; delete = true })
+                    VmkMenu(menu, { menu = false }) {
+                        VmkMenuItem(stringResource(R.string.media_rename), Sym.Edit) { menu = false; rename = true }
+                        if (collection != null) VmkMenuItem(stringResource(R.string.media_delete_collection), Sym.Delete, danger = true) { menu = false; vm.deleteCollection(collection.id) { onBack() } }
                     }
                 }
             }
@@ -340,18 +344,13 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
         Box(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
             Column(Modifier.fillMaxSize()) {
                 NoticeLine(vm)
-                MediaBody(vm, onAdd = null, onOpenCollection = {}, onMakeVideo = onMakeVideo, header = null)
+                // an empty collection offers the way to fill it: Media opens ready to select, and the folder button there adds to this collection
+                MediaBody(vm, onAdd = onAddPhotos, onOpenCollection = {}, onMakeVideo = onMakeVideo, header = null, emptyInCollection = true)
             }
             Box(Modifier.align(Alignment.BottomCenter)) { SelectionBar(vm, onMakeVideo, inCollection = true) }
         }
     }
     if (rename && collection != null) NameDialog(stringResource(R.string.media_rename_collection), collection.name, stringResource(R.string.common_save), onDismiss = { rename = false }) { vm.renameCollection(collection.id, it); rename = false }
-    if (delete && collection != null) AlertDialog(
-        onDismissRequest = { delete = false }, title = { Text(stringResource(R.string.media_delete_collection_title, collection.name)) },
-        text = { Text(stringResource(R.string.media_delete_collection_text)) },
-        confirmButton = { TextButton(onClick = { delete = false; vm.deleteCollection(collection.id) { onBack() } }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_delete), color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { delete = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
 }
 
 /** The grid with its loading, empty, error and offline states, and the full-screen viewer. */
@@ -359,7 +358,7 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
 fun MediaBody(
     vm: MediaViewModel, onAdd: (() -> Unit)?, onOpenCollection: (String) -> Unit, onMakeVideo: (List<MediaPhoto>) -> Unit,
     header: (@Composable () -> Unit)?, modifier: Modifier = Modifier, selectionHint: String? = null,
-    order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(),
+    order: Map<String, Int> = emptyMap(), dimUnselected: Boolean = false, localTiles: (@Composable () -> Unit)? = null, hiddenIds: Set<String> = emptySet(), emptyInCollection: Boolean = false,
 ) {
     val columns = rememberColumns()
     androidx.compose.material3.pulltorefresh.PullToRefreshBox(isRefreshing = vm.refreshing, onRefresh = { vm.pullRefresh() }, modifier = modifier.fillMaxSize()) {
@@ -378,7 +377,8 @@ fun MediaBody(
             }
             vm.photos.isEmpty() && !vm.search.active -> Column(Modifier.fillMaxSize()) {
                 header?.invoke()
-                StateMessage(stringResource(R.string.media_empty_title), if (onAdd != null) stringResource(R.string.media_empty_text) else stringResource(R.string.media_empty_text_pick), if (onAdd != null) stringResource(R.string.media_add_photos) else null) { onAdd?.invoke() }
+                if (emptyInCollection) StateMessage(stringResource(R.string.collection_empty_title), "", if (onAdd != null) stringResource(R.string.media_add_photos) else null) { onAdd?.invoke() }
+                else StateMessage(stringResource(R.string.media_empty_title), if (onAdd != null) stringResource(R.string.media_empty_text) else stringResource(R.string.media_empty_text_pick), if (onAdd != null) stringResource(R.string.media_add_photos) else null) { onAdd?.invoke() }
             }
             else -> PhotoGrid(
                 photos = vm.photos, selected = vm.selection.toSet(), selecting = vm.selecting, columns = columns,
@@ -405,8 +405,9 @@ private fun StateMessage(title: String, text: String, button: String?, onClick: 
     Column(Modifier.fillMaxSize().padding(32.dp).testTag("mediaState"), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(Sym.PhotoLibrary, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(48.dp))
         Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.padding(top = 12.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 16.dp))
-        if (button != null) Button(onClick = onClick, modifier = Modifier.heightIn(min = 48.dp)) { Text(button) }
+        if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+        Spacer(Modifier.size(Vmk.space.l))
+        if (button != null) TonalButton(button, onClick, Modifier.testTag("stateAction"), icon = Sym.AddPhotoAlternate.takeIf { button == stringResource(R.string.media_add_photos) })
     }
 }
 
@@ -441,93 +442,41 @@ private fun MediaNotes(hasPhotos: Boolean) {
 
 // collections
 
-@OptIn(ExperimentalFoundationApi::class)
+/**
+ * Collections on the Media tab: ONE row that opens the list ("Collections", how many), so the first photos are on screen without scrolling. With none yet the row
+ * offers to make the first one. Rename and delete live in the list.
+ */
 @Composable
-private fun CollectionsStrip(vm: MediaViewModel, pref: com.videomk.app.core.OrganizePref, onOpen: (String) -> Unit, onSeeAll: () -> Unit) {
+private fun CollectionsStrip(vm: MediaViewModel, @Suppress("UNUSED_PARAMETER") pref: com.videomk.app.core.OrganizePref, @Suppress("UNUSED_PARAMETER") onOpen: (String) -> Unit, onSeeAll: () -> Unit) {
     var create by remember { mutableStateOf(false) }
-    var menuFor by remember { mutableStateOf<MediaCollection?>(null) }
-    var rename by remember { mutableStateOf<MediaCollection?>(null) }
-    var delete by remember { mutableStateOf<MediaCollection?>(null) }
-    if (vm.collections.isEmpty()) {
-        // nothing to show yet: one quiet text button, no big tile
-        TextButton(onClick = { create = true }, modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp).testTag("newCollection")) {
-            Icon(Sym.CreateNewFolder, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.media_new_collection_text), fontWeight = FontWeight.SemiBold)
-        }
-    } else {
-    Row(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen), verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(R.string.media_collections), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
-        TextButton(onClick = onSeeAll, modifier = Modifier.heightIn(min = 44.dp).testTag("seeAllCollections")) { Text(stringResource(R.string.media_see_all), fontWeight = FontWeight.SemiBold) }
-    }
-    LazyRow(contentPadding = PaddingValues(horizontal = Vmk.space.screen), horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.testTag("collectionsStrip")) {
-        items(vm.collections, key = { it.id }) { c ->
-            Box {
-                Column(
-                    Modifier.width(104.dp)
-                        .combinedClickable(
-                            role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.media_open_collection), onLongClickLabel = stringResource(R.string.media_rename_or_delete),
-                            onClick = { onOpen(c.id) }, onLongClick = { menuFor = c },
-                        ).semantics(mergeDescendants = true) { contentDescription = Txt.n(if (c.auto) R.plurals.media_collection_desc_auto else R.plurals.media_collection_desc, c.count, c.name) }.testTag("collectionCard"),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Box(Modifier.size(104.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
-                        if (c.coverId != null && c.coverThumbUrl != null) PhotoThumb(MediaPhoto(c.coverId, null, "", null, 0, 0, 0, c.coverThumbUrl), Modifier.fillMaxSize())
-                        else Text(c.emoji ?: "🖼️", style = MaterialTheme.typography.headlineMedium)
-                        if (c.auto) Box(Modifier.align(Alignment.TopStart).padding(6.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f)).testTag("autoBadge"), contentAlignment = Alignment.Center) {
-                            Icon(Sym.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(13.dp))
-                        }
-                    }
-                    Text(c.name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(pluralStringResource(R.plurals.media_photos, c.count, c.count), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
-                }
-                CollectionMenu(menuFor?.id == c.id, { menuFor = null }, onRename = { rename = c; menuFor = null }, onDelete = { delete = c; menuFor = null })
-            }
-        }
-        item {
-            // the one place to make a collection: the end of the row, a folder-plus icon with its words
-            Column(
-                Modifier.width(104.dp).clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.media_create_collection)) { create = true }.testTag("newCollection"),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Box(Modifier.size(104.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { Icon(Sym.CreateNewFolder, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp)) }
-                Text(stringResource(R.string.media_new_collection_text), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 2)
-            }
-        }
-    }
+    Box(Modifier.padding(horizontal = Vmk.space.screen).clip(RoundedCornerShape(Vmk.radii.card)).background(Vmk.colors.surface)) {
+        if (vm.collections.isEmpty()) VmkRow(stringResource(R.string.media_new_collection_text), Modifier.testTag("newCollection"), icon = Sym.CreateNewFolder, onClick = { create = true })
+        else VmkRow(stringResource(R.string.media_collections), Modifier.testTag("seeAllCollections"), icon = Sym.PhotoLibrary, value = "${vm.collections.size}", trailing = Sym.ChevronRight, onClick = onSeeAll)
     }
     if (create) NameDialog(stringResource(R.string.media_new_collection), "", stringResource(R.string.media_create), onDismiss = { create = false }) { vm.createCollection(it); create = false }
-    rename?.let { c -> NameDialog(stringResource(R.string.media_rename_collection), c.name, stringResource(R.string.common_save), onDismiss = { rename = null }) { vm.renameCollection(c.id, it); rename = null } }
-    delete?.let { c -> DeleteCollectionDialog(c, pref, onDismiss = { delete = null }) { vm.deleteCollection(c.id); delete = null } }
 }
 
 /** Rename and Delete, with the quiet reassurance under them. */
 @Composable
 fun CollectionMenu(open: Boolean, onDismiss: () -> Unit, onRename: () -> Unit, onDelete: () -> Unit) {
-    DropdownMenu(open, onDismiss) {
-        DropdownMenuItem(text = { Text(stringResource(R.string.media_rename)) }, onClick = onRename, modifier = Modifier.testTag("collectionRename"))
-        DropdownMenuItem(text = { Text(stringResource(R.string.media_delete_collection), color = Vmk.colors.danger) }, onClick = onDelete, modifier = Modifier.testTag("collectionDelete"))
-        Text(stringResource(R.string.media_collection_menu_note), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.screen, vertical = 8.dp).widthIn(max = 240.dp))
+    VmkMenu(open, onDismiss) {
+        VmkMenuItem(stringResource(R.string.media_rename), Sym.Edit, Modifier.testTag("collectionRename"), onClick = onRename)
+        VmkMenuItem(stringResource(R.string.media_delete_collection), Sym.Delete, Modifier.testTag("collectionDelete"), danger = true, onClick = onDelete)
     }
 }
 
-@Composable
-fun DeleteCollectionDialog(c: MediaCollection, pref: com.videomk.app.core.OrganizePref, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss, title = { Text(stringResource(R.string.media_delete_collection_title, c.name)) },
-        text = { Text(pluralStringResource(if (c.auto && pref == com.videomk.app.core.OrganizePref.Always) R.plurals.media_delete_collection_body_auto else R.plurals.media_delete_collection_body, c.count, c.count)) },
-        confirmButton = { TextButton(onClick = onConfirm, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmDeleteCollection")) { Text(stringResource(R.string.common_delete), color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
-}
-
+/** Naming a collection: a small sheet with the one field and the one button (a name is typed, so this is a form, not a confirmation). */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NameDialog(title: String, initial: String, confirm: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var text by rememberSaveable { mutableStateOf(initial) }
-    AlertDialog(
-        onDismissRequest = onDismiss, title = { Text(title) },
-        text = { OutlinedTextField(text, { text = it.take(40) }, singleLine = true, label = { Text(stringResource(R.string.media_name)) }, modifier = Modifier.fillMaxWidth().testTag("collectionName")) },
-        confirmButton = { TextButton(onClick = { onConfirm(text.trim()) }, enabled = text.isNotBlank(), modifier = Modifier.heightIn(min = 48.dp).testTag("collectionNameOk")) { Text(confirm) } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet)) {
+        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).imePadding(), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+            SheetHeader(title, onDismiss)
+            VmkField(text, { text = it.take(40) }, Modifier.testTag("collectionName"), placeholder = stringResource(R.string.media_name))
+            PrimaryButton(confirm, { onConfirm(text.trim()) }, Modifier.testTag("collectionNameOk"), enabled = text.isNotBlank())
+        }
+    }
 }
 
 // selection
@@ -537,7 +486,6 @@ fun NameDialog(title: String, initial: String, confirm: String, onDismiss: () ->
 fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, inCollection: Boolean = false) {
     if (!vm.selecting) return
     var pick by remember { mutableStateOf(false) }
-    var confirm by remember { mutableStateOf(false) }
     val n = vm.selection.size
     val max = com.videomk.app.core.PhotoLimits.MAX_PHOTOS
     val used = minOf(n, max)   // a video takes at most [max] photos: the button says how many it will really use
@@ -547,39 +495,38 @@ fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, in
     val bg = Vmk.colors.background
     Column(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to bg.copy(alpha = 0f), 0.45f to bg.copy(alpha = 0.92f), 1f to bg)).navigationBarsPadding().padding(top = Vmk.space.xl)) {
         if (n > max) Text(stringResource(R.string.media_make_video_limit, max), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = Vmk.space.screen).testTag("makeVideoLimit"))
-        Row(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-            PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(max)) }, Modifier.weight(1f).testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
-                Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = Vmk.colors.onPrimary)
-                Text(makeLabel, style = VmkType.cta, color = Vmk.colors.onPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            })
+        val icons: @Composable () -> Unit = {
             GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0, size = 56.dp, raised = true)
-            GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0, size = 56.dp, tint = Vmk.colors.danger, raised = true)
+            GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_selected), { vm.deleteSelected() }, Modifier.testTag("deleteSelected"), enabled = n > 0, size = 56.dp, tint = Vmk.colors.danger, raised = true)
+        }
+        val button: @Composable (Modifier) -> Unit = { m ->
+            PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(max)) }, m.testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
+                Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = androidx.compose.material3.LocalContentColor.current)
+                Text(makeLabel, style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            })
+        }
+        if (isLargeText()) Column(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s).testTag("selectionBar"), verticalArrangement = Arrangement.spacedBy(Vmk.space.s), horizontalAlignment = Alignment.End) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) { icons() }
+            button(Modifier.fillMaxWidth())
+        } else Row(Modifier.fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.s).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+            button(Modifier.weight(1f)); icons()
         }
     }
     if (pick) CollectionPickerDialog(vm, onDismiss = { pick = false }) { c -> vm.addToCollection(c, vm.selection.toList()); pick = false }
-    if (confirm) AlertDialog(
-        onDismissRequest = { confirm = false },
-        title = { Text(pluralStringResource(R.plurals.media_delete_title, n, n)) },
-        text = { Text(pluralStringResource(R.plurals.media_delete_text, n)) },
-        confirmButton = { TextButton(onClick = { confirm = false; vm.deleteSelected() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmDelete")) { Text(stringResource(R.string.common_delete), color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { confirm = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionPickerDialog(vm: MediaViewModel, onDismiss: () -> Unit, onPick: (MediaCollection) -> Unit) {
     var creating by remember { mutableStateOf(false) }
     if (creating) { NameDialog(stringResource(R.string.media_new_collection), "", stringResource(R.string.media_create_and_add), onDismiss = { creating = false }) { name -> vm.createCollection(name) { onPick(it) }; creating = false }; return }
-    AlertDialog(
-        onDismissRequest = onDismiss, title = { Text(stringResource(R.string.media_add_to_collection)) },
-        text = {
-            Column {
-                vm.collections.forEach { c -> Text("${c.emoji ?: "🖼️"}  ${c.name}", color = Vmk.colors.text, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onPick(c) }.padding(vertical = 12.dp)) }
-                Text(stringResource(R.string.media_new_collection_row), color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { creating = true }.padding(vertical = 12.dp))
-            }
-        },
-        confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet)) {
+        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).verticalScroll(rememberScrollState())) {
+            SheetHeader(stringResource(R.string.media_add_to_collection), onDismiss)
+            vm.collections.forEach { c -> VmkRow(listOfNotNull(c.emoji, c.name).joinToString("  "), onClick = { onPick(c) }) }
+            VmkRow(stringResource(R.string.media_new_collection), icon = Sym.CreateNewFolder, onClick = { creating = true })
+        }
+    }
 }
 
 // storage
@@ -590,16 +537,17 @@ fun StorageSheet(summary: MediaSummary, live: Pair<Long, Long>?, onDismiss: () -
     val uri = LocalUriHandler.current
     val used = live?.first ?: summary.usedBytes
     val limit = live?.second ?: summary.limitBytes
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface) {
-        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 32.dp).testTag("storageSheet"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.media_storage), style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text)
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet)) {
+        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).testTag("storageSheet"), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+            SheetHeader(stringResource(R.string.media_storage), onDismiss)
             StorageMeterRow(used, limit, onClick = {})
-            Row { Text(stringResource(R.string.media_plan), color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f)); Text(if (summary.plan == "pro") stringResource(R.string.media_plan_pro) else stringResource(R.string.media_plan_free), color = Vmk.colors.text) }
-            Row { Text(stringResource(R.string.media_photos_label), color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f)); Text(String.format(Txt.locale, "%,d", summary.count), color = Vmk.colors.text) }
-            Row { Text(stringResource(R.string.media_used), color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f)); Text(StorageMeter.label(used, limit), color = Vmk.colors.text) }
-            Text(stringResource(R.string.media_storage_full_text), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
-            Text(PRIVACY_COPY, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
-            if (summary.canUpgrade) Button(onClick = { runCatching { uri.openUri("https://videomk.com/storage") } }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("upgradeButton")) { Text(stringResource(R.string.media_get_more_storage)) }
+            VmkGroup(onSheet = true) {
+                VmkRow(stringResource(R.string.media_plan), value = if (summary.plan == "pro") stringResource(R.string.media_plan_pro) else summary.plan.replaceFirstChar { it.uppercase() }.ifBlank { stringResource(R.string.media_plan_free) })
+                VmkRow(stringResource(R.string.media_photos_label), value = String.format(Txt.locale, "%,d", summary.count))
+                VmkRow(stringResource(R.string.media_used), value = StorageMeter.label(used, limit))
+            }
+            Text(stringResource(R.string.media_storage_short), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
+            if (summary.canUpgrade) TonalButton(stringResource(R.string.media_get_more_storage), { runCatching { uri.openUri("https://videomk.com/storage") } }, Modifier.testTag("upgradeButton"), fill = true)
         }
     }
 }
@@ -610,9 +558,8 @@ fun SelectAllButton(vm: MediaViewModel, modifier: Modifier = Modifier) {
     if (vm.photos.isEmpty()) return
     val all = vm.allInViewSelected
     val label = SelectAll.label(all, vm.viewCount)
-    TextButton(onClick = { vm.toggleSelectAll() }, enabled = !vm.selectingAll, modifier = modifier.heightIn(min = 48.dp).testTag("selectAllButton")) {
-        if (vm.selectingAll) androidx.compose.material3.CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-        else Icon(Sym.SelectAll, null, Modifier.size(18.dp))
-        Spacer(Modifier.width(6.dp)); Text(label, fontWeight = FontWeight.Bold)
+    Row(modifier.heightIn(min = Vmk.minTouch).clip(CircleShape).clickable(enabled = !vm.selectingAll, role = Role.Button) { vm.toggleSelectAll() }.padding(horizontal = Vmk.space.m).testTag("selectAllButton"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (vm.selectingAll) LiveRing(size = 16.dp) else Icon(Sym.SelectAll, null, Modifier.size(18.dp), tint = Vmk.colors.primary)
+        Text(label, style = MaterialTheme.typography.titleSmall, color = Vmk.colors.primary)
     }
 }

@@ -243,15 +243,19 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     private var storedPrefs: CreatePrefs? = null
 
     /** A choice the person made on the Create screen (a remembered default no longer overrides it when the capabilities arrive). */
-    fun updateOptions(o: CreateOptions) { options = o; touched = true }
+    fun updateOptions(o: CreateOptions) { options = CreateDefaults.priced(o, caps); touched = true }
 
     /** The length chip (or a one-tap fix): from now on a platform pick keeps this length and only shows its recommendation. */
-    fun setLength(minutes: Double) { options = DeckOptions.chooseLength(options, minutes); touched = true; lengthChosen = true }
+    fun setLength(minutes: Double) { options = CreateDefaults.priced(DeckOptions.chooseLength(options, minutes), caps); touched = true; lengthChosen = true }
     var lengthChosen = false
         private set
 
     /** A platform chip: its format and resolution, and its recommended length unless a length was chosen since this screen opened. */
-    fun selectPlatform(chip: PlatformChip) { options = CreatePlatforms.select(options, chip, lengthChosen || deckState is DeckState.Ready, caps.presets); touched = true }
+    fun selectPlatform(chip: PlatformChip) {
+        // a platform's recommended length never goes over what the plan makes (the server refuses a longer one, it does not shorten it)
+        val o = CreatePlatforms.select(options, chip, lengthChosen || deckState is DeckState.Ready, caps.presets)
+        options = CreateDefaults.priced(o.copy(minutes = CreateDefaults.withinPlan(o.minutes, caps), resolution = o.resolution.takeIf { caps.resolution(it)?.available != false } ?: options.resolution), caps); touched = true
+    }
 
     /** "Make another" from a finished video: Create opens with the idea filled in and one choice changed (core/Remix.kt). Nothing is sent. */
     fun startRemix(prompt: String, kind: com.videomk.app.core.RemixKind) {
@@ -273,6 +277,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun applyCapabilities(c: Capabilities) {
         caps = c; capsLoaded = true
         if (!touched) options = CreateDefaults.resolve(storedPrefs, c)
+        else options = CreateDefaults.priced(options.copy(minutes = if (options.useSuggestedLength) options.minutes else CreateDefaults.withinPlan(options.minutes, c)), c)
         waitingDeck?.let { if (c.deck != null) { waitingDeck = null; addDeck(it, true) } }
     }
 
@@ -336,7 +341,10 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun clearInlineError() { inlineError = null }
 
     /** generate itself answered blocked or paused (rare: the check already ran): the same kind sheets. */
-    fun showStop(e: ApiError): Boolean { val s = CreateErrors.fromGenerate(e) ?: return false; stop = s; sheetKind = CreateSheetKind.Stop; return true }
+    fun showStop(e: ApiError): Boolean { val s = CreateErrors.fromGenerate(e) ?: return false; stop = CreateErrors.withFix(s, caps, e); sheetKind = CreateSheetKind.Stop; return true }
+
+    /** The one-tap fix of a "too long for your plan" refusal: that length, and the sheet closes on the form (the person taps Create when ready). */
+    fun useShorter(minutes: Double) { setLength(minutes); dismissSheet() }
 
     /** The slow-check skeleton's "Make it now": stop waiting and go on without a brief. */
     fun skipCheck() { checkJob?.cancel(); sheetKind = CreateSheetKind.None; finish(null) }

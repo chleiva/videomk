@@ -43,6 +43,8 @@ class AppContainer(
         if (config != null && a != null) DebugHooks.fakeMedia(appContext) ?: com.videomk.app.core.ApiMediaApi(ApiClient(config, a, http, appVersion = BuildConfig.VERSION_NAME)) else null
     }
     private val appScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
+    /** "Deleted · Undo": one bar for videos, photos and collections (docs/DESIGN_BAR_2026.md rule 8). In the app scope, so a removal is still sent when its screen is gone. */
+    val undo = com.videomk.app.core.UndoCenter(appScope)
     val mediaUploads: com.videomk.app.data.MediaUploadController? by lazy { mediaApi?.let { com.videomk.app.data.MediaUploadController(appContext, it, http, appScope, DebugHooks.fakePoster(appContext)) } }
 
     /** The capabilities and the request check. The debug build can swap in fake ones (see DebugHooks). */

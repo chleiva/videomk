@@ -53,19 +53,16 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
     var rename by remember { mutableStateOf<MediaCollection?>(null) }
     var delete by remember { mutableStateOf<MediaCollection?>(null) }
     var create by remember { mutableStateOf(false) }
+    vm.undo = LocalContainerOrNull.current?.undo
     Scaffold(
         containerColor = Vmk.colors.background, contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         topBar = {
             VmkTopBar(title = stringResource(R.string.media_collections), onBack = onBack) {
-                GlassIconButton(Sym.Add, stringResource(R.string.media_new_collection), { create = true }, Modifier.testTag("newCollection"))
+                GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_new_collection), { create = true }, Modifier.testTag("newCollection"))
             }
         },
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("collectionsList"), contentPadding = PaddingValues(horizontal = Vmk.space.screen, vertical = 8.dp)) {
-            item {
-                Text(stringResource(R.string.media_collections), style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
-                Text(stringResource(R.string.collections_subtitle), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
-            }
             items(vm.collections.sortedByDescending { it.auto }, key = { it.id }) { c ->
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 80.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.media_open_collection)) { onOpen(c.id) }.padding(vertical = 8.dp)
@@ -83,7 +80,7 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
                         }
                     }
                     Box {
-                        IconButton(onClick = { menuFor = c }, modifier = Modifier.size(48.dp).testTag("collectionMore")) { Icon(Sym.MoreHoriz, stringResource(R.string.collections_more_for, c.name), tint = Vmk.colors.textSecondary) }
+                        GlassIconButton(Sym.MoreHoriz, stringResource(R.string.collections_more_for, c.name), { menuFor = c }, Modifier.testTag("collectionMore"))
                         CollectionMenu(menuFor?.id == c.id, { menuFor = null }, onRename = { rename = c; menuFor = null }, onDelete = { delete = c; menuFor = null })
                     }
                 }
@@ -92,5 +89,5 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
     }
     if (create) NameDialog(stringResource(R.string.media_new_collection), "", stringResource(R.string.media_create), onDismiss = { create = false }) { vm.createCollection(it); create = false }
     rename?.let { c -> NameDialog(stringResource(R.string.media_rename_collection), c.name, stringResource(R.string.common_save), onDismiss = { rename = null }) { vm.renameCollection(c.id, it); rename = null } }   // the Auto chip stays
-    delete?.let { c -> DeleteCollectionDialog(c, pref, onDismiss = { delete = null }) { vm.deleteCollection(c.id); delete = null } }
+    delete?.let { c -> vm.deleteCollection(c.id); delete = null }
 }

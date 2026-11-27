@@ -25,7 +25,10 @@ import com.videomk.app.core.WalletInfo
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,9 +82,17 @@ data class AppState(
     val retryNotice: String? = null,
     /** Failed videos whose Try again is being sent (the button waits; the server also answers a second tap with the current state). */
     val retrying: Set<String> = emptySet(),
+    /** Videos taken off the screen by "Delete" or "Remove" while their undo time runs (the server still has them until it is over). */
+    val hidden: Set<String> = emptySet(),
+    /** Videos whose "Cancel video" is being sent. */
+    val cancelling: Set<String> = emptySet(),
 ) {
-    val entries: List<LibraryEntry> get() = LibraryMerge.entries(pending, videos)
-    val hasRunningVideos: Boolean get() = videos.any { it.status.isRunning } || pending.any { it.state == PendingVideo.State.Sending }
+    val entries: List<LibraryEntry> get() = LibraryMerge.entries(pending, videos.filterNot { it.id in hidden })
+    /**
+     * Something is being made, so the list must keep being read: a running video, a request on its way, or a request the server accepted whose video the list
+     * does not show yet (without the last one the polling stopped right after Create and the card stayed "making" for good).
+     */
+    val hasRunningVideos: Boolean get() = videos.any { it.status.isRunning } || pending.any { it.state == PendingVideo.State.Sending || it.state is PendingVideo.State.Accepted }
     fun video(id: String): VideoItem? = videos.firstOrNull { it.id == id }
 }
 
@@ -97,7 +108,11 @@ class AppViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     accountApi: com.videomk.app.core.AccountApi? = null,
     private val wiper: com.videomk.app.core.LocalWiper = com.videomk.app.core.LocalWiper { },
+    private val pollMillis: Long = POLL_MILLIS,
+    undoCenter: com.videomk.app.core.UndoCenter? = null,
 ) : ViewModel() {
+    /** "Deleted · Undo" and short confirmations: the app-wide one, so Media's removals share the same bar. */
+    val undo: com.videomk.app.core.UndoCenter = undoCenter ?: com.videomk.app.core.UndoCenter(viewModelScope)
     private val _state = MutableStateFlow(AppState())
     val state: StateFlow<AppState> = _state.asStateFlow()
     /** Bumps whenever an edit was published or previewed, so an open video page reloads its player. */
@@ -190,19 +205,32 @@ class AppViewModel(
 
     fun signOut() {
         auth?.signOut()
+        // a removal still waiting is dropped with the session (nothing was sent: the video is simply still there at the next sign-in)
+        undo.undo()
         photoData.clear(); photoMeta.clear(); libraryData.clear(); briefData.clear(); deckData.clear()
         update { AppState(phase = Phase.SignedOut) }
     }
 
     // library
 
-    suspend fun refresh() {
+    private var inFlight: kotlinx.coroutines.Deferred<List<VideoItem>>? = null
+    @Volatile private var lastRefreshMillis = Long.MIN_VALUE / 2
+
+    /**
+     * Reads the list (and the credits). [ifOlderThanMillis]: skip when a read finished less than that ago (the screens ask on every return; one answer serves them all).
+     * Never ends the caller for a cancellation that is not the caller's own: a read cut short from outside (see [onForeground]) is just a read that failed.
+     */
+    suspend fun refresh(ifOlderThanMillis: Long = 0) {
         val b = backend ?: return
+        if (_state.value.phase !is Phase.SignedIn && _state.value.phase != Phase.Launching) return
         refreshLock.withLock {
+            if (ifOlderThanMillis > 0 && clock() - lastRefreshMillis in 0 until ifOlderThanMillis) return
             if (_state.value.videos.isEmpty() && _state.value.loadState !is LoadState.Loaded) update { it.copy(loadState = LoadState.Loading) }
             try {
                 viewModelScope.launch { refreshWallet() }   // credits load alongside the list
-                val fresh = b.listVideos()
+                // its own job, so a read left hanging from before the phone slept can be dropped without touching whoever asked for it
+                val fresh = kotlinx.coroutines.coroutineScope { async { b.listVideos() }.also { inFlight = it }.await() }
+                lastRefreshMillis = clock()
                 announceFinished(_state.value, fresh)
                 update { s ->
                     val (stages, completions) = track(s, fresh)
@@ -211,17 +239,16 @@ class AppViewModel(
                         pending = LibraryMerge.stillPending(s.pending, fresh), loadState = LoadState.Loaded,
                     )
                 }
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: ApiError.Unauthorized) {
                 signOut()
             } catch (e: Exception) {
+                if (e is CancellationException) kotlin.coroutines.coroutineContext.ensureActive()   // the caller's own cancellation ends it; anyone else's does not
                 val offline = e is ApiError.Network
                 // keep what we have on screen; only a first load shows a full-screen error
                 update { s ->
                     s.copy(offline = offline, loadState = if (s.videos.isEmpty() && s.loadState !is LoadState.Loaded) LoadState.Failed((e as? ApiError)?.message ?: Txt.s(R.string.nav_load_videos_failed)) else LoadState.Loaded)
                 }
-            }
+            } finally { inFlight = null }
         }
     }
 
@@ -264,18 +291,32 @@ class AppViewModel(
     /** Off screen with "Tell me when it's ready" on: keep checking, slowly, until everything has settled or half an hour has passed (then Android may well have stopped the app anyway). */
     fun onBackground(watch: Boolean) {
         backgroundWatch?.cancel()
+        undo.flush()   // a removal still waiting for its undo time is made final when the app leaves the screen: nothing is left half done
         if (!watch || !_state.value.hasRunningVideos) return
         backgroundWatch = viewModelScope.launch {
             val until = clock() + BACKGROUND_WATCH_MILLIS
             while (isActive && _state.value.hasRunningVideos && clock() < until) { delay(BACKGROUND_POLL_MILLIS); refresh() }
         }
     }
-    fun onForeground() { backgroundWatch?.cancel(); backgroundWatch = null }
+    /**
+     * Back on screen (also after the phone was locked): whatever was asked before the pause is dropped (its connection may be dead and would hold the next
+     * read for up to a minute) and the list is read at once, so a video that finished meanwhile shows as finished without a pull to refresh.
+     */
+    fun onForeground() {
+        backgroundWatch?.cancel(); backgroundWatch = null
+        inFlight?.cancel()
+        if (_state.value.phase is Phase.SignedIn) viewModelScope.launch { refresh() }
+    }
 
-    /** Polls while anything is running; ends when the caller's coroutine is cancelled or everything has settled. */
+    /**
+     * For a visible screen: reads at once (unless something just did), then keeps reading every few seconds while anything is being made, and waits
+     * without reading while nothing is. Ends only when the caller's coroutine is cancelled (the screen left); a failed read never ends it.
+     */
     suspend fun pollWhileRunning() {
-        while (currentIsActive() && _state.value.hasRunningVideos) {
-            delay(POLL_MILLIS)
+        refresh(ifOlderThanMillis = FRESH_MILLIS)
+        while (currentIsActive()) {
+            if (!_state.value.hasRunningVideos) state.first { it.hasRunningVideos }
+            delay(pollMillis)
             if (!currentIsActive()) break
             refresh()
         }
@@ -358,24 +399,75 @@ class AppViewModel(
         }
     }
 
-    /** Removes a video that did not finish from the list (and from the server). */
-    fun removeFailed(video: VideoItem) {
+    /**
+     * "Delete" on a finished video and "Remove" on one that did not finish: the card leaves the list at once and "Deleted · Undo" shows for six seconds. The server is
+     * asked only when that time is over (it has no bin: once asked, the video and its files are gone). Undo before that puts the card back and nothing was sent.
+     */
+    fun delete(video: VideoItem) {
+        backend ?: return
+        if (video.id in _state.value.hidden) return
+        update { it.copy(hidden = it.hidden + video.id) }
+        undo.offer(Txt.s(R.string.common_deleted), commit = { deleteNow(video) }, undo = { update { it.copy(hidden = it.hidden - video.id) } })
+    }
+
+    /** Kept for the callers of the older name. */
+    fun removeFailed(video: VideoItem) = delete(video)
+
+    private suspend fun deleteNow(video: VideoItem) {
         val b = backend ?: return
+        fun putBack(message: String) = update { it.copy(hidden = it.hidden - video.id, retryNotice = message) }
+        try {
+            if (b.deleteVideo(video.id)) update { s -> s.copy(videos = s.videos.filterNot { it.id == video.id }, hidden = s.hidden - video.id) }
+            else putBack(Txt.s(R.string.retry_remove_unavailable))
+        } catch (e: CancellationException) {
+            update { it.copy(hidden = it.hidden - video.id) }; throw e
+        } catch (e: ApiError.Unauthorized) {
+            signOut()
+        } catch (e: ApiError) {
+            putBack(e.message); refresh()   // "being made" or "an edit is rendering": the card is back and says why
+        } catch (e: Exception) {
+            putBack(ApiError.Server.message)
+        }
+    }
+
+    /**
+     * "Cancel video" while it is being made: the server stops it and gives the credits of this attempt back. The card turns into the cancelled one at once and the
+     * bar says how many credits came back. A video that finished meanwhile is simply shown as what it is now.
+     */
+    fun cancel(video: VideoItem) {
+        val b = backend ?: return
+        if (video.id in _state.value.cancelling) return
+        update { it.copy(cancelling = it.cancelling + video.id) }
         viewModelScope.launch {
             try {
-                if (b.deleteVideo(video.id)) update { s -> s.copy(videos = s.videos.filterNot { it.id == video.id }) }
-                else update { it.copy(retryNotice = Txt.s(R.string.retry_remove_unavailable)) }
+                when (val r = b.cancelVideo(video.id)) {
+                    is com.videomk.app.core.CancelResult.Cancelled -> {
+                        update { s -> s.copy(videos = s.videos.map { if (it.id == video.id) it.copy(status = VideoStatus.Cancelled, making = null) else it }, stageSince = s.stageSince - video.id) }
+                        undo.say(if (r.refunded > 0) Txt.n(R.plurals.cancel_done_credits, r.refunded, r.refunded) else Txt.s(R.string.cancel_done))
+                        refreshWallet(); refresh()
+                    }
+                    is com.videomk.app.core.CancelResult.NotCancellable -> { refresh(); update { it.copy(retryNotice = r.message) } }
+                    com.videomk.app.core.CancelResult.Unsupported -> update { it.copy(retryNotice = Txt.s(R.string.cancel_unavailable)) }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: ApiError.Unauthorized) {
                 signOut()
             } catch (e: ApiError) {
                 update { it.copy(retryNotice = e.message) }
-                refresh()
             } catch (e: Exception) {
                 update { it.copy(retryNotice = ApiError.Server.message) }
+            } finally {
+                update { it.copy(cancelling = it.cancelling - video.id) }
             }
         }
+    }
+
+    /** A request that failed before the server took it: its card can be removed, with the same undo (the request and its photos are kept until the time is over). */
+    fun removePending(id: String) {
+        val p = _state.value.pending.firstOrNull { it.id == id } ?: return
+        update { s -> s.copy(pending = s.pending.filterNot { it.id == id }) }
+        undo.offer(Txt.s(R.string.common_deleted), commit = { dismissPending(id) }, undo = { update { s -> if (s.pending.any { it.id == id }) s else s.copy(pending = listOf(p) + s.pending) } })
     }
 
     fun dismissRetryNotice() = update { it.copy(retryNotice = null) }
@@ -416,7 +508,7 @@ class AppViewModel(
         } catch (e: CancellationException) {
             throw e
         } catch (e: ApiError) {
-            if (interactive && (e is ApiError.Blocked || e is ApiError.Paused)) { dismissPending(id); return SubmitOutcome.Stopped(e) }
+            if (interactive && (e is ApiError.Blocked || e is ApiError.Paused || e is ApiError.Plan)) { dismissPending(id); return SubmitOutcome.Stopped(e) }   // a plan refusal is read on Create, with the draft intact
             if (interactive && e is ApiError.Network) { dismissPending(id); return SubmitOutcome.Offline(e.message) }
             if (e is ApiError.InsufficientCredits) refreshWallet()
             if (e !is ApiError.Unauthorized) setPendingState(id, PendingVideo.State.Failed(e.message))
@@ -434,6 +526,8 @@ class AppViewModel(
 
     companion object {
         const val POLL_MILLIS = 4000L
+        /** A read this recent answers a screen that has just become visible. */
+        const val FRESH_MILLIS = 1500L
         const val BACKGROUND_POLL_MILLIS = 15_000L
         const val BACKGROUND_WATCH_MILLIS = 30 * 60_000L
         val SIGN_IN_FAILED: String get() = Txt.s(R.string.auth_sign_in_failed)

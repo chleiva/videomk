@@ -80,7 +80,7 @@ class LibraryTest {
 
     @Test fun `status mapping covers the server's statuses`() {
         assertEquals(VideoStatus.Complete, VideoStatus.fromServer("preview_ready"))
-        assertEquals(VideoStatus.Failed, VideoStatus.fromServer("CANCELLED"))
+        assertEquals(VideoStatus.Cancelled, VideoStatus.fromServer("CANCELLED")); assertEquals(VideoStatus.Failed, VideoStatus.fromServer("EDIT_FAILED"))
         assertEquals(VideoStatus.Running(Stage.VoiceAndVisuals), VideoStatus.fromServer("STORYBOARD_CREATION"))
         assertEquals(VideoStatus.Running(Stage.Starting), VideoStatus.fromServer(""))
         assertTrue(VideoStatus.fromServer("RENDERING").isRunning); assertFalse(VideoStatus.Complete.isRunning)
@@ -90,7 +90,7 @@ class LibraryTest {
         assertEquals(listOf(0f, 0f, 0f, 0f), MakingSteps.fills(0.0)); assertEquals(listOf(1f, 1f, 1f, 1f), MakingSteps.fills(1.0))
         assertEquals(listOf(1f, 0.5f, 0f, 0f), MakingSteps.fills(0.32).map { Math.round(it * 100) / 100f })
         assertEquals(2, MakingSteps.current(0.5)); assertEquals(3, MakingSteps.current(1.0)); assertEquals(0, MakingSteps.current(0.0))
-        assertEquals("Writing the story.", MakingSteps.sentence(VideoStatus.Stage.Writing))
+        assertEquals("Finding the story", MakingSteps.sentence(VideoStatus.Stage.Writing))
         assertEquals("Less than a minute left.", ProgressEstimator.leftText(VideoStatus.Stage.Rendering, 500.0, 1.0))
         assertTrue(ProgressEstimator.leftText(VideoStatus.Stage.Starting, 0.0, 3.0).startsWith("About "))
         assertTrue(ProgressEstimator.secondsLeft(VideoStatus.Stage.Starting, 0.0) > ProgressEstimator.secondsLeft(VideoStatus.Stage.Rendering, 0.0))

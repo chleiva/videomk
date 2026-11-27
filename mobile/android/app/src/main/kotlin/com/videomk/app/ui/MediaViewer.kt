@@ -1,5 +1,6 @@
 package com.videomk.app.ui
 
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.res.stringResource
@@ -73,7 +74,6 @@ fun MediaViewer(vm: MediaViewModel, startIndex: Int, onClose: () -> Unit, onMake
     val pager = rememberPagerState(initialPage = startIndex.coerceIn(0, photos.size - 1)) { photos.size }
     var zoomed by remember { mutableStateOf(false) }
     var info by remember { mutableStateOf(false) }
-    var confirm by remember { mutableStateOf(false) }
     var collect by remember { mutableStateOf(false) }
     val current = photos.getOrNull(pager.currentPage)
     BackHandler(onBack = onClose)
@@ -83,23 +83,38 @@ fun MediaViewer(vm: MediaViewModel, startIndex: Int, onClose: () -> Unit, onMake
                 val p = photos[page]
                 ZoomableImage(p, vm, onZoomChange = { if (page == pager.currentPage) zoomed = it })
             }
-            Row(Modifier.statusBarsPadding().fillMaxWidth().padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) { Icon(Sym.ArrowBack, stringResource(R.string.media_close_viewer), tint = Color.White) }
-                Text(stringResource(R.string.media_viewer_position, pager.currentPage + 1, photos.size), color = Color.White, modifier = Modifier.weight(1f))
-                IconButton(onClick = { info = true }, modifier = Modifier.size(48.dp).testTag("viewerInfo")) { Icon(Sym.Info, stringResource(R.string.media_photo_details), tint = Color.White) }
+            // the kit's glass buttons over the picture; the position is read out when the page changes
+            val position = stringResource(R.string.media_viewer_position, pager.currentPage + 1, photos.size)
+            Row(Modifier.statusBarsPadding().fillMaxWidth().padding(horizontal = Vmk.space.m, vertical = Vmk.space.xs), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+                GlassIconButton(Sym.Close, stringResource(R.string.media_close_viewer), onClose, Modifier.testTag("viewerClose"), onDark = true)
+                Text(position, style = MaterialTheme.typography.titleSmall, color = Color.White, modifier = Modifier.weight(1f).semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
+                GlassIconButton(Sym.Info, stringResource(R.string.media_photo_details), { info = true }, Modifier.testTag("viewerInfo"), onDark = true)
             }
-            Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { collect = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("viewerCollection")) { Icon(Sym.PhotoLibrary, null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_collection), color = Color.White) }
-                TextButton(onClick = { current?.let(onMakeVideo) }, modifier = Modifier.heightIn(min = 48.dp).testTag("viewerMakeVideo")) { Icon(Sym.Movie, null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_make_video), color = Color.White) }
-                IconButton(onClick = { confirm = true }, modifier = Modifier.size(48.dp).testTag("viewerDelete")) { Icon(Sym.Delete, stringResource(R.string.media_delete_this_photo), tint = Color(0xFFF87171)) }
+            // one labelled action (Make a video, with the play-sparkle) and two quiet icons
+            val make: @Composable (Modifier) -> Unit = { m ->
+                PrimaryButton(stringResource(R.string.media_make_video), { current?.let(onMakeVideo) }, m.testTag("viewerMakeVideo"), content = {
+                    Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = androidx.compose.material3.LocalContentColor.current)
+                    Text(stringResource(R.string.media_make_video), style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current, maxLines = 2)
+                })
+            }
+            val icons: @Composable () -> Unit = {
+                GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { collect = true }, Modifier.testTag("viewerCollection"), onDark = true, size = 56.dp)
+                GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_this_photo), { current?.let { vm.deleteIds(listOf(it.id)) } }, Modifier.testTag("viewerDelete"), onDark = true, size = 56.dp)
+            }
+            // at large text the two icons sit above the button, so its label is never squeezed onto two lines
+            if (isLargeText()) Column(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.m), verticalArrangement = Arrangement.spacedBy(Vmk.space.s), horizontalAlignment = Alignment.End) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) { icons() }
+                make(Modifier.fillMaxWidth())
+            } else Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.m), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalAlignment = Alignment.CenterVertically) {
+                make(Modifier.weight(1f)); icons()
             }
         }
     }
     if (info && current != null) {
-        ModalBottomSheet(onDismissRequest = { info = false }, containerColor = Vmk.colors.surface) {
-            Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        ModalBottomSheet(onDismissRequest = { info = false }, containerColor = Vmk.colors.surface, shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet)) {
+            Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl), verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                 val day = MediaGrouping.dayOf(current, ZoneId.systemDefault())
-                Text(day?.let { com.videomk.app.core.MediaDates.full(it) } ?: stringResource(R.string.media_date_unknown), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text)
+                SheetHeader(day?.let { com.videomk.app.core.MediaDates.full(it) } ?: stringResource(R.string.media_date_unknown), { info = false })
                 current.place?.let { Text(it, color = Vmk.colors.text) }
                 Text("${current.w} x ${current.h} · ${StorageMeter.format(current.bytes)}", color = Vmk.colors.textSecondary)
                 val names = vm.collections.filter { it.id in current.collections }.joinToString { it.name }
@@ -108,11 +123,6 @@ fun MediaViewer(vm: MediaViewModel, startIndex: Int, onClose: () -> Unit, onMake
         }
     }
     if (collect && current != null) CollectionPickerDialog(vm, onDismiss = { collect = false }) { c -> vm.addToCollection(c, listOf(current.id)); collect = false }
-    if (confirm && current != null) AlertDialog(
-        onDismissRequest = { confirm = false }, title = { Text(pluralStringResource(R.plurals.media_delete_title, 1, 1)) }, text = { Text(pluralStringResource(R.plurals.media_delete_text, 1)) },
-        confirmButton = { TextButton(onClick = { confirm = false; vm.deleteIds(listOf(current.id)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmViewerDelete")) { Text(stringResource(R.string.common_delete), color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { confirm = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.common_cancel)) } },
-    )
 }
 
 @Composable

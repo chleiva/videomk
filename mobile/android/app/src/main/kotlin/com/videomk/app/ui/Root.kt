@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -103,6 +104,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
     androidx.compose.runtime.LaunchedEffect(completions) { if (completions > seenCompletions) haptics.play(com.videomk.app.core.DesignTokens.Haptic.VideoReady); seenCompletions = completions }
     var feedbackFrom by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<FeedbackContext?>(null) }
     // photos picked in My media and sent to Create stay selected until the video is sent or the draft is discarded: back from Create returns to the same selection
+    var pendingSelect by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var creditsOpen by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     var mediaSelecting by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     var madeFromSelection by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     val showTabs = (route == "library" || route == "media") && !(route == "media" && mediaSelecting)
@@ -117,18 +120,19 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             LibraryScreen(
                 app, composer,
                 onOpenVideo = { nav.navigate("video/$it") },
-                onOpenWallet = { nav.navigate("wallet") },
+                onOpenWallet = { creditsOpen = true },
                 onOpenSettings = { nav.navigate("settings") },
                 onOpenMedia = { navigateTab(nav, "media") },
                 onNewVideo = { nav.navigate("create") },
             )
         }
         composable("create") {
-            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { nav.navigate("wallet") }, onSent = { nav.popBackStack("library", inclusive = false) })   // straight to Videos, where the Making card is (navigateTab would save Create and restore it at once)
+            CreateScreen(app, composer, onClose = { nav.popBackStack() }, onOpenWallet = { creditsOpen = true }, onSent = { nav.popBackStack("library", inclusive = false) })   // straight to Videos, where the Making card is (navigateTab would save Create and restore it at once)
         }
         composable("media") { entry ->
             val vm: MediaViewModel = viewModel(entry, key = "media-home", factory = mediaFactory)
             SelectionAfterCreate(vm, composer, madeFromSelection) { madeFromSelection = false }
+            androidx.compose.runtime.LaunchedEffect(pendingSelect) { if (pendingSelect) { pendingSelect = false; vm.beginSelecting() } }
             MediaScreen(vm, container.mediaUploads, onOpenCollection = { nav.navigate("media/collection/$it") }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) }, organize = container.organize, onOpenCollections = { nav.navigate("media/collections") }, onSelectingChange = { mediaSelecting = it })
         }
         composable("media/collections") {
@@ -141,7 +145,10 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             val id = entry.arguments?.getString("id").orEmpty()
             val vm: MediaViewModel = viewModel(entry, key = "media-collection-$id", factory = viewModelFactory { initializer { MediaViewModel(container.mediaApi, id, null) } })
             SelectionAfterCreate(vm, composer, madeFromSelection) { madeFromSelection = false }
-            CollectionScreen(vm, id, onBack = { nav.popBackStack() }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) })
+            CollectionScreen(vm, id, onBack = { nav.popBackStack() }, onMakeVideo = { madeFromSelection = vm.selecting; makeVideoFrom(nav, composer, container, email, it) }, onAddPhotos = {
+                // back to Media with selection already on: choose the photos, then the folder button adds them here
+                nav.popBackStack("media", inclusive = false); pendingSelect = true
+            })
         }
         composable("video/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString("id").orEmpty()
@@ -159,7 +166,6 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             val vm: EditorViewModel = viewModel(entry, key = "editor-$id", factory = viewModelFactory { initializer { EditorViewModel(id, container.backend, onChanged = { app.noteEdited() }) } })
             EditorScreen(vm, onClose = { nav.popBackStack() })
         }
-        composable("wallet") { WalletScreen(app, onBack = { nav.popBackStack() }) }
         composable("settings") {
             val d = app.deletion
             val ds = d?.state?.collectAsState()?.value ?: DeletionState.Idle
@@ -175,7 +181,13 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
         route, showMedia = container.mediaApi != null, onTab = { navigateTab(nav, it) },
         onNew = { composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create") }, modifier = Modifier.align(Alignment.BottomCenter),
     )
+    // the one bar for "Deleted · Undo" and short confirmations: above the tab bar (or the selection bar), below sheets
+    val undoItem by container.undo.current.collectAsState()
+    androidx.compose.animation.AnimatedVisibility(undoItem != null, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = (if (showTabs) BAR_HEIGHT else if (route == "media" || route?.startsWith("media/collection/") == true) SELECTION_BAR else 0.dp) + Vmk.space.m), enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it / 2 }, exit = androidx.compose.animation.fadeOut()) {
+        undoItem?.let { UndoBar(it, onUndo = { container.undo.undo() }) }
     }
+    }
+    if (creditsOpen) CreditsSheet(app, onDismiss = { creditsOpen = false })
     feedbackFrom?.let { FeedbackSheet(container.feedbackApi, container.feedbackDraft, it, onClose = { feedbackFrom = null }) }
     val appState = app.state.collectAsState().value
     RatingHost(container, onLibrary = route == "library", creating = route == "create" || appState.pending.any { it.state == com.videomk.app.core.PendingVideo.State.Sending })
@@ -185,6 +197,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
 /** How much of the bottom of a top-level screen the floating bar covers (0 where there is no bar): lists add it to their bottom padding so the last row can scroll clear. */
 val LocalBarSpace = compositionLocalOf { 0.dp }
 private val BAR_HEIGHT = 84.dp
+/** The height of Media's selection bar: the undo bar sits above it. */
+private val SELECTION_BAR = 88.dp
 
 /**
  * The floating bar: a pill with the two places (Videos, Media) and, apart from it, the round New video button with the play-sparkle glyph (never a bare plus).
@@ -194,12 +208,12 @@ private val BAR_HEIGHT = 84.dp
 private fun FloatingBar(route: String?, showMedia: Boolean, onTab: (String) -> Unit, onNew: () -> Unit, modifier: Modifier = Modifier) {
     val bg = Vmk.colors.background
     Row(
-        modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to bg.copy(alpha = 0f), 0.55f to bg.copy(alpha = 0.92f), 1f to bg))
+        modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to bg.copy(alpha = 0f), 0.28f to bg.copy(alpha = 0.96f), 0.4f to bg, 1f to bg))
             .navigationBarsPadding().padding(horizontal = Vmk.space.screen).padding(top = Vmk.space.xl, bottom = Vmk.space.s),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.m),
     ) {
         if (showMedia) Row(
-            Modifier.vmkShadow(2, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.colors.surface).padding(4.dp).semantics { isTraversalGroup = true },
+            Modifier.vmkShadow(2, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.colors.surface).padding(4.dp).selectableGroup().semantics { isTraversalGroup = true },
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             BarTab(stringResource(R.string.nav_tab_videos), if (route == "library") Sym.VideosFilled else Sym.Videos, route == "library", "tabVideos") { onTab("library") }

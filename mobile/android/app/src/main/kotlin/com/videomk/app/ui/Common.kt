@@ -52,11 +52,14 @@ fun MessageState(title: String, body: String, actionLabel: String? = null, onAct
     }
 }
 
-/** Runs the library poll while the screen is visible and something is being made. */
+/**
+ * While the screen is visible: the list is read the moment it becomes visible (first show, back from another app, the phone unlocked) and then for as long
+ * as something is being made. [running] is not a key on purpose: the loop itself waits for the next video, so nothing restarts it and no return is missed.
+ */
 @Composable
-fun PollWhileRunning(app: AppViewModel, running: Boolean) {
+fun PollWhileRunning(app: AppViewModel, @Suppress("UNUSED_PARAMETER") running: Boolean = false) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(running, lifecycle) {
+    LaunchedEffect(app, lifecycle) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { app.pollWhileRunning() }
     }
 }

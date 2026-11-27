@@ -1,5 +1,9 @@
 package com.videomk.app.ui
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
 import androidx.compose.ui.semantics.heading
@@ -80,10 +84,11 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
         // the sample: decoration for the eye, silent for TalkBack (the promise below says the same in words)
         Box(Modifier.fillMaxWidth().height(full * 0.64f).clearAndSetSemantics { }) {
             val clip = sampleVideoRes(androidx.compose.ui.platform.LocalContext.current)
-            if (clip != null) SignInSample(clip, Modifier.fillMaxSize(), fill = true)
-            else Image(painterResource(R.drawable.signin_sample), null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            // our own footage: a still from the sample video, and over it the same video as a silent loop (the still alone when animations are off)
+            Image(painterResource(R.drawable.signin_sample), null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            if (clip != null && !reduceMotion(androidx.compose.ui.platform.LocalContext.current)) SignInSample(clip, Modifier.fillMaxSize(), fill = true)
             Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.18f), 0.35f to Color.Transparent, 0.62f to Color.Transparent, 1f to bg)))
-            GlassChip(stringResource(R.string.quoted, stringResource(R.string.auth_sample_prompt)), Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = Vmk.space.xxxl), leading = { Sparkle(tint = Vmk.colors.live, size = 14.dp) })
+            // no words on the footage: it speaks for itself (the screen's budget is 12 words plus the buttons)
         }
         // at least the screen high so the buttons sit at the bottom, and taller (scrolling over the picture) when large text needs it: nothing overlaps or clips
         Column(Modifier.fillMaxWidth().heightIn(min = full).verticalScroll(rememberScrollState()).statusBarsPadding().navigationBarsPadding(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -121,7 +126,7 @@ fun SignInScreen(state: AppState, social: SocialSwitches = SocialSwitches(), onS
                                 else Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary, textAlign = TextAlign.Center)
                             } else PrimaryButton(label, onClick = { onSignIn(option) }, enabled = !busy || emailSpinning, modifier = Modifier.fillMaxWidth().testTag("signInButton")) {
                                 if (emailSpinning) LiveRing(Modifier.semantics { contentDescription = signingInText }, track = Color.White.copy(alpha = 0.3f), color = Color.White)
-                                else Text(label, style = VmkType.cta, color = Vmk.colors.onPrimary, textAlign = TextAlign.Center)
+                                else Text(label, style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current, textAlign = TextAlign.Center)
                             }
                         }
                     }
@@ -179,28 +184,49 @@ fun LegalLine() {
             rest = rest.substring(i + 1)
         }
     }
-    Text(text, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
+    Box(Modifier.heightIn(min = Vmk.minTouch), contentAlignment = Alignment.Center) { Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center) }
 }
 
-/** The id of `res/raw/sample_intro`, or null while that asset does not exist (none ships today: the owner has not supplied one). */
-fun sampleVideoRes(context: android.content.Context): Int? =
-    context.resources.getIdentifier("sample_intro", "raw", context.packageName).takeIf { it != 0 }
+/** Our own footage for the sign-in screen: six silent seconds cut from the forest sample video (`res/raw/sample_intro.mp4`). Named directly so resource shrinking keeps it. */
+@Suppress("UNUSED_PARAMETER")
+fun sampleVideoRes(context: android.content.Context): Int? = R.raw.sample_intro
 
-/** A muted, looped sample clip above the sign-in buttons. It never makes a sound and stands still when animations are off. */
+/**
+ * A muted, looped sample clip above the sign-in buttons. It never makes a sound. It is drawn on a TextureView that stays invisible until the first frame is on it,
+ * so the still underneath shows from the first moment (a SurfaceView would punch a black hole until the decoder starts), then it fades in. The picture is
+ * centre-cropped to fill, like the still.
+ */
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun SignInSample(res: Int, modifier: Modifier = Modifier, fill: Boolean = false) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val still = reduceMotion(context)
+    var shown by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var videoRatio by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     val player = remember {
         androidx.media3.exoplayer.ExoPlayer.Builder(context).build().apply {
             volume = 0f; repeatMode = androidx.media3.common.Player.REPEAT_MODE_ALL
-            setMediaItem(androidx.media3.common.MediaItem.fromUri("android.resource://${context.packageName}/$res")); prepare(); playWhenReady = !still
+            setMediaItem(androidx.media3.common.MediaItem.fromUri("android.resource://${context.packageName}/$res")); prepare(); playWhenReady = true
         }
     }
-    androidx.compose.runtime.DisposableEffect(player) { onDispose { player.release() } }
-    androidx.compose.ui.viewinterop.AndroidView(
-        factory = { c -> androidx.media3.ui.PlayerView(c).apply { useController = false; resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM; this.player = player } },
-        modifier = (if (fill) modifier else modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radii.videoCard))).clearAndSetSemantics { },
-    )
+    androidx.compose.runtime.DisposableEffect(player) {
+        val l = object : androidx.media3.common.Player.Listener {
+            override fun onRenderedFirstFrame() { shown = true }
+            override fun onVideoSizeChanged(size: androidx.media3.common.VideoSize) { if (size.height > 0) videoRatio = size.width.toFloat() / size.height }
+        }
+        player.addListener(l)
+        onDispose { player.removeListener(l); player.release() }
+    }
+    // the app left the screen: the loop stops; back: it goes on
+    androidx.lifecycle.compose.LifecycleStartEffect(player) { player.play(); onStopOrDispose { player.pause() } }
+    val alpha by androidx.compose.animation.core.animateFloatAsState(if (shown) 1f else 0f, androidx.compose.animation.core.tween(300), label = "sample")
+    androidx.compose.foundation.layout.BoxWithConstraints((if (fill) modifier else modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(Vmk.radii.videoCard))).clipToBounds().clearAndSetSemantics { }) {
+        val viewRatio = if (maxHeight.value > 0f) maxWidth.value / maxHeight.value else 1f
+        // a TextureView stretches the video over itself: scale the longer side up so it fills and crops from the centre
+        val sx = if (videoRatio > 0f && videoRatio > viewRatio) videoRatio / viewRatio else 1f
+        val sy = if (videoRatio > 0f && videoRatio < viewRatio) viewRatio / videoRatio else 1f
+        androidx.compose.ui.viewinterop.AndroidView(
+            factory = { c -> android.view.TextureView(c).also { player.setVideoTextureView(it) } },
+            modifier = Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha; scaleX = sx; scaleY = sy },
+        )
+    }
 }

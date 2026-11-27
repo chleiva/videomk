@@ -147,11 +147,13 @@ fun Poster(video: VideoItem, modifier: Modifier = Modifier, grey: Boolean = fals
 fun FailedRow(
     title: String, rejected: Boolean, detail: String?, thumb: String?, tag: String,
     onRetry: (() -> Unit)?, onDismiss: (() -> Unit)?, modifier: Modifier = Modifier,
+    /** The person stopped it: a calm card (nothing went wrong), "Cancelled" and the credits line. */
+    cancelled: Boolean = false, onOpen: (() -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(Vmk.radii.card)
-    val container = if (rejected) Vmk.colors.warningContainer else Vmk.colors.dangerContainer
-    val accent = if (rejected) Vmk.colors.warning else Vmk.colors.danger
-    val statusLabel = stringResource(if (rejected) R.string.lib_status_not_allowed else R.string.lib_status_didnt_finish)
+    val container = if (cancelled) Vmk.colors.surface else if (rejected) Vmk.colors.warningContainer else Vmk.colors.dangerContainer
+    val accent = if (cancelled) Vmk.colors.textSecondary else if (rejected) Vmk.colors.warning else Vmk.colors.danger
+    val statusLabel = stringResource(if (cancelled) R.string.lib_status_cancelled else if (rejected) R.string.lib_status_not_allowed else R.string.lib_status_didnt_finish)
     val desc = stringResource(R.string.lib_failed_desc, title, statusLabel)
     val grey = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
     Column(
@@ -161,7 +163,7 @@ fun FailedRow(
         Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.m), verticalAlignment = Alignment.Top) {
             if (!isLargeText()) Box(Modifier.width(72.dp).height(72.dp).clip(RoundedCornerShape(Vmk.radii.thumb)).background(Vmk.colors.surface3).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
                 if (thumb != null) StableImage(thumb, ContentScale.Crop, Modifier.fillMaxSize().alpha(0.6f), grey)
-                Icon(Sym.Warning, null, tint = accent, modifier = Modifier.size(24.dp))
+                Icon(if (cancelled) Sym.Stop else Sym.Warning, null, tint = accent, modifier = Modifier.size(24.dp))
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -169,17 +171,12 @@ fun FailedRow(
                     Text(statusLabel, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = accent)
                 }
                 Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                detail?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary) }
+                (detail ?: if (cancelled) stringResource(R.string.video_cancelled_body) else null)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary) }
             }
         }
         if (onRetry != null || onDismiss != null) FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-            if (onRetry != null) TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("retryButton")) {
-                Icon(Sym.Refresh, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.common_try_again), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.primary)
-            }
-            if (onDismiss != null) TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("removeButton")) {
-                Text(stringResource(R.string.common_remove), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.textSecondary)
-            }
+            if (onRetry != null) TonalButton(stringResource(R.string.common_try_again), onRetry, Modifier.testTag("retryButton"), icon = Sym.Refresh, onSurface = !cancelled)
+            if (onDismiss != null) TextAction(stringResource(R.string.common_remove), onDismiss, Modifier.testTag("removeButton"), color = Vmk.colors.textSecondary)
         }
     }
 }

@@ -94,7 +94,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                 AndroidView(
                     factory = { ctx ->
                         PlayerView(ctx).apply {
-                            useController = true
+                            useController = false   // the same controls as the inline player
                             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                             this.player = p
                         }
@@ -102,14 +102,8 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     onRelease = { it.player = null },
                     modifier = Modifier.fillMaxSize(),
                 )
-                IconButton(
-                    onClick = ::close,
-                    modifier = Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp).size(48.dp).testTag("closeFullScreenButton"),
-                ) {
-                    Box(Modifier.size(40.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
-                        Icon(Sym.Close, contentDescription = stringResource(R.string.player_close_full_screen), tint = Color.White)
-                    }
-                }
+                com.videomk.app.ui.PlayerControls(p, onFullScreen = null, modifier = Modifier.fillMaxSize(), bottomInset = 12.dp)
+                Box(Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp)) { com.videomk.app.ui.GlassIconButton(Sym.Close, stringResource(R.string.player_close_full_screen), ::close, Modifier.testTag("closeFullScreenButton"), onDark = true) }
             }
         }
     }

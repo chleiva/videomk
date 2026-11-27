@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lib_status_cancelled">Cancelado</string>
+    <string name="video_cancelled_body">Tus créditos han vuelto.</string>
+    <string name="err_plan_default">Esto no está incluido en tu plan.</string>
+    <string name="question_skip_all">Omitir todo</string>
+    <string name="question_position">Pregunta %1$d de %2$d</string>
+    <plurals name="stop_paused_hours">
+        <item quantity="one">En pausa · inténtalo en %1$d hora</item>
+        <item quantity="other">En pausa · inténtalo en %1$d horas</item>
+    </plurals>
+    <plurals name="stop_paused_minutes">
+        <item quantity="one">En pausa · inténtalo en %1$d minuto</item>
+        <item quantity="other">En pausa · inténtalo en %1$d minutos</item>
+    </plurals>
+    <string name="stop_paused_minute">En pausa · inténtalo en un minuto</string>
+    <string name="stop_plan_title">No incluido en tu plan</string>
+    <string name="stop_free_paused_title">Los videos gratis se acabaron por hoy</string>
+    <string name="stop_free_unavailable_title">Los videos gratis no están disponibles</string>
+    <string name="stop_resumes">Vuelven %1$s.</string>
+    <string name="plan_coming_soon">%1$s llegará pronto.</string>
+    <string name="plan_today_at">hoy, %1$s</string>
+    <string name="plan_tomorrow_at">mañana, %1$s</string>
+    <string name="plan_tomorrow">mañana</string>
+    <string name="create_use_length">Usar %1$s</string>
+    <string name="common_undo">Deshacer</string>
+    <string name="common_deleted">Eliminado</string>
+    <string name="cancel_done">Cancelado</string>
+    <plurals name="cancel_done_credits">
+        <item quantity="one">Cancelado · %1$d crédito devuelto</item>
+        <item quantity="other">Cancelado · %1$d créditos devueltos</item>
+    </plurals>
+    <string name="cancel_unavailable">Este video no se puede cancelar desde aquí ahora.</string>
+    <string name="making_cancel">Cancelar video</string>
+    <string name="video_delete">Eliminar</string>
+    <string name="video_cancelled_title">Cancelado</string>
+    <string name="info_about">Acerca de</string>
+    <string name="info_made_with_ai">Hecho con IA por VideoMK.</string>
+    <string name="info_captions">Los subtítulos forman parte de la imagen.</string>
+    <string name="info_sources">Fuentes y créditos</string>
+    <string name="photo_menu_library">Galería</string>
+    <string name="photo_menu_presentation">Presentación</string>
+    <string name="deck_replaced_photos">Una presentación reemplaza las fotos.</string>
+    <string name="create_with_length">Crear · %1$s</string>
+    <string name="create_locked_default">Los videos gratis no están disponibles ahora.</string>
+    <string name="plans_coming_soon">Los planes Pro y Max llegarán pronto.</string>
+    <string name="opt_scenes">Escenas</string>
+    <string name="opt_background">Fondo</string>
+    <string name="opt_watermark">Marca de agua</string>
+    <string name="opt_watermark_default">Predeterminada</string>
+    <string name="opt_presence">Se muestra</string>
+    <string name="opt_beta">Beta</string>
+    <plurals name="wallet_next_free_credit">
+        <item quantity="one">Próximo crédito gratis: %1$s</item>
+        <item quantity="other">Próximos créditos gratis: %1$s</item>
+    </plurals>
+    <string name="wallet_plan">Plan</string>
+    <string name="wallet_plan_longest">Videos de hasta %1$s</string>
+    <string name="wallet_plan_watermark">Marca de agua de VideoMK</string>
+    <string name="wallet_bucket_plan">Créditos del plan</string>
+    <string name="settings_photos_footer">Las fechas y los lugares ordenan tus fotos en un video. Tus fotos siguen siendo privadas.</string>
+    <string name="media_storage_short">Con el almacenamiento lleno puedes ver y eliminar fotos; las nuevas esperan.</string>
+    <string name="player_controls">Mostrar u ocultar los controles</string>
+    <string name="player_play">Reproducir</string>
+    <string name="player_pause">Pausar</string>
+    <string name="player_seek">Posición en el video</string>
+    <string name="collection_empty_title">Aún no hay fotos aquí</string>
+</resources>

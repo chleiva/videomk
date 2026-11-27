@@ -134,13 +134,12 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         if (e != null) {
             composer.text = Txt.s(e.text)
             if (e.minutes != null) composer.updateOptions(composer.options.copy(minutes = e.minutes))
-            if (e.photos) composer.openAddPhotos(if (container?.mediaApi != null) 1 else 0)
+            if (e.photos && container?.mediaApi != null) composer.openAddPhotos(1)
         }
         onNewVideo()
     }
 
-    LaunchedEffect(Unit) { app.refresh() }
-    PollWhileRunning(app, state.hasRunningVideos)
+    PollWhileRunning(app)   // reads the list every time Videos becomes visible, then for as long as something is being made
     DisposableEffect(context) {
         // when the connection comes back, reload what could not be loaded
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
@@ -151,14 +150,8 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         onDispose { runCatching { cm?.unregisterNetworkCallback(cb) } }
     }
 
-    state.retryNotice?.let { notice ->
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { app.dismissRetryNotice() },
-            confirmButton = { TextButton(onClick = { app.dismissRetryNotice() }, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("retryNoticeOk")) { Text(stringResource(android.R.string.ok)) } },
-            text = { Text(notice, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text) },
-            containerColor = Vmk.colors.surface,
-        )
-    }
+    // what the server says about a retry, a cancel or a removal goes to the one bar (no dialog to dismiss)
+    LaunchedEffect(state.retryNotice) { state.retryNotice?.let { app.undo.say(it); app.dismissRetryNotice() } }
     Scaffold(
         containerColor = Vmk.colors.background,
         contentWindowInsets = WindowInsets(0),
@@ -204,7 +197,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                             items(rows, key = { it.key }, contentType = { it::class }) { row ->
                                 when (row) {
                                     is com.videomk.app.core.FeedRow.Live -> when (val entry = row.entry) {
-                                        is LibraryEntry.Pending -> PendingCard(entry.pending, onRetry = { app.retry(entry.pending.id) }, onDismiss = { app.dismissPending(entry.pending.id) })
+                                        is LibraryEntry.Pending -> PendingCard(entry.pending, onRetry = { app.retry(entry.pending.id) }, onDismiss = { app.removePending(entry.pending.id) })
                                         is LibraryEntry.Video -> MakingCard(rememberMakingSnapshot(entry.video, state), Modifier.animateItem().testTag("runningRow"), onClick = { onOpenVideo(entry.video.id) }, videoId = entry.video.id)
                                     }
                                     // the Making card settles into the poster: the same list item, cross-faded by the list's own item animation
@@ -221,11 +214,11 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                                     is com.videomk.app.core.FeedRow.Problem -> {
                                         val v = row.video
                                         FailedRow(
-                                            title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
+                                            title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason, cancelled = v.status == VideoStatus.Cancelled,
                                             thumb = v.previewGifUrl, tag = "problemRow", modifier = Modifier.animateItem(),
                                             // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a refused video, a used-up presentation or one out of retries.
-                                            onRetry = if (v.status == VideoStatus.Failed && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
-                                            onDismiss = { app.removeFailed(v) },
+                                            onRetry = if ((v.status == VideoStatus.Failed || v.status == VideoStatus.Cancelled) && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
+                                            onDismiss = { app.delete(v) }, onOpen = { onOpenVideo(v.id) },
                                         )
                                     }
                                 }
@@ -244,7 +237,8 @@ private fun PosterCard(video: VideoItem, day: String, large: Boolean, onClick: (
     val shape = RoundedCornerShape(Vmk.radii.videoCard)
     val desc = stringResource(R.string.lib_ready_desc, video.displayTitle) + " " + day + "."
     Column(
-        modifier.fillMaxWidth().clip(shape).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_play), onClick = onClick)
+        // only the picture is clipped to the card shape: clipping the whole column cut the corner of the day under it ("Today" lost part of its T)
+        modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.tile)).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_play), onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = desc }.testTag("videoRow"),
         verticalArrangement = Arrangement.spacedBy(Vmk.space.s),
     ) {
@@ -254,7 +248,7 @@ private fun PosterCard(video: VideoItem, day: String, large: Boolean, onClick: (
             if (video.aspect != null && video.aspect != "16:9") GlassChip(video.aspect!!, Modifier.align(Alignment.TopStart).padding(Vmk.space.s))
             video.durationSeconds?.let { GlassChip(duration(it), Modifier.align(Alignment.BottomEnd).padding(Vmk.space.s)) }
         }
-        Column(Modifier.padding(horizontal = 2.dp).padding(bottom = 2.dp)) {
+        Column(Modifier.padding(horizontal = Vmk.space.xs).padding(bottom = Vmk.space.xs)) {
             Text(video.displayTitle, style = if (large) VmkType.makingTitle else MaterialTheme.typography.titleSmall, color = Vmk.colors.text, maxLines = if (isLargeText()) 3 else 2, overflow = TextOverflow.Ellipsis)
             Text(day, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
         }
@@ -435,6 +429,7 @@ fun StatusChip(status: VideoStatus) {
         is VideoStatus.Running -> stringResource(R.string.lib_status_making) to MaterialTheme.colorScheme.primary
         VideoStatus.Complete -> stringResource(R.string.lib_status_ready) to Vmk.colors.success
         VideoStatus.Failed -> stringResource(R.string.lib_status_failed) to Vmk.colors.danger
+        VideoStatus.Cancelled -> stringResource(R.string.lib_status_cancelled) to Vmk.colors.textSecondary
         VideoStatus.Rejected -> stringResource(R.string.lib_status_not_allowed) to Vmk.colors.warning
     }
     Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = color,

@@ -37,7 +37,7 @@ class ComposerLogicTest {
 
     @Test fun `no credits at all offers add credits instead of a length`() {
         val s = st(balance = 0)
-        assertEquals(StatusKind.NoCredits, s.kind); assertEquals("You have no credits", s.text); assertTrue(s.fix!!.addCredits); assertEquals("Add credits", s.fix!!.label())
+        assertEquals(StatusKind.NoCredits, s.kind); assertEquals("You have no credits", s.text); assertTrue(s.fix!!.addCredits); assertEquals("See credits", s.fix!!.label())
         assertNull(ComposerLogic.affordableLength(0, listOf(1.0, 2.0, 3.0)))
     }
 
@@ -69,9 +69,9 @@ class ComposerLogicTest {
     @Test fun `one selection across both tabs with counts and the limit`() {
         assertEquals("Choose up to 100 photos", AddPhotosLogic.subline(0, 0, 3.0)); assertEquals("Choose photos", AddPhotosLogic.title(0)); assertEquals("Add", AddPhotosLogic.addLabel(0))
         assertEquals("7 selected", AddPhotosLogic.title(7)); assertEquals("Add 7", AddPhotosLogic.addLabel(7))
-        assertEquals("4 from this phone, 3 from My media. About 153 fit in 3 minutes.", AddPhotosLogic.subline(4, 3, 3.0))
-        assertEquals("4 from this phone, 3 from My media. About 51 fit in 1 minute.", AddPhotosLogic.subline(4, 3, 1.0))
-        assertEquals("60 from this phone, 33 from My media. 93 of 100. About 51 fit in 1 minute.", AddPhotosLogic.subline(60, 33, 1.0))
+        assertEquals("4 from this phone, 3 from Media. About 153 fit in 3 minutes.", AddPhotosLogic.subline(4, 3, 3.0))
+        assertEquals("4 from this phone, 3 from Media. About 51 fit in 1 minute.", AddPhotosLogic.subline(4, 3, 1.0))
+        assertEquals("60 from this phone, 33 from Media. 93 of 100. About 51 fit in 1 minute.", AddPhotosLogic.subline(60, 33, 1.0))
         assertEquals(93, AddPhotosLogic.total(60, 33)); assertEquals(7, AddPhotosLogic.room(60, 33)); assertFalse(AddPhotosLogic.limitReached(60, 39)); assertTrue(AddPhotosLogic.limitReached(60, 40)); assertEquals(0, AddPhotosLogic.room(100, 5))
         assertEquals("You can add up to 100 photos. Remove one to choose another.", AddPhotosLogic.LIMIT_MESSAGE)
         assertNull(AddPhotosLogic.badge(0)); assertEquals("100", AddPhotosLogic.badge(100))

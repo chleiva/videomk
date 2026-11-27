@@ -284,16 +284,10 @@ fun UploadBar(
                     IconButton(onClick = { onExpanded(!expanded) }, modifier = Modifier.size(48.dp)) { Icon(if (expanded) Sym.ExpandMore else Sym.ExpandLess, toggleText, tint = Vmk.colors.textSecondary) }
                 }
                 if (progress.active) LinearProgressIndicator(progress = { progress.finished.toFloat() / total }, modifier = Modifier.fillMaxWidth().heightIn(min = 3.dp), color = Vmk.colors.primary, trackColor = Vmk.colors.surface3, drawStopIndicator = {})
-                if (expanded) Expanded(progress, items, stats, onRetry, onRetryAll, onPause, onResume, onCancelAsk = { confirmCancel = true })
+                if (expanded) Expanded(progress, items, stats, onRetry, onRetryAll, onPause, onResume, onCancelAsk = onCancel)
             }
         }
     }
-    if (confirmCancel) AlertDialog(
-        onDismissRequest = { confirmCancel = false },
-        title = { Text(pluralStringResource(R.plurals.upload_cancel_title, waitingCount, waitingCount)) }, text = { Text(stringResource(R.string.upload_cancel_text)) },
-        confirmButton = { TextButton(onClick = { confirmCancel = false; onCancel() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirmCancelUploads")) { Text(stringResource(R.string.upload_cancel_remaining), color = Vmk.colors.danger) } },
-        dismissButton = { TextButton(onClick = { confirmCancel = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.upload_keep)) } },
-    )
 }
 
 @Composable

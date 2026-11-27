@@ -91,28 +91,49 @@ fun VideoDetailScreen(
     val editRevision by app.editRevision.collectAsState()
     val initialRevision = rememberSaveable { editRevision }
 
-    LaunchedEffect(Unit) { if (app.state.value.videos.none { it.id == detail.videoId }) app.refresh() }
-    PollWhileRunning(app, state.hasRunningVideos)
+    // PollWhileRunning reads the list every time this page becomes visible (also after the phone was locked), so a Making page turns into the player by itself
+    PollWhileRunning(app)
+    // back on a finished video: a link that has expired meanwhile (they are signed for a limited time) is replaced before the person taps anything
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { detail.onVisible() }
     LaunchedEffect(video?.status) { if (video?.status == VideoStatus.Complete) detail.load() }
     LaunchedEffect(editRevision) { if (editRevision != initialRevision && video?.status == VideoStatus.Complete) { app.refresh(); detail.reload() } }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { detail.pause() }
 
+    // deleted from here (or cancelled and removed): the page has nothing left to show
+    LaunchedEffect(video?.id, state.hidden) { if (video != null && video.id in state.hidden) onBack() }
+    var makingMenu by remember { mutableStateOf(false) }
     Scaffold(
         containerColor = Vmk.colors.background,
-        // only the way back: the title sits under the picture, once
-        topBar = { VmkTopBar(onBack = onBack) },
+        // only the way back, and while it is being made the one way out: More > Cancel video
+        topBar = {
+            VmkTopBar(onBack = onBack) {
+                if (video?.status is VideoStatus.Running) Box {
+                    GlassIconButton(Sym.MoreHoriz, stringResource(R.string.action_more), { makingMenu = true }, Modifier.testTag("makingMore"), enabled = video.id !in state.cancelling)
+                    VmkMenu(makingMenu, { makingMenu = false }) {
+                        VmkMenuItem(stringResource(R.string.making_cancel), Sym.Stop, Modifier.testTag("cancelVideo")) { makingMenu = false; app.cancel(video) }
+                    }
+                }
+            }
+        },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             if (video == null) { FullScreenSpinner(); return@Box }
-            val kind = when (video.status) { VideoStatus.Complete -> 1; is VideoStatus.Running -> 0; VideoStatus.Failed -> 2; VideoStatus.Rejected -> 3 }
+            val kind = when (video.status) { VideoStatus.Complete -> 1; is VideoStatus.Running -> 0; VideoStatus.Failed -> 2; VideoStatus.Rejected -> 3; VideoStatus.Cancelled -> 4 }
             // Making settles into the player with a cross-fade (the same component as the home card, in its roomier layout)
             SettleCrossfade(kind, Modifier.fillMaxSize()) { k ->
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
                     when (k) {
-                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = { detail.pause(); onMakeAnother() }, onFeedback = onFeedback, remixPrompt = Remix.prompt(state.briefs[video.id], video.title), caps = caps, onRemix = { p, k -> detail.pause(); onRemix(p, k) })
+                        1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = { detail.pause(); onMakeAnother() }, onFeedback = onFeedback, remixPrompt = Remix.prompt(state.briefs[video.id], video.title), caps = caps, onRemix = { p, k -> detail.pause(); onRemix(p, k) }, onDelete = { detail.pause(); app.delete(video) })
                         0 -> MakingBody(rememberMakingSnapshot(video, state), video.id, video.frameRatio, LocalContainerOrNull.current?.readyNotifier, Modifier.testTag("progressCard"))
-                        2 -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Sym.Warning, Vmk.colors.danger) }
-                        else -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Sym.PanTool, Vmk.colors.warning) }
+                        // a video that did not finish names itself and keeps its two ways on: the same card as on the list
+                        else -> Column(Modifier.padding(horizontal = Vmk.space.screen)) {
+                            FailedRow(
+                                title = state.briefs[video.id] ?: video.displayTitle, rejected = video.status == VideoStatus.Rejected, cancelled = video.status == VideoStatus.Cancelled,
+                                detail = video.rejectReason ?: if (video.status == VideoStatus.Failed) stringResource(R.string.lib_no_credits_used) else null, thumb = video.previewGifUrl, tag = "problemPage",
+                                onRetry = if ((video.status == VideoStatus.Failed || video.status == VideoStatus.Cancelled) && video.canRetry != false && video.id !in state.deckVideos && video.id !in state.retrying) { { app.tryAgain(video) } } else null,
+                                onDismiss = { app.delete(video) },
+                            )
+                        }
                     }
                 }
             }
@@ -127,7 +148,7 @@ private fun captionOf(video: VideoItem): String? = listOfNotNull(video.durationS
 @Composable
 private fun PlayerSection(
     video: VideoItem, detail: VideoDetailViewModel, playback: PlaybackState, http: OkHttpClient, onEdit: () -> Unit, onMakeAnother: () -> Unit, onFeedback: () -> Unit,
-    remixPrompt: String?, caps: com.videomk.app.core.Capabilities, onRemix: (String, RemixKind) -> Unit,
+    remixPrompt: String?, caps: com.videomk.app.core.Capabilities, onRemix: (String, RemixKind) -> Unit, onDelete: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -138,11 +159,12 @@ private fun PlayerSection(
         when (playback) {
             is PlaybackState.Ready -> InlinePlayer(detail.player, onFullScreen = { detail.enterFullScreen(video.isTall)?.let { fullScreen.launch(it) } }, ratio = video.frameRatio, onNew = onMakeAnother)
             is PlaybackState.Error -> Column(
-                Modifier.fillMaxWidth().background(Vmk.colors.surface, RoundedCornerShape(Vmk.radii.videoCard)).padding(Vmk.space.xxl).testTag("playbackError"),
-                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Vmk.space.m),
+                Modifier.fillMaxWidth().aspectRatio(maxOf(video.frameRatio, 1f)).clip(RoundedCornerShape(Vmk.radii.videoCard)).background(Vmk.colors.surface).padding(Vmk.space.xxl).testTag("playbackError"),
+                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Vmk.space.m, Alignment.CenterVertically),
             ) {
-                Text(playback.message, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)
-                TextButton(onClick = { detail.reload() }, modifier = Modifier.heightIn(min = Vmk.minTouch)) { Text(stringResource(R.string.common_try_again), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.primary) }
+                Icon(Sym.CloudOff, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
+                Text(playback.message, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, textAlign = TextAlign.Center)
+                TonalButton(stringResource(R.string.common_try_again), { detail.reload() }, icon = Sym.Refresh)
             }
             // the picture's place is kept while the link loads: nothing jumps when it arrives
             else -> Box(Modifier.fillMaxWidth().aspectRatio(maxOf(video.frameRatio, 1f)).clip(RoundedCornerShape(Vmk.radii.videoCard)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { LiveRing(size = 28.dp) }
@@ -182,8 +204,8 @@ private fun PlayerSection(
                     sharing = false
                 }
             }, modifier = Modifier.testTag("shareButton"), enabled = url != null, fill = false) {
-                if (sharing) LiveRing(size = 20.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White) else Icon(Sym.Share, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary)
-                Text(shareLabel, style = VmkType.cta, color = Vmk.colors.onPrimary)
+                if (sharing) LiveRing(size = 20.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White) else Icon(Sym.Share, null, Modifier.size(20.dp), tint = androidx.compose.material3.LocalContentColor.current)
+                Text(shareLabel, style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current)
             }
             if (Build.VERSION.SDK_INT >= 29) {
                 if (saving) Box(Modifier.size(Vmk.minTouch).semantics { contentDescription = Txt.s(R.string.video_saving) }, contentAlignment = Alignment.Center) { LiveRing() }
@@ -204,9 +226,10 @@ private fun PlayerSection(
             GlassIconButton(Sym.Info, stringResource(R.string.action_info), { infoOpen = true }, Modifier.testTag("infoButton"), enabled = description != null)
             Box {
                 GlassIconButton(Sym.MoreHoriz, stringResource(R.string.action_more), { moreOpen = true }, Modifier.testTag("moreButton"))
-                androidx.compose.material3.DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(Vmk.radii.card)) {
-                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.lib_new_video)) }, leadingIcon = { Icon(Sym.PlaySparkle, null) }, onClick = { moreOpen = false; onMakeAnother() }, modifier = Modifier.testTag("makeAnother"))
-                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.feedback_title)) }, leadingIcon = { Icon(Sym.ChatBubbleOutline, null) }, onClick = { moreOpen = false; onFeedback() }, modifier = Modifier.testTag("feedbackLink"))
+                // New video already lives on the end card and the tab bar: More holds what has no other place
+                VmkMenu(moreOpen, { moreOpen = false }) {
+                    VmkMenuItem(stringResource(R.string.feedback_title), Sym.ChatBubbleOutline, Modifier.testTag("feedbackLink")) { moreOpen = false; onFeedback() }
+                    VmkMenuItem(stringResource(R.string.video_delete), Sym.Delete, Modifier.testTag("deleteVideo"), danger = true) { moreOpen = false; onDelete() }
                 }
             }
         }
@@ -219,40 +242,46 @@ private fun PlayerSection(
 
         // "Make another": the same idea with one choice changed. A chip opens Create prefilled (nothing is sent there until the person taps Create); only what this server can make is offered.
         val offers = remember(video, caps, remixPrompt) { Remix.offers(video, caps, Txt.localeTag.take(2), remixPrompt != null) }
-        if (remixPrompt != null && offers.isNotEmpty()) Column(Modifier.padding(top = Vmk.space.s).testTag("remix"), verticalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-            Overline(stringResource(R.string.remix_title))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
-                for (k in offers) SparkleChip(
-                    stringResource(when (k) { RemixKind.Short -> R.string.remix_short; RemixKind.Spanish -> R.string.remix_spanish; RemixKind.English -> R.string.remix_english; RemixKind.Cut30 -> R.string.remix_cut30 }),
-                    { haptics.play(DesignTokens.Haptic.Selection); onRemix(remixPrompt, k) }, Modifier.testTag("remix-${k.name}"), onClickLabel = stringResource(R.string.lib_new_video),
-                )
-            }
+        // no header: the sparkle already says "a suggestion" (the video page's budget is 8 words)
+        if (remixPrompt != null && offers.isNotEmpty()) FlowRow(Modifier.padding(top = Vmk.space.s).testTag("remix"), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
+            for (k in offers) SparkleChip(
+                stringResource(when (k) { RemixKind.Short -> R.string.remix_short; RemixKind.Spanish -> R.string.remix_spanish; RemixKind.English -> R.string.remix_english; RemixKind.Cut30 -> R.string.remix_cut30 }),
+                { haptics.play(DesignTokens.Haptic.Selection); onRemix(remixPrompt, k) }, Modifier.testTag("remix-${k.name}"), onClickLabel = stringResource(R.string.lib_new_video),
+            )
         }
 
         if (infoOpen && description != null) InfoSheet(description, onDismiss = { infoOpen = false })
     }
 }
 
-/** Info: the description and the photo credits, with one Copy button (replaces the disclosure and "Copy description with credits"). */
+/**
+ * Info, in three short groups: About (made with AI, captions are part of the picture), the description, and the sources and credits with their links.
+ * One Copy button for the description with its credits.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InfoSheet(description: String, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var copied by remember { mutableStateOf(false) }
-    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, modifier = Modifier.testTag("infoSheet")) {
-        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl), verticalArrangement = Arrangement.spacedBy(Vmk.space.m)) {
-            Text(stringResource(R.string.video_info_title), style = MaterialTheme.typography.titleLarge, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
-            androidx.compose.foundation.text.selection.SelectionContainer {
-                Text(linkified(description, MaterialTheme.colorScheme.primary), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.verticalScroll(rememberScrollState()).heightIn(max = 320.dp))
+    val parts = remember(description) { com.videomk.app.core.InfoText.split(description) }
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(topStart = Vmk.radii.sheet, topEnd = Vmk.radii.sheet), modifier = Modifier.testTag("infoSheet")) {
+        Column(Modifier.padding(horizontal = Vmk.space.sheet).padding(bottom = Vmk.space.xxl).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
+            SheetHeader(stringResource(R.string.video_info_title), onDismiss)
+            Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
+                Overline(stringResource(R.string.info_about))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) { Sparkle(size = 16.dp); Text(stringResource(R.string.info_made_with_ai), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text) }
+                Text(stringResource(R.string.info_captions), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             }
-            TextButton(
-                onClick = { copyText(context, Txt.s(R.string.share_clip_label_description), description); copied = true; scope.launch { delay(2000); copied = false } },
-                modifier = Modifier.heightIn(min = 48.dp).testTag("copyDescription"),
-            ) {
-                Icon(if (copied) Sym.Check else Sym.TextSnippet, null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
-                Text(stringResource(if (copied) R.string.share_copied else R.string.video_copy), textAlign = TextAlign.Start)
+            if (parts.about.isNotBlank()) androidx.compose.foundation.text.selection.SelectionContainer { Text(parts.about, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text) }
+            if (parts.credits.isNotBlank()) Column(verticalArrangement = Arrangement.spacedBy(Vmk.space.xs)) {
+                Overline(stringResource(R.string.info_sources))
+                androidx.compose.foundation.text.selection.SelectionContainer { Text(linkified(parts.credits, MaterialTheme.colorScheme.primary), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary) }
             }
+            TonalButton(
+                stringResource(if (copied) R.string.share_copied else R.string.video_copy), { copyText(context, Txt.s(R.string.share_clip_label_description), description); copied = true; scope.launch { delay(2000); copied = false } },
+                Modifier.testTag("copyDescription"), icon = if (copied) Sym.Check else Sym.ContentCopy,
+            )
         }
     }
 }
@@ -263,7 +292,7 @@ private fun copyText(context: Context, label: String, text: String) {
     runCatching { (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText(label, text)) }
 }
 
-/** Copies the video into the phone's gallery (Movies/videomk) through MediaStore: no storage permission is needed from Android 10; older versions do not offer Save. */
+/** Copies the video into the phone's gallery (Movies/VideoMK) through MediaStore: no storage permission is needed from Android 10; older versions do not offer Save. */
 @androidx.annotation.RequiresApi(29)
 private suspend fun saveVideoToGallery(context: Context, http: OkHttpClient, url: String, name: String) {
     withContext(Dispatchers.IO) {
@@ -271,7 +300,7 @@ private suspend fun saveVideoToGallery(context: Context, http: OkHttpClient, url
         val values = android.content.ContentValues().apply {
             put(android.provider.MediaStore.Video.Media.DISPLAY_NAME, "$safe.mp4")
             put(android.provider.MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-            put(android.provider.MediaStore.Video.Media.RELATIVE_PATH, "Movies/videomk")
+            put(android.provider.MediaStore.Video.Media.RELATIVE_PATH, "Movies/VideoMK")
             put(android.provider.MediaStore.Video.Media.IS_PENDING, 1)
         }
         val resolver = context.contentResolver

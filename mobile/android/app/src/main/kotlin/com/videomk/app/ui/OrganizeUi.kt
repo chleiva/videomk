@@ -147,7 +147,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.OfferBody(offer: Orga
                 Text(stringResource(R.string.organize_always_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
                 Text(stringResource(R.string.organize_always_text), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
             }
-            Switch(checked = pref == OrganizePref.Always, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Color.White, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
+            Switch(checked = pref == OrganizePref.Always, onCheckedChange = null, colors = vmkSwitchColors())
         }
     }
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -255,15 +255,11 @@ fun OrganizeBar(state: OrganizeState, onCancel: () -> Unit, onRetry: () -> Unit,
                 Text(sub, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 2)
             }
             if (failed) TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp).testTag("organizeRetry")) { Text(stringResource(R.string.common_try_again), fontWeight = FontWeight.SemiBold) }
-            IconButton(onClick = { confirm = true }, modifier = Modifier.size(48.dp).testTag("organizeStop")) { Icon(Sym.Close, stringResource(R.string.organize_stop), tint = Vmk.colors.textSecondary) }
+            // stopping asks nothing: what was already organized stays, and the menu starts it again
+            GlassIconButton(Sym.Close, stringResource(R.string.organize_stop), onCancel, Modifier.testTag("organizeStop"))
         }
         if (!failed) LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth().heightIn(min = 3.dp), color = if (offline) Vmk.colors.outline else Vmk.colors.primary, trackColor = Vmk.colors.surface3, drawStopIndicator = {})
     }
-    if (confirm) AlertDialog(
-        onDismissRequest = { confirm = false }, title = { Text(stringResource(R.string.organize_stop_title)) }, text = { Text(stringResource(R.string.organize_stop_text)) },
-        confirmButton = { TextButton(onClick = { confirm = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.organize_keep_going), fontWeight = FontWeight.SemiBold) } },
-        dismissButton = { TextButton(onClick = { confirm = false; onCancel() }, modifier = Modifier.heightIn(min = 48.dp).testTag("organizeStopConfirm")) { Text(stringResource(R.string.organize_stop_button), color = Vmk.colors.danger) } },
-    )
 }
 
 /** Aggregated, polite progress announcements for screen readers: at most every 10 percent or 15 seconds, never per call. */

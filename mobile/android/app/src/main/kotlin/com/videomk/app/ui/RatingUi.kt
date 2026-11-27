@@ -92,7 +92,7 @@ private fun RatingSheet(love: Boolean, onDismiss: () -> Unit, onYes: () -> Unit,
             if (!love) {
                 Text(stringResource(R.string.rating_ask_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
                 PrimaryButton(stringResource(R.string.rating_yes), onYes, Modifier.testTag("ratingYes"))
-                OutlinedButton(onClick = onNotReally, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("ratingNotReally")) { Text(stringResource(R.string.rating_not_really)) }
+                TonalButton(stringResource(R.string.rating_not_really), onNotReally, Modifier.testTag("ratingNotReally"), fill = true)
             } else {
                 Text(stringResource(R.string.rating_love_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
                 Text(stringResource(R.string.rating_love_body), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary)
@@ -100,7 +100,7 @@ private fun RatingSheet(love: Boolean, onDismiss: () -> Unit, onYes: () -> Unit,
                     onRate()
                     if (activity != null) container.launchReview(activity)
                 }, Modifier.testTag("ratingRate"))
-                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("ratingLater")) { Text(stringResource(R.string.rating_later), color = Vmk.colors.textSecondary, fontWeight = FontWeight.SemiBold) }
+                TextAction(stringResource(R.string.rating_later), onDismiss, Modifier.fillMaxWidth().testTag("ratingLater"), color = Vmk.colors.textSecondary)
                 TextButton(onClick = onAlready, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("ratingAlready")) { Text(stringResource(R.string.rating_already), color = Vmk.colors.textSecondary, textAlign = TextAlign.Center) }
             }
         }
