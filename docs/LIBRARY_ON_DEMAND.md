@@ -28,6 +28,8 @@
 
 Shared code: `engine/ondemand.py` (entitlement, the allowance, `reserve`, decisions, metrics), `common/clip_config.py` (every knob, `limits()`), `common/clip_store.py` (rows and files), `engine/clip_brief.py` (reusable or not; clips and images).
 Status: clips are built, tested and proven (sections 11 and 13). Images and objects are built behind the same flag, tested, and proven with small real runs (parts A and B). Nothing is merged or deployed.
+Added 2026-11-27 (parts C, D and E at the end): **one safety policy** for everything we generate and own, with an audit of what the library already holds and a takedown command (part C);
+**the tracer function** that lets sketch objects be made on Lambda, in a stack of its own (part D); **stock photo sources ranked so that Unsplash is the last resort** (part E).
 
 
 Owner's requirement (condensed): instead of buying 100 random clips, VideoMK makes a clip when a Max customer's video asks for footage that our library does not have. Only when the
@@ -454,7 +456,8 @@ On-demand images get the metadata at once and the watermark later (`watermark: p
 | Wikimedia Commons | per file: CC BY as above; public domain recommended only | reusers "can choose format of the credit line" (a Commons essay, not policy) | a credits list; a collective list is not explicitly approved: unverified |
 | NASA | acknowledgement expected | "NASA should be acknowledged as the source of the material"; no endorsement implied | unspecified; a credits list covers it |
 
-* **Recommendation (nothing changed in the engine: a licence decision is the owner's)**: (1) keep own library first, so credits disappear as it grows; (2) move the credit of **Pixabay, Pexels, CC0 and public-domain** media off the frame into the description and Info sheet, where the list already is: their terms do not ask for more; (3) **CC BY and NASA**: the description list is enough by CC's own guidance; an end card is the cautious extra; (4) **Unsplash is the one that needs the on-frame line**: its API terms tie the credit to each display and nothing approves a description-only credit for video, so either keep the small on-frame credit for Unsplash photos only, or ask Unsplash in writing, or prefer the other sources and our own images ahead of Unsplash. Note also that the API terms ask to hotlink their URLs, which a rendered video cannot do: that question exists today, with or without this change.
+* **Built 2026-11-27 (owner: "2 ok"): the other sources are ranked ahead of Unsplash, which is now the last resort (part E).** No credit was removed or changed.
+* **Recommendation (the rest is still not changed in the engine: a licence decision is the owner's)**: (1) keep own library first, so credits disappear as it grows; (2) move the credit of **Pixabay, Pexels, CC0 and public-domain** media off the frame into the description and Info sheet, where the list already is: their terms do not ask for more; (3) **CC BY and NASA**: the description list is enough by CC's own guidance; an end card is the cautious extra; (4) **Unsplash is the one that needs the on-frame line**: its API terms tie the credit to each display and nothing approves a description-only credit for video, so either keep the small on-frame credit for Unsplash photos only, or ask Unsplash in writing, or prefer the other sources and our own images ahead of Unsplash. Note also that the API terms ask to hotlink their URLs, which a rendered video cannot do: that question exists today, with or without this change.
 
 ### A6. Proof (2026-11-28, laptop, real OpenAI calls, QA models, local catalog)
 | Video | Search | Result |
@@ -503,7 +506,7 @@ below `object_sure_score` (0.55) counts as missing together with the boxed label
 Cost is cents, so the limits are about latency and quality: 1 call a video (up to 6 drawings), 30 s; account share $0.15 a month; platform $1 a day and $10 a month; test $0.30 an account from $0.50 a day and $5 a month.
 **Max only, as the owner said** (knob `object_plans`). My recommendation stays: open it to Pro once a week of rejection data exists; a call is under 1 % of Pro's margin. Opening it needs Pro's own "kept" figures in the allowance formula, which today knows Max only: not built.
 
-### B4. What going live on Lambda needs (not done; say it plainly)
+### B4. What going live on Lambda needs (built 2026-11-27 as option 1: see part D; not deployed)
 The tracer uses **scipy** (`ndimage` and `interpolate`) and **vtracer**, and the engine's layer has neither. The layer is 148 MB; scipy is about 97 MB installed; the limit for a function with
 its layers is 250 MB, so scipy does not simply fit. In the engine's functions `fill` therefore answers `no_tracer`, spends nothing and leaves the plan alone (tested). Two ways to go live:
 1. **A small tracer function of its own** (a container image, in a separate small stack; the plan step invokes it with the 30 s limit). Clean, no risk to the engine layer. My recommendation.
@@ -512,7 +515,7 @@ Either way the tracing code (`trace.py`, `vectorize.py`, the cutter and gate of 
 Until then the same result can be had after the video: `fill` works on a laptop today, so a nightly run over the day's missing names would stock the library for the next video.
 
 ### B5. Not done (objects)
-* Not running on Lambda (B4). The plan function's rights and variables exist under the flag.
+* Not running on Lambda yet: the tracer function is built and tested but not deployed (part D). The plan function's rights and variables exist under the flag.
 * The proof ran `fill` on boards built by the real `_sanitize`, not inside a full plan step, and no board was rendered with the new drawings (the packages are the builder's own format, which the renderer already draws).
 * The boards were laid out and scored before the swap; a drawing of a very different shape than its stand-in is laid out again at render time but the self-check does not run again.
 * `object_sure_score` 0.55 is a first value; all eight wrong stand-ins in the proof were under it, and no correct match was tested against it.
@@ -522,3 +525,157 @@ Until then the same result can be had after the video: `fill` works on a laptop 
 gate flag, who may, the switches, catalog hit, duplicate, 4 a video, the type share, day stop, test budget, yearly gets images but no clip, **clips and images on one account total**,
 provider failures and timeout, the OpenAI client, the photo step with fallback and with the flag off), objects (made, stored, drawn; rejected keeps its label; one call a video; who may; no tracer; slow or failing call; never overwrite; the meaning-match rule).
 With the clip tests and the neighbours: see the run at the end of the work. The full suite was not run.
+
+
+## Part C. Safety of everything we generate and own (2026-11-27, tracker R160)
+
+Owner: "We must ensure images are safe, on the safe side, I don't want to generate and own images that are risky, controversial, etc."
+
+### C1. The policy (ONE module: `backend/lambdas/common/media_policy.py`, version 2026-11-27)
+A library asset is reused in many videos about topics nobody can foresee, so it must be harmless under ANY narration. **Refused, for clips, images and sketch objects alike:**
+
+| Code | What |
+|---|---|
+| `politics` | politicians, parties, elections, voting, governments, parliaments, campaigns, protests, riots, activism, propaganda, political symbols |
+| `religion` | places of worship, clergy, prayer, rituals, religious symbols, clothing, texts, figures and holidays of any faith |
+| `war_weapons` | armed conflict, soldiers, armies, military vehicles, guns, blades shown as weapons, bombs, explosives, ammunition |
+| `violence` | fighting, attacks, abuse, threats, killing, torture, kidnapping, robbery, arrests, prisons, bullying |
+| `injury_medical` | blood, wounds, surgery, needles and injections, vaccines, exposed or realistic organs, broken bones, burns, visible suffering |
+| `sexual` | nudity or partial nudity, underwear or swimwear as the subject, kissing, seductive poses, anything erotic |
+| `drugs_alcohol_tobacco` | narcotics and their use, pills as drugs, beer, wine, spirits, bars and drinking, cigarettes, cigars, pipes, vaping |
+| `gambling` | casinos, betting, slot machines, roulette, poker, lotteries |
+| `tragedy_disaster` | natural disasters, accidents, crashes, destructive fires, wreckage, death, funerals, graves, grief, poverty and suffering |
+| `children` | babies, toddlers, children or teenagers as the main subject (toys or an empty classroom are fine; a child is not) |
+| `flags_maps` | any country's flag, national emblem or anthem scene, any map, a globe with country outlines, borders, checkpoints, disputed territory |
+| `stereotypes` | people shown as typical of a nationality, ethnicity, race, religion, gender, age, class, disability or profession; ethnic costume as shorthand for a people |
+| `real_people` | any named, famous or recognisable person, any real face clear enough to be recognised, portraits, look-alikes |
+| `brands_ip` | brands, logos, packaging, recognisable product design, mascots, film, game, comic or cartoon characters, team kits, franchises |
+| `hate` | nazi, supremacist or extremist symbols, slurs, racist caricature, harassment of a group |
+| `self_harm` | suicide, self-injury, eating disorders, overdose, nooses |
+| `frightening` | horror, monsters, skulls and skeletons, ghosts, screaming, menace, disgust, shocking or disturbing scenes |
+
+**When unsure, refuse.** The video then uses stock media (clips, images) or keeps its written label (sketch objects): the fallbacks that already existed. `python backend/scripts/library_safety.py policy` prints the policy as the models read it.
+
+### C2. The layers, cheapest first, and where each one sits
+| Layer | Clips | Images | Sketch objects | Cost |
+|---|---|---|---|---|
+| 1. Word lists, English and Spanish, accents and case ignored (`text_reason`) on the director's own wording | `clip_brief.pre_filter` | the same | `object_ondemand.missing` | free |
+| 2. The policy inside the model rubric (`TEXT_RUBRIC`): the answer must say `"policy": "none"` | the brief call that already existed | the same | `judge_names`: ONE small-model call a video, which also returns the plain English name | none extra; about $0.0003 a video for objects |
+| 3. Word lists again, on the English brief or name the model wrote, plus "plain English only" | `clip_brief.post_filter` | the same | inside `judge_names` | free |
+| 4. Provider's own moderation of the exact prompt, BEFORE paying | Gemini Omni filters the prompt itself (a blocked prompt is not billed and nothing is stored) | OpenAI moderation endpoint on the prompt; refused or unavailable = nothing generated, the reservation goes back | the same, on the sheet's prompt (`object_maker.sheet`) | free |
+| 5. The provider's own filter during generation | Gemini Omni: "applies content safety filters to both input prompts and generated video" | `moderation: "auto"` sent explicitly | the same | free |
+| 6. After generation: the policy inside the vision check (`VISION_RUBRIC`), answer must say `"policy": "none"` | the 6-frame gate (`clip_gate.judge`) | the catalog's check (`catalog_make.judge`), which the offline batch tool shares | `vision_check` on every finished drawing (one small-model call each, in parallel) | none extra for clips and images; about $0.0002 a drawing |
+| 7. Provider's own moderation of the result | none exists for video outside the generation call | OpenAI moderation endpoint on the picture | on the whole sheet | free |
+
+Every layer **fails closed**: a missing `"policy"` field, an unknown word in it, an unreadable answer, an error, a moderation service that does not answer, a drawing without a picture to judge, an answer that is not sure: all are refusals. **Rejected media is never stored**: only a ledger row with the reason (`policy:<code>`, `moderation:<category>`) and the cost. A refusal before the provider is paid gives the reservation back (`policy_refused`); one after it is charged like any rejected generation.
+
+**Provider moderation, as read on the providers' own pages on 2026-11-27** (not from memory):
+* OpenAI (images and sketch sheets): `POST /v1/moderations`, model `omni-moderation-latest`, "The moderation endpoint is free to use"; input is text and/or pictures (a base64 data URL is accepted); pictures are scored for sexual, violence, violence/graphic and the self-harm categories only (hate, harassment, illicit and sexual/minors are text only), which is why the prompt is checked as text as well. We refuse on the provider's own `flagged` and, stricter, on any category score at or above 0.2 (`MODERATION_MAX_SCORE`). The image generation parameter `moderation` is `"auto"` (default) or `"low"` ("less restrictive"); we send `"auto"` explicitly. Source: developers.openai.com/api/docs/guides/moderation and /api/reference/resources/images.
+* Google Gemini Omni (clips): the Omni page says "Omni applies content safety filters to both input prompts and generated video" and "Prompts that violate usage policies are blocked"; it documents no safety parameter for video and no separate moderation endpoint. The Interactions API's safety page describes adjustable thresholds (`safety_settings`, strictest `block_low_and_above`, default off for recent text models) but does not mention the video model, so **no threshold is sent for clips**: an undocumented parameter could break every generation. A blocked request answers HTTP 400 with code `safety`, `jailbreak`, `prohibited_content` or `blocklist`; the client treats all four as "blocked, not billed". Source: aistudio.google.com/docs/omni and /docs/safety-settings. Not verified with a real blocked call.
+
+### C3. Languages
+The word lists are **English and Spanish** (every wording is checked against both, whatever language it claims to be). Seven more video languages are coming (French, German, Italian, Brazilian Portuguese, Dutch, Polish, Finnish). They are handled by construction, not by seven more word lists:
+* **The generator is only ever sent English that we checked.** For clips and images that is the general brief the model writes ("Write the brief in English whatever the language of the search"); a brief with any letter outside plain English is refused (`english_only`), and the English word lists then read it. For sketch objects, `judge_names` turns each name into its plain English name, and only that name reaches the generator (a German "geige" is drawn from "violin"; the board keeps its own wording).
+* The director's own wording, in whatever language, is read by the model rubric, which is told to apply the policy "to the meaning, in whatever language the wording is written".
+* So a language without a word list is covered by the rubric on the way in and by the English lists on what is actually generated. What it does not get is the free refusal before the model call: a French wording costs one small-model call (about $0.0002) to be refused. Adding a language's words to `CATEGORIES` is a one-line change per category.
+* Honest limit: a brief written in Spanish without accents would pass `english_only` (it only looks at the letters); the Spanish word lists still read it, and the rubric asks for English.
+
+### C4. The audit of what the library already holds (read only)
+`python backend/scripts/library_safety.py audit --store qa [--media images,objects,clips] [--vision none|small|large] [--ids a,b] [--json out.json]`. Word lists on every title, subject and name; the policy's vision check on every picture; the provider's moderation on images. Verdicts: **remove** = a check of the picture itself named a category or the provider's moderation refused it; **review** = only words matched, or a check was unsure or could not run; **ok**. It never changes anything (tested: not one byte of either store differs after a run).
+
+**Run on QA, 2026-11-27** (`AWS_PROFILE=qa`, read only; full rows in `docs/clips_on_demand/safety_audit_qa_2026-11-27.json`; model calls $0.57; nothing was changed or deleted):
+
+| | Checked | ok | review | remove (the checker's word) |
+|---|---|---|---|---|
+| Catalog images (large vision model, and OpenAI moderation: 98 of 98 clean) | 98 | 87 | 6 | 5 |
+| Sketch objects, the 354 bundled drawings (small vision model) | 354 | 338 | 2 | 14 |
+| Library clips | 0 | | | QA holds none (not deployed) |
+
+The checker is told "when unsure, it does" and it behaves so. I looked at the 11 images myself (a contact sheet): none is offensive; the question for each is only whether it sits inside the owner's list. **What I recommend, in two tiers:**
+
+*Images: remove (inside the written list):*
+* `c02e27543388a36b3bf1ae927c2b643793ec9e2f636818a92826bbc810f7bfe9` "Compass and old map": an old map with border-like lines fills the frame (maps and borders).
+* `486c23bcb869d44b4f1d2a432ee3d64a9bc528202021365ca66857ee14584a8f` "Old stone ruins with columns": it is a Greek temple (a place of worship, and it reads as a specific landmark).
+
+*Images: the owner's call (the checker refused; a reasonable person could keep them):*
+* `1714b43d4ea432270fd83c40ec7e51990529538322985071ef39b9f9e34cd201` "Person meditating at sunrise": a lotus-pose silhouette can read as a spiritual practice.
+* `c3e43c811d59799c9d9d349e2ce0d3837ca0f3108cd54675dab7ac4f71ea2b15` "Single candle in the dark": reads as vigil, mourning or prayer under the wrong narration.
+* `eec6aae2d1e39b725c7df32f7b37b6c8c0addd08e66d1243d83e5a2fa5ae39ee` "Robot hand and human hand": echoes Michelangelo's Creation of Adam.
+
+*Images: reviewed, keep (the checker was only "unsure"; I see nothing)*: `1a069c13...` cup of coffee (the word "logos" is in its own negative prompt), `1c8794fc...` open book (blurred, unreadable text), `1e490d4d...` hand holding a blank black phone, `94711f87...` train (a livery, no logo), `a54320b5...` closed plain laptop, `e1393324...` chess pieces (the king's cross).
+
+*Sketch objects: remove (inside the written list):* `baby`, `child`, `family` (children as the subject), `church` (religion; the drawing has a cross), `map` (maps), `syringe` (needles and injections), `explosion` (explosions), `leader` (a person holding a flag).
+*Sketch objects: the owner's call:* `pill` and `medicine_bottle` (medicine, which the strict reading files under drugs), `flag` and `mountain_flag` (a plain flag, no country), `compass_rose` (a map element), `crown` (monarchy), `old_person` (a person with a cane: age), `peace_dove` (a peace symbol: activism, also religious).
+The bundled drawings are named in `backend/lambdas/engine/assets/whiteboard/library_index.json`: removing one for good is deleting its entry there and deploying; the takedown below takes it out of service before that.
+
+Honest limits of the audit: the small model's answers vary between runs (two drawings refused on the second look passed on the third); the first pass cut 21 answers short because the answer limit was too low for a model that thinks before answering (fixed: the limit is now 1,000 tokens, and a cut answer was always a refusal, never a pass); the image audit used one large-model call per image, not several; the vector cartoon backgrounds and characters (`vector_catalog_*`, `vector_character_*`) are other libraries and were not audited; prod was not audited.
+
+### C5. Takedown: one asset out of the library at once
+`python backend/scripts/library_safety.py takedown image|clip|object <id> --store <store> --reason "why" [--no-dry-run]` (`restore` undoes it; `taken` lists the record). Dry run by default; production asks to type `prod`. Code: `backend/lambdas/common/takedown.py`. In this order, so a failure half-way still leaves the asset out of service:
+1. **The row first.** Image: `review_status` becomes `taken_down` (every use reads the row and requires `approved`: the next video cannot get it). Clip and on-demand drawing: `status` becomes `taken_down` (search loads only `active` rows; the clip's metadata document says the same, so a rebuilt index and a promotion keep it out).
+2. **Out of search.** The image's vector is removed from the index (a copy is kept in quarantine so it can be restored).
+3. **The files go to quarantine, copied first, then deleted at the original key**: `quarantine/o|p|t/<id>.jpg` and `quarantine/w/<id>.json` in the catalog bucket (which is versioned: the original key also keeps its versions), `cliplib/q/v|p/<id>` for clips (**the assets bucket is NOT versioned**, checked on QA: for a clip the quarantine copy is the only one). Nothing is hard-deleted.
+4. A takedown record (when, why, what moved) under `clipgen:takedown` in the usage table.
+
+How immediate, honestly: an image is immediate (the row is read at every use). A clip leaves search for every new function instance at once and for a warm one within 2 minutes (its row cache); a warm instance that still holds the row can no longer fetch the file, so the beat falls back to stock. A drawing made on demand is not loaded by the next plan step. **A bundled drawing** is put on the takedown list, which the plan step reads only when library media on demand is deployed (`CLIPS_ON_DEMAND`); with the flag off (QA and prod today) the package's removal stops new render instances from loading it (the board then writes its label) but a warm instance may keep its cached copy until it is recycled, so the lasting removal is its entry in `library_index.json` plus a deploy.
+Built and tested against local stores only. **Not run against QA or prod.** The engine's functions have no right to `quarantine/`; the command runs with the operator's own credentials.
+
+### C6. What is not done (safety)
+* The policy's wording and word lists are a first version written by the builder; the owner should read the table in C1. Loosening or tightening is editing one tuple.
+* Deliberately NOT refused by the word lists (the rubric decides): kitchen knives, dice and playing cards, ambulances, medicine in general, a globe without borders.
+* The offline sketch-library builder (`lib_build.py`) and the vector libraries do not call the policy; the image batch tool does (it shares the check).
+* Clips have no second, independent moderation of the finished frames (the provider documents none). OpenAI's free moderation could read the six frames if the owner accepts sending our generated frames to a second provider: not built.
+* No real refusal by either provider's moderation was provoked (it would mean sending a bad prompt on purpose); the clients are tested against stand-ins of the documented answers.
+* The kill switches are the existing ones: `master_enabled` and the per-type switches (`clips_admin.py config set master_enabled false`, live within a minute).
+
+## Part D. The tracer function: sketch objects on Lambda (2026-11-27, tracker R153; built, tested, NOT deployed)
+
+**Why its own stack**: the maker needs scipy and vtracer; the engine layer is 148 MB and may not grow by about 100 MB (250 MB limit); the main stack `videomk-<stage>` is near 500 resources.
+**What it is**: `videomk-<stage>-wb-tracer`, **5 resources**: one zip function (Python 3.12, 3008 MB, 60 s), its own layer `tracer_deps` (numpy, scipy, Pillow, vtracer, resvg: **161 MB unpacked, 54 MB zipped**, all manylinux wheels, built by the same `build_layer.sh`, **no Docker and no container registry**), a role, its policy, a log group (30 days). Its only two rights: `bedrock:InvokeModel` (the builder's gate) and `ssm:GetParameter` on `/videomk/openai_api_key` (read at every call, never kept). It has no table, no bucket, no account or video data.
+**What it does** (`backend/tracer/handler.py` -> `lambdas/common/object_maker.py`, the library builder's own code from `scripts/whiteboard_proto`, bundled at synth time, not a copy): plain English names in; moderation of the prompt; ONE sheet from the image provider; moderation of the sheet; cut, trace, the builder's gate (which names, colours and orders); the accepted packages and a JPEG of each drawing out. The plan step then runs the policy's vision check on each drawing and stores the accepted ones in OUR library itself: the function writes nothing.
+**How the engine calls it** (`object_ondemand.tracer_maker`): one synchronous `lambda:Invoke`, no retry, read timeout = the plan step's own limit (`object_timeout_s`, 30 s) + 2 s, and only after every existing condition passed (the flag, `object_enabled`, `master_enabled`, entitlement, not an edit, names cleared by the policy, money reserved). **Function missing, not allowed, throttled, slow, failing or answering nonsense: the boards keep exactly what they had** (tested for eight failure kinds). When the failure happened before the image provider could be paid (function missing, access denied, no key, prompt refused) the reservation is given back; otherwise it stays, like any failed generation.
+
+**Added to the main stack, exactly** (only under the existing `clipsOnDemand` flag; **0 resources**): on the plan function, one environment variable `OBJECT_TRACER_FUNCTION=videomk-<stage>-wb-tracer` and one IAM statement `lambda:InvokeFunction` on `arn:aws:lambda:<region>:<account>:function:videomk-<stage>-wb-tracer`. No cross-stack reference: the two stacks share only that name, so either deploys or is deleted without the other.
+
+**Deploy on QA** (not run; the main session deploys):
+```
+cd backend
+layers/build_layer.sh tracer_deps                      # once, and when layers/tracer_deps/requirements.txt changes
+AWS_PROFILE=qa npx --yes aws-cdk@latest deploy videomk-qa-wb-tracer -c stage=qa -c objectTracer=1 --require-approval never
+# smoke test: expects {"ok": true, "tracer": true}
+AWS_PROFILE=qa aws lambda invoke --region eu-west-1 --function-name videomk-qa-wb-tracer --cli-binary-format raw-in-base64-out --payload '{"action":"ping"}' /dev/stdout
+```
+If the QA engine is deployed with `-c planModelId=<id>`, pass the same to the tracer stack (it is the gate's model). Then, when the owner says: the main stack with `-c clipsOnDemand=1` (the variable and the statement above, with the rest of the flag) and `clips_admin.py config set object_enabled true --stage qa`. Remove: `cdk destroy videomk-qa-wb-tracer -c stage=qa -c objectTracer=1`.
+
+**Measured**: the stack synthesises (5 resources) and `cdk diff` against QA shows exactly those 5 as new, with the two rights above (2026-11-27; the diff publishes the template file to the CDK bucket and creates no stack: checked afterwards). On a laptop, with the provider and the gate's model replaced by stand-ins, cut + trace + package of 3 drawings takes **0.7 s** (0.2 to 0.3 s each, in parallel); the earlier real runs (part B) were 10 to 15 s for a whole call, almost all of it the image provider and the gate.
+**Not verified** (it needs the deploy): the cold start with a 161 MB layer (expect a few seconds; it fits the 30 s limit only if the sheet itself takes its usual 8 to 10 s), the function's two rights against AWS, the layer's Linux wheels at run time (they are the versions of the laptop proofs: numpy 2.5.5, scipy 1.18.1, built for Python 3.12 manylinux; the code bundle is tested to import alone in a fresh interpreter, on macOS), and one real object made end to end on Lambda. The first QA run should watch one video with a missing drawing.
+
+## Part E. Stock photo sources: Unsplash is the last resort (2026-11-27, tracker R155)
+
+**Where the engine ranked sources**: `engine/stock.py`. Photos come from two sources only: Unsplash (API) and Openverse (CC0, public domain, CC BY). `gather()` used to interleave them Unsplash first and show the reviewer six at once.
+**The change** (small, in `gather()` and `scout_reviewed()`): the other sources come first; the reviewer is shown them alone; **an Unsplash photo is looked at only when the reviewer finds nothing suitable among the others**, or when there are none, or when the chosen one cannot be downloaded. When an Unsplash photo is used, its on-frame credit ("Photo: name / Unsplash"), its description credit and the download ping are exactly as before (tested). `LAST_RESORT = ("unsplash",)` is the one place that says so. A lone candidate from another source is still reviewed before it can displace Unsplash; a failing reviewer never takes an unreviewed Openverse photo while Unsplash has candidates. Cost: one more small-model review (about $0.0005) only when the first group is rejected.
+
+**Measured on 15 real searches** (2026-11-27; real Openverse and Unsplash searches, the real reviewer, nothing downloaded in full; `docs/clips_on_demand/unsplash_ranking_measure_2026-11-27.jsonl`):
+
+| | Unsplash picked | Another source picked |
+|---|---|---|
+| Before (interleaved, one review) | **15 of 15** | 0 |
+| After | **5 of 15** | 10 (all CC0) |
+
+In all 10 searches where the reviewer could see the other sources' photos it found a suitable one. **All 5 remaining Unsplash picks were Openverse's thumbnails failing to load** (its anonymous API, which answers errors when asked for several thumbnails quickly), not the reviewer preferring Unsplash; a registered (free) Openverse key or a retry would bring them back. Fifteen searches are a sample, not a rate.
+**Say plainly:**
+* **This does not remove the on-frame credit.** An Openverse photo still gets its own on-frame line today ("Photo: name (CC0 1.0)"). What changed is that the credit is no longer the Unsplash one, whose terms tie it to the frame. Taking CC0, public-domain and CC BY credits off the frame (they stay in the description list) is recommendation (2) and (3) of A5: a licence decision, not built here.
+* **Picture quality may drop.** Openverse is Flickr, museums and public archives; the reviewer accepted "vintage" photographs twice in the sample. Unsplash was the better photography, which is why it used to come first. The reviewer still rejects what does not fit, and the lasting answer is our own library.
+* Pixabay and Pexels are not photo sources of the engine today (only video sources); adding Pixabay photos (the key exists) would give the first group better pictures: not built.
+* The editor's candidate list shows the other sources first too.
+
+## Tests added on 2026-11-27 (targeted files; the full suite was NOT run)
+| File | Tests | What |
+|---|---|---|
+| `backend/tests/test_media_policy.py` | 20 | the word lists in both languages (every category, 30 ordinary wordings left alone); one rubric in all six prompts; fail-closed parsing; the brief step (refused before any model call, the model's `policy`, plain English, tags); the clip gate and the image check; provider moderation before paying and after, with the reservation given back; the moderation client (request shape, stricter threshold, six kinds of failure, the key never in the request body); the vision check; object names (any language in, English out); drawings refused by the vision check never stored; the sheet between two moderation checks; the audit (verdicts, read only, budget stop); takedown and restore of an image, a clip, an on-demand and a bundled drawing; the command line (dry run by default, a reason required, production asks) |
+| `backend/tests/test_stock_ranking.py` | 9 | other sources first; Unsplash only when nothing else suits, its credit unchanged; nothing suitable anywhere; a lone candidate; a failed download; a failing reviewer; one source down |
+| `backend/tests/test_object_tracer.py` | 17 | the engine's call (only English names, nothing of the customer); eight ways the function can fail, each leaving the labels and the right money; switches and entitlement; the handler (answer shape, bad requests, the policy, every failure an answer); the code bundle importing alone in a fresh interpreter; the REAL cut, trace and gate on a sheet drawn in the test; the stack (5 resources, 2 rights, no tie to the main stack) |
+| `backend/tests/test_clips_on_demand_cdk.py` | 5 (1 new) | the main stack gets one variable and one statement on the plan function, and still no resource |
+Also run and green after the changes: `test_clips_on_demand.py` (134), `test_library_on_demand.py` (21), `test_image_catalog.py` (75), `test_four_k.py` (37), `test_photos.py` (25), `test_clips.py` (72), `test_engine.py` (not slow). Their stand-in model answers now carry `"policy": "none"`.
+
+**Spend of this work** (limit $2): **$0.58**, all Bedrock: the audit's vision checks $0.57 (98 images with the large model $0.49 including a 3-image trial; 354 drawings with the small model, and the second and third looks, $0.08) and the 25 reviews of the ranking measurement $0.007. OpenAI's moderation endpoint (101 calls) is free. No image, sheet or clip was generated.

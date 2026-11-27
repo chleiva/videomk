@@ -80,3 +80,20 @@ def test_the_alarms_live_in_their_own_small_stack(templates):
     assert len(res) == 2 and {v["Type"] for v in res.values()} == {"AWS::CloudWatch::Alarm"}
     by = {v["Properties"]["MetricName"]: v["Properties"] for v in res.values()}
     assert by["BudgetStop"]["Threshold"] == 1 and by["SpendUsd"]["Threshold"] == 8 and all("AlarmActions" not in p for p in by.values())
+
+
+def _plan(t):
+    (fn,) = [v for v in t["Resources"].values() if v["Type"] == "AWS::Lambda::Function" and v["Properties"].get("FunctionName") == "v2_plan"]
+    return fn
+
+
+def test_the_plan_function_only_learns_the_tracers_name(templates):
+    """The whiteboard tracer function is in a stack of its own (backend/object_tracer.py). The main stack gets one variable and one statement, under the same flag."""
+    import object_tracer
+    assert "OBJECT_TRACER_FUNCTION" not in json.dumps(templates["off"]) and "wb-tracer" not in json.dumps(templates["off"])
+    assert _plan(templates["on"])["Properties"]["Environment"]["Variables"]["OBJECT_TRACER_FUNCTION"] == object_tracer.function_name("qa") == "videomk-qa-wb-tracer"
+    role = _plan(templates["on"])["Properties"]["Role"]["Fn::GetAtt"][0]
+    stm = [s for v in templates["on"]["Resources"].values() if v["Type"] == "AWS::IAM::Policy" and {"Ref": role} in v["Properties"]["Roles"] for s in v["Properties"]["PolicyDocument"]["Statement"]]
+    (invoke,) = [s for s in stm if s["Action"] == "lambda:InvokeFunction"]
+    assert invoke["Resource"] == "arn:aws:lambda:eu-west-1:123456789012:function:videomk-qa-wb-tracer"                     # that one function, by name: no reference between the stacks
+    assert "OBJECT_TRACER_FUNCTION" not in _beat(templates["on"])["Properties"]["Environment"]["Variables"]

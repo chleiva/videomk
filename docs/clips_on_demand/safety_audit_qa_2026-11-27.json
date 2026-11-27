@@ -1,0 +1,451 @@
+{
+ "what": "Library safety audit of the QA library, READ ONLY (scripts/library_safety.py audit --store qa). Nothing was changed.",
+ "policy_version": "2026-11-27",
+ "date": "2026-11-27",
+ "images": {
+  "checked": 98,
+  "counts": {
+   "ok": 87,
+   "review": 6,
+   "remove": 5
+  },
+  "vision_model": "large (Sonnet-class), one call an image",
+  "provider_moderation": "OpenAI omni-moderation-latest on every image: all 98 clean",
+  "cost_usd": 0.4789,
+  "not_ok": [
+   {
+    "media": "image",
+    "id": "1714b43d4ea432270fd83c40ec7e51990529538322985071ef39b9f9e34cd201",
+    "title": "Person meditating at sunrise",
+    "status": "approved",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:religion (Meditation in lotus pose with mudra hands may suggest a spiritual or religious ritual.)"
+    ],
+    "vision": "policy:religion",
+    "seen": "Silhouette of a person meditating in lotus pose on a beach at sunset",
+    "vision_reason": "Meditation in lotus pose with mudra hands may suggest a spiritual or religious ritual.",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "1a069c1365986ae84d63f3481f881907e6eeb170c2c58ffd6603346fafc4fe5e",
+    "title": "Cup of coffee",
+    "status": "approved",
+    "verdict": "review",
+    "why": [
+     "words: brands_ip:logos"
+    ],
+    "words": [
+     "brands_ip:logos"
+    ],
+    "vision": "none",
+    "seen": "Steaming white cup of black coffee on wooden table, blurred green background",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "1c8794fc815fe515701958688f6e9d3b1157e702e8091f506bf069686c8ed48c",
+    "title": "Open book on a desk",
+    "status": "approved",
+    "verdict": "review",
+    "why": [
+     "picture: policy:unsure"
+    ],
+    "vision": "policy:unsure",
+    "seen": "Open hardcover book with blurred text on a wooden desk, warm light",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "1e490d4d7b8e5045a3156618211914f13a3b619f95a6b76368e44c214699e73e",
+    "title": "Smartphone in hand",
+    "status": "approved",
+    "verdict": "review",
+    "why": [
+     "picture: policy:unsure"
+    ],
+    "vision": "policy:unsure",
+    "seen": "Hand holding a blank black smartphone before a calm lake and hills at dusk",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "486c23bcb869d44b4f1d2a432ee3d64a9bc528202021365ca66857ee14584a8f",
+    "title": "Old stone ruins with columns",
+    "status": "approved",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:religion (Ruins resemble an ancient temple, a place of worship; uncertain, so treated as religion.)"
+    ],
+    "vision": "policy:religion",
+    "seen": "Ancient Greek-style temple ruins with columns on a hill at sunset",
+    "vision_reason": "Ruins resemble an ancient temple, a place of worship; uncertain, so treated as religion.",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "94711f872ca554812ee1af604f91c52b330fe03657ff2c9012c45ef0c3bc3301",
+    "title": "Train crossing a landscape",
+    "status": "approved",
+    "verdict": "review",
+    "why": [
+     "picture: policy:unsure (Train livery might resemble a rail operator brand, but no logo is clearly visible.)"
+    ],
+    "vision": "policy:unsure",
+    "seen": "Passenger train crossing green countryside at sunset",
+    "vision_reason": "Train livery might resemble a rail operator brand, but no logo is clearly visible.",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "a54320b5940c30349fc98b5a8076b27c8f3c51193c748562dcca25f957d2736e",
+    "title": "Laptop on a tidy desk",
+    "status": "approved",
+    "verdict": "review",
+    "why": [
+     "picture: policy:unsure"
+    ],
+    "vision": "policy:unsure",
+    "seen": "Closed plain gray laptop and spiral notebook on wooden desk by sunlit window",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "c02e27543388a36b3bf1ae927c2b643793ec9e2f636818a92826bbc810f7bfe9",
+    "title": "Compass and old map",
+    "status": "approved",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:flags_maps (A map with territorial outlines or borders is visible in the background.)",
+     "words: flags_maps:map"
+    ],
+    "words": [
+     "flags_maps:map"
+    ],
+    "vision": "policy:flags_maps",
+    "seen": "Brass compass resting on an old parchment map with border-like lines",
+    "vision_reason": "A map with territorial outlines or borders is visible in the background.",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "c3e43c811d59799c9d9d349e2ce0d3837ca0f3108cd54675dab7ac4f71ea2b15",
+    "title": "Single candle in the dark",
+    "status": "approved",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:religion (A lone candle in darkness suggests vigil, mourning or prayer, so it may touch religion or tragedy.)"
+    ],
+    "vision": "policy:religion",
+    "seen": "Single lit candle on a table in a dark room",
+    "vision_reason": "A lone candle in darkness suggests vigil, mourning or prayer, so it may touch religion or tragedy.",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "e1393324f979e8a038a69495d88fa298507e07abb0b12b0940db0a205455ab86",
+    "title": "Chess pieces on a board",
+    "status": "approved",
+    "verdict": "review",
+    "why": [
+     "picture: policy:unsure (The king's cross top could read as a religious symbol, but it is a standard chess piece design.)"
+    ],
+    "vision": "policy:unsure",
+    "seen": "Wooden chess king, knight and rook on a chessboard",
+    "vision_reason": "The king's cross top could read as a religious symbol, but it is a standard chess piece design.",
+    "moderation": "clean"
+   },
+   {
+    "media": "image",
+    "id": "eec6aae2d1e39b725c7df32f7b37b6c8c0addd08e66d1243d83e5a2fa5ae39ee",
+    "title": "Robot hand and human hand",
+    "status": "approved",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:religion (Evokes Michelangelo's Creation of Adam, a religious artwork; unsure whether this counts.)"
+    ],
+    "vision": "policy:religion",
+    "seen": "Robot hand reaching toward human hand against a hazy sky",
+    "vision_reason": "Evokes Michelangelo's Creation of Adam, a religious artwork; unsure whether this counts.",
+    "moderation": "clean"
+   }
+  ]
+ },
+ "objects": {
+  "checked": 354,
+  "counts": {
+   "ok": 338,
+   "review": 2,
+   "remove": 14
+  },
+  "vision_model": "small (Haiku-class), one call a drawing; 22 looked at a second time after the answer limit was raised (the first pass cut 21 answers short, which reads as a refusal), 6 a third time after the medical wording was narrowed to gore",
+  "cost_usd": 0.0805,
+  "not_ok": [
+   {
+    "media": "object",
+    "id": "baby",
+    "title": "Sitting Baby",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:children (A baby is the main subject of the asset.)",
+     "words: children:baby, children:bebe"
+    ],
+    "words": [
+     "children:baby",
+     "children:bebe"
+    ],
+    "vision": "policy:children",
+    "seen": "Simple line drawing of a seated baby in a blue top",
+    "vision_reason": "A baby is the main subject of the asset.",
+    "look": "first"
+   },
+   {
+    "media": "object",
+    "id": "child",
+    "title": "Child with arms out",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:children (Stated purpose is a child as the main subject; generic figure, but intent is a child.)",
+     "words: children:child, children:nino"
+    ],
+    "words": [
+     "children:child",
+     "children:nino"
+    ],
+    "vision": "policy:children",
+    "seen": "Light-blue pictogram figure with arms outstretched, black outline, no background",
+    "vision_reason": "Stated purpose is a child as the main subject; generic figure, but intent is a child.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "church",
+    "title": "Small Church",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:religion (Place of worship and Christian religious symbol (cross) visible.)",
+     "words: religion:church, religion:iglesia"
+    ],
+    "words": [
+     "religion:church",
+     "religion:iglesia"
+    ],
+    "vision": "policy:religion",
+    "seen": "Simple black line drawing of a church with a steeple and cross",
+    "vision_reason": "Place of worship and Christian religious symbol (cross) visible.",
+    "look": "first"
+   },
+   {
+    "media": "object",
+    "id": "compass_rose",
+    "title": "Compass Rose",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:flags_maps (Compass rose is a map element; its star-in-circle form resembles the NATO emblem.)"
+    ],
+    "vision": "policy:flags_maps",
+    "seen": "Black line icon of a compass rose: four-pointed star inside a circle",
+    "vision_reason": "Compass rose is a map element; its star-in-circle form resembles the NATO emblem.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "crown",
+    "title": "Royal Crown",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:politics (Royal crown may read as a monarchy or political symbol)"
+    ],
+    "vision": "policy:politics",
+    "seen": "Simple yellow crown icon with black outline, no background",
+    "vision_reason": "Royal crown may read as a monarchy or political symbol",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "explosion",
+    "title": "Explosion Burst",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:war_weapons (Depicts an explosion, which could read as explosives; abstract graphic.)"
+    ],
+    "vision": "policy:war_weapons",
+    "seen": "Yellow starburst shape with black outline, meant as an explosion burst",
+    "vision_reason": "Depicts an explosion, which could read as explosives; abstract graphic.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "family",
+    "title": "Family of three",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:children (A child figure is one of the three main subjects.)"
+    ],
+    "vision": "policy:children",
+    "seen": "Simple marker icon of two adult figures and a small child holding hands",
+    "vision_reason": "A child figure is one of the three main subjects.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "flag",
+    "title": "Flag on pole",
+    "status": "bundled",
+    "verdict": "review",
+    "why": [
+     "words: flags_maps:flag, flags_maps:bandera"
+    ],
+    "words": [
+     "flags_maps:flag",
+     "flags_maps:bandera"
+    ],
+    "vision": "none",
+    "seen": "Simple coral flag icon on a pole, plain outline drawing",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "leader",
+    "title": "Person holding flag",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:flags_maps (A flag is shown; it is not identifiably a national flag, but it is unclear, so policy applies.)",
+     "words: flags_maps:flag, flags_maps:bandera"
+    ],
+    "words": [
+     "flags_maps:flag",
+     "flags_maps:bandera"
+    ],
+    "vision": "policy:flags_maps",
+    "seen": "Simple blue stick figure holding a plain red flag on a pole",
+    "vision_reason": "A flag is shown; it is not identifiably a national flag, but it is unclear, so policy applies.",
+    "look": "first"
+   },
+   {
+    "media": "object",
+    "id": "map",
+    "title": "Map with Pin",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:flags_maps (Shows a map; policy covers any map regardless of territory.)",
+     "words: flags_maps:map, flags_maps:mapa"
+    ],
+    "words": [
+     "flags_maps:map",
+     "flags_maps:mapa"
+    ],
+    "vision": "policy:flags_maps",
+    "seen": "Simple icon of a folded map with a red location pin",
+    "vision_reason": "Shows a map; policy covers any map regardless of territory.",
+    "look": "first"
+   },
+   {
+    "media": "object",
+    "id": "medicine_bottle",
+    "title": "Medicine bottle",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:drugs_alcohol_tobacco (Medicine bottle may depict pills as drugs; ambiguous, so flagged.)"
+    ],
+    "vision": "policy:drugs_alcohol_tobacco",
+    "seen": "Line icon of a medicine bottle with a red medical cross",
+    "vision_reason": "Medicine bottle may depict pills as drugs; ambiguous, so flagged.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "mountain_flag",
+    "title": "Mountain with flag",
+    "status": "bundled",
+    "verdict": "review",
+    "why": [
+     "words: flags_maps:flag, flags_maps:bandera"
+    ],
+    "words": [
+     "flags_maps:flag",
+     "flags_maps:bandera"
+    ],
+    "vision": "none",
+    "seen": "Cartoon mountain with snow cap and plain pink summit flag.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "old_person",
+    "title": "Person walking with cane",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:stereotypes (Cane suggests age or disability; could be read as a stereotype of that group)"
+    ],
+    "vision": "policy:stereotypes",
+    "seen": "Blue stick-figure pictogram of a person walking with a cane",
+    "vision_reason": "Cane suggests age or disability; could be read as a stereotype of that group",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "peace_dove",
+    "title": "Dove with olive branch",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:politics (Dove with olive branch is a common peace symbol tied to political activism; also a religious image.)"
+    ],
+    "vision": "policy:politics",
+    "seen": "Line drawing of a dove carrying an olive branch",
+    "vision_reason": "Dove with olive branch is a common peace symbol tied to political activism; also a religious image.",
+    "look": "second"
+   },
+   {
+    "media": "object",
+    "id": "pill",
+    "title": "Capsule and Tablet",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:drugs_alcohol_tobacco (Pills shown as medication, which the policy lists as drugs.)"
+    ],
+    "vision": "policy:drugs_alcohol_tobacco",
+    "seen": "Line icon of a capsule and a round tablet pill",
+    "vision_reason": "Pills shown as medication, which the policy lists as drugs.",
+    "look": "first"
+   },
+   {
+    "media": "object",
+    "id": "syringe",
+    "title": "Syringe",
+    "status": "bundled",
+    "verdict": "remove",
+    "why": [
+     "picture: policy:injury_medical (Syringe and needle relate to injections, a listed medical category.)",
+     "words: injury_medical:syringe, injury_medical:jeringa"
+    ],
+    "words": [
+     "injury_medical:syringe",
+     "injury_medical:jeringa"
+    ],
+    "vision": "policy:injury_medical",
+    "seen": "Simple black line drawing of a syringe with a needle",
+    "vision_reason": "Syringe and needle relate to injections, a listed medical category.",
+    "look": "first"
+   }
+  ]
+ },
+ "clips": {
+  "checked": 0,
+  "note": "QA holds no library clips (the feature is not deployed): 0 index rows, 0 files under cliplib/"
+ }
+}

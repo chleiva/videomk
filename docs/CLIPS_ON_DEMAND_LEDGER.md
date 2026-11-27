@@ -33,3 +33,12 @@ Notes
 OpenAI total: about **$0.27** (3 sheets, 3 images, 1 probe). Bedrock around them (gates, briefs, checks, embeddings): about $0.08 measured ($0.063 + $0.0065 + $0.002) plus a few embeddings. **About $0.36 of the $2.**
 The watermark measurements and the metadata work made no paid call. Two QA catalog images were rewritten with metadata and watermark (S3 and DynamoDB requests only).
 The full records: `docs/clips_on_demand/proof_objects_2026-11-28.json` and `proof_images_2026-11-28.json`; the watermark numbers: `docs/clips_on_demand/watermark_eval_2026-11-28.json`.
+
+## 2026-11-27: safety policy, audit, ranking, tracer (limit $2)
+| What | Calls | Cost |
+|---|---|---|
+| Audit of the 98 QA catalog images, large vision model (and a 3-image trial) | 101 | $0.4934 |
+| Audit of the 354 QA sketch objects, small vision model; second look at 22, third at 6, one probe | 383 | $0.0808 |
+| Unsplash ranking measurement: the small-model photo reviewer on 15 searches, before and after | 25 | $0.0070 |
+| OpenAI moderation endpoint on the 98 images (and the trial) | 101 | free |
+**Total about $0.58, all Bedrock.** No image, sheet or clip was generated. Results: `docs/clips_on_demand/safety_audit_qa_2026-11-27.json`, `unsplash_ranking_measure_2026-11-27.jsonl`. Nothing in QA was changed.

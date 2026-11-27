@@ -458,6 +458,11 @@ class BackendStack(Stack):
                                                               resources=[usage_table.table_arn], conditions={"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["clipgen:*"]}}))
             v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{self.region}:{self.account}:parameter{clips_param}",
                                                                                                          f"arn:aws:ssm:{self.region}:{self.account}:parameter/videomk/openai_api_key"]))
+            # the whiteboard tracer function lives in a stack of its own (backend/object_tracer.py): the plan step only knows its NAME and may invoke it. One variable and
+            # one statement, no resource and no cross-stack reference; with that stack absent the call fails and the boards keep their labels.
+            from object_tracer import function_name as tracer_name
+            v2.plan_fn.add_environment("OBJECT_TRACER_FUNCTION", tracer_name(stage))
+            v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["lambda:InvokeFunction"], resources=[f"arn:aws:lambda:{self.region}:{self.account}:function:{tracer_name(stage)}"]))
 
         # videomk's own image catalog (docs/IMAGE_CATALOG.md): only with `-c imageCatalog=1` (default off) and the v2 engine, whose beat Lambda is the only reader.
         if v2 is not None and str(self.node.try_get_context("imageCatalog") or "").lower() in ("1", "true"):
