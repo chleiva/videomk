@@ -8,7 +8,8 @@
     "bgLoops": true,
     "vectorScenes": true,
     "forceWatermark": true,
-    "whiteboard": true
+    "whiteboard": true,
+    "presenters": true
   },
   "prod": {
     "account": "464863885161",

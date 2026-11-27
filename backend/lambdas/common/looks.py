@@ -72,7 +72,7 @@ _CHARACTERS_RE = re.compile(
     r"|" + _ANIMAL + r" (?:explain(?:ing|s)?|present(?:ing|s)?|host(?:ing|s)?) "
     r"|personajes? (?:animad[oa]s?|de dibujos|que (?:explican?|hablan?|presentan?|cuentan?)|explicando|hablando|presentando)"
     r"|(?:con|usando) (?:una? |unos |unas |el |la |los )?(?:presentador(?:a|es)?|personajes?|mascotas?|avatar(?:es)?|animales (?:animados|que hablan))"
-    r"|(?:explicad[oa]|presentad[oa]|narrad[oa]|contad[oa]) por (?:una? |el |la |unos |dos )?(?:personajes?|presentador(?:a|es)?|mascotas?|profesor(?:a)?|maestr[oa]|ingenier[oa]|doctor(?:a)?|m[eé]dic[oa]|chef|cociner[oa]|" + _ANIMAL + r")"
+    r"|(?:explicad[oa]s?|presentad[oa]s?|narrad[oa]s?|contad[oa]s?) por (?:una? |el |la |unos |dos )?(?:personajes?|presentador(?:a|es)?|mascotas?|profesor(?:a)?|maestr[oa]|ingenier[oa]|doctor(?:a)?|m[eé]dic[oa]|chef|cociner[oa]|" + _ANIMAL + r")"
     r"|" + _ANIMAL + r" (?:animad[oa]s?|que (?:explican?|presentan?)|explicando|presentando)"
     r"|animales animados|mu[ñn]ecos? animados?)\b", re.I)
 _NO_CHARACTERS_RE = re.compile(r"\b(no (?:presenters?|characters?|hosts?|mascots?)|without (?:an? |any )?(?:presenters?|characters?|hosts?|mascots?)|sin (?:presentador(?:a|es)?|personajes?|mascotas?))\b", re.I)
@@ -94,6 +94,26 @@ def wishes(prompt: Any) -> List[str]:
     if _CHARACTERS_RE.search(text) and not _NO_CHARACTERS_RE.search(text):
         out.append("characters")
     return out
+
+
+# Which presenter the words name ("explained by a fox", "con una doctora"): character id -> the words for it. Read only where the request asks for someone on screen.
+PRESENTER_WORDS = {"fox": r"fox|zorr[oa]", "ines": r"teacher|professor|profesor(?:a)?|maestr[oa]", "david": r"engineer|programmer|developer|ingenier[oa]|programador(?:a)?",
+                   "priya": r"doctor(?:a)?|scientist|m[eé]dic[oa]|cient[ií]fic[oa]", "mateo": r"chef|cook|cociner[oa]"}
+_BY_RE = (r"(?:(?:explained|presented|narrated|hosted|told) by|(?:with|featuring) (?:an? |the )?(?:animated |cartoon |friendly |talking |funny |cute |wise |little )*(?=\w+ (?:as )?(?:the )?(?:presenter|host|character|mascot))"
+          r"|(?:explicad[oa]s?|presentad[oa]s?|narrad[oa]s?|contad[oa]s?) por|con (?:una? |el |la )?(?=\w+ (?:como )?(?:presentador|presentadora|personaje|mascota|animad)))"
+          r"\s*(?:an? |the |una? |el |la )?(?:(?:animated|cartoon|talking|friendly|funny|cute|wise|little) )*")
+
+
+def presenter_wish(prompt: Any) -> Optional[str]:
+    """What the request says about a presenter: 'none' ("no presenter", "sin presentador"), a character id when the words name one ("explained by a fox",
+    "explicado por un zorro", "with a doctor as the presenter"), 'any' for a presenter or characters in general, None when it says nothing."""
+    text = " ".join(str(prompt or "").split())
+    if _NO_CHARACTERS_RE.search(text):
+        return "none"
+    for cid, words in PRESENTER_WORDS.items():
+        if re.search(_BY_RE + r"(?:" + words + r")\b", text, re.I):
+            return cid
+    return "any" if _CHARACTERS_RE.search(text) else None
 
 
 def about_news(prompt: Any) -> bool:
@@ -132,7 +152,7 @@ def _base(f: Dict[str, bool], cartoon: bool = False) -> str:
 
 
 def resolve(prompt: Any, option: Any = None, lang: Optional[str] = None, *, model: Optional[Dict[str, Any]] = None, media_count: int = 0,
-            f: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
+            f: Optional[Dict[str, bool]] = None, presenter: Any = None) -> Dict[str, Any]:
     """What the video will look like and what to tell the person.
 
     -> {"style": auto|cartoon|real|whiteboard (what `generate` will resolve to on this stage), "asked": [wishes], "presenter": bool (a presenter will be offered to the
@@ -146,6 +166,10 @@ def resolve(prompt: Any, option: Any = None, lang: Optional[str] = None, *, mode
         asked = [option] + [w for w in asked if w == "characters"]
     if model and model["wish"] in ("cartoon", "characters", "whiteboard") and model["wish"] not in asked and "real" not in asked:
         asked.append(model["wish"])
+    if presenter == "none":   # the create option `presenter` wins over the words (docs/PRESENTERS.md)
+        asked = [w for w in asked if w != "characters"]
+    elif isinstance(presenter, str) and presenter not in ("", "auto") and "characters" not in asked:
+        asked.append("characters")
     serious = about_news(prompt) or bool(model and model.get("serious"))
     photos = media_count > 0
     style, adapted, note, presenter = "auto", [], None, False

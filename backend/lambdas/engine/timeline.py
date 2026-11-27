@@ -177,6 +177,10 @@ def build_timeline(
         from . import whiteboard_policy
 
         whiteboard_policy.link(scenes)
+    if any(sc["type"] == "presenter" for sc in scenes):   # presenter scenes (docs/PRESENTERS.md): each learns the words it speaks and when, for its gestures and mouth
+        from . import presenter_policy
+
+        presenter_policy.link(scenes)
     # the director's animated background (engine/background.py; only in a plan made with BG_ANIMATED on): each scene knows where in the loop it starts, so the
     # background flows on across scene changes and chunks instead of jumping
     bg = plan.get("background") if isinstance(plan.get("background"), dict) else None

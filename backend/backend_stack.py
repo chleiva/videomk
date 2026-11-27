@@ -424,6 +424,10 @@ class BackendStack(Stack):
                 if str(self.node.try_get_context("imageCatalog") or "").lower() not in ("1", "true"):
                     raise ValueError("whiteboard needs the catalog bucket: deploy with -c imageCatalog=1")
                 engine_env["WHITEBOARD"] = "1"
+            # presenter characters (docs/PRESENTERS.md): a cartoon presenter in a few scenes of a video; same switch pattern (stages.json "presenters" or -c presenters=1). The
+            # characters are part of the engine code (no bucket, no new function, no new right): only this variable.
+            if str(self.node.try_get_context("presenters") or ("1" if stage_cfg.get("presenters") else "")).lower() in ("1", "true"):
+                engine_env["PRESENTERS"] = "1"
             for ctx_key, env_key in (("editDailyLimit", "EDIT_DAILY_LIMIT"), ("planModelId", "PLAN_MODEL_ID"), ("reviewModelId", "REVIEW_MODEL_ID"), ("unsplashAppName", "UNSPLASH_APP_NAME"), ("httpUserAgent", "HTTP_USER_AGENT"), ("ttsVoice", "TTS_VOICE"), ("pollyEngine", "POLLY_ENGINE"), ("pollyRegion", "POLLY_REGION")):
                 if self.node.try_get_context(ctx_key):
                     engine_env[env_key] = str(self.node.try_get_context(ctx_key))
@@ -590,7 +594,7 @@ class BackendStack(Stack):
             ready_resolutions=ready_resolutions,
         )
         # what capabilities says about the looks of this stage (lambdas/capabilities_api.looks): the same three switches the engine functions get
-        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS"), ("whiteboard", "WHITEBOARD")):
+        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS"), ("whiteboard", "WHITEBOARD"), ("presenters", "PRESENTERS")):
             if str(self.node.try_get_context(ctx_key) or ("1" if stage_cfg.get(ctx_key) else "")).lower() in ("1", "true"):
                 req_options.fn.add_environment(env_key, "1")
 
@@ -631,7 +635,7 @@ class BackendStack(Stack):
         )
         # The request check and the launcher know the looks of this stage (common/looks.py): the same switches as capabilities and the engine, so the check never claims
         # the product "cannot make cartoons" and a look wish that is adapted gets its note. Environment variables on existing functions only: no new resource.
-        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS"), ("whiteboard", "WHITEBOARD")):
+        for ctx_key, env_key in (("vectorScenes", "VECTOR_SCENES"), ("bgAnimated", "BG_ANIMATED"), ("bgLoops", "BG_LOOPS"), ("whiteboard", "WHITEBOARD"), ("presenters", "PRESENTERS")):
             if str(self.node.try_get_context(ctx_key) or ("1" if stage_cfg.get(ctx_key) else "")).lower() in ("1", "true"):
                 for fn in (intake.brief_fn, launcher_fn):
                     fn.add_environment(env_key, "1")

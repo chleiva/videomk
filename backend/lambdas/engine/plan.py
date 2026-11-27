@@ -17,6 +17,7 @@ from . import numfmt
 from . import sync as sync_mod
 from . import vector_policy
 from . import whiteboard_policy
+from . import presenter_policy
 from . import voices as voice_mod
 from .audio import PLANNER_SFX
 from .netsafe import quality_fixes
@@ -772,6 +773,8 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
                 props_in = {k: v for k, v in scene_in.items() if k != "type"}
             if stype == "whiteboard" and not whiteboard_policy.allowed():   # the whiteboard look: only in a video the policy made a whiteboard video (engine/whiteboard_policy.py)
                 raise ValueError("whiteboard is not available for this video")
+            if stype == "presenter" and not presenter_policy.allowed(plan):   # a presenter: only in a video the policy gave one (engine/presenter_policy.py), or one that already has it (an edit)
+                raise ValueError("presenter is not available for this video")
             if stype == "vector_scene":   # the cartoon scenes: only when the policy for THIS video offered them, and only the catalog ids it listed (engine/vector_policy.py)
                 scene = {"type": stype, "props": vector_policy.sanitize(props_in)}
             else:
