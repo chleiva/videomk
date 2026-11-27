@@ -21,7 +21,7 @@ export function esDelete(): LegalContent {
 			"Los registros técnicos se eliminan a los 14 días. Contienen el identificador de tu cuenta, pero no tu correo.",
 			"Si nuestro control de seguridad detuvo una petición tuya, se conserva un registro breve (tipo de motivo, hora, los primeros 160 caracteres y una huella de la petición) durante el resto de sus 90 días bajo una referencia codificada, no con los datos de tu cuenta.",
 			"Si alguna vez la ley nos obliga a conservar registros de compras por motivos contables, se conservan solo esos, durante el tiempo que exija la ley. Las compras hechas a través de Apple o Google permanecen en sus registros; cancela cualquier suscripción con ellos.",
-			"Los créditos gratuitos no se restituyen si te registras de nuevo: al eliminar tu cuenta se elimina tu saldo."] },
+			"Los créditos gratuitos no se restituyen si te registras de nuevo: al eliminar tu cuenta se elimina tu saldo. Para garantizarlo, conservamos una huella irreversible y con sal de tu correo electrónico, de tu identidad de inicio de sesión de Google o Apple y de la clave de dispositivo de la app durante 2 años desde el día en que se concedieron los créditos gratuitos. No contiene datos de la cuenta ni puede convertirse de nuevo en ellos, y se usa únicamente para evitar que los créditos gratuitos se obtengan dos veces."] },
 		{ title: "Eliminar solo algunos videos", paras: [`En la app puedes eliminar cualquier video, o todas tus fotos de Mi biblioteca, sin eliminar tu cuenta. Para cualquier otra cosa, escribe a ${CONTACT_EMAIL} con los títulos de los videos.`] },
 	];
 	return { title: "Eliminar tu cuenta", intro: "Cómo eliminar tu cuenta de videomk y tus datos.", glance, sections };

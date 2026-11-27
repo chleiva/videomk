@@ -22,7 +22,7 @@ function en(): LegalContent {
 			"Technical logs are deleted after 14 days. They hold your account id but not your email address.",
 			"If our safety check stopped a request of yours, a short record (type of reason, time, the first 160 characters and a fingerprint of the request) is kept for the rest of its 90 days under a scrambled reference, not your account details.",
 			"If we are ever legally required to keep purchase records for accounting, only those are kept, for the period the law requires. Purchases made through Apple or Google stay in their records; cancel any subscription with them.",
-			"Free credits are not restored if you sign up again: deleting your account removes your balance."] },
+			"Free credits are not restored if you sign up again: deleting your account removes your balance. To make sure of that, we keep a salted, one-way fingerprint of your email address, of your Google or Apple sign-in identity and of the app’s device key for 2 years from the day the free credits were given. It holds no account details and cannot be turned back into them, and it is used solely to stop free credits being collected twice."] },
 		{ title: "Delete only some videos", paras: [`In the app you can delete any video, or all your photos in My media, without deleting your account. For anything else, email ${CONTACT_EMAIL} with the video titles.`] },
 	];
 	return { title: "Delete your account", intro: "How to delete your videomk account and data.", glance, sections };

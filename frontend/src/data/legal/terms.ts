@@ -9,7 +9,7 @@ function en(): LegalContent {
 		"You own your prompts and photos and, between you and us, your videos. We only use your content to run the service, as the Privacy Policy explains.",
 		"Credits pay for videos: 1 credit per started minute (double for 4K). A video that fails or is stopped is refunded. Credits have no cash value.",
 		"Some pictures and clips come from videomk’s own AI-generated library, which you may use inside your videos. Stock pictures and clips come from other providers under their own licences: keep the credits we list in the video description if you post it.",
-		"No harmful, deceptive or unlawful videos, and nothing that puts words in a real person’s mouth. Section 8 lists what we stop.",
+		"No harmful, deceptive or unlawful videos, and nothing that puts words in a real person’s mouth. Section 8 lists what is not allowed. Section 9 says what we may do about it, up to closing an account, and how to appeal.",
 	];
 	const sections = [
 		{ title: "Acceptance", paras: [
@@ -24,7 +24,7 @@ function en(): LegalContent {
 			"videomk is a new service. Features, languages, lengths, limits and prices can change, and some things may not work as hoped."] },
 		{ title: "Credits", bullets: [
 			"Videos are paid for with credits. 1 credit covers one started minute of video (a video of 61 seconds is 2 credits), up to 12 minutes. A 4K video costs double. The app shows the cost before you make a video, and the length you choose is the length we make and bill. Editing a video you already made is free.",
-			"Free credits: new accounts get welcome credits that expire after 30 days, and you can claim a small daily free credit that expires the same night. Free credits may be changed, reduced or stopped, and we may refuse them where we see abuse, such as many accounts made to collect credits.",
+			"Free credits: new accounts get welcome credits that expire after 30 days, and you can claim a small daily free credit that expires the same night. Free credits may be changed, reduced or stopped, and we may refuse them where we see abuse, such as many accounts made to collect credits. Free credits are limited to one set per person. Free and promotional credits, including extra credits we may choose to give to some accounts, are given at our discretion, and we may change, limit or withdraw them for the future at any time. Free or promotional credits already in your balance stay until they expire, unless they were obtained by breaking these Terms.",
 			"If a video fails or is stopped by our safety check, the credits it used are returned. If the credits you spent had already expired, we return them as credits that last 24 hours.",
 			"Credits have no cash value, cannot be sold or transferred, and are lost if your account is deleted or closed for breaking these Terms.",
 			"Buying credits is not available yet. When it is, purchases will be made through Apple or Google under their terms, and the plan or credit pack will have its own terms covering price, renewal, cancellation and refunds. Those terms will not take away rights the law gives you, including any right to a refund or to cancel within a set period."] },
@@ -35,9 +35,10 @@ function en(): LegalContent {
 		{ title: "Photos, voices and likenesses", paras: [
 			"Only attach photos you have the right to use. If a photo shows other people, make sure they are happy to appear in a video, and be extra careful with photos of children: only use them if you are their parent or guardian or have the parent’s permission.",
 			"Do not use videomk to make a video that shows or imitates a real person doing or saying something they did not do or say, or that uses someone’s image or voice to mislead. The narrator voices in videomk are synthetic voices, not recordings of real people, and videomk does not copy anyone’s voice."] },
-		{ title: "What you may not do", paras: [
-			"Our safety check stops requests that fall in these groups. Educational, news, historical, fiction and medical-information requests that discuss a topic are fine. A request is stopped when its purpose or content is the harm. You may not use videomk to make:"], bullets: [
-			"anything that sexualises children, in any form;",
+		{ title: "Acceptable use: what you may not do", paras: [
+			"These are the rules for what you may make with videomk. Our safety check stops requests that it recognises as falling in these groups. Educational, news, historical, fiction and medical-information requests that discuss a topic are fine. A request is stopped when its purpose or content is the harm. You may not use videomk to make:"], bullets: [
+			"anything that is illegal where you live or in the United Kingdom, or that helps someone commit a crime;",
+			"child sexual abuse material, or anything else that sexualises children or shows sexual content involving anyone under 18, in any form;",
 			"practical instructions or help to hurt or kill people, or to plan or carry out an attack or terrorism;",
 			"material that targets a private person for harassment, stalking, intimidation or doxxing, including finding or publishing where they live, work or how to reach them;",
 			"explicit sexual content or pornography, or intimate or sexual content about a real person without their consent;",
@@ -49,12 +50,18 @@ function en(): LegalContent {
 			"malware, or help breaking into other people’s systems or accounts;",
 			"propaganda, recruitment or praise for terrorist or violent extremist groups;",
 			"election or health disinformation presented as fact;",
+			"content that infringes someone else’s copyright, trade mark, privacy, image or other rights;",
+			"spam, or misleading or unwanted bulk promotion;",
 			"anything else clearly meant to seriously harm people."], after: [
-			"You also may not attack, overload, scrape, probe or reverse engineer videomk, avoid its limits (for example with many accounts for free credits), resell it, or use it to build a competing product or to train AI models.",
+			"You also may not attack, overload, scrape, probe or reverse engineer videomk; create accounts by automated means, or hold more than one account to collect free credits; get around its limits, its safety check or the limit of one set of free credits per person; resell, rent or share access to videomk or to your account; or use it to build a competing product or to train AI models.",
 			"The check is automatic and can make mistakes. If you think we stopped something by mistake, email us."] },
-		{ title: "What happens if you break the rules", paras: [
-			"A request that breaks the rules is stopped and no credits are charged. We record the stop as the Privacy Policy describes. Three stops in 24 hours pause video creation on your account for 24 hours. A request in the most serious groups (children, instructions to hurt people, targeting a private person), or repeated stops over a month, put your account on hold while we review it. We may also remove content, suspend or close accounts, and report illegal content to the authorities.",
-			`You can ask us to review a pause, hold or closure by emailing ${CONTACT_EMAIL}. We will look at it, tell you what we decide and lift it if it was a mistake.`] },
+		{ title: "What we may do if you break the rules, and how to appeal", paras: [
+			"A request that breaks the rules is stopped and no credits are charged. We record the stop and its category against your account, as the Privacy Policy describes. Three stops in 24 hours pause video creation on your account for 24 hours. A request in the most serious groups (children, instructions to hurt people, targeting a private person), or repeated stops over a month, put your account on hold while a person reviews it.",
+			"Depending on how serious the breach is and whether it has happened before, we may refuse or stop a request, remove content, warn you, suspend video creation on your account for a time and, for a serious or repeated breach, close your account. We aim to act in proportion: a first, minor breach normally leads to a stop or a warning, and an account is closed only after a person has reviewed it.",
+			"We will tell you what we have done and why, in the app or by email, before we do it where we reasonably can and otherwise as soon as possible afterwards. We may act without notice, or without giving the full reason, only where the law requires it or where that is needed to protect people, other users or the service.",
+			"If we close your account because of a serious or repeated breach, your free and promotional credits are lost and, so far as the law allows, you are not entitled to a refund of unused paid credits or of fees you have paid. This does not take away any refund the law gives you.",
+			"Where the law requires it, we preserve the relevant information and report it to the authorities, for example child sexual abuse material. We may also keep information where it is needed to deal with a legal claim.",
+			`If you think we got it wrong, email ${CONTACT_EMAIL} from the address on your account and say what you want reviewed: a stop, a warning, a pause, a suspension or a closure. A person, not an automated system, reviews it and we tell you the outcome. If it was a mistake, we lift it and restore your account and credits.`] },
 		{ title: "AI-generated videos", paras: [
 			"Videos are produced by AI and may be wrong, incomplete, out of date, biased or unsuitable for your purpose, and pictures, clips and captions may not match perfectly. We do not promise a video is accurate or original, or that it will not look like someone else’s work. A video is not legal, medical, financial or other professional advice.",
 			"You are responsible for checking a video, and for what you do with it, before you publish it or rely on it. Many platforms and some laws require you to say when content is made or altered with AI: follow the rules of where you post, and label the video where they ask for it, for example the AI-content labels on YouTube, TikTok and Instagram. Where a platform or the app asks for it, we label AI-generated media as such; that never replaces your own duty to disclose."] },
@@ -76,7 +83,7 @@ function en(): LegalContent {
 			"We review notices promptly, may remove material and tell the account holder, who can reply with a counter-notice. We may close the accounts of people who repeatedly infringe. Knowingly false notices can have legal consequences for the sender."] },
 		{ title: "Availability, suspension and ending", paras: [
 			"We aim to keep videomk reliable but do not promise it will always be available or error free. We may change, suspend or stop all or part of it, and will give notice where we reasonably can if the change hurts you.",
-			"You can stop using videomk and delete your account at any time. We may suspend or end your account if you break these Terms, if the law requires it, or if you put others or the service at risk; we will normally tell you why and how to ask for a review. When an account ends, your content is deleted as the Privacy Policy describes, so download or share anything you want first."] },
+			"You can stop using videomk and delete your account at any time. We may suspend or end your account if you break these Terms (section 9), if the law requires it, or if you put others or the service at risk; we will normally tell you why and how to ask for a review. If we end your account for a reason that is not a breach by you, we will give you reasonable notice where we can, and you can ask us to refund any paid credits or paid period you have not used. When an account ends, your content is deleted as the Privacy Policy describes, so download or share anything you want first."] },
 		{ title: "Disclaimers and limits on our liability", paras: [
 			"So far as the law allows, videomk is provided “as is” and “as available”, and we do not promise that it will meet your needs or that its results will be accurate.",
 			"Nothing in these Terms limits any right you have as a consumer, or liability that cannot lawfully be limited, including for fraud, or for death or personal injury caused by negligence.",

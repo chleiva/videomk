@@ -1,7 +1,7 @@
 // The only place the legal identity and contact live: change it here and every page follows.
 export const COMPANY = "Agilegency Ltd";
 export const CONTACT_EMAIL = "hello@videomk.com";
-export const EFFECTIVE = "26 November 2026";
+export const EFFECTIVE = "27 November 2026";
 export const SITE = "videomk.com";
 // Optional: when set, shown next to the company name in the Privacy Policy and Terms. Leave "" until you have them.
 export const COMPANY_ADDRESS = "c/o SG Accounting, 1 Cedar Office Park, Cobham Road, Wimborne, BH21 7SB, United Kingdom";
@@ -14,7 +14,7 @@ export const REGULATOR = "the Information Commissioner’s Office (ICO) in the U
 export const MIN_AGE = 16;
 export const RETENTION_DAYS = { safety: 90, logs: 14, working: 7, uploads: 2, workflowHistory: 90, backups: 35 };
 // Spanish versions of the values above (the Spanish legal pages; English prevails in case of conflict).
-export const EFFECTIVE_ES = "26 de noviembre de 2026";
+export const EFFECTIVE_ES = "27 de noviembre de 2026";
 export const REGULATOR_ES = "la Information Commissioner’s Office (ICO) del Reino Unido, o tu autoridad local de protección de datos";
 export const GOVERNING_LAW_ES = "Inglaterra y Gales";
 export const effective = (l: "en" | "es") => (l === "es" ? EFFECTIVE_ES : EFFECTIVE);
