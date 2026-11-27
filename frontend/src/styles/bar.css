@@ -96,46 +96,57 @@
 .app-shell .attach-strip::-webkit-scrollbar { display: none; }
 .app-shell .attach { width: 4.5rem; height: 4.5rem; border-radius: var(--radius-card); }
 .app-shell .attach-count { flex: none; margin-left: var(--space-2); font-size: var(--fs-caption); color: var(--text-tertiary); white-space: nowrap; }
-.app-shell .composer-bar { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--outline); gap: var(--space-2); }
-.app-shell .composer-tools { gap: var(--space-2); margin-right: var(--space-2); }
-.app-shell .composer-pills { gap: var(--space-2); }
-.app-shell .pill { height: var(--min-touch); min-height: 0; padding: 0 0.875rem; gap: 0.375rem; font-weight: 600; }
-.pill-k { color: var(--text-tertiary); font-weight: 500; }
-.app-shell .pill > svg { color: var(--text-tertiary); }
-.app-shell .compose-go { height: 3.125rem; padding: 0 1.375rem 0 1.625rem; gap: var(--space-4); font-size: var(--fs-body); }
-.go-cost { display: inline-flex; align-items: center; gap: var(--space-1); font-variant-numeric: tabular-nums; }
 .app-shell .compose-examples { margin-top: 1.875rem; gap: 0.625rem; justify-content: center; }
 .app-shell .compose-examples .chip { min-height: 2.5rem; font-weight: 500; }
-.app-shell .compose-progress { width: max-content; max-width: 100%; margin: var(--space-6) auto 0; min-height: 3rem; padding: 0 var(--space-2) 0 var(--space-5); border-radius: var(--radius-pill); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--outline); color: var(--text); font-weight: 600; }
-.app-shell .compose-progress:not(:has(button)) { padding-right: var(--space-5); }
 @media (min-width: 48rem) {
   .app-shell .compose-head { margin-bottom: var(--space-10); }
   .app-shell .composer-card { padding: 1.875rem 1.875rem 1.375rem; border-radius: 2rem; }
   .app-shell .compose-text { min-height: 6.375rem; font-size: 1.5rem; line-height: 2.125rem; letter-spacing: -0.025em; }
   .app-shell .compose { max-width: calc(51.25rem + 6rem); }
-  /* one line when it fits (the mockup); when it does not (a tablet beside the rail, Spanish labels, a long look name with its faces) the pills take what they
-     need and Create moves to its own line, right-aligned: nothing ever runs out of the card or under another control */
-  .app-shell .composer-bar { margin-top: 1.375rem; padding-top: 1.125rem; flex-wrap: wrap; row-gap: var(--space-3); }
-  .app-shell .composer-pills { flex: 1 1 auto; flex-wrap: wrap; }
 }
 
-.pill-phone, .compose-balance { display: none; }
-/* phones (phone_3_create): the tools with Options at the far end, ONE row of three short pills, a full-width Create with its price at the end, the balance beneath */
+/* ---- the Create dock (docs/design_bar/CREATE_SCREEN_WEB_VALUES.md): ONE row of pills, then ONE tool row: photo, mic and Options on the left, Create at the end */
+.app-shell .composer-bar { position: relative; display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }
+.app-shell .composer-pills { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) 0.375rem; min-width: 0; }
+.look-root { display: contents; }   /* the Look and Characters pills are flex items of the pill row; the surface they open is placed against the dock */
+.pill { display: inline-flex; align-items: center; background: var(--surface-2); color: var(--text); font-size: var(--fs-subhead); border-radius: var(--radius-pill); white-space: nowrap; }
+.app-shell .pill { height: var(--min-touch); min-height: 0; max-width: 100%; padding: 0 0.75rem; gap: 0.375rem; font-weight: 600; }
+.app-shell .pill:hover { background: var(--surface-3); }
+.pill > svg { flex: none; color: var(--text-tertiary); }
+.pill > .pill-glyph { color: var(--text-secondary); }   /* the leading glyph: shape of the format, clock, sparkle, people */
+.pill-v, .look-pill-v, .cast-pill-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.composer-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.tool-cluster { display: flex; flex-wrap: wrap; flex: 1 1 auto; align-items: center; gap: 0.25rem; min-width: 0; }
+.tool-btn { position: relative; flex: none; }
+.tool-options { display: inline-flex; align-items: center; gap: 0.25rem; height: var(--min-touch); padding: 0 0.625rem 0 0.5rem; border-radius: var(--radius-pill); font-size: var(--fs-subhead); font-weight: 600; white-space: nowrap; }
+.tool-badge { position: absolute; top: 0; right: 0; min-width: 1.25rem; height: 1.25rem; padding: 0 0.25rem; border-radius: var(--radius-pill); background: var(--text); color: var(--background); font-size: var(--fs-caption); font-weight: 700; line-height: 1.25rem; text-align: center; font-variant-numeric: tabular-nums; }
+.tool-listening { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; margin-left: var(--space-2); overflow: hidden; color: var(--text-secondary); font-size: var(--fs-subhead); font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.tool-listening .live-dot { flex: none; background: var(--danger); }
+.app-shell .compose-go { flex: none; height: 3rem; min-width: 7rem; margin-left: auto; padding: 0 1.25rem; gap: 0.375rem; font-size: var(--fs-body); font-weight: 700; box-shadow: 0 2px 8px rgba(75, 60, 220, 0.28); }
+.go-cost { display: inline-flex; align-items: center; gap: 2px; font-variant-numeric: tabular-nums; }
+/* inactive (the prompt is empty, or the mic is on): an opaque fill, the secondary label, no shadow; still focusable and tappable (the tap says what is missing) */
+.app-shell .btn-primary.compose-go.is-inactive { background: var(--surface-3); color: var(--text-secondary); box-shadow: none; opacity: 1; filter: none; cursor: default; }
+.app-shell .btn-primary.compose-go.is-inactive:hover { filter: none; }
+/* the fallback (large text, zoom, a narrow window): measured in Composer.tsx, which sets is-stacked when Create no longer fits beside the tools: its own full-width row, 52 px */
+.composer-tools.is-stacked .compose-go { flex: 1 0 100%; height: 3.25rem; }
+.compose-balance { margin: 0; text-align: center; font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
+.composer-card.is-locked .composer-top { opacity: 0.5; pointer-events: none; transition: opacity var(--dur-select) var(--ease); }
+/* creating: Create springs into the full-width live capsule (a cross-fade under reduced motion), Cancel keeps its place at the end */
+.create-capsule { display: flex; align-items: center; gap: var(--space-3); min-height: 4rem; margin-top: var(--space-4); padding: 0 var(--space-2) 0 var(--space-5); border-radius: var(--radius-pill); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--outline); font-weight: 600; transform-origin: right bottom; animation: vmk-capsule var(--dur-sheet) cubic-bezier(0.34, 1.4, 0.64, 1); }
+.create-capsule > span:not(.spinner):not([class]) { flex: 1; min-width: 0; }
+.create-capsule:not(:has(button)) { padding-right: var(--space-5); }
+@keyframes vmk-capsule { from { opacity: 0; transform: scale(0.45, 0.7); } }
+@media (prefers-reduced-motion: reduce) { .create-capsule { animation: vmk-fade var(--dur-reduced) linear; } }
+@media (min-width: 40.01rem) { .opts-root > .vm-pop { left: 0; right: auto; } }   /* Options is at the start of the row now: its popover opens to the right of it */
 @media (max-width: 47.99rem) {
   .app-shell .compose-aura { inset: 2rem 0 auto 0; }
-  .app-shell .composer-bar { position: relative; gap: var(--space-3) var(--space-2); }
-  .app-shell .composer-pills { flex-wrap: nowrap; gap: 0.375rem; }
-  .app-shell .composer-pills > .vm-menu { min-width: 0; flex: 0 1 auto; }
-  .app-shell .composer-pills .pill { max-width: 100%; padding: 0 0.75rem; gap: var(--space-1); }
-  .app-shell .composer-pills .pill > span { overflow: hidden; text-overflow: ellipsis; }
-  .app-shell .composer-pills .pill > svg { flex: none; }
-  .app-shell .pill-k, .app-shell .pill-v { display: none; }
-  .app-shell .pill-phone { display: inline; }
-  .app-shell .composer-pills > .vm-pop-root { position: absolute; right: 0; top: var(--space-4); }
-  .app-shell .compose-go { justify-content: space-between; height: 3.5rem; }
-  .app-shell .compose-balance { display: block; text-align: center; font-size: var(--fs-caption); color: var(--text-tertiary); }
+  .app-shell .composer-card { padding: var(--space-4) 0.75rem 0.75rem; }
+  .app-shell .pill { padding: 0 0.625rem; gap: 0.25rem; }
+  .composer-tools:has(.tool-listening) .tool-options-label { display: none; }
+  .composer-tools:has(.tool-listening) .tool-options { padding: 0; width: var(--min-touch); justify-content: center; }
   .app-shell .compose-examples { justify-content: flex-start; }
 }
+@media (max-height: 40rem) { .app-shell .compose-examples .chip:nth-child(n + 3) { display: none; } }   /* a short window: two chips, not three */
 
 /* ---- Media: month grid, selection, the floating bar, the upload toast */
 .app-shell .mhead { position: static; display: flex; align-items: baseline; gap: var(--space-3); margin: var(--space-8) 0 var(--space-4); padding: 0; background: none; font-size: var(--fs-title2); font-weight: 600; letter-spacing: -0.02em; color: var(--text); }

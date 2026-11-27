@@ -16,7 +16,7 @@ function useDismiss(open: boolean, close: () => void, root: React.RefObject<HTML
   }, [open, close, root]);
 }
 
-export function Menu({ label, trigger, items, onPick, align = "start", className = "", triggerClass = "" }: { label: string; trigger: ReactNode; items: MenuItem[]; onPick: (id: string) => void; align?: "start" | "end"; className?: string; triggerClass?: string }) {
+export function Menu({ label, trigger, items, onPick, align = "start", className = "", triggerClass = "", disabled = false }: { label: string; trigger: ReactNode; items: MenuItem[]; onPick: (id: string) => void; align?: "start" | "end"; className?: string; triggerClass?: string; disabled?: boolean }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -37,7 +37,7 @@ export function Menu({ label, trigger, items, onPick, align = "start", className
   const radio = items.some((i) => i.checked !== undefined);
   return (
     <div className={`vm-menu ${className}`} ref={root}>
-      <button ref={btn} type="button" className={triggerClass} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={label} onClick={() => setOpen((v) => !v)}>{trigger}</button>
+      <button ref={btn} type="button" className={triggerClass} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={label} disabled={disabled} onClick={() => setOpen((v) => !v)}>{trigger}</button>
       {open && (
         <div id={id} ref={list} role="menu" aria-label={label} className={`vm-menu-list vm-menu-${align}`} onKeyDown={move}>
           {items.map((it) => {
@@ -54,7 +54,7 @@ export function Menu({ label, trigger, items, onPick, align = "start", className
   );
 }
 
-export function Popover({ label, trigger, children, className = "", triggerClass = "", onOpenChange }: { label: string; trigger: ReactNode; children: (close: () => void) => ReactNode; className?: string; triggerClass?: string; onOpenChange?: (o: boolean) => void }) {
+export function Popover({ label, trigger, children, className = "", triggerClass = "", onOpenChange, disabled = false }: { label: string; trigger: ReactNode; children: (close: () => void) => ReactNode; className?: string; triggerClass?: string; onOpenChange?: (o: boolean) => void; disabled?: boolean }) {
   const [open, setOpenRaw] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -66,7 +66,7 @@ export function Popover({ label, trigger, children, className = "", triggerClass
   useEffect(() => { if (open) panel.current?.querySelector<HTMLElement>("button, [href], input, select")?.focus(); }, [open]);
   return (
     <div className={`vm-pop-root ${className}`} ref={root}>
-      <button ref={btn} type="button" className={triggerClass} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={label} onClick={() => setOpen(!open)}>{trigger}</button>
+      <button ref={btn} type="button" className={triggerClass} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={label} disabled={disabled} onClick={() => setOpen(!open)}>{trigger}</button>
       {open && <div className="vm-pop-scrim" aria-hidden="true" />}
       {open && <div id={id} ref={panel} role="dialog" aria-label={label} className="vm-pop">{children(close)}</div>}
     </div>

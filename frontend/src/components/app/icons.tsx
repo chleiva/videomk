@@ -20,9 +20,21 @@ const EXTRA: Record<string, ReactNode> = {
   addphoto: <path {...P} d="M13 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-7M4 16l4-4 4 4 2.5-2.5L19 18M18.5 3v6M15.5 6h6M9 9.5h.01" />,
   folderplus: <path {...P} d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10.5v5M9.5 13h5" />,
   lock: <path {...P} d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1z" />,
+  clock: <path {...P} d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2" />,
+  "shape-wide": <rect {...P} x="3" y="6.5" width="18" height="11" rx="2.5" />,
+  "shape-tall": <rect {...P} x="7.5" y="3" width="9" height="18" rx="2.5" />,
+  "shape-square": <rect {...P} x="5" y="5" width="14" height="14" rx="2.5" />,
+  "shape-portrait": <rect {...P} x="6" y="4" width="12" height="16" rx="2.5" />,
+  people: <path {...P} d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3.5 19a5.5 5.5 0 0 1 11 0M16 5.2a3 3 0 0 1 0 5.6M17.5 14a5.5 5.5 0 0 1 3 5" />,
   upload: <path {...P} d="M12 15V4m0 0L8 8m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />,
 };
 export function AIcon({ name, size = 20, className }: { name: string; size?: number; className?: string }) {
   if (EXTRA[name]) return <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width={size} height={size} className={className}>{EXTRA[name]}</svg>;
   return <Icon name={name} size={size} className={className} />;
+}
+
+/** The glyph of a format: its shape (landscape, portrait, tall, square) from an id such as "16:9". */
+export function shapeGlyph(aspect: string): string {
+  const [w, h] = aspect.split(":").map(Number), r = w > 0 && h > 0 ? w / h : 16 / 9;
+  return r > 1.2 ? "shape-wide" : r > 0.95 ? "shape-square" : r > 0.7 ? "shape-portrait" : "shape-tall";
 }

@@ -179,5 +179,15 @@
  "create.pick_not_photos": "No con fotos",
  "create.pick_not_deck": "No con presentación",
  "create.pick_plan": "Plan {plan}",
- "create.pick_use_shape": "Usar {shape}"
+ "create.pick_use_shape": "Usar {shape}",
+ "create.pill_cast": "Personajes",
+ "create.cast_a11y": "Personajes: {names}",
+ "create.dictate_stop": "Detener el dictado",
+ "create.cta_name": "Crear video",
+ "create.state_ready": "Listo, cuesta {credits}.",
+ "create.state_need_text": "No está listo: describe tu video.",
+ "create.state_listening": "No está listo: deja de dictar primero.",
+ "create.state_wait": "No está listo: un momento.",
+ "create.need_text": "Describe tu video para crearlo.",
+ "create.first_caption": "{credits}. Tienes {balance}."
 }
