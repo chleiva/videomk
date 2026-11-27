@@ -119,6 +119,41 @@ A scene that breaks the rule is converted to the look's own scene type with the 
 
 **Auto is one decision per video, not one per scene.** With `look: "auto"` (or nothing sent) the director first commits to ONE direction for the whole video (one of the recipes above), with a one-sentence reason from the topic, the audience, the platform and the length, and every scene must then fit it, by the same check and repair as a chosen look. The topic policies (cartoon characters only for children's, fun and tutorial videos; the whiteboard only for explaining a process or concept; real pictures for news, real people and places) decide which directions `auto` may choose from; they no longer sprinkle single cartoon scenes into a photo video.
 
+## Characters that speak different languages (contract 2026-11-27, server switch `POLYGLOT`; design `docs/MULTILINGUAL_CONVERSATIONS_DESIGN_2026-11-27.md`; `lambdas/common/look_choice.py`, `common/lang_names.py`, engine `engine/polyglot.py`, `engine/plan_langs.py`; tests `tests/test_look_choice_languages.py`, `tests/test_polyglot.py`, `tests/test_plan_langs.py`)
+
+In a cartoon conversation (2 or 3 characters) each character may speak its OWN language, taking turns, each with a voice of its language. The video keeps one **main language** (the request's language, or the narration language option: unchanged); it is the language of the title, the description, the end card and the **translation line**.
+
+**Request.** A `cast` entry is an id (as always) or an object `{"id": "fox", "language": "fr"}`; the two forms can be mixed. `language` is one of `capabilities.looks.cast.languages.options` (`en es fr de it pt nl pl fi` where the stage has them); a character with no `language` speaks the main language. New optional field `translation`: `"auto"` (default), `"on"`, `"off"`.
+
+```json
+{"prompt": "Why is the sea salty?", "look": "cartoon", "cast": ["fox", {"id": "bear", "language": "de"}, {"id": "owl", "language": "it"}], "translation": "auto"}
+```
+
+* `cast` is **normalised to the same list of ids** plus a `cast_languages` map (`{"bear": "de", "owl": "it"}`), so everything that only knows ids (the stored request, the engine's older readers, the Android client that sends strings) is unchanged. Nothing is added to a request that sends no language.
+* The person's choice always wins over words in the request ("a French fox" in the prompt): the form decides. Without a form choice, the request's own words decide ("a French fox, a German bear and an Italian owl explain why the sea is salty"), and where it only says "different languages" the app picks the languages and says so in `note`.
+* 400 with a plain message (nothing charged): a `language` that is not one of this stage's languages; an object with keys other than `id` and `language`; the same id twice.
+* Never a refusal: where the languages cannot be given, the video is made in one language and `look.languages.reason` and `note` say why: `not_available` (the stage has no `POLYGLOT`), `needs_cartoon` (the look is not cartoon), `needs_two` (one character cannot take turns with itself; one character speaking the video's own language is just a character), `too_short` (three languages need 30 s and two need 20 s: in a shorter video the third character speaks the main language).
+* A request written in one language that asks for lines in other languages ("a French fox and a German bear", "characters speaking different languages") is **never** `not_supported` and never blocked by the request check. A language the app does not have (a "Japanese owl") is dropped with a note, the video is still made.
+* Dutch, Polish and Finnish have only women's voices: a man's character that speaks them gets a woman's voice and the note says so; they are given to women characters first when the app chooses. Finnish has one voice in all.
+* **Phrasebook requests** ("say hello in five languages") with more languages than characters are reduced to the characters' languages (at most 3) and the note says so; one character speaking several languages comes later.
+
+**Answer** (`brief` and `generate`): `look.languages` = `{"by_character": {"bear": "de", "owl": "it"}, "translation": "auto", "reason": null | code, "note": null | sentence}`; its `note` is also the answer's `note` when nothing else explains. Present only when the request sent languages or `translation`.
+
+**Capabilities** (`looks.cast.languages`, and `languages` on each of `looks.cast.members`; empty where the stage has no `POLYGLOT`):
+
+```json
+"languages": {"param": "cast[].language", "available": true, "max": 3, "min_cast": 2, "note": "...", "min_seconds": {"2": 20, "3": 30},
+              "options": [{"id": "fr", "label": "Français", "voices": {"female": 4, "male": 4}, "women_only": false}, ...],
+              "translation": {"param": "translation", "default": "auto", "options": [{"id": "auto", "label": "..."}, {"id": "on", ...}, {"id": "off", ...}]}}
+"members": [{"id": "bear", ..., "languages": [{"id": "fr", "voices": 4, "note": null}, {"id": "nl", "voices": 0, "note": "Dutch has only women's voices here, ..."}]}]
+```
+
+Show a language chip per ticked character ("Fox: French") when `languages.available`; `members[].languages[].voices` is how many voices of the character's gender the language has (0 with a `note` = a woman's voice will speak).
+
+**Translation line.** `translation: "auto"` shows, under each line spoken in another language than the main one, a smaller row with the same line in the main language, **even when `captions` is false** (a video whose lines nobody understands needs one row of text). `on` shows it always (also for lines in the main language), `off` never. The row is drawn in the caption band; with captions on, the caption (each line in its own language) moves up to make room.
+
+**In the plan** (read-only, for review): `plan.language` = main language; `plan.polyglot` = `{"mode": "conversation", "translate": true, "speakers": {"fox": "fr", "bear": "de"}, "by": "form" | "words" | "app", "languages": [...], "notes": [...]}`, present only when more than one language is spoken; per beat `translation` (main language). The audit `plan.polyglot.audit` lists any line whose language is not its speaker's and any voice whose language is not its speaker's (a mismatch is a bug).
+
 ## Looks: scene style and moving backgrounds (2026-11-27; `lambdas/capabilities_api.looks`, `engine/vector_policy.py`, `engine/background.py`, tests `tests/test_looks.py`)
 What a client can ask for and what the server decides by itself. Capabilities says what THIS stage has switched on; read it instead of assuming.
 
