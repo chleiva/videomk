@@ -139,9 +139,22 @@ English is the base (`res/values`), Spanish is `res/values-es`; the contract (po
   Check at 360x640 dp, font scale 1.0 and 2.0, light and dark: Spanish is about 25 to 35 percent longer.
 - State held in a view model (for example an error banner) keeps the language it was created in until it is replaced; screens re-render in the new language on the activity recreation a language change causes.
 
+## Second pass, 2026-11-27 (audit: docs/audits/2026-11-27/ANDROID_AUDIT.md)
+- **A video that finished while the phone was locked** (tracker R124): the token refresh scope is a `SupervisorJob`, a 401 forces one refresh and one retry, returning to the
+  foreground drops a hung read and reads the list at once, the poll loop survives failures. Check by hand with the fake backend: `adb shell run-as com.videomk.app touch files/fake_finish`
+  while the app is in the background, `adb shell dumpsys deviceidle force-idle`, come back: the Making card is the finished video.
+- **Undo over confirm**: `core/Undo.kt` `UndoCenter` (one bar, six seconds, the server call waits; `AppContainer.undo`). Videos, photos, collections, failed requests.
+- **Plans** (read-only, `can_upgrade` false): `core/Plans.kt`, `ApiError.Plan`, `CreateGate`; lengths and qualities the plan lacks are locked; refusals are read on Create.
+  Debug: `files/fake_plan` = `free` | `locked` | `pro`.
+- **Looks and watermark** come from capabilities (`LooksCaps`, `WatermarkCaps`) and are sent only when chosen. **Cancel** (`POST .../cancel`), **delete** of finished videos, `GET /gallery`.
+- **Kit** (`ui/UiKit.kt`, `ui/Theme.kt`): `PrimaryButton` (opaque when disabled), `TonalButton`, `TextAction`, `SheetHeader`, `VmkRow`, `VmkGroup`, `VmkField`, `VmkMenu`, `ChoiceChip`,
+  `vmkSwitchColors`, `UndoBar`, `PlayerControls` (one set for inline and full screen).
+- **Name**: VideoMK wherever a person reads it; `BrandTest` fails on any other spelling in strings, the app label and code literals (docs/BRAND.md).
+- Portrait on phones (`MainActivity`); the full-screen player has its own orientation.
+
 ## Tests
 ```
-./gradlew testDebugUnitTest              # 404 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
+./gradlew testDebugUnitTest              # 438 JVM unit tests, no network (MockWebServer): API client, auth/PKCE/refresh, dictation plan + locale,
                                          # library merge + progress estimator, photo geometry + multipart + uploader, editor diff/snapshot/view model, app view model
 ./scripts/run-ui-tests.sh                # instrumented tests on the running emulator, against QA (see below)
 ./scripts/run-ui-tests.sh com.videomk.app.E2ETest   # makes ONE real 1-minute video from 4 photos on QA (a few cents), plays it, full screen, edits it

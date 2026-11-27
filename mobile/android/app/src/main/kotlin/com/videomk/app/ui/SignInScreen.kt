@@ -187,9 +187,9 @@ fun LegalLine() {
     Box(Modifier.heightIn(min = Vmk.minTouch), contentAlignment = Alignment.Center) { Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center) }
 }
 
-/** The id of `res/raw/sample_intro`, or null while that asset does not exist (none ships today: the owner has not supplied one). */
-fun sampleVideoRes(context: android.content.Context): Int? =
-    context.resources.getIdentifier("sample_intro", "raw", context.packageName).takeIf { it != 0 }
+/** Our own footage for the sign-in screen: six silent seconds cut from the forest sample video (`res/raw/sample_intro.mp4`). Named directly so resource shrinking keeps it. */
+@Suppress("UNUSED_PARAMETER")
+fun sampleVideoRes(context: android.content.Context): Int? = R.raw.sample_intro
 
 /**
  * A muted, looped sample clip above the sign-in buttons. It never makes a sound. It is drawn on a TextureView that stays invisible until the first frame is on it,

@@ -425,7 +425,7 @@ private fun LockedCreate(gate: com.videomk.app.core.CreateGate.Locked, caps: com
         else for (v in list) {
             val shape = RoundedCornerShape(Vmk.radii.videoCard)
             Column(
-                Modifier.fillMaxWidth().clip(shape).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_play)) { play.launch(FullScreenArgs(v.videoUrl, 0, true, com.videomk.app.core.VideoItem.ratioOf(v.aspect) < 0.99f)) }
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(Vmk.radii.tile)).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_play)) { play.launch(FullScreenArgs(v.videoUrl, 0, true, com.videomk.app.core.VideoItem.ratioOf(v.aspect) < 0.99f)) }
                     .semantics(mergeDescendants = true) { }.testTag("showcaseVideo"),
                 verticalArrangement = Arrangement.spacedBy(Vmk.space.s),
             ) {
@@ -434,7 +434,7 @@ private fun LockedCreate(gate: com.videomk.app.core.CreateGate.Locked, caps: com
                     else Icon(Sym.PlayArrow, null, tint = Color.White.copy(alpha = 0.9f), modifier = Modifier.align(Alignment.Center).size(44.dp))
                     v.seconds?.let { GlassChip(duration(it), Modifier.align(Alignment.BottomEnd).padding(Vmk.space.s)) }
                 }
-                if (v.title.isNotBlank()) Text(v.title, style = VmkType.makingTitle, color = Vmk.colors.text, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 2.dp))
+                if (v.title.isNotBlank()) Text(v.title, style = VmkType.makingTitle, color = Vmk.colors.text, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = Vmk.space.xs).padding(bottom = Vmk.space.xs))
             }
         }
     }

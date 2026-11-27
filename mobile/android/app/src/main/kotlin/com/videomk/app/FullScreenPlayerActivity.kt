@@ -103,7 +103,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                 )
                 com.videomk.app.ui.PlayerControls(p, onFullScreen = null, modifier = Modifier.fillMaxSize(), bottomInset = 12.dp)
-                com.videomk.app.ui.GlassIconButton(Sym.Close, stringResource(R.string.player_close_full_screen), ::close, Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp).testTag("closeFullScreenButton"), onDark = true)
+                Box(Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp)) { com.videomk.app.ui.GlassIconButton(Sym.Close, stringResource(R.string.player_close_full_screen), ::close, Modifier.testTag("closeFullScreenButton"), onDark = true) }
             }
         }
     }

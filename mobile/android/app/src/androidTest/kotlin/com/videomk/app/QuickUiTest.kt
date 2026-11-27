@@ -85,12 +85,12 @@ class QuickUiTest {
         Ui.require("balanceChip", 30_000).click()
         val value = Ui.require("balanceValue")
         assertEquals("∞", value.text)   // the QA test user has unlimited credits
-        Ui.require("creditsExplainer").click(); Ui.clickText("Done", exists = true); Ui.shot("05-credits")
+        Ui.require("creditsExplainer"); Ui.shot("05-credits")   // Credits is a sheet: the rules are one line in it
         device.pressBack()
         Ui.require("settingsButton").click()
         assertEquals("qa-android@videomk.test", Ui.require("accountEmail").text)
         Ui.shot("06-settings")
-        Ui.require("signOutButton").click(); Ui.clickText("Sign out of videomk?", exists = true); device.findObjects(By.text("Sign out")).last().click()
+        Ui.require("signOutButton").click()   // signing out asks nothing (it deletes nothing)
         Ui.require("signInButton")
         assertFalse(Ui.has("composerField"))
     }
@@ -149,7 +149,7 @@ class QuickUiTest {
         Ui.launch(signedIn = true)
         Ui.openCreate()
         Ui.require("photoButton", 30_000).click()
-        Ui.require("pickFromPhone", 10_000).click()   // the Add photos sheet opens the system picker from its This phone tab
+        Ui.clickText("Photo library", exists = true)   // the photo icon is a menu: this row opens the system picker at once
         val picker = "com.google.android.providers.media.module"
         val tiles = device.wait(Until.findObjects(By.res("$picker:id/icon_thumbnail")), 15_000)
         org.junit.Assume.assumeTrue("no photos on the device (push p1..p4.jpg to /sdcard/Pictures)", !tiles.isNullOrEmpty())

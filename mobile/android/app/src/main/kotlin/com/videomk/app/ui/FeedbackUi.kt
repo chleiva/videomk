@@ -135,11 +135,7 @@ fun FeedbackSheet(api: FeedbackApi?, draft: FeedbackDraft, context: FeedbackCont
             Text(stringResource(R.string.feedback_kind_label), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 for ((k, res) in listOf(FeedbackKind.Idea to R.string.feedback_kind_idea, FeedbackKind.Problem to R.string.feedback_kind_problem, FeedbackKind.Other to R.string.feedback_kind_other)) {
-                    FilterChip(
-                        selected = kind == k, enabled = !sending,
-                        onClick = { kind = if (kind == k) null else k; flow.pick(kind) },
-                        label = { Text(stringResource(res)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("feedbackKind-${k.wire}"),
-                    )
+                    ChoiceChip(stringResource(res), kind == k, Modifier.testTag("feedbackKind-${k.wire}")) { kind = if (kind == k) null else k; flow.pick(kind) }
                 }
             }
             (stage as? FeedbackStage.Failed)?.let { f ->

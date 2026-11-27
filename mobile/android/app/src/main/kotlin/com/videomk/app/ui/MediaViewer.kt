@@ -91,13 +91,22 @@ fun MediaViewer(vm: MediaViewModel, startIndex: Int, onClose: () -> Unit, onMake
                 GlassIconButton(Sym.Info, stringResource(R.string.media_photo_details), { info = true }, Modifier.testTag("viewerInfo"), onDark = true)
             }
             // one labelled action (Make a video, with the play-sparkle) and two quiet icons
-            Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.m), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalAlignment = Alignment.CenterVertically) {
-                PrimaryButton(stringResource(R.string.media_make_video), { current?.let(onMakeVideo) }, Modifier.weight(1f).testTag("viewerMakeVideo"), content = {
+            val make: @Composable (Modifier) -> Unit = { m ->
+                PrimaryButton(stringResource(R.string.media_make_video), { current?.let(onMakeVideo) }, m.testTag("viewerMakeVideo"), content = {
                     Icon(Sym.PlaySparkle, null, Modifier.size(22.dp), tint = androidx.compose.material3.LocalContentColor.current)
                     Text(stringResource(R.string.media_make_video), style = VmkType.cta, color = androidx.compose.material3.LocalContentColor.current, maxLines = 2)
                 })
+            }
+            val icons: @Composable () -> Unit = {
                 GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { collect = true }, Modifier.testTag("viewerCollection"), onDark = true, size = 56.dp)
                 GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_this_photo), { current?.let { vm.deleteIds(listOf(it.id)) } }, Modifier.testTag("viewerDelete"), onDark = true, size = 56.dp)
+            }
+            // at large text the two icons sit above the button, so its label is never squeezed onto two lines
+            if (isLargeText()) Column(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.m), verticalArrangement = Arrangement.spacedBy(Vmk.space.s), horizontalAlignment = Alignment.End) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) { icons() }
+                make(Modifier.fillMaxWidth())
+            } else Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(horizontal = Vmk.space.screen, vertical = Vmk.space.m), horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalAlignment = Alignment.CenterVertically) {
+                make(Modifier.weight(1f)); icons()
             }
         }
     }

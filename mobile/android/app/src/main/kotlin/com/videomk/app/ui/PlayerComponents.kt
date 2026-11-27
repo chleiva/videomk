@@ -149,16 +149,30 @@ fun PlayerControls(player: Player, onFullScreen: (() -> Unit)?, modifier: Modifi
         androidx.compose.animation.AnimatedVisibility(visible, Modifier.matchParentSize(), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) {
             Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.Transparent, 0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.6f)))) {
                 if (buffering) LiveRing(Modifier.align(Alignment.Center), size = 36.dp, track = Color.White.copy(alpha = 0.3f), color = Color.White)
-                else GlassIconButton(if (playing) Sym.Pause else Sym.PlayArrow, stringResource(if (playing) R.string.player_pause else R.string.player_play), { if (playing) player.pause() else player.play(); touched++ }, Modifier.align(Alignment.Center).testTag("playPause"), onDark = true, size = 64.dp)
+                else {
+                    // the one large control: a glass disc that reads on any picture, 64 dp, with the icon at a size to match
+                    val label = stringResource(if (playing) R.string.player_pause else R.string.player_play)
+                    Box(
+                        Modifier.align(Alignment.Center).size(64.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color.Black.copy(alpha = 0.45f))
+                            .clickable(role = androidx.compose.ui.semantics.Role.Button) { if (playing) player.pause() else player.play(); touched++ }.semantics { contentDescription = label }.testTag("playPause"),
+                        contentAlignment = Alignment.Center,
+                    ) { Icon(if (playing) Sym.Pause else Sym.PlayArrow, null, tint = Color.White, modifier = Modifier.size(36.dp)) }
+                }
                 Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(start = Vmk.space.l, end = Vmk.space.xs, bottom = bottomInset), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s)) {
                     val shown = scrub?.let { (it * duration).toLong() } ?: position
                     Text(clock(shown) + " / " + clock(duration), style = MaterialTheme.typography.labelMedium, color = Color.White, maxLines = 1, modifier = Modifier.testTag("playerTime"))
                     val seekLabel = stringResource(R.string.player_seek)
+                    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                    val sliderColors = androidx.compose.material3.SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color.White, inactiveTrackColor = Color.White.copy(alpha = 0.35f))
+                    // a thin white line with a round handle (the stock slider's tall bar and gaps are another vocabulary)
+                    @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
                     androidx.compose.material3.Slider(
                         value = scrub ?: if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f,
                         onValueChange = { scrub = it; touched++ }, onValueChangeFinished = { scrub?.let { player.seekTo((it * duration).toLong()) }; scrub = null },
                         enabled = duration > 0, modifier = Modifier.weight(1f).heightIn(min = Vmk.minTouch).semantics { contentDescription = seekLabel }.testTag("playerSeek"),
-                        colors = androidx.compose.material3.SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color.White, inactiveTrackColor = Color.White.copy(alpha = 0.35f)),
+                        colors = sliderColors, interactionSource = interaction,
+                        thumb = { Box(Modifier.size(16.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color.White)) },
+                        track = { state -> androidx.compose.material3.SliderDefaults.Track(sliderState = state, modifier = Modifier.height(4.dp), colors = sliderColors, drawStopIndicator = null, thumbTrackGapSize = 0.dp, trackInsideCornerSize = 2.dp) },
                     )
                     if (onFullScreen != null) GlassIconButton(Sym.Fullscreen, stringResource(R.string.player_full_screen), onFullScreen, Modifier.testTag("fullScreenButton"), onDark = true)
                     else Spacer(Modifier.width(Vmk.space.s))

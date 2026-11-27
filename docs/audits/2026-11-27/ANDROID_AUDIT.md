@@ -135,7 +135,7 @@ The rebuilt screens are labelled with care: `GlassIconButton` requires a label, 
 | Question sheet | The progress dots have no label. | One merged description, "Question 1 of 3". | `CreateSheets.kt:75-77` |
 | Photo viewer | "1 of 60" is plain text; paging announces nothing. | A polite live region on the counter. | `MediaViewer.kt:88` |
 | Floating bar | Two tabs with the selected state but no "tab list" grouping beyond traversal. | `selectableGroup()` on the pill. | `Root.kt:201-207` |
-| Storage sheet | The meter has no value. | `progressBarRangeInfo` and the meter text. | `MediaComponents.kt` (storageMeter) |
+| Storage meter | Checked again: the row already speaks its text ("Storage: 1.8 GB of 2 GB, almost full") as one element. | None needed. | `MediaComponents.kt:277-285` |
 | Undo | No undo exists, so nothing is announced after a removal. | The undo bar is an assertive live region with "Undo" as its action. | new |
 
 ### Android points
@@ -163,3 +163,55 @@ The rebuilt screens are labelled with care: `GlassIconButton` requires a label, 
 ## Method
 
 One emulator, one job at a time. States were reached with the debug file flags and `adb shell input`; node positions came from `uiautomator dump` by test tag. Captures are JPEG at 540 x 1200.
+
+## 4. After the fixes (same day, branch `android-pass2`)
+
+Captures after the fixes: `docs/audits/2026-11-27/android_after/` (136 files: the full light set, and the key screens in dark, Spanish, 200 % text, Spanish at 200 % and 360 dp; file names match the "before" set where the screen still exists). Looked at against the before set and the mockups, screen by screen.
+
+Commits: `d248a13` (R124), `3f25b1b` (plans, looks, watermark, cancel, gallery, refusal sheets, kit), `33cf34f` (fixes part 1), `9ef4d63` (fixes part 2), and the closing commit of this pass (player button, viewer at large text, captures, this section).
+
+| # | Status | What was done | Evidence |
+|---|---|---|---|
+| P0-1 | Fixed | See the pass report: refresh scope, forced refresh on 401, read on return, poll loop. Verified again on the final build with `deviceidle force-idle`. | `android_after/r124_back_from_idle_light.jpg` |
+| P0-2 | Fixed | A 403 or 429 with a `code` is `ApiError.Plan`: the server's sentence in the refusal sheet, draft kept, "Use 30 s" when the length is the problem. Unit tests for every code. | `PlansTest`, `AppViewModelTest` |
+| P0-3 | Fixed | "See credits"; Credits is a sheet with the balance, the next free credit, the plan and its limits, what expires. No buy button. | `android_after/credits_light.jpg`, `plan_free_credits_light.jpg` |
+| P0-4 | Fixed | Lengths over the plan's longest and qualities the plan lacks are locked with the plan's name; Create never starts on one; with nothing to spend and no free video the screen shows the server's sentence, the plans and the showcase. | `plan_free_lengths_light.jpg`, `plan_free_create_light.jpg`, `plan_locked_create_light.jpg` |
+| P1-1 | Fixed | `MainActivity` is portrait; the full-screen player keeps its own orientation. | manifest |
+| P1-2 | Fixed | Opaque disabled Create; "Create · 1 min" when the balance pays for a shorter video. | `create_light.jpg`, `create_nocredits_light.jpg`, `create_notaffordable_light.jpg` |
+| P1-3 | Fixed | The photo icon is a menu: Photo library (system picker at once), Media ("Add · N"), Presentation where offered. Explainer removed. | `create_photo_menu_light.jpg` |
+| P1-4 | Fixed | "Skip all", kit back button, content-height sheets, spoken position. | `create_questions_light.jpg`, `create_summary_light.jpg` |
+| P1-5 | Fixed | "Paused · try again in about 1 hour" with OK; a message that repeats the title is not drawn; plan refusals share the sheet. | `create_paused_light.jpg`, `create_blocked_light.jpg` |
+| P1-6 | Fixed, one exception | One "Deleted · Undo" bar for videos, photos, collections and failed requests; nine confirm dialogs removed. Kept on purpose: the editor's "discard changes?" (unsaved edits cannot be restored by an undo) and the name sheets (forms, not confirmations). | `videos_deleted_undo_light.jpg`, `media_deleted_undo_light.jpg` |
+| P1-7 | Fixed | More > Cancel video; "Cancelled · 2 credits back"; a cancelled card with Try again and Remove. | `making_more_light.jpg`, `videos_cancelled_light.jpg` |
+| P1-8 | Fixed | The failed, refused and cancelled page shows the list's card: title, line, Try again, Remove. | code; the card is the one in `videos_bottom_light.jpg` |
+| P1-9 | Fixed | Opaque disabled primary everywhere. | `delete_sheet-form_light.jpg`, `editor_light.jpg` |
+| P1-10 | Fixed | The picture alone is clipped; the day is whole. | `videos_light.jpg` |
+| P1-11 | Fixed | The fade reaches the page colour behind the bar's pill. | `videos_light.jpg`, `media_dark.jpg` |
+| P1-12 | Fixed | One set of controls drawn by the app, inline and full screen: play or pause, time, a bar, full screen. | `player_light.jpg`, `player_playing_light.jpg` |
+| P1-13 | Fixed | The selection button keeps one line (icons above it at large text), the collections strip is one row, rows put their value under the title at large text, the viewer's button keeps one line. | `media_selected_es_xl.jpg`, `media_es_xl.jpg`, `viewer_es_xl.jpg`, `settings_es_xl.jpg` |
+| P1-14 | Fixed | Media / Biblioteca in every string; "Video" on the pill and in its menu; VideoMK in every string, the app label and code literals, held by `BrandTest`. | `media_es.jpg`, `rating_light.jpg` |
+| P1-15 | Fixed | Options on the kit: one chip, Scenes and Background from `looks`, the Watermark row (fixed on Free; mode and presence otherwise), ratio and "Beta" on the tiles. The person's own logo is not set up from the phone (web only for now). | `options_light.jpg`, `options2_light.jpg`, `plan_free_options_light.jpg`, `plan_pro_options_light.jpg` |
+| P1-16 | Mostly fixed | Viewer, Collections, Editor, Delete account, Rating, Feedback, Settings, Credits and Storage use the kit (top bar, icon button, primary, tonal, row, switch, field, menu). Left: about 20 literal colours outside the theme (upload tile states drawn over photographs, the look swatches, the official Google and Apple button colours, the white end-card pill) and 7 literal text sizes; the upload bar and the deck card were not rebuilt. | `viewer_light.jpg`, `collections_light.jpg`, `editor_light.jpg`, `settings_light.jpg`, `feedback_light.jpg` |
+| P1-17 | Fixed | YouTube · 1 min on the first run (30 s where the plan stops there), then the last choice. | `create_light.jpg`, `plan_free_create_light.jpg` |
+| P1-18 | Fixed | Six silent seconds of our own forest sample, cut above its captions, over a still from the same video; the still alone when animations are off. | `signin_light.jpg` |
+| P1-19 | Fixed | No header; "As a Short", "In Spanish", "30 seconds". | `player_light.jpg` |
+| P2-1 | Fixed | About (made with AI, captions), the description, Sources and credits, one Copy. | `player_info_light.jpg` |
+| P2-2 | Fixed | Icon, one line, a tonal Try again; a player error first fetches a fresh link by itself. | code |
+| P2-3 | Fixed | No full stops; "Finding the story". | strings |
+| P2-4 | Fixed | One border on the shrunken tile. | `media_selected_light.jpg` |
+| P2-5 | Fixed | One "Collections" row. | `media_light.jpg` |
+| P2-6 | Fixed | "No photos here yet" and "Add photos" (Media opens ready to select). | `collection_light.jpg` |
+| P2-7 | Fixed | The meter, three rows, one sentence. | `storage_light.jpg` |
+| P2-8 | Fixed | One row style with icons and trailing glyphs; one switch colour (green) in Settings, Options, Editor, Organize. | `settings_light.jpg`, `settings_dark.jpg` |
+| P2-9 | Partly | Attached-photo remove is a 48 dp target. The old composer strip's 44 dp close (not on any current screen) was left. | code |
+| P2-10 | Fixed | More = Send feedback, Delete. | `player_more_light.jpg` |
+| P2-11 | Not done | The empty Videos screen is still text and chips: it needs the illustration set, which this pass did not have. | n/a |
+| P2-12 | Fixed | Tonal secondary; "Enjoying VideoMK?". | `rating_light.jpg` |
+| P2-13 | Fixed | The summary's close says "Edit request"; the dots speak "Question 1 of 3". | code |
+| TalkBack | Fixed where listed | Question position, viewer position (polite live region), the tab pill as a selectable group, the undo bar (assertive, with Undo). Not run with TalkBack speaking. | code |
+
+Word counts after: Create 12 on its surface (hint 3, "YouTube", "1 min", "Auto look", "Create", "9 credits left"; the three example chips are suggestions and are counted apart, 10 words, as on the iPhone); player 7 (Share, three chips); sign-in 10 plus the button; Media 7; Videos 3 plus titles.
+
+Score after, judged from the after captures: **Interaction 4.2, Delight 3.8, Visuals 4.1, Inclusivity 4.0, Innovation 4.0, Social impact 3.2; overall about 3.9.** Below the bar of 4 in Delight (no empty-state art, the reveal is a cross-fade, not a shared element) and under 4.5 in Visuals (the upload bar and the deck card were not rebuilt).
+
+Not verified after the fixes: anything against the real backend (cancel, delete, plan refusals, the gallery, looks and the watermark row were exercised only with the debug fakes and unit tests), the system photo picker opening from the new menu, the sign-in loop on a real phone, TalkBack speaking, the instrumented tests (they compile; they were not run).
