@@ -14,7 +14,7 @@ from ..scenes import ELEMENTS
 from ..scenes.registry import PrepareCtx
 from common import clip_config
 
-from .. import align, assets, audio, awsio, catalog_pick, clip_ondemand, clips, costs, image_ondemand, format_options, making_progress, plan as plan_mod, stock, timeline as timeline_mod, tts, voices
+from .. import align, assets, audio, awsio, catalog_pick, clip_ondemand, clips, costs, image_ondemand, format_options, making_progress, plan as plan_mod, register, stock, timeline as timeline_mod, tts, voices
 
 
 def _provider(cfg: Dict[str, Any]):
@@ -65,6 +65,47 @@ def _context(beat: Dict[str, Any]) -> str:
     return str(p.get("alt") or p.get("image_query") or p.get("clip_query") or " ".join(p.get("image_queries") or []))
 
 
+def settle_register(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, samples: np.ndarray, again: Any, *, wait_s: Optional[float] = None, sleep: Any = time.sleep) -> tuple:
+    """One register for a speaker across the scenes of a video (engine/register.py). The median pitch of this first take is written next to the audio; when it
+    lies outside the band around the speaker's register (known from the first takes of the speaker's other beats, which their own functions write), the beat is
+    said again with `again()` (a new take; at most register.retakes() times) and the take nearest the register is kept. -> (samples, record or None): the
+    record {"hz", "ref", "first_hz", "takes"} goes into the beat's media. Never raises for a reason of its own: on any doubt the first take stands."""
+    pfx = awsio.prefix(video_id)
+    first = register.median_pitch(samples, audio.SR)
+    if not first:
+        return samples, None
+    awsio.put_json(f"{pfx}audio/{plan_mod.tts_hash(plan, beat)}.f0.json", {"hz": first})   # the FIRST take, whatever is kept: every beat judges against first takes, so all judge alike
+    others = [f"{pfx}audio/{plan_mod.tts_hash(plan, b)}.f0.json" for b in register.peers(plan, beat)]
+    if not others:
+        return samples, {"hz": first, "takes": 1}
+    need, found = min(len(others), register.PEERS), {}
+    deadline = time.time() + (register.WAIT_S if wait_s is None else wait_s)
+    while True:   # the other beats are being said at this moment by their own functions: a short wait for enough of them
+        for k in others:
+            if k not in found:
+                try:
+                    found[k] = float(awsio.get_json(k)["hz"])
+                except Exception:
+                    pass
+        if len(found) >= need or time.time() >= deadline:
+            break
+        sleep(0.4)
+    ref = register.reference([first] + list(found.values()))
+    if not ref or register.off(first, ref, beat["narration"]) <= 0:
+        return samples, {"hz": first, **({"ref": round(ref, 1)} if ref else {}), "takes": 1}
+    takes = [{"hz": first, "samples": samples}]
+    for _ in range(register.retakes()):
+        new = again()
+        if new is None or new.size < audio.SR * 0.3:
+            break
+        takes.append({"hz": register.median_pitch(new, audio.SR), "samples": new})
+        if takes[-1]["hz"] and register.off(takes[-1]["hz"], ref, beat["narration"]) <= 0:
+            break
+    best = takes[register.choose(takes, ref)]
+    logging.info("REGISTER beat=%s voice=%s ref=%.0f first=%.0f kept=%.0f takes=%s", beat.get("id"), voices.beat_voice(plan, beat), ref, first, best["hz"] or 0, len(takes))
+    return best["samples"], {"hz": best["hz"], "ref": round(ref, 1), "first_hz": first, "takes": len(takes)}
+
+
 def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_field: str) -> Dict[str, Any]:
     if beat.get("silent"):  # a pause: no synthesis, no cost; the duration is how long the picture is held
         return {"tts_hash": plan_mod.tts_hash(plan, beat), "audio_key": None, "duration": round(float(beat.get("hold") or plan_mod.DEFAULT_HOLD_S), 3), "silent": True}
@@ -86,9 +127,18 @@ def make_audio(plan: Dict[str, Any], beat: Dict[str, Any], video_id: str, cost_f
     samples = tts.synth_beat(provider, text, voice=voice, style=cfg.get("style", ""))
     if samples.size < audio.SR * 0.3:
         raise RuntimeError("TTS returned (almost) no audio")
+    reg = None
+    if register.applies(plan, beat):   # a lively voice: one register from scene to scene (a beat far from it is said again; the retakes are paid like any speech)
+        def again() -> Optional[np.ndarray]:
+            costs.add_cost(video_id, len(text) * (getattr(provider, "cost_per_char", None) or costs.TTS_PER_CHAR.get(provider.name, 0.00002)), field=cost_field, part="speech")
+            return tts.synth_beat(provider, text, voice=voice, style=cfg.get("style", ""))
+        try:
+            samples, reg = settle_register(plan, beat, video_id, samples, again)
+        except Exception:   # the first take stands
+            logging.exception("register step failed for beat %s", beat.get("id"))
     dur = round(samples.size / audio.SR, 3)
     awsio.put_bytes_meta(key, _wav_bytes(samples), "audio/wav", {"duration": str(dur)})
-    out = {"tts_hash": h, "audio_key": key, "duration": dur, "voice": voice}
+    out = {"tts_hash": h, "audio_key": key, "duration": dur, "voice": voice, **({"register": reg} if reg else {})}
     if _store_words(wkey, samples, text):
         out["words_key"] = wkey
     return out

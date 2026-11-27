@@ -28,39 +28,50 @@ import threading
 import zlib
 from typing import Any, Dict, List, Optional
 
-# id -> who they are. `voices`: the Polly voices that fit, per language, first choice first (all in engine/voices.CATALOG). `skills`: the producer's kinds of video
-# (engine/skills.py) the character is cast for; `words`: topic words that cast it when the kind of video does not decide.
+# id -> who they are. `voices`: the Polly voices that fit the character, first choice first (all in engine/voices.CATALOG). English: hand-picked, the same for
+# every viewer. Every other language: the character's own order among the voices of its gender; which of them speaks also follows the viewer's accent and the
+# voice family (`voice_for`). Since 2026-11-27 every first choice is a LIVELY voice where the language has one of that gender (engine/voices.STEADY; measured:
+# docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md): Spanish women Lupe and men Carlos (they were Mia, Lucia, Pedro, Andrés, Sergio), French Ambre and Florian, Italian
+# Beatrice and Lorenzo, German and Portuguese below. A language with no entry has one lively voice per gender at most and needs no order.
+# `skills`: the producer's kinds of video (engine/skills.py) the character is cast for; `words`: topic words that cast it when the kind of video does not decide.
+_ES_F, _ES_M = ["Lupe", "Mia", "Lucia"], ["Carlos", "Pedro", "Andres", "Sergio"]
 CAST: Dict[str, Dict[str, Any]] = {
-    "ines": {"name": "Inés", "role": {"en": "Teacher", "es": "Profesora"}, "voices": {"en": ["Ruth", "Danielle"], "es": ["Lupe", "Lucia"]},
+    # the teacher: the default narrator's voice of each language (clear, even)
+    "ines": {"name": "Inés", "role": {"en": "Teacher", "es": "Profesora"}, "voices": {"en": ["Ruth", "Danielle"], "es": _ES_F, "de": ["Vicki", "Tina"], "pt": ["Camila", "Carolina"]},
              "skills": {"explainer-education", "science-wonder", "history-story", "finance-business", "inspiration-motivation", "listicle-ranking"}, "words": r""},
-    "david": {"name": "David", "role": {"en": "Engineer", "es": "Ingeniero"}, "voices": {"en": ["Matthew", "Stephen"], "es": ["Pedro", "Andres"]},
+    "david": {"name": "David", "role": {"en": "Engineer", "es": "Ingeniero"}, "voices": {"en": ["Matthew", "Stephen"], "es": _ES_M},
               "skills": {"coding-tutorial"},
               "words": r"software|code|coding|program|app\b|apps\b|computer|internet|website|algorithm|robot|engineer|technology|tech\b|data\b|\bai\b|machine learning|"
                        r"c[oó]digo|programa|computador|ordenador|tecnolog|ingenier|algoritmo|inteligencia artificial"},
-    "priya": {"name": "Priya", "role": {"en": "Doctor", "es": "Doctora"}, "voices": {"en": ["Kajal", "Danielle"], "es": ["Mia", "Lucia"]},
+    # the doctor: Kiara, the lively Indian English voice (it was Kajal, steady); elsewhere the calmer, slower woman (German Tina 155 words a minute against Vicki 172)
+    "priya": {"name": "Priya", "role": {"en": "Doctor", "es": "Doctora"}, "voices": {"en": ["Kiara", "Danielle"], "es": _ES_F, "de": ["Tina", "Vicki"], "pt": ["Camila", "Carolina"]},
               "skills": {"health-wellbeing"},
               "words": r"health|healthy|doctor|medicine|medical|vaccine|body|heart|brain|sleep|exercise|vitamin|immune|disease|virus|bacteria|"
                        r"salud|saludable|m[eé]dic|medicina|vacuna|cuerpo|coraz[oó]n|cerebro|sue[ñn]o|ejercicio|vitamina|enfermedad"},
-    "mateo": {"name": "Mateo", "role": {"en": "Chef", "es": "Chef"}, "voices": {"en": ["Stephen", "Matthew"], "es": ["Andres", "Pedro"]},
+    "mateo": {"name": "Mateo", "role": {"en": "Chef", "es": "Chef"}, "voices": {"en": ["Stephen", "Matthew"], "es": _ES_M},
               "skills": set(),
               "words": r"recipe|cook|cooking|kitchen|food|bake|baking|bread|pasta|pizza|soup|ingredient|meal|chef|dish|"
                        r"receta|cocina|cocinar|comida|hornear|pan\b|sopa|ingrediente|plato"},
-    "fox": {"name": "Fox", "role": {"en": "Guide for children", "es": "Guía para niños"}, "voices": {"en": ["Joanna", "Salli"], "es": ["Lucia", "Mia"]},
+    # the fox is young: the brighter, quicker woman (German Vicki, the liveliest on a children's text; Portuguese Carolina, 218 Hz and 207 words a minute against Camila 202 and 198)
+    "fox": {"name": "Fox", "role": {"en": "Guide for children", "es": "Guía para niños"}, "voices": {"en": ["Joanna", "Salli"], "es": _ES_F, "de": ["Vicki", "Tina"], "pt": ["Carolina", "Camila"]},
             "skills": {"kids-family", "funny-light"}, "words": r"kids?\b|children|child\b|toddlers?|preschool|\d-year-olds?|ni[ñn]os|ni[ñn]as|infantil|peques"},
     # The animal cast. They are cast by themselves only in children's and fun videos (the fox's kinds of video), by the topic `words`; anywhere when asked for by name.
-    "owl": {"name": "Hugo", "role": {"en": "Owl professor", "es": "Búho profesor"}, "voices": {"en": ["Brian", "Matthew"], "es": ["Sergio", "Pedro"]}, "skills": set(),
+    # the owl is older and calm: a man's voice, the lowest and slowest lively one there is (English Brian; one lively man per language elsewhere: Carlos, Florian, Lennart, Lorenzo, Leo)
+    "owl": {"name": "Hugo", "role": {"en": "Owl professor", "es": "Búho profesor"}, "voices": {"en": ["Brian", "Matthew"], "es": _ES_M}, "skills": set(),
             "words": r"learn\w*|school|homework|lessons?|science|scientists?|experiments?|history|ancient|maths?|numbers|planets?|space|stars?|dinosaurs?|"
                      r"aprend\w*|escuela|colegio|deberes|lecci[oó]n|ciencias?|experimentos?|historia|antigu[oa]s?|matem[aá]ticas|n[uú]meros|planetas?|espacio|estrellas?|dinosaurios?"},
-    "bear": {"name": "Bruno", "role": {"en": "Caring bear", "es": "Oso cariñoso"}, "voices": {"en": ["Stephen", "Matthew"], "es": ["Andres", "Pedro"]}, "skills": set(),
+    "bear": {"name": "Bruno", "role": {"en": "Caring bear", "es": "Oso cariñoso"}, "voices": {"en": ["Stephen", "Matthew"], "es": _ES_M}, "skills": set(),
              "words": r"health|healthy|feelings?|emotions?|worr(?:y|ied|ies)|sad|angry|afraid|scared|calm|bedtime|sleep\w*|teeth|wash\w* (?:your |our )?hands|doctor|dentist|kindness|friendship|"
                       r"salud|saludable|sentimientos?|emoci[oó]n(?:es)?|miedo|triste|enfad\w*|enoj\w*|calma|dormir|sue[ñn]o|dientes|lavarse|m[eé]dic[oa]|dentista|amistad"},
-    "cat": {"name": "Mika", "role": {"en": "Curious cat", "es": "Gata curiosa"}, "voices": {"en": ["Olivia", "Salli"], "es": ["Mia", "Lucia"]}, "skills": set(),
+    # the cat is curious and quick: as the fox; in a conversation with the fox she takes the other woman
+    "cat": {"name": "Mika", "role": {"en": "Curious cat", "es": "Gata curiosa"}, "voices": {"en": ["Olivia", "Salli"], "es": _ES_F, "de": ["Vicki", "Tina"], "pt": ["Carolina", "Camila"]}, "skills": set(),
             "words": r"technology|tech|computers?|robots?|internet|coding|code|apps?|machines?|engines?|electricity|batter(?:y|ies)|gadgets?|inventions?|phones?|how (?:\w+ ){0,3}works?|"
                      r"tecnolog\w*|computador\w*|ordenador(?:es)?|robots?|internet|programar|c[oó]digo|m[aá]quinas?|motor(?:es)?|electricidad|bater[ií]as?|inventos?|tel[eé]fonos?|c[oó]mo funcionan?"},
-    "parrot": {"name": "Paco", "role": {"en": "Travelling parrot", "es": "Loro viajero"}, "voices": {"en": ["Nate", "Matthew"], "es": ["Pedro", "Sergio"]}, "skills": set(),
+    "parrot": {"name": "Paco", "role": {"en": "Travelling parrot", "es": "Loro viajero"}, "voices": {"en": ["Nate", "Matthew"], "es": _ES_M}, "skills": set(),
                "words": r"languages?|spanish|english|french|vocabulary|alphabet|travel\w*|trips?|countr(?:y|ies)|cities|flags?|fun facts?|did you know|"
                         r"idiomas?|espa[ñn]ol|ingl[eé]s|franc[eé]s|vocabulario|abecedario|viaj\w*|pa[ií]s(?:es)?|ciudades|banderas?|datos curiosos|curiosidades|sab[ií]as que"},
-    "turtle": {"name": "Tula", "role": {"en": "Wise turtle", "es": "Tortuga sabia"}, "voices": {"en": ["Amy", "Ruth"], "es": ["Lupe", "Lucia"]}, "skills": set(),
+    # the turtle is wise and unhurried: the slower woman (German Tina, Portuguese Camila)
+    "turtle": {"name": "Tula", "role": {"en": "Wise turtle", "es": "Tortuga sabia"}, "voices": {"en": ["Amy", "Ruth"], "es": _ES_F, "de": ["Tina", "Vicki"], "pt": ["Camila", "Carolina"]}, "skills": set(),
                "words": r"nature|sea|oceans?|beach|rivers?|forests?|jungle|plants?|trees?|recycl\w*|environment|step[- ]by[- ]step|how to|"
                         r"naturaleza|mar|oc[eé]anos?|playa|r[ií]os?|bosques?|selva|plantas?|[aá]rbol(?:es)?|recicl\w*|medio ambiente|paso a paso|c[oó]mo hacer"},
 }
@@ -125,12 +136,31 @@ def cast(prompt: str, skill_ids: Optional[List[str]] = None, asked: Optional[str
     return DEFAULT
 
 
-def voice_for(cid: str, language: str, taken: Optional[List[str]] = None) -> str:
-    names = CAST[cid]["voices"].get(language)
-    if not names:   # a language the cast has no hand-picked voices for: the closest voice of that language to the character's own (same gender), by the resolver
-        from . import voices
-        return voices.resolve({"gender": voices.CATALOG[CAST[cid]["voices"]["en"][0]][2]}, language, None, taken)[0]
-    return next((n for n in names if n not in (taken or [])), names[0])
+def voice_for(cid: str, language: str, taken: Optional[List[str]] = None, region: Optional[str] = None) -> str:
+    """The voice of a character in a video of `language` for a viewer in `region`. English: the character's hand-picked voice, the same everywhere. Every other
+    language: a voice of the character's gender that is, in this order, free (not `taken` by another character of the video), of the VIEWER'S accent (the accent
+    of `voices.default_voice`; then the accent nearest to it), lively rather than steady, and first in the character's own order. So the characters of one video
+    share the viewer's accent as far as Polly has voices for it: a conversation for a Latin American viewer is Lupe and Carlos, in Spain Lucia and Sergio; a
+    second woman is Mia in Latin America (Mexican: Polly has one lively Latin American woman) and Lupe in Spain (it has one Castilian woman). A language with
+    no voice of the character's gender (Dutch, Polish and Finnish have no man) gives one of the other gender, as before."""
+    from . import voices
+
+    taken = list(taken or [])
+    names = CAST[cid]["voices"].get(language) or []
+    if language == "en" and names:
+        return next((n for n in names if n not in taken), names[0])
+    gender = voices.CATALOG[CAST[cid]["voices"]["en"][0]][2]
+    pool = [n for n in voices.names(language) if voices.CATALOG[n][2] == gender] or voices.names(language)
+    if not pool:
+        return voices.default_voice(language, region)
+    home = voices.INFO[voices.default_voice(language, region)]["locale"]
+    near = voices._NEAR.get(home, []) + voices._HOME_NEAR.get(home, [])
+
+    def rank(n: str) -> tuple:
+        loc = voices.INFO[n]["locale"]
+        return (n in taken, 0 if loc == home else 1 if loc in near else 2, n in voices.STEADY, names.index(n) if n in names else len(names), voices._ORDER.index(n))
+
+    return min(pool, key=rank)
 
 
 class Policy:
@@ -310,7 +340,7 @@ def enforce(plan: Dict[str, Any], policy: Optional[Policy], sanitize: Optional[A
     taken: List[str] = []
     new_voices = dict(voices)
     for sp, w in who.items():
-        v = voice_for(w["character"], language, taken)
+        v = voice_for(w["character"], language, taken, plan.get("region"))   # the viewer's accent for every character of the video
         taken.append(v)
         new_voices[sp] = v
     if not speakers:

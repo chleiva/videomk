@@ -22,7 +22,7 @@ A video can be narrated in a language that the apps themselves are not translate
 | Need | How it is met | English, Spanish | French, German, Italian, Portuguese, Dutch, Polish, Finnish | Korean |
 |---|---|---|---|---|
 | A generative voice | Polly, `us-east-1` | 21 and 7 voices | 8, 6, 3, 3, 2, 2, 1 voices | 2 voices |
-| Default voice by region | `voices.default_voice` | the owner's choices, unchanged | chosen without listening: owner to confirm | Seoyeon |
+| Default voice by region | `voices.default_voice` | English as chosen by the owner, India now Kiara; Spanish since 2026-11-27: Sergio in Spain, Lupe for everyone else | since 2026-11-27 a lively voice wherever the accent has one (French Ambre; `docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md`), chosen by measurement, not by ear: owner to confirm | Seoyeon |
 | Script in the language | the planner model writes in it (one line of the prompt names the language) | proven | plans made in French, German and Polish passed the plan audit; **the writing quality has not been judged by a native speaker** | not tried |
 | Language detection | word lists first (free), the small model when unsure | as before | a clear request is recognised without a model call; a short one ("Roma") goes to the small model | the small model |
 | Request check and safety | the check model reads any language ("Requests can be in any language; judge them the same way"); its prompt names the stage's languages | as before | works; the deterministic fallback list used only when the model call fails is English and Spanish | same |
@@ -35,7 +35,7 @@ A video can be narrated in a language that the apps themselves are not translate
 | Length fit (speaking rate) | `engine/length.py`, `engine/plan.words_per_s` | four voices fitted on 1,700 real beats; word budget 2.4 words a second | since 2026-11-27: the default voice of each language fitted on a 70-word passage and, for fr, de, it, pt, pl, the four beats of a QA video; the other voices are that fit scaled by their one sentence; **the word budget follows the language** (table below) | one sentence |
 | Research | the Wikipedia of the language; web research told the language | as before | fr, de, it, pt, nl, pl, fi Wikipedias | ko |
 | Stock photo and clip search | the planner writes the search words | in the video's language or English, as before | **told to write search words in English** | - |
-| Presenter characters | a voice of the language for the character's gender (`presenter_policy.voice_for`) | hand-picked voices | by the resolver; Dutch, Polish and Finnish have no male voice, so David, Mateo and the male animals get a woman's voice there | - |
+| Presenter characters | a voice of the language for the character's gender (`presenter_policy.voice_for`) | English hand-picked; Spanish Lupe and Carlos (Spain: Lucia and Sergio) | a lively voice of the character's gender and the viewer's accent (Ambre, Florian, Vicki or Tina, Lennart, Beatrice, Lorenzo, Camila or Carolina, Leo); Dutch, Polish and Finnish have no male voice, so David, Mateo and the male animals get a woman's voice there | - |
 | Closing card | "Made with VideoMK" in the language | yes | yes | written, unused |
 | Description: "Image credits:", "Sources:", the "Intro" chapter | `engine/assets.LABELS` | yes | yes since 2026-11-27 (it was English: "Sources:" under a French description) | written |
 | App strings | EN/ES only (`docs/I18N.md`) | yes | the app stays in English or Spanish; server messages too | same |
@@ -62,7 +62,7 @@ Two changes to the aligner, both for every language: a Hangul block counts as a 
 ## Known limits of the seven new languages
 
 1. **Nobody who speaks them has watched a video yet.** The plan audit checks structure, cast and language code, not prose quality. First step on QA: one video per language, watched by a native speaker where possible.
-2. **Voices were not chosen by ear.** Defaults are the longest-standing voice per accent.
+2. **Voices were not chosen by ear.** Since 2026-11-27 the default of each accent is a lively voice where Polly has one, chosen by measured pitch movement (`docs/POLLY_LIVELY_DEFAULTS_2026-11-27.md`); Canadian and Belgian French, Dutch of the Netherlands and Polish have only steady voices.
 3. **Few voices in three languages:** Dutch 2 and Polish 2 (all women), Finnish 1. A request for a male narrator there gets a woman's voice and the plan records it (`voice_notes`).
 4. **Wishes written in the request are read in English and Spanish only** where they are read by rules: "whiteboard", "cartoon", "with a presenter", "no background", gestures cued by "first, second". In other languages the request check (a model) still understands the look asked for, but the rule-based shortcuts do not fire. The video is made; the wish may be missed.
 5. **Numbers:** German, Italian, Dutch and Portuguese more often group thousands with a point (12.345,6); we write 12 345,6, which is correct and unambiguous but less customary.
@@ -79,11 +79,11 @@ Two changes to the aligner, both for every language: a Hangul block counts as a 
 | Language (default voice) | Words a second, measured | Words asked for 45 s | for 60 s |
 |---|---|---|---|
 | English (Ruth), Spanish (Lucia) | 2.63 (median of 174 videos); budget 2.4, unchanged | 89 | 130 |
-| French (Léa) | 3.03 | 103 | 150 |
+| French (Ambre since 2026-11-27; Léa was 3.03) | 3.41 | 116 | 169 |
 | Portuguese (Camila) | 3.09 | 105 | 153 |
 | Dutch (Laura) | 2.79 (one passage) | 95 | 138 |
 | German (Vicki) | 2.66 | 90 | 131 |
-| Italian (Bianca; the default is Beatrice since 2026-11-27, about 2.85: docs/VOICE_QUALITY_IT_ES_2026-11-27.md) | 2.59 | 88 | 128 |
+| Italian (Beatrice since 2026-11-27, on real beats; Bianca was 2.59) | 2.54 | 86 | 125 |
 | Polish (Ola) | 2.37 | 80 | 117 |
 | Finnish (Suvi) | 1.95 (one passage) | 66 | 96 |
 

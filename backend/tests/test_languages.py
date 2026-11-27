@@ -105,7 +105,7 @@ def test_the_request_check_names_the_languages_of_the_stage(monkeypatch):
 
 
 # ================================================================= casting: what is wanted -> the closest voice there is
-@pytest.mark.parametrize("lang,region,voice", [("fr", None, "Lea"), ("fr", "FR", "Lea"), ("fr", "CA", "Gabrielle"), ("fr", "BE", "Isabelle"), ("de", "DE", "Vicki"),
+@pytest.mark.parametrize("lang,region,voice", [("fr", None, "Ambre"), ("fr", "FR", "Ambre"), ("fr", "CA", "Gabrielle"), ("fr", "BE", "Isabelle"), ("de", "DE", "Vicki"),
                                                ("de", "AT", "Hannah"), ("de", "CH", "Sabrina"), ("it", "IT", "Beatrice"), ("pt", "BR", "Camila"), ("pt", "PT", "Camila"),
                                                ("nl", "NL", "Laura"), ("nl", "BE", "Lisa"), ("pl", "PL", "Ola"), ("fi", "FI", "Suvi"), ("ko", "KR", "Seoyeon")])
 def test_the_default_voice_of_every_language_follows_the_region(lang, region, voice):
@@ -118,7 +118,7 @@ def test_the_resolver_casts_what_was_asked_and_says_what_it_substituted():
     assert r({"accent": "British", "gender": "male"}, "en", "US") == ("Brian", "")
     assert r({"accent": "British"}, "en", "IN") == ("Amy", "") and r("a British woman", "en", "US") == ("Amy", "")
     assert r({"gender": "male"}, "en", "GB") == ("Brian", "") and r({"gender": "male"}, "en", "US")[0] == "Matthew"   # no accent asked: the viewer's own
-    assert r({}, "en", "IN") == ("Kajal", "") and r(None, "es", "MX") == ("Lupe", "") and r({"gender": "any"}, "en") == ("Ruth", "")
+    assert r({}, "en", "IN") == ("Kiara", "") and r(None, "es", "MX") == ("Lupe", "") and r({"gender": "any"}, "en") == ("Ruth", "")   # India: Kiara, the lively voice (it was Kajal)
     assert r({"name": "Brian"}, "en", "US") == ("Brian", "") and r("stephen", "en") == ("Stephen", "")
     assert r({"accent": "mexicana", "gender": "female"}, "es", "ES") == ("Mia", "") and r({"accent": "Latin American"}, "es", "ES") == ("Lupe", "")
     assert r({"accent": "Canadian", "gender": "male"}, "fr", "FR") == ("Liam", "") and r({"accent": "Swiss"}, "de") == ("Sabrina", "")
@@ -128,7 +128,7 @@ def test_the_resolver_casts_what_was_asked_and_says_what_it_substituted():
     v, note = r({"accent": "Canadian"}, "en", "CA")
     assert v == "Ruth" and note.startswith("no Canadian voice: Ruth (American, female)")
     v, note = r({"accent": "Argentinian", "gender": "female"}, "es", "ES")
-    assert v == "Mia" and "no Argentinian voice" in note
+    assert v == "Lupe" and "no Argentinian voice" in note                                                # the Latin American voices stand in, the lively one first (it was Mia)
     v, note = r({"gender": "male"}, "nl", "NL")
     assert v == "Laura" and note.startswith("no free male voice in Dutch")
     v, note = r({"accent": "Portugal"}, "pt", "PT")
@@ -198,11 +198,13 @@ def test_every_voice_has_a_measured_pace_and_the_fitted_voices_keep_their_fit():
         est = length.estimate_speech(voice_data.SAMPLE[v["language"]], v["language"], v["id"])
         if v["language"] in ("en", "es", "ko"):
             assert est == pytest.approx(v["sample_s"] * length.SAMPLE_CALIBRATION, rel=0.01), v["id"]     # the estimate reproduces the one sentence the voice was heard saying
-        else:   # a newer language: its default voice is fitted on a long passage and real beats (length.RATES); the others are that fit, as much faster or slower as they said the sentence
-            base = next(x for x in voice_data.VOICES if x["id"] == voices.default_voice(v["language"]))
-            assert base["id"] in length.RATES
+        else:   # a newer language: a fitted voice of it and of the voice's own family stands for it (Léa for the steady French voices), as much faster or slower as they said the sentence
+            base = length._base_voice(v)
+            assert base["id"] in length.RATES and voices.default_voice(v["language"]) in length.RATES
+            assert (base["id"] in voices.STEADY) == (v["id"] in voices.STEADY) or not any(x["id"] in length.RATES and (x["id"] in voices.STEADY) == (v["id"] in voices.STEADY)
+                                                                                         for x in voice_data.VOICES if x["language"] == v["language"])
             assert est == pytest.approx(length.estimate_speech(voice_data.SAMPLE[v["language"]], v["language"], base["id"]) * v["sample_s"] / base["sample_s"], rel=0.01), v["id"]
-    assert length.rate_for("fr") == length.rate_for("fr", "Lea") and length.rate_for("xx") == length.LANG_RATES["en"]
+    assert length.rate_for("fr") == length.rate_for("fr", "Ambre") and length.rate_for("xx") == length.LANG_RATES["en"]
     assert length.estimate_speech("Bonjour à tous.", "fr", "Florian") < length.estimate_speech("Bonjour à tous.", "fr", "Lea")   # Florian speaks faster than Léa
     # sentences are cut at capitals of every Latin alphabet (a Polish sentence opening with Ś or Ł is a sentence)
     assert length.sentences("To jest pierwsze zdanie tekstu. Śnieg pada od rana w górach. Łódź płynie powoli po rzece.") == [

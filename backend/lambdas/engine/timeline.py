@@ -57,6 +57,24 @@ def stretch_to(durs: List[float], silent: List[bool], min_seconds: float, max_ho
     return out
 
 
+def shortest(plan: Dict[str, Any], speech: Sequence[float], fit_seconds: float) -> tuple:
+    """(the length of the video with the silences around every spoken beat at their floors, the length the fit works towards). `speech`: the measured speech
+    of each beat in seconds (a pause beat: how long it is held). The same arithmetic as `build_timeline`: the intro, the outro and the closing card count.
+    A video whose first number is past the window above the second cannot be saved by shorter silences (length.overrun): sentences must come out."""
+    intro = max(0.0, min(6.0, float(plan.get("intro_s") or 0.0)))
+    outro = max(END_HOLD, min(8.0, float(plan.get("outro_s") or END_HOLD)))
+    beats = plan.get("beats") or []
+    total = 0.0
+    for i, beat in enumerate(beats):
+        sp = float(speech[i])
+        total += max(MIN_SCENE, sp) if beat.get("silent") else max(MIN_SCENE, length_mod.LEAD_FLOOR + sp + length_mod.TAIL_FLOOR)
+    if beats and not beats[0].get("silent"):
+        total += intro
+    wm0 = watermark_spec.parse(plan.get("watermark"), strict=False)
+    card = watermark_spec.END_CARD_S if wm0 and wm0.get("mode") == "videomk" and wm0.get("end_card") else 0.0
+    return total + outro, (max(1.0, float(fit_seconds) - card) if fit_seconds else 0.0)
+
+
 def build_timeline(
     plan: Dict[str, Any],
     beat_info: Sequence[Dict[str, Any]],

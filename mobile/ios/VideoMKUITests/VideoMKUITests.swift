@@ -669,7 +669,7 @@ final class VideoMKUITests: XCTestCase {
         let field = openCreate(app)
         field.tap()
         field.typeText("A visual tour of the landmarks of Rome")
-        XCTAssertTrue(element(app, "costLine").waitForExistence(timeout: 5), "the Create screen shows what is left after the video")
+        XCTAssertTrue((app.buttons["sendButton"].value as? String ?? "").contains("credits"), "the Create button says what the video costs, in words")
         shot(app, "5-create-filled")
         app.buttons["moreOptions"].tap()
         XCTAssertTrue(element(app, "subtitlesToggle").waitForExistence(timeout: 5), "More options opens in place")

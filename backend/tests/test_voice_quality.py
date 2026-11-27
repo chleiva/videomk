@@ -90,7 +90,7 @@ def test_the_plan_records_the_full_band_rate():
 
 def test_no_default_voice_is_a_steady_one_where_its_accent_has_a_lively_one():
     """Polly's generative voices are two families (voices.STEADY): the steady 18 read like the neural engine. Italian and Latin American Spanish have lively
-    voices, so their defaults are lively; Spain has none, so Lucia stays until another provider or voice exists."""
+    voices, so their defaults are lively; Spain has none, so it keeps a Castilian voice (Sergio, who moves a little more than Lucia: tests/test_polly_lively.py)."""
     ids = {v["id"] for v in voice_data.VOICES}
     assert voices.STEADY <= ids and len(voices.STEADY) == 18
     assert voices.STEADY == set(voice_data.PARTIAL_REGIONS["eu-west-2"])        # the same split Polly makes by region: a new voice there is a lively one
@@ -98,6 +98,6 @@ def test_no_default_voice_is_a_steady_one_where_its_accent_has_a_lively_one():
     for region in ("MX", "AR", "CO", "CL", "PE", "US"):
         assert voices.default_voice("es", region) == "Lupe"
     assert voices.default_voice("de") == "Vicki" and "Vicki" not in voices.STEADY and voices.default_voice("en") not in voices.STEADY
-    assert voices.default_voice("es", "ES") == "Lucia" and {v["id"] for v in voice_data.VOICES if v["locale"] == "es-ES"} <= voices.STEADY   # nothing better in Polly
+    assert voices.default_voice("es", "ES") == "Sergio" and {v["id"] for v in voice_data.VOICES if v["locale"] == "es-ES"} <= voices.STEADY   # nothing better in Polly
     assert voices.resolve({"accent": "mexicana"}, "es", "ES")[0] in ("Mia", "Andres")            # a Mexican accent asked by name is still Mexican
     assert length.rate_for("it", "Beatrice") == length.RATES["Beatrice"] and length.rate_for("it", "Bianca") == length.RATES["Bianca"]

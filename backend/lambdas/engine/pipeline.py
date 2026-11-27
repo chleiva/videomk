@@ -9,7 +9,7 @@ from PIL import Image
 
 from . import media
 from . import music as music_mod
-from .audio import MIX_SR, SFX_KINDS, SR, build_narration, build_sfx_track, write_wav
+from .audio import MIX_SR, SFX_KINDS, SR, build_narration, build_sfx_track, level_speech, write_wav
 from .renderer import Renderer
 from .timeline import GOP_SECONDS
 
@@ -73,7 +73,7 @@ def make_audio(
     duration = float(timeline["duration"])
     with tempfile.TemporaryDirectory() as tmp:
         beats = [
-            {"offset": float(sc["start"]) + float(sc.get("narration_offset", 0.0)), "samples": s}
+            {"offset": float(sc["start"]) + float(sc.get("narration_offset", 0.0)), "samples": level_speech(s, SR)}   # every voice and every take at one speech level: the music is ducked by it
             for sc, s in zip(timeline["scenes"], beat_samples)
             if s is not None   # a silent beat has no narration
         ]

@@ -140,6 +140,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                                                       allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
+    if region:   # before the cast is given its voices: the characters of a video speak with the viewer's accent (presenter_policy.voice_for)
+        plan["region"] = region
     warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]
     warnings += whiteboard_policy.enforce(plan, wpolicy)   # look on: text beats the director left become boards; records plan["whiteboard"]
     if ppolicy.flag:   # records plan["presenter"] (nothing at all where the flag is off)
@@ -194,7 +196,8 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
     if fit_to_target() and not photos:   # a script too short for scenes held a moment longer to reach the length is lengthened once by its writer, existing sentences kept (length.extend_script); what comes back too long is cut just below
-        ext = length_mod.extend_script(plan, minutes * 60.0 - (2.4 if (options or {}).get("end_card") else 0.0), ask_big, max_beat_words=plan_mod.MAX_BEAT_WORDS)
+        ext = length_mod.extend_script(plan, minutes * 60.0 - (2.4 if (options or {}).get("end_card") else 0.0), ask_big, max_beat_words=plan_mod.MAX_BEAT_WORDS,
+                                       notes="\n\n".join(str(n) for n in written_from if n))   # what it adds is new content from the grounding, never a sentence said again
         if ext["asked"]:
             info["length_extended"] = ext
             warnings.append(f"length: estimated {ext['before']:.0f} s for {ext['target']:.0f} s asked, {ext['extended']} of {ext['asked']} beats lengthened by {ext['added_words']} words to {ext['after']:.0f} s")
