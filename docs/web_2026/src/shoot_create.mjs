@@ -82,7 +82,7 @@ const face = (...ids) => ids.flatMap((id) => [{ click: `[data-face=${id}]` }, { 
 const cartoon = [...fill, ...open, ...pick("cartoon"), ...face("fox", "bear"), { key: "Escape" }, { wait: 250 }];
 const LEN = "button[aria-label='Length'], button[aria-label='Duración']";
 const OPT = "button[aria-label='Options'], button[aria-label='Opciones']";
-const FOR = "button[aria-label='Made for'], button[aria-label='Hecho para']";
+const FOR = "button[aria-label='Made for'], button[aria-label='Hecho para'], button[aria-label='Para qué es']";
 const MAIN = ["p390", "t768", "d1440"];
 const STANDARD = [["light", "en"], ["dark", "en"], ["light", "es"]];
 const ST = [
