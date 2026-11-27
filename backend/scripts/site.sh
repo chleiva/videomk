@@ -41,7 +41,7 @@ PY
 # (client id, hosts); no secret is involved. APP_OUT / APP_ASTRO_OUT let a test build into scratch folders.
 APP_OUT="${APP_OUT:-build/app}"; APP_ASTRO_OUT="${APP_ASTRO_OUT:-$PWD/../frontend/dist-app}"
 app_build() {
-  (cd ../frontend && PUBLIC_API_BASE="${PUBLIC_API_BASE:-https://api.videomk.com}" PUBLIC_AUTH_DOMAIN="${PUBLIC_AUTH_DOMAIN:-https://login.videomk.com}" \
+  (cd ../frontend && PUBLIC_API_BASE="${PUBLIC_API_BASE:-https://backend.videomk.com}" PUBLIC_AUTH_DOMAIN="${PUBLIC_AUTH_DOMAIN:-https://login.videomk.com}" \
      PUBLIC_COGNITO_CLIENT_ID="${PUBLIC_COGNITO_CLIENT_ID:-55borf73gh37uka0t3vj965dkc}" PUBLIC_AUTH_GOOGLE="${PUBLIC_AUTH_GOOGLE:-1}" \
      npx --yes astro build --outDir "$APP_ASTRO_OUT" >/dev/null)
   rm -rf "$APP_OUT" && mkdir -p "$APP_OUT/auth"

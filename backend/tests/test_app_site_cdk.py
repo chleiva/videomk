@@ -65,7 +65,7 @@ def test_security_headers_csp_and_noindex(t):
     sec = cfg["SecurityHeadersConfig"]
     assert sec["StrictTransportSecurity"]["AccessControlMaxAgeSec"] == 365 * 86400 and sec["FrameOptions"]["FrameOption"] == "DENY"
     csp = sec["ContentSecurityPolicy"]["ContentSecurityPolicy"]
-    for part in ("frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'", "connect-src 'self' https://api.videomk.com https://login.videomk.com", "form-action 'self' https://login.videomk.com"):
+    for part in ("frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'", "connect-src 'self' https://backend.videomk.com https://login.videomk.com", "form-action 'self' https://login.videomk.com"):
         assert part in csp
     assert "*" not in csp.replace("https://*.s3", "")   # no wildcard hosts except the S3 upload hosts
     custom = {x["Header"]: x["Value"] for x in cfg["CustomHeadersConfig"]["Items"]}
@@ -126,5 +126,5 @@ def test_prod_signin_urls_and_upload_origins():
     prod, qa = st["prod"], st["qa"]
     assert prod["callbackUrls"][0] == "https://app.videomk.com/auth/callback" and prod["logoutUrls"][0] == "https://app.videomk.com/"
     assert all(u.startswith("https://") for u in prod["callbackUrls"] + prod["logoutUrls"])   # no localhost in prod
-    assert prod["domain"] == "videomk.com"   # api.videomk.com for the web build and the apps
+    assert prod["domain"] == "videomk.com" and prod["apiHost"] == "backend.videomk.com"   # api.videomk.com is held by another AWS account
     assert "https://app.videomk.com" in _web_origins(prod) and "https://app.videomk.com" in _web_origins(qa)

@@ -135,7 +135,7 @@ class AccountDeletion(Construct):
         if apple:
             if apple_layer is None:
                 raise ValueError("appleRevoke needs the apple_deps layer")
-            return_url = f"https://api.{domain}/account/apple-callback" if domain else f"https://{api.rest_api_id}.execute-api.{region}.amazonaws.com/prod/account/apple-callback"   # not api.url_for_path: that would make the function depend on the deployment that contains it
+            return_url = f"https://{domain}/account/apple-callback" if domain else f"https://{api.rest_api_id}.execute-api.{region}.amazonaws.com/prod/account/apple-callback"   # not api.url_for_path: that would make the function depend on the deployment that contains it
             api_fn.add_environment("APPLE_RETURN_URL", return_url)
             api_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{region}:{account}:parameter/videomk/apple_services_id"]))
             rev = acct_res.add_resource("apple-revoke")

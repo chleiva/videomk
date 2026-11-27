@@ -17,6 +17,7 @@
     "logoutUrls": [
       "https://app.videomk.com/",
       "https://videomk.com/"
-    ]
+    ],
+    "apiHost": "backend.videomk.com"
   }
 }

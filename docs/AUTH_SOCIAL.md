@@ -28,8 +28,8 @@ scripts/deploy.sh qa -c socialGoogle=1 -c socialApple=1      # either flag alone
 - `app.py` checks, before synthesis, that every value needed by an enabled flag exists in the target account (using the stage's profile) and stops with the list of
   missing names. `-c socialSkipCheck=1` skips the check (synth only). CloudFormation would also fail at deploy with its own "can't find the specified secret/parameter" message.
 - Stack outputs: `SocialProviders` (`none`, `Google`, `SignInWithApple` or both, comma separated), `SocialRedirectUri` (the exact URL to register,
-  `https://<cognito domain>/oauth2/idpresponse`), `SocialAppleDomain` (the same host without the scheme, for Apple's Domains field). Cognito domain today:
-  `videomk-<stage>-<last 6 digits of the account>.auth.<region>.amazoncognito.com` (`AuthDomain` output).
+  `https://<cognito domain>/oauth2/idpresponse`), `SocialAppleDomain` (the same host without the scheme, for Apple's Domains field). Cognito domain: QA uses
+  `videomk-qa-<last 6 digits of the account>.auth.<region>.amazoncognito.com`; **prod uses our own host `login.videomk.com`** (`-c authDomain=login.videomk.com -c authCertArn=<ACM, us-east-1> -c authZoneId=<zone>`; `auth.videomk.com` is blocked by an external CloudFront alias conflict). The web app lives at **app.videomk.com**; Google's redirect URI stays `https://login.videomk.com/oauth2/idpresponse`, so the app host does not change the Google client. `AuthDomain` output.
 
 ## 2. Client contract (web and native)
 
@@ -41,7 +41,7 @@ Clients only change the authorize request; everything after it (callback, token 
 |---|---|
 | `response_type` | `code` |
 | `client_id` | web: `UserPoolClientId` output; native: `MobileClientId` output |
-| `redirect_uri` | must exactly match a registered one. Web: `https://<site origin>/auth/callback/index.html` (dev `http://localhost:4321/auth/callback`). Native (both iOS and Android): `com.videomk.app://auth/callback` |
+| `redirect_uri` | must exactly match a registered one. Web: `https://app.videomk.com/auth/callback` (dev `http://localhost:4321/auth/callback`; the CloudFront rewrite serves the folder page, so the registered string has no `index.html`). Native (both iOS and Android): `com.videomk.app://auth/callback` |
 | `scope` | `openid email profile` |
 | `state` | random per attempt, verified on return |
 | `code_challenge_method` / `code_challenge` | `S256` / base64url(SHA-256(verifier)); PKCE on web too |

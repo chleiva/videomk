@@ -21,7 +21,7 @@ from constructs import Construct
 APP_HOST = "app.videomk.com"
 MARKETING_HOST = "videomk.com"
 ZONE_ID = "Z07620702J1XHOWB4O7NZ"   # videomk.com in the prod account (the marketing stack owns it)
-API_HOST = "api.videomk.com"
+API_HOST = "backend.videomk.com"
 AUTH_HOST = "login.videomk.com"
 
 # ES5.1 (CloudFront Functions): the public pages go back to videomk.com, folders get their index.html, everything else is served as is.

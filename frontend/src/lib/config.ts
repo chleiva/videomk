@@ -3,7 +3,7 @@
 // originals if they differ, and diff before merging.
 const env = (import.meta as any).env ?? {};
 
-export const API_BASE: string = (env.PUBLIC_API_BASE as string) || "https://api.videomk.com";
+export const API_BASE: string = (env.PUBLIC_API_BASE as string) || "https://backend.videomk.com";
 export const AUTH_DOMAIN: string = (env.PUBLIC_AUTH_DOMAIN as string) || "https://login.videomk.com";
 export const COGNITO_CLIENT_ID: string = (env.PUBLIC_COGNITO_CLIENT_ID as string) || "";
 

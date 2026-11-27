@@ -59,7 +59,9 @@ class BackendStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
         is_prod = stage == "prod"
         keep = RemovalPolicy.RETAIN if is_prod else RemovalPolicy.DESTROY
-        domain = stage_cfg.get("domain")  # e.g. "videomk.com": enables api.<domain>; None => default execute-api URL
+        domain = stage_cfg.get("domain")  # e.g. "videomk.com": enables the API custom domain; None => default execute-api URL
+        # `apiHost` names it (default api.<domain>). Prod uses backend.videomk.com: API Gateway refuses api.videomk.com ("domain name already exists"; another AWS account of the owner still holds it).
+        api_host = stage_cfg.get("apiHost") or (f"api.{domain}" if domain else None)
         ASSETS_BUCKET = f"videomk-{stage}-{self.account}"
 
         # ============================
@@ -437,15 +439,15 @@ class BackendStack(Stack):
         if domain:
             hosted_zone = route53.HostedZone.from_lookup(self, "HostedZone", domain_name=domain)
             certificate = acm.Certificate(
-                self, "ApiCertificate", domain_name=f"api.{domain}", validation=acm.CertificateValidation.from_dns(hosted_zone)
+                self, "ApiCertificate", domain_name=api_host, validation=acm.CertificateValidation.from_dns(hosted_zone)
             )
             api_domain = apigw.DomainName(
-                self, "ApiDomain", domain_name=f"api.{domain}", certificate=certificate,
+                self, "ApiDomain", domain_name=api_host, certificate=certificate,
                 endpoint_type=apigw.EndpointType.REGIONAL, security_policy=apigw.SecurityPolicy.TLS_1_2,
             )
             apigw.BasePathMapping(self, "ApiBasePathMapping", domain_name=api_domain, rest_api=api, stage=api.deployment_stage)
             route53.ARecord(
-                self, "ApiAliasRecord", zone=hosted_zone, record_name="api",
+                self, "ApiAliasRecord", zone=hosted_zone, record_name=api_host,
                 target=route53.RecordTarget.from_alias(targets.ApiGatewayDomain(api_domain)),
             )
 
@@ -585,7 +587,7 @@ class BackendStack(Stack):
             self, "AccountDeletion", stage=stage, is_prod=is_prod, make_fn=make_fn, user_pool=user_pool, api=api, user_id_resource=user_id, cognito_auth=cognito_auth,
             cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"], common_env=common_env, videos_table=videos_table, usage_table=usage_table, wallet_table=wallet_table,
             flags_table=flags_table, safety_table=intake.table, feedback_table=feedback_loop.table if feedback_loop else None, assets_bucket_name=ASSETS_BUCKET, generate_machines=[active_machine], edit_machine=v2.edit_state_machine if v2 is not None else None,
-            media=media, tombstone=tombstone, tombstone_days=int(self.node.try_get_context("tombstoneDays") or 90), domain=domain,
+            media=media, tombstone=tombstone, tombstone_days=int(self.node.try_get_context("tombstoneDays") or 90), domain=api_host,
             web_return_url=callback_urls[0].rsplit("/auth/callback", 1)[0].rstrip("/") + "/delete-account", apple=apple_revoke, apple_layer=apple_layer,
         )
         for fn in (wallet_fn, launcher_fn):   # the wallet refuses a welcome credit to an account that is being deleted (and, with the tombstone on, to a returning one)
