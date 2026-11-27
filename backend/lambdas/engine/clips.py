@@ -295,7 +295,7 @@ def nasa_usable() -> bool:
     return os.environ.get("CLIPS_NASA", "1") != "0"
 
 
-# ----------------------------------------------------------------------------- videomk's own clip library (docs/VIDEO_CATALOG.md section 8, first small step)
+# ----------------------------------------------------------------------------- VideoMK's own clip library (docs/VIDEO_CATALOG.md section 8, first small step)
 OWN_PROVIDER = "own"
 _OWN_STOP = set("a an the and or of in on at to for with by from as is are it its this that over under into through slowly slow camera gently soft light".split())
 
@@ -340,7 +340,7 @@ def own_search(query: str, orientation: str = "landscape", limit: int = 4) -> Li
             scored.append((hit / len(q), {
                 "provider": OWN_PROVIDER, "id": str(e["id"]), "thumb_url": ("file://" + poster) if os.path.isfile(poster) and poster.startswith(root + os.sep) else "",
                 "video_url": "file://" + video, "width": int(e.get("width") or 1280), "height": int(e.get("height") or 720), "duration": float(e.get("duration") or 0),
-                "creator": "videomk", "creator_url": "", "landing_url": "", "license": "videomk AI-generated", "alt": str(e.get("prompt", ""))[:200], "attribution": "AI-generated video by videomk"}))
+                "creator": "VideoMK", "creator_url": "", "landing_url": "", "license": "VideoMK AI-generated", "alt": str(e.get("prompt", ""))[:200], "attribution": "AI-generated video by VideoMK"}))
         except (KeyError, TypeError, ValueError):
             continue
     scored.sort(key=lambda t: -t[0])
@@ -428,7 +428,7 @@ def credit_line(c: Candidate) -> str:
     if c.get("provider") == "nasa":
         return "Video: NASA"
     if c.get("provider") == OWN_PROVIDER:
-        return "Video: AI-generated (videomk)"
+        return "Video: AI-generated (VideoMK)"
     return f"Video: {c.get('creator', 'Unknown')} ({c.get('license', '')})"
 
 

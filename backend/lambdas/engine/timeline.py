@@ -77,7 +77,7 @@ def build_timeline(
 
     wm0 = watermark_spec.parse(plan.get("watermark"), strict=False)
     card = watermark_spec.END_CARD_S if wm0 and wm0.get("mode") == "videomk" and wm0.get("end_card") else 0.0
-    if card:   # the closing "Made with videomk" card is part of the video's length: the scenes aim that much shorter, so the whole video still lands on the length asked (seen on QA: 32.8 s for 30)
+    if card:   # the closing "Made with VideoMK" card is part of the video's length: the scenes aim that much shorter, so the whole video still lands on the length asked (seen on QA: 32.8 s for 30)
         min_seconds = max(0.0, min_seconds - card) if min_seconds else min_seconds
         fit_seconds = max(1.0, fit_seconds - card) if fit_seconds else fit_seconds
     if fit_seconds:   # a first render: the pace is worked out from the measured audio
@@ -165,9 +165,9 @@ def build_timeline(
     wm = watermark_spec.parse(plan.get("watermark"), strict=False)   # the plan's watermark option (docs/WATERMARK.md): none/absent = nothing added anywhere
     if wm and wm["mode"] == "none":
         wm = None
-    if wm and wm.get("end_card") and scenes:   # optional closing card (videomk mark only): a silent 'Made with videomk' scene after the last one
+    if wm and wm.get("end_card") and scenes:   # optional closing card (VideoMK mark only): a silent 'Made with VideoMK' scene after the last one
         es = str(plan.get("language") or "en").lower().startswith("es")
-        props = {"title": "Hecho con videomk" if es else "Made with videomk", "subtitle": "videomk.com"}
+        props = {"title": "Hecho con VideoMK" if es else "Made with VideoMK", "subtitle": "videomk.com"}
         scenes.append({"id": "endcard", "type": "title", "start": round(t, 4), "duration": watermark_spec.END_CARD_S, "props": props, "words": [], "audio_key": None, "silent": True,
                        "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, watermark_spec.END_CARD_S)[:8]], "transition": "fade"})
         t += watermark_spec.END_CARD_S

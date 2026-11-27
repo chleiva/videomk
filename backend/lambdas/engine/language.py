@@ -51,4 +51,4 @@ def detect(text: str, ask: Optional[Detector] = None) -> str:
 
 
 def unsupported_message() -> str:
-    return "videomk can make videos in English and Spanish for now. Try describing your video in one of those."
+    return "VideoMK can make videos in English and Spanish for now. Try describing your video in one of those."

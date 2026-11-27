@@ -6,7 +6,7 @@ Options (one dict, the same in the request, the profile, the plan and the timeli
   opacity   0.2 .. 1.0 (default 0.65)
   size      'small' (mark height 5 % of the short side) | 'medium' (7 %)
   style     'mark' (default) | 'lockup' (mark plus the word 'videomk')       only for mode 'videomk'
-  end_card  true | false (default false)                                      only for mode 'videomk': 2.4 s 'Made with videomk' card after the last scene
+  end_card  true | false (default false)                                      only for mode 'videomk': 2.4 s 'Made with VideoMK' card after the last scene
   presence  'always' (there for the whole video) | 'moments' (fades in for about 4 s near the start and about every 30 s, see `moments`)   only for mode 'videomk'
 
 Placement is worked out in DESIGN units (the frame's 1080-short-side canvas) and never covers the captions, the clip credit line or (auto, 9:16) the platform UI zones:
@@ -129,7 +129,7 @@ def parse(raw: Any, *, strict: bool = True) -> Optional[Dict[str, Any]]:
         if not strict and pres == "moments" and isinstance(raw.get("windows"), list):   # server-written by the timeline: when the mark is on screen
             out["windows"] = clean_windows(raw["windows"])
     elif strict and raw.get("presence") is not None:
-        raise WatermarkError("'presence' is only for the videomk watermark")
+        raise WatermarkError("'presence' is only for the VideoMK watermark")
     if not strict:   # server-written fields of a stored spec (the custom logo's file in the video's own folder, its content hash)
         if mode == "custom" and isinstance(raw.get("asset"), str):
             out["asset"] = raw["asset"]
