@@ -28,6 +28,9 @@ LEDGER = os.path.join(HERE, "..", "..", "docs", "vector_character_spend.jsonl")
 RUN = "vector-character-hands"
 ASSETS = os.path.join(HERE, "..", "lambdas", "engine", "assets", "vector_characters")
 NAMES = ["open", "one", "two", "three", "thumb"]
+# Where the thumb is on each character's ORIGINAL forearm+hand drawing (lower_arm.svg, hanging down): +1 on the right of the drawing, -1 on the left. Read by eye from the
+# pieces (the relaxed hands are too small and too symmetric to measure reliably); the rig mirrors the drawing so that the thumb ends up on the body side of each arm.
+RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1}
 SHRINK = 0.42
 
 WHO = {
@@ -154,6 +157,20 @@ def cut_cuff(im: Image.Image, skin) -> Image.Image:
     return im
 
 
+def thumb_side(svg: str, meta) -> str:
+    """Side of the open hand (upright, as on the sheet) where the thumb sticks out: the palm rows reach further from the wrist line on that side."""
+    import io
+
+    import resvg_py
+
+    im = Image.open(io.BytesIO(bytes(resvg_py.svg_to_bytes(svg_path=svg, width=meta["w"], height=meta["h"])))).convert("RGBA")
+    al = np.array(im)[..., 3] > 96
+    cx = meta["pivot"][0]
+    rows = [np.nonzero(al[y])[0] for y in range(int(im.height * 0.45), int(im.height * 0.85))]
+    rows = [r for r in rows if r.size]
+    return "left" if max(cx - r.min() for r in rows) >= max(r.max() - cx for r in rows) else "right"
+
+
 def build(a) -> int:
     import vector_character_build as vb
     from engine import vector_presenter as vp
@@ -185,6 +202,8 @@ def build(a) -> int:
             hands[name] = {"file": f"hand_{name}.svg", "w": im.width, "h": im.height, "svg_bytes": size, "pivot": [float((xs.min() + xs.max()) / 2), float(im.height - im.height * 0.06)],
                            "wrist_w": float(xs.max() - xs.min() + 1), "scale": (cfg.get("hands", {}).get(name, {}) or {}).get("scale", 1.0)}
         cfg["hands"] = hands
+        cfg["relaxed_thumb"] = RELAXED_THUMB[cid]
+        cfg["sheet_thumb"] = thumb_side(os.path.join(folder, "hand_open.svg"), hands["open"])      # "left" for a right hand seen from the palm, upright
         if cid == "fox":
             im = ps[-1]
             im = im.resize((round(im.width * SHRINK), round(im.height * SHRINK)), Image.LANCZOS)

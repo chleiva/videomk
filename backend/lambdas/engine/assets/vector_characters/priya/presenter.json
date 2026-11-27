@@ -60,5 +60,7 @@
    "wrist_w": 71.0,
    "scale": 1.0
   }
- }
+ },
+ "relaxed_thumb": 1,
+ "sheet_thumb": "left"
 }

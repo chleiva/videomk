@@ -24,6 +24,8 @@ Rating as speakers (SHIP = fine in a customer video; all five use the same rig, 
 | Enter by slide, side step | SHIP | SHIP | SHIP | SHIP | SHIP |
 | Raised arm up close | NEEDS WORK (thick cardigan sleeve) | SHIP | NEEDS WORK (white on white) | NEEDS WORK | SHIP |
 
+For every new character, look at the original forearm drawing and set where its thumb is in `RELAXED_THUMB` in `vector_character_hands.py` (it goes into `presenter.json` as `relaxed_thumb`): the rig mirrors the drawing so that the thumb is on the body side at rest. The first cut missed this and, with a wrong elbow bend at rest, made the arms look swapped (fixed, see the proof note).
+
 Quality bar for a new character on this rig, in addition to the list below: `pytest backend/tests/test_vector_presenter.py` with the id added to `CAST` (all six hand shapes present, wrist found, fused leg, joints covered by paint in the extreme poses, folder under 1 MB), then `vector_character_presenter_demo.py --talk --peaks --only <id>` and a look at the peak sheet: straight legs, sleeve on the shoulder, each hand readable.
 Spend of this pass: USD 0.1774 for five hand sheets, about USD 0.06 of Polly. Walking is no longer offered for these characters.
 
