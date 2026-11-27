@@ -29,7 +29,8 @@ from ..base import SceneCtx
 from ..registry import Element, PrepareCtx
 
 # id -> how tall the character is drawn against the others (the same numbers the review clips used) and whether it has a tail
-CAST: Dict[str, Dict[str, Any]] = {"ines": {"size": 1.0}, "david": {"size": 1.02}, "priya": {"size": 0.99}, "mateo": {"size": 1.03}, "fox": {"size": 0.95, "tail": True}}
+CAST: Dict[str, Dict[str, Any]] = {"ines": {"size": 1.0}, "david": {"size": 1.02}, "priya": {"size": 0.99}, "mateo": {"size": 1.03}, "fox": {"size": 0.95, "tail": True},
+                                   "owl": {"size": 0.95, "tail": True}, "bear": {"size": 1.04}}
 DEFAULT_CHARACTER = "ines"
 SIDES = ("left", "right")
 FRAMINGS = ("auto",) + vp.FRAMINGS

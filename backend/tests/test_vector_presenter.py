@@ -13,7 +13,8 @@ from PIL import Image  # noqa: E402
 from engine import character_gestures as cg  # noqa: E402
 from engine import vector_presenter as vp  # noqa: E402
 
-CAST = ["ines", "david", "priya", "mateo", "fox"]
+CAST = ["ines", "david", "priya", "mateo", "fox", "owl", "bear"]
+TAILS = {"fox", "owl"}                      # the animals whose sheet has a tail piece
 
 
 def dist(a, b):
@@ -100,7 +101,7 @@ def test_cast_has_the_presenter_pieces(cid):
     assert set(cfg["hands"]) == {"open", "one", "two", "three", "thumb"}
     for h in cfg["hands"].values():
         assert os.path.getsize(os.path.join(folder, h["file"])) > 500 and h["wrist_w"] > 10
-    assert ("tail" in cfg) == (cid == "fox")
+    assert ("tail" in cfg) == (cid in TAILS)
     assert sum(os.path.getsize(os.path.join(folder, f)) for f in os.listdir(folder)) < 1_000_000
     ch = vp.load(cid, 1.2)
     assert ch.shapes == list(vp.HAND_SHAPES)
@@ -198,7 +199,8 @@ def test_performance_poses_draw_on_the_real_rig():
 
 
 # ----------------------------------------------------------------------------- the home pose must not be mirrored (owner's review: "the arms look swapped")
-RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1}     # where the thumb is on each original forearm drawing, read by eye
+RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1, "owl": -1, "bear": -1}     # where the thumb is on each original forearm drawing, read by eye
+SHEET_THUMB_RIGHT = {"fox"}                 # hand sheets drawn the other way round (thumb of the upright open hand on the right)
 
 
 def _rest_checks(g):
@@ -224,7 +226,7 @@ def test_rest_pose_and_hand_sides_per_character(cid):
     ch = vp.load(cid, 2.0)
     _rest_checks(ch.g)
     cfg = json.load(open(os.path.join(vp.DIR, cid, "presenter.json")))
-    assert cfg["relaxed_thumb"] == RELAXED_THUMB[cid] and cfg["sheet_thumb"] == ("right" if cid == "fox" else "left")
+    assert cfg["relaxed_thumb"] == RELAXED_THUMB[cid] and cfg["sheet_thumb"] == ("right" if cid in SHEET_THUMB_RIGHT else "left")
     for s, side in (("l", -1), ("r", 1)):
         assert ch.thumb_x[("relaxed", s)] * side == -1          # at home the thumb is on the BODY side of the hand
         for shape in ("open", "one", "two", "three", "thumb"):

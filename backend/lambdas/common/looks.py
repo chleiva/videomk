@@ -41,7 +41,7 @@ def prompt_block(f: Optional[Dict[str, bool]] = None) -> str:
     if f.get("bg_animated") or f.get("bg_loops"):
         have.append("ANIMATED" + (" and 3D" if f.get("bg_loops") else "") + " moving backgrounds behind text scenes")
     if f.get("presenters"):
-        have.append("animated PRESENTER CHARACTERS (a cartoon teacher, engineer, doctor, chef or a fox mascot who stands beside the content and speaks the narration with gestures; "
+        have.append("animated PRESENTER CHARACTERS (a cartoon teacher, engineer, doctor or chef, or an animal: a fox, an owl professor or a bear, who stands beside the content and speaks the narration with gestures; "
                     "for children's, fun and tutorial videos, not for serious news or the person's own photos)")
     soon = [name for key, name in (("presenters", "talking animated characters"), ("cartoon", "cartoon scenes"), ("whiteboard", "the whiteboard look")) if not f.get(key)]
     return ("LOOKS AND STYLES. The app can make: " + "; ".join(have) + "."
@@ -91,17 +91,30 @@ def wishes(prompt: Any) -> List[str]:
         out.append("whiteboard")
     if _CARTOON_RE.search(text) and "real" not in out:
         out.append("cartoon")
-    if _CHARACTERS_RE.search(text) and not _NO_CHARACTERS_RE.search(text):
+    if (_CHARACTERS_RE.search(text) or _animal_at_the_end(text)) and not _NO_CHARACTERS_RE.search(text):
         out.append("characters")
     return out
 
 
 # Which presenter the words name ("explained by a fox", "con una doctora"): character id -> the words for it. Read only where the request asks for someone on screen.
-PRESENTER_WORDS = {"fox": r"fox|zorr[oa]", "ines": r"teacher|professor|profesor(?:a)?|maestr[oa]", "david": r"engineer|programmer|developer|ingenier[oa]|programador(?:a)?",
+PRESENTER_WORDS = {"fox": r"fox|zorr[oa]", "owl": r"owl|b[uú]ho|lechuza", "bear": r"bear|os[oa]|osit[oa]", "ines": r"teacher|professor|profesor(?:a)?|maestr[oa]", "david": r"engineer|programmer|developer|ingenier[oa]|programador(?:a)?",
                    "priya": r"doctor(?:a)?|scientist|m[eé]dic[oa]|cient[ií]fic[oa]", "mateo": r"chef|cook|cociner[oa]"}
 _BY_RE = (r"(?:(?:explained|presented|narrated|hosted|told) by|(?:with|featuring) (?:an? |the )?(?:animated |cartoon |friendly |talking |funny |cute |wise |little )*(?=\w+ (?:as )?(?:the )?(?:presenter|host|character|mascot))"
           r"|(?:explicad[oa]s?|presentad[oa]s?|narrad[oa]s?|contad[oa]s?) por|con (?:una? |el |la )?(?=\w+ (?:como )?(?:presentador|presentadora|personaje|mascota|animad)))"
           r"\s*(?:an? |the |una? |el |la )?(?:(?:animated|cartoon|talking|friendly|funny|cute|wise|little) )*")
+
+
+# An animal of the cast named at the end of the request ("Why the sky is blue, with an owl", "Los planetas, con un búho"): the animal presents. In the middle of a
+# sentence ("a story with an owl who learns to fly") it is the subject of the video, not a wish.
+_ANIMAL_CAST = ("fox", "owl", "bear")
+_WITH_ANIMAL_RE = r"(?:with|by|con|por) (?:an? |the |una? |el |la )(?:(?:friendly|funny|cute|wise|little|talking|cartoon|animated) )*(?:{words})(?: (?:animad[oa]|simp[aá]tic[oa]|sabi[oa]))?\s*[.!]?\s*$"
+
+
+def _animal_at_the_end(text: str) -> Optional[str]:
+    for cid in _ANIMAL_CAST:
+        if re.search(_WITH_ANIMAL_RE.format(words=PRESENTER_WORDS[cid]), text, re.I):
+            return cid
+    return None
 
 
 def presenter_wish(prompt: Any) -> Optional[str]:
@@ -113,7 +126,7 @@ def presenter_wish(prompt: Any) -> Optional[str]:
     for cid, words in PRESENTER_WORDS.items():
         if re.search(_BY_RE + r"(?:" + words + r")\b", text, re.I):
             return cid
-    return "any" if _CHARACTERS_RE.search(text) else None
+    return _animal_at_the_end(text) or ("any" if _CHARACTERS_RE.search(text) else None)
 
 
 def about_news(prompt: Any) -> bool:

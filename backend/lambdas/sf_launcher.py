@@ -21,7 +21,7 @@ from common.identity import extract_cognito_sub
 import plan_gate
 import video_retry
 from common import deck_limits, i18n, intake, library, looks, safety, usage, wallet, watermark_store
-from engine import format_options, watermark_spec
+from engine import format_options, presenter_policy, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
 logger = logging.getLogger()
@@ -81,6 +81,7 @@ def request_region(event: Dict[str, Any]) -> Optional[str]:
 
 
 THEMES = ("midnight", "paper", "sunrise")
+PRESENTER_OPTIONS = presenter_policy.OPTIONS   # auto, none and the cast (docs/PRESENTERS.md)
 MIN_MINUTES, MAX_MINUTES = 0.25, 12.0   # 15 seconds to 12 minutes; credits are still the started minutes, minimum 1 (common/wallet.py)
 MAX_IMAGES_PER_MINUTE = 10.0   # the ceiling a request can ask for; the planner treats it as a maximum, never a target
 
@@ -151,8 +152,8 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
         out["theme"] = body["theme"]
     if "presenter" in body and body["presenter"] is not None:   # a presenter character (docs/PRESENTERS.md): 'auto' (only where it fits), 'none', or a character id from capabilities
-        if not isinstance(body["presenter"], str) or body["presenter"] not in ("auto", "none", "ines", "david", "priya", "mateo", "fox"):
-            raise BadRequest("'presenter' must be one of: auto, none, ines, david, priya, mateo, fox")
+        if not isinstance(body["presenter"], str) or body["presenter"] not in PRESENTER_OPTIONS:
+            raise BadRequest("'presenter' must be one of: " + ", ".join(PRESENTER_OPTIONS))
         if body["presenter"] != "auto":
             out["presenter"] = body["presenter"]
     if body.get("watermark") is not None:   # {mode, position, opacity, size, style, end_card}: docs/WATERMARK.md; who may use which mode is decided in the handler (it needs the account)

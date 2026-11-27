@@ -1,6 +1,6 @@
 """Does this video get a presenter, who is it, and how often is it on screen? (docs/PRESENTERS.md)
 
-A presenter is one of the five standing cartoon characters (engine/vector_presenter.py). In a video that has one, a few beats are `presenter` scenes
+A presenter is one of the standing cartoon characters (engine/vector_presenter.py): four people and the animal cast. In a video that has one, a few beats are `presenter` scenes
 (engine/scenes/elements/presenter.py): the character stands beside a card, a chart or a picture and says the narration. The other beats stay normal scenes.
 
   * the server setting PRESENTERS must be on (default OFF; QA on, production off);
@@ -10,9 +10,10 @@ A presenter is one of the five standing cartoon characters (engine/vector_presen
     history, recap), not even when asked: the request check's note says so (common/looks.py);
   * `presenter: "none"` or "no presenter" in the words: never.
 
-Casting (`cast`): the character the person named, else by topic: the doctor for health, the engineer for technology, the chef for food, the fox for children and
-fun, the teacher for everything else. The narrator's voice becomes the character's voice. A dialogue (two or three speaking characters) gets one presenter per
-speaker, up to two, each on their own side.
+Casting (`cast`): the character the person named. Else a children's or fun video gets an ANIMAL, by its topic (the owl for learning, science and history, the bear
+for health, feelings and bedtime), and the fox when no topic decides. Every other video gets a PERSON by topic, as before the animals: the doctor for health, the
+engineer for technology, the chef for food, the teacher for everything else. The narrator's voice becomes the character's voice. A dialogue (two or three
+speaking characters) gets one presenter per speaker, up to two, each on their own side: animals with animals, people with people.
 
 How often (`Policy.cap`): the opening, the closing and the key points between: about one beat in three, at least two, never two in a row.
 
@@ -45,8 +46,17 @@ CAST: Dict[str, Dict[str, Any]] = {
                        r"receta|cocina|cocinar|comida|hornear|pan\b|sopa|ingrediente|plato"},
     "fox": {"name": "Fox", "role": {"en": "Guide for children", "es": "Guía para niños"}, "voices": {"en": ["Joanna", "Salli"], "es": ["Lucia", "Mia"]},
             "skills": {"kids-family", "funny-light"}, "words": r"kids?\b|children|child\b|toddlers?|preschool|\d-year-olds?|ni[ñn]os|ni[ñn]as|infantil|peques"},
+    # The animal cast. They are cast by themselves only in children's and fun videos (the fox's kinds of video), by the topic `words`; anywhere when asked for by name.
+    "owl": {"name": "Hugo", "role": {"en": "Owl professor", "es": "Búho profesor"}, "voices": {"en": ["Brian", "Matthew"], "es": ["Sergio", "Pedro"]}, "skills": set(),
+            "words": r"learn\w*|school|homework|lessons?|science|scientists?|experiments?|history|ancient|maths?|numbers|planets?|space|stars?|dinosaurs?|"
+                     r"aprend\w*|escuela|colegio|deberes|lecci[oó]n|ciencias?|experimentos?|historia|antigu[oa]s?|matem[aá]ticas|n[uú]meros|planetas?|espacio|estrellas?|dinosaurios?"},
+    "bear": {"name": "Bruno", "role": {"en": "Caring bear", "es": "Oso cariñoso"}, "voices": {"en": ["Stephen", "Matthew"], "es": ["Andres", "Pedro"]}, "skills": set(),
+             "words": r"health|healthy|feelings?|emotions?|worr(?:y|ied|ies)|sad|angry|afraid|scared|calm|bedtime|sleep\w*|teeth|wash\w* (?:your |our )?hands|doctor|dentist|kindness|friendship|"
+                      r"salud|saludable|sentimientos?|emoci[oó]n(?:es)?|miedo|triste|enfad\w*|enoj\w*|calma|dormir|sue[ñn]o|dientes|lavarse|m[eé]dic[oa]|dentista|amistad"},
 }
-ORDER = ("ines", "david", "priya", "mateo", "fox")
+ORDER = ("ines", "david", "priya", "mateo", "fox", "owl", "bear")
+ANIMALS = ("fox", "owl", "bear")                 # the rest of ORDER are people
+KIDS_TOPICS = ("bear", "owl")                    # in a children's or fun video: the first animal whose topic words are in the request (else the fox)
 DEFAULT = "ines"
 OPTIONS = ("auto", "none") + ORDER
 
@@ -82,14 +92,17 @@ def wish(option: Any, prompt: str) -> str:
     return looks.presenter_wish(prompt) or "auto"
 
 
-def cast(prompt: str, skill_ids: Optional[List[str]] = None, asked: Optional[str] = None) -> str:
-    """Which character presents. Asked by name: that one. Else children's and fun videos get the fox; then the topic's words (doctor, engineer, chef); then the kind of
-    video; else the teacher."""
+def cast(prompt: str, skill_ids: Optional[List[str]] = None, asked: Optional[str] = None, language: str = "en") -> str:
+    """Which character presents. Asked by name: that one. Else children's and fun videos get an animal: the one whose topic it is (KIDS_TOPICS), else the fox. Every
+    other video gets a person: by the topic's words (doctor, engineer, chef), then by the kind of video, else the teacher."""
     if asked in CAST:
         return asked
     ids = set(skill_ids or [])
     text = str(prompt or "")
     if ids & CAST["fox"]["skills"] or re.search(CAST["fox"]["words"], text, re.I):
+        for cid in KIDS_TOPICS:
+            if re.search(r"\b(?:" + CAST[cid]["words"] + r")\b", text, re.I):
+                return cid
         return "fox"
     for cid in ("mateo", "priya", "david"):
         if re.search(r"\b(?:" + CAST[cid]["words"] + r")", text, re.I):
@@ -170,12 +183,12 @@ def decide(prompt: str, *, options: Optional[Dict[str, Any]] = None, skill_ids: 
     if ids & NEVER_SKILLS:
         return no("kind_of_video")
     if o.get("style") == "real":
-        return no("real_style") if not asked else Policy(True, "asked", character=cast(prompt, skill_ids, w), asked=True, language=language)
+        return no("real_style") if not asked else Policy(True, "asked", character=cast(prompt, skill_ids, w, language), asked=True, language=language)
     if asked:
-        return Policy(True, "asked", character=cast(prompt, skill_ids, w), asked=True, language=language)
+        return Policy(True, "asked", character=cast(prompt, skill_ids, w, language), asked=True, language=language)
     if not ids & AUTO_SKILLS:
         return no("kind_of_video")
-    return Policy(True, "auto", character=cast(prompt, skill_ids, None), language=language)
+    return Policy(True, "auto", character=cast(prompt, skill_ids, None, language), language=language)
 
 
 class scope:
@@ -268,7 +281,8 @@ def enforce(plan: Dict[str, Any], policy: Optional[Policy], sanitize: Optional[A
     # who presents: one character for the narrator; in a dialogue one per speaking character (two at most), each on their own side
     who: Dict[str, Dict[str, str]] = {}
     if speakers:
-        others = [c for c in ORDER if c != policy.character]
+        kind = [c for c in ORDER if (c in ANIMALS) == (policy.character in ANIMALS)]      # an animal talks with another animal, a person with a person
+        others = [c for c in kind if c != policy.character]
         for i, sp in enumerate(speakers[:2]):
             who[sp] = {"character": policy.character if i == 0 else others[zlib.crc32(sp.encode()) % len(others)], "side": "left" if i == 0 else "right"}
     else:
