@@ -90,5 +90,6 @@
  "hero.title_1": "Descríbelo.",
  "hero.title_2": "Recibe el video.",
  "landing.nav_signin": "Entrar",
- "hero.mic": "Dilo"
+ "hero.mic": "Dilo",
+ "gallery.sub_prompts": "Videos reales hechos con videomk. Cada uno empezó con la frase que tiene debajo."
 }

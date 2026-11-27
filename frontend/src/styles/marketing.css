@@ -144,6 +144,7 @@ html.marketing main { padding-top: 4.5rem; }
 .mk-ask-mic:hover { color: var(--text); background: var(--surface-2); }
 .mk-ask-mic.is-live { color: var(--danger); background: var(--danger-container); }
 .mk-ask-btn { min-height: 3.125rem; padding: 0 1.625rem; font-size: 1.0625rem; font-weight: 600; box-shadow: 0 8px 22px rgba(75, 60, 220, 0.32); }
+@media (max-width: 26rem) { .mk-ask { padding-left: 1.25rem; gap: var(--space-1); } .mk-ask-input { font-size: 1.0625rem; } .mk-ask-btn { padding: 0 1.25rem; } }   /* the whole placeholder fits beside the mic and Create on a 390 px phone */
 .mk-fine { margin-top: var(--space-4); color: var(--text-tertiary); }
 .mk-hero-stage { position: relative; max-width: 70rem; margin: var(--space-12) auto 0; padding-inline: var(--gutter); }
 .mk-sample-hero { max-width: none; }
@@ -176,7 +177,7 @@ html.marketing main { padding-top: 4.5rem; }
 .mk-asp { position: absolute; left: var(--space-3); top: var(--space-3); height: 1.5rem; padding: 0 var(--space-2); border-radius: var(--radius-field); background: var(--scrim); color: var(--on-scrim); font-size: var(--fs-caption); font-weight: 600; line-height: 1.5rem; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); pointer-events: none; }
 .mk-rail .mk-hint { top: var(--space-3); }
 .mk-cap { margin-top: 0.875rem; }
-.mk-cap-title { font-size: var(--fs-subhead); line-height: 1.45; font-weight: 400; letter-spacing: 0; color: var(--text-secondary); }
+.mk-cap-title, .mk-cap-prompt { font-size: var(--fs-subhead); line-height: 1.45; font-weight: 400; letter-spacing: 0; color: var(--text-secondary); }
 .mk-own-card { height: 20rem; border-radius: 1.5rem; }
 @media (min-width: 64rem) { .mk-rail { max-width: 76rem; } .mk-rail .mk-sample { width: calc(20rem * var(--w) / var(--h)); } .mk-own-card { height: 20rem; } }
 .mk-alt { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }

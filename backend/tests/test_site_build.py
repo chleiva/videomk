@@ -86,12 +86,19 @@ def test_home_page_meets_the_google_brand_checks_and_the_budget(site):
         assert len(videos) >= 4
         for v in videos:   # poster first, nothing downloaded until it is on screen, a name for screen readers
             assert "poster=" in v and 'preload="none"' in v and "aria-label=" in v and "autoplay" not in v
+        # only the first video (the hero, the largest thing on the first screen) carries its poster in the HTML; the gallery's wait in data-poster until they are near the screen
+        assert ' poster="' in videos[0] and all(' poster="' not in v and 'data-poster="' in v for v in videos[1:])
+        hero_poster = re.search(r' poster="([^"]+)"', videos[0]).group(1)
+        assert 'rel="preload" as="image" href="' + hero_poster + '"' in html
         for src in re.findall(r'(?:src|poster)="(/samples/[^"]+)"', html):
             assert os.path.isfile(os.path.join(site, src.lstrip("/"))), src
         for img in re.findall(r"<img[^>]*>", html):
             assert "alt=" in img
         assert len(html.encode()) < 60_000   # the page itself stays light; the media loads lazily
-    assert "Descríbelo. Recibe el video." in read(site, "es/index.html") and "Describe it. Get the video." in read(site, "index.html")
+    # the headline is set on two lines (design bar: the second line carries the gradient), so it is read as the heading's text, not as one run of HTML
+    def headline(html):
+        return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S).group(1))).strip()
+    assert headline(read(site, "es/index.html")) == "Descríbelo. Recibe el video." and headline(read(site, "index.html")) == "Describe it. Get the video."
     assert os.path.isfile(os.path.join(site, "og.jpg")) and os.path.isdir(os.path.join(site, "samples"))
 
 

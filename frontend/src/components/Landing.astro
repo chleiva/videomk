@@ -40,7 +40,7 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 
 	<section class="mk-hero" aria-labelledby="hero-title">
 		<div class="mk-wrap mk-center">
-			<h1 id="hero-title" class="mk-h1">{tr("hero.title_1")}<br /><span class="mk-grad">{tr("hero.title_2")}</span></h1>
+			<h1 id="hero-title" class="mk-h1">{tr("hero.title_1")}{" "}<br /><span class="mk-grad">{tr("hero.title_2")}</span></h1>
 			<p class="mk-lead">{tr("hero.lead")}</p>
 			<form class="mk-ask" action={appUrl(APP_PATHS.create)} method="get">
 				<label for="hero-prompt" class="sr-only-vmk">{tr("hero.field")}</label>
@@ -65,7 +65,7 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 	<section id="gallery" class="mk-section" aria-labelledby="gallery-title">
 		<div class="mk-wrap">
 			<h2 id="gallery-title" class="mk-h2 mk-center">{tr("gallery.title")}</h2>
-			<p class="mk-sub mk-center">{tr("gallery.sub")}</p>
+			<p class="mk-sub mk-center">{tr(gallery.every((s) => s.prompt) ? "gallery.sub_prompts" : "gallery.sub")}</p>
 		</div>
 		<ul class="mk-rail" role="list">
 			{gallery.map((s) => (
@@ -168,9 +168,13 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 
 	<p slot="footer-extra" class="footer-row mk-company">{tr("landing.company", { company: COMPANY, number: COMPANY_NUMBER })}</p>
 
-	<script is:inline data-keep>(function(){var d=document,m=matchMedia,rm=m("(prefers-reduced-motion: reduce)").matches,c=navigator.connection,sd=c&&c.saveData;var vs=[].slice.call(d.querySelectorAll("video[data-sample]"));if(!vs.length||rm||sd||!("IntersectionObserver" in window))return;d.documentElement.classList.add("mk-js");
+	<script is:inline data-keep>(function(){var d=document,m=matchMedia,rm=m("(prefers-reduced-motion: reduce)").matches,c=navigator.connection,sd=c&&c.saveData,IO="IntersectionObserver" in window;var vs=[].slice.call(d.querySelectorAll("video[data-sample]"));
+var lp=vs.filter(function(v){return v.dataset.poster}),sp=function(v){v.poster=v.dataset.poster},ld=function(f){d.readyState==="complete"?f():addEventListener("load",f)};
+ld(function(){if(!IO){lp.forEach(sp);return}var po=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting})){lp.forEach(sp);po.disconnect()}},{rootMargin:"300px"});lp.forEach(function(v){po.observe(v)})});
+if(!vs.length||rm||sd||!IO)return;d.documentElement.classList.add("mk-js");
 function stop(except){vs.forEach(function(v){if(v!==except&&v.dataset.sound){v.pause();v.muted=true;v.controls=false;delete v.dataset.sound}})}
 var io=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(v.dataset.sound)return;if(e.isIntersecting){v.preload="auto";var p=v.play();if(p&&p.catch)p.catch(function(){v.controls=true})}else v.pause()})},{threshold:.5});
-vs.forEach(function(v){v.controls=false;v.muted=true;v.loop=true;io.observe(v);v.addEventListener("click",function(){if(v.dataset.sound){v.paused?v.play():v.pause();return}stop(v);v.dataset.sound="1";v.muted=false;v.controls=true;v.currentTime=0;v.play()})})})();
+ld(function(){vs.forEach(function(v){io.observe(v)})});
+vs.forEach(function(v){v.controls=false;v.muted=true;v.loop=true;v.addEventListener("click",function(){if(v.dataset.sound){v.paused?v.play():v.pause();return}stop(v);v.dataset.sound="1";v.muted=false;v.controls=true;v.currentTime=0;v.play()})})})();
 (function(){var b=document.querySelector("[data-mic]"),R=window.SpeechRecognition||window.webkitSpeechRecognition,i=document.getElementById("hero-prompt");if(!b||!R||!i)return;b.hidden=false;var r=null;b.addEventListener("click",function(){if(r){r.stop();return}r=new R();r.lang=b.dataset.lang;r.interimResults=true;b.classList.add("is-live");r.onresult=function(e){var s="";for(var k=0;k<e.results.length;k++)s+=e.results[k][0].transcript;i.value=s.slice(0,500)};r.onend=r.onerror=function(){r=null;b.classList.remove("is-live");i.focus()};try{r.start()}catch(x){r=null;b.classList.remove("is-live")}})})();</script>
 </MarketingLayout>

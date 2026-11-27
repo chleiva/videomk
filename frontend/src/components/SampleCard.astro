@@ -1,6 +1,9 @@
 ---
 // One sample video: poster first, lazy, muted loop that the page script starts when it is on screen (and never when reduced motion or data saver is on);
 // without JavaScript the native controls stay, so the video still plays. The sound button is added by the script.
+// Posters: the hero's is in the HTML (it is the largest thing on the first screen, and preloaded); the gallery's wait in data-poster and the page script sets them shortly
+// before they scroll into view, so on a phone five pictures below the fold never compete with the hero's for the first second of a slow connection.
+// The caption is the sentence that made the video when we have the real one (never an invented one), else what the video is about.
 import { translate } from "../lib/i18n";
 import type { Locale } from "../lib/i18n";
 import MIcon from "./MIcon.astro";
@@ -15,7 +18,7 @@ const style = `aspect-ratio:${s.width}/${s.height}`;
 ---
 <figure class={`mk-sample${hero ? " mk-sample-hero" : ""}`} style={`--w:${s.width};--h:${s.height}`}>
 	<div class="mk-frame" style={style}>
-		<video class="mk-video" data-sample={s.id} poster={s.poster} width={s.width} height={s.height} preload="none" playsinline loop controls title={tr("hero.sound")} aria-label={tr("landing.sample_alt", { title })}>
+		<video class="mk-video" data-sample={s.id} {...(hero ? { poster: s.poster } : { "data-poster": s.poster })} width={s.width} height={s.height} preload="none" playsinline loop controls title={tr("hero.sound")} aria-label={tr("landing.sample_alt", { title })}>
 			<source src={s.file} type="video/mp4" />
 			<a href={s.file}>{tr("hero.open_file")}</a>
 		</video>
@@ -24,7 +27,7 @@ const style = `aspect-ratio:${s.width}/${s.height}`;
 	</div>
 	{!hero && (
 		<figcaption class="mk-cap">
-			<span class="mk-cap-title">{title}</span>
+			{s.prompt ? <q class="mk-cap-prompt" lang={s.lang}>{s.promptShort ?? s.prompt}</q> : <span class="mk-cap-title">{title}</span>}
 		</figcaption>
 	)}
 </figure>

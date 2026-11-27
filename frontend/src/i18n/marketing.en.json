@@ -90,5 +90,6 @@
  "hero.title_1": "Describe it.",
  "hero.title_2": "Get the video.",
  "landing.nav_signin": "Sign in",
- "hero.mic": "Say it"
+ "hero.mic": "Say it",
+ "gallery.sub_prompts": "Real videos made with videomk. Each one started as the line under it."
 }
