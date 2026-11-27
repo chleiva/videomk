@@ -357,8 +357,8 @@ struct FloatingTabBar: View {
 /// The page fades out under the floating tab bar, so nothing is cut off behind it.
 struct TabBarFade: View {
     var body: some View {
-        LinearGradient(stops: [.init(color: Theme.background.opacity(0), location: 0), .init(color: Theme.background.opacity(0.9), location: 0.55), .init(color: Theme.background, location: 1)], startPoint: .top, endPoint: .bottom)
-            .frame(height: 150).allowsHitTesting(false).accessibilityHidden(true)
+        LinearGradient(stops: [.init(color: Theme.background.opacity(0), location: 0), .init(color: Theme.background.opacity(0.85), location: 0.7), .init(color: Theme.background, location: 1)], startPoint: .top, endPoint: .bottom)
+            .frame(height: 112).allowsHitTesting(false).accessibilityHidden(true)
     }
 }
 

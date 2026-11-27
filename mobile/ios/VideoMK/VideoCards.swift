@@ -27,19 +27,20 @@ struct Poster: View {
     var fill = true
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Theme.surfaceRaised
-            if let url = video.previewGifURL {
-                CachedImage(url: url) { image in
-                    if fill { image.resizable().scaledToFill() }
-                    else { ZStack { image.resizable().scaledToFill().blur(radius: 18).opacity(0.7); image.resizable().scaledToFit() } }
+        Theme.surfaceRaised
+            .overlay {       // an overlay: a picture of another shape never changes the frame it is given
+                if let url = video.previewGifURL {
+                    CachedImage(url: url) { image in
+                        if fill { image.resizable().scaledToFill() }
+                        else { ZStack { Color.clear.overlay { image.resizable().scaledToFill().blur(radius: 18).opacity(0.7) }; image.resizable().scaledToFit() } }
+                    }
+                } else {
+                    Theme.makingGradient.opacity(0.9)
+                    Image(systemName: "play.fill").font(.role(.title)).foregroundStyle(Theme.onPrimary.opacity(0.92)).accessibilityHidden(true)
                 }
-            } else {
-                Theme.makingGradient.opacity(0.9)
-                Image(systemName: "play.fill").font(.role(.title)).foregroundStyle(Theme.onPrimary.opacity(0.92)).frame(maxWidth: .infinity, maxHeight: .infinity).accessibilityHidden(true)
             }
-            if let d = video.durationSeconds { GlassChip(text: VideoRow.duration(d)).padding(10) }
-        }
+            .clipped()
+            .overlay(alignment: .bottomTrailing) { if let d = video.durationSeconds { GlassChip(text: VideoRow.duration(d)).padding(10) } }
         .overlay(alignment: .topLeading) { if video.aspect != nil, video.isPortrait { GlassChip(text: video.aspect ?? "").padding(10) } }
         .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: radius, style: .continuous))

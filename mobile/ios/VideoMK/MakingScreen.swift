@@ -48,8 +48,7 @@ struct MakingScreen: View {
 
     /// The scene being built, large. Its picture when the server has one (else the last finished scene's); else the brand gradient, quietly alive.
     private var hero: some View {
-        ZStack {
-            Theme.makingGradient
+        Rectangle().fill(Theme.makingGradient).overlay {
             if let url = snapshot.info?.heroThumb {
                 CachedImage(url: url) { $0.resizable().scaledToFill() }.id(ImageKey.stable(url)).transition(.opacity)
             } else {

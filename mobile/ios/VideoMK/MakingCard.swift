@@ -101,12 +101,10 @@ private struct SceneTile: View {
                 shape.strokeBorder(surface == .gradient ? Theme.onPrimary.opacity(0.24) : Theme.outline, lineWidth: 1.5)
             case .current:
                 shape.fill(surface == .gradient ? Theme.onPrimary.opacity(0.22) : Theme.surface3)
-                if let url = tile.thumbURL { CachedImage(url: url) { $0.resizable().scaledToFill() }.opacity(0.55) }
+                    .overlay { if let url = tile.thumbURL { CachedImage(url: url) { $0.resizable().scaledToFill() }.opacity(0.55) } }      // an overlay: the picture never widens its tile
             case .done:
-                Group {
-                    if surface == .gradient { shape.fill(Theme.onPrimary.opacity(0.9)) } else { shape.fill(Theme.makingGradient) }
-                    if let url = tile.thumbURL { CachedImage(url: url) { $0.resizable().scaledToFill() } }
-                }
+                Group { if surface == .gradient { shape.fill(Theme.onPrimary.opacity(0.9)) } else { shape.fill(Theme.makingGradient) } }
+                    .overlay { if let url = tile.thumbURL { CachedImage(url: url) { $0.resizable().scaledToFill() } } }
                 .transition(reduceMotion ? .opacity : .scale(scale: 0.6).combined(with: .opacity))
             }
         }

@@ -46,8 +46,8 @@ struct SignInView: View {
 
     /// The sample: one frame of a video videomk made, and the sentence it was made from. It fades into the page.
     private func sample(height: CGFloat, top: CGFloat) -> some View {
-        Image("SignInSample").resizable().scaledToFill()
-            .frame(maxWidth: .infinity).frame(height: height).clipped()
+        Color.clear.frame(maxWidth: .infinity).frame(height: height)
+            .overlay { Image("SignInSample").resizable().scaledToFill() }.clipped()
             .overlay { LinearGradient(stops: [.init(color: Theme.mediaInk.opacity(0.3), location: 0), .init(color: .clear, location: 0.22), .init(color: .clear, location: 0.46), .init(color: Theme.background, location: 0.96)], startPoint: .top, endPoint: .bottom) }
             .overlay(alignment: .top) {
                 HStack(spacing: Theme.Space.s) {

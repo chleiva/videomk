@@ -152,7 +152,7 @@ struct VideoDetailView: View {
     /// Share is the ONE labelled primary. Save, Edit, Info and More are quiet icons, each with a spoken label.
     @ViewBuilder private func actions(_ video: VideoItem) -> some View {
         let stacked = typeSize.isAccessibilitySize
-        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: Theme.Space.m)) : AnyLayout(HStackLayout(spacing: 10))
+        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: Theme.Space.m)) : AnyLayout(HStackLayout(spacing: Theme.Space.s))
         layout {
             if let playbackURL {
                 ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle, onShared: { Task { @MainActor in Haptics.play(.shareDone) } }), preview: SharePreview(video.displayTitle)) {
@@ -162,17 +162,17 @@ struct VideoDetailView: View {
             } else {
                 PrimaryLabel(title: tr("common.share"), symbol: "square.and.arrow.up").modifier(PrimaryPlaceholder())
             }
-            HStack(spacing: 10) {
+            HStack(spacing: Theme.Space.s) {
                 if let playbackURL {
-                    if save == .saving { ProgressView().frame(width: 54, height: 54).background(Theme.surfaceRaised, in: Circle()) }
-                    else { IconButton(symbol: save == .saved ? "checkmark" : "arrow.down.to.line", label: saveLabel, size: 54, identifier: "saveButton") { Task { await saveToPhotos(playbackURL, name: video.displayTitle) } } }
+                    if save == .saving { ProgressView().frame(width: 48, height: 48).background(Theme.surfaceRaised, in: Circle()) }
+                    else { IconButton(symbol: save == .saved ? "checkmark" : "arrow.down.to.line", label: saveLabel, size: 48, identifier: "saveButton") { Task { await saveToPhotos(playbackURL, name: video.displayTitle) } } }
                 }
-                if video.editable { IconButton(symbol: "pencil", label: tr("common.edit"), size: 54, identifier: "editButton") { player?.pause(); editing = true } }
-                if videoDescription != nil { IconButton(symbol: "info.circle", label: tr("detail.info"), size: 54, identifier: "infoButton") { showInfo = true } }
+                if video.editable { IconButton(symbol: "pencil", label: tr("common.edit"), size: 48, identifier: "editButton") { player?.pause(); editing = true } }
+                if videoDescription != nil { IconButton(symbol: "info.circle", label: tr("detail.info"), size: 48, identifier: "infoButton") { showInfo = true } }
                 Menu {
                     Button { dismiss(); model.createRequested = true } label: { Label(tr("create.new_video"), systemImage: "play") }.accessibilityIdentifier("makeAnother")
                     Button { showFeedback = true } label: { Label(tr("feedback.title"), systemImage: "bubble.left") }.accessibilityIdentifier("sendFeedbackLink")
-                } label: { IconButtonFace(symbol: "ellipsis", size: 54) }
+                } label: { IconButtonFace(symbol: "ellipsis", size: 48) }
                 .accessibilityLabel(tr("media.more")).accessibilityIdentifier("moreButton")
             }
         }
