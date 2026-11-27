@@ -17,7 +17,7 @@ Everything is in `~/Downloads/videomk-whiteboard/` (not in git). Phone-sized cop
 | `object_sheet_1.jpg` to `_3.jpg` | The generated art exactly as returned (3 calls, 18 objects) |
 | `order_strategies_sheet1.jpg` to `_3.jpg` | The two drawing-order strategies, 8 moments per object, for all 18 objects |
 | `experiments/` | Methods A, B, C, D: 4K still, three 100 % crops, 12 s draw-on clip each, `stats.json` |
-| `web/` | 42 web-friendly files and `captions.json` |
+| `web/` | 38 web-friendly files and `captions.json` |
 
 Small reference frames are in `docs/whiteboard/` (1.3 MB).
 
