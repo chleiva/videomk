@@ -13,8 +13,8 @@ from PIL import Image  # noqa: E402
 from engine import character_gestures as cg  # noqa: E402
 from engine import vector_presenter as vp  # noqa: E402
 
-CAST = ["ines", "david", "priya", "mateo", "fox", "owl", "bear"]
-TAILS = {"fox", "owl"}                      # the animals whose sheet has a tail piece
+CAST = ["ines", "david", "priya", "mateo", "fox", "owl", "bear", "cat", "parrot", "turtle"]
+TAILS = {"fox", "owl", "cat", "parrot", "turtle"}                      # the animals whose sheet has a tail piece
 
 
 def dist(a, b):
@@ -199,7 +199,7 @@ def test_performance_poses_draw_on_the_real_rig():
 
 
 # ----------------------------------------------------------------------------- the home pose must not be mirrored (owner's review: "the arms look swapped")
-RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1, "owl": -1, "bear": -1}     # where the thumb is on each original forearm drawing, read by eye
+RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1, "owl": -1, "bear": -1, "cat": -1, "parrot": 1, "turtle": -1}     # where the thumb is on each original forearm drawing, read by eye
 SHEET_THUMB_RIGHT = {"fox"}                 # hand sheets drawn the other way round (thumb of the upright open hand on the right)
 
 

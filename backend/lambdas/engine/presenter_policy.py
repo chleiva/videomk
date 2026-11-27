@@ -11,7 +11,8 @@ A presenter is one of the standing cartoon characters (engine/vector_presenter.p
   * `presenter: "none"` or "no presenter" in the words: never.
 
 Casting (`cast`): the character the person named. Else a children's or fun video gets an ANIMAL, by its topic (the owl for learning, science and history, the bear
-for health, feelings and bedtime), and the fox when no topic decides. Every other video gets a PERSON by topic, as before the animals: the doctor for health, the
+for health, feelings and bedtime, the cat for technology and how things work, the parrot for languages, travel and fun facts, the turtle for nature, the sea and
+step-by-step), and when no topic decides the parrot in a Spanish children's video and the fox everywhere else. Every other video gets a PERSON by topic, as before the animals: the doctor for health, the
 engineer for technology, the chef for food, the teacher for everything else. The narrator's voice becomes the character's voice. A dialogue (two or three
 speaking characters) gets one presenter per speaker, up to two, each on their own side: animals with animals, people with people.
 
@@ -53,10 +54,20 @@ CAST: Dict[str, Dict[str, Any]] = {
     "bear": {"name": "Bruno", "role": {"en": "Caring bear", "es": "Oso cariñoso"}, "voices": {"en": ["Stephen", "Matthew"], "es": ["Andres", "Pedro"]}, "skills": set(),
              "words": r"health|healthy|feelings?|emotions?|worr(?:y|ied|ies)|sad|angry|afraid|scared|calm|bedtime|sleep\w*|teeth|wash\w* (?:your |our )?hands|doctor|dentist|kindness|friendship|"
                       r"salud|saludable|sentimientos?|emoci[oó]n(?:es)?|miedo|triste|enfad\w*|enoj\w*|calma|dormir|sue[ñn]o|dientes|lavarse|m[eé]dic[oa]|dentista|amistad"},
+    "cat": {"name": "Mika", "role": {"en": "Curious cat", "es": "Gata curiosa"}, "voices": {"en": ["Olivia", "Salli"], "es": ["Mia", "Lucia"]}, "skills": set(),
+            "words": r"technology|tech|computers?|robots?|internet|coding|code|apps?|machines?|engines?|electricity|batter(?:y|ies)|gadgets?|inventions?|phones?|how (?:\w+ ){0,3}works?|"
+                     r"tecnolog\w*|computador\w*|ordenador(?:es)?|robots?|internet|programar|c[oó]digo|m[aá]quinas?|motor(?:es)?|electricidad|bater[ií]as?|inventos?|tel[eé]fonos?|c[oó]mo funcionan?"},
+    "parrot": {"name": "Paco", "role": {"en": "Travelling parrot", "es": "Loro viajero"}, "voices": {"en": ["Nate", "Matthew"], "es": ["Pedro", "Sergio"]}, "skills": set(),
+               "words": r"languages?|spanish|english|french|vocabulary|alphabet|travel\w*|trips?|countr(?:y|ies)|cities|flags?|fun facts?|did you know|"
+                        r"idiomas?|espa[ñn]ol|ingl[eé]s|franc[eé]s|vocabulario|abecedario|viaj\w*|pa[ií]s(?:es)?|ciudades|banderas?|datos curiosos|curiosidades|sab[ií]as que"},
+    "turtle": {"name": "Tula", "role": {"en": "Wise turtle", "es": "Tortuga sabia"}, "voices": {"en": ["Amy", "Ruth"], "es": ["Lupe", "Lucia"]}, "skills": set(),
+               "words": r"nature|sea|oceans?|beach|rivers?|forests?|jungle|plants?|trees?|recycl\w*|environment|step[- ]by[- ]step|how to|"
+                        r"naturaleza|mar|oc[eé]anos?|playa|r[ií]os?|bosques?|selva|plantas?|[aá]rbol(?:es)?|recicl\w*|medio ambiente|paso a paso|c[oó]mo hacer"},
 }
-ORDER = ("ines", "david", "priya", "mateo", "fox", "owl", "bear")
-ANIMALS = ("fox", "owl", "bear")                 # the rest of ORDER are people
-KIDS_TOPICS = ("bear", "owl")                    # in a children's or fun video: the first animal whose topic words are in the request (else the fox)
+ORDER = ("ines", "david", "priya", "mateo", "fox", "owl", "bear", "cat", "parrot", "turtle")
+ANIMALS = ("fox", "owl", "bear", "cat", "parrot", "turtle")       # the rest of ORDER are people
+KIDS_TOPICS = ("bear", "cat", "parrot", "turtle", "owl")          # in a children's or fun video: the first animal whose topic words are in the request
+KIDS_DEFAULT = {"es": "parrot"}                                   # no topic decides: the parrot in a Spanish children's video, the fox everywhere else
 DEFAULT = "ines"
 OPTIONS = ("auto", "none") + ORDER
 
@@ -93,7 +104,7 @@ def wish(option: Any, prompt: str) -> str:
 
 
 def cast(prompt: str, skill_ids: Optional[List[str]] = None, asked: Optional[str] = None, language: str = "en") -> str:
-    """Which character presents. Asked by name: that one. Else children's and fun videos get an animal: the one whose topic it is (KIDS_TOPICS), else the fox. Every
+    """Which character presents. Asked by name: that one. Else children's and fun videos get an animal: the one whose topic it is (KIDS_TOPICS), else the parrot in a Spanish children's video and the fox elsewhere. Every
     other video gets a person: by the topic's words (doctor, engineer, chef), then by the kind of video, else the teacher."""
     if asked in CAST:
         return asked
@@ -103,7 +114,8 @@ def cast(prompt: str, skill_ids: Optional[List[str]] = None, asked: Optional[str
         for cid in KIDS_TOPICS:
             if re.search(r"\b(?:" + CAST[cid]["words"] + r")\b", text, re.I):
                 return cid
-        return "fox"
+        kids = "kids-family" in ids or re.search(CAST["fox"]["words"], text, re.I)
+        return KIDS_DEFAULT.get(str(language or "en")[:2], "fox") if kids else "fox"
     for cid in ("mateo", "priya", "david"):
         if re.search(r"\b(?:" + CAST[cid]["words"] + r")", text, re.I):
             return cid

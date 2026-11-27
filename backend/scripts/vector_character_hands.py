@@ -30,7 +30,7 @@ ASSETS = os.path.join(HERE, "..", "lambdas", "engine", "assets", "vector_charact
 NAMES = ["open", "one", "two", "three", "thumb"]
 # Where the thumb is on each character's ORIGINAL forearm+hand drawing (lower_arm.svg, hanging down): +1 on the right of the drawing, -1 on the left. Read by eye from the
 # pieces (the relaxed hands are too small and too symmetric to measure reliably); the rig mirrors the drawing so that the thumb ends up on the body side of each arm.
-RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1, "owl": -1, "bear": -1}
+RELAXED_THUMB = {"ines": -1, "david": 1, "priya": 1, "mateo": -1, "fox": -1, "owl": -1, "bear": -1, "cat": -1, "parrot": 1, "turtle": -1}
 SHRINK = 0.42
 
 WHO = {
@@ -69,9 +69,12 @@ TAILS = {
     "parrot": "; (6) a long bundle of parrot TAIL FEATHERS on its own: three long narrow feathers, scarlet red with blue tips, the root (where it joins the body) at the bottom, the tips at the top",
     "turtle": "; (6) a small short pointed TURTLE TAIL on its own: soft green, a simple cone, the root (where it joins the body) at the bottom, the tip at the top",
 }
-TAIL_DEFAULT = {"fox": (78.0, 10.0, 8.0, -52.0), "owl": (50.0, 6.0, 6.0, -122.0)}      # height_u, x, y, angle (the owl's fan hangs down behind one hip)
-# Rig settings a sheet cannot give, set by eye (presenter.json; kept by later builds): shoulder_x where the torso art is much wider at the ribs than at the shoulders.
-RIG = {"owl": {"shoulder_x": 38.0}, "bear": {"shoulder_x": 40.0}}
+# height_u, x, y, angle: the owl's fan and the parrot's long feathers hang down behind one hip, the cat's tail curls up like the fox's, the turtle's is a small point
+TAIL_DEFAULT = {"fox": (78.0, 10.0, 8.0, -52.0), "owl": (50.0, 6.0, 6.0, -122.0), "cat": (78.0, 10.0, 8.0, -52.0), "parrot": (72.0, 6.0, 8.0, -148.0), "turtle": (26.0, 15.0, -3.0, -105.0)}
+# Rig settings a sheet cannot give, set by eye (presenter.json; kept by later builds): shoulder_x where the torso art is much wider at the ribs than at the shoulders
+# (the turtle's torso includes the shell: the arms hang from the body in front of it, not from the shell's rim).
+RIG = {"owl": {"shoulder_x": 38.0}, "bear": {"shoulder_x": 40.0}, "turtle": {"shoulder_x": 34.0}}
+HAND_K = {"cat": 1.3}       # gesture hands drawn larger than the wrist says (a thin sleeve cuff): they must read at video size
 
 
 def spent(run: str = RUN) -> float:
@@ -226,7 +229,7 @@ def build(a) -> int:
             al = np.array(im)[..., 3] > 0
             xs = np.nonzero(al[-max(3, im.height // 30):].any(axis=0))[0]
             hands[name] = {"file": f"hand_{name}.svg", "w": im.width, "h": im.height, "svg_bytes": size, "pivot": [float((xs.min() + xs.max()) / 2), float(im.height - im.height * 0.06)],
-                           "wrist_w": float(xs.max() - xs.min() + 1), "scale": (cfg.get("hands", {}).get(name, {}) or {}).get("scale", 1.0)}
+                           "wrist_w": float(xs.max() - xs.min() + 1), "scale": (cfg.get("hands", {}).get(name, {}) or {}).get("scale", HAND_K.get(cid, 1.0))}
         cfg["hands"] = hands
         for k, v in RIG.get(cid, {}).items():
             cfg.setdefault(k, v)

@@ -81,12 +81,14 @@ vb.find_pieces = find_pieces
 # fraction of the torso width cut away at each side (the torso art has its own hanging sleeves, the rig has separate arms): set by eye per character
 CUT = {"ines": 0.17, "david": 0.16, "priya": 0.17, "mateo": 0.17, "fox": 0.2}
 # the animal cast (vector_character_sheet5.py --animals): 0 = the torso was drawn without sleeves, nothing is cut. `--only` is needed to build one of them.
-ANIMAL_CUT = {"owl": 0.0, "bear": 0.0, "cat": 0.0, "parrot": 0.0, "turtle": 0.0}
+ANIMAL_CUT = {"owl": 0.0, "bear": 0.0, "cat": 0.17, "parrot": 0.0, "turtle": 0.0}
 # Where the eyes and the mouth sit on each animal's head, set by eye (manifest "face", read by engine/vector_presenter.py): eyes_y / mouth_y = share of the head's height from
 # the top, eyes_w / mouth_w = width as a share of the head's width, mouth_anchor "top" = a beak, which hangs from its top edge and opens downward.
 ANIMAL_FACE = {
     "owl": {"eyes_y": 0.50, "eyes_w": 0.52, "mouth_y": 0.62, "mouth_w": 0.20, "mouth_anchor": "top"},      # the eyes sit in the glasses, the beak just under them
     "bear": {"eyes_y": 0.43, "eyes_w": 0.46, "mouth_y": 0.84, "mouth_w": 0.24},                             # the eyes above the nose, the mouth on the muzzle under it
+    "parrot": {"eyes_y": 0.50, "eyes_w": 0.44, "mouth_y": 0.60, "mouth_w": 0.30, "mouth_anchor": "top"},   # a big hooked beak in the middle of the white face patch
+    "turtle": {"eyes_y": 0.55, "eyes_w": 0.46, "mouth_y": 0.78},
 }
 
 
@@ -109,7 +111,38 @@ def fill_notch(im, rgba, pieces):
     return Image.fromarray(a)
 
 
-vb.TORSO_POST["owl"] = fill_notch
+def one_colour(im, rgba, pieces):
+    """The parrot's upper arm was drawn red, yellow and blue, and so was its forearm: on the rig the bands would repeat down the arm. The upper arm becomes plain red
+    (the colour of its own top), so the arm reads red at the shoulder, then the yellow band, then blue to the hand."""
+    from PIL import Image
+
+    a = np.array(im)
+    rgb = a[..., :3].astype(np.int32)
+    fill = (a[..., 3] > 0) & (rgb.sum(axis=-1) > 200)
+    top = fill.copy()
+    top[int(a.shape[0] * 0.3):] = False
+    a[fill, :3] = np.median(a[top][:, :3], axis=0).astype(np.uint8)
+    return Image.fromarray(a)
+
+
+def plain_face(im, rgba, pieces):
+    """The turtle's head was drawn with two nostrils low on the face, where the mouth piece goes: they are painted over with the head's own colour."""
+    from PIL import Image
+
+    a = np.array(im)
+    rgb = a[..., :3].astype(np.int32)
+    solid = a[..., 3] > 0
+    ink = solid & (rgb.sum(axis=-1) < 330)
+    lab, n = ndi.label(ink)
+    border = set(np.unique(lab[ndi.binary_dilation(~solid, iterations=3) & ink])) - {0}       # the outline touches the outside; marks inside the face do not
+    inner = ink & ~np.isin(lab, list(border))
+    a[ndi.binary_dilation(inner, iterations=3) & solid & ~np.isin(lab, list(border)), :3] = np.median(a[solid & ~ink][:, :3], axis=0).astype(np.uint8)
+    return Image.fromarray(a)
+
+
+vb.PIECE_POST[("owl", "torso")] = fill_notch
+vb.PIECE_POST[("turtle", "head")] = plain_face
+vb.PIECE_POST[("parrot", "upper_arm")] = one_colour
 _RIG = "biped front-facing cut-out (head, torso, upper/lower arm, upper/lower leg, 2 eye sets, 3 mouths)"
 ANIMAL_META = {
     "owl": {"name": "Hugo", "role": "professor", "species": "owl (bipedal mascot)", "age_group": "ageless", "tags": ["mascot", "animal", "professor", "calm", "learning", "kids", "explainer"],

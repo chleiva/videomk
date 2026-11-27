@@ -37,8 +37,8 @@ from engine import vector_scene as vs  # noqa: E402
 from engine.audio import SR  # noqa: E402
 
 ORDER = ["ines", "david", "priya", "mateo", "fox"]
-ANIMALS = ["owl", "bear"]                # the animal cast: rendered when named in --only (talk) or with --animals (the group still)
-TAILS = {"fox", "owl"}
+ANIMALS = ["owl", "bear", "cat", "parrot", "turtle"]                # the animal cast: rendered when named in --only (talk) or with --animals (the group still)
+TAILS = {"fox", "owl", "cat", "parrot", "turtle"}
 # script, framing, side of the frame where the character stands, the card beside it (title, [(word that reveals the line, line)])
 TALK: Dict[str, Dict[str, Any]] = {
     "ines": {"text": "Hello, I'm Inés. Learning something new takes three things: time, practice and patience. Some days it feels slow, but every small step counts. So, what will you learn today? Thank you for listening!",
@@ -55,6 +55,13 @@ TALK: Dict[str, Dict[str, Any]] = {
             "framing": "three_quarter", "side": "left", "scene": "library_interior_view", "card": ("Why the sky is blue", [("colours.", "Light has many colours"), ("First,", "1  It meets the air"), ("Second,", "2  Blue scatters most")])},
     "bear": {"text": "Hello, I'm Bruno. Feeling worried is okay. Here are three things that help: breathe slowly, name the feeling, and tell someone you trust. Big feelings come, but they also go. You are doing great. Sleep well!",
              "framing": "three_quarter", "side": "right", "scene": "bedroom_window_morning", "card": ("When you feel worried", [("slowly,", "Breathe slowly"), ("name", "Name the feeling"), ("tell", "Tell someone you trust")])},
+    "cat": {"text": "Hi, I'm Mika! How does a robot work? It needs three things: sensors, a brain and motors. First, the sensors look around. Second, the brain decides. And look at this: the motors make it move. Thanks for watching!",
+            "framing": "three_quarter", "side": "left", "scene": "robotics_lab_window", "card": ("How a robot works", [("sensors,", "Sensors: it looks"), ("brain", "Brain: it decides"), ("motors.", "Motors: it moves")])},
+    # the parrot speaks Spanish (a Spanish Polly voice): the natural Spanish-first character
+    "parrot": {"text": "¡Hola! Soy Paco. Hoy aprendemos a saludar en tres idiomas. Primero, en español: hola. Segundo, en inglés: hello. Y tercero, en francés: bonjour. Mira qué fácil. ¡Gracias, y buen viaje!",
+               "framing": "three_quarter", "side": "right", "scene": "tropical_river_jungle", "card": ("Saludar en tres idiomas", [("Primero,", "Español: hola"), ("Segundo,", "Inglés: hello"), ("tercero,", "Francés: bonjour")])},
+    "turtle": {"text": "Hello, I'm Tula. The sea is full of life. Let's go step by step. First, sunlight feeds tiny plants. Second, small fish eat them. Third, bigger fish follow. Slow down, look closely, and the sea tells its story. Thank you!",
+               "framing": "three_quarter", "side": "left", "scene": "deep_ocean_reef", "card": ("Life in the sea", [("First,", "1  Sunlight feeds tiny plants"), ("Second,", "2  Small fish eat them"), ("Third,", "3  Bigger fish follow")])},
 }
 SIZE = {c: old.CAST[c]["size"] for c in ORDER + ANIMALS}
 

@@ -42,6 +42,9 @@ CAST: Dict[str, Dict[str, Any]] = {
     # the animal cast (docs/PRESENTERS.md): used by vector_character_presenter_demo.py only
     "owl": {"name": "Hugo", "role": "owl professor", "voices": ["Brian", "Matthew"], "size": 0.95, "scene": "library_interior_view", "line": "Good day, I'm Hugo. Every question is the start of a discovery."},
     "bear": {"name": "Bruno", "role": "wellbeing friend", "voices": ["Stephen", "Matthew"], "size": 1.04, "scene": "bedroom_window_morning", "line": "Hello, I'm Bruno. Let's take a slow, deep breath together."},
+    "cat": {"name": "Mika", "role": "tech explorer", "voices": ["Olivia", "Salli"], "size": 0.96, "scene": "robotics_lab_window", "line": "Hi, I'm Mika. Let's open it up and see how it works!"},
+    "parrot": {"name": "Paco", "role": "language and travel guide", "voices": ["Pedro", "Sergio"], "size": 0.94, "scene": "tropical_river_jungle", "line": "¡Hola! Soy Paco. ¿Listos para viajar?"},
+    "turtle": {"name": "Tula", "role": "nature guide", "voices": ["Amy", "Ruth"], "size": 0.97, "scene": "deep_ocean_reef", "line": "Hello, I'm Tula. Slow and steady, one step at a time."},
 }
 ORDER = ["ines", "david", "priya", "mateo", "fox"]
 TEAM_LINES = [("mateo", "Every healthy meal starts with fresh ingredients."),

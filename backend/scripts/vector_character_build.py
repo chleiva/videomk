@@ -18,7 +18,7 @@ from PIL import Image
 from scipy import ndimage as ndi
 
 TORSO_CUT = {"mia": 0.17, "leo": 0.16, "nora": 0.17, "sam": 0.23}   # fraction of the torso width cut away on each side, by eye per character
-TORSO_POST: Dict[str, Any] = {}   # id -> f(torso image, sheet rgba, pieces) -> torso image: a fix of one character's torso art (see vector_character_build5.py)
+PIECE_POST: Dict[Tuple[str, str], Any] = {}   # (id, piece name) -> f(piece image, sheet rgba, pieces) -> piece image: a fix of one character's art (see vector_character_build5.py)
 NAMES = ["head", "torso", "upper_arm", "lower_arm", "upper_leg", "lower_leg", "eyes_open", "eyes_closed", "mouth_closed", "mouth_half", "mouth_wide"]
 OUTLINE = (20, 18, 24, 0)
 
@@ -134,8 +134,8 @@ def build(sheet: str, cid: str, out_root: str) -> Dict[str, Any]:
         im = cut(rgba, box, mask)
         if name == "torso" and TORSO_CUT.get(cid, 0.17) > 0:        # 0: the torso art has no sleeves of its own (a waistcoat, a jumper body), nothing to cut
             im = trim_sleeves(im, TORSO_CUT.get(cid, 0.17))
-        if name == "torso" and cid in TORSO_POST:
-            im = TORSO_POST[cid](im, rgba, pieces)
+        if (cid, name) in PIECE_POST:
+            im = PIECE_POST[(cid, name)](im, rgba, pieces)
         size = trace(im, os.path.join(folder, name + ".svg"), os.path.join(folder, "_tmp.png"))
         w, h = im.size
         part: Dict[str, Any] = {"file": name + ".svg", "w": w, "h": h, "svg_bytes": size}

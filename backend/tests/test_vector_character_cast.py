@@ -11,7 +11,7 @@ from PIL import Image  # noqa: E402
 
 from engine import vector_character as vc  # noqa: E402
 
-CAST = ["ines", "david", "priya", "mateo", "fox", "owl", "bear"]
+CAST = ["ines", "david", "priya", "mateo", "fox", "owl", "bear", "cat", "parrot", "turtle"]
 PARTS = ["head", "torso", "upper_arm", "lower_arm", "upper_leg", "lower_leg", "eyes_open", "eyes_closed", "mouth_closed", "mouth_half", "mouth_wide"]
 META_KEYS = {"id", "name", "role", "species", "age_group", "tags", "voice_hint", "suitable_topics", "provenance"}
 
