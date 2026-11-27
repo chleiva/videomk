@@ -416,19 +416,19 @@ def test_a_pro_plan_and_an_unlimited_test_account_are_premium_but_a_lapsed_plan_
 
 
 def test_an_unlimited_test_account_carries_the_name_by_default_and_can_remove_it(launcher, wm_on, monkeypatch):
-    """Owner decision 2026-11-27: every video made by a test account has the brand (lockup, always, end card) unless the account says otherwise; customers are untouched."""
+    """Owner decision 2026-11-27: every video made by a test account has the gentle brand (lockup in short moments plus the closing end card; second decision, the whole-video mark is a choice) unless the account says otherwise; customers are untouched."""
     _flags(wm_on, USER, unlimited=True)
     assert _launch(launcher)["statusCode"] == 202
     wm = sent(launcher)["watermark"]
-    assert wm["mode"] == "videomk" and wm["style"] == "lockup" and wm.get("presence") == "always" and wm["end_card"] is True
+    assert wm["mode"] == "videomk" and wm["style"] == "lockup" and wm.get("presence") == "moments" and wm["end_card"] is True
     assert _launch(launcher, watermark={"mode": "none"}, target_minutes=2)["statusCode"] == 202 and "watermark" not in sent(launcher)     # the setting removes it
-    assert _launch(launcher, watermark={"mode": "videomk", "presence": "moments"}, target_minutes=3)["statusCode"] == 202
-    assert sent(launcher)["watermark"]["presence"] == "moments"                                                                        # and can soften it
+    assert _launch(launcher, watermark={"mode": "videomk", "presence": "always"}, target_minutes=3)["statusCode"] == 202
+    assert sent(launcher)["watermark"]["presence"] == "always"                                                                        # and can make it constant
     store.put_profile(USER, {"mode": "none"})                                                                                          # a saved choice is honoured
     assert _launch(launcher, target_minutes=1)["statusCode"] == 202 and "watermark" not in sent(launcher)
-    store.put_profile(USER, {"mode": "videomk"})                                                                                       # saved mark without a stated presence: always, not moments
-    assert _launch(launcher, target_minutes=2)["statusCode"] == 202 and sent(launcher)["watermark"].get("presence") == "always"
-    assert store.capabilities(USER)["default_presence"] == "always"
+    store.put_profile(USER, {"mode": "videomk"})                                                                                       # saved mark without a stated presence: the gentle form
+    assert _launch(launcher, target_minutes=2)["statusCode"] == 202 and sent(launcher)["watermark"].get("presence") == "moments"
+    assert store.capabilities(USER)["default_presence"] == "moments"
 
 
 def test_the_test_account_default_never_reaches_a_customer_or_production(launcher, wm_on, monkeypatch):

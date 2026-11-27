@@ -123,7 +123,8 @@ def is_premium(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[f
 # What a free (non-premium) account's video carries where the stack forces the mark (owner decision 2026-11-27, docs/WATERMARK.md section 5): the videomk lockup
 # (mark + the word), small, in the quiet corner of the shape, there for the whole video, and the closing "Made with videomk" card. Nothing of it can be chosen away.
 FORCED_SPEC: Dict[str, Any] = {"mode": "videomk", "style": "lockup", "presence": "always", "end_card": True, "position": "auto", "size": "small", "opacity": ws.DEFAULT_OPACITY}
-PREMIUM_DEFAULT_PRESENCE = "moments"   # a premium account that keeps the videomk mark gets the gentle form unless it says otherwise
+PREMIUM_DEFAULT_PRESENCE = "moments"
+TEST_DEFAULT_SPEC: Dict[str, Any] = {**FORCED_SPEC, "presence": "moments"}   # test accounts: the lockup in short moments plus the end card; the whole-video mark is a choice   # a premium account that keeps the videomk mark gets the gentle form unless it says otherwise
 def rights(user: str, item: Optional[Dict[str, Any]] = None, now: Optional[float] = None) -> Dict[str, Any]:
     """{premium (own logo), forced (the videomk mark cannot be removed), modes (the modes the plan allows, None where plans are off), by_plan, plan}."""
     from common import plans
@@ -174,7 +175,7 @@ def capabilities(user: str, locale: Optional[str] = None) -> Dict[str, Any]:
             "presences": [{"id": "always", "available": True, "label": i18n.t("wm.presence.always", loc), "note": i18n.t("wm.presence.always_note", loc)},
                           {"id": "moments", "available": may_moments, **({"requires": "premium"} if not may_moments else {}), **({"requires_plan": None if may_moments else _plan_for_mode("moments")} if wr["by_plan"] else {}),
                            "label": i18n.t("wm.presence.moments", loc), "note": i18n.t("wm.presence.moments_note", loc)}],
-            "default_presence": PREMIUM_DEFAULT_PRESENCE if may_moments and (premium or wr["by_plan"]) and not wr.get("test") else "always",
+            "default_presence": PREMIUM_DEFAULT_PRESENCE if may_moments and (premium or wr["by_plan"] or wr.get("test")) else "always",
             "opacity": {"min": ws.OPACITY_MIN, "max": ws.OPACITY_MAX, "default": ws.DEFAULT_OPACITY},
             "premium": premium, "forced": forced, "end_card": True,
             **({"forced_watermark": dict(FORCED_SPEC), "forced_note": i18n.t("wm.forced_note", loc)} if forced else {}),
@@ -189,7 +190,7 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
     explicit = requested is not None
     spec = dict(requested if explicit else (profile or {}))
     if not spec:
-        spec = dict(FORCED_SPEC) if test else ({"mode": "videomk"} if forced else {"mode": "none"})   # a test account carries the name by default (it can choose otherwise)
+        spec = dict(TEST_DEFAULT_SPEC) if test else ({"mode": "videomk"} if forced else {"mode": "none"})   # a test account carries the gentle brand by default: short moments plus the closing card (owner 27 Nov, second decision); it can choose "always" or none
     mode = spec.get("mode", "none")
     if modes is not None and explicit and mode != "custom" and mode not in modes:   # plans: an explicit request for a mode the plan lacks is refused with the plan that has it
         raise WatermarkError(403, "plan.watermark", "plan_watermark", extra={"feature": "watermark", "requires_plan": _plan_for_mode(mode)})
@@ -211,7 +212,7 @@ def resolve(requested: Optional[Dict[str, Any]], profile: Optional[Dict[str, Any
             raise WatermarkError(403, "plan.watermark", "plan_watermark", extra={"feature": "watermark", "requires_plan": _plan_for_mode("moments")})
         spec.pop("presence", None)   # a saved setting from a plan that ended
     if mode == "videomk" and spec.get("presence") not in ws.PRESENCES and may_moments:
-        spec["presence"] = "always" if test else PREMIUM_DEFAULT_PRESENCE   # (test accounts: always visible unless they say 'moments'; everyone else: absent, which is 'always', exactly as before the option existed)
+        spec["presence"] = PREMIUM_DEFAULT_PRESENCE   # (test accounts and premium: the gentle form unless they say 'always')
     out = ws.parse(spec, strict=False) or {"mode": "none"}
     return out
 
