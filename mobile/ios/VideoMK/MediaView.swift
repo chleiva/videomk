@@ -237,7 +237,7 @@ struct SearchBar: View {
             else if !feed.text.isEmpty { Button { feed.text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textSecondary) }.accessibilityLabel(tr("media.clear_search")) }
         }
         .padding(.horizontal, 12).frame(minHeight: 40)
-        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
         .padding(.horizontal, 16)
     }
 }
@@ -256,7 +256,7 @@ struct ChipsRow: View {
                                 Image(systemName: "xmark").font(.vmk(9, weight: .bold))
                             }
                             .padding(.horizontal, 10).padding(.vertical, 6)
-                            .background(Theme.primary.opacity(0.15), in: RoundedRectangle(cornerRadius: 16, style: .continuous)).foregroundStyle(Theme.primary)
+                            .background(Theme.primary.opacity(0.15), in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous)).foregroundStyle(Theme.primary)
                         }
                         .accessibilityLabel(tr("media.chip_a11y", chip.label))
                         .accessibilityHint(tr("media.double_tap_to_remove_this"))

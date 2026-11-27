@@ -37,6 +37,7 @@ final class AppModel {
 
     struct CreateProblem: Identifiable, Equatable { let id = UUID(); let message: String; let retryAfter: Int?; let paused: Bool; let prompt: String }
     var selectedTab = 0                                    // 0 videos, 1 media
+    var tabBarHidden = false                               // a video is open: the floating bar steps aside
     var composerDraft: String?                             // text to put in the composer (Try again on a failed video)
     var composerLibrary: [LibraryPhoto] = []               // library photos chosen for the next video
     var signInError: String?

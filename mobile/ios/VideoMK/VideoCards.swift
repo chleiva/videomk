@@ -36,8 +36,11 @@ struct VideoThumb: View {
                 Image(systemName: "play.fill").font(.vmk(20)).foregroundStyle(.white.opacity(0.9)).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             if showsDuration, let d = video.durationSeconds {
-                Text(VideoRow.duration(d)).font(.vmk(12, weight: .semibold).monospacedDigit()).foregroundStyle(.white)
-                    .padding(.horizontal, 7).frame(height: 20).background(.black.opacity(0.55), in: Capsule()).padding(6)
+                HStack(spacing: 4) {
+                    if video.aspect != nil, abs(video.aspectRatio - 16.0 / 9.0) >= 0.15 { Image(systemName: video.isPortrait ? "rectangle.portrait" : "square").font(.vmk(10, weight: .bold)).accessibilityHidden(true) }
+                    Text(VideoRow.duration(d)).font(.vmk(12, weight: .semibold).monospacedDigit())
+                }
+                .foregroundStyle(.white).padding(.horizontal, 7).frame(height: 20).background(.black.opacity(0.55), in: Capsule()).padding(6)
             }
         }
         .aspectRatio(16.0 / 9.0, contentMode: .fit)
@@ -56,8 +59,7 @@ struct VideoRow: View {
         layout {
             VideoThumb(video: video).frame(maxWidth: stacked ? .infinity : CGFloat(DesignTokens.Size.thumbWidth))
             VStack(alignment: .leading, spacing: 3) {
-                Text(video.displayTitle).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(stacked ? 4 : 2).multilineTextAlignment(.leading)
-                Text(meta).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+                Text(video.displayTitle).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(stacked ? 4 : 3).multilineTextAlignment(.leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -90,7 +92,7 @@ struct VideoRow: View {
 /// Did not finish (or was not allowed): the same row shape, in the danger (or warning) container, with the one action and the reassurance.
 struct FailedRow: View {
     let title: String
-    let message: String
+    var message: String?
     var retry: (() -> Void)?
     var onRemove: (() -> Void)?
     var rejected = false
@@ -112,7 +114,7 @@ struct FailedRow: View {
                     Text(title).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(stacked ? 4 : 2).frame(maxWidth: .infinity, alignment: .leading)
                     if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.vmk(16, weight: .bold)).foregroundStyle(Theme.textSecondary).frame(width: Theme.minTouch, height: Theme.minTouch) }.accessibilityLabel(tr("media.more")).padding(.top, -10).padding(.trailing, -10) }
                 }
-                Text(tr("videos.row_meta", status, message)).font(.vmk(13, weight: .medium)).foregroundStyle(tint).fixedSize(horizontal: false, vertical: true)
+                Text(message.map { tr("videos.row_meta", status, $0) } ?? status).font(.vmk(13, weight: .medium)).foregroundStyle(tint).fixedSize(horizontal: false, vertical: true)
                 if let retry {
                     Button(action: retry) {
                         Label(tr("common.try_again"), systemImage: "arrow.clockwise").font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch)
@@ -123,7 +125,7 @@ struct FailedRow: View {
         .padding(12).frame(maxWidth: .infinity, alignment: .leading)
         .background(container, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(tr("videos.failed_row_a11y", title, status, message))
+        .accessibilityLabel(tr("videos.failed_row_a11y", title, status, message ?? tr("videos.no_credits_were_used")))
     }
 }
 

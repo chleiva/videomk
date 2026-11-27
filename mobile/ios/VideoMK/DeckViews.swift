@@ -8,28 +8,6 @@ func deckContentTypes(_ caps: DeckCapabilities?) -> [UTType] {
 }
 
 /// "Add a presentation": one quiet row that looks like the photos row. Only drawn when the server has the feature on.
-struct DeckAddRow: View {
-    let action: () -> Void
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                Image(systemName: "rectangle.on.rectangle.angled").font(.vmk(20)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(tr("create.add_presentation")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading)
-                    Text(tr("create.presentation_hint")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 4)
-                Image(systemName: "chevron.right").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary)
-            }
-            .padding(.horizontal, 14).padding(.vertical, 10).frame(minHeight: 64)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.outline, lineWidth: 1))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(tr("create.add_presentation")).accessibilityHint(tr("deck.add_a11y_hint")).accessibilityIdentifier("deckButton")
-    }
-}
 
 /// The attached presentation, in whatever state the journey is in: uploading (progress, cancel), reading (spinner), ready (name, slides, length, credits,
 /// the promise) or a calm problem with the right action. The price follows the length chosen below.
@@ -51,8 +29,8 @@ struct DeckCard: View {
             }
         }
         .padding(14).frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(isProblem ? Theme.warning.opacity(0.7) : Theme.outline, lineWidth: 1))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(isProblem ? Theme.warning.opacity(0.7) : Theme.outline, lineWidth: 1))
         .accessibilityElement(children: .contain).accessibilityIdentifier("deckCard")
     }
 
@@ -60,7 +38,7 @@ struct DeckCard: View {
 
     private func header(_ symbol: String, tint: Color = Theme.primary, container: Color = Theme.primaryContainer) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol).font(.vmk(18)).foregroundStyle(tint).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(container, in: RoundedRectangle(cornerRadius: 12, style: .continuous)).accessibilityHidden(true)
+            Image(systemName: symbol).font(.vmk(18)).foregroundStyle(tint).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(container, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).accessibilityHidden(true)
             if let name = deck.fileName {
                 Text(name).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).lineLimit(typeSize.isAccessibilitySize ? 4 : 2).truncationMode(.middle).fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("deckName")

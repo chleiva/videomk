@@ -36,37 +36,26 @@ struct CreateView: View {
         NavigationStack {
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        promptCard.id("prompt")
-                        if form.hasDeck { Text(tr("deck.prompt_hint")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 6).padding(.top, 6).accessibilityIdentifier("deckPromptHint") }
-                        photosRow.padding(.top, 12)
-                        deckSection.padding(.top, 12)
-                        section(tr("create.what_is_it_for")).padding(.top, 20)
-                        platformChips.padding(.top, 8)
-                        recommendation(proxy).padding(.top, 10)
-                        alsoWorks
-                        deckVerticalWarning.padding(.top, 4)
-                        fourKAdvice.padding(.top, 4)
-                        section(tr("create.length")).padding(.top, 18)
-                        lengthChips.padding(.top, 8)
-                        maxHint.padding(.top, 6)
-                        photoHint.padding(.top, 8)
-                        moreOptions.padding(.top, 18).id("more")
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack { GlassIconButton(symbol: "xmark", label: tr("common.cancel"), identifier: "createCancel") { cancel() }; Spacer() }
+                        promptArea.id("prompt")
+                        if form.hasDeck { Text(tr("deck.prompt_hint")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckPromptHint") }
+                        attachments
+                        deckSection
+                        pills
+                        notice
                     }
-                    .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
+                    .padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 24)
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .onChange(of: create.deck.state) { _, state in
                     // a result (ready or a problem) is brought fully into view: on a small phone its buttons start under the bottom bar
                     switch state { case .ready, .failed: withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { proxy.scrollTo("deck", anchor: .bottom) }; default: break }
                 }
-                .onChange(of: create.showMore) { _, open in if open { withAnimation { proxy.scrollTo("format", anchor: .top) } } }
-                .task { if create.showMore { try? await Task.sleep(for: .milliseconds(300)); proxy.scrollTo("more", anchor: .top) } }
                 .background(Theme.background.ignoresSafeArea())
                 .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar(proxy) }
             }
-            .navigationTitle(tr("create.new_video")).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(tr("common.cancel")) { cancel() }.accessibilityIdentifier("createCancel") } }
+            .toolbar(.hidden, for: .navigationBar)
             .confirmationDialog(tr("create.discard_this_video"), isPresented: $confirmDiscard, titleVisibility: .visible) {
                 Button(tr("create.discard"), role: .destructive) { discard() }
                 Button(tr("create.keep_editing"), role: .cancel) {}
@@ -77,11 +66,14 @@ struct CreateView: View {
         .task {
             await create.loadCapabilities(userID: model.userID)
             if let auto = create.autoOpenPhotos { create.autoOpenPhotos = nil; addOnLibrary = auto.library; try? await Task.sleep(for: .milliseconds(350)); showingAdd = true }
+            else if !create.form.hasContent && !create.form.hasDeck && !create.deck.isActive && create.stage == .form {      // the keyboard opens at once on an empty prompt: type, then Create
+                try? await Task.sleep(for: .milliseconds(450)); if !create.form.hasContent { focused = true }
+            }
         }
         .onAppear { dictation.onText = { create.form.text = $0 }; dictation.onKeyboardFallback = { focused = true } }
         .onDisappear { dictation.stop() }
         .sheet(isPresented: $showingAdd, onDismiss: { if pendingDeckPick { pendingDeckPick = false; startDeckPick() } }) {
-            AddPhotosSheet(attached: totalPhotos, minutes: form.minutes, startOnLibrary: addOnLibrary, onDeck: create.deckAvailable ? { pendingDeckPick = true } : nil) { phone, library in
+            AddPhotosSheet(attached: totalPhotos, minutes: form.minutes, startOnLibrary: addOnLibrary, onDeck: nil) { phone, library in
                 create.photos.add(phone)
                 let known = Set(model.composerLibrary.map(\.id))
                 model.composerLibrary += library.filter { !known.contains($0.id) }
@@ -103,7 +95,7 @@ struct CreateView: View {
             Button(tr("deck.replace_deck.keep"), role: .cancel) {}
         } message: { Text(tr("deck.replace_deck.message")) }
         .onChange(of: create.deck.state, initial: true) { _, _ in create.syncDeck() }
-        .sheet(isPresented: $showingCost) { CostExplainerSheet() }
+        .sheet(isPresented: $create.showMore) { CreateOptionsSheet(create: create) }
         .sheet(isPresented: $showingPhotos) { AttachedPhotosSheet(create: create) { showingPhotos = false; showingAdd = true } }
         .sheet(isPresented: Binding(get: { create.stage != .form && create.stage != .checking(slow: false) }, set: { if !$0 { create.dismissOverlay() } })) {
             CreateStageSheet(create: create, balance: balance, mediaCount: totalPhotos, onSubmit: finish, onEdit: { create.dismissOverlay(); focused = true })
@@ -113,28 +105,23 @@ struct CreateView: View {
 
     // MARK: pieces
 
-    private func section(_ t: String) -> some View {
-        Text(t.uppercased()).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).accessibilityAddTraits(.isHeader)
-    }
-
-    private var promptCard: some View {
-        ZStack(alignment: .bottomTrailing) {
+    /// The prompt: large, borderless, the keyboard open at once. Photo and mic are two glass icons under it.
+    private var promptArea: some View {
+        VStack(alignment: .leading, spacing: 10) {
             TextField(form.hasDeck ? tr("deck.placeholder") : tr("create.describe_your_video_for_example"), text: $create.form.text, axis: .vertical)
-                .focused($focused).lineLimit(3...10).font(.vmk(19)).tint(Theme.primary)
+                .focused($focused).lineLimit(3...12).font(.vmk(22)).tint(Theme.primary)
                 .textInputAutocapitalization(.sentences)
                 .foregroundStyle(dictation.isListening ? Theme.textSecondary : Theme.text)
-                .frame(maxWidth: .infinity, minHeight: 112 - 32, alignment: .topLeading)
-                .padding(.bottom, 34)
+                .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
                 .accessibilityIdentifier("composerField")
             HStack(spacing: 8) {
+                photoButton
+                GlassIconButton(symbol: "slider.horizontal.3", label: tr("create.options"), identifier: "moreOptions") { focused = false; create.showMore = true }
+                Spacer(minLength: 8)
                 if dictation.isListening { Text(tr("create.listening_tap_to_stop")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("listeningHint") }
-                else if !form.hasContent && !form.hasDeck { Text(tr("create.tap_the_mic_to_speak")).font(.vmk(13)).foregroundStyle(Theme.textTertiary) }
                 mic
             }
         }
-        .padding(16)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(dictation.isListening ? Theme.danger.opacity(0.6) : Theme.outline, lineWidth: 1))
         .overlay(alignment: .top) { dictationHint }
     }
 
@@ -143,10 +130,11 @@ struct CreateView: View {
             Task { await dictation.toggle(currentText: create.form.text) }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
-            ZStack {
-                Circle().fill(dictation.isListening ? Theme.danger : Theme.surfaceRaised).frame(width: 44, height: 44)
-                Image(systemName: dictation.isListening ? "stop.fill" : "mic").font(.vmk(dictation.isListening ? 16 : 20)).foregroundStyle(dictation.isListening ? .white : Theme.text)
-            }.frame(width: 44, height: 44)
+            Image(systemName: dictation.isListening ? "stop.fill" : "mic").font(.vmk(dictation.isListening ? 16 : 19, weight: .semibold)).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                .foregroundStyle(dictation.isListening ? .white : Theme.text).frame(width: 44, height: 44)
+                .background { if dictation.isListening { Circle().fill(Theme.danger) } }
+                .modifier(MicGlass(listening: dictation.isListening))
+                .frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(dictation.isListening ? tr("create.stop_dictation") : tr("create.dictate")).accessibilityHint(tr("create.say_what_video_you_want"))
@@ -156,12 +144,12 @@ struct CreateView: View {
     @ViewBuilder private var dictationHint: some View {
         if case .unavailable(let message) = dictation.state {
             Label(message, systemImage: "mic.slash").font(.footnote).foregroundStyle(Theme.warning).padding(10)
-                .background(Theme.warningContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous)).offset(y: -44)
+                .background(Theme.warningContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).offset(y: -44)
                 .accessibilityIdentifier("dictationUnavailable")
                 .task(id: message) { try? await Task.sleep(for: .seconds(12)); dictation.clearHint() }
         } else if case .keyboardHint(let message) = dictation.state {
             Label(message, systemImage: "keyboard").font(.footnote).foregroundStyle(Theme.textSecondary).padding(10)
-                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous)).offset(y: -44)
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).offset(y: -44)
                 .accessibilityIdentifier("dictationKeyboardHint")
                 .task { try? await Task.sleep(for: .seconds(8)); dictation.clearHint() }
         }
@@ -169,48 +157,50 @@ struct CreateView: View {
 
     // photos
 
-    @ViewBuilder private var photosRow: some View {
-        if totalPhotos == 0 && create.photos.loading == 0 {
-            Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: {
-                HStack(spacing: 14) {
-                    Image(systemName: "photo.badge.plus").font(.vmk(20)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(tr("create.add_photos")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text)
-                        Text(tr("create.optional_from_this_phone_or")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer(minLength: 4)
-                    Image(systemName: "chevron.right").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary)
-                }
-                .padding(.horizontal, 14).frame(minHeight: 64)
-                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.outline, lineWidth: 1))
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tr("create.add_photos")).accessibilityHint(tr("create.choose_photos_from_this_phone")).accessibilityIdentifier("photoButton")
+    /// One photo icon; a count badge when something is attached. When the account has presentations (and none is attached) it is a small menu:
+    /// Photos, or Add a presentation.
+    @ViewBuilder private var photoButton: some View {
+        if create.deckAvailable && !create.deck.isActive {
+            Menu {
+                Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: { Label(tr("create.add_photos"), systemImage: "photo") }.accessibilityIdentifier("photosMenuItem")
+                Button { startDeckPick() } label: { Label(tr("create.add_presentation"), systemImage: "rectangle.on.rectangle") }.accessibilityIdentifier("deckButton")
+            } label: { photoIcon }
+            .accessibilityLabel(totalPhotos > 0 ? tr("photos.count", totalPhotos) : tr("create.add_photos")).accessibilityIdentifier("photoButton")
         } else {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 10) {
-                    Image(systemName: "photo.badge.plus").font(.vmk(15)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 32, height: 32).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    Text(tr("photos.count", totalPhotos)).font(.vmk(17, weight: .bold).monospacedDigit()).foregroundStyle(Theme.text)
-                        .accessibilityIdentifier("photosNote")
-                    Spacer()
-                    Button(tr("common.edit")) { focused = false; showingPhotos = true }.font(.vmk(16, weight: .semibold)).frame(minWidth: 44, minHeight: 44).accessibilityIdentifier("photoButton")
-                }
+            Button { focused = false; addOnLibrary = false; startPhotoAdd() } label: { photoIcon }
+                .buttonStyle(.plain)
+                .accessibilityLabel(totalPhotos > 0 ? tr("photos.count", totalPhotos) : tr("create.add_photos")).accessibilityHint(tr("create.choose_photos_from_this_phone")).accessibilityIdentifier("photoButton")
+        }
+    }
+
+    private var photoIcon: some View {
+        Image(systemName: "photo").font(.vmk(19, weight: .semibold)).dynamicTypeSize(...DynamicTypeSize.xxxLarge).foregroundStyle(Theme.text).frame(width: 44, height: 44).vmkGlass(in: Circle())
+            .overlay(alignment: .topTrailing) {
+                if totalPhotos > 0 { Text("\(totalPhotos)").font(.vmk(11, weight: .bold).monospacedDigit()).foregroundStyle(Theme.onPrimary).padding(.horizontal, 6).frame(minWidth: 20, minHeight: 20).background(Theme.gradient, in: Capsule()).offset(x: 6, y: -6).accessibilityHidden(true) }
+            }
+            .frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
+    }
+
+    /// A single thumbnail strip, only when something is attached.
+    @ViewBuilder private var attachments: some View {
+        if totalPhotos > 0 || create.photos.loading > 0 {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
-                    ForEach(Array(create.thumbs(library: model.composerLibrary).prefix(4).enumerated()), id: \.offset) { _, t in ThumbCell(thumb: t, media: model.media) }
-                    if totalPhotos > 4 {
-                        Button { showingPhotos = true } label: { Text("+\(totalPhotos - 4)").font(.vmk(17, weight: .bold)).foregroundStyle(Theme.primary).frame(width: 56, height: 56).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous)) }.buttonStyle(.plain).accessibilityLabel(tr("create.more_photos", totalPhotos - 4))
+                    ForEach(Array(create.thumbs(library: model.composerLibrary).prefix(5).enumerated()), id: \.offset) { _, t in ThumbCell(thumb: t, media: model.media) }
+                    if totalPhotos > 5 {
+                        Button { showingPhotos = true } label: { Text("+\(totalPhotos - 5)").font(.vmk(17, weight: .bold)).foregroundStyle(Theme.primary).frame(width: 56, height: 56).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)) }
+                            .buttonStyle(.plain).accessibilityLabel(tr("create.more_photos", totalPhotos - 5))
+                    } else if totalPhotos > 0 {
+                        Button { showingPhotos = true } label: { Image(systemName: "pencil").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.primary).frame(width: 56, height: 56).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)) }
+                            .buttonStyle(.plain).accessibilityLabel(tr("common.edit")).accessibilityIdentifier("editPhotos")
                     }
                     if create.photos.loading > 0 { ProgressView().frame(width: 56, height: 56) }
                     Spacer(minLength: 0)
                 }
+                .accessibilityElement(children: .contain).accessibilityLabel(tr("photos.count", totalPhotos)).accessibilityIdentifier("photosNote")
                 if let n = create.photos.notice { Text(n).font(.caption).foregroundStyle(Theme.danger).accessibilityIdentifier("photosNotice") }
                 if let p = create.photos.preparingText { Text(p).font(.caption.weight(.semibold)).foregroundStyle(Theme.primary).accessibilityIdentifier("photosPreparing") }
             }
-            .padding(14).frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.outline, lineWidth: 1))
         }
     }
 
@@ -229,275 +219,88 @@ struct CreateView: View {
 
     @ViewBuilder private var deckSection: some View {
         if create.deck.isActive { DeckCard(create: create) { startDeckPick() }.id("deck") }
-        else if create.deckAvailable { DeckAddRow { startDeckPick() } }
     }
 
-    /// The slide is small in a vertical frame: a gentle line and one tap back to 16:9. Never a block.
-    @ViewBuilder private var deckVerticalWarning: some View {
+    // pills: For, Length, Look, and the one Options sheet
+
+    private var pills: some View {
+        WrapLayout(spacing: 8) {
+            forPill
+            lengthPill
+            lookPill
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    /// Short words only (a pill is 12 characters at most); the menu rows carry the long names.
+    private func shortName(_ chip: PlatformChip) -> String {
+        switch chip.id { case "other": tr("pill.video"); case "shorts": tr("pill.shorts"); default: chip.label }
+    }
+
+    private var forPill: some View {
+        let current = form.chip(create.caps)
+        let value = form.isCustom(create.caps) ? tr("create.custom") : (current.map(shortName) ?? tr("pill.video"))
+        return Pill(symbol: form.aspect == "16:9" ? "rectangle" : "rectangle.portrait", value: value, spoken: tr("create.what_is_it_for"), identifier: "forPill") {
+            ForEach(PlatformChips.make(create.caps)) { chip in
+                let selected = current?.id == chip.id && !form.isCustom(create.caps)
+                Button {
+                    if chip.supported { create.form.select(chip); Haptics.play(.selection) } else { Haptics.play(.warning) }
+                } label: {
+                    if selected { Label(chip.label, systemImage: "checkmark") } else { Text(chip.supported ? chip.label : tr("create.chip_soon_a11y", chip.label, create.caps.aspectName(chip.aspect))) }
+                }
+                .disabled(!chip.supported)
+                .accessibilityIdentifier("platform-\(chip.id)")
+            }
+        }
+    }
+
+    private var lengthPill: some View {
+        let max = form.chip(create.caps)?.maxMinutes
+        return Pill(symbol: "clock", value: LengthLabel.chip(form.minutes), spoken: tr("create.length"), identifier: "lengthPill") {
+            ForEach(create.caps.lengthPresets, id: \.self) { m in
+                let credits = ComposerPlan.credits(forMinutes: m, multiplier: form.creditsMultiplier)
+                let over = max.map { m > $0 + 1e-9 } ?? false
+                Button { create.form.setMinutes(m); Haptics.play(.selection) } label: {
+                    let title = "\(LengthLabel.chip(m))  ·  \(tr("credits.count", credits))"
+                    if form.minutes == m { Label(title, systemImage: "checkmark") } else { Text(title) }
+                }
+                .disabled(over)
+                .accessibilityLabel(tr("create.length_a11y", LengthLabel.spoken(m), tr("credits.count", credits)))
+                .accessibilityIdentifier("length-\(m < 1 ? "\(Int((m * 60).rounded()))s" : "\(Int(m))")")
+            }
+            if let chip = form.chip(create.caps), let max { Text(tr("create.max_length", chip.label, LengthLabel.clock(max))) }
+        }
+    }
+
+    private var lookPill: some View {
+        Pill(symbol: "sparkles", value: form.look?.title ?? tr("pill.auto"), spoken: tr("create.look"), identifier: "lookPill") {
+            Button { create.form.look = nil; Haptics.play(.selection) } label: { if form.look == nil { Label(tr("look.auto"), systemImage: "checkmark") } else { Text(tr("look.auto")) } }
+            ForEach(VideoLook.allCases) { l in
+                Button { create.form.look = l; Haptics.play(.selection) } label: { if form.look == l { Label(l.title, systemImage: "checkmark") } else { Text(l.title) } }
+            }
+        }
+    }
+
+    // notices: at most one, only when something needs a decision
+
+    @ViewBuilder private var notice: some View {
         if form.deckVerticalWarning {
-            HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "info.circle").font(.vmk(14)).foregroundStyle(Theme.warning).padding(.top, 2).accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("deck.vertical_warning")).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("deckVerticalWarning")
-                    FixChip(title: tr("create.use", "16:9")) { create.form.aspect = "16:9"; create.form.normalize(create.caps); Haptics.play(.selection) }.accessibilityIdentifier("deckUse169")
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(12).background(Theme.warningContainer.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            noticeRow(tr("deck.vertical_warning"), id: "deckVerticalWarning", fix: tr("create.use", "16:9"), fixID: "deckUse169") { create.form.aspect = "16:9"; create.form.normalize(create.caps); Haptics.play(.selection) }
+        } else if let advice = form.fourKAdvice(create.caps) {
+            noticeRow(advice.text, id: "fourKAdvice", fix: tr("create.use", create.caps.resolutionLabel(advice.useResolution)), fixID: "use1080p") { create.form.setResolution(advice.useResolution); Haptics.play(.selection) }
+        } else if let hint = form.maxLengthHint(create.caps) {
+            noticeRow(hint.text, id: "maxLengthHint", fix: tr("create.use", LengthLabel.chip(hint.fixMinutes)), fixID: "maxFixChip") { create.form.setMinutes(hint.fixMinutes); Haptics.play(.selection) }
         }
     }
 
-    // platform
-
-    private var platformChips: some View {
-        WrapLayout(spacing: 8) {                     // chips wrap onto more lines: nothing is clipped or scrolled sideways (Spanish, large text)
-            Group {
-                ForEach(PlatformChips.make(create.caps)) { chip in
-                    let selected = form.chip(create.caps)?.id == chip.id && !form.isCustom(create.caps)
-                    Button {
-                        if chip.supported { create.form.select(chip); Haptics.play(.selection) }
-                        else { Haptics.play(.warning); soonTip = true; Task { try? await Task.sleep(for: .seconds(2)); soonTip = false } }
-                    } label: {
-                        HStack(spacing: 6) {
-                            if selected { Image(systemName: "checkmark").font(.vmk(13, weight: .bold)) }
-                            else { Image(systemName: icon(chip)).font(.vmk(15)) }
-                            Text(chip.label).font(.vmk(15, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
-                            if !chip.supported { Text(tr("create.soon")).font(.vmk(11, weight: .bold)).foregroundStyle(Theme.textSecondary).padding(.horizontal, 6).frame(height: 18).background(Theme.surface3, in: Capsule()) }
-                        }
-                        .foregroundStyle(selected ? Theme.primary : Theme.text).padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 44)
-                        .background(selected ? Theme.primaryContainer : Theme.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, lineWidth: selected ? 1.5 : 1))
-                        .opacity(chip.supported ? 1 : 0.62)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(chip.supported ? chip.label : tr("create.chip_soon_a11y", chip.label, create.caps.aspectName(chip.aspect)))
-                    .accessibilityAddTraits(selected ? .isSelected : [])
-                    .accessibilityIdentifier("platform-\(chip.id)")
-                }
-            }
-        }
-        .overlay(alignment: .bottomLeading) { if soonTip { Text(tr("create.coming_soon")).font(.vmk(13, weight: .semibold)).foregroundStyle(.white).padding(.horizontal, 12).frame(height: 30).background(Color(hex: 0x23263F), in: Capsule()).offset(y: 34).transition(.opacity) } }
-        .accessibilityElement(children: .contain).accessibilityLabel(tr("create.what_is_it_for"))
-    }
-
-    private func icon(_ chip: PlatformChip) -> String { chip.id == "other" ? "sparkles" : chip.aspect == "16:9" ? "rectangle" : chip.aspect == "4:5" ? "rectangle.portrait" : "rectangle.portrait" }
-
-    private func recommendation(_ proxy: ScrollViewProxy) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: form.aspect == "16:9" ? "rectangle" : "rectangle.portrait").font(.vmk(14)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            let parts = form.recommendation(create.caps).components(separatedBy: " · ")
-            (Text(parts.first.map { "\($0) · " } ?? "").foregroundStyle(Theme.textSecondary) + Text(parts.dropFirst().joined(separator: " · ")).fontWeight(.bold).foregroundStyle(Theme.text))
-                .font(.vmk(15.5)).lineLimit(2).accessibilityIdentifier("recommendation")
+    private func noticeRow(_ text: String, id: String, fix: String, fixID: String, action: @escaping () -> Void) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "info.circle").font(.vmk(14)).foregroundStyle(Theme.warning).accessibilityHidden(true)
+            Text(text).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier(id)
             Spacer(minLength: 4)
-            if form.canChangeFormat(create.caps) {
-                Button(tr("create.change")) { withAnimation(reduceMotion ? nil : .snappy) { create.showMore = true } }.font(.vmk(15.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("changeFormat")
-            }
+            FixChip(title: fix, action: action).accessibilityIdentifier(fixID)
         }
-        .accessibilityElement(children: .combine)
-    }
-
-    /// "Also works: Square, Landscape": the platform's other formats, switching only the format.
-    @ViewBuilder private var alsoWorks: some View {
-        let others = form.alsoWorks(create.caps)
-        if !others.isEmpty {
-            WrapLayout(spacing: 8) {
-                Text(tr("create.also_works")).font(.vmk(13.5)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
-                ForEach(others, id: \.id) { o in
-                    Button { create.form.aspect = o.id; create.form.normalize(create.caps); Haptics.play(.selection) } label: {
-                        Text(o.name).font(.vmk(13.5, weight: .semibold)).foregroundStyle(Theme.primary).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 12).padding(.vertical, 6).frame(minHeight: 30).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 15, style: .continuous)).frame(minHeight: 44)
-                    }.buttonStyle(.plain).accessibilityLabel(tr("create.use_instead", o.name)).accessibilityIdentifier("also-\(o.id)")
-                }
-            }
-            .accessibilityElement(children: .contain)
-        }
-    }
-
-    /// Longer than the platform allows: one gentle line and a one-tap chip.
-    @ViewBuilder private var maxHint: some View {
-        if let hint = form.maxLengthHint(create.caps) {
-            HStack(spacing: 8) {
-                Image(systemName: "info.circle").font(.vmk(14)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-                Text(hint.text).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("maxLengthHint")
-                Spacer(minLength: 4)
-                FixChip(title: tr("create.use", LengthLabel.chip(hint.fixMinutes))) { create.form.setMinutes(hint.fixMinutes); Haptics.play(.selection) }
-                    .accessibilityLabel(tr("create.use_instead", LengthLabel.spoken(hint.fixMinutes))).accessibilityIdentifier("maxFixChip")
-            }
-        }
-    }
-
-    // length
-
-    private var lengthChips: some View {
-        let presets = create.caps.lengthPresets
-        let wide = typeSize >= .xxxLarge
-        return Group {
-            if wide { LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) { ForEach(presets, id: \.self) { lengthChip($0, fixedWidth: nil) } } }
-            else { ScrollViewReader { sp in ScrollView(.horizontal, showsIndicators: false) { HStack(spacing: 8) { ForEach(presets, id: \.self) { lengthChip($0, fixedWidth: 70).id($0) } }.padding(.horizontal, 16) }
-                .onAppear { sp.scrollTo(form.minutes, anchor: .center) }.onChange(of: form.minutes) { _, m in withAnimation { sp.scrollTo(m, anchor: .center) } } }.padding(.horizontal, -16) }
-        }
-        .accessibilityElement(children: .contain).accessibilityLabel(tr("create.length"))
-    }
-
-    private func lengthChip(_ m: Double, fixedWidth: CGFloat?) -> some View {
-        let selected = form.minutes == m, credits = ComposerPlan.credits(forMinutes: m, multiplier: form.creditsMultiplier), costly = balance.map { credits > $0 } ?? false
-        return Button { create.form.setMinutes(m); Haptics.play(.selection) } label: {
-            VStack(spacing: 2) {
-                Text(LengthLabel.chip(m)).font(.vmk(16, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.text).fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.vmk(10)); Text("\(credits)").font(.vmk(13, weight: .semibold).monospacedDigit()) }
-                    .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
-            }
-            .padding(.horizontal, 6).frame(minWidth: fixedWidth).frame(maxWidth: fixedWidth == nil ? .infinity : nil, minHeight: 58)
-            .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(tr("create.length_a11y", LengthLabel.spoken(m), tr("credits.count", credits)))
-        .accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("length-\(m < 1 ? "\(Int((m * 60).rounded()))s" : "\(Int(m))")")
-    }
-
-    @ViewBuilder private var photoHint: some View {
-        if let hint = PhotoCapacity.hint(photos: totalPhotos, minutes: form.minutes, options: create.caps.lengthPresets) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(hint).font(.vmk(15)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("photoCapacityHint")
-                if let fix = ComposerPlan.photoFix(photos: totalPhotos, minutes: form.minutes, balance: balance, lengths: create.caps.lengthPresets, multiplier: form.creditsMultiplier) {
-                    FixChip(title: fix.title) { if case .useMinutes(let m, _) = fix { create.form.setMinutes(m); Haptics.play(.selection) } }.accessibilityIdentifier("fixChip").accessibilityLabel(fix.title.replacingOccurrences(of: "⚡", with: tr("a11y.credits_word")))
-                }
-            }
-        }
-    }
-
-    // more options
-
-    private var moreOptions: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Button { withAnimation(reduceMotion ? nil : .snappy) { create.showMore.toggle() } } label: {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("create.more_options")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text)
-                        if !create.showMore { Text(form.moreSummary(create.caps)).font(.vmk(14)).foregroundStyle(Theme.textSecondary).lineLimit(1) }
-                    }
-                    Spacer()
-                    Image(systemName: create.showMore ? "chevron.up" : "chevron.down").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.text)
-                }
-                .padding(.horizontal, 16).frame(minHeight: 56).contentShape(Rectangle())
-            }
-            .buttonStyle(.plain).accessibilityAddTraits(.isButton).accessibilityValue(create.showMore ? tr("common.expanded") : tr("common.collapsed")).accessibilityIdentifier("moreOptions")
-            if create.showMore {
-                Divider()
-                VStack(alignment: .leading, spacing: 0) {
-                    section(tr("create.look")).padding(.bottom, 8)
-                    HStack(alignment: .top, spacing: 10) { look(nil, tr("create.look_auto")); ForEach(VideoLook.allCases) { look($0, $0.title) } }
-                    Divider().padding(.vertical, 12)
-                    Toggle(isOn: $create.form.captions) { Label(tr("create.subtitles"), systemImage: "captions.bubble").font(.vmk(17)).foregroundStyle(Theme.text) }.tint(Theme.primary).frame(minHeight: 48).accessibilityIdentifier("subtitlesToggle")
-                    Divider()
-                    languageRow
-                    Divider().padding(.bottom, 12)
-                    section(tr("create.format")).padding(.bottom, 8).id("format")
-                    formatTiles
-                    resolutionControl.padding(.top, 10)
-                }
-                .padding(16)
-            }
-        }
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Theme.outline, lineWidth: 1))
-    }
-
-    private func look(_ look: VideoLook?, _ title: String) -> some View {
-        let selected = form.look == look
-        return Button { create.form.look = look; Haptics.play(.selection) } label: {
-            VStack(spacing: 6) {
-                LookSwatch(look: look).aspectRatio(3 / 3.6, contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
-                    .padding(selected ? 3 : 0).background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
-                Text(title).font(.vmk(15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.7).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .buttonStyle(.plain).frame(maxWidth: .infinity)
-        .accessibilityLabel(look == nil ? tr("create.look_auto_a11y") : title).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("look-\(look?.rawValue ?? "auto")")
-    }
-
-    private var languageRow: some View {
-        Menu {
-            Button { create.form.language = "auto" } label: { if form.language == "auto" { Label(tr("create.same_as_my_description"), systemImage: "checkmark") } else { Text(tr("create.same_as_my_description")) } }
-            ForEach(create.caps.languages, id: \.id) { l in Button { create.form.language = l.id } label: { if form.language == l.id { Label(l.label, systemImage: "checkmark") } else { Text(l.label) } } }
-        } label: {
-            HStack {
-                Label(tr("create.language"), systemImage: "globe").font(.vmk(17)).foregroundStyle(Theme.text)
-                Spacer(minLength: 8)
-                Text(form.language == "auto" ? tr("create.same_as_my_description") : (create.caps.languages.first { $0.id == form.language }?.label ?? form.language)).font(.vmk(15)).foregroundStyle(Theme.textSecondary).lineLimit(1)
-                Image(systemName: "chevron.right").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.textSecondary)
-            }.frame(minHeight: 48)
-        }
-        .accessibilityIdentifier("languageRow")
-    }
-
-    private var formatTiles: some View {
-        HStack(spacing: 10) {
-            ForEach([("16:9", tr("aspect.landscape"), "rectangle"), ("9:16", tr("aspect.vertical"), "rectangle.portrait"), ("1:1", tr("aspect.square"), "square"), ("4:5", tr("aspect.portrait"), "rectangle.portrait")], id: \.0) { id, name, symbol in
-                let ready = create.caps.readyAspects.contains { $0.id == id }
-                let selected = form.aspect == id
-                let beta = create.caps.aspect(id)?.beta == true
-                Button { if ready { create.form.aspect = id; create.form.normalize(create.caps); Haptics.play(.selection) } else { Haptics.play(.warning) } } label: {
-                    VStack(spacing: 5) {
-                        Image(systemName: symbol).font(.vmk(22)).foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-                        Text("\(name)\n\(id)").font(.vmk(13, weight: .semibold)).multilineTextAlignment(.center).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(2).minimumScaleFactor(0.7).fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(.horizontal, 4).padding(.vertical, 8).frame(maxWidth: .infinity, minHeight: 76)
-                    .background(selected ? Theme.primaryContainer : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
-                    .overlay(alignment: .topTrailing) { if !ready || beta { Text(ready ? tr("create.beta") : tr("create.soon")).font(.vmk(10.5, weight: .bold)).foregroundStyle(Theme.textSecondary).padding(.top, 5).padding(.trailing, 7) } }
-                    .opacity(ready ? 1 : 0.62)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(ready ? (beta ? tr("create.aspect_a11y_beta", name, id) : "\(name) \(id)") : tr("create.aspect_a11y_soon", name, id)).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("aspect-\(id)")
-            }
-        }
-    }
-
-    /// The resolutions the server lists for this shape, in its order ("4K" carries a small "2x credits" mark); its note sits underneath when chosen.
-    @ViewBuilder private var resolutionControl: some View {
-        let choices = form.resolutionChoices(create.caps)
-        if choices.count > 1 {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 0) {
-                    ForEach(choices, id: \.id) { r in
-                        let selected = form.resolution == r.id
-                        Button { create.form.setResolution(r.id); Haptics.play(.selection) } label: {
-                            VStack(spacing: 1) {
-                                Text(r.label).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
-                                if r.creditsMultiplier > 1 { Text(tr("create.credits_multiplier", r.creditsMultiplier)).font(.vmk(11.5, weight: .bold)).foregroundStyle(selected ? Theme.primary : Theme.textSecondary).fixedSize(horizontal: false, vertical: true) }
-                            }
-                            .multilineTextAlignment(.center).padding(.vertical, 4).frame(maxWidth: .infinity, minHeight: 44)
-                            .background(selected ? Theme.surface : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            .shadow(color: .black.opacity(selected ? 0.08 : 0), radius: 3, y: 1)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(r.creditsMultiplier > 1 ? tr("create.credits_multiplier_a11y", r.label, r.creditsMultiplier) : r.label).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("resolution-\(r.id)")
-                    }
-                }
-                .padding(3).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                if let note = form.resolutionNote(create.caps) {
-                    Text(note).font(.vmk(13.5)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("resolutionNote")
-                }
-            }
-        }
-    }
-
-    /// 4K chosen for a platform that does not deliver it: the server's sentence and one tap back to 1080p. Never a block.
-    @ViewBuilder private var fourKAdvice: some View {
-        if let advice = form.fourKAdvice(create.caps) {
-            HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "info.circle").font(.vmk(14)).foregroundStyle(Theme.warning).padding(.top, 2).accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(advice.text).font(.vmk(14)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("fourKAdvice")
-                    FixChip(title: tr("create.use", create.caps.resolutionLabel(advice.useResolution))) { create.form.setResolution(advice.useResolution); Haptics.play(.selection) }
-                        .accessibilityIdentifier("use1080p")
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(12).background(Theme.warningContainer.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
+        .padding(12).background(Theme.warningContainer.opacity(0.5), in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
     }
 
     // MARK: bottom bar
@@ -505,25 +308,7 @@ struct CreateView: View {
     private func bottomBar(_ proxy: ScrollViewProxy) -> some View {
         let s = status
         let ready = s.canSend && !checking
-        return VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                if checking { ProgressView().controlSize(.small) }
-                else { Image(systemName: s.isProblem && s.kind != .tooShort ? "exclamationmark.triangle" : s.kind == .tooShort || s.kind == .price ? "info.circle" : "bolt.fill").font(.vmk(14, weight: .semibold)).foregroundStyle(s.isProblem && s.kind != .tooShort ? tint(s) : Theme.primary).accessibilityHidden(true) }
-                Text(checking ? tr("create.checking_your_request") : s.kind == .price || s.kind == .tooShort && false ? (form.hasContent ? s.message : tr("create.describe_to_continue")) : s.message)
-                    .font(.vmk(14, weight: .medium)).foregroundStyle(tint(s)).fixedSize(horizontal: false, vertical: true)
-                    .modifier(Shake(travel: reduceMotion ? 0 : 4, value: shake))
-                    .accessibilityIdentifier(unaffordable ? "notEnoughCredits" : "costLine")
-                Spacer(minLength: 4)
-                if let fix = s.fix, !checking { FixChip(title: fix.title) { applyFix(fix) }.accessibilityIdentifier("fixChip") }
-                else if !checking && !s.isProblem {
-                    Button { showingCost = true } label: { Image(systemName: "info.circle").font(.vmk(17)).foregroundStyle(Theme.primary).frame(width: Theme.minTouch, height: Theme.minTouch) }
-                        .buttonStyle(.plain).padding(.vertical, -10).accessibilityLabel(tr("create.cost_why")).accessibilityIdentifier("costWhy")
-                }
-            }
-            .frame(minHeight: 28)
-            .padding(.horizontal, flash ? 6 : 0).background(flash ? Theme.warningContainer : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .accessibilityElement(children: .contain).accessibilityIdentifier("statusLine")
-            if form.creditsMultiplier > 1 { Text(tr("create.cost_4k_double")).font(.vmk(13)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).padding(.top, -4).accessibilityIdentifier("costFourK") }
+        return VStack(spacing: 8) {
             Button { tapCreate(s, proxy) } label: {
                 HStack(spacing: 8) {
                     if checking { ProgressView().tint(Theme.onPrimary) }
@@ -542,11 +327,36 @@ struct CreateView: View {
             .accessibilityValue(ready ? tr("create.ready_costs", tr("credits.count", form.options.credits)) : checking ? tr("create.checking_a11y") : tr("create.not_ready", s.message))
             .accessibilityHint(ready ? tr("create.starts_video") : tr("create.tells_missing"))
             .accessibilityIdentifier("sendButton")
+            caption(s)
         }
-        .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 8)
+        .padding(.horizontal, 20).padding(.top, 10).padding(.bottom, 8)
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)      // the bar that is always visible stays compact; the form above scrolls at full size
         .background(.bar)
-        .overlay(alignment: .top) { Divider() }
+    }
+
+    /// One line under the button, only when it says something: what is left, what is missing, or what is wrong (with its one-tap fix).
+    @ViewBuilder private func caption(_ s: ComposerStatus) -> some View {
+        Group {
+            if checking {
+                HStack(spacing: 8) { ProgressView().controlSize(.small); Text(tr("create.checking_your_request")).font(.vmk(14, weight: .medium)).foregroundStyle(Theme.textSecondary) }
+            } else if s.kind == .ready {
+                if let balance { Text(tr("create.credits_left", balance - form.options.credits)).font(.vmk(14)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("costLine") } else { Color.clear.frame(height: 0) }
+            } else if s.kind == .price || (s.kind == .tooShort && !form.hasContent) {
+                Text(tr("create.describe_to_continue")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("costLine")
+            } else {
+                HStack(spacing: 8) {
+                    Image(systemName: s.isProblem && s.kind != .tooShort ? "exclamationmark.triangle" : "info.circle").font(.vmk(14, weight: .semibold)).foregroundStyle(tint(s)).accessibilityHidden(true)
+                    Text(s.message).font(.vmk(14, weight: .medium)).foregroundStyle(tint(s)).fixedSize(horizontal: false, vertical: true)
+                        .modifier(Shake(travel: reduceMotion ? 0 : 4, value: shake))
+                        .accessibilityIdentifier(unaffordable ? "notEnoughCredits" : s.kind == .photoHint ? "photoCapacityHint" : "costLine")
+                    Spacer(minLength: 4)
+                    if let fix = s.fix { FixChip(title: fix.title) { applyFix(fix) }.accessibilityIdentifier("fixChip") }
+                }
+                .padding(.horizontal, flash ? 6 : 0).background(flash ? Theme.warningContainer : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
+        .frame(minHeight: 22)
+        .accessibilityElement(children: .contain).accessibilityIdentifier("statusLine")
     }
 
     private var showsPrice: Bool { create.deckComposer == .none || create.deckComposer == .ready }
@@ -606,7 +416,7 @@ struct ThumbCell: View {
     let media: MediaModel?
     var body: some View {
         switch thumb {
-        case .phone(let p): Image(uiImage: p.thumbnail).resizable().scaledToFill().frame(width: 56, height: 56).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous)).accessibilityIdentifier("attachedPhoto")
+        case .phone(let p): Image(uiImage: p.thumbnail).resizable().scaledToFill().frame(width: 56, height: 56).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous)).accessibilityIdentifier("attachedPhoto")
         case .library(let l): LibraryStripTile(photo: l, media: media, label: tr("create.library_photo_a11y"), showRemove: false) {}
         }
     }
@@ -632,4 +442,9 @@ struct AttachedPhotosSheet: View {
         }
         .presentationDetents([.medium, .large])
     }
+}
+
+private struct MicGlass: ViewModifier {
+    let listening: Bool
+    func body(content: Content) -> some View { if listening { content } else { content.vmkGlass(in: Circle()) } }
 }

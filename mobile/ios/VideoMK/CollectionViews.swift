@@ -14,14 +14,14 @@ struct CollectionsStrip: View {
             HStack {
                 Text(tr("viewer.collections")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.vmk(14.5, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
+                Button(tr("collections.see_all")) { media.showCollectionsList = true }.font(.vmk(15, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("seeAllCollections")
             }.padding(.horizontal, 16)
         }
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 10) {
                 Button(action: onNew) {
                     VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.surface).frame(width: 104, height: 104)
+                        RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).fill(Theme.surface).frame(width: 104, height: 104)
                             .overlay { Image(systemName: "plus").font(.title2).foregroundStyle(Theme.primary) }
                         Text(tr("collections.new")).font(.caption).foregroundStyle(Theme.textSecondary)
                     }
@@ -61,9 +61,9 @@ struct CollectionCard: View {
     @State private var cover: UIImage?
     var body: some View {
         VStack(spacing: 6) {
-            RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.surfaceRaised).frame(width: 104, height: 104)
+            RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).fill(Theme.surfaceRaised).frame(width: 104, height: 104)
                 .overlay { if let cover { Image(uiImage: cover).resizable().scaledToFill() } else { Text(collection.emoji ?? "").font(.largeTitle) } }
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
                 .overlay(alignment: .topLeading) { if collection.auto { AutoBadge().padding(6) } }
             VStack(spacing: 0) {
                 Text(collection.name).font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
@@ -212,7 +212,7 @@ struct CollectionsListView: View {
                 accentText(tr("collections.auto_note"), accent: Theme.primary, base: Theme.textSecondary)
                 ForEach(media.collections) { c in row(c) }
             }
-            .font(.vmk(14.5)).padding(.horizontal, 16).padding(.bottom, 24)
+            .font(.vmk(15)).padding(.horizontal, 16).padding(.bottom, 24)
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(tr("viewer.collections")).navigationBarTitleDisplayMode(.large)
@@ -236,7 +236,7 @@ struct CollectionsListView: View {
                 HStack(spacing: 14) {
                     CoverThumb(media: media, collection: c)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(c.name).font(.vmk(16.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
+                        Text(c.name).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                         HStack(spacing: 8) {
                             if c.auto { AutoChip() }
                             Text(tr("photos.count", c.count)).font(.vmk(14)).foregroundStyle(Theme.textSecondary)
@@ -265,9 +265,9 @@ struct CoverThumb: View {
     let collection: LibraryCollection
     @State private var image: UIImage?
     var body: some View {
-        RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Theme.surfaceRaised).frame(width: 60, height: 60)
+        RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).fill(Theme.surfaceRaised).frame(width: 60, height: 60)
             .overlay { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Text(collection.emoji ?? "").font(.title2) } }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
             .task(id: collection.coverID) {
                 guard let id = collection.coverID else { return }
                 image = await media.thumbnail(for: LibraryPhoto(id: id, thumbURL: collection.coverThumbURL))

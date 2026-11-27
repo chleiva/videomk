@@ -79,13 +79,13 @@ struct OrganizeSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(title).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
-                    Text(tr("organize.well_group_them_by_place")).font(.vmk(14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
+                    Text(tr("organize.well_group_them_by_place")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
                     VStack(spacing: 0) {
                         if skeleton { ForEach(0..<3, id: \.self) { _ in SkeletonRow() } }
                         else { ForEach(showAll ? groups : Array(groups.prefix(5))) { GroupRow(media: media, group: $0) } }
                     }.padding(.top, 14)
                     if !skeleton, groups.count > 5, !showAll {
-                        Button { withAnimation(reduceMotion ? nil : .snappy) { showAll = true } } label: { Text(tr("organize.more", groups.count - 5)).font(.vmk(14.5, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44, alignment: .leading) }
+                        Button { withAnimation(reduceMotion ? nil : .snappy) { showAll = true } } label: { Text(tr("organize.more", groups.count - 5)).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: 44, alignment: .leading) }
                             .buttonStyle(.plain).accessibilityLabel(tr("organize.more_a11y", groups.count - 5)).accessibilityIdentifier("organizeMore")
                     }
                     if let p = preview, p.skipped > 0, !skeleton {
@@ -103,7 +103,7 @@ struct OrganizeSheet: View {
     private var alwaysRow: some View {
         Toggle(isOn: Binding(get: { media.organizePref.switchIsOn }, set: { media.setOrganizePref(OrganizePref.fromSwitch($0)) })) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(tr("organize.always_organize_new_uploads")).font(.vmk(15.5, weight: .semibold)).foregroundStyle(Theme.text)
+                Text(tr("organize.always_organize_new_uploads")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text)
                 Text(tr("organize.photos_from_later_uploads_join")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
             }
         }
@@ -146,12 +146,12 @@ struct OrganizeSheet: View {
     private var singleContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(tr("organize.put_all_title", organized)).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 22).accessibilityAddTraits(.isHeader)
-            Text(tr("organize.give_it_a_name_you")).font(.vmk(14.5)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
+            Text(tr("organize.give_it_a_name_you")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).padding(.top, 6)
             TextField(tr("organize.collection_name"), text: $name).focused($nameFocused).font(.vmk(17)).padding(.horizontal, 14).frame(height: 52)
-                .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.primary, lineWidth: nameFocused ? 2 : 0))
+                .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: nameFocused ? 2 : 0))
                 .padding(.top, 16).submitLabel(.done).accessibilityIdentifier("collectionName")
-            Text(tr("organize.suggestions")).font(.vmk(12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
+            Text(tr("organize.suggestions")).font(.vmk(12, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 16)
             ScrollView(.horizontal, showsIndicators: false) {
                 WrapLayout(spacing: 8) { ForEach(SuggestedNames.suggest(groups: groups), id: \.self) { s in FixChip(title: s) { name = s } } }
             }
@@ -198,7 +198,7 @@ private struct GroupRow: View {
                 ForEach(Array(group.sampleIDs.prefix(3).enumerated()), id: \.offset) { i, id in SampleThumb(media: media, id: id).zIndex(Double(i)) }
             }.frame(width: 70, alignment: .leading).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                Text(group.name).font(.vmk(15.5, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(typeSize.isAccessibilitySize ? 3 : 1).minimumScaleFactor(0.8)
+                Text(group.name).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(typeSize.isAccessibilitySize ? 3 : 1).minimumScaleFactor(0.8)
                 Text(tr("photos.count", group.count)).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
                 if typeSize.isAccessibilitySize, group.existing { existing }
             }
@@ -230,7 +230,7 @@ private struct SkeletonRow: View {
     @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.surfaceRaised).frame(height: 56).padding(.vertical, 4)
+        RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).fill(Theme.surfaceRaised).frame(height: 56).padding(.vertical, 4)
             .opacity(pulse && !reduceMotion ? 0.55 : 1)
             .onAppear { if !reduceMotion { withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true } } }
             .accessibilityHidden(true)
@@ -267,9 +267,9 @@ struct OrganizeBar: View {
                 .padding(.horizontal, 14).padding(.vertical, 2)
                 GeometryReader { g in Rectangle().fill(tint(bar)).frame(width: g.size.width * bar.fraction) }.frame(height: 3)
             }
-            .background(bar.kind == .failed ? Theme.warningContainer : Theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(bar.kind == .failed ? Theme.warning : Theme.outline, lineWidth: 1))
+            .background(bar.kind == .failed ? Theme.warningContainer : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(bar.kind == .failed ? Theme.warning : Theme.outline, lineWidth: 1))
             .elevation(3)
             .padding(.horizontal, 12).padding(.bottom, 8)
             .accessibilityElement(children: .contain)

@@ -34,8 +34,9 @@ struct LibraryView: View {
             .background(Theme.background.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
-            .safeAreaInset(edge: .bottom, spacing: 0) { entry }       // an inset, not an overlay: the last row always scrolls clear of the button
+            .safeAreaInset(edge: .bottom, spacing: 0) { uploadStrip }       // an inset, not an overlay: the last row always scrolls clear
         }
+        .onChange(of: path) { _, p in model.tabBarHidden = !p.isEmpty }
         .task { await model.refresh() }
         .task { await model.createModel.loadCapabilities(userID: model.userID) }       // ready before the sheet opens
         #if DEBUG
@@ -71,39 +72,19 @@ struct LibraryView: View {
         showingCreate = true
     }
 
-    // MARK: the one entry
+    // MARK: upload progress (the only thing that floats above the tab bar, and only while photos are being uploaded)
 
-    /// The labelled floating capsule above the tab bar; on the empty home a full-width filled button.
-    @ViewBuilder private var entry: some View {
-        let empty = model.entries.isEmpty && model.loadState != .loading && model.loadState != .idle
-        VStack(alignment: empty ? .center : .trailing, spacing: 8) {
-            if let media = model.media { UploadPill(media: media) { model.selectedTab = 1 } }
-            Button { openCreate() } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "plus").font(.vmk(22, weight: .semibold))
-                    Text(tr("create.new_video")).font(.vmk(19, weight: .bold))
-                }
-                .foregroundStyle(Theme.onPrimary).frame(maxWidth: empty ? .infinity : nil, minHeight: 58).padding(.horizontal, empty ? 0 : 24).padding(.vertical, 6)
-                .background(Theme.gradient, in: Capsule())
-                .shadow(color: Theme.gradientStart.opacity(0.4), radius: 14, y: 8).padding(.bottom, 4)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tr("create.new_video")).accessibilityHint(tr("videos.opens_the_screen_where_you")).accessibilityIdentifier("newVideo")
+    @ViewBuilder private var uploadStrip: some View {
+        if let media = model.media {
+            UploadPill(media: media) { model.selectedTab = 1 }.frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 16).padding(.top, 4).vmkOneLineCap()
         }
-        .frame(maxWidth: .infinity, alignment: empty ? .center : .trailing).vmkOneLineCap()
-        .padding(.horizontal, 16).padding(.bottom, 14).padding(.top, 10)
-        .background(LinearGradient(colors: [Theme.background.opacity(0), Theme.background.opacity(0.96)], startPoint: .top, endPoint: .center).allowsHitTesting(false))
     }
 
     // MARK: top bar
 
     private var topBar: some View {
-        HStack(spacing: 10) {
-            HStack(spacing: 10) {
-                Image(systemName: "play.fill").font(.vmk(13, weight: .bold)).foregroundStyle(.white).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 30, height: 30)
-                    .background(Theme.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous)).accessibilityHidden(true)
-                Text(tr("videos.videomk")).font(.vmk(21, weight: .bold)).lineLimit(1).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
-            }
+        HStack(spacing: 8) {
+            BrandMark(size: 32)
             Spacer()
             if let wallet = model.wallet {
                 Button { showingWallet = true } label: {
@@ -111,17 +92,16 @@ struct LibraryView: View {
                         Image(systemName: "bolt.fill").font(.vmk(13)).foregroundStyle(Theme.primary)
                         Text(wallet.unlimited ? "∞" : "\(wallet.balance)").font(.vmk(17, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text)
                     }
-                    .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).frame(minHeight: 44)
+                    .padding(.horizontal, 14).frame(height: 38).vmkGlass(in: Capsule()).frame(minHeight: 44)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(wallet.unlimited ? tr("videos.unlimited_credits") : tr("credits.count", wallet.balance))
                 .accessibilityHint(tr("videos.shows_your_credits"))
                 .accessibilityIdentifier("balanceChip")
             }
-            Button { showingSettings = true } label: { Image(systemName: "gearshape").font(.vmk(20)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }
-                .accessibilityLabel(tr("videos.settings")).accessibilityIdentifier("settingsButton")
+            GlassIconButton(symbol: "person", label: tr("videos.settings"), identifier: "settingsButton") { showingSettings = true }
         }
-        .padding(.leading, 16).padding(.trailing, 8).frame(minHeight: 52).vmkOneLineCap()      // wordmark, credits and gear stay on one row; the page below scrolls and wraps
+        .padding(.leading, 20).padding(.trailing, 12).frame(minHeight: 52).vmkOneLineCap()      // mark, credits and account stay on one row; the page below scrolls and wraps
     }
 
     // MARK: feed
@@ -173,7 +153,7 @@ struct LibraryView: View {
             case .running: NavigationLink(value: v.id) { RunningCard(video: v) }.buttonStyle(.plain)
             case .complete: NavigationLink(value: v.id) { VideoRow(video: v) }.buttonStyle(.plain)
             case .failed:
-                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: tr("videos.no_credits_were_used"), retry: { model.tryAgain(v) })
+                FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: nil, retry: { model.tryAgain(v) })
                     .accessibilityIdentifier("failedVideo")
             case .rejected:
                 FailedRow(title: model.brief(for: v.id) ?? v.displayTitle, message: v.rejectReason ?? tr("detail.rejected_body"), rejected: true)
@@ -188,13 +168,23 @@ struct LibraryView: View {
 
     // MARK: empty
 
+    /// First run: the headline, a real prompt field (a tap opens Create with the keyboard up) and three example chips. Nothing else.
     private var emptyState: some View {
         ScrollView {
-            VStack(spacing: 0) {
-                EmptyState(title: tr("videos.describe_itnwell_make_the_video"), message: tr("videos.narrated_and_illustrated_in_minutes")) { FilmFrames().frame(height: 120) }
-                firstVideoCard.padding(.top, 20)
-                Text(tr("videos.try_one")).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 24).padding(.bottom, 8)
-                VStack(spacing: 10) { ForEach(ExamplePrompt.all) { example in exampleCard(example) } }
+            VStack(alignment: .leading, spacing: 0) {
+                Text(tr("videos.describe_itnwell_make_the_video")).font(.vmk(34, weight: .bold)).tracking(-1).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 36).accessibilityAddTraits(.isHeader)
+                Button { openCreate(prefill: nil, minutes: 0.5) } label: {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(tr("create.describe_your_video_for_example")).font(.vmk(19)).foregroundStyle(Theme.textTertiary)
+                        Spacer(minLength: 0)
+                        HStack { Spacer(); Image(systemName: "mic").font(.vmk(18)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44).background(Theme.surfaceRaised, in: Circle()).accessibilityHidden(true) }
+                    }
+                    .padding(16).frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+                }
+                .buttonStyle(.plain).padding(.top, 24).accessibilityLabel(tr("create.describe_your_video_for_example")).accessibilityIdentifier("firstVideoButton")
+                WrapLayout(spacing: 8) { ForEach(ExamplePrompt.all) { example in exampleChip(example) } }.padding(.top, 14)
             }
             .padding(.horizontal, Theme.Space.l).padding(.bottom, Theme.Space.l)
         }
@@ -202,43 +192,17 @@ struct LibraryView: View {
         .refreshable { await model.refresh() }
     }
 
-    /// First run: an editable idea already written, 30 seconds, 1 credit. One tap on "Make my first video" opens Create with it (nothing is sent
-    /// until Create video is tapped), so the first result is two taps away. The bottom button stays the single gradient action.
-    private var firstVideoCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(tr("videos.first_title")).font(.vmk(17, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
-            Text("\u{201C}\(tr("videos.first_prompt"))\u{201D}").font(.vmk(19)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
-            Text(tr("videos.first_sub")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
-            Button { openCreate(prefill: tr("videos.first_prompt"), minutes: 0.5) } label: {
-                Text(tr("videos.first_cta")).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.primary).multilineTextAlignment(.center).frame(maxWidth: .infinity, minHeight: 50)
-                    .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-            }.buttonStyle(.plain).accessibilityIdentifier("firstVideoButton")
-            Button { openCreate(prefill: nil, minutes: 0.5) } label: {
-                Text(tr("videos.first_edit")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).frame(maxWidth: .infinity, minHeight: Theme.minTouch)
-            }.buttonStyle(.plain).accessibilityIdentifier("firstVideoEdit")
-        }
-        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
-    }
-
-    private func exampleCard(_ e: ExamplePrompt) -> some View {
+    private func exampleChip(_ e: ExamplePrompt) -> some View {
         Button { use(e) } label: {
-            HStack(spacing: 14) {
-                Image(systemName: e.symbol).font(.vmk(18)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                Text(e.text).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
-                HStack(spacing: 4) {
-                    if e.usesPhotos { Image(systemName: "photo").font(.vmk(12)) }
-                    Text(e.tag).font(.vmk(12.5, weight: .semibold)).lineLimit(1).fixedSize()
-                }
-                .foregroundStyle(Theme.primary).padding(.horizontal, 10).frame(height: 30).background(Theme.primaryContainer, in: Capsule())
+            HStack(spacing: 6) {
+                if e.usesPhotos { Image(systemName: "photo").font(.vmk(13)).accessibilityHidden(true) }
+                Text(e.label).font(.vmk(15, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, 14).frame(minHeight: 64)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+            .foregroundStyle(Theme.text).padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 44)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(e.text), \(e.tag)")
         .accessibilityHint(tr("videos.fills_in_the_description_it"))
         .accessibilityIdentifier("example")
     }
@@ -267,31 +231,15 @@ struct LibraryView: View {
 }
 
 struct ExamplePrompt: Identifiable {
-    let text: String, tag: String, symbol: String
+    let text: String, label: String, tag: String, symbol: String
     var minutes: Double?
     var usesPhotos = false
     var id: String { text }
     static let all = [
-        ExamplePrompt(text: tr("videos.a_calm_oneminute_story_about"), tag: LengthLabel.chip(1), symbol: "film", minutes: 1),
-        ExamplePrompt(text: tr("videos.how_bees_make_honey_explained"), tag: LengthLabel.chip(3), symbol: "sparkles", minutes: 3),
-        ExamplePrompt(text: tr("videos.my_holiday_in_thailand_told"), tag: tr("videos.tag_photos"), symbol: "photo", minutes: nil, usesPhotos: true),
+        ExamplePrompt(text: tr("videos.a_calm_oneminute_story_about"), label: tr("videos.chip_story"), tag: LengthLabel.chip(1), symbol: "film", minutes: 1),
+        ExamplePrompt(text: tr("videos.how_bees_make_honey_explained"), label: tr("videos.chip_bees"), tag: LengthLabel.chip(3), symbol: "sparkles", minutes: 3),
+        ExamplePrompt(text: tr("videos.my_holiday_in_thailand_told"), label: tr("videos.chip_holiday"), tag: tr("videos.tag_photos"), symbol: "photo", minutes: nil, usesPhotos: true),
     ]
-}
-
-/// Three overlapping film frames: a quiet picture for the empty state.
-struct FilmFrames: View {
-    var body: some View {
-        ZStack {
-            frame([Color(hex: 0xF5C9A8), Color(hex: 0xB8734F)], -7).offset(x: -78, y: 8)
-            frame([Color(hex: 0x4C3B8F), Color(hex: 0x1F1740)], 7).offset(x: 80, y: 6)
-            frame([Color(hex: 0xFFC77A), Color(hex: 0x7A3E66)], 0).offset(y: -4)
-        }
-    }
-    private func frame(_ colors: [Color], _ angle: Double) -> some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous).fill(LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom))
-            .frame(width: 104, height: 66).overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white, lineWidth: 2.5))
-            .shadow(color: .black.opacity(0.12), radius: 8, y: 4).rotationEffect(.degrees(angle))
-    }
 }
 
 struct RoundRectangle: Shape {
@@ -333,16 +281,19 @@ struct CreateProblemSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).padding(.top, 22).accessibilityHidden(true)
+            HStack(alignment: .top) {
+                Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
+                Spacer()
+                GlassIconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { dismiss() }
+            }.padding(.top, 14)
             Text(problem.paused ? tr("videos.creating_videos_is_paused") : tr("videos.we_cant_make_this_one")).font(.vmk(30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader)
             Text(problem.message).font(.vmk(17)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
             if problem.paused, let retry = RetryText.make(problem.retryAfter) { Text(retry).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
             Spacer()
             Text(tr("create.nothing_was_charged")).font(.vmk(15)).foregroundStyle(Theme.textSecondary)
             Button { onEdit(problem) } label: { Text(tr("create.edit_request")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
-            Button(tr("common.close")) { dismiss() }.font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
         }
         .padding(.horizontal, 20).padding(.bottom, 6)
-        .presentationBackground(Theme.surface).presentationDetents([.height(470), .large]).presentationDragIndicator(.visible)
+        .presentationBackground(Theme.surface).presentationDetents([.height(420), .large]).presentationDragIndicator(.visible)
     }
 }

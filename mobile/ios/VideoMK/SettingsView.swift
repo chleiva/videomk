@@ -14,30 +14,12 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(tr("settings.account")) {
-                    if case .signedIn(let email) = model.phase, let email { LabeledContent(tr("settings.signed_in_as"), value: email) }
-                    Button(tr("settings.sign_out")) { confirmSignOut = true }.foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch).accessibilityIdentifier("signOutButton")      // not destructive: primary colour, not red
-                }
                 Section {
-                    Button { showFeedback = true } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: "bubble.left").font(.vmk(18)).foregroundStyle(Theme.primary).frame(width: 28).accessibilityHidden(true)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(tr("feedback.title")).font(.vmk(17)).foregroundStyle(Theme.text)
-                                Text(tr("feedback.row_subtitle")).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
-                            }
-                            Spacer(minLength: 4)
-                            Image(systemName: "chevron.right").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
-                        }
-                        .frame(minHeight: Theme.minTouch).contentShape(Rectangle())
+                    if case .signedIn(let email) = model.phase, let email {
+                        Label { Text(email).font(.vmk(17)).foregroundStyle(Theme.text).lineLimit(1).truncationMode(.middle) } icon: { Image(systemName: "person.crop.circle").foregroundStyle(Theme.textSecondary) }
+                            .frame(minHeight: Theme.minTouch).accessibilityIdentifier("accountEmail")
                     }
-                    .accessibilityElement(children: .combine).accessibilityIdentifier("sendFeedbackRow")
-                }
-                Section {
-                    Button(role: .destructive) { showDelete = true } label: { Label { Text(tr("settings.delete_account")) } icon: { Image(systemName: "trash").foregroundStyle(.red) } }
-                        .accessibilityIdentifier("deleteAccountButton")
-                } footer: {
-                    Text(tr("settings.delete_footer"))
+                    Button(tr("settings.sign_out")) { confirmSignOut = true }.foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch).accessibilityIdentifier("signOutButton")      // not destructive: primary colour, not red
                 }
                 Section {
                     Picker(tr("settings.language"), selection: Binding(get: { Localization.shared.choice }, set: { model.setLanguage($0) })) {
@@ -45,36 +27,37 @@ struct SettingsView: View {
                         Text(AppLanguage.en.nativeName).tag(LanguageChoice.en)
                         Text(AppLanguage.es.nativeName).tag(LanguageChoice.es)
                     }
-                    .accessibilityIdentifier("languagePicker")
-                } header: { Text(tr("settings.language")) } footer: { Text(tr("settings.language_footer")) }
+                    .frame(minHeight: Theme.minTouch).accessibilityIdentifier("languagePicker")
+                }
                 Section {
-                    Toggle(tr("settings.photo_dates"), isOn: $useDates).accessibilityIdentifier("usePhotoDates")
-                    Toggle(tr("settings.photo_locations"), isOn: $useLocations).accessibilityIdentifier("usePhotoLocations")
-                } header: { Text(tr("settings.photos")) } footer: {
-                    Text(tr("settings.photos_footer"))
-                }
-                if let media = model.media {
-                    Section {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Label(tr("settings.organize"), systemImage: "sparkles").font(.vmk(16, weight: .semibold))
-                            Picker(tr("settings.organize"), selection: Binding(get: { media.organizePref }, set: { media.setOrganizePref($0) })) {
-                                ForEach(OrganizePref.allCases, id: \.self) { Text($0.title).tag($0) }
-                            }
-                            .pickerStyle(.segmented).labelsHidden().accessibilityIdentifier("organizePref")
+                    Toggle(tr("settings.photo_dates"), isOn: $useDates).frame(minHeight: Theme.minTouch).accessibilityIdentifier("usePhotoDates")
+                    Toggle(tr("settings.photo_locations"), isOn: $useLocations).frame(minHeight: Theme.minTouch).accessibilityIdentifier("usePhotoLocations")
+                    if let media = model.media {
+                        Picker(tr("settings.organize"), selection: Binding(get: { media.organizePref }, set: { media.setOrganizePref($0) })) {
+                            ForEach(OrganizePref.allCases, id: \.self) { Text($0.title).tag($0) }
                         }
-                        .padding(.vertical, 4)
-                    } footer: {
-                        Text(tr("settings.organize_footer"))
+                        .frame(minHeight: Theme.minTouch).accessibilityIdentifier("organizePref")
                     }
+                } header: {
+                    HStack(spacing: 0) { Text(tr("settings.photos")); InfoPopover(text: tr("settings.photos_info"), spoken: tr("settings.photos"), identifier: "photosInfo").offset(y: -2) }
                 }
-                Section(tr("media.title")) {
-                    Text(MediaCopy.privacy).font(.footnote).foregroundStyle(Theme.textSecondary)
+                Section {
+                    Button { showFeedback = true } label: {
+                        HStack { Label(tr("feedback.title"), systemImage: "bubble.left").foregroundStyle(Theme.text); Spacer(minLength: 4); Image(systemName: "chevron.right").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true) }
+                            .frame(minHeight: Theme.minTouch).contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("sendFeedbackRow")
+                    Link(destination: URL(string: "mailto:hello@videomk.com")!) {
+                        HStack { Label(tr("settings.support"), systemImage: "lifepreserver").foregroundStyle(Theme.text); Spacer(minLength: 4); Image(systemName: "arrow.up.right").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.textTertiary).accessibilityHidden(true) }.frame(minHeight: Theme.minTouch)
+                    }
+                    .accessibilityIdentifier("supportLink")
+                    Link(tr("legal.terms"), destination: URL(string: tr("legal.terms_url"))!).frame(minHeight: Theme.minTouch).accessibilityIdentifier("termsLink")
+                    Link(tr("legal.privacy"), destination: URL(string: tr("legal.privacy_url"))!).frame(minHeight: Theme.minTouch)
+                    LabeledContent(tr("settings.about"), value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "").frame(minHeight: Theme.minTouch)
                 }
-                Section(tr("settings.about")) {
-                    LabeledContent(tr("settings.version"), value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
-                    Link(tr("settings.support"), destination: URL(string: "mailto:hello@videomk.com")!).accessibilityIdentifier("supportLink")
-                    Link(tr("legal.terms"), destination: URL(string: tr("legal.terms_url"))!).accessibilityIdentifier("termsLink")
-                    Link(tr("legal.privacy"), destination: URL(string: tr("legal.privacy_url"))!)
+                Section {
+                    Button(role: .destructive) { showDelete = true } label: { Text(tr("settings.delete_account")).frame(minHeight: Theme.minTouch, alignment: .leading) }
+                        .accessibilityIdentifier("deleteAccountButton")
                 }
             }
             .sheet(isPresented: $showDelete) { DeleteAccountView() }

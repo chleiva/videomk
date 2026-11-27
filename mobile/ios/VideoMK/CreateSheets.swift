@@ -25,13 +25,13 @@ struct CreateStageSheet: View {
             }
         }
         .presentationBackground(Theme.surface)
-        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(470), .height(640), .large], selection: $detent)
-        .onChange(of: create.stage, initial: true) { _, _ in detent = typeSize.isAccessibilitySize || hasLongLabels ? .large : .height(isSummary ? 640 : 470) }
+        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(420), .height(560), .large], selection: $detent)
+        .onChange(of: create.stage, initial: true) { _, _ in detent = typeSize.isAccessibilitySize || hasLongLabels ? .large : .height(isSummary ? 560 : 420) }
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(isChecking)
     }
 
-    @State private var detent: PresentationDetent = .height(470)
+    @State private var detent: PresentationDetent = .height(420)
     /// Long answers wrap onto two lines, so the sheet opens at full height instead of hiding the buttons below them.
     private var hasLongLabels: Bool {
         let longest: Int
@@ -48,7 +48,7 @@ struct CreateStageSheet: View {
 
     private var skeleton: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack { Spacer(); Button(tr("create.make_it_now")) { create.skipCheck(submit: onSubmit) }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("makeItNow") }
+            HStack { Spacer(); Button(tr("create.skip")) { create.skipCheck(submit: onSubmit) }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("makeItNow") }
             RoundedRectangle(cornerRadius: 8).fill(Theme.surfaceRaised).frame(width: 220, height: 28)
             RoundedRectangle(cornerRadius: 8).fill(Theme.surfaceRaised).frame(width: 150, height: 16)
             HStack(spacing: 10) { ForEach(0..<3, id: \.self) { _ in Capsule().fill(Theme.surfaceRaised).frame(height: 50) } }
@@ -82,7 +82,6 @@ private struct QuestionStep: View {
                         .transition(reduceMotion ? .identity : .asymmetric(insertion: .offset(x: forward ? 24 : -24).combined(with: .opacity), removal: .opacity))
                 }.scrollBounceBehavior(.basedOnSize).scrollIndicators(.hidden)
                 Spacer(minLength: 0)
-                HStack { Spacer(); Button(tr("create.skip")) { advance { $0.skip() } }.font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44).accessibilityIdentifier("skipQuestion"); Spacer() }
             }
             .padding(.horizontal, 20).padding(.top, 10).padding(.bottom, 6)
         )
@@ -93,21 +92,20 @@ private struct QuestionStep: View {
             if flow.canGoBack { Button { forward = false; withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.28)) { var f = flow; f.back(); create.stage = .questions(f) } } label: { Image(systemName: "chevron.left").font(.vmk(17, weight: .semibold)).frame(width: 44, height: 44) }.accessibilityLabel(tr("create.back")) }
             else { Spacer().frame(width: 44) }
             Spacer()
-            HStack(spacing: 6) { ForEach(0..<flow.questions.count, id: \.self) { i in Capsule().fill(i == flow.index ? Theme.primary : Theme.surface3).frame(width: i == flow.index ? 22 : 8, height: 8) } }.accessibilityHidden(true)
+            HStack(spacing: 6) { ForEach(0..<flow.questions.count, id: \.self) { i in Capsule().fill(i == flow.index ? Theme.primary : Theme.surface3).frame(width: i == flow.index ? 22 : 8, height: 8) } }.accessibilityLabel(flow.progressText)
             Spacer()
-            Button(tr("create.make_it_now")) { var f = flow; f.makeItNow(); create.answer(f, mediaCount: mediaCount, submit: onSubmit) }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("makeItNow")
+            Button(tr("create.skip")) { advance { $0.skip() } }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).accessibilityIdentifier("skipQuestion")
         }
     }
 
     private func content(_ q: IntakeQuestion) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(flow.progressText.uppercased()).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary).padding(.top, 14)
-            Text(q.title).font(.vmk(27, weight: .bold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 6).accessibilityAddTraits(.isHeader).accessibilityIdentifier("questionTitle")
-            if let h = q.helper { Text(h).font(.vmk(15)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).padding(.top, 4) }
+            Text(q.title).font(.vmk(27, weight: .bold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 16).accessibilityAddTraits(.isHeader).accessibilityIdentifier("questionTitle")
+                .accessibilityLabel("\(flow.progressText). \(q.title)")
             if other {
                 HStack(spacing: 10) {
-                    TextField(tr("create.type_your_answer"), text: $otherText).focused($otherFocused).padding(.horizontal, 14).frame(height: 50).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.primary, lineWidth: 2)).submitLabel(.done).onSubmit { submitOther() }.accessibilityIdentifier("otherField")
+                    TextField(tr("create.type_your_answer"), text: $otherText).focused($otherFocused).padding(.horizontal, 14).frame(height: 50).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: 2)).submitLabel(.done).onSubmit { submitOther() }.accessibilityIdentifier("otherField")
                     Button(tr("common.done")) { submitOther() }.font(.vmk(17, weight: .semibold)).frame(minHeight: 44).disabled(otherText.trimmingCharacters(in: .whitespaces).isEmpty)
                 }.padding(.top, 18)
             } else {
@@ -139,8 +137,8 @@ private struct QuestionStep: View {
             }
             .foregroundStyle(c.dashed ? Theme.textSecondary : selected ? Theme.primary : Theme.text).padding(.horizontal, 20).padding(.vertical, 12)
             .frame(maxWidth: typeSize >= .accessibility1 ? .infinity : nil, minHeight: 50, alignment: .leading)
-            .background(selected ? Theme.primaryContainer : (c.dashed ? .clear : Theme.surfaceRaised), in: RoundedRectangle(cornerRadius: 25, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 25, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, style: StrokeStyle(lineWidth: selected ? 2 : 1.5, dash: c.dashed ? [4, 4] : [])))
+            .background(selected ? Theme.primaryContainer : (c.dashed ? .clear : Theme.surfaceRaised), in: RoundedRectangle(cornerRadius: Theme.Radii.composer, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.composer, style: .continuous).stroke(selected ? Theme.primary : Theme.outline, style: StrokeStyle(lineWidth: selected ? 2 : 1.5, dash: c.dashed ? [4, 4] : [])))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(c.label).accessibilityAddTraits(selected ? .isSelected : []).accessibilityIdentifier("answer-\(c.id)")
@@ -176,25 +174,21 @@ private struct SummaryStep: View {
             HStack {
                 Text(tr("create.ready_when_you_are")).font(.vmk(23, weight: .bold)).foregroundStyle(Theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button(tr("common.close")) { create.dismissOverlay() }.font(.vmk(17, weight: .medium)).foregroundStyle(Theme.textSecondary).frame(minHeight: 44)
-            }.padding(.top, 18)
+                GlassIconButton(symbol: "xmark", label: tr("create.edit_request"), identifier: "editRequest") { onEdit() }
+            }.padding(.top, 14)
             VStack(alignment: .leading, spacing: 4) {
-                Text(tr("create.your_request")).font(.vmk(12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
-                Text(create.form.text).font(.vmk(17)).foregroundStyle(Theme.text).lineLimit(3)
+                Text(create.form.text).font(.vmk(17)).foregroundStyle(Theme.text).lineLimit(4)
             }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(16).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.top, 10)
+            .frame(maxWidth: .infinity, alignment: .leading).padding(16).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous)).padding(.top, 10)
             WrapLayout(spacing: 10) {
                 ForEach(Array(flow.chips(briefSummary: brief?["summary"]).enumerated()), id: \.offset) { _, c in
                     Button { var f = flow; f.edit(c.questionID); create.stage = .questions(f) } label: {
                         HStack(spacing: 6) { Text(c.text).font(.vmk(17, weight: .semibold)).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true); Image(systemName: "pencil").font(.vmk(13)) }
-                            .foregroundStyle(Theme.primary).padding(.horizontal, 16).padding(.vertical, 10).frame(minHeight: 44).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                            .foregroundStyle(Theme.primary).padding(.horizontal, 16).padding(.vertical, 10).frame(minHeight: 44).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
                     }.buttonStyle(.plain).accessibilityLabel(tr("create.summary_chip_a11y", c.text)).accessibilityIdentifier("summaryChip")
                 }
             }.padding(.top, 14)
-            Text(tr("create.tap_an_answer_to_change")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).padding(.top, 8)
-            Divider().padding(.vertical, 12)
-            HStack(spacing: 8) { Image(systemName: create.form.aspect == "16:9" ? "rectangle" : "rectangle.portrait").font(.vmk(14)); Text(tr("create.summary_format", create.form.recommendation(create.caps), LengthLabel.chip(create.form.minutes))).font(.vmk(15)).lineLimit(2) }.foregroundStyle(Theme.textSecondary)
-            Spacer(minLength: 8)
+            Spacer(minLength: 16)
             HStack(spacing: 8) {
                 Image(systemName: "bolt.fill").font(.vmk(14)).foregroundStyle(Theme.primary)
                 Text(status.message).font(.vmk(14, weight: .medium)).foregroundStyle(status.isProblem ? Theme.warning : Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
@@ -205,7 +199,6 @@ private struct SummaryStep: View {
                 HStack(spacing: 8) { Text(tr("create.create_video") + " ·").font(.vmk(19, weight: .bold)); HStack(spacing: 3) { Image(systemName: "bolt.fill").font(.vmk(15)); Text("\(create.form.options.credits)").font(.vmk(19, weight: .bold).monospacedDigit()) } }
                     .foregroundStyle(status.canSend ? Color.white : Theme.textTertiary).frame(maxWidth: .infinity, minHeight: 54).background(status.canSend ? AnyShapeStyle(Theme.gradient) : AnyShapeStyle(Theme.surface3), in: Capsule())
             }.buttonStyle(.plain).disabled(!status.canSend).padding(.top, 10).accessibilityIdentifier("summaryCreate")
-            Button(tr("create.edit_request")) { onEdit() }.font(.vmk(17, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 44).accessibilityIdentifier("editRequest")
         }
         .padding(.horizontal, 20).padding(.bottom, 6)
     }
@@ -221,24 +214,27 @@ private struct KindStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).padding(.top, 22).accessibilityHidden(true)
+            HStack(alignment: .top) {
+                Image(systemName: "exclamationmark.triangle").font(.vmk(34)).foregroundStyle(Theme.warning).frame(width: 56, height: 56).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
+                Spacer()
+                GlassIconButton(symbol: "xmark", label: tr("common.close"), identifier: "kindClose") { create.dismissOverlay() }
+            }.padding(.top, 14)
             Text(title).font(.vmk(30, weight: .bold)).foregroundStyle(Theme.text).padding(.top, 16).accessibilityAddTraits(.isHeader).accessibilityIdentifier("kindTitle")
             Text(message).font(.vmk(17)).foregroundStyle(Theme.textSecondary).padding(.top, 8).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("kindMessage")
             if let retry { Text(retry).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.text).padding(.top, 6) }
             if let suggestion, !suggestion.isEmpty {
                 HStack(alignment: .center, spacing: 10) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(tr("create.for_example")).font(.vmk(12.5, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
+                        Text(tr("create.for_example")).font(.vmk(12, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
                         Text(suggestion).font(.vmk(16)).foregroundStyle(Theme.text)
                     }
                     Spacer(minLength: 4)
                     Button(tr("create.use_this")) { create.form.text = suggestion; create.dismissOverlay() }.font(.vmk(15, weight: .bold)).foregroundStyle(Theme.primary).padding(.horizontal, 14).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()).accessibilityIdentifier("useSuggestion")
-                }.padding(16).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 20, style: .continuous)).padding(.top, 16)
+                }.padding(16).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous)).padding(.top, 16)
             }
             Spacer(minLength: 8)
             Text(tr("create.nothing_was_charged")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).accessibilityIdentifier("nothingCharged")
             Button { onEdit() } label: { Text(tr("create.edit_request")).font(.vmk(19, weight: .bold)).foregroundStyle(Theme.onPrimary).frame(maxWidth: .infinity, minHeight: 54).background(Theme.gradient, in: Capsule()) }.buttonStyle(.plain).padding(.top, 8).accessibilityIdentifier("editRequest")
-            Button(tr("common.close")) { create.dismissOverlay() }.font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, minHeight: 44)
         }
         .padding(.horizontal, 20).padding(.bottom, 6)
     }

@@ -129,7 +129,7 @@ struct AttachedPhotosStrip: View {
                             Image(uiImage: photo.thumbnail)
                                 .resizable().scaledToFill()
                                 .frame(width: 56, height: 56)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
                                 .overlay(alignment: .topTrailing) { RemoveX(label: tr("attach.remove_photo", index + 1)) { withAnimation(.snappy) { photos.remove(photo.id) } } }
                                 .accessibilityElement(children: .contain)
                                 .accessibilityLabel(tr("attach.photo_n_of", index + 1, photos.items.count))
@@ -139,7 +139,7 @@ struct AttachedPhotosStrip: View {
                             LibraryStripTile(photo: photo, media: media, label: tr("attach.library_photo_n_of", index + 1, library.count)) { withAnimation(.snappy) { onRemoveLibrary(photo.id) } }
                         }
                         if photos.loading > 0 {   // one spinner tile, however many are still being prepared
-                            ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            ProgressView().frame(width: 56, height: 56).background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
                         }
                     }
                 }
@@ -186,7 +186,7 @@ struct LibraryStripTile: View {
     var body: some View {
         Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
             .frame(width: 56, height: 56)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
             .overlay(alignment: .bottomLeading) { Image(systemName: "photo.stack.fill").font(.vmk(10)).padding(3).foregroundStyle(.white).background(Theme.primary, in: Circle()).padding(2).accessibilityHidden(true) }
             .overlay(alignment: .topTrailing) { if showRemove { RemoveX(label: tr("attach.remove_label", label), action: onRemove) } }
             .accessibilityElement(children: .contain)

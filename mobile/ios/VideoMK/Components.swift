@@ -3,39 +3,6 @@ import VideoMKCore
 
 // The shared pieces of docs/UX_REVIEW.md section 6.2 item 8 that are not the Making card (MakingCard.swift) or the rows (VideoCards.swift).
 
-/// The cost rule in four short lines, shared by the Create screen's "What does this cost?" sheet and the wallet body.
-struct CostExplainer: View {
-    var includeExpiry = true
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            line("bolt.fill", tr("wallet.cost_minute"))
-            line("timer", tr("wallet.cost_example"))
-            line("4.circle", tr("wallet.cost_4k"))
-            if includeExpiry { line("clock.arrow.circlepath", tr("wallet.cost_expiry")) }
-        }
-        .accessibilityElement(children: .contain)
-    }
-    private func line(_ symbol: String, _ text: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: symbol).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 28, height: 28).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 8, style: .continuous)).accessibilityHidden(true)
-            Text(text).font(.vmk(15)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-}
-
-struct CostExplainerSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    var body: some View {
-        NavigationStack {
-            ScrollView { CostExplainer().padding(20) }
-                .background(Theme.background.ignoresSafeArea())
-                .navigationTitle(tr("wallet.cost_title")).navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } } }
-        }
-        .presentationDetents([.medium, .large])
-    }
-}
-
 /// Bolt + the receipt line ("3 credits · you'll have 39 left") + a quiet "What does this cost?" link. One component for Create and any future paywall.
 struct CostLine: View {
     let text: String

@@ -68,12 +68,12 @@ struct OptionsSheet: View {
         return Button { options.minutes = m; Haptics.play(.selection) } label: {
             VStack(spacing: 2) {
                 Text(LengthLabel.chip(m)).font(.vmk(17, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text)
-                HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.vmk(10)); Text("\(credits)").font(.vmk(12.5).monospacedDigit()) }
+                HStack(spacing: 2) { Image(systemName: "bolt.fill").font(.vmk(10)); Text("\(credits)").font(.vmk(12).monospacedDigit()) }
                     .foregroundStyle(costly ? Theme.warning : selected ? Theme.primary : Theme.textSecondary)
             }
             .frame(maxWidth: .infinity, minHeight: 62)
-            .background(selected ? Theme.primaryContainer : (costly ? Theme.warningContainer.opacity(0.7) : Theme.surfaceRaised), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
+            .background(selected ? Theme.primaryContainer : (costly ? Theme.warningContainer.opacity(0.7) : Theme.surfaceRaised), in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 1.5 : 0))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(tr("create.length_a11y", LengthLabel.spoken(m), tr("credits.count", credits)))
@@ -86,10 +86,10 @@ struct OptionsSheet: View {
         return Button { options.look = look; Haptics.play(.selection) } label: {
             VStack(spacing: 6) {
                 LookSwatch(look: look).aspectRatio(3 / 3.6, contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.primary, lineWidth: selected ? 2 : 0))
                     .padding(selected ? 3 : 0)
-                    .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+                    .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
                 Text(title).font(.vmk(15, weight: selected ? .semibold : .regular)).foregroundStyle(selected ? Theme.primary : Theme.text).lineLimit(1).minimumScaleFactor(0.7)
             }
         }
@@ -112,7 +112,7 @@ struct LookSwatch: View {
                 Image(systemName: "sparkles").font(.vmk(26)).foregroundStyle(Theme.primary)
             case .midnight?:
                 LinearGradient(colors: [Color(hex: 0x1C2150), Color(hex: 0x0C0F28)], startPoint: .top, endPoint: .bottom)
-                lines([Color(hex: 0xB9BBFF), Color(hex: 0x7C80FF), Color(hex: 0x5F63F0)])
+                lines([Theme.toastAccent, Color(hex: 0x7C80FF), Color(hex: 0x5F63F0)])
             case .paper?:
                 Color(hex: 0xF6EEE2)
                 lines([Color(hex: 0x3B3226), Color(hex: 0x8C7F66), Color(hex: 0xB9AC92)])

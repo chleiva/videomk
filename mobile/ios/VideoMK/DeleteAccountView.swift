@@ -259,7 +259,7 @@ private struct DestructiveButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(.headline).foregroundStyle(.white).frame(maxWidth: .infinity, minHeight: 50).padding(.horizontal, 12)
-            .background(Color(hex: 0xB91C1C).opacity(isEnabled ? 1 : 0.35), in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
+            .background(Theme.dangerSolid.opacity(isEnabled ? 1 : 0.35), in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
             .opacity(configuration.isPressed ? 0.85 : 1)
     }
 }

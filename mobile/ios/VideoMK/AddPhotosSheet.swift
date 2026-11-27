@@ -110,7 +110,7 @@ struct AddPhotosSheet: View {
         return VStack(spacing: 0) {
             Divider()
             Text(tr("add.location_data_is_removed_from"))
-                .font(.vmk(11.5)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.top, 8)
+                .font(.vmk(11)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.top, 8)
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
@@ -120,7 +120,7 @@ struct AddPhotosSheet: View {
                             Button(label) { selectAllTapped() }.font(.vmk(15, weight: .semibold)).frame(minHeight: 32).accessibilityIdentifier("selectAll")
                         }
                     }
-                    Text(sel.subline(minutes: minutes)).font(.vmk(12.5)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    Text(sel.subline(minutes: minutes)).font(.vmk(12)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityAddTraits(.updatesFrequently)
@@ -196,9 +196,9 @@ struct AddPhotosSheet: View {
 
     @ViewBuilder private var toastView: some View {
         if let toast {
-            Text(toast).font(.vmk(14.5)).foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 14)
+            Text(toast).font(.vmk(15)).foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(hex: 0x23263F), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(Theme.toastSurface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
                 .padding(.horizontal, 16).padding(.bottom, 130).transition(.move(edge: .bottom).combined(with: .opacity))
                 .accessibilityIdentifier("limitToast")
         }
@@ -254,10 +254,10 @@ private struct LibraryChooser: View {
 
     private func chip(_ title: String, selected: Bool, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title).font(.vmk(13.5, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+            Text(title).font(.vmk(13, weight: .semibold)).foregroundStyle(selected ? Theme.primary : Theme.text).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 14).padding(.vertical, 8).frame(minHeight: 34)
-                .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(Theme.outline, lineWidth: selected ? 0 : 1))
+                .background(selected ? Theme.primaryContainer : .clear, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.outline, lineWidth: selected ? 0 : 1))
                 .frame(minHeight: 44).contentShape(Rectangle())
         }
         .buttonStyle(.plain)

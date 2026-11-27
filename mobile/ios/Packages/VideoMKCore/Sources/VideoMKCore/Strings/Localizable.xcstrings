@@ -1583,23 +1583,6 @@
         }
       }
     },
-    "common.collapsed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "collapsed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "contraído"
-          }
-        }
-      }
-    },
     "common.copied" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1664,23 +1647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Editar"
-          }
-        }
-      }
-    },
-    "common.expanded" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "expanded"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "expandido"
           }
         }
       }
@@ -2011,30 +1977,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add photos"
+            "value" : "Photos"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agregar fotos"
-          }
-        }
-      }
-    },
-    "create.also_works" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Also works:"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "También funciona:"
+            "value" : "Fotos"
           }
         }
       }
@@ -2073,23 +2022,6 @@
         }
       }
     },
-    "create.aspect_a11y_soon" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@, coming soon, dimmed"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@, próximamente, atenuado"
-          }
-        }
-      }
-    },
     "create.back" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2107,23 +2039,6 @@
         }
       }
     },
-    "create.beta" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beta"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beta"
-          }
-        }
-      }
-    },
     "create.cant_make_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2137,23 +2052,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No podemos crear este video"
-          }
-        }
-      }
-    },
-    "create.change" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cambiar"
           }
         }
       }
@@ -2226,23 +2124,6 @@
         }
       }
     },
-    "create.coming_soon" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coming soon"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximamente"
-          }
-        }
-      }
-    },
     "create.cost_4k_double" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2300,13 +2181,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Create video"
+            "value" : "Create"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Crear video"
+            "value" : "Crear"
           }
         }
       }
@@ -2368,13 +2249,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Describe your video to continue"
+            "value" : "Describe your video"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Describe tu video para continuar"
+            "value" : "Describe tu video"
           }
         }
       }
@@ -2385,13 +2266,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Describe your video. For example: how bees make honey, explained for kids."
+            "value" : "A video about…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Describe tu video. Por ejemplo: cómo hacen la miel las abejas, explicado para niños."
+            "value" : "Un video sobre…"
           }
         }
       }
@@ -2668,23 +2549,6 @@
         }
       }
     },
-    "create.make_it_now" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make it now"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Crearlo ya"
-          }
-        }
-      }
-    },
     "create.max_length" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2698,23 +2562,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ permite hasta %2$@."
-          }
-        }
-      }
-    },
-    "create.more_options" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "More options"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Más opciones"
           }
         }
       }
@@ -2811,23 +2658,6 @@
         }
       }
     },
-    "create.not_ready" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not ready. %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No está listo. %@"
-          }
-        }
-      }
-    },
     "create.nothing_was_charged" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2841,23 +2671,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se cobró nada."
-          }
-        }
-      }
-    },
-    "create.optional_from_this_phone_or" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Optional · from this phone or My media"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opcional · de este teléfono o de Mi biblioteca"
           }
         }
       }
@@ -3032,23 +2845,6 @@
         }
       }
     },
-    "create.soon" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soon"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pronto"
-          }
-        }
-      }
-    },
     "create.starts_video" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3113,57 +2909,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@. Toca dos veces para cambiar."
-          }
-        }
-      }
-    },
-    "create.summary_format" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ · %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ · %2$@"
-          }
-        }
-      }
-    },
-    "create.tap_an_answer_to_change" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap an answer to change it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca una respuesta para cambiarla."
-          }
-        }
-      }
-    },
-    "create.tap_the_mic_to_speak" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap the mic to speak"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toca el micrófono para hablar"
           }
         }
       }
@@ -3236,23 +2981,6 @@
         }
       }
     },
-    "create.use_instead" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use %@ instead"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar %@ en su lugar"
-          }
-        }
-      }
-    },
     "create.use_this" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3276,13 +3004,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What is it for?"
+            "value" : "For"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Para qué es?"
+            "value" : "Para"
           }
         }
       }
@@ -3300,23 +3028,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tú decides"
-          }
-        }
-      }
-    },
-    "create.your_request" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "YOUR REQUEST"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TU SOLICITUD"
           }
         }
       }
@@ -4235,47 +3946,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copy description with credits"
+            "value" : "Copy"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copiar descripción con créditos"
-          }
-        }
-      }
-    },
-    "detail.copy_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy title"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copiar título"
-          }
-        }
-      }
-    },
-    "detail.description_credits" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Description and photo credits"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descripción y créditos de las fotos"
+            "value" : "Copiar"
           }
         }
       }
@@ -4286,13 +3963,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "We couldn't finish this video. You haven't been charged for it."
+            "value" : "No credits used."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos terminar este video. No se te cobró por él."
+            "value" : "Sin créditos usados."
           }
         }
       }
@@ -4303,47 +3980,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Something went wrong"
+            "value" : "Didn't finish"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Algo salió mal"
-          }
-        }
-      }
-    },
-    "detail.make_another" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make another video"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hacer otro video"
-          }
-        }
-      }
-    },
-    "detail.make_another_sub" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Describe your next idea."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Describe tu próxima idea."
+            "value" : "No se completó"
           }
         }
       }
@@ -4361,40 +4004,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Creando tu video"
-          }
-        }
-      }
-    },
-    "detail.making_overline" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Making your video"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Creando tu video"
-          }
-        }
-      }
-    },
-    "detail.making_sub" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This usually takes a few minutes. You can leave this screen; it keeps going."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto suele tardar unos minutos. Puedes salir de esta pantalla: sigue en marcha."
           }
         }
       }
@@ -4473,13 +4082,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saved to Photos"
+            "value" : "Saved"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Guardado en Fotos"
+            "value" : "Guardado"
           }
         }
       }
@@ -6130,13 +5739,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You can leave. It keeps going, and it will be here when it’s ready."
+            "value" : "You can leave. We'll tell you when it's ready."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Puedes salir. Sigue en marcha y estará aquí cuando esté listo."
+            "value" : "Puedes salir. Te avisamos cuando esté listo."
           }
         }
       }
@@ -6181,13 +5790,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recording the voice and drawing the pictures."
+            "value" : "Making voice and pictures"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grabando la voz y dibujando las imágenes."
+            "value" : "Voz e imágenes"
           }
         }
       }
@@ -7205,13 +6814,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search your photos, try ‘beach in Thailand’"
+            "value" : "Search photos"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Busca tus fotos, prueba “playa en Tailandia”"
+            "value" : "Buscar fotos"
           }
         }
       }
@@ -9306,23 +8915,6 @@
         }
       }
     },
-    "settings.account" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Account"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cuenta"
-          }
-        }
-      }
-    },
     "settings.delete_account" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9340,23 +8932,6 @@
         }
       }
     },
-    "settings.delete_footer" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permanently deletes your account, your videos, your photos in My media and your credits."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elimina de forma permanente tu cuenta, tus videos, tus fotos de Mi biblioteca y tus créditos."
-          }
-        }
-      }
-    },
     "settings.language" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9370,23 +8945,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Idioma"
-          }
-        }
-      }
-    },
-    "settings.language_footer" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatic follows your iPhone's language. This changes the app only, not the language of your videos."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automático sigue el idioma de tu iPhone. Esto cambia solo la app, no el idioma de tus videos."
           }
         }
       }
@@ -9421,23 +8979,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Organizar las subidas nuevas"
-          }
-        }
-      }
-    },
-    "settings.organize_footer" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ask offers after a big upload. Always groups photos by place and month, and adds later uploads to matching collections. Never leaves everything as it is."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preguntar lo ofrece tras una subida grande. Siempre agrupa las fotos por lugar y mes, y agrega las subidas posteriores a las colecciones que coincidan. Nunca deja todo como está."
           }
         }
       }
@@ -9493,23 +9034,6 @@
         }
       }
     },
-    "settings.photos_footer" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use photo dates: puts your photos in the order they were taken and groups them by day.\n\nUse photo locations: names the places in your story. An approximate location (about 1 km) is sent, never the exact spot, and it is not kept after your video is planned. Location is always removed from the photo files themselves."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar fechas de las fotos: ordena tus fotos según cuándo se tomaron y las agrupa por día.\n\nUsar ubicaciones de las fotos: nombra los lugares de tu historia. Se envía una ubicación aproximada (de unos 1 km), nunca el lugar exacto, y no se conserva después de planificar tu video. La ubicación siempre se elimina de los archivos de las fotos."
-          }
-        }
-      }
-    },
     "settings.sign_out" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9544,23 +9068,6 @@
         }
       }
     },
-    "settings.signed_in_as" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Signed in as"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sesión iniciada como"
-          }
-        }
-      }
-    },
     "settings.support" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9591,23 +9098,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustes"
-          }
-        }
-      }
-    },
-    "settings.version" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versión"
           }
         }
       }
@@ -11137,91 +10627,6 @@
         }
       }
     },
-    "videos.first_cta" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make my first video"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hacer mi primer video"
-          }
-        }
-      }
-    },
-    "videos.first_edit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change the idea"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cambiar la idea"
-          }
-        }
-      }
-    },
-    "videos.first_prompt" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How bees make honey, explained in 30 seconds"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómo hacen miel las abejas, explicado en 30 segundos"
-          }
-        }
-      }
-    },
-    "videos.first_sub" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Change the idea or make it as it is. About 30 seconds, 1 credit."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cambia la idea o hazlo tal cual. Unos 30 segundos, 1 crédito."
-          }
-        }
-      }
-    },
-    "videos.first_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make your first video"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Haz tu primer video"
-          }
-        }
-      }
-    },
     "videos.group_earlier" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11324,23 +10729,6 @@
         }
       }
     },
-    "videos.making" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Making"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Creando"
-          }
-        }
-      }
-    },
     "videos.making_a11y" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11405,23 +10793,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mis vacaciones en Tailandia, contadas con mis fotos"
-          }
-        }
-      }
-    },
-    "videos.narrated_and_illustrated_in_minutes" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Narrated and illustrated in minutes. Add your own photos if you like."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Narrado e ilustrado en minutos. Agrega tus propias fotos si quieres."
           }
         }
       }
@@ -11630,23 +11001,6 @@
         }
       }
     },
-    "videos.try_one" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TRY ONE"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PRUEBA UNO"
-          }
-        }
-      }
-    },
     "videos.unlimited_credits" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11738,13 +11092,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your videos"
+            "value" : "Videos"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus videos"
+            "value" : "Videos"
           }
         }
       }
@@ -12055,91 +11409,6 @@
         }
       }
     },
-    "wallet.coming_soon" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buying credits is coming soon."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pronto podrás comprar créditos."
-          }
-        }
-      }
-    },
-    "wallet.cost_4k" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "4K costs double: a 1-minute video in 4K is 2 credits."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "4K cuesta el doble: un video de 1 minuto en 4K son 2 créditos."
-          }
-        }
-      }
-    },
-    "wallet.cost_example" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A 10-second and a 60-second video cost 1 credit. A 61-second video costs 2."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un video de 10 segundos y uno de 60 cuestan 1 crédito. Uno de 61 segundos cuesta 2."
-          }
-        }
-      }
-    },
-    "wallet.cost_expiry" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Free credits expire. Credits you buy never do."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los créditos gratis caducan. Los que compras nunca caducan."
-          }
-        }
-      }
-    },
-    "wallet.cost_minute" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 credit makes up to 1 minute of video, rounded up."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 crédito crea hasta 1 minuto de video, redondeado hacia arriba."
-          }
-        }
-      }
-    },
     "wallet.cost_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12232,23 +11501,6 @@
         }
       }
     },
-    "wallet.get_more" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get more credits"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Obtener más créditos"
-          }
-        }
-      }
-    },
     "wallet.never_expire" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12296,23 +11548,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ahora no tienes créditos."
-          }
-        }
-      }
-    },
-    "wallet.rules" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 credit makes up to 1 minute of video, rounded up: a 10-second video and a 60-second video cost 1 credit, a 61-second video costs 2. Free credits expire; credits you buy never do."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 crédito crea hasta 1 minuto de video, redondeado hacia arriba: un video de 10 segundos y uno de 60 segundos cuestan 1 crédito; uno de 61 segundos cuesta 2. Los créditos gratis vencen; los que compras nunca vencen."
           }
         }
       }
@@ -12381,30 +11616,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "unlimited (test account)"
+            "value" : "∞"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ilimitados (cuenta de prueba)"
-          }
-        }
-      }
-    },
-    "wallet.what_you_have" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you have"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo que tienes"
+            "value" : "∞"
           }
         }
       }
@@ -12426,23 +11644,6 @@
         }
       }
     },
-    "create.presentation_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PowerPoint or PDF. We'll explain every slide."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PowerPoint o PDF. Explicaremos cada diapositiva."
-          }
-        }
-      }
-    },
     "deck.add_link" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12456,23 +11657,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Agregar una presentación"
-          }
-        }
-      }
-    },
-    "deck.add_a11y_hint" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a PowerPoint or PDF from the Files app"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige un PowerPoint o un PDF desde la app Archivos"
           }
         }
       }
@@ -13579,36 +12763,19 @@
         }
       }
     },
-    "feedback.row_subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We read every message"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Leemos cada mensaje"
-          }
-        }
-      }
-    },
     "feedback.intro" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tell us anything: an idea, something missing, something that annoyed you. We read every message and we act on it."
+            "value" : "Tell us anything."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cuéntanos lo que quieras: una idea, algo que falta o algo que te molestó. Leemos cada mensaje y actuamos en consecuencia."
+            "value" : "Cuéntanos lo que quieras."
           }
         }
       }
@@ -13721,13 +12888,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What is it about? (optional)"
+            "value" : "Topic"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿De qué se trata? (opcional)"
+            "value" : "Tema"
           }
         }
       }
@@ -13840,13 +13007,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A person on our team will read it, and we use feedback to decide what to improve."
+            "value" : "A person on our team will read it."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una persona de nuestro equipo lo leerá y usamos los comentarios para decidir qué mejorar."
+            "value" : "Una persona de nuestro equipo lo leerá."
           }
         }
       }
@@ -14068,6 +13235,244 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ya lo valoré"
+          }
+        }
+      }
+    },
+    "detail.replay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetir"
+          }
+        }
+      }
+    },
+    "detail.info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        }
+      }
+    },
+    "pill.video" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video"
+          }
+        }
+      }
+    },
+    "pill.shorts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shorts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cortos"
+          }
+        }
+      }
+    },
+    "create.options" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Options"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones"
+          }
+        }
+      }
+    },
+    "create.quality" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quality"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calidad"
+          }
+        }
+      }
+    },
+    "create.credits_left" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te quedan %lld"
+          }
+        }
+      }
+    },
+    "settings.photos_info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dates put your photos in order. Places are approximate (about 1 km), never exact, and not kept after planning. Location is removed from your files. Your photos are private to you."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las fechas ordenan tus fotos. Los lugares son aproximados (1 km), nunca exactos, y no se guardan tras la planificación. La ubicación se elimina de tus archivos. Tus fotos son privadas."
+          }
+        }
+      }
+    },
+    "wallet.rules_short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 min = 1 credit. 4K = 2x. Free credits expire; bought credits never do."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 min = 1 crédito. 4K = 2x. Los gratis caducan; los comprados no."
+          }
+        }
+      }
+    },
+    "create.not_ready" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not ready. %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No está listo. %@"
+          }
+        }
+      }
+    },
+    "videos.chip_story" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A calm story"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una historia"
+          }
+        }
+      }
+    },
+    "videos.chip_bees" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How bees make honey"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo hacen miel las abejas"
+          }
+        }
+      }
+    },
+    "videos.chip_holiday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My holiday photos"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis fotos de vacaciones"
+          }
+        }
+      }
+    },
+    "pill.auto" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
           }
         }
       }

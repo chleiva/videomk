@@ -13,18 +13,14 @@ struct SignInView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     Spacer(minLength: 24)
-                    VStack(spacing: 20) {
-                        Image(systemName: "play.rectangle.fill")
-                            .font(.vmk(64))
-                            .foregroundStyle(Theme.gradient)
-                            .accessibilityHidden(true)
-                        Text("videomk")
-                            .font(.vmk(40, weight: .bold, design: .rounded))
-                            .foregroundStyle(Theme.text)
+                    VStack(spacing: 24) {
+                        Image("Lockup").resizable().interpolation(.high).scaledToFit().frame(maxWidth: 260)
+                            .accessibilityLabel(tr("videos.videomk")).accessibilityAddTraits(.isHeader)
                         Text(tr("signin.tagline"))
-                            .font(.title3)
+                            .font(.vmk(20))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 32)
                     }
                     Spacer(minLength: 24)

@@ -15,6 +15,8 @@ struct VideoDetailView: View {
     @State private var playbackURL: URL?
     @State private var videoDescription: String?
     @State private var copiedDescription = false
+    @State private var showInfo = false
+    @State private var ended = false
     @State private var playbackError: String?
     @State private var editing = false
     @State private var save = SaveState.idle
@@ -30,8 +32,8 @@ struct VideoDetailView: View {
                     switch video.status {
                     case .complete: playerSection(video).transition(.opacity)
                     case .running: makingSection(video).padding(Theme.Space.xl).transition(.opacity)
-                    case .failed: message(tr("detail.failed_title"), tr("detail.failed_body"), icon: "exclamationmark.triangle", color: Theme.danger, container: Theme.dangerContainer).padding(Theme.Space.xl)
-                    case .rejected: message(tr("detail.rejected_title"), video.rejectReason ?? tr("detail.rejected_body"), icon: "hand.raised", color: Theme.warning, container: Theme.warningContainer).padding(Theme.Space.xl)
+                    case .failed: message(tr("detail.failed_title"), tr("detail.failed_body"), icon: "exclamationmark.triangle", color: Theme.danger, retry: { model.tryAgain(video) }).padding(Theme.Space.xl)
+                    case .rejected: message(tr("detail.rejected_title"), video.rejectReason ?? tr("detail.rejected_body"), icon: "hand.raised", color: Theme.warning).padding(Theme.Space.xl)
                     }
                 }
                 .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.insert, value: video.status == .complete)
@@ -44,7 +46,10 @@ struct VideoDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task(id: model.video(videoID)?.status) { await loadPlayerIfReady() }
         .task(id: model.hasRunningVideos) { await model.pollWhileRunning() }
-        .onDisappear { player?.pause(); watcher?.stop(); watcher = nil }
+        .onDisappear { player?.pause(); watcher?.stop(); watcher = nil; model.tabBarHidden = false }
+        .onAppear { model.tabBarHidden = true }
+        .onChange(of: model.isPlayingVideo) { _, playing in if playing { ended = false } }
+        .sheet(isPresented: $showInfo) { VideoInfoSheet(description: videoDescription ?? "") }
         .sheet(isPresented: $showFeedback) { FeedbackSheet(composer: model.makeFeedback(.afterVideo)) }
         .fullScreenCover(isPresented: $editing, onDismiss: {
             watcher?.stop(); watcher = nil; player = nil; playbackURL = nil  // the edit may have published a new version
@@ -55,30 +60,27 @@ struct VideoDetailView: View {
     // MARK: making (the shared MakingCard in its detail form)
 
     private func makingSection(_ video: VideoItem) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(tr("detail.making_overline").uppercased()).font(.vmk(12, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textTertiary).accessibilityHidden(true)
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                let snapshot = model.makingSnapshot(for: video, now: context.date)
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(snapshot.title).font(.vmk(28, weight: .bold)).tracking(-0.4).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
-                    Text(tr("making.leave_promise")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).padding(.bottom, 8)
-                    MakingCard(snapshot: snapshot, layout: .detail)
-                }
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let snapshot = model.makingSnapshot(for: video, now: context.date)
+            VStack(alignment: .leading, spacing: 18) {
+                Text(snapshot.title).font(.vmk(34, weight: .bold)).tracking(-0.8).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
+                MakingCard(snapshot: snapshot, layout: .detail)
+                Text(tr("making.leave_promise")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .center).multilineTextAlignment(.center)
             }
-            .accessibilityIdentifier("progressCard")
         }
+        .accessibilityIdentifier("progressCard")
     }
 
     // MARK: ready
 
     @ViewBuilder private func playerSection(_ video: VideoItem) -> some View {
         Group {
-            if let player { InlinePlayer(player: player, landscape: video.aspectRatio >= 1.2) }
+            if let player { InlinePlayer(player: player, landscape: video.aspectRatio >= 1.2, playing: model.isPlayingVideo).overlay { if ended { endCard(player) } } }
             else if let playbackError {
                 VStack(spacing: 12) {
-                    Text(playbackError).foregroundStyle(Theme.textSecondary)
-                    Button(tr("common.try_again")) { Task { await loadPlayerIfReady() } }.frame(minHeight: Theme.minTouch)
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Text(playbackError).foregroundStyle(.white.opacity(0.8)).multilineTextAlignment(.center)
+                    Button(tr("common.try_again")) { Task { await loadPlayerIfReady() } }.frame(minHeight: Theme.minTouch).foregroundStyle(.white)
+                }.frame(maxWidth: .infinity, maxHeight: .infinity).padding()
             } else { ProgressView().tint(.white).frame(maxWidth: .infinity, maxHeight: .infinity) }
         }
         .aspectRatio(video.aspectRatio, contentMode: .fit)
@@ -86,86 +88,84 @@ struct VideoDetailView: View {
         .frame(maxWidth: .infinity)
         .background(.black)
         .accessibilityIdentifier("player")
-
-        VStack(alignment: .leading, spacing: 16) {
-            Text(video.displayTitle).font(.vmk(22, weight: .bold)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 4)
-            actions(video)
-            makeAnotherCard
-            FeedbackLink { showFeedback = true }
-            if let d = videoDescription {
-                DisclosureGroup(tr("detail.description_credits")) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(Linkified.attributed(d)).font(.vmk(13)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled)
-                        Button {
-                            UIPasteboard.general.string = d
-                            copiedDescription = true
-                            Task { try? await Task.sleep(for: .seconds(2)); copiedDescription = false }
-                        } label: {
-                            Label(copiedDescription ? tr("common.copied") : tr("detail.copy_description"), systemImage: copiedDescription ? "checkmark" : "text.alignleft").font(.vmk(15, weight: .semibold)).frame(maxWidth: .infinity, minHeight: Theme.minTouch)
-                        }.buttonStyle(.bordered).accessibilityIdentifier("copyDescription")
-                    }.padding(.top, 8)
-                }
-                .tint(Theme.primary).accessibilityIdentifier("descriptionGroup")
-            }
+        .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime)) { n in
+            if let item = n.object as? AVPlayerItem, item === player?.currentItem { withAnimation(Theme.Motion.fade) { ended = true } }
         }
-        .padding(Theme.Space.xl)
+
+        VStack(alignment: .leading, spacing: 14) {
+            if let caption = caption(video) { Text(caption).font(.vmk(14).monospacedDigit()).foregroundStyle(Theme.textSecondary).padding(.top, 2).accessibilityIdentifier("videoCaption") }
+            actions(video)
+            if save == .failed { Text(tr("detail.save_failed")).font(.vmk(13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true) }
+        }
+        .padding(.horizontal, Theme.Space.xl).padding(.vertical, Theme.Space.l)
     }
 
-    /// Share is the one primary action; Save and Edit sit under it, equal and tonal.
+    /// "1:20 · 1080p": the only metadata under the video.
+    private func caption(_ video: VideoItem) -> String? {
+        let parts = [video.durationSeconds.map { VideoRow.duration($0) }, video.resolution].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// The video is over: replay or a new video. A scrim over the picture; the one place the words "New video" appear on this screen.
+    private func endCard(_ player: AVPlayer) -> some View {
+        ZStack {
+            Color.black.opacity(0.6)
+            HStack(spacing: 28) {
+                endButton("arrow.counterclockwise", tr("detail.replay"), "replayButton") { player.seek(to: .zero); player.play(); ended = false }
+                endButton("plus", tr("create.new_video"), "endNewVideo") { dismiss(); model.createRequested = true }
+            }
+        }
+        .transition(.opacity)
+    }
+
+    private func endButton(_ symbol: String, _ label: String, _ id: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: symbol).font(.vmk(22, weight: .semibold)).foregroundStyle(.white).frame(width: 56, height: 56).background(.white.opacity(0.18), in: Circle()).overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 0.5))
+                Text(label).font(.vmk(13, weight: .semibold)).foregroundStyle(.white).lineLimit(1).vmkOneLineCap()
+            }
+            .frame(minWidth: 72, minHeight: 88)
+        }
+        .buttonStyle(.plain).accessibilityLabel(label).accessibilityIdentifier(id)
+    }
+
+    /// Icons only, evenly spaced, each with a spoken label: Share (the one filled control), Save, Edit, Info, More.
     @ViewBuilder private func actions(_ video: VideoItem) -> some View {
-        let stacked = typeSize.isAccessibilitySize
-        VStack(spacing: 10) {
+        HStack(spacing: 0) {
             if let playbackURL {
                 ShareLink(item: SharedVideo(remoteURL: playbackURL, name: video.displayTitle), preview: SharePreview(video.displayTitle)) {
-                    Label(tr("common.share"), systemImage: "square.and.arrow.up").multilineTextAlignment(.center)
+                    Image(systemName: "square.and.arrow.up").font(.vmk(20, weight: .semibold)).foregroundStyle(Theme.onPrimary).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        .frame(width: 56, height: 56).background(Theme.gradient, in: Circle()).shadow(color: Theme.gradientStart.opacity(0.3), radius: 8, y: 3)
                 }
-                .buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("shareButton")
+                .accessibilityLabel(tr("common.share")).accessibilityIdentifier("shareButton")
+                .frame(maxWidth: .infinity)
+                Group {
+                    if save == .saving { ProgressView().frame(width: 44, height: 44) }
+                    else { GlassIconButton(symbol: save == .saved ? "checkmark" : "arrow.down.to.line", label: saveLabel, identifier: "saveButton") { Task { await saveToPhotos(playbackURL, name: video.displayTitle) } } }
+                }.frame(maxWidth: .infinity)
             }
-            (stacked ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))) {
-                if let playbackURL { secondary(saveLabel, symbol: saveSymbol) { Task { await saveToPhotos(playbackURL, name: video.displayTitle) } }.disabled(save == .saving).accessibilityIdentifier("saveButton") }
-                if video.editable { secondary(tr("common.edit"), symbol: "slider.horizontal.3") { player?.pause(); editing = true }.accessibilityIdentifier("editButton") }
+            if video.editable { GlassIconButton(symbol: "slider.horizontal.3", label: tr("common.edit"), identifier: "editButton") { player?.pause(); editing = true }.frame(maxWidth: .infinity) }
+            if videoDescription != nil { GlassIconButton(symbol: "info", label: tr("detail.info"), identifier: "infoButton") { showInfo = true }.frame(maxWidth: .infinity) }
+            Menu {
+                Button { dismiss(); model.createRequested = true } label: { Label(tr("create.new_video"), systemImage: "plus") }.accessibilityIdentifier("makeAnother")
+                Button { showFeedback = true } label: { Label(tr("feedback.title"), systemImage: "bubble.left") }.accessibilityIdentifier("sendFeedbackLink")
+            } label: {
+                Image(systemName: "ellipsis").font(.vmk(18, weight: .semibold)).foregroundStyle(Theme.text).frame(width: 44, height: 44).vmkGlass(in: Circle()).frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Circle())
             }
-            if save == .failed { Text(tr("detail.save_failed")).font(.vmk(13)).foregroundStyle(Theme.danger).frame(maxWidth: .infinity, alignment: .leading).fixedSize(horizontal: false, vertical: true) }
+            .accessibilityLabel(tr("media.more")).accessibilityIdentifier("moreButton").frame(maxWidth: .infinity)
         }
-    }
-
-    private func secondary(_ title: String, symbol: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Label(title, systemImage: symbol).font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.primary).multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, minHeight: 50).padding(.horizontal, 8)
-                .background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-        }.buttonStyle(.plain)
     }
 
     private var saveLabel: String { save == .saved ? tr("detail.saved") : tr("detail.save") }
-    private var saveSymbol: String { save == .saved ? "checkmark" : "arrow.down.to.line" }
 
-    /// The "next" card: the retention hook after a result. (A vertical version of the same script needs a backend call: not built.)
-    private var makeAnotherCard: some View {
-        Button { dismiss(); model.createRequested = true } label: {
-            HStack(spacing: 14) {
-                Image(systemName: "plus").font(.vmk(18, weight: .semibold)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.primaryContainer, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("detail.make_another")).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.text).multilineTextAlignment(.leading)
-                    Text(tr("detail.make_another_sub")).font(.vmk(14)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.leading)
-                }
-                Spacer(minLength: 4)
-                Image(systemName: "chevron.right").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary).accessibilityHidden(true)
-            }
-            .padding(14).frame(maxWidth: .infinity, minHeight: Theme.minTouch)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+    private func message(_ title: String, _ body: String, icon: String, color: Color, retry: (() -> Void)? = nil) -> some View {
+        VStack(spacing: 14) {
+            Image(systemName: icon).font(.vmk(30)).foregroundStyle(color).frame(width: 64, height: 64).background(color.opacity(0.14), in: Circle()).accessibilityHidden(true)
+            Text(title).font(.vmk(22, weight: .bold)).foregroundStyle(Theme.text).multilineTextAlignment(.center).accessibilityAddTraits(.isHeader)
+            Text(body).font(.vmk(15)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+            if let retry { Button(action: retry) { Label(tr("common.try_again"), systemImage: "arrow.clockwise").font(.vmk(17, weight: .semibold)).foregroundStyle(Theme.primary).frame(minHeight: Theme.minTouch) }.buttonStyle(.plain).accessibilityIdentifier("tryAgain") }
         }
-        .buttonStyle(.plain).accessibilityIdentifier("makeAnother")
-    }
-
-    private func message(_ title: String, _ body: String, icon: String, color: Color, container: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(title, systemImage: icon).font(.vmk(17, weight: .semibold)).foregroundStyle(color)
-            Text(body).font(.vmk(15)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-        .background(container, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+        .frame(maxWidth: .infinity).padding(.top, 48)
     }
 
     // MARK: loading and saving
@@ -229,5 +229,29 @@ struct SharedVideo: Transferable {
             try FileManager.default.moveItem(at: tmp, to: dest)
             return SentTransferredFile(dest)
         }
+    }
+}
+
+/// The description and the photo credits, one copy button. Opens from the (i) under the video.
+struct VideoInfoSheet: View {
+    let description: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var copied = false
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                Text(Linkified.attributed(description)).font(.vmk(15)).foregroundStyle(Theme.text).frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled).padding(20)
+            }
+            .navigationTitle(tr("detail.info")).navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { UIPasteboard.general.string = description; copied = true; Task { try? await Task.sleep(for: .seconds(2)); copied = false } } label: { Label(copied ? tr("common.copied") : tr("detail.copy_description"), systemImage: copied ? "checkmark" : "doc.on.doc") }
+                        .accessibilityIdentifier("copyDescription")
+                }
+                ToolbarItem(placement: .confirmationAction) { Button(tr("common.done")) { dismiss() } }
+            }
+        }
+        .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
+        .accessibilityIdentifier("descriptionGroup")
     }
 }

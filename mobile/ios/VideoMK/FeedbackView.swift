@@ -145,14 +145,3 @@ struct FeedbackSheet: View {
     private var retry: Bool { if case .failed = composer.phase { true } else { false } }
 }
 
-/// The quiet entry after a video and the row in Settings share this label style.
-struct FeedbackLink: View {
-    let action: () -> Void
-    var body: some View {
-        Button(action: action) {
-            Label(tr("feedback.title"), systemImage: "bubble.left").font(.vmk(14)).foregroundStyle(Theme.textSecondary)
-                .frame(maxWidth: .infinity, minHeight: Theme.minTouch)
-        }
-        .buttonStyle(.plain).accessibilityIdentifier("feedbackLink")
-    }
-}

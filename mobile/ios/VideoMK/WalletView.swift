@@ -9,24 +9,21 @@ struct WalletView: View {
         NavigationStack {
             ScrollView {
                 if let w = model.wallet {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 16) {
                         WalletHero(balance: w.balance, unlimited: w.unlimited, nextFree: w.nextFreeAt.map { tr("wallet.next_free", Localization.shared.relative($0)) })
-                        VStack(alignment: .leading, spacing: 12) {
-                            heading(tr("wallet.cost_title"))
-                            CostExplainer().padding(16).frame(maxWidth: .infinity, alignment: .leading).background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            heading(tr("wallet.what_you_have"))
-                            VStack(spacing: 0) {
-                                ForEach(Array(w.buckets.enumerated()), id: \.offset) { i, b in
-                                    if i > 0 { Divider().padding(.leading, 16) }
-                                    bucketRow(b)
-                                }
-                                if w.buckets.isEmpty { Text(tr("wallet.none")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).padding(16).frame(maxWidth: .infinity, alignment: .leading) }
+                        VStack(spacing: 0) {
+                            ForEach(Array(w.buckets.enumerated()), id: \.offset) { i, b in
+                                if i > 0 { Divider().padding(.leading, 16) }
+                                bucketRow(b)
                             }
-                            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-                            Label(tr("wallet.daily_free", w.dailyCredits), systemImage: "gift").font(.vmk(14)).foregroundStyle(Theme.textSecondary).labelStyle(.titleAndIcon)
+                            if w.buckets.isEmpty { Text(tr("wallet.none")).font(.vmk(15)).foregroundStyle(Theme.textSecondary).padding(16).frame(maxWidth: .infinity, alignment: .leading) }
                         }
+                        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+                        HStack(spacing: 2) {
+                            Text(tr("wallet.cost_title")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.textSecondary)
+                            InfoPopover(text: tr("wallet.rules_short") + "\n" + tr("wallet.daily_free", w.dailyCredits), spoken: tr("wallet.cost_title"), identifier: "walletInfo")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                     .padding(Theme.Space.l)
                 } else {

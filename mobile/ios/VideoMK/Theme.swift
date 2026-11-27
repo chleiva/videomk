@@ -28,6 +28,12 @@ enum Theme {
     static let dangerContainer = role(DesignTokens.dangerContainer)
     static let gradientStart = role(DesignTokens.gradientStart)
     static let gradientEnd = role(DesignTokens.gradientEnd)
+    /// Toasts and the "soon" tip: always dark, so the same in both appearances.
+    static let toastSurface = Color(hex: 0x23263F)
+    static let toastAccent = Color(hex: 0xB9BBFF)
+    static let toastSuccess = Color(hex: 0x4ADE80)
+    /// The solid red of the one destructive confirm button (white text, 6.5:1).
+    static let dangerSolid = Color(hex: 0xB91C1C)
     static let makingStart = Color(hex: DesignTokens.makingStart)
     static let makingEnd = Color(hex: DesignTokens.makingEnd)
 

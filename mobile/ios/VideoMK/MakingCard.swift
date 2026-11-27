@@ -35,36 +35,44 @@ struct MakingCard: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     private var detail: Bool { layout == .detail }
-    private var steps: [String] { MakingProgress.steps }
+    /// One bar for the whole job (the four stage segments averaged): the stage verb already says where it is.
+    private var fraction: Double { let v = snapshot.segments; return v.isEmpty ? 0 : min(1, max(0, v.reduce(0, +) / Double(v.count))) }
+    /// "Scene 3 of 7", else the estimate: one quiet second line.
+    private var detailLine: String? {
+        let parts = [snapshot.scene.map { tr("making.scene_counter", $0.index, $0.total) }, snapshot.eta].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             Theme.makingGradient
             shimmer
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .center, spacing: 8) {
-                    GlassChip(text: tr("videos.making"), dot: Theme.live)
-                    Spacer(minLength: 8)
-                    if let eta = snapshot.eta, !typeSize.isAccessibilitySize { Text(eta).font(.vmk(13, weight: .medium)).foregroundStyle(.white.opacity(0.86)).multilineTextAlignment(.trailing) }
-                    if let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.vmk(18, weight: .bold)).foregroundStyle(.white).frame(width: Theme.minTouch, height: Theme.minTouch) }.accessibilityLabel(tr("media.more")) }
+                HStack(alignment: .top, spacing: 8) {
+                    if detail {
+                        Text(snapshot.stageLine).font(.vmk(22, weight: .bold)).foregroundStyle(.white).lineLimit(typeSize.isAccessibilitySize ? nil : 2).fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(snapshot.title).font(.vmk(19, weight: .semibold)).foregroundStyle(.white).lineLimit(typeSize.isAccessibilitySize ? 4 : 2).fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 4)
+                    if onRemove != nil, let onRemove { Menu { Button(tr("videos.remove"), role: .destructive, action: onRemove) } label: { Image(systemName: "ellipsis").font(.vmk(18, weight: .bold)).foregroundStyle(.white).frame(width: Theme.minTouch, height: Theme.minTouch) }.accessibilityLabel(tr("media.more")).padding(.top, -10).padding(.trailing, -10) }
                 }
-                if typeSize.isAccessibilitySize, let eta = snapshot.eta { Text(eta).font(.vmk(13, weight: .medium)).foregroundStyle(.white.opacity(0.86)).padding(.top, 6) }
-                if !detail {
-                    Text(snapshot.title).font(.vmk(19, weight: .semibold)).foregroundStyle(.white).lineLimit(typeSize.isAccessibilitySize ? 4 : 2).padding(.top, 10)
+                if detail {
+                    if let line = detailLine { Text(line).font(.vmk(15, weight: .medium).monospacedDigit()).foregroundStyle(.white.opacity(0.88)).padding(.top, 6) }
+                } else {
+                    HStack(spacing: 6) {
+                        Circle().fill(Theme.live).frame(width: 7, height: 7).accessibilityHidden(true)
+                        Text([snapshot.stageLine, snapshot.scene.map { tr("making.scene_counter", $0.index, $0.total) }].compactMap { $0 }.joined(separator: " · "))
+                            .font(.vmk(15)).foregroundStyle(.white.opacity(0.9)).lineLimit(typeSize.isAccessibilitySize ? nil : 1).fixedSize(horizontal: false, vertical: true)
+                    }.padding(.top, 6)
                 }
-                Text(snapshot.stageLine).font(.vmk(detail ? 19 : 15, weight: detail ? .semibold : .regular)).foregroundStyle(.white.opacity(detail ? 1 : 0.88)).padding(.top, detail ? 22 : 4)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 2).fixedSize(horizontal: false, vertical: true)
-                if let scene = snapshot.scene {
-                    Text(tr("making.scene_counter", scene.index, scene.total)).font(.vmk(15, weight: .medium).monospacedDigit()).foregroundStyle(.white.opacity(0.86)).padding(.top, 2)
-                }
-                if !snapshot.thumbnails.isEmpty { thumbnailStrip.padding(.top, 12) }
-                if detail { checklist.padding(.top, 18) }
-                Spacer(minLength: 14)
-                segmentBar
+                if !snapshot.thumbnails.isEmpty { thumbnailStrip.padding(.top, 14) }
+                Spacer(minLength: detail ? 22 : 12)
+                progressBar
             }
-            .padding(detail ? 20 : 14)
+            .padding(detail ? 20 : 16)
         }
-        .frame(maxWidth: .infinity, minHeight: detail ? 240 : 168)
+        .frame(maxWidth: .infinity, minHeight: detail ? 150 : 108)
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
         .elevation(2)
         .transition(.opacity)
@@ -97,37 +105,15 @@ struct MakingCard: View {
         .accessibilityHidden(true)
     }
 
-    private var checklist: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { i, name in
-                HStack(spacing: 10) {
-                    if snapshot.segments.indices.contains(i), snapshot.segments[i] >= 1 { Image(systemName: "checkmark.circle.fill").foregroundStyle(.white) }
-                    else if i == snapshot.current { Image(systemName: "circle.lefthalf.filled").foregroundStyle(Theme.live) }
-                    else { Image(systemName: "circle").foregroundStyle(.white.opacity(0.6)) }
-                    Text(name).font(.vmk(16, weight: i == snapshot.current ? .semibold : .regular)).foregroundStyle(.white.opacity(i <= snapshot.current ? 1 : 0.72))
-                }
+    private var progressBar: some View {
+        GeometryReader { g in
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.24))
+                Capsule().fill(.white).frame(width: max(6, g.size.width * fraction))
+                    .animation(reduceMotion ? nil : .linear(duration: 1), value: fraction)       // continuous between the one-second ticks
             }
         }
-    }
-
-    private var segmentBar: some View {
-        HStack(alignment: .top, spacing: 8) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { i, name in
-                VStack(alignment: .leading, spacing: 8) {
-                    GeometryReader { g in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(.white.opacity(0.24))
-                            Capsule().fill(.white).frame(width: g.size.width * (snapshot.segments.indices.contains(i) ? snapshot.segments[i] : 0))
-                                .animation(reduceMotion ? nil : .linear(duration: 1), value: snapshot.segments)       // continuous between the one-second ticks
-                        }
-                    }.frame(height: 4)
-                    if !detail && (!typeSize.isAccessibilitySize || i == snapshot.current) {
-                        Text(name).font(.vmk(12, weight: i == snapshot.current ? .bold : .regular)).foregroundStyle(i == snapshot.current ? .white : .white.opacity(0.8)).lineLimit(typeSize.isAccessibilitySize ? 2 : 1).minimumScaleFactor(0.8)
-                    }
-                }
-                .frame(maxWidth: typeSize.isAccessibilitySize && i != snapshot.current ? 24 : .infinity, alignment: .leading)
-            }
-        }
+        .frame(height: 4).accessibilityHidden(true)
     }
 }
 

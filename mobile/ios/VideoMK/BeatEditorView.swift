@@ -56,7 +56,7 @@ struct BeatEditorView: View {
         Section {
             if let photo = beat.photo, let url = photo.url, model.picks[beatID] == nil {
                 AsyncImage(url: url) { $0.resizable().scaledToFill() } placeholder: { ProgressView() }
-                    .frame(height: 180).frame(maxWidth: .infinity).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .frame(height: 180).frame(maxWidth: .infinity).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
                 if let credit = photo.credit { Text(credit).font(.footnote).foregroundStyle(Theme.textSecondary) }
             } else if beat.photo?.noPhoto == true, model.picks[beatID] == nil {
                 Label(tr("editor.no_suitable_photo_was_found"), systemImage: "photo.badge.exclamationmark")

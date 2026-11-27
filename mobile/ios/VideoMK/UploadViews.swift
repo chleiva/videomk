@@ -133,7 +133,7 @@ struct UploadTile: View {
 
     private func glass(_ text: String, symbol: String) -> some View {
         HStack(spacing: 4) { Image(systemName: symbol).font(.vmk(10)); Text(text).font(.vmk(11, weight: .semibold)).fixedSize(horizontal: false, vertical: true) }
-            .foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .foregroundStyle(.white).padding(.horizontal, 8).padding(.vertical, 3).frame(minHeight: 22).background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: Theme.Radii.field, style: .continuous))
     }
 }
 
@@ -231,9 +231,9 @@ struct UploadBar: View {
             .accessibilityIdentifier("uploadBar")
             GeometryReader { g in Rectangle().fill(tint(bar)).frame(width: g.size.width * bar.fraction) }.frame(height: 3)
         }
-        .background(bar.kind == .needsAttention || bar.kind == .storageFull ? Theme.warningContainer : Theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(bar.kind == .needsAttention || bar.kind == .storageFull ? Theme.warning : Theme.outline, lineWidth: 1))
+        .background(bar.kind == .needsAttention || bar.kind == .storageFull ? Theme.warningContainer : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(bar.kind == .needsAttention || bar.kind == .storageFull ? Theme.warning : Theme.outline, lineWidth: 1))
         .elevation(3)
     }
 
@@ -244,7 +244,7 @@ struct UploadBar: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(bar.title).font(.vmk(16, weight: .bold)).foregroundStyle(Theme.text)
                     Text(bar.subtitle).font(.vmk(14)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
-                    if let m = media.meter { Text(m.label).font(.vmk(12.5).monospacedDigit()).foregroundStyle(Theme.warning).padding(.top, 2) }
+                    if let m = media.meter { Text(m.label).font(.vmk(12).monospacedDigit()).foregroundStyle(Theme.warning).padding(.top, 2) }
                 }
             }
             HStack(spacing: 10) {
@@ -255,8 +255,8 @@ struct UploadBar: View {
             }
         }
         .padding(14)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Theme.warning, lineWidth: 1.5))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.warning, lineWidth: 1.5))
         .elevation(3)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("storageFullCard")
@@ -301,8 +301,8 @@ struct UploadPanel: View {
                 }
             }
             .padding(14)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Theme.outline, lineWidth: 1))
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
             .elevation(3)
             .padding(.horizontal, 12)
             .accessibilityElement(children: .contain)
@@ -316,7 +316,7 @@ struct UploadPanel: View {
             Text(label).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
         }
         .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading).padding(.horizontal, 10)
-        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 
@@ -353,13 +353,13 @@ struct UploadToast: View {
     let onDismiss: () -> Void
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill").font(.vmk(20)).foregroundStyle(Color(hex: 0x4ADE80))
-            Text(toast.text).font(.vmk(14.5)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
+            Image(systemName: "checkmark.circle.fill").font(.vmk(20)).foregroundStyle(Theme.toastSuccess)
+            Text(toast.text).font(.vmk(15)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 4)
-            if let action = toast.action { Button(action: action == tr("upload.review") || action == tr("org.view") ? onAction : onDismiss) { Text(action).font(.vmk(14, weight: .semibold)).foregroundStyle(Color(hex: 0xB9BBFF)).frame(minWidth: 44, minHeight: 44) } }
+            if let action = toast.action { Button(action: action == tr("upload.review") || action == tr("org.view") ? onAction : onDismiss) { Text(action).font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.toastAccent).frame(minWidth: 44, minHeight: 44) } }
         }
         .padding(.leading, 14).padding(.trailing, 8).frame(minHeight: 52)
-        .background(Color(hex: 0x23263F), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Theme.toastSurface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
         .padding(.horizontal, 12).padding(.bottom, 8)
         .transition(.move(edge: .bottom).combined(with: .opacity))
         .accessibilityElement(children: .combine)

@@ -36,18 +36,24 @@ struct RootView: View {
     }
 }
 
-/// The bottom tab bar: Videos (the home screen) and Media (the private photo library).
+/// The floating tab bar (Videos, Media) with the round (+) beside it. Both tabs stay alive underneath, so a pushed video, a scroll position or an open
+/// sheet survives a switch. The bar hides while a video is open (the video screen is a full page).
 struct MainTabs: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         @Bindable var model = model
-        TabView(selection: $model.selectedTab) {
-            LibraryView().tabItem { Label(tr("tab.videos"), systemImage: "play.rectangle.on.rectangle") }.tag(0)
+        ZStack {
+            LibraryView().opacity(model.selectedTab == 0 ? 1 : 0).allowsHitTesting(model.selectedTab == 0).accessibilityHidden(model.selectedTab != 0)
             Group {
                 if let media = model.media { MediaView(media: media) } else { ContentUnavailableView(tr("app.not_available"), systemImage: "photo.on.rectangle") }
             }
-            .tabItem { Label(tr("tab.media"), systemImage: "photo.on.rectangle") }.tag(1)
+            .opacity(model.selectedTab == 1 ? 1 : 0).allowsHitTesting(model.selectedTab == 1).accessibilityHidden(model.selectedTab != 1)
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !model.tabBarHidden { FloatingTabBar(selection: $model.selectedTab) { model.createRequested = true }.transition(.move(edge: .bottom).combined(with: .opacity)) }
+        }
+        .animation(.easeOut(duration: 0.22), value: model.tabBarHidden)
+        .background(Theme.background.ignoresSafeArea())
     }
 }
