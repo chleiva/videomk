@@ -37,7 +37,7 @@ def maker(cid):
 
 
 def geom(cid):
-    return vp.load(cid, 0.5).g
+    return vp.load(cid, ac.GEOM_PPU).g
 
 
 def tracked(perf, g, t0, t1):
@@ -58,7 +58,7 @@ def active(perf):
 # ----------------------------------------------------------------------------- the instrument over the whole matrix
 @pytest.mark.parametrize("cid", CAST)
 def test_instrument_counts_zero_over_the_whole_matrix(cid):
-    ch = vp.load(cid, 0.5)
+    ch = vp.load(cid, ac.GEOM_PPU)
     g = ch.g
     total, cases = {}, 0
     for group, name, perf, t0, t1 in ac.scenarios(KINDS, maker(cid), overlap=True):
@@ -371,23 +371,35 @@ def test_every_gesture_is_home_before_the_scene_ends():
         assert -19.0 < fo < 7.0 and shape == "relaxed"
 
 
-def test_hands_fold_up_beside_a_card_and_stay_low_where_there_is_no_room():
+def test_hands_fold_up_beside_a_card_and_come_in_front_of_the_body_where_there_is_no_room():
     g = geom("ines")
-    reach = lambda key: g.upper * math.sin(math.radians(key[0])) + (g.fore + g.hand * cg.HAND_REACH) * math.sin(math.radians(min(180.0, key[1] + max(0.0, key[2]))))     # noqa: E731
+    reach = lambda key: g.upper * math.sin(math.radians(key[0])) + (g.fore + g.reach) * math.sin(math.radians(min(180.0, key[1] + max(0.0, key[2]))))     # noqa: E731
     free, _ = cg.fit_key("present", True, g)
-    for room in (60.0, 48.0, 36.0):
-        key, _ = cg.fit_key("present", True, g, room, 80.0)
-        assert reach(key) <= room + 0.5 and key[1] >= free[1]                                 # the forearm folds up until the hand fits
-    for kind in cg.PALMS:
-        key, _ = cg.fit_key(kind, True, g, 22.0, 22.0)                                        # no room to swing up: the same gesture low, by the hip
-        assert key[1] < 60.0 and key[0] >= vp.elbow_need(key[1])
-    perf = cg.Performance(seed=0.3, content_side=1, who="ines", room=(60.0, 20.0), clear=(70.0, 20.0))
-    perf.gesture("count", 1.5, 1.0, "r")
-    assert perf.gestures[0].hand == "l"                                                       # a count goes to the hand that has the room
-    w = ac.fake_words("First we wash our hands. Great, exactly!")
-    boxed = cg.Performance(seed=0.3, content_side=1, who="ines", room=(20.0, 20.0), clear=(20.0, 20.0))
-    boxed.speak(w, None, w[-1][2])
-    assert not any(x.kind in ("count", "thumb") for x in boxed.gestures)                      # and is not made at all when neither has
+    for room in (80.0, 66.0, 50.0, 36.0):
+        key, _ = cg.fit_key("present", True, g, room, 90.0)
+        assert reach(key) <= room + 0.5 and key[1] >= free[1]                                 # the forearm folds up until the whole hand fits
+    assert 35.0 < cg.path_need(g) < 70.0 and cg.outward(40.0, 90.0, g) and not cg.outward(40.0, 30.0, g) and not cg.outward(20.0, 90.0, g)
+    for cid in CAST:                                                                          # no room beside the body: the same gesture in front of it
+        gg = geom(cid)
+        for kind in GESTURES:
+            (up, fo, fl), shape = cg.fit_key(kind, True, gg, 20.0, 20.0)
+            assert fo < -60.0 and 0.0 < up <= 24.0 and vp.BEND_MIN < fo - up, (cid, kind)     # elbow at the side, forearm up across the body
+            sk = vp.solve(gg, {"arms": ((7.0, -4.0), (up, fo)), "wrist": (0.0, fl)})
+            w, hd = sk["wrists"][1], sk["hand_dir"][1]
+            tip = (w[0] + hd[0] * gg.reach, w[1] + hd[1] * gg.reach)
+            assert w[0] > 2.0 and tip[1] < sk["neck"][1] - 4.0, (cid, kind, w, tip)           # the wrist on its own side of the body, the finger tips under the chin
+            assert sk["elbows"][1][0] - sk["shoulders"][1][0] <= 18.0                         # and the elbow inside the little room there is
+    # a two-handed gesture without room for both hands is made by one: two hands crossed on the chest say something else
+    both = cg.Performance(seed=0.3, content_side=1, who="ines", room=(20.0, 20.0), clear=(20.0, 20.0), geom=g)
+    both.gesture("open", 1.5, 1.0)
+    x = both.gestures[0]
+    lead, other = (0, 1) if x.lead == "l" else (1, 0)
+    assert both.arm(x.stroke + 0.3, lead, g)[1] < -60.0 and -19.0 < both.arm(x.stroke + 0.3, other, g)[1] < 7.0
+    half = cg.Performance(seed=0.3, content_side=1, who="ines", room=(80.0, 20.0), clear=(90.0, 20.0), geom=g)
+    half.gesture("open", 1.5, 1.0)
+    assert half.arm(half.gestures[0].stroke + 0.3, 0, g)[1] > 90.0 and -19.0 < half.arm(half.gestures[0].stroke + 0.3, 1, g)[1] < 7.0     # the arm with room makes it alone
+    half.gesture("count", 6.0, 1.0, "r")
+    assert half.gestures[-1].hand == "l"                                                      # and a count goes to the hand that has the room
 
 
 def test_gestures_are_not_on_every_sentence_and_the_plan_is_deterministic():

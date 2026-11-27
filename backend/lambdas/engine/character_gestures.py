@@ -1,17 +1,22 @@
 """Automatic speaker gestures for the standing presenter rig (engine/vector_presenter.py). No model decides anything here: the narration's words and their timings do.
 
-  plan_gestures(words)        text cues + word timings -> a short list of Gesture events (at most one meaningful gesture per sentence, never overlapping, each one returns
-                              to the home position), plus beat times on stressed words
+  plan_gestures(words)        text cues + word timings -> a short list of Gesture events (at most one meaningful gesture per sentence, and not on every sentence),
+                              plus beat times on stressed words
   Performance(...).pose(t)    a pure function of time: the events, the idle life (breathing, blinks, weight shift, small head moves, eye darts), listening, entering and
                               leaving, turned into one pose dict for Presenter.draw. The same input and seed give the same pose on any machine, in any order of frames.
 
-The rules follow what speaking coaches teach and what gesture research measured (sources in docs/CHARACTER_ANIMATION_PROOF.md):
-  * home base = arms relaxed at the sides; the hands come back to it after every gesture
-  * gestures stay in the box between waist and shoulders (only the greeting wave goes higher), with OPEN hands; nobody points with a finger
-  * the stroke of a gesture lands on (a hair before) the word it belongs to; the preparation starts about 0.4 s earlier (Kendon's phases: preparation, stroke, hold, retraction)
-  * the hand travels on an arc about the shoulder and the elbow follows (IK); slow in, slow out, a small settle after the stroke, the hand drags behind the forearm,
-    and in two-handed gestures one hand leads by two or three frames (no twinning)
-  * a character is never still: breathing, irregular blinks, a weight shift now and then, eye darts, nods on stressed words
+The rules follow what speaking coaches teach, what gesture research measured and what animators know about arms (sources in docs/PRESENTERS.md "Arms"):
+  * rest = arms relaxed at the sides, elbows a little out, never two straight sticks and never the same on both sides for long; a listener may hold its hands
+    loosely together in front. Rest is alive (breath, a slow sway, the weight shift) but never fidgets
+  * gestures stay in the box between waist and shoulders (only the greeting wave goes higher), elbows near the body, with OPEN hands; nobody points with a finger
+  * the stroke of a gesture lands on (a hair before) the word it belongs to, and is then HELD; the preparation starts as much earlier as the arm's way needs
+    (Kendon's phases: preparation, stroke, hold, retraction)
+  * arms are bone ANGLES (shoulder, elbow, wrist), never wrist targets: the elbow goes out when the forearm swings out, the upper arm leads on the way up and
+    follows on the way down, the hand trails the forearm; slow in, slow out, a small overshoot that settles after the stroke
+  * the way home is a RETURN: longer than the way up, slowest at the end, a hair past rest and back; never a drop
+  * a gesture that follows closely goes straight from the pose the arm is in; the hands rest in between only when there is time to rest
+  * two-handed gestures are never mirror images: one hand leads and they hold at different heights
+  * where there is no room beside the body (a card, a neighbour) the same gesture is made in front of the chest
 
 Text cues (English and Spanish): greeting / goodbye -> wave; "first, second, third", a number up to three, or a list "a, b and c" -> count on the fingers;
 "but / however / on the other hand" -> compare left and right; a question -> shrug with open palms; "this / here / look" -> present toward the content with the whole hand;
@@ -37,9 +42,11 @@ PRIORITY = {k: i for i, k in enumerate(KINDS)}
 PREP = {"wave": 0.94, "count": 0.90, "thumb": 0.90, "open": 0.90, "present": 0.78, "compare": 0.90, "shrug": 0.86, "beat": 0.60}
 RETRACT = {"wave": 1.30, "count": 1.25, "thumb": 1.25, "open": 1.25, "present": 1.05, "compare": 1.25, "shrug": 1.20, "beat": 0.70}
 PREP_S = 0.60               # the shortest preparation
-RETRACT_S = 0.85            # the shortest retraction
+RETRACT_S = 0.92            # the shortest retraction
+LATE_MAX_S = 0.45           # the only late strokes: a gesture on the first word of a shot that fades in over another may land this much after its word
+QUIET_MAX_S = 4.0           # a speaker who has not moved a hand for this long gives the most stressed word of the next sentence one open hand
 RISE_DPS = 200.0            # degrees a second the forearm averages on the way up (its top speed is about 1.5 times that)
-FALL_DPS = 150.0            # ... and on the way home
+FALL_DPS = 132.0            # ... and on the way home
 MIN_HOLD_S = 0.45
 MAX_HOLD_S = 1.9
 SEEN_S = 0.28               # a gesture has been seen this long after its stroke: only then may the next one take the arm over
@@ -81,37 +88,55 @@ KEY: Dict[str, Tuple[Arm, Optional[Arm], str]] = {
 }
 TWO_HANDED = ("open", "shrug", "compare")
 COUNT_SHAPES = ("one", "two", "three")
-HAND_REACH = 1.15           # a gesture hand is drawn this much longer than the relaxed one
+HAND_REACH = 1.15           # a gesture hand is drawn about this much longer than the relaxed one (the rig measures it: Geom.reach)
 
 
 PALMS = ("open", "shrug", "compare", "present")
 RAISED = ("wave", "count", "thumb")
-PATH_NEED = 50.0            # units outward of the shoulder a hand sweeps through on its way up (forearm level, hand trailing): every character's is 50 to 53
-LOW_ROOM = 30.0             # with less room than this beside it an open-palm gesture is made low, by the hip (folded up it would be "hands up")
+PATH_NEED = 56.0            # units outward of the shoulder the middle of a hand sweeps through on its way up, when the character's sizes are not known (path_need)
+SIDE_ROOM = 30.0            # with less room than this beside it a gesture folded up to fit would be "hands up": it is made in front of the body instead
+# The same gestures made IN FRONT of the body, for an arm with no room beside it (a wide character between the frame's edge and the card, three in a row):
+# the elbow stays at the side and the forearm comes up across the body, the hand in front of the chest. (forearm of the lead arm, of the other arm, wrist turn).
+FRONT: Dict[str, Tuple[float, float, float]] = {
+    "open": (-112.0, -97.0, -34.0), "shrug": (-104.0, -93.0, -40.0), "compare": (-112.0, -99.0, -34.0), "present": (-100.0, -100.0, -30.0),
+    "count": (-124.0, -124.0, -42.0), "thumb": (-120.0, -120.0, -40.0), "wave": (-122.0, -122.0, -34.0),
+}
+
+
+def path_need(geom: Any) -> float:
+    """Units outward of the shoulder the middle of the hand passes through on its way up beside the body (forearm level, elbow a little out, the hand trailing)."""
+    return PATH_NEED if geom is None else 0.2 * geom.upper + geom.fore + 0.5 * geom.hand + 3.0
+
+
+def outward(room: Optional[float], clear: Optional[float], geom: Any = None) -> bool:
+    """Has this arm the room to gesture beside the body (to swing up there, and to hold a hand there)?"""
+    return (clear is None or clear >= path_need(geom)) and (room is None or room >= SIDE_ROOM)
 
 
 def fit_key(kind: str, lead: bool, geom: Any, room: Optional[float] = None, clear: Optional[float] = None) -> Tuple[List[float], str]:
     """The key pose of a gesture for one arm of one character -> ([upper, fore, flex], shape).
     room   units outward of the shoulder the HELD hand may reach (the card's text, the board, another figure, the frame's edge)
     clear  units the hand may SWEEP through on its way (the same without the frame's edge: a hand may leave the picture for a few frames)
-    With room for the way up: the table's pose, the forearm folded up as far as `room` asks; a waving hand goes beside the head, not in front of the face.
-    Without (clear < PATH_NEED, or an open palm with less than LOW_ROOM): the same gesture made LOW by the hip, forearm out only as far as there is room, so the
-    hand never crosses the card or a neighbour on its way."""
+    With room beside the body: the table's pose, the forearm folded up as far as `room` asks; a waving hand goes beside the head, not in front of the face.
+    Without (`outward` is False): the same gesture in FRONT of the body: the hand never crosses the card or a neighbour, on its way or held."""
     a, b, shape = KEY[kind]
     up, fo, fl = a if (lead or b is None) else b
-    U, F, H = geom.upper, geom.fore, geom.hand * HAND_REACH
-    tight = min(x for x in (room, clear, 1e9) if x is not None)
-    low = (clear is not None and clear < PATH_NEED and kind != "beat") or (kind in PALMS and room is not None and room < LOW_ROOM)
-    if low:
-        from engine.vector_presenter import elbow_need
-
-        fo = 20.0
-        for f in range(58, 19, -2):                           # the widest low pose that fits
-            u = elbow_need(float(f)) + 2.0
-            if U * math.sin(math.radians(u)) + (F + H) * math.sin(math.radians(f + 14.0)) <= tight - 2.0:
-                fo = float(f) - (0.0 if lead else 6.0)
+    U, F, H = geom.upper, geom.fore, getattr(geom, "reach", geom.hand * HAND_REACH)
+    if kind in FRONT and not outward(room, clear, geom):
+        f_lead, f_other, fl = FRONT[kind]
+        fo = f_lead if lead else f_other
+        reach_in = geom.shoulder_x - 3.0                      # the wrist stays on its own side of the body
+        tight = min(x for x in (room, clear, 1e9) if x is not None)
+        up = 2.0
+        chin = getattr(geom, "neck_y", 85.6) - geom.shoulder_y - 8.0      # finger tips stay under the chin: a hand in front of the mouth hides the speaker
+        for _ in range(16):                                   # a long forearm: the elbow moves out to keep the wrist on its side; no room for that, or the hand would
+            need = F * math.sin(math.radians(-fo)) - reach_in  # reach the face: the forearm comes less far up
+            up = 2.0 if need <= U * math.sin(math.radians(2.0)) else math.degrees(math.asin(min(0.95, need / U)))
+            top = -U * math.cos(math.radians(up)) - F * math.cos(math.radians(fo)) - H * math.cos(math.radians(fo + fl))
+            if U * math.sin(math.radians(up)) <= max(4.0, tight - 3.0) and up <= 24.0 and top <= chin:
                 break
-        return [elbow_need(fo) + 2.0, fo, 8.0 if kind != "shrug" else 16.0], shape
+            fo += 4.0
+        return [up, fo, fl], shape
     if kind == "wave":                                        # the waving hand goes beside the head, not in front of the face
         need = 0.5 * getattr(geom, "head_w", 92.0) + 0.55 * H - geom.shoulder_x
         rest = need - (F + 0.5 * H) * math.sin(math.radians(fo))
@@ -144,17 +169,27 @@ def arm_times(kind: str, key: Sequence[float]) -> Tuple[float, float]:
 
 
 # ----------------------------------------------------------------------------- text cues (EN + ES)
-_GREET = {"hello", "hi", "hey", "welcome", "hola", "bienvenido", "bienvenida", "bienvenidos", "bienvenidas", "buenas", "buenos"}
-_BYE = {"bye", "goodbye", "thanks", "thank", "adios", "adiós", "gracias", "hasta", "chao"}
-_ORDINAL = {"first": 1, "firstly": 1, "second": 2, "secondly": 2, "third": 3, "thirdly": 3, "primero": 1, "primera": 1, "segundo": 2, "segunda": 2, "tercero": 3, "tercera": 3}
-_NUMBER = {"one": 1, "two": 2, "three": 3, "1": 1, "2": 2, "3": 3, "dos": 2, "tres": 3}
-_CONTRAST = {"but", "however", "instead", "whereas", "versus", "vs", "yet", "pero", "sino", "aunque"}
-_CONTRAST_PHRASE = (("on", "the", "other", "hand"), ("sin", "embargo"), ("en", "cambio"), ("por", "otro", "lado"), ("on", "the", "contrary"))
-_DEICTIC = {"this", "these", "here", "look", "see", "watch", "notice", "aquí", "aqui", "mira", "miren", "observa", "este", "esta", "estos", "estas", "fíjate"}
-_AFFIRM = {"great", "perfect", "exactly", "excellent", "awesome", "genial", "perfecto", "excelente", "exacto", "bravo"}
+# English and Spanish first (the two languages the apps are in), then the commonest words of the other languages videos are made in (German, French, Portuguese,
+# Italian, Dutch): a greeting, a goodbye, a contrast, "look", praise and emphasis. A language without words here still gets "?" and "!" and the stressed words.
+_GREET = {"hello", "hi", "hey", "welcome", "hola", "bienvenido", "bienvenida", "bienvenidos", "bienvenidas", "buenas", "buenos",
+          "hallo", "willkommen", "servus", "moin", "bonjour", "salut", "bienvenue", "olá", "ola", "oi", "ciao", "buongiorno", "benvenuti", "benvenuto", "hoi", "welkom"}
+_BYE = {"bye", "goodbye", "thanks", "thank", "adios", "adiós", "gracias", "hasta", "chao",
+        "tschüss", "tschüs", "danke", "wiedersehen", "merci", "revoir", "obrigado", "obrigada", "tchau", "adeus", "grazie", "arrivederci", "doei", "dag", "bedankt"}
+_ORDINAL = {"first": 1, "firstly": 1, "second": 2, "secondly": 2, "third": 3, "thirdly": 3, "primero": 1, "primera": 1, "segundo": 2, "segunda": 2, "tercero": 3, "tercera": 3,
+            "erstens": 1, "zweitens": 2, "drittens": 3, "premièrement": 1, "deuxièmement": 2, "troisièmement": 3, "primeiro": 1, "terceiro": 3}
+_NUMBER = {"one": 1, "two": 2, "three": 3, "1": 1, "2": 2, "3": 3, "dos": 2, "tres": 3, "zwei": 2, "drei": 3, "deux": 2, "trois": 3, "dois": 2, "três": 3, "due": 2, "tre": 3, "twee": 2, "drie": 3}
+_CONTRAST = {"but", "however", "instead", "whereas", "versus", "vs", "yet", "pero", "sino", "aunque",
+             "aber", "jedoch", "sondern", "mais", "cependant", "pourtant", "porém", "contudo", "però", "invece", "maar", "echter"}
+_CONTRAST_PHRASE = (("on", "the", "other", "hand"), ("sin", "embargo"), ("en", "cambio"), ("por", "otro", "lado"), ("on", "the", "contrary"), ("auf", "der", "anderen", "seite"),
+                    ("en", "revanche"), ("par", "contre"), ("por", "outro", "lado"))
+_DEICTIC = {"this", "these", "here", "look", "see", "watch", "notice", "aquí", "aqui", "mira", "miren", "observa", "este", "esta", "estos", "estas", "fíjate",
+            "hier", "schau", "schaut", "sieh", "seht", "voici", "regarde", "regardez", "ici", "olha", "olhem", "veja", "guarda", "guardate", "ecco", "qui", "kijk"}
+_AFFIRM = {"great", "perfect", "exactly", "excellent", "awesome", "genial", "perfecto", "excelente", "exacto", "bravo",
+           "genau", "super", "toll", "prima", "richtig", "perfekt", "klasse", "exactement", "parfait", "ótimo", "perfeito", "exatamente", "esatto", "perfetto", "precies", "goed"}
 _STRONG = {"very", "really", "important", "key", "never", "always", "must", "every", "everything", "all", "huge", "best", "most", "essential", "remember",
-           "muy", "importante", "clave", "nunca", "siempre", "todo", "todos", "mejor", "esencial", "recuerda"}
-_LIST_AND = {"and", "or", "y", "o", "e"}
+           "muy", "importante", "clave", "nunca", "siempre", "todo", "todos", "mejor", "esencial", "recuerda",
+           "sehr", "wichtig", "immer", "niemals", "très", "toujours", "jamais", "muito", "sempre", "molto", "mai", "heel", "altijd", "nooit", "belangrijk"}
+_LIST_AND = {"and", "or", "y", "o", "e", "und", "oder", "et", "ou", "en", "of"}
 _FUNCTION = {"the", "a", "an", "of", "to", "in", "on", "and", "or", "is", "are", "it", "that", "for", "with", "as", "at", "by", "i", "im", "you", "we", "so", "be", "my", "your",
              "el", "la", "los", "las", "un", "una", "de", "en", "y", "o", "es", "son", "que", "por", "con", "para", "se", "lo", "al", "del", "mi", "tu", "su"}
 
@@ -398,6 +433,31 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
     while len(picked) > 1 and (len(picked) > max(1, math.ceil(max_per_minute * total / 60.0)) or busy(picked) > max_busy + 0.06):     # holds cannot shrink below MIN_HOLD_S, so a small excess is let through
         j = max(range(len(picked)), key=lambda k: (PRIORITY[picked[k].kind], picked[k].t1 - picked[k].t0))
         picked.pop(j)
+    # a speaker is not a statue: where no cue asked for a gesture for QUIET_MAX_S, the most stressed word of a sentence gets ONE open hand (hands in turn)
+    hand = "l" if last_hand == "r" else "r"
+    for si, idx in enumerate(sents):
+        if len(idx) < 5 or len(picked) >= max(1, math.ceil(max_per_minute * total / 60.0)):
+            continue
+        s0, s1 = words[idx[0]][1], words[idx[-1]][2]
+        if any(g.t0 < s1 and g.t1 > s0 for g in picked):
+            continue
+        head = idx[: max(3, int(len(idx) * 0.7))]
+        i = max(head, key=lambda j: _stress_score(words, j, level))
+        stroke = words[i][1] - STROKE_LEAD_S
+        t0 = stroke - PREP["open"]
+        hold_end = min(max(stroke + MIN_HOLD_S + 0.25, s1 - 0.15), stroke + 1.5)
+        g = Gesture("open", t0, stroke, hold_end, hold_end + RETRACT["open"], hand, hand, (), 0, 0.9, words[i][0])
+        before = [x for x in picked if x.stroke < stroke]
+        after = [x for x in picked if x.stroke > stroke]
+        if t0 < 0.0 or (before and stroke - before[-1].hold_end < QUIET_MAX_S) or (not before and stroke - words[0][1] < 0.5 * QUIET_MAX_S and si == 0 and len(sents) > 1):
+            continue
+        if after and after[0].t0 < g.t1 + GAP_S:
+            continue
+        if busy(picked + [g]) > max_busy:
+            continue
+        picked.append(g)
+        picked.sort(key=lambda x: x.t0)
+        hand = "l" if hand == "r" else "r"
     # beats: the most stressed word of a phrase, where the hands are free or holding (never during a preparation, a stroke or a retraction)
     beats: List[Tuple[float, str, float]] = []
     hand = "l" if last_hand == "r" else "r"
@@ -499,19 +559,20 @@ class Performance:
       limit    the shot's length: every gesture is back at rest by then (the next shot starts from the rest pose)
       room     (left, right) free space in units outward from each shoulder to the nearest thing a HELD hand must not cover (the card's text, the board, another
                figure, the frame's edge); None = unlimited. Gesture poses fold the forearm up to stay inside it
-      clear    (left, right) the same for a hand on its WAY (without the frame's edge). An arm without the room to swing up makes its gesture low, by the hip;
-               a wave, a count or a thumb goes to the other hand when that one has the room (fit_key, _place)
+      clear    (left, right) the same for a hand on its WAY (without the frame's edge). An arm without the room to swing up beside the body makes its gestures
+               in front of the body; a wave, a count or a thumb goes to the other hand when that one has the room (fit_key, _place)
       fold     (at the start, at the end): a listener that holds its hands together already when the shot starts / still when it ends
       quiet    seconds at the start of the shot during which no gesture begins (the crossfade from the shot before)
     """
 
     def __init__(self, seed: float = 0.0, content_side: int = 0, energy: float = 1.0, tail: bool = False, lift: float = 0.0, who: Optional[str] = None,
                  clock: float = 0.0, limit: Optional[float] = None, room: Optional[Tuple[Optional[float], Optional[float]]] = None,
-                 clear: Optional[Tuple[Optional[float], Optional[float]]] = None, fold: Tuple[bool, bool] = (False, False), quiet: float = 0.0):
+                 clear: Optional[Tuple[Optional[float], Optional[float]]] = None, fold: Tuple[bool, bool] = (False, False), quiet: float = 0.0, geom: Any = None):
         self.seed, self.content_side, self.energy, self.tail = seed, content_side, energy, tail
         self.lift = lift                                     # waist-up framing: a beat at rest is made this much higher so that it shows above the frame's edge
         self.who, self.clock, self.limit, self.room, self.fold = who, float(clock), limit, room or (None, None), fold
         self.clear = clear or self.room
+        self.geom = geom                                     # the character's sizes, when the caller knows them (how much room its arms need)
         self.quiet = quiet                                   # no gesture starts before this (the crossfade from the shot before: two pictures of one arm)
         self.life = _h01("life", who) if who else seed       # the seed of everything that must not change at a cut
         self.gestures: List[Gesture] = []
@@ -544,14 +605,18 @@ class Performance:
                 kept.append(g)
             gs = kept
             beats = [b for b in beats if b[0] < self.limit - 0.7]
-        gs = [g for g in gs if self._place(g) or g.kind == "wave"]       # a count or a thumb that could only be made low by the hip is not made
-        if self.quiet > 0.0:                                 # the shot fades in over the one before: an arm already on its way would show twice
-            kept = []
-            for g in gs:
-                if g.t0 < self.quiet:
-                    if g.stroke - self.quiet < 0.75 * PREP[g.kind]:
+        for g in gs:
+            self._place(g)
+        if self.quiet > 0.0:                                 # the shot fades in over the one before: an arm already on its way would show twice.
+            kept: List[Gesture] = []                         # A gesture on the line's first word (a reaction: "Exactly!") is made a moment later instead
+            for k, g in enumerate(gs):
+                d = self.quiet - g.t0
+                if d > 0.0:
+                    nxt = gs[k + 1] if k + 1 < len(gs) else None
+                    if d > LATE_MAX_S or (nxt is not None and nxt.t0 < _last_beat(g) + d + MIN_HOLD_S) or (self.limit is not None and g.t1 + d > self.limit - 0.04):
                         continue
-                    g.t0 = self.quiet
+                    g.t0, g.stroke, g.hold_end, g.t1 = g.t0 + d, g.stroke + d, g.hold_end + d, g.t1 + d
+                    g.steps = tuple((ts + d, v) for ts, v in g.steps)
                 kept.append(g)
             gs = kept
             beats = [b for b in beats if b[0] > self.quiet + 0.3]
@@ -569,15 +634,14 @@ class Performance:
         self.nods.sort()
 
     def _place(self, g: Gesture) -> bool:
-        """A raised one-handed gesture is given to the hand that has the room to go up (the other one when the planned hand has none). False: neither has."""
+        """A raised one-handed gesture is given to the hand that has the room to go up beside the body (the other one when the planned hand has none)."""
         if g.kind not in RAISED or g.hand == "both":
             return True
-        ok = {s: (self.clear[i] is None or self.clear[i] >= PATH_NEED) for i, s in enumerate(("l", "r"))}
+        ok = {s: outward(self.room[i], self.clear[i], self.geom) for i, s in enumerate(("l", "r"))}
         if not ok[g.hand]:
             other = "r" if g.hand == "l" else "l"
-            if not ok[other]:
-                return False
-            g.hand = g.lead = other
+            if ok[other]:
+                g.hand = g.lead = other                      # (neither has: it is made in front of the chest, with the planned hand)
         return True
 
     def gesture(self, kind: str, stroke: float, hold: float = 1.2, hand: Optional[str] = None, side: int = 0) -> None:
@@ -738,13 +802,22 @@ class Performance:
         return self._keys[key]
 
     # --- gestures
+    def _takes_part(self, g: Gesture, s: str) -> bool:
+        """Does arm s make gesture g? A two-handed gesture needs room beside the body for both hands: where only one arm has it, that arm makes the gesture alone;
+        where neither has, the leading hand makes it in front of the chest and the other stays at rest (two hands crossed on the chest say something else)."""
+        if g.hand != "both":
+            return g.hand == s
+        i = 0 if s == "l" else 1
+        mine, other = outward(self.room[i], self.clear[i], self.geom), outward(self.room[1 - i], self.clear[1 - i], self.geom)
+        return mine or (not other and g.lead == s)
+
     def _arm_key(self, g: Gesture, s: str, geom: Any) -> Tuple[List[float], str, float, float]:
         """(key pose, hand shape, preparation, retraction) of arm s in gesture g for this character, in this place."""
         lead = g.hand != "both" or g.lead == s
         ck = (g.kind, lead, s, id(geom))
         if ck not in self._keys:
             i = 0 if s == "l" else 1
-            key, shape = fit_key(g.kind, lead, geom, self.room[i], self.clear[i])
+            key, shape = fit_key(g.kind, lead, self.geom or geom, self.room[i], self.clear[i])
             self._keys[ck] = (key, shape) + arm_times(g.kind, key)
         return self._keys[ck]
 
@@ -763,12 +836,12 @@ class Performance:
             gs = self.gestures
             for a, g in enumerate(gs):
                 for s in ("l", "r"):
-                    if g.hand not in ("both", s):
+                    if not self._takes_part(g, s):
                         continue
-                    lag = TWIN_LAG_S if (g.hand == "both" and g.lead != s) else 0.0
+                    lag = TWIN_LAG_S + 0.12 if (g.hand == "both" and g.lead != s) else 0.0      # the second hand also lets go later: the two do not come down as a pair
                     falls[(id(g), s)] = (g.hold_end + lag, None)
                     for h in gs[a + 1:]:
-                        if h.hand in ("both", s):
+                        if self._takes_part(h, s):
                             st = self._arm_stroke(h, s)                        # when THIS arm of the next gesture lands (the second hand of a comparison comes later)
                             if st - PREP[h.kind] < g.t1 + BRIDGE_S:
                                 falls[(id(g), s)] = (st + 0.02, st + 0.30)
@@ -805,9 +878,12 @@ class Performance:
         tau = t - g.stroke
         if g.kind == "wave":
             on = _smooth((tau + 0.10) / 0.45) * _smooth((g.hold_end - t) / 0.45)        # the hand starts to wave as it arrives and stops before it leaves
-            fo += 10.0 * math.sin(2 * math.pi * WAVE_HZ * tau) * on
-            fl += 9.0 * math.sin(2 * math.pi * WAVE_HZ * tau - 0.9) * on
+            front = fo < 0.0                                                             # a wave in front of the chest is made with the hand, the forearm hardly moves
+            fo += (4.0 if front else 10.0) * math.sin(2 * math.pi * WAVE_HZ * tau) * on
+            fl += (11.0 if front else 9.0) * math.sin(2 * math.pi * WAVE_HZ * tau - 0.9) * on
         elif g.kind == "count":
+            if g.steps:                                                                  # the hand comes up already showing its number ("second": two fingers, never one first)
+                shape = COUNT_SHAPES[max(0, min(2, int(g.steps[0][1]) - 1))]
             for ts, v in g.steps:
                 if t >= ts - 0.06:
                     shape = COUNT_SHAPES[max(0, min(2, int(v) - 1))]
@@ -829,7 +905,7 @@ class Performance:
         pose = self._rest_arm(t, i, geom)
         shape, away = "relaxed", 0.0
         for g in self.gestures:
-            if g.hand not in ("both", s) or t <= g.t0 or t > g.t1 + 2.0:
+            if t <= g.t0 or t > g.t1 + 2.0 or not self._takes_part(g, s):
                 continue
             w = self._weight(g, s, t, geom)
             if w == 0.0:
@@ -893,6 +969,8 @@ class Performance:
             if not (g.t0 <= t < g.t1 + 0.4):
                 continue
             ls = g.lead if g.hand == "both" else g.hand
+            if not self._takes_part(g, ls):
+                ls = "r" if ls == "l" else "l"
             e = min(1.0, max(0.0, self._weight(g, ls, t, geom))) if t < g.hold_end else 1.0 - _fall((t - g.hold_end) / max(g.t1 - g.hold_end, 1e-6))
             if g.kind == "present":
                 lean += 1.6 * g.side * e

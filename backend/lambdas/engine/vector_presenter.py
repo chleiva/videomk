@@ -5,9 +5,10 @@ Standing still it reads as a person half sitting, and a raised sleeve leaves the
 
   legs      one straight piece per leg (thigh and shin fused once at load: widths matched at the knee, the inner outline removed), feet planted, toes turned out;
             the hips may shift a little over planted feet (weight shift) and a foot may take a small side step. There is no knee and no walk.
-  arms      shoulder pivot in the CENTRE of the round sleeve cap (the cap stays on the shoulder at any angle), elbow pivot inside both pieces, a two-bone IK from a wrist
-            target, with the elbow always on the same side of the shoulder-wrist line, so it cannot flip (see arm_ik), and the reach clamped so the arm never locks straight;
-            at home the arm hangs by its own angles (elbow out, forearm in: solve_arm), blended into the IK as the hand leaves
+  arms      shoulder pivot in the CENTRE of the round sleeve cap (the cap stays on the shoulder at any angle), elbow pivot inside both pieces. An arm is posed by its
+            two bone ANGLES (`solve` "arms"), inside joint limits that no pose can leave (limit_arm): the upper arm never swings in across the chest, the elbow
+            never folds or opens past its range, the bones keep their length. `elbow_need` says how far out the elbow belongs for a forearm at a given angle
+            (the gestures follow it). The older wrist-target IK (`solve` "hands", arm_ik, solve_arm) is kept for callers that have a point to reach
   hands     the forearm piece is cut at the wrist: the hand is its own piece that turns at the wrist and can be swapped (relaxed, open palm, one, two, three, thumb up)
   tail      optional piece behind the legs (the fox)
 
@@ -74,6 +75,7 @@ class Geom:
         self.shoulder_x = 26.0
         self.shoulder_y = 70.0       # above the waist
         self.head_w = 92.0           # the head's width (a raised hand keeps clear of it)
+        self.reach = 22.0            # wrist -> finger tips of the largest gesture hand
         self.neck_y = TORSO_U * 0.93
         self.upper = 38.0            # shoulder -> elbow
         self.fore = 34.0             # elbow -> wrist
@@ -477,6 +479,8 @@ class Presenter:
         g.hand = (hand.img.height - hand.pivot[1]) / u
         g.leg_len = (leg.end[1] - leg.pivot[1]) / u
         g.head_w = hw
+        # how far the finger tips of a gesture hand (open palm, a finger, a thumb) are from the wrist: they are drawn larger than the relaxed hand
+        g.reach = max([g.hand] + [(self.pieces[f"hand_{n}_r"].img.height - self.pieces[f"hand_{n}_r"].pivot[1]) / u for n in self.shapes if n != "relaxed"])
         self.g = g
         self.hw, self.tw = hw, tw
         self.height = g.hip_h - WAIST_UP + g.neck_y + HEAD_U     # ground to the top of the head, units

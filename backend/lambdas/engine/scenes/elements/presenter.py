@@ -212,7 +212,7 @@ def _stress(words: List[Tuple[str, float, float]]) -> List[float]:
 
 
 def performance(props: Dict[str, Any], dur: float, lift: float, side: str, who: Optional[str] = None, slot: int = 0, toward: float = 0.0, content_side: Optional[int] = None,
-                room: Optional[Tuple[Tuple[float, float], Tuple[float, float]]] = None) -> cg.Performance:
+                room: Optional[Tuple[Tuple[float, float], Tuple[float, float]]] = None, geom: Any = None) -> cg.Performance:
     """Everything a character does in this scene, planned once from the words (kept for the frames that follow). `who` is the character (default: the speaker);
     a character that is not the speaker LISTENS: it looks toward the speaker (`toward`: -1 left, +1 right), nods now and then, mouth closed, hands at rest or held
     together. `room`: free space for each hand (`rooms`). The idle life runs on the video's clock (`at`: where the scene starts), and every gesture is home before
@@ -234,7 +234,7 @@ def performance(props: Dict[str, Any], dur: float, lift: float, side: str, who: 
     # a listener that also listened in the scene before / listens in the next one keeps its hands together across the cut
     fold = (props.get("prev_speaker") not in (None, who), props.get("next_speaker") not in (None, who)) if (props.get("cast") and not speaking) else (False, False)
     perf = cg.Performance(seed=seed, content_side=content_side, tail=bool(CAST.get(who, {}).get("tail")), lift=lift, who=who, clock=at, limit=dur, room=room[0], clear=room[1], fold=fold,
-                          quiet=0.0 if props.get("enter", True) else QUIET_S)
+                          quiet=0.0 if props.get("enter", True) else QUIET_S, geom=geom)
     if props.get("enter", True):
         perf.enter(0.10 + 0.16 * slot, from_side=-content_side, distance=55.0)   # each steps in from its own edge of the picture, one after another
     if speaking and words:
@@ -259,7 +259,7 @@ def rooms(lay: Dict[str, Any], fig: Optional[Dict[str, Any]], geom: Any, size: f
     x = fig["x"] if fig else lay["x"]
     u = (fig["ppu"] if fig else lay["ppu"]) * size
     ground = fig["ground"] if fig else lay["ground"]
-    edge = [0.0 - 0.3 * geom.hand * u, frame_w + 0.3 * geom.hand * u]            # finger tips may touch the picture's edges
+    edge = [0.0 - 0.15 * geom.hand * u, frame_w + 0.15 * geom.hand * u]          # finger tips may touch the picture's edges
     lim = [-1e9, 1e9]
     x0, y0, x1, y1 = lay["content"]
     if x1 > x0 and y1 > ground - 215.0 * u:                                      # the content reaches down to where hands work (beside the figure, not above it)
@@ -390,7 +390,7 @@ def _draw_character(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, la
     try:
         ch = vp.load_cached(cid, round(lay["ppu"] * k, 4), CAST[cid]["size"])
         room = rooms(lay, fig, ch.g, CAST[cid]["size"], cv.W, 0.0 if (props.get("board") or props.get("asset")) else CARD_PAD)
-        perf = performance(props, dur, lay["lift"], lay["side"], cid, fig["slot"], fig["toward"], fig["content_side"], room=room) if fig else performance(props, dur, lay["lift"], lay["side"], room=room)
+        perf = performance(props, dur, lay["lift"], lay["side"], cid, fig["slot"], fig["toward"], fig["content_side"], room=room, geom=ch.g) if fig else performance(props, dur, lay["lift"], lay["side"], room=room, geom=ch.g)
         pose, ex = perf.pose(lt, ch.g)
         if ex["alpha"] <= 0.003:
             return

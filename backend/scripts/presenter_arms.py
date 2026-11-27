@@ -33,7 +33,7 @@ def maker(cid):
 def measure(cids, overlap, verbose=False):
     table, by_kind, worst = {}, {}, []
     for cid in cids:
-        ch = vp.load(cid, 0.5)
+        ch = vp.load(cid, ac.GEOM_PPU)
         g = ch.g
         tot = {}
         for group, name, perf, t0, t1 in ac.scenarios(KINDS, maker(cid), overlap=overlap):
@@ -147,7 +147,7 @@ def gesture_sheet(out, ppu=1.05, w=250, h=300, room=None):
             ch = vp.load(cid, ppu)
             perf = maker(cid)(0.37, 1, 0.14)
             if room is not None:
-                perf.room = (room, room)
+                perf.room = perf.clear = (room, room)
             perf.gesture(kind, 1.3, 1.2, None, 1 if kind == "present" else 0)
             g = perf.gestures[-1]
             t = g.stroke + (0.9 if kind in ("compare", "count") else 0.35)

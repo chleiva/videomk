@@ -17,8 +17,8 @@ What is counted (thresholds are the constants below; they are the stated limits 
                    flip     the elbow changes the side it bends to while the arm is raised or fast (upper > FLIP_UPPER, or faster than FLIP_SPEED): a snap through straight
   discontinuity  a frame in which a segment turns faster than SPEED_MAX, changes its speed by more than ACCEL_MAX, or the wrist falls faster than DROP_MAX
   stretch        a bone whose length is not its own (more than STRETCH_TOL off)
-  penetration    the hand over the character's own face, across the body's centre line, or (when `keep_out` is given: the card's text area or the board, and
-                 the body of another figure) inside that
+  penetration    the hand (its middle, half way to the finger tips) over the character's own face, across the body's centre line, or (when `keep_out` is
+                 given: the card's text area or the board, and the body of another figure) inside that
   twin           both arms move and mirror each other (same angles within TWIN_DEG) for TWIN_RUN frames or more in a row: symmetric flapping
   dead           DEAD_S of rest during which neither bone of an arm turns DEAD_DEG (a frozen figure), or the forearm turns more than FIDGET_DEG (fidgeting)
 DROP_MAX: a limp arm let go from the horizontal reaches about 7 arm lengths a second at the wrist (sqrt(3 g L)); a hand that is PUT down stays under 2.6.
@@ -48,6 +48,8 @@ DEAD_DEG = 0.5           # peak-to-peak turn of the forearm within DEAD_S that s
 DEAD_S = 3.0
 FIDGET_DEG = 18.0        # ... and more than this at rest is fidgeting
 MIDLINE = 4.0            # units a wrist may cross the body's centre line (hands held together touch it)
+
+GEOM_PPU = 2.0           # the size at which a character's pieces are measured for the instrument (much smaller and the hand's length is lost in rounding)
 
 CLASSES = ("wrong_way", "discontinuity", "stretch", "penetration", "twin", "dead")
 
@@ -131,7 +133,9 @@ def check(frames: Sequence[Dict[str, Any]], geom: Any, fps: float = 30.0, active
                 d["face"].append(k)
             if side * (a["wx"] - f["waist"][0]) < -MIDLINE:
                 d["midline"].append(k)
-            if keep_out is not None and (keep_out((hx, hy)) or keep_out((a["wx"] + a["hx"] * geom.hand, a["wy"] + a["hy"] * geom.hand))):
+            shaped = f["shapes"][i] != "relaxed"
+            hl = getattr(geom, "reach", geom.hand) if shaped else geom.hand                  # a gesture hand is longer than the relaxed one
+            if keep_out is not None and keep_out((a["wx"] + a["hx"] * 0.5 * hl, a["wy"] + a["hy"] * 0.5 * hl)):
                 d["keep_out"].append(k)
             if k == 0:
                 continue
@@ -327,13 +331,13 @@ def scene_tracks(scenes: Sequence[Dict[str, Any]], aspect: str = "16:9", fps: fl
         figs = lay.get("figures") or [None]
         for fig in figs:
             cid = fig["character"] if fig else props["character"]
-            ch = vp.load(cid, 0.5)
+            ch = vp.load(cid, GEOM_PPU)
             g, size = ch.g, el.CAST[cid]["size"]
             x = fig["x"] if fig else lay["x"]
             u = (fig["ppu"] if fig else lay["ppu"]) * size
             ground = fig["ground"] if fig else lay["ground"]
             pad = 0.0 if (props.get("board") or props.get("asset")) else getattr(el, "CARD_PAD", 36.0)
-            kw = {"room": el.rooms(lay, fig, g, size, ctx.frame.W, pad)} if hasattr(el, "rooms") else {}
+            kw = {"room": el.rooms(lay, fig, g, size, ctx.frame.W, pad), "geom": g} if hasattr(el, "rooms") else {}
             perf = el.performance(props, dur, fig["lift"] if fig else lay["lift"], "left" if (fig["content_side"] if fig else (1 if lay["side"] == "left" else -1)) > 0 else "right",
                                   cid, fig["slot"] if fig else 0, fig["toward"] if fig else 0.0, fig["content_side"] if fig else None, **kw)
             x0, y0, x1, y1 = lay["content"]
