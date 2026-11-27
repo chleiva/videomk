@@ -414,3 +414,42 @@ Known gaps against the mockups (in priority order):
 
 Tooling: `docs/web_2026/src/walk.mjs` (tour and behaviour checks against a mocked API) and `shoot_home.mjs` (home page, local or live).
 <!-- DESIGN-BAR-PASS-END -->
+
+<!-- REAL-QA-PASS-BEGIN (2026-11-27, web) -->
+## Real-API pass (2026-11-27): the signed-in web app driven in Chrome against the QA backend
+
+How: `astro dev` with `PUBLIC_API_BASE` = the QA API, `PUBLIC_AUTH_DOMAIN` = the QA hosted sign-in, `PUBLIC_COGNITO_CLIENT_ID` = the QA web client (stack output `UserPoolClientId`), both `PUBLIC_SITE_URL` and `PUBLIC_APP_URL` = `http://localhost:4321`. Playwright (installed Chrome) signs in through the real hosted page with the QA test account and keeps the session. Scripts: `docs/web_2026/real_qa/src/` (`login`, `tour`, `flow_media`, `flow_create`, `flow_watch`, `mock_making`, `home`, `serve`; set `OUT` to a scratch folder; no password or token is in them). Screenshots: `docs/web_2026/real_qa/shots/` (`*_real` = taken during the real journey; `t_*` = tour at 1440 and 390, light and dark, EN and ES; `mk_*` = the Making views with the documented `making` object injected into the real list; `h_*` = the built home page).
+
+| Flow | What ran against the real API | Result |
+|---|---|---|
+| Sign-in | Hosted page, code exchange, return to Videos | pass |
+| Videos | List, thumbnails, search, toast after Create, polling | pass |
+| My media | Upload 4 photos (slot, direct S3 post), month grid, search by meaning, viewer, select, delete with confirm | 4 defects fixed (below) |
+| Media to Create | "Make a video · 3", back keeps the selection, photos arrive in the composer | pass |
+| Create | Request check (locked form, capsule with Cancel), `generate` with `library_media`, 15 s for 1 credit | pass; phone layout and the balance line fixed |
+| Making | The real `making` object (scenes, pictures, live line) drawn in the banner while two videos were made | pass; counter fixed for the render phase |
+| Watch | Play (1920x1080), keyboard, Share (copy path), Save (download), Details, Make another, Edit | 3 defects fixed (below) |
+| Settings, Credits | Language, appearance, watermark default saved (`PUT /watermark` 200), balance and buckets | pass |
+| Try again / Remove | The card and both calls reach the real routes (a made-up id answers 404: "not found" / removed) | routes and messages verified; a REAL failed video was not available, so a real restart was not seen |
+
+**Defects found and fixed (each with a test where it is logic):**
+1. My media stayed empty after an upload: the server lists a photo a few seconds after it took the file, and the page looked once. It now looks again until every new photo is listed (about a minute at most; `SETTLE_DELAYS_MS`, `pendingIds`). Seen: 4 tiles after 6 to 10 s.
+2. After deleting the selection the page stayed in select mode (a tap ticked instead of opening the photo).
+3. The finished upload card sat over the selection bar: it now leaves by itself after 6 s when there is nothing to fix, and never sits under the bar.
+4. Spanish at 390 px: the search field was cut ("Buscar fot"), Add photos wrapped, the selection bar ran off the screen.
+5. Watch: a vertical video sat in a black 16:9 box with its last controls cut off; the player is now its own shape and drops the volume slider when narrow.
+6. Watch: the picture-in-picture button never showed its state (React has no props for those events: two console errors per visit).
+7. Watch: after the big play button the keyboard did nothing (focus was lost with the button).
+8. Create: "you have 1" under the card was a fragment; it now says what the video needs and what is left, and at 390 px the page scrolled sideways by 64 px.
+9. Rail: "0 credits" is now "No credits left".
+10. Making: "Scene 3 of 3 · Putting the scenes together" during the render (no scene is in work then): the counter is dropped once every scene is done.
+
+**Mockup gaps, now:**
+- **Making** (was gap 1): done against the live contract. Videos banner = title, "Scene 5 of 9 · live line", film strip with the scene pictures (cached by video and scene, never by link; links never stored), time left when the server gives one. The Watch page follows a video being made (same strip, the narrated sentence, "You can leave") and turns into the player when it is ready. Without `making` both fall back to the four steps / "Still being made".
+- **Watch "The prompt"** (was gap 3): shown with "Use this prompt again". The API still does not return the prompt, so it is the sentence remembered by the browser that made the video (`lib/prompts.ts`, this device only, wiped with the local data); `prompt` in `GET /videos/{id}` wins as soon as the server sends it. Videos made elsewhere show "Make another" only.
+- **Phone Create pills** (was gap 5): tools with Options at the far end, one row of three short pills, full-width Create with its price, the balance beneath (phone_3_create).
+- **Gallery lines** (was gap 2): NOT closed in content. The card now shows the sentence in quotes whenever a sample has its real prompt, and the subtitle switches to "Each one started as the line under it" when all of them do; the five gallery samples still have no saved prompt (no invented prompts), so they show their subject. Needs new samples with saved prompts (owner approval, about $4).
+- **Home page mobile LCP**: 2.2 s before (same harness: built page, gzip, Lighthouse 12 mobile, simulated slow 4G; the earlier report said 2.6 s without compression), **1.5 s after** (three runs: 1.5, 1.5, 1.5; budget 2.0). The five gallery posters no longer load with the first screen (they wait in `data-poster` and are set after load when the gallery is within 300 px), and the hero video starts downloading after load. Desktop 0.4 s. Without JavaScript the gallery videos have native controls but no poster.
+
+**Not verified:** Safari and Firefox (Chrome only); the native share sheet (headless Chrome has none: the copy-link path was run); a real "Try again" on a really failed video; Apple and Google sign-in; delete account; deck upload; the editor beyond opening a real video in it.
+<!-- REAL-QA-PASS-END -->
