@@ -173,5 +173,21 @@
  "media.make_video_n": "Crear video · {n}",
  "media.select": "Seleccionar",
  "media.select_done": "Listo",
- "media.photos_n": "{n, plural, one {# foto} other {# fotos}}"
+ "media.photos_n": "{n, plural, one {# foto} other {# fotos}}",
+ "making.cancel": "Cancelar",
+ "making.cancel_a11y": "Cancelar la creación de {title}",
+ "making.cancel_title": "¿Dejar de hacer este video?",
+ "making.cancel_body": "Recuperas tus créditos.",
+ "making.cancel_keep": "Seguir",
+ "making.cancel_stop": "Detener",
+ "making.cancelled": "Cancelado.",
+ "making.cancelled_refund": "Cancelado. {n, plural, one {# crédito recuperado} other {# créditos recuperados}}.",
+ "making.cancel_done": "Terminó antes de poder cancelarlo.",
+ "making.cancel_error": "No pudimos cancelarlo. Inténtalo de nuevo.",
+ "making.cancel_unsupported": "Cancelar no está disponible por ahora.",
+ "gen.cancelled_detail": "Cancelaste este video. Recuperaste tus créditos.",
+ "gen.delete": "Eliminar",
+ "gen.deleted": "Eliminado",
+ "gen.undo": "Deshacer",
+ "gen.delete_error": "No pudimos eliminarlo. Sigue en tus videos."
 }

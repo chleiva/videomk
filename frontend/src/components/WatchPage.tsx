@@ -9,6 +9,11 @@ import FilmStrip from "./app/FilmStrip";
 import { Sheet, Spinner, useToast } from "./ui";
 import { IconButton } from "./ui/IconButton";
 import { Button } from "./ui/Button";
+import { Dialog } from "./ui/Dialog";
+import { cancelVideo } from "../lib/api";
+import { getCapabilities } from "../lib/create";
+import { noteFor, parseVideoLook } from "../lib/looks";
+import type { LooksCaps, VideoLook } from "../lib/looks";
 import { getAuthorizationHeader } from "../lib/auth";
 import { apiGateway } from "../lib/config";
 import { currentLocaleHeaders } from "../lib/i18n";
@@ -20,7 +25,17 @@ import { useLocale } from "../lib/useLocale";
 
 const POLL_MS = 5000;   // while the video is being made this page follows it (same call, same pace as the list)
 
-interface Known { title?: string; editable?: boolean; duration_s?: number | null; preview_gif_url?: string | null }
+interface Known { title?: string; editable?: boolean; duration_s?: number | null; preview_gif_url?: string | null; look?: VideoLook | null }
+const DELETE_HANDOFF = "vmk_delete_handoff";   // read by the Videos page, which deletes with "Deleted · Undo" (one place deletes)
+
+/** "Whiteboard", "Cartoon · Fox, Bear · Hand-drawn board": the look the video got, in the server's own words when capabilities has them. */
+export function lookSummary(look: VideoLook, caps: LooksCaps | null | undefined): string {
+  const o = caps?.options.find((x) => x.id === look.applied);
+  const name = o?.label ?? look.applied.charAt(0).toUpperCase() + look.applied.slice(1);
+  const cast = look.cast.map((id) => caps?.cast?.members.find((m) => m.id === id)?.name ?? id.charAt(0).toUpperCase() + id.slice(1)).join(", ");
+  const extras = look.extras.flatMap((id) => o?.extras.find((e) => e.id === id)?.label ?? []).join(", ");
+  return [name, cast, extras].filter(Boolean).join(" · ");
+}
 type View = { state: "loading" } | { state: "error" } | { state: "making"; making: Making | null } | { state: "failed" } | { state: "ready"; url: string };
 
 /** What the list already told us about this video (title, editable, duration), from the session cache the list writes. */
@@ -41,6 +56,10 @@ export default function WatchPage() {
   const [sheet, setSheet] = useState(false);
   const [menu, setMenu] = useState(false);
   const [tries, setTries] = useState(0);
+  const [look, setLook] = useState<VideoLook | null>(info.look ?? null);   // the look the video got (the record's `look`; absent on an older server)
+  const [looks, setLooks] = useState<LooksCaps | null>(null);              // the names of looks and characters, read when Details opens
+  const [stopping, setStopping] = useState<"ask" | "busy" | null>(null);
+  const note = useMemo(() => noteFor(id), [id]);
   const toast = useToast();
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
@@ -72,6 +91,7 @@ export default function WatchPage() {
         if (typeof j?.title === "string" && j.title.trim()) setTitle(j.title);
         if (typeof j?.description === "string") setDescription(j.description);
         setPrompt((p) => pickPrompt(j?.prompt, p));
+        setLook((l) => parseVideoLook(j?.look) ?? l);
         if (typeof j?.url === "string") setView({ state: "ready", url: j.url });
         else setView({ state: "error" });
       } catch {
@@ -127,6 +147,21 @@ export default function WatchPage() {
     finally { setSaving(false); }
   }, [id, saving, shown, t, toast]);
 
+  useEffect(() => { if (!sheet || !look || looks) return; let alive = true; void getCapabilities().then((c) => { if (alive && c?.looks) setLooks(c.looks); }); return () => { alive = false; }; }, [sheet, look, looks]);
+
+  // Cancel while it is being made: one question, the credits come back, then the list (where it can be tried again or removed)
+  const stop = async () => {
+    if (stopping === "busy") return;
+    setStopping("busy");
+    const out = await cancelVideo(id);
+    setStopping(null);
+    if (out.ok) { location.assign("/generations"); return; }
+    if (out.kind === "done") { setTries((n) => n + 1); toast.show(t("making.cancel_done")); return; }
+    toast.show(out.kind === "unsupported" ? t("making.cancel_unsupported") : out.kind === "gone" ? t("gen.retry_gone") : out.message || t("making.cancel_error"));
+  };
+  // Delete: the Videos page does it, with "Deleted · Undo"
+  const del = () => { try { sessionStorage.setItem(DELETE_HANDOFF, id); } catch { return; } location.assign("/generations"); };
+
   const copyInfo = async () => {
     try { await navigator.clipboard.writeText(description); toast.show(t("watch.copied")); } catch { toast.show(t("watch.share_failed")); }
   };
@@ -158,7 +193,9 @@ export default function WatchPage() {
                       <FilmStrip tiles={stripTiles(view.making, sceneThumbs, id)} className="watch-strip" />
                       {scene && <p className="watch-making-count">{t("making.scene_counter", scene)}</p>}
                       {view.making?.narration_line && <p className="watch-making-says">“{view.making.narration_line}”</p>}
+                      {note && <p className="watch-making-note"><PIcon name="info" size={16} /><span>{note}</span></p>}
                       <p className="watch-making-leave">{t("making.leave_promise")}</p>
+                      <button type="button" className="mkb-cancel" onClick={() => setStopping("ask")}>{t("making.cancel")}</button>
                     </div>
                   );
                 })()}
@@ -183,6 +220,7 @@ export default function WatchPage() {
                     <button role="menuitem" type="button" onClick={() => { setMenu(false); setSheet(true); }} disabled={!url}><PIcon name="info" size={20} />{t("watch.info")}</button>
                     <a role="menuitem" href={feedbackHref}><PIcon name="chat" size={20} />{t("watch.feedback")}</a>
                     <a role="menuitem" href={reportHref}><PIcon name="flag" size={20} />{t("watch.report")}</a>
+                    {url && <button role="menuitem" type="button" className="is-danger" onClick={() => { setMenu(false); del(); }}><AIcon name="trash" size={20} />{t("watch.delete")}</button>}
                   </div>
                 )}
               </span>
@@ -209,15 +247,23 @@ export default function WatchPage() {
       {sheet && (
         <Sheet title={t("watch.info_title")} onClose={() => setSheet(false)}>
           <div className="info-body">
+            {look && (
+              <div className="info-look">
+                <p className="eyebrow">{t("watch.look")}</p>
+                <p className="info-look-name">{lookSummary(look, looks)}{look.by === "auto" && <span className="muted"> · {t("watch.look_auto")}</span>}</p>
+                {look.why && <p className="muted">{look.why}</p>}
+              </div>
+            )}
             {description ? (
               <>
                 <pre className="info-text">{description}</pre>
                 <Button variant="tonal" small icon={<PIcon name="copy" size={18} />} onClick={copyInfo}>{t("watch.copy")}</Button>
               </>
-            ) : <p className="muted">{t("watch.info_empty")}</p>}
+            ) : !look && <p className="muted">{t("watch.info_empty")}</p>}
           </div>
         </Sheet>
       )}
+      {stopping && <Dialog title={t("making.cancel_title")} confirmLabel={t("making.cancel_stop")} cancelLabel={t("making.cancel_keep")} danger busy={stopping === "busy"} onConfirm={() => void stop()} onCancel={() => { if (stopping !== "busy") setStopping(null); }}>{t("making.cancel_body")}</Dialog>}
       {toast.node}
     </section>
   );

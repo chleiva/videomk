@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { AIcon as Icon } from "./icons";
 
-export interface MenuItem { id: string; label: ReactNode; detail?: ReactNode; checked?: boolean; disabled?: boolean; href?: string }
+export interface MenuItem { id: string; label: ReactNode; detail?: ReactNode; checked?: boolean; disabled?: boolean; href?: string; danger?: boolean }
 
 function useDismiss(open: boolean, close: () => void, root: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
@@ -42,7 +42,7 @@ export function Menu({ label, trigger, items, onPick, align = "start", className
         <div id={id} ref={list} role="menu" aria-label={label} className={`vm-menu-list vm-menu-${align}`} onKeyDown={move}>
           {items.map((it) => {
             const body = <>{radio && <span className="vm-menu-check" aria-hidden="true">{it.checked ? <Icon name="check" size={16} /> : null}</span>}<span className="vm-menu-label">{it.label}</span>{it.detail != null && <span className="vm-menu-detail">{it.detail}</span>}</>;
-            const cls = `vm-menu-item ${it.disabled ? "is-dim" : ""}`;
+            const cls = `vm-menu-item ${it.disabled ? "is-dim" : ""} ${it.danger ? "is-danger" : ""}`;
             return it.href && !it.disabled
               ? <a key={it.id} role="menuitem" href={it.href} className={cls} onClick={() => setOpen(false)}>{body}</a>
               : <button key={it.id} type="button" role={radio ? "menuitemradio" : "menuitem"} aria-checked={radio ? !!it.checked : undefined} className={cls} aria-disabled={it.disabled || undefined} disabled={false}
