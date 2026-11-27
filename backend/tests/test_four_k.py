@@ -343,12 +343,15 @@ def test_clip_sizes_and_the_transcode_command(monkeypatch):
     out = os.path.join(os.environ.get("TMPDIR", "/tmp"), "fourk_clip_test.mp4")
     clips.transcode("in.mp4", out, start=1.0, seconds=5.0)
     clips.transcode("in.mp4", out, start=1.0, seconds=5.0, hd=True)
+    clips.transcode("in.mp4", out, start=1.0, seconds=5.0, orientation="portrait", hd=True)   # a landscape 1080p source: its vertical crop is a narrow strip, so the 720 copy (shown in a window)
+    monkeypatch.setattr(clips, "probe_size", lambda path: (1080, 1920))   # a real vertical 1080 file: the 1080 copy
     clips.transcode("in.mp4", out, start=1.0, seconds=5.0, orientation="portrait", hd=True)
     os.unlink(out)
     vf = [c[c.index("-vf") + 1] for c in cmds]
     assert vf[0].startswith("scale=1280:720:") and "crop=1280:720" in vf[0] and cmds[0][cmds[0].index("-crf") + 1] == "26"
     assert vf[1].startswith("scale=1920:1080:") and "crop=1920:1080" in vf[1] and cmds[1][cmds[1].index("-crf") + 1] == "23"
-    assert "crop=1080:1920" in vf[2]
+    assert "crop=720:1280" in vf[2] and cmds[2][cmds[2].index("-crf") + 1] == "26"
+    assert "crop=1080:1920" in vf[3] and cmds[3][cmds[3].index("-crf") + 1] == "23"
 
 
 def test_stock_libraries_are_asked_for_a_1080p_file_only_for_4k():
