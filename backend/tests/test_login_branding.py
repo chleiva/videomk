@@ -94,7 +94,7 @@ def test_assets_fit_cognito_rules():
 def test_light_and_dark_logos_differ_in_ink():
     by = {(x["category"], x["color_mode"]): base64.b64decode(x["bytes"]).decode() for x in lb.assets() if x["extension"] == "SVG"}
     assert by[("FORM_LOGO", "LIGHT")] != by[("FORM_LOGO", "DARK")]
-    assert "#11142b" in by[("FORM_LOGO", "LIGHT")] and "#f3f4fb" in by[("FORM_LOGO", "DARK")]
+    assert "#0B0C14" in by[("FORM_LOGO", "LIGHT")] and "#F4F5FA" in by[("FORM_LOGO", "DARK")]   # the wordmark: ink on light, text-on-dark on dark (docs/BRAND.md)
 
 
 @pytest.fixture(scope="module")

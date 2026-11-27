@@ -6,7 +6,7 @@ Managed Login (the newer hosted sign-in) needs the user pool on the Essentials o
   settings()        the branding settings document (light and dark, DYNAMIC follows the device)
   assets()          [{category, color_mode, extension, bytes(base64)}]
 
-Design rules come from docs/brand/README.md: indigo-violet gradient and white, cyan only on dark surfaces, the lockup (Sparklet Trio tile + wordmark) above
+Design rules come from docs/brand/README.md: indigo-violet gradient and white, cyan only on dark surfaces, the lockup (the play and two stars on the action gradient tile + the VideoMK wordmark, docs/BRAND.md) above
 the form, one primary button, 12-20 px radii, generous spacing, no heading clutter, no side graphics. Colours are RRGGBBAA.
 Texts are Cognito's own and follow the browser language or the `lang` query parameter (en, es): the apps pass `lang`, see docs/AUTH_SOCIAL.md.
 """
