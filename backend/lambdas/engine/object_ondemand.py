@@ -97,6 +97,41 @@ def apply(plan: Dict[str, Any], made: Dict[str, str], sure: float = 0.55) -> int
     return n
 
 
+def offer(ctx: Optional[Dict[str, Any]], *, is_edit: bool = False) -> int:
+    """How many drawings that the library lacks the director may NAME in this video's plan (engine/whiteboard_policy.allow_new_drawings): `object_max_per_call` when
+    `fill` could make them for this account right now (the flag, both switches, an entitled plan, a store, a maker), else 0. Without it the director is told to draw
+    only from the list, picks a stand-in itself, and `missing` never finds anything to make. Never raises; spends nothing (the limits are checked by `fill`)."""
+    try:
+        if not clip_config.flag() or is_edit or cs.current() is None:
+            return 0
+        cfg = clip_config.config()
+        if not cfg["object_enabled"] or not cfg["master_enabled"] or ondemand.entitlement(ctx) is None or ondemand.plan_of(ctx) not in cfg["object_plans"]:
+            return 0
+        return int(cfg["object_max_per_call"]) if (_maker or default_maker()) is not None else 0
+    except Exception:   # noqa: BLE001 - then the director draws from the list, as before
+        logging.exception("objects on demand: offer failed")
+        return 0
+
+
+def settle(plan: Dict[str, Any], sure: Optional[float] = None) -> int:
+    """After `fill`, for a plan whose director was allowed new names (`offer` > 0): a name that was NOT made and is still shown by an unsure match by meaning
+    (a cheese for a honeycomb) becomes its written name in a box, which is what the director was promised ("drawn when it can be made, otherwise written").
+    -> how many items changed."""
+    try:
+        sure = float(clip_config.config()["object_sure_score"]) if sure is None else float(sure)
+    except Exception:   # noqa: BLE001
+        sure = 0.55
+    n = 0
+    for it in _items(plan):
+        if isinstance(it, dict) and it.get("draw") and it.get("asked") and float(it.get("match") or 1.0) < sure:
+            name = str(it["asked"])
+            for k in ("draw", "fill", "asked", "match"):
+                it.pop(k, None)
+            it["write"], it["boxed"], it["size"] = name, True, "m"
+            n += 1
+    return n
+
+
 # ----------------------------------------------------------------------------- the maker: the library builder's own pipeline, here or in the tracer function
 TRACER_ENV = "OBJECT_TRACER_FUNCTION"   # the name of the small tracer function of its own stack (backend/object_tracer.py). Unset = no function to call
 
