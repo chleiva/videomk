@@ -95,7 +95,7 @@ def test_old_app_addresses_on_the_marketing_site_redirect_to_the_app():
     from site_stack import MARKETING_FUNCTION as F
     r = run_fn(F, "/generations/index.html")
     assert r["statusCode"] == 301 and r["headers"]["location"]["value"] == "https://app.videomk.com/generations"
-    assert run_fn(F, "/watch", {"id": {"value": "a b&c"}})["headers"]["location"]["value"] == "https://app.videomk.com/watch?id=a%20b%26c"
+    assert run_fn(F, "/watch", {"id": {"value": "a%20b%26c"}})["headers"]["location"]["value"] == "https://app.videomk.com/watch?id=a%20b%26c"   # raw values stay raw
     assert run_fn(F, "/auth/callback/", {"code": {"value": "x"}, "state": {"value": "y"}})["headers"]["location"]["value"] == "https://app.videomk.com/auth/callback?code=x&state=y"
     assert run_fn(F, "/edit/index.html", {"id": {"value": "1"}})["headers"]["location"]["value"] == "https://app.videomk.com/edit?id=1"
     for p in ("/signin", "/wallet", "/feedback", "/questions"):

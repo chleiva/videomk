@@ -18,13 +18,13 @@ from constructs import Construct
 
 APP_HOST = "app.videomk.com"
 APP_PATHS = "signin|generations|wallet|feedback|watch|edit|questions|auth\\/callback"   # the app screens that used to live on videomk.com
-# CloudFront Functions run ES5.1: no template strings, no arrow functions.
+# CloudFront Functions run ES5.1: no template strings, no arrow functions. The query values in the event are the raw (still percent-encoded) text of the request: copied as they are (encoding them again would turn %20 into %2520).
 MARKETING_FUNCTION = (
     "function handler(e){var r=e.request;var u=r.uri;"
     "var m=/^\\/(" + APP_PATHS + ")(\\/(index\\.html)?)?$/.exec(u);"
     "if(m){var q=[];var qs=r.querystring||{};for(var k in qs){var o=qs[k];"
-    "if(o.multiValue){for(var i=0;i<o.multiValue.length;i++){q.push(encodeURIComponent(k)+'='+encodeURIComponent(o.multiValue[i].value));}}"
-    "else{q.push(encodeURIComponent(k)+'='+encodeURIComponent(o.value));}}"
+    "if(o.multiValue){for(var i=0;i<o.multiValue.length;i++){q.push(k+'='+o.multiValue[i].value);}}"
+    "else{q.push(k+'='+o.value);}}"
     "return {statusCode:301,statusDescription:'Moved Permanently',headers:{location:{value:'https://" + APP_HOST + "/'+m[1]+(q.length?'?'+q.join('&'):'')}}};}"
     "if(u.endsWith('/')){r.uri=u+'index.html';}else if(u.indexOf('.')<0){r.uri=u+'/index.html';}return r;}"
 )
