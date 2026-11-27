@@ -32,6 +32,8 @@ NAMES: Dict[str, str] = {
 }
 ENGLISH_NAME = {"en": "English", "es": "Spanish", "fr": "French", "de": "German", "it": "Italian", "pt": "Portuguese", "nl": "Dutch", "pl": "Polish", "fi": "Finnish",
                 "ko": "Korean", "ja": "Japanese", "zh": "Chinese", "ru": "Russian", "ar": "Arabic", "hi": "Hindi", "tr": "Turkish"}
+SPANISH_NAME = {"en": "inglés", "es": "español", "fr": "francés", "de": "alemán", "it": "italiano", "pt": "portugués", "nl": "neerlandés", "pl": "polaco", "fi": "finlandés",
+                "ko": "coreano", "ja": "japonés", "zh": "chino", "ru": "ruso", "ar": "árabe", "hi": "hindi", "tr": "turco"}
 READY = ("en", "es", "fr", "de", "it", "pt", "nl", "pl", "fi")
 
 # words that are a language name only in some languages and a common word in another: they count when the text around them agrees (see `find`)
@@ -97,7 +99,10 @@ def cue(text: str) -> bool:
     return bool(_CUE.search(t) or _CUE.search(fold(t)))
 
 
-def name_of(code: str, native: bool = False) -> str:
+def name_of(code: str, native: bool = False, loc: Optional[str] = None) -> str:
+    """The name of a language: English by default, `loc="es"` in Spanish, `native=True` in its own language ("Français")."""
+    if loc == "es":
+        return SPANISH_NAME.get(code) or ENGLISH_NAME.get(code, code)
     if native:
         try:
             from engine import voices   # the engine package is beside this one in every deployment that has voices; without it the English name is used

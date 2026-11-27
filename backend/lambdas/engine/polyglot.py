@@ -293,13 +293,13 @@ def note_texts(poly: Polyglot) -> List[str]:
     for n in poly.notes:
         params = {k: v for k, v in n.items() if k != "code"}
         if "pairs" in params and isinstance(params["pairs"], dict):
-            params["pairs"] = ", ".join(f"{_char_name(c)}: {lang_names.name_of(l)}" for c, l in params["pairs"].items()) if n["code"] != "app_chose" else params["pairs"]
+            params["pairs"] = ", ".join(f"{_char_name(c)}: {lang_names.name_of(l, loc=loc)}" for c, l in params["pairs"].items()) if n["code"] != "app_chose" else params["pairs"]
         if n["code"] == "app_chose":
-            params["pairs"] = ", ".join(f"{_char_name(c)}: {lang_names.name_of(l)}" for c, l in poly.speakers.items())
+            params["pairs"] = ", ".join(f"{_char_name(c)}: {lang_names.name_of(l, loc=loc)}" for c, l in poly.speakers.items())
         if "dropped" in params:
-            params["dropped"] = ", ".join(lang_names.name_of(l) for l in params["dropped"])
+            params["dropped"] = ", ".join(lang_names.name_of(l, loc=loc) for l in params["dropped"])
         if "language" in params:
-            params["language"] = lang_names.name_of(params["language"])
+            params["language"] = lang_names.name_of(params["language"], loc=loc)
         if "character" in params:
             params["character"] = _char_name(params["character"])
         out.append(i18n.t(f"polyglot.note.{n['code']}", loc, **params))
