@@ -83,7 +83,7 @@ Two changes to the aligner, both for every language: a Hangul block counts as a 
 | Portuguese (Camila) | 3.09 | 105 | 153 |
 | Dutch (Laura) | 2.79 (one passage) | 95 | 138 |
 | German (Vicki) | 2.66 | 90 | 131 |
-| Italian (Bianca) | 2.59 | 88 | 128 |
+| Italian (Bianca; the default is Beatrice since 2026-11-27, about 2.85: docs/VOICE_QUALITY_IT_ES_2026-11-27.md) | 2.59 | 88 | 128 |
 | Polish (Ola) | 2.37 | 80 | 117 |
 | Finnish (Suvi) | 1.95 (one passage) | 66 | 96 |
 

@@ -106,7 +106,7 @@ def test_the_request_check_names_the_languages_of_the_stage(monkeypatch):
 
 # ================================================================= casting: what is wanted -> the closest voice there is
 @pytest.mark.parametrize("lang,region,voice", [("fr", None, "Lea"), ("fr", "FR", "Lea"), ("fr", "CA", "Gabrielle"), ("fr", "BE", "Isabelle"), ("de", "DE", "Vicki"),
-                                               ("de", "AT", "Hannah"), ("de", "CH", "Sabrina"), ("it", "IT", "Bianca"), ("pt", "BR", "Camila"), ("pt", "PT", "Camila"),
+                                               ("de", "AT", "Hannah"), ("de", "CH", "Sabrina"), ("it", "IT", "Beatrice"), ("pt", "BR", "Camila"), ("pt", "PT", "Camila"),
                                                ("nl", "NL", "Laura"), ("nl", "BE", "Lisa"), ("pl", "PL", "Ola"), ("fi", "FI", "Suvi"), ("ko", "KR", "Seoyeon")])
 def test_the_default_voice_of_every_language_follows_the_region(lang, region, voice):
     assert voices.default_voice(lang, region) == voice and voices.language_of(voice) == lang
@@ -118,9 +118,9 @@ def test_the_resolver_casts_what_was_asked_and_says_what_it_substituted():
     assert r({"accent": "British", "gender": "male"}, "en", "US") == ("Brian", "")
     assert r({"accent": "British"}, "en", "IN") == ("Amy", "") and r("a British woman", "en", "US") == ("Amy", "")
     assert r({"gender": "male"}, "en", "GB") == ("Brian", "") and r({"gender": "male"}, "en", "US")[0] == "Matthew"   # no accent asked: the viewer's own
-    assert r({}, "en", "IN") == ("Kajal", "") and r(None, "es", "MX") == ("Mia", "") and r({"gender": "any"}, "en") == ("Ruth", "")
+    assert r({}, "en", "IN") == ("Kajal", "") and r(None, "es", "MX") == ("Lupe", "") and r({"gender": "any"}, "en") == ("Ruth", "")
     assert r({"name": "Brian"}, "en", "US") == ("Brian", "") and r("stephen", "en") == ("Stephen", "")
-    assert r({"accent": "mexicana", "gender": "female"}, "es", "ES") == ("Mia", "") and r({"accent": "Latin American"}, "es", "ES") == ("Mia", "")
+    assert r({"accent": "mexicana", "gender": "female"}, "es", "ES") == ("Mia", "") and r({"accent": "Latin American"}, "es", "ES") == ("Lupe", "")
     assert r({"accent": "Canadian", "gender": "male"}, "fr", "FR") == ("Liam", "") and r({"accent": "Swiss"}, "de") == ("Sabrina", "")
     # what the catalogue does not have: the nearest voice, and one plain sentence saying so
     v, note = r({"accent": "Irish", "gender": "male"}, "en", "US")
