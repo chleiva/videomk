@@ -21,7 +21,7 @@ def templates():
         from clips_obs import ClipsObsStack
         os.environ.setdefault("CDK_SKIP_LAYER_CHECK", "1")
         out = {}
-        for name, ctx in (("off", {}), ("on", {"clipsOnDemand": "1"})):
+        for name, ctx in (("off", {}), ("on", {"clipsOnDemand": "1"}), ("catalog", {"clipsOnDemand": "1", "imageCatalog": "1"})):   # catalog: how QA is deployed
             app = cdk.App(context={"stage": "qa", "engine": "v2", **ctx}, outdir=os.path.join(os.environ.get("TMPDIR", "/tmp"), f"vmk-clipsod-{name}"))
             stack = BackendStack(app, "videomk-qa", stage="qa", stage_cfg={"account": "123456789012", "region": "eu-west-1", "domain": None, "callbackUrls": ["https://qa.videomk.com/auth/callback"]},
                                  env=cdk.Environment(account="123456789012", region="eu-west-1"))
@@ -97,3 +97,16 @@ def test_the_plan_function_only_learns_the_tracers_name(templates):
     (invoke,) = [s for s in stm if s["Action"] == "lambda:InvokeFunction"]
     assert invoke["Resource"] == "arn:aws:lambda:eu-west-1:123456789012:function:videomk-qa-wb-tracer"                     # that one function, by name: no reference between the stacks
     assert "OBJECT_TRACER_FUNCTION" not in _beat(templates["on"])["Properties"]["Environment"]["Variables"]
+
+
+def test_with_the_catalog_the_plan_function_knows_where_a_new_drawing_goes(templates):
+    """Found on QA (2026-11-27): the plan function had the right to write w/* in the catalog bucket but no CATALOG_BUCKET variable, so object_ondemand._put_package
+    failed for every drawing: paid for, never stored, never drawn."""
+    fn = _plan(templates["catalog"])
+    ref = fn["Properties"]["Environment"]["Variables"]["CATALOG_BUCKET"]["Ref"]
+    bucket = templates["catalog"]["Resources"][ref]
+    assert bucket["Type"] == "AWS::S3::Bucket" and bucket["Properties"]["BucketName"] == _beat(templates["catalog"])["Properties"]["Environment"]["Variables"]["CATALOG_BUCKET"]   # the catalog bucket itself
+    role = fn["Properties"]["Role"]["Fn::GetAtt"][0]
+    stm = [s for v in templates["catalog"]["Resources"].values() if v["Type"] == "AWS::IAM::Policy" and {"Ref": role} in v["Properties"]["Roles"] for s in v["Properties"]["PolicyDocument"]["Statement"]]
+    assert any(s["Action"] == "s3:PutObject" and "/w/*" in json.dumps(s["Resource"]) for s in stm)
+    assert "CATALOG_BUCKET" not in _plan(templates["on"])["Properties"]["Environment"]["Variables"]      # no catalog on the stage: nothing new

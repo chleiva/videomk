@@ -53,6 +53,23 @@ def wish(option: Any, prompt: str) -> str:
     return STYLE if _WISH_RE.search(text) else "auto"
 
 
+# Drawings made on demand (docs/LIBRARY_ON_DEMAND.md part B). The director is normally told to draw ONLY from the list, so it never asks for a drawing the
+# library lacks (it picks a stand-in from the list: a house for a beehive) and nothing could ever be made on demand. When the plan step knows that THIS video may
+# have drawings made (the flag, the switches, an entitled account, a tracer), it allows a few new names here; object_ondemand.fill makes them and
+# object_ondemand.settle writes the name of any that could not be made. 0 (the default, and always without the flag): the prompt is byte for byte what it was.
+_new_drawings = 0
+_NEW_LINE = ("  * Use drawing ids from the list whenever one really shows the thing. When a KEY OBJECT of the topic is not in the list, do NOT use a different drawing as a "
+             "stand-in (never a house for a beehive): give `draw` the object's own plain name instead, one or two lowercase English words (\"honeycomb\", \"beehive\"). "
+             "At most {n} such new names in the whole video, each a simple physical everyday object; it is drawn when it can be made, otherwise its name is written. Never a new "
+             "name for a person, a brand, a flag, a map, a symbol, a weapon, anything medical, or text; for an idea that is not an object, WRITE the word instead.\n")
+
+
+def allow_new_drawings(n: int) -> None:
+    """How many drawings that are not in the list the director may name in the next plan (the plan step sets it for every video; 0 = none, the list only)."""
+    global _new_drawings
+    _new_drawings = max(0, min(6, int(n or 0)))
+
+
 class Policy:
     def __init__(self, allowed: bool, reason: str, *, asked: bool = False, flag: bool = True, judged: Optional[Dict[str, Any]] = None, aspect: str = "16:9"):
         self.allowed, self.reason, self.asked, self.flag, self.judged = allowed, reason, asked, flag, judged
@@ -109,7 +126,8 @@ class Policy:
             "big (size l or xl) and then circled or underlined; a comparison is two written numbers; a list is one `write` with a line per point (\"1. ...\\n2. ...\", at most 4 lines of 1 to 3 words) in a "
             "wide zone, size m, tool marker; the pen is only for the small labels beside drawings. Markup: ^{2} for a power, _{2} for a subscript, \\frac{a}{b}, -> for an arrow.\n"
             "  * Drawings are size l (m when two share a zone's row with labels); they are the pictures of the board, not icons.\n"
-            "  * Use ONLY drawing ids from the list. If nothing in the list shows the idea, WRITE the word instead (a written label is always fine); never invent an id.\n"
+            + (_NEW_LINE.format(n=_new_drawings) if _new_drawings > 0 else
+               "  * Use ONLY drawing ids from the list. If nothing in the list shows the idea, WRITE the word instead (a written label is always fine); never invent an id.\n") +
             "  * People are the simple figures of the list (person_*, doctor, teacher...); never a real, named person.\n"
             "  * The first beat opens the first board with the video's question or title written large on top and the first drawings. The LAST beat stays on the last board (\"board\": \"same\") and sums up "
             "there: the key term or takeaway written large in a free zone, underlined twice.\n"
