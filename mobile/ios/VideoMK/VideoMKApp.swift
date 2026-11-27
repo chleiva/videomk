@@ -59,10 +59,12 @@ struct MainTabs: View {
             }
             .opacity(model.selectedTab == 1 ? 1 : 0).allowsHitTesting(model.selectedTab == 1).accessibilityHidden(model.selectedTab != 1)
         }
-        .overlay(alignment: .bottom) { if barShown { TabBarFade().ignoresSafeArea(edges: .bottom).transition(.opacity) } }       // the page fades out under the floating bar
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        // The bar floats over both tabs. Each tab draws its own fade and keeps its own bars above the bar (`TabBarRoom`): nothing here covers a tab's content.
+        // It stays at the bottom edge when the keyboard is up (it never rides above it).
+        .overlay(alignment: .bottom) {
             if barShown { FloatingTabBar(selection: $model.selectedTab) { model.requestCreate() }.transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity)) }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.tabBarHidden)
         .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: model.mediaSelecting)
         .background(Theme.background.ignoresSafeArea())

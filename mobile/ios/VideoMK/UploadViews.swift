@@ -173,93 +173,90 @@ struct ProcessingShimmer: View {
 
 // MARK: the bar
 
-/// One persistent, collapsible upload bar above the tab bar. Expanded it is a panel with the counts and what needs the person.
+/// One persistent, collapsible upload bar above the tab bar: an opaque card (never glass, never under a fade). Expanded it is a panel with the
+/// counts and what needs the person.
 struct UploadBar: View {
     let media: MediaModel
     let onManageStorage: () -> Void
     @State private var storageNotNow = false
-    @State private var confirmCancel = false
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         if let bar = media.bar, bar.kind != .finished, !media.barExpanded || bar.kind == .storageFull {
             Group {
                 if bar.kind == .storageFull && !storageNotNow { storageCard(bar) } else { collapsed(bar) }
             }
-            .padding(.horizontal, 12).padding(.bottom, 8)
+            .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s)
             .transition(.move(edge: .bottom).combined(with: .opacity))
-            .confirmationDialog(tr("upload.cancel_title", media.upload.queued + media.upload.uploading + media.upload.noSpace), isPresented: $confirmCancel, titleVisibility: .visible) {
-                Button(tr("media.cancel_remaining"), role: .destructive) { media.cancelUploads() }
-                Button(tr("media.keep_uploading"), role: .cancel) {}
-            } message: { Text(tr("media.photos_already_added_stay")) }
         }
     }
 
     private func tint(_ bar: UploadBarState) -> Color {
-        switch bar.kind { case .storageFull, .offline: Theme.warning; case .needsAttention: Theme.warning; default: Theme.primary }
+        switch bar.kind { case .storageFull, .offline, .needsAttention: Theme.warning; default: Theme.primary }
     }
 
     private func collapsed(_ bar: UploadBarState) -> some View {
         let p = media.upload
-        return VStack(spacing: 0) {
+        return HStack(spacing: Theme.Space.m) {
             Button { withAnimation(.snappy) { media.barExpanded.toggle() } } label: {
-                HStack(spacing: 12) {
-                    ZStack {
-                        Circle().stroke(Theme.surface3, lineWidth: 4)
-                        Circle().trim(from: 0, to: max(0.04, bar.fraction)).stroke(tint(bar), style: StrokeStyle(lineWidth: 4, lineCap: .round)).rotationEffect(.degrees(-90))
-                        Image(systemName: bar.kind == .offline ? "icloud.slash" : "icloud.and.arrow.up").font(.vmk(15, weight: .semibold)).foregroundStyle(tint(bar))
-                    }.frame(width: 40, height: 40)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(bar.title).font(.vmk(15, weight: .bold)).foregroundStyle(Theme.text).lineLimit(1)
-                        Text(bar.subtitle).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+                HStack(spacing: Theme.Space.m) {
+                    UploadRing(fraction: bar.fraction, symbol: bar.kind == .offline ? "icloud.slash" : bar.kind == .needsAttention || bar.kind == .storageFull ? "exclamationmark" : "arrow.up", tint: tint(bar))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(bar.title).font(.role(.subhead, weight: .semibold)).monospacedDigit().foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.85)
+                        Text(bar.subtitle).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(2)
                     }
-                    Spacer(minLength: 4)
-                    if bar.kind == .needsAttention {
-                        Text(tr("upload.review")).font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.primary)
-                    } else if bar.kind != .storageFull {
-                        Button { p.paused ? media.resumeUploads() : media.pauseUploads() } label: { Image(systemName: p.paused ? "play.fill" : "pause.fill").font(.vmk(17)).foregroundStyle(Theme.text).frame(width: 44, height: 44) }
-                            .buttonStyle(.plain).accessibilityLabel(p.paused ? tr("upload.resume_uploads") : tr("upload.pause_uploads")).accessibilityIdentifier("pauseUploads")
-                    }
-                    Image(systemName: media.barExpanded ? "chevron.down" : "chevron.up").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 36, height: 44)
+                    Spacer(minLength: Theme.Space.xs)
+                    if bar.kind == .needsAttention { Text(tr("upload.review")).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.primary) }
                 }
-                .padding(.horizontal, 14).padding(.vertical, 2)
-                .contentShape(Rectangle())
+                .frame(minHeight: Theme.minTouch).contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("\(bar.title). \(bar.subtitle)")
             .accessibilityHint(media.barExpanded ? tr("upload.collapses_the_upload_details") : tr("upload.shows_the_upload_details"))
             .accessibilityIdentifier("uploadBar")
-            GeometryReader { g in Rectangle().fill(tint(bar)).frame(width: g.size.width * bar.fraction) }.frame(height: 3)
+            if bar.kind != .needsAttention && bar.kind != .storageFull {
+                IconButton(symbol: p.paused ? "play.fill" : "pause.fill", label: p.paused ? tr("upload.resume_uploads") : tr("upload.pause_uploads"), size: Theme.minTouch, identifier: "pauseUploads") { p.paused ? media.resumeUploads() : media.pauseUploads() }
+            }
         }
-        .background(bar.kind == .needsAttention || bar.kind == .storageFull ? Theme.warningContainer : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(bar.kind == .needsAttention || bar.kind == .storageFull ? Theme.warning : Theme.outline, lineWidth: 1))
+        .padding(.leading, Theme.Space.l).padding(.trailing, Theme.Space.m).padding(.vertical, Theme.Space.s)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
         .elevation(3)
     }
 
     private func storageCard(_ bar: UploadBarState) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "exclamationmark.triangle").font(.vmk(18)).foregroundStyle(Theme.warning).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.warningContainer, in: Circle())
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(bar.title).font(.vmk(16, weight: .bold)).foregroundStyle(Theme.text)
-                    Text(bar.subtitle).font(.vmk(14)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
-                    if let m = media.meter { Text(m.label).font(.vmk(12).monospacedDigit()).foregroundStyle(Theme.warning).padding(.top, 2) }
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
+            HStack(alignment: .top, spacing: Theme.Space.m) {
+                Image(systemName: "exclamationmark.triangle").font(.role(.headline)).foregroundStyle(Theme.warning).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Theme.warningContainer, in: Circle()).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(bar.title).font(.role(.headline)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+                    Text(bar.subtitle).font(.role(.subhead)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    if let m = media.meter { Text(m.label).font(.role(.footnote).monospacedDigit()).foregroundStyle(Theme.textSecondary).padding(.top, 2) }
                 }
             }
-            HStack(spacing: 10) {
-                Button(action: onManageStorage) { Text(tr("upload.manage_storage")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.onPrimary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.gradient, in: Capsule()) }
-                    .buttonStyle(.plain).accessibilityIdentifier("manageStorage")
-                Button { withAnimation(.snappy) { storageNotNow = true } } label: { Text(tr("organize.not_now")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, 18).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
-                    .buttonStyle(.plain)
+            HStack(spacing: Theme.Space.s) {
+                Button(tr("upload.manage_storage"), action: onManageStorage).buttonStyle(TonalButtonStyle()).accessibilityIdentifier("manageStorage")
+                Button(tr("organize.not_now")) { withAnimation(.snappy) { storageNotNow = true } }.buttonStyle(TextButtonStyle()).padding(.horizontal, Theme.Space.m).accessibilityIdentifier("storageNotNow")
             }
         }
-        .padding(14)
+        .padding(Theme.Space.l)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.warning, lineWidth: 1.5))
         .elevation(3)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("storageFullCard")
+    }
+}
+
+/// The progress ring of the upload bar: how far along, with a glyph that says what is happening.
+struct UploadRing: View {
+    let fraction: Double
+    let symbol: String
+    var tint: Color = Theme.primary
+    var body: some View {
+        ZStack {
+            Circle().stroke(Theme.surface3, lineWidth: 3.5)
+            Circle().trim(from: 0, to: max(0.04, fraction)).stroke(tint, style: StrokeStyle(lineWidth: 3.5, lineCap: .round)).rotationEffect(.degrees(-90))
+            Image(systemName: symbol).font(.role(.footnote, weight: .bold)).foregroundStyle(tint).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        }
+        .frame(width: 36, height: 36).accessibilityHidden(true)
     }
 }
 
@@ -272,39 +269,37 @@ struct UploadPanel: View {
     var body: some View {
         if let bar = media.bar {
             let failed = media.queueItems.filter { $0.state == .failed }
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 12) {
-                    Image(systemName: "icloud.and.arrow.up").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.primary).dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(width: 40, height: 40).background(Circle().stroke(Theme.surface3, lineWidth: 4))
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(bar.title).font(.vmk(15, weight: .bold)).foregroundStyle(Theme.text)
-                        Text(bar.subtitle).font(.vmk(13)).foregroundStyle(Theme.textSecondary)
+            VStack(alignment: .leading, spacing: Theme.Space.m) {
+                HStack(spacing: Theme.Space.m) {
+                    UploadRing(fraction: bar.fraction, symbol: "arrow.up")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(bar.title).font(.role(.subhead, weight: .semibold)).monospacedDigit().foregroundStyle(Theme.text)
+                        Text(bar.subtitle).font(.role(.footnote)).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
-                    Button(action: onClose) { Image(systemName: "chevron.down").font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 44, height: 44) }.accessibilityLabel(tr("upload.collapse"))
+                    IconButton(symbol: "chevron.down", label: tr("upload.collapse"), size: Theme.minTouch, action: onClose)
                 }
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: typeSize.isAccessibilitySize ? 2 : 4), spacing: 8) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Space.s), count: typeSize.isAccessibilitySize ? 2 : 4), spacing: Theme.Space.s) {
                     stat(bar.added, tr("upload.stat_added")); stat(bar.gettingReady, tr("upload.stat_getting_ready")); stat(bar.waiting, tr("upload.stat_waiting")); stat(bar.needYou, tr("upload.stat_need_you"), danger: bar.needYou > 0)
                 }
                 if !failed.isEmpty {
-                    Text(tr("upload.needs_attention")).font(.vmk(13, weight: .bold)).tracking(0.3).foregroundStyle(Theme.textSecondary)
+                    Text(tr("upload.needs_attention")).font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.textSecondary)
                     ForEach(Array(failed.prefix(4).enumerated()), id: \.element.id) { n, item in failedRow(item, n) }
-                    if failed.count > 4 { Text(tr("upload.and_more", failed.count - 4)).font(.vmk(13)).foregroundStyle(Theme.textSecondary) }
+                    if failed.count > 4 { Text(tr("upload.and_more", failed.count - 4)).font(.role(.footnote)).foregroundStyle(Theme.textSecondary) }
                 }
-                Text(tr("upload.you_can_close_the_app")).font(.vmk(14)).foregroundStyle(Theme.textSecondary)
-                HStack {
-                    Button(tr("media.cancel_remaining"), role: .destructive, action: cancel).font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.danger).frame(minHeight: 44)
+                Text(tr("upload.you_can_close_the_app")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: Theme.Space.s) {
+                    Button(tr("media.cancel_remaining"), action: cancel).buttonStyle(TextButtonStyle(tint: Theme.danger)).accessibilityIdentifier("cancelUploads")
                     Spacer()
                     Button { media.upload.paused ? media.resumeUploads() : media.pauseUploads() } label: {
-                        Label(media.upload.paused ? tr("upload.resume_all") : tr("upload.pause_all"), systemImage: media.upload.paused ? "play.fill" : "pause.fill").font(.vmk(16, weight: .semibold)).foregroundStyle(Theme.primary)
-                            .padding(.horizontal, 18).frame(minHeight: 48).background(Theme.primaryContainer, in: Capsule())
-                    }.buttonStyle(.plain)
+                        Label(media.upload.paused ? tr("upload.resume_all") : tr("upload.pause_all"), systemImage: media.upload.paused ? "play.fill" : "pause.fill")
+                    }.buttonStyle(TonalButtonStyle(fullWidth: false))
                 }
             }
-            .padding(14)
+            .padding(Theme.Space.l)
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous).stroke(Theme.outline, lineWidth: 1))
             .elevation(3)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, Theme.gutter)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("uploadPanel")
         }
@@ -312,24 +307,23 @@ struct UploadPanel: View {
 
     private func stat(_ n: Int, _ label: String, danger: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("\(n)").font(.vmk(24, weight: .bold).monospacedDigit()).foregroundStyle(danger ? Theme.danger : Theme.text)
-            Text(label).font(.vmk(13)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+            Text("\(n)").font(.role(.title).monospacedDigit()).foregroundStyle(danger ? Theme.danger : Theme.text)
+            Text(label).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).lineLimit(2)
         }
-        .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading).padding(.horizontal, 10)
-        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
+        .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading).padding(.horizontal, Theme.Space.m)
+        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 
     private func failedRow(_ item: QueueItem, _ n: Int) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Space.m) {
             FailedThumb(item: item, media: media)
             VStack(alignment: .leading, spacing: 1) {
-                Text(item.file.hasSuffix(".jpg") && item.file.count < 24 ? item.file : tr("attach.photo_n", n + 1)).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
-                Text(item.reason ?? tr("upload.connection_dropped")).font(.vmk(13)).foregroundStyle(Theme.danger).fixedSize(horizontal: false, vertical: true)
+                Text(item.file.hasSuffix(".jpg") && item.file.count < 24 ? item.file : tr("attach.photo_n", n + 1)).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
+                Text(item.reason ?? tr("upload.connection_dropped")).font(.role(.footnote)).foregroundStyle(Theme.textSecondary).fixedSize(horizontal: false, vertical: true)
             }
-            Spacer(minLength: 4)
-            Button { media.retryItem(item.id) } label: { Text(tr("upload.retry")).font(.vmk(15, weight: .semibold)).foregroundStyle(Theme.primary).padding(.horizontal, Theme.gutter).frame(minHeight: 44).background(Theme.primaryContainer, in: Capsule()) }
-                .buttonStyle(.plain).accessibilityIdentifier("retryItem")
+            Spacer(minLength: Theme.Space.xs)
+            Button(tr("upload.retry")) { media.retryItem(item.id) }.buttonStyle(TonalButtonStyle(fullWidth: false)).accessibilityIdentifier("retryItem")
         }
     }
 }
@@ -340,7 +334,7 @@ private struct FailedThumb: View {
     @State private var image: UIImage?
     var body: some View {
         Group { if let image { Image(uiImage: image).resizable().scaledToFill() } else { Theme.surfaceRaised } }
-            .frame(width: 44, height: 44).clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .frame(width: 44, height: 44).clipShape(RoundedRectangle(cornerRadius: Theme.Radii.thumb, style: .continuous))
             .task { image = await media.localImage(for: item) }
     }
 }
@@ -352,49 +346,32 @@ struct UploadToast: View {
     let onAction: () -> Void
     let onDismiss: () -> Void
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill").font(.vmk(20)).foregroundStyle(Theme.toastSuccess)
-            Text(toast.text).font(.vmk(15)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 4)
-            if let action = toast.action { Button(action: action == tr("upload.review") || action == tr("org.view") ? onAction : onDismiss) { Text(action).font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.toastAccent).frame(minWidth: 44, minHeight: 44) } }
-        }
-        .padding(.leading, 14).padding(.trailing, 8).frame(minHeight: 52)
-        .background(Theme.toastSurface, in: RoundedRectangle(cornerRadius: Theme.Radii.card, style: .continuous))
-        .padding(.horizontal, 12).padding(.bottom, 8)
-        .transition(.move(edge: .bottom).combined(with: .opacity))
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("uploadToast")
+        ToastBar(text: toast.text, action: toast.action, identifier: "uploadToast", onAction: toast.action == tr("upload.review") || toast.action == tr("org.view") ? onAction : onDismiss)
     }
 }
 
-/// A slim pill above the tab bar on Videos while photos are uploading. Opens Media.
+/// A slim, opaque pill above the tab bar on Videos while photos are uploading or being organized. Opens Media.
 struct UploadPill: View {
     let media: MediaModel
     let onTap: () -> Void
     var body: some View {
         if let ob = media.organizeBar, media.bar == nil || media.bar?.kind == .finished {
-            Button(action: onTap) {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.primary)
-                    Text(ob.kind == .running ? ob.title.replacingOccurrences(of: "…", with: "") : ob.title).font(.vmk(14, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
-                    Image(systemName: "chevron.right").font(.vmk(11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
-                }
-                .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).elevation(2).frame(minHeight: 44)
-            }
-            .buttonStyle(.plain).accessibilityLabel(tr("upload.opens_media_a11y", ob.title)).accessibilityIdentifier("organizePill")
+            pill(symbol: "sparkles", title: ob.kind == .running ? ob.title.replacingOccurrences(of: "…", with: "") : ob.title, id: "organizePill")
         } else if let bar = media.bar, bar.kind != .finished {
-            Button(action: onTap) {
-                HStack(spacing: 8) {
-                    Image(systemName: "icloud.and.arrow.up").font(.vmk(13, weight: .semibold)).foregroundStyle(Theme.primary)
-                    Text(bar.title).font(.vmk(14, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(1)
-                    Image(systemName: "chevron.right").font(.vmk(11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
-                }
-                .padding(.horizontal, 14).frame(height: 36).background(Theme.surface, in: Capsule()).overlay(Capsule().stroke(Theme.outline, lineWidth: 1)).elevation(2)
-                .frame(minHeight: 44)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(tr("upload.opens_media_a11y", bar.title))
-            .accessibilityIdentifier("uploadPill")
+            pill(symbol: "arrow.up.circle", title: bar.title, id: "uploadPill")
         }
+    }
+
+    private func pill(symbol: String, title: String, id: String) -> some View {
+        Button(action: onTap) {
+            HStack(spacing: Theme.Space.s) {
+                Image(systemName: symbol).font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.primary)
+                Text(title).font(.role(.subhead, weight: .semibold).monospacedDigit()).foregroundStyle(Theme.text).lineLimit(1)
+                Image(systemName: "chevron.right").font(.role(.caption, weight: .semibold)).foregroundStyle(Theme.textSecondary)
+            }
+            .padding(.horizontal, Theme.Space.l).frame(minHeight: 40).background(Theme.surface, in: Capsule()).elevation(2)
+            .frame(minHeight: Theme.minTouch).contentShape(Capsule())
+        }
+        .buttonStyle(.plain).accessibilityLabel(tr("upload.opens_media_a11y", title)).accessibilityIdentifier(id)
     }
 }

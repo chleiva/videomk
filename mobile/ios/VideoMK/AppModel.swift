@@ -583,7 +583,12 @@ final class AppModel {
     private func seedDebugScreens() {
         guard media?.isFake == true else { return }
         let env = ProcessInfo.processInfo.environment
-        if let b = env["VMK_DEBUG_BALANCE"].flatMap(Int.init) { wallet = WalletInfo(balance: b) }
+        if let b = env["VMK_DEBUG_BALANCE"].flatMap(Int.init) {
+            // `VMK_DEBUG_WALLET=buckets` lists where the credits came from; `nodate` is a server that sends no date for the next free credit
+            let tomorrow = Calendar.current.startOfDay(for: .now.addingTimeInterval(86400)).addingTimeInterval(60)
+            let buckets = env["VMK_DEBUG_WALLET"] == "buckets" ? [WalletBucket(kind: "daily", remaining: 1, expiresAt: tomorrow), WalletBucket(kind: "signup", remaining: max(0, b - 1), expiresAt: .now.addingTimeInterval(20 * 86400))] : []
+            wallet = WalletInfo(balance: b, buckets: buckets, nextFreeAt: env["VMK_DEBUG_WALLET"] == "nodate" ? nil : tomorrow)
+        }
         if env["VMK_DEBUG_FAKE_VIDEOS"] == "many" {
             // 40 videos, every fifth one vertical, one still being made: a long list to flick through
             videos = (0..<40).map { n in

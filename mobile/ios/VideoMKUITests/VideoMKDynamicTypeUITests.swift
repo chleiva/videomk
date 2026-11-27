@@ -65,10 +65,24 @@ final class VideoMKDynamicTypeUITests: XCTestCase {
         XCTAssertTrue(el(app, "lengthPill").waitForExistence(timeout: 5), "the length is a pill")
     }
 
-    func testCreditsInfoOpensFromTheCreditsSheet() {
+    /// The Credits sheet is never a dead end: it says when the next free credit arrives, states the rule in one line, and never says "no credits" above a balance.
+    func testCreditsSheetSaysWhenTheNextFreeCreditArrives() {
         let app = launch(spanish: false, signedIn: true, env: ["VMK_DEBUG_SHEET": "wallet", "VMK_DEBUG_BALANCE": "9"], largeText: false)   // the fake wallet only exists with a balance
-        XCTAssertTrue(el(app, "walletInfo").waitForExistence(timeout: 15))
-        el(app, "walletInfo").tap()
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS '1 min = 1 credit'")).firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(el(app, "walletNextFree").waitForExistence(timeout: 15))
+        XCTAssertEqual(el(app, "walletNextFree").label, "1 free credit tomorrow")
+        XCTAssertTrue(el(app, "walletInfo").label.contains("1 minute costs 1 credit"))
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'no credits' OR label CONTAINS[c] 'no free credits'")).firstMatch.exists)
+        el(app, "walletClose").tap()
+        XCTAssertTrue(el(app, "walletNextFree").waitForNonExistence(timeout: 5))
+    }
+
+    /// Out of credits: Create offers "See credits" (nothing can be bought yet), and the sheet answers with the date.
+    func testOutOfCreditsLeadsToAnAnswer() {
+        let app = launch(spanish: false, signedIn: true, env: ["VMK_DEBUG_CREATE": "filled", "VMK_DEBUG_BALANCE": "0"], largeText: false)
+        XCTAssertTrue(app.buttons["fixChip"].waitForExistence(timeout: 15))
+        XCTAssertEqual(app.buttons["fixChip"].label, "See credits")
+        app.buttons["fixChip"].tap()
+        XCTAssertTrue(el(app, "walletNextFree").waitForExistence(timeout: 10))
+        XCTAssertEqual(el(app, "walletNextFree").label, "1 free credit tomorrow")
     }
 }

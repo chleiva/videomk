@@ -43,8 +43,8 @@ struct MediaView: View {
                     if !feed.isSearching, !selection.active, !media.collections.isEmpty { CollectionsStrip(media: media, onNew: { newCollection = true }) }       // while selecting, the photos sit right under the search field
                     content
                 }
-                .padding(.top, 4)
-                .padding(.bottom, tabBarRoom)
+                .padding(.top, Theme.Space.xs)
+                .padding(.bottom, Theme.Space.l)
             }
             .scrollDismissesKeyboard(.interactively)
             }
@@ -53,13 +53,12 @@ struct MediaView: View {
             .navigationDestination(for: LibraryCollection.self) { CollectionDetailView(media: media, collection: $0) }
             .navigationDestination(isPresented: Binding(get: { media.showCollectionsList }, set: { media.showCollectionsList = $0 })) { CollectionsListView(media: media) }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 0) {
+                TabBarRoom(reserve: !selection.active) {
                     if let toast = media.toast { UploadToast(toast: toast, onAction: { media.dismissToast(); if toast.action == tr("org.view") { media.showCollectionsList = true } else { withAnimation(.snappy) { media.barExpanded = true } } }, onDismiss: { media.dismissToast() }) }
                     UploadBar(media: media, onManageStorage: { showStorage = true })
                     if media.bar == nil || media.bar?.kind == .finished { OrganizeBar(media: media) }
                     if showNextStep { NextStepBar(count: justAdded.count, onMake: { model.startVideo(with: justAdded) }, onDismiss: { withAnimation(reduceMotion ? nil : .snappy) { media.clearLastBatch() } }) }
                     if selection.active { SelectionBar(selection: selection, onVideo: makeVideo, icons: [.init(id: "addToCollection", symbol: "folder.badge.plus", label: tr("collections.add_to_collection")) { showAddToCollection = true }, .init(id: "deleteSelection", symbol: "trash", label: tr("common.delete"), danger: true) { confirmDelete = true }]) }
-                    else { Color.clear.frame(height: tabBarRoom) }       // the floating tab bar sits over this area: the bars above it stay clear of it
                 }
                 .animation(reduceMotion ? nil : .snappy, value: media.toast)
                 .animation(reduceMotion ? nil : .snappy, value: media.bar?.kind)
@@ -174,8 +173,6 @@ struct MediaView: View {
     }
     private var showNextStep: Bool { !selection.active && !justAdded.isEmpty && !feed.isSearching && (media.bar == nil || media.bar?.kind == .finished) }
     private var showCoach: Bool { !coachSeen && !selection.active && !feed.photos.isEmpty && !feed.isSearching && !showNextStep }
-    /// The floating tab bar is drawn over the Media screen: this is its height, so bars and the last row of the grid stay clear of it.
-    private var tabBarRoom: CGFloat { selection.active ? 0 : Theme.floatingBarHeight }
 
     // MARK: the upload batch in the grid
 
@@ -202,7 +199,7 @@ struct MediaView: View {
             ZStack(alignment: .bottom) {
                 Theme.mediaInk.opacity(0.18).ignoresSafeArea().onTapGesture { withAnimation(.snappy) { media.barExpanded = false } }.accessibilityHidden(true)
                 UploadPanel(media: media, onClose: { withAnimation(.snappy) { media.barExpanded = false } }, cancel: { confirmCancelUploads = true })
-                    .padding(.bottom, 70)
+                    .padding(.bottom, Theme.floatingBarHeight + Theme.Space.s)
             }
             .transition(.opacity)
             .confirmationDialog(tr("media.cancel_remaining_uploads"), isPresented: $confirmCancelUploads, titleVisibility: .visible) {

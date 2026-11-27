@@ -43,20 +43,22 @@ extension View {
 // MARK: the primary button (one per screen)
 
 /// The ONE primary action of a screen: the action gradient in a full pill, a verb in the headline role, white on it. `fullWidth: false` hugs its label
-/// (Share next to the quiet icons). Disabled: the same shape at 45%.
+/// (Share next to the quiet icons). Disabled: the same shape as an opaque `surface3` fill with a `text2` label and no shadow (never see-through).
 struct PrimaryButtonStyle: ButtonStyle {
     var fullWidth = true
     var compact = false         // beside other controls (Share next to the quiet icons): less padding, the same height
+    var looksDisabled = false   // cannot act yet but still takes the tap (Create shakes its caption): drawn as disabled
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.role(.headline)).foregroundStyle(Theme.onPrimary).multilineTextAlignment(.center)
+        let off = !isEnabled || looksDisabled
+        return configuration.label
+            .font(.role(.headline)).foregroundStyle(off ? Theme.textSecondary : Theme.onPrimary).multilineTextAlignment(.center)
             .padding(.horizontal, compact ? Theme.Space.l : Theme.Space.xxl).padding(.vertical, Theme.Space.s)
             .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: Theme.primaryHeight)
-            .background(Theme.gradient, in: Capsule())
-            .shadow(color: Theme.gradientStart.opacity(isEnabled ? 0.32 : 0), radius: 14, y: 8)
-            .opacity(isEnabled ? (configuration.isPressed ? 0.88 : 1) : 0.45)
+            .background(off ? AnyShapeStyle(Theme.surface3) : AnyShapeStyle(Theme.gradient), in: Capsule())
+            .shadow(color: Theme.gradientStart.opacity(off ? 0 : 0.32), radius: 14, y: 8)
+            .opacity(configuration.isPressed ? 0.88 : 1)
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
             .animation(Theme.Motion.press, value: configuration.isPressed)
             .contentShape(Capsule())
@@ -120,9 +122,10 @@ struct TonalButtonStyle: ButtonStyle {
 
 /// A text button in the bar ("Select", "Cancel", "Use email"): primary colour, headline weight, a 44 pt target.
 struct TextButtonStyle: ButtonStyle {
+    var tint: Color = Theme.primary
     @Environment(\.isEnabled) private var isEnabled
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.role(.body, weight: .medium)).foregroundStyle(Theme.primary).lineLimit(1)
+        configuration.label.font(.role(.body, weight: .medium)).foregroundStyle(tint).lineLimit(1)
             .frame(minHeight: Theme.minTouch).contentShape(Rectangle())
             .opacity(isEnabled ? (configuration.isPressed ? 0.6 : 1) : 0.4)
     }
@@ -365,11 +368,58 @@ struct FloatingTabBar: View {
     }
 }
 
-/// The page fades out under the floating tab bar, so nothing is cut off behind it.
+/// The page fades out under the floating tab bar: a short ramp that is the page colour by the bar's top edge, and stays so behind the bar.
+/// It is drawn inside each tab, beneath that tab's own floating bars (never over the whole screen), and is no taller than the bar plus its ramp.
 struct TabBarFade: View {
+    static let ramp: CGFloat = 28
     var body: some View {
-        LinearGradient(stops: [.init(color: Theme.background.opacity(0), location: 0), .init(color: Theme.background.opacity(0.85), location: 0.7), .init(color: Theme.background, location: 1)], startPoint: .top, endPoint: .bottom)
-            .frame(height: 112).allowsHitTesting(false).accessibilityHidden(true)
+        VStack(spacing: 0) {
+            LinearGradient(colors: [Theme.background.opacity(0), Theme.background], startPoint: .top, endPoint: .bottom).frame(height: Self.ramp)
+            Theme.background.ignoresSafeArea(edges: .bottom)
+        }
+        .frame(height: Theme.floatingBarHeight + Self.ramp).allowsHitTesting(false).accessibilityHidden(true)
+    }
+}
+
+/// The bottom of a tab's root screen: that screen's own floating bars (upload, toast, next step), then the room the floating tab bar takes,
+/// with the fade behind it all. Use as the content of `.safeAreaInset(edge: .bottom, spacing: 0)` so the last row always scrolls clear of the bar.
+struct TabBarRoom<Bars: View>: View {
+    var reserve = true          // false while the tab bar is hidden (selecting): the bars sit at the bottom edge
+    @ViewBuilder var bars: Bars
+    var body: some View {
+        VStack(spacing: 0) {
+            bars
+            if reserve { Color.clear.frame(height: Theme.floatingBarHeight).allowsHitTesting(false) }
+        }
+        .frame(maxWidth: .infinity)
+        .background(alignment: .bottom) { if reserve { TabBarFade() } }
+    }
+}
+
+/// The one toast: a dark, opaque bar with one line and at most one action ("Deleted · Undo", "12 photos added · View"). It floats above the tab bar.
+struct ToastBar: View {
+    let text: String
+    var symbol: String? = "checkmark.circle.fill"
+    var action: String?
+    var identifier = "toast"
+    var onAction: () -> Void = {}
+    var body: some View {
+        HStack(spacing: Theme.Space.m) {
+            if let symbol { Image(systemName: symbol).font(.role(.headline)).foregroundStyle(Theme.toastSuccess).accessibilityHidden(true) }
+            Text(text).font(.role(.subhead, weight: .medium)).foregroundStyle(Theme.onMedia).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: Theme.Space.xs)
+            if let action {
+                Button(action: onAction) { Text(action).font(.role(.subhead, weight: .semibold)).foregroundStyle(Theme.toastAccent).frame(minWidth: Theme.minTouch, minHeight: Theme.minTouch).contentShape(Rectangle()) }
+                    .buttonStyle(.plain).accessibilityIdentifier(identifier + "Action")
+            }
+        }
+        .padding(.leading, Theme.Space.l).padding(.trailing, Theme.Space.m).frame(minHeight: 52)
+        .background(Theme.toastSurface, in: Capsule())
+        .elevation(3)
+        .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.s)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(identifier)
     }
 }
 
@@ -388,5 +438,55 @@ struct InfoPopover: View {
             Text(text).font(.role(.subhead)).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).padding(Theme.Space.l).frame(maxWidth: 300)
                 .presentationCompactAdaptation(.popover)
         }
+    }
+}
+
+// MARK: sheets (one look)
+
+/// The header of every sheet: its title in the title role and one close button. No system navigation bar.
+struct SheetHeader: View {
+    let title: String
+    var closeLabel: String = tr("common.close")
+    var closeID = "sheetClose"
+    let onClose: () -> Void
+    var body: some View {
+        HStack(alignment: .center, spacing: Theme.Space.m) {
+            Text(title).textRole(.title).foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
+            Spacer(minLength: Theme.Space.s)
+            IconButton(symbol: "xmark", label: closeLabel, identifier: closeID, action: onClose)
+        }
+        .padding(.top, Theme.Space.xl)
+    }
+}
+
+private struct SheetHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+/// A sheet as tall as what it holds (never half empty), on the opaque surface, with the 20 pt gutter. Past the screen it scrolls.
+struct FittedSheet<Content: View>: View {
+    @ViewBuilder var content: Content
+    @State private var height: CGFloat = 360
+    var body: some View {
+        ScrollView {
+            content
+                .padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.l)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(GeometryReader { g in Color.clear.preference(key: SheetHeightKey.self, value: g.size.height) })
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .onPreferenceChange(SheetHeightKey.self) { h in Task { @MainActor in if h > 0, abs(h - height) > 0.5 { height = h } } }
+        .presentationDetents([.height(height), .large])
+        .presentationBackground(Theme.surface).presentationDragIndicator(.visible)
+    }
+}
+
+/// A section label inside a sheet or a list: small, never the tertiary colour (it is essential text).
+struct SectionLabel: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+    var body: some View {
+        Text(text).font(.role(.footnote, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading).accessibilityAddTraits(.isHeader)
     }
 }

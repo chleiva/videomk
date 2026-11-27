@@ -31,17 +31,14 @@ struct CostLine: View {
 struct WalletHero: View {
     let balance: Int
     let unlimited: Bool
-    var nextFree: String?
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(spacing: 6) {
             Text(unlimited ? "∞" : Localization.shared.number(balance))
-                .font(.vmk(56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(.white).minimumScaleFactor(0.5).lineLimit(1)
-            Text(unlimited ? Self.unlimitedLabel : tr("wallet.unit", balance)).font(.vmk(17, weight: .semibold)).foregroundStyle(.white.opacity(0.9))
-            if let nextFree { Text(nextFree).font(.vmk(13, weight: .medium)).foregroundStyle(.white.opacity(0.85)).multilineTextAlignment(.center).padding(.top, 4) }
+                .font(.vmk(56, weight: .bold, design: .rounded).monospacedDigit()).foregroundStyle(Theme.onMedia).minimumScaleFactor(0.5).lineLimit(1)
+            Text(unlimited ? Self.unlimitedLabel : tr("wallet.unit", balance)).font(.role(.headline)).foregroundStyle(Theme.onMedia)
         }
-        .frame(maxWidth: .infinity).padding(.vertical, 28).padding(.horizontal, Theme.gutter)
+        .frame(maxWidth: .infinity).padding(.vertical, Theme.Space.xl).padding(.horizontal, Theme.gutter)
         .background(Theme.makingGradient, in: RoundedRectangle(cornerRadius: Theme.Radii.videoCard, style: .continuous))
         .elevation(2)
         .accessibilityElement(children: .combine)

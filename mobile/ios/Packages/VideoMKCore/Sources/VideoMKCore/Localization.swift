@@ -151,6 +151,11 @@ public extension Localization {
     func abbreviatedDate(_ d: Date) -> String { d.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted).locale(locale)) }
     func mediumDateTime(_ d: Date) -> String { d.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale)) }
     func relative(_ d: Date) -> String { d.formatted(.relative(presentation: .named).locale(locale)) }
+    /// When the next free credits arrive, in plain words: "tomorrow" for the next calendar day, else the relative time ("in 5 hours", "in 3 days").
+    func nextFree(_ d: Date, now: Date = .now, calendar: Calendar = .current) -> String {
+        if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now), calendar.isDate(d, inSameDayAs: tomorrow) { return tr("wallet.tomorrow") }
+        return d.formatted(Date.RelativeFormatStyle(presentation: .named, locale: locale, calendar: calendar).locale(locale))
+    }
     func number(_ n: Int) -> String { n.formatted(.number.locale(locale)) }
     /// "1:05" or "1:02:03" for a video length in seconds.
     func clock(seconds: Double) -> String {

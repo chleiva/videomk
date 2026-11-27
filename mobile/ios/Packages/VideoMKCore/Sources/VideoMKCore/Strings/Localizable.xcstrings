@@ -1742,13 +1742,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add credits"
+            "value" : "See credits"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agregar créditos"
+            "value" : "Ver créditos"
           }
         }
       }
@@ -11475,64 +11475,6 @@
         }
       }
     },
-    "wallet.cost_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How credits work"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómo funcionan los créditos"
-          }
-        }
-      }
-    },
-    "wallet.daily_free" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld free credit every day. It expires that night."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld free credits every day. They expire that night."
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld crédito gratis cada día. Vence esa noche."
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld créditos gratis cada día. Vencen esa noche."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "wallet.expire_on" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11584,36 +11526,19 @@
         }
       }
     },
-    "wallet.next_free" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next free credits: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximos créditos gratis: %@"
-          }
-        }
-      }
-    },
     "wallet.none" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No credits right now."
+            "value" : "No free credits right now"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ahora no tienes créditos."
+            "value" : "Ahora no hay créditos gratis"
           }
         }
       }
@@ -13470,13 +13395,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 min = 1 credit. 4K = 2x. Free credits expire; bought credits never do."
+            "value" : "1 minute costs 1 credit. 4K costs double."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 min = 1 crédito. 4K = 2x. Los gratis caducan; los comprados no."
+            "value" : "1 minuto cuesta 1 crédito. 4K cuesta el doble."
           }
         }
       }
@@ -14211,6 +14136,105 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“Cómo respira un bosque”"
+          }
+        }
+      }
+    },
+    "wallet.tomorrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mañana"
+          }
+        }
+      }
+    },
+    "wallet.next_free_n" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld free credit %2$@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld free credits %2$@"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld crédito gratis %2$@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$lld créditos gratis %2$@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "wallet.daily_short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld free credit every day"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld free credits every day"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld crédito gratis cada día"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld créditos gratis cada día"
+                }
+              }
+            }
           }
         }
       }

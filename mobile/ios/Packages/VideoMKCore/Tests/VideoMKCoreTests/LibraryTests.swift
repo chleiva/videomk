@@ -104,4 +104,21 @@ import Testing
         let u = try JSONDecoder().decode(WalletInfo.self, from: Data(#"{"balance":999,"unlimited":true,"buckets":[]}"#.utf8))
         #expect(u.unlimited && u.canAfford(12))
     }
+
+    @Test func nextFreeCreditIsSaidInPlainWords() {
+        var cal = Calendar(identifier: .gregorian); cal.timeZone = TimeZone(identifier: "UTC")!
+        let now = Date(timeIntervalSince1970: 1_800_000_000)            // 2027-01-15 08:00 UTC
+        let midnight = cal.startOfDay(for: now).addingTimeInterval(86400)
+        Localization.$override.withValue(.en) {
+            #expect(Localization.shared.nextFree(midnight, now: now, calendar: cal) == "tomorrow")
+            #expect(Localization.shared.nextFree(midnight.addingTimeInterval(86399), now: now, calendar: cal) == "tomorrow")
+            #expect(Localization.shared.nextFree(now.addingTimeInterval(3 * 3600), now: now, calendar: cal) != "tomorrow")
+            #expect(tr("wallet.next_free_n", 1, "tomorrow") == "1 free credit tomorrow" && tr("wallet.next_free_n", 3, "tomorrow") == "3 free credits tomorrow")
+            #expect(tr("composer.fix.add_credits") == "See credits")
+        }
+        Localization.$override.withValue(.es) {
+            #expect(Localization.shared.nextFree(midnight, now: now, calendar: cal) == "mañana")
+            #expect(tr("wallet.next_free_n", 1, "mañana") == "1 crédito gratis mañana")
+        }
+    }
 }

@@ -35,7 +35,7 @@ struct LibraryView: View {
             .background(Theme.background.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { VideoDetailView(videoID: $0) }
-            .safeAreaInset(edge: .bottom, spacing: 0) { uploadStrip }       // an inset, not an overlay: the last row always scrolls clear
+            .safeAreaInset(edge: .bottom, spacing: 0) { TabBarRoom { uploadStrip } }       // an inset, not an overlay: the pill sits above the tab bar and the last row scrolls clear of both
         }
         .onChange(of: path) { _, p in model.tabBarHidden = !p.isEmpty }
         .task { await model.refresh() }
@@ -85,7 +85,7 @@ struct LibraryView: View {
 
     @ViewBuilder private var uploadStrip: some View {
         if let media = model.media {
-            UploadPill(media: media) { model.selectedTab = 1 }.frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.xs).vmkOneLineCap()
+            UploadPill(media: media) { model.selectedTab = 1 }.frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, Theme.gutter).padding(.bottom, Theme.Space.xs).vmkOneLineCap()
         }
     }
 
@@ -149,7 +149,7 @@ struct LibraryView: View {
                     }
                 }
             }
-            .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).padding(.bottom, Theme.Space.xxl)
+            .padding(.horizontal, Theme.gutter).padding(.top, Theme.Space.s).padding(.bottom, Theme.Space.l)
             .frame(maxWidth: 640).frame(maxWidth: .infinity)
             .animation(reduceMotion ? Theme.Motion.fade : Theme.Motion.spring, value: statusKeys)
         }
