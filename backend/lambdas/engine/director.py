@@ -191,4 +191,5 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     plan["sources"] = sources
     if wpolicy.allowed:   # the narration is final now: every board is tied to the words really said and gets emphasis marks where its pen would rest
         warnings = [w for w in warnings if "whiteboard twice in a row" not in w] + whiteboard_policy.settle(plan, wpolicy)
+        warnings += whiteboard_policy.review(plan, wpolicy, ask_big, language)   # the self-check: boards that fail (sparse, overlapping, pen resting) are written again once, with the complaint
     return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

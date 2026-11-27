@@ -71,7 +71,13 @@ def test_prompt_block_teaches_the_scene_and_lists_the_library(on):
     assert "whiteboard" in b and "EVERY beat" in b and "never coordinates" in b
     for oid in ("sun", "piggy_bank", "person_standing", "syringe"):
         assert oid in b
-    assert len(b) < 12000
+    assert len(b) < 16000
+    # the quality rules of 2026-11-27: full boards shared by beats, every key noun on the board, labels, pacing, large titles and numbers
+    for rule in ('"board": "same"', "8 to 12 drawings and written phrases", "EVERY KEY NOUN", "label", "never more than 5 words", "4th to 6th word", "NEIGHBOURS", "size l or xl"):
+        assert rule in b, rule
+    assert "TALL" not in b and "left to right" in b
+    tall = wp.decide("x as a whiteboard video", options={"aspect": "9:16"}).prompt_block("es")
+    assert "THIS VIDEO IS TALL (9:16)" in tall and "top to bottom" in tall and "1 to 3 words per line" in tall
 
 
 def test_the_plan_gate():
@@ -179,3 +185,90 @@ def test_a_whiteboard_video_is_on_paper(on):
     plan = {"theme": "midnight", "beats": [{"narration": "x", "scene": {"type": "whiteboard", "props": _board([{"write": "Hi", "zone": "top"}])}}]}
     wp.enforce(plan, wp.Policy(True, "asked"))
     assert plan["theme"] == "paper"
+
+
+# ----------------------------------------------------------------------------- boards shared by beats, pacing with real times (docs/WHITEBOARD.md "Quality")
+def _beat(narration, items, board=None):
+    return {"narration": narration, "scene": {"type": "whiteboard", "props": ELEMENTS["whiteboard"].sanitize({"items": items, **({"board": board} if board else {})})}}
+
+
+def _wb(n, zone, word):
+    return [{"id": f"d{k}", "write": f"{word}{k}", "zone": z, "say": word} for k, z in zip(range(n), zone)]
+
+
+def test_compose_keeps_beats_on_a_board_until_it_is_full():
+    said = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen"        # 16 words
+    beats = [_beat(said, _wb(3, ("top", "left", "right"), "a")), _beat(said, _wb(3, ("bottom-left", "bottom", "bottom-right"), "b")),      # the director forgot to say "same": the board is far from full
+             _beat(said, _wb(3, ("top", "left", "right"), "c"), "new"), _beat(said, _wb(2, ("centre", "bottom"), "d"), "same"),
+             _beat(said + " " + said + " " + said + " " + said, _wb(3, ("top", "left", "right"), "e"), "same"),                           # no room for 64 more words: a new board whatever it says
+             _beat("the end", [{"id": "k", "write": "Key", "zone": "bottom", "say": "end"}])]                                           # the closing beat never opens a nearly empty board
+    st = wp.compose(beats)
+    flags = [b["scene"]["props"].get("board") for b in beats]
+    assert flags == [None, "same", None, "same", None, "same"] and st["boards"] == 3 and st["shared"] == 3 and st["merged"] == 2
+    assert wp.compose(beats)["boards"] == 3 and [b["scene"]["props"].get("board") for b in beats] == flags        # settled
+    from engine.whiteboard import score
+
+    assert score.boards_of(beats) == [[0, 1], [2, 3], [4, 5]]
+
+
+def test_compose_gives_every_thing_its_own_zone_on_the_board():
+    said = "one two three four five six seven eight"
+    beats = [_beat(said, [{"id": "t", "write": "Title", "zone": "top-row", "say": "one"}, {"id": "a", "draw": "sun", "zone": "left", "say": "two"}]),
+             _beat(said, [{"id": "x", "write": "Again", "zone": "top-row", "say": "one"}, {"id": "b", "draw": "piggy_bank", "zone": "left", "say": "two"},
+                          {"id": "l", "write": "label", "near": "b", "say": "three"}], "same")]
+    st = wp.compose(beats)
+    items = beats[1]["scene"]["props"]["items"]
+    assert st["rezoned"] == 2 and items[0]["zone"] in ("middle-row", "bottom-row") and items[1]["zone"] not in ("left", "top-left", "top", "top-right")
+    assert "zone" not in items[2]                                                 # a label stays beside its drawing
+    assert wp.free_zones([b["scene"]["props"] for b in beats])                    # ... and the zones still free can be named
+
+
+def test_fill_rests_uses_the_real_word_times():
+    before = [{"id": "0:t", "write": "Title", "zone": "top"}, {"id": "0:s", "draw": "sun", "zone": "left"}]
+    props = {"before": list(before), "items": [{"id": "1:n", "write": "350", "zone": "right", "say": "350"}, {"id": "1:m", "mark": "underline", "on": "1:n", "say": "cases"}]}
+    assert wp.fill_rests(props, [3.2, 7.5], end=10.0) == 3                     # the wait before the number, the gap before the mark, the breath after the last word
+    ids = [it["id"] for it in props["items"]]
+    assert ids[0].startswith("+r") and ids[1] == "1:n" and ids[2].startswith("+r") and ids[3] == "1:m" and ids[4].startswith("+r")
+    lead, mid, tail = props["items"][0], props["items"][2], props["items"][4]
+    assert lead["on"] == "0:s" and 0.4 <= lead["at"] < 2.0 and "say" not in lead    # something an earlier beat drew, at a fixed time inside the wait
+    assert 3.5 < mid["at"] < 7.0 and 7.8 < tail["at"] < 10.0 and len({lead["on"], mid["on"], tail["on"]}) == 3
+    assert ELEMENTS["whiteboard"].anchors(props) == ["350", "cases"]              # the scene's cue list is untouched
+    assert wp.fill_rests(props, [3.2, 7.5], end=10.0) == 0                      # once
+    calm = {"items": [{"id": "a", "draw": "sun", "zone": "left", "say": "sun"}, {"id": "b", "draw": "piggy_bank", "zone": "right", "say": "pig"}]}
+    assert wp.fill_rests(calm, [1.9, 4.5], end=5.2) == 0                        # a drawing is drawn slowly through the wait: no rest, no mark; a NEW board does not wait at its start
+
+
+def test_link_fills_rests_and_knows_the_breath_after_the_last_word():
+    a = ELEMENTS["whiteboard"].sanitize({"items": [{"id": "t", "write": "Title", "zone": "top", "say": "title"}, {"id": "s", "draw": "sun", "zone": "left", "say": "sun"}]})
+    b = ELEMENTS["whiteboard"].sanitize({"board": "same", "items": [{"id": "n", "write": "350", "zone": "right", "say": "number"}]})
+    scenes = [{"id": "s0", "type": "whiteboard", "duration": 6.0, "transition": "fade", "props": dict(a, cues=[1.0, 3.0])},
+              {"id": "s1", "type": "whiteboard", "duration": 9.0, "transition": "fade", "props": dict(b, cues=[4.0])}]
+    wp.link(scenes)
+    extra = [it for it in scenes[1]["props"]["items"] if "+r" in it["id"]]
+    assert len(extra) >= 2 and all(isinstance(it["at"], float) and it["on"].startswith(("0:", "1:")) and it["id"].startswith("+r1.") for it in extra)
+    assert [it["id"] for it in scenes[0]["props"]["after"]] == [it["id"] for it in scenes[1]["props"]["items"]]      # the first beat reserves the place of everything the second will draw
+    again = [dict(s, props=dict(s["props"])) for s in scenes]
+    wp.link(again)
+    assert [s["props"] for s in again] == [s["props"] for s in scenes]            # an edit rebuilds the timeline: linking twice changes nothing
+
+
+def test_keep_busy_fills_five_word_gaps_and_marks_a_thing_twice_at_most():
+    p = _board([{"id": "t", "write": "Sleep", "zone": "top", "say": "sleep"}])
+    narration = "Sleep is when the brain files away what it learned during the whole long day and clears out waste so you think clearly."
+    n = wp.keep_busy(p, narration)
+    marks = [it for it in p["items"] if it.get("mark")]
+    assert n == len(marks) == 2 and len({m["mark"] for m in marks}) == 2 and all(m["on"] == "t" for m in marks)     # one thing only: two different marks, never a third
+    assert wp.FILL_EVERY_WORDS == 5
+
+
+def test_a_continued_board_keeps_its_first_word(on):
+    from engine import sync
+
+    words = [("Time", 0.4, 0.7), ("and", 0.8, 1.0), ("how", 1.0, 1.2), ("often", 1.3, 1.6), ("the", 1.8, 2.0), ("bank", 2.1, 2.4), ("pays", 2.6, 2.9), ("matter", 3.0, 3.4)]
+    for board in ("same", None):
+        p = ELEMENTS["whiteboard"].sanitize({"items": [{"id": "a", "write": "matter", "zone": "top", "say": "matter"}], **({"board": board} if board else {})})
+        sync.apply("whiteboard", p, words, 6.0)
+        if board:
+            assert p["cues"][0] > sync.WHITEBOARD_FIRST_S                         # it goes on drawing on a board that is in the picture: every thing on its word
+        else:
+            assert p["cues"][0] == sync.WHITEBOARD_FIRST_S                        # an empty board does not wait for a late word

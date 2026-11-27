@@ -15,7 +15,7 @@ import logging
 import os
 import re
 import threading
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 STYLE = "whiteboard"
 # What the person may write in the request (English and Spanish).
@@ -54,8 +54,9 @@ def wish(option: Any, prompt: str) -> str:
 
 
 class Policy:
-    def __init__(self, allowed: bool, reason: str, *, asked: bool = False, flag: bool = True, judged: Optional[Dict[str, Any]] = None):
+    def __init__(self, allowed: bool, reason: str, *, asked: bool = False, flag: bool = True, judged: Optional[Dict[str, Any]] = None, aspect: str = "16:9"):
         self.allowed, self.reason, self.asked, self.flag, self.judged = allowed, reason, asked, flag, judged
+        self.aspect = aspect if aspect in ("16:9", "9:16", "1:1", "4:5") else "16:9"
 
     def summary(self) -> Dict[str, Any]:
         return {"decision": "whiteboard" if self.allowed else "no", "reason": self.reason, "asked": self.asked, **({"judged": self.judged} if self.judged else {})}
@@ -70,26 +71,48 @@ class Policy:
         for it in library.index()["items"]:
             cats.setdefault(it.get("category") or "other", []).append(it["id"])
         menu = "\n".join(f"    {c}: {', '.join(v)}" for c, v in cats.items())[:MAX_MENU_CHARS]
+        tall = self.aspect in ("9:16", "4:5")
+        shape = ("  THIS VIDEO IS TALL (" + self.aspect + "): the board is narrow. Titles and lists go in a full-width zone (top-row, middle-row, bottom-row); every written text is 1 to 3 words per line; "
+                 "arrange the flow from top to bottom (top row, then middle, then bottom), not left to right.\n") if tall else \
+                ("  The board is wide: arrange the flow from left to right, the title on top, results and numbers along the bottom.\n" if self.aspect == "16:9" else "")
         return (
             "\n\nWHITEBOARD VIDEO. This whole video is a whiteboard explainer: EVERY beat's scene is of type `whiteboard` (no other scene type, no photographs, no clips, no charts).\n"
-            "- whiteboard: {items: [...]}. A board that a marker draws and writes on while the narrator speaks. You give MEANING, never coordinates. Items, in the order they are drawn:\n"
-            '    {"id": "<short name>", "draw": "<a drawing id from the list below>", "zone": "<zone>", "say": "<ONE word of this beat\'s narration>", "size": "s|m|l"}\n'
-            '    {"id": "...", "write": "<1 to 6 words, a number, or a short formula>", "zone": "<zone>" (or "near": "<id>", "side": "below|above|left|right"), "say": "<one word>", "size": "s|m|l|xl", "tool": "marker|pen", "ink": "black|blue|red|orange|green"}\n'
-            '    {"id": "...", "connect": "arrow|wavy|dashed", "from": "<id>", "to": "<id>", "color": "blue|red|orange|green|grey"}\n'
-            '    {"id": "...", "mark": "underline|double_underline|circle|box|tick|cross|highlight", "on": "<id>", "color": "red|blue|green|orange"}\n'
-            '    {"id": "...", "chart": "bars|line", "values": [2 to 6 numbers], "labels": ["<short>", ...], "zone": "<zone>", "say": "<one word>"}   (numbers compared or growing: drawn by hand, never a real chart scene)\n'
-            "  Zones: top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right (one drawing per zone; a label goes `near` its drawing). A title or a list may use a wide zone: top-row, left-wide, right-wide, bottom-row.\n"
+            "- whiteboard: {board: \"new\"|\"same\", items: [...]}. A board that a marker draws and writes on while the narrator speaks. You give MEANING, never coordinates.\n"
+            "  BOARDS. A board is ONE full picture, like a teacher's finished whiteboard: by the time it is left it holds 8 to 12 drawings and written phrases, joined by arrows, with marks on the key words, "
+            "and it stays on screen for about 15 to 20 seconds. One beat cannot fill a board, so TWO consecutive beats share a board (three when they are short): the first has \"board\": \"new\", the next has "
+            "\"board\": \"same\" and goes on drawing in the zones the first one left free. Plan each board as a whole BEFORE writing its beats: its title, what the first beat puts where, what the second adds. "
+            "A video of N beats has about N/2 boards; never one sparse board per beat. The camera shows a board whole and still, moves only to go to the next board, and ends the video on all boards together: "
+            "every board must read as a finished, composed picture.\n"
+            "  Items, in the order they are drawn:\n"
+            '    {"id": "<short name>", "draw": "<a drawing id from the list below>", "zone": "<zone>", "say": "<ONE word of this beat\'s narration>", "size": "m|l"}\n'
+            '    {"id": "...", "write": "<1 to 4 words, a number, or a short formula>", "zone": "<zone>" (or "near": "<id>", "side": "below|above|left|right"), "say": "<one word>", "size": "s|m|l|xl", "tool": "marker|pen", "ink": "black|blue|red|orange|green"}\n'
+            '    {"id": "...", "connect": "arrow|wavy|dashed", "from": "<id>", "to": "<id>", "color": "blue|red|orange|green|grey", "say": "<one word>"}\n'
+            '    {"id": "...", "mark": "underline|double_underline|circle|box|tick|cross|highlight", "on": "<id>", "color": "red|blue|green|orange", "say": "<one word>"}\n'
+            '    {"id": "...", "chart": "bars|line", "values": [2 to 5 numbers], "labels": ["<short>", ...], "zone": "<zone>", "say": "<one word>"}   (numbers compared or growing: drawn by hand, never a real chart scene)\n'
+            "  Zones: a 3x3 grid: top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right. ONE drawing or text per zone for the WHOLE board (all its beats together); a label goes `near` "
+            "its drawing and needs no zone. Wide zones for a title, a list or a chart: top-row, middle-row, bottom-row (the full width), top-left-wide, top-right-wide, left-wide, right-wide, bottom-left-wide, "
+            "bottom-right-wide (two zones). `from`, `to`, `on` and `near` name items of the SAME beat.\n"
+            + shape +
             "  Rules:\n"
-            "  * 4 to 8 items per beat: usually 2 or 3 drawings or written phrases, joined by arrows, plus one or two marks. Never an empty board, never more than 9 drawings and texts.\n"
+            "  * FILL THE BOARD. Each beat has 7 to 10 items: 4 or 5 drawings or written phrases (never fewer than 3), each drawing with a short written label `near` it (1 to 3 words, tool pen) unless the "
+            "narration makes it obvious, joined by arrows, plus 1 or 2 marks. By the end of a board at least 7 of its 9 zones are used, the left and the right side and the top and the bottom row among them. "
+            "Never an empty board; never more than 9 drawings and texts in one beat.\n"
+            "  * EVERY KEY NOUN of the narration is on the board: DRAWN when the list has it, otherwise WRITTEN. Numbers, names of steps and technical terms are written.\n"
             "  * `say` is the exact narration word at which the item is finished, in the order the narration says them: the sun is drawn as the narrator says \"sun\". Write the narration so that it NAMES what is drawn.\n"
-            "  * Keep the pen busy 50 to 70 % of the time: about one item for every 5 or 6 words of narration. When the narration goes on for more than a few words with nothing new to draw, add an EMPHASIS item "
-            "with its own `say` word: an arrow between two things, or a mark (underline, circle, box, tick) on something already there. A board whose pen rests for seconds looks dead.\n"
-            "  * Consecutive beats are panels of ONE big board: the camera travels from one to the next and ends on all of them. So each beat is a self-contained panel; do not repeat the previous panel's drawings.\n"
-            "  * Writing is for titles, key terms, numbers and short formulas, never whole sentences. Numbers and results are WRITTEN big (size l or xl) and then circled or underlined; a comparison is two written numbers; "
-            "a list is one `write` with a line per point (\"1. ...\\n2. ...\", at most 4 short lines) in a wide zone, size m, tool marker; the pen is only for small labels beside drawings. Markup: ^{2} for a power, _{2} for a subscript, \\frac{a}{b}, -> for an arrow.\n"
+            "  * PACING. Keep the pen busy: one item finishes about every 3 or 4 words of narration, and never more than 5 words pass with nothing finishing. The pen needs time BEFORE the word an item "
+            "is tied to: about 4 words for a drawing, a title or a chart, 1 or 2 words for an arrow, a mark or a small label. So the first item of a beat is tied to its 4th to 6th word (the pen is already "
+            "moving while the first words are said), a drawing's `say` word comes at least 3 words after the previous item's, and two items are never tied to the same or to neighbouring words. "
+            "Arrows and marks have their own `say` word: an arrow on the verb that links two things (\"heats\", \"becomes\", \"earns\"), an underline, circle, box or tick on the word that stresses "
+            "something already on the board. A board whose pen rests for more than a second looks dead.\n"
+            "  * Arrows join NEIGHBOURS (items in adjacent zones); an arrow never has to cross a third item.\n"
+            "  * Writing is for titles, key terms, numbers and short formulas, never whole sentences. A board's title is written large (size l) in the top row by its first beat. Numbers and results are WRITTEN "
+            "big (size l or xl) and then circled or underlined; a comparison is two written numbers; a list is one `write` with a line per point (\"1. ...\\n2. ...\", at most 4 lines of 1 to 3 words) in a "
+            "wide zone, size m, tool marker; the pen is only for the small labels beside drawings. Markup: ^{2} for a power, _{2} for a subscript, \\frac{a}{b}, -> for an arrow.\n"
+            "  * Drawings are size l (m when two share a zone's row with labels); they are the pictures of the board, not icons.\n"
             "  * Use ONLY drawing ids from the list. If nothing in the list shows the idea, WRITE the word instead (a written label is always fine); never invent an id.\n"
             "  * People are the simple figures of the list (person_*, doctor, teacher...); never a real, named person.\n"
-            "  * The first beat is a board with the video's question or title written (zone top or centre) and one drawing. The last beat sums up: the key term written large, underlined twice.\n"
+            "  * The first beat opens the first board with the video's question or title written large on top and the first drawings. The LAST beat stays on the last board (\"board\": \"same\") and sums up "
+            "there: the key term or takeaway written large in a free zone, underlined twice.\n"
             f"  Drawing ids, by group:\n{menu}"
         )
 
@@ -102,7 +125,7 @@ def decide(prompt: str, *, options: Optional[Dict[str, Any]] = None, skill_ids: 
     flag = enabled()
 
     def no(reason: str) -> Policy:
-        return Policy(False, reason, asked=w == STYLE, flag=flag)
+        return Policy(False, reason, asked=w == STYLE, flag=flag, aspect=o.get("aspect"))
 
     if not flag:
         return no("flag_off")
@@ -113,7 +136,7 @@ def decide(prompt: str, *, options: Optional[Dict[str, Any]] = None, skill_ids: 
     if o.get("deck"):
         return no("deck")
     if w == STYLE:
-        return Policy(True, "asked", asked=True)
+        return Policy(True, "asked", asked=True, aspect=o.get("aspect"))
     if research_mode == "web":
         return no("current_events")
     ids = set(skill_ids or [])
@@ -123,8 +146,8 @@ def decide(prompt: str, *, options: Optional[Dict[str, Any]] = None, skill_ids: 
         return no("no_classifier")
     judged = _classify(prompt, ask)
     if not judged["fit"]:
-        return Policy(False, "not_suited", judged=judged)
-    return Policy(True, "auto", judged=judged)
+        return Policy(False, "not_suited", judged=judged, aspect=o.get("aspect"))
+    return Policy(True, "auto", judged=judged, aspect=o.get("aspect"))
 
 
 def _classify(prompt: str, ask: Callable[[str, str], str]) -> Dict[str, Any]:
@@ -201,7 +224,11 @@ def board_for(scene: Dict[str, Any], narration: str) -> Optional[Dict[str, Any]]
 
 
 THEME = "paper"            # captions and the closing card of a whiteboard video are light, like the board
-FILL_EVERY_WORDS = 8       # a stretch of narration this long with nothing drawn gets an emphasis mark (phase 1a: boards looked dead without them)
+FILL_EVERY_WORDS = 5       # a stretch of narration this long with nothing drawn (about 2 s) gets an emphasis mark: no dead air over about 1.5 s (it was 8: the first QA videos rested up to 2.5 s)
+FILL_PER_GAP = 3           # at most this many marks in one stretch
+# A board (one full picture) is shared by consecutive beats (`compose`): how much it may hold, and when it is full enough to be left
+BOARD_MAX_BEATS, BOARD_MAX_SOLID, BOARD_MAX_WORDS = 3, 12, 66
+BOARD_FULL_SOLID, BOARD_FULL_WORDS = 6, 28
 
 
 def _words(narration: str) -> List[str]:
@@ -302,10 +329,10 @@ def retie(props: Dict[str, Any], narration: str) -> Dict[str, int]:
     return stats
 
 
-def keep_busy(props: Dict[str, Any], narration: str, max_items: int = 16) -> int:
+def keep_busy(props: Dict[str, Any], narration: str, max_items: int = 20) -> int:
     """The cheap pacing check: where the narration runs for FILL_EVERY_WORDS words or more with nothing tied to it, an emphasis mark (underline, circle, box,
-    tick, in turn) is added on the last unmarked thing drawn before the gap, tied to a word in the middle of the gap. Deterministic, no model. Call after
-    `retie`. -> marks added."""
+    tick, in turn) is added on the last unmarked thing drawn before the gap (when everything is marked already: a second, different mark on the latest thing),
+    tied to a word in the middle of the gap. Deterministic, no model. Call after `retie`. -> marks added."""
     items: List[Dict[str, Any]] = props.get("items") or []
     words = _words(narration)
     if len(words) < FILL_EVERY_WORDS or not items:
@@ -318,6 +345,8 @@ def keep_busy(props: Dict[str, Any], narration: str, max_items: int = 16) -> int
         pos.append(k)
         prev = k if k is not None else prev
     marked = {it.get("on") for it in items if it.get("mark")}
+    twice: set = set()
+    has = {(it.get("on"), it.get("mark")) for it in items if it.get("mark")}
     kinds = ("underline", "circle", "tick", "box", "double_underline")
     known = [(k, i) for i, k in enumerate(pos) if k is not None]
     if not known:
@@ -326,53 +355,304 @@ def keep_busy(props: Dict[str, Any], narration: str, max_items: int = 16) -> int
     inserts: List[Any] = []                                   # (item index to insert after, order, mark)
     for (ka, ia), (kb, _) in zip(bounds, bounds[1:]):
         gap = kb - ka - 1
-        for j in range(min(2, gap // FILL_EVERY_WORDS)):
+        for j in range(min(FILL_PER_GAP, gap // FILL_EVERY_WORDS)):
             if len(items) + len(inserts) >= max_items:
                 break
-            aim = ka + (gap + 1) * (j + 1) / (min(2, gap // FILL_EVERY_WORDS) + 1)
+            aim = ka + (gap + 1) * (j + 1) / (min(FILL_PER_GAP, gap // FILL_EVERY_WORDS) + 1)
             ok = [q for q in range(ka + 1, kb) if words[q] and words[q] not in words[ka + 1:q] and all(q != m[3] for m in inserts)]
             ok = [q for q in ok if not any(m[0] == ia and m[3] >= q for m in inserts)]
-            before = [i for i in range(ia + 1) if (items[i].get("draw") or items[i].get("write") or items[i].get("chart")) and items[i]["id"] not in marked]
+            drawn = [i for i in range(ia + 1) if items[i].get("draw") or items[i].get("write") or items[i].get("chart")]
+            before = [i for i in drawn if items[i]["id"] not in marked] or [i for i in drawn if items[i]["id"] not in twice]
             if not ok or not before:
                 break
             q = min(ok, key=lambda q_: abs(q_ - aim))
             target = items[before[-1]]
+            if target["id"] in marked:
+                twice.add(target["id"])
             marked.add(target["id"])
             kind = kinds[len(inserts) % len(kinds)]
             if not target.get("write") and kind in ("underline", "double_underline"):
                 kind = "circle"
             if target.get("write") and "\n" in target["write"] and kind == "circle":
                 kind = "box"
+            if (target["id"], kind) in has or (target["id"] in twice and kind in ("circle", "box") and has & {(target["id"], "circle"), (target["id"], "box")}):
+                kind = next((k_ for k_ in ("tick", "underline" if target.get("write") else "box", "box", "circle") if (target["id"], k_) not in has), "tick")
+            has.add((target["id"], kind))
             inserts.append((ia, len(inserts), {"id": f"em{len(inserts)}_{target['id']}"[:24], "mark": kind, "on": target["id"], "color": "red" if len(inserts) % 2 == 0 else "blue", "say": words[q]}, q))
     for ia, _, m, _q in sorted(inserts, key=lambda x: (-x[0], -x[1])):
         items.insert(ia + 1, m)
     return len(inserts)
 
 
+def _solid(it: Dict[str, Any]) -> bool:
+    return bool(it.get("draw") or it.get("write") or it.get("chart"))
+
+
+def _cells(zone: str) -> List[Any]:
+    from .whiteboard import spec
+
+    names = spec.SPANS.get(zone, zone)
+    cs = [spec.ZONES[n] for n in ([names] if isinstance(names, str) else names)]
+    c0, r0, c1, r1 = min(c[0] for c in cs), min(c[1] for c in cs), max(c[0] for c in cs), max(c[1] for c in cs)
+    return [(c, r) for c in range(c0, c1 + 1) for r in range(r0, r1 + 1)]
+
+
+def free_zones(props_list: List[Dict[str, Any]]) -> List[str]:
+    """The single zones no drawing, text or chart of this board has been given."""
+    from .scenes.elements import whiteboard as wbe
+
+    used = {c for p in props_list for it in p.get("items") or [] if it.get("zone") and not it.get("near") for c in _cells(it["zone"])}
+    return [z for z in wbe.ZONES if _cells(z)[0] not in used]
+
+
+def _place(p: Dict[str, Any], used: Dict[Any, int], dry: bool = False) -> Tuple[Dict[Any, int], int, int]:
+    """One beat's drawings, texts and charts on a board whose cells `used` are taken: a thing whose zone is taken moves to a free zone of the same shape, else
+    to a free single zone. -> (cells this beat takes, things moved, things that found no free zone). `dry`: only count, change nothing."""
+    from .scenes.elements import whiteboard as wbe
+
+    mine: Dict[Any, int] = {}
+    other: Dict[Any, int] = {}               # cells a text or chart of this beat has (a drawing never shares those)
+    moved = stuck = 0
+    for it in p.get("items") or []:
+        if not _solid(it) or it.get("near") or not it.get("zone"):
+            continue
+        cells = _cells(it["zone"])
+        clash = any(used.get(c) for c in cells) or any(other.get(c) for c in cells) or (not it.get("draw") and any(mine.get(c) for c in cells))
+        if clash:
+            shape = (max(c[0] for c in cells) - min(c[0] for c in cells), max(c[1] for c in cells) - min(c[1] for c in cells))
+            cx, cy = sum(c[0] for c in cells) / len(cells), sum(c[1] for c in cells) / len(cells)
+            best = None
+            for z in wbe.ZONES + wbe.SPANS:
+                zc = _cells(z)
+                if any(used.get(c) or mine.get(c) for c in zc):
+                    continue
+                same = (max(c[0] for c in zc) - min(c[0] for c in zc), max(c[1] for c in zc) - min(c[1] for c in zc)) == shape
+                if not same and len(zc) > 1:
+                    continue
+                d = abs(sum(c[0] for c in zc) / len(zc) - cx) + abs(sum(c[1] for c in zc) / len(zc) - cy)
+                key = (0 if same else 1, d)
+                if best is None or key < best[0]:
+                    best = (key, z, zc)
+            if best is not None:
+                cells = best[2]
+                moved += 1
+                if not dry:
+                    it["zone"] = best[1]
+            else:
+                stuck += 1
+        for c in cells:
+            mine[c] = mine.get(c, 0) + 1
+            if not it.get("draw"):
+                other[c] = 1
+    return mine, moved, stuck
+
+
+def compose(beats: List[Dict[str, Any]]) -> Dict[str, int]:
+    """Which beats share a BOARD, decided when the script is final. The director marks a beat that goes on drawing on the previous beat's board ("board": "same");
+    the engine keeps that when the board has room (BOARD_MAX_*), and ALSO keeps a beat on the board when the director started a new one although the board
+    is far from full (fewer than BOARD_FULL_SOLID things or BOARD_FULL_WORDS words): sparse boards were the main flaw of the first videos. Then, on each
+    board, a drawing, text or chart whose zone an earlier item of the board already has moves to a free zone of the same shape (or a free single zone).
+    Deterministic, no model. -> {"boards", "shared": beats that continue a board, "merged": of those, decided by the engine, "rezoned": items moved}."""
+    stats = {"boards": 0, "shared": 0, "merged": 0, "rezoned": 0}
+    cur: List[Dict[str, Any]] = []           # the props of the beats on the current board
+    words = solid = 0
+    used: Dict[Any, int] = {}
+    prev_i = None
+    for i, b in enumerate(beats):
+        sc = b.get("scene") or {}
+        if sc.get("type") != "whiteboard" or not isinstance(sc.get("props"), dict):
+            cur, prev_i = [], None
+            continue
+        p = sc["props"]
+        n_words = len(str(b.get("narration") or "").split())
+        n_solid = sum(1 for it in p.get("items") or [] if _solid(it))
+        room = bool(cur) and prev_i == i - 1 and len(cur) < BOARD_MAX_BEATS and solid + n_solid <= BOARD_MAX_SOLID and words + n_words <= BOARD_MAX_WORDS
+        asked = p.get("board") == "same"
+        thin = solid < BOARD_FULL_SOLID or words < BOARD_FULL_WORDS
+        last = not any((x.get("scene") or {}).get("type") == "whiteboard" for x in beats[i + 1:])
+        thin = thin or (last and n_solid < 4)                    # the closing beat sums up on the last board: it never opens a nearly empty one when there is room
+        if room and (asked or thin):
+            p["board"] = "same"
+            stats["shared"] += 1
+            stats["merged"] += 0 if asked else 1
+        else:
+            p.pop("board", None)
+            cur, words, solid, used = [], 0, 0, {}
+            stats["boards"] += 1
+        # zones: one drawing or text per zone on the whole board (two drawings of the SAME beat may share one: they are laid side by side)
+        mine, moved, stuck = _place(p, used, dry=True)
+        if stuck and cur and p.get("board") == "same":            # the board has no free zone left for what this beat adds: the board is full, whatever its counts say
+            p.pop("board", None)
+            stats["shared"] -= 1
+            stats["merged"] -= 0 if asked else 1
+            cur, words, solid, used = [], 0, 0, {}
+            stats["boards"] += 1
+        mine, moved, stuck = _place(p, used)
+        stats["rezoned"] += moved
+        for c, v in mine.items():
+            used[c] = used.get(c, 0) + v
+        cur.append(p)
+        words += n_words
+        solid += n_solid
+        prev_i = i
+    return stats
+
+
+def _renamed(items: List[Dict[str, Any]], j: int, ties: bool = True) -> List[Dict[str, Any]]:
+    """The items of the j-th beat of a shared board under names that are unique on the board (every scene of the board uses the same names, so an item looks
+    the same in all of them)."""
+    out = []
+    for it in items:
+        o = {k: v for k, v in it.items() if ties or k != "say"}
+        o["id"] = f"{j}:{it['id']}"
+        for f in ("from", "to", "on", "near"):
+            if o.get(f):
+                o[f] = f"{j}:{o[f]}"
+        out.append(o)
+    return out
+
+
+def _plain(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Items as the plan has them: without the board-wide names and the marks a previous `link` added (so linking twice gives the same result)."""
+    out = []
+    for it in items:
+        if re.sub(r"^\d+:", "", str(it.get("id", ""))).startswith("+r"):
+            continue
+        o = dict(it)
+        for f in ("id", "from", "to", "on", "near"):
+            if isinstance(o.get(f), str):
+                o[f] = re.sub(r"^\d+:", "", o[f])
+        out.append(o)
+    return out
+
+
+def linked_props(props_list: List[Dict[str, Any]], sizes: List[int], ends: Optional[List[Optional[float]]] = None) -> List[Dict[str, Any]]:
+    """The props of a run of consecutive whiteboard scenes, grouped into boards of `sizes` scenes each -> new props, one per scene, that know their board:
+    `before` / `after` (what the other scenes of the board draw: already there, or still to come), `panel` [board, boards], `prev` (the board before, on the
+    first scene of a board: the camera travels from it) and `wall` (every earlier board, on the very last scene: the final pull-back).
+    `ends` (one per scene, with the scenes' `cues` in their props): the time each scene's pen may work until; given, the rests of the pen are filled with
+    emphasis marks (`fill_rests`) BEFORE the boards are told about each other, so a mark is part of its board in every scene that shows it. Pure."""
+    keep = lambda p: {**{k: v for k, v in p.items() if k not in ("prev", "wall", "panel", "before", "after")}, "items": _plain(p.get("items") or [])}      # noqa: E731
+    style = lambda p: {f: p[f] for f in ("hand", "tool") if f in p}      # noqa: E731
+    untied = lambda items: [{k: v for k, v in it.items() if k not in ("say", "at")} for it in items]      # noqa: E731
+    boards: List[List[Dict[str, Any]]] = []
+    k = 0
+    for n in sizes:
+        grp = [keep(p) for p in props_list[k:k + n]]
+        for j, q in enumerate(grp):
+            if len(grp) > 1:
+                q["items"] = _renamed(q["items"], j)
+            if ends is not None:
+                seen = dict(q, before=[it for i in range(j) for it in untied(grp[i]["items"])])
+                if fill_rests(seen, q.get("cues"), ends[k + j], tag=f"{j}." if len(grp) > 1 else ""):
+                    q["items"] = seen["items"]
+        boards.append(grp)
+        k += n
+    whole = [{"items": [it for q in grp for it in untied(q["items"])], **style(grp[0])} for grp in boards]      # each board finished, without ties
+    out: List[Dict[str, Any]] = []
+    for bi, grp in enumerate(boards):
+        for j, q in enumerate(grp):
+            if len(grp) > 1:
+                q["before"] = [it for i in range(j) for it in untied(grp[i]["items"])]
+                q["after"] = [it for i in range(j + 1, len(grp)) for it in untied(grp[i]["items"])]
+            if len(boards) > 1:
+                q["panel"] = [bi, len(boards)]
+            if bi > 0 and j == 0:
+                q["prev"] = whole[bi - 1]
+            out.append(q)
+    if len(boards) > 1 and out:
+        out[-1]["wall"] = whole[:-1][-8:]
+    return out
+
+
+REST_S = 1.4               # the pen may rest this long between two things; a longer rest gets an emphasis mark (`fill_rests`)
+COVER_S = {"draw": 2.2, "chart": 3.0, "write": 1.2, "connect": 0.9, "mark": 0.5}      # how long before its word the pen is already busy with a thing (a drawing is drawn slowly when there is time)
+MAX_REST_MARKS = 4
+
+
+def fill_rests(props: Dict[str, Any], cues: Optional[List[float]], end: Optional[float] = None, tag: str = "") -> int:
+    """Pacing with the REAL word times (they exist only once the voice is made: the timeline's `link` calls this; the self-check calls it with estimated
+    times). Wherever the pen would rest for more than REST_S between two tied things, at the start of a beat that continues a board, or between the last
+    thing and the last word (`end`), an emphasis mark is added at a fixed time of the rest: a circle, underline, box or tick on something already on the
+    board (this beat's or an earlier beat's of the same board) that has no mark yet. At most MAX_REST_MARKS a scene. Deterministic. -> marks added."""
+    items: List[Dict[str, Any]] = list(props.get("items") or [])
+    before = list(props.get("before") or [])
+    if not cues or any("+r" in str(it.get("id", "")) for it in items):
+        return 0
+    kind_of = lambda it: next(k for k in ("draw", "chart", "write", "connect", "mark") if k in it)      # noqa: E731
+    marked = {it.get("on") for it in before + items if it.get("mark")}
+    tied = [(i, float(cues[k])) for k, (i, _) in enumerate([(i, it) for i, it in enumerate(items) if it.get("say")]) if k < len(cues)]
+    if not tied:
+        return 0
+    spans = []                                    # (rest starts, rest ends, index in items to insert before)
+    prev_t = 0.0 if before else None              # a new board's first thing is brought forward by the timeline; a continued board must not wait
+    for i, t in tied:
+        busy_from = t - COVER_S[kind_of(items[i])]
+        if prev_t is not None and busy_from - prev_t > REST_S:
+            spans.append((prev_t, busy_from, i))
+        prev_t = t + 0.3
+    if end is not None and end - prev_t > REST_S:
+        spans.append((prev_t, end, len(items)))
+    added: List[Any] = []
+    kinds = ("circle", "underline", "box", "tick")
+    for lo, hi, at_i in spans:
+        n = min(2, int((hi - lo) / (REST_S + 0.6)) or 1)
+        for k in range(n):
+            if len(added) >= MAX_REST_MARKS:
+                break
+            drawn = [it for it in before + items[:at_i] if _solid(it)]
+            pool = [it for it in drawn if it["id"] not in marked] or [it for it in drawn if (it["id"], "tick") not in marked]
+            if not pool:
+                break
+            target = pool[-1]
+            if target["id"] in marked:
+                kind = "tick"
+                marked.add((target["id"], "tick"))
+            else:
+                kind = kinds[len(added) % 3] if target.get("write") else ("circle", "box")[len(added) % 2]
+                if kind == "circle" and target.get("write") and "\n" in target["write"]:
+                    kind = "box"
+            marked.add(target["id"])
+            at = lo + (hi - lo) * (k + 0.5) / n
+            added.append((at_i, {"id": f"+r{tag}{len(added)}", "mark": kind, "on": target["id"], "color": ("blue", "red", "green")[len(added) % 3], "at": round(max(0.4, at), 2)}))
+    for at_i, m in sorted(added, key=lambda x: -x[0]):
+        items.insert(at_i, m)
+    if added:
+        props["items"] = items
+    return len(added)
+
+
 def link(scenes: List[Dict[str, Any]]) -> int:
-    """Timeline step (engine/timeline.py): consecutive `whiteboard` scenes become panels of ONE big board. Each later panel learns the one before it (the camera
-    travels from it; the renderer's crossfade is switched off between them), the last one learns them all (the final pull-back). Also stamps the library version
-    into the props, so a rebuilt library changes the segment hash. Pure; -> how many scenes were linked."""
+    """Timeline step (engine/timeline.py): consecutive `whiteboard` scenes become ONE big board of panels. Scenes whose props say "board": "same" share a
+    panel with the scene before (they go on drawing on it; the picture does not move or fade between them); the first scene of a later panel learns the panel
+    before it (the camera travels from it), the last scene learns them all (the final pull-back). Also stamps the library version into the props, so a
+    rebuilt library changes the segment hash. Pure; -> how many scenes were linked."""
     from .whiteboard import library
 
     built = str(library.index().get("built") or "")
 
-    def lite(p: Dict[str, Any]) -> Dict[str, Any]:
-        return {"items": p.get("items") or [], **{f: p[f] for f in ("hand", "tool") if f in p}}
-
     def close(run: List[Dict[str, Any]]) -> int:
-        n = len(run)
+        if not run:
+            return 0
+        from .scenes.elements import whiteboard as wbe
+
+        sizes: List[int] = []
         for k, sc in enumerate(run):
-            p = sc["props"] = {k_: v for k_, v in sc["props"].items() if k_ not in ("prev", "wall", "panel")}
+            if k and sc["props"].get("board") == "same":
+                sizes[-1] += 1
+            else:
+                sizes.append(1)
+        ends: List[Optional[float]] = []
+        for k, sc in enumerate(run):
+            dur = float(sc.get("duration") or 0.0)                  # the breath after the last word belongs to the scene: the pen does not stop there either
+            tail = wbe._tail({"wall": [1] * (len(sizes) - 1)}, dur) if k == len(run) - 1 and len(sizes) > 1 else 0.0
+            ends.append(dur - tail - 0.5 if dur else None)
+        for k, (sc, p) in enumerate(zip(run, linked_props([sc["props"] for sc in run], sizes, ends))):
             p["lib"] = built
-            if n > 1:
-                p["panel"] = [k, n]
+            sc["props"] = p
             if k > 0:
-                p["prev"] = lite(run[k - 1]["props"])
                 sc["transition"] = "none"
-        if n > 1:
-            run[-1]["props"]["wall"] = [lite(s["props"]) for s in run[:-1]][-8:]
-        return n if n > 1 else 0
+        return len(run) if len(run) > 1 else 0
 
     linked, run = 0, []
     for sc in scenes:
@@ -390,6 +670,7 @@ def settle(plan: Dict[str, Any], policy: Optional[Policy]) -> List[str]:
     if policy is None or not policy.allowed:
         return []
     tot = {"moved": 0, "retied": 0, "untied": 0, "marks_added": 0}
+    boards = compose(plan.get("beats") or [])
     for b in plan.get("beats") or []:
         sc = b.get("scene") or {}
         if sc.get("type") != "whiteboard" or not isinstance(sc.get("props"), dict):
@@ -397,8 +678,99 @@ def settle(plan: Dict[str, Any], policy: Optional[Policy]) -> List[str]:
         for k, v in retie(sc["props"], str(b.get("narration") or "")).items():
             tot[k] += v
         tot["marks_added"] += keep_busy(sc["props"], str(b.get("narration") or ""))
-    plan.setdefault("whiteboard", policy.summary()).update(tot)
-    return [f"whiteboard: {tot['retied']} tie(s) moved to words still said, {tot['untied']} dropped, {tot['marks_added']} emphasis mark(s) added"] if any(tot.values()) else []
+    plan.setdefault("whiteboard", policy.summary()).update(tot, panels=boards["boards"], beats_sharing_a_board=boards["shared"], rezoned=boards["rezoned"])
+    return [f"whiteboard: {boards['boards']} board(s) for {boards['boards'] + boards['shared']} beats ({boards['merged']} kept on a board by the engine, {boards['rezoned']} item(s) moved to a free zone); "
+            f"{tot['retied']} tie(s) moved to words still said, {tot['untied']} dropped, {tot['marks_added']} emphasis mark(s) added"]
+
+
+REVIEW_SYSTEM = (
+    "You repair the boards of a whiteboard explainer video. The narration is FINAL: never change, add or remove a spoken word. For each beat you are given, write its board again so that the complaints "
+    "about its board are fixed, keeping everything that already works (the same ids where the item stays). "
+    'Answer ONLY JSON: {"beats": [{"beat": <the beat number given>, "board": "new"|"same", "items": [...]}]} with exactly the beats given, in order. '
+    "Every `say` must be a word that this beat's narration really says, and the items of a beat are in the order the narration says their words.")
+
+
+def review(plan: Dict[str, Any], policy: Optional[Policy], ask: Optional[Callable[[str, str], str]], language: str = "en") -> List[str]:
+    """The self-check (engine/whiteboard/score.py), after `settle`: every board is laid out and timed as the renderer will and scored. Boards that fail are
+    sent back to the director ONCE with their complaints (the narration stays as it is); the new boards are kept only if the video then scores at least as
+    well. The scores are logged (`WHITEBOARD_SCORE`) and kept in plan["whiteboard"]["score"]. Never fails a plan."""
+    import copy
+    import json
+
+    if policy is None or not policy.allowed:
+        return []
+    from .whiteboard import score
+
+    notes: List[str] = []
+    try:
+        beats = plan.get("beats") or []
+        scores = score.score_plan(plan, policy.aspect)
+        first = score.summary(scores)
+        failed = [s for s in scores if not s["ok"]]
+        info: Dict[str, Any] = {"first": first, "replanned": False}
+        print("WHITEBOARD_SCORE " + json.dumps({"pass": 1, **first, "complaints": [c for s in failed for c in s["complaints"]][:12]}, ensure_ascii=False))
+        if failed and ask is not None:
+            want = sorted({i - 1 for s in failed for i in s["beats"]})
+            parts = []
+            for s in failed:
+                parts.append(f"BOARD {s['board']} (beats {', '.join(str(i) for i in s['beats'])}). Complaints:\n" + "\n".join(f"- {c}" for c in s["complaints"]))
+                for i in s["beats"]:
+                    pr = beats[i - 1]["scene"]["props"]
+                    parts.append(f"Beat {i}. Narration (final): {json.dumps(beats[i - 1].get('narration') or '', ensure_ascii=False)}\n"
+                                 f"Its board now: {json.dumps({'board': pr.get('board', 'new'), 'items': pr.get('items')}, ensure_ascii=False)}")
+            try:
+                raw = ask(REVIEW_SYSTEM + policy.prompt_block(language), "\n\n".join(parts))
+                data = json.loads(raw[raw.index("{"): raw.rindex("}") + 1])
+                from .scenes import ELEMENTS
+
+                trial = copy.deepcopy(plan)
+                done = 0
+                for row in data.get("beats") or []:
+                    i = int(row.get("beat", 0)) - 1
+                    if i not in want or not isinstance(row.get("items"), list):
+                        continue
+                    try:
+                        with scope(policy):
+                            props = ELEMENTS["whiteboard"].sanitize({"items": row["items"], "board": row.get("board")})
+                    except (ValueError, TypeError):
+                        continue
+                    old = trial["beats"][i]["scene"]["props"]
+                    trial["beats"][i]["scene"]["props"] = {**props, **{f: old[f] for f in ("hand", "tool") if f in old and f not in props}}
+                    done += 1
+                if done:
+                    compose(trial["beats"])
+                    for i in want:
+                        b = trial["beats"][i]
+                        retie(b["scene"]["props"], str(b.get("narration") or ""))
+                        keep_busy(b["scene"]["props"], str(b.get("narration") or ""))
+                    again = score.score_plan(trial, policy.aspect)
+                    second = score.summary(again)
+                    took = score.better(scores, again)
+                    info.update(replanned=True, beats=[i + 1 for i in want], second=second, kept="new" if took else "first")
+                    print("WHITEBOARD_SCORE " + json.dumps({"pass": 2, **second, "kept": info["kept"], "complaints": [c for s in again if not s["ok"] for c in s["complaints"]][:12]}, ensure_ascii=False))
+                    if took:
+                        for i, b in enumerate(beats):                     # `compose` may have regrouped: the flags of the trial are the truth
+                            if (b.get("scene") or {}).get("type") != "whiteboard":
+                                continue
+                            same = trial["beats"][i]["scene"]["props"].get("board") == "same"
+                            if i in want:
+                                b["scene"] = trial["beats"][i]["scene"]
+                            b["scene"]["props"].pop("board", None)
+                            if same:
+                                b["scene"]["props"]["board"] = "same"
+                        scores = again
+                    notes.append(f"whiteboard self-check: {len(failed)} board(s) failed, written again once; kept the {'new' if took else 'first'} boards ({second['failed']} failing now)")
+            except Exception as e:  # noqa: BLE001 - the repair is a bonus: the first boards stand
+                logging.warning("whiteboard review: repair failed (%s: %s)", type(e).__name__, str(e)[:200])
+                info["error"] = f"{type(e).__name__}: {str(e)[:120]}"
+        final = score.summary(scores)
+        plan.setdefault("whiteboard", policy.summary())["score"] = {**final, **{k: v for k, v in info.items() if k != "first"}, "first": first,
+                                                                    "boards_detail": [{k: v for k, v in s.items() if k not in ("overlaps", "crossed", "off_board", "late")} for s in scores]}
+        if final["failed"]:
+            notes.append(f"whiteboard self-check: {final['failed']} of {final['boards']} board(s) still below the bar: " + "; ".join(c for s in scores for c in s["complaints"])[:300])
+    except Exception as e:  # noqa: BLE001
+        logging.warning("whiteboard review failed (%s: %s)", type(e).__name__, str(e)[:200])
+    return notes
 
 
 def enforce(plan: Dict[str, Any], policy: Optional[Policy], sanitize: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None) -> List[str]:
