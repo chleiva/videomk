@@ -278,8 +278,9 @@ def word_levels(words: Sequence[Word], env: Sequence[float], fps: float, t0: flo
     return out
 
 
-def _candidates(words: Sequence[Word], idx: List[int], first: bool, last: bool, level: Optional[Sequence[float]]) -> List[Dict[str, Any]]:
-    """Every gesture the sentence could carry: [{kind, i (the word the stroke lands on), ...}]."""
+def _candidates(words: Sequence[Word], idx: List[int], first: bool, last: bool, level: Optional[Sequence[float]], latest: Optional[float] = None) -> List[Dict[str, Any]]:
+    """Every gesture the sentence could carry: [{kind, i (the word the stroke lands on), ...}]. `latest`: a gesture that may choose its word (a question's shrug,
+    emphasis) lands on a word that starts by then, when the sentence has one (the shot ends soon after: the hand must still come home)."""
     toks = [_norm(words[i][0]) for i in idx]
     raw = [words[i][0] for i in idx]
     out: List[Dict[str, Any]] = []
@@ -327,8 +328,9 @@ def _candidates(words: Sequence[Word], idx: List[int], first: bool, last: bool, 
             out.append({"kind": "compare", "i": idx[a], "second": idx[k_con]})
         else:                    # the sentence opens with the contrast: the "other hand" alone
             out.append({"kind": "compare", "i": idx[k_con], "second": None})
+    free = [j for j in range(n) if latest is None or words[idx[j]][1] <= latest] or list(range(n))
     if raw[-1].rstrip("\"')»”").endswith("?") and n >= 3:
-        k = max(range(n), key=lambda j: _stress_score(words, idx[j], level) + (0.2 if j >= n - 2 else 0.0))
+        k = max(free, key=lambda j: _stress_score(words, idx[j], level) + (0.2 if j >= n - 2 else 0.0) + 0.15 * j / n)      # a question rises toward its end
         out.append({"kind": "shrug", "i": idx[k]})
     k_d = next((j for j, t in enumerate(toks) if t in _DEICTIC), None)
     if k_d is not None and n >= 3:
@@ -338,16 +340,16 @@ def _candidates(words: Sequence[Word], idx: List[int], first: bool, last: bool, 
         out.append({"kind": "thumb", "i": idx[k_a]})
     k_s = next((j for j, t in enumerate(toks) if t in _STRONG), None)
     if k_s is None and raw[-1].rstrip("\"')»”").endswith("!") and n >= 3:
-        k_s = max(range(n), key=lambda j: _stress_score(words, idx[j], level))
+        k_s = max(free, key=lambda j: _stress_score(words, idx[j], level))
     if k_s is not None and n >= 3:
         out.append({"kind": "open", "i": idx[k_s]})
     return out
 
 
 def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 0, level: Optional[Sequence[float]] = None, end: Optional[float] = None,
-                  max_per_minute: float = MAX_PER_MINUTE, max_busy: float = MAX_BUSY) -> Tuple[List[Gesture], List[Tuple[float, str, float]]]:
+                  max_per_minute: float = MAX_PER_MINUTE, max_busy: float = MAX_BUSY, home_by: Optional[float] = None) -> Tuple[List[Gesture], List[Tuple[float, str, float]]]:
     """-> (gestures, beats). words: [(word, start_s, end_s)] of ONE speaker, in order. content_side: -1 / +1 when there is content on the left / right of the speaker (0: none).
-    level: optional loudness per word (word_levels). beats: [(time, hand, strength)] small pulses on stressed words, layered on whatever the hands are doing.
+    level: optional loudness per word (word_levels). home_by: when the shot ends (hands are home by then: a gesture that may choose its word chooses an earlier one). beats: [(time, hand, strength)] small pulses on stressed words, layered on whatever the hands are doing.
     Deterministic: the same words, seed and options give the same plan."""
     if not words:
         return [], []
@@ -357,7 +359,7 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
     last_kind = ""
     last_hand = "l" if _h01(seed, "hand") < 0.5 else "r"
     for si, idx in enumerate(sents):
-        cands = _candidates(words, idx, si == 0, si == len(sents) - 1, level)
+        cands = _candidates(words, idx, si == 0, si == len(sents) - 1, level, None if home_by is None else home_by - RETRACT_S - 0.70)
         cands.sort(key=lambda c: PRIORITY[c["kind"]])
         s_end = words[idx[-1]][2]
         for c in cands:
@@ -442,7 +444,7 @@ def plan_gestures(words: Sequence[Word], seed: float = 0.0, content_side: int = 
         s0, s1 = words[idx[0]][1], words[idx[-1]][2]
         if any(g.t0 < s1 and g.t1 > s0 for g in picked):
             continue
-        head = idx[: max(3, int(len(idx) * 0.7))]
+        head = [j for j in idx[: max(3, int(len(idx) * 0.7))] if home_by is None or words[j][1] <= home_by - RETRACT_S - 0.70] or idx[:3]
         i = max(head, key=lambda j: _stress_score(words, j, level))
         stroke = words[i][1] - STROKE_LEAD_S
         t0 = stroke - PREP["open"]
@@ -593,11 +595,11 @@ class Performance:
     def speak(self, words: Sequence[Word], level: Optional[Sequence[float]] = None, end: Optional[float] = None) -> None:
         if not words:
             return
-        gs, beats = plan_gestures(words, self.seed + 0.01 * len(self.talk), self.content_side, level, end)
+        gs, beats = plan_gestures(words, self.seed + 0.01 * len(self.talk), self.content_side, level, end, home_by=self.limit)
         if self.limit is not None:                           # the shot ends: hands are home by then, or the gesture is not made
             kept = []
             for g in gs:                                     # (the time RESERVED for the way home may run past the end: the shortest way home may not)
-                over = g.hold_end + (RETRACT_S if g.kind in PALMS else HOME_RAISED_S) - (self.limit - 0.04)
+                over = g.hold_end + (RETRACT_S if g.kind in PALMS else HOME_RAISED_S) + (TWIN_LAG_S + 0.12 if g.hand == "both" else 0.0) - (self.limit - 0.04)
                 if over > 0:
                     if g.hold_end - over < _last_beat(g) + 0.30:
                         continue
@@ -861,7 +863,7 @@ class Performance:
             return 0.0
         fs, fe = self._link()[(id(g), s)]
         if fe is None:
-            fe = fs + min(retract, max(0.78, g.t1 + lag - fs))
+            fe = fs + min(retract, max(0.78, g.t1 - fs))
         if t < st:
             return _rise((t - t0) / max(st - t0, 1e-6))
         if t <= fs:
