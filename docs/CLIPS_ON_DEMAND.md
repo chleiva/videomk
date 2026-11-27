@@ -3,7 +3,7 @@
 Owner's requirement (condensed): instead of buying 100 random clips, VideoMK makes a clip when a Max customer's video asks for footage that our library does not have. Only when the
 clip is general enough to be reused. Ours first (library), then their video. Hard limits so that no account and no day can lose money. Invisible to the customer. Observable.
 
-Status: sections 1 to 10 are the design and the numbers **for the owner to confirm**; section 11 says what is built. Everything is behind the flag `CLIPS_ON_DEMAND` (off everywhere)
+Status: the owner confirmed the numbers and decisions D1 to D4 on 2026-11-27 (section 12). Sections 1 to 10 are the design; section 11 says what is built and tested; section 13 is the end-to-end proof. Everything is behind the flag `CLIPS_ON_DEMAND` (off everywhere)
 and a live kill switch (`enabled`, off by default). Nothing is deployed.
 
 ## 0. The recommended numbers on one page
@@ -11,8 +11,8 @@ and a live kill switch (`enabled`, off by default). Nothing is deployed.
 | What | Recommended | Why |
 |---|---|---|
 | Provider, size | Gemini Omni 1.2 Flash, **720p, 8 s** (10 s when the beat is longer than 8.5 s), 16:9 or 9:16 | cheapest top-quality option (docs/VIDEO_PROVIDERS_2026-11-27.md); 1080p and 4K are upsampled, so paying for them buys nothing (docs/FOUR_K.md); the pilot showed 5 s is too short |
-| Cost of one generation | **$0.57** (8 s) or **$0.71** (10 s), checks included | section 1 |
-| Expected rejections | **35 %** planned (to be measured), so about **$0.88 per kept 8 s clip** | section 1 |
+| Cost of one generation | **$0.58** (8 s) or **$0.72** (10 s), checks included | section 1 |
+| Expected rejections | **35 %** planned (to be measured), so about **$0.89 per kept 8 s clip** | section 1 |
 | Max monthly account | **$2.90 a calendar month**, about **5 generations** | half of what is left after all 120 credits at the p90 cost and a $1 floor, at the lowest (EU) price: section 2 |
 | Max yearly account | **$0.35 a month: less than one clip, so none**; it still gets every clip already in the library | the EU yearly margin at p90 is $1.70: section 2 |
 | Per video | at most **2 generations** | bounds the wait and spreads the allowance over 3 videos or more |
@@ -20,7 +20,7 @@ and a live kill switch (`enabled`, off by default). Nothing is deployed.
 | Platform budget, paying accounts | **$10 a day, $150 a month**, hard stop | section 3 |
 | Test and comped accounts | **$3 an account a month**, 2 per video, from a separate budget of **$2 a day, $20 a month** | they bring no revenue, so they never touch the paying budget |
 | Wait | generation may take at most **150 s**; never started later than 60 s into the beat; otherwise the stock clip or a photo | section 5 |
-| Reuse | library clips serve **every plan**; only generation is Max-only | owner decision D1, section 12 |
+| Reuse | library clips serve **every plan**; only generation is Max-only | owner decision D1 (confirmed) |
 
 ## 1. What one clip costs (prices read 2026-11-27)
 
@@ -36,20 +36,20 @@ Note: `gemini-omni-1.1-flash` ($17.50 per 1M) is routed to 1.2 from 2026-12-03. 
 | **8 s** | **$0.556** | $0.834 | $1.668 |
 | **10 s** | **$0.695** | $1.043 | $2.085 |
 
-Added per generation (model prices from docs/PLANS_PROPOSAL_2026-11-27.md, checked there against the bill): the reusability decision, one small-model call, about $0.0002; the quality
+Added per generation (model prices from docs/PLANS_PROPOSAL_2026-11-27.md, checked there against the bill): the reusability decision, one small-model call, about $0.0002; the provider's own "thought" tokens, billed as text output (measured on a real call: 1,166 tokens, about $0.010; not on the price page as such, so treat as measured, not quoted); the quality
 gate, 6 frames to the large vision model (Sonnet-class, $2 per 1M input), about $0.010; the normal 3-frame check against the narration, $0.0003; two Cohere embeddings (brief text,
-middle frame), under $0.001 (Cohere's price was not re-read today: unverified, but it is three orders of magnitude below the clip). **Overhead $0.012**, so **$0.57 for 8 s and $0.71 for 10 s**.
+middle frame), under $0.001 (Cohere's price was not re-read today: unverified, but it is three orders of magnitude below the clip). **Overhead $0.025** (knob `overhead_usd`), so **$0.58 for 8 s and $0.72 for 10 s**. Measured on the first real call (3 s, 360p): the answer's usage block said 5,793 video tokens = exactly 1,931 a second, as the price list says.
 
 Rejections: the 10-clip Gemini pilot ($3.75, tracker R065) left no reject count in the repository and its files are no longer on this machine, so there is no measured rate.
 docs/VIDEO_CATALOG.md expects 20 to 40 % for calm, people-free scenes and 60 % or more with people, hands or crowds. The briefs here are written to be the first kind (section 4), so the
-plan is **35 %**: $0.88 per kept 8 s clip ($1.14 at 50 %). The budgets count every generation, kept or not, so a worse rate means fewer clips, never more money. The real rate is a metric (section 9).
+plan is **35 %**: $0.89 per kept 8 s clip ($1.16 at 50 %). The budgets count every generation, kept or not, so a worse rate means fewer clips, never more money. The real rate is a metric (section 9).
 
 ## 2. The cap per Max account
 
 ### 2.1 What is left of a Max subscription
 Kept per subscriber per month after the store fee (15 %) and VAT, from docs/PLANS_PROPOSAL_2026-11-27.md section 4. Credits: 120 a month; cost per credit $0.15 (p50) and $0.20 (p90).
 
-| Plan | Kept a month | Left if all 120 credits are used, p50 ($18) | Left at p90 ($24) | After a $1 floor (p90) | Half of that = the allowance | Generations of 8 s ($0.57) |
+| Plan | Kept a month | Left if all 120 credits are used, p50 ($18) | Left at p90 ($24) | After a $1 floor (p90) | Half of that = the allowance | Generations of 8 s ($0.58) |
 |---|---|---|---|---|---|---|
 | Max monthly, US | $33.99 | $15.99 | $9.99 | $8.99 | $4.50 | 7 |
 | Max monthly, UK | $32.48 | $14.48 | $8.48 | $7.48 | $3.74 | 6 |
@@ -91,7 +91,7 @@ are live and the entitlement records the storefront, use the storefront's own fi
 savings in the proposal bring it to about $0.09), lower `credit_cost_usd` and every allowance grows by itself.
 
 ### 2.5 Per video
-At most **2 generations per video** (`video_cap_clips`). A 3-minute video has about 7 clip beats; two bound the extra wait and the money one video can take ($1.42), and leave the month's
+At most **2 generations per video** (`video_cap_clips`). A 3-minute video has about 7 clip beats; two bound the extra wait and the money one video can take ($1.16), and leave the month's
 allowance for at least three videos. Montage beats (2 to 4 short clips) only ask for a generation when the whole montage would otherwise fall back to a photo.
 
 ### 2.6 Accounts that pay nothing
@@ -102,7 +102,7 @@ Free and Pro never generate. A plan in its billing grace period does not generat
 ## 3. Global guardrails (live config)
 
 One SSM parameter, `/videomk/<stage>/clips/config` (a JSON object, same pattern as the plans knobs: read with a 60 s cache, a missing or invalid knob falls back to its default, the
-stack never creates or resets it; `backend/scripts/clips_admin.py config show|set`). A read failure keeps the last good values; with none, the defaults, in which `enabled` is false.
+stack never creates or resets it; `backend/scripts/clips_admin.py config show|set|reset`). A read failure keeps the last good values; with none, the defaults, in which `enabled` is false.
 
 | Knob | Default | Meaning |
 |---|---|---|
@@ -114,7 +114,7 @@ stack never creates or resets it; `backend/scripts/clips_admin.py config show|se
 | `account_cap_usd`, `share`, `floor_usd`, `credit_cost_usd`, `kept_usd_month`, `kept_usd_year` | 3.00, 0.5, 1.00, 0.20, 30.83, 25.70 | section 2.2 |
 | `test_account_cap_usd` | 3.00 | section 2.6 |
 | `video_cap_clips` | 2 | section 2.5 |
-| `price_per_second_usd`, `overhead_usd` | 0.0695, 0.012 | what a generation is charged to the budgets (the provider reports no dollar amount) |
+| `price_per_second_usd`, `overhead_usd` | 0.0695, 0.025 | what a generation is charged to the budgets (the provider reports no dollar amount) |
 | `clip_seconds`, `clip_seconds_long` | 8, 10 | lengths generated |
 | `gen_timeout_s`, `start_deadline_s` | 150, 60 | section 5 |
 | `search_min_score`, `reuse_min_score` | 0.35, 0.62 | library search floor (text to clip); "the library already has this brief" (brief to brief) |
@@ -202,7 +202,7 @@ time), so a video waits for its slowest beat, not for the sum: **the video is at
 
 ## 8. Storage, budgets and promotion (no new stack resources)
 * **Files**: the existing assets bucket, prefix `cliplib/`: `v/<id>.mp4` (the provider's file, audio stripped), `p/<id>.jpg` (poster), `m/<id>.json` (all metadata and both vectors: the
-  source of truth). `<id>` is the SHA-256 of the video. No lifecycle rule touches the prefix: a clip costs $0.57 once and about $0.0001 a month to keep (4 to 6 MB; 1,000 clips are
+  source of truth). `<id>` is the SHA-256 of the video. No lifecycle rule touches the prefix: a clip costs $0.58 once and about $0.0001 a month to keep (4 to 6 MB; 1,000 clips are
   about 5 GB, $0.12 a month).
 * **Index, budgets, demand, claims**: rows in the existing usage table under the partition prefix `clipgen:` (the table already holds the free-plan budget rows the same way).
   The library index row carries the vectors (2 x 1024 float32 = 8 KB); search is an exact cosine comparison in the function over all rows (cached while warm). That is right up to a
@@ -215,14 +215,15 @@ time), so a video waits for its slowest beat, not for the sum: **the video is at
   by default; prod needs `--yes-prod`). It never calls the provider or the embedder: the vectors travel with the clip. A local folder (`local:<dir>`) is a third kind of store, so a
   library made on a laptop can be promoted the same way.
 * **IAM added to the beat function only when the flag is on** (statements on its existing policy, no new resource): the usage table (read, write, transactions), `cliplib/*` in
-  the assets bucket (get, put), the config parameter (read). The provider key is read from `/videomk/gemini_api_key` (SecureString, which the function may already read as `/videomk/*_api_key`).
+  the assets bucket (get, put), the config parameter (read). The provider key is read from `/videomk/gemini_api_key` (SecureString, which the function may already read as `/videomk/*_api_key`) **at every call and never kept**: the owner rotates the key in SSM and the next generation uses the new one, with no deploy and no restart. The usage-table statement is limited to partitions that start with `clipgen:`.
+* **Room for exclusive media later (backlog, not built)**: every clip record carries `scope`, today always `library`. Search reads only `scope = library`, `add_clip` refuses any other scope, and promotion skips it, so a future clip made for and owned by one customer (`scope: exclusive`, `owner`) can never reach another account through the shared library; it will need its own store path and rights.
 
 ## 9. Observability
 * **Metrics** (embedded metric format, namespace `videomk/Clips`, no API call): `Decisions{Outcome}`, `Generated`, `Rejected{Reason}`, `Used{Source=library|generated}`,
   `SpendUsd{Kind=paid|test}`, `CapHit{Cap=video|account|platform_day|platform_month|test_day|test_month}`, `BudgetStop{Kind}` (a platform budget refused a generation),
   `GenerationSeconds`, `Timeout`, `ProviderError`.
 * **Rows the report reads**: day and month spend, per-account month spend and count, each clip's `uses` and distinct `videos`, the ledger of every generation (kept or rejected), the demand log.
-* **Report**: `backend/scripts/clips_report.py --stage qa|prod [--days 30]`: generated, rejected by reason, rejection rate, spend by day and by account (salted refs), cap hits and
+* **Report**: `backend/scripts/clips_admin.py report --store qa|prod|local:<dir> [--days 30] [--json]`: generated, rejected by reason, rejection rate, spend by day and by account (salted refs), cap hits and
   budget stops, latency p50/p95, library size, top clips by reuse, the most-asked briefs without a clip, and the **reuse rate**.
 * **Reuse rate, the test of "general"**: a clip older than 30 days used by fewer than 2 different videos is a **miss**. The report lists misses and gives `misses / clips older than
   30 days`. Target: under 40 %. Above it the generalisation rubric is too permissive: tighten the rubric or raise `min_demand` to 2.
@@ -242,14 +243,103 @@ time), so a video waits for its slowest beat, not for the sum: **the video is at
    Gemini Omni through the Gemini API: there is **no confirmed indemnity** for these clips (open question in docs/VIDEO_PROVIDERS_2026-11-27.md).
 6. Labelling: the on-screen credit reads "VideoMK library". Where a platform or a law asks that AI-generated footage be labelled, the Terms already say VideoMK labels "where a
    platform or the app asks for it"; the ledger of every video records which beats use a library clip, so a label can be added later without regenerating.
-7. Sub-processor to list in the Privacy policy if not already there: Google (Gemini API) receives general scene descriptions only, no personal data.
+7. Sub-processor to list in the Privacy policy if not already there: Google (Gemini API) receives general scene descriptions only, no personal data. The API requires the request to be stored on Google's side for the delivery method used (`store=true`), so the general description and the generated clip are kept by Google under its own retention terms (not read for this work: check before launch).
 8. Customers are not charged for generation and are not told when one happens. Nothing in the plan promises generated clips; the Terms should not promise them either.
 
-## 11. What is built
-(Filled in at the end of the work: see the last section of this file.)
+## 11. What is built (branch `clips-on-demand`; not merged, not deployed)
 
-## 12. Owner decisions asked
-* **D1** Library clips for every plan (recommended: the library is the product's asset; generation is the Max-only part), or Max only? Knob `reuse_plans`.
-* **D2** Confirm the numbers of section 0, in particular: $2.90 a month per monthly Max account, nothing for yearly, 2 per video, $10 a day and $150 a month.
-* **D3** Gemini API key (as used here) or Vertex (cleaner indemnity story, needs a Google Cloud project)? The client is behind an interface, so the switch is one class.
-* **D4** On-screen credit "Video: VideoMK library" (recommended, the owner's wording) replaces "Video: AI-generated (VideoMK)" of the first own-library step.
+Everything is behind the stack flag `-c clipsOnDemand=1` (or `"clipsOnDemand": true` in stages.json), which sets `CLIPS_ON_DEMAND=1` on the beat function, and the knob `enabled`.
+Both are off everywhere. With the flag off the beat step makes exactly the calls it made before (tested) and the stack's template has no trace of the feature (tested).
+
+| Part | Where | Notes |
+|---|---|---|
+| The knobs | `lambdas/common/clip_config.py` | one SSM parameter, 60 s cache, bad value = default, read failure = last good or defaults (generation off); the allowance formula and the price live here |
+| Storage and the transaction | `lambdas/common/clip_store.py` | `AwsStore` (assets bucket `cliplib/`, usage table `clipgen:*`) and `LocalStore` (a folder); `reserve()` moves the four counters in one `TransactWriteItems` or none |
+| The library | `lambdas/engine/clip_library.py` | add, Cohere embedding search (text and frame vectors), shape rules, `scope` (only `library` is ever searched), use counts per distinct video, retire, reindex, promote |
+| Reusable or not | `lambdas/engine/clip_brief.py` | deterministic filters, the rubric (`BRIEF_SYSTEM`), filters on the answer, the prompt builder |
+| The provider | `lambdas/engine/clip_gen.py` | interface `Provider`; `GeminiOmni` (plain HTTPS, key read at every call, never in a URL or an error text), `Mock`; errors say whether they could have been billed |
+| The quality gate | `lambdas/engine/clip_gate.py` | technical checks, then 6 frames to the large vision model; fails closed |
+| The flow | `lambdas/engine/clip_ondemand.py` | entitlement, decision with reason codes, demand log, lock, reservation, background generation, ledger, metrics, wait with a deadline |
+| The beat step | `lambdas/engine/clips.py` (`scout_own`, `own_library`, the credit line), `lambdas/engine/handlers/beat_handler.py` (`make_clip`) | ours first; generation in parallel with the stock search; the clip is read back from the library; fallback to stock or a photo |
+| Which budget pays | `lambdas/plan_gate.py` (`record`) | the video row now also carries `plan_interval`, `plan_source`, `plan_state` of a paid plan |
+| Account deletion | `lambdas/common/deletion.py` | the account's allowance rows (`clipgen:acct:<user>`) are removed with the account |
+| Stack | `backend_stack.py` (flag: 3 variables, 3 policy statements, **0 new resources**), `clips_obs.py` + `app.py` (`-c clipsAlarms=1`: a separate stack of 2 alarms) | |
+| Admin | `scripts/clips_admin.py` | `config show/set/reset`, `list`, `report`, `sheet`, `retire`/`restore`, `reindex`, `promote` |
+| Proof | `scripts/clips_on_demand_proof.py` | section 13 |
+
+Tests (`backend/tests/test_clips_on_demand.py`, 133; `test_clips_on_demand_cdk.py`, 4; no network, provider mocked): the two switches; bad and unreadable config; the price; the
+allowance formula and the invariant for every storefront; entitlement (Free, Pro, grace, admin-granted, test); own photos, decks, edits; too late, too long; 15 refusals without
+a model call and 11 refusals of model answers; the prompt clauses; every gate flag, the technical checks, fail-closed; stored-before-used with full metadata and no customer
+data; rejected never stored but charged; refund when the provider refused before making anything; timeout; crash containment; library hit; a retried beat; two beats on one scene;
+the per-video cap; the account allowance (5 then stop); yearly; tightening; unreadable credits; the daily and monthly stops; test budgets kept apart; the low-demand rule;
+12 threads racing for a budget of 2; the DynamoDB transaction (moto) and the whole flow on DynamoDB and S3; search, shapes and crops; exclusive scope; retire, reindex, use
+counts; promotion without embedding or generating; the provider client (request shape, key handling, rotation, error kinds); the beat step with real ffmpeg (generated clip used,
+reuse by a Free video, four fallbacks, flag off, 4K stays 720p, vertical asks 9:16); the report; the stack (no new resource, least privilege, the alarms stack).
+Also run and green: `test_clips.py`, `test_four_k.py`, `test_clip_framed_4k.py`, `test_plans.py`, `test_account_deletion.py`. The full suite was NOT run (machine rule).
+
+### To switch it on in QA (when the owner says)
+1. Put the provider key in SSM: `aws ssm put-parameter --name /videomk/gemini_api_key --type SecureString --value '<key>' --profile qa --region eu-west-1` (the proof used the key in the repository's `.env`; QA has none in SSM as far as this work knows: unverified).
+2. Deploy QA with `-c clipsOnDemand=1` (or add `"clipsOnDemand": true` to the qa stage). Library reuse is then on for every plan; generation is still off.
+3. Optional: `clips_admin.py promote --from local:$HOME/Downloads/videomk-looks/clip_library_proof --to qa --no-dry-run` puts the three clips of the proof in QA's library without paying again.
+4. `clips_admin.py config set enabled true --stage qa`. Kill switch: `config set enabled false` (live within a minute).
+5. Optional alarms: `cdk deploy videomk-qa-clips-obs -c stage=qa -c clipsAlarms=1`.
+
+### Not done
+* **The 10 pilot clips were not seeded**: they are not on this machine and the document that would say where is not on this branch. The library starts with the 3 proof clips (step 3).
+* Not run on Lambda: the 150 s wait, the IAM statements and the usage-table condition key (`dynamodb:LeadingKeys`) are tested in the template and with moto, not against AWS. First QA run should watch one generation end to end.
+* The storefront of a plan is not recorded, so every paying account uses the EU figure (section 2.4). Purchases are not live, so today every Max account is admin-granted and draws from the test budget.
+* A generation abandoned at the deadline is lost money (the API is synchronous here; its background mode is not documented well enough to build on). Measured latency was 34 to 41 s, far from the 150 s limit.
+* Montage beats only ask for a generation when the whole montage fails; their segments reuse the library.
+* The search index is exact comparison in the function; S3 Vectors in a small separate stack when the library passes a few thousand clips.
+* The reuse and search thresholds (`search_min_score` 0.35, `reuse_min_score` 0.62, `demand_join_score` 0.80) are first values, checked on a handful of real searches in the proof, not tuned on real traffic.
+* No human review step is forced: `clips_admin.py sheet` and `retire` exist; nobody is told to look.
+* Exclusive media for one customer (owner's backlog item): only the `scope` field and the guards exist.
+* Terms and Privacy pages: section 10 lists the facts; no page was edited. The requirements tracker was not edited on this branch (the main session owns it).
+
+## 12. Owner decisions (confirmed 2026-11-27)
+* **D1** Library clips are reusable by **every plan**; only Max triggers generation ("it comes to the library, and the library is for all"). Knob `reuse_plans`.
+* **D2** The numbers of section 0 as proposed.
+* **D3** The Gemini API key. The owner will rotate it: the key is read from SSM at every call and never cached or copied, so a rotation needs no code change or deploy.
+* **D4** On-screen credit "Video: VideoMK library", like a stock source.
+* **Backlog (not built)**: a very premium option where media is generated exclusively for one customer, never enters the shared library and is owned by them. The data model keeps room for it (`scope`, section 8).
+
+## 13. End-to-end proof (2026-11-27, this laptop, real provider; ledger in docs/CLIPS_ON_DEMAND_LEDGER.md)
+
+`AWS_PROFILE=qa python backend/scripts/clips_on_demand_proof.py OUT --env-file <.env>`: the real beat step, models, embeddings, Polly, stock search, provider, ffmpeg and renderer;
+S3, the library and the counters are local folders; who owns each video is told to the engine by the script. Every knob at its default except `enabled`.
+
+**Reusable or not, on 9 specific searches** (7 refused by the free filters before any model call, 2 generalised by the small model):
+
+| Search | Decision |
+|---|---|
+| woman in a red coat buying mangoes in Oaxaca market on a rainy Tuesday | refused: proper noun (the place name), before any model call |
+| president giving a speech at a podium | refused: news |
+| coca-cola bottle on a table | refused: brand |
+| Eiffel Tower at sunset | refused: proper noun |
+| stock market chart on a trading screen | refused: text or graphic |
+| close-up of a surgeon making an incision | refused: unsafe |
+| footballer scoring the winning goal | refused: identity |
+| rain falling on a quiet pond | brief: "raindrops falling on a quiet still pond surface, creating gentle ripples in soft overcast light" |
+| old wooden fishing boat tied at a jetty | brief: "small wooden boat moored at a quiet jetty in calm harbour water, soft morning light" |
+
+**Three videos, in order**
+
+| Video | Beat (search) | What happened | On screen |
+|---|---|---|---|
+| A: test account, 16:9, four clip beats made in parallel | bees on lavender flowers | **generated** (8 s, 34 s to make), gate 8/10, stored, read back, checked against the narration | Video: VideoMK library |
+| | baker hands kneading bread dough | **generated** (8 s, 38 s), gate 8/10, stored, read back | Video: VideoMK library |
+| | golden wheat field swaying in the wind | refused: `cap_video` (the video already had its 2); the stock clip found meanwhile was used | Video: ulleo / Pixabay |
+| | steam rising from a cup of coffee | refused: `low_demand` (58 % of the day's $2 test budget was reserved, so a scene needs two askers); stock | Video: Life-Of-Vids / Pixabay |
+| B: a **Free** account, 16:9 | kneading dough by hand | **library reuse** of the dough clip: no generation, no stock search | Video: VideoMK library |
+| | wheat field at sunset | not in the library, Free never generates: stock | Video: JoshuaWoroniecki / Pixabay |
+| C: second test account, **9:16** | steam rising from coffee cup | second asker of that scene: **generated in 9:16** (8 s, 38 s), gate 8/10 | Video: VideoMK library |
+| | bees on lavender flowers | **library reuse** of the 16:9 bees clip, centre-cropped (the gate had marked it centre-safe; the 3-frame check passed on the crop) | Video: VideoMK library |
+
+* **Gate**: 3 of 3 passed (score 8, no flag). Three clips are no rejection rate; the 35 % plan stands until real traffic says otherwise. I looked at six frames of each: clean, no text, no faces; the dough clip shows an apron and forearms as well as hands; the coffee steam is prettier than real steam.
+* **Money**: charged to the test budget $1.743 (3 x $0.581); the provider's own token counts come to $0.563 to $0.566 a clip at list price, so the charge covers the provider, the gate ($0.005 to $0.010 measured) and the checks. Day counter $1.743 of $2.00: a fourth generation would have been a budget stop.
+* **Time**: video A's beat step took 44.7 s with two generations in it and 10.4 s when the same beats were made again from the library: **the customer's video was about 34 s later**, against a worst-case limit of about 3 minutes.
+* **Report** (`clips_admin.py report --store local:...`): 3 generations, 3 kept, spend $1.74, $0.58 per kept clip, latency p50 40.4 s and p95 41.4 s, cap hits `video: 2`, decisions `generated 3, cap_video 2, low_demand 2`, used `generated 3, library 4`, dough and bees each used by 2 distinct videos, the wheat brief listed as asked for without a clip.
+* **Promotion**: the three clips were copied to a second store with `promote` (3 copied; a second run: 3 already there); nothing was generated or embedded.
+* **The video** (30.4 s, narrated, captions on): `~/Downloads/videomk-looks/web/clipgen_video_from_field_to_breakfast.mp4`, with the three clips, the vertical crop and the library sheet beside it (`clipgen_*`, captions in `captions_clipgen.json`).
+* Found and fixed by the proof: the provider requires `store=true` for URI delivery; the provider bills about 700 to 1,200 "thought" tokens a call (overhead raised from $0.012 to $0.025).
+* What the proof did not exercise: DynamoDB and S3 (covered by tests with moto), a paying account's formula (tests), a gate rejection or a timeout on real footage (tests), 4K (tests).

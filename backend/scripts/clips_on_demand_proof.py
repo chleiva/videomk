@@ -9,7 +9,6 @@ counter are OUT_DIR/library (a `LocalStore`), and who owns each video is told to
 It spends real money on the provider: a hard stop after --max-generations calls, whatever the budgets say. Writes OUT_DIR/proof.json. Nothing is uploaded or deployed.
 """
 import argparse
-import importlib.util
 import json
 import os
 import sys
@@ -18,9 +17,8 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "lambdas"))
-_spec = importlib.util.spec_from_file_location("own_clips_demo", os.path.join(HERE, "own_clips_demo.py"))
-demo = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(demo)
+sys.path.insert(0, HERE)
+import own_clips_demo as demo   # noqa: E402 - the local stand-ins for S3 and the render worker (imported by name so the render processes can find it)
 
 VIDEO_A = "00000000-0000-4000-8000-00000c11b0a1"   # a 16:9 video of test account t1: four clip beats, the per-video cap allows two generations
 VIDEO_B = "00000000-0000-4000-8000-00000c11b0b2"   # a FREE account's video: may only reuse the library
@@ -32,10 +30,10 @@ BASE = {"legit": True, "title": "From field to breakfast table", "description": 
         "region": "US", "sources": [], "music": {"track": "cinematic-rise"}, "target_seconds": 30, "captions": True,
         "tts": {"provider": "polly", "voice": "", "style": "Say in a clear, warm, engaging explainer voice", "engine": "generative", "region": "us-east-1"}}
 BEATS_A = [
-    ("a1c11p01", "Breakfast starts far from the kitchen, in wide fields where wheat ripens under the summer sun.", "golden wheat field swaying in the wind", "ripe wheat ears moving in a breeze"),
-    ("a1c11p02", "Flour, water and patient hands turn that grain into dough, pressed and folded until it is smooth.", "baker hands kneading bread dough", "hands folding dough on a floured table"),
-    ("a1c11p03", "Honey begins with bees, drifting from flower to flower through the warm morning air.", "bees on lavender flowers", "honey bees collecting nectar"),
-    ("a1c11p04", "And at the end of that long journey, steam rises from a quiet cup of coffee.", "steam rising from a cup of coffee", "hot coffee cup on a wooden table"),
+    ("a1c11p01", "Breakfast starts far away, in wide fields where wheat ripens in the sun.", "golden wheat field swaying in the wind", "ripe wheat ears moving in a breeze"),
+    ("a1c11p02", "Patient hands press and fold flour and water into smooth dough.", "baker hands kneading bread dough", "hands folding dough on a floured table"),
+    ("a1c11p03", "Honey begins with bees drifting from flower to flower.", "bees on lavender flowers", "honey bees collecting nectar"),
+    ("a1c11p04", "And at the journey's end, steam rises from a quiet cup of coffee.", "steam rising from a cup of coffee", "hot coffee cup on a wooden table"),
 ]
 REFUSALS = [("woman in a red coat buying mangoes in Oaxaca market on a rainy Tuesday", "fruit stall at a street market in the rain"),
             ("president giving a speech at a podium", "politician speaking to a crowd"), ("coca-cola bottle on a table", "soft drink bottle"),
@@ -57,6 +55,7 @@ def main():
     ap.add_argument("out_dir")
     ap.add_argument("--max-generations", type=int, default=4)
     ap.add_argument("--no-video", action="store_true")
+    ap.add_argument("--video-only", action="store_true", help="a second run over the same OUT_DIR: only video A again (its clips now come from the library) and the render; writes proof_video.json")
     ap.add_argument("--env-file", default=os.path.join(HERE, "..", "..", ".env"))
     ap.add_argument("--workers", type=int, default=2)
     a = ap.parse_args()
@@ -107,7 +106,7 @@ def main():
 
     # 1. the reusability decision on specific searches (the small model only; nothing is generated)
     proof["decisions"] = []
-    for q, alt in REFUSALS:
+    for q, alt in ([] if a.video_only else REFUSALS):
         d, _ = clip_brief.generalise(q, alt, "")
         proof["decisions"].append({"search": q, "reusable": d["reusable"], "reason": d["reason"], "brief": d.get("brief")})
         print("decide:", q, "->", d["reason"] if not d["reusable"] else d["brief"])
@@ -130,7 +129,7 @@ def main():
 
     # 3. video B, a FREE account: the same scenes worded differently. It may only reuse the library.
     proof["video_b"] = []
-    for i, (n, q, alt) in enumerate([("Fields of grain stretch to the horizon before harvest.", "wheat field at sunset", "ears of wheat in a field"),
+    for i, (n, q, alt) in enumerate([] if a.video_only else [("Fields of grain stretch to the horizon before harvest.", "wheat field at sunset", "ears of wheat in a field"),
                                      ("Bread begins as dough worked by hand.", "kneading dough by hand", "baker working bread dough")]):
         before = len(proof["generations"])
         out = beat_handler.make_clip({**BASE, "beats": [], "frame": format_options.frame_dict("16:9", "720p", None)},
@@ -140,7 +139,7 @@ def main():
 
     # 4. video C, vertical, another test account: scenes video A asked for and did not get (its cap). The day's budget decides.
     proof["video_c"] = []
-    for i, (n, q, alt) in enumerate([("Steam curls up from a fresh cup of coffee.", "steam rising from coffee cup", "hot coffee steaming in a mug"),
+    for i, (n, q, alt) in enumerate([] if a.video_only else [("Steam curls up from a fresh cup of coffee.", "steam rising from coffee cup", "hot coffee steaming in a mug"),
                                      ("Bees move between the flowers all morning.", "bees on lavender flowers", "honey bees on purple flowers")]):
         before = len(proof["generations"])
         out = beat_handler.make_clip({**BASE, "beats": [], "frame": format_options.frame_dict("9:16", "1080p", None)},
@@ -155,7 +154,7 @@ def main():
     proof["spend"] = {"test_day_usd": cs.usd((store.get(cs.spend_pk("test", "day"), cs.day()) or {}).get("spent")), "paid_day_usd": cs.usd((store.get(cs.spend_pk("paid", "day"), cs.day()) or {}).get("spent"))}
     proof["ledger"] = [{k: v for k, v in r.items() if k not in ("pk", "ttl")} for r in store.query(cs.ledger_pk(cs.month()))]
     proof["library"] = [{k: r.get(k) for k in ("sk", "brief", "aspect", "seconds", "width", "height", "center_safe", "gate_score", "uses", "videos", "cost_usd")} for r in store.query(cs.LIB)]
-    json.dump(proof, open(os.path.join(out_dir, "proof.json"), "w"), indent=1, ensure_ascii=False, default=str)
+    json.dump(proof, open(os.path.join(out_dir, "proof_video.json" if a.video_only else "proof.json"), "w"), indent=1, ensure_ascii=False, default=str)
 
     # 5. render video A
     if not a.no_video:
@@ -172,7 +171,7 @@ def main():
             video = os.path.join(out_dir, "video_a.mp4")
             media.mux_final([r[1] for r in results], audio_path, video, fps=tl["fps"])
         proof["video_a"]["file"], proof["video_a"]["seconds"] = video, round(media.ffprobe_duration(video), 1)
-        json.dump(proof, open(os.path.join(out_dir, "proof.json"), "w"), indent=1, ensure_ascii=False, default=str)
+        json.dump(proof, open(os.path.join(out_dir, "proof_video.json" if a.video_only else "proof.json"), "w"), indent=1, ensure_ascii=False, default=str)
         print("video:", video, proof["video_a"]["seconds"], "s")
     print(json.dumps({"generations": len(proof["generations"]), "spend": proof["spend"], "models_usd": proof["models_usd"], "stats": proof["stats"]}, indent=1))
 

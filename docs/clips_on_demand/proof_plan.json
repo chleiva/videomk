@@ -1,0 +1,103 @@
+{
+ "legit": true,
+ "title": "From field to breakfast table",
+ "description": "",
+ "mood": "warm",
+ "theme": "midnight",
+ "language": "en",
+ "voices": {
+  "narrator": "Ruth"
+ },
+ "skills": [
+  "explainer-education"
+ ],
+ "background": {
+  "style": "smoke",
+  "palette": "midnight",
+  "mode": "dark",
+  "speed": 1.0,
+  "intensity": 1.0,
+  "seed": 11,
+  "loop_seconds": 12.0,
+  "by": "director"
+ },
+ "region": "US",
+ "sources": [],
+ "music": {
+  "track": "cinematic-rise"
+ },
+ "target_seconds": 30,
+ "captions": true,
+ "tts": {
+  "provider": "polly",
+  "voice": "",
+  "style": "Say in a clear, warm, engaging explainer voice",
+  "engine": "generative",
+  "region": "us-east-1"
+ },
+ "frame": {
+  "aspect": "16:9",
+  "resolution": "720p",
+  "width": 1280,
+  "height": 720,
+  "orientation": "landscape",
+  "platform": "other"
+ },
+ "beats": [
+  {
+   "id": "a1c11p01",
+   "narration": "Breakfast starts far away, in wide fields where wheat ripens in the sun.",
+   "scene": {
+    "type": "clip",
+    "props": {
+     "clip_query": "golden wheat field swaying in the wind",
+     "alt": "ripe wheat ears moving in a breeze"
+    }
+   }
+  },
+  {
+   "id": "a1c11p02",
+   "narration": "Patient hands press and fold flour and water into smooth dough.",
+   "scene": {
+    "type": "clip",
+    "props": {
+     "clip_query": "baker hands kneading bread dough",
+     "alt": "hands folding dough on a floured table"
+    }
+   }
+  },
+  {
+   "id": "a1c11p03",
+   "narration": "Honey begins with bees drifting from flower to flower.",
+   "scene": {
+    "type": "clip",
+    "props": {
+     "clip_query": "bees on lavender flowers",
+     "alt": "honey bees collecting nectar"
+    }
+   }
+  },
+  {
+   "id": "a1c11p04",
+   "narration": "And at the journey's end, steam rises from a quiet cup of coffee.",
+   "scene": {
+    "type": "clip",
+    "props": {
+     "clip_query": "steam rising from a cup of coffee",
+     "alt": "hot coffee cup on a wooden table"
+    }
+   }
+  },
+  {
+   "id": "a1c11p05",
+   "narration": "Every breakfast is a small journey.",
+   "scene": {
+    "type": "kinetic_text",
+    "props": {
+     "text": "Every breakfast is a small journey.",
+     "emphasis": "journey"
+    }
+   }
+  }
+ ]
+}
