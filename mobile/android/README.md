@@ -25,6 +25,29 @@ On Create the app asks `POST .../videos/brief` (2.5 s before the skeleton, 8 s b
 (`ui/CreateSheets.kt`), or the kind "We can't make this one" sheet, then calls generate with `platform`, `aspect`, `resolution`, `language` and `brief` (only values away from the defaults are sent).
 A server without the new endpoints degrades to landscape 16:9 at 1080p and no check. Choices are remembered per person (`CreatePrefsStore`). Pure logic with tests: `core/CreateLogic.kt`, `core/CreateModels.kt`.
 
+## The look of the video: Look and Characters (docs/CREATE_API.md "Video look (chosen and enforced)")
+Only where the server lists `looks.look` in capabilities (`Capabilities.lookPicker`); without it the Look pill is the colour menu it always was and nothing new is sent. The design is the iPhone app's
+after its expert review (`LookPickerSheet.swift`), the split structure: two pills, two small sheets that each do one thing.
+- **Core** (`core/Looks.kt`, plain Kotlin, `LookTest`): `LookCaps` / `CastCaps` read `looks.look.options[]` and `looks.cast` leniently (a missing or malformed part is absent; labels, notes, previews and faces are
+  the server's, never hard-coded); `LookChoice` is what is sent (`look`, `cast`, `extras` in generate and in `options` of brief; Auto sends none of the three, and a chosen look replaces the older `style`);
+  `LookRules` holds every rule (tiles, blocks, reset, the cast of 1 to 3, the conversation's shortest length, the words); `AppliedLook` / `StartedVideo` read the answers and the video record.
+- **Create** (`ui/CreateScreen.kt`, `ui/LookPicker.kt`): the Look pill says the look only and opens the **Look sheet**: four tiles (the server's picture, label and one-line note; Auto is a brand-tinted tile
+  with the sparkle), one tap chooses and the sheet closes after a beat, for every look. Chosen is ONE ring outside the picture and nothing else. A look the plan does not include, or that is not made from the
+  attached photos or slides, stays in place at 40 percent with its reason where the note was ("Pro plan", "Not with photos", "Not with slides"); only a look this stage does not have is hidden.
+  A look with characters adds the **Characters pill** (up to three small faces, or the sparkle for "we choose") which opens the **Characters sheet**: ten faces five across (people, then animals), one text
+  line ("We pick for you. Or choose up to 3." / "Fox presents." / "Fox and Bruno talk it through."), at three the others are dimmed and inert, and one switch per extra labelled by the server (the board).
+  `PillRows` (`ui/UiKit.kt`) keeps the pills to two rows: the Characters pill drops to its faces alone where the word does not fit.
+- **Rules on the screen**: photos or a presentation attached after choosing a drawn look send it back to Auto with one line right above the pills (`ComposerViewModel.syncLook`, `lookNotice`); a conversation
+  (or a look) that needs a longer video moves the length to the shortest preset that works and says so in the same text slot; a length shortened afterwards only shows a quiet line with "Use 30 s".
+  The last choice is remembered with the other choices (`CreatePrefs.pick`) and kept inside what the server still lists.
+- **After Create**: the 202's `note` (the look was adapted) is one line on the Making screen as sent (`AppState.lookNotes`, `MakingSnapshot.note`); Info shows "Look: Whiteboard · chosen for you" and the
+  reason from the video record (`VideoItem.look`), or from the start answer until the record has it.
+- **Accessibility**: tiles are radio buttons that say "<label>, <note or reason>" and their selected state, dimmed ones say they are not available; faces are checkboxes named with role and topic; the
+  switch row is one 52 dp target; at font scale 1.5 and over the tiles become rows (a small picture and the name) and the faces go three across; the sheet's header stays while its body scrolls.
+- **Try it without the server** (debug build): `files/fake_looks` next to `fake_backend` and `fake_intake` serves the backend's own capabilities answer (`src/debug/assets/looks_en.json`, `looks_es.json`,
+  made by `mobile/ios/scripts/gen_look_fixtures.py`); its content picks a variant (`plan`, `hidden`, `minlen`). `LookUiTest` (instrumented, no account) drives the flows; `scripts/look-shots.sh <dir>` takes the
+  captures of every state in light, dark, Spanish, the largest text and on a small phone.
+
 ## Presentations to video (PowerPoint or PDF; docs/CREATE_API.md, docs/DECK_TO_VIDEO.md)
 Only where the server lists it: `capabilities.deck {max_mb, max_slides, formats}` is absent while the feature is off, and then nothing about it is drawn.
 - **Entry**: "Add a presentation" is a row at the top of the Add photos sheet (`DeckEntryRow`); it closes the sheet and opens the system document picker (`ActivityResultContracts.OpenDocument`, MIME types from

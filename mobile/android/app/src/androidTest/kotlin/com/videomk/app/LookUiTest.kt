@@ -296,6 +296,15 @@ class LookUiTest {
         openInfo(); shot("look-19-info-look")
     }
 
+    /** The decision check of the split design: with the fourth pill the pills never take more than two rows (small phones, the largest text, both languages). */
+    @Test fun capturesOfThePillRows() {
+        org.junit.Assume.assumeTrue("captures are taken only when asked (-e shots <folder>)", shots != null)
+        open()
+        pickLook("cartoon"); shot("look-pills-auto")
+        openCast(); Ui.require("cast-fox").click(); Ui.require("cast-bear").click(); Ui.require("cast-ines").click(); closeCast()
+        shot("look-pills-three-faces")
+    }
+
     /** Scrolls the open sheet to its end (large text, small phones); does nothing visible when everything fits. */
     private fun swipeSheet() {
         val h = device.displayHeight; val w = device.displayWidth
