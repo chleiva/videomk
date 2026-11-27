@@ -1,0 +1,419 @@
+{
+ "images": [
+  "04873a3692b7",
+  "47ee905b8e9a",
+  "701723642a3d",
+  "ac8c7c9dcca3",
+  "dca4e666c904"
+ ],
+ "methods": {
+  "TrustMark Q (BCH_5, 61 bits)": {
+   "psnr": [
+    44.78,
+    44.69,
+    46.96,
+    42.49,
+    47.85
+   ],
+   "ssim": [
+    0.9979,
+    0.9973,
+    0.9983,
+    0.9935,
+    0.9981
+   ],
+   "embed_s": [
+    1.19,
+    0.07,
+    0.06,
+    0.06,
+    0.07
+   ],
+   "attacks": {
+    "stored as JPEG q92 (the library file)": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "JPEG re-save q80": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "resize to 1920x1080 + JPEG q90 (our working copy)": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "centre crop to 9:16, to 1080x1920": {
+     "exact": 0,
+     "bit_acc": [
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
+    },
+    "Ken Burns zoom 1.08, 1920x1080": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "captions and scrim drawn over the bottom": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "H.264 1080p crf 20 with slow zoom (our render), one frame": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "H.264 720p crf 28 with slow zoom (a web copy), one frame": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "H.264 1080p crf 20 of the 9:16 crop, one frame": {
+     "exact": 0,
+     "bit_acc": [
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
+    },
+    "screenshot: shown at 1280x720, saved JPEG q75": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "phone screenshot of the video: 720p H.264 frame, scaled to 1170 wide, JPEG q80": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   },
+   "clean_false_read": 0
+  },
+  "invisible-watermark dwtDct (48 bits)": {
+   "psnr": [
+    41.31,
+    40.97,
+    41.44,
+    41.7,
+    41.79
+   ],
+   "ssim": [
+    0.9576,
+    0.9507,
+    0.9593,
+    0.962,
+    0.951
+   ],
+   "embed_s": [
+    4.5,
+    0.13,
+    0.14,
+    0.13,
+    0.14
+   ],
+   "attacks": {
+    "stored as JPEG q92 (the library file)": {
+     "exact": 0,
+     "bit_acc": [
+      0.729,
+      0.688,
+      0.438,
+      0.479,
+      0.458
+     ]
+    },
+    "JPEG re-save q80": {
+     "exact": 0,
+     "bit_acc": [
+      0.479,
+      0.521,
+      0.438,
+      0.479,
+      0.458
+     ]
+    },
+    "resize to 1920x1080 + JPEG q90 (our working copy)": {
+     "exact": 0,
+     "bit_acc": [
+      0.583,
+      0.625,
+      0.479,
+      0.542,
+      0.458
+     ]
+    },
+    "centre crop to 9:16, to 1080x1920": {
+     "exact": 0,
+     "bit_acc": [
+      0.458,
+      0.521,
+      0.438,
+      0.521,
+      0.458
+     ]
+    },
+    "Ken Burns zoom 1.08, 1920x1080": {
+     "exact": 0,
+     "bit_acc": [
+      0.458,
+      0.521,
+      0.438,
+      0.5,
+      0.458
+     ]
+    },
+    "captions and scrim drawn over the bottom": {
+     "exact": 0,
+     "bit_acc": [
+      0.458,
+      0.521,
+      0.438,
+      0.521,
+      0.458
+     ]
+    },
+    "H.264 1080p crf 20 with slow zoom (our render), one frame": {
+     "exact": 0,
+     "bit_acc": [
+      0.583,
+      0.458,
+      0.479,
+      0.479,
+      0.458
+     ]
+    },
+    "H.264 720p crf 28 with slow zoom (a web copy), one frame": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.562,
+      0.479,
+      0.479,
+      0.458
+     ]
+    },
+    "H.264 1080p crf 20 of the 9:16 crop, one frame": {
+     "exact": 0,
+     "bit_acc": [
+      0.458,
+      0.5,
+      0.438,
+      0.521,
+      0.458
+     ]
+    },
+    "screenshot: shown at 1280x720, saved JPEG q75": {
+     "exact": 0,
+     "bit_acc": [
+      0.5,
+      0.396,
+      0.458,
+      0.479,
+      0.458
+     ]
+    },
+    "phone screenshot of the video: 720p H.264 frame, scaled to 1170 wide, JPEG q80": {
+     "exact": 0,
+     "bit_acc": [
+      0.604,
+      0.604,
+      0.438,
+      0.479,
+      0.458
+     ]
+    }
+   },
+   "clean_false_read": 0
+  },
+  "invisible-watermark dwtDctSvd (48 bits)": {
+   "psnr": [
+    41.78,
+    41.24,
+    41.03,
+    41.94,
+    42.01
+   ],
+   "ssim": [
+    0.9847,
+    0.9753,
+    0.9797,
+    0.982,
+    0.9777
+   ],
+   "embed_s": [
+    0.42,
+    0.41,
+    0.42,
+    0.42,
+    0.41
+   ],
+   "attacks": {
+    "stored as JPEG q92 (the library file)": {
+     "exact": 5,
+     "bit_acc": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "JPEG re-save q80": {
+     "exact": 0,
+     "bit_acc": [
+      0.812,
+      0.958,
+      0.875,
+      0.938,
+      0.833
+     ]
+    },
+    "resize to 1920x1080 + JPEG q90 (our working copy)": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.562,
+      0.521,
+      0.562
+     ]
+    },
+    "centre crop to 9:16, to 1080x1920": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.562,
+      0.5,
+      0.542
+     ]
+    },
+    "Ken Burns zoom 1.08, 1920x1080": {
+     "exact": 0,
+     "bit_acc": [
+      0.521,
+      0.479,
+      0.542,
+      0.5,
+      0.5
+     ]
+    },
+    "captions and scrim drawn over the bottom": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.562,
+      0.479,
+      0.583
+     ]
+    },
+    "H.264 1080p crf 20 with slow zoom (our render), one frame": {
+     "exact": 0,
+     "bit_acc": [
+      0.479,
+      0.438,
+      0.5,
+      0.333,
+      0.542
+     ]
+    },
+    "H.264 720p crf 28 with slow zoom (a web copy), one frame": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.562,
+      0.479,
+      0.542
+     ]
+    },
+    "H.264 1080p crf 20 of the 9:16 crop, one frame": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.562,
+      0.479,
+      0.542
+     ]
+    },
+    "screenshot: shown at 1280x720, saved JPEG q75": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.562,
+      0.479,
+      0.542
+     ]
+    },
+    "phone screenshot of the video: 720p H.264 frame, scaled to 1170 wide, JPEG q80": {
+     "exact": 0,
+     "bit_acc": [
+      0.542,
+      0.479,
+      0.583,
+      0.479,
+      0.521
+     ]
+    }
+   },
+   "clean_false_read": 0
+  }
+ }
+}

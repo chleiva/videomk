@@ -1,0 +1,356 @@
+{
+ "started": "2026-11-27T19:01:07Z",
+ "config": {
+  "test_day_usd": 2.0,
+  "test_month_usd": 20.0,
+  "test_account_cap_usd": 3.0,
+  "video_cap_clips": 2,
+  "price_per_second_usd": 0.0695,
+  "overhead_usd": 0.025,
+  "clip_seconds": 8,
+  "gen_timeout_s": 150,
+  "model": "gemini-omni-1.2-flash"
+ },
+ "generations": [
+  {
+   "prompt": "Honey bees moving slowly across purple lavender blossoms in a sunlit summer meadow, shallow depth of field. Photorealistic documentary stock footage, one continuous shot, wide 16:9 framing, the main subject centred in the frame. Slow, steady camera (a gentle push-in or a locked-off shot), natural light, calm natural motion, realistic physics, consistent shapes from the first frame to the last. No people in the shot. No text, letters, numbers, signs, logos, brands, watermarks or screens anywhere. No cuts, no transitions, no fast motion, no crowds, no special effects. Quiet natural ambient sound only, no music, no speech.",
+   "seconds": 8,
+   "aspect": "16:9",
+   "at": "19:01:11",
+   "ok": true,
+   "latency_s": 34.3,
+   "bytes": 3546242,
+   "usage": {
+    "total_tokens": 47184,
+    "total_input_tokens": 138,
+    "input_tokens_by_modality": [
+     {
+      "modality": "text",
+      "tokens": 138
+     }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 46336,
+    "output_tokens_by_modality": [
+     {
+      "modality": "video",
+      "tokens": 46336
+     }
+    ],
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 710,
+    "initial_input_tokens": 138
+   }
+  },
+  {
+   "prompt": "Close on hands folding pale dough over a floured wooden table in soft morning window light. Photorealistic documentary stock footage, one continuous shot, wide 16:9 framing, the main subject centred in the frame. Slow, steady camera (a gentle push-in or a locked-off shot), natural light, calm natural motion, realistic physics, consistent shapes from the first frame to the last. Only hands are visible, natural and anatomically correct, doing one simple slow action; no faces. No text, letters, numbers, signs, logos, brands, watermarks or screens anywhere. No cuts, no transitions, no fast motion, no crowds, no special effects. Quiet natural ambient sound only, no music, no speech.",
+   "seconds": 8,
+   "aspect": "16:9",
+   "at": "19:01:11",
+   "ok": true,
+   "latency_s": 37.7,
+   "bytes": 4522685,
+   "usage": {
+    "total_tokens": 47254,
+    "total_input_tokens": 150,
+    "input_tokens_by_modality": [
+     {
+      "modality": "text",
+      "tokens": 150
+     }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 46336,
+    "output_tokens_by_modality": [
+     {
+      "modality": "video",
+      "tokens": 46336
+     }
+    ],
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 768,
+    "initial_input_tokens": 150
+   }
+  },
+  {
+   "prompt": "Steaming mug of hot coffee on a wooden table beside a window in soft morning light. Photorealistic documentary stock footage, one continuous shot, vertical 9:16 framing, the main subject centred in the frame. Slow, steady camera (a gentle push-in or a locked-off shot), natural light, calm natural motion, realistic physics, consistent shapes from the first frame to the last. No people in the shot. No text, letters, numbers, signs, logos, brands, watermarks or screens anywhere. No cuts, no transitions, no fast motion, no crowds, no special effects. Quiet natural ambient sound only, no music, no speech.",
+   "seconds": 8,
+   "aspect": "9:16",
+   "at": "19:02:06",
+   "ok": true,
+   "latency_s": 37.9,
+   "bytes": 3858320,
+   "usage": {
+    "total_tokens": 47521,
+    "total_input_tokens": 136,
+    "input_tokens_by_modality": [
+     {
+      "modality": "text",
+      "tokens": 136
+     }
+    ],
+    "total_cached_tokens": 0,
+    "total_output_tokens": 46336,
+    "output_tokens_by_modality": [
+     {
+      "modality": "video",
+      "tokens": 46336
+     }
+    ],
+    "total_tool_use_tokens": 0,
+    "total_thought_tokens": 1049,
+    "initial_input_tokens": 136
+   }
+  }
+ ],
+ "models_usd": 0.025607,
+ "decisions": [
+  {
+   "search": "woman in a red coat buying mangoes in Oaxaca market on a rainy Tuesday",
+   "reusable": false,
+   "reason": "filter:proper noun",
+   "brief": ""
+  },
+  {
+   "search": "president giving a speech at a podium",
+   "reusable": false,
+   "reason": "filter:news",
+   "brief": ""
+  },
+  {
+   "search": "coca-cola bottle on a table",
+   "reusable": false,
+   "reason": "filter:brand",
+   "brief": ""
+  },
+  {
+   "search": "Eiffel Tower at sunset",
+   "reusable": false,
+   "reason": "filter:proper noun",
+   "brief": ""
+  },
+  {
+   "search": "stock market chart on a trading screen",
+   "reusable": false,
+   "reason": "filter:text or graphic",
+   "brief": ""
+  },
+  {
+   "search": "close-up of a surgeon making an incision",
+   "reusable": false,
+   "reason": "filter:unsafe",
+   "brief": ""
+  },
+  {
+   "search": "footballer scoring the winning goal",
+   "reusable": false,
+   "reason": "filter:identity",
+   "brief": ""
+  },
+  {
+   "search": "rain falling on a quiet pond",
+   "reusable": true,
+   "reason": "ok",
+   "brief": "raindrops falling on a quiet still pond surface, creating gentle ripples in soft overcast light"
+  },
+  {
+   "search": "old wooden fishing boat tied at a jetty",
+   "reusable": true,
+   "reason": "ok",
+   "brief": "small wooden boat moored at a quiet jetty in calm harbour water, soft morning light"
+  }
+ ],
+ "video_a": {
+  "beats_wall_s": 44.7,
+  "clip_beats": [
+   {
+    "beat": "a1c11p01",
+    "query": "golden wheat field swaying in the wind",
+    "chosen": "pixabay:17285",
+    "credit": "Video: ulleo / Pixabay",
+    "photo_fallback": false
+   },
+   {
+    "beat": "a1c11p02",
+    "query": "baker hands kneading bread dough",
+    "chosen": "videomk-library:2544c936a5358b2144423c919e59adf17a045c561891c8625ba5236d73ec1a43",
+    "credit": "Video: VideoMK library",
+    "photo_fallback": false
+   },
+   {
+    "beat": "a1c11p03",
+    "query": "bees on lavender flowers",
+    "chosen": "videomk-library:6f951becaa69f01d61ba346f3e799db0335ba2b154e7a7bf6fe4a7b211b9a6c5",
+    "credit": "Video: VideoMK library",
+    "photo_fallback": false
+   },
+   {
+    "beat": "a1c11p04",
+    "query": "steam rising from a cup of coffee",
+    "chosen": "pixabay:3595",
+    "credit": "Video: Life-Of-Vids / Pixabay",
+    "photo_fallback": false
+   }
+  ]
+ },
+ "video_b": [
+  {
+   "query": "wheat field at sunset",
+   "chosen": "pixabay:86697",
+   "credit": "Video: JoshuaWoroniecki / Pixabay",
+   "generations_started": 0
+  },
+  {
+   "query": "kneading dough by hand",
+   "chosen": "videomk-library:2544c936a5358b2144423c919e59adf17a045c561891c8625ba5236d73ec1a43",
+   "credit": "Video: VideoMK library",
+   "generations_started": 0
+  }
+ ],
+ "video_c": [
+  {
+   "query": "steam rising from coffee cup",
+   "chosen": "videomk-library:8dd3e768a1f36386dbe8d0eff393347f187a019e0dbc52f6e99210f457473893",
+   "credit": "Video: VideoMK library",
+   "generations_started": 1
+  },
+  {
+   "query": "bees on lavender flowers",
+   "chosen": "videomk-library:6f951becaa69f01d61ba346f3e799db0335ba2b154e7a7bf6fe4a7b211b9a6c5",
+   "credit": "Video: VideoMK library",
+   "generations_started": 0
+  }
+ ],
+ "stats": {
+  "cap_video": 1,
+  "d_cap_video": 1,
+  "d_generated": 3,
+  "d_low_demand": 1,
+  "g_generated": 3,
+  "g_latency_ds": 1195,
+  "g_n": 3,
+  "used_generated": 3,
+  "used_library": 2
+ },
+ "spend": {
+  "test_day_usd": 1.743,
+  "paid_day_usd": 0.0
+ },
+ "ledger": [
+  {
+   "account": "7c86f60b8ac2ffb3",
+   "allowance_usd": 3.0,
+   "asked": 1,
+   "aspect": "16:9",
+   "at": 1795806070,
+   "brief": "close on hands folding pale dough over a floured wooden table in soft morning window light",
+   "charged_usd": 0.581,
+   "clip_id": "2544c936a5358b2144423c919e59adf17a045c561891c8625ba5236d73ec1a43",
+   "gate_score": 8.0,
+   "gate_usd": 0.004822,
+   "kind": "test",
+   "latency_s": 40.4,
+   "outcome": "generated",
+   "provider_usd": 0.563169,
+   "query": "baker hands kneading bread dough",
+   "reason": "ok",
+   "reserved_usd": 0.581,
+   "seconds": 8,
+   "sk": "1795806070420-1eb6e2",
+   "video": "c963c1982d51768a"
+  },
+  {
+   "account": "7c86f60b8ac2ffb3",
+   "allowance_usd": 3.0,
+   "asked": 1,
+   "aspect": "16:9",
+   "at": 1795806070,
+   "brief": "honey bees moving slowly across purple lavender blossoms in a sunlit summer meadow, shallow depth of field",
+   "charged_usd": 0.581,
+   "clip_id": "6f951becaa69f01d61ba346f3e799db0335ba2b154e7a7bf6fe4a7b211b9a6c5",
+   "gate_score": 8.0,
+   "gate_usd": 0.005108,
+   "kind": "test",
+   "latency_s": 37.7,
+   "outcome": "generated",
+   "provider_usd": 0.562629,
+   "query": "bees on lavender flowers",
+   "reason": "ok",
+   "reserved_usd": 0.581,
+   "seconds": 8,
+   "sk": "1795806070420-b0b48c",
+   "video": "c963c1982d51768a"
+  },
+  {
+   "account": "d91ff63265173293",
+   "allowance_usd": 3.0,
+   "asked": 2,
+   "aspect": "9:16",
+   "at": 1795806125,
+   "brief": "steaming mug of hot coffee on a wooden table beside a window in soft morning light",
+   "charged_usd": 0.581,
+   "clip_id": "8dd3e768a1f36386dbe8d0eff393347f187a019e0dbc52f6e99210f457473893",
+   "gate_score": 8.0,
+   "gate_usd": 0.009952,
+   "kind": "test",
+   "latency_s": 41.4,
+   "outcome": "generated",
+   "provider_usd": 0.565677,
+   "query": "steam rising from coffee cup",
+   "reason": "ok",
+   "reserved_usd": 0.581,
+   "seconds": 8,
+   "sk": "1795806125102-012f3b",
+   "video": "f2a156977161ad37"
+  }
+ ],
+ "library": [
+  {
+   "sk": "2544c936a5358b2144423c919e59adf17a045c561891c8625ba5236d73ec1a43",
+   "brief": "close on hands folding pale dough over a floured wooden table in soft morning window light",
+   "aspect": "16:9",
+   "seconds": 8.04,
+   "width": 1280,
+   "height": 720,
+   "center_safe": true,
+   "gate_score": 8.0,
+   "uses": 2,
+   "videos": [
+    "21b7fd2375de0c88",
+    "c963c1982d51768a"
+   ],
+   "cost_usd": 0.581
+  },
+  {
+   "sk": "6f951becaa69f01d61ba346f3e799db0335ba2b154e7a7bf6fe4a7b211b9a6c5",
+   "brief": "honey bees moving slowly across purple lavender blossoms in a sunlit summer meadow, shallow depth of field",
+   "aspect": "16:9",
+   "seconds": 8.04,
+   "width": 1280,
+   "height": 720,
+   "center_safe": true,
+   "gate_score": 8.0,
+   "uses": 2,
+   "videos": [
+    "c963c1982d51768a",
+    "f2a156977161ad37"
+   ],
+   "cost_usd": 0.581
+  },
+  {
+   "sk": "8dd3e768a1f36386dbe8d0eff393347f187a019e0dbc52f6e99210f457473893",
+   "brief": "steaming mug of hot coffee on a wooden table beside a window in soft morning light",
+   "aspect": "9:16",
+   "seconds": 8.04,
+   "width": 720,
+   "height": 1280,
+   "center_safe": false,
+   "gate_score": 8.0,
+   "uses": 1,
+   "videos": [
+    "f2a156977161ad37"
+   ],
+   "cost_usd": 0.581
+  }
+ ]
+}

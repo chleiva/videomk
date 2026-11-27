@@ -457,10 +457,40 @@ class BackendStack(Stack):
             )
             active_machine = v2.state_machine
 
+        # Library clips on demand (docs/CLIPS_ON_DEMAND.md): only with `-c clipsOnDemand=1` or stages.json "clipsOnDemand" (off everywhere by default). NO new resource:
+        # variables on the beat function and statements on its existing policy. The clips live under cliplib/ in the assets bucket, the budgets and the index in the
+        # usage table (partitions `clipgen:*`), the knobs in one SSM parameter the stack never creates (absent = every default, in which generation is off).
+        if v2 is not None and str(self.node.try_get_context("clipsOnDemand") or ("1" if stage_cfg.get("clipsOnDemand") else "")).lower() in ("1", "true"):
+            clips_param = f"/videomk/{stage}/clips/config"
+            for k, v in {"CLIPS_ON_DEMAND": "1", "CLIPS_CONFIG_PARAM": clips_param, "GSI_USER_VIDEOS": "GSI_UserVideos"}.items():
+                v2.beat_fn.add_environment(k, v)
+            v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:Query"],
+                                                              resources=[usage_table.table_arn], conditions={"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["clipgen:*"]}}))
+            v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}/cliplib/*"]))
+            v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{self.region}:{self.account}:parameter{clips_param}"]))
+            # whiteboard objects on demand run in the PLAN step (part B of docs/LIBRARY_ON_DEMAND.md): the same budgets, knobs and index rows, and the image provider's key
+            for k, v in {"CLIPS_ON_DEMAND": "1", "CLIPS_CONFIG_PARAM": clips_param, "GSI_USER_VIDEOS": "GSI_UserVideos"}.items():
+                v2.plan_fn.add_environment(k, v)
+            v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:Query"],
+                                                              resources=[usage_table.table_arn], conditions={"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["clipgen:*"]}}))
+            v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["ssm:GetParameter"], resources=[f"arn:aws:ssm:{self.region}:{self.account}:parameter{clips_param}",
+                                                                                                         f"arn:aws:ssm:{self.region}:{self.account}:parameter/videomk/openai_api_key"]))
+            # the whiteboard tracer function lives in a stack of its own (backend/object_tracer.py): the plan step only knows its NAME and may invoke it. One variable and
+            # one statement, no resource and no cross-stack reference; with that stack absent the call fails and the boards keep their labels.
+            from object_tracer import function_name as tracer_name
+            v2.plan_fn.add_environment("OBJECT_TRACER_FUNCTION", tracer_name(stage))
+            v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["lambda:InvokeFunction"], resources=[f"arn:aws:lambda:{self.region}:{self.account}:function:{tracer_name(stage)}"]))
+
         # videomk's own image catalog (docs/IMAGE_CATALOG.md): only with `-c imageCatalog=1` (default off) and the v2 engine, whose beat Lambda is the only reader.
         if v2 is not None and str(self.node.try_get_context("imageCatalog") or "").lower() in ("1", "true"):
             self.catalog = ImageCatalog(self, "ImageCatalog", stage=stage, account=self.account, region=self.region, is_prod=is_prod, beat_fn=v2.beat_fn,
                                         min_score=str(self.node.try_get_context("catalogMinScore") or ""))
+            if str(self.node.try_get_context("clipsOnDemand") or ("1" if stage_cfg.get("clipsOnDemand") else "")).lower() in ("1", "true"):
+                # images on demand (docs/LIBRARY_ON_DEMAND.md part A): the beat function may ADD a picture to the catalog (three objects, one vector, one row). Statements only, no resource.
+                v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"{self.catalog.bucket.bucket_arn}/{p}/*" for p in ("o", "p", "t")]))
+                v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["dynamodb:PutItem"], resources=[self.catalog.table.table_arn]))
+                v2.beat_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3vectors:PutVectors"], resources=[self.catalog.index_arn]))
+                v2.plan_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:PutObject"], resources=[f"{self.catalog.bucket.bucket_arn}/w/*"]))   # a new whiteboard drawing's package
             if vector_scenes:   # the functions that draw frames read one scene package at a time: v/<scene id>/* of the catalog bucket, nothing else, no listing, no write
                 for fn in (v2.chunk_fn, v2.selftest_fn):
                     fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[f"{self.catalog.bucket.bucket_arn}/v/*"]))

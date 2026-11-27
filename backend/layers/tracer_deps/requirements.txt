@@ -1,0 +1,9 @@
+# The whiteboard tracer function's own layer (backend/object_tracer.py, docs/LIBRARY_ON_DEMAND.md part D): what the tracing code needs and the engine layer
+# cannot hold (scipy alone is about 100 MB; the engine layer is 148 MB of the 250 MB a function may unpack). Every package is a manylinux wheel:
+#   backend/layers/build_layer.sh tracer_deps
+# The versions are the ones the sketch-object proofs ran with on a laptop.
+numpy==2.5.5
+scipy==1.18.1
+Pillow==13.0.0
+vtracer==0.6.15
+resvg-py==0.5.0

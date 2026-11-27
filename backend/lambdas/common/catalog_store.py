@@ -57,6 +57,8 @@ class Store:
     def get_vector(self, vid: str) -> Optional[Tuple[List[float], Dict[str, Any]]]: raise NotImplementedError
     def put_vector(self, vid: str, vec: List[float], metadata: Dict[str, Any]) -> None: raise NotImplementedError
     def vector_ids(self) -> List[str]: raise NotImplementedError
+    def delete(self, key: str) -> None: raise NotImplementedError            # only the takedown uses these two (common/takedown.py), after the copy to quarantine/
+    def delete_vector(self, vid: str) -> None: raise NotImplementedError
 
     def query(self, vec: List[float], k: int = 3) -> List[Tuple[str, float]]:
         """(id, cosine similarity) best first. Over the whole index: the catalog is small (hundreds), so the offline tools just compare."""
@@ -127,6 +129,16 @@ class LocalStore(Store):
 
     def vector_ids(self) -> List[str]: return list(self._json("vectors.json").keys())
 
+    def delete(self, key: str) -> None:
+        if os.path.exists(self._obj(key)):
+            os.remove(self._obj(key))
+
+    def delete_vector(self, vid: str) -> None:
+        with self._lock:
+            d = self._json("vectors.json")
+            if d.pop(vid, None) is not None:
+                self._save("vectors.json", d)
+
 
 class AwsStore(Store):
     def __init__(self, stage: str, session: Any = None) -> None:
@@ -184,6 +196,12 @@ class AwsStore(Store):
             tok = r.get("nextToken")
             if not tok:
                 return out
+
+    def delete(self, key: str) -> None:
+        self.s3.delete_object(Bucket=self.n["bucket"], Key=key)   # the bucket is versioned: this adds a delete marker, the bytes stay recoverable
+
+    def delete_vector(self, vid: str) -> None:
+        self.vec.delete_vectors(**self._target(), keys=[vid])
 
     def query(self, vec: List[float], k: int = 3) -> List[Tuple[str, float]]:
         r = self.vec.query_vectors(**self._target(), queryVector={"float32": [float(x) for x in vec]}, topK=k, returnDistance=True)

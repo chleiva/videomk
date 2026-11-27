@@ -1,0 +1,275 @@
+{
+ "models_usd": 0.06278,
+ "images": [],
+ "objects": [
+  {
+   "video": "vid-max",
+   "asked": [
+    "honeycomb",
+    "beehive",
+    "skateboard",
+    "violin",
+    "kite",
+    "teapot"
+   ],
+   "before": [
+    [
+     "bee",
+     null,
+     null
+    ],
+    [
+     "bee",
+     null,
+     null
+    ],
+    [
+     "scooter",
+     null,
+     null
+    ],
+    [
+     null,
+     "violin",
+     true
+    ],
+    [
+     "helicopter",
+     null,
+     null
+    ],
+    [
+     "pot",
+     null,
+     null
+    ],
+    [
+     null,
+     "How bees make honey",
+     null
+    ]
+   ],
+   "after": [
+    [
+     "honeycomb",
+     null
+    ],
+    [
+     "beehive",
+     null
+    ],
+    [
+     "skateboard",
+     null
+    ],
+    [
+     "violin",
+     null
+    ],
+    [
+     "kite",
+     null
+    ],
+    [
+     "teapot",
+     null
+    ],
+    [
+     null,
+     "How bees make honey"
+    ]
+   ],
+   "result": {
+    "asked": [
+     "honeycomb",
+     "beehive",
+     "skateboard",
+     "violin",
+     "kite",
+     "teapot"
+    ],
+    "made": [
+     "beehive",
+     "honeycomb",
+     "kite",
+     "skateboard",
+     "teapot",
+     "violin"
+    ],
+    "reason": "generated"
+   },
+   "wall_s": 11.6,
+   "ledger": {
+    "outcome": "generated",
+    "reason": "ok",
+    "latency_s": 10.3,
+    "made_n": 6,
+    "rejected_n": 0,
+    "provider_usd": 0.0375,
+    "charged_usd": 0.082
+   }
+  },
+  {
+   "video": "vid-max2",
+   "asked": [
+    "igloo",
+    "violin",
+    "accordion",
+    "sundial",
+    "trowel",
+    "honeycomb"
+   ],
+   "before": [
+    [
+     "iceberg",
+     null,
+     null
+    ],
+    [
+     "violin",
+     null,
+     null
+    ],
+    [
+     null,
+     "accordion",
+     true
+    ],
+    [
+     "hourglass",
+     null,
+     null
+    ],
+    [
+     "broom",
+     null,
+     null
+    ],
+    [
+     "honeycomb",
+     null,
+     null
+    ],
+    [
+     null,
+     "How bees make honey",
+     null
+    ]
+   ],
+   "after": [
+    [
+     "igloo",
+     null
+    ],
+    [
+     "violin",
+     null
+    ],
+    [
+     "accordion",
+     null
+    ],
+    [
+     "sundial",
+     null
+    ],
+    [
+     "trowel",
+     null
+    ],
+    [
+     "honeycomb",
+     null
+    ],
+    [
+     null,
+     "How bees make honey"
+    ]
+   ],
+   "result": {
+    "asked": [
+     "igloo",
+     "accordion",
+     "sundial",
+     "trowel"
+    ],
+    "made": [
+     "accordion",
+     "igloo",
+     "sundial",
+     "trowel"
+    ],
+    "reason": "generated"
+   },
+   "wall_s": 12.5,
+   "ledger": {
+    "outcome": "generated",
+    "reason": "ok",
+    "latency_s": 11.7,
+    "made_n": 4,
+    "rejected_n": 0,
+    "provider_usd": 0.0376,
+    "charged_usd": 0.068
+   }
+  }
+ ],
+ "ledger": [
+  {
+   "account": "7c86f60b8ac2ffb3",
+   "allowance_usd": 3.0,
+   "asked_n": 6,
+   "at": 1795807711,
+   "brief": "honeycomb, beehive, skateboard, violin, kite, teapot",
+   "charged_usd": 0.082,
+   "clip_id": "beehive,honeycomb,kite,skateboard,teapot,violin",
+   "kind": "test",
+   "latency_s": 10.3,
+   "made_n": 6,
+   "media": "object",
+   "outcome": "generated",
+   "provider_usd": 0.0375,
+   "reason": "ok",
+   "rejected_n": 0,
+   "reserved_usd": 0.082,
+   "sk": "1795807711439-5205b4",
+   "video": "5e40c3979edbe23a"
+  },
+  {
+   "account": "d91ff63265173293",
+   "allowance_usd": 3.0,
+   "asked_n": 4,
+   "at": 1795807724,
+   "brief": "igloo, accordion, sundial, trowel",
+   "charged_usd": 0.068,
+   "clip_id": "accordion,igloo,sundial,trowel",
+   "kind": "test",
+   "latency_s": 11.7,
+   "made_n": 4,
+   "media": "object",
+   "outcome": "generated",
+   "provider_usd": 0.0376,
+   "reason": "ok",
+   "rejected_n": 0,
+   "reserved_usd": 0.068,
+   "sk": "1795807724023-a1cf23",
+   "video": "383c829e17a6a456"
+  }
+ ],
+ "stats": {
+  "image": {},
+  "object": {
+   "d_generated": 2,
+   "g_generated": 2,
+   "g_latency_ds": 220,
+   "g_n": 2,
+   "o_asked": 10,
+   "o_made": 10,
+   "o_rejected": 0,
+   "used_generated": 10
+  }
+ },
+ "spend": {
+  "image": 0.0,
+  "object": 0.15
+ }
+}
