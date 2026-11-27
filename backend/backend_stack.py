@@ -33,6 +33,7 @@ from auth_cleanup import UnconfirmedCleanup, enabled as unconfirmed_cleanup_enab
 from request_intake import RequestIntake
 from request_options import RequestOptions
 from feedback_loop import FeedbackLoop, enabled as feedback_enabled
+from watermark_feature import WatermarkSettings, enabled as watermark_enabled, forced as watermark_forced
 
 from engine_v2 import EngineV2
 
@@ -220,7 +221,7 @@ class BackendStack(Stack):
         videos_table.grant_read_write_data(launcher_fn)
         usage_table.grant_read_write_data(launcher_fn)
         launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:GetObject"], resources=[uploads_objects]))  # HeadObject: are the photos really there?
-        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["uploads/*"]}}))
+        launcher_fn.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[f"arn:aws:s3:::{ASSETS_BUCKET}"], conditions={"StringLike": {"s3:prefix": ["uploads/*"] + (["watermark/*"] if watermark_enabled(self.node) else [])}}))   # watermark/*: has the person a logo? (a missing one must answer 404, not 403)
         for fn in (launcher_fn, wallet_fn):
             wallet_table.grant_read_write_data(fn)
             flags_table.grant_read_data(fn)  # read only: nothing at runtime can grant itself unlimited credits
@@ -559,6 +560,14 @@ class BackendStack(Stack):
             media = MediaLibrary(
                 self, "MediaLibrary", extra_env=model_env, stage=stage, account=self.account, region=self.region, is_prod=is_prod, make_fn=make_fn, engine_layer=engine_layer, flags_table=flags_table,
                 usage_table=usage_table, user_id_resource=user_id, cognito_auth=cognito_auth, launcher_fn=launcher_fn, assets_bucket_name=ASSETS_BUCKET,
+            )
+
+        # The watermark (docs/WATERMARK.md): saved settings and logo, and what the launcher, capabilities and the plan step need. On by default, `-c watermark=0` removes it; `-c forceWatermark=1` is the free-tier policy.
+        if v2 is not None and watermark_enabled(self.node):
+            WatermarkSettings(
+                self, "Watermark", make_fn=make_fn, engine_layer=engine_layer, usage_table=usage_table, flags_table=flags_table, assets_bucket_name=ASSETS_BUCKET, user_id_resource=user_id,
+                cognito_auth=cognito_auth, cors_headers=["Content-Type", "Authorization", "X-Region", "X-Timezone", "X-Locale"], launcher_fn=launcher_fn, capabilities_fn=req_options.fn,
+                plan_fn=v2.plan_fn, force=watermark_forced(self.node),
             )
 
         # The request check (safety, clarity) and the per-account record of safety stops: docs/INTAKE_AND_SAFETY.md. Same small-model override as above.

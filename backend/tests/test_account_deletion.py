@@ -149,6 +149,8 @@ def seed(w, user, vid, vid2=None, orphan=None):
         s3.put_object(Bucket=ASSETS, Key=f"videos/{user}/{orphan}.mp4", Body=b"x")
         s3.put_object(Bucket=ASSETS, Key=f"generation/v2/{orphan}/plan_r1.json", Body=b"x")
     s3.put_object(Bucket=ASSETS, Key=f"uploads/{user}/aaaaaaaaaaaaaaaa.jpg", Body=b"x")
+    for k in ("profile.json", "logo.png"):   # the saved watermark settings and logo (docs/WATERMARK.md) go with the account
+        s3.put_object(Bucket=ASSETS, Key=f"watermark/{user}/{k}", Body=b"x")
     for m in ("0123456789abcdef", "fedcba9876543210"):
         ddb.Table("Media").put_item(Item={"user_id": user, "sk": f"m#{m}", "st": "ready"})
         ddb.Table("Media").put_item(Item={"user_id": user, "sk": f"h#{m * 4}", "mid": m})

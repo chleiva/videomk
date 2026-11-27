@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, List, Sequence
 
 from . import sync as sync_mod
+from . import watermark_spec
 from .align import estimate_words
 from .scenes import ELEMENTS, SCENES
 
@@ -142,6 +143,15 @@ def build_timeline(
         if beat.get("chapter"):
             chapters.append({"start": round(t, 3), "title": beat["chapter"]})
         t += dur
+    wm = watermark_spec.parse(plan.get("watermark"), strict=False)   # the plan's watermark option (docs/WATERMARK.md): none/absent = nothing added anywhere
+    if wm and wm["mode"] == "none":
+        wm = None
+    if wm and wm.get("end_card") and scenes:   # optional closing card (videomk mark only): a silent 'Made with videomk' scene after the last one
+        es = str(plan.get("language") or "en").lower().startswith("es")
+        props = {"title": "Hecho con videomk" if es else "Made with videomk", "subtitle": "videomk.com"}
+        scenes.append({"id": "endcard", "type": "title", "start": round(t, 4), "duration": watermark_spec.END_CARD_S, "props": props, "words": [], "audio_key": None, "silent": True,
+                       "narration_offset": 0.0, "cues": [round(c, 3) for c in SCENES["title"][1](props, watermark_spec.END_CARD_S)[:8]], "transition": "fade"})
+        t += watermark_spec.END_CARD_S
     # segment boundaries must be a multiple of the GOP so chunks start on an IDR frame
     from . import music as music_mod
 
@@ -162,6 +172,7 @@ def build_timeline(
         "scenes": scenes,
         "chapters": chapters,
         "title": plan.get("title", ""),
+        **({"watermark": wm} if wm else {}),
     }
 
 
@@ -217,6 +228,7 @@ def chunk_plan(timeline: Dict[str, Any], target_seconds: float = 30, draft: bool
             "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "draft": draft,
             "scenes": [_scene_fingerprint(x) for x in scenes[lo:hi]],
             "lead": _scene_fingerprint(scenes[lo - 1]) if lo > 0 else None, "outro": hi == len(scenes),
+            **({"wm": timeline["watermark"], "first": lo == 0} if timeline.get("watermark") else {}),   # the mark is part of every frame (and fades in on the first chunk only)
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:24]
         n = max(1, f1 - f0)
         if not max_frames or n <= max_frames:
@@ -240,4 +252,5 @@ def chunk_timeline(timeline: Dict[str, Any], lo: int, hi: int) -> Dict[str, Any]
         "captions": timeline.get("captions", True), "language": timeline.get("language", "en"), "scenes": sub, "lead": scenes[lo - 1] if lo > 0 else None,
         "outro": hi == len(scenes), "duration": round(sum(float(x["duration"]) for x in sub), 6),
         **({"frame": timeline["frame"]} if timeline.get("frame") else {}),
+        **({"watermark": timeline["watermark"]} if timeline.get("watermark") else {}),
     }

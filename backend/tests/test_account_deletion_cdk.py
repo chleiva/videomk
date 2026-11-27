@@ -151,10 +151,10 @@ def test_the_worker_deletes_per_user_prefixes_only(synth):
         assert "*" not in s["resources"]
         if "s3:DeleteObject" in s["actions"]:
             tails = [(r["Fn::Join"][1][-1] if isinstance(r, dict) and "Fn::Join" in r else r) for r in s["resources"]]
-            assert all(re.search(r"/(videos|uploads|generation/v2|generation/assets|o|t)/\*$", x) for x in tails), tails      # exactly the per-user areas, never a bucket-wide delete
+            assert all(re.search(r"/(videos|uploads|watermark|generation/v2|generation/assets|o|t)/\*$", x) for x in tails), tails      # exactly the per-user areas, never a bucket-wide delete
         else:
             prefixes = s["conditions"]["StringLike"]["s3:prefix"]
-            assert set(prefixes) <= {"videos/*", "uploads/*", "generation/v2/*", "generation/assets/*", "o/*", "t/*"}
+            assert set(prefixes) <= {"videos/*", "uploads/*", "watermark/*", "generation/v2/*", "generation/assets/*", "o/*", "t/*"}
 
 
 def test_the_worker_has_no_wildcard_resources_and_the_only_write_it_has_is_deleting(synth):

@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional
 from PIL import Image
 
 from . import numfmt
+from . import watermark as watermark_mod
 from .canvas import Canvas
 from .frame import Frame
 from .scenes import SCENES
@@ -87,6 +88,8 @@ class Renderer:
         self._clips: Dict[str, Any] = {}
         self._image_loader = image_loader
         self._images: Dict[str, Optional[Image.Image]] = {}
+        # the watermark (docs/WATERMARK.md): drawn last on every frame, at the output size; None when the timeline has none
+        self.wm = watermark_mod.build(timeline.get("watermark"), self.frame, (self.out_w, self.out_h), self.ctx.captions, image_loader)
 
     # ----- assets
     def _load_image(self, key: str) -> Optional[Image.Image]:
@@ -155,6 +158,9 @@ class Renderer:
         img = self._compose(t)
         if img.size != (self.out_w, self.out_h):   # draft (half size) or 720p: design units -> output pixels
             img = img.resize((self.out_w, self.out_h), Image.BILINEAR if self.draft else Image.LANCZOS)
+        if self.wm is not None:   # last of all, at output pixels: never scaled with the picture, fades in with the video and out with the closing fade
+            k = max(0.0, min(1.0, (t - (self.total - OUTRO_FADE_S)) / OUTRO_FADE_S)) if self.outro else 0.0
+            img = self.wm.apply(img, t, first=self.lead is None, outro_k=k)
         return img
 
     def _compose(self, t: float) -> Image.Image:

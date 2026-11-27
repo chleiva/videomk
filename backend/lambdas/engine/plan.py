@@ -15,6 +15,7 @@ from .theme import THEMES
 from . import library as library_mod
 from . import numfmt
 from . import sync as sync_mod
+from . import vector_policy
 from . import voices as voice_mod
 from .audio import PLANNER_SFX
 from .netsafe import quality_fixes
@@ -657,7 +658,7 @@ def enforce_elements(beats: List[Dict[str, Any]]) -> List[str]:
         el = ELEMENTS.get(t)
         if el is not None:
             used[t] = used.get(t, 0) + 1
-            if el.max_per_video is not None and used[t] > el.max_per_video:
+            if t != "vector_scene" and el.max_per_video is not None and used[t] > el.max_per_video:   # vector_scene has its own share cap (vector_policy.enforce)
                 b["scene"] = _fallback_scene(b["narration"])
                 warns.append(f"beat {i}: {t} replaced by a title card (at most {el.max_per_video} per video)")
                 t = "title"
@@ -765,7 +766,10 @@ def _validate_plan(plan: Dict[str, Any], *, max_beats: int = MAX_BEATS, language
             props_in = scene_in.get("props")
             if not isinstance(props_in, dict):  # the model sometimes flattens the props onto the scene itself
                 props_in = {k: v for k, v in scene_in.items() if k != "type"}
-            scene = {"type": stype, "props": sanitize_props(stype, props_in)}
+            if stype == "vector_scene":   # the cartoon scenes: only when the policy for THIS video offered them, and only the catalog ids it listed (engine/vector_policy.py)
+                scene = {"type": stype, "props": vector_policy.sanitize(props_in)}
+            else:
+                scene = {"type": stype, "props": sanitize_props(stype, props_in)}
         except (ValueError, TypeError, AttributeError) as e:
             warnings.append(f"beat {i}: scene replaced ({e})")
             if rejects is not None and not silent:

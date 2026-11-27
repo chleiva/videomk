@@ -115,7 +115,7 @@ def test_english_text_is_unchanged(key, params, text):
 
 
 def test_every_english_key_is_in_the_golden_table():
-    assert {k for k, _, _ in ENGLISH_BEFORE} >= {k for k in i18n.EN if not k.startswith(("cap.", "deck.", "uploads.too_many_decks", "feedback."))}   # the deck messages are new (tests/test_deck.py checks them)
+    assert {k for k, _, _ in ENGLISH_BEFORE} >= {k for k in i18n.EN if not k.startswith(("cap.", "deck.", "uploads.too_many_decks", "feedback.", "wm."))}   # the deck and watermark messages are new (tests/test_deck.py and tests/test_watermark.py check them)
 
 
 # ---------- Spanish where a locale is sent, English where not

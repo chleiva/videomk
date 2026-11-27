@@ -18,8 +18,8 @@ from botocore.exceptions import ClientError
 
 from common.http import json_response
 from common.identity import extract_cognito_sub
-from common import deck_limits, i18n, intake, library, safety, usage, wallet
-from engine import format_options
+from common import deck_limits, i18n, intake, library, safety, usage, wallet, watermark_store
+from engine import format_options, watermark_spec
 from common.photo_ids import MAX_PHOTOS, PhotoError, upload_key, valid_media_ids, valid_media_meta
 
 logger = logging.getLogger()
@@ -135,6 +135,11 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
             if not isinstance(body[field], str) or body[field] not in allowed:
                 raise BadRequest(f"'{field}' must be one of: " + ", ".join(allowed))
             out[field] = body[field]
+    if "style" in body and body["style"] is not None:   # the look of the scenes: 'auto' (the director decides, cartoon scenes only where the policy allows), 'cartoon' (illustrated), 'real' (photographs and footage only); docs/VECTOR_SCENE_POLICY.md
+        if not isinstance(body["style"], str) or body["style"] not in ("auto", "cartoon", "real"):
+            raise BadRequest("'style' must be one of: auto, cartoon, real")
+        if body["style"] != "auto":
+            out["style"] = body["style"]
     if out.get("aspect", format_options.DEFAULT_ASPECT) not in format_options.ready_aspects():
         raise BadRequest(i18n.Localized("create.format_unavailable"))
     if out.get("resolution", format_options.DEFAULT_RESOLUTION) not in format_options.ready_resolutions():   # 4K is on only where the server says so (READY_RESOLUTIONS)
@@ -143,7 +148,37 @@ def validate_options(body: Dict[str, Any]) -> Dict[str, Any]:
         if body["theme"] not in THEMES:
             raise BadRequest("'theme' must be one of: " + ", ".join(THEMES))
         out["theme"] = body["theme"]
+    if body.get("watermark") is not None:   # {mode, position, opacity, size, style, end_card}: docs/WATERMARK.md; who may use which mode is decided in the handler (it needs the account)
+        try:
+            out["watermark"] = watermark_spec.parse(body["watermark"], strict=True)
+        except watermark_spec.WatermarkError as e:
+            raise BadRequest(f"'watermark': {e}") from e
     return out
+
+
+def apply_watermark(user_id: str, options: Dict[str, Any], loc: str) -> Optional[Dict[str, Any]]:
+    """Settles the video's watermark (the request's own, else the person's saved default, else the stack policy) and puts the result in `options['watermark']`;
+    nothing is added when the result is 'no watermark' (so a stack with the feature off sends exactly what it always sent). None, or the 4xx response to return."""
+    if not watermark_store.enabled():
+        options.pop("watermark", None)
+        return None
+    try:
+        premium = watermark_store.is_premium(user_id)
+        requested = options.get("watermark")
+        profile = watermark_store.get_profile(user_id) if requested is None else None
+        needs_logo = (requested or profile or {}).get("mode") == "custom"
+        spec = watermark_store.resolve(requested, profile, premium=premium, forced=watermark_store.force_policy() and not premium,
+                                       has_logo=watermark_store.has_logo(user_id) if needs_logo else False)
+    except watermark_store.WatermarkError as e:
+        return json_response(e.status, {"message": i18n.t(e.key, loc, **e.params), **({"code": e.code} if e.code else {})})
+    except Exception:   # noqa: BLE001 - a watermark lookup problem must never stop a video: the policy default decides
+        logger.exception("WATERMARK_RESOLVE_FAILED user=%s", user_id)
+        spec = {"mode": "videomk"} if watermark_store.force_policy() else {"mode": "none"}
+    if spec.get("mode") == "none":
+        options.pop("watermark", None)
+    else:
+        options["watermark"] = spec
+    return None
 
 
 def bring_library_photos(user_id: str, options: Dict[str, Any]) -> bool:
@@ -292,6 +327,10 @@ def handler(event: Dict[str, Any], context: Any):
             _s3.head_object(Bucket=os.environ["ASSETS_BUCKET"], Key=upload_key(user_id, mid))
         except ClientError:
             return json_response(400, {"message": i18n.t("create.photo_unfinished", loc)})
+
+    bad_wm = apply_watermark(user_id, options, loc)
+    if bad_wm:
+        return bad_wm
 
     try:
         if not bring_library_photos(user_id, options):

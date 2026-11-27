@@ -21,7 +21,7 @@ SETTLE_SECONDS = TOKEN_VALID_SECONDS + 300
 # neither listed here nor in EXEMPT, so a future per-user table cannot be forgotten silently.
 COVERED_TABLES = {"VideosTable": "videos", "UsageTable": "usage", "WalletTable": "wallet", "AccountFlagsTable": "flags", "MediaTable": "media", "SafetyTable": "safety", "FeedbackTable": "feedback (userId replaced by a one-way hash, the text is kept)"}
 EXEMPT_TABLES = {"AccountDeletionTable": "the deletion jobs and tombstones themselves"}
-COVERED_BUCKETS = {"AssetsBucket": ["videos/<user>/", "uploads/<user>/", "generation/v2/<video>/", "generation/assets/<video>/"], "MediaBucket": ["o/<user>/", "t/<user>/"]}
+COVERED_BUCKETS = {"AssetsBucket": ["videos/<user>/", "uploads/<user>/", "watermark/<user>/", "generation/v2/<video>/", "generation/assets/<video>/"], "MediaBucket": ["o/<user>/", "t/<user>/"]}
 COVERED_VECTOR_INDEXES = ["PhotoIndex"]
 # Resources that exist only behind a flag and hold NO personal data: the image catalog (docs/IMAGE_CATALOG.md) is videomk's own generated pictures; its demand table keeps generic search
 # phrases and a salted hash of a video (no user id, no prompt) and expires after 12 months. They are not cleaned per user because nothing in them belongs to a user.
@@ -97,7 +97,7 @@ class AccountDeletion(Construct):
         if media is not None:
             tbl(media.table, ["dynamodb:Query", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"])
         assets_arn = f"arn:aws:s3:::{assets_bucket_name}"
-        asset_prefixes = ["videos/*", "uploads/*", "generation/v2/*", "generation/assets/*"]
+        asset_prefixes = ["videos/*", "uploads/*", "watermark/*", "generation/v2/*", "generation/assets/*"]
         worker.add_to_role_policy(iam.PolicyStatement(actions=["s3:ListBucket"], resources=[assets_arn], conditions={"StringLike": {"s3:prefix": asset_prefixes}}))
         worker.add_to_role_policy(iam.PolicyStatement(actions=["s3:DeleteObject"], resources=[f"{assets_arn}/{p}" for p in asset_prefixes]))
         if media is not None:

@@ -1,7 +1,7 @@
 """Step 1: ground (Wikipedia) -> direct (LLM) -> validate -> store plan_r1.json. Rejects bad prompts here."""
 import logging
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from generate_video.db import set_attributes, update_status
 
@@ -89,6 +89,27 @@ def _deck_result(event: Dict[str, Any], video_id: str, user_id: str, prompt: str
     return result
 
 
+def _watermark(event: Dict[str, Any], video_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+    """The plan's `watermark` entry, or None. A custom logo is copied from the person's private store to `<video>/assets/watermark.png` (so every render of this video, and every edit,
+    uses the logo as it was when the video was made); if it is gone the video gets the videomk mark when the stack forces one, else none: it never fails a video."""
+    from .. import watermark_spec as ws
+    spec = ws.parse(event.get("watermark"), strict=False)
+    if not spec or spec["mode"] == "none":
+        return None
+    if spec["mode"] != "custom":
+        return spec
+    try:
+        from common import watermark_store
+        data = awsio.get_bytes(watermark_store.logo_key(user_id))
+        key = awsio.prefix(video_id) + "assets/watermark.png"
+        awsio.put_bytes(key, data, "image/png")
+        from .. import watermark as wm_mod
+        return {**spec, "asset": key, "hash": wm_mod.logo_hash(data)}
+    except Exception:   # noqa: BLE001
+        logging.warning("WATERMARK_LOGO_COPY_FAILED video=%s", video_id)
+        return {"mode": "videomk"} if os.environ.get("FORCE_WATERMARK", "0") == "1" else None
+
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     video_id = str(event["video_id"])
     user_id = str(event.get("user_id", ""))
@@ -123,7 +144,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         result = _deck_result(event, video_id, user_id, prompt, minutes, spent, ask_small, ask_big, catalog)
     else:
         result = director.direct(prompt, minutes=minutes, ask_small=ask_small, ask_big=ask_big, language=None if event.get("language") in (None, "auto") else event.get("language"),   # auto: detected from the description
-                                 options={k: event.get(k) for k in ("platform", "aspect", "brief")},
+                                 options={k: event.get(k) for k in ("platform", "aspect", "brief", "style")},
                                  region=event.get("region"), theme=event.get("theme"), web_provider=provider, ask_tools=ask_tools, photos=photos, story=story,
                                  max_images_per_minute=event.get("max_images_per_minute", float(os.environ.get("MAX_IMAGES_PER_MINUTE", "10"))),
                                  music_tracks=catalog)
@@ -147,6 +168,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     plan["target_seconds"] = round(minutes * 60)   # the length asked and billed: the timeline never comes out shorter
     plan["frame"] = format_options.frame_dict(event.get("aspect"), event.get("resolution"), event.get("platform"))   # the picture size: the timeline, the renderer and every edit read it back
     plan["captions"] = bool(event.get("captions", True))   # the creator's choice: subtitles on (default) or off
+    wm = _watermark(event, video_id, user_id)   # the watermark the launcher settled (docs/WATERMARK.md); a custom logo is copied into this video's own folder
+    if wm:
+        plan["watermark"] = wm
     plan["tts"] = {"provider": os.environ.get("TTS_PROVIDER", "polly"), "voice": os.environ.get("TTS_VOICE", ""), "style": os.environ.get("TTS_STYLE", "Say in a clear, warm, engaging explainer voice")}
     forced = os.environ.get("TTS_VOICE", "")
     if forced:  # an operator-forced voice overrides the director's casting: one voice, no dialogue

@@ -5,6 +5,7 @@
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py limited you@example.com          # back to normal
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py give you@example.com 20          # add 20 paid credits
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py show you@example.com
+  AWS_PROFILE=qa python backend/scripts/wallet_admin.py watermark you@example.com [--off]   # premium watermark: the person's own logo as the watermark (works in production too; docs/WATERMARK.md)
   AWS_PROFILE=qa python backend/scripts/wallet_admin.py storage you@example.com --plan pro [--extra-gb 100] [--until 2027-01-31]   # photo library size (free = 2 GB, pro = 100 GB, plus extra GB)
 The unlimited flag is only honoured outside production (ALLOW_UNLIMITED_ACCOUNTS is 0 there) and lives in a table the Lambdas cannot write.
 Accounts are found by email in the stage's Cognito pool, or pass a user id (the token `sub`). Defaults to stage qa; prod asks you to type prod.
@@ -22,9 +23,10 @@ from common import library as lib, wallet  # noqa: E402
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("action", choices=["unlimited", "limited", "give", "show", "storage"])
+    ap.add_argument("action", choices=["unlimited", "limited", "give", "show", "storage", "watermark"])
     ap.add_argument("who", help="email or user id (sub)")
     ap.add_argument("amount", nargs="?", type=int)
+    ap.add_argument("--off", action="store_true", help="with `watermark`: take premium watermark away again")
     ap.add_argument("--stage", default="qa")
     ap.add_argument("--plan", choices=["free", "pro"], default="free")
     ap.add_argument("--extra-gb", type=int, default=0)
@@ -55,6 +57,10 @@ def main() -> None:
         uid = next(x["Value"] for x in users[0]["Attributes"] if x["Name"] == "sub")
     if a.action in ("unlimited", "limited"):
         wallet.set_unlimited(uid, a.action == "unlimited")
+    elif a.action == "watermark":
+        boto3.resource("dynamodb").Table(os.environ["FLAGS_TABLE"]).update_item(Key={"user_id": uid}, UpdateExpression="SET watermark_custom = :v", ExpressionAttributeValues={":v": not a.off})   # keeps the other flags
+        print(f"{a.who} ({a.stage}): premium watermark {'OFF' if a.off else 'ON'}")
+        return
     elif a.action == "storage":
         import calendar, time as _t
         until = calendar.timegm(_t.strptime(a.until, "%Y-%m-%d")) + 86400 if a.until else None

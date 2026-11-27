@@ -10,7 +10,7 @@ from datetime import date
 
 import logging
 
-from . import engagement, language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, voices
+from . import engagement, language as lang_mod, plan as plan_mod, quality, research, researcher, skills as skills_mod, staged as staged_mod, vector_policy, voices
 from .netsafe import quality_fixes
 
 SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S = 1.0, 1.5   # the same under a minute (15, 30, 45 s): the music-only frame is 2.5 s, not 6 (plan.SHORT_PHOTO_FRAME_S)
@@ -29,7 +29,7 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
            web_provider: Any = None, ask_tools: Optional[researcher.AskTools] = None, today: Optional[str] = None,
            budget: Optional[researcher.Budget] = None, photos: Optional[List[Dict[str, Any]]] = None,
            max_images_per_minute: Optional[float] = None, music_tracks: Optional[List[Dict[str, Any]]] = None, story: Optional[Dict[str, Any]] = None,
-           options: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+           options: Optional[Dict[str, Any]] = None, vector_search: Optional[Callable[..., List[Dict[str, Any]]]] = None) -> Dict[str, Any]:
     """Returns {"legit": False, "reason": ...} or {"legit": True, "plan": ..., "warnings": [...], "fetched": [titles], "research": {...}}.
     With a `web_provider` the brief is first classified: time-sensitive briefs get a web research agent, the rest the cheap encyclopedia path."""
     region = voices.clean_region(region)
@@ -78,40 +78,46 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
                 sources = r.sources + [s for s in sources if s["title"] not in have]
     if plan_mod.is_short(minutes):
         notes = notes[:SHORT_NOTES_CHARS]
+    vpolicy = vector_policy.decide(prompt, options=options, skill_ids=skill_ids, photos=photos, research_mode=info["mode"], minutes=minutes,
+                                   expected_beats=plan_mod.expected_beats(minutes, len(photos or [])), search=vector_search,
+                                   ask=(lambda sys_, usr: ask_small(sys_, usr, 160)) if vector_policy.enabled() else None)   # the cartoon scenes: a special style, offered only where the policy allows (docs/VECTOR_SCENE_POLICY.md)
+    craft += vpolicy.prompt_block(language)
     written_from = [notes]   # everything the writer was shown (the grounding check compares the narration with it)
     rate = {"max_images_per_minute": max_images_per_minute} if max_images_per_minute is not None else {}
-    if staged_mod.is_staged(minutes, len(photos or [])):
-        # a long video is written in stages (outline, then each section on its own, each with its own research): see engine/staged.py
-        lock = threading.Lock()
+    with vector_policy.scope(vpolicy):
+        if staged_mod.is_staged(minutes, len(photos or [])):
+            # a long video is written in stages (outline, then each section on its own, each with its own research): see engine/staged.py
+            lock = threading.Lock()
 
-        def research_section(sec: Dict[str, Any]) -> Tuple[str, List[Dict[str, str]]]:
-            brief = f"{prompt}: {sec['title']}. {sec['goal']}"
-            if web_provider is not None and ask_tools is not None:
-                dec = researcher.Decision(mode="web", queries=sec["queries"], topic="general", reason="research for one section of a long video")
-                r = researcher.research_web(brief, decision=dec, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools, budget=budget)
-                with lock:
-                    info["searches"] = info.get("searches", 0) + r.searches
-                    info["section_searches"] = info.get("section_searches", 0) + r.searches
-                if r.sources:
-                    return r.notes, r.sources
-            sec_errors: List[Dict[str, Any]] = []
-            out = research.gather_notes(f"{sec['title']} {prompt}", language=language, ask=lambda s, u: ask_small(s, u, 120), errors=sec_errors)
-            if sec_errors:
-                with lock:
-                    fetch_errors.extend(sec_errors)
-            return out
+            def research_section(sec: Dict[str, Any]) -> Tuple[str, List[Dict[str, str]]]:
+                brief = f"{prompt}: {sec['title']}. {sec['goal']}"
+                if web_provider is not None and ask_tools is not None:
+                    dec = researcher.Decision(mode="web", queries=sec["queries"], topic="general", reason="research for one section of a long video")
+                    r = researcher.research_web(brief, decision=dec, language=language, region=region, today=today, provider=web_provider, ask_tools=ask_tools, budget=budget)
+                    with lock:
+                        info["searches"] = info.get("searches", 0) + r.searches
+                        info["section_searches"] = info.get("section_searches", 0) + r.searches
+                    if r.sources:
+                        return r.notes, r.sources
+                sec_errors: List[Dict[str, Any]] = []
+                out = research.gather_notes(f"{sec['title']} {prompt}", language=language, ask=lambda s, u: ask_small(s, u, 120), errors=sec_errors)
+                if sec_errors:
+                    with lock:
+                        fetch_errors.extend(sec_errors)
+                return out
 
-        plan, warnings, sinfo = staged_mod.generate(prompt, notes, minutes, ask_big, research=research_section, language=language, region=region,
-                                                    today=today if web_provider is not None else None, allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, **rate)
-        seen = {s["title"] for s in sources}
-        sources = sources + [s for s in sinfo["sources"] if s["title"] not in seen and not seen.add(s["title"])]
-        info["staged"] = {"sections": sinfo["sections"], "titles": sinfo["titles"]}
-        written_from = [notes] + list(sinfo.get("notes") or [])
-    else:
-        plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
-                                                  allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, **rate)
+            plan, warnings, sinfo = staged_mod.generate(prompt, notes, minutes, ask_big, research=research_section, language=language, region=region,
+                                                        today=today if web_provider is not None else None, allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, **rate)
+            seen = {s["title"] for s in sources}
+            sources = sources + [s for s in sinfo["sources"] if s["title"] not in seen and not seen.add(s["title"])]
+            info["staged"] = {"sections": sinfo["sections"], "titles": sinfo["titles"]}
+            written_from = [notes] + list(sinfo.get("notes") or [])
+        else:
+            plan, warnings = plan_mod.generate_plan(prompt, notes, minutes, ask_big, language=language, region=region, today=today if info["mode"] == "web" else None, photos=photos,
+                                                      allow_clips=info["mode"] != "web", music_tracks=music_tracks, craft=craft, story=story, **rate)
     if not plan.get("legit"):
         return {"legit": False, "reason": plan.get("reason", "")}
+    warnings += vector_policy.enforce(plan, vpolicy)   # only catalog ids, the share cap, never two in a row; records plan["vector"]
     rejected = plan.pop("_rejected_scenes", None) or []
     if fetch_errors:
         info["fetch_errors"] = fetch_errors[:20]
