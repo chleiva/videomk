@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from PIL import Image
 
+from .. import numfmt
 from ..canvas import Canvas, partial_polyline, with_alpha
 from ..easing import ease_in_out_cubic, ease_out_back, ease_out_cubic, lerp, progress, reveal_times
 from ..theme import Theme
@@ -108,8 +109,9 @@ def draw_diagram(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: T
 def _fmt(v: float, unit: str) -> str:
     dec = 0 if abs(v) >= 100 or float(v).is_integer() else 1 if abs(v) >= 10 else 2
     s = format_number(v, dec, abs(v) >= 1000)
-    if "." in s:
-        s = s.rstrip("0").rstrip(".")
+    mark = "," if numfmt.current_language() == "es" else "."   # the video's decimal mark (the number is already written the way its language does)
+    if mark in s:
+        s = s.rstrip("0").rstrip(mark)
     if unit in ("$", "€", "£"):
         return unit + s
     return s + (unit if unit in ("%", "x") else (" " + unit if unit else ""))
@@ -458,7 +460,7 @@ def _credit_y(fr) -> float:
     return 40 if fr.landscape else max(40, fr.margin_top - 30)
 
 
-def _draw_word(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, ctx: Optional[SceneCtx] = None) -> None:
+def _draw_word(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, ctx: Optional[SceneCtx] = None, over: Optional[Tuple[float, float, float]] = None) -> None:
     """One big word over a picture (a silent beat's punchline): fades in, holds, fades out, with a soft shadow so it reads on any photograph."""
     word = str(props.get("word") or "").strip()
     if not word:
@@ -468,7 +470,9 @@ def _draw_word(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, ctx: Op
     if a <= 0.01:
         return
     fr = ctx.frame if ctx is not None else None
-    if fr is None or fr.landscape:
+    if over is not None:   # a picture smaller than the frame (the 4K clip window): the word sits inside it, (centre x, centre y, widest)
+        cx, base_y, mw, start = over[0], over[1], over[2], 190
+    elif fr is None or fr.landscape:
         cx, base_y, mw, start = 960, 500, 1500, 210
     else:
         cx, base_y, mw, start = fr.cx, ctx.top + (ctx.bottom - ctx.top) * 0.55, fr.W - 2 * fr.margin_x, 210 * fr.type_scale
@@ -562,6 +566,68 @@ def clip_cues(props: Dict[str, Any], dur: float) -> List[float]:
     return [0.0]
 
 
+# 4K and footage below ~1080p wide (our own 720p library, small stock files): drawn in a window at FRAMED_SCALE output pixels per source pixel instead of a 3x full-frame enlargement.
+FRAMED_SCALE = 1.5          # output pixels per source pixel in the window (1.0 = pixel for pixel; 1.5 verified clean on the forest clips)
+FRAMED_MIN_FULL_W = 1900    # footage at least this wide (1080p) keeps the full-bleed look: it is enlarged 2x at most, the same as 720p footage in a 1080p video
+
+
+def clip_is_framed(fr, size: Tuple[int, int]) -> bool:
+    """True for a landscape 4K frame and footage narrower than FRAMED_MIN_FULL_W. Every other frame (720p, 1080p, vertical, square) keeps the full-frame look unchanged."""
+    return bool(fr is not None and getattr(fr, "resolution", "") == "2160p" and fr.landscape and size[0] < FRAMED_MIN_FULL_W)
+
+
+_ROUND_MASK: Dict[Tuple[int, int, int], Image.Image] = {}
+
+
+def _round_mask(w: int, h: int, r: int) -> Image.Image:
+    key = (w, h, r)
+    if key not in _ROUND_MASK:
+        from PIL import ImageDraw
+
+        if len(_ROUND_MASK) > 6:
+            _ROUND_MASK.clear()
+        m = Image.new("L", (w, h), 0)
+        ImageDraw.Draw(m).rounded_rectangle([0, 0, w - 1, h - 1], radius=r, fill=255)
+        _ROUND_MASK[key] = m
+    return _ROUND_MASK[key]
+
+
+def _draw_clip_framed(cv: Canvas, props: Dict[str, Any], src: Image.Image, lt: float, dur: float, p: float, th: Theme, ctx: SceneCtx) -> None:
+    """The clip in a rounded window at its own resolution over a soft glow of itself, with a small caption line and the credit under it. Everything but the footage is
+    drawn at the canvas density, so text and edges are native 4K; the footage is enlarged at most FRAMED_SCALE x."""
+    tw, tht = cv.W * cv.ss, cv.H * cv.ss
+    ss = cv.ss
+    px = max(1.0, ss / 2.0)                       # output pixels per design unit (2 on a 4K canvas)
+    sw, sh = src.size
+    glow = Image.eval(src.resize((48, 27), Image.BOX).resize((max(2, tw // 2), max(2, tht // 2)), Image.BICUBIC), lambda v: int(v * 0.42))
+    cv.im.paste(glow.resize((tw, tht), Image.NEAREST) if ss >= HALF_FILL_SS else glow.resize((tw, tht), Image.BILINEAR))
+    wd = min(sw * FRAMED_SCALE / px, cv.W * 0.74)    # window size in design units
+    hd = wd * sh / sw
+    caption = str(props.get("alt") or "").strip()
+    credit = str(props.get("credit") or "").strip()
+    block = hd + (74 if (caption or credit) else 0)
+    top_limit, bottom_limit = 70.0, (800.0 if ctx.captions else 1000.0)
+    x = (cv.W - wd) / 2
+    y = top_limit + max(0.0, (bottom_limit - top_limit - block) / 2)
+    a = ease_out_cubic(progress(lt, 0.0, 0.45))
+    y += (1 - a) * 14
+    wc, hc = max(2, round(wd * ss)), max(2, round(hd * ss))
+    z = lerp(1.0, 1.04, p)
+    vw, vh = sw / z, sh / z
+    box = ((sw - vw) / 2, (sh - vh) / 2, (sw + vw) / 2, (sh + vh) / 2)
+    win = _fill(src, wc, hc, box, ss)
+    radius = 26
+    cv.shadow(x, y, wd, hd, radius, blur=34, dy=18, alpha=0.5 * a)
+    cv.im.paste(win, (round(x * ss), round(y * ss)), _round_mask(wc, hc, round(radius * ss)))
+    cv.rrect(x, y, wd, hd, radius, outline=with_alpha((255, 255, 255), 0.16), width=1.5)
+    ty = y + hd + 38
+    if caption:
+        cv.text(x + 6, ty, caption[:90], "regular", 30, with_alpha((255, 255, 255), 0.9 * a), anchor="lm")
+    if credit:
+        cv.text(x + wd - 6, ty, credit[:90], "regular", 22, with_alpha((255, 255, 255), 0.6 * a), anchor="rm")
+    _draw_word(cv, props, lt, dur, ctx, over=(x + wd / 2, y + hd * 0.52, wd * 0.84))
+
+
 def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Theme, ctx: SceneCtx) -> None:
     frames = ctx.resolve_clip(str(props.get("asset", ""))) if props.get("asset") else None
     tw, tht = cv.W * cv.ss, cv.H * cv.ss
@@ -572,6 +638,9 @@ def draw_clip(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, th: Them
     t = max(0.0, min(lt, dur))  # an outgoing scene holds its final frame during the crossfade; footage shorter than the scene holds its last frame (never loops)
     src = frames.frame(int(t * frames.fps))
     p = ease_in_out_cubic(progress(t, 0.0, max(dur, 0.5)))
+    if clip_is_framed(fr, src.size):   # 4K video, footage too small to fill the frame without a visible enlargement: a native-size window (docs/FOUR_K.md)
+        _draw_clip_framed(cv, props, src, lt, dur, p, th, ctx)
+        return
     z = lerp(1.0, 1.06, p)  # a slow push-in hides the modest source resolution and keeps the frame alive
     sw, sh = src.size
     base = max(tw / sw, tht / sh)

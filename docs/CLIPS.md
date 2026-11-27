@@ -154,3 +154,6 @@ Same 42 clip/montage beats (the 12 audit prompts' plans), before -> after: singl
 
 ### xfade on the Lambda's ffmpeg
 The beat Lambda uses the `engine_deps` layer: `imageio-ffmpeg==0.6.0`, a static GPL build of ffmpeg 7.0.2 for linux x86_64 (`backend/layers/engine_deps/python/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2`, built with libx264). It could not be executed here (macOS; the Docker daemon was not running), but the binary contains the `xfade` filter ("Cross fade one video with another video." plus its duration/offset/transition options), `concat`, `tpad`, `trim` and libx264. The exact filter chain ran on ffmpeg 7.1.1 locally (tests include real assemblies). Still to check on QA after deploy: one real montage. (The older `video_deps` layer has ffmpeg 4.2.2, which also has xfade, but the beat step does not use it.)
+
+## 4K videos: small footage plays in a window (2026-11-27)
+In a 4K video, footage narrower than 1900 px (our own 720p library, small stock files) is normalised to 1280x720 and drawn in a rounded 1.5x window over a dark glow of itself, with the scene's `alt` and the credit under it, instead of a 3x full-frame enlargement. Footage of 1080p or more stays full bleed. 720p and 1080p videos are unchanged. Details and numbers: docs/FOUR_K.md (section "Clips in 4K").

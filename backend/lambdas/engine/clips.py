@@ -541,9 +541,30 @@ def verify(mp4: bytes, narration: str, alt: str, query: str, seconds: float, *, 
 
 
 # ----------------------------------------------------------------------------- normalise
+NATIVE_MIN_HD_W = 1900   # a source narrower than this is not enlarged to 1920x1080 for a 4K video (see transcode)
+
+
+def probe_size(path: str) -> Tuple[int, int]:
+    """(width, height) of the first video stream, read with ffmpeg itself (no ffprobe in the layer); (0, 0) when unreadable."""
+    try:
+        proc = subprocess.run([media.ffmpeg_bin(), "-hide_banner", "-i", path], capture_output=True, text=True, timeout=30)
+        for line in proc.stderr.splitlines():
+            if "Video:" in line:
+                m = re.search(r"(?<![\d])(\d{2,5})x(\d{2,5})(?![\d])", line.split("Video:", 1)[1])
+                if m:
+                    return int(m.group(1)), int(m.group(2))
+    except Exception:
+        pass
+    return 0, 0
+
+
 def transcode(src_path: str, out_path: str, *, start: float, seconds: float, loop: bool = False, orientation: str = "landscape", hd: bool = False) -> None:
     """Trim, crop to the video's shape (16:9 1280x720 by default, 9:16 720x1280 portrait, 720x720 square; `hd`, for 4K videos: 1920x1080, 1080x1920, 1080x1080), 30 fps, no audio,
     H.264: small, uniform, cheap to decode frame by frame. A source smaller than the target is enlarged here (bicubic), as before."""
+    if hd and _orient(orientation) == "landscape":
+        w0, _h0 = probe_size(src_path)
+        if 0 < w0 < NATIVE_MIN_HD_W:
+            hd = False   # footage under ~1080p wide stays at its own resolution (1280x720) in a 4K video: the renderer shows it in a window instead of enlarging it 3x (docs/FOUR_K.md)
     CLIP_W, CLIP_H = clip_size(orientation, hd)
     cmd = [media.ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error"]   # footage is never looped: `loop` is kept only for old callers and ignored
     cmd += ["-ss", f"{start:.3f}", "-i", src_path, "-t", f"{seconds:.3f}", "-an", "-sn",
@@ -756,7 +777,7 @@ def plan_slots(cover: float, avail: Sequence[float], fade: float = MONTAGE_FADE_
     return [round(x, 3) for x in slots]
 
 
-def _montage_cmd(paths: Sequence[str], slots: Sequence[float], avail: Sequence[float], out: str, *, dissolve: bool, hd: bool) -> List[str]:
+def _montage_cmd(paths: Sequence[str], slots: Sequence[float], avail: Sequence[float], out: str, *, dissolve: bool, hd: bool, size: Optional[Tuple[int, int]] = None) -> List[str]:
     k = len(paths)
     cmd = [media.ffmpeg_bin(), "-y", "-hide_banner", "-loglevel", "error"]
     for pth in paths:
@@ -765,7 +786,7 @@ def _montage_cmd(paths: Sequence[str], slots: Sequence[float], avail: Sequence[f
     parts = []
     for i in range(k):
         hold = max(0.0, lens[i] - avail[i])   # at most MONTAGE_MAX_HOLD_S by construction (plan_slots)
-        parts.append(f"[{i}:v]tpad=stop_mode=clone:stop_duration={hold + 0.05:.3f},trim=duration={lens[i]:.3f},setpts=PTS-STARTPTS[v{i}]")
+        parts.append(f"[{i}:v]tpad=stop_mode=clone:stop_duration={hold + 0.05:.3f},trim=duration={lens[i]:.3f},setpts=PTS-STARTPTS{f',scale={size[0]}:{size[1]},setsar=1' if size else ''}[v{i}]")
     if k == 1:
         chain, last = "", "v0"
     elif dissolve:
@@ -795,8 +816,13 @@ def assemble_montage(parts: Sequence[bytes], slots: Sequence[float], avail: Sequ
             paths.append(pth)
         out = os.path.join(tmp, "montage.mp4")
         err = ""
+        size = None
+        if hd and len(paths) > 1:   # in a 4K video footage can arrive at 1280x720 (small sources) or 1920x1080: a montage needs one size, the smallest (never enlarge)
+            sizes = {probe_size(q) for q in paths} - {(0, 0)}
+            if len(sizes) > 1:
+                size = min(sizes, key=lambda z: z[0] * z[1])
         for dissolve in ((True, False) if len(parts) > 1 else (False,)):
-            proc = subprocess.run(_montage_cmd(paths, slots, avail, out, dissolve=dissolve, hd=hd), capture_output=True, text=True, timeout=120)
+            proc = subprocess.run(_montage_cmd(paths, slots, avail, out, dissolve=dissolve, hd=hd, **({"size": size} if size else {})), capture_output=True, text=True, timeout=120)
             if proc.returncode == 0 and os.path.exists(out) and os.path.getsize(out) > 1000:
                 with open(out, "rb") as fh:
                     return fh.read()

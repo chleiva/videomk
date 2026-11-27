@@ -339,6 +339,7 @@ def test_clip_sizes_and_the_transcode_command(monkeypatch):
 
     monkeypatch.setattr(clips.subprocess, "run", run)
     monkeypatch.setattr(clips.media, "ffmpeg_bin", lambda: "ffmpeg")
+    monkeypatch.setattr(clips, "probe_size", lambda path: (1920, 1080))   # a 1080p source (a smaller one stays 1280x720 in a 4K video: tests/test_clip_framed_4k.py)
     out = os.path.join(os.environ.get("TMPDIR", "/tmp"), "fourk_clip_test.mp4")
     clips.transcode("in.mp4", out, start=1.0, seconds=5.0)
     clips.transcode("in.mp4", out, start=1.0, seconds=5.0, hd=True)
