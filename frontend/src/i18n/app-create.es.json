@@ -151,5 +151,7 @@
  "create.sign_in_again": "Vuelve a iniciar sesión.",
  "create.prompt_label": "Describe tu video",
  "create.try_prompt_added": "Tu idea está lista.",
- "create.lang_auto": "Automático"
+ "create.lang_auto": "Automático",
+ "create.starting": "Iniciando tu video…",
+ "create.cancel": "Cancelar"
 }

@@ -207,7 +207,7 @@ export default function Editor() {
           </div>
           {tab === "preview" && plan.preview.url && !previewFresh && <p className="caption">{t("editor.older")}</p>}
           <div className="editor-video">
-            {showUrl ? <Player key={showUrl} src={showUrl} title={meta.title || t("gen.untitled")} newVideoHref="/generations?create=1" /> : <div className="watch-state">{t("editor.no_video_yet")}</div>}
+            {showUrl ? <Player key={showUrl} src={showUrl} title={meta.title || t("gen.untitled")} newVideoHref="/new" /> : <div className="watch-state">{t("editor.no_video_yet")}</div>}
             {rendering && <div className="editor-rendering" role="status"><Spinner />{plan.edit_mode === "final" ? t("editor.rendering_final") : t("editor.rendering_preview")}</div>}
           </div>
           <div className="editor-actions">

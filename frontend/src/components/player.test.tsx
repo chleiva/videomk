@@ -6,7 +6,7 @@ import { PATHS } from "./PlayerIcons";
 import { EN, ES } from "../i18n/catalog";
 
 describe("player markup", () => {
-  const m = html(<Player src="https://example.com/v.mp4" title="Forest" newVideoHref="/generations?create=1" />);
+  const m = html(<Player src="https://example.com/v.mp4" title="Forest" newVideoHref="/new" />);
   it("is a labelled group the keyboard can reach", () => {
     expect(m).toContain('role="group"');
     expect(m).toContain('aria-label="Video player: Forest"');

@@ -42,8 +42,7 @@ const faq = ["own", "lang", "photos", "google", "cost"] as const;
 		<div class="mk-wrap mk-center">
 			<h1 id="hero-title" class="mk-h1">{tr("hero.title")}</h1>
 			<p class="mk-lead">{tr("hero.lead")}</p>
-			<form class="mk-ask" action={appUrl(APP_PATHS.videos)} method="get">
-				<input type="hidden" name="new" value="1" />
+			<form class="mk-ask" action={appUrl(APP_PATHS.create)} method="get">
 				<label for="hero-prompt" class="sr-only-vmk">{tr("hero.field")}</label>
 				<input id="hero-prompt" class="mk-ask-input" type="text" name="prompt" maxlength="500" placeholder={tr("hero.placeholder")} autocomplete="off" enterkeyhint="go" />
 				<button class="btn btn-primary mk-ask-btn" type="submit">{tr("hero.cta")}</button>

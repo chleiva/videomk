@@ -1,14 +1,14 @@
 // Videos: a grid of real thumbnails (the making card first), a search pill, a New video button. No per-card buttons: the card opens the video, the ... menu holds the rest.
 import "../../styles/app-b.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { EmptyState, MakingCard, Thumb, useToast } from "../ui";
+import { EmptyState, MakingCard, Spinner, Thumb, useToast } from "../ui";
 import { AIcon as Icon } from "./icons";
 import { Menu } from "./Menu";
 import Shortcuts from "./Shortcuts";
 import { useVideos } from "./useVideos";
 import { APP_PATHS, appUrl } from "../../lib/links";
 import { filterVideos, formatDuration, isMaking } from "../../lib/videos";
-import type { TaskItem } from "../../lib/videos";
+import type { RetryOutcome, TaskItem } from "../../lib/videos";
 import { useLocale } from "../../lib/useLocale";
 
 function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, number>) => string): string | null {
@@ -26,8 +26,10 @@ function ago(iso: string | null | undefined, tr: (k: string, p?: Record<string, 
   return mon < 12 ? tr("time.months", { n: mon }) : tr("time.years", { n: Math.floor(mon / 12) });
 }
 
-function Card({ v, thumb, onCopied }: { v: TaskItem; thumb?: string; onCopied: () => void }) {
+function Card({ v, thumb, onCopied, onRetry, onRemove }: { v: TaskItem; thumb?: string; onCopied: () => void; onRetry: (id: string) => Promise<void>; onRemove: (id: string) => Promise<void> }) {
   const { t } = useLocale();
+  const [busy, setBusy] = useState<"retry" | "remove" | null>(null);
+  const act = async (what: "retry" | "remove") => { if (busy) return; setBusy(what); try { await (what === "retry" ? onRetry(v.id) : onRemove(v.id)); } finally { setBusy(null); } };
   const title = v.title || t("gen.untitled");
   const dur = formatDuration(v.duration_s);
   const failed = v.status === "error" || v.status === "rejected";
@@ -42,7 +44,14 @@ function Card({ v, thumb, onCopied }: { v: TaskItem; thumb?: string; onCopied: (
   return (
     <article className={`vtile ${failed ? "is-failed" : ""}`}>
       {failed ? (
-        <div className="vtile-fail"><p className="vtile-title">{title}</p><p className="muted">{v.status === "rejected" ? (v.reject_reason || t("gen.rejected_default")) : t("gen.error_detail")}</p></div>
+        <div className="vtile-fail">
+          <p className="vtile-title">{title}</p>
+          <p className="muted">{v.status === "rejected" ? (v.reject_reason || t("gen.rejected_default")) : t("gen.error_detail")}</p>
+          <div className="vtile-actions">
+            {v.status === "error" && v.can_retry && <button type="button" className="btn btn-tonal btn-sm" disabled={busy !== null} aria-busy={busy === "retry"} onClick={() => void act("retry")}>{busy === "retry" ? <Spinner /> : <Icon name="retry" size={16} />}{t("gen.retry")}</button>}
+            <button type="button" className="btn btn-line btn-sm" disabled={busy !== null} aria-busy={busy === "remove"} onClick={() => void act("remove")}>{busy === "remove" && <Spinner />}{t("gen.remove")}</button>
+          </div>
+        </div>
       ) : (
         <a href={watch} onClick={remember} className="vtile-link" aria-label={dur ? t("gen.watch_duration", { title, duration: dur }) : t("gen.watch", { title })}>
           <Thumb id={v.id} src={thumb} duration={dur} />
@@ -57,7 +66,7 @@ function Card({ v, thumb, onCopied }: { v: TaskItem; thumb?: string; onCopied: (
 
 export default function VideosPage() {
   const { t } = useLocale();
-  const { items, thumbs, state, reload } = useVideos();
+  const { items, thumbs, state, reload, retry, remove } = useVideos();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -75,6 +84,10 @@ export default function VideosPage() {
     return () => window.removeEventListener("vmk:search", on);
   }, []);
 
+  const RETRY_KEY: Record<Exclude<RetryOutcome, { ok: true }>["kind"], string> = { attachments: "gen.retry_attachments", limit: "gen.retry_limit", rejected: "gen.retry_rejected", credits: "gen.retry_credits", gone: "gen.retry_gone", unsupported: "gen.retry_unsupported", paused: "gen.retry_error", error: "gen.retry_error" };
+  const onRetry = async (id: string) => { const out = await retry(id); if (out.ok) { toast.show(t("gen.retry_started")); window.scrollTo({ top: 0, behavior: "smooth" }); } else toast.show(out.message || t(RETRY_KEY[out.kind])); };
+  const onRemove = async (id: string) => { toast.show(t((await remove(id)) ? "gen.removed" : "gen.remove_error")); };
+
   const making = useMemo(() => items.filter(isMaking), [items]);
   const rest = useMemo(() => filterVideos(items.filter((i) => !isMaking(i)), q), [items, q]);
   const showMaking = !q.trim();
@@ -91,7 +104,7 @@ export default function VideosPage() {
       <>
         <div className="vgrid">
           {showMaking && making.map((m) => <MakingCard key={m.id} title={m.title} stage={m.stage} etaSeconds={m.eta_seconds} />)}
-          {rest.map((v) => <Card key={v.id} v={v} thumb={thumbs[v.id]} onCopied={() => toast.show(t("gen.link_copied"))} />)}
+          {rest.map((v) => <Card key={v.id} v={v} thumb={thumbs[v.id]} onCopied={() => toast.show(t("gen.link_copied"))} onRetry={onRetry} onRemove={onRemove} />)}
         </div>
         {q.trim() && rest.length === 0 && <p className="muted vempty" role="status">{t("gen.search_none", { q: q.trim() })}</p>}
       </>

@@ -151,5 +151,7 @@
  "create.sign_in_again": "Please sign in again.",
  "create.prompt_label": "Describe your video",
  "create.try_prompt_added": "Your prompt is ready.",
- "create.lang_auto": "Auto"
+ "create.lang_auto": "Auto",
+ "create.starting": "Starting your video…",
+ "create.cancel": "Cancel"
 }

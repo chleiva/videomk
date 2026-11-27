@@ -91,3 +91,30 @@ describe("redesigned list helpers", () => {
     expect(nextPollMs(0, true, true)).toBeNull();
   });
 });
+
+import { markRetrying, retryOutcome } from "./videos";
+describe("try again reuses the same video", () => {
+  it("a cancelled or failed video is a failed card that can offer Try again", () => {
+    expect(normalizeItem({ video_id: "a", status: "CANCELLED", can_retry: true })).toMatchObject({ status: "error", can_retry: true });
+    expect(normalizeItem({ video_id: "b", status: "FAILED" })).toMatchObject({ status: "error", can_retry: false });
+  });
+  it("maps the retry route's answers; an older server never leads to a resend", () => {
+    expect(retryOutcome(202, { status: "STARTED_PROCESSING" })).toEqual({ ok: true });
+    expect(retryOutcome(200, { message: "already running" })).toEqual({ ok: true });
+    expect(retryOutcome(409, { code: "attachments_unavailable", message: "m" })).toEqual({ ok: false, kind: "attachments", message: "m" });
+    expect(retryOutcome(409, { code: "retry_limit" })).toMatchObject({ ok: false, kind: "limit" });
+    expect(retryOutcome(409, { code: "rejected" })).toMatchObject({ ok: false, kind: "rejected" });
+    expect(retryOutcome(402, { code: "insufficient_credits" })).toMatchObject({ ok: false, kind: "credits" });
+    expect(retryOutcome(404, { code: "not_found" })).toMatchObject({ ok: false, kind: "gone" });
+    expect(retryOutcome(404, { message: "Missing Authentication Token" })).toEqual({ ok: false, kind: "unsupported" });
+    expect(retryOutcome(403, null)).toEqual({ ok: false, kind: "unsupported" });
+    expect(retryOutcome(500, null)).toMatchObject({ ok: false, kind: "error" });
+  });
+  it("the retried item stays the same item: same id, same place, now being made", () => {
+    const list = [{ id: "x", status: "complete" as const }, { id: "f", status: "error" as const, can_retry: true, title: "T" }];
+    const next = markRetrying(list, "f");
+    expect(next).toHaveLength(2);
+    expect(next[1]).toMatchObject({ id: "f", title: "T", status: "running", stage: "starting", can_retry: false });
+    expect(next[0]).toBe(list[0]);
+  });
+});

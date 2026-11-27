@@ -158,5 +158,17 @@
  "upload.a11y": "Photo upload progress",
  "gen.download": "Download",
  "media.previous": "Previous photo",
- "media.next": "Next photo"
+ "media.next": "Next photo",
+ "gen.remove": "Remove",
+ "gen.removed": "Removed.",
+ "gen.remove_error": "We couldn't remove it. Try again.",
+ "gen.retry_started": "Trying again. Same video, same photos.",
+ "gen.retry_attachments": "Some photos of this video are no longer available, so it can't be made again as it was. Create it again with your photos.",
+ "gen.retry_limit": "This video was tried several times. Create it again as a new video.",
+ "gen.retry_rejected": "This request can't be made.",
+ "gen.retry_credits": "You need more credits to try again.",
+ "gen.retry_gone": "This video is no longer here.",
+ "gen.retry_unsupported": "Trying again isn't available right now. Your video and its photos were not changed.",
+ "gen.retry_error": "We couldn't start it again. Try in a moment.",
+ "media.make_video_n": "Make a video · {n}"
 }

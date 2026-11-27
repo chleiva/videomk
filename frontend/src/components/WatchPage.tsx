@@ -109,7 +109,7 @@ export default function WatchPage() {
     try { await navigator.clipboard.writeText(description); toast.show(t("watch.copied")); } catch { toast.show(t("watch.share_failed")); }
   };
 
-  const newHref = "/generations?create=1";
+  const newHref = "/new";
   const feedbackHref = `/feedback?from=after_video&video=${encodeURIComponent(id)}`;
   const reportHref = `/feedback?from=report&kind=problem&video=${encodeURIComponent(id)}`;
 

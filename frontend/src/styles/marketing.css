@@ -43,7 +43,8 @@ html.marketing { scroll-padding-top: 4.5rem; scroll-behavior: smooth; }
 /* ---- sample videos */
 .mk-frame { position: relative; overflow: hidden; border-radius: var(--radius-video); background: var(--stage); box-shadow: var(--elev-3); }
 .mk-video { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--stage); }
-.mk-hint { display: none; position: absolute; top: var(--space-3); right: var(--space-3); align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius-pill); background: var(--scrim); color: var(--on-scrim); pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+/* the sound hint sits UNDER the video's own top-right credit line ("Video: …"), never on it */
+.mk-hint { display: none; position: absolute; top: max(2.25rem, 7.5%); right: var(--space-3); align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius-pill); background: var(--scrim); color: var(--on-scrim); pointer-events: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .mk-js .mk-hint { display: inline-flex; }
 .mk-frame:has(video[data-sound]) .mk-hint { display: none; }
 .mk-js .mk-video { cursor: pointer; }

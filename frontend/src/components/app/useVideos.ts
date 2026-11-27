@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getAuthorizationHeader } from "../../lib/auth";
 import { apiGateway } from "../../lib/config";
 import { currentLocaleHeaders } from "../../lib/i18n";
-import { isMaking, nextPollMs, normalizeItem, reuseUnchanged, stableThumbs } from "../../lib/videos";
-import type { TaskItem } from "../../lib/videos";
+import { isMaking, markRetrying, nextPollMs, normalizeItem, retryOutcome, reuseUnchanged, stableThumbs } from "../../lib/videos";
+import type { RetryOutcome, TaskItem } from "../../lib/videos";
 
 const CACHE = "vmk_tasks";
 const newestFirst = (a: TaskItem, b: TaskItem) => (b.created_at ? Date.parse(b.created_at) : 0) - (a.created_at ? Date.parse(a.created_at) : 0);
@@ -52,5 +52,33 @@ export function useVideos() {
   }, [load]);
 
   const reload = useCallback(() => { attempt.current = 0; setState((s) => (s === "ready" ? s : "loading")); void load(); }, [load]);
-  return { items, thumbs, state, reload };
+
+  /** "Try again": the SAME video runs again (same id, same card). Nothing is created here and nothing is resent from the browser, so the photos cannot be lost. */
+  const retry = useCallback(async (id: string): Promise<RetryOutcome> => {
+    try {
+      const { Authorization, userId } = await getAuthorizationHeader();
+      if (!userId) return { ok: false, kind: "error" };
+      const res = await fetch(apiGateway.retryVideo(userId, id), { method: "POST", headers: { Authorization, ...currentLocaleHeaders() } });
+      const out = retryOutcome(res.status, await res.json().catch(() => null));
+      if (out.ok && alive.current) {
+        setItems((prev) => { const next = markRetrying(prev, id); try { sessionStorage.setItem(CACHE, JSON.stringify(next)); } catch { /* full */ } return next; });
+        attempt.current = 0; void load();
+      }
+      return out;
+    } catch { return { ok: false, kind: "error" }; }
+  }, [load]);
+
+  /** Remove a video that did not finish (DELETE .../videos/{id}); a made video is never deleted here. */
+  const remove = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      const { Authorization, userId } = await getAuthorizationHeader();
+      if (!userId) return false;
+      const res = await fetch(apiGateway.getVideo(userId, id), { method: "DELETE", headers: { Authorization, ...currentLocaleHeaders() } });
+      if (!res.ok && res.status !== 404) return false;
+      if (alive.current) setItems((prev) => { const next = prev.filter((i) => i.id !== id); try { sessionStorage.setItem(CACHE, JSON.stringify(next)); } catch { /* full */ } return next; });
+      return true;
+    } catch { return false; }
+  }, []);
+
+  return { items, thumbs, state, reload, retry, remove };
 }

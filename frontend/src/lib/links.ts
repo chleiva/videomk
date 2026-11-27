@@ -4,7 +4,7 @@ import { APP_URL, SITE_URL } from "./config";
 import type { Locale } from "./i18n";
 
 /** Paths that exist in the app (app.videomk.com). */
-export const APP_PATHS = { videos: "/generations", create: "/generations?new=1", watch: "/watch", edit: "/edit", credits: "/wallet", feedback: "/feedback", signin: "/signin", media: "/media", settings: "/settings" } as const;
+export const APP_PATHS = { videos: "/generations", create: "/new", watch: "/watch", edit: "/edit", credits: "/wallet", feedback: "/feedback", signin: "/signin", media: "/media", settings: "/settings" } as const;
 /** Paths that exist on the marketing site (videomk.com), English; Spanish lives under /es. */
 export const SITE_PATHS = { home: "/", privacy: "/privacy", terms: "/terms", support: "/support", deleteAccount: "/delete-account" } as const;
 
@@ -29,5 +29,5 @@ export function siteUrl(path: string = "/", locale: Locale = "en"): string {
 
 /** "Try this prompt" CTA: opens the app's Create with the prompt filled in (the app reads `prompt`; signed-out people go through sign-in first and come back). */
 export function tryPromptUrl(prompt: string): string {
-  return appUrl(APP_PATHS.videos, { new: 1, prompt: prompt.slice(0, 500) });
+  return appUrl(APP_PATHS.create, { prompt: prompt.slice(0, 500) });
 }

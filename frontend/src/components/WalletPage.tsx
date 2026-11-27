@@ -46,7 +46,7 @@ export default function WalletPage() {
           {wallet.next_daily_at && !wallet.unlimited && <p className="credits-line">{t("credits.next_free", { date: day(wallet.next_daily_at) })}</p>}
 
           <div className="credits-actions">
-            <a className="btn btn-primary" href="/generations?create=1"><PIcon name="plus" size={18} />{t("credits.new_video")}</a>
+            <a className="btn btn-primary" href="/new"><PIcon name="plus" size={18} />{t("credits.new_video")}</a>
             <button type="button" className="btn btn-tonal" disabled aria-disabled="true" title={t("credits.soon")}>{t("credits.get_more")}<span className="soon">{t("credits.soon")}</span></button>
           </div>
 

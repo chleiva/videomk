@@ -21,6 +21,7 @@ import { libraryDeps } from "../../lib/uploadDeps";
 import { useLocale } from "../../lib/useLocale";
 
 const HANDOFF = "vmk_compose_library";
+const SELECTION = "vmk_media_selection";   // the ticked photos survive the trip to Create and back (cleared when the video is sent or the selection is closed)
 const PRIVACY_KEY = "vmk_media_privacy_seen";
 const ORGANIZE_FROM = 30;   // batches under 30 photos never prompt
 
@@ -29,7 +30,8 @@ export default function MediaPage() {
   const lib = useLibrary();
   const up = useUploadQueue(libraryDeps);
   const toast = useToast();
-  const [sel, setSel] = useState<Selection>(emptySelection);
+  const [sel, setSelRaw] = useState<Selection>(() => { try { const ids = JSON.parse(sessionStorage.getItem(SELECTION) || "null"); return Array.isArray(ids) && ids.length ? { ids: ids.filter((x) => typeof x === "string").slice(0, MAX_SELECT), anchor: null } : emptySelection; } catch { return emptySelection; } });
+  const setSel = useCallback((next: Selection) => { setSelRaw(next); try { if (next.ids.length) sessionStorage.setItem(SELECTION, JSON.stringify(next.ids)); else sessionStorage.removeItem(SELECTION); } catch { /* private mode */ } }, []);
   const [viewer, setViewer] = useState<number | null>(null);
   const [confirm, setConfirm] = useState<string[] | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -128,7 +130,7 @@ export default function MediaPage() {
         <h1 className="h1">{t("media.title")}</h1>
         <div className="page-tools">
           {sum && sum.limit_bytes > 0 && <p className={`storage tone-${tone}`} aria-label={t("media.storage_a11y", { used: formatBytes(sum.used_bytes, locale), limit: formatBytes(sum.limit_bytes, locale) })}><span className="storage-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, Math.round((sum.used_bytes / sum.limit_bytes) * 100))}%` }} /></span><span>{t("media.storage", { used: formatBytes(sum.used_bytes, locale), limit: formatBytes(sum.limit_bytes, locale) })}</span></p>}
-          <button type="button" className="btn btn-primary" onClick={() => input.current?.click()} disabled={sum?.read_only}><Icon name="plus" size={18} />{t("media.add")}</button>
+          <button type="button" className="btn btn-primary" onClick={() => input.current?.click()} disabled={sum?.read_only}><Icon name="upload" size={18} />{t("media.add")}</button>
         </div>
         <input ref={input} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { add(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
       </header>
@@ -147,7 +149,7 @@ export default function MediaPage() {
           {years.map((y) => <button key={y.year} type="button" className="chip" aria-pressed={lib.filter.kind === "year" && (lib.filter as any).value === y.year} onClick={() => lib.setFilter({ kind: "year", value: y.year })}>{y.year}</button>)}
           {places.map((p) => <button key={p.name} type="button" className="chip" aria-pressed={lib.filter.kind === "place" && (lib.filter as any).value === p.name} onClick={() => lib.setFilter({ kind: "place", value: p.name })}>{p.name.split(",")[0]}</button>)}
           {sum.collections.map((c) => <button key={c.id} type="button" className="chip" aria-pressed={lib.filter.kind === "collection" && (lib.filter as any).value === c.id} onClick={() => lib.setFilter({ kind: "collection", value: c.id })}>{c.emoji ? `${c.emoji} ` : ""}{c.name}<span className="chip-count">{c.count}</span></button>)}
-          <button type="button" className="chip chip-add" aria-label={t("media.new_collection")} onClick={() => { setPendingAdd([]); setNewName(""); }}><Icon name="plus" size={16} /></button>
+          <button type="button" className="chip chip-add" onClick={() => { setPendingAdd([]); setNewName(""); }}><Icon name="folder" size={16} />{t("media.new_collection")}</button>
         </div>
       )}
       {inCollection && <p className="coll-bar"><span>{inCollection.name}</span><button type="button" className="btn btn-line btn-sm" onClick={async () => { if (await deleteCollection(inCollection.id)) { lib.setFilter({ kind: "all" }); void lib.loadSummary(); } else toast.show(t("media.collection_error")); }}>{t("media.collection_delete")}</button></p>}
@@ -157,7 +159,7 @@ export default function MediaPage() {
       {selecting && (
         <div className="selbar" role="toolbar" aria-label={t("media.selected_n", { n: sel.ids.length })}>
           <span className="selbar-n" role="status">{t("media.selected_n", { n: sel.ids.length })}</span>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => makeVideo(sel.ids)}>{t("media.make_video")}</button>
+          <button type="button" className="btn btn-primary btn-sm selbar-go" onClick={() => makeVideo(sel.ids)}>{t("media.make_video_n", { n: sel.ids.length })}</button>
           <Menu label={t("media.add_to_collection")} triggerClass="btn btn-line btn-sm" trigger={<span>{t("media.add_to_collection")}</span>} align="end"
             items={[...(sum?.collections ?? []).filter((c) => !c.auto || true).map((c) => ({ id: c.id, label: `${c.emoji ? c.emoji + " " : ""}${c.name}` })), { id: "__new", label: t("media.new_collection") }]}
             onPick={(id) => { if (id === "__new") { setPendingAdd(sel.ids); setNewName(""); } else void addTo(id, sel.ids, sum?.collections.find((c) => c.id === id)?.name ?? ""); }} />

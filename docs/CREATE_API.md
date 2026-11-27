@@ -88,3 +88,19 @@ The flow has three calls before `generate`, so the person sees problems and the 
 6. **What the apps must send**: `X-Locale` on every call above (messages and codes follow the person's language; the `code` never changes), `X-Timezone` on `generate` as always. Never log or cache deck contents; the app never needs to read the file after uploading it.
 
 What the video is: the person's slides stay on screen exactly as designed (rendered to pictures; **animations, transitions and embedded video/audio are ignored, every slide shows its final state**; bullets do not appear one by one), a narrator explains each slide, the camera pushes in on the part being discussed, and slides cross-fade. Fonts the server does not have are substituted (Calibri, Cambria, Arial, Times, Courier are metric-compatible), so line breaks can differ slightly. Set this expectation in the upload sheet: "Your slides appear as they are. Animations are not included."
+
+## Retry a video, remove a video that did not finish (2026-11-27; `lambdas/video_retry.py`, tests `tests/test_video_retry.py`)
+
+"Try again" on a video that did not finish reuses **that video**: same id, same list item, status back to making. A client must **never** build a new `generate` request for a retry (that is how a video lost its 60 photos): it calls the route below, and the server runs the stored request again with every photo, option, language and watermark.
+
+* **`POST /users/{user}/videos/{video_id}/retry`** (Cognito, no body; send `X-Locale`).
+  * `202 {"message": "workflow restarted", "video_id", "status": "STARTED_PROCESSING", "retries": n, "photos": n, "photos_unusable"?: n}`: the same item is being made again.
+  * `200 {"message": "already running", "video_id", "status", "retries"}`: a second tap; nothing started, nothing charged. Treat like 202.
+  * `409 {"code": "attachments_unavailable", "message", "photos", "missing"}`: some photos can no longer be restored. Nothing started, nothing charged. Show the message; the person creates the video again with their photos.
+  * `409 {"code": "retry_limit"}` (3 retries per video), `409 {"code": "rejected"}` (a safety decision is never retried), `409 {"code": "not_failed"}`, `409 {"code": "no_request" | "deck_used"}`.
+  * `402 {"code": "insufficient_credits", "balance", "needed"}`: the failed attempt was refunded; the retry is charged like a new video.
+  * `404 {"code": "not_found"}`: not the caller's video (ids cannot be probed). A 404 **without** that code, or 403/405, means an older server without the route: show "not available", do not resend.
+  * `429` with `Retry-After`: the account is paused.
+* **`DELETE /users/{user}/videos/{video_id}`**: removes a `FAILED`, `CANCELLED` or `REJECTED` video of the caller and its working files. `200 {"message": "deleted", "video_id"}`; `409 {"code": "not_deletable"}` for a made video; `404 {"code": "not_found"}`.
+* **List** (`GET .../videos`): a `FAILED` or `CANCELLED` item carries `"can_retry": true|false` (false after 3 retries or for a presentation video, whose deck was used up). Offer "Try again" only when it is true; always offer "Remove".
+* **Clients**: iOS, Android and web (`frontend/src/components/app/useVideos.ts`, `lib/videos.ts retryOutcome`) update the card in place (the item becomes the making card), then poll as usual.

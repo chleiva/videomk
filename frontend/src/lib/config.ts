@@ -25,6 +25,7 @@ export const apiGateway = {
   deckProcess: (userId: string, deckId: string) => `${API_BASE}/users/${u(userId)}/decks/${u(deckId)}/process`,
   feedback: (userId: string) => `${API_BASE}/users/${u(userId)}/feedback`,
   wallet: (userId: string) => `${API_BASE}/users/${u(userId)}/wallet`,
+  retryVideo: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/retry`,
   edits: (userId: string, videoId: string) => `${API_BASE}/users/${u(userId)}/videos/${u(videoId)}/edits`,
 };
 

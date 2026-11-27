@@ -27,6 +27,7 @@ import { useLocale } from "../../lib/useLocale";
 import type { Photo } from "../../lib/library";
 
 const EXAMPLES = ["create.example1", "create.example2", "create.example3"];
+const MEDIA_SELECTION = "vmk_media_selection";   // My media keeps its ticked photos here while the composer is open, so Back returns to the same selection
 const HANDOFF = "vmk_compose_library";       // My media -> "Make a video": the chosen photos wait here for the composer
 // The scene-style row stays hidden until the server's VECTOR_SCENES switch is on in this environment (docs/VECTOR_SCENE_POLICY.md): set PUBLIC_SCENE_STYLE=1 at build time then.
 const SCENE_STYLE_ON = ["1", "true", "on"].includes(String(((import.meta as any).env ?? {}).PUBLIC_SCENE_STYLE ?? "").toLowerCase());
@@ -71,8 +72,12 @@ export default function Composer() {
   const dict = useRef<Dictation | null>(null);
   const dictBase = useRef("");
   const urls = useRef<string[]>([]);
+  const formEl = useRef<HTMLFormElement>(null);
+  const checkRun = useRef(0);   // a request check that was cancelled must not act when its answer arrives late
 
   const photos = useUploadQueue(directDeps);
+  const lockedNow = sending || stage.k === "checking";
+  useEffect(() => { const el = formEl.current; if (!el) return; el.toggleAttribute("inert", lockedNow); if (lockedNow) (document.activeElement as HTMLElement | null)?.blur?.(); }, [lockedNow]);
 
   useEffect(() => {
     let alive = true;
@@ -153,6 +158,7 @@ export default function Composer() {
         return;
       }
       if (!ready) saveChoices(f);
+      try { sessionStorage.removeItem(MEDIA_SELECTION); } catch { /* private mode */ }   // the photos were used: My media starts clean
       location.assign(`${APP_PATHS.videos}?started=1`);
     } catch (e) {
       console.error(e);
@@ -173,8 +179,13 @@ export default function Composer() {
     if (!enough) { setHint({ text: t("create.not_enough", { needed: credits, balance: wallet?.balance ?? 0 }), credits: true }); return; }
     if (!live || c.intake === false) { await generate(); return; }
     setHint(null); setStage({ k: "checking" });
-    followBrief(await checkRequest(text, buildOptions(f, c, live), []), []);
+    const run = ++checkRun.current;
+    const out = await checkRequest(text, buildOptions(f, c, live), []);
+    if (run !== checkRun.current) return;   // cancelled meanwhile: the form is already back, untouched
+    followBrief(out, []);
   }
+  /** Cancel while the request is being checked: nothing was sent to be made yet, so the form simply comes back as it was. */
+  function cancelCheck() { if (stage.k !== "checking" || sending) return; checkRun.current++; setStage({ k: "form" }); setTimeout(() => area.current?.focus(), 20); }
   function followBrief(out: Awaited<ReturnType<typeof checkRequest>>, answers: Answer[]) {
     if (out.status === "questions") { setOther(""); setStage({ k: "questions", questions: out.questions, i: 0, answers }); }
     else if (out.status === "ok") void generate(out.brief);
@@ -189,7 +200,9 @@ export default function Composer() {
   async function finish(answers: Answer[]) {
     if (!f) return;
     setStage({ k: "checking" });
+    const run = ++checkRun.current;
     const out = await checkRequest(f.text.trim(), buildOptions(f, c, live), answers);
+    if (run !== checkRun.current) return;
     if (out.status === "ok") void generate(out.brief); else if (out.status === "questions") void generate(); else followBrief(out, answers);   // asked enough: make it
   }
 
@@ -209,6 +222,7 @@ export default function Composer() {
   const quality = qualityChoices(c, f);
   const aspects = c.aspects.filter((a) => a.ready);
   const questionTitle = stage.k === "questions" ? t("create.questions_title") : stage.k === "stop" ? (stage.kind === "paused" ? t("create.paused_title") : t("create.cant_make_title")) : "";
+  const locked = sending || stage.k === "checking";   // from the tap until the answer: nothing on the form can change, and it says what is happening
   const canSend = !sending && !busyDeck && !addingPhotos && stage.k === "form" && (ready ? true : f.text.trim().length > 0);
   const empty = !f.text.trim() && !deckActive && totalPhotos === 0;
 
@@ -218,7 +232,7 @@ export default function Composer() {
         <h1 className="compose-title">{t("create.heading")}</h1>
       </div>
 
-      <form className="composer-card" onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
+      <form ref={formEl} className={`composer-card ${locked ? "is-locked" : ""}`} aria-busy={locked} onSubmit={submit} onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }} onDrop={(e) => { if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}>
         <label htmlFor="create-text" className="sr-only-vmk">{t("create.prompt_label")}</label>
         <textarea id="create-text" ref={area} data-autofocus autoFocus rows={3} className="compose-text" value={f.text} maxLength={1500} placeholder={ready ? t("deck.placeholder") : t("create.placeholder")} aria-describedby="create-hint"
           onChange={(e) => { setHint(null); set({ text: e.target.value }); }}
@@ -288,12 +302,19 @@ export default function Composer() {
           </div>
 
           <button type="submit" className="btn btn-primary compose-go" disabled={!canSend} aria-busy={sending || stage.k === "checking"} aria-label={t("create.cta_a11y", { credits: t("create.credits", { n: credits }) })}>
-            {sending || stage.k === "checking" ? <><Spinner /><span>{stage.k === "checking" ? t("create.checking") : t("gen.starting")}</span></> : addingPhotos ? <><Spinner /><span>{t("create.photos_wait")}</span></> : <><span>{t("create.cta", { n: credits })}</span><Icon name="bolt" size={18} /></>}
+            {sending || stage.k === "checking" ? <><Spinner /><span>{sending ? t("create.starting") : t("create.checking")}</span></> : addingPhotos ? <><Spinner /><span>{t("create.photos_wait")}</span></> : <><span>{t("create.cta", { n: credits })}</span><Icon name="bolt" size={18} /></>}
           </button>
         </div>
         <input ref={files} type="file" hidden tabIndex={-1} accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
         {c.deck && <input ref={deckInput} type="file" hidden tabIndex={-1} accept={c.deck.formats.map((x) => (x === "pdf" ? ".pdf" : ".pptx")).join(",")} onChange={(e) => { const file = e.target.files?.[0]; if (file) void deck.begin(file); e.target.value = ""; }} />}
       </form>
+
+      {locked && (
+        <p className="compose-progress" role="status">
+          <span>{sending ? t("create.starting") : t("create.checking")}</span>
+          {!sending && <button type="button" className="btn btn-line btn-sm" onClick={cancelCheck}>{t("create.cancel")}</button>}
+        </p>
+      )}
 
       <div className="compose-notes" aria-live="polite">
         {listening && <p className="hint"><span className="live-dot" aria-hidden="true" /> {t("create.dictating")}</p>}

@@ -15,6 +15,7 @@ export interface TaskItem {
   preview_gif_url?: string | null;
   duration_s?: number | null;
   video_url?: string | null;
+  can_retry?: boolean;   // a failed video the server will run again as the SAME item (POST .../retry)
 }
 
 const STATUS: Record<string, [Status, Stage?]> = {
@@ -26,6 +27,7 @@ const STATUS: Record<string, [Status, Stage?]> = {
   COMPLETE: ["complete"],
   ERROR: ["error"],
   FAILED: ["error"],
+  CANCELLED: ["error"],
   REJECTED: ["rejected"],
 };
 
@@ -55,6 +57,7 @@ export function normalizeItem(it: any): TaskItem | null {
     created_at: typeof it?.created_at === "string" ? it.created_at : null,
     duration_s: typeof it?.duration_s === "number" ? it.duration_s : null,
     video_url: typeof it?.video_url === "string" ? it.video_url : null,
+    can_retry: it?.can_retry === true,
   };
 }
 
@@ -146,4 +149,32 @@ export function reuseUnchanged(prev: TaskItem[], next: TaskItem[]): TaskItem[] {
 export function nextPollMs(attempt: number, anyMaking: boolean, hidden: boolean): number | null {
   if (!anyMaking || hidden) return null;
   return Math.min(30000, 5000 + attempt * 3000);
+}
+
+// ---------------------------------------------------------------- try again / remove (docs/CREATE_API.md "Retry a video")
+/** What the retry route answered, as the list needs it. "Try again" reuses the SAME video: it never creates a second item and never resends a request without its photos. */
+export type RetryOutcome =
+  | { ok: true }                                                      // 202 restarted, or 200 already running
+  | { ok: false; kind: "attachments" | "limit" | "rejected" | "credits" | "gone" | "unsupported" | "paused" | "error"; message?: string };
+
+export function retryOutcome(status: number, body: any): RetryOutcome {
+  const message = typeof body?.message === "string" ? body.message : undefined;
+  if (status === 200 || status === 202) return { ok: true };
+  if (status === 402) return { ok: false, kind: "credits", message };
+  if (status === 429) return { ok: false, kind: "paused", message };
+  if (status === 409) {
+    const code = String(body?.code ?? "");
+    if (code === "attachments_unavailable") return { ok: false, kind: "attachments", message };
+    if (code === "retry_limit") return { ok: false, kind: "limit", message };
+    if (code === "rejected") return { ok: false, kind: "rejected", message };
+    return { ok: false, kind: "error", message };
+  }
+  if (status === 404) return body?.code === "not_found" ? { ok: false, kind: "gone", message } : { ok: false, kind: "unsupported" };   // an older server has no such route: say so, never resend without the photos
+  if (status === 403 || status === 405) return { ok: false, kind: "unsupported" };
+  return { ok: false, kind: "error", message };
+}
+
+/** The list right after a retry was accepted: the same item, now being made (first in the list until the next poll brings the server's view). */
+export function markRetrying(items: TaskItem[], id: string): TaskItem[] {
+  return items.map((i) => (i.id === id ? { ...i, status: "running" as Status, stage: "starting" as Stage, can_retry: false, reject_reason: null } : i));
 }

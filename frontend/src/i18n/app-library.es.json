@@ -158,5 +158,17 @@
  "upload.a11y": "Progreso de la subida de fotos",
  "gen.download": "Descargar",
  "media.previous": "Foto anterior",
- "media.next": "Foto siguiente"
+ "media.next": "Foto siguiente",
+ "gen.remove": "Quitar",
+ "gen.removed": "Quitado.",
+ "gen.remove_error": "No pudimos quitarlo. Inténtalo de nuevo.",
+ "gen.retry_started": "Intentándolo de nuevo. El mismo video, las mismas fotos.",
+ "gen.retry_attachments": "Algunas fotos de este video ya no están disponibles, así que no se puede repetir tal cual. Créalo de nuevo con tus fotos.",
+ "gen.retry_limit": "Este video se intentó varias veces. Créalo de nuevo como un video nuevo.",
+ "gen.retry_rejected": "Esta solicitud no se puede crear.",
+ "gen.retry_credits": "Necesitas más créditos para intentarlo de nuevo.",
+ "gen.retry_gone": "Este video ya no está aquí.",
+ "gen.retry_unsupported": "Ahora mismo no se puede volver a intentar. Tu video y sus fotos no han cambiado.",
+ "gen.retry_error": "No pudimos iniciarlo de nuevo. Prueba en un momento.",
+ "media.make_video_n": "Crear un video · {n}"
 }
