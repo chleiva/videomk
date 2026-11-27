@@ -58,3 +58,24 @@ Owner decision: the director picks. `engine/background.py`, tests `tests/test_ba
 - **Never muddy:** the palette must be one that suits the theme (midnight: midnight, ocean, violet, forest, mono; sunrise: sunrise, ember, violet; paper, light mode: violet, ocean, forest, midnight, mono), and `mesh`/`lava` are never used on the warm palettes (sunrise, ember), nor `mesh` in light mode (a dark corner on the sample sheet). A wish outside this keeps its style on an allowed palette, else the mood's style. A theme change in the editor re-settles it.
 - **Continuity:** the background runs on the video's clock, not the scene's: the timeline writes each scene's place in the loop (`bg_t0 = start mod loop`), so it flows across scene changes and chunk boundaries (tested: the cut is one frame's drift). An edit that shifts later scenes re-renders their chunks (only for videos with a background).
 - **Switch:** `stages.json` `"bgAnimated": true` (QA) or `-c bgAnimated=1` sets `BG_ANIMATED=1` on the engine functions. Off: no call, no plan field, frames and segment hashes exactly as before. A plan that already has a background renders with the static glow if the flag is later turned off.
+
+## Asking for a background in the request text (2026-11-27; `engine/background.request_wish`, tests `backend/tests/test_looks.py`)
+The person can ask in plain words, in English or Spanish, the way "make it a cartoon" asks for cartoon scenes. Only phrases that name the background count ("a video about smoke" changes nothing). A stated wish wins over the mood and over the data-heavy rule; it never applies to a video made of the person's own photos; with the switches off it does nothing.
+| Words in the request | Result |
+|---|---|
+| "with a purple 3D background" (purple, violet, blue, indigo; "con un fondo 3D morado", violeta, azul) | `gas-brand-dark`; the video takes the midnight theme |
+| "with a warm 3D background" (warm, orange, fire, ember, red; "con un fondo 3D cálido", naranja, fuego, rojo) | `gas-ember-dark`; sunrise theme |
+| "with a green 3D background" (green, teal, aurora, emerald; "con un fondo 3D verde", turquesa) | `gas-aurora-dark`; midnight theme |
+| "with a light 3D background" (light, white, bright, pale; "con un fondo 3D claro", blanco) | `gas-brand-light`; paper theme |
+| "with a 3D background", "3D smoke background", "fondo 3D", "fondo en 3D" (no colour) | a 3D loop that fits the theme the writer chose (the one whose tags name the video's mood, else the first) |
+| "with an animated background", "moving background", "smoke background", "fondo animado", "fondo en movimiento" | a moving background for sure (also on a data-heavy video); which one is still the director's choice |
+| "no moving background", "still / static background", "without an animated background", "fondo fijo", "fondo estático", "sin fondo animado" | no moving background: the static look. Wins when both kinds of words appear |
+* A colour word must sit right at the word background ("purple background", "fondo morado", "fondo 3D de color verde"); a colour elsewhere in the request is ignored. A colour alone ("a blue background") already asks for that loop.
+* The theme follows the look only when the person did not choose a theme in the options (`theme` in the request). If they did and it cannot carry the look (a light background on the midnight theme), the theme stays and the nearest procedural background plays.
+* Where the 3D loops are switched off the same words give the procedural gas in the nearest palette.
+* The plan records it: `plan.background.by = "request"` (and `research.background`), or `research.background = {"by": "request", "style": "none"}` for "no moving background".
+* No model call is made when a look or "3D" is named (the choice is arithmetic). Capabilities publishes the phrases per stage: `looks.backgrounds.ask = [{id, label, say}]` (a test checks that every published phrase does what it says, in both languages).
+* Honest limit: the words stay in the request the writer reads, so the script may occasionally mention the background. Not seen in the checks, not excluded.
+
+**Production (2026-11-27):** `"bgAnimated": true` is now also set for `prod` in `backend/stages.json` (owner: prod and QA behave the same). Remove it and deploy to switch off.
+

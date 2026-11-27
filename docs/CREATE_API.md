@@ -25,7 +25,7 @@ An unknown value is a 400 with a plain message. An `aspect` not listed as `ready
  "platforms": [{"id": "youtube", "label": "YouTube", "aspect": "16:9", "resolution": "1080p", "recommended_minutes": 3, "max_minutes": null, "other_aspects": ["1:1", "4:5"], "note": "Landscape 16:9 · 1080p · about 3 min", "supports_4k": true, "note_4k": null},
                {"id": "linkedin", "label": "LinkedIn", "aspect": "4:5", "resolution": "1080p", "recommended_minutes": 1, "max_minutes": 10, "other_aspects": ["1:1", "16:9"], "note": "Portrait 4:5 · 1080p · about 1 min", "supports_4k": false, "note_4k": "LinkedIn publishes at 1080p or lower; 4K would cost twice the credits for no visible gain."}, ...],
  "languages": [{"id": "en", "label": "English"}, {"id": "es", "label": "Español"}],
- "lengths": {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]}, "max_photos": 100, "intake": true}
+ "lengths": {"min_minutes": 0.25, "max_minutes": 12, "presets": [0.25, 0.5, 0.75, 1, 2, 3, 5, 8, 12]}, "max_photos": 100, "intake": true, "looks": {...see "Looks" below...}}
 ```
 **Lengths.** `target_minutes` is a number from 0.25 (15 s) to 12; `presets` are the chips to show (15 s, 30 s, 45 s, 1 min, 2 min ...). Credits are the started minutes, at least 1: 15, 30, 45 and 60 seconds cost 1 credit, 61 seconds costs 2. Under a minute the engine writes a short-form script (about 2 to 4 beats, hook in the first 2 seconds), see `docs/SHORT_VIDEOS.md`.
 
@@ -43,6 +43,47 @@ An unknown value is a 400 with a plain message. An `aspect` not listed as `ready
 * A failed or rejected 4K video refunds everything it was charged (the doubled amount). Edits and re-renders of a 4K video stay 4K, cost no credits (as for every video), and their **previews are the same small draft as for a 1080p video** (960x540 for 16:9); only the final render is 4K. `GET .../videos` and the video item report `resolution: "2160p"` for a finished 4K video.
 * A 4K video takes about 2 to 3 times as long to render as the same video at 1080p (roughly 15 to 20 minutes for a 12-minute video) and its file is about 2.3 times as large (about 70 MB per minute, at most 180 MB per minute): the app should say that it takes longer and should not assume the file is small when downloading or sharing.
 * The `brief` request accepts `"resolution": "2160p"` in `options` like any other value; it never changes the questions.
+
+## Looks: scene style and moving backgrounds (2026-11-27; `lambdas/capabilities_api.looks`, `engine/vector_policy.py`, `engine/background.py`, tests `tests/test_looks.py`)
+What a client can ask for and what the server decides by itself. Capabilities says what THIS stage has switched on; read it instead of assuming.
+
+**In capabilities** (`GET /users/{user}/capabilities`, labels and notes in the `X-Locale` language):
+```json
+"looks": {
+  "style": {"param": "style", "default": "auto", "options": [
+    {"id": "auto",    "label": "Auto",        "note": "We choose: photos and footage, with cartoon scenes only where they suit the topic.", "available": true},
+    {"id": "cartoon", "label": "Illustrated", "note": "Adds animated cartoon scenes. Good for children's topics and simple ideas.",        "available": true},
+    {"id": "real",    "label": "Real",        "note": "Only photos and footage, never cartoon scenes.",                                    "available": true}]},
+  "backgrounds": {"animated": true, "loops_3d": true, "chosen_by": "director", "note": "Moving backgrounds behind text scenes are chosen for each video. Videos made from your photos keep a still background.", "ask": [...see below...]}
+}
+```
+Spanish labels: `Automático`, `Ilustradas`, `Reales`. An older server has no `looks` key: then offer no style choice.
+
+**Scene style: the `style` field of `POST /users/{user}/videos/generate`** (string; also accepted by `brief` in `options`).
+| Send | Meaning |
+|---|---|
+| nothing, or `"style": "auto"` | The director decides. Cartoon scenes appear only where the policy allows (children's topics, everyday or abstract ideas, light-hearted, wellness; never news, real people, places or products, history, finance, medical, how-to that needs real pictures, LinkedIn, the person's own photos), and sparingly: at most about 20 percent of the scenes (40 percent for children's topics). Most videos get none. |
+| `"style": "cartoon"` | The person wants illustrated scenes: up to 60 percent of the scenes are cartoon scenes from our catalog, when the catalog has scenes that fit the topic. The words "make it a cartoon", "illustrated style", "dibujos animados", "estilo ilustrado" in the request text do the same. |
+| `"style": "real"` | Photographs and footage only, never a cartoon scene. The words "real footage", "no cartoons", "imágenes reales", "sin dibujos" in the text do the same, and win over cartoon words. |
+* The field, when sent, wins over the words of the request. Any other value is a 400.
+* `available: false` on `cartoon` means the cartoon scenes are switched off on this stage (prod today): hide or disable that option. Sending `"style": "cartoon"` there is still accepted and simply produces a video without cartoon scenes.
+* A cartoon scene is one beat of the video: a flat-colour illustrated landscape or setting with gentle motion (drifting clouds, swaying plants, swimming fish, bobbing boats, birds, smoke), full screen in every format (16:9, 9:16, 1:1, 4:5), with the captions on top. They are settings, not characters: there are no people or animals acting out the story yet. A short video (under about 50 seconds; under 30 for children's topics) gets none.
+* What the video got is recorded in its plan (`plan.vector`: decision, reason, the scenes used); the list and item responses do not carry it.
+
+**Moving backgrounds: no request field, but the person can ask in the request text.** For every video that is not made from the person's own photos the director picks one background for the whole video: a pre-rendered 3D loop (`loops_3d`) or a procedural animated one (`animated`), by the topic's mood; a video that is mostly charts, tables, maps or code, and every photo video, keeps the still background. The background is only visible behind text and diagram scenes: full-screen clips, photographs and cartoon scenes cover it, so a video made mostly of footage shows little of it.
+* **Asking by words** (read by the server from `prompt`; full table in `docs/HERO_LOOPS_3D.md`): capabilities lists the phrases this stage understands as `looks.backgrounds.ask`, already in the `X-Locale` language:
+```json
+"ask": [{"id": "gas-brand-dark",  "label": "Purple 3D gas",        "say": "with a purple 3D background"},
+        {"id": "gas-ember-dark",  "label": "Warm 3D embers",       "say": "with a warm 3D background"},
+        {"id": "gas-aurora-dark", "label": "Green 3D aurora",      "say": "with a green 3D background"},
+        {"id": "gas-brand-light", "label": "Light 3D gas",         "say": "with a light 3D background"},
+        {"id": "animated",        "label": "Any moving background", "say": "with an animated background"},
+        {"id": "none",            "label": "Still background",     "say": "no moving background"}]
+```
+  (Spanish `say`: "con un fondo 3D morado", "con un fondo 3D cálido", "con un fondo 3D verde", "con un fondo 3D claro", "con un fondo animado", "con fondo fijo".) The four loop entries are present only where `loops_3d` is true; the list is empty where both switches are off. An app that wants to offer a choice appends the `say` text to the person's prompt (for example as a suggestion chip); there is nothing else to send. A named look also sets the video's theme unless the request carries `theme`.
+* A wish never applies to a video made from the person's photos.
+
+**Not available:** animated characters (five pilot characters exist as test clips only; nothing in the engine or the API).
 
 ## Request check (intake)
 `POST /users/{user}/videos/brief` (authenticated), called by the app when the person taps Create, BEFORE `generate`. Nothing is charged here.

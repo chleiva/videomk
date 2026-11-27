@@ -149,7 +149,7 @@ def _caps(monkeypatch, locale="en", **env):
 def test_capabilities_lists_the_looks_of_this_stage(monkeypatch):
     off = _caps(monkeypatch)
     assert off["style"]["param"] == "style" and off["style"]["default"] == "auto" and [o["id"] for o in off["style"]["options"]] == ["auto", "cartoon", "real"]
-    assert [o["available"] for o in off["style"]["options"]] == [True, False, True] and off["backgrounds"] == {"animated": False, "loops_3d": False, "chosen_by": "director", "note": off["backgrounds"]["note"]}
+    assert [o["available"] for o in off["style"]["options"]] == [True, False, True] and off["backgrounds"] == {"animated": False, "loops_3d": False, "chosen_by": "director", "note": off["backgrounds"]["note"], "ask": []}
     assert "cartoon" not in off["style"]["options"][0]["note"].lower()                         # with the cartoon scenes off, Auto does not promise them
     on = _caps(monkeypatch, VECTOR_SCENES="1", BG_ANIMATED="1", BG_LOOPS="1")
     assert [o["available"] for o in on["style"]["options"]] == [True, True, True] and on["backgrounds"]["animated"] is True and on["backgrounds"]["loops_3d"] is True
@@ -218,3 +218,123 @@ def test_the_stack_switches_the_cartoon_scenes_on_only_where_asked_and_only_with
 def test_stages_json_turns_the_cartoon_scenes_on_in_qa_only():
     stages = json.load(open(os.path.join(ROOT, "stages.json")))
     assert stages["qa"].get("vectorScenes") is True and "vectorScenes" not in stages["prod"]
+
+
+# ---------------------------------------------------------------- a background asked for in the request text
+from engine import background as bgsel, bg_loops as L, director   # noqa: E402
+from tests.test_background import _big, _small   # noqa: E402
+
+LOOPS = L.clean_index(json.load(open(os.path.join(ROOT, "scripts", "hero_loops_index.json"))))
+
+
+@pytest.mark.parametrize("text,want", [
+    ("How tides work, with a purple 3D background", {"kind": "loop", "look": "brand"}),
+    ("The history of fire with a warm 3D smoke background", {"kind": "loop", "look": "ember"}),
+    ("How forests breathe. Green 3D background please", {"kind": "loop", "look": "aurora"}),
+    ("Three tips for better sleep with a light 3D background", {"kind": "loop", "look": "light"}),
+    ("How tides work with a 3D smoke background", {"kind": "loop"}),
+    ("How tides work, background in 3D", {"kind": "loop"}),
+    ("Cómo funcionan las mareas, con un fondo 3D morado", {"kind": "loop", "look": "brand"}),
+    ("La historia del fuego con fondo 3D cálido", {"kind": "loop", "look": "ember"}),
+    ("Cómo respiran los bosques, con un fondo 3D verde", {"kind": "loop", "look": "aurora"}),
+    ("Tres consejos para dormir mejor con un fondo 3D claro", {"kind": "loop", "look": "light"}),
+    ("Cómo funcionan las mareas con fondo en 3D", {"kind": "loop"}),
+    ("How tides work, with an animated background", {"kind": "animated"}),
+    ("How tides work with a moving background", {"kind": "animated"}),
+    ("Cómo funcionan las mareas con un fondo animado", {"kind": "animated"}),
+    ("Cómo funcionan las mareas, fondo en movimiento", {"kind": "animated"}),
+    ("A blue background for a video about the sea", {"kind": "loop", "look": "brand"}),
+    ("How tides work, no moving background", {"kind": "none"}),
+    ("How tides work with a still background", {"kind": "none"}),
+    ("How tides work without an animated background", {"kind": "none"}),
+    ("Cómo funcionan las mareas, con fondo fijo", {"kind": "none"}),
+    ("Cómo funcionan las mareas sin fondo animado", {"kind": "none"}),
+    ("An animated background, but no 3D background", {"kind": "none"}),          # "no" wins when both appear
+    ("How smoke detectors work", None), ("The background of the French Revolution", None), ("Why is the sky blue", None), ("A 3D printer explained", None),
+    ("El trasfondo de la guerra fría", None), ("Purple rain: the story of the song", None), ("", None), (None, None),
+])
+def test_the_request_text_can_ask_for_a_background(text, want):
+    assert bgsel.request_wish(text) == want
+
+
+@pytest.mark.parametrize("look,loop,theme", [("brand", "gas-brand-dark", "midnight"), ("ember", "gas-ember-dark", "sunrise"), ("aurora", "gas-aurora-dark", "midnight"), ("light", "gas-brand-light", "paper")])
+def test_a_wished_look_gets_its_loop_and_its_theme_without_a_model_call(look, loop, theme):
+    wish = {"kind": "loop", "look": look}
+    assert bgsel.wish_theme(wish) == theme
+    for mood in ("calm", "bright", "tense"):
+        bg = bgsel.choose("x", {"title": "T", "mood": mood, "theme": theme}, lambda s, u: (_ for _ in ()).throw(AssertionError("no call")), loops=LOOPS, wish=wish)
+        assert bg["loop"] == loop and bg["by"] == "request" and bg["loop_seconds"] == 10.0 and bg["mode"] == bgsel.mode_of(theme) and bgsel.allowed(bg["style"], bg["palette"], bg["mode"])
+    no_loops = bgsel.choose("x", {"title": "T", "mood": "calm", "theme": theme}, None, loops=None, wish=wish)   # the loops switched off: the nearest procedural look
+    assert "loop" not in no_loops and no_loops["by"] == "request" and no_loops["style"] == "gas" and no_loops["palette"] in bgsel.THEME_PALETTES[theme]
+    other = "paper" if theme != "paper" else "midnight"                                                            # a theme chosen in the options that cannot carry the look
+    assert "loop" not in bgsel.choose("x", {"title": "T", "mood": "calm", "theme": other}, None, loops=LOOPS, wish=wish)
+
+
+def test_3d_without_a_colour_takes_a_loop_of_the_videos_theme():
+    for theme, ids in (("midnight", ("gas-brand-dark", "gas-aurora-dark")), ("sunrise", ("gas-ember-dark",)), ("paper", ("gas-brand-light",))):
+        assert bgsel.choose("x", {"title": "T", "mood": "bright", "theme": theme}, None, loops=LOOPS, wish={"kind": "loop"})["loop"] in ids
+
+
+def _direct(monkeypatch, prompt, answer='{"style": "bokeh", "palette": "midnight", "loop": "none"}', theme=None, scenes=None, photos=None, **env):
+    for k in ("BG_LOOPS", "BG_ANIMATED"):
+        monkeypatch.delenv(k, raising=False)
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    from engine import awsio
+    monkeypatch.setattr(awsio, "get_json", lambda k: json.load(open(os.path.join(ROOT, "scripts", "hero_loops_index.json"))))
+    L.reset_index_cache()
+
+    def big(system, user):
+        d = json.loads(_big(system, user))
+        if scenes:
+            for b, sc in zip(d["beats"], scenes):
+                b["scene"] = sc
+        return json.dumps(d)
+    out = director.direct(prompt, minutes=1.0, ask_small=_small(answer), ask_big=big, language="en", theme=theme, photos=photos)
+    L.reset_index_cache()
+    return out
+
+
+def test_the_director_follows_the_wish_and_sets_the_theme_the_look_needs(monkeypatch):
+    out = _direct(monkeypatch, "how tides work, with a warm 3D background", BG_LOOPS="1", BG_ANIMATED="1")
+    assert out["plan"]["theme"] == "sunrise" and out["plan"]["background"]["loop"] == "gas-ember-dark" and out["research"]["background"]["by"] == "request"
+    out = _direct(monkeypatch, "how tides work, con un fondo 3D claro", BG_LOOPS="1")
+    assert out["plan"]["theme"] == "paper" and out["plan"]["background"]["loop"] == "gas-brand-light"
+    out = _direct(monkeypatch, "how tides work, with a light 3D background", theme="midnight", BG_LOOPS="1", BG_ANIMATED="1")   # the person also chose a theme in the options: it stays
+    assert out["plan"]["theme"] == "midnight" and "loop" not in out["plan"]["background"] and out["plan"]["background"]["by"] == "request"
+    out = _direct(monkeypatch, "how tides work")                                                                    # both switches off: nothing, whatever the words say
+    assert "background" not in out["plan"]
+    assert "background" not in _direct(monkeypatch, "how tides work with a purple 3D background")["plan"]
+
+
+def test_no_moving_background_means_none_and_a_wish_beats_the_data_heavy_rule(monkeypatch):
+    out = _direct(monkeypatch, "how tides work, no moving background", BG_LOOPS="1", BG_ANIMATED="1")
+    assert "background" not in out["plan"] and out["research"]["background"] == {"by": "request", "style": "none"}
+    chart = {"type": "chart", "props": {"kind": "bar", "labels": ["Red", "Green", "Violet"], "values": [42, 41, 40], "unit": "°"}}
+    title = {"type": "title", "props": {"title": "x"}}
+    plain = _direct(monkeypatch, "how tides work", scenes=[title, chart, chart, title], BG_LOOPS="1", BG_ANIMATED="1")
+    assert "background" not in plain["plan"]                                                                        # data heavy: static by default
+    asked = _direct(monkeypatch, "how tides work with a purple 3D background", scenes=[title, chart, chart, title], BG_LOOPS="1", BG_ANIMATED="1")
+    assert asked["plan"]["background"]["loop"] == "gas-brand-dark"                                                 # ... unless the person asked for one
+    moving = _direct(monkeypatch, "how tides work with an animated background", scenes=[title, chart, chart, title], BG_ANIMATED="1")
+    assert moving["plan"]["background"]["style"] == "bokeh" and moving["plan"]["background"]["by"] == "director"   # any moving one: the director still picks which
+
+
+def test_a_video_of_the_persons_photos_never_follows_a_background_wish(monkeypatch):
+    photos = [{"id": "P1", "key": "k", "w": 600, "h": 400, "orientation": "landscape", "caption": "a street"}]
+    img = [{"type": "image", "props": {"photo": "P1", "image_query": "a street", "alt": "a"}}] * 4
+    out = _direct(monkeypatch, "my trip to Paris with a purple 3D background", scenes=img, photos=photos, BG_LOOPS="1", BG_ANIMATED="1")
+    assert "background" not in out["plan"] and out["plan"]["theme"] == "midnight"
+
+
+def test_capabilities_says_how_to_ask_for_a_background(monkeypatch):
+    on = _caps(monkeypatch, BG_LOOPS="1", BG_ANIMATED="1")["backgrounds"]["ask"]
+    assert [a["id"] for a in on] == ["gas-brand-dark", "gas-ember-dark", "gas-aurora-dark", "gas-brand-light", "animated", "none"]
+    for a in on:   # every phrase we publish does what it says
+        w = bgsel.request_wish("How tides work, " + a["say"])
+        assert w and (w["kind"] == a["id"] if a["id"] in ("animated", "none") else bgsel.choose("x", {"theme": bgsel.wish_theme(w), "mood": "calm"}, None, loops=LOOPS, wish=w)["loop"] == a["id"])
+    es = _caps(monkeypatch, "es", BG_LOOPS="1", BG_ANIMATED="1")["backgrounds"]["ask"]
+    for a in es:
+        w = bgsel.request_wish("Cómo funcionan las mareas, " + a["say"])
+        assert w and (w["kind"] == a["id"] if a["id"] in ("animated", "none") else bgsel.choose("x", {"theme": bgsel.wish_theme(w), "mood": "calm"}, None, loops=LOOPS, wish=w)["loop"] == a["id"])
+    assert [a["id"] for a in _caps(monkeypatch, BG_ANIMATED="1")["backgrounds"]["ask"]] == ["animated", "none"] and _caps(monkeypatch)["backgrounds"]["ask"] == []

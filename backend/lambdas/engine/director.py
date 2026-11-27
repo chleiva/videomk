@@ -153,13 +153,18 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
-    if background.enabled() and not photos and not background.data_heavy(plan):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS, QA only; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
+    bg_wish = None if photos else background.request_wish(prompt)   # "with a purple 3D background", "fondo fijo": a stated wish wins over the mood (never on a video of the person's own photos)
+    if bg_wish and background.enabled() and theme not in ("midnight", "paper", "sunrise") and background.wish_theme(bg_wish):
+        plan["theme"] = background.wish_theme(bg_wish)   # the look asked for needs its theme (a light background is the paper theme); a theme chosen in the options stays
+    if background.enabled() and not photos and (bg_wish or {}).get("kind") != "none" and (bg_wish or not background.data_heavy(plan)):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
         bg_menu = None
         if background.loops_enabled():   # the pre-rendered 3D loops in the assets bucket: the premium look, offered when the flag is on and the index can be read
             from . import bg_loops
             bg_menu = bg_loops.load_index()
-        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 300), loops=bg_menu)   # the answer is about 20 tokens, but the model's own thinking counts against the limit (60 came back empty on QA)
+        plan["background"] = background.choose(prompt, plan, lambda s, u: ask_small(s, u, 300), loops=bg_menu, wish=bg_wish)   # the answer is about 20 tokens, but the model's own thinking counts against the limit (60 came back empty on QA)
         info["background"] = {k: plan["background"][k] for k in ("style", "palette", "by", "loop") if k in plan["background"]}
+    elif bg_wish and background.enabled():
+        info["background"] = {"by": "request", "style": "none"}
     if photos:   # the music has the first seconds and the last seconds to itself: the pictures arrive before the voice does, and the ending is held
         plan["intro_s"], plan["outro_s"] = (SHORT_PHOTO_INTRO_S, SHORT_PHOTO_OUTRO_S) if plan_mod.is_short(minutes) else (PHOTO_INTRO_S, PHOTO_OUTRO_S)
     if fit_to_target():   # the length is kept by arithmetic (engine/length.py): a script estimated past the length asked loses whole sentences, then a surplus beat; never the opening or the last line

@@ -25,7 +25,11 @@ def looks(loc: str) -> Dict[str, Any]:
             {"id": "auto", "label": i18n.t("cap.look.auto", loc), "note": i18n.t("cap.look.auto_note" if cartoon else "cap.look.auto_note_real", loc), "available": True},
             {"id": "cartoon", "label": i18n.t("cap.look.cartoon", loc), "note": i18n.t("cap.look.cartoon_note", loc), "available": cartoon},
             {"id": "real", "label": i18n.t("cap.look.real", loc), "note": i18n.t("cap.look.real_note", loc), "available": True}]},
-        "backgrounds": {"animated": _on("BG_ANIMATED"), "loops_3d": _on("BG_LOOPS"), "chosen_by": "director", "note": i18n.t("cap.look.backgrounds_note", loc)},
+        "backgrounds": {"animated": _on("BG_ANIMATED"), "loops_3d": _on("BG_LOOPS"), "chosen_by": "director", "note": i18n.t("cap.look.backgrounds_note", loc),
+                        # what a person can write in the request to ask for one (engine/background.request_wish reads the words; there is no request field)
+                        "ask": ([{"id": lid, "label": i18n.t(f"cap.look.bg.{key}", loc), "say": i18n.t(f"cap.look.bg.{key}_say", loc)}
+                                 for lid, key in (("gas-brand-dark", "purple"), ("gas-ember-dark", "warm"), ("gas-aurora-dark", "green"), ("gas-brand-light", "light")) if _on("BG_LOOPS")]
+                                + [{"id": k, "label": i18n.t(f"cap.look.bg.{k}", loc), "say": i18n.t(f"cap.look.bg.{k}_say", loc)} for k in ("animated", "none") if _on("BG_ANIMATED") or _on("BG_LOOPS")])},
     }
 
 

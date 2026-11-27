@@ -122,6 +122,8 @@ def load_folder(folder: str, width: int, height: int) -> VectorScene:
     return VectorScene(folder, width, height)
 
 
+ANIM_FPS = 15            # drawings per second of a cartoon scene (the video stays 30 fps: each drawing is held for two frames)
+_LAST: Dict[str, Any] = {}   # the last drawing made (one scene is on screen at a time; a crossfade between two cartoon scenes simply redraws)
 MAX_RASTER_SIDE = 2560   # the longest side a scene is rasterised and animated at; a 4K frame is enlarged from it (flat colour art: no visible loss, about a third of the time)
 
 
@@ -144,9 +146,15 @@ def frame_for(folder: str, w: int, h: int, t: float, dur: float) -> Image.Image:
     except (OSError, ValueError, TypeError, IndexError):
         native = (16, 9)
     rw, rh, up = cover_size(native, w, h)
+    t = round(float(t) * ANIM_FPS) / ANIM_FPS   # drawn "on twos" like hand animation: a new drawing every second video frame (the motion is slow; half the work)
+    key = (folder, w, h, t, round(float(dur), 4))
+    if _LAST.get("key") == key:
+        return _LAST["frame"]
     fr = load_folder(folder, rw, rh).frame(t, dur)
     cw, ch = min(rw, int(round(w / up))), min(rh, int(round(h / up)))   # the frame's share of the rendered scene
     if (cw, ch) != (rw, rh):
         x, y = (rw - cw) // 2, (rh - ch) // 2
         fr = fr.crop((x, y, x + cw, y + ch))
-    return fr if fr.size == (w, h) else fr.resize((w, h), Image.BICUBIC)
+    fr = fr if fr.size == (w, h) else fr.resize((w, h), Image.BICUBIC)
+    _LAST.update(key=key, frame=fr)
+    return fr

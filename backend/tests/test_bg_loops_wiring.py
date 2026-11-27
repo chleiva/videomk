@@ -337,6 +337,6 @@ def test_the_stack_sets_the_flag_only_where_asked_and_grants_read_only_access_to
     assert "backgrounds/loops/*" in by["V2RenderChunkFn"] and "backgrounds/loops/*" in by["V2SelfTestFn"]
 
 
-def test_stages_json_turns_the_loops_on_in_qa_only():
-    stages = json.load(open(os.path.join(ROOT, "stages.json")))
-    assert stages["qa"].get("bgLoops") is True and "bgLoops" not in stages["prod"]
+def test_stages_json_turns_the_loops_on_in_qa_and_prod():
+    stages = json.load(open(os.path.join(ROOT, "stages.json")))   # prod since 2026-11-27: the owner watched the four loops and approved them
+    assert stages["qa"].get("bgLoops") is True and stages["prod"].get("bgLoops") is True and stages["prod"].get("bgAnimated") is True

@@ -2,7 +2,7 @@
 
 Owner request: a few pre-rendered "advanced 3D" gas/nebula backgrounds, modern and lean, usable behind text, as the premium tier above the procedural backgrounds (docs/BACKGROUNDS_ANIMATED.md).
 
-**State (2026-11-27, evening):** four loops rendered, checked and stored in the QA bucket AND copied to the prod bucket; wired into the engine behind the flag `BG_LOOPS` (on in QA through `stages.json` `"bgLoops": true`, off in prod); two real QA videos made and looked at. See "Wired into the engine" below.
+**State (2026-11-27, evening):** four loops rendered, checked and stored in the QA bucket AND copied to the prod bucket; wired into the engine behind the flag `BG_LOOPS` (on in QA and, since the owner watched and approved all four loops on 2026-11-27, in prod: `stages.json` `"bgLoops": true` in both); two real QA videos made and looked at. See "Wired into the engine" below.
 
 ## What exists
 | id | look | text colour | 1080p | 4K master | worst / mean title contrast in the middle |
@@ -84,7 +84,7 @@ Measured on 11 frames of each file (`first`, `last`, and nine in between), nothi
 * **Plan and timeline:** `plan["background"]` keeps the procedural choice and adds `loop`, `loop_palette` and `loop_seconds = 10` (the loop's length), so every scene's `bg_t0 = start mod 10` and the picture runs on the video's clock; the loop id is in every chunk's hash. If the loop cannot be used (flag off, index unreadable, theme changed) the procedural style of the same plan plays; if the file cannot be fetched inside a render the static glow is drawn and the download is not retried for every frame (`canvas._moving_background`, log line `BG_LOOP_FAILED`).
 * **Edits:** a theme change keeps the loop only while it still fits (`background.retheme`); otherwise it is dropped and the procedural style follows the new theme.
 * **IAM:** `s3:GetObject` on `backgrounds/loops/*` for the chunk renderer and the self-test, on `backgrounds/loops/index.json` for the planner; granted in every stage (read only, no listing), so switching the flag needs no new rights.
-* **Production:** code deployed, files copied (13 objects, 223,249,438 bytes, same sizes as QA), flag OFF. To switch on: `"bgLoops": true` under `prod` in `backend/stages.json` (or `-c bgLoops=1`) and deploy. Prod render functions have 3008 MB; the loop needs about 190 MB of decoded frames at 1080p.
+* **Production:** code deployed, files copied (13 objects, 223,249,438 bytes, same sizes as QA), flag ON since 2026-11-27 (`"bgLoops": true` and `"bgAnimated": true` under `prod` in `backend/stages.json`; remove them and deploy to switch off). Prod render functions have 3008 MB; the loop needs about 190 MB of decoded frames at 1080p.
 
 ### Measured on QA (two real videos, 30 s, made 2026-11-27 13:45 UTC)
 | video | format | loop | where the loop shows |
@@ -96,6 +96,24 @@ Measured on 11 frames of each file (`first`, `last`, and nine in between), nothi
 * **Banding:** 16:9: none visible even with the dark range stretched 4 times; 9 one-level stairs in 104 rows of the finished video. 9:16: the loop is a 608 px wide centre crop enlarged 1.78 times, so it is softer, and the finished video has 55 stairs in 104 rows; at normal contrast the frame is smooth, stretched 5 times it shows the encoder's blotches in the dark areas (no contour lines). Not judged on a phone at full brightness.
 * **Cost on Lambda (the same 476-frame chunk of `555ee526` rendered three ways on warm functions):** static glow 166 ms per frame, **loop 296 ms**, procedural 408 ms. The loop costs about 130 ms a frame more than the static look and about 110 ms less than the procedural background that was already live on QA. The first real render of that video took 122, 75 and 144 s in its three render functions.
 * **Memory:** the three cold render functions of the loop video peaked at 1376, 759 and 1064 MB (of 10240 MB); a 720p vertical video with a procedural background earlier the same day peaked at 524 to 842 MB. A clean like-for-like peak was not possible (Lambda reports the highest use since the function started, and the comparison ran on warm functions).
+
+## Asking for a background in the request text (2026-11-27; `engine/background.request_wish`, tests `backend/tests/test_looks.py`)
+The person can ask in plain words, in English or Spanish, the way "make it a cartoon" asks for cartoon scenes. Only phrases that name the background count ("a video about smoke" changes nothing). A stated wish wins over the mood and over the data-heavy rule; it never applies to a video made of the person's own photos; with the switches off it does nothing.
+| Words in the request | Result |
+|---|---|
+| "with a purple 3D background" (purple, violet, blue, indigo; "con un fondo 3D morado", violeta, azul) | `gas-brand-dark`; the video takes the midnight theme |
+| "with a warm 3D background" (warm, orange, fire, ember, red; "con un fondo 3D cálido", naranja, fuego, rojo) | `gas-ember-dark`; sunrise theme |
+| "with a green 3D background" (green, teal, aurora, emerald; "con un fondo 3D verde", turquesa) | `gas-aurora-dark`; midnight theme |
+| "with a light 3D background" (light, white, bright, pale; "con un fondo 3D claro", blanco) | `gas-brand-light`; paper theme |
+| "with a 3D background", "3D smoke background", "fondo 3D", "fondo en 3D" (no colour) | a 3D loop that fits the theme the writer chose (the one whose tags name the video's mood, else the first) |
+| "with an animated background", "moving background", "smoke background", "fondo animado", "fondo en movimiento" | a moving background for sure (also on a data-heavy video); which one is still the director's choice |
+| "no moving background", "still / static background", "without an animated background", "fondo fijo", "fondo estático", "sin fondo animado" | no moving background: the static look. Wins when both kinds of words appear |
+* A colour word must sit right at the word background ("purple background", "fondo morado", "fondo 3D de color verde"); a colour elsewhere in the request is ignored. A colour alone ("a blue background") already asks for that loop.
+* The theme follows the look only when the person did not choose a theme in the options (`theme` in the request). If they did and it cannot carry the look (a light background on the midnight theme), the theme stays and the nearest procedural background plays.
+* Where the 3D loops are switched off the same words give the procedural gas in the nearest palette.
+* The plan records it: `plan.background.by = "request"` (and `research.background`), or `research.background = {"by": "request", "style": "none"}` for "no moving background".
+* No model call is made when a look or "3D" is named (the choice is arithmetic). Capabilities publishes the phrases per stage: `looks.backgrounds.ask = [{id, label, say}]` (a test checks that every published phrase does what it says, in both languages).
+* Honest limit: the words stay in the request the writer reads, so the script may occasionally mention the background. Not seen in the checks, not excluded.
 
 ## Hook-up steps (the plan that was followed)
 1. **Canvas** (`engine/canvas.py`, `Canvas.background`): where `anim` is handled today, accept a `bg_loops.LoopSpec` as well: `arr = bg_loops.render(anim, self.W, self.H, t) if isinstance(anim, bg_loops.LoopSpec) else bg_animated.render(anim, self.W, self.H, t)`; the rest (enlarge to the supersampled canvas) stays. Wrap the loop call in `try/except` and fall through to the static glow: a missing file must never fail a render.

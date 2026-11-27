@@ -58,6 +58,58 @@ Palettes: {palettes}. Use the first unless the topic clearly belongs to another 
 Answer with ONLY this JSON: {{"style": "<one style>", "palette": "<one palette>"}}"""
 
 
+# ---------------------------------------------------------------- a wish stated in the request ("with a purple 3D background", "fondo fijo")
+# The person can ask for a background in plain words, the way "make it a cartoon" asks for cartoon scenes (engine/vector_policy.py). A stated wish wins over the
+# mood and over the data-heavy rule; it never applies to a video of the person's own photos. Only phrases that name the BACKGROUND count ("a video about smoke" does not).
+_BG = r"(?:background|backdrop|fondo)"
+_NONE_RE = re.compile(
+    r"\bno\s+(?:moving|animated|3[\s-]?d|motion)\s+(?:background|backdrop)|\bwithout\s+(?:a\s+|an\s+)?(?:moving|animated|3[\s-]?d)\s+(?:background|backdrop)"
+    r"|\b(?:still|static|plain|fixed|simple)\s+(?:background|backdrop)|\bno\s+background\s+(?:animation|motion|movement)"
+    r"|\bfondo\s+(?:fijo|est[aá]tico|quieto|liso|sin\s+movimiento|sin\s+animaci[oó]n)|\bsin\s+fondo\s+(?:animado|3[\s-]?d|en\s+movimiento|en\s+3[\s-]?d)", re.I)
+_3D_RE = re.compile(
+    r"\b3[\s-]?d\b[^.\n]{0,30}\b(?:background|backdrop)|\b(?:background|backdrop)\b[^.\n]{0,20}\b3[\s-]?d\b|\bfondo\b[^.\n]{0,25}\b3[\s-]?d\b|\b3[\s-]?d\b[^.\n]{0,15}\bfondo\b"
+    r"|\bfondo\s+tridimensional", re.I)
+_ANIM_RE = re.compile(
+    r"\b(?:animated|moving|motion|live|smoke|smoky|gas|nebula|flowing)\s+(?:background|backdrop)|\b(?:background|backdrop)\s+(?:that\s+moves|animation|in\s+motion)"
+    r"|\bfondo\s+(?:animado|en\s+movimiento|con\s+movimiento|de\s+humo|de\s+gas|que\s+se\s+mueve)", re.I)
+_COLOUR_BG_RE = re.compile(r"\b([a-záéíóúñü]+)\s+(?:3[\s-]?d\s+)?(?:smoke\s+|gas\s+|animated\s+)?(?:background|backdrop)\b|\bfondo\s+(?:3[\s-]?d\s+|animado\s+|en\s+3[\s-]?d\s+|de\s+humo\s+)?(?:de\s+color\s+|en\s+|color\s+)?([a-záéíóúñü]+)", re.I)
+# colour and mood words -> the look they mean: (loop palette, light/dark mode, the theme that carries it, the procedural palette nearest to it)
+WISH_LOOKS: Dict[str, Tuple[str, str, str, str]] = {"brand": ("brand", "dark", "midnight", "violet"), "ember": ("ember", "dark", "sunrise", "ember"),
+                                                     "aurora": ("aurora", "dark", "midnight", "forest"), "light": ("brand", "light", "paper", "violet")}
+WISH_WORDS: Dict[str, Tuple[str, ...]] = {
+    "brand": ("purple", "violet", "blue", "indigo", "brand", "morado", "morada", "violeta", "azul", "púrpura", "purpura", "lila"),
+    "ember": ("warm", "orange", "fire", "fiery", "ember", "embers", "red", "amber", "cálido", "calido", "cálida", "calida", "naranja", "fuego", "brasas", "rojo", "ámbar", "ambar"),
+    "aurora": ("green", "teal", "aurora", "turquoise", "emerald", "verde", "turquesa", "esmeralda"),
+    "light": ("light", "white", "bright", "pale", "claro", "clara", "blanco", "blanca", "luminoso", "luminosa"),
+}
+
+
+def request_wish(prompt: Any) -> Optional[Dict[str, Any]]:
+    """What the request text says about the background, or None when it says nothing: {"kind": "none"} (no moving background), {"kind": "animated"} (a moving one,
+    whichever), {"kind": "loop"} (a 3D one), each with an optional "look" (brand, ember, aurora, light) when a colour or mood word sits right at the word background."""
+    text = " ".join(str(prompt or "").split())
+    if not text or not re.search(_BG, text, re.I):
+        return None
+    if _NONE_RE.search(text):
+        return {"kind": "none"}
+    look = None
+    for m in _COLOUR_BG_RE.finditer(text):
+        word = (m.group(1) or m.group(2) or "").lower()
+        look = next((k for k, words in WISH_WORDS.items() if word in words), None)
+        if look:
+            break
+    three_d = bool(_3D_RE.search(text))
+    if not (three_d or look or _ANIM_RE.search(text)):
+        return None
+    return {"kind": "loop" if three_d or look else "animated", **({"look": look} if look else {})}
+
+
+def wish_theme(wish: Optional[Dict[str, Any]]) -> Optional[str]:
+    """The theme a wished look needs (a light background means the paper theme, a warm one sunrise); None when the wish names no look."""
+    look = (wish or {}).get("look")
+    return WISH_LOOKS[look][2] if look in WISH_LOOKS else None
+
+
 def enabled() -> bool:
     return os.environ.get("BG_ANIMATED", "0") == "1" or loops_enabled()
 
@@ -132,13 +184,24 @@ def settle(style: Any, palette: Any, mood: str, theme: str) -> Tuple[str, str]:
     return "gas", pals[0]
 
 
-def choose(prompt: str, plan: Dict[str, Any], ask: Optional[Callable[[str, str], str]] = None, loops: Any = None) -> Dict[str, Any]:
+def choose(prompt: str, plan: Dict[str, Any], ask: Optional[Callable[[str, str], str]] = None, loops: Any = None, wish: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """The `background` entry of a plan: {style, palette, mode, speed, intensity, seed, loop_seconds, by} and, when a pre-rendered loop was chosen (only from `loops`,
     the index entries; pass them only with BG_LOOPS on), also {loop, loop_palette} with loop_seconds = the loop's own length. The procedural style is always there too:
     it is what plays if the loop cannot be used. Never raises; `by` says who chose ('director' or 'mood')."""
     theme = plan.get("theme") if plan.get("theme") in THEME_PALETTES else "midnight"
     mood = plan.get("mood") if plan.get("mood") in MOOD_STYLE else "calm"
     menu = loops_for(theme, loops)
+    asked = wish if isinstance(wish, dict) and wish.get("kind") in ("loop", "animated") else None   # what the request text asked for (request_wish): it wins over the mood
+    look = WISH_LOOKS.get(asked.get("look")) if asked else None
+    if asked and (look or asked["kind"] == "loop"):   # a look or "3D" was named: settled here, no model call
+        pool = [lp for lp in menu if not look or (lp.palette, lp.mode) == look[:2]]
+        spec = next((lp for lp in pool if mood in lp.mood), pool[0] if pool else None)
+        style, palette = settle("gas", look[3] if look else None, mood, theme)   # the procedural stand-in (also what plays where the loops are switched off): gas in the nearest palette
+        seed = zlib.crc32(str(plan.get("title") or prompt or "").encode("utf-8")) % 9973 + 1
+        out = {"style": style, "palette": palette, "mode": mode_of(theme), "speed": MOOD_SPEED[mood], "intensity": INTENSITY, "seed": seed, "loop_seconds": LOOP_SECONDS, "by": "request"}
+        if spec is not None:
+            out.update(loop=spec.id, loop_palette=spec.palette, loop_seconds=min(20.0, max(6.0, float(spec.seconds))))
+        return out
     wish: Dict[str, Any] = {}
     if ask is not None:
         try:

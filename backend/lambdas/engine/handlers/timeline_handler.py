@@ -13,6 +13,9 @@ CHUNK_SECONDS = int(os.environ.get("CHUNK_SECONDS", "10"))
 # every render function then finishes in a few minutes of its 10. Previews of a 4K video are small drafts and are chunked like any other video.
 CHUNK_SECONDS_4K = int(os.environ.get("CHUNK_SECONDS_4K", "6"))
 CHUNK_MAX_FRAMES_4K = int(os.environ.get("CHUNK_MAX_FRAMES_4K", "180"))
+# A cartoon scene (vector_scene) costs about a second a frame on Lambda (measured on QA: 1.3 s before it was drawn on twos): a video that has one is cut into pieces of
+# at most 5 seconds, like 4K, so no render function works for more than a few minutes of its 10 whatever the scene's length.
+CHUNK_MAX_FRAMES_VECTOR = int(os.environ.get("CHUNK_MAX_FRAMES_VECTOR", "150"))
 
 
 def credits_ledger(plan: Dict[str, Any]) -> list:
@@ -87,5 +90,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "duration": tl["duration"],
         "chunks": [{**c, "video_id": video_id, "timeline_key": key} for c in (
             chunk_plan(tl, CHUNK_SECONDS_4K, draft=False, max_frames=CHUNK_MAX_FRAMES_4K) if format_options.is_4k(frame["resolution"]) and mode != "preview"
-            else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview")))],
+            else chunk_plan(tl, CHUNK_SECONDS, draft=(mode == "preview"), max_frames=CHUNK_MAX_FRAMES_VECTOR if any(sc.get("type") == "vector_scene" for sc in tl["scenes"]) else 0))],
     }

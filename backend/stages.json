@@ -21,6 +21,8 @@
       "https://app.videomk.com/",
       "https://videomk.com/"
     ],
-    "apiHost": "backend.videomk.com"
+    "apiHost": "backend.videomk.com",
+    "bgAnimated": true,
+    "bgLoops": true
   }
 }
