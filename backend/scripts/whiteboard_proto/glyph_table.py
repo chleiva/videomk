@@ -14,7 +14,18 @@ sys.path.insert(0, HERE)
 import vectorize as vz  # noqa: E402
 import writing as wr  # noqa: E402
 
-CHARS = ("".join(chr(c) for c in range(33, 127)) + "áéíóúüñÁÉÍÓÚÜÑ¿¡àèìòùÀÈÌÒÙâêîôûÂÊÎÔÛäëïöÄËÏÖçÇãõÃÕåÅøØæÆœŒß°€£¥¢±×÷·•…–—‘’“”«»§©®™µ¼½¾²³¹ªº")
+# Every letter a video language writes (docs/LANGUAGES.md: en, es, fr, de, it, pt, nl, pl, fi, and whatever Latin language comes next): printable ASCII, the whole of
+# Latin-1 and Latin Extended-A (ą ć ę ł ń ś ź ż, š ž, ÿ Ÿ, ĳ, ...), and the punctuation and signs texts carry. A character the font has no glyph for is left out
+# (the engine then falls back, engine/whiteboard/hand.py); tests/test_languages.py walks every language's letters against the tables.
+CHARS = ("".join(chr(c) for c in range(33, 127)) + "".join(chr(c) for c in range(0xA1, 0x180) if c != 0xAD)
+         + "•…–—‘’‚“”„«»‹›€™")
+
+
+def _has(font, ch: str) -> bool:
+    """Does the font draw this character itself (not its "missing glyph" box)?"""
+    box = font.getmask("\U0010fffd")
+    m = font.getmask(ch)
+    return (bytes(m), m.size) != (bytes(box), box.size)
 
 
 def main() -> int:
@@ -22,7 +33,10 @@ def main() -> int:
     os.makedirs(out, exist_ok=True)
     for hand in ("neat", "casual"):
         table = {}
+        font = wr._font(wr.HANDS[hand]["font"])
         for ch in CHARS:
+            if not _has(font, ch):
+                continue
             g = wr.glyph(ch, hand)
             if not g["strokes"] and ch.strip():
                 continue

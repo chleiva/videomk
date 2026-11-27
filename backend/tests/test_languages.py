@@ -245,6 +245,47 @@ def test_every_font_draws_every_letter_of_the_language(lang):
         assert _missing(font, PANGRAM[lang] + voice_data.SAMPLE[lang] + PANGRAM[lang].upper() + language.made_with(lang)) == "", (lang, rel)
 
 
+def _letters(lang):
+    """Everything the language writes: its pangram in both cases, its sample sentence, its closing-card line."""
+    return sorted({c for c in PANGRAM[lang] + PANGRAM[lang].upper() + voice_data.SAMPLE[lang] + language.made_with(lang) if not c.isspace()})
+
+
+@pytest.mark.parametrize("lang", voices.READY)
+@pytest.mark.parametrize("hand_name", ["neat", "casual"])
+def test_the_pen_has_strokes_for_every_letter_of_the_language(lang, hand_name):
+    """The font having a letter is not enough on a whiteboard: the pen writes from the STROKE tables (assets/whiteboard/glyphs_*.json). A letter missing there
+    was a gap of the wrong width that the pen never traced ("sł ońce")."""
+    from engine.whiteboard import hand
+
+    table = hand._table(hand_name)["glyphs"]
+    font = ImageFont.truetype(hand.HANDS[hand_name]["font"], 1000)
+    lacking = "".join(c for c in _letters(lang) if c not in table or not table[c]["strokes"])
+    assert lacking == "", (lang, hand_name, lacking)
+    for c in _letters(lang):
+        g = hand.glyph(c, hand_name)
+        assert not g.get("missing") and abs(g["adv"] - font.getlength(c) / 1000) < 0.01, (lang, hand_name, c)            # the font's own advance: no gap
+
+
+@pytest.mark.parametrize("hand_name", ["neat", "casual"])
+def test_a_letter_without_strokes_is_still_written_at_its_own_width(hand_name, monkeypatch):
+    """Whatever the tables lack (a sign, a letter of a language added later): the font's advance, a pen path over its ink, and the word is drawn."""
+    from engine.whiteboard import hand
+
+    table = hand._table(hand_name)
+    full = hand.layout("słońce", hand_name, 120.0)
+    monkeypatch.setitem(hand._TABLES, hand_name, dict(table, glyphs={k: v for k, v in table["glyphs"].items() if k not in "łńĄŻ"}))
+    hand._FALLBACK.clear()
+    g = hand.glyph("ł", hand_name)
+    assert g["missing"] and abs(g["adv"] - table["glyphs"]["ł"]["adv"]) < 0.01 and g["strokes"]
+    xs = np.concatenate(g["strokes"])[:, 0]
+    assert xs.min() > -0.2 and xs.max() < g["adv"] + 0.2                                    # the pen stays on the letter
+    cut = hand.layout("słońce", hand_name, 120.0)
+    assert abs(cut["w"] - full["w"]) < 0.02 * full["w"]                                     # the word is as wide as with the table: no "sł ońce"
+    only = hand.layout("ĄŻ", hand_name, 120.0)["words"][0]                                  # a word made only of such letters
+    r = hand.raster_word(only, (0.0, 0.0), hand_name, "marker", 120.0, 1.0)
+    assert r is not None and (r["alpha"] > 0.5).sum() > 500 and ((r["T"] <= 1.0) & (r["alpha"] > 0.5)).sum() > 0.6 * (r["alpha"] > 0.5).sum()   # drawn, and the pen uncovers it
+
+
 def test_the_glyph_check_sees_a_missing_letter_and_korean_is_why_it_is_not_ready():
     inter = ImageFont.truetype(os.path.join(ASSETS, "fonts", "Inter-Regular.ttf"), 48)
     assert _missing(inter, "기차 abc") == "기차" and _missing(inter, voice_data.SAMPLE["ko"]) != ""    # no Hangul in the render package: Korean captions would be boxes

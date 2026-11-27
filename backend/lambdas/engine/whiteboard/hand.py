@@ -37,12 +37,55 @@ def _table(hand: str) -> Dict[str, Any]:
     return _TABLES[hand]
 
 
+_FALLBACK: Dict[Tuple[str, str], Dict[str, Any]] = {}
+
+
+def _fallback(ch: str, hand: str) -> Dict[str, Any]:
+    """A letter the stroke table does not have (the tables hold all of Latin-1 and Latin Extended-A, so this is a rare sign or another script): never a gap.
+    Its advance is the FONT's own, and its pen path is a hatch over the letter as the font draws it, left to right, so the pen passes over all of its ink and
+    the word is drawn even when every letter of it is unknown. No SciPy: the centre line cannot be traced here, the ink can be read."""
+    key = (ch, hand)
+    if key in _FALLBACK:
+        return _FALLBACK[key]
+    from PIL import Image, ImageDraw, ImageFont
+
+    em = 96
+    f = ImageFont.truetype(HANDS[hand]["font"], em)
+    adv = float(f.getlength(ch)) / em
+    if adv <= 0.0:                                         # a combining or zero-width character: nothing to write, no room taken
+        g = {"strokes": [], "adv": 0.0, "missing": True}
+        _FALLBACK[key] = g
+        return g
+    pad = em // 2
+    im = Image.new("L", (int(adv * em) + 2 * pad, int(em * 1.8) + pad), 0)
+    ImageDraw.Draw(im).text((pad, pad // 2), ch, font=f, fill=255)           # same origin as the table's letters: the pen position on the line's top
+    ink = np.asarray(im) > 127
+    cols = np.flatnonzero(ink.any(axis=0))
+    strokes: List[np.ndarray] = []
+    if len(cols):
+        step = max(2, int(round(0.07 * em)))
+        pts, down = [], True
+        for x in list(range(int(cols[0]), int(cols[-1]) + 1, step)) + [int(cols[-1])]:
+            ys = np.flatnonzero(ink[:, max(0, x - step // 2):x + step // 2 + 1].any(axis=1))
+            if not len(ys):
+                continue
+            y0, y1 = float(ys[0]), float(ys[-1])
+            pts += [(x, y0), (x, y1)] if down else [(x, y1), (x, y0)]
+            down = not down
+        if len(pts) >= 2:
+            strokes = [(np.asarray(pts, np.float64) - np.array([pad, pad // 2])) / em]
+    g = {"strokes": strokes, "adv": adv, "missing": True}
+    _FALLBACK[key] = g
+    return g
+
+
 def glyph(ch: str, hand: str) -> Dict[str, Any]:
-    """-> {"strokes": [(n,2) arrays in em from the pen position on the line's top], "adv": advance in em}. An unknown letter is a gap the width of an "n"."""
+    """-> {"strokes": [(n,2) arrays in em from the pen position on the line's top], "adv": advance in em}. A letter the table lacks comes from the font
+    itself (`_fallback`: its real advance and a pen path over its ink), marked "missing"."""
     t = _table(hand)["glyphs"]
     g = t.get(ch)
     if g is None:
-        return {"strokes": [], "adv": t.get("n", {"adv": 0.5})["adv"], "missing": True}
+        return _fallback(ch, hand)
     if "np" not in g:
         g["np"] = [np.asarray(s, np.float64) for s in g["strokes"]]
     return {"strokes": g["np"], "adv": g["adv"]}

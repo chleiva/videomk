@@ -79,7 +79,7 @@ Per video: the director's usual calls plus about 14,000 characters of prompt (ru
 * The library has 354 objects: a topic outside it gets stand-ins (cheese for wax cells) or written words.
 * Pen busy measured 77 to 79 % with pen travel counted, above the 50 to 70 % aimed at; counting only tenths with new ink it is 63 to 66 %.
 * The whiteboard look is never chosen by itself when the person asked for a presenter character (and a presenter never appears on a whiteboard video).
-* Only Latin handwriting (EN, ES). Ties are one word. The editor apps have no board editor (editing the narration re-ties the board). 4K not re-measured. 1:1 and 4:5 were looked at as local renders only.
+* Only Latin handwriting: every letter of en, es, fr, de, it, pt, nl, pl, fi has pen strokes (tables rebuilt with `scripts/whiteboard_proto/glyph_table.py`, which needs SciPy; the engine does not). A sign outside the tables is written from the font with a plain left-to-right pen path, not a traced centre line. Ties are one word. The editor apps have no board editor (editing the narration re-ties the board). 4K not re-measured. 1:1 and 4:5 were looked at as local renders only.
 
 ## Files
 `engine/whiteboard/` (core, board, hand, spec, primitives, library), `engine/scenes/elements/whiteboard.py`, `engine/whiteboard_policy.py`, `engine/assets/whiteboard/` (two OFL fonts with licences, glyph tables, library index), `engine/whiteboard/score.py` (the self-check), `scripts/whiteboard_local.py` (a whole video on a laptop), tests `test_el_whiteboard.py`, `test_whiteboard_policy.py`, `test_whiteboard_score.py`, `test_looks.py`.
