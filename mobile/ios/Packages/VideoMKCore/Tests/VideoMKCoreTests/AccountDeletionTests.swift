@@ -180,7 +180,7 @@ private func errorOf(_ flow: AccountDeletionFlow, unknown: Bool = false) async -
     }
 
     @Test func noMessageContainsATokenOrSubAndTheContractWordingIsUsed() {
-        #expect(AppleRevoke.manualSteps == "To finish, open Settings on your iPhone, tap your name, Sign in with Apple, videomk, and choose Stop using Apple ID.")
+        #expect(AppleRevoke.manualSteps == "To finish, open Settings on your iPhone, tap your name, Sign in with Apple, VideoMK, and choose Stop using Apple ID.")
         #expect(AccountError.uncertain.message.contains("safe to try again"))
         #expect(AccountError.reauthNotAccepted.offersEmail && !AccountError.network.offersEmail)
     }

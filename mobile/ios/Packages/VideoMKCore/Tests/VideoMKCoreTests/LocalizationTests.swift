@@ -41,7 +41,7 @@ private func inSpanish<T>(_ body: () throws -> T) rethrows -> T { try Localizati
             let s = ComposerPlan.status(text: "How bees make honey", balance: 0, options: CreateOptions(minutes: 1), photos: 0)
             #expect(s.message == "No tienes créditos" && s.fix?.title == "Ver créditos")
             #expect(APIError.network.message.hasPrefix("Problema de conexión"))
-            #expect(AccountError.uncertain.message.hasPrefix("No pudimos conectar con videomk"))
+            #expect(AccountError.uncertain.message.hasPrefix("No pudimos conectar con VideoMK"))
             #expect(VideoStatus.Stage.rendering.shortTitle == "Procesando")
             #expect(RetryText.make(3600) == "Inténtalo de nuevo en aproximadamente 1 hora.")
             #expect(LengthLabel.spoken(0.25) == "15 segundos")

@@ -2142,13 +2142,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This request is outside what videomk can make. Try describing the topic in a different way."
+            "value" : "This request is outside what VideoMK can make. Try describing the topic in a different way."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta solicitud está fuera de lo que videomk puede crear. Prueba a describir el tema de otra forma."
+            "value" : "Esta solicitud está fuera de lo que VideoMK puede crear. Prueba a describir el tema de otra forma."
           }
         }
       }
@@ -2285,13 +2285,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "We couldn't reach videomk, so nothing was deleted. Check your connection and try again."
+            "value" : "We couldn't reach VideoMK, so nothing was deleted. Check your connection and try again."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos conectar con videomk, así que no se eliminó nada. Revisa tu conexión e inténtalo de nuevo."
+            "value" : "No pudimos conectar con VideoMK, así que no se eliminó nada. Revisa tu conexión e inténtalo de nuevo."
           }
         }
       }
@@ -2455,13 +2455,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "We couldn't reach videomk and can't tell whether your request arrived. It is safe to try again: asking twice does no harm."
+            "value" : "We couldn't reach VideoMK and can't tell whether your request arrived. It is safe to try again: asking twice does no harm."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No pudimos conectar con videomk y no sabemos si llegó tu solicitud. Puedes intentarlo de nuevo sin problema: pedirlo dos veces no causa ningún daño."
+            "value" : "No pudimos conectar con VideoMK y no sabemos si llegó tu solicitud. Puedes intentarlo de nuevo sin problema: pedirlo dos veces no causa ningún daño."
           }
         }
       }
@@ -2489,13 +2489,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To finish, open Settings on your iPhone, tap your name, Sign in with Apple, videomk, and choose Stop using Apple ID."
+            "value" : "To finish, open Settings on your iPhone, tap your name, Sign in with Apple, VideoMK, and choose Stop using Apple ID."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para terminar, abre Ajustes en tu iPhone, toca tu nombre, Iniciar sesión con Apple, videomk y elige Dejar de usar el ID de Apple."
+            "value" : "Para terminar, abre Ajustes en tu iPhone, toca tu nombre, Iniciar sesión con Apple, VideoMK y elige Dejar de usar el ID de Apple."
           }
         }
       }
@@ -2642,13 +2642,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your email, Google or Apple sign-in for videomk."
+            "value" : "Your email, Google or Apple sign-in for VideoMK."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu correo, o tu inicio de sesión con Google o Apple en videomk."
+            "value" : "Tu correo, o tu inicio de sesión con Google o Apple en VideoMK."
           }
         }
       }
@@ -2880,13 +2880,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This permanently deletes your videomk account. It can't be undone."
+            "value" : "This permanently deletes your VideoMK account. It can't be undone."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esto elimina tu cuenta de videomk de forma permanente. No se puede deshacer."
+            "value" : "Esto elimina tu cuenta de VideoMK de forma permanente. No se puede deshacer."
           }
         }
       }
@@ -2965,13 +2965,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Done. videomk can no longer use your Apple Account to sign in."
+            "value" : "Done. VideoMK can no longer use your Apple Account to sign in."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Listo. videomk ya no puede usar tu cuenta de Apple para iniciar sesión."
+            "value" : "Listo. VideoMK ya no puede usar tu cuenta de Apple para iniciar sesión."
           }
         }
       }
@@ -2982,13 +2982,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple keeps a link between videomk and your Apple Account. Remove it now with Face ID or your Apple Account password. Your account is deleted either way."
+            "value" : "Apple keeps a link between VideoMK and your Apple Account. Remove it now with Face ID or your Apple Account password. Your account is deleted either way."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple guarda un vínculo entre videomk y tu cuenta de Apple. Quítalo ahora con Face ID o con la contraseña de tu cuenta de Apple. Tu cuenta se elimina de todos modos."
+            "value" : "Apple guarda un vínculo entre VideoMK y tu cuenta de Apple. Quítalo ahora con Face ID o con la contraseña de tu cuenta de Apple. Tu cuenta se elimina de todos modos."
           }
         }
       }
@@ -3237,13 +3237,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow microphone access for videomk in Settings, or turn on Dictation in Settings › General › Keyboard."
+            "value" : "Allow microphone access for VideoMK in Settings, or turn on Dictation in Settings › General › Keyboard."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Permite el acceso al micrófono para videomk en Ajustes, o activa el dictado en Ajustes › General › Teclado."
+            "value" : "Permite el acceso al micrófono para VideoMK en Ajustes, o activa el dictado en Ajustes › General › Teclado."
           }
         }
       }
@@ -3254,13 +3254,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow speech recognition for videomk in Settings, or turn on Dictation in Settings › General › Keyboard."
+            "value" : "Allow speech recognition for VideoMK in Settings, or turn on Dictation in Settings › General › Keyboard."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Permite el reconocimiento de voz para videomk en Ajustes, o activa el dictado en Ajustes › General › Teclado."
+            "value" : "Permite el reconocimiento de voz para VideoMK en Ajustes, o activa el dictado en Ajustes › General › Teclado."
           }
         }
       }
@@ -3288,13 +3288,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Microphone access is off for videomk, so use the microphone key on your keyboard instead."
+            "value" : "Microphone access is off for VideoMK, so use the microphone key on your keyboard instead."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El acceso al micrófono está desactivado para videomk. Usa la tecla de micrófono de tu teclado."
+            "value" : "El acceso al micrófono está desactivado para VideoMK. Usa la tecla de micrófono de tu teclado."
           }
         }
       }
@@ -3356,13 +3356,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speech recognition is off for videomk, so use the microphone key on your keyboard instead."
+            "value" : "Speech recognition is off for VideoMK, so use the microphone key on your keyboard instead."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El reconocimiento de voz está desactivado para videomk. Usa la tecla de micrófono de tu teclado."
+            "value" : "El reconocimiento de voz está desactivado para VideoMK. Usa la tecla de micrófono de tu teclado."
           }
         }
       }
@@ -5709,13 +5709,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your photos are private to you. Only you can see them. Nobody at videomk browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time."
+            "value" : "Your photos are private to you. Only you can see them. Nobody at VideoMK browses them. They are used to find your photos and to make the videos you ask for. Delete any photo or everything, any time."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus fotos son privadas. Solo tú puedes verlas. Nadie en videomk las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina cualquier foto, o todas, cuando quieras."
+            "value" : "Tus fotos son privadas. Solo tú puedes verlas. Nadie en VideoMK las revisa. Se usan para encontrar tus fotos y crear los videos que pides. Elimina cualquier foto, o todas, cuando quieras."
           }
         }
       }
@@ -9538,13 +9538,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk"
+            "value" : "VideoMK"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk"
+            "value" : "VideoMK"
           }
         }
       }
@@ -10055,13 +10055,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep videomk open until this finishes."
+            "value" : "Keep VideoMK open until this finishes."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantén videomk abierto hasta que termine."
+            "value" : "Mantén VideoMK abierto hasta que termine."
           }
         }
       }
@@ -11446,13 +11446,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enjoying videomk?"
+            "value" : "Enjoying VideoMK?"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Te está gustando videomk?"
+            "value" : "¿Te está gustando VideoMK?"
           }
         }
       }
@@ -11514,13 +11514,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A rating on the App Store helps other people find videomk, and it means a lot to a small team."
+            "value" : "A rating on the App Store helps other people find VideoMK, and it means a lot to a small team."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una valoración en la App Store ayuda a que otras personas encuentren videomk, y significa mucho para un equipo pequeño."
+            "value" : "Una valoración en la App Store ayuda a que otras personas encuentren VideoMK, y significa mucho para un equipo pequeño."
           }
         }
       }
@@ -11531,13 +11531,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rate videomk"
+            "value" : "Rate VideoMK"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Valorar videomk"
+            "value" : "Valorar VideoMK"
           }
         }
       }
@@ -12214,13 +12214,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notifications are off for videomk in Settings."
+            "value" : "Notifications are off for VideoMK in Settings."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las notificaciones de videomk están desactivadas en Ajustes."
+            "value" : "Las notificaciones de VideoMK están desactivadas en Ajustes."
           }
         }
       }

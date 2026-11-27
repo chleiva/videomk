@@ -47,11 +47,11 @@ struct SignInView: View {
         .background(Theme.background.ignoresSafeArea())
     }
 
-    /// The sample: one frame of a video videomk made, and the sentence it was made from. It fades into the page.
+    /// The sample: one frame of a video VideoMK made, and the sentence it was made from. It fades into the page.
     private func sample(height: CGFloat, top: CGFloat) -> some View {
         Color.clear.frame(maxWidth: .infinity).frame(height: height)
             .overlay { Image("SignInSample").resizable().scaledToFill() }       // the still: what shows first, and all that shows with Reduce Motion
-            .overlay { if !reduceMotion { SampleLoop().transition(.opacity) } }   // six silent seconds of a video videomk made, looping
+            .overlay { if !reduceMotion { SampleLoop().transition(.opacity) } }   // six silent seconds of a video VideoMK made, looping
             .clipped()
             .overlay { LinearGradient(stops: [.init(color: Theme.mediaInk.opacity(0.3), location: 0), .init(color: .clear, location: 0.22), .init(color: .clear, location: 0.46), .init(color: Theme.background, location: 0.96)], startPoint: .top, endPoint: .bottom) }
             .ignoresSafeArea(edges: .top)

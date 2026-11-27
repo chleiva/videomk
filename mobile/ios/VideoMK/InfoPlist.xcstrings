@@ -7,13 +7,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk"
+            "value" : "VideoMK"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk"
+            "value" : "VideoMK"
           }
         }
       }
@@ -24,13 +24,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk uses the microphone only while you hold dictation on, so you can say what video you want instead of typing it."
+            "value" : "VideoMK uses the microphone only while you hold dictation on, so you can say what video you want instead of typing it."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk usa el micrófono solo mientras mantienes activado el dictado, para que puedas decir qué video quieres en lugar de escribirlo."
+            "value" : "VideoMK usa el micrófono solo mientras mantienes activado el dictado, para que puedas decir qué video quieres en lugar de escribirlo."
           }
         }
       }
@@ -41,13 +41,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk turns your speech into text for your video brief. Where your iPhone supports it, this happens on the device."
+            "value" : "VideoMK turns your speech into text for your video brief. Where your iPhone supports it, this happens on the device."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk convierte tu voz en texto para la descripción de tu video. Si tu iPhone lo admite, esto ocurre en el dispositivo."
+            "value" : "VideoMK convierte tu voz en texto para la descripción de tu video. Si tu iPhone lo admite, esto ocurre en el dispositivo."
           }
         }
       }
@@ -58,13 +58,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk saves a finished video to your Photos only when you tap Save to Photos."
+            "value" : "VideoMK saves a finished video to your Photos only when you tap Save to Photos."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "videomk guarda un video terminado en Fotos solo cuando tocas Guardar en Fotos."
+            "value" : "VideoMK guarda un video terminado en Fotos solo cuando tocas Guardar en Fotos."
           }
         }
       }

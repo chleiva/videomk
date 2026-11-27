@@ -5,7 +5,7 @@ import VideoMKCore
 /// The friendly rating question, in a soft sheet. Swipe down or tap outside means "later" with no consequence (docs/FEEDBACK.md, "Rating prompt").
 /// Why a store link and not `SKStoreReviewController`: Apple says the system prompt must not be tied to a button (it is rate limited and often shows
 /// nothing, so a "Rate" button would silently do nothing), and the write-review page is the one reliable way to take someone to the review box.
-/// So "Yes" shows our own warm ask and "Rate videomk" opens `AppStoreInfo.writeReviewURL()`; we never call `requestReview`.
+/// So "Yes" shows our own warm ask and "Rate VideoMK" opens `AppStoreInfo.writeReviewURL()`; we never call `requestReview`.
 struct RatingPromptView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
