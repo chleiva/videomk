@@ -269,8 +269,46 @@ def fuse_leg(ul: Image.Image, ll: Image.Image, ll_pivot_x: float, sole_x: float)
     return Piece(out, (left + (t0 + t1) / 2, ul.height * 0.05), (lx + sole_x, float(H)))
 
 
+class TurnCache:
+    """Turned (and scaled) pieces kept between frames, for the real renders (engine/scenes/elements/presenter.py; docs/PRESENTERS.md "Render cost").
+
+    Turning a piece is 85 % of a frame's drawing time, and a speaker's pieces come back to the same angles all the time (home base, the same gestures). With a cache the
+    angle is snapped to `STEP` degrees and the scale to `SCALE_STEP`, so a frame depends only on the snapped values: the picture is the same whether the piece came from the
+    cache or was turned again, i.e. the same in every render chunk and on every machine. Memory is bounded: least recently used pieces are dropped beyond `max_bytes`."""
+
+    STEP = 0.5          # degrees: half a degree at the wrist of a 54-unit forearm is under half a pixel at 1080p
+    SCALE_STEP = 0.004  # breathing and head squash change the size by a few thousandths
+
+    def __init__(self, max_bytes: int = 48 << 20):
+        from collections import OrderedDict
+        self.max_bytes, self.bytes, self.hits, self.misses = max_bytes, 0, 0, 0
+        self.d: "OrderedDict[tuple, Tuple[Image.Image, Vec]]" = OrderedDict()
+
+    def get(self, key: tuple) -> Optional[Tuple[Image.Image, Vec]]:
+        v = self.d.get(key)
+        if v is None:
+            self.misses += 1
+            return None
+        self.d.move_to_end(key)
+        self.hits += 1
+        return v
+
+    def put(self, key: tuple, im: Image.Image, off: Vec) -> None:
+        self.d[key] = (im, off)
+        self.bytes += im.width * im.height * 4
+        while self.bytes > self.max_bytes and len(self.d) > 1:
+            _, (old, _o) = self.d.popitem(last=False)
+            self.bytes -= old.width * old.height * 4
+
+    def clear(self) -> None:
+        self.d.clear()
+        self.bytes = 0
+
+
 class Presenter:
     """Rasterised pieces of one character at `ppu` pixels per unit, ready to draw standing poses."""
+
+    cache: Optional[TurnCache] = None    # set by `load_cached`: turned pieces are kept and angles snapped (see TurnCache); None = exact angles, nothing kept (the demos and pin tests)
 
     def __init__(self, folder: str, ppu: float, size: float = 1.0):
         with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
@@ -388,6 +426,9 @@ class Presenter:
     # --- drawing
     def _put(self, frame: Image.Image, piece: Piece, pos: Vec, angle: float, sx: float = 1.0, sy: float = 1.0) -> None:
         """Paste `piece` with its pivot at `pos` (px), turned by `angle` degrees counter-clockwise on screen; optional scale about the pivot."""
+        if self.cache is not None:
+            self._put_cached(frame, piece, pos, angle, sx, sy)
+            return
         im, pv = piece.img, piece.pivot
         if sx != 1.0 or sy != 1.0:
             im1 = im.resize((max(1, round(im.width * sx)), max(1, round(im.height * sy))), Image.BILINEAR)
@@ -403,6 +444,33 @@ class Presenter:
         off = (vx * c + vy * s, -vx * s + vy * c)
         r = im.rotate(angle, resample=Image.BICUBIC, expand=True)
         _paste_clip(frame, r, (round(pos[0] + off[0] - r.width / 2), round(pos[1] + off[1] - r.height / 2)))
+
+    def _put_cached(self, frame: Image.Image, piece: Piece, pos: Vec, angle: float, sx: float, sy: float) -> None:
+        """`_put` with the angle and scale snapped and the turned piece kept (TurnCache). The piece is stored with the offset of its top-left corner from the pivot."""
+        c = self.cache
+        qa = round((angle + piece.bias) / c.STEP)
+        qx, qy = round(sx / c.SCALE_STEP), round(sy / c.SCALE_STEP)
+        key = (id(piece), qa, qx, qy)
+        got = c.get(key)
+        if got is None:
+            im, pv = piece.img, piece.pivot
+            fx, fy = qx * c.SCALE_STEP, qy * c.SCALE_STEP
+            if qx != round(1.0 / c.SCALE_STEP) or qy != round(1.0 / c.SCALE_STEP):
+                im1 = im.resize((max(1, round(im.width * fx)), max(1, round(im.height * fy))), Image.BILINEAR)
+                pv = (pv[0] * im1.width / im.width, pv[1] * im1.height / im.height)
+                im = im1
+            a_deg = qa * c.STEP
+            if qa == 0:
+                got = (im, (-pv[0], -pv[1]))
+            else:
+                a = math.radians(a_deg)
+                cs, sn = math.cos(a), math.sin(a)
+                vx, vy = im.width / 2 - pv[0], im.height / 2 - pv[1]
+                r = im.rotate(a_deg, resample=Image.BICUBIC, expand=True)
+                got = (r, (vx * cs + vy * sn - r.width / 2, -vx * sn + vy * cs - r.height / 2))
+            c.put(key, got[0], got[1])
+        im, off = got
+        _paste_clip(frame, im, (round(pos[0] + off[0]), round(pos[1] + off[1])))
 
     def draw(self, frame: Image.Image, x: float, ground: float, pose: Optional[Dict[str, Any]] = None, sk: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Draw on an RGBA `frame`: x = horizontal centre (px), ground = y of the soles (px). Returns the solved skeleton."""
@@ -474,6 +542,18 @@ def load(cid: str, ppu: float, size: float = 1.0) -> Presenter:
     if not os.path.isfile(os.path.join(folder, "manifest.json")):
         raise ValueError(f"unknown vector character {cid!r}")
     return Presenter(folder, ppu, size)
+
+
+@lru_cache(maxsize=4)
+def load_cached(cid: str, ppu: float, size: float = 1.0, max_mb: int = 48) -> Presenter:
+    """A presenter of its own (not the shared one of `load`) that keeps its turned pieces: for rendering real videos. At most 4 are kept (a video has one presenter,
+    a dialogue two), each with at most `max_mb` of turned pieces."""
+    folder = os.path.join(DIR, cid)
+    if not os.path.isfile(os.path.join(folder, "manifest.json")):
+        raise ValueError(f"unknown vector character {cid!r}")
+    p = Presenter(folder, ppu, size)
+    p.cache = TurnCache(max_mb << 20)
+    return p
 
 
 # ----------------------------------------------------------------------------- framing presets
