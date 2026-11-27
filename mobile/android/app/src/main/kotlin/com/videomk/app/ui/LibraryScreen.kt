@@ -139,8 +139,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
         onNewVideo()
     }
 
-    LaunchedEffect(Unit) { app.refresh() }
-    PollWhileRunning(app, state.hasRunningVideos)
+    PollWhileRunning(app)   // reads the list every time Videos becomes visible, then for as long as something is being made
     DisposableEffect(context) {
         // when the connection comes back, reload what could not be loaded
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
@@ -224,7 +223,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                                             title = state.briefs[v.id] ?: v.displayTitle, rejected = v.status == VideoStatus.Rejected, detail = v.rejectReason,
                                             thumb = v.previewGifUrl, tag = "problemRow", modifier = Modifier.animateItem(),
                                             // "Try again" starts THIS video again on the server (all its photos and options): no new row. Not offered for a refused video, a used-up presentation or one out of retries.
-                                            onRetry = if (v.status == VideoStatus.Failed && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
+                                            onRetry = if ((v.status == VideoStatus.Failed || v.status == VideoStatus.Cancelled) && v.canRetry != false && v.id !in state.deckVideos && v.id !in state.retrying) { { app.tryAgain(v) } } else null,
                                             onDismiss = { app.removeFailed(v) },
                                         )
                                     }
@@ -435,6 +434,7 @@ fun StatusChip(status: VideoStatus) {
         is VideoStatus.Running -> stringResource(R.string.lib_status_making) to MaterialTheme.colorScheme.primary
         VideoStatus.Complete -> stringResource(R.string.lib_status_ready) to Vmk.colors.success
         VideoStatus.Failed -> stringResource(R.string.lib_status_failed) to Vmk.colors.danger
+        VideoStatus.Cancelled -> stringResource(R.string.lib_status_cancelled) to Vmk.colors.textSecondary
         VideoStatus.Rejected -> stringResource(R.string.lib_status_not_allowed) to Vmk.colors.warning
     }
     Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = color,

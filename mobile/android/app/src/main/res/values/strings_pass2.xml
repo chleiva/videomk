@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Second pass (2026-11-27): cancel, delete with undo, credits sheet, plans, looks, watermark. -->
+<resources>
+    <string name="lib_status_cancelled">Cancelled</string>
+    <string name="video_cancelled_body">Your credits are back.</string>
+</resources>

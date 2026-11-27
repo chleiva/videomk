@@ -159,7 +159,7 @@ class AuthTest {
 
         val offline = InMemoryTokenStore(Tokens(fakeJwt(), "a", "r", Instant.now().minusSeconds(10)))
         server.close()   // nothing is listening any more
-        try { service(offline).authorization(); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Failed, e.kind) }
+        try { service(offline).authorization(); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Network, e.kind) }
         assertNotNull(offline.load())   // offline is not "signed out"
     }
 
@@ -172,6 +172,32 @@ class AuthTest {
         server.enqueue(json(body = tokenBody(id = fakeJwt(sub = "fresh"))))
         assertEquals("fresh", kotlinx.coroutines.withTimeout(5000) { auth.authorization().userId })
         assertEquals(2, server.requestCount)
+    }
+
+    @Test fun `after a 401 the token is refreshed whatever its expiry says, once for everyone who was refused with the same token`() = runBlocking {
+        val old = Tokens(fakeJwt(sub = "old"), "a", "r-old", Instant.now().plusSeconds(3000))   // the phone's clock believes in it; the server did not
+        val store = InMemoryTokenStore(old); val auth = service(store)
+        val rejected = auth.authorization()
+        assertEquals(0, server.requestCount)
+        server.enqueue(json(body = tokenBody(id = fakeJwt(sub = "fresh"))))
+        val results = (1..5).map { async { auth.reauthorized(rejected)!!.userId } }.awaitAll()
+        assertTrue(results.all { it == "fresh" }); assertEquals(1, server.requestCount)
+        assertEquals("fresh", auth.reauthorized(rejected)!!.userId); assertEquals(1, server.requestCount)   // already newer than the refused one: no second refresh
+        // a revoked session is still the end of the session
+        server.enqueue(json(400, """{"error":"invalid_grant"}"""))
+        try { auth.reauthorized(auth.authorization()); fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.SignedOut, e.kind) }
+        assertNull(store.load())
+    }
+
+    @Test fun `a refresh request that never answers ends by itself and the next one works`() = runBlocking {
+        val store = InMemoryTokenStore(Tokens(fakeJwt(sub = "old"), "a", "r-old", Instant.now().minusSeconds(10)))
+        val quick = AuthService(configFor(server), store, http, tokenCallMillis = 300)
+        assertTrue(AuthService.TOKEN_CALL_SECONDS in 5..30)   // the real limit: long enough for a slow network, short enough not to hold the list for a minute
+        server.enqueue(mockwebserver3.MockResponse.Builder().code(200).body(tokenBody()).headersDelay(30, java.util.concurrent.TimeUnit.SECONDS).build())
+        try { kotlinx.coroutines.withTimeout(5_000) { quick.authorization() }; fail() } catch (e: AuthException) { assertEquals(AuthException.Kind.Network, e.kind) }
+        assertNotNull(store.load())
+        server.enqueue(json(body = tokenBody(id = fakeJwt(sub = "fresh"))))
+        assertEquals("fresh", quick.authorization().userId)
     }
 
     @Test fun `no tokens means signed out and sign out clears`() = runBlocking {

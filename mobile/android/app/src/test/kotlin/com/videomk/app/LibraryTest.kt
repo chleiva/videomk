@@ -80,7 +80,7 @@ class LibraryTest {
 
     @Test fun `status mapping covers the server's statuses`() {
         assertEquals(VideoStatus.Complete, VideoStatus.fromServer("preview_ready"))
-        assertEquals(VideoStatus.Failed, VideoStatus.fromServer("CANCELLED"))
+        assertEquals(VideoStatus.Cancelled, VideoStatus.fromServer("CANCELLED")); assertEquals(VideoStatus.Failed, VideoStatus.fromServer("EDIT_FAILED"))
         assertEquals(VideoStatus.Running(Stage.VoiceAndVisuals), VideoStatus.fromServer("STORYBOARD_CREATION"))
         assertEquals(VideoStatus.Running(Stage.Starting), VideoStatus.fromServer(""))
         assertTrue(VideoStatus.fromServer("RENDERING").isRunning); assertFalse(VideoStatus.Complete.isRunning)

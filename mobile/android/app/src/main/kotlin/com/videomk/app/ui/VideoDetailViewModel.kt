@@ -22,6 +22,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.videomk.app.core.WatchTracker
 
+/** Signed video links stop working after a while (an hour today): one that old is replaced when the page is looked at again. elapsedRealtime, so time asleep counts. */
+object PlaybackLink {
+    const val MAX_AGE_MILLIS = 45 * 60_000L
+    fun isStale(loadedAtMillis: Long, nowMillis: Long): Boolean = loadedAtMillis > 0 && nowMillis - loadedAtMillis >= MAX_AGE_MILLIS
+}
+
 sealed interface PlaybackState {
     data object Idle : PlaybackState
     data object Loading : PlaybackState
@@ -47,6 +53,7 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
     private var tracker: WatchTracker? = null
     private var tickJob: Job? = null
     private var reported = false
+    private var autoRetried = false
 
     private fun checkWatched() {
         if (!reported && tracker?.completed == true) { reported = true; onFullyWatched(videoId) }
@@ -78,6 +85,25 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
         load()
     }
 
+    private var loadedAtMillis = 0L
+
+    /**
+     * The page is visible again. A playback error is retried with a fresh link, and so is a link old enough to have expired (the phone slept on this page):
+     * the position is kept. A video that is playing or was loaded moments ago is left alone.
+     */
+    fun onVisible(nowMillis: Long = android.os.SystemClock.elapsedRealtime()) {
+        when (_playback.value) {
+            is PlaybackState.Error -> reload()
+            is PlaybackState.Ready -> if (PlaybackLink.isStale(loadedAtMillis, nowMillis) && player?.isPlaying != true) {
+                val at = player?.currentPosition ?: 0L
+                resumeAtMs = at
+                reload()
+            }
+            else -> Unit
+        }
+    }
+    private var resumeAtMs = 0L
+
     private fun createPlayer(url: String) {
         releasePlayer()
         val p = ExoPlayer.Builder(getApplication())
@@ -93,13 +119,18 @@ class VideoDetailViewModel(app: Application, private val backend: Backend?, val 
                 if (reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT) tracker?.seek(newPosition.positionMs)
             }
             override fun onPlayerError(error: PlaybackException) {
-                // most often an expired link: show "try again", which fetches a new one
+                // most often an expired link: fetch a new one once by itself, at the same place; only a second failure shows "try again"
+                val at = p.currentPosition
+                if (!autoRetried) { autoRetried = true; resumeAtMs = at; reload(); return }
                 _playback.value = PlaybackState.Error(Txt.s(R.string.video_play_failed))
                 releasePlayer()
             }
+            override fun onIsPlayingChanged(isPlaying: Boolean) { if (isPlaying) autoRetried = false }
         })
         p.setMediaItem(MediaItem.fromUri(url))
+        if (resumeAtMs > 0) { p.seekTo(resumeAtMs); resumeAtMs = 0 }
         p.prepare()
+        loadedAtMillis = android.os.SystemClock.elapsedRealtime()
         player = p
         tracker = null; reported = false
         tickJob = viewModelScope.launch { while (true) { delay(500); tracker?.sample(p.currentPosition, p.isPlaying); checkWatched() } }

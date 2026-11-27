@@ -25,7 +25,10 @@ import com.videomk.app.core.WalletInfo
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,7 +84,11 @@ data class AppState(
     val retrying: Set<String> = emptySet(),
 ) {
     val entries: List<LibraryEntry> get() = LibraryMerge.entries(pending, videos)
-    val hasRunningVideos: Boolean get() = videos.any { it.status.isRunning } || pending.any { it.state == PendingVideo.State.Sending }
+    /**
+     * Something is being made, so the list must keep being read: a running video, a request on its way, or a request the server accepted whose video the list
+     * does not show yet (without the last one the polling stopped right after Create and the card stayed "making" for good).
+     */
+    val hasRunningVideos: Boolean get() = videos.any { it.status.isRunning } || pending.any { it.state == PendingVideo.State.Sending || it.state is PendingVideo.State.Accepted }
     fun video(id: String): VideoItem? = videos.firstOrNull { it.id == id }
 }
 
@@ -97,6 +104,7 @@ class AppViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     accountApi: com.videomk.app.core.AccountApi? = null,
     private val wiper: com.videomk.app.core.LocalWiper = com.videomk.app.core.LocalWiper { },
+    private val pollMillis: Long = POLL_MILLIS,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AppState())
     val state: StateFlow<AppState> = _state.asStateFlow()
@@ -196,13 +204,24 @@ class AppViewModel(
 
     // library
 
-    suspend fun refresh() {
+    private var inFlight: kotlinx.coroutines.Deferred<List<VideoItem>>? = null
+    @Volatile private var lastRefreshMillis = Long.MIN_VALUE / 2
+
+    /**
+     * Reads the list (and the credits). [ifOlderThanMillis]: skip when a read finished less than that ago (the screens ask on every return; one answer serves them all).
+     * Never ends the caller for a cancellation that is not the caller's own: a read cut short from outside (see [onForeground]) is just a read that failed.
+     */
+    suspend fun refresh(ifOlderThanMillis: Long = 0) {
         val b = backend ?: return
+        if (_state.value.phase !is Phase.SignedIn && _state.value.phase != Phase.Launching) return
         refreshLock.withLock {
+            if (ifOlderThanMillis > 0 && clock() - lastRefreshMillis in 0 until ifOlderThanMillis) return
             if (_state.value.videos.isEmpty() && _state.value.loadState !is LoadState.Loaded) update { it.copy(loadState = LoadState.Loading) }
             try {
                 viewModelScope.launch { refreshWallet() }   // credits load alongside the list
-                val fresh = b.listVideos()
+                // its own job, so a read left hanging from before the phone slept can be dropped without touching whoever asked for it
+                val fresh = kotlinx.coroutines.coroutineScope { async { b.listVideos() }.also { inFlight = it }.await() }
+                lastRefreshMillis = clock()
                 announceFinished(_state.value, fresh)
                 update { s ->
                     val (stages, completions) = track(s, fresh)
@@ -211,17 +230,16 @@ class AppViewModel(
                         pending = LibraryMerge.stillPending(s.pending, fresh), loadState = LoadState.Loaded,
                     )
                 }
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: ApiError.Unauthorized) {
                 signOut()
             } catch (e: Exception) {
+                if (e is CancellationException) kotlin.coroutines.coroutineContext.ensureActive()   // the caller's own cancellation ends it; anyone else's does not
                 val offline = e is ApiError.Network
                 // keep what we have on screen; only a first load shows a full-screen error
                 update { s ->
                     s.copy(offline = offline, loadState = if (s.videos.isEmpty() && s.loadState !is LoadState.Loaded) LoadState.Failed((e as? ApiError)?.message ?: Txt.s(R.string.nav_load_videos_failed)) else LoadState.Loaded)
                 }
-            }
+            } finally { inFlight = null }
         }
     }
 
@@ -270,12 +288,25 @@ class AppViewModel(
             while (isActive && _state.value.hasRunningVideos && clock() < until) { delay(BACKGROUND_POLL_MILLIS); refresh() }
         }
     }
-    fun onForeground() { backgroundWatch?.cancel(); backgroundWatch = null }
+    /**
+     * Back on screen (also after the phone was locked): whatever was asked before the pause is dropped (its connection may be dead and would hold the next
+     * read for up to a minute) and the list is read at once, so a video that finished meanwhile shows as finished without a pull to refresh.
+     */
+    fun onForeground() {
+        backgroundWatch?.cancel(); backgroundWatch = null
+        inFlight?.cancel()
+        if (_state.value.phase is Phase.SignedIn) viewModelScope.launch { refresh() }
+    }
 
-    /** Polls while anything is running; ends when the caller's coroutine is cancelled or everything has settled. */
+    /**
+     * For a visible screen: reads at once (unless something just did), then keeps reading every few seconds while anything is being made, and waits
+     * without reading while nothing is. Ends only when the caller's coroutine is cancelled (the screen left); a failed read never ends it.
+     */
     suspend fun pollWhileRunning() {
-        while (currentIsActive() && _state.value.hasRunningVideos) {
-            delay(POLL_MILLIS)
+        refresh(ifOlderThanMillis = FRESH_MILLIS)
+        while (currentIsActive()) {
+            if (!_state.value.hasRunningVideos) state.first { it.hasRunningVideos }
+            delay(pollMillis)
             if (!currentIsActive()) break
             refresh()
         }
@@ -434,6 +465,8 @@ class AppViewModel(
 
     companion object {
         const val POLL_MILLIS = 4000L
+        /** A read this recent answers a screen that has just become visible. */
+        const val FRESH_MILLIS = 1500L
         const val BACKGROUND_POLL_MILLIS = 15_000L
         const val BACKGROUND_WATCH_MILLIS = 30 * 60_000L
         val SIGN_IN_FAILED: String get() = Txt.s(R.string.auth_sign_in_failed)

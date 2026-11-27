@@ -12,6 +12,8 @@ sealed interface VideoStatus {
     data object Complete : VideoStatus
     data object Failed : VideoStatus
     data object Rejected : VideoStatus
+    /** The person stopped it while it was being made; the credits came back. Can be tried again or removed, like a failed one. */
+    data object Cancelled : VideoStatus
 
     enum class Stage(@StringRes private val shortRes: Int, @StringRes private val titleRes: Int) {
         Starting(R.string.stage_starting_short, R.string.stage_starting),
@@ -30,8 +32,9 @@ sealed interface VideoStatus {
     companion object {
         /** [stage] is the item's `stage` field (`deck_reading`, `deck_writing`); it only matters while the status is PLOT_CREATION and is ignored afterwards. */
         fun fromServer(raw: String, stage: String? = null): VideoStatus = when (raw.uppercase()) {
-            "COMPLETE", "PREVIEW_READY" -> Complete
-            "FAILED", "EDIT_FAILED", "CANCELLED" -> Failed
+            "COMPLETE", "COMPLETED", "PREVIEW_READY" -> Complete
+            "FAILED", "EDIT_FAILED" -> Failed
+            "CANCELLED" -> Cancelled
             "REJECTED" -> Rejected
             "PLOT_CREATION" -> when (stage) { "deck_reading" -> Running(Stage.Writing, DeckStage.Reading); "deck_writing" -> Running(Stage.Writing, DeckStage.Writing); else -> Running(Stage.Writing) }
             "ASSETS_CREATION", "STORYBOARD_CREATION" -> Running(Stage.VoiceAndVisuals)

@@ -29,5 +29,6 @@ sealed class ApiError : Exception() {
 }
 
 class AuthException(val kind: Kind) : Exception(kind.name) {
-    enum class Kind { SignedOut, Cancelled, Failed, AccountLink }
+    /** [Network]: the auth server could not be reached (as opposed to [Failed], an answer that could not be used). */
+    enum class Kind { SignedOut, Cancelled, Failed, AccountLink, Network }
 }

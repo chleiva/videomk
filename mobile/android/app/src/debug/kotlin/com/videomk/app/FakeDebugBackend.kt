@@ -35,7 +35,15 @@ class FakeDebugBackend(private val deckDemo: Boolean = false) : Backend {
         VideoItem("d2", VideoStatus.Running(VideoStatus.Stage.Writing, VideoStatus.DeckStage.Writing), "Sales kickoff", null, now.minusSeconds(60), null, null, null, false, "16:9", "1080p"),
     )
 
-    override suspend fun listVideos(): List<VideoItem> = if (deckDemo) deckVideos + videos.toList() else videos.toList()
+    /**
+     * `files/fake_finish` (created from outside while the app is in the background: `adb shell run-as com.videomk.app touch files/fake_finish`): the video being made
+     * is finished from then on. That is how "it finished while the phone was locked" is checked by hand and in the instrumented test (tracker R124).
+     */
+    private fun finished(): Boolean = java.io.File("/data/data/com.videomk.app/files/fake_finish").exists()
+    override suspend fun listVideos(): List<VideoItem> {
+        val list = if (finished()) videos.map { if (it.id == "v2") it.copy(status = VideoStatus.Complete, durationSeconds = 62.0, making = null, editable = true, videoUrl = "https://example.com/v2.mp4", previewGifUrl = pic("s_forest.jpg")) else it } else videos.toList()
+        return if (deckDemo) deckVideos + list else list
+    }
     /** "Try again" on the canned failed video: the SAME row turns into a making one (as the server does), so the in-place change can be looked at. */
     override suspend fun retryVideo(videoId: String): RetryResult {
         kotlinx.coroutines.delay(1200)

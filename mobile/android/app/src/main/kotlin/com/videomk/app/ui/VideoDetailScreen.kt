@@ -91,8 +91,10 @@ fun VideoDetailScreen(
     val editRevision by app.editRevision.collectAsState()
     val initialRevision = rememberSaveable { editRevision }
 
-    LaunchedEffect(Unit) { if (app.state.value.videos.none { it.id == detail.videoId }) app.refresh() }
-    PollWhileRunning(app, state.hasRunningVideos)
+    // PollWhileRunning reads the list every time this page becomes visible (also after the phone was locked), so a Making page turns into the player by itself
+    PollWhileRunning(app)
+    // back on a finished video: a link that has expired meanwhile (they are signed for a limited time) is replaced before the person taps anything
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { detail.onVisible() }
     LaunchedEffect(video?.status) { if (video?.status == VideoStatus.Complete) detail.load() }
     LaunchedEffect(editRevision) { if (editRevision != initialRevision && video?.status == VideoStatus.Complete) { app.refresh(); detail.reload() } }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { detail.pause() }
@@ -104,7 +106,7 @@ fun VideoDetailScreen(
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             if (video == null) { FullScreenSpinner(); return@Box }
-            val kind = when (video.status) { VideoStatus.Complete -> 1; is VideoStatus.Running -> 0; VideoStatus.Failed -> 2; VideoStatus.Rejected -> 3 }
+            val kind = when (video.status) { VideoStatus.Complete -> 1; is VideoStatus.Running -> 0; VideoStatus.Failed -> 2; VideoStatus.Rejected -> 3; VideoStatus.Cancelled -> 4 }
             // Making settles into the player with a cross-fade (the same component as the home card, in its roomier layout)
             SettleCrossfade(kind, Modifier.fillMaxSize()) { k ->
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Vmk.space.l)) {
@@ -112,6 +114,7 @@ fun VideoDetailScreen(
                         1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = { detail.pause(); onMakeAnother() }, onFeedback = onFeedback, remixPrompt = Remix.prompt(state.briefs[video.id], video.title), caps = caps, onRemix = { p, k -> detail.pause(); onRemix(p, k) })
                         0 -> MakingBody(rememberMakingSnapshot(video, state), video.id, video.frameRatio, LocalContainerOrNull.current?.readyNotifier, Modifier.testTag("progressCard"))
                         2 -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Sym.Warning, Vmk.colors.danger) }
+                        4 -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.lib_status_cancelled), stringResource(R.string.video_cancelled_body), Sym.Info, Vmk.colors.textSecondary) }
                         else -> Column(Modifier.padding(Vmk.space.screen)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Sym.PanTool, Vmk.colors.warning) }
                     }
                 }

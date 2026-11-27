@@ -194,4 +194,43 @@ class ApiClientTest {
         server.enqueue(json(body = """{"balance":999,"unlimited":true}"""))
         assertTrue(api.wallet().canAfford(1000))
     }
+
+    // ---- a 401 gets one forced token refresh and one more try before the session is given up (R124)
+
+    private fun realAuth(store: com.videomk.app.core.InMemoryTokenStore) = com.videomk.app.core.AuthService(configFor(server), store, okhttp3.OkHttpClient())
+    private fun tokenJson(sub: String) = """{"id_token":"${fakeJwt(sub = sub)}","access_token":"acc","expires_in":3600}"""
+    private fun stored(sub: String = "user-1") = com.videomk.app.core.InMemoryTokenStore(com.videomk.app.core.Tokens(fakeJwt(sub = sub), "a", "r-1", java.time.Instant.now().plusSeconds(3000)))
+
+    @Test fun `a 401 refreshes the token and sends the call again - the person stays signed in`() = runBlocking {
+        val store = stored(); val old = store.load()!!.idToken
+        val client = ApiClient(configFor(server), realAuth(store))
+        server.enqueue(json(401, """{"message":"Unauthorized"}"""))
+        server.enqueue(json(body = tokenJson("user-1")))
+        server.enqueue(json(body = """{"items":[{"video_id":"v1","status":"COMPLETE"}]}"""))
+        assertEquals(VideoStatus.Complete, client.listVideos().single().status)
+        val first = server.takeRequest(); val token = server.takeRequest(); val second = server.takeRequest()
+        assertEquals("Bearer $old", first.headers["Authorization"])
+        assertTrue(token.url.encodedPath.endsWith("/oauth2/token")); assertTrue(token.body!!.utf8().contains("grant_type=refresh_token"))
+        assertEquals(first.url.encodedPath, second.url.encodedPath)
+        assertEquals("Bearer ${store.load()!!.idToken}", second.headers["Authorization"])
+        assertEquals("android", second.headers["X-Platform"])
+    }
+
+    @Test fun `a second 401 with the fresh token is the end of the session, and a provider that cannot refresh fails at once`() = runBlocking {
+        val client = ApiClient(configFor(server), realAuth(stored()))
+        server.enqueue(json(401, "{}")); server.enqueue(json(body = tokenJson("user-1"))); server.enqueue(json(401, "{}"))
+        try { client.wallet(); fail() } catch (e: ApiError) { assertEquals(ApiError.Unauthorized, e) }
+        assertEquals(3, server.requestCount)
+        server.enqueue(json(401, "{}"))
+        expectError(ApiError.Unauthorized) { api.wallet() }   // FixedAuth: nothing to refresh
+        assertEquals(4, server.requestCount)
+    }
+
+    @Test fun `try again and remove also get the refresh on a 401`() = runBlocking {
+        val client = ApiClient(configFor(server), realAuth(stored()))
+        server.enqueue(json(401, "{}")); server.enqueue(json(body = tokenJson("user-1"))); server.enqueue(json(202, """{"photos":3}"""))
+        assertEquals(com.videomk.app.core.RetryResult.Started(3, 0), client.retryVideo("v1"))
+        server.enqueue(json(401, "{}")); server.enqueue(json(body = tokenJson("user-1"))); server.enqueue(json(401, "{}"))
+        try { client.deleteVideo("v1"); fail() } catch (e: ApiError) { assertEquals(ApiError.Unauthorized, e) }   // refused again with a fresh token: that stands
+    }
 }

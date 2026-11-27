@@ -106,8 +106,7 @@ class ApiClient(
 
     /** "Try again": the same video starts again on the server with every photo, option, language and watermark it had. Nothing is resent from the phone. */
     suspend fun retryVideo(videoId: String): RetryResult {
-        val a = auth.authorization()
-        val (code, text) = try { raw("POST", listOf("videos", videoId, "retry"), a.idToken, a.userId, JsonObject(emptyMap())) } catch (e: IOException) { throw ApiError.Network }
+        val (code, text) = authed("POST", listOf("videos", videoId, "retry"))
         val o = runCatching { parseObject(text) }.getOrNull()
         return when (code) {
             202 -> RetryResult.Started(o?.int("photos"), o?.int("photos_unusable") ?: 0)
@@ -123,8 +122,7 @@ class ApiClient(
 
     /** Removes a video that did not finish (failed, cancelled or refused); a made video is never deleted here (409). False: the server does not have the route. */
     suspend fun deleteVideo(videoId: String): Boolean {
-        val a = auth.authorization()
-        val (code, text) = try { raw("DELETE", listOf("videos", videoId), a.idToken, a.userId, JsonObject(emptyMap())) } catch (e: IOException) { throw ApiError.Network }
+        val (code, text) = authed("DELETE", listOf("videos", videoId))
         val o = runCatching { parseObject(text) }.getOrNull()
         return when (code) {
             200, 204 -> true
@@ -199,6 +197,15 @@ class ApiClient(
         return runCatching { parseObject(text).str("authorize_url") }.getOrNull()?.takeIf { AppleRevokeLink.isAcceptable(it) }
     }
 
+    /** A call whose status the caller reads itself, with the session's token. A 401 gets one forced token refresh and one more try (see [send]). */
+    private suspend fun authed(method: String, path: List<String>, body: JsonObject = JsonObject(emptyMap())): Pair<Int, String> {
+        val a = auth.authorization()
+        val first = try { raw(method, path, a.idToken, a.userId, body) } catch (e: IOException) { throw ApiError.Network }
+        if (first.first != 401) return first
+        val fresh = auth.reauthorized(a) ?: return first
+        return try { raw(method, path, fresh.idToken, fresh.userId, body) } catch (e: IOException) { throw ApiError.Network }
+    }
+
     /** One request with the caller's token. Never logs; throws [IOException] for any network problem (including a timeout). */
     private suspend fun raw(method: String, path: List<String>, idToken: String, sub: String, body: JsonObject): Pair<Int, String> {
         val url = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(sub).also { b -> path.forEach { b.addPathSegment(it) } }.build()
@@ -219,8 +226,22 @@ class ApiClient(
     suspend fun library(method: String, path: List<String>, body: JsonObject? = null, query: List<Pair<String, String>> = emptyList()): JsonObject =
         send(method, listOf("library") + path, body, query = query, library = true)
 
+    /** The server said 401 to the first try of a call: the token is refreshed once and the call sent again before the session is given up. */
+    private class TokenRejected : Exception()
+
+    /**
+     * Every JSON call. A 401 does not end the session at once: a phone back from sleep can hold a token its own clock still believes in, so the token is
+     * refreshed (forced) and the call tried once more; only a second 401 is [ApiError.Unauthorized].
+     */
     private suspend fun send(method: String, path: List<String>, body: JsonObject? = null, conflictIsEdit: Boolean = false, query: List<Pair<String, String>> = emptyList(), library: Boolean = false, soft: Boolean = false, deck: Boolean = false): JsonObject {
         val a = auth.authorization()
+        return try { sendOnce(a, true, method, path, body, conflictIsEdit, query, library, soft, deck) } catch (e: TokenRejected) {
+            val fresh = auth.reauthorized(a) ?: throw ApiError.Unauthorized
+            sendOnce(fresh, false, method, path, body, conflictIsEdit, query, library, soft, deck)
+        }
+    }
+
+    private suspend fun sendOnce(a: Authorization, first: Boolean, method: String, path: List<String>, body: JsonObject?, conflictIsEdit: Boolean, query: List<Pair<String, String>>, library: Boolean, soft: Boolean, deck: Boolean): JsonObject {
         val url: HttpUrl = config.apiBase.newBuilder().addPathSegment("users").addPathSegment(a.userId).also { b -> path.forEach { b.addPathSegment(it) }; query.forEach { (k, v) -> b.addQueryParameter(k, v) } }.build()
         val rb = Request.Builder().url(url)
             .header("Authorization", "Bearer ${a.idToken}")
@@ -239,7 +260,7 @@ class ApiClient(
             val text = try { r.body.string() } catch (e: IOException) { throw ApiError.Network }
             when (r.code) {
                 in 200..299 -> return if (text.isBlank()) JsonObject(emptyMap()) else parseObject(text)
-                401 -> throw ApiError.Unauthorized
+                401 -> if (first) throw TokenRejected() else throw ApiError.Unauthorized
                 403 -> if (soft) throw ApiError.NotFound else throw ApiError.Unauthorized
                 404 -> if (deck) throw ApiError.Deck(codeOf(text) ?: "unavailable", message(text) ?: "") else if (library || soft) throw ApiError.NotFound else throw ApiError.Server
                 413 -> if (library) throw ApiError.Invalid(Txt.s(R.string.err_photo_too_large)) else throw ApiError.Server

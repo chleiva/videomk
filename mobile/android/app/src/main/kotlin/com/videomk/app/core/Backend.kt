@@ -24,7 +24,7 @@ class ApiBackend(private val api: ApiClient, private val uploader: PhotoUploader
         block()
     } catch (e: AuthException) {
         if (e.kind == AuthException.Kind.SignedOut) { onSignedOut(); throw ApiError.Unauthorized }
-        throw ApiError.Server
+        throw if (e.kind == AuthException.Kind.Network) ApiError.Network else ApiError.Server
     }
 
     override suspend fun listVideos() = guarded { api.listVideos() }

@@ -3,11 +3,13 @@ package com.videomk.app.core
 import com.videomk.app.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import okhttp3.FormBody
 import okhttp3.HttpUrl
@@ -84,6 +86,12 @@ class InMemoryTokenStore(initial: Tokens? = null) : TokenStore {
 fun interface AuthorizationProviding {
     /** A valid ID token (refreshed if needed) and the user id (the token's `sub`). */
     suspend fun authorization(): Authorization
+
+    /**
+     * The server answered 401 to [rejected]: a token newer than that one (refreshed now, whatever its expiry says, or already refreshed by another caller).
+     * Null when this provider cannot refresh; then the 401 stands.
+     */
+    suspend fun reauthorized(rejected: Authorization): Authorization? = null
 }
 
 data class Authorization(val idToken: String, val userId: String)
@@ -136,12 +144,16 @@ class AuthService(
     private val store: TokenStore,
     private val http: OkHttpClient,
     private val now: () -> Instant = { Instant.now() },
+    /** The whole-call limit of a token request. */
+    private val tokenCallMillis: Long = TOKEN_CALL_SECONDS * 1000,
 ) : DeletionSession {
     private data class PendingSignIn(val pkce: PKCE, val state: String, val provider: SignInProvider, val retried: Boolean)
 
     private val lock = Mutex()
     private var refreshJob: Deferred<Tokens>? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
+    // SupervisorJob: a refresh that fails (no network on the way back from a locked phone) must not cancel the scope, or every later refresh would
+    // die with "Parent job is Cancelled" until the process restarts (tracker R124: a finished video stayed "being made").
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     @Volatile private var pending: PendingSignIn? = null
     private data class PendingReauth(val pkce: PKCE, val state: String, val expectedSub: String, val retried: Boolean)
     @Volatile private var reauth: PendingReauth? = null
@@ -266,15 +278,23 @@ class AuthService(
 
     override suspend fun authorization(): Authorization {
         var t = store.load() ?: throw AuthException(AuthException.Kind.SignedOut)
-        if (java.time.Duration.between(now(), t.expiresAt).seconds < 120) t = refreshed(t)
+        if (java.time.Duration.between(now(), t.expiresAt).seconds < 120) t = refreshed(t, force = false)
         val sub = Jwt.subject(t.idToken) ?: throw AuthException(AuthException.Kind.Failed)
         return Authorization(t.idToken, sub)
     }
 
-    private suspend fun refreshed(old: Tokens): Tokens {
+    /** After a 401: the stored token when it is already another one than [rejected], else a refresh now (the clock of a phone that slept can be wrong about the expiry). */
+    override suspend fun reauthorized(rejected: Authorization): Authorization? {
+        var t = store.load() ?: throw AuthException(AuthException.Kind.SignedOut)
+        if (t.idToken == rejected.idToken) t = refreshed(t, force = true)
+        val sub = Jwt.subject(t.idToken) ?: throw AuthException(AuthException.Kind.Failed)
+        return Authorization(t.idToken, sub)
+    }
+
+    private suspend fun refreshed(old: Tokens, force: Boolean): Tokens {
         val job = lock.withLock {
             // another caller may have refreshed while this one waited for the lock
-            store.load()?.let { cur -> if (cur != old && java.time.Duration.between(now(), cur.expiresAt).seconds >= 120) return cur }
+            store.load()?.let { cur -> if (cur != old && (force || java.time.Duration.between(now(), cur.expiresAt).seconds >= 120)) return cur }
             refreshJob?.takeIf { it.isActive } ?: run {
                 val rt = old.refreshToken
                 if (rt == null) { signOut(); throw AuthException(AuthException.Kind.SignedOut) }
@@ -288,22 +308,30 @@ class AuthService(
                         if (e.kind == AuthException.Kind.SignedOut) signOut()   // refresh token revoked or expired
                         throw e
                     }
-                }.also { refreshJob = it }
+                }.also { d -> refreshJob = d; d.invokeOnCompletion { if (refreshJob === d) refreshJob = null } }   // a finished or failed refresh is never handed to the next caller
             }
         }
-        return job.await()
+        return try { job.await() } catch (e: CancellationException) {
+            kotlin.coroutines.coroutineContext.ensureActive()   // this caller was cancelled: let it end
+            throw AuthException(AuthException.Kind.Network)      // the refresh itself was cancelled: a failure to report, never a silent end of the caller
+        }
     }
 
-    private suspend fun tokenRequest(params: Map<String, String>, previous: Tokens?): Tokens = withContext(Dispatchers.IO) {
+    private suspend fun tokenRequest(params: Map<String, String>, previous: Tokens?): Tokens {
         val form = FormBody.Builder().also { b -> params.forEach { (k, v) -> b.add(k, v) } }.build()
         val req = Request.Builder().url(config.authDomain.newBuilder().addPathSegments("oauth2/token").build()).post(form).build()
+        // a whole-call limit and a cancellable call: a request left hanging by a sleeping phone ends, and never holds a thread
         val (status, body) = try {
-            http.newCall(req).execute().use { it.code to (it.body.string()) }
-        } catch (e: java.io.IOException) { throw AuthException(AuthException.Kind.Failed) }
+            tokenHttp.newCall(req).await().use { it.code to (it.body.string()) }
+        } catch (e: java.io.IOException) { throw AuthException(AuthException.Kind.Network) }
         if (status == 400 && previous != null) throw AuthException(AuthException.Kind.SignedOut)
         val j = if (status == 200) try { parseObject(body) } catch (e: Exception) { null } else null
         val id = j?.str("id_token"); val access = j?.str("access_token"); val expiresIn = j?.int("expires_in")
         if (id == null || access == null || expiresIn == null) throw AuthException(AuthException.Kind.Failed)
-        Tokens(id, access, j.str("refresh_token") ?: previous?.refreshToken, now().plusSeconds(expiresIn.toLong()))
+        return Tokens(id, access, j.str("refresh_token") ?: previous?.refreshToken, now().plusSeconds(expiresIn.toLong()))
     }
+
+    private val tokenHttp: OkHttpClient by lazy { http.newBuilder().callTimeout(tokenCallMillis, java.util.concurrent.TimeUnit.MILLISECONDS).build() }
+
+    companion object { const val TOKEN_CALL_SECONDS = 20L }
 }
