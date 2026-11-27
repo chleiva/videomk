@@ -1,0 +1,55 @@
+{
+ "name": "forest_path",
+ "aspect": [
+  16,
+  9
+ ],
+ "source_size": [
+  1536,
+  864
+ ],
+ "layers": [
+  {
+   "file": "0_sky.svg",
+   "name": "sky",
+   "z": 0.0
+  },
+  {
+   "file": "1_clouds.svg",
+   "name": "clouds",
+   "z": 0.05,
+   "drift": 0.012
+  },
+  {
+   "file": "2_layer1.svg",
+   "name": "layer1",
+   "z": 0.3333333333333333,
+   "sway": {
+    "amp": 0.0026,
+    "period": 3.6,
+    "phase": 0.4
+   }
+  },
+  {
+   "file": "3_layer2.svg",
+   "name": "layer2",
+   "z": 0.6666666666666666,
+   "sway": {
+    "amp": 0.0034,
+    "period": 3.1,
+    "phase": 1.7
+   }
+  },
+  {
+   "file": "4_layer3.svg",
+   "name": "layer3",
+   "z": 1.0,
+   "sway": {
+    "amp": 0.0042,
+    "period": 2.8,
+    "phase": 2.9
+   }
+  }
+ ],
+ "motion": {}
+}

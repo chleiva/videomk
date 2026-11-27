@@ -4,3 +4,4 @@ Pillow==10.4.0
 # Bundles a static ffmpeg (libx264, aac, sidechaincompress, ...). >=0.5 ships a modern ffmpeg (amix normalize needs >=4.4);
 # the engine_selftest Lambda reports the exact version and filters on the real runtime.
 imageio-ffmpeg==0.6.0
+resvg-py==0.5.0   # layered vector scenes (engine/vector_scene.py): rasterises SVG layers; a 1.4 MB abi3 manylinux wheel

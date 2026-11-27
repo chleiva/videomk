@@ -1,0 +1,59 @@
+{
+ "name": "seaside",
+ "aspect": [
+  16,
+  9
+ ],
+ "source_size": [
+  2048,
+  1152
+ ],
+ "layers": [
+  {
+   "file": "0_sky.svg",
+   "name": "sky",
+   "z": 0.0
+  },
+  {
+   "file": "1_clouds.svg",
+   "name": "clouds",
+   "z": 0.05,
+   "drift": 0.012
+  },
+  {
+   "file": "2_layer1.svg",
+   "name": "layer1",
+   "z": 0.25
+  },
+  {
+   "file": "3_layer2.svg",
+   "name": "layer2",
+   "z": 0.5
+  },
+  {
+   "file": "4_layer3.svg",
+   "name": "layer3",
+   "z": 0.75,
+   "bob": {
+    "amp": 0.004,
+    "period": 3.2
+   },
+   "sway": {
+    "amp": 0.0012,
+    "period": 4.2,
+    "phase": 1.0
+   }
+  },
+  {
+   "file": "5_layer4.svg",
+   "name": "layer4",
+   "z": 1.0,
+   "sway": {
+    "amp": 0.0018,
+    "period": 3.0,
+    "phase": 0.5
+   }
+  }
+ ],
+ "motion": {}
+}
