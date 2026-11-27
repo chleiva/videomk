@@ -3,13 +3,20 @@
 import { getAuthorizationHeader } from "./auth";
 import { apiGateway } from "./config";
 import { currentLocaleHeaders } from "./i18n";
+import { AUTO, lookRequest, normalizeChoice, parseLooks } from "./looks";
+import type { LookChoice, LookContext, LooksCaps } from "./looks";
+import { lengthLock, parseLengthLimits, parsePlanState } from "./plan";
+import type { LengthLimits, PlanState } from "./plan";
 
 export interface Aspect { id: string; label: string; ready: boolean; beta?: boolean }
-export interface Resolution { id: string; label: string; credits_multiplier: number; aspects: string[]; note?: string }
+export interface Resolution { id: string; label: string; credits_multiplier: number; aspects: string[]; note?: string; available?: boolean; requires_plan?: string | null }   // available false: the plan does not make it (shown locked with the plan's name)
 export interface Platform { id: string; label: string; aspect: string; resolution: string; recommended_minutes: number; max_minutes: number | null; other_aspects?: string[]; note?: string; supports_4k?: boolean; note_4k?: string | null }
 export interface Capabilities {
   aspects: Aspect[]; resolutions: Resolution[]; platforms: Platform[]; languages: { id: string; label: string }[];
   lengths: { min_minutes: number; max_minutes: number; presets: number[] }; max_photos?: number; intake?: boolean; deck?: DeckCaps; watermark?: WatermarkCaps;
+  looks?: LooksCaps;        // the chosen, enforced look (docs/CREATE_API.md "Video look"); absent on a server without it: the Look pill is then the colour theme, as before
+  limits?: LengthLimits;    // the plan's longest video and the lengths over it (docs/PLANS.md); absent: no plan limit
+  plans?: PlanState;        // plan, free, can_upgrade
 }
 
 /** `capabilities.watermark` (docs/WATERMARK.md): present only where the stack has the feature on. Modes carry `available` (false: locked or hidden) and `requires`. */
@@ -47,7 +54,8 @@ export const FALLBACK_CAPS: Capabilities = {
 
 export interface Form {
   text: string; platform: string; aspect: string; resolution: string; minutes: number; captions: boolean; language: string;
-  look: Look; scenes: SceneStyle; watermark: WatermarkChoice | null;   // look auto and scenes auto send nothing; watermark null = the saved default applies (nothing is sent)
+  look: Look; scenes: SceneStyle; watermark: WatermarkChoice | null;   // look (the colour theme) auto and scenes auto send nothing; watermark null = the saved default applies (nothing is sent)
+  pick: LookChoice;   // the video look chosen in the picker: Auto sends nothing
 }
 
 const readyAspects = (c: Capabilities) => c.aspects.filter((a) => a.ready);
@@ -57,6 +65,14 @@ export function resolutionOf(c: Capabilities, id: string): Resolution | undefine
 
 /** The resolutions the chosen aspect can be made in (the pair must not be offered otherwise). */
 export function resolutionsFor(c: Capabilities, aspect: string): Resolution[] { return c.resolutions.filter((r) => !r.aspects || r.aspects.includes(aspect)); }
+/** The same, without the ones the plan locks: what may actually be chosen. */
+const openResolutions = (c: Capabilities, aspect: string): Resolution[] => resolutionsFor(c, aspect).filter((r) => r.available !== false);
+/** The longest preset the plan makes (null: no plan limit, or no preset fits). */
+export function planMaxPreset(c: Capabilities): number | null {
+  if (!c.limits) return null;
+  const ok = c.lengths.presets.filter((m) => !lengthLock(m, c.limits));
+  return ok.length < c.lengths.presets.length && ok.length ? Math.max(...ok) : null;
+}
 
 /** What the Options popover offers as quality: the aspect's resolutions, without the paid-up ones on a platform that does not show them (YouTube and general keep 4K). */
 export function qualityChoices(c: Capabilities, f: Pick<Form, "aspect" | "platform">): Resolution[] {
@@ -69,10 +85,12 @@ export function normalize(f: Form, c: Capabilities): Form {
   const out = { ...f };
   const aspects = readyAspects(c);
   if (!aspects.some((a) => a.id === out.aspect)) out.aspect = aspects[0]?.id ?? "16:9";
-  const res = resolutionsFor(c, out.aspect);
-  if (!res.some((r) => r.id === out.resolution)) out.resolution = res.find((r) => r.id === "1080p")?.id ?? res[0]?.id ?? "1080p";
+  const res = openResolutions(c, out.aspect).length ? openResolutions(c, out.aspect) : resolutionsFor(c, out.aspect);   // a resolution the plan locks is never kept
+  if (!res.some((r) => r.id === out.resolution)) out.resolution = res.find((r) => r.id === "1080p")?.id ?? res[res.length - 1]?.id ?? "1080p";
   if (c.platforms.length && !platformOf(c, out.platform)) out.platform = (platformOf(c, "other") ?? c.platforms[0]).id;
   out.minutes = clampMinutes(out.minutes, c);
+  if (lengthLock(out.minutes, c.limits)) out.minutes = planMaxPreset(c) ?? out.minutes;   // over the plan's longest video: the longest it makes
+  out.pick = normalizeChoice(out.pick, c.looks).choice;
   if (out.language !== "auto" && !c.languages.some((l) => l.id === out.language)) out.language = "auto";
   if (!LOOKS.includes(out.look)) out.look = "auto";
   if (out.scenes !== "cartoon" && out.scenes !== "real") out.scenes = "auto";
@@ -91,7 +109,7 @@ export function clampMinutes(m: number, c: Capabilities): number {
 
 export function defaultForm(c: Capabilities, saved?: Partial<Form> | null): Form {
   const p = platformOf(c, saved?.platform ?? "other") ?? platformOf(c, "other") ?? c.platforms[0];
-  const base: Form = { text: "", platform: p?.id ?? "other", aspect: p?.aspect ?? "16:9", resolution: p?.resolution ?? "1080p", minutes: p?.recommended_minutes ?? 1, captions: true, language: "auto", look: "auto", scenes: "auto", watermark: null };
+  const base: Form = { text: "", platform: p?.id ?? "other", aspect: p?.aspect ?? "16:9", resolution: p?.resolution ?? "1080p", minutes: p?.recommended_minutes ?? 1, captions: true, language: "auto", look: "auto", scenes: "auto", watermark: null, pick: AUTO };
   return normalize({ ...base, ...(saved ?? {}), text: "" }, c);
 }
 
@@ -127,12 +145,12 @@ export function overPlatformLimit(f: Form, c: Capabilities): number | null {
 }
 
 /** The fields generate and brief accept next to the prompt. With no capabilities from the server nothing but the length is sent. */
-export function buildOptions(f: Form, c: Capabilities, live: boolean): Record<string, unknown> {
+export function buildOptions(f: Form, c: Capabilities, live: boolean, ctx?: LookContext): Record<string, unknown> {
   if (!live) return { target_minutes: f.minutes };
   return {
     platform: f.platform, aspect: f.aspect, resolution: f.resolution, captions: f.captions, language: f.language, target_minutes: f.minutes,
     ...(f.look !== "auto" ? { theme: f.look } : {}),
-    ...(f.scenes !== "auto" ? { style: f.scenes } : {}),
+    ...(c.looks ? lookRequest(f.pick, c.looks, ctx) : f.scenes !== "auto" ? { style: f.scenes } : {}),   // the picker replaces the older `style`: with it only look, cast, extras are sent
     ...(f.watermark && c.watermark ? { watermark: { mode: f.watermark } } : {}),   // only when the person changed it for this video: otherwise the saved default applies
   };
 }
@@ -145,9 +163,9 @@ export function pillValues(f: Form, c: Capabilities, otherLabel: string): { for:
 }
 
 /** Rows of the Length menu: each preset with its credit price, greyed over the platform's soft limit. */
-export function lengthMenu(c: Capabilities, f: Pick<Form, "platform" | "resolution">): { minutes: number; credits: number; over: boolean }[] {
+export function lengthMenu(c: Capabilities, f: Pick<Form, "platform" | "resolution">): { minutes: number; credits: number; over: boolean; locked: { requires: string | null } | false }[] {
   const max = platformOf(c, f.platform)?.max_minutes ?? null;
-  return c.lengths.presets.map((m) => ({ minutes: m, credits: creditsFor(m, f.resolution, c), over: max != null && m > max }));
+  return c.lengths.presets.map((m) => ({ minutes: m, credits: creditsFor(m, f.resolution, c), over: max != null && m > max, locked: lengthLock(m, c.limits) }));
 }
 
 // ---------------------------------------------------------------- photos in a video (docs/PHOTOS.md): the generate body carries them
@@ -177,7 +195,7 @@ export function saveChoices(f: Form): void {
 export interface Question { id: string; text: string; options: { id: string; label: string }[]; allow_other?: boolean }
 export type Answer = { id: string; option?: string; text?: string; skip?: boolean };
 export type BriefOutcome =
-  | { status: "ok"; brief?: Record<string, string> }
+  | { status: "ok"; brief?: Record<string, string>; note?: string }   // note: a look that was adapted (optional; never a reason to stop)
   | { status: "questions"; questions: Question[] }
   | { status: "not_supported"; message?: string; suggestion?: string }
   | { status: "blocked"; message?: string }
@@ -193,8 +211,20 @@ export function parseBrief(httpStatus: number, body: any): BriefOutcome {
   }
   if (body?.status === "not_supported") return { status: "not_supported", message: body.message, suggestion: body.suggestion };
   if (body?.status === "blocked") return { status: "blocked", message: body.message };
-  if (body?.status === "ok" && body.brief && typeof body.brief === "object") return { status: "ok", brief: body.brief };
-  return { status: "ok" };
+  const note = typeof body?.note === "string" && body.note.trim() ? { note: body.note.trim().slice(0, 300) } : {};
+  if (body?.status === "ok" && body.brief && typeof body.brief === "object") return { status: "ok", brief: body.brief, ...note };
+  return { status: "ok", ...(body?.status === "ok" ? note : {}) };
+}
+
+/** The capabilities body as the form uses it. The newer parts (looks, plan limits) are read leniently: missing or malformed means "not offered", never an error. */
+export function parseCapabilities(b: any): Capabilities | null {
+  if (!Array.isArray(b?.aspects) || !Array.isArray(b?.resolutions) || !b?.lengths?.presets?.length) return null;
+  const limits = parseLengthLimits(b.lengths), plans = parsePlanState(b);
+  return {
+    aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths,
+    max_photos: b.max_photos, intake: b.intake !== false, deck: parseDeckCaps(b.deck), watermark: parseWatermarkCaps(b.watermark),
+    looks: parseLooks(b.looks), ...(limits.planMaxSeconds != null || limits.locked.length ? { limits } : {}), ...(plans.plan || plans.free ? { plans } : {}),
+  };
 }
 
 export async function getCapabilities(): Promise<Capabilities | null> {
@@ -204,8 +234,7 @@ export async function getCapabilities(): Promise<Capabilities | null> {
     const res = await fetch(apiGateway.capabilities(userId), { headers: { Authorization, ...currentLocaleHeaders() } });
     if (!res.ok) return null;
     const b = await res.json();
-    if (!Array.isArray(b?.aspects) || !Array.isArray(b?.resolutions) || !b?.lengths?.presets?.length) return null;
-    return { aspects: b.aspects, resolutions: b.resolutions, platforms: Array.isArray(b.platforms) ? b.platforms : [], languages: Array.isArray(b.languages) ? b.languages : [], lengths: b.lengths, max_photos: b.max_photos, intake: b.intake !== false, deck: parseDeckCaps(b.deck), watermark: parseWatermarkCaps(b.watermark) };
+    return parseCapabilities(b);
   } catch {
     return null;
   }

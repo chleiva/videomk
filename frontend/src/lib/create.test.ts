@@ -94,8 +94,8 @@ describe("pills and menus", () => {
   it("the Length menu prices every preset and greys the ones over the platform's soft limit", () => {
     const f = selectPlatform(defaultForm(caps), caps, "tiktok");
     const rows = lengthMenu(caps, f);
-    expect(rows.find((r) => r.minutes === 0.5)).toEqual({ minutes: 0.5, credits: 1, over: false });
-    expect(rows.find((r) => r.minutes === 5)).toEqual({ minutes: 5, credits: 5, over: true });
+    expect(rows.find((r) => r.minutes === 0.5)).toMatchObject({ minutes: 0.5, credits: 1, over: false });
+    expect(rows.find((r) => r.minutes === 5)).toMatchObject({ minutes: 5, credits: 5, over: true });
     expect(lengthMenu(caps, { platform: "youtube", resolution: "2160p" }).find((r) => r.minutes === 3)).toMatchObject({ credits: 6, over: false });
   });
 });
@@ -147,5 +147,59 @@ describe("photos in a video", () => {
     expect(e.media_meta).toEqual({ d0: { taken: "2024-07-14T10:00:00", lat: 7.88, lon: 98.39 } });
     expect(mediaExtras([], [])).toEqual({});
     expect((mediaExtras(["a"], ["a", "b"]) as any).library_media).toEqual(["b"]);   // a photo is never sent twice
+  });
+});
+
+// ---------------------------------------------------------------- the video look and the plan's limits (docs/CREATE_API.md "Video look", "Plans")
+import { lengthMenu, parseCapabilities, planMaxPreset, qualityChoices } from "./create";
+import { LOOKS_FIXTURE } from "./looks.fixture";
+
+const body = (extra: Record<string, unknown> = {}) => ({ aspects: caps.aspects, resolutions: caps.resolutions, platforms: caps.platforms, languages: caps.languages, lengths: caps.lengths, intake: true, ...extra });
+
+describe("capabilities with the look picker and the plan", () => {
+  it("today's server (no looks.look, no plan): nothing new is offered and the request is exactly what it was", () => {
+    const c = parseCapabilities(body({ looks: { style: { param: "style", default: "auto", options: [{ id: "auto", label: "Auto" }] } } }))!;
+    expect(c.looks).toBeUndefined(); expect(c.limits).toBeUndefined(); expect(c.plans).toBeUndefined();
+    const f = { ...defaultForm(c), look: "paper" as const, scenes: "real" as const, pick: { look: "cartoon", cast: ["fox"], extras: ["board"] } };
+    const sent = buildOptions(normalize(f, c), c, true);
+    expect(sent).toEqual({ platform: "other", aspect: "16:9", resolution: "1080p", captions: true, language: "auto", target_minutes: 1, theme: "paper", style: "real" });
+    expect(parseCapabilities({})).toBeNull();
+  });
+  it("with the picker: look, cast and extras are sent per the contract, the older `style` never, and nothing on Auto", () => {
+    const c = parseCapabilities(body({ looks: LOOKS_FIXTURE }))!;
+    expect(c.looks!.options).toHaveLength(4);
+    const f = defaultForm(c);
+    const base = { platform: "other", aspect: "16:9", resolution: "1080p", captions: true, language: "auto", target_minutes: 1 };
+    expect(buildOptions({ ...f, scenes: "real" }, c, true)).toEqual(base);
+    expect(buildOptions({ ...f, pick: { look: "whiteboard", cast: "auto", extras: [] } }, c, true)).toEqual({ ...base, look: "whiteboard" });
+    expect(buildOptions({ ...f, pick: { look: "cartoon", cast: ["fox", "bear"], extras: ["board"] } }, c, true)).toEqual({ ...base, look: "cartoon", cast: ["fox", "bear"], extras: ["board"] });
+    expect(buildOptions({ ...f, pick: { look: "cartoon", cast: "auto", extras: [] } }, c, true)).toEqual({ ...base, look: "cartoon" });
+    expect(buildOptions({ ...f, pick: { look: "cartoon", cast: ["fox"], extras: [] } }, c, true, { photos: true, deck: false })).toEqual(base);   // photos attached: made from the photos
+    expect(buildOptions({ ...f, pick: { look: "cartoon", cast: ["fox"], extras: [] } }, c, false)).toEqual({ target_minutes: 1 });
+  });
+  it("a remembered look that is no longer offered falls back to Auto", () => {
+    const c = parseCapabilities(body({ looks: LOOKS_FIXTURE }))!;
+    expect(normalize({ ...defaultForm(c), pick: { look: "clay", cast: ["x"], extras: [] } }, c).pick).toEqual({ look: "auto", cast: "auto", extras: [] });
+    expect(defaultForm(c, { pick: "junk" } as any).pick).toEqual({ look: "auto", cast: "auto", extras: [] });
+    expect(defaultForm(c, { pick: { look: "cartoon", cast: ["fox", "ghost"], extras: [] } }).pick).toEqual({ look: "cartoon", cast: ["fox"], extras: [] });
+  });
+  it("the plan's longest video: longer lengths are locked with the plan that makes them, and a saved longer length comes down", () => {
+    const c = parseCapabilities(body({ lengths: { ...caps.lengths, plan_max_seconds: 30, locked: [{ over_seconds: 30, max_seconds: 300, requires_plan: "pro" }, { over_seconds: 300, max_seconds: 720, requires_plan: "max" }] }, plan: { id: "free", name: "Free", limits: { max_seconds: 30 } }, can_upgrade: false }))!;
+    expect(c.plans!.plan!.name).toBe("Free"); expect(c.plans!.canUpgrade).toBe(false);
+    const rows = lengthMenu(c, defaultForm(c));
+    expect(rows.filter((r) => !r.locked).map((r) => r.minutes)).toEqual([0.25, 0.5]);
+    expect(rows.find((r) => r.minutes === 1)!.locked).toEqual({ requires: "pro" });
+    expect(rows.find((r) => r.minutes === 8)!.locked).toEqual({ requires: "max" });
+    expect(planMaxPreset(c)).toBe(0.5);
+    expect(defaultForm(c).minutes).toBe(0.5);                                  // the neutral platform recommends 1 min: the plan's longest instead
+    expect(normalize({ ...defaultForm(c), minutes: 5 }, c).minutes).toBe(0.5);
+    expect(selectPlatform(defaultForm(c), c, "youtube").minutes).toBe(0.5);
+    expect(planMaxPreset(parseCapabilities(body())!)).toBeNull();
+  });
+  it("a resolution the plan does not make stays in the list (locked) and is never the choice", () => {
+    const res = caps.resolutions.map((r) => (r.id === "2160p" ? { ...r, available: false, requires_plan: "max" } : { ...r, available: true, requires_plan: null }));
+    const c = parseCapabilities(body({ resolutions: res }))!;
+    expect(qualityChoices(c, { aspect: "16:9", platform: "youtube" }).map((r) => [r.id, r.available])).toEqual([["720p", true], ["1080p", true], ["2160p", false]]);
+    expect(normalize({ ...defaultForm(c), platform: "youtube", resolution: "2160p" }, c).resolution).toBe("1080p");
   });
 });
