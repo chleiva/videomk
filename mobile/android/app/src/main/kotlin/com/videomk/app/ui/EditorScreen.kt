@@ -21,23 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Hub
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -97,18 +80,19 @@ import com.videomk.app.core.SceneKind
 /** The row text of a pause, e.g. Silent pause, 4 s. */
 internal fun silentLabel(hold: Double?): String = if (hold == null) Txt.s(R.string.editor_silent_pause) else Txt.s(R.string.editor_silent_pause_hold, Math.round(hold).toInt())
 
+@Composable
 fun SceneKind?.icon(): ImageVector = when (this) {
-    SceneKind.Title -> Icons.Filled.TextFields
-    SceneKind.Bullets -> Icons.AutoMirrored.Filled.FormatListBulleted
-    SceneKind.Diagram -> Icons.Filled.Hub
-    SceneKind.Chart -> Icons.Filled.BarChart
-    SceneKind.Timeline -> Icons.Filled.Schedule
-    SceneKind.Stat -> Icons.Filled.Numbers
-    SceneKind.Quote -> Icons.Filled.FormatQuote
-    SceneKind.Image -> Icons.Filled.Image
-    SceneKind.Clip -> Icons.Filled.Movie
-    SceneKind.Gallery -> Icons.Filled.PhotoLibrary
-    null -> Icons.Filled.Widgets   // a scene type this version doesn't know: a neutral icon
+    SceneKind.Title -> Sym.TextFields
+    SceneKind.Bullets -> Sym.FormatListBulleted
+    SceneKind.Diagram -> Sym.Hub
+    SceneKind.Chart -> Sym.BarChart
+    SceneKind.Timeline -> Sym.Schedule
+    SceneKind.Stat -> Sym.Numbers
+    SceneKind.Quote -> Sym.FormatQuote
+    SceneKind.Image -> Sym.Image
+    SceneKind.Clip -> Sym.Movie
+    SceneKind.Gallery -> Sym.PhotoLibrary
+    null -> Sym.Widgets   // a scene type this version doesn't know: a neutral icon
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,18 +116,11 @@ fun EditorScreen(vm: EditorViewModel, onClose: () -> Unit) {
     Scaffold(
         containerColor = Vmk.colors.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.editor_title)) },
-                navigationIcon = {
-                    TextButton(onClick = ::requestClose, enabled = !state.isLocked, modifier = Modifier.heightIn(min = 48.dp).testTag("closeEditor")) { Text(stringResource(R.string.common_close)) }
-                },
-                actions = {
-                    if (state.phase == EditorPhase.Editing) {
-                        TextButton(onClick = { reorder = !reorder }, modifier = Modifier.heightIn(min = 48.dp).testTag("reorderToggle")) { Text(stringResource(if (reorder) R.string.common_done else R.string.editor_reorder)) }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
-            )
+            VmkTopBar(title = stringResource(R.string.editor_title), onBack = { if (!state.isLocked) requestClose() }, close = true, backTag = "closeEditor") {
+                if (state.phase == EditorPhase.Editing) {
+                    TextButton(onClick = { reorder = !reorder }, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("reorderToggle")) { Text(stringResource(if (reorder) R.string.common_done else R.string.editor_reorder)) }
+                }
+            }
         },
         bottomBar = { if (state.phase == EditorPhase.Editing) ActionBar(vm, state) },
     ) { padding ->
@@ -264,7 +241,7 @@ internal fun BeatRow(
                     }
                     if (beat.silent && beat.narration.isEmpty()) {
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("silentBeatLabel")) {
-                            Icon(Icons.AutoMirrored.Filled.VolumeOff, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
+                            Icon(Sym.VolumeOff, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
                             Text(silentLabel(beat.hold), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
                         }
                     } else Text(beat.narration, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -273,10 +250,10 @@ internal fun BeatRow(
             }
             if (reorder) {
                 Column {
-                    IconButton(onClick = onUp, enabled = canUp, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.ArrowUpward, stringResource(R.string.editor_move_up)) }
-                    IconButton(onClick = onDown, enabled = canDown, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.ArrowDownward, stringResource(R.string.editor_move_down)) }
+                    IconButton(onClick = onUp, enabled = canUp, modifier = Modifier.size(48.dp)) { Icon(Sym.ArrowUpward, stringResource(R.string.editor_move_up)) }
+                    IconButton(onClick = onDown, enabled = canDown, modifier = Modifier.size(48.dp)) { Icon(Sym.ArrowDownward, stringResource(R.string.editor_move_down)) }
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) { Icon(Icons.Filled.Delete, stringResource(R.string.editor_delete_scene), tint = Vmk.colors.danger) }
+                IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) { Icon(Sym.Delete, stringResource(R.string.editor_delete_scene), tint = Vmk.colors.danger) }
             }
         }
     }
@@ -331,11 +308,9 @@ private fun BeatEditor(vm: EditorViewModel, state: EditorState, beatId: String, 
     Scaffold(
         containerColor = Vmk.colors.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.editor_scene_generic)) },
-                actions = { TextButton(onClick = onDone, enabled = error == null, modifier = Modifier.heightIn(min = 48.dp).testTag("beatDone")) { Text(stringResource(R.string.common_done)) } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
-            )
+            VmkTopBar(title = stringResource(R.string.editor_scene_generic)) {
+                TextButton(onClick = onDone, enabled = error == null, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("beatDone")) { Text(stringResource(R.string.common_done)) }
+            }
         },
     ) { padding ->
         if (beat == null) { MessageState(stringResource(R.string.editor_scene_missing_title), stringResource(R.string.editor_scene_missing_body), stringResource(R.string.common_back), onDone, Modifier.padding(padding)); return@Scaffold }
@@ -431,7 +406,7 @@ private fun CandidateTile(c: PhotoCandidate, chosen: Boolean, modifier: Modifier
         Box(Modifier.fillMaxWidth().height(90.dp).clip(RoundedCornerShape(10.dp)).background(Vmk.colors.surfaceRaised)) {
             AsyncImage(c.thumbUrl, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             if (chosen) Box(Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp).clip(RoundedCornerShape(11.dp)).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(Sym.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
             }
         }
         Text(c.creator, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)

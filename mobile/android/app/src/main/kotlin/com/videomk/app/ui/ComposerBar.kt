@@ -37,16 +37,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -116,7 +106,7 @@ internal fun dictationHint(state: DictationController.State) {
 @Composable
 private fun HintRow(message: String, color: Color, tag: String) {
     Row(Modifier.padding(top = 4.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Icon(Icons.Filled.Warning, null, tint = color, modifier = Modifier.size(16.dp))
+        Icon(Sym.Warning, null, tint = color, modifier = Modifier.size(16.dp))
         Text(message, style = MaterialTheme.typography.bodySmall, color = color)
     }
 }
@@ -132,9 +122,9 @@ internal fun StatusLine(status: ComposerStatus, flash: Float, shake: Float, onFi
         else -> Vmk.colors.textSecondary
     }
     val icon = when (status.kind) {
-        StatusKind.NotAffordable, StatusKind.NoCredits, StatusKind.TooLong -> Icons.Filled.Warning
-        StatusKind.Listening -> Icons.Filled.GraphicEq
-        else -> Icons.Filled.Bolt
+        StatusKind.NotAffordable, StatusKind.NoCredits, StatusKind.TooLong -> Sym.Warning
+        StatusKind.Listening -> Sym.GraphicEq
+        else -> Sym.Bolt
     }
     val iconTint = when (status.kind) { StatusKind.Ready, StatusKind.Idle, StatusKind.PhotoHint, StatusKind.TooShort -> Vmk.colors.primary; else -> color }
     val tag = when (status.kind) {
@@ -212,7 +202,7 @@ private fun StripTile(modifier: Modifier, removeLabel: String, onRemove: () -> U
         // 18 dp to look at, 44 dp to hit
         Box(Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-12).dp).size(44.dp).clickable(onClickLabel = removeLabel, role = Role.Button, onClick = onRemove), contentAlignment = Alignment.Center) {
             Box(Modifier.size(18.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Close, removeLabel, tint = Color.White, modifier = Modifier.size(12.dp))
+                Icon(Sym.Close, removeLabel, tint = Color.White, modifier = Modifier.size(12.dp))
             }
         }
     }

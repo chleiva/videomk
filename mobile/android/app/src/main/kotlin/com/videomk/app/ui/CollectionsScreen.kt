@@ -20,10 +20,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,10 +56,8 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
     Scaffold(
         containerColor = Vmk.colors.background, contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         topBar = {
-            Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back), tint = Vmk.colors.primary) }
-                Box(Modifier.weight(1f))
-                IconButton(onClick = { create = true }, modifier = Modifier.size(48.dp).testTag("newCollection")) { Icon(Icons.Filled.Add, stringResource(R.string.media_new_collection), tint = Vmk.colors.primary) }
+            VmkTopBar(title = stringResource(R.string.media_collections), onBack = onBack) {
+                GlassIconButton(Sym.Add, stringResource(R.string.media_new_collection), { create = true }, Modifier.testTag("newCollection"))
             }
         },
     ) { padding ->
@@ -89,7 +83,7 @@ fun CollectionsScreen(vm: MediaViewModel, pref: OrganizePref, onBack: () -> Unit
                         }
                     }
                     Box {
-                        IconButton(onClick = { menuFor = c }, modifier = Modifier.size(48.dp).testTag("collectionMore")) { Icon(Icons.Filled.MoreHoriz, stringResource(R.string.collections_more_for, c.name), tint = Vmk.colors.textSecondary) }
+                        IconButton(onClick = { menuFor = c }, modifier = Modifier.size(48.dp).testTag("collectionMore")) { Icon(Sym.MoreHoriz, stringResource(R.string.collections_more_for, c.name), tint = Vmk.colors.textSecondary) }
                         CollectionMenu(menuFor?.id == c.id, { menuFor = null }, onRename = { rename = c; menuFor = null }, onDelete = { delete = c; menuFor = null })
                     }
                 }

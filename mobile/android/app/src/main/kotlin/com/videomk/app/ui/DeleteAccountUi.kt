@@ -20,9 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -133,7 +130,7 @@ internal fun DeleteAccountSheet(
 private fun Header() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(Modifier.size(44.dp).clip(CircleShape).background(Vmk.colors.dangerContainer), contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.DeleteForever, null, tint = Vmk.colors.danger, modifier = Modifier.size(26.dp))
+            Icon(Sym.DeleteForever, null, tint = Vmk.colors.danger, modifier = Modifier.size(26.dp))
         }
         Text(stringResource(R.string.deletion_header), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
     }
@@ -186,7 +183,7 @@ internal fun DeletionDoneScreen(apple: AppleStep, onOpenApple: () -> Unit, onDon
         ) {
             Column(Modifier.widthIn(max = 480.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Box(Modifier.size(72.dp).clip(CircleShape).background(Vmk.colors.successContainer), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.CheckCircle, null, tint = Vmk.colors.success, modifier = Modifier.size(40.dp))
+                    Icon(Sym.CheckCircle, null, tint = Vmk.colors.success, modifier = Modifier.size(40.dp))
                 }
                 Text(DeletionText.DONE_TITLE, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
                 Text(DeletionText.DONE_BODY, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)

@@ -27,12 +27,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -90,14 +84,14 @@ fun MediaViewer(vm: MediaViewModel, startIndex: Int, onClose: () -> Unit, onMake
                 ZoomableImage(p, vm, onZoomChange = { if (page == pager.currentPage) zoomed = it })
             }
             Row(Modifier.statusBarsPadding().fillMaxWidth().padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.media_close_viewer), tint = Color.White) }
+                IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) { Icon(Sym.ArrowBack, stringResource(R.string.media_close_viewer), tint = Color.White) }
                 Text(stringResource(R.string.media_viewer_position, pager.currentPage + 1, photos.size), color = Color.White, modifier = Modifier.weight(1f))
-                IconButton(onClick = { info = true }, modifier = Modifier.size(48.dp).testTag("viewerInfo")) { Icon(Icons.Filled.Info, stringResource(R.string.media_photo_details), tint = Color.White) }
+                IconButton(onClick = { info = true }, modifier = Modifier.size(48.dp).testTag("viewerInfo")) { Icon(Sym.Info, stringResource(R.string.media_photo_details), tint = Color.White) }
             }
             Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { collect = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("viewerCollection")) { Icon(Icons.Filled.PhotoLibrary, null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_collection), color = Color.White) }
-                TextButton(onClick = { current?.let(onMakeVideo) }, modifier = Modifier.heightIn(min = 48.dp).testTag("viewerMakeVideo")) { Icon(Icons.Filled.Movie, null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_make_video), color = Color.White) }
-                IconButton(onClick = { confirm = true }, modifier = Modifier.size(48.dp).testTag("viewerDelete")) { Icon(Icons.Filled.Delete, stringResource(R.string.media_delete_this_photo), tint = Color(0xFFF87171)) }
+                TextButton(onClick = { collect = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("viewerCollection")) { Icon(Sym.PhotoLibrary, null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_collection), color = Color.White) }
+                TextButton(onClick = { current?.let(onMakeVideo) }, modifier = Modifier.heightIn(min = 48.dp).testTag("viewerMakeVideo")) { Icon(Sym.Movie, null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_make_video), color = Color.White) }
+                IconButton(onClick = { confirm = true }, modifier = Modifier.size(48.dp).testTag("viewerDelete")) { Icon(Sym.Delete, stringResource(R.string.media_delete_this_photo), tint = Color(0xFFF87171)) }
             }
         }
     }

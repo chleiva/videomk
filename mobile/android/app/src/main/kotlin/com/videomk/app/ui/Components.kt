@@ -1,8 +1,6 @@
 package com.videomk.app.ui
 
 import com.videomk.app.core.Txt
-import androidx.compose.material.icons.filled.CropSquare
-import androidx.compose.material.icons.filled.CropPortrait
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -33,15 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.HourglassTop
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -138,7 +127,7 @@ fun Poster(video: VideoItem, modifier: Modifier = Modifier, grey: Boolean = fals
     Box(modifier.clip(shape).background(Brush.linearGradient(listOf(Vmk.colors.gradientStart, Vmk.colors.gradientEnd))).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
         if (video.previewGifUrl != null) StableImage(video.previewGifUrl!!, ContentScale.Crop, Modifier.fillMaxSize(), filter)
         if (!grey) Box(Modifier.size(32.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.38f)), contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(22.dp))
+            Icon(Sym.PlayArrow, null, tint = Color.White, modifier = Modifier.size(22.dp))
         }
         // the shape of a vertical, square or 4:5 video, as numbers, top left of the picture (landscape is the default and says nothing)
         if (!grey && video.aspect != null && video.aspect != "16:9") Text(video.aspect!!, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1,
@@ -172,11 +161,11 @@ fun FailedRow(
         Row(horizontalArrangement = Arrangement.spacedBy(Vmk.space.m), verticalAlignment = Alignment.Top) {
             if (!isLargeText()) Box(Modifier.width(72.dp).height(72.dp).clip(RoundedCornerShape(Vmk.radii.thumb)).background(Vmk.colors.surface3).clearAndSetSemantics { }, contentAlignment = Alignment.Center) {
                 if (thumb != null) StableImage(thumb, ContentScale.Crop, Modifier.fillMaxSize().alpha(0.6f), grey)
-                Icon(Icons.Filled.Warning, null, tint = accent, modifier = Modifier.size(24.dp))
+                Icon(Sym.Warning, null, tint = accent, modifier = Modifier.size(24.dp))
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (isLargeText()) Icon(Icons.Filled.Warning, null, tint = accent, modifier = Modifier.size(18.dp))
+                    if (isLargeText()) Icon(Sym.Warning, null, tint = accent, modifier = Modifier.size(18.dp))
                     Text(statusLabel, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = accent)
                 }
                 Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -185,7 +174,7 @@ fun FailedRow(
         }
         if (onRetry != null || onDismiss != null) FlowRow(horizontalArrangement = Arrangement.spacedBy(Vmk.space.s), verticalArrangement = Arrangement.spacedBy(0.dp)) {
             if (onRetry != null) TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("retryButton")) {
-                Icon(Icons.Filled.Refresh, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                Icon(Sym.Refresh, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
                 Text(stringResource(R.string.common_try_again), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.primary)
             }
             if (onDismiss != null) TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("removeButton")) {
@@ -301,7 +290,7 @@ fun <T> SettleCrossfade(state: T, modifier: Modifier = Modifier, content: @Compo
 fun CostLine(text: String?, fourK: Boolean, onWhy: () -> Unit, modifier: Modifier = Modifier, showWhy: Boolean = true) {
     Column(modifier.fillMaxWidth().testTag("costHelp"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (text != null) Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Icon(Icons.Filled.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp).padding(top = 2.dp))
+            Icon(Sym.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp).padding(top = 2.dp))
             Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.weight(1f))
         }
         if (fourK) Text(stringResource(R.string.create_cost_4k_double), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
@@ -335,7 +324,7 @@ fun WalletHero(balanceText: String, label: String, modifier: Modifier = Modifier
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(Icons.Filled.Bolt, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(40.dp))
+            Icon(Sym.Bolt, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(40.dp))
             Text(balanceText, style = VmkType.hero, color = Vmk.colors.onPrimary, modifier = Modifier.testTag("balanceValue"))
         }
         Text(label, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary.copy(alpha = 0.92f), textAlign = TextAlign.Center)

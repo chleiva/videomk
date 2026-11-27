@@ -1,5 +1,12 @@
 package com.videomk.app.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,16 +14,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,88 +34,104 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.videomk.app.R
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.videomk.app.R
+import com.videomk.app.core.DesignTokens
 
-/** Shared building blocks of the redesigned screens (docs/UI_DESIGN.md sections g and h). */
+/** The shared building blocks (docs/DESIGN_BAR_2026.md sections 4 and 5): one primary button (Theme.kt), one icon button, one top bar, one pill, one chip. */
 
-/** Card shadow: a soft tinted shadow in light mode; dark mode relies on surface lightness and the hairline ring instead. */
+private val ShadowTint = Color(0xFF000000L or DesignTokens.makingStart.toLong())
+
+/** The one soft card shadow, light mode only (dark mode separates by surface lightness). Never beside a border. */
 fun Modifier.vmkShadow(level: Int, shape: Shape, dark: Boolean): Modifier {
-    val e = when (level) { 1 -> 1.dp; 2 -> 4.dp; else -> 8.dp }
-    return if (dark) this else this.shadow(e, shape, ambientColor = Color(0xFF282C6E).copy(alpha = 0.18f), spotColor = Color(0xFF282C6E).copy(alpha = 0.25f))
+    val e = when (level) { 1 -> 2.dp; 2 -> 8.dp; else -> 16.dp }
+    return if (dark) this else this.shadow(e, shape, ambientColor = ShadowTint.copy(alpha = 0.10f), spotColor = ShadowTint.copy(alpha = 0.22f))
+}
+
+/** The glow under the primary button and the New video button: the action colour, soft, in both themes. */
+fun Modifier.vmkGlow(shape: Shape): Modifier {
+    val c = Color(0xFF000000L or DesignTokens.gradientEnd.light.toLong())
+    return this.shadow(14.dp, shape, ambientColor = c.copy(alpha = 0.35f), spotColor = c.copy(alpha = 0.55f))
 }
 
 @Composable
 fun Overline(text: String, modifier: Modifier = Modifier) {
-    Text(text.uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = modifier)
+    Text(text.uppercase(), style = MaterialTheme.typography.labelSmall, color = Vmk.colors.textSecondary, modifier = modifier.semantics { heading() })
 }
 
-/** The fix that comes with a problem ("Use 1 min · ⚡1"): 32 dp to look at, 44 dp to hit. */
+/** The fix that comes with a problem ("Use 1 min · ⚡1"): 32 dp to look at, 48 dp to hit. */
 @Composable
 fun FixChip(label: String, description: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
-        modifier.heightIn(min = 48.dp).clickable(role = Role.Button, onClickLabel = description, onClick = onClick).semantics { contentDescription = description },
+        modifier.heightIn(min = Vmk.minTouch).clickable(role = Role.Button, onClickLabel = description, onClick = onClick).semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
         Row(
             Modifier.heightIn(min = 32.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) { Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.primary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
+        ) { Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 2, overflow = TextOverflow.Ellipsis) }
     }
 }
 
-/** "3 min · ⚡3" with the bolt drawn; used on the options pill and the options cards. */
+/** "3 min · ⚡3" with the bolt drawn; used on the options cards. */
 @Composable
 fun CreditsText(minutes: Int, credits: Int, color: Color, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(R.string.nav_minutes_short, minutes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1)
+        Text(stringResource(R.string.nav_minutes_short, minutes), style = MaterialTheme.typography.titleSmall, color = Vmk.colors.text, maxLines = 1)
         Text("·", color = Vmk.colors.textTertiary)
-        Icon(Icons.Filled.Bolt, null, tint = color, modifier = Modifier.size(15.dp))
-        Text("$credits", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = color, maxLines = 1)
+        Icon(Sym.Bolt, null, tint = color, modifier = Modifier.size(15.dp))
+        Text("$credits", style = MaterialTheme.typography.titleSmall, color = color, maxLines = 1)
     }
 }
 
-/** The brand mark (Sparklet Trio): the app icon's own layers, a play triangle emitting three sparks on the brand gradient. */
+/** The brand mark: the app icon's own layers, a play triangle with its sparkle on the brand gradient. */
 @Composable
 fun LogoMark(modifier: Modifier = Modifier, size: Dp = 30.dp) {
-    Box(modifier.size(size).clip(RoundedCornerShape(size * 0.3f))) {
+    Box(modifier.size(size).clip(RoundedCornerShape(size * 0.26f))) {
         Image(painterResource(R.drawable.ic_launcher_background), null, Modifier.fillMaxSize())
         Image(painterResource(R.drawable.ic_launcher_foreground), null, Modifier.fillMaxSize().scale(1.3f))
     }
 }
 
-/** A dark glass chip for text on pictures (always white on the dark scrim). */
+/** The sparkle: AI suggestions and live work only. */
 @Composable
-fun GlassChip(text: String, modifier: Modifier = Modifier, dot: Color? = null, container: Color = Color.Black.copy(alpha = 0.38f), leading: (@Composable () -> Unit)? = null) {
+fun Sparkle(modifier: Modifier = Modifier, tint: Color = Vmk.colors.primary, size: Dp = 16.dp) {
+    Icon(Sym.Sparkle, null, tint = tint, modifier = modifier.size(size).clearAndSetSemantics { })
+}
+
+/** A dark glass chip for text on pictures (always white on the dark scrim): durations, format badges. */
+@Composable
+fun GlassChip(text: String, modifier: Modifier = Modifier, dot: Color? = null, container: Color = Color.Black.copy(alpha = 0.5f), leading: (@Composable () -> Unit)? = null) {
     Row(
         modifier.heightIn(min = 26.dp).clip(CircleShape).background(container).padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -117,29 +142,29 @@ fun GlassChip(text: String, modifier: Modifier = Modifier, dot: Color? = null, c
     }
 }
 
-/** Hairline ring used on cards and the composer. */
+/** Hairline ring: only where there is no shadow (an empty scene tile, an outlined provider button). */
 fun Modifier.hairline(shape: Shape, color: Color): Modifier = this.border(1.dp, color, shape)
 
 @Composable
 fun hairlineColor(): Color = Vmk.colors.outline
 
-
 /**
- * The one icon button (docs/UX_2026_REDESIGN.md section 5): a 48 dp target around a 40 dp tonal circle ("glass" on Android is a tonal surface, no blur).
- * The spoken label is a required parameter and doubles as the long-press tooltip. [filled] is the one primary icon action (the brand gradient).
+ * The ONE icon button: a 48 dp target around a 44 dp circle. Quiet by default (a tonal circle on the page); [onDark] is the glass version for controls over media;
+ * [filled] carries the action gradient and is used at most once per screen, only where the primary action has no room for its label.
+ * The spoken label is a required parameter and doubles as the long-press tooltip.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlassIconButton(
     icon: ImageVector, description: String, onClick: () -> Unit, modifier: Modifier = Modifier,
-    filled: Boolean = false, enabled: Boolean = true, badge: String? = null, size: Dp = 48.dp, onDark: Boolean = false,
+    filled: Boolean = false, enabled: Boolean = true, badge: String? = null, size: Dp = Vmk.minTouch, onDark: Boolean = false, tint: Color? = null,
 ) {
     val container = when {
         filled -> null
-        onDark -> Color.Black.copy(alpha = 0.55f)
+        onDark -> Color.Black.copy(alpha = 0.45f)
         else -> Vmk.colors.surfaceRaised
     }
-    val tint = if (filled || onDark) Color.White.let { if (filled) Vmk.colors.onPrimary else it } else Vmk.colors.text
+    val iconTint = tint ?: if (filled) Vmk.colors.onPrimary else if (onDark) Color.White else Vmk.colors.text
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = { PlainTooltip { Text(description) } },
@@ -153,13 +178,13 @@ fun GlassIconButton(
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
-                    Modifier.size(size - 8.dp).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradientNow) else Modifier.background(container!!)),
+                    Modifier.size(size - 4.dp).clip(CircleShape).then(if (filled) Modifier.background(Vmk.gradient) else Modifier.background(container!!)),
                     contentAlignment = Alignment.Center,
-                ) { Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp)) }
+                ) { Icon(icon, null, tint = iconTint, modifier = Modifier.size(22.dp)) }
             }
             // drawn outside the clipped circle and nudged inwards, so a count such as "45" is never cut off
             if (badge != null) Text(
-                badge, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.onPrimary, maxLines = 1, softWrap = false,
+                badge, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1, softWrap = false,
                 modifier = Modifier.align(Alignment.TopEnd).offset(x = 2.dp, y = (-2).dp).clip(CircleShape).background(Vmk.colors.primary).padding(horizontal = 6.dp, vertical = 2.dp).clearAndSetSemantics { },
             )
         }
@@ -167,30 +192,95 @@ fun GlassIconButton(
 }
 
 /**
- * A pill that opens a menu (docs/UX_2026_REDESIGN.md section 5): icon, the current value, a chevron. The value is the label, so the state is always visible.
- * 40 dp tall visually, 48 dp to hit; values are one short word (the menu rows carry the long names).
+ * A pill that opens a menu: the current value and a chevron, no key label (the value is the label, so the state is always visible).
+ * 44 dp tall to look at, 48 dp to hit; values are one short word (the menu rows carry the long names). [locked]: the chevron goes and it stops answering.
  */
 @Composable
 fun Pill(
-    value: String, description: String, modifier: Modifier = Modifier, icon: ImageVector? = null, expanded: Boolean, onExpandedChange: (Boolean) -> Unit,
+    value: String, description: String, modifier: Modifier = Modifier, icon: ImageVector? = null, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, locked: Boolean = false,
     menu: @Composable () -> Unit,
 ) {
     Box(modifier) {
         Row(
-            Modifier.heightIn(min = 48.dp).wrapContentSize(Alignment.CenterStart).clip(CircleShape)
-                .clickable(role = Role.DropdownList, onClickLabel = description) { onExpandedChange(true) }
+            Modifier.heightIn(min = Vmk.minTouch).wrapContentSize(Alignment.CenterStart).clip(CircleShape)
+                .clickable(enabled = !locked, role = Role.DropdownList, onClickLabel = description) { onExpandedChange(true) }
                 .semantics(mergeDescendants = true) { contentDescription = "$description: $value"; stateDescription = value },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
-                Modifier.heightIn(min = 40.dp).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = 12.dp, end = 8.dp),
+                Modifier.heightIn(min = Vmk.iconButton).clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(start = Vmk.space.l, end = if (locked) Vmk.space.l else Vmk.space.m),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 if (icon != null) Icon(icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
-                Text(value, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                Icon(Icons.Filled.ExpandMore, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
+                Text(value, style = MaterialTheme.typography.labelLarge, color = if (locked) Vmk.colors.textSecondary else Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                if (!locked) Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(18.dp))
             }
         }
-        androidx.compose.material3.DropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }, containerColor = Vmk.colors.surface) { menu() }
+        androidx.compose.material3.DropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }, containerColor = Vmk.colors.surface, shape = RoundedCornerShape(Vmk.radii.card)) { menu() }
     }
 }
+
+/**
+ * A suggestion chip (an example prompt on Create, "Make another" on the player): the sparkle and a few words on an opaque pill.
+ * 44 dp to look at, 48 dp to hit; the text wraps to two lines at large sizes.
+ */
+@Composable
+fun SparkleChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, onClickLabel: String? = null) {
+    Box(modifier.heightIn(min = Vmk.minTouch), contentAlignment = Alignment.Center) {
+        Row(
+            Modifier.heightIn(min = Vmk.iconButton).vmkShadow(1, CircleShape, Vmk.colors.dark).clip(CircleShape).background(Vmk.colors.surface)
+                .clickable(role = Role.Button, onClickLabel = onClickLabel, onClick = onClick).padding(horizontal = Vmk.space.l, vertical = Vmk.space.s),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s),
+        ) {
+            Sparkle(size = 14.dp)
+            Text(text, style = MaterialTheme.typography.labelLarge, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/**
+ * The ONE top bar. [large]: a top-level screen (its name at the large-title size on the left, actions on the right). Otherwise: the way back as an icon button,
+ * an optional title (one line, beside it) and actions. No divider, no elevation; it sits on the page.
+ */
+@Composable
+fun VmkTopBar(
+    modifier: Modifier = Modifier, title: String? = null, large: Boolean = false, onBack: (() -> Unit)? = null, close: Boolean = false, backTag: String = "backButton",
+    actions: @Composable RowScope.() -> Unit = {},
+) {
+    if (large) Row(
+        modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 64.dp).padding(start = Vmk.space.screen, end = Vmk.space.screen - 2.dp, top = Vmk.space.s),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.s),
+    ) {
+        Text(title.orEmpty(), style = MaterialTheme.typography.headlineLarge, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).semantics { heading() }.testTag("screenTitle"))
+        actions()
+    } else Row(
+        modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 60.dp).padding(horizontal = Vmk.space.screen - 2.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Vmk.space.xs),
+    ) {
+        if (onBack != null) GlassIconButton(if (close) Sym.Close else Sym.ArrowBack, stringResource(if (close) R.string.common_close else R.string.common_back), onBack, Modifier.testTag(backTag))
+        if (title != null) Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(horizontal = Vmk.space.s).semantics { heading() })
+        else Spacer(Modifier.weight(1f))
+        actions()
+    }
+}
+
+/**
+ * The live ring: one turn every 2.4 s on the capsule and the current scene. Reduced motion: a still two-tone ring (motion is never the only signal: words sit beside it).
+ */
+@Composable
+fun LiveRing(modifier: Modifier = Modifier, size: Dp = 22.dp, stroke: Dp = 2.5.dp, track: Color = Vmk.colors.surface3, color: Color = Vmk.colors.primary) {
+    val still = reduceMotion(LocalContext.current)
+    val angle = if (still) 0f else rememberInfiniteTransition(label = "ring").animateFloat(0f, 360f, infiniteRepeatable(tween(DesignTokens.Motion.ring, easing = LinearEasing), RepeatMode.Restart), label = "a").value
+    Canvas(modifier.size(size).clearAndSetSemantics { }) {
+        val w = stroke.toPx()
+        val inset = Offset(w / 2, w / 2); val s = Size(this.size.width - w, this.size.height - w)
+        drawArc(track, 0f, 360f, false, inset, s, style = Stroke(w))
+        rotate(angle) { drawArc(color, -90f, if (still) 180f else 100f, false, inset, s, style = Stroke(w, cap = StrokeCap.Round)) }
+    }
+}
+
+/** A soft aura behind a locked, waiting screen: the action colour and the live accent, low and blurred by distance (two radial washes, no blur effect needed). */
+fun Modifier.vmkAura(strength: Float): Modifier = this.then(
+    Modifier.background(Brush.radialGradient(listOf(Color(0xFF000000L or DesignTokens.gradientEnd.light.toLong()).copy(alpha = 0.34f * strength), Color.Transparent), center = Offset(0f, Float.POSITIVE_INFINITY), radius = 900f))
+        .background(Brush.radialGradient(listOf(Color(0xFF000000L or DesignTokens.live.toLong()).copy(alpha = 0.26f * strength), Color.Transparent), center = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY), radius = 1000f)),
+)

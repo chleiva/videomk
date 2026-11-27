@@ -1,7 +1,5 @@
 package com.videomk.app.ui
 
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -25,8 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -99,13 +95,13 @@ fun InlinePlayer(player: Player?, onFullScreen: () -> Unit, modifier: Modifier =
             modifier = Modifier.matchParentSize(),
         )
         if (player != null) androidx.compose.animation.AnimatedVisibility(controlsVisible && !ended, Modifier.align(Alignment.TopEnd), enter = androidx.compose.animation.fadeIn(), exit = androidx.compose.animation.fadeOut()) {
-            GlassIconButton(Icons.Filled.Fullscreen, stringResource(R.string.player_full_screen), onFullScreen, Modifier.padding(6.dp).testTag("fullScreenButton"), onDark = true)
+            GlassIconButton(Sym.Fullscreen, stringResource(R.string.player_full_screen), onFullScreen, Modifier.padding(6.dp).testTag("fullScreenButton"), onDark = true)
         }
         if (ended && player != null) Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.62f)).testTag("endCard"), contentAlignment = Alignment.Center) {
             Row(horizontalArrangement = Arrangement.spacedBy(28.dp), verticalAlignment = Alignment.CenterVertically) {
-                GlassIconButton(Icons.Filled.Replay, stringResource(R.string.video_replay), { player.seekTo(0); player.play() }, Modifier.testTag("replayButton"), onDark = true, size = 56.dp)
+                GlassIconButton(Sym.Replay, stringResource(R.string.video_replay), { player.seekTo(0); player.play() }, Modifier.testTag("replayButton"), onDark = true, size = 56.dp)
                 if (onNew != null) Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    GlassIconButton(Icons.Filled.Add, stringResource(R.string.lib_new_video), onNew, Modifier.testTag("endNewVideo"), filled = true, size = 56.dp)
+                    GlassIconButton(Sym.Add, stringResource(R.string.lib_new_video), onNew, Modifier.testTag("endNewVideo"), filled = true, size = 56.dp)
                     Text(stringResource(R.string.lib_new_video), style = MaterialTheme.typography.labelMedium, color = Color.White, modifier = Modifier.padding(top = 2.dp))
                 }
             }

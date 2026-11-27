@@ -1,6 +1,5 @@
 package com.videomk.app.ui
 
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -31,12 +30,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -131,7 +124,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.AskingBody(composer: 
     val still = reduceMotion(LocalContext.current)
     val view = LocalView.current
     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (f.canGoBack) IconButton(onClick = { composer.questionBack() }, modifier = Modifier.size(48.dp).testTag("questionBack")) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.question_previous), tint = Vmk.colors.text) }
+        if (f.canGoBack) IconButton(onClick = { composer.questionBack() }, modifier = Modifier.size(48.dp).testTag("questionBack")) { Icon(Sym.ArrowBack, stringResource(R.string.question_previous), tint = Vmk.colors.text) }
         else Box(Modifier.size(48.dp))
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
             for (i in 0 until f.total) Box(Modifier.size(width = if (i == f.index) 22.dp else 8.dp, height = 8.dp).clip(CircleShape).background(if (i == f.index) Vmk.colors.primary else Vmk.colors.surface3))
@@ -196,7 +189,7 @@ private fun AnswerChip(label: String, selected: Boolean, description: String, mo
                 .semantics { this.selected = selected; contentDescription = description },
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (icon) Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.text, modifier = Modifier.size(18.dp))
+            if (icon) Icon(Sym.AutoAwesome, null, tint = Vmk.colors.text, modifier = Modifier.size(18.dp))
             Text(
                 label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else if (dashed) Vmk.colors.textSecondary else Vmk.colors.text,
                 maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
@@ -214,7 +207,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
     val status = ComposerLogic.status(composer.text, options, balance, 0, false, false, createScreen = true)
     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.summary_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() }.testTag("summaryTitle"))
-        GlassIconButton(Icons.Filled.Close, stringResource(R.string.common_close), { composer.dismissSheet() }, Modifier.testTag("editRequest"))
+        GlassIconButton(Sym.Close, stringResource(R.string.common_close), { composer.dismissSheet() }, Modifier.testTag("editRequest"))
     }
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Vmk.colors.primaryContainer).padding(16.dp)) {
         Text(composer.text, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, maxLines = 4)
@@ -224,7 +217,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
         for (c in chips) Row(
             Modifier.widthIn(max = 600.dp).heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = changeAnswer) { composer.editAnswer(c.questionId) }.padding(horizontal = 16.dp, vertical = 6.dp).semantics { contentDescription = "${c.label}. $changeAnswer" }.testTag("summaryChip"),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) { Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)); Icon(Icons.Filled.Edit, null, tint = Vmk.colors.primary, modifier = Modifier.size(14.dp)) }
+        ) { Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)); Icon(Sym.Edit, null, tint = Vmk.colors.primary, modifier = Modifier.size(14.dp)) }
     }
     Box(Modifier.weight(1f, fill = false).heightIn(min = 16.dp))
     StatusLine(status, 0f, 0f) { if (status.fix?.addCredits == true) onWallet() else status.fix?.minutes?.let { composer.setLength(it) } }
@@ -237,7 +230,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.SummaryBody(composer:
         val c = if (ready) Vmk.colors.onPrimary else Vmk.colors.textSecondary
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.create_create_video), style = VmkType.cta, color = c, modifier = Modifier.weight(1f, fill = false)); Text("·", style = VmkType.cta, color = c)
-            Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp)); Text("${options.credits}", style = VmkType.cta, color = c)
+            Icon(Sym.Bolt, null, tint = c, modifier = Modifier.size(20.dp)); Text("${options.credits}", style = VmkType.cta, color = c)
         }
     }
     if (version < 0) Box(Modifier)   // read above so the summary refreshes after an edit
@@ -252,9 +245,9 @@ private fun androidx.compose.foundation.layout.ColumnScope.StopBody(composer: Co
     }
     Column(Modifier.fillMaxWidth().padding(top = 4.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(28.dp)) }
+            Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Sym.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(28.dp)) }
             Spacer(Modifier.weight(1f))
-            GlassIconButton(Icons.Filled.Close, stringResource(R.string.common_close), { composer.dismissSheet() }, Modifier.testTag("stopClose"))
+            GlassIconButton(Sym.Close, stringResource(R.string.common_close), { composer.dismissSheet() }, Modifier.testTag("stopClose"))
         }
         Text(title, style = MaterialTheme.typography.headlineMedium, color = Vmk.colors.text, modifier = Modifier.padding(top = 14.dp).semantics { heading() }.testTag("stopTitle"))
         Text(message, style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 6.dp).semantics { liveRegion = LiveRegionMode.Polite }.testTag("stopMessage"))

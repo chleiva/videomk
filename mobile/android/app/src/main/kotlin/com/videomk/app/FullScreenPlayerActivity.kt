@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
@@ -37,6 +35,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.videomk.app.ui.Sym
 
 /**
  * Full screen video: always landscape (declared in the manifest), system bars hidden, a close button, and playback continues from the
@@ -108,7 +107,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     modifier = Modifier.align(Alignment.TopStart).displayCutoutPadding().padding(12.dp).size(48.dp).testTag("closeFullScreenButton"),
                 ) {
                     Box(Modifier.size(40.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.player_close_full_screen), tint = Color.White)
+                        Icon(Sym.Close, contentDescription = stringResource(R.string.player_close_full_screen), tint = Color.White)
                     }
                 }
             }

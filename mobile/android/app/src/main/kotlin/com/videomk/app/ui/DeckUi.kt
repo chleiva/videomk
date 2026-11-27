@@ -15,12 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Slideshow
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -65,13 +59,13 @@ fun DeckEntryRow(onClick: () -> Unit, modifier: Modifier = Modifier) {
             Text(stringResource(R.string.deck_add_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
             Text(stringResource(R.string.deck_add_subtitle), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
         }
-        Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
+        Icon(Sym.ChevronRight, null, tint = Vmk.colors.textSecondary)
     }
 }
 
 @Composable
 private fun DeckIcon(tint: Color = Vmk.colors.primary) {
-    Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Slideshow, null, tint = tint) }
+    Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Sym.Slideshow, null, tint = tint) }
 }
 
 /**
@@ -105,7 +99,7 @@ fun DeckCard(
             if (state is DeckState.Ready || state is DeckState.Failed) Box(
                 Modifier.size(48.dp).clip(CircleShape).clickable(role = Role.Button, onClickLabel = removeLabel, onClick = onRemove).semantics { contentDescription = removeLabel }.testTag("deckRemove"),
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.Close, null, tint = Vmk.colors.textSecondary) }
+            ) { Icon(Sym.Close, null, tint = Vmk.colors.textSecondary) }
         }
         when (state) {
             is DeckState.Copying -> Working(stringResource(R.string.deck_copying), null, null, onRemove)
@@ -114,7 +108,7 @@ fun DeckCard(
             is DeckState.Ready -> {
                 val info = state.info
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Filled.CheckCircle, null, tint = Vmk.colors.success, modifier = Modifier.size(20.dp))
+                    Icon(Sym.CheckCircle, null, tint = Vmk.colors.success, modifier = Modifier.size(20.dp))
                     Text(
                         stringResource(R.string.deck_ready_line, pluralStringResource(R.plurals.deck_slides, info.slides, info.slides), Lengths.long(info.suggestedMinutes)),
                         style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, modifier = Modifier.testTag("deckSummary"),
@@ -127,7 +121,7 @@ fun DeckCard(
                 val f = state.failure
                 Column(Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(20.dp).padding(top = 2.dp))
+                        Icon(Sym.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(20.dp).padding(top = 2.dp))
                         Text(f.title(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("deckErrorTitle"))
                     }
                     Text(f.body(caps), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.testTag("deckErrorBody"))

@@ -27,20 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -159,28 +145,28 @@ fun LocalUploadTile(item: QueueItem, server: MediaPhoto?, state: TileState, show
         }
         if (dim > 0f) Box(Modifier.fillMaxSize().background(Color(0xFF0B0D2A).copy(alpha = dim)))
         when (state) {
-            TileState.Queued -> Badge(Icons.Filled.Schedule, Modifier.align(Alignment.TopEnd).padding(6.dp))
-            TileState.Waiting -> Badge(Icons.Filled.Pause, Modifier.align(Alignment.TopEnd).padding(6.dp))
+            TileState.Queued -> Badge(Sym.Schedule, Modifier.align(Alignment.TopEnd).padding(6.dp))
+            TileState.Waiting -> Badge(Sym.Pause, Modifier.align(Alignment.TopEnd).padding(6.dp))
             TileState.Uploading -> Box(Modifier.align(Alignment.Center).size(44.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(Modifier.size(44.dp), color = Color.White, trackColor = Color.White.copy(alpha = 0.35f), strokeWidth = 3.dp)
-                Icon(Icons.Filled.CloudUpload, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                Icon(Sym.CloudUpload, null, tint = Color.White, modifier = Modifier.size(18.dp))
             }
             TileState.Processing -> {
                 Shimmer(Modifier.fillMaxSize())
                 if (showLabel) GlassLabel(UploadTiles.processingLabel(secondsSince), Modifier.align(Alignment.BottomStart).padding(8.dp)) {
-                    Icon(Icons.Filled.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(12.dp))
+                    Icon(Sym.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(12.dp))
                 }
             }
             TileState.Done -> AnimatedVisibility(tick, Modifier.align(Alignment.TopEnd).padding(6.dp), exit = fadeOut(tween(if (still) 0 else 300))) {
-                Box(Modifier.size(24.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(16.dp)) }
+                Box(Modifier.size(24.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) { Icon(Sym.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(16.dp)) }
             }
             TileState.Failed -> {
                 Box(Modifier.fillMaxSize().background(Color(0xFFB91C1C).copy(alpha = 0.55f)))
-                Box(Modifier.align(Alignment.Center).size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.9f)), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Refresh, null, tint = Vmk.colors.danger) }
+                Box(Modifier.align(Alignment.Center).size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.9f)), contentAlignment = Alignment.Center) { Icon(Sym.Refresh, null, tint = Vmk.colors.danger) }
                 Text(stringResource(R.string.upload_tap_retry), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color(0xFFB91C1C), maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).clip(CircleShape).background(Color.White).padding(horizontal = 8.dp, vertical = 3.dp))
             }
-            TileState.AlreadyThere -> GlassLabel(stringResource(R.string.upload_already_there), Modifier.align(Alignment.Center), white = true) { Icon(Icons.Filled.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(12.dp)) }
+            TileState.AlreadyThere -> GlassLabel(stringResource(R.string.upload_already_there), Modifier.align(Alignment.Center), white = true) { Icon(Sym.Check, null, tint = Color(0xFF127035), modifier = Modifier.size(12.dp)) }
         }
     }
 }
@@ -244,7 +230,7 @@ fun UploadBar(
             }
             storageFull -> Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-                    Box(Modifier.size(36.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning) }
+                    Box(Modifier.size(36.dp).clip(CircleShape).background(Vmk.colors.warningContainer), contentAlignment = Alignment.Center) { Icon(Sym.Warning, null, tint = Vmk.colors.warning) }
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(stringResource(R.string.upload_storage_full), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.testTag("storageFullMessage"))
                         Text(pluralStringResource(R.plurals.upload_no_space_waiting, progress.noSpace, progress.noSpace), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary)
@@ -282,10 +268,10 @@ fun UploadBar(
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                        if (progress.offline) Icon(Icons.Filled.CloudOff, null, tint = Vmk.colors.warning)
+                        if (progress.offline) Icon(Sym.CloudOff, null, tint = Vmk.colors.warning)
                         else {
                             CircularProgressIndicator(progress = { progress.finished.toFloat() / total }, Modifier.size(40.dp), color = Vmk.colors.primary, trackColor = Vmk.colors.surface3, strokeWidth = 3.dp)
-                            Icon(Icons.Filled.CloudUpload, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+                            Icon(Sym.CloudUpload, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
                         }
                     }
                     Column(Modifier.weight(1f)) {
@@ -293,9 +279,9 @@ fun UploadBar(
                         Text(sub, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 2)
                     }
                     if (progress.active && !progress.offline) IconButton(onClick = { if (progress.paused) onResume() else onPause() }, modifier = Modifier.size(48.dp).testTag(if (progress.paused) "uploadResume" else "uploadPause")) {
-                        Icon(if (progress.paused) Icons.Filled.PlayArrow else Icons.Filled.Pause, stringResource(if (progress.paused) R.string.upload_resume_uploads else R.string.upload_pause_uploads), tint = Vmk.colors.text)
+                        Icon(if (progress.paused) Sym.PlayArrow else Sym.Pause, stringResource(if (progress.paused) R.string.upload_resume_uploads else R.string.upload_pause_uploads), tint = Vmk.colors.text)
                     }
-                    IconButton(onClick = { onExpanded(!expanded) }, modifier = Modifier.size(48.dp)) { Icon(if (expanded) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess, toggleText, tint = Vmk.colors.textSecondary) }
+                    IconButton(onClick = { onExpanded(!expanded) }, modifier = Modifier.size(48.dp)) { Icon(if (expanded) Sym.ExpandMore else Sym.ExpandLess, toggleText, tint = Vmk.colors.textSecondary) }
                 }
                 if (progress.active) LinearProgressIndicator(progress = { progress.finished.toFloat() / total }, modifier = Modifier.fillMaxWidth().heightIn(min = 3.dp), color = Vmk.colors.primary, trackColor = Vmk.colors.surface3, drawStopIndicator = {})
                 if (expanded) Expanded(progress, items, stats, onRetry, onRetryAll, onPause, onResume, onCancelAsk = { confirmCancel = true })
@@ -362,7 +348,7 @@ fun MediaToast(message: String, action: String?, onAction: () -> Unit, modifier:
     Surface(modifier.padding(horizontal = 12.dp).fillMaxWidth().testTag("mediaToast"), shape = RoundedCornerShape(16.dp), color = Vmk.colors.inverseSurface) {
         val fg = Vmk.colors.inverseOnSurface
         Row(Modifier.heightIn(min = 52.dp).padding(start = 14.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF4ADE80), modifier = Modifier.size(22.dp))
+            Icon(Sym.CheckCircle, null, tint = Color(0xFF4ADE80), modifier = Modifier.size(22.dp))
             Text(message, style = MaterialTheme.typography.bodyMedium, color = fg, modifier = Modifier.weight(1f).padding(vertical = 10.dp))
             if (action != null) TextButton(onClick = onAction, modifier = Modifier.heightIn(min = 44.dp)) { Text(action, color = if (Vmk.colors.dark) Color(0xFF4F52E0) else Color(0xFFB9BBFF), fontWeight = FontWeight.SemiBold) }
         }

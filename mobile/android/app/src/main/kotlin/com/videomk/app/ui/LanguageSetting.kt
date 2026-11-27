@@ -2,9 +2,6 @@ package com.videomk.app.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -51,13 +48,13 @@ fun LanguageSetting() {
         ) {
             Text(stringResource(R.string.settings_language_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
             Text(nameOf(choice), color = Vmk.colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
-            Icon(Icons.Filled.ExpandMore, null, tint = Vmk.colors.textSecondary)
+            Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Vmk.colors.surface) {
             AppLocale.choices.forEach { c ->
                 DropdownMenuItem(
                     text = { Text(nameOf(c), fontWeight = if (choice == c) FontWeight.Bold else FontWeight.Normal) },
-                    trailingIcon = { if (choice == c) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                    trailingIcon = { if (choice == c) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
                     onClick = { open = false; if (choice != c) { choice = c; if (language.set(c)) (context as? android.app.Activity)?.recreate() } },
                     modifier = Modifier.testTag("language-$c"),
                 )

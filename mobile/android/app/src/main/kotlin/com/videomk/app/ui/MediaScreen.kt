@@ -37,21 +37,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -252,9 +240,9 @@ private fun MediaHeader(vm: MediaViewModel, organize: com.videomk.app.data.Organ
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             if (vm.photos.isNotEmpty()) TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = 48.dp).testTag("selectMode")) { Text(stringResource(R.string.media_select), fontWeight = FontWeight.SemiBold) }
             Box {
-                GlassIconButton(Icons.Filled.MoreHoriz, stringResource(R.string.media_more), { onMenu(true) }, Modifier.testTag("mediaMenu"))
+                GlassIconButton(Sym.MoreHoriz, stringResource(R.string.media_more), { onMenu(true) }, Modifier.testTag("mediaMenu"))
                 DropdownMenu(menuOpen, { onMenu(false) }) {
-                    if (organize != null) DropdownMenuItem(text = { Text(stringResource(R.string.media_organize_library)) }, leadingIcon = { Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary) }, onClick = { onMenu(false); organize.organizeLibrary() }, modifier = Modifier.testTag("organizeLibrary"))
+                    if (organize != null) DropdownMenuItem(text = { Text(stringResource(R.string.media_organize_library)) }, leadingIcon = { Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary) }, onClick = { onMenu(false); organize.organizeLibrary() }, modifier = Modifier.testTag("organizeLibrary"))
                     DropdownMenuItem(text = { Text(stringResource(R.string.media_storage)) }, onClick = { onMenu(false); onStorage() })
                 }
             }
@@ -282,7 +270,7 @@ fun SelectionTopBar(vm: MediaViewModel) {
     }
     Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 8.dp, vertical = 4.dp).testTag("selectionTopBar")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            GlassIconButton(Icons.Filled.Close, stringResource(R.string.media_cancel_selection), { vm.clearSelection() }, Modifier.testTag("closeSelection"))
+            GlassIconButton(Sym.Close, stringResource(R.string.media_cancel_selection), { vm.clearSelection() }, Modifier.testTag("closeSelection"))
             count(Modifier.weight(1f).padding(horizontal = 8.dp))
             if (!bigText) SelectAllButton(vm)
         }
@@ -294,7 +282,7 @@ fun SelectionTopBar(vm: MediaViewModel) {
 @Composable
 private fun AddPhotosButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     PrimaryButton(stringResource(R.string.media_add_photos), onClick, modifier.testTag("addMedia"), content = {
-        Icon(Icons.Filled.AddPhotoAlternate, null, Modifier.size(22.dp)); Spacer(Modifier.width(8.dp))
+        Icon(Sym.AddPhotoAlternate, null, Modifier.size(22.dp)); Spacer(Modifier.width(8.dp))
         Text(stringResource(R.string.media_add_photos), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary)
     })
 }
@@ -332,21 +320,16 @@ fun CollectionScreen(vm: MediaViewModel, collectionId: String, onBack: () -> Uni
     Scaffold(
         containerColor = Vmk.colors.background,
         topBar = {
-            if (vm.selecting) SelectionTopBar(vm) else TopAppBar(
-                title = { Text(listOfNotNull(collection?.emoji, collection?.name ?: stringResource(R.string.media_collection_default)).joinToString(" "), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) } },
-                actions = {
-                    if (vm.photos.isNotEmpty()) TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = 48.dp).testTag("selectMode")) { Text(stringResource(R.string.media_select), fontWeight = FontWeight.SemiBold) }
-                    Box {
-                        TextButton(onClick = { menu = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("collectionMenu")) { Text(stringResource(R.string.media_edit)) }
-                        DropdownMenu(menu, { menu = false }) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.media_rename)) }, onClick = { menu = false; rename = true })
-                            DropdownMenuItem(text = { Text(stringResource(R.string.media_delete_collection), color = Vmk.colors.danger) }, onClick = { menu = false; delete = true })
-                        }
+            if (vm.selecting) SelectionTopBar(vm) else VmkTopBar(title = listOfNotNull(collection?.emoji, collection?.name ?: stringResource(R.string.media_collection_default)).joinToString(" "), onBack = onBack) {
+                if (vm.photos.isNotEmpty()) TextButton(onClick = { vm.beginSelecting() }, modifier = Modifier.heightIn(min = Vmk.minTouch).testTag("selectMode")) { Text(stringResource(R.string.media_select), style = MaterialTheme.typography.titleMedium) }
+                Box {
+                    GlassIconButton(Sym.MoreHoriz, stringResource(R.string.media_edit), { menu = true }, Modifier.testTag("collectionMenu"))
+                    DropdownMenu(menu, { menu = false }, containerColor = Vmk.colors.surface) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.media_rename)) }, onClick = { menu = false; rename = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.media_delete_collection), color = Vmk.colors.danger) }, onClick = { menu = false; delete = true })
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
-            )
+                }
+            }
         },
         bottomBar = { SelectionBar(vm, onMakeVideo, inCollection = true) },
     ) { padding ->
@@ -400,7 +383,7 @@ fun MediaBody(
         }
         if (vm.search.active && vm.photos.isNotEmpty() && !vm.selecting) {
             TextButton(onClick = { vm.selectAllInView() }, modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).heightIn(min = 48.dp).testTag("selectAllInView")) {
-                Icon(Icons.Filled.SelectAll, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_select_all_in_view))
+                Icon(Sym.SelectAll, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.media_select_all_in_view))
             }
         }
     }
@@ -413,7 +396,7 @@ fun MediaBody(
 @Composable
 private fun StateMessage(title: String, text: String, button: String?, onClick: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(32.dp).testTag("mediaState"), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(Icons.Filled.PhotoLibrary, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(48.dp))
+        Icon(Sym.PhotoLibrary, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(48.dp))
         Text(title, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.padding(top = 12.dp))
         Text(text, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.padding(top = 4.dp, bottom = 16.dp))
         if (button != null) Button(onClick = onClick, modifier = Modifier.heightIn(min = 48.dp)) { Text(button) }
@@ -442,7 +425,7 @@ private fun MediaNotes(hasPhotos: Boolean) {
     } else if (!hintSeen && hasPhotos) {
         // the one-time tip: how a person gets from photos to a video
         Row(Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Vmk.colors.surfaceRaised).padding(start = 14.dp, top = 4.dp, bottom = 4.dp, end = 4.dp).testTag("selectHint"), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Movie, null, tint = Vmk.colors.primary, modifier = Modifier.size(20.dp))
+            Icon(Sym.Movie, null, tint = Vmk.colors.primary, modifier = Modifier.size(20.dp))
             Text(stringResource(R.string.media_select_hint), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.text, modifier = Modifier.weight(1f).padding(horizontal = 10.dp))
             TextButton(onClick = { settings.mediaSelectHintSeen = true; hintSeen = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("selectHintGotIt")) { Text(stringResource(R.string.media_got_it)) }
         }
@@ -461,7 +444,7 @@ private fun CollectionsStrip(vm: MediaViewModel, pref: com.videomk.app.core.Orga
     if (vm.collections.isEmpty()) {
         // nothing to show yet: one quiet text button, no big tile
         TextButton(onClick = { create = true }, modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp).testTag("newCollection")) {
-            Icon(Icons.Filled.CreateNewFolder, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.media_new_collection_text), fontWeight = FontWeight.SemiBold)
+            Icon(Sym.CreateNewFolder, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.media_new_collection_text), fontWeight = FontWeight.SemiBold)
         }
     } else {
     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -483,7 +466,7 @@ private fun CollectionsStrip(vm: MediaViewModel, pref: com.videomk.app.core.Orga
                         if (c.coverId != null && c.coverThumbUrl != null) PhotoThumb(MediaPhoto(c.coverId, null, "", null, 0, 0, 0, c.coverThumbUrl), Modifier.fillMaxSize())
                         else Text(c.emoji ?: "🖼️", style = MaterialTheme.typography.headlineMedium)
                         if (c.auto) Box(Modifier.align(Alignment.TopStart).padding(6.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f)).testTag("autoBadge"), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(13.dp))
+                            Icon(Sym.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(13.dp))
                         }
                     }
                     Text(c.name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -498,7 +481,7 @@ private fun CollectionsStrip(vm: MediaViewModel, pref: com.videomk.app.core.Orga
                 Modifier.width(104.dp).clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.media_create_collection)) { create = true }.testTag("newCollection"),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Box(Modifier.size(104.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { Icon(Icons.Filled.CreateNewFolder, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp)) }
+                Box(Modifier.size(104.dp).clip(RoundedCornerShape(18.dp)).background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) { Icon(Sym.CreateNewFolder, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp)) }
                 Text(stringResource(R.string.media_new_collection_text), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text, maxLines = 2)
             }
         }
@@ -557,10 +540,10 @@ fun SelectionBar(vm: MediaViewModel, onMakeVideo: (List<MediaPhoto>) -> Unit, in
       Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
         if (n > max) Text(stringResource(R.string.media_make_video_limit, max), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).testTag("makeVideoLimit"))
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag("selectionBar"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            GlassIconButton(Icons.Filled.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0)
-            GlassIconButton(Icons.Filled.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0)
+            GlassIconButton(Sym.CreateNewFolder, stringResource(R.string.media_add_to_collection), { pick = true }, Modifier.testTag("addToCollection"), enabled = n > 0)
+            GlassIconButton(Sym.Delete, stringResource(R.string.media_delete_selected), { confirm = true }, Modifier.testTag("deleteSelected"), enabled = n > 0)
             PrimaryButton(makeLabel, { onMakeVideo(vm.selectedPhotos().take(max)) }, Modifier.weight(1f).testTag("makeVideo").semantics { contentDescription = makeDesc }, enabled = n > 0, content = {
-                Icon(Icons.Filled.Movie, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary); Spacer(Modifier.width(8.dp))
+                Icon(Sym.Movie, null, Modifier.size(20.dp), tint = Vmk.colors.onPrimary); Spacer(Modifier.width(8.dp))
                 Text(makeLabel, style = MaterialTheme.typography.titleMedium, color = Vmk.colors.onPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             })
         }
@@ -622,7 +605,7 @@ fun SelectAllButton(vm: MediaViewModel, modifier: Modifier = Modifier) {
     val label = SelectAll.label(all, vm.viewCount)
     TextButton(onClick = { vm.toggleSelectAll() }, enabled = !vm.selectingAll, modifier = modifier.heightIn(min = 48.dp).testTag("selectAllButton")) {
         if (vm.selectingAll) androidx.compose.material3.CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-        else Icon(Icons.Filled.SelectAll, null, Modifier.size(18.dp))
+        else Icon(Sym.SelectAll, null, Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp)); Text(label, fontWeight = FontWeight.Bold)
     }
 }

@@ -31,10 +31,6 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -160,7 +156,7 @@ fun AddPhotosSheet(composer: ComposerViewModel, api: MediaApi?, tracker: Arrival
 private fun Segmented(selected: Int, onTab: (Int) -> Unit, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(12.dp)
     Row(modifier.fillMaxWidth().heightIn(min = 40.dp).clip(shape).background(Vmk.colors.surfaceRaised).padding(3.dp)) {
-        listOf(stringResource(R.string.photos_tab_phone) to Icons.Filled.PhoneAndroid, stringResource(R.string.photos_tab_media) to Icons.Filled.Shield).forEachIndexed { i, (label, icon) ->
+        listOf(stringResource(R.string.photos_tab_phone) to Sym.PhoneAndroid, stringResource(R.string.photos_tab_media) to Sym.Shield).forEachIndexed { i, (label, icon) ->
             val sel = i == selected
             val tabDesc = stringResource(R.string.photos_tab_desc, label, i + 1)
             val selectedText = stringResource(R.string.media_state_selected)
@@ -183,7 +179,7 @@ private fun PhoneTab(composer: ComposerViewModel, onPick: () -> Unit) {
     if (composer.photos.isEmpty() && composer.loading == 0) {
         // nothing chosen yet: one clear way in
         Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.size(72.dp).clip(CircleShape).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(36.dp)) }
+            Box(Modifier.size(72.dp).clip(CircleShape).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Sym.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(36.dp)) }
             Text(stringResource(R.string.photos_choose_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
             Text(stringResource(R.string.photos_picker_explain), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             Box(Modifier.padding(top = 6.dp).heightIn(min = 48.dp).clip(CircleShape).background(Vmk.gradientNow).clickable(role = Role.Button, onClick = onPick).padding(horizontal = 26.dp).testTag("pickFromPhone"), contentAlignment = Alignment.Center) {
@@ -208,7 +204,7 @@ private fun PhoneTab(composer: ComposerViewModel, onPick: () -> Unit) {
                         .semantics { contentDescription = chooseDesc }.testTag("pickFromPhone"),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
                 ) {
-                    Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(32.dp))
+                    Icon(Sym.AddPhotoAlternate, null, tint = Vmk.colors.primary, modifier = Modifier.size(32.dp))
                     Text(stringResource(R.string.photos_choose), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, modifier = Modifier.padding(top = 6.dp))
                 }
             }

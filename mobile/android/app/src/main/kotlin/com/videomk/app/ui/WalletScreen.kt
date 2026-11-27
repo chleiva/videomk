@@ -1,7 +1,6 @@
 package com.videomk.app.ui
 
 import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,10 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -58,11 +53,7 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
     Scaffold(
         containerColor = Vmk.colors.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.wallet_title)) },
-                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
-            )
+            VmkTopBar(title = stringResource(R.string.wallet_title), onBack = onBack)
         },
     ) { padding ->
         val w = state.wallet
@@ -82,7 +73,7 @@ fun WalletScreen(app: AppViewModel, onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(stringResource(R.string.wallet_cost_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
-                Icon(Icons.Filled.Info, null, tint = Vmk.colors.primary)
+                Icon(Sym.Info, null, tint = Vmk.colors.primary)
             }
             if (rules) androidx.compose.material3.AlertDialog(
                 onDismissRequest = { rules = false }, title = { Text(stringResource(R.string.wallet_cost_title)) }, text = {

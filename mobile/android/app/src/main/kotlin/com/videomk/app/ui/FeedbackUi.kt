@@ -19,10 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -75,9 +71,9 @@ internal fun FeedbackRow(onOpen: () -> Unit) {
         Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(onClickLabel = open, role = androidx.compose.ui.semantics.Role.Button, onClick = onOpen).testTag("feedbackRow"),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Icon(Icons.AutoMirrored.Filled.Chat, null, tint = Vmk.colors.primary, modifier = Modifier.size(22.dp))
+        Icon(Sym.Chat, null, tint = Vmk.colors.primary, modifier = Modifier.size(22.dp))
         Text(stringResource(R.string.feedback_title), color = Vmk.colors.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
+        Icon(Sym.ChevronRight, null, tint = Vmk.colors.textSecondary)
     }
 }
 
@@ -117,7 +113,7 @@ fun FeedbackSheet(api: FeedbackApi?, draft: FeedbackDraft, context: FeedbackCont
             if (stage is FeedbackStage.Sent) {
                 Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(Modifier.size(64.dp).clip(CircleShape).background(Vmk.colors.successContainer), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Check, stringResource(R.string.feedback_sent_a11y), tint = Vmk.colors.success, modifier = Modifier.size(36.dp))
+                        Icon(Sym.Check, stringResource(R.string.feedback_sent_a11y), tint = Vmk.colors.success, modifier = Modifier.size(36.dp))
                     }
                     Text(stringResource(R.string.feedback_thanks_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading(); liveRegion = LiveRegionMode.Polite }.testTag("feedbackThanks"))
                     Text(stringResource(R.string.feedback_thanks_body), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.textSecondary, textAlign = TextAlign.Center)

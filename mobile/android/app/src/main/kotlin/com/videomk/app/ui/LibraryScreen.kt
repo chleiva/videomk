@@ -17,18 +17,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.animation.animateContentSize
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ColorFilter
@@ -62,17 +56,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.HourglassTop
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -126,12 +109,12 @@ import com.videomk.app.core.VideoStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private class Example(@androidx.annotation.StringRes val text: Int, @androidx.annotation.StringRes val chip: Int, @androidx.annotation.StringRes val tag: Int, val minutes: Double?, val photos: Boolean, val icon: ImageVector)
+private class Example(@androidx.annotation.StringRes val text: Int, @androidx.annotation.StringRes val chip: Int, @androidx.annotation.StringRes val tag: Int, val minutes: Double?, val photos: Boolean)
 
 private val Examples = listOf(
-    Example(R.string.lib_example_lighthouse, R.string.lib_example_chip_lighthouse, R.string.lib_example_tag_1min, 1.0, false, Icons.Filled.Movie),
-    Example(R.string.lib_example_bees, R.string.lib_example_chip_bees, R.string.lib_example_tag_3min, 3.0, false, Icons.Filled.AutoAwesome),
-    Example(R.string.lib_example_holiday, R.string.lib_example_chip_holiday, R.string.lib_example_tag_photos, null, true, Icons.Filled.Image),
+    Example(R.string.lib_example_lighthouse, R.string.lib_example_chip_lighthouse, R.string.lib_example_tag_1min, 1.0, false),
+    Example(R.string.lib_example_bees, R.string.lib_example_chip_bees, R.string.lib_example_tag_3min, 3.0, false),
+    Example(R.string.lib_example_holiday, R.string.lib_example_chip_holiday, R.string.lib_example_tag_photos, null, true),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -201,7 +184,7 @@ fun LibraryScreen(app: AppViewModel, composer: ComposerViewModel, onOpenVideo: (
                 entries.isEmpty() -> EmptyState(
                     onExample = { e -> newVideo(e) },
                     onFirst = { app.submit(Txt.s(R.string.lib_first_prompt), CreateOptions(minutes = com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES)) },
-                    onChange = { newVideo(Example(R.string.lib_first_prompt, R.string.lib_example_chip_bees, R.string.lib_example_tag_1min, com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES, false, Icons.Filled.Movie)) },
+                    onChange = { newVideo(Example(R.string.lib_first_prompt, R.string.lib_example_chip_bees, R.string.lib_example_tag_1min, com.videomk.app.core.CreateDefaults.FIRST_TIME_MINUTES, false)) },
                 )
                 else -> {
                     var refreshing by remember { mutableStateOf(false) }
@@ -264,12 +247,12 @@ private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: (
                     .testTag("balanceChip"),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Icon(Icons.Filled.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+                Icon(Sym.Bolt, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
                 Text(if (w.unlimited) "∞" else "${w.balance}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.text)
             }
         }
         IconButton(onClick = onOpenSettings, modifier = Modifier.size(48.dp).testTag("settingsButton")) {
-            Icon(Icons.Filled.AccountCircle, stringResource(R.string.lib_settings), tint = Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
+            Icon(Sym.AccountCircle, stringResource(R.string.lib_settings), tint = Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
         }
     }
 }
@@ -278,7 +261,7 @@ private fun MainTopBar(wallet: com.videomk.app.core.WalletInfo?, onOpenWallet: (
 private fun OfflineBanner(onRetry: () -> Unit) {
     Surface(shape = RoundedCornerShape(16.dp), color = Vmk.colors.warningContainer, modifier = Modifier.fillMaxWidth().testTag("offlineBanner")) {
         Row(Modifier.padding(start = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Filled.CloudOff, null, tint = Vmk.colors.warning)
+            Icon(Sym.CloudOff, null, tint = Vmk.colors.warning)
             Text(stringResource(R.string.lib_offline_banner), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text, modifier = Modifier.weight(1f))
             TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.lib_retry)) }
         }
@@ -319,7 +302,7 @@ private fun EmptyState(onExample: (Example) -> Unit, onFirst: () -> Unit, onChan
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(hint, style = VmkType.prompt, color = Vmk.colors.textTertiary, modifier = Modifier.weight(1f))
-            Icon(Icons.Filled.Add, null, tint = Vmk.colors.primary)
+            Icon(Sym.Add, null, tint = Vmk.colors.primary)
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             for (e in Examples) {
@@ -327,7 +310,7 @@ private fun EmptyState(onExample: (Example) -> Unit, onFirst: () -> Unit, onChan
                     Modifier.heightIn(min = 48.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).clickable(role = Role.Button, onClickLabel = stringResource(R.string.lib_use_idea)) { onExample(e) }.padding(horizontal = 14.dp, vertical = 8.dp).testTag("exampleCard"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(e.icon, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+                    Sparkle(size = 14.dp)
                     Text(stringResource(e.chip), style = MaterialTheme.typography.labelLarge, color = Vmk.colors.text)
                 }
             }
@@ -377,7 +360,7 @@ private fun UploadPill(progress: com.videomk.app.core.QueueProgress, onClick: ()
     ) {
         Row(Modifier.heightIn(min = 36.dp).clip(CircleShape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, CircleShape).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { contentDescription = text }.testTag("uploadPill"),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Filled.CloudUpload, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+            Icon(Sym.CloudUpload, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
             Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
         }
     }
@@ -408,7 +391,7 @@ fun Thumbnail(url: String?, status: VideoStatus, modifier: Modifier = Modifier) 
     Box(modifier.background(Vmk.colors.surfaceRaised), contentAlignment = Alignment.Center) {
         val placeholder: @Composable () -> Unit = {
             Icon(
-                when { status.isRunning -> Icons.Filled.HourglassTop; status == VideoStatus.Complete -> Icons.Filled.PlayArrow; else -> Icons.Filled.ErrorOutline },
+                when { status.isRunning -> Sym.HourglassTop; status == VideoStatus.Complete -> Sym.PlayArrow; else -> Sym.ErrorOutline },
                 null, tint = Vmk.colors.textSecondary,
             )
         }

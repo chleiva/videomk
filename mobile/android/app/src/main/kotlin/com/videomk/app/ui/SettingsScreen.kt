@@ -1,8 +1,5 @@
 package com.videomk.app.ui
 
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.clickable
@@ -16,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,11 +60,7 @@ fun SettingsScreen(
     Scaffold(
         containerColor = Vmk.colors.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium) },
-                navigationIcon = { IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Vmk.colors.background, titleContentColor = Vmk.colors.text),
-            )
+            VmkTopBar(title = stringResource(R.string.settings_title), onBack = onBack)
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -93,7 +83,7 @@ fun SettingsScreen(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.settings_photos), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text, modifier = Modifier.weight(1f).semantics { heading() })
-                        GlassIconButton(Icons.Filled.Info, stringResource(R.string.settings_photos_info), { photoInfo = true }, Modifier.testTag("photosInfo"), size = 44.dp)
+                        GlassIconButton(Sym.Info, stringResource(R.string.settings_photos_info), { photoInfo = true }, Modifier.testTag("photosInfo"), size = 44.dp)
                     }
                     SwitchRow(stringResource(R.string.settings_photo_dates), dates, "photoDatesSwitch") { dates = it; photoSettings.useDates = it }
                     SwitchRow(stringResource(R.string.settings_photo_locations), places, "photoLocationsSwitch") { places = it; photoSettings.useLocations = it }
@@ -180,12 +170,12 @@ private fun OrganizeSetting(controller: com.videomk.app.data.OrganizeController)
         Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList, onClickLabel = stringResource(R.string.settings_organize_title)) { open = true }, verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.settings_organize_title), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
             Text(pref.label, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary)
-            Icon(Icons.Filled.ExpandMore, null, tint = Vmk.colors.textSecondary)
+            Icon(Sym.ExpandMore, null, tint = Vmk.colors.textSecondary)
         }
         androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Vmk.colors.surface) {
             for (o in com.videomk.app.core.OrganizePref.entries) androidx.compose.material3.DropdownMenuItem(
                 text = { Text(o.label, fontWeight = if (o == pref) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal) },
-                trailingIcon = { if (o == pref) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                trailingIcon = { if (o == pref) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
                 onClick = { open = false; controller.setPref(o) }, modifier = Modifier.testTag("organizePref-${o.wire}"),
             )
         }

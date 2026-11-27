@@ -14,6 +14,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.videomk.app.DebugHooks
 import com.videomk.app.core.Brief
+import com.videomk.app.core.CreateCapsule
+import com.videomk.app.core.CreateCapsule.Event as E
+import com.videomk.app.core.CreateSubmit
 import com.videomk.app.core.DeckApi
 import com.videomk.app.core.DeckAttachment
 import com.videomk.app.core.DeckJourney
@@ -217,8 +220,11 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         private set
     private var touched = false
     private var capsLoaded = false
-    var checking by mutableStateOf(false)
+    /** The run between the tap on Create and its answer: the state machine of core/CreateSubmit.kt (CreateCapsule) is the one source of "is something running". */
+    var run by mutableStateOf(CreateCapsule.State())
         private set
+    private fun fire(e: E) { run = CreateCapsule.next(run, e) }
+    val checking: Boolean get() = run.phase == CreateSubmit.Phase.Checking
     var sheetKind by mutableStateOf(CreateSheetKind.None)
         private set
     var stop by mutableStateOf<CreateStop?>(null)
@@ -252,8 +258,11 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
         storedPrefs = stored; touched = false; lengthChosen = false
         options = CreateDefaults.resolve(stored, caps)
         deck.ready?.let { options = DeckOptions.onReady(options, it) }   // reopened with a presentation still attached
-        sheetKind = CreateSheetKind.None; checking = false; stop = null
+        sheetKind = CreateSheetKind.None; cancelCheck(); stop = null
     }
+
+    /** Stops a running request check (nothing exists on the server yet, so this is clean). Does nothing while the send itself is in flight. */
+    private fun cancelCheck() { checkJob?.cancel(); fire(E.Cancel) }
 
     fun applyCapabilities(c: Capabilities) {
         caps = c; capsLoaded = true
@@ -264,7 +273,7 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     /** Anything entered that Cancel should ask about. */
     val hasDraft: Boolean get() = text.isNotBlank() || totalPhotos > 0 || deckState.attached
 
-    fun discardDraft() { dictation.stop(); text = ""; photos.clear(); library.clear(); deck.cancel(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; checking = false; checkJob?.cancel() }
+    fun discardDraft() { dictation.stop(); text = ""; photos.clear(); library.clear(); deck.cancel(); notice = null; cleanupIfIdle(); sheetKind = CreateSheetKind.None; cancelCheck() }
 
     private fun request(answers: List<Answer>) = IntakeRequest(text, options, totalPhotos, answers)
 
@@ -273,14 +282,14 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
      * A failed or slow check never blocks: it just proceeds without a brief.
      */
     fun create(intake: IntakeApi?, submitter: suspend (kotlinx.serialization.json.JsonObject?) -> SubmitOutcome, onAccepted: () -> Unit) {
-        if (checking || submitting) return
+        if (run.phase != CreateSubmit.Phase.Idle) return
         dictation.stop()
         intakeApi = intake; submitFn = submitter; acceptedFn = onAccepted; inlineError = null
         if (intake == null || !caps.intake || deckState.attached) { finish(null); return }   // the request check is about a description and photos: a presentation brings its own story
-        checking = true
+        fire(E.Tap(willCheck = true))
         checkJob = viewModelScope.launch {
-            val r = IntakeCheck(intake).run(request(emptyList())) { if (checking) sheetKind = CreateSheetKind.Checking }
-            checking = false
+            // the capsule on the screen says "Checking your request" and offers Cancel for as long as this takes (the check gives up by itself after a few seconds)
+            val r = IntakeCheck(intake).run(request(emptyList()))
             handle(r)
         }
     }
@@ -288,13 +297,15 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     private fun handle(r: IntakeResult) {
         when (r) {
             is IntakeResult.Ok -> { sheetKind = CreateSheetKind.None; finish(r.brief) }
-            is IntakeResult.Questions -> { flow = QuestionFlow(r.questions); flowVersion++; sheetKind = CreateSheetKind.Asking }
-            else -> { stop = CreateErrors.fromCheck(r); sheetKind = if (stop != null) CreateSheetKind.Stop else CreateSheetKind.None; if (stop == null) finish(null) }
+            is IntakeResult.Questions -> { fire(E.CheckAsks); flow = QuestionFlow(r.questions); flowVersion++; sheetKind = CreateSheetKind.Asking }
+            else -> {
+                stop = CreateErrors.fromCheck(r); sheetKind = if (stop != null) CreateSheetKind.Stop else CreateSheetKind.None
+                if (stop == null) finish(null) else fire(E.CheckRefuses)
+            }
         }
     }
 
-    var submitting by mutableStateOf(false)
-        private set
+    val submitting: Boolean get() = run.phase == CreateSubmit.Phase.Starting
     /** Shown inline on Create when the send failed for lack of a connection; the draft is intact. */
     var inlineError by mutableStateOf<String?>(null)
         private set
@@ -304,14 +315,14 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     private fun finish(brief: kotlinx.serialization.json.JsonObject?) {
         val send = submitFn ?: return
         if (submitting) return
-        submitting = true; inlineError = null
+        fire(if (checking) E.CheckDone else E.Tap(willCheck = false)); inlineError = null
         viewModelScope.launch {
-            val r = try { send(brief) } catch (e: kotlinx.coroutines.CancellationException) { submitting = false; throw e } catch (e: Exception) { SubmitOutcome.Offline(ApiError.Network.message) }
-            submitting = false
+            val r = try { send(brief) } catch (e: kotlinx.coroutines.CancellationException) { fire(E.SendFailed); throw e } catch (e: Exception) { SubmitOutcome.Offline(ApiError.Network.message) }
             when (r) {
-                is SubmitOutcome.Accepted -> { clearAfterSend(); sheetKind = CreateSheetKind.None; stop = null; acceptedFn?.invoke() }
-                is SubmitOutcome.Stopped -> if (!showStop(r.error)) inlineError = ApiError.Server.message
-                is SubmitOutcome.Offline -> { sheetKind = CreateSheetKind.None; inlineError = r.message }
+                is SubmitOutcome.Accepted -> { fire(E.Accepted); clearAfterSend(); sheetKind = CreateSheetKind.None; stop = null; acceptedFn?.invoke() }
+                // every other end restores the form exactly as it was: the prompt, the photos and the options are untouched
+                is SubmitOutcome.Stopped -> if (showStop(r.error)) fire(E.SendRefused) else { fire(E.SendFailed); inlineError = ApiError.Server.message }
+                is SubmitOutcome.Offline -> { fire(E.SendFailed); sheetKind = CreateSheetKind.None; inlineError = r.message }
             }
         }
     }
@@ -322,9 +333,10 @@ class ComposerViewModel(app: Application) : AndroidViewModel(app) {
     fun showStop(e: ApiError): Boolean { val s = CreateErrors.fromGenerate(e) ?: return false; stop = s; sheetKind = CreateSheetKind.Stop; return true }
 
     /** The slow-check skeleton's "Make it now": stop waiting and go on without a brief. */
-    fun skipCheck() { checkJob?.cancel(); checking = false; sheetKind = CreateSheetKind.None; finish(null) }
+    fun skipCheck() { checkJob?.cancel(); sheetKind = CreateSheetKind.None; finish(null) }
 
-    fun dismissSheet() { checkJob?.cancel(); checking = false; sheetKind = CreateSheetKind.None; stop = null }
+    /** Closes whatever sheet is open; during the request check this is Cancel (the form comes back exactly as it was). */
+    fun dismissSheet() { cancelCheck(); sheetKind = CreateSheetKind.None; stop = null }
 
     fun useSuggestion(s: String) { text = s; dismissSheet() }
 

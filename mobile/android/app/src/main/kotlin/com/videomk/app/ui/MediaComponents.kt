@@ -33,10 +33,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -227,7 +223,7 @@ private fun SelectBadge(selected: Boolean, number: Int?, modifier: Modifier = Mo
             .border(2.dp, Color.White, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        if (selected) { if (number != null) Text("$number", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color.White) else Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(16.dp)) }
+        if (selected) { if (number != null) Text("$number", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color.White) else Icon(Sym.Check, null, tint = Color.White, modifier = Modifier.size(16.dp)) }
     }
 }
 
@@ -246,13 +242,13 @@ fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: Str
                     Modifier.fillMaxWidth().heightIn(min = 44.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).padding(start = 12.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(Icons.Filled.Search, null, tint = Vmk.colors.textTertiary, modifier = Modifier.size(20.dp))
+                    Icon(Sym.Search, null, tint = Vmk.colors.textTertiary, modifier = Modifier.size(20.dp))
                     Box(Modifier.weight(1f)) {
                         if (vm.search.query.isEmpty()) Text(stringResource(R.string.media_search_hint), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textTertiary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         inner()
                     }
                     if (vm.searching) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    else if (vm.search.active) IconButton(onClick = { vm.clearSearch() }, modifier = Modifier.size(44.dp)) { Icon(Icons.Filled.Close, stringResource(R.string.media_clear_search)) }
+                    else if (vm.search.active) IconButton(onClick = { vm.clearSearch() }, modifier = Modifier.size(44.dp)) { Icon(Sym.Close, stringResource(R.string.media_clear_search)) }
                     else Box(Modifier.size(12.dp))
                 }
             },
@@ -266,7 +262,7 @@ fun MediaSearchBar(vm: MediaViewModel, modifier: Modifier = Modifier, label: Str
                     val chip = chips[i]
                     InputChip(
                         selected = true, onClick = { vm.dropChip(chip.label) }, label = { Text(chip.label) },
-                        trailingIcon = { Icon(Icons.Filled.Close, null, Modifier.size(16.dp)) },
+                        trailingIcon = { Icon(Sym.Close, null, Modifier.size(16.dp)) },
                         modifier = Modifier.semantics { contentDescription = "${chip.label}. Double tap to remove this filter" }.testTag("searchChip"),
                     )
                 }

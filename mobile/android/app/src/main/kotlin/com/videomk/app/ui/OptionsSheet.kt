@@ -4,13 +4,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.layout.FlowRow
 import com.videomk.app.core.CreatePlatforms
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.CropLandscape
-import androidx.compose.material.icons.filled.CropSquare
-import androidx.compose.material.icons.filled.CropPortrait
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,10 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -96,7 +86,7 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
             if (qualities.size > 1) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Overline(stringResource(R.string.create_quality), Modifier.weight(1f).semantics { heading() })
-                    GlassIconButton(Icons.Filled.Info, stringResource(R.string.create_quality_info), onCostInfo, Modifier.testTag("costWhy"), size = 40.dp)
+                    GlassIconButton(Sym.Info, stringResource(R.string.create_quality_info), onCostInfo, Modifier.testTag("costWhy"), size = 40.dp)
                 }
                 Segmented(qualities, o.resolution) { composer.updateOptions(o.copy(resolution = it)) }
             }
@@ -107,7 +97,7 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
                         .semantics(mergeDescendants = true) { stateDescription = captionsState }.testTag("subtitlesRow"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Icon(Icons.Filled.ClosedCaption, null, tint = Vmk.colors.text)
+                    Icon(Sym.ClosedCaption, null, tint = Vmk.colors.text)
                     Text(stringResource(R.string.create_subtitles), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text, modifier = Modifier.weight(1f))
                     Switch(checked = o.captions, onCheckedChange = null, colors = SwitchDefaults.colors(checkedTrackColor = Vmk.colors.gradientStart, checkedThumbColor = Vmk.colors.onPrimary, uncheckedTrackColor = Vmk.colors.surface3, uncheckedBorderColor = Vmk.colors.outline))
                 }
@@ -115,10 +105,10 @@ fun CreateOptionsSheet(composer: ComposerViewModel, caps: com.videomk.app.core.C
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.create_language_desc), onClick = onLanguage).testTag("languageRow"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Icon(Icons.Filled.Language, null, tint = Vmk.colors.text)
+                    Icon(Sym.Language, null, tint = Vmk.colors.text)
                     Text(stringResource(R.string.create_language), style = MaterialTheme.typography.bodyLarge, color = Vmk.colors.text)
                     Text(CreatePlatforms.languageLabel(o, caps), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, modifier = Modifier.weight(1f), maxLines = 1, textAlign = androidx.compose.ui.text.style.TextAlign.End, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    Icon(Icons.Filled.ChevronRight, null, tint = Vmk.colors.textSecondary)
+                    Icon(Sym.ChevronRight, null, tint = Vmk.colors.textSecondary)
                 }
             }
             // FORMAT: the shape is the label; the name only under the chosen one; formats that are not ready for this account are not shown
@@ -145,7 +135,7 @@ private fun FormatTile(id: String, label: String, beta: Boolean, selected: Boole
     ) {
         if (beta) Box(Modifier.align(Alignment.TopEnd).padding(8.dp).size(7.dp).clip(CircleShape).background(Vmk.colors.warning))
         Column(Modifier.align(Alignment.Center).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Icon(when (id) { "16:9" -> Icons.Filled.CropLandscape; "1:1" -> Icons.Filled.CropSquare; else -> Icons.Filled.CropPortrait }, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
+            Icon(when (id) { "16:9" -> Sym.CropLandscape; "1:1" -> Sym.CropSquare; else -> Sym.CropPortrait }, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.textSecondary, modifier = Modifier.size(28.dp))
             if (selected) Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = Vmk.colors.primary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
     }
@@ -186,7 +176,7 @@ internal fun LookSwatch(label: String, description: String, look: VideoLook?, se
                 .clip(shape).background(swatch(look)).then(if (selected) Modifier.border(2.dp, Vmk.colors.primary, shape) else Modifier),
             contentAlignment = Alignment.Center,
         ) {
-            if (look == null) Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary)
+            if (look == null) Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary)
             else Column(Modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 val c = lineColor(look)
                 for (a in listOf(1f, 0.7f, 0.5f)) Box(Modifier.fillMaxWidth().size(width = 10.dp, height = 3.dp).background(c.copy(alpha = a), RoundedCornerShape(2.dp)))

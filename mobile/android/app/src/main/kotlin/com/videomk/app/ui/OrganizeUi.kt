@@ -26,11 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -120,7 +115,7 @@ private fun Loading() {
 @Composable
 private fun Message(title: String, body: String, primary: String?, onPrimary: () -> Unit, secondary: String, onSecondary: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(28.dp)) }
+        Box(Modifier.size(56.dp).clip(CircleShape).background(Vmk.colors.primaryContainer), contentAlignment = Alignment.Center) { Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(28.dp)) }
         Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Vmk.colors.text, modifier = Modifier.semantics { heading() })
         Text(body, style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         if (primary != null) PrimaryButton(primary, onPrimary, Modifier.padding(top = 6.dp))
@@ -250,9 +245,9 @@ fun OrganizeBar(state: OrganizeState, onCancel: () -> Unit, onRetry: () -> Unit,
         Row(Modifier.fillMaxWidth().heightIn(min = 68.dp).padding(start = 14.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
                 when {
-                    failed -> Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning)
-                    offline -> Icon(Icons.Filled.CloudOff, null, tint = Vmk.colors.textSecondary)
-                    else -> { CircularProgressIndicator(progress = { fraction }, Modifier.size(40.dp), color = Vmk.colors.primary, trackColor = Vmk.colors.surface3, strokeWidth = 3.dp); Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp)) }
+                    failed -> Icon(Sym.Warning, null, tint = Vmk.colors.warning)
+                    offline -> Icon(Sym.CloudOff, null, tint = Vmk.colors.textSecondary)
+                    else -> { CircularProgressIndicator(progress = { fraction }, Modifier.size(40.dp), color = Vmk.colors.primary, trackColor = Vmk.colors.surface3, strokeWidth = 3.dp); Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp)) }
                 }
             }
             Column(Modifier.weight(1f)) {
@@ -260,7 +255,7 @@ fun OrganizeBar(state: OrganizeState, onCancel: () -> Unit, onRetry: () -> Unit,
                 Text(sub, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, maxLines = 2)
             }
             if (failed) TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp).testTag("organizeRetry")) { Text(stringResource(R.string.common_try_again), fontWeight = FontWeight.SemiBold) }
-            IconButton(onClick = { confirm = true }, modifier = Modifier.size(48.dp).testTag("organizeStop")) { Icon(Icons.Filled.Close, stringResource(R.string.organize_stop), tint = Vmk.colors.textSecondary) }
+            IconButton(onClick = { confirm = true }, modifier = Modifier.size(48.dp).testTag("organizeStop")) { Icon(Sym.Close, stringResource(R.string.organize_stop), tint = Vmk.colors.textSecondary) }
         }
         if (!failed) LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth().heightIn(min = 3.dp), color = if (offline) Vmk.colors.outline else Vmk.colors.primary, trackColor = Vmk.colors.surface3, drawStopIndicator = {})
     }
@@ -298,7 +293,7 @@ fun OrganizePill(state: OrganizeState, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp).heightIn(min = 44.dp).clickable(role = Role.Button, onClickLabel = stringResource(R.string.organize_open_media), onClick = onClick), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
         Row(Modifier.heightIn(min = 36.dp).clip(CircleShape).background(Vmk.colors.surface).border(1.dp, Vmk.colors.outline, CircleShape).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { contentDescription = text }.testTag("organizePill"),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
+            Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(18.dp))
             Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = Vmk.colors.text)
         }
     }
@@ -312,7 +307,7 @@ fun AutoChip(modifier: Modifier = Modifier) {
         modifier.heightIn(min = 20.dp).clip(CircleShape).background(Vmk.colors.primaryContainer).padding(horizontal = 8.dp).semantics { contentDescription = autoText },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
-        Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(11.dp))
+        Icon(Sym.AutoAwesome, null, tint = Vmk.colors.primary, modifier = Modifier.size(11.dp))
         Text(stringResource(R.string.organize_auto), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.primary)
     }
 }

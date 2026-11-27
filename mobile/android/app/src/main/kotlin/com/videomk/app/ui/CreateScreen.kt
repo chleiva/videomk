@@ -1,9 +1,5 @@
 package com.videomk.app.ui
 
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Add
 import com.videomk.app.core.AddPhotosLogic
 import android.Manifest
 import android.content.pm.PackageManager
@@ -48,23 +44,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.ClosedCaption
-import androidx.compose.material.icons.filled.CropLandscape
-import androidx.compose.material.icons.filled.CropPortrait
-import androidx.compose.material.icons.filled.CropSquare
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -271,7 +251,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
     Column(Modifier.fillMaxWidth().background(Vmk.colors.background).statusBarsPadding().windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)).testTag("createScreen")) {
         // the sheet is the title: only a close button (docs/UX_2026_REDESIGN.md 4.2)
         Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            GlassIconButton(Icons.Filled.Close, stringResource(R.string.common_close), ::close, Modifier.testTag("createCancel"))
+            GlassIconButton(Sym.Close, stringResource(R.string.common_close), ::close, Modifier.testTag("createCancel"))
         }
         Box(Modifier.fillMaxWidth().size(1.dp).background(if (scroll.value > 0) Vmk.colors.outline else Color.Transparent))
 
@@ -279,8 +259,8 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
             PromptField(composer, listening, focus, deck = deckState.attached)
             // photo and mic: two icons under the prompt; the count is a badge, "Tap the mic to speak" is gone (the mic icon is universal)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (!deckState.attached) GlassIconButton(Icons.Filled.AddPhotoAlternate, stringResource(R.string.create_add_photos), { composer.openAddPhotos(null) }, Modifier.testTag("photoButton"), badge = AddPhotosLogic.badge(photoTotal))
-                GlassIconButton(if (listening) Icons.Filled.Stop else Icons.Filled.Mic, stringResource(if (listening) R.string.create_stop_dictation else R.string.create_dictate_desc), ::onMic, Modifier.testTag("micButton"), filled = listening)
+                if (!deckState.attached) GlassIconButton(Sym.AddPhotoAlternate, stringResource(R.string.create_add_photos), { composer.openAddPhotos(null) }, Modifier.testTag("photoButton"), badge = AddPhotosLogic.badge(photoTotal))
+                GlassIconButton(if (listening) Sym.Stop else Sym.Mic, stringResource(if (listening) R.string.create_stop_dictation else R.string.create_dictate_desc), ::onMic, Modifier.testTag("micButton"), filled = listening)
                 if (listening) Text(stringResource(R.string.composer_listening), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.danger)
             }
             dictationHint(dictationState)
@@ -297,12 +277,12 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                 Pill(platformPillValue(options, caps), forDesc, Modifier.testTag("pillFor"), expanded = forOpen, onExpandedChange = { forOpen = it }) {
                     for (c in chips) androidx.compose.material3.DropdownMenuItem(
                         text = { Text(c.label, fontWeight = if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) FontWeight.Bold else FontWeight.Normal) },
-                        trailingIcon = { if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                        trailingIcon = { if (c.id == options.platform && !CreatePlatforms.isCustom(options, caps)) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
                         onClick = { forOpen = false; composer.selectPlatform(c) }, modifier = Modifier.testTag("platform-${c.id}"),
                     )
                 }
                 val maxMinutes = CreatePlatforms.chip(caps, options.platform)?.takeIf { it.enabled }?.maxMinutes
-                Pill(if (options.useSuggestedLength && deckState is DeckState.Ready) stringResource(R.string.deck_suggested) else Lengths.short(options.minutes), lengthDesc, Modifier.testTag("pillLength"), Icons.Filled.Timer, expanded = lengthOpen, onExpandedChange = { lengthOpen = it }) {
+                Pill(if (options.useSuggestedLength && deckState is DeckState.Ready) stringResource(R.string.deck_suggested) else Lengths.short(options.minutes), lengthDesc, Modifier.testTag("pillLength"), Sym.Timer, expanded = lengthOpen, onExpandedChange = { lengthOpen = it }) {
                     (deckState as? DeckState.Ready)?.let { ready ->
                         LengthMenuRow(stringResource(R.string.deck_suggested) + " · " + Lengths.short(ready.info.suggestedMinutes), ready.info.suggestedCredits, options.useSuggestedLength, balance != null && ready.info.suggestedCredits > balance, true, "length-suggested") { lengthOpen = false; composer.useSuggestedLength() }
                     }
@@ -314,20 +294,20 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
                     }
                     if (anyOver && maxMinutes != null) Text(stringResource(R.string.create_over_max, CreatePlatforms.chip(caps, options.platform)!!.label, Lengths.clock(maxMinutes)), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(max = 240.dp))
                 }
-                Pill(options.look?.displayName() ?: stringResource(R.string.create_look_auto), lookDesc, Modifier.testTag("pillLook"), Icons.Filled.AutoAwesome, expanded = lookOpen, onExpandedChange = { lookOpen = it }) {
+                Pill(options.look?.displayName() ?: stringResource(R.string.create_look_auto), lookDesc, Modifier.testTag("pillLook"), Sym.AutoAwesome, expanded = lookOpen, onExpandedChange = { lookOpen = it }) {
                     for (l in listOf<VideoLook?>(null) + VideoLook.entries) androidx.compose.material3.DropdownMenuItem(
                         text = { Text(l?.displayName() ?: stringResource(R.string.create_look_auto), fontWeight = if (options.look == l) FontWeight.Bold else FontWeight.Normal) },
-                        trailingIcon = { if (options.look == l) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+                        trailingIcon = { if (options.look == l) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
                         onClick = { lookOpen = false; composer.updateOptions(options.copy(look = l)) }, modifier = Modifier.testTag("look-${l?.wire ?: "auto"}"),
                     )
                 }
-                GlassIconButton(Icons.Filled.Tune, stringResource(R.string.create_options), { optionsOpen = true }, Modifier.testTag("optionsMenu"))
+                GlassIconButton(Sym.Tune, stringResource(R.string.create_options), { optionsOpen = true }, Modifier.testTag("optionsMenu"))
             }
             tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Vmk.colors.textSecondary, modifier = Modifier.semantics { contentDescription = it }) }
             // only when there is something to say: slides are wide, a platform's limit, what the photos can fill
             if (composer.deckVerticalWarning) Column(Modifier.fillMaxWidth().testTag("deckVerticalWarning")) {
                 Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Filled.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(18.dp).padding(top = 2.dp))
+                    Icon(Sym.Warning, null, tint = Vmk.colors.warning, modifier = Modifier.size(18.dp).padding(top = 2.dp))
                     Text(stringResource(R.string.deck_vertical_warning), style = MaterialTheme.typography.bodySmall, color = Vmk.colors.text)
                 }
                 FixChip(stringResource(R.string.deck_use_landscape), stringResource(R.string.deck_use_landscape_desc), Modifier.testTag("deckUseLandscape")) { composer.useLandscape() }
@@ -347,7 +327,7 @@ fun CreateScreen(app: AppViewModel, composer: ComposerViewModel, onClose: () -> 
             Column(Modifier.padding(horizontal = 20.dp).padding(top = 6.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 composer.inlineError?.let { m ->
                     Row(Modifier.fillMaxWidth().testTag("createError").semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Assertive }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Filled.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
+                        Icon(Sym.Warning, null, tint = Vmk.colors.danger, modifier = Modifier.size(18.dp))
                         Text(stringResource(R.string.create_error_retry, m), style = MaterialTheme.typography.bodyMedium, color = Vmk.colors.danger)
                     }
                 }
@@ -393,7 +373,7 @@ internal fun PlatformChipView(c: PlatformChip, selected: Boolean, onClick: () ->
             .semantics { this.selected = selected; contentDescription = chipDescription }.testTag("platform-${c.id}"),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Icon(if (selected) Icons.Filled.Check else if (c.id == "other") Icons.Filled.AutoAwesome else if (c.aspect == "16:9") Icons.Filled.CropLandscape else if (c.aspect == "1:1") Icons.Filled.CropSquare else Icons.Filled.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.text, modifier = Modifier.size(18.dp))
+        Icon(if (selected) Sym.Check else if (c.id == "other") Sym.AutoAwesome else if (c.aspect == "16:9") Sym.CropLandscape else if (c.aspect == "1:1") Sym.CropSquare else Sym.CropPortrait, null, tint = if (selected) Vmk.colors.primary else Vmk.colors.text, modifier = Modifier.size(18.dp))
         Text(c.label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (selected) Vmk.colors.primary else Vmk.colors.text, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
         if (!c.enabled) Text(stringResource(R.string.create_soon), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Vmk.colors.textSecondary, modifier = Modifier.clip(CircleShape).background(Vmk.colors.surfaceRaised).padding(horizontal = 6.dp, vertical = 2.dp))
     }
@@ -436,7 +416,7 @@ private fun CreateButton(ready: Boolean, busyText: String?, credits: Int, reason
                 Text(createLabel, style = VmkType.cta, color = c, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f, fill = false))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("·", style = VmkType.cta, color = c, modifier = Modifier.padding(end = 8.dp))
-                    Icon(Icons.Filled.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
+                    Icon(Sym.Bolt, null, tint = c, modifier = Modifier.size(20.dp))
                     Text("$credits", style = VmkType.cta, color = c)
                 }
             }
@@ -506,7 +486,7 @@ private fun PhotoStrip(composer: ComposerViewModel, onAdd: () -> Unit) {
             item {
                 val add = stringResource(R.string.create_add_photos)
                 Box(Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(Vmk.colors.surfaceRaised).clickable(role = Role.Button, onClickLabel = add, onClick = onAdd).semantics { contentDescription = add }, contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.AddPhotoAlternate, null, tint = Vmk.colors.primary)
+                    Icon(Sym.AddPhotoAlternate, null, tint = Vmk.colors.primary)
                 }
             }
         }
@@ -525,7 +505,7 @@ private fun RemovableThumb(onRemove: () -> Unit, content: @Composable () -> Unit
         Box(Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))) { content() }
         Box(Modifier.align(Alignment.TopEnd).size(40.dp).clickable(role = Role.Button, onClickLabel = remove, onClick = onRemove).semantics { contentDescription = remove }.testTag("removePhoto"), contentAlignment = Alignment.TopEnd) {
             Box(Modifier.padding(2.dp).size(22.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.65f)), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Close, null, tint = Color.White, modifier = Modifier.size(14.dp))
+                Icon(Sym.Close, null, tint = Color.White, modifier = Modifier.size(14.dp))
             }
         }
     }
@@ -541,12 +521,12 @@ private fun LengthMenuRow(label: String, credits: Int, selected: Boolean, overBa
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.widthIn(min = 72.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Bolt, null, tint = tint, modifier = Modifier.size(14.dp))
+                    Icon(Sym.Bolt, null, tint = tint, modifier = Modifier.size(14.dp))
                     Text("$credits", style = MaterialTheme.typography.labelMedium, color = tint)
                 }
             }
         },
-        trailingIcon = { if (selected) Icon(Icons.Filled.Check, null, tint = Vmk.colors.primary) },
+        trailingIcon = { if (selected) Icon(Sym.Check, null, tint = Vmk.colors.primary) },
         enabled = enabled, onClick = onClick, modifier = Modifier.semantics { this.selected = selected; contentDescription = desc }.testTag(tag),
     )
 }

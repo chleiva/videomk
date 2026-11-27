@@ -1,9 +1,5 @@
 package com.videomk.app.ui
 
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.statusBarsPadding
 import android.content.ClipData
@@ -24,21 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.PanTool
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.automirrored.filled.TextSnippet
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -114,7 +95,7 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
         topBar = {
             // back (a glass circle), the title once, nothing on the right (docs/UX_2026_REDESIGN.md 4.1)
             Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 56.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                GlassIconButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back), onBack, Modifier.testTag("backButton"))
+                GlassIconButton(Sym.ArrowBack, stringResource(R.string.common_back), onBack, Modifier.testTag("backButton"))
                 Text(
                     if (video?.status?.isRunning == true) "" else video?.displayTitle ?: stringResource(R.string.video_title_fallback), style = MaterialTheme.typography.titleMedium, color = Vmk.colors.text,
                     maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier.weight(1f).padding(horizontal = 8.dp).semantics { heading() },
@@ -132,8 +113,8 @@ fun VideoDetailScreen(app: AppViewModel, detail: VideoDetailViewModel, http: OkH
                     when (k) {
                         1 -> PlayerSection(video, detail, playback, http, onEdit = { detail.pause(); onEdit() }, onMakeAnother = onMakeAnother, onFeedback = onFeedback)
                         0 -> Column(Modifier.padding(20.dp)) { MakingCard(rememberMakingSnapshot(video, state), Modifier.testTag("progressCard"), MakingLayout.Detail) }
-                        2 -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Icons.Filled.Warning, Vmk.colors.danger) }
-                        else -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Icons.Filled.PanTool, Vmk.colors.warning) }
+                        2 -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_failed_title), stringResource(R.string.video_failed_body), Sym.Warning, Vmk.colors.danger) }
+                        else -> Column(Modifier.padding(20.dp)) { MessageCard(stringResource(R.string.video_rejected_title), video.rejectReason ?: stringResource(R.string.video_rejected_body), Sym.PanTool, Vmk.colors.warning) }
                     }
                 }
             }
@@ -196,12 +177,12 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
                             }
                         }.semantics { contentDescription = shareLabel }.testTag("shareButton"),
                     contentAlignment = Alignment.Center,
-                ) { if (sharing) CircularProgressIndicator(Modifier.size(24.dp), color = Vmk.colors.onPrimary, strokeWidth = 2.dp) else Icon(Icons.Filled.Share, null, Modifier.size(26.dp), tint = Vmk.colors.onPrimary) }
+                ) { if (sharing) CircularProgressIndicator(Modifier.size(24.dp), color = Vmk.colors.onPrimary, strokeWidth = 2.dp) else Icon(Sym.Share, null, Modifier.size(26.dp), tint = Vmk.colors.onPrimary) }
             }
             if (url != null && Build.VERSION.SDK_INT >= 29) {
                 if (saving) Box(Modifier.size(48.dp).semantics { contentDescription = Txt.s(R.string.video_saving) }, contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp) }
                 else GlassIconButton(
-                    if (saved) Icons.Filled.Check else Icons.Filled.Download, stringResource(R.string.video_save),
+                    if (saved) Sym.Check else Sym.Download, stringResource(R.string.video_save),
                     onClick = {
                         saving = true; shareError = null; saved = false
                         scope.launch {
@@ -212,13 +193,13 @@ private fun PlayerSection(video: VideoItem, detail: VideoDetailViewModel, playba
                     modifier = Modifier.testTag("saveButton"),
                 )
             }
-            if (video.editable) GlassIconButton(Icons.Filled.Tune, stringResource(R.string.video_edit_desc), onEdit, Modifier.testTag("editButton"))
-            if (description != null) GlassIconButton(Icons.Filled.Info, stringResource(R.string.action_info), { infoOpen = true }, Modifier.testTag("infoButton"))
+            if (video.editable) GlassIconButton(Sym.Tune, stringResource(R.string.video_edit_desc), onEdit, Modifier.testTag("editButton"))
+            if (description != null) GlassIconButton(Sym.Info, stringResource(R.string.action_info), { infoOpen = true }, Modifier.testTag("infoButton"))
             Box {
-                GlassIconButton(Icons.Filled.MoreHoriz, stringResource(R.string.action_more), { moreOpen = true }, Modifier.testTag("moreButton"))
+                GlassIconButton(Sym.MoreHoriz, stringResource(R.string.action_more), { moreOpen = true }, Modifier.testTag("moreButton"))
                 androidx.compose.material3.DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }, containerColor = Vmk.colors.surface) {
-                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.lib_new_video)) }, leadingIcon = { Icon(Icons.Filled.Add, null) }, onClick = { moreOpen = false; onMakeAnother() }, modifier = Modifier.testTag("makeAnother"))
-                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.feedback_title)) }, leadingIcon = { Icon(Icons.Filled.ChatBubbleOutline, null) }, onClick = { moreOpen = false; onFeedback() }, modifier = Modifier.testTag("feedbackLink"))
+                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.lib_new_video)) }, leadingIcon = { Icon(Sym.Add, null) }, onClick = { moreOpen = false; onMakeAnother() }, modifier = Modifier.testTag("makeAnother"))
+                    androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.feedback_title)) }, leadingIcon = { Icon(Sym.ChatBubbleOutline, null) }, onClick = { moreOpen = false; onFeedback() }, modifier = Modifier.testTag("feedbackLink"))
                 }
             }
         }
@@ -245,7 +226,7 @@ private fun InfoSheet(description: String, onDismiss: () -> Unit) {
                 onClick = { copyText(context, Txt.s(R.string.share_clip_label_description), description); copied = true; scope.launch { delay(2000); copied = false } },
                 modifier = Modifier.heightIn(min = 48.dp).testTag("copyDescription"),
             ) {
-                Icon(if (copied) Icons.Filled.Check else Icons.AutoMirrored.Filled.TextSnippet, null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
+                Icon(if (copied) Sym.Check else Sym.TextSnippet, null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
                 Text(stringResource(if (copied) R.string.share_copied else R.string.video_copy), textAlign = TextAlign.Start)
             }
         }
@@ -329,9 +310,9 @@ fun ProgressCard(stage: VideoStatus.Stage) {
                     horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically,
                 ) {
                     when {
-                        s < stage -> Icon(Icons.Filled.CheckCircle, null, tint = Vmk.colors.success, modifier = Modifier.size(22.dp))
+                        s < stage -> Icon(Sym.CheckCircle, null, tint = Vmk.colors.success, modifier = Modifier.size(22.dp))
                         s == stage -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                        else -> Icon(Icons.Filled.RadioButtonUnchecked, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(22.dp))
+                        else -> Icon(Sym.RadioButtonUnchecked, null, tint = Vmk.colors.textSecondary, modifier = Modifier.size(22.dp))
                     }
                     Text(s.title, color = if (s <= stage) Vmk.colors.text else Vmk.colors.textSecondary)
                 }

@@ -23,10 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.remember
 import androidx.compose.material3.NavigationBar
@@ -112,8 +108,8 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
             // the tab bar floats as a rounded pill; Create is a separate round (+) beside it, so it never covers a row (docs/UX_2026_REDESIGN.md section 3)
             if (showTabs) Row(Modifier.fillMaxWidth().background(Vmk.colors.background).padding(horizontal = Vmk.space.screen).padding(top = 6.dp, bottom = 8.dp).navigationBarsPadding(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (container.mediaApi != null) NavigationBar(Modifier.weight(1f).clip(RoundedCornerShape(32.dp)), containerColor = Vmk.colors.surface, windowInsets = WindowInsets(0)) {
-                    NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Icons.Filled.Movie, null) }, label = { Text(stringResource(R.string.nav_tab_videos)) }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
-                    NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Icons.Filled.PhotoLibrary, null) }, label = { Text(stringResource(R.string.nav_tab_media)) }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
+                    NavigationBarItem(selected = route == "library", onClick = { navigateTab(nav, "library") }, icon = { Icon(Sym.Movie, null) }, label = { Text(stringResource(R.string.nav_tab_videos)) }, colors = tabColors(), modifier = Modifier.testTag("tabVideos"))
+                    NavigationBarItem(selected = route == "media", onClick = { navigateTab(nav, "media") }, icon = { Icon(Sym.PhotoLibrary, null) }, label = { Text(stringResource(R.string.nav_tab_media)) }, colors = tabColors(), modifier = Modifier.testTag("tabMedia"))
                 } else Spacer(Modifier.weight(1f))
                 val newVideo = stringResource(R.string.lib_new_video)
                 Box(
@@ -121,7 +117,7 @@ private fun SignedInNav(app: AppViewModel, composer: ComposerViewModel, containe
                         .clickable(role = Role.Button, onClickLabel = newVideo) { composer.openCreate(container.createPrefs?.load(email)); nav.navigate("create") }
                         .semantics { contentDescription = newVideo }.testTag("newVideoFab"),
                     contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Filled.AutoAwesome, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(26.dp)) }
+                ) { Icon(Sym.AutoAwesome, null, tint = Vmk.colors.onPrimary, modifier = Modifier.size(26.dp)) }
             }
         },
     ) { inner ->
