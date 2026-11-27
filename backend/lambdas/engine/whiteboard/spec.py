@@ -87,10 +87,12 @@ def _edge_point(box, towards, gap: float):
 
 def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur: float, size_units: Tuple[float, float], scale: float, load: Callable[[str], Dict[str, Any]], *,
                   hand: str = "neat", tool: str = "marker", chalk: bool = False, camera: str = "auto", pad: Tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0),
-                  frame_aspect: Optional[float] = None) -> Tuple[bd.Board, bd.Camera, Dict[str, Any]]:
+                  frame_aspect: Optional[float] = None, tail: float = 0.0) -> Tuple[bd.Board, bd.Camera, Dict[str, Any]]:
     """-> (board, camera, report). Deterministic: the same items, anchor times, size and scale give the same board on any machine.
     `anchors`: item id -> scene-local time its narration word starts (items without one are drawn right after the previous item). `size_units`: the board's
-    width and height in board units (the content box). `scale`: raster pixels per unit. `pad`: paper around the content (left, top, right, bottom, units)."""
+    width and height in board units (the content box). `scale`: raster pixels per unit. `pad`: paper around the content (left, top, right, bottom, units). `tail`: seconds at the end of the
+    scene by which everything, the pull-back included, is over (the last scene of a big board then pulls back over all its panels)."""
+    dur = max(2.0, dur - tail)
     L = Layout(size_units[0], size_units[1])
     b = bd.Board(int(round(L.W + pad[0] + pad[2])), int(round(L.H + pad[1] + pad[3])), scale, paper=CHALK_PAPER if chalk else bd.PAPER, origin=(pad[0], pad[1]))
     hand_default, tool_default = hand, tool
@@ -148,7 +150,10 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
                             dx, dy = it.get("shift", [0, 0])
                             x, y = x0 + (slot_w - w) / 2 + dx * slot_w, y0 + (y1 - y0 - h) / 2 + dy * (y1 - y0)
                         g.update(kind="draw", pkg=pkg, k=k, box=(x, y, x + w, y + h), cells=cells)
-                if "write" in it:
+                if "chart" in it:
+                    cells = L.cells(it["zone"])
+                    g.update(kind="chart", cells=cells, **_chart(it, L.rect(cells), hand_default, _seed(it["id"])))
+                elif "write" in it:
                     hand, tool = it.get("hand", hand_default), it.get("tool", tool_default)
                     size = TEXT_SIZE[it["size"]] if isinstance(it.get("size"), str) else float(it.get("size", TEXT_SIZE["m"]))
                     if "near" in it:
@@ -219,7 +224,7 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
         raise ValueError(f"items that depend on each other: {[x['id'] for x in pending]}")
 
     geo = [by_id[it["id"]] for it in items]
-    solid = [g for g in geo if g["kind"] in ("draw", "write")]
+    solid = [g for g in geo if g["kind"] in ("draw", "write", "chart")]
     for i, a in enumerate(solid):
         for c in solid[i + 1:]:
             ox = min(a["box"][2], c["box"][2]) - max(a["box"][0], c["box"][0])
@@ -247,6 +252,11 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
                     o["anchor"] = t
                     t -= o["nat"] * 1.05 + 0.05
             ops += block_ops
+        elif g["kind"] == "chart":
+            pen = sum(core.length_of(s) for s in g["strokes"])
+            ops.append({"g": g, "nat": float(np.clip(pen / PEN_SPEED, 0.7, 3.0)), "anchor": anchor, "stretch": True})
+            ops += [{"g": g, "text": ti, "word": wi, "nat": max(0.12, wr.write_time(w["strokes"], "pen", blk["size"], hand_default)), "anchor": None, "stretch": False}
+                    for ti, (blk, _) in enumerate(g["texts"]) for wi, w in enumerate(blk["words"])]
         else:
             pen = sum(core.length_of(s) for s in g["strokes"])
             ops.append({"g": g, "nat": float(np.clip(pen / PEN_SPEED, 0.3, 1.8)), "anchor": anchor, "stretch": g["kind"] == "connect"})
@@ -304,6 +314,21 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
                         b.place_under(fa, g["box"][0], g["box"][1], col, tf, tf + d, opacity=0.6 if chalk else 0.92, tip_colour=tuple(int(v * 0.82) for v in col), tip_size=1.0)
                         tf += d + 0.05
                 o["fill_end"] = tf
+        elif g["kind"] == "chart" and "text" in o:
+            blk, org = g["texts"][o["text"]]
+            r = wr.raster_word(blk["words"][o["word"]], org, hand_default, "pen", blk["size"], scale, seed=_seed(g["id"]) + 31 * o["text"] + o["word"])
+            if r is not None:
+                b.place(r, r["x"], r["y"], ink("black"), t0, t1, tip_size=0.78)
+        elif g["kind"] == "chart":
+            q = core.stroke_package(g["strokes"], LINE * 0.9, seed=_seed(g["id"]))
+            b.place(core.raster_strokes(q, scale), q["x"], q["y"], ink(it.get("color"), "blue"), t0, t1)
+            tf = t1 + 0.06
+            for (x0_, y0_, x1_, y1_) in g["bars"]:
+                fa = core.svg_alpha(f'<rect x="0" y="0" width="{x1_ - x0_:.1f}" height="{y1_ - y0_:.1f}" fill="#000"/>', x1_ - x0_, y1_ - y0_, scale)
+                col = FILLS["light_blue"]
+                b.place_under(fa, x0_, y0_, col, tf, tf + 0.3, opacity=0.6 if chalk else 0.92, tip_colour=tuple(int(v * 0.82) for v in col), tip_size=1.0)
+                tf += 0.34
+            o["fill_end"] = tf
         elif g["kind"] == "write":
             blk, tool = g["blk"], g["tool"]
             w = blk["words"][o["word"]]
@@ -367,7 +392,7 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
         else:
             look = [c for _, c in seq[i:i + 7]]
             nxt = max(cands, key=lambda w: (sum(inside(c, w) for c in look), -abs(w[0] - (cur[0] if isinstance(cur, tuple) else w[0])) - abs(w[1] - (cur[1] if isinstance(cur, tuple) else w[1]))))
-            if cur == "all" and sum(inside(c, nxt) for c in look[:3]) < min(3, len(look)):
+            if cur == "all" and (len(look) < 2 or sum(inside(c, nxt) for c in look[:3]) < min(3, len(look))):   # (nor zoom in for one last mark, only to pull back again)
                 continue                           # stay wide while the next items jump around
         if nxt != cur:
             moves.append((ts, nxt))
@@ -402,6 +427,42 @@ def compile_board(items_in: List[Dict[str, Any]], anchors: Dict[str, float], dur
     return b, cam, report
 
 
+def _chart(it: Dict[str, Any], rect, hand: str, seed: int) -> Dict[str, Any]:
+    """Numbers drawn by hand: `bars` (a baseline and one outlined, coloured bar per value, its value above, its label below) or `line` (two axes and a rising
+    or falling line with an arrow head). -> the pen strokes, the bar areas to colour, the texts and the box."""
+    x0, y0, x1, y1 = rect
+    vals, labels = [float(v) for v in it["values"]], list(it.get("labels") or [])
+    n = len(vals)
+    lab = min(60.0, (y1 - y0) * 0.11)
+    has_labels = any(labels)
+    yb = y1 - (lab * 1.5 if has_labels else 8.0)
+    top = y0 + lab * 1.5
+    slot = (x1 - x0) / n
+    vmax = max(vals) or 1.0
+    strokes: List[np.ndarray] = []
+    bars, texts = [], []
+
+    def text(s_: str, cx: float, y: float, size: float, k: int):
+        blk = wr.layout(s_, hand, size, max_width=slot * 0.96, align="center", seed=seed + k)
+        texts.append((blk, (cx - blk["w"] / 2, y)))
+
+    if it.get("chart") == "line":
+        strokes += [pr.line((x0, top - lab), (x0, yb), seed, 3.0), pr.line((x0, yb), (x1, yb), seed + 1, 3.0)]
+        pts = [(x0 + slot * (k + 0.5), yb - (yb - top) * (0.06 + 0.94 * v / vmax)) for k, v in enumerate(vals)]
+        strokes += pr.arrow(pts, seed=seed + 2, size=44.0)
+    else:
+        strokes.append(pr.line((x0, yb), (x1, yb), seed, 3.0))
+        for k, v in enumerate(vals):
+            bx0, bx1, by = x0 + slot * (k + 0.2), x0 + slot * (k + 0.8), yb - max(14.0, (yb - top) * v / vmax)
+            strokes += [pr.line((bx0, yb), (bx0, by), seed + 3 * k + 2, 2.5), pr.line((bx0, by), (bx1, by), seed + 3 * k + 3, 2.5), pr.line((bx1, by), (bx1, yb), seed + 3 * k + 4, 2.5)]
+            bars.append((bx0 + 8, by + 8, bx1 - 8, yb - 6))
+            text(f"{v:,.10g}", (bx0 + bx1) / 2, by - lab * 1.35, lab, 100 + k)
+    for k, s_ in enumerate(labels[:n]):
+        if s_:
+            text(s_, x0 + slot * (k + 0.5), yb + lab * 0.1, lab * 0.9, k)
+    return {"strokes": strokes, "bars": [b_ for b_ in bars if b_[2] - b_[0] > 12 and b_[3] - b_[1] > 12], "texts": texts, "box": (x0, y0, x1, y1)}
+
+
 def _seed(s: str) -> int:
     import zlib
 
@@ -433,7 +494,7 @@ def _beside(tb, w, h, side, gap):
 
 def _free_side(tb, w, h, side, gap, by_id, L):
     """Beside the target on the asked side; if that would cover another drawing or text, or leave the board, the first other side that is free."""
-    others = [g["box"] for g in by_id.values() if g.get("kind") in ("draw", "write") and g["box"] != tb]
+    others = [g["box"] for g in by_id.values() if g.get("kind") in ("draw", "write", "chart") and g["box"] != tb]
     best = None
     for sd in [side] + [x for x in ("below", "right", "above", "left") if x != side]:
         x, y = _beside(tb, w, h, sd, gap)

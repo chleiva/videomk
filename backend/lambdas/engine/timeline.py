@@ -173,6 +173,10 @@ def build_timeline(
         t += watermark_spec.END_CARD_S
     if wm and wm.get("mode") == "videomk" and wm.get("presence") == "moments":   # the mark comes and goes: its appearances are fixed here, once, for the whole video
         wm = {**wm, "windows": watermark_spec.moments(scenes, t, watermark_spec.END_CARD_S if wm.get("end_card") else 0.0)}
+    if any(sc["type"] == "whiteboard" for sc in scenes):   # the whiteboard look (docs/WHITEBOARD.md): consecutive boards are panels of one big board
+        from . import whiteboard_policy
+
+        whiteboard_policy.link(scenes)
     # the director's animated background (engine/background.py; only in a plan made with BG_ANIMATED on): each scene knows where in the loop it starts, so the
     # background flows on across scene changes and chunks instead of jumping
     bg = plan.get("background") if isinstance(plan.get("background"), dict) else None

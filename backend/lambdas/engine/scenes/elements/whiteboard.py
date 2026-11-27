@@ -29,6 +29,8 @@ CONNECT = ("arrow", "wavy", "dashed", "line")
 MARKS = ("underline", "double_underline", "circle", "box", "tick", "cross", "cross_out", "highlight")
 SIDES = ("below", "above", "left", "right", "over")
 MAX_ITEMS, MAX_SOLID, MIN_SOLID = 16, 9, 1
+CHARTS = ("bars", "line")
+MAX_BARS = 6
 MAX_TEXT = 70
 LEAD_IN_S = 0.15          # engine/sync.py puts a cue this long before its word; the board wants the word itself
 _ID = re.compile(r"[^a-z0-9_]")
@@ -59,7 +61,23 @@ def _sanitize(props: Dict[str, Any]) -> Dict[str, Any]:
             iid = f"{iid}_{k}"
         o: Dict[str, Any] = {"id": iid}
         say = _clean_text(it.get("say"), 40)
-        if it.get("draw") or it.get("write"):
+        if it.get("chart") and not (it.get("draw") or it.get("write")):
+            vals = [float(v) for v in (it.get("values") or []) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and abs(v) < 1e12][:MAX_BARS]
+            if len(vals) < 2 or solid >= MAX_SOLID or max(vals) <= 0 or min(vals) < 0:
+                continue
+            labels = [_clean_text(x, 14) for x in (it.get("labels") if isinstance(it.get("labels"), list) else [])][:len(vals)]
+            o.update(chart=it["chart"] if it["chart"] in CHARTS else "bars", values=vals, labels=labels + [""] * (len(vals) - len(labels)))
+            zone = it.get("zone") if it.get("zone") in ZONES + SPANS else None
+            if zone is None or used_zones.get(zone):
+                zone = next((z for z in ("centre", "right", "left", "bottom", "top") if not used_zones.get(z)), "centre")
+            used_zones[zone] = used_zones.get(zone, 0) + 1
+            o["zone"] = zone
+            if it.get("color") in INKS:
+                o["color"] = it["color"]
+            if say:
+                o["say"] = say
+            solid += 1
+        elif it.get("draw") or it.get("write"):
             if solid >= MAX_SOLID:
                 continue
             if it.get("draw"):
@@ -148,14 +166,24 @@ def _cues(props: Dict[str, Any], dur: float) -> List[float]:
     return [round(dur * (0.1 + 0.7 * k / max(1, n - 1)), 3) for k in range(n)]
 
 
+BOARD_K = 1.5
+PAN_S = 0.8               # the camera's move from the previous panel of the big board to this one, at the start of a scene
+WALL_S = 3.0              # the last scene's final pull-back over every panel of the big board
+WALL_MAX = 9
+_STILLS: Dict[str, Image.Image] = {}     # the finished pictures of other panels (the previous one for the pan, all of them for the last pull-back): small, at most WALL_MAX + 1
+
+
 def geometry(ctx: SceneCtx, w: int, h: int) -> Dict[str, Any]:
     """The board for this frame: the content box (above the captions, below a top watermark band) becomes the board, the rest of the frame is paper around it.
-    Board units are half a design unit, so the close view (2x2 of the 3x3 zones) shows drawings at the size the standalone demos have."""
+    The board is BOARD_K design units wide per design unit of the box: smaller than the standalone demos' 2.0, so that drawings and writing are still a good
+    size when the camera has pulled back to the whole board (looked at on the first local video: at 2.0 a finished board was mostly white). The close view
+    (2x2 of the 3x3 zones) is one raster pixel per output pixel."""
     fr = ctx.frame
     x0, y0, x1, y1 = ctx.box
     bw, bh = float(x1 - x0), float(y1 - y0)
     ppd = w / float(fr.W)                                  # real pixels per design unit
-    return {"units": (2.0 * bw, 2.0 * bh), "scale": 0.75 * ppd, "pad": (2.0 * x0, 2.0 * y0, 2.0 * (fr.W - x1), 2.0 * (fr.H - y1)),
+    k = BOARD_K
+    return {"units": (k * bw, k * bh), "scale": 1.5 / k * ppd, "pad": (k * x0, k * y0, k * (fr.W - x1), k * (fr.H - y1)),
             "box": (x0, y0, bw, bh), "frame": (float(fr.W), float(fr.H))}
 
 
@@ -165,6 +193,11 @@ def full_view(view: Tuple[float, float, float], geo: Dict[str, Any]) -> Tuple[fl
     x0, y0, bw, bh = geo["box"]
     vh = vw * bh / bw
     return (vx - vw * x0 / bw, vy - vh * y0 / bh, vw * geo["frame"][0] / bw)
+
+
+def _tail(props: Dict[str, Any], dur: float) -> float:
+    """Seconds kept at the end of the LAST scene of a run for the pull-back over the whole big board."""
+    return min(WALL_S, max(0.0, dur - 5.0)) if props.get("wall") else 0.0
 
 
 def build(props: Dict[str, Any], dur: float, ctx: SceneCtx, w: int, h: int):
@@ -179,21 +212,102 @@ def build(props: Dict[str, Any], dur: float, ctx: SceneCtx, w: int, h: int):
                 anchors[it["id"]] = float(cues[k]) + LEAD_IN_S
             k += 1
     board, cam, report = spec.compile_board(props["items"], anchors, dur, geo["units"], geo["scale"], library.load, hand=props.get("hand", "neat"), tool=props.get("tool", "marker"),
-                                            pad=geo["pad"], frame_aspect=geo["box"][2] / geo["box"][3])
+                                            pad=geo["pad"], frame_aspect=geo["box"][2] / geo["box"][3], tail=_tail(props, dur))
     return board, cam, geo, report
 
 
+def grid(n: int) -> Tuple[int, int]:
+    """The big board: `n` panels, row by row -> (columns, rows)."""
+    import math
+
+    cols = max(1, int(math.ceil(math.sqrt(n))))
+    return cols, int(math.ceil(n / cols))
+
+
+def _still(lite: Dict[str, Any], ctx: SceneCtx, w: int, h: int) -> Image.Image:
+    """Another panel of the big board, finished: its items laid out exactly as its own scene lays them out (layout does not depend on timing)."""
+    key = hashlib.sha1(json.dumps([lite, w, h, ctx.frame.aspect, ctx.frame.top_inset, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
+    im = _STILLS.get(key)
+    if im is None:
+        try:
+            board, cam, geo, _ = build({"items": lite["items"], **{f: lite[f] for f in ("hand", "tool") if f in lite}}, 1e6, ctx, w, h)
+            im = board.frame(1e6 - 1.0, full_view(cam.at(1e6), geo), (w, h), tip=False)
+            del board
+        except Exception as e:  # noqa: BLE001 - a neighbour that cannot be drawn is blank paper, never a failed frame
+            print(f"WHITEBOARD_STILL_FAILED {type(e).__name__}: {str(e)[:200]}")
+            from ...whiteboard import board as bd
+
+            im = Image.new("RGB", (w, h), bd.PAPER)
+        if len(_STILLS) > WALL_MAX:
+            _STILLS.pop(next(iter(_STILLS)))
+        _STILLS[key] = im
+    return im
+
+
+def _pan(frame: Image.Image, props: Dict[str, Any], lt: float, ctx: SceneCtx) -> Image.Image:
+    """The first moments of a scene that continues a big board: the camera travels from the previous panel (finished) to this one (still empty)."""
+    from ...whiteboard import board as bd
+
+    w, h = frame.size
+    u = bd.ease(lt / PAN_S)
+    k, n = (list(props.get("panel") or [1, 2]) + [2])[:2]
+    cols = grid(min(int(n), WALL_MAX))[0]
+    dx, dy = ((-1, 1) if cols > 1 else (0, 1)) if int(k) % cols == 0 else (1, 0)      # the next panel is to the right; after the end of a row, below and back to the left
+    out = Image.new("RGB", (w, h), bd.PAPER)
+    out.paste(_still(props["prev"], ctx, w, h), (int(round(-dx * u * w)), int(round(-dy * u * h))))
+    out.paste(frame, (int(round(dx * (1 - u) * w)), int(round(dy * (1 - u) * h))))
+    return out
+
+
+def _wall(frame: Image.Image, props: Dict[str, Any], u: float, ctx: SceneCtx) -> Image.Image:
+    """The end of the last scene: the camera pulls back from this panel until every panel of the big board is in the picture."""
+    from ...whiteboard import board as bd
+
+    w, h = frame.size
+    others = list(props["wall"])[-(WALL_MAX - 1):]
+    m = len(others) + 1
+    cols, rows = grid(m)
+    g = float(max(cols, rows))                               # the final view, in panels: the grid centred in a frame-shaped window
+    end = ((cols - g) / 2.0, (rows - g) / 2.0, g)
+    c0, r0 = (m - 1) % cols, (m - 1) // cols
+    u = bd.ease(u)
+    vw = float(g ** u)                                       # zoom eased in log space, like the board's own camera
+    f = (vw - 1.0) / (g - 1.0) if g > 1 else 1.0
+    vx, vy = c0 + (end[0] - c0) * f, r0 + (end[1] - r0) * f
+    out = Image.new("RGB", (w, h), bd.PAPER)
+    cw, ch = w / vw, h / vw
+    sw, sh = max(2, int(round(w * min(1.0, 2.0 / g)))), max(2, int(round(h * min(1.0, 2.0 / g))))      # the other panels are only ever seen small
+    for i in range(m):
+        x, y = (i % cols - vx) * cw, (i // cols - vy) * ch
+        if x >= w or y >= h or x + cw <= 0 or y + ch <= 0:
+            continue
+        src = frame if i == m - 1 else _still(others[i], ctx, sw, sh)
+        box = (int(round(x)), int(round(y)), int(round(x + cw)), int(round(y + ch)))
+        size = (max(1, box[2] - box[0]), max(1, box[3] - box[1]))
+        out.paste(src if src.size == size else src.resize(size, Image.BILINEAR, reducing_gap=2.0), box[:2])
+    return out
+
+
 def _draw(cv: Canvas, props: Dict[str, Any], lt: float, dur: float, theme: Theme, ctx: SceneCtx) -> None:
-    # The finished picture is the canvas at half its pixel size (the renderer reduces 2x): the board is drawn at that size and pasted doubled with NEAREST.
+    # The finished picture is the canvas at half its pixel size (the renderer reduces 2x; a draft has no supersampling and is reduced afterwards): the board is
+    # drawn at that size and pasted doubled with NEAREST.
     w, h = max(2, cv.im.width // 2), max(2, cv.im.height // 2)
-    key = hashlib.sha1(json.dumps([props, round(dur, 3), w, h, ctx.frame.aspect, ctx.frame.top_inset, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
+    lt = max(0.0, lt)
+    core_props = {k: v for k, v in props.items() if k not in ("prev", "wall", "panel")}
+    key = hashlib.sha1(json.dumps([core_props, bool(props.get("wall")), round(dur, 3), w, h, ctx.frame.aspect, ctx.frame.top_inset, bool(ctx.captions)], sort_keys=True, default=str).encode()).hexdigest()
     try:
         if _STATE.get("key") != key:
             _STATE.clear()
             board, cam, geo, _ = build(props, dur, ctx, w, h)
             _STATE.update(key=key, board=board, cam=cam, geo=geo)
         st = _STATE
-        frame = st["board"].frame(max(0.0, lt), full_view(st["cam"].at(max(0.0, lt)), st["geo"]), (w, h))
+        tail = _tail(props, dur)
+        t_board = min(lt, dur - tail) if tail else lt          # during the last pull-back this panel is finished and still
+        frame = st["board"].frame(t_board, full_view(st["cam"].at(t_board), st["geo"]), (w, h))
+        if props.get("prev") and lt < PAN_S:
+            frame = _pan(frame, props, lt, ctx)
+        elif tail and lt > dur - tail:
+            frame = _wall(frame, props, (lt - (dur - tail)) / max(min(1.6, tail - 0.4), 0.2), ctx)
     except Exception as e:  # noqa: BLE001 - never a failed render for a picture
         print(f"WHITEBOARD_DRAW_FAILED {type(e).__name__}: {str(e)[:200]}")
         _STATE.clear()

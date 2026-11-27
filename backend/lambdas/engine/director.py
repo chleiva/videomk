@@ -154,15 +154,17 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             info["opening"] = opened[0].split(": ", 1)[-1]
     if theme in ("midnight", "paper", "sunrise"):  # the user's choice beats the model's
         plan["theme"] = theme
+    if wpolicy.allowed:   # a whiteboard video is on paper whatever theme was chosen (captions and the closing card match the board), and has no moving background behind it
+        plan["theme"] = whiteboard_policy.THEME
     fetched: List[str] = [s["title"] for s in sources]
     used = plan.pop("sources_used", None)
     if used is not None:  # cite only the pages the script actually drew on, not everything the research happened to fetch
         sources = [s for s in sources if s["title"] in set(used)]
     plan["skills"] = skill_ids   # which craft guides shaped this video (for review)
-    bg_wish = None if photos else background.request_wish(prompt)   # "with a purple 3D background", "fondo fijo": a stated wish wins over the mood (never on a video of the person's own photos)
+    bg_wish = None if photos or wpolicy.allowed else background.request_wish(prompt)   # "with a purple 3D background", "fondo fijo": a stated wish wins over the mood (never on a video of the person's own photos)
     if bg_wish and background.enabled() and theme not in ("midnight", "paper", "sunrise") and background.wish_theme(bg_wish):
         plan["theme"] = background.wish_theme(bg_wish)   # the look asked for needs its theme (a light background is the paper theme); a theme chosen in the options stays
-    if background.enabled() and not photos and (bg_wish or {}).get("kind") != "none" and (bg_wish or not background.data_heavy(plan)):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
+    if background.enabled() and not photos and not wpolicy.allowed and (bg_wish or {}).get("kind") != "none" and (bg_wish or not background.data_heavy(plan)):   # the moving background, chosen by the topic's mood (BG_ANIMATED / BG_LOOPS; docs/BACKGROUNDS_ANIMATED.md, docs/HERO_LOOPS_3D.md): one small call, never a failure. Photo videos and data-heavy videos keep the static look
         bg_menu = None
         if background.loops_enabled():   # the pre-rendered 3D loops in the assets bucket: the premium look, offered when the flag is on and the index can be read
             from . import bg_loops
@@ -187,4 +189,6 @@ def direct(prompt: str, *, minutes: float, ask_small: Ask, ask_big: Callable[[st
             plan["photo_story"] = {"story": story.get("story", ""), "voice": story.get("voice"), "tone": story.get("tone", ""), "chapters": [{"title": c.get("title", ""), "summary": c.get("summary", "")} for c in story["chapters"]],
                                    "unused": story.get("unused", [])}
     plan["sources"] = sources
+    if wpolicy.allowed:   # the narration is final now: every board is tied to the words really said and gets emphasis marks where its pen would rest
+        warnings = [w for w in warnings if "whiteboard twice in a row" not in w] + whiteboard_policy.settle(plan, wpolicy)
     return {"legit": True, "plan": plan, "warnings": warnings, "fetched": fetched, "research": info}

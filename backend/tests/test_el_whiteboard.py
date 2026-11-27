@@ -148,3 +148,96 @@ def test_handwriting_tables_cover_english_and_spanish():
     blk = hand.layout("año ^{2} \\frac{1}{2} -> ¿sí?", "neat", 120.0, max_width=900)
     assert len(blk["words"]) == 5 and all(w["strokes"] for w in blk["words"])
     assert hand.layout("one two three four five six seven", "neat", 150.0, max_width=500, max_height=260)["size"] < 150.0     # shrinks to fit its zone
+
+
+# ----------------------------------------------------------------------------- charts drawn by hand
+def test_a_chart_is_drawn_in_the_look():
+    p = EL.sanitize({"items": [{"id": "t", "write": "Growth", "zone": "top", "say": "growth"},
+                               {"id": "c", "chart": "bars", "values": [5, 10, 16, 23], "labels": ["1", "2", "3", "4"], "zone": "centre", "say": "bigger"},
+                               {"id": "l", "chart": "line", "values": [1, 2, 4], "zone": "right", "say": "rises"}, {"id": "b", "mark": "box", "on": "c"}]})
+    assert [it.get("chart") for it in p["items"]] == [None, "bars", "line", None] and EL.sanitize(p) == p
+    p["cues"] = [1.0, 3.0, 5.0]
+    wbe._STATE.clear()
+    assert ink(render("whiteboard", p, 9.9, dur=10.0)) > 3 * ink(render("whiteboard", p, 1.4, dur=10.0))
+    for bad in ({"chart": "bars", "values": [1]}, {"chart": "bars", "values": ["a", "b"]}, {"chart": "bars", "values": [-1, 2]}, {"chart": "bars", "values": [0, 0]}):
+        with pytest.raises(ValueError):
+            EL.sanitize({"items": [bad]})                # an unusable chart is dropped; a board with nothing else is refused
+
+
+# ----------------------------------------------------------------------------- one big board: the pan from the previous panel, the last pull-back
+def _linked(n=3):
+    from engine import whiteboard_policy as wp
+
+    scenes = [{"id": f"s{k}", "type": "whiteboard", "duration": 10.0, "transition": "fade", "props": dict(props(k % 2))} for k in range(n)]
+    assert wp.link(scenes) == n
+    return scenes
+
+
+def test_consecutive_boards_are_panels_of_one_board():
+    scenes = _linked(3)
+    assert [s["transition"] for s in scenes] == ["fade", "none", "none"]                # the camera travels instead of a crossfade
+    assert [s["props"].get("panel") for s in scenes] == [[0, 3], [1, 3], [2, 3]]
+    assert "prev" not in scenes[0]["props"] and scenes[1]["props"]["prev"]["items"] == scenes[0]["props"]["items"]
+    assert len(scenes[2]["props"]["wall"]) == 2 and "wall" not in scenes[1]["props"]
+    assert all(s["props"]["lib"] for s in scenes)                                           # the library version is part of the segment hash
+    from engine import whiteboard_policy as wp
+
+    alone = [{"id": "a", "type": "whiteboard", "duration": 8.0, "transition": "fade", "props": dict(props())}, {"id": "t", "type": "title", "duration": 3.0, "props": {"title": "x"}}]
+    assert wp.link(alone) == 0 and alone[0]["transition"] == "fade" and "panel" not in alone[0]["props"]
+    again = [dict(s, props=dict(s["props"])) for s in scenes]
+    wp.link(again)
+    assert [s["props"] for s in again] == [s["props"] for s in scenes]                  # linking twice (an edit rebuilds the timeline) changes nothing
+
+
+def test_the_pan_shows_the_previous_panel_then_only_this_one():
+    scenes = _linked(2)
+    p0, p1 = scenes[0]["props"], scenes[1]["props"]
+    wbe._STATE.clear()
+    wbe._STILLS.clear()
+    start = render("whiteboard", p1, 0.0, dur=10.0)                # the previous panel, finished, fills the frame
+    prev_end = render("whiteboard", {k: v for k, v in p0.items() if k != "panel"}, 9.99, dur=10.0)
+    assert changed(start, prev_end) < 0.02
+    mid = render("whiteboard", p1, wbe.PAN_S / 2, dur=10.0)
+    assert ink(mid) > 300 and changed(mid, start) > 0.002
+    after = render("whiteboard", p1, wbe.PAN_S + 0.01, dur=10.0)
+    alone = render("whiteboard", {k: v for k, v in p1.items() if k not in ("prev", "panel")}, wbe.PAN_S + 0.01, dur=10.0)
+    assert np.array_equal(np.asarray(after), np.asarray(alone))    # after the pan the scene is exactly its own board
+
+
+def test_the_last_panel_pulls_back_over_the_whole_board():
+    scenes = _linked(3)
+    last = scenes[2]["props"]
+    wbe._STATE.clear()
+    wbe._STILLS.clear()
+    before = render("whiteboard", last, 12.0 - wbe.WALL_S - 0.05, dur=12.0)
+    end = render("whiteboard", last, 11.9, dur=12.0)
+    assert changed(before, end) > 0.01 and ink(end) > 1000
+    a = np.asarray(end.convert("L"), np.int16)
+    h, w = a.shape
+    assert (a[: h // 2, : w // 3] < 150).sum() > 50 and (a[: h // 2, w // 3: 2 * w // 3] < 150).sum() > 50      # the first two panels are in the picture too
+    wbe._STATE.clear()
+    wbe._STILLS.clear()
+    assert np.array_equal(np.asarray(end), np.asarray(render("whiteboard", last, 11.9, dur=12.0)))               # ... and a fresh container draws the same frame
+
+
+def test_chunks_agree_at_any_split():
+    """A scene rendered by two containers (a chunk boundary inside a run, or a 4K piece) is frame for frame what one container renders."""
+    scenes = _linked(2)
+    p1 = scenes[1]["props"]
+    times = [0.2, 0.6, 2.0, 5.0, 9.0]
+    wbe._STATE.clear(); wbe._STILLS.clear()
+    one = [np.asarray(render("whiteboard", p1, t, dur=10.0)) for t in times]
+    two = []
+    for t in reversed(times):
+        wbe._STATE.clear(); wbe._STILLS.clear()
+        two.append(np.asarray(render("whiteboard", p1, t, dur=10.0)))
+    assert all(np.array_equal(a, b) for a, b in zip(one, reversed(two)))
+
+
+def test_memory_is_bounded():
+    scenes = _linked(3)
+    for s in scenes:
+        render("whiteboard", s["props"], 9.5, dur=10.0)
+        render("whiteboard", s["props"], 0.1, dur=10.0)
+    assert set(wbe._STATE) <= {"key", "board", "cam", "geo"}       # one built board at a time
+    assert len(wbe._STILLS) <= wbe.WALL_MAX + 1

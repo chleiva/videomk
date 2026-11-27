@@ -111,3 +111,71 @@ def test_enforce_writes_text_beats_on_the_board(on):
     assert any("kept another scene type" in w for w in warnings)
     off = {"beats": [{"narration": "x", "scene": {"type": "title", "props": {"title": "T"}}}]}
     assert wp.enforce(off, wp.Policy(False, "flag_off")) == [] and off["beats"][0]["scene"]["type"] == "title" and off["whiteboard"]["decision"] == "no"
+
+
+# ----------------------------------------------------------------------------- the board follows the narration as it finally is
+def _board(items):
+    return ELEMENTS["whiteboard"].sanitize({"items": items})
+
+
+def _mentions(props, narration):
+    """What the engine's alignment will find (engine/sync.py), with every word one second apart."""
+    from engine import sync
+
+    words = [[w, float(i), float(i) + 0.9] for i, w in enumerate(narration.split())]
+    return sync.find_mentions(ELEMENTS["whiteboard"].anchors(props), words)
+
+
+def test_retie_draws_in_the_order_the_narrator_names_things():
+    p = _board([{"id": "t", "write": "Compound interest", "zone": "top", "say": "compound"}, {"id": "p", "draw": "piggy_bank", "zone": "left", "say": "savings"},
+                {"id": "s", "draw": "sun", "zone": "right", "say": "money"}, {"id": "a", "connect": "arrow", "from": "p", "to": "s", "say": "snowball"},
+                {"id": "u", "mark": "underline", "on": "t", "say": "time"}])
+    narration = "Your savings can earn money on money they already earned. That snowball is called compound interest, and time makes it grow."
+    st = wp.retie(p, narration)
+    assert [it["id"] for it in p["items"]] == ["p", "s", "a", "t", "u"] and st["moved"] > 0
+    found = _mentions(p, narration)
+    assert None not in found and found == sorted(found)
+
+
+def test_retie_moves_a_lost_tie_to_a_word_that_is_said():
+    p = _board([{"id": "h", "write": "Simple interest", "zone": "top", "say": "simple"}, {"id": "b", "draw": "piggy_bank", "zone": "left", "say": "deposit"},
+                {"id": "n", "write": "$100", "zone": "centre", "say": "hundred"}, {"id": "c", "mark": "circle", "on": "n", "say": "year"}])
+    narration = "Put in one hundred dollars, and every year you get the same small amount."        # the sentence that said "simple" and "deposit" was cut
+    st = wp.retie(p, narration)
+    assert st["retied"] + st["untied"] == 2
+    found = _mentions(p, narration)
+    assert None not in found and found == sorted(found) and len(set(found)) == len(found)
+    assert wp.retie(p, narration) == {"moved": 0, "retied": 0, "untied": 0}                      # settled: a second pass changes nothing
+
+
+def test_retie_never_puts_a_mark_or_an_arrow_before_its_target():
+    p = _board([{"id": "a", "write": "Alpha", "zone": "left", "say": "last"}, {"id": "m", "mark": "circle", "on": "a", "say": "first"}])
+    wp.retie(p, "First we wait and at last we see alpha.")
+    assert [it["id"] for it in p["items"]] == ["a", "m"]
+
+
+def test_keep_busy_adds_emphasis_where_the_pen_would_rest():
+    p = _board([{"id": "t", "write": "Sleep", "zone": "top", "say": "sleep"}, {"id": "s", "draw": "sun", "zone": "left", "say": "morning"}])
+    narration = "Sleep is when the brain files away what it learned during the whole long day and clears out waste so that by morning you think clearly again and feel rested and ready."
+    n = wp.keep_busy(p, narration)
+    marks = [it for it in p["items"] if it.get("mark")]
+    assert n == len(marks) >= 1 and all(m["on"] in ("t", "s") and m.get("say") for m in marks)
+    assert ELEMENTS["whiteboard"].sanitize(p)["items"] == p["items"]                             # what was added is valid
+    found = _mentions(p, narration)
+    assert None not in found and found == sorted(found)
+    assert wp.keep_busy(_board([{"id": "t", "write": "Hi", "zone": "top", "say": "hi"}]), "Hi there.") == 0
+
+
+def test_settle_runs_both_and_records_them(on):
+    plan = {"beats": [{"narration": "Put in one hundred dollars, and every year you get the same small amount.",
+                       "scene": {"type": "whiteboard", "props": _board([{"id": "h", "write": "Simple", "zone": "top", "say": "simple"}, {"id": "n", "write": "$100", "zone": "centre", "say": "hundred"}])}},
+                      {"narration": "A photo.", "scene": {"type": "image", "props": {"image_query": "x"}}}]}
+    w = wp.settle(plan, wp.Policy(True, "asked"))
+    assert plan["whiteboard"]["retied"] + plan["whiteboard"]["untied"] == 1 and w
+    assert wp.settle({"beats": []}, wp.Policy(False, "flag_off")) == []
+
+
+def test_a_whiteboard_video_is_on_paper(on):
+    plan = {"theme": "midnight", "beats": [{"narration": "x", "scene": {"type": "whiteboard", "props": _board([{"write": "Hi", "zone": "top"}])}}]}
+    wp.enforce(plan, wp.Policy(True, "asked"))
+    assert plan["theme"] == "paper"
